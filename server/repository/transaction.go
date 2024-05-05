@@ -7,17 +7,17 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10/orm"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
 type TransactionUpdateId struct {
-	TransactionId uint64 `pg:"transaction_id"`
-	BankAccountId uint64 `pg:"bank_account_id"`
-	Amount        int64  `pg:"amount"`
+	TransactionId ID[Transaction] `pg:"transaction_id"`
+	BankAccountId ID[BankAccount] `pg:"bank_account_id"`
+	Amount        int64           `pg:"amount"`
 }
 
-func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []models.Transaction) error {
+func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []Transaction) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -28,9 +28,9 @@ func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []
 	return errors.Wrap(err, "failed to insert transactions")
 }
 
-func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error) {
+func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ID[Link], plaidTransactionIds []string) (map[string]Transaction, error) {
 	if len(plaidTransactionIds) == 0 {
-		return map[string]models.Transaction{}, nil
+		return map[string]Transaction{}, nil
 	}
 
 	span := crumbs.StartFnTrace(ctx)
@@ -41,9 +41,9 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 		"plaidTransactionIds": plaidTransactionIds,
 	}
 
-	items := make([]models.Transaction, 0)
+	items := make([]Transaction, 0)
 	// Deliberatly include all transactions, regardless of delete status.
-	// TODO This query is using a FROM for models.Transaction, but it would
+	// TODO This query is using a FROM for Transaction, but it would
 	// probably be more efficient to use the plaid transactions table as the base
 	// and then join on transaction. But for now this is still fine.
 	err := r.txn.ModelContext(span.Context(), &items).
@@ -66,7 +66,7 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 
 	span.Status = sentry.SpanStatusOK
 
-	result := map[string]models.Transaction{}
+	result := map[string]Transaction{}
 	for i := range items {
 		item := items[i]
 		if item.PlaidTransaction != nil {
@@ -80,56 +80,7 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 	return result, nil
 }
 
-// GetTransactionsByTellerId is used by the sync code to compare transactions
-// from teller to the transactions in the database. All transactions that have
-// the specified teller Ids will be included if they exist. But if
-// includePending is true then additional transactions might also be returned.
-// This way pending transactios that are no longer present in the API can be
-// compared easily.
-func (r *repositoryBase) GetTransactionsByTellerId(
-	ctx context.Context,
-	bankAccountId uint64,
-	tellerIds []string,
-	includePending bool,
-) ([]models.Transaction, error) {
-	if len(tellerIds) == 0 {
-		return []models.Transaction{}, nil
-	}
-
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"bankAccountId": bankAccountId,
-		"tellerIds":     tellerIds,
-	}
-
-	items := make([]models.Transaction, 0)
-	query := r.txn.ModelContext(span.Context(), &items).
-		Relation("TellerTransaction").
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction"."bank_account_id" = ?`, bankAccountId)
-
-	if includePending {
-		query = query.WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-			q = q.WhereInOr(`"teller_transaction"."teller_id" IN (?)`, tellerIds).
-				WhereOr(`"teller_transaction"."is_pending" = ?`, true)
-			return q, nil
-		})
-	} else {
-		query = query.WhereIn(`"teller_transaction"."teller_id" IN (?)`, tellerIds)
-	}
-
-	err := query.Select(&items)
-	if err != nil {
-		span.Status = sentry.SpanStatusInternalError
-		return nil, errors.Wrap(err, "failed to find transactions by teller Id")
-	}
-
-	return items, nil
-}
-
-func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint64, limit, offset int) ([]models.Transaction, error) {
+func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId ID[BankAccount], limit, offset int) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -140,7 +91,7 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint
 		"offset":        offset,
 	}
 
-	items := make([]models.Transaction, 0)
+	items := make([]Transaction, 0)
 	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
@@ -160,7 +111,7 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint
 	return items, nil
 }
 
-func (r *repositoryBase) GetTransactionsAfter(ctx context.Context, bankAccountId uint64, after *time.Time) ([]models.Transaction, error) {
+func (r *repositoryBase) GetTransactionsAfter(ctx context.Context, bankAccountId ID[BankAccount], after *time.Time) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -170,9 +121,8 @@ func (r *repositoryBase) GetTransactionsAfter(ctx context.Context, bankAccountId
 		"after":         after,
 	}
 
-	var items []models.Transaction
+	var items []Transaction
 	query := r.txn.ModelContext(span.Context(), &items).
-		Relation("TellerTransaction").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Order(`date DESC`).
@@ -195,9 +145,9 @@ func (r *repositoryBase) GetTransactionsAfter(ctx context.Context, bankAccountId
 
 func (r *repositoryBase) GetPendingTransactions(
 	ctx context.Context,
-	bankAccountId uint64,
+	bankAccountId ID[BankAccount],
 	limit, offset int,
-) ([]models.Transaction, error) {
+) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -208,7 +158,7 @@ func (r *repositoryBase) GetPendingTransactions(
 		"offset":        offset,
 	}
 
-	var items []models.Transaction
+	var items []Transaction
 	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
@@ -229,7 +179,7 @@ func (r *repositoryBase) GetPendingTransactions(
 	return items, nil
 }
 
-func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAccountId, spendingId uint64, limit, offset int) ([]models.Transaction, error) {
+func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending], limit, offset int) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -241,7 +191,7 @@ func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAcc
 		"offset":        offset,
 	}
 
-	var items []models.Transaction
+	var items []Transaction
 	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
@@ -262,7 +212,7 @@ func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAcc
 	return items, nil
 }
 
-func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId, transactionId uint64) (*models.Transaction, error) {
+func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -271,11 +221,10 @@ func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId, tran
 		"transactionId": transactionId,
 	}
 
-	var result models.Transaction
+	var result Transaction
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation("PlaidTransaction").
 		Relation("PendingPlaidTransaction").
-		Relation("TellerTransaction").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).
@@ -290,7 +239,7 @@ func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId, tran
 	return &result, nil
 }
 
-func (r *repositoryBase) CreateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error {
+func (r *repositoryBase) CreateTransaction(ctx context.Context, bankAccountId ID[BankAccount], transaction *Transaction) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -312,7 +261,7 @@ func (r *repositoryBase) CreateTransaction(ctx context.Context, bankAccountId ui
 	return nil
 }
 
-func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error {
+func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId ID[BankAccount], transaction *Transaction) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -339,7 +288,7 @@ func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId ui
 
 // UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is doing a
 // bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
-func (r *repositoryBase) UpdateTransactions(ctx context.Context, transactions []*models.Transaction) error {
+func (r *repositoryBase) UpdateTransactions(ctx context.Context, transactions []*Transaction) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -365,11 +314,11 @@ func (r *repositoryBase) UpdateTransactions(ctx context.Context, transactions []
 	return nil
 }
 
-func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId, transactionId uint64) error {
+func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	_, err := r.txn.ModelContext(span.Context(), &models.Transaction{}).
+	_, err := r.txn.ModelContext(span.Context(), &Transaction{}).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).
@@ -379,11 +328,11 @@ func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId, t
 	return errors.Wrap(err, "failed to soft-delete transaction")
 }
 
-func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context, linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error) {
+func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context, linkId ID[Link], plaidTransactionIds []string) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	result := make([]models.Transaction, 0)
+	result := make([]Transaction, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
@@ -401,11 +350,11 @@ func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context
 	return result, nil
 }
 
-func (r *repositoryBase) GetRecentDepositTransactions(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error) {
+func (r *repositoryBase) GetRecentDepositTransactions(ctx context.Context, bankAccountId ID[BankAccount]) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	result := make([]models.Transaction, 0)
+	result := make([]Transaction, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
@@ -420,7 +369,7 @@ func (r *repositoryBase) GetRecentDepositTransactions(ctx context.Context, bankA
 	return result, nil
 }
 
-func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error) {
+func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAccountId ID[BankAccount], input, existing *Transaction) (updatedExpenses []Spending, _ error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -435,12 +384,12 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 		RemoveExpense
 	)
 
-	var existingSpendingId uint64
+	var existingSpendingId ID[Spending]
 	if existing.SpendingId != nil {
 		existingSpendingId = *existing.SpendingId
 	}
 
-	var newSpendingId uint64
+	var newSpendingId ID[Spending]
 	if input.SpendingId != nil {
 		newSpendingId = *input.SpendingId
 	}
@@ -448,13 +397,13 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 	var expensePlan int
 
 	switch {
-	case existingSpendingId == 0 && newSpendingId > 0:
+	case existingSpendingId.IsZero() && !newSpendingId.IsZero():
 		// Spending is being added to the transaction.
 		expensePlan = AddExpense
-	case existingSpendingId != 0 && newSpendingId != existingSpendingId && newSpendingId > 0:
+	case !existingSpendingId.IsZero() && newSpendingId != existingSpendingId && !newSpendingId.IsZero():
 		// Spending is being changed from one expense to another.
 		expensePlan = ChangeExpense
-	case existingSpendingId != 0 && newSpendingId == 0:
+	case !existingSpendingId.IsZero() && newSpendingId.IsZero():
 		// Spending is being removed from the transaction.
 		expensePlan = RemoveExpense
 	default:
@@ -463,7 +412,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 	}
 
 	// Retrieve the expenses that we need to work with and potentially update.
-	var currentExpense, newExpense *models.Spending
+	var currentExpense, newExpense *Spending
 	var currentErr, newErr error
 	switch expensePlan {
 	case AddExpense:
@@ -483,7 +432,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 		return nil, errors.Wrap(newErr, "failed to retrieve the new expense for the transaction")
 	}
 
-	expenseUpdates := make([]models.Spending, 0)
+	expenseUpdates := make([]Spending, 0)
 
 	switch expensePlan {
 	case ChangeExpense, RemoveExpense:
@@ -498,9 +447,9 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 		currentExpense.CurrentAmount += *existing.SpendingAmount
 
 		switch currentExpense.SpendingType {
-		case models.SpendingTypeExpense:
+		case SpendingTypeExpense:
 		// Nothing special for expenses.
-		case models.SpendingTypeGoal:
+		case SpendingTypeGoal:
 			// Revert the amount used for the current spending object.
 			currentExpense.UsedAmount -= *existing.SpendingAmount
 		}
@@ -540,7 +489,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 	return expenseUpdates, r.UpdateSpending(span.Context(), bankAccountId, expenseUpdates)
 }
 
-func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) error {
+func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transaction *Transaction, spending *Spending) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -563,9 +512,9 @@ func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transactio
 	spending.CurrentAmount -= allocationAmount
 
 	switch spending.SpendingType {
-	case models.SpendingTypeExpense:
+	case SpendingTypeExpense:
 	// We don't need to do anything special if it's an expense, at least not right now.
-	case models.SpendingTypeGoal:
+	case SpendingTypeGoal:
 		// Goals also keep track of how much has been spent, so increment the used amount.
 		spending.UsedAmount += allocationAmount
 	}

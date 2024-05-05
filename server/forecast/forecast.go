@@ -7,7 +7,7 @@ import (
 
 	"github.com/ahmetb/go-linq/v3"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/sirupsen/logrus"
 )
 
@@ -32,21 +32,21 @@ type Forecast struct {
 type Forecaster interface {
 	GetForecast(ctx context.Context, start, end time.Time, timezone *time.Location) Forecast
 	GetAverageContribution(ctx context.Context, start, end time.Time, timezone *time.Location) int64
-	GetNextContribution(ctx context.Context, start time.Time, fundingScheduleId uint64, timezone *time.Location) int64
+	GetNextContribution(ctx context.Context, start time.Time, fundingScheduleId ID[FundingSchedule], timezone *time.Location) int64
 }
 
 type forecasterBase struct {
 	log            *logrus.Entry
 	currentBalance int64
-	funding        map[uint64]FundingInstructions
-	spending       map[uint64]SpendingInstructions
+	funding        map[ID[FundingSchedule]]FundingInstructions
+	spending       map[ID[Spending]]SpendingInstructions
 }
 
-func NewForecaster(log *logrus.Entry, spending []models.Spending, funding []models.FundingSchedule) Forecaster {
+func NewForecaster(log *logrus.Entry, spending []Spending, funding []FundingSchedule) Forecaster {
 	forecaster := &forecasterBase{
 		log:      log,
-		funding:  map[uint64]FundingInstructions{},
-		spending: map[uint64]SpendingInstructions{},
+		funding:  map[ID[FundingSchedule]]FundingInstructions{},
+		spending: map[ID[Spending]]SpendingInstructions{},
 	}
 	for _, fundingSchedule := range funding {
 		forecaster.funding[fundingSchedule.FundingScheduleId] = NewFundingScheduleFundingInstructions(log, fundingSchedule)
@@ -114,7 +114,7 @@ func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, 
 		SelectT(func(group linq.Group) Event {
 			date := time.Unix(group.Key.(int64), 0)
 			spendingItems := make([]SpendingEvent, len(group.Group))
-			fundingMap := map[uint64]FundingEvent{}
+			fundingMap := map[ID[FundingSchedule]]FundingEvent{}
 			var delta int64 = 0
 			var transaction int64
 			var contribution int64
@@ -213,7 +213,7 @@ func (f *forecasterBase) GetAverageContribution(ctx context.Context, start, end 
 	return popularContribution
 }
 
-func (f *forecasterBase) GetNextContribution(ctx context.Context, start time.Time, fundingScheduleId uint64, timezone *time.Location) int64 {
+func (f *forecasterBase) GetNextContribution(ctx context.Context, start time.Time, fundingScheduleId ID[FundingSchedule], timezone *time.Location) int64 {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

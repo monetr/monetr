@@ -38,8 +38,8 @@ var (
 )
 
 func (o *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.FundingScheduleId.Kind() == UnknownIDKind {
-		o.FundingScheduleId = NewID[FundingSchedule]()
+	if o.FundingScheduleId.IsZero() {
+		o.FundingScheduleId = NewID(o)
 	}
 
 	return ctx, nil

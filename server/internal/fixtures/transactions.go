@@ -10,7 +10,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/util"
 	"github.com/stretchr/testify/require"
@@ -36,34 +36,34 @@ func GivenIHaveATransactionName(t *testing.T, clock clock.Clock) (name, company 
 	return name, company
 }
 
-func GivenIHaveATransaction(t *testing.T, clock clock.Clock, bankAccount models.BankAccount) models.Transaction {
+func GivenIHaveATransaction(t *testing.T, clock clock.Clock, bankAccount BankAccount) Transaction {
 	transactions := GivenIHaveNTransactions(t, clock, bankAccount, 1)
 	require.Len(t, transactions, 1, "must have one transaction")
 
 	return transactions[0]
 }
 
-func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount models.BankAccount, n int) []models.Transaction {
+func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount BankAccount, n int) []Transaction {
 	require.NotZero(t, bankAccount.BankAccountId, "bank account Id must be included")
 	require.NotZero(t, bankAccount.AccountId, "bank account Id must be included")
 	require.NotNil(t, bankAccount.Account, "bank account must include account object")
 
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedBy, bankAccount.AccountId, db)
 
 	timezone, err := bankAccount.Account.GetTimezone()
 	require.NoError(t, err, "must be able to get the timezone from the account")
 
-	transactions := make([]models.Transaction, n)
+	transactions := make([]Transaction, n)
 
 	for i := 0; i < n; i++ {
 		date := util.Midnight(clock.Now(), timezone)
 		name, company := GivenIHaveATransactionName(t, clock)
 		amount := int64(gofakeit.Number(100, 10000))
 
-		var plaidTransaction *models.PlaidTransaction
+		var plaidTransaction *PlaidTransaction
 		if plaidBankAccount := bankAccount.PlaidBankAccount; plaidBankAccount != nil {
-			plaidTransaction = &models.PlaidTransaction{
+			plaidTransaction = &PlaidTransaction{
 				AccountId:          bankAccount.AccountId,
 				PlaidBankAccountId: plaidBankAccount.PlaidBankAccountId,
 				PlaidId:            gofakeit.UUID(),
@@ -87,7 +87,7 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount models
 			)
 		}
 
-		transaction := models.Transaction{
+		transaction := Transaction{
 			AccountId:                 bankAccount.AccountId,
 			Account:                   bankAccount.Account,
 			BankAccountId:             bankAccount.BankAccountId,
@@ -120,18 +120,18 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount models
 	return transactions
 }
 
-func AssertThatIHaveZeroTransactions(t *testing.T, accountId uint64) {
+func AssertThatIHaveZeroTransactions(t *testing.T, accountId ID[Account]) {
 	db := testutils.GetPgDatabase(t)
-	exists, err := db.Model(&models.Transaction{}).Where(`"transaction"."account_id" = ?`, accountId).Exists()
+	exists, err := db.Model(&Transaction{}).Where(`"transaction"."account_id" = ?`, accountId).Exists()
 	require.NoError(t, err, "must be able to query transactions successfully")
 	if exists {
 		panic("account has transactions")
 	}
 }
 
-func CountNonDeletedTransactions(t *testing.T, accountId uint64) int64 {
+func CountNonDeletedTransactions(t *testing.T, accountId ID[Account]) int64 {
 	db := testutils.GetPgDatabase(t)
-	count, err := db.Model(&models.Transaction{}).
+	count, err := db.Model(&Transaction{}).
 		Where(`"transaction"."account_id" = ?`, accountId).
 		Where(`"transaction"."deleted_at" IS NULL`).
 		Count()
@@ -140,9 +140,9 @@ func CountNonDeletedTransactions(t *testing.T, accountId uint64) int64 {
 	return int64(count)
 }
 
-func CountAllTransactions(t *testing.T, accountId uint64) int64 {
+func CountAllTransactions(t *testing.T, accountId ID[Account]) int64 {
 	db := testutils.GetPgDatabase(t)
-	count, err := db.Model(&models.Transaction{}).
+	count, err := db.Model(&Transaction{}).
 		Where(`"transaction"."account_id" = ?`, accountId).
 		Count()
 	require.NoError(t, err, "must be able to query transactions successfully")
@@ -150,9 +150,9 @@ func CountAllTransactions(t *testing.T, accountId uint64) int64 {
 	return int64(count)
 }
 
-func CountPendingTransactions(t *testing.T, accountId uint64) int64 {
+func CountPendingTransactions(t *testing.T, accountId ID[Account]) int64 {
 	db := testutils.GetPgDatabase(t)
-	count, err := db.Model(&models.Transaction{}).
+	count, err := db.Model(&Transaction{}).
 		Where(`"transaction"."account_id" = ?`, accountId).
 		Where(`"transaction"."is_pending" = ?`, true).
 		Where(`"transaction"."deleted_at" IS NULL`).

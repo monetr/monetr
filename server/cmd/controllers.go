@@ -16,7 +16,6 @@ import (
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
-	"github.com/monetr/monetr/server/teller"
 	"github.com/monetr/monetr/server/ui"
 	"github.com/sirupsen/logrus"
 )
@@ -27,7 +26,6 @@ func getControllers(
 	db *pg.DB,
 	backgroundJobs *background.BackgroundJobs,
 	plaidClient platypus.Platypus,
-	tellerClient teller.Client,
 	stats *metrics.Stats,
 	stripe stripe_helper.Stripe,
 	cache *redis.Pool,
@@ -45,7 +43,6 @@ func getControllers(
 			db,
 			backgroundJobs,
 			plaidClient,
-			tellerClient,
 			stats,
 			stripe,
 			cache,

@@ -17,7 +17,7 @@ func (r *repositoryBase) CreatePlaidBankAccount(
 
 	bankAccount.AccountId = r.AccountId()
 	bankAccount.CreatedAt = r.clock.Now().UTC()
-	bankAccount.CreatedByUserId = r.UserId()
+	bankAccount.CreatedBy = r.UserId()
 
 	_, err := r.txn.ModelContext(span.Context(), bankAccount).Insert(bankAccount)
 

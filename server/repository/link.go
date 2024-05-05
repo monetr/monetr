@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*Link, error) {
+func (r *repositoryBase) GetLink(ctx context.Context, linkId ID[Link]) (*Link, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{

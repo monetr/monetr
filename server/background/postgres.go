@@ -15,7 +15,6 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/identifier"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
@@ -97,7 +96,6 @@ func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, argu
 	}
 
 	job := models.Job{
-		JobId:       identifier.New(identifier.JobKind),
 		Queue:       queue,
 		Signature:   signature,
 		Input:       string(encodedArguments),

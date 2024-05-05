@@ -5,16 +5,16 @@ import (
 	"time"
 
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
 	"github.com/sirupsen/logrus"
 )
 
 type FundingEvent struct {
-	Date              time.Time `json:"date"`
-	OriginalDate      time.Time `json:"originalDate"`
-	WeekendAvoided    bool      `json:"weekendAvoided"`
-	FundingScheduleId uint64    `json:"fundingScheduleId"`
+	Date              time.Time           `json:"date"`
+	OriginalDate      time.Time           `json:"originalDate"`
+	WeekendAvoided    bool                `json:"weekendAvoided"`
+	FundingScheduleId ID[FundingSchedule] `json:"fundingScheduleId"`
 }
 
 var (
@@ -31,12 +31,12 @@ type FundingInstructions interface {
 
 type fundingScheduleBase struct {
 	log             *logrus.Entry
-	fundingSchedule models.FundingSchedule
+	fundingSchedule FundingSchedule
 }
 
 func NewFundingScheduleFundingInstructions(
 	log *logrus.Entry,
-	fundingSchedule models.FundingSchedule,
+	fundingSchedule FundingSchedule,
 ) FundingInstructions {
 	return &fundingScheduleBase{
 		log:             log,

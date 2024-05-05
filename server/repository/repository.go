@@ -11,7 +11,7 @@ import (
 )
 
 type BaseRepository interface {
-	AccountId() uint64
+	AccountId() ID[Account]
 
 	CreatePlaidBankAccount(ctx context.Context, bankAccount *PlaidBankAccount) error
 	UpdatePlaidBankAccount(ctx context.Context, bankAccount *PlaidBankAccount) error
@@ -49,7 +49,6 @@ type BaseRepository interface {
 	GetBankAccountsWithPlaidByLinkId(ctx context.Context, linkId ID[Link]) ([]BankAccount, error)
 	GetFundingSchedule(ctx context.Context, bankAccountId ID[BankAccount], fundingScheduleId ID[FundingSchedule]) (*FundingSchedule, error)
 	GetFundingSchedules(ctx context.Context, bankAccountId ID[BankAccount]) ([]FundingSchedule, error)
-	GetFundingStats(ctx context.Context, bankAccountId ID[BankAccount]) ([]FundingStats, error)
 	GetIsSetup(ctx context.Context) (bool, error)
 	GetLink(ctx context.Context, linkId ID[Link]) (*Link, error)
 	GetLinkIsManual(ctx context.Context, linkId ID[Link]) (bool, error)
@@ -57,11 +56,10 @@ type BaseRepository interface {
 	GetLinks(ctx context.Context) ([]Link, error)
 
 	// Plaid syncing
-	GetLastPlaidSync(ctx context.Context, linkId ID[Link]) (*PlaidSync, error)
+	GetLastPlaidSync(ctx context.Context, plaidLinkId ID[PlaidLink]) (*PlaidSync, error)
 	RecordPlaidSync(ctx context.Context, plaidLinkId ID[PlaidLink], trigger, nextCursor string, added, modified, removed int) error
 
 	GetNumberOfPlaidLinks(ctx context.Context) (int, error)
-	GetSettings(ctx context.Context) (*Settings, error)
 	GetSpending(ctx context.Context, bankAccountId ID[BankAccount]) ([]Spending, error)
 	GetSpendingByFundingSchedule(ctx context.Context, bankAccountId ID[BankAccount], fundingScheduleId ID[FundingSchedule]) ([]Spending, error)
 	GetSpendingById(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending]) (*Spending, error)
@@ -114,7 +112,7 @@ type BaseRepository interface {
 
 type Repository interface {
 	BaseRepository
-	UserId() uint64
+	UserId() ID[User]
 
 	GetMe(ctx context.Context) (*User, error)
 	UpdateUser(ctx context.Context, user *User) error

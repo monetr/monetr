@@ -6,7 +6,7 @@ import (
 
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
 	"github.com/sirupsen/logrus"
 	"github.com/teambition/rrule-go"
@@ -18,7 +18,7 @@ type SpendingEvent struct {
 	ContributionAmount int64          `json:"contributionAmount"`
 	RollingAllocation  int64          `json:"rollingAllocation"`
 	Funding            []FundingEvent `json:"funding"`
-	SpendingId         uint64         `json:"spendingId"`
+	SpendingId         ID[Spending]   `json:"spendingId"`
 }
 
 var (
@@ -32,11 +32,11 @@ type SpendingInstructions interface {
 
 type spendingInstructionBase struct {
 	log      *logrus.Entry
-	spending models.Spending
+	spending Spending
 	funding  FundingInstructions
 }
 
-func NewSpendingInstructions(log *logrus.Entry, spending models.Spending, fundingInstructions FundingInstructions) SpendingInstructions {
+func NewSpendingInstructions(log *logrus.Entry, spending Spending, fundingInstructions FundingInstructions) SpendingInstructions {
 	return &spendingInstructionBase{
 		log:      log,
 		spending: spending,
@@ -160,7 +160,7 @@ func (s spendingInstructionBase) GetNextNSpendingEventsAfter(ctx context.Context
 
 func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []time.Time {
 	switch s.spending.SpendingType {
-	case models.SpendingTypeExpense:
+	case SpendingTypeExpense:
 		rule := s.spending.RuleSet.Set
 		rule.DTStart(rule.GetDTStart().In(timezone))
 
@@ -171,7 +171,7 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, sta
 		// funding event, so we need to know how much will be spent before then, so we know how much to allocate.
 		items := rule.Between(start, end.Add(-1*time.Second), true)
 		return items
-	case models.SpendingTypeGoal:
+	case SpendingTypeGoal:
 		if s.spending.NextRecurrence.After(start) && s.spending.NextRecurrence.Before(end) {
 			return []time.Time{s.spending.NextRecurrence}
 		}
@@ -198,16 +198,16 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 
 	nextRecurrence := util.Midnight(s.spending.NextRecurrence, timezone)
 	switch s.spending.SpendingType {
-	case models.SpendingTypeOverflow:
+	case SpendingTypeOverflow:
 		return nil
-	case models.SpendingTypeGoal:
+	case SpendingTypeGoal:
 		// If we are working with a goal and it has already "completed" then there
 		// is nothing more to do, no more events will come up for this spending
 		// object.
 		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
 			return nil
 		}
-	case models.SpendingTypeExpense:
+	case SpendingTypeExpense:
 		if rule == nil {
 			panic("expense spending type must have a recurrence rule!")
 		}
@@ -245,9 +245,9 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 	// The amount of funds needed for each individual spending event.
 	var perSpendingAmount int64
 	switch s.spending.SpendingType {
-	case models.SpendingTypeExpense:
+	case SpendingTypeExpense:
 		perSpendingAmount = s.spending.TargetAmount
-	case models.SpendingTypeGoal:
+	case SpendingTypeGoal:
 		// If we are working with a goal then we need to subtract the amount we have
 		// already used from the goal. This is because a goal could have its funds
 		// spent from it throughout the life of the goal. But we don't want to

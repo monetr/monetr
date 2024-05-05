@@ -67,35 +67,6 @@ func (c *Controller) getFundingScheduleById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, fundingSchedule)
 }
 
-// Get Funding Stats
-// @Summary Get Funding Stats
-// @id get-funding-status
-// @tags Funding Schedules
-// @description Retrieve information about how much spending objects will receive on the next funding schedule.
-// @Security ApiKeyAuth
-// @Produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Router /bank_accounts/{bankAccountId}/funding_schedules/stats [get]
-// @Success 200 {array} repository.FundingStats
-// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getFundingScheduleStats(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
-		return c.badRequest(ctx, "must specify a valid bank account Id")
-	}
-
-	repo := c.mustGetAuthenticatedRepository(ctx)
-
-	stats, err := repo.GetFundingStats(c.getContext(ctx), bankAccountId)
-	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to retrieve funding schedules")
-	}
-
-	return ctx.JSON(http.StatusOK, stats)
-}
-
 // Create Funding Schedule
 // @Summary Create Funding Schedule
 // @id create-funding-schedule

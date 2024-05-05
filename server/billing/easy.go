@@ -92,7 +92,7 @@ func (p *postgresAccountRepository) GetAccount(ctx context.Context, accountId ui
 		log.WithError(err).Errorf("failed to retrieve account data from cache")
 	}
 
-	if account.AccountId > 0 {
+	if !account.AccountId.IsZero() {
 		log.Trace("returning account from cache")
 		return &account, nil
 	}

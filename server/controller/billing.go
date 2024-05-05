@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -131,7 +130,7 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 					"environment": c.configuration.Environment,
 					"revision":    build.Revision,
 					"release":     build.Release,
-					"accountId":   strconv.FormatUint(me.AccountId, 10),
+					"accountId":   me.AccountId.String(),
 				},
 			},
 		})
@@ -224,7 +223,7 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 				"environment": c.configuration.Environment,
 				"revision":    build.Revision,
 				"release":     build.Release,
-				"accountId":   strconv.FormatUint(me.AccountId, 10),
+				"accountId":   me.AccountId.String(),
 			},
 			TransferData: nil,
 		},

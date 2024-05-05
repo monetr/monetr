@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
@@ -12,7 +12,7 @@ var (
 	ErrFundingScheduleNotFound = errors.New("funding schedule does not exist")
 )
 
-func (r *repositoryBase) GetFundingSchedules(ctx context.Context, bankAccountId uint64) ([]models.FundingSchedule, error) {
+func (r *repositoryBase) GetFundingSchedules(ctx context.Context, bankAccountId ID[BankAccount]) ([]FundingSchedule, error) {
 	span := sentry.StartSpan(ctx, "GetFundingSchedules")
 	defer span.Finish()
 
@@ -21,7 +21,7 @@ func (r *repositoryBase) GetFundingSchedules(ctx context.Context, bankAccountId 
 		"bankAccountId": bankAccountId,
 	}
 
-	result := make([]models.FundingSchedule, 0)
+	result := make([]FundingSchedule, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
 		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
@@ -36,7 +36,7 @@ func (r *repositoryBase) GetFundingSchedules(ctx context.Context, bankAccountId 
 	return result, nil
 }
 
-func (r *repositoryBase) GetFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error) {
+func (r *repositoryBase) GetFundingSchedule(ctx context.Context, bankAccountId ID[BankAccount], fundingScheduleId ID[FundingSchedule]) (*FundingSchedule, error) {
 	span := sentry.StartSpan(ctx, "GetFundingSchedule")
 	defer span.Finish()
 
@@ -46,7 +46,7 @@ func (r *repositoryBase) GetFundingSchedule(ctx context.Context, bankAccountId, 
 		"fundingScheduleId": fundingScheduleId,
 	}
 
-	var result models.FundingSchedule
+	var result FundingSchedule
 	err := r.txn.ModelContext(span.Context(), &result).
 		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
@@ -63,7 +63,7 @@ func (r *repositoryBase) GetFundingSchedule(ctx context.Context, bankAccountId, 
 	return &result, nil
 }
 
-func (r *repositoryBase) CreateFundingSchedule(ctx context.Context, fundingSchedule *models.FundingSchedule) error {
+func (r *repositoryBase) CreateFundingSchedule(ctx context.Context, fundingSchedule *FundingSchedule) error {
 	span := sentry.StartSpan(ctx, "CreateFundingSchedule")
 	defer span.Finish()
 
@@ -84,7 +84,7 @@ func (r *repositoryBase) CreateFundingSchedule(ctx context.Context, fundingSched
 	return nil
 }
 
-func (r *repositoryBase) UpdateFundingSchedule(ctx context.Context, fundingSchedule *models.FundingSchedule) error {
+func (r *repositoryBase) UpdateFundingSchedule(ctx context.Context, fundingSchedule *FundingSchedule) error {
 	span := sentry.StartSpan(ctx, "UpdateFundingSchedule")
 	defer span.Finish()
 
@@ -111,11 +111,11 @@ func (r *repositoryBase) UpdateFundingSchedule(ctx context.Context, fundingSched
 	return nil
 }
 
-func (r *repositoryBase) DeleteFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) error {
+func (r *repositoryBase) DeleteFundingSchedule(ctx context.Context, bankAccountId ID[BankAccount], fundingScheduleId ID[FundingSchedule]) error {
 	span := sentry.StartSpan(ctx, "DeleteFundingSchedule")
 	defer span.Finish()
 
-	result, err := r.txn.ModelContext(span.Context(), &models.FundingSchedule{}).
+	result, err := r.txn.ModelContext(span.Context(), &FundingSchedule{}).
 		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
 		Where(`"funding_schedule"."funding_schedule_id" = ?`, fundingScheduleId).

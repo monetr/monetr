@@ -19,7 +19,7 @@ const (
 type Job struct {
 	tableName string `pg:"jobs"`
 
-	JobId       ID         `json:"-" pg:"job_id,notnull,pk"`
+	JobId       ID[Job]    `json:"-" pg:"job_id,notnull,pk"`
 	Queue       string     `json:"-" pg:"queue,notnull"`
 	Signature   string     `json:"-" pg:"signature,notnull"`
 	Input       string     `json:"-" pg:"input"`
@@ -31,13 +31,17 @@ type Job struct {
 	CompletedAt *time.Time `json:"-" pg:"completed_at"`
 }
 
+func (Job) IdentityPrefix() string {
+	return "job"
+}
+
 var (
 	_ pg.BeforeInsertHook = (*Job)(nil)
 )
 
 func (o *Job) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.JobId.Kind() == UnknownIDKind {
-		o.JobId = NewID(JobIDKind)
+	if o.JobId.IsZero() {
+		o.JobId = NewID(o)
 	}
 
 	now := time.Now()

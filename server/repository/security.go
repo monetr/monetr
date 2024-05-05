@@ -9,7 +9,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -32,7 +32,7 @@ type SecurityRepository interface {
 	// not the user must change their password at this time. A user MUST NOT be given credentials if their password
 	// requires changing. If the provided credentials are invalid then ErrInvalidCredentials is returned.
 	// NOTE: ErrRequirePasswordChange is no longer returned.
-	Login(ctx context.Context, email, password string) (_ *models.Login, requiresPasswordChange bool, err error)
+	Login(ctx context.Context, email, password string) (_ *Login, requiresPasswordChange bool, err error)
 
 	// ChangePassword accepts a login ID and the old hashed password and the new hashed password. The two passwords
 	// should be hashed from the user's input. Specifically, you should not retrieve the "oldHashedPassword" from the
@@ -40,7 +40,7 @@ type SecurityRepository interface {
 	// is 100% valid. This method will return true if the oldHashedPassword is correct and the update succeeds, it will
 	// return false if the oldHashedPassword is incorrect and/or if the update fail. If the oldHashedPassword provided
 	// is not valid for the login ID, then ErrInvalidCredentials will be returned.
-	ChangePassword(ctx context.Context, loginId uint64, oldHashedPassword, newHashedPassword string) error
+	ChangePassword(ctx context.Context, loginId ID[Login], oldHashedPassword, newHashedPassword string) error
 }
 
 var (
@@ -59,13 +59,13 @@ func NewSecurityRepository(db pg.DBI, clock clock.Clock) SecurityRepository {
 	}
 }
 
-func (b *baseSecurityRepository) Login(ctx context.Context, email, password string) (*models.Login, bool, error) {
+func (b *baseSecurityRepository) Login(ctx context.Context, email, password string) (*Login, bool, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	requiresPasswordChange := false
 
-	var login models.LoginWithHash
+	var login LoginWithHash
 	err := b.db.ModelContext(span.Context(), &login).
 		Relation("Users").
 		Relation("Users.Account").
@@ -90,11 +90,11 @@ func (b *baseSecurityRepository) Login(ctx context.Context, email, password stri
 	return &login.Login, requiresPasswordChange, nil
 }
 
-func (b *baseSecurityRepository) ChangePassword(ctx context.Context, loginId uint64, oldPassword, newPassword string) error {
+func (b *baseSecurityRepository) ChangePassword(ctx context.Context, loginId ID[Login], oldPassword, newPassword string) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	var login models.LoginWithHash
+	var login LoginWithHash
 	err := b.db.ModelContext(span.Context(), &login).
 		Where(`"login_id" = ?`, loginId).
 		Limit(1).

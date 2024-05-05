@@ -4,14 +4,14 @@ import (
 	"context"
 
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
 func (r *repositoryBase) WriteTransactionClusters(
 	ctx context.Context,
-	bankAccountId uint64,
-	clusters []models.TransactionCluster,
+	bankAccountId ID[BankAccount],
+	clusters []TransactionCluster,
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -21,7 +21,7 @@ func (r *repositoryBase) WriteTransactionClusters(
 		clusters[i].BankAccountId = bankAccountId
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), new(models.TransactionCluster)).
+	_, err := r.txn.ModelContext(span.Context(), new(TransactionCluster)).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"bank_account_id" = ?`, bankAccountId).
 		Delete()
@@ -39,13 +39,13 @@ func (r *repositoryBase) WriteTransactionClusters(
 
 func (r *repositoryBase) GetTransactionClusterByMember(
 	ctx context.Context,
-	bankAccountId uint64,
-	transactionId uint64,
-) (*models.TransactionCluster, error) {
+	bankAccountId ID[BankAccount],
+	transactionId ID[Transaction],
+) (*TransactionCluster, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	var cluster models.TransactionCluster
+	var cluster TransactionCluster
 	err := r.txn.ModelContext(span.Context(), &cluster).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"bank_account_id" = ?`, bankAccountId).

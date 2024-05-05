@@ -3,7 +3,6 @@ package repository_test
 import (
 	"context"
 	"encoding/base64"
-	"math"
 	"testing"
 
 	"github.com/benbjohnson/clock"
@@ -26,7 +25,7 @@ func TestSecretsRepository_Store(t *testing.T) {
 		kms := secrets.NewPlaintextKMS()
 		ctx := context.Background()
 
-		repo := repository.NewSecretsRepository(log, clock, db, kms, math.MaxInt64)
+		repo := repository.NewSecretsRepository(log, clock, db, kms, "acct_bogus")
 
 		err := repo.Store(ctx, &repository.SecretData{
 			Kind:  models.PlaidSecretKind,

@@ -2,14 +2,12 @@ package repository_test
 
 import (
 	"context"
-	"math"
 	"testing"
 	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/consts"
-	"github.com/monetr/monetr/server/hash"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -142,7 +140,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 
 		// Try to create another user with the same login and account, this should fail.
 		userAgain := user
-		userAgain.UserId = 0
+		userAgain.UserId = ""
 		err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &userAgain)
 		assert.Error(t, err, "should not create duplicate login for account")
 		assert.Zero(t, userAgain.UserId, "should not have an id")
@@ -155,7 +153,7 @@ func TestUnauthenticatedRepo_ResetPassword(t *testing.T) {
 		repo := GetTestUnauthenticatedRepository(t, clock)
 		login, _ := fixtures.GivenIHaveLogin(t, clock)
 
-		err := repo.ResetPassword(context.Background(), login.LoginId, hash.HashPassword(login.Email, "new Password"))
+		err := repo.ResetPassword(context.Background(), login.LoginId, gofakeit.UUID())
 		assert.NoError(t, err, "must reset password without an error")
 	})
 
@@ -163,7 +161,7 @@ func TestUnauthenticatedRepo_ResetPassword(t *testing.T) {
 		clock := clock.NewMock()
 		repo := GetTestUnauthenticatedRepository(t, clock)
 
-		err := repo.ResetPassword(context.Background(), math.MaxUint64, hash.HashPassword(testutils.GetUniqueEmail(t), "new Password"))
+		err := repo.ResetPassword(context.Background(), "lgn_bogus", gofakeit.UUID())
 		assert.EqualError(t, err, "no logins were updated", "should return an error for invalid login")
 	})
 }

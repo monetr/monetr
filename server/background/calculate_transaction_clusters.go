@@ -7,6 +7,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/recurring"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
@@ -18,8 +19,8 @@ const (
 )
 
 var (
-	_ JobHandler = &CalculateTransactionClustersHandler{}
-	_ Job        = &CalculateTransactionClustersJob{}
+	_ JobHandler        = &CalculateTransactionClustersHandler{}
+	_ JobImplementation = &CalculateTransactionClustersJob{}
 )
 
 type CalculateTransactionClustersHandler struct {
@@ -30,8 +31,8 @@ type CalculateTransactionClustersHandler struct {
 }
 
 type CalculateTransactionClustersArguments struct {
-	AccountId     uint64 `json:"accountId"`
-	BankAccountId uint64 `json:"bankAccountId"`
+	AccountId     ID[Account]     `json:"accountId"`
+	BankAccountId ID[BankAccount] `json:"bankAccountId"`
 }
 
 type CalculateTransactionClustersJob struct {
@@ -119,7 +120,7 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 	accountId := c.args.AccountId
 	bankAccountId := c.args.BankAccountId
 
-	repo := repository.NewRepositoryFromSession(c.clock, 0, accountId, c.db)
+	repo := repository.NewRepositoryFromSession(c.clock, "user_system", accountId, c.db)
 
 	log := c.log.WithContext(span.Context())
 

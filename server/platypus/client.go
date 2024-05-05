@@ -3,7 +3,6 @@ package platypus
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -11,6 +10,7 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/models"
 	"github.com/plaid/plaid-go/v20/plaid"
 	"github.com/sirupsen/logrus"
 )
@@ -37,8 +37,8 @@ var (
 )
 
 type PlaidClient struct {
-	accountId   uint64
-	linkId      uint64
+	accountId   models.ID[models.Account]
+	linkId      models.ID[models.Link]
 	accessToken string
 	itemId      string
 	log         *logrus.Entry
@@ -257,7 +257,7 @@ func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection boo
 			Language:     consts.PlaidLanguage,
 			CountryCodes: consts.PlaidCountries,
 			User: plaid.LinkTokenCreateRequestUser{
-				ClientUserId: strconv.FormatUint(p.accountId, 10),
+				ClientUserId: p.accountId.String(),
 				EmailAddress: nil,
 			},
 			Webhook:               webhooksUrl,

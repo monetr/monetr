@@ -54,7 +54,7 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 		})
 
 		link := &models.Link{
-			LinkId:    1234,
+			LinkId:    "link_foo",
 			AccountId: user.AccountId,
 		}
 
@@ -110,7 +110,7 @@ func TestPlaidClient_GetAllTransactions(t *testing.T) {
 		})
 
 		link := &models.Link{
-			LinkId:    1234,
+			LinkId:    "link_foo",
 			AccountId: user.AccountId,
 		}
 
@@ -171,7 +171,7 @@ func TestPlaidClient_UpdateItem(t *testing.T) {
 		})
 
 		link := &models.Link{
-			LinkId:    1234,
+			LinkId:    "link_foo",
 			AccountId: user.AccountId,
 		}
 

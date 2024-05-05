@@ -2,14 +2,13 @@ package background
 
 import (
 	"context"
-	"math"
 	"testing"
 	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -22,7 +21,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
-		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
 		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", false)
@@ -42,14 +41,14 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		contributions := fundingSchedule.GetNumberOfContributionsBetween(clock.Now(), nextDue, timezone)
 		assert.NotZero(t, contributions, "must have at least one contribution, if this fails then this test is written wrong")
 
-		spending := models.Spending{
+		spending := Spending{
 			AccountId:              user.AccountId,
 			Account:                user.Account,
 			BankAccountId:          bankAccount.BankAccountId,
 			BankAccount:            &bankAccount,
 			FundingScheduleId:      fundingSchedule.FundingScheduleId,
 			FundingSchedule:        fundingSchedule,
-			SpendingType:           models.SpendingTypeExpense,
+			SpendingType:           SpendingTypeExpense,
 			Name:                   "Amazon",
 			Description:            "Amazon Prime Subscription",
 			TargetAmount:           1395,
@@ -61,7 +60,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 			NextContributionAmount: 100,
 			IsBehind:               false,
 			IsPaused:               false,
-			DateCreated:            clock.Now(),
+			CreatedAt:              clock.Now(),
 		}
 		testutils.MustDBInsert(t, &spending)
 
@@ -69,7 +68,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		args := ProcessFundingScheduleArguments{
 			AccountId:     fundingSchedule.AccountId,
 			BankAccountId: bankAccount.BankAccountId,
-			FundingScheduleIds: []uint64{
+			FundingScheduleIds: []ID[FundingSchedule]{
 				fundingSchedule.FundingScheduleId,
 			},
 		}
@@ -93,10 +92,10 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 
 		handler := NewProcessFundingScheduleHandler(log, db, clock)
 		args := ProcessFundingScheduleArguments{
-			AccountId:     math.MaxUint64,
-			BankAccountId: 123,
-			FundingScheduleIds: []uint64{
-				123,
+			AccountId:     "acct_bogus",
+			BankAccountId: "bac_bogus",
+			FundingScheduleIds: []ID[FundingSchedule]{
+				"fund_bogus",
 			},
 		}
 
@@ -115,7 +114,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
-		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=DAILY;INTERVAL=1", false)
@@ -126,7 +125,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		args := ProcessFundingScheduleArguments{
 			AccountId:     fundingSchedule.AccountId,
 			BankAccountId: bankAccount.BankAccountId,
-			FundingScheduleIds: []uint64{
+			FundingScheduleIds: []ID[FundingSchedule]{
 				fundingSchedule.FundingScheduleId,
 			},
 		}

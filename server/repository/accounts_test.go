@@ -17,7 +17,7 @@ func TestRepositoryBase_GetAccount(t *testing.T) {
 		clock := clock.NewMock()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
-		repo := repository.NewRepositoryFromSession(clock, 123, 1234, db)
+		repo := repository.NewRepositoryFromSession(clock, "user_bogus", "acct_bogus", db)
 		account, err := repo.GetAccount(context.Background())
 		assert.EqualError(t, err, "failed to retrieve account: pg: no rows in result set")
 		assert.Nil(t, account, "should not return an account")

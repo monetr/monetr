@@ -254,7 +254,6 @@ func RunServer() error {
 		db,
 		backgroundJobs,
 		plaidClient,
-		tellerClient,
 		stats,
 		stripe,
 		redisController.Pool(),

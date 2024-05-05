@@ -24,7 +24,6 @@ import (
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
-	"github.com/monetr/monetr/server/teller"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -46,7 +45,6 @@ type Controller struct {
 	paywall                  billing.BasicPayWall
 	plaid                    platypus.Platypus
 	plaidInstitutions        platypus.PlaidInstitutions
-	teller                   teller.Client
 	kms                      secrets.KeyManagement
 	plaidWebhookVerification platypus.WebhookVerification
 	ps                       pubsub.PublishSubscribe
@@ -61,7 +59,6 @@ func NewController(
 	db *pg.DB,
 	jobRunner background.JobController,
 	plaidClient platypus.Platypus,
-	tellerClient teller.Client,
 	stats *metrics.Stats,
 	stripe stripe_helper.Stripe,
 	cachePool *redis.Pool,
@@ -117,7 +114,6 @@ func NewController(
 		stats:                    stats,
 		stripe:                   stripe,
 		stripeWebhooks:           billing.NewStripeWebhookHandler(log, accountsRepo, basicBilling, pubSub),
-		teller:                   tellerClient,
 	}
 }
 
