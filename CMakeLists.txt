@@ -222,19 +222,12 @@ add_custom_target(
   DEPENDS ${MONETR_EXECUTABLE}
 )
 
-add_custom_target(
-  development.migrate
-  COMMAND ${CMAKE_Go_COMPILER} run ${MONETR_CLI_PKG} database migrate
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
-
 ################################################################################
 #                                     TESTING                                  #
 ################################################################################
 
 enable_testing()
 option(BUILD_TESTING "Build the testing tree." OFF)
-
 
 include(GolangTestUtils)
 
