@@ -746,7 +746,7 @@ CREATE TABLE "funding_schedules" (
   "account_id"               VARCHAR(32) NOT NULL,
   "bank_account_id"          VARCHAR(32) NOT NULL,
   "name"                     VARCHAR(200) NOT NULL,
-  "description"              VARCHAR(500) NOT NULL,
+  "description"              VARCHAR(500),
   "ruleset"                  TEXT NOT NULL,
   "last_recurrence"          TIMESTAMP WITH TIME ZONE,
   "next_recurrence"          TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -1013,3 +1013,49 @@ LEFT JOIN "plaid_transactions_old" AS "p" ON "p"."plaid_transaction_id" = "t"."p
 LEFT JOIN "plaid_transactions_old" AS "pp" ON "pp"."plaid_transaction_id" = "t"."pending_plaid_transaction_id"
 WHERE "t"."teller_transaction_id" IS NULL;
 
+DROP VIEW "balances";
+DROP TABLE "teller_syncs" CASCADE;
+DROP TABLE "plaid_syncs_old" CASCADE;
+DROP TABLE "transaction_clusters_old" CASCADE;
+DROP TABLE "transactions_old" CASCADE;
+DROP TABLE "teller_transactions" CASCADE;
+DROP TABLE "plaid_transactions_old" CASCADE;
+DROP TABLE "spending_old" CASCADE; 
+DROP TABLE "funding_schedules_old" CASCADE;
+DROP TABLE "bank_accounts_old" CASCADE;
+DROP TABLE "plaid_bank_accounts_old" CASCADE;
+DROP TABLE "teller_bank_accounts" CASCADE;
+DROP TABLE "links_old" CASCADE;
+DROP TABLE "plaid_links_old" CASCADE;
+DROP TABLE "teller_links" CASCADE;
+DROP TABLE "secrets_old" CASCADE;
+DROP TABLE "files_old" CASCADE;
+DROP TABLE "jobs_old" CASCADE;
+DROP TABLE "users_old" CASCADE;
+DROP TABLE "accounts_old" CASCADE;
+DROP TABLE "logins_old" CASCADE;
+DROP TABLE "betas_old" CASCADE;
+DROP TABLE IF EXISTS "funding_stats" CASCADE;
+
+CREATE OR REPLACE VIEW balances AS
+ SELECT bank_account.bank_account_id,
+    bank_account.account_id,
+    bank_account.current_balance AS current,
+    bank_account.available_balance AS available,
+    bank_account.available_balance::numeric - sum(COALESCE(expense.current_amount, 0::numeric)) - sum(COALESCE(goal.current_amount, 0::numeric)) AS free,
+    sum(COALESCE(expense.current_amount, 0::numeric)) AS expenses,
+    sum(COALESCE(goal.current_amount, 0::numeric)) AS goals
+   FROM bank_accounts bank_account
+     LEFT JOIN ( SELECT spending.bank_account_id,
+            spending.account_id,
+            sum(spending.current_amount) AS current_amount
+           FROM spending
+          WHERE spending.spending_type = 0
+          GROUP BY spending.bank_account_id, spending.account_id) expense ON expense.bank_account_id = bank_account.bank_account_id AND expense.account_id = bank_account.account_id
+     LEFT JOIN ( SELECT spending.bank_account_id,
+            spending.account_id,
+            sum(spending.current_amount) AS current_amount
+           FROM spending
+          WHERE spending.spending_type = 1
+          GROUP BY spending.bank_account_id, spending.account_id) goal ON goal.bank_account_id = bank_account.bank_account_id AND goal.account_id = bank_account.account_id
+  GROUP BY bank_account.bank_account_id, bank_account.account_id;
