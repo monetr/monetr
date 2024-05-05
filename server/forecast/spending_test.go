@@ -24,7 +24,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			models.FundingSchedule{
 				RuleSet:         fundingRule,
 				ExcludeWeekends: false,
-				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				NextRecurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -98,7 +98,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			models.FundingSchedule{
 				RuleSet:         fundingRule,
 				ExcludeWeekends: false,
-				NextOccurrence:  time.Date(2024, 3, 15, 0, 0, 0, 0, timezone),
+				NextRecurrence:  time.Date(2024, 3, 15, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -236,7 +236,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			models.FundingSchedule{
 				RuleSet:         fundingRule,
 				ExcludeWeekends: false,
-				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				NextRecurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -350,7 +350,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			models.FundingSchedule{
 				RuleSet:         fundingRule,
 				ExcludeWeekends: true,
-				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				NextRecurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -474,7 +474,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			models.FundingSchedule{
 				RuleSet:         fundingRule,
 				ExcludeWeekends: true,
-				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+				NextRecurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -511,7 +511,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			models.FundingSchedule{
 				RuleSet:         fundingRule,
 				ExcludeWeekends: true,
-				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+				NextRecurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -546,7 +546,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			models.FundingSchedule{
 				RuleSet:         fundingRule,
 				ExcludeWeekends: true,
-				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+				NextRecurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -578,7 +578,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			models.FundingSchedule{
 				RuleSet:           fundingRule,
 				ExcludeWeekends:   true,
-				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
+				NextRecurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
 				FundingScheduleId: 1,
 			},
 		)
@@ -616,7 +616,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				// GetFundingEventsBetween does not properly implement excluding
 				// weekends.
 				ExcludeWeekends:   true,
-				NextOccurrence:    time.Date(2024, 3, 15, 0, 0, 0, 0, timezone),
+				NextRecurrence:    time.Date(2024, 3, 15, 0, 0, 0, 0, timezone),
 				FundingScheduleId: 1,
 			},
 		)

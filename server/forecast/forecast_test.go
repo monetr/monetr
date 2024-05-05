@@ -27,7 +27,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			{
 				RuleSet:         fundingRule,
 				ExcludeWeekends: true,
-				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				NextRecurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 			},
 		}
 		spending := []models.Spending{
@@ -100,7 +100,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			{
 				RuleSet:           fundingRule,
 				ExcludeWeekends:   true,
-				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
+				NextRecurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
 				FundingScheduleId: 1,
 			},
 		}
@@ -145,7 +145,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			{
 				RuleSet:           fundingRule,
 				ExcludeWeekends:   true,
-				NextOccurrence:    time.Date(2023, 8, 15, 0, 0, 0, 0, timezone),
+				NextRecurrence:    time.Date(2023, 8, 15, 0, 0, 0, 0, timezone),
 				FundingScheduleId: 1,
 			},
 		}
@@ -280,7 +280,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		now := time.Date(2023, 07, 05, 15, 9, 0, 0, timezone).UTC()
 		log := testutils.GetLog(t)
 
-		end := funding[0].NextOccurrence
+		end := funding[0].NextRecurrence
 		end = end.AddDate(0, 0, 20)
 		assert.Greater(t, end, now, "make sure that our end is actually in the future")
 
@@ -312,7 +312,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			{
 				RuleSet:           fundingRule,
 				ExcludeWeekends:   true,
-				NextOccurrence:    time.Date(2023, 10, 31, 0, 0, 0, 0, timezone),
+				NextRecurrence:    time.Date(2023, 10, 31, 0, 0, 0, 0, timezone),
 				FundingScheduleId: 1,
 			},
 		}

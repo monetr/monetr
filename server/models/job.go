@@ -1,9 +1,10 @@
 package models
 
 import (
+	"context"
 	"time"
 
-	"github.com/monetr/monetr/server/identifier"
+	"github.com/go-pg/pg/v10"
 )
 
 type JobStatus string
@@ -18,14 +19,35 @@ const (
 type Job struct {
 	tableName string `pg:"jobs"`
 
-	JobId       identifier.ID `json:"-" pg:"job_id,notnull,pk,type:'bigserial'"`
-	Queue       string        `json:"-" pg:"queue,notnull"`
-	Signature   string        `json:"-" pg:"signature,notnull"`
-	Input       string        `json:"-" pg:"input"`
-	Output      string        `json:"-" pg:"output"`
-	Status      JobStatus     `json:"-" pg:"status,notnull"`
-	CreatedAt   time.Time     `json:"-" pg:"created_at,notnull"`
-	UpdatedAt   time.Time     `json:"-" pg:"updated_at,notnull"`
-	StartedAt   *time.Time    `json:"-" pg:"started_at"`
-	CompletedAt *time.Time    `json:"-" pg:"completed_at"`
+	JobId       ID         `json:"-" pg:"job_id,notnull,pk"`
+	Queue       string     `json:"-" pg:"queue,notnull"`
+	Signature   string     `json:"-" pg:"signature,notnull"`
+	Input       string     `json:"-" pg:"input"`
+	Output      string     `json:"-" pg:"output"`
+	Status      JobStatus  `json:"-" pg:"status,notnull"`
+	CreatedAt   time.Time  `json:"-" pg:"created_at,notnull"`
+	UpdatedAt   time.Time  `json:"-" pg:"updated_at,notnull"`
+	StartedAt   *time.Time `json:"-" pg:"started_at"`
+	CompletedAt *time.Time `json:"-" pg:"completed_at"`
+}
+
+var (
+	_ pg.BeforeInsertHook = (*Job)(nil)
+)
+
+func (o *Job) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.JobId.Kind() == UnknownIDKind {
+		o.JobId = NewID(JobIDKind)
+	}
+
+	now := time.Now()
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = now
+	}
+
+	if o.UpdatedAt.IsZero() {
+		o.UpdatedAt = now
+	}
+
+	return ctx, nil
 }

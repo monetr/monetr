@@ -85,7 +85,7 @@ func GiveMeAFundingSchedule(nextContributionDate time.Time, ruleset *RuleSet) *F
 		Name:              "Bogus Funding Schedule",
 		Description:       "Bogus",
 		RuleSet:           ruleset,
-		NextOccurrence:    nextContributionDate,
+		NextRecurrence:    nextContributionDate,
 	}
 }
 

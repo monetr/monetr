@@ -5,18 +5,18 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
-func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*models.Link, error) {
+func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*Link, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
 		"linkId": linkId,
 	}
 
-	var link models.Link
+	var link Link
 	err := r.txn.ModelContext(span.Context(), &link).
 		Relation("PlaidLink").
 		Relation("TellerLink").
@@ -31,11 +31,11 @@ func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*models.Li
 	return &link, nil
 }
 
-func (r *repositoryBase) GetLinks(ctx context.Context) ([]models.Link, error) {
+func (r *repositoryBase) GetLinks(ctx context.Context) ([]Link, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	result := make([]models.Link, 0)
+	result := make([]Link, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation("PlaidLink").
 		Relation("TellerLink").
@@ -53,9 +53,9 @@ func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error)
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	count, err := r.txn.ModelContext(span.Context(), &models.Link{}).
+	count, err := r.txn.ModelContext(span.Context(), &Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
-		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
+		Where(`"link"."link_type" = ?`, PlaidLinkType).
 		Where(`"link"."deleted_at" IS NULL`).
 		Count()
 	if err != nil {
@@ -65,17 +65,17 @@ func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error)
 	return count, nil
 }
 
-func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId uint64) (bool, error) {
+func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId ID[Link]) (bool, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
 		"linkId": linkId,
 	}
 
-	ok, err := r.txn.ModelContext(span.Context(), &models.Link{}).
+	ok, err := r.txn.ModelContext(span.Context(), &Link{}).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."link_id" = ?`, linkId).
-		Where(`"link"."link_type" = ?`, models.ManualLinkType).
+		Where(`"link"."link_type" = ?`, ManualLinkType).
 		Where(`"link"."deleted_at" IS NULL`).
 		Exists()
 	if err != nil {
@@ -88,19 +88,19 @@ func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId uint64) (bo
 	return ok, nil
 }
 
-func (r *repositoryBase) GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId uint64) (bool, error) {
+func (r *repositoryBase) GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId ID[BankAccount]) (bool, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
 		"bankAccountId": bankAccountId,
 	}
 
-	ok, err := r.txn.ModelContext(span.Context(), &models.Link{}).
+	ok, err := r.txn.ModelContext(span.Context(), &Link{}).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."link_id" = "link"."link_id" AND "bank_account"."account_id" = "link"."account_id"`).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."bank_account_id" = ?`, bankAccountId).
-		Where(`"link"."link_type" = ?`, models.ManualLinkType).
+		Where(`"link"."link_type" = ?`, ManualLinkType).
 		Where(`"link"."deleted_at" IS NULL`).
 		Exists()
 	if err != nil {
@@ -113,14 +113,14 @@ func (r *repositoryBase) GetLinkIsManualByBankAccountId(ctx context.Context, ban
 	return ok, nil
 }
 
-func (r *repositoryBase) CreateLink(ctx context.Context, link *models.Link) error {
+func (r *repositoryBase) CreateLink(ctx context.Context, link *Link) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	userId := r.UserId()
 	now := r.clock.Now().UTC()
 	link.AccountId = r.AccountId()
-	link.CreatedByUserId = userId
+	link.CreatedBy = userId
 	link.CreatedAt = now
 	link.UpdatedAt = now
 
@@ -128,7 +128,7 @@ func (r *repositoryBase) CreateLink(ctx context.Context, link *models.Link) erro
 	return errors.Wrap(err, "failed to insert link")
 }
 
-func (r *repositoryBase) UpdateLink(ctx context.Context, link *models.Link) error {
+func (r *repositoryBase) UpdateLink(ctx context.Context, link *Link) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

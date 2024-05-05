@@ -1,8 +1,10 @@
 package models
 
 import (
+	"context"
 	"time"
 
+	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/feature"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
@@ -12,7 +14,7 @@ import (
 type Account struct {
 	tableName string `pg:"accounts"`
 
-	AccountId                    uint64                     `json:"accountId" pg:"account_id,notnull,pk,type:'bigserial'"`
+	AccountId                    ID[Account]                `json:"accountId" pg:"account_id,notnull,pk"`
 	Timezone                     string                     `json:"timezone" pg:"timezone,notnull,default:'UTC'"`
 	Locale                       string                     `json:"locale" pg:"locale,notnull"`
 	StripeCustomerId             *string                    `json:"-" pg:"stripe_customer_id"`
@@ -22,6 +24,27 @@ type Account struct {
 	SubscriptionStatus           *stripe.SubscriptionStatus `json:"subscriptionStatus" pg:"subscription_status"`
 	TrialEndsAt                  *time.Time                 `json:"trialEndsAt" pg:"trial_ends_at"`
 	CreatedAt                    time.Time                  `json:"createdAt" pg:"created_at,notnull"`
+}
+
+func (Account) IdentityPrefix() string {
+	return "acct"
+}
+
+var (
+	_ pg.BeforeInsertHook = (*Account)(nil)
+)
+
+func (o *Account) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.AccountId.IsZero() {
+		o.AccountId = NewID(o)
+	}
+
+	now := time.Now()
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = now
+	}
+
+	return ctx, nil
 }
 
 func (a *Account) GetTimezone() (*time.Location, error) {

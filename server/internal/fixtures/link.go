@@ -35,9 +35,9 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user models.User) mod
 		user.AccountId,
 	)
 
-	secret := repository.Secret{
-		Kind:   models.PlaidSecretKind,
-		Secret: gofakeit.UUID(),
+	secret := repository.SecretData{
+		Kind:  models.PlaidSecretKind,
+		Value: gofakeit.UUID(),
 	}
 	err := secretsRepo.Store(context.Background(), &secret)
 	require.NoError(t, err, "must be able to see plaid token secret")
@@ -104,9 +104,9 @@ func GivenIHaveATellerLink(t *testing.T, clock clock.Clock, user models.User) mo
 		user.AccountId,
 	)
 
-	secret := repository.Secret{
-		Kind:   models.TellerSecretKind,
-		Secret: gofakeit.Generate("token_????????????????????????????????"),
+	secret := repository.SecretData{
+		Kind:  models.TellerSecretKind,
+		Value: gofakeit.Generate("token_????????????????????????????????"),
 	}
 	err := secretsRepo.Store(context.Background(), &secret)
 	require.NoError(t, err, "must be able to see plaid token secret")

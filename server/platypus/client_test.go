@@ -61,7 +61,7 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 		platypus, err := client.NewClient(
 			context.Background(),
 			link,
-			secret.Secret,
+			secret.Value,
 			gofakeit.UUID(),
 		)
 		assert.NoError(t, err, "should create platypus")
@@ -117,7 +117,7 @@ func TestPlaidClient_GetAllTransactions(t *testing.T) {
 		client, err := platypus.NewClient(
 			context.Background(),
 			link,
-			secret.Secret,
+			secret.Value,
 			gofakeit.UUID(),
 		)
 		assert.NoError(t, err, "should create platypus")
@@ -178,7 +178,7 @@ func TestPlaidClient_UpdateItem(t *testing.T) {
 		client, err := platypus.NewClient(
 			context.Background(),
 			link,
-			secret.Secret,
+			secret.Value,
 			gofakeit.UUID(),
 		)
 		assert.NoError(t, err, "should create client")

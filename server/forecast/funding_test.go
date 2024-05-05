@@ -19,7 +19,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
-			NextOccurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, timezone),
+			NextRecurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, timezone),
 		}
 
 		now := time.Date(2022, 5, 1, 0, 0, 0, 0, timezone)
@@ -37,7 +37,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: true,
-			NextOccurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, timezone),
+			NextRecurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, timezone),
 		}
 
 		now := time.Date(2022, 5, 1, 0, 0, 0, 0, time.UTC)
@@ -55,7 +55,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: true,
-			NextOccurrence:  time.Date(2022, 9, 31, 0, 0, 0, 0, timezone),
+			NextRecurrence:  time.Date(2022, 9, 31, 0, 0, 0, 0, timezone),
 		}
 
 		// 12:23:10 AM on September 31st 2022.
@@ -85,7 +85,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: true,
-			NextOccurrence:  time.Date(2022, 5, 13, 0, 0, 0, 0, timezone),
+			NextRecurrence:  time.Date(2022, 5, 13, 0, 0, 0, 0, timezone),
 		}
 
 		now := time.Date(2022, 5, 14, 0, 0, 0, 0, timezone)
@@ -107,7 +107,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
-			NextOccurrence:  next,
+			NextRecurrence:  next,
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextFundingOccurrence := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
@@ -124,7 +124,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
-			NextOccurrence:  time.Time{},
+			NextRecurrence:  time.Time{},
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextFundingOccurrence := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
@@ -141,7 +141,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
-			NextOccurrence:  next,
+			NextRecurrence:  next,
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextFundingOccurrence := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
@@ -170,7 +170,7 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
-			NextOccurrence:  expected[0].Date,
+			NextRecurrence:  expected[0].Date,
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextN := instructions.GetNFundingEventsAfter(context.Background(), 2, now, timezone)
@@ -207,7 +207,7 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
-			NextOccurrence:  expected[0].Date,
+			NextRecurrence:  expected[0].Date,
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextN := instructions.GetNFundingEventsAfter(context.Background(), 4, now, timezone)
@@ -244,7 +244,7 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: true,
-			NextOccurrence:  expected[0].Date,
+			NextRecurrence:  expected[0].Date,
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextN := instructions.GetNFundingEventsAfter(context.Background(), 4, now, timezone)
@@ -264,7 +264,7 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
-			NextOccurrence:  next,
+			NextRecurrence:  next,
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
@@ -283,7 +283,7 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
-			NextOccurrence:  next,
+			NextRecurrence:  next,
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
@@ -302,7 +302,7 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		fundingSchedule := models.FundingSchedule{
 			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
-			NextOccurrence:  next,
+			NextRecurrence:  next,
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)

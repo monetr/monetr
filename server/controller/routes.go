@@ -202,7 +202,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 
 	// Webhook endpoints
 	repoParty.POST("/plaid/webhook", c.postPlaidWebhook)
-	repoParty.POST("/teller/webhook", c.postTellerWebhook)
 	repoParty.POST("/stripe/webhook", c.handleStripeWebhook)
 
 	// Endpoints used by the client/UI.

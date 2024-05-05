@@ -7,33 +7,33 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-type Secret struct {
-	SecretId uint64            `json:"-"`
-	Kind     models.SecretKind `json:"-"`
-	Secret   string            `json:"-"`
+type SecretData struct {
+	SecretId ID[Secret] `json:"-"`
+	Kind     SecretKind `json:"-"`
+	Value    string     `json:"-"`
 }
 
 type SecretsRepository interface {
-	Store(ctx context.Context, secret *Secret) error
-	Read(ctx context.Context, secretId uint64) (*Secret, error)
-	Delete(ctx context.Context, secretId uint64) error
+	Store(ctx context.Context, secret *SecretData) error
+	Read(ctx context.Context, secretId ID[Secret]) (*SecretData, error)
+	Delete(ctx context.Context, secretId ID[Secret]) error
 }
 
 type baseSecretsRepository struct {
-	accountId uint64
+	accountId ID[Account]
 	clock     clock.Clock
 	log       *logrus.Entry
 	db        pg.DBI
 	kms       secrets.KeyManagement
 }
 
-func (b *baseSecretsRepository) AccountId() uint64 {
+func (b *baseSecretsRepository) AccountId() ID[Account] {
 	return b.accountId
 }
 
@@ -42,7 +42,7 @@ func NewSecretsRepository(
 	clock clock.Clock,
 	db pg.DBI,
 	kms secrets.KeyManagement,
-	accountId uint64,
+	accountId ID[Account],
 ) SecretsRepository {
 	return &baseSecretsRepository{
 		accountId: accountId,
@@ -53,14 +53,14 @@ func NewSecretsRepository(
 	}
 }
 
-func (b *baseSecretsRepository) Store(ctx context.Context, secret *Secret) error {
+func (b *baseSecretsRepository) Store(ctx context.Context, secret *SecretData) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	log := b.log.WithContext(span.Context())
 
-	var item models.Secret
-	if secret.SecretId != 0 {
+	var item Secret
+	if !secret.SecretId.IsZero() {
 		log = log.WithField("secretId", secret.SecretId)
 		err := b.db.ModelContext(span.Context(), &item).
 			Where(`"secret"."account_id" = ?`, b.AccountId()).
@@ -76,7 +76,7 @@ func (b *baseSecretsRepository) Store(ctx context.Context, secret *Secret) error
 		item.UpdatedAt = b.clock.Now().UTC()
 	} else {
 		log.Trace("secret does not exist, a new secret will be stored")
-		item = models.Secret{
+		item = Secret{
 			AccountId: b.AccountId(),
 			Kind:      secret.Kind,
 			UpdatedAt: b.clock.Now().UTC(),
@@ -86,7 +86,7 @@ func (b *baseSecretsRepository) Store(ctx context.Context, secret *Secret) error
 
 	keyId, version, encrypted, err := b.kms.Encrypt(
 		span.Context(),
-		secret.Secret,
+		secret.Value,
 	)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
@@ -98,7 +98,7 @@ func (b *baseSecretsRepository) Store(ctx context.Context, secret *Secret) error
 	item.Secret = encrypted
 
 	query := b.db.ModelContext(span.Context(), &item)
-	if item.SecretId == 0 {
+	if item.SecretId.IsZero() {
 		_, err = query.Insert(&item)
 	} else {
 		_, err = query.WherePK().Update(&item)
@@ -119,12 +119,12 @@ func (b *baseSecretsRepository) Store(ctx context.Context, secret *Secret) error
 
 func (b *baseSecretsRepository) Read(
 	ctx context.Context,
-	secretId uint64,
-) (*Secret, error) {
+	secretId ID[Secret],
+) (*SecretData, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	var item models.Secret
+	var item Secret
 	err := b.db.ModelContext(span.Context(), &item).
 		Where(`"secret"."account_id" = ?`, b.AccountId()).
 		Where(`"secret"."secret_id" = ?`, secretId).
@@ -144,21 +144,21 @@ func (b *baseSecretsRepository) Read(
 
 	span.Status = sentry.SpanStatusOK
 
-	return &Secret{
+	return &SecretData{
 		SecretId: secretId,
 		Kind:     item.Kind,
-		Secret:   string(decrypted),
+		Value:    string(decrypted),
 	}, nil
 }
 
 func (b *baseSecretsRepository) Delete(
 	ctx context.Context,
-	secretId uint64,
+	secretId ID[Secret],
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	_, err := b.db.ModelContext(span.Context(), new(models.Secret)).
+	_, err := b.db.ModelContext(span.Context(), new(Secret)).
 		Where(`"secret"."account_id" = ?`, b.AccountId()).
 		Where(`"secret"."secret_id" = ?`, secretId).
 		Delete()

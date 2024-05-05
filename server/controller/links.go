@@ -258,7 +258,7 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		client, err := c.plaid.NewClient(
 			c.getContext(ctx),
 			link,
-			secret.Secret,
+			secret.Value,
 			link.PlaidLink.PlaidId,
 		)
 		if err != nil {
@@ -286,7 +286,7 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
 		}
 
-		client := c.teller.GetAuthenticatedClient(secret.Secret)
+		client := c.teller.GetAuthenticatedClient(secret.Value)
 
 		bankAccounts, err := repo.GetBankAccountsByLinkId(c.getContext(ctx), link.LinkId)
 		if err != nil {

@@ -207,7 +207,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 
 		if !fundingSchedule.CalculateNextOccurrence(span.Context(), p.clock.Now(), timezone) {
 			crumbs.IndicateBug(span.Context(), "bug: funding schedule for processing occurs in the future", map[string]interface{}{
-				"nextOccurrence": fundingSchedule.NextOccurrence,
+				"nextOccurrence": fundingSchedule.NextRecurrence,
 			})
 			span.Status = sentry.SpanStatusInvalidArgument
 			fundingLog.Warn("skipping processing funding schedule, it does not occur yet")

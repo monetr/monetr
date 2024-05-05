@@ -55,10 +55,10 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(
 	// normally stored in UTC so this just adjusts it to be the user's current timezone.
 	rule.DTStart(rule.GetDTStart().In(timezone))
 	var nextContributionDate time.Time
-	if f.fundingSchedule.NextOccurrence.IsZero() {
+	if f.fundingSchedule.NextRecurrence.IsZero() {
 		nextContributionDate = util.Midnight(rule.Before(input, false), timezone)
 	} else {
-		nextContributionDate = util.Midnight(f.fundingSchedule.NextOccurrence, timezone)
+		nextContributionDate = util.Midnight(f.fundingSchedule.NextRecurrence, timezone)
 	}
 	if input.Before(nextContributionDate) {
 		// If now is before the already established next occurrence, then just return that.

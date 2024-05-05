@@ -279,9 +279,9 @@ func TestPutTransactions(t *testing.T) {
 			ExcludeWeekends:        true,
 			WaitForDeposit:         false,
 			EstimatedDeposit:       nil,
-			LastOccurrence:         nil,
-			NextOccurrence:         fundingRule.After(now, false),
-			NextOccurrenceOriginal: fundingRule.After(now, false),
+			LastRecurrence:         nil,
+			NextRecurrence:         fundingRule.After(now, false),
+			NextRecurrenceOriginal: fundingRule.After(now, false),
 		})
 
 		// Create the spending object we want to test spending from, specifically make it so that the spending object has

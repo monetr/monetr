@@ -52,8 +52,8 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 			Name:                   "Payday",
 			Description:            "Payday",
 			RuleSet:                fundingRule,
-			NextOccurrence:         fundingRule.After(clock.Now(), false),
-			NextOccurrenceOriginal: fundingRule.After(clock.Now(), false),
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
 
 		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", clock.Now())
@@ -168,7 +168,7 @@ func TestJobRepository_GetAccountsWithTooManyFiles(t *testing.T) {
 				Name:            uuid.NewString(),
 				ContentType:     "text/csv",
 				Size:            100,
-				ObjectUri:       "bogus://temp",
+				BlobUri:         "bogus://temp",
 				CreatedAt:       time.Now(),
 				CreatedByUserId: user.UserId,
 			})

@@ -26,11 +26,11 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
 		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", false)
-		for fundingSchedule.NextOccurrence.After(clock.Now()) {
-			fundingSchedule.NextOccurrence = fundingSchedule.NextOccurrence.AddDate(0, 0, -7)
+		for fundingSchedule.NextRecurrence.After(clock.Now()) {
+			fundingSchedule.NextRecurrence = fundingSchedule.NextRecurrence.AddDate(0, 0, -7)
 		}
 		testutils.MustDBUpdate(t, fundingSchedule)
-		assert.Greater(t, clock.Now(), fundingSchedule.NextOccurrence, "next occurrence must be in the past")
+		assert.Greater(t, clock.Now(), fundingSchedule.NextRecurrence, "next occurrence must be in the past")
 
 		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR", clock.Now())
 		// spendingRule.DTStart(time.Now().Add(14 * 24 * time.Hour))
@@ -119,7 +119,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, clock, &bankAccount, "FREQ=DAILY;INTERVAL=1", false)
-		fundingSchedule.NextOccurrence = clock.Now().Add(1 * time.Hour).In(timezone)
+		fundingSchedule.NextRecurrence = clock.Now().Add(1 * time.Hour).In(timezone)
 		testutils.MustDBUpdate(t, fundingSchedule)
 
 		handler := NewProcessFundingScheduleHandler(log, db, clock)

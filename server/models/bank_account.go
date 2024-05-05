@@ -1,6 +1,11 @@
 package models
 
-import "time"
+import (
+	"context"
+	"time"
+
+	"github.com/go-pg/pg/v10"
+)
 
 type BankAccountType string
 
@@ -44,23 +49,43 @@ const (
 type BankAccount struct {
 	tableName string `pg:"bank_accounts"`
 
-	BankAccountId       uint64             `json:"bankAccountId" pg:"bank_account_id,notnull,pk,type:'bigserial'"`
-	AccountId           uint64             `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE"`
-	Account             *Account           `json:"-" pg:"rel:has-one"`
-	LinkId              uint64             `json:"linkId" pg:"link_id,notnull,on_delete:CASCADE"`
-	Link                *Link              `json:"-,omitempty" pg:"rel:has-one"`
-	PlaidBankAccountId  *uint64            `json:"-" pg:"plaid_bank_account_id"`
-	PlaidBankAccount    *PlaidBankAccount  `json:"plaidBankAccount,omitempty" pg:"rel:has-one"`
-	TellerBankAccountId *uint64            `json:"-" pg:"teller_bank_account_id"`
-	TellerBankAccount   *TellerBankAccount `json:"tellerBankAccount,omitempty" pg:"rel:has-one"`
-	AvailableBalance    int64              `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
-	CurrentBalance      int64              `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
-	Mask                string             `json:"mask" pg:"mask"`
-	Name                string             `json:"name,omitempty" pg:"name,notnull"`
-	OriginalName        string             `json:"originalName" pg:"original_name,notnull"`
-	Type                BankAccountType    `json:"accountType" pg:"account_type"`
-	SubType             BankAccountSubType `json:"accountSubType" pg:"account_sub_type"`
-	Status              BankAccountStatus  `json:"status" pg:"status,notnull"`
-	LastUpdated         time.Time          `json:"lastUpdated" pg:"last_updated,notnull"`
-	CreatedAt           time.Time          `json:"createdAt" pg:"created_at,notnull"`
+	BankAccountId      ID[BankAccount]       `json:"bankAccountId" pg:"bank_account_id,notnull,pk"`
+	AccountId          ID[Account]           `json:"-" pg:"account_id,notnull,pk"`
+	Account            *Account              `json:"-" pg:"rel:has-one"`
+	LinkId             ID[Link]              `json:"linkId" pg:"link_id,notnull"`
+	Link               *Link                 `json:"-,omitempty" pg:"rel:has-one"`
+	PlaidBankAccountId *ID[PlaidBankAccount] `json:"-" pg:"plaid_bank_account_id"`
+	PlaidBankAccount   *PlaidBankAccount     `json:"plaidBankAccount,omitempty" pg:"rel:has-one"`
+	AvailableBalance   int64                 `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
+	CurrentBalance     int64                 `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
+	Mask               string                `json:"mask" pg:"mask"`
+	Name               string                `json:"name,omitempty" pg:"name,notnull"`
+	OriginalName       string                `json:"originalName" pg:"original_name,notnull"`
+	Type               BankAccountType       `json:"accountType" pg:"account_type"`
+	SubType            BankAccountSubType    `json:"accountSubType" pg:"account_sub_type"`
+	Status             BankAccountStatus     `json:"status" pg:"status,notnull"`
+	LastUpdated        time.Time             `json:"lastUpdated" pg:"last_updated,notnull"`
+	CreatedAt          time.Time             `json:"createdAt" pg:"created_at,notnull"`
+	UpdatedAt          time.Time             `json:"updatedAt" pg:"updated_at,notnull"`
+}
+
+func (BankAccount) IdentityPrefix() string {
+	return "bac"
+}
+
+var (
+	_ pg.BeforeInsertHook = (*BankAccount)(nil)
+)
+
+func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.BankAccountId.IsZero() {
+		o.BankAccountId = NewID(o)
+	}
+
+	now := time.Now()
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = now
+	}
+
+	return ctx, nil
 }

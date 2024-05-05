@@ -392,7 +392,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	}
 
 	if beta != nil {
-		if err = repo.UseBetaCode(c.getContext(ctx), beta.BetaID, user.UserId); err != nil {
+		if err = repo.UseBetaCode(c.getContext(ctx), beta.BetaId, user.UserId); err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 				"failed to use beta code",
 			)

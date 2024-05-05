@@ -139,14 +139,14 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 	// We also calculate the next occurrence if the provided occurrence is in the past. This technically should not
 	// happen via the UI. But it is currently possible for someone to select the current day in the UI. Which then gets
 	// adjusted for midnight that day, which will always be in the past for the user.
-	if (time.Time{}).Equal(fundingSchedule.NextOccurrence) || c.clock.Now().After(fundingSchedule.NextOccurrence) {
+	if (time.Time{}).Equal(fundingSchedule.NextRecurrence) || c.clock.Now().After(fundingSchedule.NextRecurrence) {
 		fundingSchedule.CalculateNextOccurrence(c.getContext(ctx), c.clock.Now(), c.mustGetTimezone(ctx))
 	} else {
-		fundingSchedule.NextOccurrenceOriginal = fundingSchedule.NextOccurrence
+		fundingSchedule.NextRecurrenceOriginal = fundingSchedule.NextRecurrence
 	}
 
 	// It has never occurred so this needs to be nil.
-	fundingSchedule.LastOccurrence = nil
+	fundingSchedule.LastRecurrence = nil
 
 	if err = repo.CreateFundingSchedule(c.getContext(ctx), &fundingSchedule); err != nil {
 		return c.wrapPgError(ctx, err, "failed to create funding schedule")
@@ -184,7 +184,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 	request.FundingScheduleId = fundingScheduleId
 	request.BankAccountId = bankAccountId
 	request.AccountId = existingFundingSchedule.AccountId
-	request.LastOccurrence = existingFundingSchedule.LastOccurrence
+	request.LastRecurrence = existingFundingSchedule.LastRecurrence
 
 	if request.Name == "" {
 		return c.badRequest(ctx, "funding schedule must have a name")
@@ -200,15 +200,15 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 
 	recalculateSpending := false
 	// If the next occurrence changes then we need to recalulate spending.
-	if !request.NextOccurrence.Equal(existingFundingSchedule.NextOccurrence) {
+	if !request.NextRecurrence.Equal(existingFundingSchedule.NextRecurrence) {
 		// The user cannot override the next occurrence for a funding schedule and have it be in the past. If they set it to
 		// be in the future then that is okay. The next time the funding schedule is processed it will be relative to that
 		// next occurrence.
-		if request.NextOccurrence.Before(c.clock.Now()) {
-			request.NextOccurrence = existingFundingSchedule.NextOccurrence
-			request.NextOccurrenceOriginal = existingFundingSchedule.NextOccurrenceOriginal
+		if request.NextRecurrence.Before(c.clock.Now()) {
+			request.NextRecurrence = existingFundingSchedule.NextRecurrence
+			request.NextRecurrenceOriginal = existingFundingSchedule.NextRecurrenceOriginal
 		} else {
-			request.NextOccurrenceOriginal = request.NextOccurrence
+			request.NextRecurrenceOriginal = request.NextRecurrence
 		}
 		recalculateSpending = true
 	}

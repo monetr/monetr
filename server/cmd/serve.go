@@ -25,7 +25,6 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/stripe_helper"
-	"github.com/monetr/monetr/server/teller"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -211,16 +210,6 @@ func RunServer() error {
 		plaidClient = platypus.NewPlaid(log, clock, kms, db, configuration.Plaid)
 	}
 
-	var tellerClient teller.Client
-	if configuration.Teller.GetEnabled() {
-		log.Debug("teller is enabled and will be setup")
-		tellerClient, err = teller.NewClient(log, configuration.Teller)
-		if err != nil {
-			log.WithError(err).Fatal("failed to setup teller!")
-			return err
-		}
-	}
-
 	var email communication.EmailCommunication
 	if configuration.Email.Enabled {
 		email = communication.NewEmailCommunication(log, configuration)
@@ -238,7 +227,6 @@ func RunServer() error {
 			redisController.Pool(),
 			pubsub.NewPostgresPubSub(log, db),
 			plaidClient,
-			tellerClient,
 			kms,
 			fileStorage,
 		)

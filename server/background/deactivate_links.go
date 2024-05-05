@@ -211,7 +211,7 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	client, err := d.plaidPlatypus.NewClient(span.Context(), link, secret.Secret, link.PlaidLink.PlaidId)
+	client, err := d.plaidPlatypus.NewClient(span.Context(), link, secret.Value, link.PlaidLink.PlaidId)
 	if err != nil {
 		log.WithError(err).Error("failed to create client for link deactivation")
 		return err

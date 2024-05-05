@@ -309,7 +309,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	plaidClient, err := s.plaidPlatypus.NewClient(
 		span.Context(),
 		link,
-		secret.Secret,
+		secret.Value,
 		plaidLink.PlaidId,
 	)
 	if err != nil {

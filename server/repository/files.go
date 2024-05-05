@@ -5,29 +5,27 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
 type fileRepositoryInterface interface {
-	CreateFile(ctx context.Context, file *models.File) error
-	GetFiles(ctx context.Context, bankAccountId uint64) ([]models.File, error)
+	CreateFile(ctx context.Context, file *File) error
+	GetFiles(ctx context.Context) ([]File, error)
 }
 
-func (r *repositoryBase) GetFiles(ctx context.Context, bankAccountId uint64) ([]models.File, error) {
+func (r *repositoryBase) GetFiles(ctx context.Context) ([]File, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Data = map[string]interface{}{
-		"accountId":     r.AccountId(),
-		"bankAccountId": bankAccountId,
+		"accountId": r.AccountId(),
 	}
 
-	var items []models.File
+	var items []File
 	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"account_id" = ?`, r.AccountId()).
-		Where(`"bank_account_id" = ?`, bankAccountId).
-		Limit(50).
+		Limit(100).
 		Order(`file_id DESC`).
 		Select(&items)
 	if err != nil {
@@ -40,18 +38,17 @@ func (r *repositoryBase) GetFiles(ctx context.Context, bankAccountId uint64) ([]
 	return items, nil
 }
 
-func (r *repositoryBase) CreateFile(ctx context.Context, file *models.File) error {
+func (r *repositoryBase) CreateFile(ctx context.Context, file *File) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Data = map[string]interface{}{
-		"accountId":     r.AccountId(),
-		"bankAccountId": file.BankAccountId,
+		"accountId": r.AccountId(),
 	}
 
 	file.AccountId = r.AccountId()
 	file.CreatedAt = r.clock.Now().UTC()
-	file.CreatedByUserId = r.UserId()
+	file.CreatedBy = r.UserId()
 
 	_, err := r.txn.ModelContext(span.Context(), file).
 		Insert(file)
@@ -59,7 +56,7 @@ func (r *repositoryBase) CreateFile(ctx context.Context, file *models.File) erro
 		return errors.Wrap(err, "failed to create file record")
 	}
 
-	span.Data["spendingId"] = file.FileId
+	span.Data["fileId"] = file.FileId
 	span.Status = sentry.SpanStatusOK
 
 	return nil

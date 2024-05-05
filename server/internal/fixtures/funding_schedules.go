@@ -39,9 +39,9 @@ func GivenIHaveAFundingSchedule(t *testing.T, clock clock.Clock, bankAccount *mo
 		Description:            gofakeit.Generate("{sentence:5}"),
 		RuleSet:                rule,
 		ExcludeWeekends:        excludeWeekends,
-		LastOccurrence:         nil,
-		NextOccurrence:         nextOccurrence,
-		NextOccurrenceOriginal: nextOccurrence,
+		LastRecurrence:         nil,
+		NextRecurrence:         nextOccurrence,
+		NextRecurrenceOriginal: nextOccurrence,
 	}
 
 	require.NoError(t, repo.CreateFundingSchedule(context.Background(), &fundingSchedule), "must be able to create funding schedule")

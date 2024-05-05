@@ -275,9 +275,9 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		log.WithError(err).Warn("failed to retrieve access token for existing plaid link")
 	}
 
-	if secret.Secret != result.AccessToken {
+	if secret.Value != result.AccessToken {
 		log.Info("access token for link has been updated")
-		secret.Secret = result.AccessToken
+		secret.Value = result.AccessToken
 		if err = secrets.Store(c.getContext(ctx), secret); err != nil {
 			log.WithError(err).Warn("failed to store updated access token")
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store updated access token")
@@ -422,9 +422,9 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	}
 
 	secrets := c.mustGetSecretsRepository(ctx)
-	secret := repository.Secret{
-		Kind:   models.PlaidSecretKind,
-		Secret: result.AccessToken,
+	secret := repository.SecretData{
+		Kind:  models.PlaidSecretKind,
+		Value: result.AccessToken,
 	}
 	if err = secrets.Store(c.getContext(ctx), &secret); err != nil {
 		log.WithError(err).Errorf("failed to store access token")

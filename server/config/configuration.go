@@ -55,7 +55,6 @@ type Configuration struct {
 	Server              Server         `yaml:"server"`
 	Storage             Storage        `yaml:"storage"`
 	Stripe              Stripe         `yaml:"stripe"`
-	Teller              Teller         `yaml:"teller"`
 }
 
 func (c Configuration) GetConfigFileName() string {
@@ -536,7 +535,6 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.StatsPort", 9000)
 	v.SetDefault("Server.UICacheHours", 12)
 	v.SetDefault("Stripe.FreeTrialDays", 30)
-	v.SetDefault("Teller.Environment", "sandbox")
 	v.SetDefault("UIDomainName", "0.0.0.0:4000")
 }
 
@@ -610,9 +608,4 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Stripe.BillingEnabled", "MONETR_STRIPE_BILLING_ENABLED")
 	_ = v.BindEnv("Stripe.TaxesEnabled", "MONETR_STRIPE_TAXES_ENABLED")
 	_ = v.BindEnv("Stripe.InitialPlan.StripePriceId", "MONETR_STRIPE_DEFAULT_PRICE_ID")
-	_ = v.BindEnv("Teller.ApplicationId", "MONETR_TELLER_APPLICATION_ID")
-	_ = v.BindEnv("Teller.WebhookSigningSecret", "MONETR_TELLER_WEBHOOK_SECRETS")
-	_ = v.BindEnv("Teller.Environment", "MONETR_TELLER_ENVIRONMENT")
-	_ = v.BindEnv("Teller.Certificate", "MONETR_TELLER_CERTIFICATE")
-	_ = v.BindEnv("Teller.PrivateKey", "MONETR_TELLER_PRIVATE_KEY")
 }

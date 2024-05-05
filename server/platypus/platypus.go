@@ -408,7 +408,7 @@ func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error
 		return nil, err
 	}
 
-	return p.NewClient(span.Context(), link, secret.Secret, link.PlaidLink.PlaidId)
+	return p.NewClient(span.Context(), link, secret.Value, link.PlaidLink.PlaidId)
 }
 
 func (p *Plaid) Close() error {

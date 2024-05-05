@@ -28,9 +28,9 @@ func TestSecretsRepository_Store(t *testing.T) {
 
 		repo := repository.NewSecretsRepository(log, clock, db, kms, math.MaxInt64)
 
-		err := repo.Store(ctx, &repository.Secret{
-			Kind:   models.PlaidSecretKind,
-			Secret: gofakeit.UUID(),
+		err := repo.Store(ctx, &repository.SecretData{
+			Kind:  models.PlaidSecretKind,
+			Value: gofakeit.UUID(),
 		})
 		assert.EqualError(t, err, `failed to store secret: ERROR #23503 insert or update on table "secrets" violates foreign key constraint "fk_secrets_account"`)
 	})
@@ -46,9 +46,9 @@ func TestSecretsRepository_Store(t *testing.T) {
 
 		repo := repository.NewSecretsRepository(log, clock, db, kms, user.AccountId)
 
-		secret := repository.Secret{
-			Kind:   models.PlaidSecretKind,
-			Secret: accessToken,
+		secret := repository.SecretData{
+			Kind:  models.PlaidSecretKind,
+			Value: accessToken,
 		}
 		err := repo.Store(ctx, &secret)
 		assert.NoError(t, err, "should be able to store the secret successfully")
@@ -56,7 +56,7 @@ func TestSecretsRepository_Store(t *testing.T) {
 
 		result, err := repo.Read(ctx, secret.SecretId)
 		assert.NoError(t, err, "should be able to store the secret successfully")
-		assert.Equal(t, secret.Secret, result.Secret, "should read the same value back")
+		assert.Equal(t, secret.Value, result.Value, "should read the same value back")
 	})
 
 	t.Run("first write with kms", func(t *testing.T) {
@@ -89,9 +89,9 @@ func TestSecretsRepository_Store(t *testing.T) {
 
 		repo := repository.NewSecretsRepository(log, clock, db, kms, user.AccountId)
 
-		secret := repository.Secret{
-			Kind:   models.PlaidSecretKind,
-			Secret: accessToken,
+		secret := repository.SecretData{
+			Kind:  models.PlaidSecretKind,
+			Value: accessToken,
 		}
 		err := repo.Store(ctx, &secret)
 		assert.NoError(t, err, "should be able to store the secret successfully")
@@ -112,7 +112,7 @@ func TestSecretsRepository_Store(t *testing.T) {
 
 		result, err := repo.Read(ctx, secret.SecretId)
 		assert.NoError(t, err, "should be able to store the secret successfully")
-		assert.Equal(t, secret.Secret, result.Secret, "should read the same value back")
+		assert.Equal(t, secret.Value, result.Value, "should read the same value back")
 	})
 
 	t.Run("handle change", func(t *testing.T) {
@@ -126,9 +126,9 @@ func TestSecretsRepository_Store(t *testing.T) {
 
 		repo := repository.NewSecretsRepository(log, clock, db, kms, user.AccountId)
 
-		secret := repository.Secret{
-			Kind:   models.PlaidSecretKind,
-			Secret: accessToken,
+		secret := repository.SecretData{
+			Kind:  models.PlaidSecretKind,
+			Value: accessToken,
 		}
 		err := repo.Store(ctx, &secret)
 		assert.NoError(t, err, "should be able to store the secret successfully")
@@ -136,17 +136,17 @@ func TestSecretsRepository_Store(t *testing.T) {
 
 		result, err := repo.Read(ctx, secret.SecretId)
 		assert.NoError(t, err, "should be able to store the secret successfully")
-		assert.Equal(t, secret.Secret, result.Secret, "should read the same value back")
+		assert.Equal(t, secret.Value, result.Value, "should read the same value back")
 
 		accessTokenUpdated := gofakeit.UUID()
 		assert.NotEqual(t, accessToken, accessTokenUpdated, "make sure the new token does not match the old one")
 
-		secret.Secret = accessTokenUpdated
+		secret.Value = accessTokenUpdated
 		err = repo.Store(ctx, &secret)
 		assert.NoError(t, err, "must be able to update an existing access token")
 
 		result, err = repo.Read(ctx, secret.SecretId)
 		assert.NoError(t, err, "must retrieve the written token")
-		assert.Equal(t, accessTokenUpdated, result.Secret, "retrieved token must match the second one written")
+		assert.Equal(t, accessTokenUpdated, result.Value, "retrieved token must match the second one written")
 	})
 }

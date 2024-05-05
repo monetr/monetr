@@ -95,7 +95,7 @@ func (c *Controller) postFile(ctx echo.Context) error {
 		Name:          header.Filename,
 		ContentType:   contentType,
 		Size:          uint64(header.Size),
-		ObjectUri:     fileUri,
+		BlobUri:       fileUri,
 	}
 
 	if err := repo.CreateFile(c.getContext(ctx), &file); err != nil {

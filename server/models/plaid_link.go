@@ -1,6 +1,11 @@
 package models
 
-import "time"
+import (
+	"context"
+	"time"
+
+	"github.com/go-pg/pg/v10"
+)
 
 type PlaidLinkStatus uint8
 
@@ -17,10 +22,10 @@ const (
 type PlaidLink struct {
 	tableName string `pg:"plaid_links"`
 
-	PlaidLinkId          uint64          `json:"-" pg:"plaid_link_id,notnull,pk,type:'bigserial'"`
-	AccountId            uint64          `json:"-" pg:"account_id,notnull,type:'bigint'"`
+	PlaidLinkId          ID[PlaidLink]   `json:"-" pg:"plaid_link_id,notnull,pk,type:'bigserial'"`
+	AccountId            ID[Account]     `json:"-" pg:"account_id,notnull,type:'bigint'"`
 	Account              *Account        `json:"-" pg:"rel:has-one"`
-	SecretId             uint64          `json:"-" pg:"secret_id,type:'bigint'"`
+	SecretId             ID[Secret]      `json:"-" pg:"secret_id,type:'bigint'"`
 	Secret               *Secret         `json:"-" pg:"rel:has-one"`
 	PlaidId              string          `json:"-" pg:"item_id,unique,notnull"`
 	Products             []string        `json:"products" pg:"products,type:'text[]'"`
@@ -36,6 +41,31 @@ type PlaidLink struct {
 	LastAttemptedUpdate  *time.Time      `json:"lastAttemptedUpdate" pg:"last_attempted_update"`
 	UpdatedAt            time.Time       `json:"updatedAt" pg:"updated_at,notnull"`
 	CreatedAt            time.Time       `json:"createdAt" pg:"created_at,notnull"`
-	CreatedByUserId      uint64          `json:"createdByUserId" pg:"created_by_user_id,notnull"`
-	CreatedByUser        *User           `json:"-" pg:"rel:has-one,fk:created_by_user_id"`
+	CreatedBy            ID[User]        `json:"createdBy" pg:"created_by,notnull"`
+	CreatedByUser        *User           `json:"-" pg:"rel:has-one,fk:created_by"`
+}
+
+func (PlaidLink) IdentityPrefix() string {
+	return "plx"
+}
+
+var (
+	_ pg.BeforeInsertHook = (*PlaidLink)(nil)
+)
+
+func (o *PlaidLink) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.PlaidLinkId.IsZero() {
+		o.PlaidLinkId = NewID(o)
+	}
+
+	now := time.Now()
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = now
+	}
+
+	if o.UpdatedAt.IsZero() {
+		o.UpdatedAt = now
+	}
+
+	return ctx, nil
 }

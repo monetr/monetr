@@ -1,8 +1,10 @@
 package models
 
 import (
+	"context"
 	"time"
 
+	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
 	"github.com/xlzd/gotp"
 )
@@ -14,7 +16,7 @@ var (
 type Login struct {
 	tableName string `pg:"logins"`
 
-	LoginId         uint64       `json:"loginId" pg:"login_id,notnull,pk,type:'bigserial'"`
+	LoginId         ID[Login]    `json:"loginId" pg:"login_id,notnull,pk"`
 	Email           string       `json:"email" pg:"email,notnull,unique"`
 	FirstName       string       `json:"firstName" pg:"first_name,notnull"`
 	LastName        string       `json:"lastName" pg:"last_name"`
@@ -28,6 +30,10 @@ type Login struct {
 	TOTPEnabledAt   *time.Time   `json:"totpEnabledAt" pg:"totp_enabled_at"`
 
 	Users []User `json:"-" pg:"rel:has-many"`
+}
+
+func (Login) IdentityPrefix() string {
+	return "lgn"
 }
 
 // VerifyTOTP will validate that the provided TOTP string is correct for this login. It will return ErrTOTPNotValid if
@@ -57,4 +63,16 @@ type LoginWithHash struct {
 
 func (l Login) GetEmailIsVerified() bool {
 	return l.IsEmailVerified && l.EmailVerifiedAt != nil
+}
+
+var (
+	_ pg.BeforeInsertHook = (*LoginWithHash)(nil)
+)
+
+func (o *LoginWithHash) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.LoginId.IsZero() {
+		o.LoginId = NewID(&o.Login)
+	}
+
+	return ctx, nil
 }

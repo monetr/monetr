@@ -896,7 +896,7 @@ CREATE TABLE "transaction_clusters" (
   "account_id"             VARCHAR(32) NOT NULL,
   "bank_account_id"        VARCHAR(32) NOT NULL,
   "name"                   VARCHAR(200) NOT NULL,
-  "members"                BIGINT[] NOT NULL,
+  "members"                VARCHAR(32)[] NOT NULL,
   "created_at"             TIMESTAMP WITH TIME ZONE NOT NULL,
   CONSTRAINT "pk_transaction_clusters" PRIMARY KEY ("transaction_cluster_id", "account_id"),
   CONSTRAINT "fk_transaction_clusters_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),

@@ -1,20 +1,46 @@
 package models
 
-import "time"
+import (
+	"context"
+	"time"
+
+	"github.com/go-pg/pg/v10"
+)
 
 type File struct {
 	tableName string `pg:"files"`
 
-	FileId          uint64       `json:"fileId" pg:"file_id,notnull,pk,type:'bigserial'"`
-	AccountId       uint64       `json:"-" pg:"account_id,notnull,pk,type:'bigserial'"`
-	Account         *Account     `json:"-" pg:"rel:has-one"`
-	BankAccountId   uint64       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,type:'bigint'"`
-	BankAccount     *BankAccount `json:"-" pg:"rel:has-one"`
-	Name            string       `json:"name" pg:"name,notnull"`
-	ContentType     string       `json:"contentType" pg:"content_type,notnull"`
-	Size            uint64       `json:"size" pg:"size,notnull"`
-	ObjectUri       string       `json:"-" pg:"object_uri,notnull"`
-	CreatedAt       time.Time    `json:"createdAt" pg:"created_at,notnull"`
-	CreatedByUserId uint64       `json:"createdByUserId" pg:"created_by_user_id,notnull"`
-	CreatedByUser   *User        `json:"-" pg:"rel:has-one,fk:created_by_user_id"`
+	FileId        ID[File]    `json:"fileId" pg:"file_id,notnull,pk"`
+	AccountId     ID[Account] `json:"-" pg:"account_id,notnull,pk"`
+	Account       *Account    `json:"-" pg:"rel:has-one"`
+	Name          string      `json:"name" pg:"name,notnull"`
+	ContentType   string      `json:"contentType" pg:"content_type,notnull"`
+	Size          uint64      `json:"size" pg:"size,notnull"`
+	BlobUri       string      `json:"-" pg:"blob_uri,notnull"`
+	CreatedAt     time.Time   `json:"createdAt" pg:"created_at,notnull"`
+	CreatedBy     ID[User]    `json:"createdBy" pg:"created_by,notnull"`
+	CreatedByUser *User       `json:"-" pg:"rel:has-one,fk:created_by"`
+	DeletedAt     *time.Time  `json:"deletedAt" pg:"deleted_at"`
+	ReconciledAt  *time.Time  `json:"-" pg:"reconciled_at"`
+}
+
+func (File) IdentityPrefix() string {
+	return "file"
+}
+
+var (
+	_ pg.BeforeInsertHook = (*File)(nil)
+)
+
+func (o *File) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.FileId.IsZero() {
+		o.FileId = NewID(o)
+	}
+
+	now := time.Now()
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = now
+	}
+
+	return ctx, nil
 }

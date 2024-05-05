@@ -6,20 +6,20 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
 // GetLastPlaidSync will return the last Plaid sync object for the provided plaid link. If there has not yet been a
 // Plaid sync for that link then this will return nil.
-func (r *repositoryBase) GetLastPlaidSync(ctx context.Context, plaidLinkId uint64) (*models.PlaidSync, error) {
+func (r *repositoryBase) GetLastPlaidSync(ctx context.Context, plaidLinkId ID[PlaidLink]) (*PlaidSync, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
 		"plaidLinkId": plaidLinkId,
 	}
 
-	var sync models.PlaidSync
+	var sync PlaidSync
 	err := r.txn.ModelContext(span.Context(), &sync).
 		Where(`"plaid_sync"."plaid_link_id" = ?`, plaidLinkId).
 		Where(`"plaid_sync"."account_id" = ?`, r.AccountId()).
@@ -40,7 +40,7 @@ func (r *repositoryBase) GetLastPlaidSync(ctx context.Context, plaidLinkId uint6
 
 func (r *repositoryBase) RecordPlaidSync(
 	ctx context.Context,
-	plaidLinkId uint64,
+	plaidLinkId ID[PlaidLink],
 	nextCursor string,
 	trigger string,
 	added, modified, removed int,
@@ -51,7 +51,7 @@ func (r *repositoryBase) RecordPlaidSync(
 		"plaidLinkId": plaidLinkId,
 	}
 
-	item := models.PlaidSync{
+	item := PlaidSync{
 		PlaidLinkId: plaidLinkId,
 		AccountId:   r.AccountId(),
 		Timestamp:   r.clock.Now().UTC(),
