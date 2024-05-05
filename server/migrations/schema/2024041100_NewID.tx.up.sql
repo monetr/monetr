@@ -10,20 +10,20 @@ ADD COLUMN "user_id_new" VARCHAR(64);
 ALTER TABLE "betas"
 ADD COLUMN "beta_id_new" VARCHAR(64);
 
+ALTER TABLE "plaid_links"
+ADD COLUMN "plaid_link_id_new" VARCHAR(64);
+
 ALTER TABLE "links"
 ADD COLUMN "link_id_new" VARCHAR(64);
 
 ALTER TABLE "secrets"
 ADD COLUMN "secret_id_new" VARCHAR(64);
 
+ALTER TABLE "plaid_bank_accounts"
+ADD COLUMN "plaid_bank_account_id_new" VARCHAR(64);
+
 ALTER TABLE "bank_accounts"
 ADD COLUMN "bank_account_id_new" VARCHAR(64);
-
-ALTER TABLE "transactions"
-ADD COLUMN "transaction_id_new" VARCHAR(64);
-
-ALTER TABLE "transaction_clusters"
-ADD COLUMN "transaction_cluster_id_new" VARCHAR(64);
 
 ALTER TABLE "spending"
 ADD COLUMN "spending_id_new" VARCHAR(64);
@@ -34,20 +34,20 @@ ADD COLUMN "funding_schedule_id_new" VARCHAR(64);
 ALTER TABLE "files"
 ADD COLUMN "file_id_new" VARCHAR(64);
 
+ALTER TABLE "plaid_transactions"
+ADD COLUMN "plaid_transaction_id_new" VARCHAR(64);
+
+ALTER TABLE "transaction_clusters"
+ADD COLUMN "transaction_cluster_id_new" VARCHAR(64);
+
+ALTER TABLE "transactions"
+ADD COLUMN "transaction_id_new" VARCHAR(64);
+
 ALTER TABLE "jobs"
 ADD COLUMN "job_id_new" VARCHAR(64);
 
-ALTER TABLE "plaid_links"
-ADD COLUMN "plaid_link_id_new" VARCHAR(64);
-
 ALTER TABLE "plaid_syncs"
 ADD COLUMN "plaid_sync_id_new" VARCHAR(64);
-
-ALTER TABLE "plaid_bank_accounts"
-ADD COLUMN "plaid_bank_account_id_new" VARCHAR(64);
-
-ALTER TABLE "plaid_transactions"
-ADD COLUMN "plaid_transaction_id_new" VARCHAR(64);
 
 -- https://github.com/geckoboard/pgulid/blob/master/pgulid.sql
 -- pgulid is based on OK Log's Go implementation of the ULID spec
@@ -454,6 +454,44 @@ SELECT
 FROM "secrets_old" AS "s"
 INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "s"."account_id";
 
+ALTER TABLE "files" RENAME CONSTRAINT "pk_files" TO "pk_files_old";
+ALTER TABLE "files" DROP CONSTRAINT "fk_files_account";
+ALTER TABLE "files" DROP CONSTRAINT "fk_files_bank_account";
+ALTER TABLE "files" DROP CONSTRAINT "fk_files_created_by_user_id";
+ALTER TABLE "files" RENAME TO "files_old";
+
+CREATE TABLE "files" (
+  "file_id"       VARCHAR(32) NOT NULL,
+  "account_id"    VARCHAR(32) NOT NULL,
+  "content_type"  VARCHAR(200) NOT NULL,
+  "name"          VARCHAR(200) NOT NULL,
+  "size"          INTEGER NOT NULL,
+  "blob_uri"      TEXT NOT NULL,
+  "created_at"    TIMESTAMP WITH TIME ZONE NOT NULL,
+  "created_by"    VARCHAR(32) NOT NULL,
+  "deleted_at"    TIMESTAMP WITH TIME ZONE NOT NULL,
+  "reconciled_at" TIMESTAMP WITH TIME ZONE,
+  CONSTRAINT "pk_files" PRIMARY KEY ("file_id", "account_id"),
+  CONSTRAINT "fk_files_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+  CONSTRAINT "fk_files_created_by" FOREIGN KEY ("created_by") REFERENCES "users" ("user_id")
+);
+
+INSERT INTO "files" ("file_id", "account_id", "content_type", "name", "size", "blob_uri", "created_at", "created_by", "deleted_at", "reconciled_at")
+SELECT
+  "f"."file_id_new",
+  "a"."account_id_new",
+  "f"."content_type",
+  "f"."name",
+  "f"."size",
+  "f"."object_uri",
+  "f"."created_at",
+  "u"."user_id_new",
+  NULL,
+  NULL
+FROM "files_old" AS "f"
+INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "f"."account_id"
+INNER JOIN "users_old" AS "u" ON "u"."user_id" = "f"."created_by_user_id";
+
 ALTER TABLE "plaid_links" RENAME CONSTRAINT "plaid_links_pkey" TO "plid_links_pkey_old";
 ALTER TABLE "plaid_links" DROP CONSTRAINT "uq_plaid_links_item_id";
 ALTER TABLE "plaid_links" DROP CONSTRAINT "fk_plaid_links_account";
@@ -677,9 +715,9 @@ CREATE TABLE "funding_schedules" (
   "name"                     VARCHAR(200) NOT NULL,
   "description"              VARCHAR(500) NOT NULL,
   "ruleset"                  TEXT NOT NULL,
-  "last_occurrence"          TIMESTAMP WITH TIME ZONE,
-  "next_occurrence"          TIMESTAMP WITH TIME ZONE NOT NULL,
-  "next_occurrence_original" TIMESTAMP WITH TIME ZONE NOT NULL,
+  "last_recurrence"          TIMESTAMP WITH TIME ZONE,
+  "next_recurrence"          TIMESTAMP WITH TIME ZONE NOT NULL,
+  "next_recurrence_original" TIMESTAMP WITH TIME ZONE NOT NULL,
   "exclude_weekends"         BOOLEAN NOT NULL DEFAULT false,
   "wait_for_deposit"         BOOLEAN NOT NULL DEFAULT false,
   "estimated_deposit"        BIGINT,
@@ -689,7 +727,7 @@ CREATE TABLE "funding_schedules" (
   CONSTRAINT "fk_funding_schedules_bank_account" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id")
 );
 
-INSERT INTO "funding_schedules" ("funding_schedule_id", "account_id", "bank_account_id", "name", "description", "ruleset", "last_occurrence", "next_occurrence", "next_occurrence_original", "exclude_weekends", "wait_for_deposit", "estimated_deposit")
+INSERT INTO "funding_schedules" ("funding_schedule_id", "account_id", "bank_account_id", "name", "description", "ruleset", "last_recurrence", "next_recurrence", "next_recurrence_original", "exclude_weekends", "wait_for_deposit", "estimated_deposit")
 SELECT
   "f"."funding_schedule_id_new",
   "a"."account_id_new",
@@ -706,3 +744,134 @@ SELECT
 FROM "funding_schedules_old" AS "f"
 INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "f"."account_id"
 INNER JOIN "bank_accounts_old" AS "b" ON "b"."bank_account_id" = "f"."bank_account_id";
+
+ALTER TABLE "spending" RENAME CONSTRAINT "pk_spending" TO "pk_spending_old";
+ALTER TABLE "spending" DROP CONSTRAINT "uq_spending_bank_account_id_spending_type_name";
+ALTER TABLE "spending" DROP CONSTRAINT "fk_spending_accounts_account_id";
+ALTER TABLE "spending" DROP CONSTRAINT "fk_spending_bank_accounts_bank_account_id_account_id";
+ALTER TABLE "spending" DROP CONSTRAINT "fk_spending_funding_schedules_funding_schedule_id_account_id_ba";
+ALTER TABLE "spending" RENAME TO "spending_old";
+
+CREATE TABLE "spending" (
+  "spending_id"              VARCHAR(32) NOT NULL,
+  "account_id"               VARCHAR(32) NOT NULL,
+  "bank_account_id"          VARCHAR(32) NOT NULL,
+  "funding_schedule_id"      VARCHAR(32) NOT NULL,
+  "spending_type"            SMALLINT NOT NULL,
+  "name"                     VARCHAR(200) NOT NULL,
+  "description"              VARCHAR(500),
+  "ruleset"                  TEXT,
+  "target_amount"            BIGINT NOT NULL,
+  "current_amount"           BIGINT NOT NULL,
+  "used_amount"              BIGINT NOT NULL,
+  "last_recurrence"          TIMESTAMP WITH TIME ZONE,
+  "next_recurrence"          TIMESTAMP WITH TIME ZONE NOT NULL,
+  "last_spent_from"          TIMESTAMP WITH TIME ZONE,
+  "next_contribution_amount" BIGINT NOT NULL,
+  "is_behind"                BOOLEAN NOT NULL,
+  "is_paused"                BOOLEAN NOT NULL,
+  "created_at"               TIMESTAMP WITH TIME ZONE NOT NULL,
+  CONSTRAINT "pk_spending" PRIMARY KEY ("spending_id", "account_id", "bank_account_id"),
+  CONSTRAINT "uq_spending_type_name" UNIQUE ("bank_account_id", "spending_type", "name"),
+  CONSTRAINT "fk_spending_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+  CONSTRAINT "fk_spending_bank_account" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
+  CONSTRAINT "fk_spending_funding_schedule" FOREIGN KEY ("funding_schedule_id", "account_id", "bank_account_id") REFERENCES "funding_schedules" ("funding_schedule_id", "account_id", "bank_account_id")
+);
+
+INSERT INTO "spending" ("spending_id", "account_id", "bank_account_id", "funding_schedule_id", "spending_type", "name", "description", "ruleset", "target_amount", "current_amount", "used_amount", "last_recurrence", "next_recurrence", "last_spent_from", "next_contribution_amount", "is_behind", "is_paused", "created_at")
+SELECT
+  "s"."spending_id_new",
+  "a"."account_id_new",
+  "b"."bank_account_id_new",
+  "f"."funding_schedule_id_new",
+  "s"."spending_type",
+  "s"."name",
+  "s"."description",
+  "s"."ruleset",
+  "s"."target_amount",
+  "s"."current_amount",
+  "s"."used_amount",
+  "s"."last_recurrence",
+  "s"."next_recurrence",
+  "s"."last_spent_from",
+  "s"."next_contribution_amount",
+  "s"."is_behind",
+  "s"."is_paused",
+  "s"."date_created"
+FROM "spending_old" AS "s"
+INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "s"."account_id"
+INNER JOIN "bank_accounts_old" AS "b" ON "b"."bank_account_id" = "s"."bank_account_id"
+INNER JOIN "funding_schedules_old" AS "f" ON "f"."funding_schedule_id" = "s"."funding_schedule_id";
+
+ALTER TABLE "plaid_transactions" RENAME CONSTRAINT "pk_plaid_transactions" TO "pk_plaid_transactions_old";
+ALTER TABLE "plaid_transactions" DROP CONSTRAINT "fk_plaid_transactions_account";
+ALTER TABLE "plaid_transactions" DROP CONSTRAINT "fk_plaid_transactions_plaid_bank_account";
+ALTER TABLE "plaid_transactions" RENAME TO "plaid_transactions_old";
+
+CREATE TABLE "plaid_transactions" (
+  "plaid_transaction_id"  VARCHAR(32) NOT NULL,
+  "account_id"            VARCHAR(32) NOT NULL,
+  "plaid_bank_account_id" VARCHAR(32) NOT NULL,
+  "plaid_id"              TEXT NOT NULL,
+  "pending_plaid_id"      TEXT,
+  "categories"            TEXT[],
+  "date"                  TIMESTAMP WITH TIME ZONE NOT NULL,
+  "authorized_date"       TIMESTAMP WITH TIME ZONE,
+  "name"                  VARCHAR(200) NOT NULL,
+  "merchant_name"         VARCHAR(200),
+  "amount"                BIGINT NOT NULL,
+  "currency"              VARCHAR(50) NOT NULL,
+  "is_pending"            BOOLEAN NOT NULL,
+  "created_at"            TIMESTAMP WITH TIME ZONE NOT NULL,
+  "deleted_at"            TIMESTAMP WITH TIME ZONE,
+  CONSTRAINT "pk_plaid_transactions" PRIMARY KEY ("plaid_transaction_id", "account_id"),
+  CONSTRAINT "fk_plaid_transactions_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+  CONSTRAINT "fk_plaid_transactions_plaid_bank_account" FOREIGN KEY ("plaid_bank_account_id", "account_id") REFERENCES "plaid_bank_accounts" ("plaid_bank_account_id", "account_id")
+);
+
+INSERT INTO "plaid_transactions" ("plaid_transaction_id", "account_id", "plaid_bank_account_id", "plaid_id", "pending_plaid_id", "categories", "date", "authorized_date", "name", "merchant_name", "amount", "currency", "is_pending", "created_at", "deleted_at")
+SELECT
+  "t"."plaid_transaction_id_new",
+  "a"."account_id_new",
+  "b"."plaid_bank_account_id_new",
+  "t"."plaid_id",
+  "t"."pending_plaid_id",
+  "t"."categories",
+  "t"."date",
+  "t"."authorized_date",
+  "t"."name",
+  "t"."merchant_name",
+  "t"."amount",
+  "t"."currency",
+  "t"."is_pending",
+  "t"."created_at",
+  "t"."deleted_at"
+FROM "plaid_transactions_old" AS "t"
+INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "t"."account_id"
+INNER JOIN "plaid_bank_accounts_old" AS "b" ON "b"."plaid_bank_account_id" = "t"."plaid_bank_account_id";
+
+ALTER TABLE "transaction_clusters" RENAME CONSTRAINT "pk_transaction_clusters" TO "pk_transaction_clusters_old";
+ALTER TABLE "transaction_clusters" DROP CONSTRAINT "fk_transaction_clusters_account";
+ALTER TABLE "transaction_clusters" DROP CONSTRAINT "fk_transaction_clusters_bank_account";
+ALTER TABLE "transaction_clusters" DROP INDEX "ix_transaction_clusters_bank_account";
+ALTER TABLE "transaction_clusters" DROP INDEX "ix_transaction_clusters_members";
+ALTER TABLE "transaction_clusters" RENAME TO "transaction_clusters_old";
+
+CREATE TABLE "transaction_clusters" (
+  "transaction_cluster_id" VARCHAR(32) NOT NULL,
+  "account_id"             VARCHAR(32) NOT NULL,
+  "bank_account_id"        VARCHAR(32) NOT NULL,
+  "name"                   VARCHAR(200) NOT NULL,
+  "members"                BIGINT[] NOT NULL,
+  "created_at"             TIMESTAMP WITH TIME ZONE NOT NULL,
+  CONSTRAINT "pk_transaction_clusters" PRIMARY KEY ("transaction_cluster_id", "account_id"),
+  CONSTRAINT "fk_transaction_clusters_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+  CONSTRAINT "fk_transaction_clusters_bank_account" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_account" ("bank_account_id", "account_id"),
+);
+
+-- For querying by the members contents.
+CREATE INDEX "ix_transaction_clusters_members" ON "transaction_clusters" USING GIN ("members");
+-- For narrowing down the results to a single bank account.
+CREATE INDEX "ix_transaction_clusters_bank_account" ON "transaction_clusters" ("account_id", "bank_account_id");
+
+
