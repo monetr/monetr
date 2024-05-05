@@ -1,3 +1,6 @@
+ALTER TABLE "jobs"
+ADD COLUMN "job_id_new" VARCHAR(64);
+
 ALTER TABLE "logins"
 ADD COLUMN "login_id_new" VARCHAR(64);
 
@@ -42,9 +45,6 @@ ADD COLUMN "transaction_cluster_id_new" VARCHAR(64);
 
 ALTER TABLE "transactions"
 ADD COLUMN "transaction_id_new" VARCHAR(64);
-
-ALTER TABLE "jobs"
-ADD COLUMN "job_id_new" VARCHAR(64);
 
 ALTER TABLE "plaid_syncs"
 ADD COLUMN "plaid_sync_id_new" VARCHAR(64);
@@ -304,6 +304,39 @@ WHERE "new_ids"."plaid_transaction_id" = "plaid_transactions"."plaid_transaction
 
 -- Swap tables
 
+ALTER TABLE "jobs" RENAME CONSTRAINT "pk_jobs" TO "pk_jobs_old";
+ALTER TABLE "jobs" DROP CONSTRAINT "uq_jobs_signature";
+ALTER TABLE "jobs" RENAME TO "jobs_old";
+
+CREATE TABLE "jobs" (
+  "job_id"       VARCHAR(32) NOT NULL,
+  "queue"        VARCHAR(200) NOT NULL,
+  "signature"    VARCHAR(100) NOT NULL,
+  "status"       VARCHAR(50) NOT NULL,
+  "input"        JSONB,
+  "output"       JSONB,
+  "created_at"   TIMESTAMP WITH TIME ZONE NOT NULL,
+  "updated_at"   TIMESTAMP WITH TIME ZONE NOT NULL,
+  "started_at"   TIMESTAMP WITH TIME ZONE,
+  "completed_at" TIMESTAMP WITH TIME ZONE,
+  CONSTRAINT "pk_jobs" PRIMARY KEY ("job_id"),
+  CONSTRAINT "uq_jobs_signature" UNIQUE ("signature")
+);
+
+INSERT INTO "jobs" ("job_id", "queue", "signature", "status", "input", "output", "created_at", "updated_at", "started_at", "completed_at")
+SELECT
+  "j"."job_id_new",
+  "j"."queue",
+  "j"."signature",
+  "j"."status",
+  "j"."input",
+  "j"."output",
+  "j"."created_at",
+  "j"."updated_at",
+  "j"."started_at",
+  "j"."completed_at"
+FROM "jobs_old" AS "j";
+
 ALTER TABLE "logins" RENAME CONSTRAINT "pk_logins" TO "pk_logins_old";
 ALTER TABLE "logins" DROP CONSTRAINT "uq_logins_email";
 ALTER TABLE "logins" RENAME TO "logins_old";
@@ -391,7 +424,7 @@ CREATE TABLE "users" (
 );
 
 INSERT INTO "users" ("user_id", "login_id", "account_id", "stripe_customer_id")
-SELECT 
+SELECT
   "u"."user_id_new",
   "l"."login_id_new",
   "a"."account_id_new",
@@ -457,7 +490,7 @@ INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "s"."account_id";
 ALTER TABLE "files" RENAME CONSTRAINT "pk_files" TO "pk_files_old";
 ALTER TABLE "files" DROP CONSTRAINT "fk_files_account";
 ALTER TABLE "files" DROP CONSTRAINT "fk_files_bank_account";
-ALTER TABLE "files" DROP CONSTRAINT "fk_files_created_by_user_id";
+ALTER TABLE "files" DROP CONSTRAINT "fk_files_users_created_by_user_id";
 ALTER TABLE "files" RENAME TO "files_old";
 
 CREATE TABLE "files" (
@@ -547,7 +580,7 @@ SELECT
 FROM "plaid_links_old" AS "p"
 INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "p"."account_id"
 INNER JOIN "secrets_old" AS "s" ON "s"."secret_id" = "p"."secret_id" AND "s"."account_id" = "a"."account_id"
-INNER JOIN "users_old" AS "u" ON "u"."user_id" = "p"."created_by_user_id"; 
+INNER JOIN "users_old" AS "u" ON "u"."user_id" = "p"."created_by_user_id";
 
 ALTER TABLE "links" RENAME CONSTRAINT "pk_links" TO "pk_links_old";
 ALTER TABLE "links" DROP CONSTRAINT "fk_links_accounts_account_id";
@@ -853,10 +886,11 @@ INNER JOIN "plaid_bank_accounts_old" AS "b" ON "b"."plaid_bank_account_id" = "t"
 ALTER TABLE "transaction_clusters" RENAME CONSTRAINT "pk_transaction_clusters" TO "pk_transaction_clusters_old";
 ALTER TABLE "transaction_clusters" DROP CONSTRAINT "fk_transaction_clusters_account";
 ALTER TABLE "transaction_clusters" DROP CONSTRAINT "fk_transaction_clusters_bank_account";
-ALTER TABLE "transaction_clusters" DROP INDEX "ix_transaction_clusters_bank_account";
-ALTER TABLE "transaction_clusters" DROP INDEX "ix_transaction_clusters_members";
+DROP INDEX "ix_transaction_clusters_bank_account";
+DROP INDEX "ix_transaction_clusters_members";
 ALTER TABLE "transaction_clusters" RENAME TO "transaction_clusters_old";
 
+-- Don't backfill this table, it will need to be regenerated
 CREATE TABLE "transaction_clusters" (
   "transaction_cluster_id" VARCHAR(32) NOT NULL,
   "account_id"             VARCHAR(32) NOT NULL,
@@ -866,7 +900,7 @@ CREATE TABLE "transaction_clusters" (
   "created_at"             TIMESTAMP WITH TIME ZONE NOT NULL,
   CONSTRAINT "pk_transaction_clusters" PRIMARY KEY ("transaction_cluster_id", "account_id"),
   CONSTRAINT "fk_transaction_clusters_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
-  CONSTRAINT "fk_transaction_clusters_bank_account" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_account" ("bank_account_id", "account_id"),
+  CONSTRAINT "fk_transaction_clusters_bank_account" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id")
 );
 
 -- For querying by the members contents.
@@ -874,4 +908,108 @@ CREATE INDEX "ix_transaction_clusters_members" ON "transaction_clusters" USING G
 -- For narrowing down the results to a single bank account.
 CREATE INDEX "ix_transaction_clusters_bank_account" ON "transaction_clusters" ("account_id", "bank_account_id");
 
+ALTER TABLE "plaid_syncs" RENAME CONSTRAINT "plaid_syncs_pkey" TO "plaid_syncs_pkey_old";
+ALTER TABLE "plaid_syncs" DROP CONSTRAINT "fk_plaid_syncs_account";
+ALTER TABLE "plaid_syncs" DROP CONSTRAINT "fk_plaid_syncs_plaid_link";
+DROP INDEX "ix_plaid_syncs_timestamp";
+ALTER TABLE "plaid_syncs" RENAME TO "plaid_syncs_old";
+
+CREATE TABLE "plaid_syncs" (
+  "plaid_sync_id" VARCHAR(32) NOT NULL,
+  "account_id" VARCHAR(32) NOT NULL,
+  "plaid_link_id" VARCHAR(32) NOT NULL,
+  "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL,
+  "trigger" VARCHAR(50) NOT NULL,
+  "cursor" VARCHAR(500) NOT NULL,
+  "added" INTEGER NOT NULL,
+  "modified" INTEGER NOT NULL,
+  "removed" INTEGER NOT NULL,
+  CONSTRAINT "pk_plaid_syncs" PRIMARY KEY ("plaid_sync_id", "account_id"),
+  CONSTRAINT "fk_plaid_syncs_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+  CONSTRAINT "fk_plaid_syncs_plaid_link" FOREIGN KEY ("plaid_link_id", "account_id") REFERENCES "plaid_links" ("plaid_link_id", "account_id")
+);
+
+CREATE INDEX "ix_plaid_syncs_timestamp" ON "plaid_syncs" ("plaid_link_id", "timestamp" DESC);
+
+INSERT INTO "plaid_syncs" ("plaid_sync_id", "account_id", "plaid_link_id", "timestamp", "trigger", "cursor", "added", "modified", "removed")
+SELECT
+  "s"."plaid_sync_id_new",
+  "a"."account_id_new",
+  "p"."plaid_link_id_new",
+  "s"."timestamp",
+  "s"."trigger",
+  "s"."cursor",
+  "s"."added",
+  "s"."modified",
+  "s"."removed"
+FROM "plaid_syncs_old" AS "s"
+INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "s"."account_id"
+INNER JOIN "plaid_links_old" AS "p" ON "p"."plaid_link_id" = "s"."plaid_link_id";
+
+ALTER TABLE "transactions" RENAME CONSTRAINT "pk_transactions" TO "pk_transactions_old";
+ALTER TABLE "transactions" DROP CONSTRAINT "fk_transactions_accounts_account_id";
+ALTER TABLE "transactions" DROP CONSTRAINT "fk_transactions_bank_accounts_bank_account_id_account_id";
+ALTER TABLE "transactions" DROP CONSTRAINT "fk_transactions_plaid_transactions";
+ALTER TABLE "transactions" DROP CONSTRAINT "fk_transactions_plaid_transactions_pending";
+ALTER TABLE "transactions" DROP CONSTRAINT "fk_transactions_spending";
+ALTER TABLE "transactions" DROP CONSTRAINT "fk_transactions_teller_transaction";
+DROP INDEX "ix_transactions_opt_order";
+DROP INDEX "ix_transactions_soft_delete";
+ALTER TABLE "transactions" RENAME TO "transactions_old";
+
+CREATE TABLE "transactions" (
+  "transaction_id"               VARCHAR(32) NOT NULL,
+  "account_id"                   VARCHAR(32) NOT NULL,
+  "bank_account_id"              VARCHAR(32) NOT NULL,
+  "spending_id"                  VARCHAR(32),
+  "plaid_transaction_id"         VARCHAR(32),
+  "pending_plaid_transaction_id" VARCHAR(32),
+  "name"                         VARCHAR(200),
+  "original_name"                VARCHAR(200) NOT NULL,
+  "merchant_name"                VARCHAR(200),
+  "original_merchant_name"       VARCHAR(200),
+  "categories"                   TEXT[],
+  "amount"                       BIGINT NOT NULL,
+  "spending_amount"              BIGINT,
+  "is_pending"                   BOOLEAN NOT NULL,
+  "date"                         TIMESTAMP WITH TIME ZONE NOT NULL,
+  "created_at"                   TIMESTAMP WITH TIME ZONE NOT NULL,
+  "deleted_at"                   TIMESTAMP WITH TIME ZONE,
+  CONSTRAINT "pk_transactions" PRIMARY KEY ("transaction_id", "account_id", "bank_account_id"),
+  CONSTRAINT "fk_transactions_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+  CONSTRAINT "fk_transactions_bank_account" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
+  CONSTRAINT "fk_transactions_spending" FOREIGN KEY ("spending_id", "bank_account_id", "account_id") REFERENCES "spending" ("spending_id", "bank_account_id", "account_id"),
+  CONSTRAINT "fk_transactions_plaid_transaction" FOREIGN KEY ("plaid_transaction_id", "account_id") REFERENCES "plaid_transactions" ("plaid_transaction_id", "account_id"),
+  CONSTRAINT "fk_transactions_pending_plaid_transaction" FOREIGN KEY ("pending_plaid_transaction_id", "account_id") REFERENCES "plaid_transactions" ("plaid_transaction_id", "account_id")
+);
+
+CREATE INDEX "ix_transactions_opt_order" ON "transactions" ("account_id", "bank_account_id", "date" DESC, "transaction_id" DESC);
+CREATE INDEX "ix_transactions_soft_delete" ON "transactions" ("account_id", "bank_account_id", "date" DESC, "transaction_id" DESC) WHERE "deleted_at" IS NULL;
+
+INSERT INTO "transactions" ("transaction_id", "account_id", "bank_account_id", "spending_id", "plaid_transaction_id", "pending_plaid_transaction_id", "name", "original_name", "merchant_name", "original_merchant_name", "categories", "amount", "spending_amount", "is_pending", "date", "created_at", "deleted_at")
+SELECT
+  "t"."transaction_id_new",
+  "a"."account_id_new",
+  "b"."bank_account_id_new",
+  "s"."spending_id_new",
+  "p"."plaid_transaction_id_new", -- non pending
+  "pp"."plaid_transaction_id_new", -- pending
+  "t"."name",
+  "t"."original_name",
+  "t"."merchant_name",
+  "t"."original_merchant_name",
+  "t"."categories",
+  "t"."amount",
+  "t"."spending_amount",
+  "t"."is_pending",
+  "t"."date",
+  "t"."created_at",
+  "t"."deleted_at"
+FROM "transactions_old" AS "t"
+INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "t"."account_id"
+INNER JOIN "bank_accounts_old" AS "b" ON "b"."bank_account_id" = "t"."bank_account_id"
+LEFT JOIN "spending_old" AS "s" ON "s"."spending_id" = "t"."spending_id"
+LEFT JOIN "plaid_transactions_old" AS "p" ON "p"."plaid_transaction_id" = "t"."plaid_transaction_id"
+LEFT JOIN "plaid_transactions_old" AS "pp" ON "pp"."plaid_transaction_id" = "t"."pending_plaid_transaction_id"
+WHERE "t"."teller_transaction_id" IS NULL;
 
