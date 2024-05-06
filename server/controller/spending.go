@@ -25,7 +25,7 @@ import (
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getSpending(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	bankAccountId, err := models.ParseID[models.BankAccount](ctx.Param("bankAccountId"))
 	if err != nil {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}

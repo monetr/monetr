@@ -26,8 +26,8 @@ var (
 )
 
 func (o *Beta) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.BetaId.Kind() == UnknownIDKind {
-		o.BetaId = NewID[Beta]()
+	if o.BetaId.IsZero() {
+		o.BetaId = NewID(o)
 	}
 
 	return ctx, nil

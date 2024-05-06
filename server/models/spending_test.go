@@ -81,7 +81,7 @@ func RuleToSet(t *testing.T, timezone *time.Location, ruleString string, potenti
 
 func GiveMeAFundingSchedule(nextContributionDate time.Time, ruleset *RuleSet) *FundingSchedule {
 	return &FundingSchedule{
-		FundingScheduleId: 12345,
+		FundingScheduleId: "fund_bogus",
 		Name:              "Bogus Funding Schedule",
 		Description:       "Bogus",
 		RuleSet:           ruleset,

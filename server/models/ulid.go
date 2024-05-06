@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/oklog/ulid/v2"
+	"github.com/pkg/errors"
 )
 
 type Kind string
@@ -46,17 +47,13 @@ func (i ID[T]) String() string {
 }
 
 func (i ID[T]) IsZero() bool {
-	return string(i) == ""
+	return string(i) == "" || strings.TrimPrefix(string(i), string(i.Kind())+"_") == ""
 }
 
 func (i ID[T]) Kind() Kind {
-	str := i.String()
-	index := strings.LastIndex(str, "_")
-	if index == -1 {
-		return UnknownIDKind
-	}
-
-	return Kind(str[:index])
+	inst := *new(T)
+	prefix := inst.IdentityPrefix()
+	return Kind(prefix)
 }
 
 func NewID[T Identifiable](object *T) ID[T] {
@@ -66,4 +63,15 @@ func NewID[T Identifiable](object *T) ID[T] {
 		(*object).IdentityPrefix(),
 		strings.ToLower(id.String()),
 	))
+}
+
+func ParseID[T Identifiable](input string) (ID[T], error) {
+	inst := *new(T)
+	prefix := inst.IdentityPrefix() + "_"
+
+	if !strings.HasPrefix(input, prefix) {
+		return "", errors.Errorf("failed to parse ID for %T, expected prefix: %s ID: %s", inst, prefix, input)
+	}
+
+	return ID[T](input), nil
 }

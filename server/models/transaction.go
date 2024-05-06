@@ -186,12 +186,12 @@ func ProcessSpentFrom(
 		RemoveExpense
 	)
 
-	var existingSpendingId uint64
+	var existingSpendingId ID[Spending]
 	if currentSpend != nil {
 		existingSpendingId = currentSpend.SpendingId
 	}
 
-	var newSpendingId uint64
+	var newSpendingId ID[Spending]
 	if inputSpend != nil {
 		newSpendingId = inputSpend.SpendingId
 	}
@@ -199,13 +199,13 @@ func ProcessSpentFrom(
 	var expensePlan int
 
 	switch {
-	case existingSpendingId == 0 && newSpendingId > 0:
+	case existingSpendingId.IsZero() && !newSpendingId.IsZero():
 		// Spending is being added to the transaction.
 		expensePlan = AddExpense
-	case existingSpendingId != 0 && newSpendingId != existingSpendingId && newSpendingId > 0:
+	case !existingSpendingId.IsZero() && newSpendingId != existingSpendingId && !newSpendingId.IsZero():
 		// Spending is being changed from one expense to another.
 		expensePlan = ChangeExpense
-	case existingSpendingId != 0 && newSpendingId == 0:
+	case !existingSpendingId.IsZero() && newSpendingId.IsZero():
 		// Spending is being removed from the transaction.
 		expensePlan = RemoveExpense
 	default:

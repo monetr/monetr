@@ -19,8 +19,8 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 		originalOccurrence := clock.Now().Add(-1 * time.Minute)
 
 		fundingSchedule := models.FundingSchedule{
-			AccountId:      1234,
-			BankAccountId:  1234,
+			AccountId:      "acct_1234",
+			BankAccountId:  "bac_1234",
 			Name:           "Testing #123",
 			Description:    t.Name(),
 			RuleSet:        rule,
@@ -44,8 +44,8 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 		originalOccurrence := clock.Now().Add(1 * time.Minute)
 
 		fundingSchedule := models.FundingSchedule{
-			AccountId:      1234,
-			BankAccountId:  1234,
+			AccountId:      "acct_1234",
+			BankAccountId:  "bac_1234",
 			Name:           "Testing #123",
 			Description:    t.Name(),
 			RuleSet:        rule,

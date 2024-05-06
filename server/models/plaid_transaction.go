@@ -38,8 +38,8 @@ var (
 )
 
 func (o *PlaidTransaction) BeforeInsert(ctx context.Context) (context.Context, error) {
-	if o.PlaidTransactionId.Kind() == UnknownIDKind {
-		o.PlaidTransactionId = NewID[PlaidTransaction]()
+	if o.PlaidTransactionId.IsZero() {
+		o.PlaidTransactionId = NewID(o)
 	}
 
 	now := time.Now()
