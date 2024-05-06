@@ -66,9 +66,9 @@ func NewID[T Identifiable](object *T) ID[T] {
 
 func ParseID[T Identifiable](input string) (ID[T], error) {
 	inst := *new(T)
-	prefix := inst.IdentityPrefix() + "_"
+	prefix := inst.IdentityPrefix()
 
-	if !strings.HasPrefix(input, prefix) {
+	if !strings.HasPrefix(input, prefix+"_") {
 		return "", errors.Errorf("failed to parse ID for %T, expected prefix: %s ID: %s", inst, prefix, input)
 	}
 
