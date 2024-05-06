@@ -25,9 +25,9 @@ type Claims struct {
 	// overwritten.
 	CreatedAt    time.Time `json:"createdAt"`
 	EmailAddress string    `json:"string"`
-	UserId       uint64    `json:"userId,string"`
-	AccountId    uint64    `json:"accountId,string"`
-	LoginId      uint64    `json:"loginId,string"`
+	UserId       string    `json:"userId,string"`
+	AccountId    string    `json:"accountId,string"`
+	LoginId      string    `json:"loginId,string"`
 }
 
 type ClientTokens interface {

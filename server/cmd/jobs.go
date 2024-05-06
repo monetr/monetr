@@ -13,7 +13,6 @@ import (
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/teller"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -27,22 +26,22 @@ func init() {
 	RunJobCommand.AddCommand(RunSyncTellerCommand)
 
 	RunSyncPlaidCommand.PersistentFlags().BoolVar(&AllFlag, "all", false, "Pull transactions for all accounts. This job should not be run locally unless you are debugging as it may take a very long time. Will ignore 'account' and 'link' flags.")
-	RunSyncPlaidCommand.PersistentFlags().Uint64VarP(&AccountIDFlag, "account", "a", 0, "Account ID to target for the task. Will only run against this account. (required)")
-	RunSyncPlaidCommand.PersistentFlags().Uint64VarP(&LinkIDFlag, "link", "l", 0, "Link ID to target for the task. Will only affect objects for this Link. Must belong to the account specified. (required)")
+	RunSyncPlaidCommand.PersistentFlags().StringVarP(&AccountIDFlag, "account", "a", "", "Account ID to target for the task. Will only run against this account. (required)")
+	RunSyncPlaidCommand.PersistentFlags().StringVarP(&LinkIDFlag, "link", "l", "", "Link ID to target for the task. Will only affect objects for this Link. Must belong to the account specified. (required)")
 	RunSyncPlaidCommand.PersistentFlags().BoolVarP(&DryRunFlag, "dry-run", "d", false, "Dry run the retrieval of transactions, this will log what transactions might be changed or created. No changes will be persisted. [local]")
 	RunSyncPlaidCommand.PersistentFlags().BoolVar(&LocalFlag, "local", false, "Run the job locally, this means the job is not dispatched to the external scheduler like RabbitMQ or Redis. This defaults to true when dry running or when the job engine is in-memory.")
 
 	RunSyncTellerCommand.PersistentFlags().BoolVar(&AllFlag, "all", false, "Pull transactions for all accounts. This job should not be run locally unless you are debugging as it may take a very long time. Will ignore 'account' and 'link' flags.")
-	RunSyncTellerCommand.PersistentFlags().Uint64VarP(&AccountIDFlag, "account", "a", 0, "Account ID to target for the task. Will only run against this account. (required)")
-	RunSyncTellerCommand.PersistentFlags().Uint64VarP(&LinkIDFlag, "link", "l", 0, "Link ID to target for the task. Will only affect objects for this Link. Must belong to the account specified. (required)")
+	RunSyncTellerCommand.PersistentFlags().StringVarP(&AccountIDFlag, "account", "a", "", "Account ID to target for the task. Will only run against this account. (required)")
+	RunSyncTellerCommand.PersistentFlags().StringVarP(&LinkIDFlag, "link", "l", "", "Link ID to target for the task. Will only affect objects for this Link. Must belong to the account specified. (required)")
 	RunSyncTellerCommand.PersistentFlags().BoolVarP(&DryRunFlag, "dry-run", "d", false, "Dry run the retrieval of transactions, this will log what transactions might be changed or created. No changes will be persisted. [local]")
 	RunSyncTellerCommand.PersistentFlags().BoolVar(&LocalFlag, "local", false, "Run the job locally, this means the job is not dispatched to the external scheduler like RabbitMQ or Redis. This defaults to true when dry running or when the job engine is in-memory.")
 }
 
 var (
 	AllFlag       bool
-	AccountIDFlag uint64
-	LinkIDFlag    uint64
+	AccountIDFlag string
+	LinkIDFlag    string
 	DryRunFlag    bool
 	LocalFlag     bool
 )

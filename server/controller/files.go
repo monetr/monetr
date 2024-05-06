@@ -8,7 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/sirupsen/logrus"
 )
@@ -20,8 +20,8 @@ func (c *Controller) postFile(ctx echo.Context) error {
 
 	log := c.getLog(ctx)
 
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -89,7 +89,7 @@ func (c *Controller) postFile(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to upload file")
 	}
 
-	file := models.File{
+	file := File{
 		AccountId:     c.mustGetAccountId(ctx),
 		BankAccountId: bankAccountId,
 		Name:          header.Filename,

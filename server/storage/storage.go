@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
@@ -16,10 +17,10 @@ var (
 )
 
 type FileInfo struct {
-	Name          string
-	AccountId     uint64
-	BankAccountId uint64
-	ContentType   ContentType
+	Name        string
+	Kind        string
+	AccountId   models.ID[models.Account]
+	ContentType ContentType
 }
 
 // Storage is the interface for reading and writing files presented to monetr by
