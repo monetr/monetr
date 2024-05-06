@@ -11,7 +11,6 @@ import (
 type Kind string
 
 const (
-	UnknownIDKind            Kind = ""
 	LoginIDKind              Kind = "lgn"
 	AccountIDKind            Kind = "acct"
 	UserIDKind               Kind = "user"
