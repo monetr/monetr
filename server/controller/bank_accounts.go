@@ -33,19 +33,6 @@ func (c *Controller) getBankAccount(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, bankAccount)
 }
 
-// Get Bank Account Balances
-// @Summary Get Bank Account Balances
-// @id get-bank-account-balances
-// @tags Bank Accounts
-// @description Get the balances for the specified bank account (including calculated balances).
-// @Security ApiKeyAuth
-// @Produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Router /bank_accounts/{bankAccountId}/balances [get]
-// @Success 200 {object} repository.Balances
-// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getBalances(ctx echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
