@@ -3,13 +3,12 @@ package controller
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/forecast"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 )
 
 func (c *Controller) getForecast(ctx echo.Context) error {
@@ -35,8 +34,8 @@ func (c *Controller) getForecast(ctx echo.Context) error {
 		return c.badRequest(ctx, "you are not allowed for forecast more than 12 months into the future")
 	}
 
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -89,12 +88,12 @@ func (c *Controller) getForecast(ctx echo.Context) error {
 
 func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 	var request struct {
-		FundingScheduleId uint64              `json:"fundingScheduleId"`
-		SpendingType      models.SpendingType `json:"spendingType"`
+		FundingScheduleId ID[FundingSchedule] `json:"fundingScheduleId"`
+		SpendingType      SpendingType        `json:"spendingType"`
 		TargetAmount      int64               `json:"targetAmount"`
 		CurrentAmount     int64               `json:"currentAmount"`
 		NextRecurrence    time.Time           `json:"nextRecurrence"`
-		RuleSet           *models.RuleSet     `json:"recurrenceRule"`
+		RuleSet           *RuleSet            `json:"recurrenceRule"`
 	}
 	if err := ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
@@ -106,18 +105,18 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 	if request.CurrentAmount < 0 {
 		return c.badRequest(ctx, "Current amount cannot be less than 0")
 	}
-	if request.FundingScheduleId == 0 {
+	if request.FundingScheduleId.IsZero() {
 		return c.badRequest(ctx, "Funding schedule must be specified")
 	}
-	if request.SpendingType == models.SpendingTypeExpense && request.RuleSet == nil {
+	if request.SpendingType == SpendingTypeExpense && request.RuleSet == nil {
 		return c.badRequest(ctx, "Expense spending must have a recurrence rule")
 	}
-	if request.SpendingType == models.SpendingTypeGoal && request.RuleSet != nil {
+	if request.SpendingType == SpendingTypeGoal && request.RuleSet != nil {
 		return c.badRequest(ctx, "Goal spending must not have a recurrence rule")
 	}
 
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -131,7 +130,7 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 
 	afterForecast := forecast.NewForecaster(
 		log,
-		[]models.Spending{
+		[]Spending{
 			{
 				FundingScheduleId: request.FundingScheduleId,
 				SpendingType:      request.SpendingType,
@@ -139,7 +138,7 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 				CurrentAmount:     request.CurrentAmount,
 				NextRecurrence:    request.NextRecurrence,
 				RuleSet:           request.RuleSet,
-				SpendingId:        0, // Make sure this ID does not overlap with any real spending objects.
+				SpendingId:        "spnd_forecast", // Make sure this ID does not overlap with any real spending objects.
 			},
 		},
 		fundingSchedules,
@@ -179,18 +178,18 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 
 func (c *Controller) postForecastNextFunding(ctx echo.Context) error {
 	var request struct {
-		FundingScheduleId uint64 `json:"fundingScheduleId"`
+		FundingScheduleId ID[FundingSchedule] `json:"fundingScheduleId"`
 	}
 	if err := ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
 	}
 
-	if request.FundingScheduleId == 0 {
+	if request.FundingScheduleId.IsZero() {
 		return c.badRequest(ctx, "Funding schedule must be specified")
 	}
 
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -210,7 +209,7 @@ func (c *Controller) postForecastNextFunding(ctx echo.Context) error {
 	fundingForecast := forecast.NewForecaster(
 		log,
 		spending,
-		[]models.FundingSchedule{
+		[]FundingSchedule{
 			*fundingSchedule,
 		},
 	)
