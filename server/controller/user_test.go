@@ -1,7 +1,6 @@
 package controller_test
 
 import (
-	"math"
 	"net/http"
 	"testing"
 	"time"
@@ -372,9 +371,9 @@ func TestChangePassword(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		token, err := app.Tokens.Create(security.AuthenticatedAudience, 10*time.Minute, security.Claims{
 			EmailAddress: gofakeit.Email(),
-			UserId:       math.MaxUint64,
-			AccountId:    math.MaxUint64,
-			LoginId:      math.MaxUint64,
+			UserId:       "user_bogus",
+			AccountId:    "acct_bogus",
+			LoginId:      "lgn_bogus",
 		})
 		assert.NoError(t, err, "should not have an error generating a bogus token")
 

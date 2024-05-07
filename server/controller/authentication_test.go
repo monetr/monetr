@@ -1710,9 +1710,9 @@ func TestResetPassword(t *testing.T) {
 		email := testutils.GetUniqueEmail(t)
 		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
 			EmailAddress: email,
-			UserId:       0,
-			AccountId:    0,
-			LoginId:      math.MaxInt32,
+			UserId:       "user_bogus",
+			AccountId:    "acct_bogus",
+			LoginId:      "lgn_bogus",
 		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
