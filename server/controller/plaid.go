@@ -141,17 +141,10 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 		legalName = fmt.Sprintf("%s %s", me.Login.FirstName, me.Login.LastName)
 	}
 
-	var phoneNumber *string
-	if me.Login.PhoneNumber != nil {
-		phoneNumber = myownsanity.StringP(me.Login.PhoneNumber.E164())
-	}
-
 	log.Trace("creating Plaid link token")
 	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), platypus.LinkTokenOptions{
 		ClientUserID:             userId.String(),
 		LegalName:                legalName,
-		PhoneNumber:              phoneNumber,
-		PhoneNumberVerifiedTime:  nil,
 		EmailAddress:             me.Login.Email,
 		EmailAddressVerifiedTime: me.Login.EmailVerifiedAt,
 	})

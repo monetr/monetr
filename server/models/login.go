@@ -16,18 +16,16 @@ var (
 type Login struct {
 	tableName string `pg:"logins"`
 
-	LoginId         ID[Login]    `json:"loginId" pg:"login_id,notnull,pk"`
-	Email           string       `json:"email" pg:"email,notnull,unique"`
-	FirstName       string       `json:"firstName" pg:"first_name,notnull"`
-	LastName        string       `json:"lastName" pg:"last_name"`
-	PasswordResetAt *time.Time   `json:"passwordResetAt" pg:"password_reset_at"`
-	PhoneNumber     *PhoneNumber `json:"-" pg:"phone_number,type:'text'"`
-	IsEnabled       bool         `json:"-" pg:"is_enabled,notnull,use_zero"`
-	IsEmailVerified bool         `json:"isEmailVerified" pg:"is_email_verified,notnull,use_zero"`
-	EmailVerifiedAt *time.Time   `json:"emailVerifiedAt" pg:"email_verified_at"`
-	IsPhoneVerified bool         `json:"isPhoneVerified" pg:"is_phone_verified,notnull,use_zero"`
-	TOTP            string       `json:"-" pg:"totp"`
-	TOTPEnabledAt   *time.Time   `json:"totpEnabledAt" pg:"totp_enabled_at"`
+	LoginId         ID[Login]  `json:"loginId" pg:"login_id,notnull,pk"`
+	Email           string     `json:"email" pg:"email,notnull,unique"`
+	FirstName       string     `json:"firstName" pg:"first_name,notnull"`
+	LastName        string     `json:"lastName" pg:"last_name"`
+	PasswordResetAt *time.Time `json:"passwordResetAt" pg:"password_reset_at"`
+	IsEnabled       bool       `json:"-" pg:"is_enabled,notnull,use_zero"`
+	IsEmailVerified bool       `json:"isEmailVerified" pg:"is_email_verified,notnull,use_zero"`
+	EmailVerifiedAt *time.Time `json:"emailVerifiedAt" pg:"email_verified_at"`
+	TOTP            string     `json:"-" pg:"totp"`
+	TOTPEnabledAt   *time.Time `json:"totpEnabledAt" pg:"totp_enabled_at"`
 
 	Users []User `json:"-" pg:"rel:has-many"`
 }
