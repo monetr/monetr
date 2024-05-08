@@ -11,6 +11,11 @@ import (
 	"github.com/stripe/stripe-go/v72"
 )
 
+var (
+	_ pg.BeforeInsertHook = (*Account)(nil)
+	_ Identifiable        = Account{}
+)
+
 type Account struct {
 	tableName string `pg:"accounts"`
 
@@ -29,10 +34,6 @@ type Account struct {
 func (Account) IdentityPrefix() string {
 	return "acct"
 }
-
-var (
-	_ pg.BeforeInsertHook = (*Account)(nil)
-)
 
 func (o *Account) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.AccountId.IsZero() {

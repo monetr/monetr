@@ -46,6 +46,11 @@ const (
 	InactiveBankAccountStatus BankAccountStatus = "inactive"
 )
 
+var (
+	_ pg.BeforeInsertHook = (*BankAccount)(nil)
+	_ Identifiable        = BankAccount{}
+)
+
 type BankAccount struct {
 	tableName string `pg:"bank_accounts"`
 
@@ -72,10 +77,6 @@ type BankAccount struct {
 func (BankAccount) IdentityPrefix() string {
 	return "bac"
 }
-
-var (
-	_ pg.BeforeInsertHook = (*BankAccount)(nil)
-)
 
 func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.BankAccountId.IsZero() {

@@ -7,6 +7,11 @@ import (
 	"github.com/go-pg/pg/v10"
 )
 
+var (
+	_ pg.BeforeInsertHook = (*File)(nil)
+	_ Identifiable        = File{}
+)
+
 type File struct {
 	tableName string `pg:"files"`
 
@@ -27,10 +32,6 @@ type File struct {
 func (File) IdentityPrefix() string {
 	return "file"
 }
-
-var (
-	_ pg.BeforeInsertHook = (*File)(nil)
-)
 
 func (o *File) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.FileId.IsZero() {
