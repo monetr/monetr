@@ -32,8 +32,8 @@ func TestPostFundingSchedules(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+		response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+		response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 		response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
 	})
@@ -57,8 +57,8 @@ func TestPostFundingSchedules(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+		response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+		response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 		response.JSON().Path("$.excludeWeekends").Boolean().IsTrue()
 	})
@@ -90,8 +90,8 @@ func TestPostFundingSchedules(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+		response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+		response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).IsEqual(nextFriday)
 		response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
@@ -116,8 +116,8 @@ func TestPostFundingSchedules(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 			response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
 		}
@@ -244,7 +244,7 @@ func TestPutFundingSchedules(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-			response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
+			response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
 			fundingScheduleId = uint64(response.JSON().Path("$.fundingScheduleId").Number().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}

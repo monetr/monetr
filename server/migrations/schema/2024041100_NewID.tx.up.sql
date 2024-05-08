@@ -698,6 +698,7 @@ CREATE TABLE "bank_accounts" (
   "link_id"               VARCHAR(32) NOT NULL,
   "plaid_bank_account_id" VARCHAR(32),
   "name"                  VARCHAR(200) NOT NULL,
+  "original_name"         VARCHAR(200),
   "mask"                  VARCHAR(50),
   "account_type"          VARCHAR(200),
   "account_sub_type"      VARCHAR(200),
@@ -713,13 +714,14 @@ CREATE TABLE "bank_accounts" (
   CONSTRAINT "fk_bank_accounts_plaid_bank_account" FOREIGN KEY ("plaid_bank_account_id", "account_id") REFERENCES "plaid_bank_accounts" ("plaid_bank_account_id", "account_id")
 );
 
-INSERT INTO "bank_accounts" ("bank_account_id", "account_id", "link_id", "plaid_bank_account_id", "name", "mask", "account_type", "account_sub_type", "status", "available_balance", "current_balance", "last_updated", "created_at", "updated_at")
+INSERT INTO "bank_accounts" ("bank_account_id", "account_id", "link_id", "plaid_bank_account_id", "name", "original_name", "mask", "account_type", "account_sub_type", "status", "available_balance", "current_balance", "last_updated", "created_at", "updated_at")
 SELECT
   "b"."bank_account_id_new",
   "a"."account_id_new",
   "l"."link_id_new",
   "p"."plaid_bank_account_id_new",
   "b"."name",
+  "b"."original_name",
   "b"."mask",
   "b"."account_type",
   "b"."account_sub_type",
