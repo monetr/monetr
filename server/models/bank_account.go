@@ -87,5 +87,9 @@ func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error)
 		o.CreatedAt = now
 	}
 
+	if o.UpdatedAt.IsZero() {
+		o.UpdatedAt = now
+	}
+
 	return ctx, nil
 }

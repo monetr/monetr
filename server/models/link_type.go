@@ -1,6 +1,6 @@
 package models
 
-//go:generate stringer -type=LinkType -output=link_type.strings.go
+//go:generate go run golang.org/x/tools/cmd/stringer@v0.21.0 -type=LinkType -output=link_type.strings.go
 type LinkType uint8
 
 const (
@@ -8,5 +8,4 @@ const (
 	PlaidLinkType
 	ManualLinkType
 	StripeLinkType
-	TellerLinkType
 )

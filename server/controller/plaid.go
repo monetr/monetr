@@ -48,7 +48,7 @@ func (c *Controller) checkCacheForLinkToken(
 	span := sentry.StartSpan(ctx, "StoreLinkTokenInCache")
 	defer span.Finish()
 
-	key := fmt.Sprintf("plaid:in_progress:%d:%d", userId, linkId)
+	key := fmt.Sprintf("plaid:in_progress:%s:%s", userId, linkId)
 	var token string
 	if err := c.cache.GetEz(span.Context(), key, &token); err != nil {
 		return "", errors.Wrap(err, "failed to retrieve cached link token")
@@ -64,7 +64,7 @@ func (c *Controller) removeLinkTokenFromCache(
 	span := sentry.StartSpan(ctx, "RemoteLinkTokenFromCache")
 	defer span.Finish()
 
-	key := fmt.Sprintf("plaid:in_progress:%d:%d", userId, linkId)
+	key := fmt.Sprintf("plaid:in_progress:%s:%s", userId, linkId)
 	return errors.Wrap(
 		c.cache.Delete(span.Context(), key),
 		"failed to remove cached link token",
@@ -547,7 +547,7 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusOK)
 	}
 
-	channelName := fmt.Sprintf("initial:plaid:link:%d:%d", link.AccountId, link.LinkId)
+	channelName := fmt.Sprintf("initial:plaid:link:%s:%s", link.AccountId, link.LinkId)
 
 	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
 	if err != nil {

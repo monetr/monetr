@@ -236,7 +236,7 @@ func (c *Controller) waitForDeleteLink(ctx echo.Context) error {
 	// 	return ctx.NoContent(http.StatusNoContent)
 	// }
 
-	channelName := fmt.Sprintf("link:remove:%d:%d", repo.AccountId(), linkId)
+	channelName := fmt.Sprintf("link:remove:%s:%s", repo.AccountId(), linkId)
 
 	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
 	if err != nil {

@@ -502,7 +502,7 @@ CREATE TABLE "files" (
   "blob_uri"      TEXT NOT NULL,
   "created_at"    TIMESTAMP WITH TIME ZONE NOT NULL,
   "created_by"    VARCHAR(32) NOT NULL,
-  "deleted_at"    TIMESTAMP WITH TIME ZONE NOT NULL,
+  "deleted_at"    TIMESTAMP WITH TIME ZONE,
   "reconciled_at" TIMESTAMP WITH TIME ZONE,
   CONSTRAINT "pk_files" PRIMARY KEY ("file_id", "account_id"),
   CONSTRAINT "fk_files_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
@@ -973,6 +973,7 @@ CREATE TABLE "transactions" (
   "categories"                   TEXT[],
   "amount"                       BIGINT NOT NULL,
   "spending_amount"              BIGINT,
+  "currency"                     VARCHAR(50) NOT NULL DEFAULT 'USD',
   "is_pending"                   BOOLEAN NOT NULL,
   "date"                         TIMESTAMP WITH TIME ZONE NOT NULL,
   "created_at"                   TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -988,7 +989,7 @@ CREATE TABLE "transactions" (
 CREATE INDEX "ix_transactions_opt_order" ON "transactions" ("account_id", "bank_account_id", "date" DESC, "transaction_id" DESC);
 CREATE INDEX "ix_transactions_soft_delete" ON "transactions" ("account_id", "bank_account_id", "date" DESC, "transaction_id" DESC) WHERE "deleted_at" IS NULL;
 
-INSERT INTO "transactions" ("transaction_id", "account_id", "bank_account_id", "spending_id", "plaid_transaction_id", "pending_plaid_transaction_id", "name", "original_name", "merchant_name", "original_merchant_name", "categories", "amount", "spending_amount", "is_pending", "date", "created_at", "deleted_at")
+INSERT INTO "transactions" ("transaction_id", "account_id", "bank_account_id", "spending_id", "plaid_transaction_id", "pending_plaid_transaction_id", "name", "original_name", "merchant_name", "original_merchant_name", "categories", "amount", "spending_amount", "currency", "is_pending", "date", "created_at", "deleted_at")
 SELECT
   "t"."transaction_id_new",
   "a"."account_id_new",
@@ -1003,6 +1004,7 @@ SELECT
   "t"."categories",
   "t"."amount",
   "t"."spending_amount",
+  "t"."currency",
   "t"."is_pending",
   "t"."date",
   "t"."created_at",
