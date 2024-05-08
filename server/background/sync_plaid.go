@@ -573,7 +573,7 @@ func (s *SyncPlaidJob) maintainLinkStatus(ctx context.Context, plaidLink *PlaidL
 	}
 
 	if linkWasSetup { // Send the notification that the link has been set up.
-		channelName := fmt.Sprintf("initial:plaid:link:%d:%d", s.args.AccountId, s.args.LinkId)
+		channelName := fmt.Sprintf("initial:plaid:link:%s:%s", s.args.AccountId, s.args.LinkId)
 		if notifyErr := s.publisher.Notify(
 			ctx,
 			channelName,

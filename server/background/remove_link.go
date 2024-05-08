@@ -174,7 +174,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	r.removeLink(span.Context())
 	r.removePlaidLinks(span.Context(), plaidLinkIds)
 
-	channelName := fmt.Sprintf("link:remove:%d:%d", accountId, linkId)
+	channelName := fmt.Sprintf("link:remove:%s:%s", accountId, linkId)
 	if err = r.publisher.Notify(span.Context(), channelName, "success"); err != nil {
 		log.WithError(err).Warn("failed to send notification about successfully removing link")
 		crumbs.Warn(span.Context(), "failed to send notification about successfully removing link", "pubsub", map[string]interface{}{
