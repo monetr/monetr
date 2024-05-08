@@ -39,21 +39,13 @@ var (
 )
 
 type Document struct {
-	ID          uint64
+	ID          models.ID[models.Transaction]
 	TF          map[string]float32
 	TFIDF       map[string]float32
 	Vector      []float32
 	Transaction *models.Transaction
 	Parts       []string
 	Valid       bool
-}
-
-type Datum struct {
-	ID          uint64
-	Transaction *models.Transaction
-	String      string
-	Amount      int64
-	Vector      []float32
 }
 
 type TFIDF struct {

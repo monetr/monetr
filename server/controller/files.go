@@ -3,7 +3,6 @@ package controller
 import (
 	"net/http"
 	"path"
-	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -79,10 +78,10 @@ func (c *Controller) postFile(ctx echo.Context) error {
 		c.getContext(ctx),
 		reader,
 		storage.FileInfo{
-			Name:          header.Filename,
-			AccountId:     c.mustGetAccountId(ctx),
-			BankAccountId: bankAccountId,
-			ContentType:   storage.ContentType(contentType),
+			Name:        header.Filename,
+			Kind:        "transactions/import", // TODO What should this be?
+			AccountId:   c.mustGetAccountId(ctx),
+			ContentType: storage.ContentType(contentType),
 		},
 	)
 	if err != nil {
@@ -90,12 +89,11 @@ func (c *Controller) postFile(ctx echo.Context) error {
 	}
 
 	file := File{
-		AccountId:     c.mustGetAccountId(ctx),
-		BankAccountId: bankAccountId,
-		Name:          header.Filename,
-		ContentType:   contentType,
-		Size:          uint64(header.Size),
-		BlobUri:       fileUri,
+		AccountId:   c.mustGetAccountId(ctx),
+		Name:        header.Filename,
+		ContentType: contentType,
+		Size:        uint64(header.Size),
+		BlobUri:     fileUri,
 	}
 
 	if err := repo.CreateFile(c.getContext(ctx), &file); err != nil {
@@ -106,14 +104,9 @@ func (c *Controller) postFile(ctx echo.Context) error {
 }
 
 func (c *Controller) getFiles(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
-		return c.badRequest(ctx, "Must specify a valid bank account Id")
-	}
-
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	files, err := repo.GetFiles(c.getContext(ctx), bankAccountId)
+	files, err := repo.GetFiles(c.getContext(ctx))
 	if err != nil {
 		return c.wrapPgError(ctx, err, "Failed to list files")
 	}

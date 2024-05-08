@@ -4,7 +4,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/monetr/monetr/server/models"
 )
 
@@ -29,7 +28,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) AddTransaction(txn *models.Transactio
 }
 
 type memberItem struct {
-	ID   uint64
+	ID   models.ID[models.Transaction]
 	Date time.Time
 }
 
@@ -41,9 +40,9 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []models.
 
 	for i, cluster := range result {
 		group := models.TransactionCluster{
-			TransactionClusterId: uuid.NewString(),
-			Members:              make([]uint64, len(cluster.Items)),
+			Members: make([]models.ID[models.Transaction], len(cluster.Items)),
 		}
+		group.TransactionClusterId = models.NewID(&group)
 
 		// TODO I want to determine what the best name for a given cluster is, and
 		// naturally that name is somewhere in the names of the transactions in that
@@ -66,7 +65,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []models.
 
 		merchants := map[string]int{}
 		var highestName string
-		var highestId uint64
+		var highestId models.ID[models.Transaction]
 
 		items := make([]memberItem, 0, len(cluster.Items))
 		for index := range cluster.Items {
@@ -103,14 +102,15 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []models.
 		if len(merchants) == 0 {
 			group.Name = highestName
 		} else {
-			highestId = 0
+			highestId = ""
 			highestName = ""
-			for merchant, count := range merchants {
-				if uint64(count) > highestId {
-					highestName = merchant
-					highestId = uint64(count)
-				}
-			}
+			// TODO What was I even doing here?
+			// for merchant, count := range merchants {
+			// 	if uint64(count) > highestId {
+			// 		highestName = merchant
+			// 		highestId = uint64(count)
+			// 	}
+			// }
 
 			group.Name = highestName
 		}

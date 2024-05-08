@@ -93,7 +93,7 @@ func TestCountPendingTransactions(t *testing.T) {
 		GivenIHaveATransaction(t, clock, bankAccount)
 
 		db := testutils.GetPgDatabase(t)
-		repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
+		repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedBy, bankAccount.AccountId, db)
 
 		timezone, err := bankAccount.Account.GetTimezone()
 		require.NoError(t, err, "must be able to get the timezone from the account")

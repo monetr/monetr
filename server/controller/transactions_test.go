@@ -94,7 +94,7 @@ func TestPostTransactions(t *testing.T) {
 		response := e.POST("/api/bank_accounts/1234/transactions").
 			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
-				BankAccountId: 1234,
+				BankAccountId: "bac_bogus",
 				SpendingId:    nil,
 				Categories: []string{
 					"Things",
@@ -300,7 +300,7 @@ func TestPutTransactions(t *testing.T) {
 			AccountId:              user.AccountId,
 			BankAccountId:          bank.BankAccountId,
 			FundingScheduleId:      fundingSchedule.FundingScheduleId,
-			DateCreated:            now,
+			CreatedAt:              now,
 		})
 
 		token = GivenILogin(t, e, user.Login.Email, password)

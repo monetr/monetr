@@ -2,33 +2,19 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
 )
 
-// List Funding Schedules
-// @Summary List Funding Schedules
-// @id list-funding-schedules
-// @tags Funding Schedules
-// @description List all of the funding schedule's for the current bank account.
-// @Security ApiKeyAuth
-// @Produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Router /bank_accounts/{bankAccountId}/funding_schedules [get]
-// @Success 200 {array} models.FundingSchedule
-// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getFundingSchedules(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -40,26 +26,30 @@ func (c *Controller) getFundingSchedules(ctx echo.Context) error {
 	}
 
 	if fundingSchedules == nil {
-		fundingSchedules = make([]models.FundingSchedule, 0)
+		fundingSchedules = make([]FundingSchedule, 0)
 	}
 
 	return ctx.JSON(http.StatusOK, fundingSchedules)
 }
 
 func (c *Controller) getFundingScheduleById(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	fundingScheduleId, err := strconv.ParseUint(ctx.Param("fundingScheduleId"), 10, 64)
-	if err != nil || fundingScheduleId == 0 {
+	fundingScheduleId, err := ParseID[FundingSchedule](ctx.Param("fundingScheduleId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid funding schedule Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId)
+	fundingSchedule, err := repo.GetFundingSchedule(
+		c.getContext(ctx),
+		bankAccountId,
+		fundingScheduleId,
+	)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve funding schedule")
 	}
@@ -67,32 +57,18 @@ func (c *Controller) getFundingScheduleById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, fundingSchedule)
 }
 
-// Create Funding Schedule
-// @Summary Create Funding Schedule
-// @id create-funding-schedule
-// @tags Funding Schedules
-// @security ApiKeyAuth
-// @accept json
-// @produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Param fundingSchedule body models.FundingSchedule true "New Funding Schedule"
-// @Router /bank_accounts/{bankAccountId}/funding_schedules [post]
-// @Success 200 {object} models.FundingSchedule
-// @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) postFundingSchedules(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	var fundingSchedule models.FundingSchedule
+	var fundingSchedule FundingSchedule
 	if err := ctx.Bind(&fundingSchedule); err != nil {
 		return c.invalidJson(ctx)
 	}
 
-	fundingSchedule.FundingScheduleId = 0 // Make sure we create a new funding schedule.
+	fundingSchedule.FundingScheduleId = "" // Make sure we create a new funding schedule.
 	fundingSchedule.Name = strings.TrimSpace(fundingSchedule.Name)
 	fundingSchedule.Description = strings.TrimSpace(fundingSchedule.Description)
 	fundingSchedule.BankAccountId = bankAccountId
@@ -110,8 +86,12 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 	// We also calculate the next occurrence if the provided occurrence is in the past. This technically should not
 	// happen via the UI. But it is currently possible for someone to select the current day in the UI. Which then gets
 	// adjusted for midnight that day, which will always be in the past for the user.
-	if (time.Time{}).Equal(fundingSchedule.NextRecurrence) || c.clock.Now().After(fundingSchedule.NextRecurrence) {
-		fundingSchedule.CalculateNextOccurrence(c.getContext(ctx), c.clock.Now(), c.mustGetTimezone(ctx))
+	if fundingSchedule.NextRecurrence.IsZero() || c.clock.Now().After(fundingSchedule.NextRecurrence) {
+		fundingSchedule.CalculateNextOccurrence(
+			c.getContext(ctx),
+			c.clock.Now(),
+			c.mustGetTimezone(ctx),
+		)
 	} else {
 		fundingSchedule.NextRecurrenceOriginal = fundingSchedule.NextRecurrence
 	}
@@ -127,23 +107,28 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 }
 
 func (c *Controller) putFundingSchedules(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	fundingScheduleId, err := strconv.ParseUint(ctx.Param("fundingScheduleId"), 10, 64)
-	if err != nil || fundingScheduleId == 0 {
-		return c.badRequest(ctx, "must specify valid funding schedule Id")
+	fundingScheduleId, err := ParseID[FundingSchedule](ctx.Param("fundingScheduleId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid funding schedule Id")
 	}
-	var request models.FundingSchedule
+
+	var request FundingSchedule
 	if err := ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	// Retrieve the existing funding schedule to make sure some fields cannot be overridden
-	existingFundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId)
+	existingFundingSchedule, err := repo.GetFundingSchedule(
+		c.getContext(ctx),
+		bankAccountId,
+		fundingScheduleId,
+	)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to verify funding schedule exists")
 	}
@@ -189,7 +174,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		recalculateSpending = true
 	}
 
-	updatedSpending := make([]models.Spending, 0)
+	updatedSpending := make([]Spending, 0)
 	if recalculateSpending {
 		crumbs.Debug(c.getContext(ctx), "Spending will be recalculated as part of this funding schedule update", map[string]interface{}{
 			"bankAccountId":     bankAccountId,
@@ -231,13 +216,13 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 }
 
 func (c *Controller) deleteFundingSchedules(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	fundingScheduleId, err := strconv.ParseUint(ctx.Param("fundingScheduleId"), 10, 64)
-	if err != nil || fundingScheduleId == 0 {
+	fundingScheduleId, err := ParseID[FundingSchedule](ctx.Param("fundingScheduleId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid funding schedule Id")
 	}
 

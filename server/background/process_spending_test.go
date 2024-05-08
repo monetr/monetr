@@ -47,7 +47,7 @@ func TestProcessSpendingJob_Run(t *testing.T) {
 			CurrentAmount:     5000,
 			RuleSet:           spendingRule,
 			NextRecurrence:    spendingRule.Before(clock.Now(), true), // Make it so it recurs next in the past. (STALE)
-			DateCreated:       clock.Now(),
+			CreatedAt:         clock.Now(),
 		})
 
 		handler := NewProcessSpendingHandler(log, db, clock)

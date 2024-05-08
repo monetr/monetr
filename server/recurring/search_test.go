@@ -25,7 +25,7 @@ func TestSearchTransactions(t *testing.T) {
 		}
 
 		baseline := models.Transaction{
-			TransactionId:        290,
+			TransactionId:        "txn_290", // 290,
 			Amount:               -10000,
 			Date:                 time.Date(2021, 7, 13, 0, 0, 0, 0, timezone),
 			OriginalName:         "WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 798080132284EPJ. Merchant name: WHEN I WORK INC",

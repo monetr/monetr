@@ -30,7 +30,6 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
 		job := models.Job{
-			JobId:       12345,
 			Queue:       "test queue",
 			Signature:   "abc123",
 			Input:       "",
