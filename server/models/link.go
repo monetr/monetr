@@ -1,6 +1,11 @@
 package models
 
-import "time"
+import (
+	"context"
+	"time"
+
+	"github.com/go-pg/pg/v10"
+)
 
 type Link struct {
 	tableName string `pg:"links"`
@@ -22,4 +27,21 @@ type Link struct {
 
 func (o Link) IdentityPrefix() string {
 	return "link"
+}
+
+var (
+	_ pg.BeforeInsertHook = (*Link)(nil)
+)
+
+func (o *Link) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.LinkId.IsZero() {
+		o.LinkId = NewID(o)
+	}
+
+	now := time.Now()
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = now
+	}
+
+	return ctx, nil
 }
