@@ -7,7 +7,6 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/golang/mock/gomock"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/testutils"
@@ -16,6 +15,7 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestSyncPlaidJob_Run(t *testing.T) {

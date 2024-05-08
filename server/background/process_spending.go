@@ -171,7 +171,7 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	fundingSchedules := map[uint64]*FundingSchedule{}
+	fundingSchedules := map[ID[FundingSchedule]]*FundingSchedule{}
 
 	spendingToUpdate := make([]Spending, 0, len(allSpending))
 	for i := range allSpending {

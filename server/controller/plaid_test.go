@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/golang/mock/gomock"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -16,6 +15,7 @@ import (
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/plaid/plaid-go/v20/plaid"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestPostTokenCallback(t *testing.T) {

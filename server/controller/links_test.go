@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/golang/mock/gomock"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
@@ -15,6 +14,7 @@ import (
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestPostLink(t *testing.T) {
@@ -23,7 +23,7 @@ func TestPostLink(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 		createdAndUpdatedBogus := app.Clock.Now().Add(-1 * time.Hour)
 		link := models.Link{
-			LinkId:          math.MaxInt64,        // Set it to something so we can verify its different in the result.
+			LinkId:          "link_bogus",         // Set it to something so we can verify its different in the result.
 			LinkType:        models.PlaidLinkType, // This should be changed to manual in the response.
 			InstitutionName: "U.S. Bank",
 			Description:     myownsanity.StringP("My personal link"),
@@ -76,7 +76,7 @@ func TestPostLink(t *testing.T) {
 	t.Run("unauthenticated", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		link := models.Link{
-			LinkId:          math.MaxInt64,        // Set it to something so we can verify its different in the result.
+			LinkId:          "link_bogus",         // Set it to something so we can verify its different in the result.
 			LinkType:        models.PlaidLinkType, // This should be changed to manual in the response.
 			InstitutionName: "U.S. Bank",
 			CreatedAt:       app.Clock.Now().Add(-1 * time.Hour), // Set these to something to make sure it gets overwritten.
@@ -99,7 +99,7 @@ func TestGetLink(t *testing.T) {
 		tokenA, tokenB := GivenIHaveToken(t, e), GivenIHaveToken(t, e)
 
 		link := models.Link{
-			LinkId:          math.MaxInt64,        // Set it to something so we can verify its different in the result.
+			LinkId:          "link_bogus",         // Set it to something so we can verify its different in the result.
 			LinkType:        models.PlaidLinkType, // This should be changed to manual in the response.
 			InstitutionName: "U.S. Bank",
 			CreatedAt:       app.Clock.Now().Add(-1 * time.Hour), // Set these to something to make sure it gets overwritten.
@@ -194,7 +194,7 @@ func TestGetLink(t *testing.T) {
 			response.JSON().Path("$.linkId").Number().Gt(0)
 			response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
 
-			link.LinkId = uint64(response.JSON().Path("$.linkId").Number().Raw())
+			link.LinkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 		}
 
 		{ // Retrieve the link and make sure the linkId matches.
@@ -241,7 +241,7 @@ func TestGetLink(t *testing.T) {
 		app, e := NewTestApplication(t)
 
 		var token string
-		var linkId uint64
+		var linkId models.ID[models.Link]
 		{
 			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
@@ -281,7 +281,7 @@ func TestPutLink(t *testing.T) {
 		response.JSON().Path("$.linkId").Number().Gt(0)
 		response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
 
-		linkId := uint64(response.JSON().Path("$.linkId").Number().Raw())
+		linkId := models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 
 		link.LinkId = linkId
 		link.InstitutionName = "New Name"
@@ -319,7 +319,7 @@ func TestPutLink(t *testing.T) {
 		response.JSON().Path("$.linkId").Number().Gt(0)
 		response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
 
-		linkId := uint64(response.JSON().Path("$.linkId").Number().Raw())
+		linkId := models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 
 		link.LinkId = linkId
 		link.InstitutionName = "New Name"
@@ -354,7 +354,7 @@ func TestPutLink(t *testing.T) {
 		response.JSON().Path("$.linkId").Number().Gt(0)
 		response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
 
-		linkId := uint64(response.JSON().Path("$.linkId").Number().Raw())
+		linkId := models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 
 		link.LinkId = linkId
 		link.InstitutionName = "New Name"
@@ -380,7 +380,7 @@ func TestPutLink(t *testing.T) {
 
 		// We want to create a link with tokenA. This link should not be visible later when we request the link for
 		// tokenB. This will help verify that we do not expose data from someone else's login.
-		var linkAID, linkBID uint64
+		var linkAID, linkBID models.ID[models.Link]
 		{
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, tokenA).
@@ -388,11 +388,10 @@ func TestPutLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.linkId").Number().NotEqual(link.LinkId)
-			response.JSON().Path("$.linkId").Number().Gt(0)
+			response.JSON().Path("$.linkId").NotEqual(link.LinkId)
 			response.JSON().Path("$.linkType").Number().IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
-			linkAID = uint64(response.JSON().Path("$.linkId").Number().Raw())
+			linkAID = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 		}
 
 		// Create a link for tokenB too. This way we can do a GET request for both tokens to test each scenario.
@@ -403,11 +402,10 @@ func TestPutLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.linkId").Number().NotEqual(link.LinkId)
-			response.JSON().Path("$.linkId").Number().Gt(0)
+			response.JSON().Path("$.linkId").NotEqual(link.LinkId)
 			response.JSON().Path("$.linkType").Number().IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
-			linkBID = uint64(response.JSON().Path("$.linkId").Number().Raw())
+			linkBID = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 		}
 
 		// Now using token A, try to update token B's link.
@@ -475,7 +473,7 @@ func TestDeleteLink(t *testing.T) {
 			response.JSON().Path("$.linkId").Number().Gt(0)
 			response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
 
-			link.LinkId = uint64(response.JSON().Path("$.linkId").Number().Raw())
+			link.LinkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 		}
 
 		jobController.EXPECT().

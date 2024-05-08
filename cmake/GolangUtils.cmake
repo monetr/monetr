@@ -40,9 +40,9 @@ endfunction()
 
 # mockgen for local development
 set(MOCKGEN_EXECUTABLE ${GO_BIN_DIR}/mockgen)
-set(MOCKGEN_VERSION "v1.6.0")
+set(MOCKGEN_VERSION "v0.4.0")
 go_install(
   OUTPUT ${MOCKGEN_EXECUTABLE}
-  PACKAGE "github.com/golang/mock/mockgen"
+  PACKAGE "go.uber.org/mock/mockgen"
   VERSION ${MOCKGEN_VERSION}
 )

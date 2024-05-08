@@ -455,7 +455,8 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 	t.Run("cannot read someone else's funding schedule", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 
-		var bankAccountId, fundingScheduleId uint64
+		var bankAccountId models.ID[models.BankAccount]
+		var fundingScheduleId models.ID[models.FundingSchedule]
 		{ // Create the funding schedule under the first account.
 			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
@@ -480,11 +481,11 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 					Expect()
 
 				response.Status(http.StatusOK)
-				response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-				response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+				response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+				response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 
 				// Save the ID of the created funding schedule so we can use it below.
-				fundingScheduleId = uint64(response.JSON().Path("$.fundingScheduleId").Number().Raw())
+				fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 				bankAccountId = bank.BankAccountId
 			}
 
@@ -496,8 +497,8 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 					Expect()
 
 				response.Status(http.StatusOK)
-				response.JSON().Path("$.fundingScheduleId").Number().IsEqual(fundingScheduleId)
-				response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+				response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
+				response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			}
 		}
 

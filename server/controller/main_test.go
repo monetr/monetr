@@ -17,7 +17,6 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gavv/httpexpect/v2"
-	"github.com/golang/mock/gomock"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/application"
 	"github.com/monetr/monetr/server/background"
@@ -37,6 +36,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 const (

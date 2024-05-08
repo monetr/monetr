@@ -24,7 +24,6 @@ require (
 	github.com/go-pg/pg/v10 v10.12.0
 	github.com/gocraft/work v0.5.1
 	github.com/golang-jwt/jwt/v4 v4.5.0
-	github.com/golang/mock v1.6.0
 	github.com/gomodule/redigo v1.8.9
 	github.com/google/uuid v1.6.0
 	github.com/jarcoal/httpmock v1.3.1
@@ -32,6 +31,7 @@ require (
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/mileusna/useragent v1.3.4
 	github.com/nyaruka/phonenumbers v1.3.4
+	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v20 v20.1.0
 	github.com/prometheus/client_golang v1.17.0
@@ -56,7 +56,6 @@ require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/oklog/ulid/v2 v2.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.49.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
 	go.opentelemetry.io/otel v1.24.0 // indirect
@@ -133,8 +132,9 @@ require (
 	github.com/yuin/gopher-lua v1.1.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
+	go.uber.org/mock v0.4.0
 	go.uber.org/multierr v1.9.0 // indirect
-	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
+	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.17.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect

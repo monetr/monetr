@@ -35,10 +35,9 @@ func TestFilesystemStorage(t *testing.T) {
 		buf := &bufferWrapper{bytes.NewReader(input)}
 
 		uri, err := fs.Store(context.Background(), buf, FileInfo{
-			Name:          "Test file.csv",
-			AccountId:     123,
-			BankAccountId: 456,
-			ContentType:   TextCSVContentType,
+			Name:        "Test file.csv",
+			AccountId:   "acct_123",
+			ContentType: TextCSVContentType,
 		})
 		assert.NoError(t, err, "should not have an error storing a file")
 		assert.NotEmpty(t, uri, "should have returned a valid uri")
