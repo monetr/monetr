@@ -2,7 +2,6 @@ package controller_test
 
 import (
 	"errors"
-	"math"
 	"net/http"
 	"testing"
 
@@ -126,7 +125,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("must specify a link Id")
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid link Id")
 	})
 
 	t.Run("bad link ID", func(t *testing.T) {
@@ -146,7 +145,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.PUT("/api/plaid/link/update/123").
+		response := e.PUT("/api/plaid/link/update/link_bogus").
 			WithCookie(TestCookieName, token).
 			Expect()
 
@@ -296,7 +295,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 
 		response := e.POST("/api/plaid/link/sync").
 			WithJSON(map[string]interface{}{
-				"linkId": math.MaxInt32,
+				"linkId": "link_bogus",
 			}).
 			WithCookie(TestCookieName, token).
 			Expect()

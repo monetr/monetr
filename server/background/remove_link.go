@@ -141,7 +141,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 		crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.PlaidId)
 	}
 
-	bankAccountIds := make([]uint64, 0)
+	bankAccountIds := make([]ID[BankAccount], 0)
 	{
 		err = r.db.ModelContext(span.Context(), &BankAccount{}).
 			Where(`"bank_account"."account_id" = ?`, accountId).
@@ -187,7 +187,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 
 func (r *RemoveLinkJob) removeTransactionClusters(
 	ctx context.Context,
-	bankAccountIds []uint64,
+	bankAccountIds []ID[BankAccount],
 ) {
 	result, err := r.db.ModelContext(ctx, &TransactionCluster{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
@@ -203,7 +203,7 @@ func (r *RemoveLinkJob) removeTransactionClusters(
 
 func (r *RemoveLinkJob) removeTransactions(
 	ctx context.Context,
-	bankAccountIds []uint64,
+	bankAccountIds []ID[BankAccount],
 ) {
 	result, err := r.db.ModelContext(ctx, &Transaction{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
@@ -219,9 +219,9 @@ func (r *RemoveLinkJob) removeTransactions(
 
 func (r *RemoveLinkJob) getPlaidTransactionsToRemove(
 	ctx context.Context,
-	bankAccountIds []uint64,
-) []uint64 {
-	plaidTransactionIds := make([]uint64, 0)
+	bankAccountIds []ID[BankAccount],
+) []ID[PlaidTransaction] {
+	plaidTransactionIds := make([]ID[PlaidTransaction], 0)
 	err := r.db.ModelContext(ctx, &PlaidTransaction{}).
 		Join(`INNER JOIN "transactions" AS "transaction"`).
 		JoinOn(`"plaid_transaction"."plaid_transaction_id" IN ("transaction"."plaid_transaction_id", "transaction"."pending_plaid_transaction_id")`).
@@ -239,7 +239,7 @@ func (r *RemoveLinkJob) getPlaidTransactionsToRemove(
 
 func (r *RemoveLinkJob) removePlaidTransactions(
 	ctx context.Context,
-	ids []uint64,
+	ids []ID[PlaidTransaction],
 ) {
 	if len(ids) == 0 {
 		return
@@ -259,7 +259,7 @@ func (r *RemoveLinkJob) removePlaidTransactions(
 
 func (r *RemoveLinkJob) removeSpending(
 	ctx context.Context,
-	bankAccountIds []uint64,
+	bankAccountIds []ID[BankAccount],
 ) {
 	result, err := r.db.ModelContext(ctx, &Spending{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
@@ -275,7 +275,7 @@ func (r *RemoveLinkJob) removeSpending(
 
 func (r *RemoveLinkJob) removeFundingSchedules(
 	ctx context.Context,
-	bankAccountIds []uint64,
+	bankAccountIds []ID[BankAccount],
 ) {
 	result, err := r.db.ModelContext(ctx, &FundingSchedule{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
@@ -291,9 +291,9 @@ func (r *RemoveLinkJob) removeFundingSchedules(
 
 func (r *RemoveLinkJob) getPlaidSyncsToRemove(
 	ctx context.Context,
-	bankAccountIds []uint64,
-) []uint64 {
-	ids := make([]uint64, 0)
+	bankAccountIds []ID[BankAccount],
+) []ID[PlaidSync] {
+	ids := make([]ID[PlaidSync], 0)
 	err := r.db.ModelContext(ctx, &PlaidSync{}).
 		Join(`INNER JOIN "links" AS "link"`).
 		JoinOn(`"plaid_sync"."plaid_link_id" = "link"."plaid_link_id"`).
@@ -314,7 +314,7 @@ func (r *RemoveLinkJob) getPlaidSyncsToRemove(
 
 func (r *RemoveLinkJob) removePlaidSyncs(
 	ctx context.Context,
-	ids []uint64,
+	ids []ID[PlaidSync],
 ) {
 	if len(ids) == 0 {
 		return
@@ -334,9 +334,9 @@ func (r *RemoveLinkJob) removePlaidSyncs(
 
 func (r *RemoveLinkJob) getPlaidBankAccountsToRemove(
 	ctx context.Context,
-	bankAccountIds []uint64,
-) []uint64 {
-	ids := make([]uint64, 0)
+	bankAccountIds []ID[BankAccount],
+) []ID[PlaidBankAccount] {
+	ids := make([]ID[PlaidBankAccount], 0)
 	err := r.db.ModelContext(ctx, &PlaidBankAccount{}).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"plaid_bank_account"."plaid_bank_account_id" = "bank_account"."plaid_bank_account_id"`).
@@ -354,7 +354,7 @@ func (r *RemoveLinkJob) getPlaidBankAccountsToRemove(
 
 func (r *RemoveLinkJob) removePlaidBankAccounts(
 	ctx context.Context,
-	ids []uint64,
+	ids []ID[PlaidBankAccount],
 ) {
 	if len(ids) == 0 {
 		return
@@ -374,8 +374,8 @@ func (r *RemoveLinkJob) removePlaidBankAccounts(
 
 func (r *RemoveLinkJob) getPlaidLinksToRemove(
 	ctx context.Context,
-) []uint64 {
-	ids := make([]uint64, 0)
+) []ID[PlaidLink] {
+	ids := make([]ID[PlaidLink], 0)
 	err := r.db.ModelContext(ctx, &PlaidLink{}).
 		Join(`INNER JOIN "links" AS "link"`).
 		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
@@ -393,7 +393,7 @@ func (r *RemoveLinkJob) getPlaidLinksToRemove(
 
 func (r *RemoveLinkJob) removePlaidLinks(
 	ctx context.Context,
-	ids []uint64,
+	ids []ID[PlaidLink],
 ) {
 	if len(ids) == 0 {
 		return
@@ -413,7 +413,7 @@ func (r *RemoveLinkJob) removePlaidLinks(
 
 func (r *RemoveLinkJob) removeBankAccounts(
 	ctx context.Context,
-	bankAccountIds []uint64,
+	bankAccountIds []ID[BankAccount],
 ) {
 	result, err := r.db.ModelContext(ctx, &BankAccount{}).
 		Where(`"account_id" = ?`, r.args.AccountId).

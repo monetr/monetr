@@ -39,7 +39,7 @@ func TestPostLink(t *testing.T) {
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.linkId").Number().NotEqual(link.LinkId)
 		response.JSON().Path("$.linkId").Number().Gt(0)
-		response.JSON().Path("$.linkType").Number().IsEqual(models.ManualLinkType)
+		response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 		response.JSON().Path("$.institutionName").String().NotEmpty()
 		response.JSON().Path("$.description").String().IsEqual("My personal link")
 	})
@@ -118,7 +118,7 @@ func TestGetLink(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.linkId").Number().NotEqual(link.LinkId)
 			response.JSON().Path("$.linkId").Number().Gt(0)
-			response.JSON().Path("$.linkType").Number().IsEqual(models.ManualLinkType)
+			response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
 			// Even if we specify a Plaid link type, it shouldn't be; so we should not
 			// see a plaid link on the result.
@@ -136,7 +136,7 @@ func TestGetLink(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.linkId").Number().NotEqual(link.LinkId)
 			response.JSON().Path("$.linkId").Number().Gt(0)
-			response.JSON().Path("$.linkType").Number().IsEqual(models.ManualLinkType)
+			response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
 		}
 
@@ -148,7 +148,7 @@ func TestGetLink(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$").Array().Length().IsEqual(1)
-			response.JSON().Path("$[0].linkId").Number().IsEqual(linkAID)
+			response.JSON().Path("$[0].linkId").IsEqual(linkAID)
 		}
 
 		// Now we want to test GET with token B.
@@ -294,7 +294,7 @@ func TestPutLink(t *testing.T) {
 			Expect()
 
 		updated.Status(http.StatusOK)
-		updated.JSON().Path("$.linkId").Number().IsEqual(linkId)
+		updated.JSON().Path("$.linkId").IsEqual(linkId)
 		// Make sure the institution name has not changed. This cannot be changed once a link is created.
 		updated.JSON().Path("$.institutionName").String().IsEqual(institutionName)
 	})
@@ -389,7 +389,7 @@ func TestPutLink(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.linkId").NotEqual(link.LinkId)
-			response.JSON().Path("$.linkType").Number().IsEqual(models.ManualLinkType)
+			response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
 			linkAID = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 		}
@@ -403,7 +403,7 @@ func TestPutLink(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.linkId").NotEqual(link.LinkId)
-			response.JSON().Path("$.linkType").Number().IsEqual(models.ManualLinkType)
+			response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
 			linkBID = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 		}

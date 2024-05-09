@@ -138,7 +138,7 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.transaction.transactionId").Number().IsEqual(transaction.TransactionId)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(transaction.TransactionId)
 		response.JSON().Path("$.transaction.name").String().IsEqual(transaction.Name)
 		response.JSON().Path("$.transaction.name").String().NotEqual(originalTransaction.Name)
 		response.JSON().Path("$.transaction.originalName").String().IsEqual(originalTransaction.Name)
@@ -167,7 +167,7 @@ func TestPutTransactions(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.PUT(`/api/bank_accounts/00000/transactions/1234`).
+		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
 			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
@@ -183,7 +183,7 @@ func TestPutTransactions(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.PUT(`/api/bank_accounts/1234/transactions/0000`).
+		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
 			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
@@ -199,7 +199,7 @@ func TestPutTransactions(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.PUT(`/api/bank_accounts/1234/transactions/foo`).
+		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
 			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
@@ -215,7 +215,7 @@ func TestPutTransactions(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
+		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
 			WithCookie(TestCookieName, token).
 			WithBytes([]byte("I am not really json")).
 			Expect()
@@ -227,7 +227,7 @@ func TestPutTransactions(t *testing.T) {
 	t.Run("no authentication token", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 
-		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
+		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
 				Amount: 1243,
@@ -241,7 +241,7 @@ func TestPutTransactions(t *testing.T) {
 	t.Run("bad authentication token", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 
-		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
+		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
 			WithCookie(TestCookieName, gofakeit.Generate("????????")).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
@@ -316,13 +316,13 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.transaction.transactionId").Number().IsEqual(transaction.TransactionId)
-		response.JSON().Path("$.transaction.spendingId").Number().IsEqual(*transaction.SpendingId)
-		response.JSON().Path("$.transaction.spendingAmount").Number().IsEqual(transaction.Amount)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(transaction.TransactionId)
+		response.JSON().Path("$.transaction.spendingId").IsEqual(*transaction.SpendingId)
+		response.JSON().Path("$.transaction.spendingAmount").IsEqual(transaction.Amount)
 		// Make sure we spent from the right spending object.
-		response.JSON().Path("$.spending[0].spendingId").Number().IsEqual(spending.SpendingId)
+		response.JSON().Path("$.spending[0].spendingId").IsEqual(spending.SpendingId)
 		// And make sure we spent the amount we wanted.
-		response.JSON().Path("$.spending[0].currentAmount").Number().IsEqual(spending.CurrentAmount - transaction.Amount)
+		response.JSON().Path("$.spending[0].currentAmount").IsEqual(spending.CurrentAmount - transaction.Amount)
 		// Make sure the next contribution gets recalculated.
 		response.JSON().Path("$.spending[0].nextContributionAmount").Number().Lt(spending.NextContributionAmount)
 	})
