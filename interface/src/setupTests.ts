@@ -4,7 +4,7 @@
 // learn more: https://github.com/testing-library/jest-dom
 
 import * as matchers from '@testing-library/jest-dom/matchers';
-import { configure } from '@testing-library/react';
+import { cleanup, configure  } from '@testing-library/react';
 import axios from 'axios';
 
 // import { server } from '@monetr/interface/testutils/server';
@@ -45,6 +45,6 @@ configure({
 //   onUnhandledRequest: 'error',
 // }));
 afterEach(() => {
-  document.getElementsByTagName('body')[0].innerHTML = '';
+  cleanup();
 });
 // afterAll(() => server.close());
