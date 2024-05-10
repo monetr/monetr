@@ -150,8 +150,8 @@ func TestPutTransactions(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
-			WithPath("bankAccountId", 1234).
-			WithPath("transactionId", 1234).
+			WithPath("bankAccountId", "bac_bogus").
+			WithPath("transactionId", "txn_bogus").
 			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
@@ -179,22 +179,6 @@ func TestPutTransactions(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("must specify a valid bank account Id")
 	})
 
-	t.Run("invalid transaction Id numeric", func(t *testing.T) {
-		_, e := NewTestApplication(t)
-		token := GivenIHaveToken(t, e)
-
-		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
-			WithCookie(TestCookieName, token).
-			WithJSON(models.Transaction{
-				Name:   "PayPal",
-				Amount: 1243,
-			}).
-			Expect()
-
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("must specify a valid transaction Id")
-	})
-
 	t.Run("invalid transaction Id word", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
@@ -207,8 +191,8 @@ func TestPutTransactions(t *testing.T) {
 			}).
 			Expect()
 
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("must specify a valid transaction Id")
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("failed to retrieve existing transaction for update: record does not exist")
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
