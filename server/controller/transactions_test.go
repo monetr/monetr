@@ -167,7 +167,7 @@ func TestPutTransactions(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
+		response := e.PUT(`/api/bank_accounts/1234/transactions/txn_bogus`).
 			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",

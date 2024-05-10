@@ -138,7 +138,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("must specify a link Id")
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid link Id")
 	})
 
 	t.Run("missing link", func(t *testing.T) {

@@ -463,7 +463,7 @@ func TestRegister(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.user").Object().NotEmpty()
-			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.user.userId").String().IsASCII()
 			response.JSON().Path("$.isActive").Boolean().IsTrue()
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
@@ -761,7 +761,7 @@ func TestRegister(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.user").Object().NotEmpty()
-			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.user.userId").String().IsASCII()
 			response.JSON().Path("$.isActive").Boolean().IsTrue()
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsTrue()
