@@ -16,7 +16,6 @@ mock.module('react-router-dom', () => ({
   useNavigate: () => mockUseNavigate,
 }));
 
-
 describe('login page', () => {
   let mockAxios: MockAdapter;
 
