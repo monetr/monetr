@@ -1,30 +1,38 @@
-import { rest } from 'msw';
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
 
 import { useSelectedBankAccount, useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import testRenderHook from '@monetr/interface/testutils/hooks';
-import { server } from '@monetr/interface/testutils/server';
+
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
 describe('bank account hooks', () => {
   describe('useSelectedBankAccount', () => {
+    let mockAxios: MockAdapter;
+
+    beforeEach(() => {
+      mockAxios = new MockAdapter(axios);
+    });
+    afterEach(() => {
+      mockAxios.reset();
+    });
+    afterAll(() => mockAxios.restore());
+
     it('valid URL', async () => {
-      server.use(
-        rest.get('/api/bank_accounts/12', (_req, res, ctx) => {
-          return res(ctx.json({
-            'bankAccountId': 12,
-            'linkId': 4,
-            'availableBalance': 48635,
-            'currentBalance': 48635,
-            'mask': '2982',
-            'name': 'Mercury Checking',
-            'originalName': 'Mercury Checking',
-            'officialName': 'Mercury Checking',
-            'accountType': 'depository',
-            'accountSubType': 'checking',
-            'status': 'active',
-            'lastUpdated': '2023-07-02T04:22:52.48118Z',
-          }));
-        }),
-      );
+      mockAxios.onGet('/api/bank_accounts/12').reply(200, {
+        'bankAccountId': 12,
+        'linkId': 4,
+        'availableBalance': 48635,
+        'currentBalance': 48635,
+        'mask': '2982',
+        'name': 'Mercury Checking',
+        'originalName': 'Mercury Checking',
+        'officialName': 'Mercury Checking',
+        'accountType': 'depository',
+        'accountSubType': 'checking',
+        'status': 'active',
+        'lastUpdated': '2023-07-02T04:22:52.48118Z',
+      });
 
       { // Make sure use selected bank account works.
         const world = testRenderHook(useSelectedBankAccount, { initialRoute: '/bank/12/expenses' });

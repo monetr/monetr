@@ -1,5 +1,7 @@
 import { amountToFriendly, AmountType, formatAmount, friendlyToAmount } from './amounts';
 
+import { describe, expect, it } from 'bun:test';
+
 describe('amounts', () => {
   describe('amountToFriendly', () => {
     it('will convert USD cents to dollars', () => {
@@ -83,18 +85,18 @@ describe('amounts', () => {
 
     it('will format JPY properly', () => {
       const foo = formatAmount(1234, AmountType.Stored, 'ja-JP', 'JPY');
-      expect(foo).toBe('￥1,234');
+      expect(foo).toBe('¥1,234');
 
       const bar = formatAmount(-1234, AmountType.Stored, 'ja-JP', 'JPY');
-      expect(bar).toBe('-￥1,234');
+      expect(bar).toBe('-¥1,234');
     });
 
     it('will format EUR properly', () => {
       const foo = formatAmount(1234, AmountType.Stored, 'en-DE', 'EUR');
-      expect(foo).toBe('€12.34');
+      expect(foo).toBe('12,34 €');
 
       const bar = formatAmount(12.34, AmountType.Friendly, 'en-DE', 'EUR');
-      expect(bar).toBe('€12.34');
+      expect(bar).toBe('12,34 €');
     });
 
     it('will format RUB properly', () => {
