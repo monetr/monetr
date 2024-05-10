@@ -1,20 +1,29 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { rest } from 'msw';
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
 
 import Register from '@monetr/interface/pages/register';
 import testRenderer from '@monetr/interface/testutils/renderer';
-import { server } from '@monetr/interface/testutils/server';
+
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
 describe('register page', () => {
+  let mockAxios: MockAdapter;
+
+  beforeEach(() => {
+    mockAxios = new MockAdapter(axios);
+  });
+  afterEach(() => {
+    mockAxios.reset();
+  });
+
+  afterAll(() => mockAxios.restore());
+
   it('will render with default options', async () => {
-    server.use(
-      rest.get('/api/config', (_req, res, ctx) => {
-        return res(ctx.json({
-          allowSignUp: true,
-        }));
-      }),
-    );
+    mockAxios.onGet('/api/config').reply(200, {
+      allowSignUp: true,
+    });
 
     const world = testRenderer(<Register />, { initialRoute: '/register' });
 

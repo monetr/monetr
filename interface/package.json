@@ -5,8 +5,8 @@
   "scripts": {
     "build": "rspack build",
     "start": "MONETR_ENV=${MONETR_ENV:=local} rspack serve --mode development",
-    "test": "jest --config=jest.config.ts",
-    "coverage": "jest --config=jest.config.ts --coverage --coverageDirectory=./reports"
+    "test": "bun test",
+    "coverage": "bun test"
   },
   "browserslist": {
     "production": [
