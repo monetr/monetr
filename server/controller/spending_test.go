@@ -705,7 +705,7 @@ func TestGetSpendingByID(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("Must specify a valid bank account ID")
+			response.JSON().Path("$.error").String().IsEqual("must specify a valid bank account Id")
 		}
 	})
 
@@ -713,16 +713,18 @@ func TestGetSpendingByID(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		token := GivenILogin(t, e, user.Login.Email, password)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 
 		{ // Create an expense
 			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
-				WithPath("bankAccountId", "bogus_bank_id").
+				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("spendingId", "bogus_spending").
 				WithCookie(TestCookieName, token).
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("Must specify a valid spending ID")
+			response.JSON().Path("$.error").String().IsEqual("must specify a valid spending Id")
 		}
 	})
 
@@ -736,7 +738,7 @@ func TestGetSpendingByID(t *testing.T) {
 		{ // Create an expense
 			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
-				WithPath("spendingId", math.MaxInt32).
+				WithPath("spendingId", "spnd_bogus").
 				WithCookie(TestCookieName, token).
 				Expect()
 
