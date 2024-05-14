@@ -106,7 +106,7 @@ func TestPostTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("cannot create transactions for non-manual links")
+		response.JSON().Path("$.error").IsEqual("must specify a valid bank account Id")
 	})
 }
 
