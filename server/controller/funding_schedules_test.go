@@ -336,7 +336,7 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId uint64
+		var fundingScheduleId models.ID[models.FundingSchedule]
 		{ // Create the funding schedule
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -351,8 +351,8 @@ func TestDeleteFundingSchedules(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
-			response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-			fundingScheduleId = uint64(response.JSON().Path("$.fundingScheduleId").Number().Raw())
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
@@ -421,7 +421,7 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId uint64
+		var fundingScheduleId models.ID[models.FundingSchedule]
 		{ // Create the funding schedule.
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -434,11 +434,11 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 
 			// Save the ID of the created funding schedule so we can use it below.
-			fundingScheduleId = uint64(response.JSON().Path("$.fundingScheduleId").Number().Raw())
+			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 		}
 
 		response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
