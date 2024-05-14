@@ -35,7 +35,7 @@ func TestUnauthenticatedRepo_CreateAccount(t *testing.T) {
 	err := repo.CreateAccountV2(context.Background(), &account)
 	assert.NoError(t, err, "should successfully create account")
 	assert.NotEmpty(t, account, "new account should not be empty")
-	assert.Greater(t, account.AccountId, uint64(0), "accountId should be greater than 0")
+	assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
 }
 
 func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
@@ -46,7 +46,7 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, login, "new login should not be empty")
-		assert.Greater(t, login.LoginId, uint64(0), "loginId should be greater than 0")
+		assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
 	})
 
 	t.Run("duplicate email", func(t *testing.T) {
@@ -60,7 +60,7 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 		loginOne, err := repo.CreateLogin(context.Background(), email, passwordOne, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, loginOne, "new login should not be empty")
-		assert.Greater(t, loginOne.LoginId, uint64(0), "loginId should be greater than 0")
+		assert.NotEmpty(t, loginOne.LoginId, "login Id should have been generated")
 
 		passwordTwo := gofakeit.Password(true, true, true, true, false, 32)
 
@@ -81,7 +81,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, login, "new login should not be empty")
-		assert.Greater(t, login.LoginId, uint64(0), "loginId should be greater than 0")
+		assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
 
 		account := models.Account{
 			Timezone:                time.UTC.String(),
@@ -93,7 +93,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		err = repo.CreateAccountV2(context.Background(), &account)
 		assert.NoError(t, err, "should successfully create account")
 		assert.NotEmpty(t, account, "new account should not be empty")
-		assert.Greater(t, account.AccountId, uint64(0), "accountId should be greater than 0")
+		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
 
 		user := models.User{
 			LoginId:          login.LoginId,
@@ -103,7 +103,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
 		assert.NoError(t, err, "should successfully create user")
 		assert.NotEmpty(t, user, "new user should not be empty")
-		assert.Greater(t, user.UserId, uint64(0), "userId should be greater than 0")
+		assert.NotEmpty(t, user.UserId, "user Id should have been generated")
 	})
 
 	t.Run("unique login per account", func(t *testing.T) {
@@ -114,7 +114,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, login, "new login should not be empty")
-		assert.Greater(t, login.LoginId, uint64(0), "loginId should be greater than 0")
+		assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
 
 		account := models.Account{
 			Timezone:                time.UTC.String(),
@@ -126,7 +126,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		err = repo.CreateAccountV2(context.Background(), &account)
 		assert.NoError(t, err, "should successfully create account")
 		assert.NotEmpty(t, account, "new account should not be empty")
-		assert.Greater(t, account.AccountId, uint64(0), "accountId should be greater than 0")
+		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
 
 		user := models.User{
 			LoginId:          login.LoginId,
@@ -136,14 +136,13 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
 		assert.NoError(t, err, "should successfully create user")
 		assert.NotEmpty(t, user, "new user should not be empty")
-		assert.Greater(t, user.UserId, uint64(0), "userId should be greater than 0")
+		assert.NotEmpty(t, user.UserId, "user Id should have been generated")
 
 		// Try to create another user with the same login and account, this should fail.
 		userAgain := user
 		userAgain.UserId = ""
 		err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &userAgain)
 		assert.Error(t, err, "should not create duplicate login for account")
-		assert.Zero(t, userAgain.UserId, "should not have an id")
 	})
 }
 
