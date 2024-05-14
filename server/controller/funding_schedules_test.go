@@ -395,7 +395,7 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		}
 	})
 
-	t.Run("funding schedule does not exist", func(t *testing.T) {
+	t.Run("invalid funding schedule Id", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
@@ -405,6 +405,23 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
 			WithPath("bankAccountId", bank.BankAccountId).
 			WithPath("fundingScheduleId", math.MaxInt64).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid funding schedule Id")
+	})
+
+	t.Run("funding schedule does not exist", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("fundingScheduleId", "fund_bogus").
 			WithCookie(TestCookieName, token).
 			Expect()
 
