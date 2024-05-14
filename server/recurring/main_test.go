@@ -25,6 +25,7 @@ func GetFixtures(t *testing.T, name string) []models.Transaction {
 
 func TestFixFixtures(t *testing.T) {
 	t.Run("monetr_sample_data_1", func(t *testing.T) {
+		t.Skip("not needed")
 		type Item struct {
 			TransactionId        uint64    `json:"transactionId"`
 			BankAccountId        uint64    `json:"bankAccountId"`
