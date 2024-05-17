@@ -293,6 +293,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		assert.NoError(t, err, "must be able to convert the forecast into a pretty json")
 		resultingJson := strings.TrimSpace(string(pretty))
 		expectedJson := strings.TrimSpace(string(testutils.Must(t, forecastingFixtureData.ReadFile, "fixtures/elliots-result-20230705.json")))
+		// fmt.Println(string(resultingJson))
 		assert.Equal(t, expectedJson, resultingJson, "the result should match the saved fixture")
 	})
 
