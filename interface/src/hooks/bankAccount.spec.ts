@@ -8,10 +8,10 @@ describe('bank account hooks', () => {
   describe('useSelectedBankAccount', () => {
     it('valid URL', async () => {
       server.use(
-        rest.get('/api/bank_accounts/12', (_req, res, ctx) => {
+        rest.get('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx', (_req, res, ctx) => {
           return res(ctx.json({
-            'bankAccountId': 12,
-            'linkId': 4,
+            'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+            'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
             'availableBalance': 48635,
             'currentBalance': 48635,
             'mask': '2982',
@@ -27,7 +27,9 @@ describe('bank account hooks', () => {
       );
 
       { // Make sure use selected bank account works.
-        const world = testRenderHook(useSelectedBankAccount, { initialRoute: '/bank/12/expenses' });
+        const world = testRenderHook(useSelectedBankAccount, { 
+          initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/expenses',
+        });
         expect(world.result.current.data).not.toBeDefined();
         expect(world.result.current.isLoading).toBeTruthy();
         await world.waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
@@ -35,7 +37,9 @@ describe('bank account hooks', () => {
       }
 
       { // Then make sure that useSelectedBankAccountId works
-        const world = testRenderHook(useSelectedBankAccountId, { initialRoute: '/bank/12/expenses' });
+        const world = testRenderHook(useSelectedBankAccountId, { initialRoute:
+          '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/expenses',
+        });
         expect(world.result.current).toBeUndefined();
         await world.waitFor(() => expect(world.result.current).toBeDefined());
         expect(world.result.current).toBe(12);

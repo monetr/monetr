@@ -33,10 +33,10 @@ describe('funding schedule details view', () => {
           'estimatedDeposit': null,
           'excludeWeekends': true,
           'fundingScheduleId': 1,
-          'lastOccurrence': '2023-09-29T05:00:00Z',
+          'lastRecurrence': '2023-09-29T05:00:00Z',
           'name': 'Elliot\'s Contribution',
-          'nextOccurrence': '2023-10-13T05:00:00Z',
-          'nextOccurrenceOriginal': '2023-10-15T05:00:00Z',
+          'nextRecurrence': '2023-10-13T05:00:00Z',
+          'nextRecurrenceOriginal': '2023-10-15T05:00:00Z',
           'ruleset': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           'waitForDeposit': false,
         }));
