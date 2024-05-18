@@ -17,12 +17,12 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         'isSetup': true,
         'user': {
           'account': {
-            'accountId': 1,
+            'accountId': 'acct_01hy4r958ens9mp19n4vctcfxt',
             'subscriptionActiveUntil': '2023-07-26T00:31:38Z',
             'subscriptionStatus': 'active',
             'timezone': 'America/Chicago',
           },
-          'accountId': 1,
+          'accountId': 'acct_01hy4r958ens9mp19n4vctcfxt',
           'firstName': 'Elliot',
           'lastName': 'Courant',
           'login': {
@@ -32,12 +32,12 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
             'isEmailVerified': true,
             'isPhoneVerified': false,
             'lastName': 'Courant',
-            'loginId': 1,
+            'loginId': 'lgn_01hy4r9qr40w5kxnkp13cbb4a2',
             'passwordResetAt': null,
             'totpEnabledAt': null,
           },
-          'loginId': 1,
-          'userId': 1,
+          'loginId': 'lgn_01hy4r9qr40w5kxnkp13cbb4a2',
+          'userId': 'user_01hy4ra5bbrz2vpp8cb21yz9aw',
         },
       }));
     }),
@@ -419,7 +419,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
     rest.get('/api/links', (_req, res, ctx) => {
       return res(ctx.json([
         {
-          'linkId': 4,
+          'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
           'linkType': 1,
           'plaidInstitutionId': 'ins_116794',
           'plaidNewAccountsAvailable': false,
@@ -428,7 +428,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'institutionName': 'Mercury',
           'description': null,
           'createdAt': '2022-09-25T02:08:40.758642Z',
-          'createdByUserId': 1,
+          'createdBy': 'user_01hy4ra5bbrz2vpp8cb21yz9aw', // 1,
           'updatedAt': '2023-07-02T04:22:52.969206Z',
           'lastManualSync': '2023-05-02T19:56:34.953077Z',
           'lastSuccessfulUpdate': '2023-07-02T04:22:52.96916Z',
@@ -438,8 +438,8 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
     rest.get('/api/bank_accounts', (_req, res, ctx) => {
       return res(ctx.json([
         {
-          'bankAccountId': 12,
-          'linkId': 4,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+          'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
           'availableBalance': 48635,
           'currentBalance': 48635,
           'mask': '2982',
@@ -453,10 +453,10 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         },
       ]));
     }),
-    rest.get('/api/bank_accounts/12', (_req, res, ctx) => {
+    rest.get('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx', (_req, res, ctx) => {
       return res(ctx.json({
-        'bankAccountId': 12,
-        'linkId': 4,
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+        'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
         'availableBalance': 48635,
         'currentBalance': 48635,
         'mask': '2982',
@@ -469,25 +469,25 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         'lastUpdated': '2023-07-02T04:22:52.48118Z',
       }));
     }),
-    rest.get('/api/bank_accounts/12/balances', (_req, res, ctx) => {
+    rest.get('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/balances', (_req, res, ctx) => {
       return res(ctx.json({
         'available': 39347,
-        'bankAccountId': 12,
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
         'current': 39347,
         'expenses': 36509,
         'free': 2169,
         'goals': 669,
       }));
     }),
-    rest.get('/api/bank_accounts/12/spending', (_req, res, ctx) => {
+    rest.get('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/spending', (_req, res, ctx) => {
       return res(ctx.json([
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 380,
           'dateCreated': '2023-05-14T20:01:47.09268Z',
           'dateStarted': '2023-06-10T05:00:00Z',
           'description': 'Every month on the 10th',
-          'fundingScheduleId': 3,
+          'fundingScheduleId': 'fund_01hy4re7c1xc2v44cf6kx302jx', // 3,
           'isBehind': false,
           'isPaused': false,
           'lastRecurrence': '2023-07-10T05:00:00Z',
@@ -495,13 +495,13 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'nextContributionAmount': 120,
           'nextRecurrence': '2023-08-10T05:00:00Z',
           'ruleset': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=10',
-          'spendingId': 58,
+          'spendingId': 'spnd_01hy4rer4c9nb7bscx26w1xgyc', // 58,
           'spendingType': 0,
           'targetAmount': 500,
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 2664,
           'dateCreated': '2023-05-16T14:47:58.09301Z',
           'dateStarted': '2024-04-01T05:00:00Z',
@@ -520,7 +520,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 2900,
           'dateCreated': '2023-06-05T16:07:02.780623Z',
           'dateStarted': '2023-06-06T05:00:00Z',
@@ -539,7 +539,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 693,
           'dateCreated': '2022-11-02T14:11:24Z',
           'dateStarted': '2023-03-01T06:00:00Z',
@@ -558,7 +558,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 597,
           'dateCreated': '2023-01-30T22:16:20Z',
           'dateStarted': '2024-01-29T06:00:00Z',
@@ -577,7 +577,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 5920,
           'dateCreated': '2022-11-07T15:09:32Z',
           'dateStarted': '2023-03-01T06:00:00Z',
@@ -596,7 +596,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 669,
           'dateCreated': '2022-11-29T16:32:58Z',
           'dateStarted': '2022-12-31T06:00:00Z',
@@ -614,7 +614,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 850,
           'dateCreated': '2021-12-14T16:40:46Z',
           'dateStarted': '2023-03-10T06:00:00Z',
@@ -633,7 +633,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 2600,
           'dateCreated': '2021-12-14T16:43:04Z',
           'dateStarted': '2023-03-19T05:00:00Z',
@@ -652,7 +652,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 2900,
           'dateCreated': '2021-12-14T16:42:41Z',
           'dateStarted': '2023-03-25T05:00:00Z',
@@ -671,7 +671,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 500,
           'dateCreated': '2022-06-28T15:59:10Z',
           'dateStarted': '2023-06-25T05:00:00Z',
@@ -690,7 +690,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 600,
           'dateCreated': '2021-12-14T16:41:18Z',
           'dateStarted': '2023-03-01T06:00:00Z',
@@ -709,7 +709,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
           'usedAmount': 0,
         },
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'currentAmount': 15905,
           'dateCreated': '2022-11-07T15:09:16Z',
           'dateStarted': '2023-03-01T06:00:00Z',
@@ -729,9 +729,9 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         },
       ]));
     }),
-    rest.get('/api/bank_accounts/12/spending/191', (_req, res, ctx) => {
+    rest.get('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/spending/191', (_req, res, ctx) => {
       return res(ctx.json({
-        'bankAccountId': 12,
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
         'currentAmount': 15905,
         'dateCreated': '2022-11-07T15:09:16Z',
         'dateStarted': '2023-03-01T06:00:00Z',
@@ -752,7 +752,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
     }),
     rest.get('/api/bank_accounts/12/spending/63', (_req, res, ctx) => {
       return res(ctx.json({
-        'bankAccountId': 12,
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
         'currentAmount': 2900,
         'dateCreated': '2023-06-05T16:07:02.780623Z',
         'dateStarted': '2023-06-06T05:00:00Z',
@@ -774,7 +774,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
     rest.get('/api/bank_accounts/12/funding_schedules', (_req, res, ctx) => {
       return res(ctx.json([
         {
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'dateStarted': '2023-02-28T06:00:00Z',
           'description': '15th and last day of every month',
           'estimatedDeposit': null,
@@ -791,7 +791,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
     }),
     rest.get('/api/bank_accounts/12/funding_schedules/3', (_req, res, ctx) => {
       return res(ctx.json({
-        'bankAccountId': 12,
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
         'dateStarted': '2023-02-28T06:00:00Z',
         'description': '15th and last day of every month',
         'estimatedDeposit': null,
@@ -821,7 +821,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': -25000,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Transfer',
             'Payroll',
@@ -844,7 +844,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 240,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Service',
             'Business Services',
@@ -869,7 +869,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 1700,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Service',
             'Financial',
@@ -896,7 +896,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 24189,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Shops',
             'Digital Purchase',
@@ -921,7 +921,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 8159,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Shops',
             'Digital Purchase',
@@ -946,7 +946,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 1345,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Shops',
             'Digital Purchase',
@@ -971,7 +971,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 1200,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Shops',
             'Digital Purchase',
@@ -996,7 +996,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': -25000,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Transfer',
             'Payroll',
@@ -1019,7 +1019,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 34800,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Service',
           ],
@@ -1042,7 +1042,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 1500,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Transfer',
             'Debit',
@@ -1066,7 +1066,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 4583,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Shops',
             'Digital Purchase',
@@ -1091,7 +1091,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 6000,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Transfer',
             'Debit',
@@ -1116,7 +1116,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 1000,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Service',
             'Computers',
@@ -1143,7 +1143,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 1673,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Service',
             'Computers',
@@ -1170,7 +1170,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 240,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Service',
             'Business Services',
@@ -1195,7 +1195,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': -25000,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Transfer',
             'Payroll',
@@ -1218,7 +1218,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 1700,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Service',
             'Financial',
@@ -1245,7 +1245,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 154,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Service',
             'Computers',
@@ -1272,7 +1272,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 24819,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Shops',
             'Digital Purchase',
@@ -1297,7 +1297,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 8402,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Shops',
             'Digital Purchase',
@@ -1322,7 +1322,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 1345,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Shops',
             'Digital Purchase',
@@ -1347,7 +1347,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 1200,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Shops',
             'Digital Purchase',
@@ -1372,7 +1372,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': -25000,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Transfer',
             'Payroll',
@@ -1395,7 +1395,7 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         {
           'amount': 1500,
           'authorizedDate': null,
-          'bankAccountId': 12,
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'categories': [
             'Transfer',
             'Debit',
