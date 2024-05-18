@@ -33,7 +33,7 @@ describe('bank account hooks', () => {
         expect(world.result.current.data).not.toBeDefined();
         expect(world.result.current.isLoading).toBeTruthy();
         await world.waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
-        expect(world.result.current.data.bankAccountId).toBe(12);
+        expect(world.result.current.data.bankAccountId).toBe('bac_01hy4rcmadc01d2kzv7vynbxxx');
       }
 
       { // Then make sure that useSelectedBankAccountId works
@@ -42,7 +42,7 @@ describe('bank account hooks', () => {
         });
         expect(world.result.current).toBeUndefined();
         await world.waitFor(() => expect(world.result.current).toBeDefined());
-        expect(world.result.current).toBe(12);
+        expect(world.result.current).toBe('bac_01hy4rcmadc01d2kzv7vynbxxx');
       }
     });
 
