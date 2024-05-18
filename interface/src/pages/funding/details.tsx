@@ -72,7 +72,7 @@ export default function FundingDetails(): JSX.Element {
     const updatedFunding = new FundingSchedule({
       ...funding,
       name: values.name,
-      nextOccurrence: startOfDay(values.nextOccurrence),
+      nextRecurrence: startOfDay(values.nextOccurrence),
       ruleset: values.rule,
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: friendlyToAmount(values.estimatedDeposit),
@@ -112,7 +112,7 @@ export default function FundingDetails(): JSX.Element {
 
   const initialValues: FundingValues = {
     name: funding.name,
-    nextOccurrence: funding.nextOccurrenceOriginal,
+    nextOccurrence: funding.nextRecurrenceOriginal,
     rule: funding.ruleset,
     excludeWeekends: funding.excludeWeekends,
     // Because we store all amounts in cents, in order to use them in the UI we need to convert them back to dollars.
@@ -120,11 +120,11 @@ export default function FundingDetails(): JSX.Element {
   };
 
   const NextOccurrenceDecorator = () => {
-    if (isEqual(funding.nextOccurrence, funding.nextOccurrenceOriginal)) return null;
+    if (isEqual(funding.nextRecurrence, funding.nextRecurrenceOriginal)) return null;
 
     return (
       <MSpan data-testid='funding-schedule-weekend-notice' size='sm' weight='medium'>
-        Actual occurrence avoids weekend ({ format(funding.nextOccurrence, 'M/dd') })
+        Actual occurrence avoids weekend ({ format(funding.nextRecurrence, 'M/dd') })
       </MSpan>
     );
   };

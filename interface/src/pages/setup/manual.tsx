@@ -96,7 +96,7 @@ export default function SetupManual(props: SetupManualProps): JSX.Element {
       .then(bankAccount => createFundingSchedule(new FundingSchedule({
         bankAccountId: bankAccount.bankAccountId,
         name: 'Payday',
-        nextOccurrence: startOfDay(values.nextPayday),
+        nextRecurrence: startOfDay(values.nextPayday),
         ruleset: values.ruleset,
         estimatedDeposit: friendlyToAmount(values.paydayAmount),
         excludeWeekends: false,

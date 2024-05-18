@@ -1,8 +1,7 @@
 import { parseJSON } from 'date-fns';
 
 export default class File {
-  fileId: number;
-  bankAccountId: number;
+  fileId: string;
   name: string;
   contentType: string;
   size: number;

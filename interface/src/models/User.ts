@@ -1,11 +1,11 @@
 import Login from '@monetr/interface/models/Login';
 
 export default class User {
-  userId: number;
-  loginId: number;
-  accountId: number;
+  userId: string;
+  loginId: string;
+  accountId: string;
   account: {
-    accountId: number;
+    accountId: string;
     subscriptionActiveUntil: string;
     subscriptionStatus: string;
     timezone: string;

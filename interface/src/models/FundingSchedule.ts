@@ -2,14 +2,14 @@ import { parseJSON } from 'date-fns';
 
 
 export default class FundingSchedule {
-  fundingScheduleId: number;
-  bankAccountId: number;
+  fundingScheduleId: string;
+  bankAccountId: string;
   name: string;
   description?: string;
   ruleset: string;
-  lastOccurrence?: Date;
-  nextOccurrence: Date;
-  nextOccurrenceOriginal: Date;
+  lastRecurrence?: Date;
+  nextRecurrence: Date;
+  nextRecurrenceOriginal: Date;
   excludeWeekends: boolean;
   estimatedDeposit: number | null;
 
@@ -17,9 +17,9 @@ export default class FundingSchedule {
     if (data) {
       Object.assign(this, {
         ...data,
-        lastOccurrence: data.lastOccurrence && parseJSON(data.lastOccurrence),
-        nextOccurrence: parseJSON(data.nextOccurrence),
-        nextOccurrenceOriginal: parseJSON(data.nextOccurrenceOriginal),
+        lastOccurrence: data.lastRecurrence && parseJSON(data.lastRecurrence),
+        nextOccurrence: parseJSON(data.nextRecurrence),
+        nextOccurrenceOriginal: parseJSON(data.nextRecurrenceOriginal),
       });
     }
   }

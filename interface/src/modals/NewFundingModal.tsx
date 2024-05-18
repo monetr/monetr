@@ -45,7 +45,7 @@ function NewFundingModal(): JSX.Element {
     const newFundingSchedule = new FundingSchedule({
       bankAccountId: selectedBankAccountId,
       name: values.name,
-      nextOccurrence: startOfDay(new Date(values.nextOccurrence)),
+      nextRecurrence: startOfDay(new Date(values.nextOccurrence)),
       ruleset: values.ruleset,
       estimatedDeposit: null,
       excludeWeekends: false,

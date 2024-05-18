@@ -6,10 +6,10 @@ import { SpendingType } from '@monetr/interface/models/Spending';
 import request from '@monetr/interface/util/request';
 
 interface SpendingBareMinimum {
-  bankAccountId: number;
+  bankAccountId: string;
   nextRecurrence: Date;
   spendingType: SpendingType;
-  fundingScheduleId: number;
+  fundingScheduleId: string;
   targetAmount: number;
   recurrenceRule: string | null,
 }
@@ -27,7 +27,7 @@ export function useSpendingForecast(): (spending: SpendingBareMinimum) => Promis
   };
 }
 
-export function useNextFundingForecast(fundingScheduleId: number): UseQueryResult<number> {
+export function useNextFundingForecast(fundingScheduleId: string): UseQueryResult<number> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<Partial<{ nextContribution: number }>, unknown, number>(
     [
@@ -84,7 +84,7 @@ export class SpendingEvent {
   date: Date;
   funding: Array<FundingEvent>;
   rollingAllocation: number;
-  spendingId: number;
+  spendingId: string;
   transactionAmount: number;
 
   constructor(data?: Partial<SpendingEvent>) {
@@ -98,7 +98,7 @@ export class SpendingEvent {
 
 export class FundingEvent {
   date: Date;
-  fundingScheduleId: number;
+  fundingScheduleId: string;
   originalDate: Date;
   weekendAvoided: boolean;
 

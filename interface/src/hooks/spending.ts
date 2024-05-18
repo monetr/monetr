@@ -23,7 +23,7 @@ export function useSpendingSink(): SpendingResult {
   };
 }
 
-export function useSpending(spendingId: number | null): UseQueryResult<Spending> {
+export function useSpending(spendingId: string | null): UseQueryResult<Spending> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<Partial<Spending>, unknown, Spending>(
     [`/bank_accounts/${ selectedBankAccountId }/spending/${spendingId}`],
@@ -38,7 +38,7 @@ export function useSpending(spendingId: number | null): UseQueryResult<Spending>
  * useSpending retrieves a single spending item that would have been returned from the index endpoint for the currently
  * selected bank account.
  */
-export function useSpendingOld(spendingId?: number): Spending | null {
+export function useSpendingOld(spendingId?: string): Spending | null {
   const { result } = useSpendingSink();
   if (!spendingId) {
     return null;
@@ -55,11 +55,11 @@ export function useSpendingFiltered(kind: SpendingType): SpendingResult {
   };
 }
 
-export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
+export function useRemoveSpending(): (_spendingId: string) => Promise<void> {
   const queryClient = useQueryClient();
   const selectedBankAccountId = useSelectedBankAccountId();
 
-  async function removeSpending(spendingId: number): Promise<number> {
+  async function removeSpending(spendingId: string): Promise<string> {
     return request()
       .delete(`/bank_accounts/${ selectedBankAccountId }/spending/${ spendingId }`)
       .then(() => spendingId);
@@ -68,7 +68,7 @@ export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
   const { mutate } = useMutation(
     removeSpending,
     {
-      onSuccess: (removedSpendingId: number) => Promise.all([
+      onSuccess: (removedSpendingId: string) => Promise.all([
         queryClient.setQueriesData(
           [`/bank_accounts/${ selectedBankAccountId }/spending`],
           (previous: Array<Partial<Spending>>) => previous.filter(item => item.spendingId !== removedSpendingId),
@@ -81,7 +81,7 @@ export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
     },
   );
 
-  return async (spendingId: number): Promise<void> => {
+  return async (spendingId: string): Promise<void> => {
     return mutate(spendingId);
   };
 }
@@ -155,8 +155,8 @@ export function useCreateSpending(): (_spending: Spending) => Promise<Spending> 
 }
 
 export type TransferParameters = {
-  fromSpendingId: number | null,
-  toSpendingId: number | null,
+  fromSpendingId: string | null,
+  toSpendingId: string | null,
   amount: number,
 }
 
@@ -169,8 +169,8 @@ export function useTransfer(): (transferParameters: TransferParameters) => Promi
   }
 
   interface BalanceTransferRequest {
-    fromSpendingId: number | null;
-    toSpendingId: number | null;
+    fromSpendingId: string | null;
+    toSpendingId: string | null;
     amount: number;
   }
 

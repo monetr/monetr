@@ -37,7 +37,7 @@ export function useTransactions(): TransactionsResult {
   };
 }
 
-export function useTransaction(transactionId: number | null): UseQueryResult<Transaction> {
+export function useTransaction(transactionId: string | null): UseQueryResult<Transaction> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<Partial<Transaction>, unknown, Transaction>(
     [`/bank_accounts/${ selectedBankAccountId }/transactions/${ transactionId }`],

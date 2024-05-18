@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import Balance from '@monetr/interface/models/Balance';
 
-export function useBalance(bankAccountId: number): Balance | null {
+export function useBalance(bankAccountId: string): Balance | null {
   const result = useQuery<Partial<Balance>>([`/bank_accounts/${ bankAccountId }/balances`]);
   return result?.data && new Balance(result?.data);
 }
