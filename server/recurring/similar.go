@@ -105,12 +105,13 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []models.
 			highestId = ""
 			highestName = ""
 			// TODO What was I even doing here?
-			// for merchant, count := range merchants {
-			// 	if uint64(count) > highestId {
-			// 		highestName = merchant
-			// 		highestId = uint64(count)
-			// 	}
-			// }
+			highestCount := 0
+			for merchant, count := range merchants {
+				if count > highestCount {
+					highestName = merchant
+					highestCount = count
+				}
+			}
 
 			group.Name = highestName
 		}
