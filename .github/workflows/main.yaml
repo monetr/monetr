@@ -70,7 +70,7 @@ jobs:
       MONETR_PG_DATABASE: test-db
     services:
       postgres:
-        image: postgres:14
+        image: postgres:15
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_USER: api-testing
@@ -141,7 +141,6 @@ jobs:
   yaml:
     name: Kubernetes YAMLs
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/debian:12.1
     steps:
       - uses: actions/checkout@v4
       - name: Generate kubernetes yamls
