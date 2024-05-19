@@ -30,7 +30,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.7
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/mileusna/useragent v1.3.4
-	github.com/nyaruka/phonenumbers v1.3.4
+	github.com/nyaruka/phonenumbers v1.3.5
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v20 v20.1.0
