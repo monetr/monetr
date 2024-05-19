@@ -64,6 +64,3 @@ storage:
     region: us-east-1
     forcePathStyle: true
     useEnvCredentials: true # Use the AWS_ACCESS_KEY and AWS_SECRET_KEY env variables in development.
-teller:
-  enabled: true
-  # Application ID must be specified using MONETR_TELLER_APPLICATION_ID
