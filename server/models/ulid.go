@@ -1,8 +1,11 @@
 package models
 
 import (
+	"crypto/rand"
 	"fmt"
+	"io"
 	"strings"
+	"sync"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/pkg/errors"
@@ -55,8 +58,22 @@ func (i ID[T]) Kind() Kind {
 	return Kind(prefix)
 }
 
+var (
+	entropy     io.Reader
+	entropyOnce sync.Once
+)
+
+func cryptoEntropy() io.Reader {
+	entropyOnce.Do(func() {
+		entropy = &ulid.LockedMonotonicReader{
+			MonotonicReader: ulid.Monotonic(rand.Reader, 0),
+		}
+	})
+	return entropy
+}
+
 func NewID[T Identifiable](object *T) ID[T] {
-	id := ulid.Make()
+	id := ulid.MustNew(ulid.Now(), cryptoEntropy())
 	return ID[T](fmt.Sprintf(
 		"%s_%s",
 		(*object).IdentityPrefix(),
