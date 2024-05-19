@@ -100,53 +100,6 @@ a make target.
   a specific preset that they are expected to use.
 </Callout>
 
-### Teller
-
-If you are working with Teller.io locally then you may need to configure certificates if you are not using their sandbox
-environment for testing. Or you may wish to use certificates even for sandbox development. If you want to do this you
-will need to create a `CMakeUserPresets.json` file with a preset that has the following cache variables:
-
-- `TELLER_ENVIRONMENT`: One of Teller's supported environments, Sandbox is recommended.
-- `TELLER_CERTIFICATE`: A path to the `.pem` certificate file from teller.io on your computer.
-- `TELLER_PRIVATE_KEY`: A path to the `.pem` private key file from teller.io on your computer.
-
-For example:
-
-```json filename="CMakeUserPresets.json"
-{
-  "version": 5,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 23,
-    "patch": 0
-  },
-  "configurePresets": [
-    {
-      "name": "example",
-      "displayName": "Example monetr config",
-      "description": "Example monetr config for local development with Teller.io",
-      "generator": "Unix Makefiles",
-      "binaryDir": "${sourceDir}/build",
-      "inherits": "default",
-      "cacheVariables": {
-        "TELLER_ENVIRONMENT": "sandbox",
-        "TELLER_CERTIFICATE": "~/.monetr/teller/certificate.pem",
-        "TELLER_PRIVATE_KEY": "~/.monetr/teller/private_key.pem"
-      }
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "example",
-      "configurePreset": "example"
-    }
-  ]
-}
-```
-
-When running `make develop CMAKE_PROFILE=example` CMake will copy and expose those two files such that the monetr API
-can access them inside the container environment.
-
 ## Starting It Up
 
 With the above requirements installed. You should be able to spin up the local development environment that runs inside
