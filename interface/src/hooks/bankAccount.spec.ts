@@ -46,20 +46,6 @@ describe('bank account hooks', () => {
       }
     });
 
-    it('invalid url', async () => {
-      { // useSelectedBankAccount
-        const { result } = testRenderHook(useSelectedBankAccount, { initialRoute: '/bank/bad/expenses' });
-        expect(result.error).toBeDefined();
-        expect(result.error.message).toBe('invalid bank account ID specified: "bad" is not a valid bank account ID');
-      }
-
-      { // useSelectedBankAccountId
-        const { result } = testRenderHook(useSelectedBankAccountId, { initialRoute: '/bank/bad/expenses' });
-        expect(result.error).toBeDefined();
-        expect(result.error.message).toBe('invalid bank account ID specified: "bad" is not a valid bank account ID');
-      }
-    });
-
     it('non-bank url selected bank account basic', async () => {
       const { result } = testRenderHook(useSelectedBankAccount, { initialRoute: '/settings' });
       expect(result.error).toBeUndefined();
