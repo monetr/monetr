@@ -22,7 +22,7 @@ import { APIError } from '@monetr/interface/util/request';
 
 interface FundingValues {
   name: string;
-  nextOccurrence: Date;
+  nextRecurrence: Date;
   rule: string;
   excludeWeekends: boolean;
   estimatedDeposit: number | null;
@@ -32,8 +32,8 @@ export default function FundingDetails(): JSX.Element {
   // I don't want to do it this way, but it seems like it's the only way to do it for tests without having the entire
   // router also present in the test?
   const match = useMatch('/bank/:bankId/funding/:fundingId/details');
-  const fundingId = +match?.params?.fundingId || null;
-  const { data: funding } = useFundingSchedule(fundingId && +fundingId);
+  const fundingId = match?.params?.fundingId || null;
+  const { data: funding } = useFundingSchedule(fundingId);
   const navigate = useNavigate();
   const updateFundingSchedule = useUpdateFundingSchedule();
   const removeFundingSchedule = useRemoveFundingSchedule();
@@ -72,7 +72,7 @@ export default function FundingDetails(): JSX.Element {
     const updatedFunding = new FundingSchedule({
       ...funding,
       name: values.name,
-      nextRecurrence: startOfDay(values.nextOccurrence),
+      nextRecurrence: startOfDay(values.nextRecurrence),
       ruleset: values.rule,
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: friendlyToAmount(values.estimatedDeposit),
@@ -112,7 +112,7 @@ export default function FundingDetails(): JSX.Element {
 
   const initialValues: FundingValues = {
     name: funding.name,
-    nextOccurrence: funding.nextRecurrenceOriginal,
+    nextRecurrence: funding.nextRecurrenceOriginal,
     rule: funding.ruleset,
     excludeWeekends: funding.excludeWeekends,
     // Because we store all amounts in cents, in order to use them in the UI we need to convert them back to dollars.
