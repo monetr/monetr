@@ -157,15 +157,15 @@ export default function FundingDetails(): JSX.Element {
             <MTextField className='w-full' label='Name' name='name' id='funding-name-search' required />
             <MDatePicker
               className='w-full'
-              label='Next Occurrence'
-              name='nextOccurrence'
+              label='Next Recurrence'
+              name='nextRecurrence'
               labelDecorator={ NextOccurrenceDecorator }
               required
               data-testid='funding-details-date-picker'
             />
             <MSelectFrequency
               className='w-full'
-              dateFrom='nextOccurrence'
+              dateFrom='nextRecurrence'
               label='How often does this funding happen?'
               name='rule'
               placeholder='Select a funding frequency...'

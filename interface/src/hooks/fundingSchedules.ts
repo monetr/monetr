@@ -36,7 +36,7 @@ export function useNextFundingDate(): string | null {
   return null;
 }
 
-export function useFundingSchedule(fundingScheduleId: number | null): UseQueryResult<FundingSchedule | undefined, unknown> {
+export function useFundingSchedule(fundingScheduleId: string | null): UseQueryResult<FundingSchedule | undefined, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<Partial<FundingSchedule>, unknown, FundingSchedule | null>(
     [`/bank_accounts/${selectedBankAccountId}/funding_schedules/${fundingScheduleId}`],

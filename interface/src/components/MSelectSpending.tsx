@@ -55,9 +55,9 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
 
   const freeToUse: SpendingOption = {
     label: 'Free-To-Use',
-    value: -1,
+    value: '',
     spending: new Spending({
-      spendingId: -1,
+      spendingId: '',
       // It is possible for the "safe" balance to not be present when switching bank accounts. This is a pseudo race
       // condition. Instead we want to gracefully handle the value not being present initially, and print a nicer string
       // until the balance is loaded.
@@ -90,7 +90,7 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
       // some other select has already picked the safe to spend option. We need to omit that
       // from our result set.
       if (props.excludeFrom && !excludedFrom) {
-        return item.value !== -1;
+        return item.value !== '';
       }
 
       return true;
@@ -99,8 +99,8 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
   const value = formikContext.values[props.name];
   const current = options.find(item => item.value === (value ?? -1));
 
-  function onSelect(newValue: { label: string, value: number }) {
-    if (newValue.value === -1) {
+  function onSelect(newValue: { label: string, value: string }) {
+    if (newValue.value === '') {
       return formikContext.setFieldValue(props.name, null);
     }
 
@@ -123,7 +123,7 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
 
 interface SpendingOption {
   readonly label: string;
-  readonly value: number | null;
+  readonly value: string | null;
   readonly spending: Spending | null;
 }
 
