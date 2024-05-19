@@ -156,12 +156,6 @@ api:
     webhooksEnabled: false
     webhooksDomain: ""
     oauthDomain: ""
-  teller:
-    enabled: false
-    environment: sandbox
-    applicationId: ""
-    cerficiate: "" # Path to the certificate.pem file
-    privateKey: "" # Path to the private_key.pem file
   cors:
     allowedOrigins:
       - "*"
