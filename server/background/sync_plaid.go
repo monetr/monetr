@@ -11,7 +11,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
@@ -26,7 +26,7 @@ const (
 
 var (
 	_ ScheduledJobHandler = &SyncPlaidHandler{}
-	_ Job                 = &SyncPlaidJob{}
+	_ JobImplementation   = &SyncPlaidJob{}
 )
 
 type (
@@ -42,8 +42,8 @@ type (
 	}
 
 	SyncPlaidArguments struct {
-		AccountId uint64 `json:"accountId"`
-		LinkId    uint64 `json:"linkId"`
+		AccountId ID[Account] `json:"accountId"`
+		LinkId    ID[Link]    `json:"linkId"`
 		// Trigger will be "webhook" or "manual" or "command"
 		Trigger string `json:"trigger"`
 	}
@@ -59,10 +59,10 @@ type (
 		clock         clock.Clock
 
 		timezone     *time.Location
-		bankAccounts map[string]models.BankAccount
-		transactions map[string]models.Transaction
-		similarity   map[uint64]CalculateTransactionClustersArguments
-		actions      map[uint64]SyncAction
+		bankAccounts map[string]BankAccount
+		transactions map[string]Transaction
+		similarity   map[ID[BankAccount]]CalculateTransactionClustersArguments
+		actions      map[ID[Transaction]]SyncAction
 	}
 
 	SyncChange struct {
@@ -133,7 +133,7 @@ func (s *SyncPlaidHandler) HandleConsumeJob(ctx context.Context, data []byte) er
 
 		log := s.log.WithContext(span.Context())
 
-		repo := repository.NewRepositoryFromSession(s.clock, 0, args.AccountId, txn)
+		repo := repository.NewRepositoryFromSession(s.clock, "user_plaid", args.AccountId, txn)
 		secretsRepo := repository.NewSecretsRepository(
 			log,
 			s.clock,
@@ -169,14 +169,14 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 
 	log.Info("retrieving links to sync with Plaid")
 
-	links := make([]models.Link, 0)
+	links := make([]Link, 0)
 	cutoff := s.clock.Now().Add(-48 * time.Hour)
 	err := s.db.ModelContext(ctx, &links).
 		Join(`INNER JOIN "plaid_links" AS "plaid_link"`).
 		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
-		Where(`"plaid_link"."status" = ?`, models.PlaidLinkStatusSetup).
+		Where(`"plaid_link"."status" = ?`, PlaidLinkStatusSetup).
 		Where(`"plaid_link"."last_attempted_update" < ?`, cutoff).
-		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
+		Where(`"link"."link_type" = ?`, PlaidLinkType).
 		Where(`"link"."deleted_at" IS NULL`).
 		Select(&links)
 	if err != nil {
@@ -236,10 +236,10 @@ func NewSyncPlaidJob(
 		clock:         clock,
 
 		timezone:     nil, // Is set below
-		transactions: make(map[string]models.Transaction),
-		bankAccounts: make(map[string]models.BankAccount),
-		similarity:   make(map[uint64]CalculateTransactionClustersArguments),
-		actions:      make(map[uint64]SyncAction),
+		transactions: make(map[string]Transaction),
+		bankAccounts: make(map[string]BankAccount),
+		similarity:   make(map[ID[BankAccount]]CalculateTransactionClustersArguments),
+		actions:      make(map[ID[Transaction]]SyncAction),
 	}, nil
 }
 
@@ -309,7 +309,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	plaidClient, err := s.plaidPlatypus.NewClient(
 		span.Context(),
 		link,
-		secret.Secret,
+		secret.Value,
 		plaidLink.PlaidId,
 	)
 	if err != nil {
@@ -431,8 +431,8 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 		log.Debugf("found %d existing transactions", len(s.transactions))
 
-		transactionsToUpdate := make([]*models.Transaction, 0)
-		transactionsToInsert := make([]models.Transaction, 0)
+		transactionsToUpdate := make([]*Transaction, 0)
+		transactionsToInsert := make([]Transaction, 0)
 		for i := range plaidTransactions {
 			plaidTransaction := plaidTransactions[i]
 			bankAccount := s.bankAccounts[plaidTransaction.GetBankAccountId()]
@@ -545,24 +545,24 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	return s.maintainLinkStatus(ctx, plaidLink)
 }
 
-func (s *SyncPlaidJob) tagBankAccountForSimilarityRecalc(bankAccountId uint64) {
+func (s *SyncPlaidJob) tagBankAccountForSimilarityRecalc(bankAccountId ID[BankAccount]) {
 	s.similarity[bankAccountId] = CalculateTransactionClustersArguments{
 		AccountId:     s.args.AccountId,
 		BankAccountId: bankAccountId,
 	}
 }
 
-func (s *SyncPlaidJob) maintainLinkStatus(ctx context.Context, plaidLink *models.PlaidLink) error {
+func (s *SyncPlaidJob) maintainLinkStatus(ctx context.Context, plaidLink *PlaidLink) error {
 	linkWasSetup := false
 	// If the link status is not setup or pending expiration. Then change the status to setup
 	switch plaidLink.Status {
-	case models.PlaidLinkStatusSetup, models.PlaidLinkStatusPendingExpiration:
+	case PlaidLinkStatusSetup, PlaidLinkStatusPendingExpiration:
 	default:
 		crumbs.Debug(ctx, "Updating plaid link status.", map[string]interface{}{
 			"old": plaidLink.Status,
-			"new": models.PlaidLinkStatusSetup,
+			"new": PlaidLinkStatusSetup,
 		})
-		plaidLink.Status = models.PlaidLinkStatusSetup
+		plaidLink.Status = PlaidLinkStatusSetup
 		linkWasSetup = true
 	}
 	plaidLink.LastSuccessfulUpdate = myownsanity.TimeP(s.clock.Now().UTC())
@@ -573,7 +573,7 @@ func (s *SyncPlaidJob) maintainLinkStatus(ctx context.Context, plaidLink *models
 	}
 
 	if linkWasSetup { // Send the notification that the link has been set up.
-		channelName := fmt.Sprintf("initial:plaid:link:%d:%d", s.args.AccountId, s.args.LinkId)
+		channelName := fmt.Sprintf("initial:plaid:link:%s:%s", s.args.AccountId, s.args.LinkId)
 		if notifyErr := s.publisher.Notify(
 			ctx,
 			channelName,
@@ -592,7 +592,7 @@ func (s *SyncPlaidJob) maintainLinkStatus(ctx context.Context, plaidLink *models
 // differences between the transactions retrieved and the ones we have stored.
 func (s *SyncPlaidJob) hydrateTransactions(
 	ctx context.Context,
-	link *models.Link,
+	link *Link,
 	sync *platypus.SyncResult,
 ) error {
 	plaidTransactionIds := make([]string, 0, len(sync.Deleted)+len(sync.Updated)+len(sync.New))
@@ -628,7 +628,7 @@ func (s *SyncPlaidJob) hydrateTransactions(
 func (s *SyncPlaidJob) lookupTransaction(
 	plaidId string,
 	pendingPlaidId *string,
-) (models.Transaction, bool) {
+) (Transaction, bool) {
 	txn, ok := s.transactions[plaidId]
 	if ok {
 		return txn, ok
@@ -638,17 +638,17 @@ func (s *SyncPlaidJob) lookupTransaction(
 		return txn, ok
 	}
 
-	return models.Transaction{}, false
+	return Transaction{}, false
 }
 
 func (s *SyncPlaidJob) syncPlaidTransaction(
 	ctx context.Context,
-	link *models.Link,
-	bankAccount *models.BankAccount,
-	plaidLink *models.PlaidLink,
-	plaidBankAccount *models.PlaidBankAccount,
+	link *Link,
+	bankAccount *BankAccount,
+	plaidLink *PlaidLink,
+	plaidBankAccount *PlaidBankAccount,
 	input platypus.Transaction,
-) (created, updated *models.Transaction, err error) {
+) (created, updated *Transaction, err error) {
 	existingTransaction, exists := s.lookupTransaction(
 		input.GetTransactionId(),
 		input.GetPendingTransactionId(),
@@ -668,7 +668,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 	}
 
 	if !exists {
-		plaidTransaction := models.PlaidTransaction{
+		plaidTransaction := PlaidTransaction{
 			AccountId:          link.AccountId,
 			PlaidBankAccountId: plaidBankAccount.PlaidBankAccountId,
 			PlaidId:            input.GetTransactionId(),
@@ -685,7 +685,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			return nil, nil, errors.Wrap(err, "failed to store new plaid transaction")
 		}
 
-		existingTransaction = models.Transaction{
+		existingTransaction = Transaction{
 			AccountId:            link.AccountId,
 			BankAccountId:        bankAccount.BankAccountId,
 			Amount:               amount,
@@ -710,7 +710,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 		return &existingTransaction, nil, nil
 	}
 
-	var existingPlaidTransaction *models.PlaidTransaction
+	var existingPlaidTransaction *PlaidTransaction
 	if input.GetIsPending() {
 		existingPlaidTransaction = existingTransaction.PendingPlaidTransaction
 	} else {
@@ -736,7 +736,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 	// we have transitioned from a pending status to a cleared status for this
 	// transaction. We need to create the new plaid transaction for this input.
 	if existingPlaidTransaction == nil {
-		existingPlaidTransaction = &models.PlaidTransaction{
+		existingPlaidTransaction = &PlaidTransaction{
 			AccountId:          link.AccountId,
 			PlaidBankAccountId: plaidBankAccount.PlaidBankAccountId,
 			PlaidId:            input.GetTransactionId(),
@@ -837,8 +837,8 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 
 func (s *SyncPlaidJob) syncRemovedTransaction(
 	ctx context.Context,
-	link *models.Link,
-	plaidLink *models.PlaidLink,
+	link *Link,
+	plaidLink *PlaidLink,
 	id string,
 ) error {
 	log := s.log.WithFields(logrus.Fields{
@@ -906,17 +906,17 @@ func (s *SyncPlaidJob) syncRemovedTransaction(
 
 func (s *SyncPlaidJob) syncPlaidBankAccount(
 	ctx context.Context,
-	link *models.Link,
-	bankAccount *models.BankAccount,
-	plaidLink *models.PlaidLink,
-	plaidBankAccount *models.PlaidBankAccount,
+	link *Link,
+	bankAccount *BankAccount,
+	plaidLink *PlaidLink,
+	plaidBankAccount *PlaidBankAccount,
 	input platypus.BankAccount,
 ) error {
 	// If input is nil that means we are no longer seeing this specific account
 	// and we should mark it as inactive.
 	if input == nil {
 		// TODO, should we add a similar status to the plaid bank account?
-		bankAccount.Status = models.InactiveBankAccountStatus
+		bankAccount.Status = InactiveBankAccountStatus
 		bankAccount.LastUpdated = s.clock.Now().UTC()
 		return s.repo.UpdateBankAccounts(ctx, *bankAccount)
 	}

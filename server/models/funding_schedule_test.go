@@ -19,22 +19,22 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 		originalOccurrence := clock.Now().Add(-1 * time.Minute)
 
 		fundingSchedule := models.FundingSchedule{
-			AccountId:      1234,
-			BankAccountId:  1234,
+			AccountId:      "acct_1234",
+			BankAccountId:  "bac_1234",
 			Name:           "Testing #123",
 			Description:    t.Name(),
 			RuleSet:        rule,
-			LastOccurrence: nil,
-			NextOccurrence: originalOccurrence,
+			LastRecurrence: nil,
+			NextRecurrence: originalOccurrence,
 		}
 
-		assert.Nil(t, fundingSchedule.LastOccurrence, "last occurrence should still be nil")
+		assert.Nil(t, fundingSchedule.LastRecurrence, "last occurrence should still be nil")
 
 		ok := fundingSchedule.CalculateNextOccurrence(context.Background(), clock.Now(), time.Local)
 		assert.True(t, ok, "should calculate next occurrence")
-		assert.NotNil(t, fundingSchedule.LastOccurrence, "last occurrence should no longer be nil")
-		assert.Equal(t, originalOccurrence.Unix(), fundingSchedule.LastOccurrence.Unix(), "last occurrence should match original")
-		assert.Greater(t, fundingSchedule.NextOccurrence.Unix(), originalOccurrence.Unix(), "next occurrence should be in the future relative to the last occurrence")
+		assert.NotNil(t, fundingSchedule.LastRecurrence, "last occurrence should no longer be nil")
+		assert.Equal(t, originalOccurrence.Unix(), fundingSchedule.LastRecurrence.Unix(), "last occurrence should match original")
+		assert.Greater(t, fundingSchedule.NextRecurrence.Unix(), originalOccurrence.Unix(), "next occurrence should be in the future relative to the last occurrence")
 	})
 
 	t.Run("would skip", func(t *testing.T) {
@@ -44,20 +44,20 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 		originalOccurrence := clock.Now().Add(1 * time.Minute)
 
 		fundingSchedule := models.FundingSchedule{
-			AccountId:      1234,
-			BankAccountId:  1234,
+			AccountId:      "acct_1234",
+			BankAccountId:  "bac_1234",
 			Name:           "Testing #123",
 			Description:    t.Name(),
 			RuleSet:        rule,
-			LastOccurrence: nil,
-			NextOccurrence: originalOccurrence,
+			LastRecurrence: nil,
+			NextRecurrence: originalOccurrence,
 		}
 
-		assert.Nil(t, fundingSchedule.LastOccurrence, "last occurrence should still be nil")
+		assert.Nil(t, fundingSchedule.LastRecurrence, "last occurrence should still be nil")
 
 		ok := fundingSchedule.CalculateNextOccurrence(context.Background(), clock.Now(), time.Local)
 		assert.False(t, ok, "next occurrence should not be calculated")
-		assert.Equal(t, originalOccurrence.Unix(), fundingSchedule.NextOccurrence.Unix(), "next occurrence should not have changed")
+		assert.Equal(t, originalOccurrence.Unix(), fundingSchedule.NextRecurrence.Unix(), "next occurrence should not have changed")
 	})
 
 	t.Run("calculate on blank next", func(t *testing.T) {
@@ -69,11 +69,11 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 			Name:            "Bogus",
 			RuleSet:         rule,
 			ExcludeWeekends: false,
-			LastOccurrence:  nil,
-			NextOccurrence:  time.Time{},
+			LastRecurrence:  nil,
+			NextRecurrence:  time.Time{},
 		}
 		fundingSchedule.CalculateNextOccurrence(context.Background(), clock.Now(), time.UTC)
-		assert.Greater(t, fundingSchedule.NextOccurrence, clock.Now())
+		assert.Greater(t, fundingSchedule.NextRecurrence, clock.Now())
 	})
 }
 
@@ -86,8 +86,8 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 			Name:            "Bogus",
 			RuleSet:         rule,
 			ExcludeWeekends: false,
-			LastOccurrence:  nil,
-			NextOccurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, time.UTC),
+			LastRecurrence:  nil,
+			NextRecurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, time.UTC),
 		}
 
 		expected := time.Date(2022, 5, 15, 0, 0, 0, 0, time.UTC)
@@ -103,8 +103,8 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 			Name:            "Bogus",
 			RuleSet:         rule,
 			ExcludeWeekends: true,
-			LastOccurrence:  nil,
-			NextOccurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, time.UTC),
+			LastRecurrence:  nil,
+			NextRecurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, time.UTC),
 		}
 
 		expected := time.Date(2022, 5, 13, 0, 0, 0, 0, time.UTC)
@@ -122,8 +122,8 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 			Name:            "Bogus",
 			RuleSet:         rule,
 			ExcludeWeekends: true,
-			LastOccurrence:  nil,
-			NextOccurrence:  time.Date(2022, 9, 31, 0, 0, 0, 0, timezone),
+			LastRecurrence:  nil,
+			NextRecurrence:  time.Date(2022, 9, 31, 0, 0, 0, 0, timezone),
 		}
 
 		expected := time.Date(2022, 10, 14, 0, 0, 0, 0, timezone)
@@ -149,8 +149,8 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 			Name:            "Bogus",
 			RuleSet:         rule,
 			ExcludeWeekends: true,
-			LastOccurrence:  nil,
-			NextOccurrence:  time.Date(2022, 5, 13, 0, 0, 0, 0, time.UTC),
+			LastRecurrence:  nil,
+			NextRecurrence:  time.Date(2022, 5, 13, 0, 0, 0, 0, time.UTC),
 		}
 
 		expected := time.Date(2022, 5, 31, 0, 0, 0, 0, time.UTC)
@@ -169,8 +169,8 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 			Name:            "Payday",
 			RuleSet:         rule,
 			ExcludeWeekends: false,
-			LastOccurrence:  nil,
-			NextOccurrence:  next,
+			LastRecurrence:  nil,
+			NextRecurrence:  next,
 		}
 		nextFundingOccurrence, _ := fundingSchedule.GetNextContributionDateAfter(now, timezone)
 		assert.Equal(t, expected, nextFundingOccurrence, "should be on friday the 30th of september next")

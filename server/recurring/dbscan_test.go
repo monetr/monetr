@@ -69,9 +69,9 @@ func TestPreProcessor(t *testing.T) {
 	result := dbscan.Calculate()
 	assert.NotEmpty(t, result)
 	type Presentation struct {
-		ID        uint64 `json:"id"`
-		Sanitized string `json:"sanitized"`
-		Original  string `json:"original"`
+		ID        models.ID[models.Transaction] `json:"id"`
+		Sanitized string                        `json:"sanitized"`
+		Original  string                        `json:"original"`
 	}
 	output := make([][]Presentation, len(result))
 	for i, cluster := range result {

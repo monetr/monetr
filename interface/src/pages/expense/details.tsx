@@ -39,7 +39,7 @@ export default function ExpenseDetails(): JSX.Element {
   const { spendingId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
 
-  const { data: spending, isLoading, isError } = useSpending(spendingId && +spendingId);
+  const { data: spending, isLoading, isError } = useSpending(spendingId);
 
   if (!spendingId) {
     return (

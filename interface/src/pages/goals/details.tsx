@@ -34,7 +34,7 @@ interface GoalValues {
   name: string;
   amount: number;
   nextRecurrence: Date;
-  fundingScheduleId: number;
+  fundingScheduleId: string;
   isPaused: boolean;
 }
 
@@ -44,7 +44,7 @@ export default function GoalDetails(): JSX.Element {
   const navigate = useNavigate();
   const { spendingId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
-  const { data: spending, isLoading, isError } = useSpending(spendingId && +spendingId);
+  const { data: spending, isLoading, isError } = useSpending(spendingId);
 
   if (!spendingId) {
     return (

@@ -11,22 +11,22 @@ import (
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v72"
 )
 
-func buildAccountCacheKey(accountId uint64) string {
-	return fmt.Sprintf("accounts:%d", accountId)
+func buildAccountCacheKey(accountId ID[Account]) string {
+	return fmt.Sprintf("accounts:%s", accountId)
 }
 
 // AccountRepository is used by the pay wall and billing interfaces to retrieve data for an account.
 type AccountRepository interface {
-	GetAccount(ctx context.Context, accountId uint64) (*models.Account, error)
-	GetAccountByCustomerId(ctx context.Context, stripeCustomerId string) (*models.Account, error)
-	UpdateAccount(ctx context.Context, account *models.Account) error
+	GetAccount(ctx context.Context, accountId ID[Account]) (*Account, error)
+	GetAccountByCustomerId(ctx context.Context, stripeCustomerId string) (*Account, error)
+	UpdateAccount(ctx context.Context, account *Account) error
 }
 
 // BasicBilling is used by the Stripe webhooks to maintain a subscription's status within our application. As the status
@@ -53,7 +53,7 @@ type BasicBilling interface {
 	// ID and store it on the account with the new subscription data.
 	UpdateCustomerSubscription(
 		ctx context.Context,
-		account *models.Account,
+		account *Account,
 		customerId, subscriptionId string,
 		status stripe.SubscriptionStatus,
 		activeUntil *time.Time,
@@ -79,7 +79,7 @@ func NewAccountRepository(log *logrus.Entry, cacheClient cache.Cache, db pg.DBI)
 	}
 }
 
-func (p *postgresAccountRepository) GetAccount(ctx context.Context, accountId uint64) (*models.Account, error) {
+func (p *postgresAccountRepository) GetAccount(ctx context.Context, accountId ID[Account]) (*Account, error) {
 	span := sentry.StartSpan(ctx, "Billing - GetAccount")
 	defer span.Finish()
 
@@ -87,12 +87,12 @@ func (p *postgresAccountRepository) GetAccount(ctx context.Context, accountId ui
 
 	log := p.log.WithContext(span.Context()).WithField("accountId", accountId)
 
-	var account models.Account
+	var account Account
 	if err := p.cache.GetEz(span.Context(), buildAccountCacheKey(accountId), &account); err != nil {
 		log.WithError(err).Errorf("failed to retrieve account data from cache")
 	}
 
-	if account.AccountId > 0 {
+	if !account.AccountId.IsZero() {
 		log.Trace("returning account from cache")
 		return &account, nil
 	}
@@ -112,11 +112,11 @@ func (p *postgresAccountRepository) GetAccount(ctx context.Context, accountId ui
 	return &account, nil
 }
 
-func (p *postgresAccountRepository) GetAccountByCustomerId(ctx context.Context, stripeCustomerId string) (*models.Account, error) {
+func (p *postgresAccountRepository) GetAccountByCustomerId(ctx context.Context, stripeCustomerId string) (*Account, error) {
 	span := sentry.StartSpan(ctx, "Billing - GetAccountByCustomerId")
 	defer span.Finish()
 
-	var account models.Account
+	var account Account
 	if err := p.db.ModelContext(span.Context(), &account).
 		Where(`"account"."stripe_customer_id" = ?`, stripeCustomerId).
 		Limit(1).
@@ -135,7 +135,7 @@ func (p *postgresAccountRepository) GetAccountByCustomerId(ctx context.Context, 
 	return &account, nil
 }
 
-func (p *postgresAccountRepository) UpdateAccount(ctx context.Context, account *models.Account) error {
+func (p *postgresAccountRepository) UpdateAccount(ctx context.Context, account *Account) error {
 	span := sentry.StartSpan(ctx, "Billing - UpdateAccount")
 	defer span.Finish()
 
@@ -213,7 +213,7 @@ func (b *baseBasicBilling) UpdateSubscription(
 
 func (b *baseBasicBilling) UpdateCustomerSubscription(
 	ctx context.Context,
-	account *models.Account,
+	account *Account,
 	customerId, subscriptionId string,
 	status stripe.SubscriptionStatus,
 	activeUntil *time.Time,
@@ -293,9 +293,9 @@ func (b *baseBasicBilling) UpdateCustomerSubscription(
 	// Check to see if the subscription status of the account has changed with this update to be.
 	if account.IsSubscriptionActive(b.clock.Now()) != currentlyActive {
 		// If it has check to see if it was previously active.
-		updatedChannelName := fmt.Sprintf("account:%d:subscription:updated", account.AccountId)
-		activatedChannelName := fmt.Sprintf("account:%d:subscription:activated", account.AccountId)
-		canceledChannelName := fmt.Sprintf("account:%d:subscription:canceled", account.AccountId)
+		updatedChannelName := fmt.Sprintf("account:%s:subscription:updated", account.AccountId)
+		activatedChannelName := fmt.Sprintf("account:%s:subscription:activated", account.AccountId)
+		canceledChannelName := fmt.Sprintf("account:%s:subscription:canceled", account.AccountId)
 
 		if err := b.notify.Notify(span.Context(), updatedChannelName, "0"); err != nil {
 			log.WithError(err).WithField("channel", updatedChannelName).Warn("failed to send updated notification")

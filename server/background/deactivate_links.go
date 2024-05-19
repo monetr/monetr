@@ -8,6 +8,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
@@ -32,8 +33,8 @@ type (
 	}
 
 	DeactivateLinksArguments struct {
-		AccountId uint64 `json:"accountId"`
-		LinkId    uint64 `json:"linkId"`
+		AccountId ID[Account] `json:"accountId"`
+		LinkId    ID[Link]    `json:"linkId"`
 	}
 
 	DeactivateLinksJob struct {
@@ -86,7 +87,7 @@ func (d *DeactivateLinksHandler) HandleConsumeJob(ctx context.Context, data []by
 		defer span.Finish()
 
 		log := d.log.WithContext(span.Context())
-		repo := repository.NewRepositoryFromSession(d.clock, 0, args.AccountId, txn)
+		repo := repository.NewRepositoryFromSession(d.clock, "user_system", args.AccountId, txn)
 		secretsRepo := repository.NewSecretsRepository(
 			log,
 			d.clock,
@@ -211,7 +212,7 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	client, err := d.plaidPlatypus.NewClient(span.Context(), link, secret.Secret, link.PlaidLink.PlaidId)
+	client, err := d.plaidPlatypus.NewClient(span.Context(), link, secret.Value, link.PlaidLink.PlaidId)
 	if err != nil {
 		log.WithError(err).Error("failed to create client for link deactivation")
 		return err

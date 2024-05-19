@@ -27,7 +27,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			{
 				RuleSet:         fundingRule,
 				ExcludeWeekends: true,
-				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				NextRecurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 			},
 		}
 		spending := []models.Spending{
@@ -37,7 +37,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				CurrentAmount:  0,
 				NextRecurrence: time.Date(2022, 10, 8, 0, 0, 0, 0, timezone),
 				RuleSet:        spendingRuleOne,
-				SpendingId:     1,
+				SpendingId:     "spnd_1",
 			},
 			{
 				SpendingType:   models.SpendingTypeExpense,
@@ -45,7 +45,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				CurrentAmount:  6177,
 				NextRecurrence: time.Date(2022, 9, 26, 0, 0, 0, 0, timezone),
 				RuleSet:        spendingRuleTwo,
-				SpendingId:     2,
+				SpendingId:     "spnd_2",
 			},
 			{
 				SpendingType:   models.SpendingTypeExpense,
@@ -53,14 +53,14 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				CurrentAmount:  0,
 				NextRecurrence: time.Date(2022, 10, 1, 0, 0, 0, 0, timezone),
 				RuleSet:        spendingRuleThree,
-				SpendingId:     3,
+				SpendingId:     "spnd_3",
 			},
 			{
 				SpendingType:   models.SpendingTypeGoal,
 				TargetAmount:   1000000,
 				CurrentAmount:  0,
 				NextRecurrence: time.Date(2025, 10, 1, 0, 0, 0, 0, timezone),
-				SpendingId:     4,
+				SpendingId:     "spnd_4",
 			},
 		}
 
@@ -100,19 +100,19 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			{
 				RuleSet:           fundingRule,
 				ExcludeWeekends:   true,
-				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
-				FundingScheduleId: 1,
+				NextRecurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
+				FundingScheduleId: "fund_1",
 			},
 		}
 		spending := []models.Spending{
 			{
-				FundingScheduleId: 1,
+				FundingScheduleId: "fund_1",
 				SpendingType:      models.SpendingTypeGoal,
 				TargetAmount:      1000,
 				CurrentAmount:     0,
 				NextRecurrence:    time.Date(2022, 12, 1, 0, 0, 0, 0, timezone),
 				RuleSet:           nil,
-				SpendingId:        1,
+				SpendingId:        "spnd_1",
 			},
 		}
 
@@ -145,19 +145,19 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			{
 				RuleSet:           fundingRule,
 				ExcludeWeekends:   true,
-				NextOccurrence:    time.Date(2023, 8, 15, 0, 0, 0, 0, timezone),
-				FundingScheduleId: 1,
+				NextRecurrence:    time.Date(2023, 8, 15, 0, 0, 0, 0, timezone),
+				FundingScheduleId: "fund_1",
 			},
 		}
 		spending := []models.Spending{
 			{
-				FundingScheduleId: 1,
+				FundingScheduleId: "fund_1",
 				SpendingType:      models.SpendingTypeExpense,
 				TargetAmount:      2000,
 				CurrentAmount:     0,
 				NextRecurrence:    time.Date(2023, 9, 1, 0, 0, 0, 0, timezone),
 				RuleSet:           spendingRule,
-				SpendingId:        1,
+				SpendingId:        "spnd_1",
 			},
 		}
 
@@ -189,10 +189,10 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 									Date:              time.Date(2023, 8, 15, 5, 0, 0, 0, time.UTC),
 									OriginalDate:      time.Date(2023, 8, 15, 5, 0, 0, 0, time.UTC),
 									WeekendAvoided:    false,
-									FundingScheduleId: 1,
+									FundingScheduleId: "fund_1",
 								},
 							},
-							SpendingId: 1,
+							SpendingId: "spnd_1",
 						},
 					},
 					Funding: []FundingEvent{
@@ -200,7 +200,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 							Date:              time.Date(2023, 8, 15, 5, 0, 0, 0, time.UTC),
 							OriginalDate:      time.Date(2023, 8, 15, 5, 0, 0, 0, time.UTC),
 							WeekendAvoided:    false,
-							FundingScheduleId: 1,
+							FundingScheduleId: "fund_1",
 						},
 					},
 				},
@@ -221,10 +221,10 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 									Date:              time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
 									OriginalDate:      time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
 									WeekendAvoided:    false,
-									FundingScheduleId: 1,
+									FundingScheduleId: "fund_1",
 								},
 							},
-							SpendingId: 1,
+							SpendingId: "spnd_1",
 						},
 					},
 					Funding: []FundingEvent{
@@ -232,7 +232,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 							Date:              time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
 							OriginalDate:      time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
 							WeekendAvoided:    false,
-							FundingScheduleId: 1,
+							FundingScheduleId: "fund_1",
 						},
 					},
 				},
@@ -249,7 +249,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 							ContributionAmount: 0,
 							RollingAllocation:  0,
 							Funding:            []FundingEvent{},
-							SpendingId:         1,
+							SpendingId:         "spnd_1",
 						},
 					},
 					Funding: []FundingEvent{},
@@ -280,7 +280,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		now := time.Date(2023, 07, 05, 15, 9, 0, 0, timezone).UTC()
 		log := testutils.GetLog(t)
 
-		end := funding[0].NextOccurrence
+		end := funding[0].NextRecurrence
 		end = end.AddDate(0, 0, 20)
 		assert.Greater(t, end, now, "make sure that our end is actually in the future")
 
@@ -293,6 +293,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		assert.NoError(t, err, "must be able to convert the forecast into a pretty json")
 		resultingJson := strings.TrimSpace(string(pretty))
 		expectedJson := strings.TrimSpace(string(testutils.Must(t, forecastingFixtureData.ReadFile, "fixtures/elliots-result-20230705.json")))
+		// fmt.Println(string(resultingJson))
 		assert.Equal(t, expectedJson, resultingJson, "the result should match the saved fixture")
 	})
 
@@ -312,19 +313,19 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			{
 				RuleSet:           fundingRule,
 				ExcludeWeekends:   true,
-				NextOccurrence:    time.Date(2023, 10, 31, 0, 0, 0, 0, timezone),
-				FundingScheduleId: 1,
+				NextRecurrence:    time.Date(2023, 10, 31, 0, 0, 0, 0, timezone),
+				FundingScheduleId: "fund_1",
 			},
 		}
 		spending := []models.Spending{
 			{
-				FundingScheduleId: 1,
+				FundingScheduleId: "fund_1",
 				SpendingType:      models.SpendingTypeGoal,
 				TargetAmount:      2000,
 				UsedAmount:        2001,
 				CurrentAmount:     0,
 				NextRecurrence:    time.Date(2023, 11, 17, 0, 0, 0, 0, timezone),
-				SpendingId:        1,
+				SpendingId:        "spnd_1",
 			},
 		}
 
@@ -355,10 +356,10 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 									Date:              time.Date(2023, 10, 31, 0, 0, 0, 0, timezone).UTC(),
 									OriginalDate:      time.Date(2023, 10, 31, 0, 0, 0, 0, timezone).UTC(),
 									WeekendAvoided:    false,
-									FundingScheduleId: 1,
+									FundingScheduleId: "fund_1",
 								},
 							},
-							SpendingId: 1,
+							SpendingId: "spnd_1",
 						},
 					},
 					Funding: []FundingEvent{
@@ -366,7 +367,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 							Date:              time.Date(2023, 10, 31, 0, 0, 0, 0, timezone).UTC(),
 							OriginalDate:      time.Date(2023, 10, 31, 0, 0, 0, 0, timezone).UTC(),
 							WeekendAvoided:    false,
-							FundingScheduleId: 1,
+							FundingScheduleId: "fund_1",
 						},
 					},
 				},

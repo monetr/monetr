@@ -22,7 +22,7 @@ import { APIError } from '@monetr/interface/util/request';
 
 interface FundingValues {
   name: string;
-  nextOccurrence: Date;
+  nextRecurrence: Date;
   rule: string;
   excludeWeekends: boolean;
   estimatedDeposit: number | null;
@@ -32,8 +32,8 @@ export default function FundingDetails(): JSX.Element {
   // I don't want to do it this way, but it seems like it's the only way to do it for tests without having the entire
   // router also present in the test?
   const match = useMatch('/bank/:bankId/funding/:fundingId/details');
-  const fundingId = +match?.params?.fundingId || null;
-  const { data: funding } = useFundingSchedule(fundingId && +fundingId);
+  const fundingId = match?.params?.fundingId || null;
+  const { data: funding } = useFundingSchedule(fundingId);
   const navigate = useNavigate();
   const updateFundingSchedule = useUpdateFundingSchedule();
   const removeFundingSchedule = useRemoveFundingSchedule();
@@ -72,7 +72,7 @@ export default function FundingDetails(): JSX.Element {
     const updatedFunding = new FundingSchedule({
       ...funding,
       name: values.name,
-      nextOccurrence: startOfDay(values.nextOccurrence),
+      nextRecurrence: startOfDay(values.nextRecurrence),
       ruleset: values.rule,
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: friendlyToAmount(values.estimatedDeposit),
@@ -112,7 +112,7 @@ export default function FundingDetails(): JSX.Element {
 
   const initialValues: FundingValues = {
     name: funding.name,
-    nextOccurrence: funding.nextOccurrenceOriginal,
+    nextRecurrence: funding.nextRecurrenceOriginal,
     rule: funding.ruleset,
     excludeWeekends: funding.excludeWeekends,
     // Because we store all amounts in cents, in order to use them in the UI we need to convert them back to dollars.
@@ -120,11 +120,11 @@ export default function FundingDetails(): JSX.Element {
   };
 
   const NextOccurrenceDecorator = () => {
-    if (isEqual(funding.nextOccurrence, funding.nextOccurrenceOriginal)) return null;
+    if (isEqual(funding.nextRecurrence, funding.nextRecurrenceOriginal)) return null;
 
     return (
       <MSpan data-testid='funding-schedule-weekend-notice' size='sm' weight='medium'>
-        Actual occurrence avoids weekend ({ format(funding.nextOccurrence, 'M/dd') })
+        Actual occurrence avoids weekend ({ format(funding.nextRecurrence, 'M/dd') })
       </MSpan>
     );
   };
@@ -157,15 +157,15 @@ export default function FundingDetails(): JSX.Element {
             <MTextField className='w-full' label='Name' name='name' id='funding-name-search' required />
             <MDatePicker
               className='w-full'
-              label='Next Occurrence'
-              name='nextOccurrence'
+              label='Next Recurrence'
+              name='nextRecurrence'
               labelDecorator={ NextOccurrenceDecorator }
               required
               data-testid='funding-details-date-picker'
             />
             <MSelectFrequency
               className='w-full'
-              dateFrom='nextOccurrence'
+              dateFrom='nextRecurrence'
               label='How often does this funding happen?'
               name='rule'
               placeholder='Select a funding frequency...'

@@ -1,7 +1,7 @@
 import { formatAmount } from '@monetr/interface/util/amounts';
 
 export default class Balance {
-  bankAccountId: number;
+  bankAccountId: string;
   available: number;
   current: number;
   free: number;

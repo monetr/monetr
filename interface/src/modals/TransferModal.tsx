@@ -18,13 +18,13 @@ import { amountToFriendly, formatAmount, friendlyToAmount } from '@monetr/interf
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface TransferModalProps {
-  initialFromSpendingId?: number;
-  initialToSpendingId?: number;
+  initialFromSpendingId?: string;
+  initialToSpendingId?: string;
 }
 
 interface TransferValues {
-  fromSpendingId: number | null;
-  toSpendingId: number | null;
+  fromSpendingId: string | null;
+  toSpendingId: string | null;
   amount: number;
 }
 

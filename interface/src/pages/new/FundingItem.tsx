@@ -26,7 +26,7 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
 
   const ruleDescription = capitalize(rule.toText());
 
-  const next = funding.nextOccurrence;
+  const next = funding.nextRecurrence;
   const dateFormatString = isThisYear(next) ? 'EEEE LLLL do' : 'EEEE LLLL do, yyyy';
   // TODO look into format distance.
   const nextOccurrenceString = `${format(next, dateFormatString)}`;

@@ -7,7 +7,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -27,8 +27,8 @@ type (
 	}
 
 	ProcessSpendingArguments struct {
-		AccountId     uint64 `json:"accountId"`
-		BankAccountId uint64 `json:"bankAccountId"`
+		AccountId     ID[Account]     `json:"accountId"`
+		BankAccountId ID[BankAccount] `json:"bankAccountId"`
 	}
 
 	ProcessSpendingJob struct {
@@ -72,7 +72,7 @@ func (p *ProcessSpendingHandler) HandleConsumeJob(ctx context.Context, data []by
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		repo := repository.NewRepositoryFromSession(p.clock, 0, args.AccountId, txn)
+		repo := repository.NewRepositoryFromSession(p.clock, "user_system", args.AccountId, txn)
 		job, err := NewProcessSpendingJob(
 			p.log.WithContext(span.Context()),
 			repo,
@@ -171,9 +171,9 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	fundingSchedules := map[uint64]*models.FundingSchedule{}
+	fundingSchedules := map[ID[FundingSchedule]]*FundingSchedule{}
 
-	spendingToUpdate := make([]models.Spending, 0, len(allSpending))
+	spendingToUpdate := make([]Spending, 0, len(allSpending))
 	for i := range allSpending {
 		// Avoid funky pointer issues with arrays and for loops.
 		spending := allSpending[i]

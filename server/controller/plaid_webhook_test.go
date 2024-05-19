@@ -24,7 +24,7 @@ func TestPlaidWebhook(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusNotFound)
-		response.JSON().Path("$.error").String().Equal("plaid webhooks are not enabled")
+		response.JSON().Path("$.error").String().IsEqual("plaid webhooks are not enabled")
 	})
 
 	t.Run("not authorized", func(t *testing.T) {
@@ -42,7 +42,7 @@ func TestPlaidWebhook(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("unauthorized")
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
 	})
 
 	t.Run("bad authorization", func(t *testing.T) {
@@ -61,6 +61,6 @@ func TestPlaidWebhook(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("unauthorized")
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
 	})
 }

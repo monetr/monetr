@@ -61,12 +61,6 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 		policies["frame-src"]["https://*.plaid.com"] = noop
 	}
 
-	if c.configuration.Teller.GetEnabled() {
-		policies["default-src"]["https://cdn.teller.io"] = noop
-		policies["script-src-elem"]["https://*.teller.io"] = noop
-		policies["frame-src"]["https://teller.io"] = noop
-	}
-
 	// Only allow google to connect when ReCAPTCHA is enabled.
 	if c.configuration.ReCAPTCHA.Enabled {
 		policies["script-src-elem"]["https://www.gstatic.com"] = noop

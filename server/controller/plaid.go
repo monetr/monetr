@@ -14,7 +14,7 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
@@ -23,15 +23,15 @@ import (
 
 func (c *Controller) storeLinkTokenInCache(
 	ctx context.Context,
-	userId uint64,
-	linkId uint64,
+	userId ID[User],
+	linkId ID[Link],
 	linkToken string,
 	expiration time.Time,
 ) error {
 	span := sentry.StartSpan(ctx, "StoreLinkTokenInCache")
 	defer span.Finish()
 
-	key := fmt.Sprintf("plaid:in_progress:%d:%d", userId, linkId)
+	key := fmt.Sprintf("plaid:in_progress:%s:%s", userId, linkId)
 	return errors.Wrap(
 		// Cache TTL's should not use the internal clock. Because redis has it's own
 		// clock.
@@ -42,13 +42,13 @@ func (c *Controller) storeLinkTokenInCache(
 
 func (c *Controller) checkCacheForLinkToken(
 	ctx context.Context,
-	userId uint64,
-	linkId uint64,
+	userId ID[User],
+	linkId ID[Link],
 ) (string, error) {
 	span := sentry.StartSpan(ctx, "StoreLinkTokenInCache")
 	defer span.Finish()
 
-	key := fmt.Sprintf("plaid:in_progress:%d:%d", userId, linkId)
+	key := fmt.Sprintf("plaid:in_progress:%s:%s", userId, linkId)
 	var token string
 	if err := c.cache.GetEz(span.Context(), key, &token); err != nil {
 		return "", errors.Wrap(err, "failed to retrieve cached link token")
@@ -58,13 +58,13 @@ func (c *Controller) checkCacheForLinkToken(
 
 func (c *Controller) removeLinkTokenFromCache(
 	ctx context.Context,
-	userId uint64,
-	linkId uint64,
+	userId ID[User],
+	linkId ID[Link],
 ) error {
 	span := sentry.StartSpan(ctx, "RemoteLinkTokenFromCache")
 	defer span.Finish()
 
-	key := fmt.Sprintf("plaid:in_progress:%d:%d", userId, linkId)
+	key := fmt.Sprintf("plaid:in_progress:%s:%s", userId, linkId)
 	return errors.Wrap(
 		c.cache.Delete(span.Context(), key),
 		"failed to remove cached link token",
@@ -126,7 +126,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 		if linkToken, err := c.checkCacheForLinkToken(
 			c.getContext(ctx),
 			userId,
-			0,
+			"",
 		); err == nil && len(linkToken) > 0 {
 			log.Info("successfully found existing link token in cache")
 			return ctx.JSON(http.StatusOK, map[string]interface{}{
@@ -141,17 +141,10 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 		legalName = fmt.Sprintf("%s %s", me.Login.FirstName, me.Login.LastName)
 	}
 
-	var phoneNumber *string
-	if me.Login.PhoneNumber != nil {
-		phoneNumber = myownsanity.StringP(me.Login.PhoneNumber.E164())
-	}
-
 	log.Trace("creating Plaid link token")
 	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), platypus.LinkTokenOptions{
-		ClientUserID:             strconv.FormatUint(userId, 10),
+		ClientUserID:             userId.String(),
 		LegalName:                legalName,
-		PhoneNumber:              phoneNumber,
-		PhoneNumberVerifiedTime:  nil,
 		EmailAddress:             me.Login.Email,
 		EmailAddressVerifiedTime: me.Login.EmailVerifiedAt,
 	})
@@ -162,7 +155,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 	if err = c.storeLinkTokenInCache(
 		c.getContext(ctx),
 		me.UserId,
-		0, // Since no link exists this should be cached without a link Id.
+		"", // Since no link exists this should be cached without a link Id.
 		token.Token(),
 		token.Expiration(),
 	); err != nil {
@@ -179,9 +172,9 @@ func (c *Controller) putUpdatePlaidLink(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 
-	linkId, err := strconv.ParseUint(ctx.Param("linkId"), 10, 64)
-	if err != nil || linkId == 0 {
-		return c.badRequest(ctx, "must specify a link Id")
+	linkId, err := ParseID[Link](ctx.Param("linkId"))
+	if err != nil || linkId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid link Id")
 	}
 
 	updateAccountSelection := urlParamBoolDefault(ctx, "update_account_selection", false)
@@ -196,7 +189,7 @@ func (c *Controller) putUpdatePlaidLink(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve link")
 	}
 
-	if link.LinkType != models.PlaidLinkType {
+	if link.LinkType != PlaidLinkType {
 		return c.badRequest(ctx, "cannot update a non-Plaid link")
 	}
 
@@ -240,7 +233,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 	}
 
 	var callbackRequest struct {
-		LinkId      uint64   `json:"linkId"`
+		LinkId      ID[Link] `json:"linkId"`
 		PublicToken string   `json:"publicToken"`
 		AccountIds  []string `json:"accountIds"`
 	}
@@ -275,9 +268,9 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		log.WithError(err).Warn("failed to retrieve access token for existing plaid link")
 	}
 
-	if secret.Secret != result.AccessToken {
+	if secret.Value != result.AccessToken {
 		log.Info("access token for link has been updated")
-		secret.Secret = result.AccessToken
+		secret.Value = result.AccessToken
 		if err = secrets.Store(c.getContext(ctx), secret); err != nil {
 			log.WithError(err).Warn("failed to store updated access token")
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store updated access token")
@@ -286,7 +279,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		log.Info("access token for link has not changed")
 	}
 
-	link.PlaidLink.Status = models.PlaidLinkStatusSetup
+	link.PlaidLink.Status = PlaidLinkStatusSetup
 	link.PlaidLink.ErrorCode = nil
 	if err = repo.UpdatePlaidLink(c.getContext(ctx), link.PlaidLink); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update link status")
@@ -325,10 +318,10 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		}
 
 		now := time.Now()
-		accounts := make([]*models.BankAccount, len(plaidAccounts))
+		accounts := make([]*BankAccount, len(plaidAccounts))
 		for i := range plaidAccounts {
 			plaidAccount := plaidAccounts[i]
-			plaidBankAccount := models.PlaidBankAccount{
+			plaidBankAccount := PlaidBankAccount{
 				PlaidLinkId:      *link.PlaidLinkId,
 				PlaidId:          plaidAccount.GetAccountId(),
 				Name:             plaidAccount.GetName(),
@@ -341,7 +334,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 				return c.wrapPgError(ctx, err, "failed to create plaid bank account")
 			}
 
-			accounts[i] = &models.BankAccount{
+			accounts[i] = &BankAccount{
 				AccountId:          repo.AccountId(),
 				LinkId:             link.LinkId,
 				PlaidBankAccountId: &plaidBankAccount.PlaidBankAccountId,
@@ -350,8 +343,8 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 				CurrentBalance:     plaidAccount.GetBalances().GetCurrent(),
 				Name:               plaidAccount.GetName(),
 				Mask:               plaidAccount.GetMask(),
-				Type:               models.BankAccountType(plaidAccount.GetType()),
-				SubType:            models.BankAccountSubType(plaidAccount.GetSubType()),
+				Type:               BankAccountType(plaidAccount.GetType()),
+				SubType:            BankAccountSubType(plaidAccount.GetSubType()),
 				LastUpdated:        now,
 			}
 		}
@@ -391,7 +384,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	if err := c.removeLinkTokenFromCache(
 		c.getContext(ctx),
 		c.mustGetUserId(ctx),
-		0,
+		"",
 	); err != nil {
 		log.WithError(err).Warn("failed to remove link token from cache")
 	}
@@ -422,21 +415,21 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	}
 
 	secrets := c.mustGetSecretsRepository(ctx)
-	secret := repository.Secret{
-		Kind:   models.PlaidSecretKind,
-		Secret: result.AccessToken,
+	secret := repository.SecretData{
+		Kind:  PlaidSecretKind,
+		Value: result.AccessToken,
 	}
 	if err = secrets.Store(c.getContext(ctx), &secret); err != nil {
 		log.WithError(err).Errorf("failed to store access token")
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store access token")
 	}
 
-	plaidLink := models.PlaidLink{
+	plaidLink := PlaidLink{
 		PlaidId:         result.ItemId,
 		SecretId:        secret.SecretId,
 		Products:        consts.PlaidProductStrings(),
 		WebhookUrl:      webhook,
-		Status:          models.PlaidLinkStatusPending,
+		Status:          PlaidLinkStatusPending,
 		InstitutionId:   callbackRequest.InstitutionId,
 		InstitutionName: callbackRequest.InstitutionName,
 	}
@@ -444,11 +437,11 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid link")
 	}
 
-	link := models.Link{
+	link := Link{
 		AccountId:       repo.AccountId(),
 		PlaidLinkId:     &plaidLink.PlaidLinkId,
 		InstitutionName: callbackRequest.InstitutionName,
-		LinkType:        models.PlaidLinkType,
+		LinkType:        PlaidLinkType,
 	}
 	if err = repo.CreateLink(c.getContext(ctx), &link); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link")
@@ -471,10 +464,10 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	}
 
 	now := c.clock.Now().UTC()
-	accounts := make([]*models.BankAccount, len(plaidAccounts))
+	accounts := make([]*BankAccount, len(plaidAccounts))
 	for i := range plaidAccounts {
 		plaidAccount := plaidAccounts[i]
-		plaidBankAccount := models.PlaidBankAccount{
+		plaidBankAccount := PlaidBankAccount{
 			PlaidLinkId:      plaidLink.PlaidLinkId,
 			PlaidId:          plaidAccount.GetAccountId(),
 			Name:             plaidAccount.GetName(),
@@ -490,17 +483,17 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 			return c.wrapPgError(ctx, err, "failed to create plaid bank account")
 		}
 
-		accounts[i] = &models.BankAccount{
+		accounts[i] = &BankAccount{
 			LinkId:             link.LinkId,
 			PlaidBankAccountId: &plaidBankAccount.PlaidBankAccountId,
 			AvailableBalance:   plaidAccount.GetBalances().GetAvailable(),
 			CurrentBalance:     plaidAccount.GetBalances().GetCurrent(),
 			Name:               plaidAccount.GetName(),
 			Mask:               plaidAccount.GetMask(),
-			Type:               models.BankAccountType(plaidAccount.GetType()),
-			SubType:            models.BankAccountSubType(plaidAccount.GetSubType()),
+			Type:               BankAccountType(plaidAccount.GetType()),
+			SubType:            BankAccountSubType(plaidAccount.GetSubType()),
 			LastUpdated:        now,
-			Status:             models.ActiveBankAccountStatus,
+			Status:             ActiveBankAccountStatus,
 		}
 
 	}
@@ -528,9 +521,9 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
-	linkId, err := strconv.ParseUint(ctx.Param("linkId"), 10, 64)
-	if linkId == 0 {
-		return c.badRequest(ctx, "must specify a job Id")
+	linkId, err := ParseID[Link](ctx.Param("linkId"))
+	if err != nil || linkId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid link Id")
 	}
 
 	log := c.log.WithFields(logrus.Fields{
@@ -544,17 +537,17 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve link")
 	}
 
-	if link.LinkType != models.PlaidLinkType {
+	if link.LinkType != PlaidLinkType {
 		return c.badRequest(ctx, "Link is not a Plaid link")
 	}
 
 	// If the link is done just return.
-	if link.PlaidLink.Status == models.PlaidLinkStatusSetup {
+	if link.PlaidLink.Status == PlaidLinkStatusSetup {
 		crumbs.Debug(c.getContext(ctx), "Link is setup, no need to poll.", nil)
 		return ctx.NoContent(http.StatusOK)
 	}
 
-	channelName := fmt.Sprintf("initial:plaid:link:%d:%d", link.AccountId, link.LinkId)
+	channelName := fmt.Sprintf("initial:plaid:link:%s:%s", link.AccountId, link.LinkId)
 
 	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
 	if err != nil {
@@ -598,7 +591,7 @@ func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
 	}
 
 	var request struct {
-		LinkId uint64 `json:"linkId"`
+		LinkId ID[Link] `json:"linkId"`
 	}
 	if err := ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
@@ -614,12 +607,12 @@ func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve link")
 	}
 
-	if link.LinkType != models.PlaidLinkType {
+	if link.LinkType != PlaidLinkType {
 		return c.badRequest(ctx, "cannot manually sync a non-Plaid link")
 	}
 
 	switch link.PlaidLink.Status {
-	case models.PlaidLinkStatusSetup, models.PlaidLinkStatusError:
+	case PlaidLinkStatusSetup, PlaidLinkStatusError:
 		log.Debug("link is not revoked, triggering manual sync")
 	default:
 		log.WithField("status", link.PlaidLink.Status).Warn("link is not in a valid status, it cannot be manually synced")

@@ -23,7 +23,7 @@ export function useLinks(): UseQueryResult<Array<Link>> {
     });
 }
 
-export function useLink(linkId: number | null): UseQueryResult<Link> {
+export function useLink(linkId: string | null): UseQueryResult<Link> {
   const queryClient = useQueryClient();
   return useQuery<Partial<Link>, unknown, Link>(
     [`/links/${linkId}`],
@@ -78,9 +78,9 @@ export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {
   return mutate.mutateAsync;
 }
 
-export function useRemoveLink(): (_linkId: number) => Promise<void> {
+export function useRemoveLink(): (_linkId: string) => Promise<void> {
   const queryClient = useQueryClient();
-  return async function (linkId: number): Promise<void> {
+  return async function (linkId: string): Promise<void> {
     return request()
       .delete(`/links/${linkId}`)
       .then(() => void Promise.all([

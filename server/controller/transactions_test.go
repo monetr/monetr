@@ -94,7 +94,7 @@ func TestPostTransactions(t *testing.T) {
 		response := e.POST("/api/bank_accounts/1234/transactions").
 			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
-				BankAccountId: 1234,
+				BankAccountId: "bac_bogus",
 				SpendingId:    nil,
 				Categories: []string{
 					"Things",
@@ -106,7 +106,7 @@ func TestPostTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("cannot create transactions for non-manual links")
+		response.JSON().Path("$.error").IsEqual("must specify a valid bank account Id")
 	})
 }
 
@@ -138,7 +138,7 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.transaction.transactionId").Number().IsEqual(transaction.TransactionId)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(transaction.TransactionId)
 		response.JSON().Path("$.transaction.name").String().IsEqual(transaction.Name)
 		response.JSON().Path("$.transaction.name").String().NotEqual(originalTransaction.Name)
 		response.JSON().Path("$.transaction.originalName").String().IsEqual(originalTransaction.Name)
@@ -150,8 +150,8 @@ func TestPutTransactions(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
-			WithPath("bankAccountId", 1234).
-			WithPath("transactionId", 1234).
+			WithPath("bankAccountId", "bac_bogus").
+			WithPath("transactionId", "txn_bogus").
 			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
@@ -167,7 +167,7 @@ func TestPutTransactions(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.PUT(`/api/bank_accounts/00000/transactions/1234`).
+		response := e.PUT(`/api/bank_accounts/1234/transactions/txn_bogus`).
 			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
@@ -179,27 +179,11 @@ func TestPutTransactions(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("must specify a valid bank account Id")
 	})
 
-	t.Run("invalid transaction Id numeric", func(t *testing.T) {
-		_, e := NewTestApplication(t)
-		token := GivenIHaveToken(t, e)
-
-		response := e.PUT(`/api/bank_accounts/1234/transactions/0000`).
-			WithCookie(TestCookieName, token).
-			WithJSON(models.Transaction{
-				Name:   "PayPal",
-				Amount: 1243,
-			}).
-			Expect()
-
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("must specify a valid transaction Id")
-	})
-
 	t.Run("invalid transaction Id word", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.PUT(`/api/bank_accounts/1234/transactions/foo`).
+		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
 			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
@@ -207,15 +191,15 @@ func TestPutTransactions(t *testing.T) {
 			}).
 			Expect()
 
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("must specify a valid transaction Id")
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("failed to retrieve existing transaction for update: record does not exist")
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
+		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
 			WithCookie(TestCookieName, token).
 			WithBytes([]byte("I am not really json")).
 			Expect()
@@ -227,7 +211,7 @@ func TestPutTransactions(t *testing.T) {
 	t.Run("no authentication token", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 
-		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
+		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
 				Amount: 1243,
@@ -241,7 +225,7 @@ func TestPutTransactions(t *testing.T) {
 	t.Run("bad authentication token", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 
-		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
+		response := e.PUT(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
 			WithCookie(TestCookieName, gofakeit.Generate("????????")).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
@@ -279,9 +263,9 @@ func TestPutTransactions(t *testing.T) {
 			ExcludeWeekends:        true,
 			WaitForDeposit:         false,
 			EstimatedDeposit:       nil,
-			LastOccurrence:         nil,
-			NextOccurrence:         fundingRule.After(now, false),
-			NextOccurrenceOriginal: fundingRule.After(now, false),
+			LastRecurrence:         nil,
+			NextRecurrence:         fundingRule.After(now, false),
+			NextRecurrenceOriginal: fundingRule.After(now, false),
 		})
 
 		// Create the spending object we want to test spending from, specifically make it so that the spending object has
@@ -300,7 +284,7 @@ func TestPutTransactions(t *testing.T) {
 			AccountId:              user.AccountId,
 			BankAccountId:          bank.BankAccountId,
 			FundingScheduleId:      fundingSchedule.FundingScheduleId,
-			DateCreated:            now,
+			CreatedAt:              now,
 		})
 
 		token = GivenILogin(t, e, user.Login.Email, password)
@@ -316,13 +300,13 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.transaction.transactionId").Number().IsEqual(transaction.TransactionId)
-		response.JSON().Path("$.transaction.spendingId").Number().IsEqual(*transaction.SpendingId)
-		response.JSON().Path("$.transaction.spendingAmount").Number().IsEqual(transaction.Amount)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(transaction.TransactionId)
+		response.JSON().Path("$.transaction.spendingId").IsEqual(*transaction.SpendingId)
+		response.JSON().Path("$.transaction.spendingAmount").IsEqual(transaction.Amount)
 		// Make sure we spent from the right spending object.
-		response.JSON().Path("$.spending[0].spendingId").Number().IsEqual(spending.SpendingId)
+		response.JSON().Path("$.spending[0].spendingId").IsEqual(spending.SpendingId)
 		// And make sure we spent the amount we wanted.
-		response.JSON().Path("$.spending[0].currentAmount").Number().IsEqual(spending.CurrentAmount - transaction.Amount)
+		response.JSON().Path("$.spending[0].currentAmount").IsEqual(spending.CurrentAmount - transaction.Amount)
 		// Make sure the next contribution gets recalculated.
 		response.JSON().Path("$.spending[0].nextContributionAmount").Number().Lt(spending.NextContributionAmount)
 	})

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
@@ -13,23 +14,18 @@ import (
 type Transaction struct {
 	tableName string `pg:"transactions"`
 
-	TransactionId uint64       `json:"transactionId" pg:"transaction_id,notnull,pk,type:'bigserial'"`
-	AccountId     uint64       `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
-	Account       *Account     `json:"-" pg:"rel:has-one"`
-	BankAccountId uint64       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,on_delete:CASCADE,type:'bigint',unique:per_bank_account"`
-	BankAccount   *BankAccount `json:"-" pg:"rel:has-one"`
-
-	PlaidTransactionId        *uint64           `json:"-" pg:"plaid_transaction_id"`
-	PlaidTransaction          *PlaidTransaction `json:"plaidTransaction" pg:"rel:has-one"`
-	PendingPlaidTransactionId *uint64           `json:"-" pg:"pending_plaid_transaction_id"`
-	PendingPlaidTransaction   *PlaidTransaction `json:"pendingPlaidTransaction" pg:"rel:has-one,fk:pending_"` // fk: is the prefix of the column we want to use to join on in a multikey join.
-
-	TellerTransactionId *uint64            `json:"-" pg:"teller_transaction_id"`
-	TellerTransaction   *TellerTransaction `json:"tellerTransaction" pg:"rel:has-one"`
-
-	Amount     int64     `json:"amount" pg:"amount,notnull,use_zero"`
-	SpendingId *uint64   `json:"spendingId" pg:"spending_id,on_delete:SET NULL"`
-	Spending   *Spending `json:"spending,omitempty" pg:"rel:has-one"`
+	TransactionId             ID[Transaction]       `json:"transactionId" pg:"transaction_id,notnull,pk"`
+	AccountId                 ID[Account]           `json:"-" pg:"account_id,notnull,pk"`
+	Account                   *Account              `json:"-" pg:"rel:has-one"`
+	BankAccountId             ID[BankAccount]       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank_account"`
+	BankAccount               *BankAccount          `json:"-" pg:"rel:has-one"`
+	PlaidTransactionId        *ID[PlaidTransaction] `json:"-" pg:"plaid_transaction_id"`
+	PlaidTransaction          *PlaidTransaction     `json:"plaidTransaction" pg:"rel:has-one"`
+	PendingPlaidTransactionId *ID[PlaidTransaction] `json:"-" pg:"pending_plaid_transaction_id"`
+	PendingPlaidTransaction   *PlaidTransaction     `json:"pendingPlaidTransaction" pg:"rel:has-one,fk:pending_"` // fk: is the prefix of the column we want to use to join on in a multikey join.
+	Amount                    int64                 `json:"amount" pg:"amount,notnull,use_zero"`
+	SpendingId                *ID[Spending]         `json:"spendingId" pg:"spending_id,on_delete:SET NULL"`
+	Spending                  *Spending             `json:"spending,omitempty" pg:"rel:has-one"`
 	// SpendingAmount is the amount deducted from the expense this transaction was
 	// spent from. This is used when a transaction is more than the expense
 	// currently has allocated. If the transaction were to be deleted or changed
@@ -45,6 +41,27 @@ type Transaction struct {
 	IsPending            bool       `json:"isPending" pg:"is_pending,notnull,use_zero"`
 	CreatedAt            time.Time  `json:"createdAt" pg:"created_at,notnull,default:now()"`
 	DeletedAt            *time.Time `json:"deletedAt" pg:"deleted_at"`
+}
+
+func (Transaction) IdentityPrefix() string {
+	return "txn"
+}
+
+var (
+	_ pg.BeforeInsertHook = (*Transaction)(nil)
+)
+
+func (o *Transaction) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.TransactionId.IsZero() {
+		o.TransactionId = NewID(o)
+	}
+
+	now := time.Now()
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = now
+	}
+
+	return ctx, nil
 }
 
 func (t Transaction) IsAddition() bool {
@@ -169,12 +186,12 @@ func ProcessSpentFrom(
 		RemoveExpense
 	)
 
-	var existingSpendingId uint64
+	var existingSpendingId ID[Spending]
 	if currentSpend != nil {
 		existingSpendingId = currentSpend.SpendingId
 	}
 
-	var newSpendingId uint64
+	var newSpendingId ID[Spending]
 	if inputSpend != nil {
 		newSpendingId = inputSpend.SpendingId
 	}
@@ -182,13 +199,13 @@ func ProcessSpentFrom(
 	var expensePlan int
 
 	switch {
-	case existingSpendingId == 0 && newSpendingId > 0:
+	case existingSpendingId.IsZero() && !newSpendingId.IsZero():
 		// Spending is being added to the transaction.
 		expensePlan = AddExpense
-	case existingSpendingId != 0 && newSpendingId != existingSpendingId && newSpendingId > 0:
+	case !existingSpendingId.IsZero() && newSpendingId != existingSpendingId && !newSpendingId.IsZero():
 		// Spending is being changed from one expense to another.
 		expensePlan = ChangeExpense
-	case existingSpendingId != 0 && newSpendingId == 0:
+	case !existingSpendingId.IsZero() && newSpendingId.IsZero():
 		// Spending is being removed from the transaction.
 		expensePlan = RemoveExpense
 	default:

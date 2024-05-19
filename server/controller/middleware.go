@@ -2,9 +2,7 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/getsentry/sentry-go"
@@ -13,7 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
-	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
@@ -155,13 +152,17 @@ func (c *Controller) authenticateUser(ctx echo.Context) (err error) {
 	// way we can grab it later if there is an error.
 	if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
 		hub.Scope().SetUser(sentry.User{
-			ID:        strconv.FormatUint(claims.AccountId, 10),
-			Username:  fmt.Sprintf("account:%d", claims.AccountId),
+			ID:        claims.AccountId,
+			Username:  claims.AccountId,
 			IPAddress: util.GetForwardedFor(ctx),
+			Data: map[string]string{
+				"userId":  claims.UserId,
+				"loginId": claims.LoginId,
+			},
 		})
-		hub.Scope().SetTag("userId", strconv.FormatUint(claims.UserId, 10))
-		hub.Scope().SetTag("accountId", strconv.FormatUint(claims.AccountId, 10))
-		hub.Scope().SetTag("loginId", strconv.FormatUint(claims.LoginId, 10))
+		hub.Scope().SetTag("userId", claims.UserId)
+		hub.Scope().SetTag("accountId", claims.AccountId)
+		hub.Scope().SetTag("loginId", claims.LoginId)
 	}
 
 	ctx.Set(accountIdContextKey, claims.AccountId)
@@ -210,126 +211,4 @@ func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) 
 
 		return next(ctx)
 	}
-}
-
-func (c *Controller) mustGetDatabase(ctx echo.Context) pg.DBI {
-	txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
-	if !ok {
-		panic("no database on context")
-	}
-
-	return txn
-}
-
-// mustGetSecurityRepository is used to retrieve/create a repository interface
-// that can interact with more security sensitive parts of the data layer. This
-// interface is not specific to a single tenant. If the interface cannot be
-// created due then this method will panic.
-func (c *Controller) mustGetSecurityRepository(ctx echo.Context) repository.SecurityRepository {
-	db, ok := ctx.Get(databaseContextKey).(pg.DBI)
-	if !ok {
-		panic("failed to retrieve database object from controller context")
-	}
-
-	return repository.NewSecurityRepository(db, c.clock)
-}
-
-func (c *Controller) getUnauthenticatedRepository(ctx echo.Context) (repository.UnauthenticatedRepository, error) {
-	txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
-	if !ok {
-		return nil, errors.Errorf("no transaction for request")
-	}
-
-	return repository.NewUnauthenticatedRepository(c.clock, txn), nil
-}
-
-func (c *Controller) mustGetUnauthenticatedRepository(ctx echo.Context) repository.UnauthenticatedRepository {
-	repo, err := c.getUnauthenticatedRepository(ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	return repo
-}
-
-func (c *Controller) mustGetUserId(ctx echo.Context) uint64 {
-	userId, ok := ctx.Get(userIdContextKey).(uint64)
-	if userId == 0 || !ok {
-		panic("unauthorized")
-	}
-
-	return userId
-}
-
-func (c *Controller) mustGetAccountId(ctx echo.Context) uint64 {
-	accountId, ok := ctx.Get(accountIdContextKey).(uint64)
-	if accountId == 0 || !ok {
-		panic("unauthorized")
-	}
-
-	return accountId
-}
-
-func (c *Controller) getAuthenticatedRepository(ctx echo.Context) (repository.Repository, error) {
-	loginId, ok := ctx.Get(loginIdContextKey).(uint64)
-	if loginId == 0 || !ok {
-		return nil, errors.Errorf("not authorized")
-	}
-
-	userId, ok := ctx.Get(userIdContextKey).(uint64)
-	if userId == 0 || !ok {
-		return nil, errors.Errorf("you are not authenticated to an account")
-	}
-
-	accountId, ok := ctx.Get(accountIdContextKey).(uint64)
-	if accountId == 0 || !ok {
-		return nil, errors.Errorf("you are not authenticated to an account")
-	}
-
-	txn, ok := ctx.Get(databaseContextKey).(pg.DBI)
-	if !ok {
-		return nil, errors.Errorf("no transaction for request")
-	}
-
-	return repository.NewRepositoryFromSession(c.clock, userId, accountId, txn), nil
-}
-
-func (c *Controller) mustGetAuthenticatedRepository(ctx echo.Context) repository.Repository {
-	repo, err := c.getAuthenticatedRepository(ctx)
-	if err != nil {
-		panic("unauthorized")
-	}
-
-	return repo
-}
-
-func (c *Controller) getSecretsRepository(ctx echo.Context) (repository.SecretsRepository, error) {
-	accountId, ok := ctx.Get(accountIdContextKey).(uint64)
-	if accountId == 0 || !ok {
-		return nil, errors.Errorf("you are not authenticated to an account")
-	}
-
-	txn, ok := ctx.Get(databaseContextKey).(pg.DBI)
-	if !ok {
-		return nil, errors.Errorf("no transaction for request")
-	}
-
-	log := c.getLog(ctx)
-
-	return repository.NewSecretsRepository(
-		log,
-		c.clock,
-		txn,
-		c.kms,
-		accountId,
-	), nil
-}
-
-func (c *Controller) mustGetSecretsRepository(ctx echo.Context) repository.SecretsRepository {
-	repo, err := c.getSecretsRepository(ctx)
-	if err != nil {
-		panic("unauthorized")
-	}
-
-	return repo
 }

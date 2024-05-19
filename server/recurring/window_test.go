@@ -108,7 +108,7 @@ func TestWindowGetDeviation(t *testing.T) {
 			merchantComparator: comparison,
 		}
 		baseline := models.Transaction{
-			TransactionId:        291,
+			TransactionId:        "txn_291",
 			Amount:               1500,
 			Date:                 time.Date(2021, 7, 10, 0, 0, 0, 0, timezone),
 			OriginalName:         "FreshBooks. Merchant name: Freshbooks",
@@ -172,7 +172,7 @@ func TestWindowExperiment(t *testing.T) {
 			Time   time.Time
 		}
 		type Transaction struct {
-			ID       uint64
+			ID       models.ID[models.Transaction]
 			Name     string
 			Merchant string
 			Date     time.Time

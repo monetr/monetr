@@ -17,7 +17,7 @@ const (
 
 var (
 	_ ScheduledJobHandler = &CleanupJobsHandler{}
-	_ Job                 = &CleanupJobsJob{}
+	_ JobImplementation   = &CleanupJobsJob{}
 )
 
 type CleanupJobsHandler struct {
@@ -61,7 +61,7 @@ type CleanupJobsJob struct {
 	db  pg.DBI
 }
 
-func NewCleanupJobsJob(log *logrus.Entry, db pg.DBI) Job {
+func NewCleanupJobsJob(log *logrus.Entry, db pg.DBI) JobImplementation {
 	return &CleanupJobsJob{
 		log: log,
 		db:  db,

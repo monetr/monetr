@@ -3,11 +3,10 @@ package controller
 import (
 	"math"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,8 +28,8 @@ import (
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getTransactions(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -62,22 +61,27 @@ func (c *Controller) getTransactions(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, transactions)
 }
 
-// getTransactionById will simply return a single transaction for the given bank and transaction specified.
-// If the transaction does not exist then a 404 not found will be returned via the wrapPgError.
+// getTransactionById will simply return a single transaction for the given bank
+// and transaction specified. If the transaction does not exist then a 404 not
+// found will be returned via the wrapPgError.
 func (c *Controller) getTransactionById(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	transactionId, err := strconv.ParseUint(ctx.Param("transactionId"), 10, 64)
-	if err != nil || transactionId == 0 {
+	transactionId, err := ParseID[Transaction](ctx.Param("transactionId"))
+	if err != nil || transactionId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid transaction Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	transaction, err := repo.GetTransaction(c.getContext(ctx), bankAccountId, transactionId)
+	transaction, err := repo.GetTransaction(
+		c.getContext(ctx),
+		bankAccountId,
+		transactionId,
+	)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve transaction")
 	}
@@ -86,13 +90,13 @@ func (c *Controller) getTransactionById(ctx echo.Context) error {
 }
 
 func (c *Controller) getSimilarTransactionsById(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	transactionId, err := strconv.ParseUint(ctx.Param("transactionId"), 10, 64)
-	if err != nil || transactionId == 0 {
+	transactionId, err := ParseID[Transaction](ctx.Param("transactionId"))
+	if err != nil || transactionId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid transaction Id")
 	}
 
@@ -113,31 +117,14 @@ func (c *Controller) getSimilarTransactionsById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, cluster)
 }
 
-// List Transactions For Spending
-// @Summary List Transactions For Spending
-// @ID list-transactions-for-spending
-// @tags Transactions
-// @description Lists the transactions for the specified spending Id within the specified bank account Id.
-// @Security ApiKeyAuth
-// @Produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Param spendingId path int true "Spending ID"
-// @Param limit query int false "Specifies the number of transactions to return in the result, default is 25. Max is 100."
-// @Param offset query int false "The number of transactions to skip before returning any."
-// @Router /bank_accounts/{bankAccountId}/transactions/spending/{spendingId} [get]
-// @Success 200 {array} swag.TransactionResponse
-// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID, Spending ID, Limit or Offset.
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 404 {object} SpendingNotFoundError Invalid Spending ID provided.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getTransactionsForSpending(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	spendingId, err := strconv.ParseUint(ctx.Param("spendingId"), 10, 64)
-	if err != nil || spendingId == 0 {
+	spendingId, err := ParseID[Spending](ctx.Param("spendingId"))
+	if err != nil || spendingId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid spending Id")
 	}
 
@@ -168,7 +155,13 @@ func (c *Controller) getTransactionsForSpending(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusNotFound, "spending object does not exist")
 	}
 
-	transactions, err := repo.GetTransactionsForSpending(c.getContext(ctx), bankAccountId, spendingId, limit, offset)
+	transactions, err := repo.GetTransactionsForSpending(
+		c.getContext(ctx),
+		bankAccountId,
+		spendingId,
+		limit,
+		offset,
+	)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve transactions for spending")
 	}
@@ -177,8 +170,8 @@ func (c *Controller) getTransactionsForSpending(ctx echo.Context) error {
 }
 
 func (c *Controller) postTransactions(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -193,11 +186,12 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 		return c.badRequest(ctx, "cannot create transactions for non-manual links")
 	}
 
-	var transaction models.Transaction
+	var transaction Transaction
 	if err = ctx.Bind(&transaction); err != nil {
 		return c.invalidJson(ctx)
 	}
 
+	transaction.TransactionId = ""
 	transaction.BankAccountId = bankAccountId
 	transaction.Name = strings.TrimSpace(transaction.Name)
 	transaction.MerchantName = strings.TrimSpace(transaction.MerchantName)
@@ -211,18 +205,26 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 		return c.badRequest(ctx, "transaction amount must be greater than 0")
 	}
 
-	var updatedSpending *models.Spending
-	if transaction.SpendingId != nil && *transaction.SpendingId > 0 {
-		updatedSpending, err = repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transaction.SpendingId)
+	var updatedSpending *Spending
+	if transaction.SpendingId != nil && !(*transaction.SpendingId).IsZero() {
+		updatedSpending, err = repo.GetSpendingById(
+			c.getContext(ctx),
+			bankAccountId,
+			*transaction.SpendingId,
+		)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "could not get spending provided for transaction")
 		}
 
-		if err = repo.AddExpenseToTransaction(c.getContext(ctx), &transaction, updatedSpending); err != nil {
+		if err = repo.AddExpenseToTransaction(
+			c.getContext(ctx),
+			&transaction,
+			updatedSpending,
+		); err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to add expense to transaction")
 		}
 
-		if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []models.Spending{
+		if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []Spending{
 			*updatedSpending,
 		}); err != nil {
 			return c.wrapPgError(ctx, err, "failed to update spending for transaction")
@@ -246,35 +248,18 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, returnedObject)
 }
 
-// Update Transaction
-// @Summary Update Transaction
-// @ID update-transactions
-// @tags Transactions
-// @description Updates the provided transaction.
-// @Security ApiKeyAuth
-// @Accept json
-// @Produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Param transactionId path int true "Transaction ID"
-// @Param Transaction body swag.UpdateTransactionRequest true "Updated transaction"
-// @Router /bank_accounts/{bankAccountId}/transactions/{transactionId} [post]
-// @Success 200 {array} swag.TransactionUpdateResponse
-// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 404 {object} ApiError Specified transaction does not exist.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) putTransactions(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	transactionId, err := strconv.ParseUint(ctx.Param("transactionId"), 10, 64)
-	if err != nil || transactionId == 0 {
+	transactionId, err := ParseID[Transaction](ctx.Param("transactionId"))
+	if err != nil || transactionId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid transaction Id")
 	}
 
-	var transaction models.Transaction
+	var transaction Transaction
 	if err := ctx.Bind(&transaction); err != nil {
 		return c.invalidJson(ctx)
 	}
@@ -300,7 +285,6 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 
 	transaction.PlaidTransactionId = existingTransaction.PlaidTransactionId
 	transaction.PendingPlaidTransactionId = existingTransaction.PendingPlaidTransactionId
-	transaction.TellerTransactionId = existingTransaction.TellerTransactionId
 
 	if !isManual {
 		// Prevent the user from attempting to change a transaction's amount if we are on a plaid link.
@@ -357,13 +341,13 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 }
 
 func (c *Controller) deleteTransactions(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	transactionId, err := strconv.ParseUint(ctx.Param("transactionId"), 10, 64)
-	if err != nil || transactionId == 0 {
+	transactionId, err := ParseID[Transaction](ctx.Param("transactionId"))
+	if err != nil || transactionId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid transaction Id")
 	}
 

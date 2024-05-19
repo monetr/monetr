@@ -2,30 +2,14 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 
-	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 )
 
-// List Spending
-// @id list-spending
-// @tags Spending
-// @Summary List Spending
-// @description List all of the spending for the specified bank account.
-// @Security ApiKeyAuth
-// @Accept json
-// @Produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Router /bank_accounts/{bankAccountId}/spending [get]
-// @Success 200 {array} swag.SpendingResponse
-// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getSpending(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
@@ -40,17 +24,18 @@ func (c *Controller) getSpending(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, expenses)
 }
 
-// getSpendingById serves a spending object by its specific ID, eventually it will also support serving soft-deleted
-// spending items that might not be present in the index endpoint for spending.
+// getSpendingById serves a spending object by its specific ID, eventually it
+// will also support serving soft-deleted spending items that might not be
+// present in the index endpoint for spending.
 func (c *Controller) getSpendingById(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
-		return c.badRequest(ctx, "Must specify a valid bank account ID")
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	spendingId, err := strconv.ParseUint(ctx.Param("spendingId"), 10, 64)
-	if err != nil {
-		return c.badRequest(ctx, "Must specify a valid spending ID")
+	spendingId, err := ParseID[Spending](ctx.Param("spendingId"))
+	if err != nil || spendingId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid spending Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -65,88 +50,67 @@ func (c *Controller) getSpendingById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, spending)
 }
 
-// Create Spending
-// @id create-spending
-// @tags Spending
-// @Summary Create Spending
-// @description Create an spending for the specified bank account.
-// @security ApiKeyAuth
-// @accept json
-// @Produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Param Spending body swag.NewSpendingRequest true "New spending"
-// @Router /bank_accounts/{bankAccountId}/spending [post]
-// @Success 200 {object} swag.SpendingResponse
-// @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
-// @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) postSpending(ctx echo.Context) error {
-	requestSpan := c.getSpan(ctx)
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
-		requestSpan.Status = sentry.SpanStatusInvalidArgument
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	spending := &models.Spending{}
+	spending := &Spending{}
 	if err := ctx.Bind(spending); err != nil {
-		requestSpan.Status = sentry.SpanStatusInvalidArgument
 		return c.invalidJson(ctx)
 	}
 
-	spending.SpendingId = 0 // Make sure we create a new spending.
+	spending.SpendingId = "" // Make sure we create a new spending.
 	spending.BankAccountId = bankAccountId
 	spending.Name = strings.TrimSpace(spending.Name)
 	spending.Description = strings.TrimSpace(spending.Description)
 
 	if spending.Name == "" {
-		requestSpan.Status = sentry.SpanStatusInvalidArgument
 		return c.badRequest(ctx, "spending must have a name")
 	}
 
 	if spending.TargetAmount <= 0 {
-		requestSpan.Status = sentry.SpanStatusInvalidArgument
 		return c.badRequest(ctx, "target amount must be greater than 0")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	// We need to calculate what the next contribution will be for this new spending. So we need to retrieve it's funding
-	// schedule. This also helps us validate that the user has provided a valid funding schedule id.
-	fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, spending.FundingScheduleId)
+	// We need to calculate what the next contribution will be for this new
+	// spending. So we need to retrieve it's funding schedule. This also helps us
+	// validate that the user has provided a valid funding schedule id.
+	fundingSchedule, err := repo.GetFundingSchedule(
+		c.getContext(ctx),
+		bankAccountId,
+		spending.FundingScheduleId,
+	)
 	if err != nil {
-		requestSpan.Status = sentry.SpanStatusNotFound
 		return c.wrapPgError(ctx, err, "could not find funding schedule specified")
 	}
 
-	// We also need to know the current account's timezone, as contributions are made at midnight in that user's
-	// timezone.
+	// We also need to know the current account's timezone, as contributions are
+	// made at midnight in that user's timezone.
 	account, err := repo.GetAccount(c.getContext(ctx))
 	if err != nil {
-		requestSpan.Status = sentry.SpanStatusNotFound
 		return c.wrapPgError(ctx, err, "failed to retrieve account details")
 	}
 
 	spending.LastRecurrence = nil
 
-	// Once we know that the next recurrence is not in the past we can just store it here;
-	// itll be sanitized and converted to midnight below.
+	// Once we know that the next recurrence is not in the past we can just store
+	// it here; itll be sanitized and converted to midnight below.
 	next := spending.NextRecurrence
 	if next.Before(c.clock.Now()) {
-		requestSpan.Status = sentry.SpanStatusInvalidArgument
 		return c.badRequest(ctx, "next due date cannot be in the past")
 	}
 
 	switch spending.SpendingType {
-	case models.SpendingTypeExpense:
+	case SpendingTypeExpense:
 		if spending.RuleSet == nil {
-			requestSpan.Status = sentry.SpanStatusInvalidArgument
 			return c.badRequest(ctx, "recurrence rule must be specified for expenses")
 		}
-	case models.SpendingTypeGoal:
+	case SpendingTypeGoal:
 		if spending.RuleSet != nil {
-			requestSpan.Status = sentry.SpanStatusInvalidArgument
 			return c.badRequest(ctx, "recurrence rule cannot be specified for goals")
 		}
 	}
@@ -154,7 +118,6 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	// Make sure that the next recurrence date is properly in the user's timezone.
 	nextRecurrence, err := c.midnightInLocal(ctx, next)
 	if err != nil {
-		requestSpan.Status = sentry.SpanStatusInternalError
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine next recurrence")
 	}
 
@@ -167,12 +130,10 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		fundingSchedule,
 		c.clock.Now(),
 	); err != nil {
-		requestSpan.Status = sentry.SpanStatusInternalError
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate the next contribution for the new spending")
 	}
 
 	if err = repo.CreateSpending(c.getContext(ctx), spending); err != nil {
-		requestSpan.Status = sentry.SpanStatusInternalError
 		return c.wrapPgError(ctx, err, "failed to create spending")
 	}
 
@@ -180,30 +141,14 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 }
 
 type SpendingTransfer struct {
-	FromSpendingId *uint64 `json:"fromSpendingId"`
-	ToSpendingId   *uint64 `json:"toSpendingId"`
-	Amount         int64   `json:"amount"`
+	FromSpendingId *ID[Spending] `json:"fromSpendingId"`
+	ToSpendingId   *ID[Spending] `json:"toSpendingId"`
+	Amount         int64         `json:"amount"`
 }
 
-// Transfer To or From Spending
-// @id transfer-spending
-// @tags Spending
-// @Summary Transfer To or From Spending
-// @description Transfer allocated funds to or from a spending object.
-// @security ApiKeyAuth
-// @accept json
-// @produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Param Spending body SpendingTransfer true "Transfer"
-// @Router /bank_accounts/{bankAccountId}/spending/transfer [post]
-// @Success 200 {array} swag.TransferResponse
-// @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
-// @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -216,8 +161,8 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 		return c.badRequest(ctx, "transfer amount must be greater than 0")
 	}
 
-	if (transfer.FromSpendingId == nil || *transfer.FromSpendingId == 0) &&
-		(transfer.ToSpendingId == nil || *transfer.ToSpendingId == 0) {
+	if (transfer.FromSpendingId == nil || (*transfer.FromSpendingId).IsZero()) &&
+		(transfer.ToSpendingId == nil || (*transfer.ToSpendingId).IsZero()) {
 		return c.badRequest(ctx, "both a from and a to must be specified to transfer allocated funds")
 	}
 
@@ -228,14 +173,14 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to get balances for transfer")
 	}
 
-	spendingToUpdate := make([]models.Spending, 0)
+	spendingToUpdate := make([]Spending, 0)
 
 	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve account for transfer")
 	}
 
-	var fundingSchedule *models.FundingSchedule
+	var fundingSchedule *FundingSchedule
 
 	if transfer.FromSpendingId == nil && balances.Free < transfer.Amount {
 		return c.badRequest(ctx, "cannot transfer more than is available in safe to spend")
@@ -314,34 +259,18 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 	})
 }
 
-// Update Spending
-// @id update-spending
-// @tags Spending
-// @summary Update Spending
-// @description Update an existing spending object. Some changes may cause the spending object to be recalculated.
-// @security ApiKeyAuth
-// @accept json
-// @produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Param Spending body swag.UpdateSpendingRequest true "Updated spending"
-// @Router /bank_accounts/{bankAccountId}/spending [put]
-// @Success 200 {object} swag.SpendingResponse
-// @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
-// @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) putSpending(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	spendingId, err := strconv.ParseUint(ctx.Param("spendingId"), 10, 64)
-	if err != nil || spendingId == 0 {
-		return c.badRequest(ctx, "must specify valid spending Id")
+	spendingId, err := ParseID[Spending](ctx.Param("spendingId"))
+	if err != nil || spendingId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid spending Id")
 	}
 
-	updatedSpending := &models.Spending{}
+	updatedSpending := &Spending{}
 	if err := ctx.Bind(updatedSpending); err != nil {
 		return c.invalidJson(ctx)
 	}
@@ -362,7 +291,7 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 	// These fields cannot be changed by the end user and must be maintained by the API, some of these fields are
 	// just meant to be immutable like date created.
 	updatedSpending.SpendingType = existingSpending.SpendingType
-	updatedSpending.DateCreated = existingSpending.DateCreated
+	updatedSpending.CreatedAt = existingSpending.CreatedAt
 	updatedSpending.UsedAmount = existingSpending.UsedAmount
 	updatedSpending.CurrentAmount = existingSpending.CurrentAmount
 	updatedSpending.BankAccountId = existingSpending.BankAccountId
@@ -370,7 +299,7 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 	updatedSpending.LastRecurrence = existingSpending.LastRecurrence
 	updatedSpending.NextContributionAmount = existingSpending.NextContributionAmount
 
-	if updatedSpending.SpendingType == models.SpendingTypeGoal {
+	if updatedSpending.SpendingType == SpendingTypeGoal {
 		updatedSpending.RuleSet = nil
 	}
 
@@ -425,7 +354,7 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 		}
 	}
 
-	if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []models.Spending{
+	if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []Spending{
 		*updatedSpending,
 	}); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update spending")
@@ -435,14 +364,14 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 }
 
 func (c *Controller) deleteSpending(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	spendingId, err := strconv.ParseUint(ctx.Param("spendingId"), 10, 64)
-	if err != nil || spendingId == 0 {
-		return c.badRequest(ctx, "must specify valid spending Id")
+	spendingId, err := ParseID[Spending](ctx.Param("spendingId"))
+	if err != nil || spendingId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid spending Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)

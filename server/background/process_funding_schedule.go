@@ -7,7 +7,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -73,7 +73,7 @@ func (p *ProcessFundingScheduleHandler) HandleConsumeJob(ctx context.Context, da
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		job.repo = repository.NewRepositoryFromSession(p.clock, 0, job.args.AccountId, txn)
+		job.repo = repository.NewRepositoryFromSession(p.clock, "user_system", job.args.AccountId, txn)
 		return job.Run(span.Context())
 	})
 }
@@ -133,9 +133,9 @@ func (p *ProcessFundingScheduleHandler) EnqueueTriggeredJob(ctx context.Context,
 }
 
 type ProcessFundingScheduleArguments struct {
-	AccountId          uint64   `json:"accountId"`
-	BankAccountId      uint64   `json:"bankAccountId"`
-	FundingScheduleIds []uint64 `json:"fundingScheduleIds"`
+	AccountId          ID[Account]           `json:"accountId"`
+	BankAccountId      ID[BankAccount]       `json:"bankAccountId"`
+	FundingScheduleIds []ID[FundingSchedule] `json:"fundingScheduleIds"`
 }
 
 type ProcessFundingScheduleJob struct {
@@ -163,7 +163,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	expensesToUpdate := make([]models.Spending, 0)
+	expensesToUpdate := make([]Spending, 0)
 
 	initialBalances, err := p.repo.GetBalances(ctx, p.args.BankAccountId)
 	if err != nil {
@@ -207,7 +207,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 
 		if !fundingSchedule.CalculateNextOccurrence(span.Context(), p.clock.Now(), timezone) {
 			crumbs.IndicateBug(span.Context(), "bug: funding schedule for processing occurs in the future", map[string]interface{}{
-				"nextOccurrence": fundingSchedule.NextOccurrence,
+				"nextOccurrence": fundingSchedule.NextRecurrence,
 			})
 			span.Status = sentry.SpanStatusInvalidArgument
 			fundingLog.Warn("skipping processing funding schedule, it does not occur yet")

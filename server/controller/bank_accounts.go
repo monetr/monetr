@@ -2,25 +2,12 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 )
 
-// List All Bank Accounts
-// @Summary List All Bank Accounts
-// @id list-all-bank-accounts
-// @tags Bank Accounts
-// @description Lists all of the bank accounts for the currently authenticated user.
-// @Produce json
-// @Security ApiKeyAuth
-// @Router /bank_accounts [get]
-// @Success 200 {array} swag.BankAccountResponse
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getBankAccounts(ctx echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	bankAccounts, err := repo.GetBankAccounts(c.getContext(ctx))
@@ -32,8 +19,8 @@ func (c *Controller) getBankAccounts(ctx echo.Context) error {
 }
 
 func (c *Controller) getBankAccount(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil || bankAccountId == 0 {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -46,22 +33,9 @@ func (c *Controller) getBankAccount(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, bankAccount)
 }
 
-// Get Bank Account Balances
-// @Summary Get Bank Account Balances
-// @id get-bank-account-balances
-// @tags Bank Accounts
-// @description Get the balances for the specified bank account (including calculated balances).
-// @Security ApiKeyAuth
-// @Produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Router /bank_accounts/{bankAccountId}/balances [get]
-// @Success 200 {object} repository.Balances
-// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getBalances(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -89,19 +63,19 @@ func (c *Controller) getBalances(ctx echo.Context) error {
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) postBankAccounts(ctx echo.Context) error {
-	var bankAccount models.BankAccount
+	var bankAccount BankAccount
 	if err := ctx.Bind(&bankAccount); err != nil {
 		return c.invalidJson(ctx)
 	}
 
-	if bankAccount.LinkId == 0 {
+	if bankAccount.LinkId.IsZero() {
 		return c.badRequest(ctx, "link ID must be provided")
 	}
 
-	bankAccount.BankAccountId = 0
+	bankAccount.BankAccountId = ""
 	bankAccount.Name = strings.TrimSpace(bankAccount.Name)
 	bankAccount.Mask = strings.TrimSpace(bankAccount.Mask)
-	bankAccount.LastUpdated = time.Now().UTC()
+	bankAccount.LastUpdated = c.clock.Now().UTC()
 
 	if bankAccount.Name == "" {
 		return c.badRequest(ctx, "bank account must have a name")
@@ -128,8 +102,8 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 }
 
 func (c *Controller) putBankAccounts(ctx echo.Context) error {
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -140,11 +114,11 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 	}
 
 	var request struct {
-		AvailableBalance int64                    `json:"availableBalance"`
-		CurrentBalance   int64                    `json:"currentBalance"`
-		Mask             string                   `json:"mask"`
-		Name             string                   `json:"name"`
-		Status           models.BankAccountStatus `json:"status"`
+		AvailableBalance int64             `json:"availableBalance"`
+		CurrentBalance   int64             `json:"currentBalance"`
+		Mask             string            `json:"mask"`
+		Name             string            `json:"name"`
+		Status           BankAccountStatus `json:"status"`
 	}
 	if err = ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)

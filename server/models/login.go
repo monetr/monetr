@@ -1,8 +1,10 @@
 package models
 
 import (
+	"context"
 	"time"
 
+	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
 	"github.com/xlzd/gotp"
 )
@@ -14,20 +16,22 @@ var (
 type Login struct {
 	tableName string `pg:"logins"`
 
-	LoginId         uint64       `json:"loginId" pg:"login_id,notnull,pk,type:'bigserial'"`
-	Email           string       `json:"email" pg:"email,notnull,unique"`
-	FirstName       string       `json:"firstName" pg:"first_name,notnull"`
-	LastName        string       `json:"lastName" pg:"last_name"`
-	PasswordResetAt *time.Time   `json:"passwordResetAt" pg:"password_reset_at"`
-	PhoneNumber     *PhoneNumber `json:"-" pg:"phone_number,type:'text'"`
-	IsEnabled       bool         `json:"-" pg:"is_enabled,notnull,use_zero"`
-	IsEmailVerified bool         `json:"isEmailVerified" pg:"is_email_verified,notnull,use_zero"`
-	EmailVerifiedAt *time.Time   `json:"emailVerifiedAt" pg:"email_verified_at"`
-	IsPhoneVerified bool         `json:"isPhoneVerified" pg:"is_phone_verified,notnull,use_zero"`
-	TOTP            string       `json:"-" pg:"totp"`
-	TOTPEnabledAt   *time.Time   `json:"totpEnabledAt" pg:"totp_enabled_at"`
+	LoginId         ID[Login]  `json:"loginId" pg:"login_id,notnull,pk"`
+	Email           string     `json:"email" pg:"email,notnull,unique"`
+	FirstName       string     `json:"firstName" pg:"first_name,notnull"`
+	LastName        string     `json:"lastName" pg:"last_name"`
+	PasswordResetAt *time.Time `json:"passwordResetAt" pg:"password_reset_at"`
+	IsEnabled       bool       `json:"-" pg:"is_enabled,notnull,use_zero"`
+	IsEmailVerified bool       `json:"isEmailVerified" pg:"is_email_verified,notnull,use_zero"`
+	EmailVerifiedAt *time.Time `json:"emailVerifiedAt" pg:"email_verified_at"`
+	TOTP            string     `json:"-" pg:"totp"`
+	TOTPEnabledAt   *time.Time `json:"totpEnabledAt" pg:"totp_enabled_at"`
 
 	Users []User `json:"-" pg:"rel:has-many"`
+}
+
+func (Login) IdentityPrefix() string {
+	return "lgn"
 }
 
 // VerifyTOTP will validate that the provided TOTP string is correct for this login. It will return ErrTOTPNotValid if
@@ -57,4 +61,16 @@ type LoginWithHash struct {
 
 func (l Login) GetEmailIsVerified() bool {
 	return l.IsEmailVerified && l.EmailVerifiedAt != nil
+}
+
+var (
+	_ pg.BeforeInsertHook = (*LoginWithHash)(nil)
+)
+
+func (o *LoginWithHash) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.LoginId.IsZero() {
+		o.LoginId = NewID(&o.Login)
+	}
+
+	return ctx, nil
 }

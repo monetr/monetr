@@ -26,17 +26,17 @@ export function useFundingSchedulesSink(): UseQueryResult<Array<FundingSchedule>
 export function useNextFundingDate(): string | null {
   const { data: funding } = useFundingSchedulesSink();
   const date = funding
-    ?.sort((a, b) => isBefore(a.nextOccurrence, b.nextOccurrence) ? 1 : -1)
+    ?.sort((a, b) => isBefore(a.nextRecurrence, b.nextRecurrence) ? 1 : -1)
     .pop();
 
   if (date) {
-    return format(date.nextOccurrence, 'M/dd');
+    return format(date.nextRecurrence, 'M/dd');
   }
 
   return null;
 }
 
-export function useFundingSchedule(fundingScheduleId: number | null): UseQueryResult<FundingSchedule | undefined, unknown> {
+export function useFundingSchedule(fundingScheduleId: string | null): UseQueryResult<FundingSchedule | undefined, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<Partial<FundingSchedule>, unknown, FundingSchedule | null>(
     [`/bank_accounts/${selectedBankAccountId}/funding_schedules/${fundingScheduleId}`],

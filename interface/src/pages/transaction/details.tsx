@@ -32,7 +32,7 @@ export default function TransactionDetails(): JSX.Element {
   const user = useAuthentication();
   const { transactionId: id } = useParams();
   const updateTransaction = useUpdateTransaction();
-  const transactionId = +id || null;
+  const transactionId = id || null;
 
   const { data: transaction, isLoading, isError } = useTransaction(transactionId);
 

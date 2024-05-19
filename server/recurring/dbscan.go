@@ -2,6 +2,7 @@ package recurring
 
 import (
 	"github.com/monetr/monetr/server/internal/calc"
+	"github.com/monetr/monetr/server/models"
 )
 
 const (
@@ -14,12 +15,12 @@ var (
 )
 
 type Cluster struct {
-	ID    uint64
+	ID    models.ID[models.Transaction]
 	Items map[int]uint8
 }
 
 type DBSCAN struct {
-	labels    map[uint64]bool
+	labels    map[models.ID[models.Transaction]]bool
 	dataset   []Document
 	epsilon   float32
 	minPoints int
@@ -28,7 +29,7 @@ type DBSCAN struct {
 
 func NewDBSCAN(dataset []Document, epsilon float32, minPoints int) *DBSCAN {
 	return &DBSCAN{
-		labels:    map[uint64]bool{},
+		labels:    map[models.ID[models.Transaction]]bool{},
 		dataset:   dataset,
 		epsilon:   epsilon,
 		minPoints: minPoints,
@@ -82,7 +83,7 @@ func (d *DBSCAN) Calculate() []Cluster {
 		// needs improvement, but I think this should be fine for the initial implementation of the clustering algorithm.
 		for i := range newCluster.Items {
 			item := d.dataset[i]
-			if item.ID < newCluster.ID || newCluster.ID == 0 {
+			if item.ID < newCluster.ID || newCluster.ID.IsZero() {
 				newCluster.ID = item.ID
 			}
 		}

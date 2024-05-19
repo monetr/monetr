@@ -22,12 +22,12 @@ export default class Link {
    * Represents the global unique identifier for a group of bank accounts in monetr.
    * This value is generated automatically by the API upon creation, and cannot be changed.
    */
-  linkId: number;
+  linkId: string;
   linkType: LinkType;
   institutionName: string;
   updatedAt: Date;
   createdAt: Date;
-  createdByUserId: number;
+  createdBy: string;
 
   plaidLink: PlaidLink | null;
 

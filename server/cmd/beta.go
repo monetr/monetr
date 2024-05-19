@@ -2,12 +2,12 @@ package main
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/monetr/monetr/server/config"
-	"github.com/monetr/monetr/server/hash"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
@@ -103,8 +103,13 @@ var (
 			betaCode := fmt.Sprintf("%X-%X", random[:4], random[4:])
 
 			expires := util.Midnight(time.Now().Add(14*24*time.Hour), time.Local)
+
+			hash := sha256.New()
+			hash.Write([]byte(strings.ToLower(betaCode)))
+			hashedCode := fmt.Sprintf("%X", hash.Sum(nil))
+
 			beta := models.Beta{
-				CodeHash:  hash.HashPassword(strings.ToLower(betaCode), betaCode),
+				CodeHash:  hashedCode,
 				ExpiresAt: expires,
 			}
 

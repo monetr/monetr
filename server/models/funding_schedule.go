@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/util"
 )
@@ -12,20 +13,36 @@ import (
 type FundingSchedule struct {
 	tableName string `pg:"funding_schedules"`
 
-	FundingScheduleId      uint64       `json:"fundingScheduleId" pg:"funding_schedule_id,notnull,pk,type:'bigserial'"`
-	AccountId              uint64       `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
-	Account                *Account     `json:"-" pg:"rel:has-one"`
-	BankAccountId          uint64       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,on_delete:CASCADE,unique:per_bank,type:'bigint'"`
-	BankAccount            *BankAccount `json:"bankAccount,omitempty" pg:"rel:has-one"`
-	Name                   string       `json:"name" pg:"name,notnull,unique:per_bank"`
-	Description            string       `json:"description,omitempty" pg:"description"`
-	RuleSet                *RuleSet     `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
-	ExcludeWeekends        bool         `json:"excludeWeekends" pg:"exclude_weekends,notnull,use_zero"`
-	WaitForDeposit         bool         `json:"waitForDeposit" pg:"wait_for_deposit,notnull,use_zero"`
-	EstimatedDeposit       *int64       `json:"estimatedDeposit" pg:"estimated_deposit"`
-	LastOccurrence         *time.Time   `json:"lastOccurrence" pg:"last_occurrence"`
-	NextOccurrence         time.Time    `json:"nextOccurrence" pg:"next_occurrence,notnull"`
-	NextOccurrenceOriginal time.Time    `json:"nextOccurrenceOriginal" pg:"next_occurrence_original,notnull"`
+	FundingScheduleId      ID[FundingSchedule] `json:"fundingScheduleId" pg:"funding_schedule_id,notnull,pk"`
+	AccountId              ID[Account]         `json:"-" pg:"account_id,notnull,pk"`
+	Account                *Account            `json:"-" pg:"rel:has-one"`
+	BankAccountId          ID[BankAccount]     `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank"`
+	BankAccount            *BankAccount        `json:"bankAccount,omitempty" pg:"rel:has-one"`
+	Name                   string              `json:"name" pg:"name,notnull,unique:per_bank"`
+	Description            string              `json:"description,omitempty" pg:"description"`
+	RuleSet                *RuleSet            `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
+	ExcludeWeekends        bool                `json:"excludeWeekends" pg:"exclude_weekends,notnull,use_zero"`
+	WaitForDeposit         bool                `json:"waitForDeposit" pg:"wait_for_deposit,notnull,use_zero"`
+	EstimatedDeposit       *int64              `json:"estimatedDeposit" pg:"estimated_deposit"`
+	LastRecurrence         *time.Time          `json:"lastRecurrence" pg:"last_recurrence"`
+	NextRecurrence         time.Time           `json:"nextRecurrence" pg:"next_recurrence,notnull"`
+	NextRecurrenceOriginal time.Time           `json:"nextRecurrenceOriginal" pg:"next_recurrence_original,notnull"`
+}
+
+func (FundingSchedule) IdentityPrefix() string {
+	return "fund"
+}
+
+var (
+	_ pg.BeforeInsertHook = (*FundingSchedule)(nil)
+)
+
+func (o *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.FundingScheduleId.IsZero() {
+		o.FundingScheduleId = NewID(o)
+	}
+
+	return ctx, nil
 }
 
 // Deprecated: Use the forecasting package funding instructions interface instead.
@@ -53,8 +70,8 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 	// Make debugging easier.
 	now = now.In(timezone)
 	var nextContributionDate time.Time
-	if !f.NextOccurrence.IsZero() {
-		nextContributionDate = util.Midnight(f.NextOccurrence, timezone)
+	if !f.NextRecurrence.IsZero() {
+		nextContributionDate = util.Midnight(f.NextRecurrence, timezone)
 	} else {
 		nextContributionDate = util.Midnight(f.RuleSet.Before(now, false), timezone)
 	}
@@ -111,20 +128,20 @@ func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, now time.
 		"timezone":          timezone.String(),
 	}
 
-	if now.Before(f.NextOccurrence) {
+	if now.Before(f.NextRecurrence) {
 		crumbs.Debug(span.Context(), "Skipping processing funding schedule, it does not occur yet", map[string]interface{}{
 			"fundingScheduleId": f.FundingScheduleId,
-			"nextOccurrence":    f.NextOccurrence,
+			"nextOccurrence":    f.NextRecurrence,
 		})
 		return false
 	}
 
 	nextFundingOccurrence, originalNextFundingOccurrence := f.GetNextContributionDateAfter(now, timezone)
 
-	current := f.NextOccurrence
-	f.LastOccurrence = &current
-	f.NextOccurrence = nextFundingOccurrence
-	f.NextOccurrenceOriginal = originalNextFundingOccurrence
+	current := f.NextRecurrence
+	f.LastRecurrence = &current
+	f.NextRecurrence = nextFundingOccurrence
+	f.NextRecurrenceOriginal = originalNextFundingOccurrence
 
 	return true
 }

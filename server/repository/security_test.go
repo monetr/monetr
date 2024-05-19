@@ -143,7 +143,7 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 		bogusPassword := gofakeit.Generate("?????????????")
 		newPassword := gofakeit.Generate("?????????????")
 
-		err := repo.ChangePassword(context.Background(), 1234, bogusPassword, newPassword)
+		err := repo.ChangePassword(context.Background(), "user_bogus", bogusPassword, newPassword)
 		assert.EqualError(t, err, "failed to find login record to change password: forcing a bad connection")
 	})
 }

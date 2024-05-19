@@ -55,7 +55,7 @@ type (
 	}
 )
 
-//go:generate mockgen -source=email.go -package=mockgen -destination=../internal/mockgen/email.go EmailCommunication
+//go:generate go run go.uber.org/mock/mockgen@v0.4.0 -source=email.go -package=mockgen -destination=../internal/mockgen/email.go EmailCommunication
 type EmailCommunication interface {
 	SendVerification(ctx context.Context, params VerifyEmailParams) error
 	SendPasswordReset(ctx context.Context, params PasswordResetParams) error

@@ -9,9 +9,9 @@ export enum SpendingType {
 }
 
 export default class Spending {
-  spendingId: number;
-  bankAccountId: number;
-  fundingScheduleId?: number;
+  spendingId: string;
+  bankAccountId: string;
+  fundingScheduleId: string;
   name: string;
   description?: string;
   spendingType: SpendingType;

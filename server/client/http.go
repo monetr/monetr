@@ -36,9 +36,9 @@ func NewMonetrHTTPClient(log *logrus.Entry, endpoint, token string) MonetrClient
 	}
 }
 
-func (m *monetrHttpClient) GetTransactions(ctx context.Context, bankAccountId uint64, count, offset int64) ([]models.Transaction, error) {
+func (m *monetrHttpClient) GetTransactions(ctx context.Context, bankAccountId models.ID[models.BankAccount], count, offset int64) ([]models.Transaction, error) {
 	result := make([]models.Transaction, 0)
-	if err := m.request(ctx, fmt.Sprintf("/api/bank_accounts/%d/transactions", bankAccountId), url.Values{
+	if err := m.request(ctx, fmt.Sprintf("/api/bank_accounts/%s/transactions", bankAccountId), url.Values{
 		"count": []string{
 			strconv.FormatInt(count, 10),
 		},
@@ -52,18 +52,18 @@ func (m *monetrHttpClient) GetTransactions(ctx context.Context, bankAccountId ui
 	return result, nil
 }
 
-func (m *monetrHttpClient) GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error) {
+func (m *monetrHttpClient) GetSpending(ctx context.Context, bankAccountId models.ID[models.BankAccount]) ([]models.Spending, error) {
 	result := make([]models.Spending, 0)
-	if err := m.request(ctx, fmt.Sprintf("/api/bank_accounts/%d/spending", bankAccountId), nil, &result); err != nil {
+	if err := m.request(ctx, fmt.Sprintf("/api/bank_accounts/%s/spending", bankAccountId), nil, &result); err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve spending")
 	}
 
 	return result, nil
 }
 
-func (m *monetrHttpClient) GetFundingSchedules(ctx context.Context, bankAccountId uint64) ([]models.FundingSchedule, error) {
+func (m *monetrHttpClient) GetFundingSchedules(ctx context.Context, bankAccountId models.ID[models.BankAccount]) ([]models.FundingSchedule, error) {
 	result := make([]models.FundingSchedule, 0)
-	if err := m.request(ctx, fmt.Sprintf("/api/bank_accounts/%d/funding_schedules", bankAccountId), nil, &result); err != nil {
+	if err := m.request(ctx, fmt.Sprintf("/api/bank_accounts/%s/funding_schedules", bankAccountId), nil, &result); err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve funding schedules")
 	}
 

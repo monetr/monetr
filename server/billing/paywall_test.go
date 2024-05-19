@@ -2,7 +2,6 @@ package billing
 
 import (
 	"context"
-	"math"
 	"testing"
 	"time"
 
@@ -129,7 +128,7 @@ func TestBaseBasicPaywall_GetHasSubscription(t *testing.T) {
 
 		paywall := NewBasicPaywall(log, clock, accountRepo)
 
-		hasSubscription, err := paywall.GetHasSubscription(context.Background(), math.MaxUint64)
+		hasSubscription, err := paywall.GetHasSubscription(context.Background(), "acct_bogus")
 		assert.EqualError(t, err, "could not determine whether subscription was present: failed to retrieve account by Id: pg: no rows in result set")
 		assert.False(t, hasSubscription, "account that does not exist should return false")
 	})

@@ -3,10 +3,10 @@ import { parseJSON } from 'date-fns';
 import { AmountType, formatAmount } from '@monetr/interface/util/amounts';
 
 export default class Transaction {
-  transactionId: number;
-  bankAccountId: number;
+  transactionId: string;
+  bankAccountId: string;
   amount: number;
-  spendingId?: number;
+  spendingId?: string;
   spendingAmount?: number;
   categories: string[];
   date: Date;

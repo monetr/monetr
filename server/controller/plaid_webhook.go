@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -184,7 +183,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 
 	// Set the user for this webhook for sentry.
 	crumbs.IncludeUserInScope(c.getContext(ctx), link.AccountId)
-	crumbs.AddTag(c.getContext(ctx), "linkId", strconv.FormatUint(link.LinkId, 10))
+	crumbs.AddTag(c.getContext(ctx), "linkId", link.LinkId.String())
 
 	if link.PlaidLink != nil {
 		// If we have the plaid link in scope then add the institution ID onto the sentry scope.
@@ -207,7 +206,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 
 	authenticatedRepo := repository.NewRepositoryFromSession(
 		c.clock,
-		link.CreatedByUserId,
+		link.CreatedBy,
 		link.AccountId,
 		c.mustGetDatabase(ctx),
 	)

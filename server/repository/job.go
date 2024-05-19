@@ -9,41 +9,41 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
 type JobRepository interface {
-	GetBankAccountsToSync() ([]models.BankAccount, error)
+	GetBankAccountsToSync() ([]BankAccount, error)
 	GetBankAccountsWithPendingTransactions() ([]CheckingPendingTransactionsItem, error)
 	GetFundingSchedulesToProcess() ([]ProcessFundingSchedulesItem, error)
 	GetPlaidLinksByAccount(ctx context.Context) ([]PlaidLinksForAccount, error)
-	GetLinksForExpiredAccounts(ctx context.Context) ([]models.Link, error)
+	GetLinksForExpiredAccounts(ctx context.Context) ([]Link, error)
 	GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error)
 	GetAccountsWithTooManyFiles(ctx context.Context) ([]AccountWithTooManyFiles, error)
 }
 
 type ProcessFundingSchedulesItem struct {
-	AccountId          uint64   `pg:"account_id"`
-	BankAccountId      uint64   `pg:"bank_account_id"`
-	FundingScheduleIds []uint64 `pg:"funding_schedule_ids,type:bigint[]"`
+	AccountId          ID[Account]           `pg:"account_id"`
+	BankAccountId      ID[BankAccount]       `pg:"bank_account_id"`
+	FundingScheduleIds []ID[FundingSchedule] `pg:"funding_schedule_ids,type:varchar(32)[]"`
 }
 
 type CheckingPendingTransactionsItem struct {
-	AccountId uint64 `pg:"account_id"`
-	LinkId    uint64 `pg:"link_id"`
+	AccountId ID[Account] `pg:"account_id"`
+	LinkId    ID[Link]    `pg:"link_id"`
 }
 
 type PlaidLinksForAccount struct {
 	tableName string `pg:"links"`
 
-	AccountId uint64   `pg:"account_id"`
-	LinkIds   []uint64 `pg:"link_ids,type:bigint[]"`
+	AccountId ID[Account] `pg:"account_id"`
+	LinkIds   []ID[Link]  `pg:"link_ids,type:varchar(32)[]"`
 }
 
 type BankAccountWithStaleSpendingItem struct {
-	AccountId     uint64 `pg:"account_id"`
-	BankAccountId uint64 `pg:"bank_account_id"`
+	AccountId     ID[Account]     `pg:"account_id"`
+	BankAccountId ID[BankAccount] `pg:"bank_account_id"`
 }
 
 type jobRepository struct {
@@ -63,7 +63,7 @@ func (j *jobRepository) GetPlaidLinksByAccount(ctx context.Context) ([]PlaidLink
 	err := j.txn.ModelContext(ctx, &links).
 		ColumnExpr(`"account_id"`).
 		ColumnExpr(`array_agg("link_id") "link_ids"`).
-		Where(`"link_type" = ?`, models.PlaidLinkType).
+		Where(`"link_type" = ?`, PlaidLinkType).
 		Where(`"plaid_link_id" IS NOT NULL`).
 		Group("account_id").
 		Select(&links)
@@ -74,12 +74,12 @@ func (j *jobRepository) GetPlaidLinksByAccount(ctx context.Context) ([]PlaidLink
 	return links, nil
 }
 
-func (j *jobRepository) GetBankAccountsToSync() ([]models.BankAccount, error) {
-	var result []models.BankAccount
+func (j *jobRepository) GetBankAccountsToSync() ([]BankAccount, error) {
+	var result []BankAccount
 	err := j.txn.Model(&result).
 		Relation("Link").
 		Relation("Link.PlaidLink").
-		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
+		Where(`"link"."link_type" = ?`, PlaidLinkType).
 		Select(&result)
 	return result, errors.Wrap(err, "failed to retrieve bank accounts to sync")
 }
@@ -119,7 +119,7 @@ func (j *jobRepository) GetBankAccountsWithPendingTransactions() ([]CheckingPend
 		WHERE
 			"link"."link_type" = ? AND
 			"transaction"."is_pending" = true
-	`, models.PlaidLinkType)
+	`, PlaidLinkType)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve bank accounts with pending transactions")
 	}
@@ -127,8 +127,8 @@ func (j *jobRepository) GetBankAccountsWithPendingTransactions() ([]CheckingPend
 	return items, nil
 }
 
-func (r *repositoryBase) GetJob(jobId string) (models.Job, error) {
-	var result models.Job
+func (r *repositoryBase) GetJob(jobId string) (Job, error) {
+	var result Job
 	err := r.txn.Model(&result).
 		Where(`"job"."account_id" = ?`, r.AccountId()).
 		Where(`"job"."job_id" = ?`, jobId).
@@ -138,18 +138,18 @@ func (r *repositoryBase) GetJob(jobId string) (models.Job, error) {
 	return result, errors.Wrap(err, "failed to retrieve job")
 }
 
-func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]models.Link, error) {
+func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]Link, error) {
 	span := sentry.StartSpan(ctx, "GetLinksForExpiredAccounts")
 	defer span.Finish()
 
 	// Links should be seen as expired if the account subscription is not active for 90 days.
 	expirationCutoff := j.clock.Now().UTC().Add(-90 * 24 * time.Hour)
 
-	var result []models.Link
+	var result []Link
 	err := j.txn.ModelContext(span.Context(), &result).
 		Join(`INNER JOIN "accounts" AS "account"`).
 		JoinOn(`"account"."account_id" = "link"."account_id"`).
-		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
+		Where(`"link"."link_type" = ?`, PlaidLinkType).
 		WhereGroup(func(q *orm.Query) (*orm.Query, error) {
 			q = q.
 				Where(`"account"."subscription_active_until" IS NOT NULL AND "account"."subscription_active_until" < ?`, expirationCutoff).
@@ -172,7 +172,7 @@ func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([
 	defer span.Finish()
 
 	var result []BankAccountWithStaleSpendingItem
-	err := j.txn.ModelContext(span.Context(), &models.BankAccount{}).
+	err := j.txn.ModelContext(span.Context(), &BankAccount{}).
 		ColumnExpr(`"bank_account"."account_id"`).
 		ColumnExpr(`"bank_account"."bank_account_id"`).
 		Join(`INNER JOIN "spending" AS "spending"`).
@@ -192,8 +192,8 @@ func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([
 type AccountWithTooManyFiles struct {
 	tableName string `pg:"files"`
 
-	AccountId uint64 `pg:"account_id"`
-	Count     int64  `pg:"count"`
+	AccountId ID[Account] `pg:"account_id"`
+	Count     int64       `pg:"count"`
 }
 
 func (j *jobRepository) GetAccountsWithTooManyFiles(ctx context.Context) ([]AccountWithTooManyFiles, error) {

@@ -1,7 +1,6 @@
 package controller_test
 
 import (
-	"math"
 	"net/http"
 	"testing"
 	"time"
@@ -40,7 +39,7 @@ func TestMe(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.user").Object().NotEmpty()
-			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.user.userId").String().IsASCII()
 			response.JSON().Path("$.isActive").Boolean().IsTrue()
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
@@ -90,7 +89,7 @@ func TestMe(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.user").Object().NotEmpty()
-			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.user.userId").String().IsASCII()
 			response.JSON().Path("$.isActive").Boolean().IsTrue()
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsTrue()
@@ -124,7 +123,7 @@ func TestMe(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.user").Object().NotEmpty()
-			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.user.userId").String().IsASCII()
 			response.JSON().Path("$.isActive").Boolean().IsFalse()
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
@@ -372,9 +371,9 @@ func TestChangePassword(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		token, err := app.Tokens.Create(security.AuthenticatedAudience, 10*time.Minute, security.Claims{
 			EmailAddress: gofakeit.Email(),
-			UserId:       math.MaxUint64,
-			AccountId:    math.MaxUint64,
-			LoginId:      math.MaxUint64,
+			UserId:       "user_bogus",
+			AccountId:    "acct_bogus",
+			LoginId:      "lgn_bogus",
 		})
 		assert.NoError(t, err, "should not have an error generating a bogus token")
 

@@ -147,6 +147,7 @@ func newSecretsCommand(parent *cobra.Command) {
 
 func newViewSecretCommand(parent *cobra.Command) {
 	var itemId string
+	var accountId string
 	var kmsProvider string
 
 	command := &cobra.Command{
@@ -193,6 +194,7 @@ func newViewSecretCommand(parent *cobra.Command) {
 		},
 	}
 	command.PersistentFlags().StringVar(&itemId, "item-id", "", "The Plaid Item ID to retrieve the secret for.")
+	command.PersistentFlags().StringVar(&accountId, "account-id", "", "The Account ID that the Plaid item belongs to in monetr.")
 	command.PersistentFlags().StringVar(&kmsProvider, "kms-provider", "", "Override the KMS provider setting in the config.")
 
 	parent.AddCommand(command)

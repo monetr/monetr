@@ -20,6 +20,6 @@ func TestGivenIHaveAFundingSchedule(t *testing.T) {
 	assert.NotNil(t, fundingSchedule.Account, "should have the account field set")
 	assert.Equal(t, bankAccount.BankAccountId, fundingSchedule.BankAccountId, "should have the expected bank account Id")
 	assert.NotEmpty(t, fundingSchedule.Name, "should have a funding schedule name")
-	assert.NotEmpty(t, fundingSchedule.NextOccurrence, "next occurrence should be set")
-	assert.Greater(t, fundingSchedule.NextOccurrence, clock.Now(), "next occurrence should be in the past, the previous occurrence relative to now")
+	assert.NotEmpty(t, fundingSchedule.NextRecurrence, "next occurrence should be set")
+	assert.Greater(t, fundingSchedule.NextRecurrence, clock.Now(), "next occurrence should be in the past, the previous occurrence relative to now")
 }

@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"crypto/sha256"
+	"fmt"
 	"strings"
 	"time"
 
@@ -10,8 +12,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/hash"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -39,7 +40,7 @@ type unauthenticatedRepo struct {
 func (u *unauthenticatedRepo) CreateLogin(
 	ctx context.Context,
 	email, password string, firstName, lastName string,
-) (*models.Login, error) {
+) (*Login, error) {
 	span := sentry.StartSpan(ctx, "CreateLogin")
 	defer span.Finish()
 
@@ -48,8 +49,8 @@ func (u *unauthenticatedRepo) CreateLogin(
 		return nil, errors.Wrap(err, "failed to bcrypt provided password")
 	}
 
-	login := &models.LoginWithHash{
-		Login: models.Login{
+	login := &LoginWithHash{
+		Login: Login{
 			Email:           strings.ToLower(email),
 			FirstName:       firstName,
 			LastName:        lastName,
@@ -79,13 +80,13 @@ func (u *unauthenticatedRepo) CreateLogin(
 	return &login.Login, errors.Wrap(err, "failed to create login")
 }
 
-func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *models.Account) error {
+func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *Account) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	// Make sure that the Id is not being specified by the caller of this method. Will ensure that the caller cannot
 	// specify the accountId and overwrite something.
-	account.AccountId = 0
+	account.AccountId = ""
 	// TODO Should this be in the timezone of the account? Time is time right, now should be the same no matter what?
 	account.CreatedAt = time.Now()
 
@@ -93,7 +94,7 @@ func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *mode
 	return errors.Wrap(err, "failed to create account")
 }
 
-func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId, accountId uint64, user *models.User) error {
+func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId ID[Login], accountId ID[Account], user *User) error {
 	span := sentry.StartSpan(ctx, "CreateAccount")
 	defer span.Finish()
 
@@ -102,7 +103,7 @@ func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId, accountId
 		"accountId": accountId,
 	}
 
-	user.UserId = 0
+	user.UserId = ""
 	user.AccountId = accountId
 	user.LoginId = loginId
 
@@ -116,11 +117,11 @@ func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId, accountId
 	return nil
 }
 
-func (u *unauthenticatedRepo) GetLoginForEmail(ctx context.Context, emailAddress string) (*models.Login, error) {
+func (u *unauthenticatedRepo) GetLoginForEmail(ctx context.Context, emailAddress string) (*Login, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	var login models.Login
+	var login Login
 	err := u.txn.ModelContext(span.Context(), &login).
 		Where(`"login"."email" = ?`, strings.ToLower(emailAddress)). // Only for a login with this email.
 		Limit(1).
@@ -136,7 +137,7 @@ func (u *unauthenticatedRepo) SetEmailVerified(ctx context.Context, emailAddress
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	var login models.Login
+	var login Login
 	result, err := u.txn.ModelContext(span.Context(), &login).
 		Set(`"is_email_verified" = ?`, EmailVerified).               // Change the verification to true.
 		Set(`"email_verified_at" = ?`, u.clock.Now().UTC()).         // Set the verified at time to now.
@@ -156,7 +157,7 @@ func (u *unauthenticatedRepo) SetEmailVerified(ctx context.Context, emailAddress
 	return nil
 }
 
-func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error) {
+func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string) (*Link, error) {
 	span := sentry.StartSpan(ctx, "GetLinksForItem")
 	defer span.Finish()
 
@@ -164,7 +165,7 @@ func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string
 		"itemId": itemId,
 	}
 
-	var link models.Link
+	var link Link
 	err := u.txn.ModelContext(span.Context(), &link).
 		Relation("PlaidLink").
 		Where(`"plaid_link"."item_id" = ?`, itemId).
@@ -185,42 +186,18 @@ func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string
 	return &link, nil
 }
 
-func (u *unauthenticatedRepo) GetLinkByTellerEnrollmentId(ctx context.Context, enrollmentId string) (*models.Link, error) {
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-	span.Data = map[string]interface{}{
-		"enrollmentId": enrollmentId,
-	}
-
-	var link models.Link
-	err := u.txn.ModelContext(span.Context(), &link).
-		Relation("TellerLink").
-		Where(`"teller_link"."enrollment_id" = ?`, enrollmentId).
-		Limit(1).
-		Select(&link)
-	if err != nil {
-		span.Status = sentry.SpanStatusInternalError
-		return nil, errors.Wrap(err, "failed to retrieve teller link")
-	}
-
-	if link.TellerLink == nil {
-		span.Status = sentry.SpanStatusNotFound
-		return nil, errors.Errorf("failed to retrieve link for enrollment id")
-	}
-
-	span.Status = sentry.SpanStatusOK
-
-	return &link, nil
-}
-
-func (u *unauthenticatedRepo) ValidateBetaCode(ctx context.Context, betaCode string) (*models.Beta, error) {
+func (u *unauthenticatedRepo) ValidateBetaCode(ctx context.Context, betaCode string) (*Beta, error) {
 	span := sentry.StartSpan(ctx, "Validate Beta Code")
 	defer span.Finish()
-	var beta models.Beta
-	hashedCode := hash.HashPassword(strings.ToLower(betaCode), betaCode)
+	var beta Beta
+
+	hash := sha256.New()
+	hash.Write([]byte(strings.ToLower(betaCode)))
+	hashedCode := fmt.Sprintf("%X", hash.Sum(nil))
+
 	err := u.txn.ModelContext(span.Context(), &beta).
 		Where(`"beta"."code_hash" = ?`, hashedCode).
-		Where(`"beta"."used_by_user_id" IS NULL`).
+		Where(`"beta"."used_by" IS NULL`).
 		Limit(1).
 		Select(&beta)
 	if err != nil {
@@ -238,11 +215,11 @@ func (u *unauthenticatedRepo) ValidateBetaCode(ctx context.Context, betaCode str
 	return &beta, nil
 }
 
-func (u *unauthenticatedRepo) UseBetaCode(ctx context.Context, betaId, usedBy uint64) error {
+func (u *unauthenticatedRepo) UseBetaCode(ctx context.Context, betaId ID[Beta], usedBy ID[User]) error {
 	span := sentry.StartSpan(ctx, "Use Beta Code")
 	defer span.Finish()
-	result, err := u.txn.ModelContext(span.Context(), &models.Beta{}).
-		Set(`"used_by_user_id" = ?`, usedBy).
+	result, err := u.txn.ModelContext(span.Context(), &Beta{}).
+		Set(`"used_by" = ?`, usedBy).
 		Where(`"beta"."beta_id" = ?`, betaId).
 		Update()
 	if err != nil {
@@ -260,7 +237,7 @@ func (u *unauthenticatedRepo) UseBetaCode(ctx context.Context, betaId, usedBy ui
 	return nil
 }
 
-func (u *unauthenticatedRepo) ResetPassword(ctx context.Context, loginId uint64, password string) error {
+func (u *unauthenticatedRepo) ResetPassword(ctx context.Context, loginId ID[Login], password string) error {
 	span := sentry.StartSpan(ctx, "ResetPassword")
 	defer span.Finish()
 
@@ -269,7 +246,7 @@ func (u *unauthenticatedRepo) ResetPassword(ctx context.Context, loginId uint64,
 		return crumbs.WrapError(span.Context(), err, "failed to encrypt provided password for reset")
 	}
 
-	result, err := u.txn.ModelContext(span.Context(), &models.LoginWithHash{}).
+	result, err := u.txn.ModelContext(span.Context(), &LoginWithHash{}).
 		Set(`"crypt" = ?`, hashedPassword).
 		Set(`"password_reset_at" = ?`, u.clock.Now()).
 		Where(`"login_with_hash"."login_id" = ?`, loginId).

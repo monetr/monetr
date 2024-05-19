@@ -202,7 +202,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 
 	// Webhook endpoints
 	repoParty.POST("/plaid/webhook", c.postPlaidWebhook)
-	repoParty.POST("/teller/webhook", c.postTellerWebhook)
 	repoParty.POST("/stripe/webhook", c.handleStripeWebhook)
 
 	// Endpoints used by the client/UI.
@@ -231,7 +230,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// Icons
 	billed.POST("/icons/search", c.searchIcon)
 	// Account
-	billed.GET("/account/settings", c.getAccountSettings)
 	billed.DELETE("/account", c.deleteAccount)
 	// Links
 	billed.GET("/links", c.getLinks)
@@ -263,7 +261,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// Funding schedules
 	billed.GET("/bank_accounts/:bankAccountId/funding_schedules", c.getFundingSchedules)
 	billed.GET("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.getFundingScheduleById)
-	billed.GET("/bank_accounts/:bankAccountId/funding_schedules/stats", c.getFundingScheduleStats)
 	billed.POST("/bank_accounts/:bankAccountId/funding_schedules", c.postFundingSchedules)
 	billed.PUT("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.putFundingSchedules)
 	billed.DELETE("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.deleteFundingSchedules)
@@ -287,7 +284,4 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.POST("/plaid/link/token/callback", c.postPlaidTokenCallback)
 	billed.GET("/plaid/link/setup/wait/:linkId", c.getWaitForPlaid)
 	billed.POST("/plaid/link/sync", c.postSyncPlaidManually)
-	// Teller
-	billed.POST("/teller/link", c.postTellerLink)
-	billed.GET("/teller/link/:linkId/wait", c.getWaitForTeller)
 }

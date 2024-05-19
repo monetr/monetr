@@ -32,9 +32,9 @@ func TestPostFundingSchedules(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
+		response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+		response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+		response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 		response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
 	})
 
@@ -57,9 +57,9 @@ func TestPostFundingSchedules(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
+		response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+		response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+		response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 		response.JSON().Path("$.excludeWeekends").Boolean().IsTrue()
 	})
 
@@ -85,15 +85,15 @@ func TestPostFundingSchedules(t *testing.T) {
 				"name":           "Payday",
 				"description":    "Every other friday",
 				"ruleset":        ruleset,
-				"nextOccurrence": nextFriday,
+				"nextRecurrence": nextFriday,
 			}).
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
-		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).IsEqual(nextFriday)
+		response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+		response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+		response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
+		response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextFriday)
 		response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
 	})
 
@@ -116,9 +116,9 @@ func TestPostFundingSchedules(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-			response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
+			response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 			response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
 		}
 
@@ -226,7 +226,7 @@ func TestPutFundingSchedules(t *testing.T) {
 		token := GivenILogin(t, e, user.Login.Email, password)
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
-		var fundingScheduleId uint64
+		var fundingScheduleId models.ID[models.FundingSchedule]
 		{ // Create the funding schedule
 			fundingRule := testutils.Must(t, models.NewRuleSet, FifthteenthAndLastDayOfEveryMonth)
 			fundingRule.DTStart(util.Midnight(fundingRule.GetDTStart(), timezone)) // Force the Rule to be in the correct TZ.
@@ -238,18 +238,18 @@ func TestPutFundingSchedules(t *testing.T) {
 					"description":     "15th and the Last day of every month",
 					"ruleset":         fundingRule,
 					"excludeWeekends": true,
-					"nextOccurrence":  fundingRule.After(now, false),
+					"nextRecurrence":  fundingRule.After(now, false),
 				}).
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-			response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-			fundingScheduleId = uint64(response.JSON().Path("$.fundingScheduleId").Number().Raw())
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
-		var spendingId uint64
+		var spendingId models.ID[models.Spending]
 		{ // Create an expense
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
@@ -271,11 +271,11 @@ func TestPutFundingSchedules(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.spendingId").Number().Gt(0)
-			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-			response.JSON().Path("$.fundingScheduleId").Number().IsEqual(fundingScheduleId)
+			response.JSON().Path("$.spendingId").String().IsASCII()
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
-			spendingId = uint64(response.JSON().Path("$.spendingId").Number().Raw())
+			spendingId = models.ID[models.Spending](response.JSON().Path("$.spendingId").String().Raw())
 			assert.NotZero(t, spendingId, "must be able to extract the spending ID")
 		}
 
@@ -291,17 +291,17 @@ func TestPutFundingSchedules(t *testing.T) {
 					"description":     "Every friday",
 					"ruleset":         newFundingRule,
 					"excludeWeekends": false,
-					"nextOccurrence":  next,
+					"nextRecurrence":  next,
 				}).
 				WithCookie(TestCookieName, token).
 				Expect()
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.fundingSchedule.name").String().IsEqual("Payday")
-			response.JSON().Path("$.fundingSchedule.nextOccurrence").String().AsDateTime(time.RFC3339).IsEqual(next)
+			response.JSON().Path("$.fundingSchedule.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(next)
 			response.JSON().Path("$.spending").IsArray()
 			response.JSON().Path("$.spending").Array().Length().IsEqual(1)
-			response.JSON().Path("$.spending[0].spendingId").Number().IsEqual(spendingId)
+			response.JSON().Path("$.spending[0].spendingId").IsEqual(spendingId)
 		}
 	})
 }
@@ -336,7 +336,7 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId uint64
+		var fundingScheduleId models.ID[models.FundingSchedule]
 		{ // Create the funding schedule
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -350,9 +350,9 @@ func TestDeleteFundingSchedules(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-			response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-			fundingScheduleId = uint64(response.JSON().Path("$.fundingScheduleId").Number().Raw())
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
@@ -378,8 +378,8 @@ func TestDeleteFundingSchedules(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-			response.JSON().Path("$.fundingScheduleId").Number().IsEqual(fundingScheduleId)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 		}
 
@@ -395,7 +395,7 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		}
 	})
 
-	t.Run("funding schedule does not exist", func(t *testing.T) {
+	t.Run("invalid funding schedule Id", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
@@ -405,6 +405,23 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
 			WithPath("bankAccountId", bank.BankAccountId).
 			WithPath("fundingScheduleId", math.MaxInt64).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid funding schedule Id")
+	})
+
+	t.Run("funding schedule does not exist", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("fundingScheduleId", "fund_bogus").
 			WithCookie(TestCookieName, token).
 			Expect()
 
@@ -421,7 +438,7 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId uint64
+		var fundingScheduleId models.ID[models.FundingSchedule]
 		{ // Create the funding schedule.
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -434,11 +451,11 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 
 			// Save the ID of the created funding schedule so we can use it below.
-			fundingScheduleId = uint64(response.JSON().Path("$.fundingScheduleId").Number().Raw())
+			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 		}
 
 		response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
@@ -448,14 +465,15 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.fundingScheduleId").Number().IsEqual(fundingScheduleId)
-		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+		response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
+		response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 	})
 
 	t.Run("cannot read someone else's funding schedule", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 
-		var bankAccountId, fundingScheduleId uint64
+		var bankAccountId models.ID[models.BankAccount]
+		var fundingScheduleId models.ID[models.FundingSchedule]
 		{ // Create the funding schedule under the first account.
 			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
@@ -480,11 +498,11 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 					Expect()
 
 				response.Status(http.StatusOK)
-				response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-				response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+				response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+				response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 
 				// Save the ID of the created funding schedule so we can use it below.
-				fundingScheduleId = uint64(response.JSON().Path("$.fundingScheduleId").Number().Raw())
+				fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 				bankAccountId = bank.BankAccountId
 			}
 
@@ -496,8 +514,8 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 					Expect()
 
 				response.Status(http.StatusOK)
-				response.JSON().Path("$.fundingScheduleId").Number().IsEqual(fundingScheduleId)
-				response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+				response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
+				response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			}
 		}
 

@@ -6,6 +6,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -17,13 +18,13 @@ type BasicPayWall interface {
 	// account. It does not indicate whether or not this subscription object is in a state that the customer should be
 	// allowed to use their account, only whether or not the subscription object already exists in such a state that a
 	// new subscription should not be created.
-	GetHasSubscription(ctx context.Context, accountId uint64) (bool, error)
+	GetHasSubscription(ctx context.Context, accountId ID[Account]) (bool, error)
 	// GetSubscriptionIsActive should return whether or not the customer's subscription (or lack thereof) is in a state
 	// where the customer should have access to their account and data. If they lack a subscription entirely, or the
 	// subscription has been canceled or past due; then the customer should not be permitted to access their
 	// application.
-	GetSubscriptionIsActive(ctx context.Context, accountId uint64) (bool, error)
-	GetSubscriptionIsTrialing(ctx context.Context, accountId uint64) (trialing bool, err error)
+	GetSubscriptionIsActive(ctx context.Context, accountId ID[Account]) (bool, error)
+	GetSubscriptionIsTrialing(ctx context.Context, accountId ID[Account]) (trialing bool, err error)
 }
 
 var (
@@ -44,7 +45,7 @@ func NewBasicPaywall(log *logrus.Entry, clock clock.Clock, repo AccountRepositor
 	}
 }
 
-func (b *baseBasicPaywall) GetHasSubscription(ctx context.Context, accountId uint64) (bool, error) {
+func (b *baseBasicPaywall) GetHasSubscription(ctx context.Context, accountId ID[Account]) (bool, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -64,7 +65,7 @@ func (b *baseBasicPaywall) GetHasSubscription(ctx context.Context, accountId uin
 // possible for it to return a stale response within a few seconds. But in general it should be acceptable. When an
 // account is updated -> its cache is invalidated. There is likely a very small window where an invalid state could be
 // evaluated, but it should be fine.
-func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountId uint64) (active bool, err error) {
+func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountId ID[Account]) (active bool, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -111,7 +112,7 @@ func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountI
 	return account.IsSubscriptionActive(b.clock.Now()), nil
 }
 
-func (b *baseBasicPaywall) GetSubscriptionIsTrialing(ctx context.Context, accountId uint64) (trialing bool, err error) {
+func (b *baseBasicPaywall) GetSubscriptionIsTrialing(ctx context.Context, accountId ID[Account]) (trialing bool, err error) {
 	span := sentry.StartSpan(ctx, "Billing - GetSubscriptionIsTrialing")
 	defer span.Finish()
 

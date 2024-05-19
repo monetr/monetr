@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/crumbs"
@@ -96,10 +97,14 @@ func (c *Controller) returnError(ctx echo.Context, status int, msg string, args 
 }
 
 func (c *Controller) badRequest(ctx echo.Context, msg string, args ...interface{}) error {
+	requestSpan := c.getSpan(ctx)
+	requestSpan.Status = sentry.SpanStatusInvalidArgument
 	return c.returnError(ctx, http.StatusBadRequest, msg, args...)
 }
 
 func (c *Controller) invalidJson(ctx echo.Context) error {
+	requestSpan := c.getSpan(ctx)
+	requestSpan.Status = sentry.SpanStatusInvalidArgument
 	return c.returnError(ctx, http.StatusBadRequest, "invalid JSON body")
 }
 

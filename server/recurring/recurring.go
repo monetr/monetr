@@ -42,7 +42,7 @@ func (d *Detection) GetRecurringTransactions() []models.TransactionRecurring {
 		Time   time.Time
 	}
 	type Transaction struct {
-		ID       uint64
+		ID       models.ID[models.Transaction]
 		Name     string
 		Merchant string
 		Date     time.Time
@@ -61,7 +61,7 @@ func (d *Detection) GetRecurringTransactions() []models.TransactionRecurring {
 			transactions = append(transactions, transaction.Transaction)
 			a, ok := clusterAmounts[transaction.Transaction.Amount]
 			if !ok {
-				a.IDs = make([]uint64, 0, 1)
+				a.IDs = make([]models.ID[models.Transaction], 0, 1)
 				a.Amount = transaction.Transaction.Amount
 			}
 			a.IDs = append(a.IDs, transaction.ID)
@@ -78,7 +78,7 @@ func (d *Detection) GetRecurringTransactions() []models.TransactionRecurring {
 			var lastAmount int64 = 0
 			misses := make([]Miss, 0)
 			hits := make([]Hit, 0, len(transactions))
-			ids := make([]uint64, 0, len(transactions))
+			ids := make([]models.ID[models.Transaction], 0, len(transactions))
 			amounts := make(map[int64]int, len(transactions))
 			occurrences := window.Rule.Between(start.AddDate(0, 0, -window.Fuzzy), end.AddDate(0, 0, window.Fuzzy), false)
 			if len(occurrences) == 1 {
@@ -157,7 +157,7 @@ func (d *Detection) GetRecurringTransactions() []models.TransactionRecurring {
 
 type AmountCluster struct {
 	Amount int64
-	IDs    []uint64
+	IDs    []models.ID[models.Transaction]
 }
 
 func findBuckets(clusterAmounts map[int64]AmountCluster) []AmountCluster {

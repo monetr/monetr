@@ -30,8 +30,8 @@ func TestProcessSpendingJob_Run(t *testing.T) {
 			Name:                   "Payday",
 			Description:            "Payday",
 			RuleSet:                fundingRule,
-			NextOccurrence:         fundingRule.After(clock.Now(), false),
-			NextOccurrenceOriginal: fundingRule.After(clock.Now(), false),
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
 
 		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", clock.Now())
@@ -47,7 +47,7 @@ func TestProcessSpendingJob_Run(t *testing.T) {
 			CurrentAmount:     5000,
 			RuleSet:           spendingRule,
 			NextRecurrence:    spendingRule.Before(clock.Now(), true), // Make it so it recurs next in the past. (STALE)
-			DateCreated:       clock.Now(),
+			CreatedAt:         clock.Now(),
 		})
 
 		handler := NewProcessSpendingHandler(log, db, clock)

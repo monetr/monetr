@@ -17,14 +17,14 @@ func GivenIHaveAFundingSchedule(t *testing.T, clock clock.Clock, bankAccount *mo
 	require.NotNil(t, bankAccount, "must provide a valid bank account")
 	require.NotZero(t, bankAccount.BankAccountId, "bank account must have a valid Id")
 	require.NotZero(t, bankAccount.AccountId, "bank account must have a valid account Id")
-	require.NotZero(t, bankAccount.Link.CreatedByUserId, "bank account must have a valid created by user Id")
+	require.NotZero(t, bankAccount.Link.CreatedBy, "bank account must have a valid created by user Id")
 
 	if excludeWeekends {
 		panic("sorry I haven't implemented this yet")
 	}
 
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedBy, bankAccount.AccountId, db)
 
 	timezone := testutils.MustEz(t, bankAccount.Account.GetTimezone)
 	rule := testutils.RuleToSet(t, timezone, ruleString, clock.Now())
@@ -39,9 +39,9 @@ func GivenIHaveAFundingSchedule(t *testing.T, clock clock.Clock, bankAccount *mo
 		Description:            gofakeit.Generate("{sentence:5}"),
 		RuleSet:                rule,
 		ExcludeWeekends:        excludeWeekends,
-		LastOccurrence:         nil,
-		NextOccurrence:         nextOccurrence,
-		NextOccurrenceOriginal: nextOccurrence,
+		LastRecurrence:         nil,
+		NextRecurrence:         nextOccurrence,
+		NextRecurrenceOriginal: nextOccurrence,
 	}
 
 	require.NoError(t, repo.CreateFundingSchedule(context.Background(), &fundingSchedule), "must be able to create funding schedule")

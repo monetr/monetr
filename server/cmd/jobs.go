@@ -13,7 +13,6 @@ import (
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/teller"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -24,25 +23,18 @@ func init() {
 	JobCommand.AddCommand(RunJobCommand)
 	newCleanupJobsCommand(RunJobCommand)
 	RunJobCommand.AddCommand(RunSyncPlaidCommand)
-	RunJobCommand.AddCommand(RunSyncTellerCommand)
 
 	RunSyncPlaidCommand.PersistentFlags().BoolVar(&AllFlag, "all", false, "Pull transactions for all accounts. This job should not be run locally unless you are debugging as it may take a very long time. Will ignore 'account' and 'link' flags.")
-	RunSyncPlaidCommand.PersistentFlags().Uint64VarP(&AccountIDFlag, "account", "a", 0, "Account ID to target for the task. Will only run against this account. (required)")
-	RunSyncPlaidCommand.PersistentFlags().Uint64VarP(&LinkIDFlag, "link", "l", 0, "Link ID to target for the task. Will only affect objects for this Link. Must belong to the account specified. (required)")
+	RunSyncPlaidCommand.PersistentFlags().StringVarP(&AccountIDFlag, "account", "a", "", "Account ID to target for the task. Will only run against this account. (required)")
+	RunSyncPlaidCommand.PersistentFlags().StringVarP(&LinkIDFlag, "link", "l", "", "Link ID to target for the task. Will only affect objects for this Link. Must belong to the account specified. (required)")
 	RunSyncPlaidCommand.PersistentFlags().BoolVarP(&DryRunFlag, "dry-run", "d", false, "Dry run the retrieval of transactions, this will log what transactions might be changed or created. No changes will be persisted. [local]")
 	RunSyncPlaidCommand.PersistentFlags().BoolVar(&LocalFlag, "local", false, "Run the job locally, this means the job is not dispatched to the external scheduler like RabbitMQ or Redis. This defaults to true when dry running or when the job engine is in-memory.")
-
-	RunSyncTellerCommand.PersistentFlags().BoolVar(&AllFlag, "all", false, "Pull transactions for all accounts. This job should not be run locally unless you are debugging as it may take a very long time. Will ignore 'account' and 'link' flags.")
-	RunSyncTellerCommand.PersistentFlags().Uint64VarP(&AccountIDFlag, "account", "a", 0, "Account ID to target for the task. Will only run against this account. (required)")
-	RunSyncTellerCommand.PersistentFlags().Uint64VarP(&LinkIDFlag, "link", "l", 0, "Link ID to target for the task. Will only affect objects for this Link. Must belong to the account specified. (required)")
-	RunSyncTellerCommand.PersistentFlags().BoolVarP(&DryRunFlag, "dry-run", "d", false, "Dry run the retrieval of transactions, this will log what transactions might be changed or created. No changes will be persisted. [local]")
-	RunSyncTellerCommand.PersistentFlags().BoolVar(&LocalFlag, "local", false, "Run the job locally, this means the job is not dispatched to the external scheduler like RabbitMQ or Redis. This defaults to true when dry running or when the job engine is in-memory.")
 }
 
 var (
 	AllFlag       bool
-	AccountIDFlag uint64
-	LinkIDFlag    uint64
+	AccountIDFlag string
+	LinkIDFlag    string
 	DryRunFlag    bool
 	LocalFlag     bool
 )
@@ -82,7 +74,6 @@ var (
 				configuration,
 				db,
 				redisController.Pool(),
-				nil,
 				nil,
 				nil,
 				nil,
@@ -131,19 +122,19 @@ var (
 		Short: "Pull latest transactions for a specific link and account.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clock := clock.New()
-			if AccountIDFlag == 0 && !AllFlag {
+			if AccountIDFlag == "" && !AllFlag {
 				return errors.New("--account must be specified if you are not running against --all")
 			}
-			if LinkIDFlag == 0 && AccountIDFlag != 0 {
+			if LinkIDFlag == "" && AccountIDFlag != "" {
 				return errors.New("--link must be specified if you are running against a single account")
 			}
 
 			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
-			if AccountIDFlag != 0 && AllFlag {
+			if AccountIDFlag != "" && AllFlag {
 				log.Warn("--account flag does nothing when --all is specified")
 			}
-			if LinkIDFlag != 0 && AllFlag {
+			if LinkIDFlag != "" && AllFlag {
 				log.Warn("--link flag does nothing when --all is specified")
 			}
 
@@ -172,7 +163,6 @@ var (
 				nil,
 				nil,
 				nil,
-				nil,
 			)
 			if err != nil {
 				return err
@@ -181,8 +171,8 @@ var (
 			jobs := make([]background.SyncPlaidArguments, 0)
 			if !AllFlag {
 				jobArgs := background.SyncPlaidArguments{
-					AccountId: AccountIDFlag,
-					LinkId:    LinkIDFlag,
+					AccountId: models.ID[models.Account](AccountIDFlag),
+					LinkId:    models.ID[models.Link](LinkIDFlag),
 					Trigger:   "command",
 				}
 				jobs = append(jobs, jobArgs)
@@ -211,7 +201,7 @@ var (
 						return err
 					}
 
-					repo := repository.NewRepositoryFromSession(clock, 0, jobArgs.AccountId, txn)
+					repo := repository.NewRepositoryFromSession(clock, "user_admin", jobArgs.AccountId, txn)
 
 					kms, err := getKMS(log, configuration)
 					if err != nil {
@@ -255,149 +245,6 @@ var (
 					}
 				} else {
 					return background.TriggerSyncPlaid(ctx, backgroundJobs, jobArgs)
-				}
-			}
-
-			return nil
-		},
-	}
-
-	RunSyncTellerCommand = &cobra.Command{
-		Use:   "sync-teller",
-		Short: "Pull the latest transactions for a Teller link",
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			clock := clock.New()
-			if AccountIDFlag == 0 && !AllFlag {
-				return errors.New("--account must be specified if you are not running against --all")
-			}
-			if LinkIDFlag == 0 && AccountIDFlag != 0 {
-				return errors.New("--link must be specified if you are running against a single account")
-			}
-
-			configuration := config.LoadConfiguration()
-			log := logging.NewLoggerWithConfig(configuration.Logging)
-			if AccountIDFlag != 0 && AllFlag {
-				log.Warn("--account flag does nothing when --all is specified")
-			}
-			if LinkIDFlag != 0 && AllFlag {
-				log.Warn("--link flag does nothing when --all is specified")
-			}
-
-			db, err := getDatabase(log, configuration, nil)
-			if err != nil {
-				return errors.Wrap(err, "failed to get database instance")
-			}
-
-			ctx := context.Background()
-
-			redisController, err := cache.NewRedisCache(log, configuration.Redis)
-			if err != nil {
-				log.WithError(err).Fatalf("failed to create redis cache: %+v", err)
-				return err
-			}
-			defer redisController.Close()
-
-			backgroundJobs, err := background.NewBackgroundJobs(
-				cmd.Context(),
-				log,
-				clock,
-				configuration,
-				db,
-				redisController.Pool(),
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-			)
-			if err != nil {
-				return err
-			}
-
-			jobs := make([]background.SyncTellerArguments, 0)
-			if !AllFlag {
-				jobArgs := background.SyncTellerArguments{
-					AccountId: AccountIDFlag,
-					LinkId:    LinkIDFlag,
-					Trigger:   "command",
-				}
-				jobs = append(jobs, jobArgs)
-			} else {
-				var links []models.Link
-				db.Model(&links).
-					Where(`"link"."link_type" = ?`, models.TellerLinkType).
-					Where(`"link"."teller_link_id" IS NOT NULL`).
-					Select(&links)
-				for _, link := range links {
-					jobs = append(jobs, background.SyncTellerArguments{
-						AccountId: link.AccountId,
-						LinkId:    link.LinkId,
-						Trigger:   "command",
-					})
-				}
-			}
-
-			log.Infof("syncing %d link(s)", len(jobs))
-
-			for _, jobArgs := range jobs {
-				if LocalFlag || DryRunFlag {
-					txn, err := db.BeginContext(ctx)
-					if err != nil {
-						log.WithError(err).Fatalf("failed to begin transaction to cleanup jobs")
-						return err
-					}
-
-					repo := repository.NewRepositoryFromSession(clock, 0, jobArgs.AccountId, txn)
-
-					kms, err := getKMS(log, configuration)
-					if err != nil {
-						log.WithError(err).Fatal("failed to initialize KMS")
-						return err
-					}
-
-					secretsRepo := repository.NewSecretsRepository(
-						log,
-						clock,
-						txn,
-						kms,
-						jobArgs.AccountId,
-					)
-
-					client, err := teller.NewClient(log, configuration.Teller)
-					if err != nil {
-						log.WithError(err).Fatalf("failed to setup teller client")
-						return err
-					}
-					job, err := background.NewSyncTellerJob(
-						log,
-						repo,
-						clock,
-						secretsRepo,
-						client,
-						pubsub.NewPostgresPubSub(log, db),
-						backgroundJobs,
-						jobArgs,
-					)
-					if err != nil {
-						return errors.Wrap(err, "failed to create sync job")
-					}
-
-					if err := job.Run(ctx); err != nil {
-						log.WithError(err).Fatalf("failed to run sync latest transactions")
-						_ = txn.RollbackContext(ctx)
-						continue
-					}
-
-					if DryRunFlag {
-						log.Info("dry run... rolling changes back")
-						return txn.RollbackContext(ctx)
-					} else {
-						return txn.CommitContext(ctx)
-					}
-				} else {
-					if err := background.TriggerSyncTeller(ctx, backgroundJobs, jobArgs); err != nil {
-						return err
-					}
 				}
 			}
 

@@ -11,7 +11,6 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/storage"
-	"github.com/monetr/monetr/server/teller"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -25,7 +24,7 @@ var (
 	_ JobEnqueuer   = &BackgroundJobs{}
 )
 
-//go:generate mockgen -source=jobs.go -package=mockgen -destination=../internal/mockgen/jobs.go JobController
+//go:generate go run go.uber.org/mock/mockgen@v0.4.0 -source=jobs.go -package=mockgen -destination=../internal/mockgen/jobs.go JobController
 type (
 	// JobController is an interface that can be safely provided to packages outside this one that will allow jobs to be
 	// triggered manually by other events. For a job to be triggered it must have its own trigger function that accepts
@@ -54,7 +53,6 @@ func NewBackgroundJobs(
 	redisPool *redis.Pool,
 	publisher pubsub.Publisher,
 	plaidPlatypus platypus.Platypus,
-	tellerClient teller.Client,
 	kms secrets.KeyManagement,
 	fileStorage storage.Storage,
 ) (*BackgroundJobs, error) {
@@ -93,7 +91,6 @@ func NewBackgroundJobs(
 		NewProcessSpendingHandler(log, db, clock),
 		NewRemoveLinkHandler(log, db, clock, publisher),
 		NewSyncPlaidHandler(log, db, clock, kms, plaidPlatypus, publisher, enqueuer),
-		NewSyncTellerHandler(log, db, clock, kms, tellerClient, publisher, enqueuer),
 	}
 
 	// Setup jobs

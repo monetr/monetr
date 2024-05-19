@@ -22,7 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//go:generate mockgen -source=platypus.go -package=mockgen -destination=../internal/mockgen/platypus.go Platypus
+//go:generate go run go.uber.org/mock/mockgen@v0.4.0 -source=platypus.go -package=mockgen -destination=../internal/mockgen/platypus.go Platypus
 type (
 	Platypus interface {
 		CreateLinkToken(ctx context.Context, options LinkTokenOptions) (LinkToken, error)
@@ -30,7 +30,7 @@ type (
 		GetWebhookVerificationKey(ctx context.Context, keyId string) (*WebhookVerificationKey, error)
 		GetInstitution(ctx context.Context, institutionId string) (*plaid.Institution, error)
 		NewClientFromItemId(ctx context.Context, itemId string) (Client, error)
-		NewClientFromLink(ctx context.Context, accountId uint64, linkId uint64) (Client, error)
+		NewClientFromLink(ctx context.Context, accountId models.ID[models.Account], linkId models.ID[models.Link]) (Client, error)
 		NewClient(ctx context.Context, link *models.Link, accessToken, itemId string) (Client, error)
 		Close() error
 	}
@@ -344,7 +344,7 @@ func (p *Plaid) NewClientFromItemId(ctx context.Context, itemId string) (Client,
 	return p.newClient(span.Context(), link)
 }
 
-func (p *Plaid) NewClientFromLink(ctx context.Context, accountId uint64, linkId uint64) (Client, error) {
+func (p *Plaid) NewClientFromLink(ctx context.Context, accountId models.ID[models.Account], linkId models.ID[models.Link]) (Client, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -408,7 +408,7 @@ func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error
 		return nil, err
 	}
 
-	return p.NewClient(span.Context(), link, secret.Secret, link.PlaidLink.PlaidId)
+	return p.NewClient(span.Context(), link, secret.Value, link.PlaidLink.PlaidId)
 }
 
 func (p *Plaid) Close() error {

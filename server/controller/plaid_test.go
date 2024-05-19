@@ -2,12 +2,10 @@ package controller_test
 
 import (
 	"errors"
-	"math"
 	"net/http"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/golang/mock/gomock"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -16,6 +14,7 @@ import (
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/plaid/plaid-go/v20/plaid"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestPostTokenCallback(t *testing.T) {
@@ -126,7 +125,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("must specify a link Id")
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid link Id")
 	})
 
 	t.Run("bad link ID", func(t *testing.T) {
@@ -139,14 +138,14 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("must specify a link Id")
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid link Id")
 	})
 
 	t.Run("missing link", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.PUT("/api/plaid/link/update/123").
+		response := e.PUT("/api/plaid/link/update/link_bogus").
 			WithCookie(TestCookieName, token).
 			Expect()
 
@@ -296,7 +295,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 
 		response := e.POST("/api/plaid/link/sync").
 			WithJSON(map[string]interface{}{
-				"linkId": math.MaxInt32,
+				"linkId": "link_bogus",
 			}).
 			WithCookie(TestCookieName, token).
 			Expect()

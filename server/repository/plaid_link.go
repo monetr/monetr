@@ -5,22 +5,22 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
-func (r *repositoryBase) CreatePlaidLink(ctx context.Context, link *models.PlaidLink) error {
+func (r *repositoryBase) CreatePlaidLink(ctx context.Context, link *PlaidLink) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	link.AccountId = r.AccountId()
 	link.CreatedAt = r.clock.Now().UTC()
-	link.CreatedByUserId = r.UserId()
+	link.CreatedBy = r.UserId()
 	_, err := r.txn.ModelContext(span.Context(), link).Insert(link)
 	return errors.Wrap(err, "failed to create plaid link")
 }
 
-func (r *repositoryBase) UpdatePlaidLink(ctx context.Context, link *models.PlaidLink) error {
+func (r *repositoryBase) UpdatePlaidLink(ctx context.Context, link *PlaidLink) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -33,26 +33,26 @@ func (r *repositoryBase) UpdatePlaidLink(ctx context.Context, link *models.Plaid
 	return errors.Wrap(err, "failed to update Plaid link")
 }
 
-func (r *repositoryBase) DeletePlaidLink(ctx context.Context, plaidLinkId uint64) error {
+func (r *repositoryBase) DeletePlaidLink(ctx context.Context, plaidLinkId ID[PlaidLink]) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	// Update the link record to indicate that it is no longer a Plaid link but instead a manual one. This way some data
 	// is still preserved.
-	_, err := r.txn.ModelContext(span.Context(), &models.Link{}).
+	_, err := r.txn.ModelContext(span.Context(), &Link{}).
 		Set(`"plaid_link_id" = NULL`).
-		Set(`"link_type" = ?`, models.ManualLinkType).
+		Set(`"link_type" = ?`, ManualLinkType).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."plaid_link_id" = ?`, plaidLinkId).
 		// TODO That won't work anymore
-		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
+		Where(`"link"."link_type" = ?`, PlaidLinkType).
 		Update()
 	if err != nil {
 		return errors.Wrap(err, "failed to clean Plaid link prior to removal")
 	}
 
 	// Remove the sync records related to the Plaid link.
-	_, err = r.txn.ModelContext(span.Context(), &models.PlaidSync{}).
+	_, err = r.txn.ModelContext(span.Context(), &PlaidSync{}).
 		Where(`"plaid_sync"."plaid_link_id" = ?`, plaidLinkId).
 		ForceDelete()
 	if err != nil {
@@ -60,15 +60,15 @@ func (r *repositoryBase) DeletePlaidLink(ctx context.Context, plaidLinkId uint64
 	}
 
 	// Then delete the Plaid link itself.
-	_, err = r.txn.ModelContext(span.Context(), &models.PlaidLink{}).
+	_, err = r.txn.ModelContext(span.Context(), &PlaidLink{}).
 		Where(`"plaid_link"."plaid_link_id" = ?`, plaidLinkId).
 		ForceDelete()
 	return errors.Wrap(err, "failed to delete Plaid link")
 }
 
 type PlaidRepository interface {
-	GetLinkByItemId(ctx context.Context, itemId string) (*models.Link, error)
-	GetLink(ctx context.Context, accountId, linkId uint64) (*models.Link, error)
+	GetLinkByItemId(ctx context.Context, itemId string) (*Link, error)
+	GetLink(ctx context.Context, accountId ID[Account], linkId ID[Link]) (*Link, error)
 }
 
 func NewPlaidRepository(db pg.DBI) PlaidRepository {
@@ -81,14 +81,14 @@ type plaidRepositoryBase struct {
 	txn pg.DBI
 }
 
-func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string) (*models.Link, error) {
+func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string) (*Link, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
 		"itemId": itemId,
 	}
 
-	var link models.Link
+	var link Link
 	err := r.txn.ModelContext(span.Context(), &link).
 		Relation("PlaidLink").
 		Where(`"plaid_link"."item_id" = ?`, itemId).
@@ -101,7 +101,7 @@ func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string
 	return &link, nil
 }
 
-func (r *plaidRepositoryBase) GetLink(ctx context.Context, accountId, linkId uint64) (*models.Link, error) {
+func (r *plaidRepositoryBase) GetLink(ctx context.Context, accountId ID[Account], linkId ID[Link]) (*Link, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -110,7 +110,7 @@ func (r *plaidRepositoryBase) GetLink(ctx context.Context, accountId, linkId uin
 		"linkId":    linkId,
 	}
 
-	var link models.Link
+	var link Link
 	err := r.txn.ModelContext(span.Context(), &link).
 		Relation("PlaidLink").
 		Where(`"link"."account_id" = ?`, accountId).

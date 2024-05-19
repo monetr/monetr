@@ -1,7 +1,10 @@
 package models
 
 import (
+	"context"
 	"time"
+
+	"github.com/go-pg/pg/v10"
 )
 
 type JobStatus string
@@ -16,7 +19,7 @@ const (
 type Job struct {
 	tableName string `pg:"jobs"`
 
-	JobId       uint64     `json:"-" pg:"job_id,notnull,pk,type:'bigserial'"`
+	JobId       ID[Job]    `json:"-" pg:"job_id,notnull,pk"`
 	Queue       string     `json:"-" pg:"queue,notnull"`
 	Signature   string     `json:"-" pg:"signature,notnull"`
 	Input       string     `json:"-" pg:"input"`
@@ -26,4 +29,29 @@ type Job struct {
 	UpdatedAt   time.Time  `json:"-" pg:"updated_at,notnull"`
 	StartedAt   *time.Time `json:"-" pg:"started_at"`
 	CompletedAt *time.Time `json:"-" pg:"completed_at"`
+}
+
+func (Job) IdentityPrefix() string {
+	return "job"
+}
+
+var (
+	_ pg.BeforeInsertHook = (*Job)(nil)
+)
+
+func (o *Job) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.JobId.IsZero() {
+		o.JobId = NewID(o)
+	}
+
+	now := time.Now()
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = now
+	}
+
+	if o.UpdatedAt.IsZero() {
+		o.UpdatedAt = now
+	}
+
+	return ctx, nil
 }

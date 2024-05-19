@@ -17,7 +17,7 @@ func ReadBankAccounts(t *testing.T, clock clock.Clock, link models.Link) []model
 	require.NotZero(t, link.AccountId, "link id must be included")
 
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(clock, link.CreatedByUserId, link.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, link.CreatedBy, link.AccountId, db)
 
 	bankAccounts, err := repo.GetBankAccountsByLinkId(context.Background(), link.LinkId)
 	require.NoError(t, err, "must be able to read bank accounts")
@@ -31,7 +31,7 @@ func GivenIHaveABankAccount(t *testing.T, clock clock.Clock, link *models.Link, 
 	require.NotZero(t, link.AccountId, "link id must be included")
 
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(clock, link.CreatedByUserId, link.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, link.CreatedBy, link.AccountId, db)
 
 	current := int64(gofakeit.Number(2000, 100000))
 	available := current - int64(gofakeit.Number(100, 2000))
@@ -73,20 +73,20 @@ func GivenIHaveAPlaidBankAccount(
 	require.NotZero(t, link.PlaidLinkId, "link plaid link id must be included")
 
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(clock, link.CreatedByUserId, link.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, link.CreatedBy, link.AccountId, db)
 
 	current := int64(gofakeit.Number(2000, 100000))
 	available := current - int64(gofakeit.Number(100, 2000))
 
 	plaidBankAccount := models.PlaidBankAccount{
-		AccountId:       link.AccountId,
-		PlaidLinkId:     *link.PlaidLinkId,
-		PlaidId:         gofakeit.UUID(),
-		Name:            "E-ACCOUNT",
-		OfficialName:    "E-ACCOUNT",
-		Mask:            gofakeit.Generate("####"),
-		CreatedAt:       clock.Now(),
-		CreatedByUserId: link.CreatedByUserId,
+		AccountId:    link.AccountId,
+		PlaidLinkId:  *link.PlaidLinkId,
+		PlaidId:      gofakeit.UUID(),
+		Name:         "E-ACCOUNT",
+		OfficialName: "E-ACCOUNT",
+		Mask:         gofakeit.Generate("####"),
+		CreatedAt:    clock.Now(),
+		CreatedBy:    link.CreatedBy,
 	}
 	require.NoError(
 		t,

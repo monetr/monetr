@@ -9,8 +9,8 @@ export enum SubscriptionStatus {
 }
 
 export default class Subscription {
-  subscriptionId: number;
-  ownedByUserId: number;
+  subscriptionId: string;
+  ownedByUserId: string;
   features: Feature[];
   status: SubscriptionStatus;
   trialStart: Date | null;

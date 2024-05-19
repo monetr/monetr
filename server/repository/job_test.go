@@ -10,7 +10,7 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/stretchr/testify/assert"
 )
@@ -41,35 +41,35 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 		jobRepo := repository.NewJobRepository(db, clock)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
-		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
 
-		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
+		fundingSchedule := testutils.MustInsert(t, FundingSchedule{
 			AccountId:              bankAccount.AccountId,
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
 			RuleSet:                fundingRule,
-			NextOccurrence:         fundingRule.After(clock.Now(), false),
-			NextOccurrenceOriginal: fundingRule.After(clock.Now(), false),
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
 
 		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", clock.Now())
 		spendingRule.DTStart(clock.Now().Add(-8 * 24 * time.Hour)) // Allow past times.
-		spending := testutils.MustInsert(t, models.Spending{
+		spending := testutils.MustInsert(t, Spending{
 			AccountId:         bankAccount.AccountId,
 			BankAccountId:     bankAccount.BankAccountId,
 			FundingScheduleId: fundingSchedule.FundingScheduleId,
-			SpendingType:      models.SpendingTypeExpense,
+			SpendingType:      SpendingTypeExpense,
 			Name:              "Test Stale Expense",
 			Description:       "Description or something",
 			TargetAmount:      5000,
 			CurrentAmount:     5000,
 			RuleSet:           spendingRule,
 			NextRecurrence:    spendingRule.Before(clock.Now(), true), // Make it so it recurs next in the past. (STALE)
-			DateCreated:       clock.Now(),
+			CreatedAt:         clock.Now(),
 		})
 
 		result, err := jobRepo.GetBankAccountsWithStaleSpending(context.Background())
@@ -150,7 +150,7 @@ func TestJobRepository_GetAccountsWithTooManyFiles(t *testing.T) {
 		jobRepo := repository.NewJobRepository(db, clock)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
-		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 
 		{
 			// Check before we create the files, there shouldn't be any accounts right
@@ -162,15 +162,14 @@ func TestJobRepository_GetAccountsWithTooManyFiles(t *testing.T) {
 
 		// Create a ton of files in a single account
 		for i := 0; i < 100; i++ {
-			testutils.MustDBInsert(t, &models.File{
-				AccountId:       bankAccount.AccountId,
-				BankAccountId:   bankAccount.BankAccountId,
-				Name:            uuid.NewString(),
-				ContentType:     "text/csv",
-				Size:            100,
-				ObjectUri:       "bogus://temp",
-				CreatedAt:       time.Now(),
-				CreatedByUserId: user.UserId,
+			testutils.MustDBInsert(t, &File{
+				AccountId:   bankAccount.AccountId,
+				Name:        uuid.NewString(),
+				ContentType: "text/csv",
+				Size:        100,
+				BlobUri:     "bogus://temp",
+				CreatedAt:   time.Now(),
+				CreatedBy:   user.UserId,
 			})
 		}
 

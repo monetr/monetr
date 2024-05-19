@@ -1,5 +1,5 @@
 export default class Login {
-  loginId: number;
+  loginId: string;
   email: string;
   firstName: string;
   lastName: string;

@@ -32,7 +32,7 @@ type TriggerableJobHandler interface {
 	EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error
 }
 
-type Job interface {
+type JobImplementation interface {
 	Run(ctx context.Context) error
 }
 

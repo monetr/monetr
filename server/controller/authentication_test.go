@@ -3,7 +3,6 @@ package controller_test
 import (
 	"crypto/ed25519"
 	"crypto/rand"
-	"math"
 	"net/http"
 	"testing"
 	"time"
@@ -464,7 +463,7 @@ func TestRegister(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.user").Object().NotEmpty()
-			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.user.userId").String().IsASCII()
 			response.JSON().Path("$.isActive").Boolean().IsTrue()
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
@@ -762,7 +761,7 @@ func TestRegister(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.user").Object().NotEmpty()
-			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.user.userId").String().IsASCII()
 			response.JSON().Path("$.isActive").Boolean().IsTrue()
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsTrue()
@@ -918,9 +917,9 @@ func TestVerifyEmail(t *testing.T) {
 				5*time.Minute,
 				security.Claims{
 					EmailAddress: registerRequest.Email,
-					UserId:       0,
-					AccountId:    0,
-					LoginId:      0,
+					UserId:       "",
+					AccountId:    "",
+					LoginId:      "",
 				},
 			)
 			assert.NoError(t, err, "must generate verification token")
@@ -997,9 +996,9 @@ func TestVerifyEmail(t *testing.T) {
 				5*time.Minute,
 				security.Claims{
 					EmailAddress: registerRequest.Email,
-					UserId:       0,
-					AccountId:    0,
-					LoginId:      0,
+					UserId:       "",
+					AccountId:    "",
+					LoginId:      "",
 				},
 			)
 			assert.NoError(t, err, "must generate verification token")
@@ -1070,9 +1069,9 @@ func TestVerifyEmail(t *testing.T) {
 				5*time.Minute,
 				security.Claims{
 					EmailAddress: registerRequest.Email,
-					UserId:       0,
-					AccountId:    0,
-					LoginId:      0,
+					UserId:       "",
+					AccountId:    "",
+					LoginId:      "",
 				},
 			)
 			assert.NoError(t, err, "must generate verification token")
@@ -1327,10 +1326,10 @@ func TestSendForgotPassword(t *testing.T) {
 				5*time.Minute,
 				security.Claims{
 					EmailAddress: email,
-					UserId:       0,
-					AccountId:    0,
+					UserId:       "",
+					AccountId:    "",
 					// TODO At some point this will break because the login Id will be required.
-					LoginId: 0,
+					LoginId: "",
 				},
 			)
 			assert.NoError(t, err, "must generate verification token")
@@ -1456,9 +1455,9 @@ func TestResetPassword(t *testing.T) {
 				5*time.Minute,
 				security.Claims{
 					EmailAddress: user.Login.Email,
-					UserId:       0,
-					AccountId:    0,
-					LoginId:      user.LoginId,
+					UserId:       "",
+					AccountId:    "",
+					LoginId:      user.LoginId.String(),
 				},
 			)
 			assert.NoError(t, err, "must be able to generate a password reset token")
@@ -1511,9 +1510,9 @@ func TestResetPassword(t *testing.T) {
 			5*time.Minute,
 			security.Claims{
 				EmailAddress: user.Login.Email,
-				UserId:       0,
-				AccountId:    0,
-				LoginId:      user.LoginId,
+				UserId:       "",
+				AccountId:    "",
+				LoginId:      user.LoginId.String(),
 			},
 		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
@@ -1525,9 +1524,9 @@ func TestResetPassword(t *testing.T) {
 			5*time.Minute,
 			security.Claims{
 				EmailAddress: user.Login.Email,
-				UserId:       0,
-				AccountId:    0,
-				LoginId:      user.LoginId,
+				UserId:       "",
+				AccountId:    "",
+				LoginId:      user.LoginId.String(),
 			},
 		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
@@ -1574,9 +1573,9 @@ func TestResetPassword(t *testing.T) {
 
 		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
 			EmailAddress: user.Login.Email,
-			UserId:       0,
-			AccountId:    0,
-			LoginId:      user.LoginId,
+			UserId:       "",
+			AccountId:    "",
+			LoginId:      user.LoginId.String(),
 		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
@@ -1619,9 +1618,9 @@ func TestResetPassword(t *testing.T) {
 
 		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
 			EmailAddress: user.Login.Email,
-			UserId:       0,
-			AccountId:    0,
-			LoginId:      user.LoginId,
+			UserId:       "",
+			AccountId:    "",
+			LoginId:      user.LoginId.String(),
 		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
@@ -1654,9 +1653,9 @@ func TestResetPassword(t *testing.T) {
 		email := testutils.GetUniqueEmail(t)
 		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
 			EmailAddress: email,
-			UserId:       0,
-			AccountId:    0,
-			LoginId:      math.MaxInt32,
+			UserId:       "",
+			AccountId:    "",
+			LoginId:      "lgn_bogus",
 		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
@@ -1710,9 +1709,9 @@ func TestResetPassword(t *testing.T) {
 		email := testutils.GetUniqueEmail(t)
 		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
 			EmailAddress: email,
-			UserId:       0,
-			AccountId:    0,
-			LoginId:      math.MaxInt32,
+			UserId:       "user_bogus",
+			AccountId:    "acct_bogus",
+			LoginId:      "lgn_bogus",
 		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 

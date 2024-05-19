@@ -48,14 +48,14 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 			Removed:     0,
 		}
 		testutils.MustDBInsert(t, &plaidSync)
-		assert.NotZero(t, plaidSync.PlaidSyncID, "plaid sync ID must not be zero, must have created a valid record!")
+		assert.NotZero(t, plaidSync.PlaidSyncId, "plaid sync ID must not be zero, must have created a valid record!")
 
 		db := testutils.GetPgDatabase(t)
 		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 		result, err := repo.GetLastPlaidSync(context.Background(), plaidLink.PlaidLinkId)
 		assert.NoError(t, err, "should not receive an error when there is no previous plaid sync")
 		assert.NotNil(t, result, "resulting plaid sync should be returned")
-		assert.Equal(t, plaidSync.PlaidSyncID, result.PlaidSyncID, "should have received the last inserted plaid sync")
+		assert.Equal(t, plaidSync.PlaidSyncId, result.PlaidSyncId, "should have received the last inserted plaid sync")
 	})
 
 	t.Run("multiple previous syncs", func(t *testing.T) {
@@ -77,7 +77,7 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 				Removed:     0,
 			}
 			testutils.MustDBInsert(t, &plaidSync)
-			assert.NotZero(t, plaidSync.PlaidSyncID, "plaid sync ID must not be zero, must have created a valid record!")
+			assert.NotZero(t, plaidSync.PlaidSyncId, "plaid sync ID must not be zero, must have created a valid record!")
 		}
 
 		// Move the clock forward 2 days
@@ -95,7 +95,7 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 			Removed:     0,
 		}
 		testutils.MustDBInsert(t, &plaidSync)
-		assert.NotZero(t, plaidSync.PlaidSyncID, "plaid sync ID must not be zero, must have created a valid record!")
+		assert.NotZero(t, plaidSync.PlaidSyncId, "plaid sync ID must not be zero, must have created a valid record!")
 
 		clock.Add(1 * 24 * time.Hour)
 
@@ -103,6 +103,6 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 		result, err := repo.GetLastPlaidSync(context.Background(), plaidLink.PlaidLinkId)
 		assert.NoError(t, err, "should not receive an error when there is no previous plaid sync")
-		assert.Equal(t, plaidSync.PlaidSyncID, result.PlaidSyncID, "should have received the last inserted plaid sync")
+		assert.Equal(t, plaidSync.PlaidSyncId, result.PlaidSyncId, "should have received the last inserted plaid sync")
 	})
 }

@@ -1,12 +1,13 @@
+import { parseJSON } from 'date-fns';
+
 import PlaidBankAccount from '@monetr/interface/models/PlaidBankAccount';
 import { formatAmount } from '@monetr/interface/util/amounts';
-import { parseJSON } from 'date-fns';
 
 export type BankAccountStatus = 'unknown' | 'active' | 'inactive';
 
 export default class BankAccount {
-  bankAccountId: number;
-  linkId: number;
+  bankAccountId: string;
+  linkId: string;
   availableBalance: number;
   currentBalance: number;
   mask?: string;
@@ -17,7 +18,7 @@ export default class BankAccount {
   accountSubType: string;
   lastUpdated: Date;
   createdAt: Date;
-  createdByUserId: number;
+  createdBy: number;
 
   plaidBankAccount: PlaidBankAccount | null;
 

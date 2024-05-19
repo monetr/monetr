@@ -2,15 +2,14 @@ package repository
 
 import (
 	"context"
-	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
-func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error) {
+func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId ID[BankAccount]) ([]Spending, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -19,7 +18,7 @@ func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId uint64) 
 		"bankAccountId": bankAccountId,
 	}
 
-	result := make([]models.Spending, 0)
+	result := make([]Spending, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
 		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
@@ -34,7 +33,7 @@ func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId uint64) 
 	return result, nil
 }
 
-func (r *repositoryBase) GetSpendingExists(ctx context.Context, bankAccountId, spendingId uint64) (bool, error) {
+func (r *repositoryBase) GetSpendingExists(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending]) (bool, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -44,7 +43,7 @@ func (r *repositoryBase) GetSpendingExists(ctx context.Context, bankAccountId, s
 		"spendingId":    spendingId,
 	}
 
-	ok, err := r.txn.ModelContext(span.Context(), &models.Spending{}).
+	ok, err := r.txn.ModelContext(span.Context(), &Spending{}).
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
 		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
 		Where(`"spending"."spending_id" = ?`, spendingId).
@@ -59,7 +58,7 @@ func (r *repositoryBase) GetSpendingExists(ctx context.Context, bankAccountId, s
 	return ok, errors.Wrap(err, "failed to verify spending object exists")
 }
 
-func (r *repositoryBase) GetSpendingByFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) ([]models.Spending, error) {
+func (r *repositoryBase) GetSpendingByFundingSchedule(ctx context.Context, bankAccountId ID[BankAccount], fundingScheduleId ID[FundingSchedule]) ([]Spending, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -69,7 +68,7 @@ func (r *repositoryBase) GetSpendingByFundingSchedule(ctx context.Context, bankA
 		"fundingScheduleId": fundingScheduleId,
 	}
 
-	result := make([]models.Spending, 0)
+	result := make([]Spending, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
 		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
@@ -85,7 +84,7 @@ func (r *repositoryBase) GetSpendingByFundingSchedule(ctx context.Context, bankA
 	return result, nil
 }
 
-func (r *repositoryBase) CreateSpending(ctx context.Context, spending *models.Spending) error {
+func (r *repositoryBase) CreateSpending(ctx context.Context, spending *Spending) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -95,7 +94,7 @@ func (r *repositoryBase) CreateSpending(ctx context.Context, spending *models.Sp
 	}
 
 	spending.AccountId = r.AccountId()
-	spending.DateCreated = time.Now().UTC()
+	spending.CreatedAt = r.clock.Now().UTC()
 
 	if _, err := r.txn.ModelContext(span.Context(), spending).Insert(spending); err != nil {
 		span.Status = sentry.SpanStatusInternalError
@@ -108,13 +107,13 @@ func (r *repositoryBase) CreateSpending(ctx context.Context, spending *models.Sp
 	return nil
 }
 
-// UpdateSpending should only be called with complete expense models. Do not use partial models with missing data for
+// UpdateSpending should only be called with complete expense  Do not use partial models with missing data for
 // this action.
-func (r *repositoryBase) UpdateSpending(ctx context.Context, bankAccountId uint64, updates []models.Spending) error {
+func (r *repositoryBase) UpdateSpending(ctx context.Context, bankAccountId ID[BankAccount], updates []Spending) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	spendingIds := make([]uint64, len(updates))
+	spendingIds := make([]ID[Spending], len(updates))
 	for i := range updates {
 		updates[i].AccountId = r.AccountId()
 		updates[i].BankAccountId = bankAccountId
@@ -139,7 +138,7 @@ func (r *repositoryBase) UpdateSpending(ctx context.Context, bankAccountId uint6
 	return nil
 }
 
-func (r *repositoryBase) GetSpendingById(ctx context.Context, bankAccountId, spendingId uint64) (*models.Spending, error) {
+func (r *repositoryBase) GetSpendingById(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending]) (*Spending, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -149,7 +148,7 @@ func (r *repositoryBase) GetSpendingById(ctx context.Context, bankAccountId, spe
 		"spendingId":    spendingId,
 	}
 
-	var result models.Spending
+	var result Spending
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation("FundingSchedule").
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
@@ -166,7 +165,7 @@ func (r *repositoryBase) GetSpendingById(ctx context.Context, bankAccountId, spe
 	return &result, nil
 }
 
-func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId, spendingId uint64) error {
+func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending]) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -176,7 +175,7 @@ func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId, spen
 		"spendingId":    spendingId,
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &models.Transaction{}).
+	_, err := r.txn.ModelContext(span.Context(), &Transaction{}).
 		Set(`"spending_id" = NULL`).
 		Set(`"spending_amount" = NULL`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
@@ -188,7 +187,7 @@ func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId, spen
 		return errors.Wrap(err, "failed to remove spending from any transactions")
 	}
 
-	result, err := r.txn.ModelContext(span.Context(), &models.Spending{}).
+	result, err := r.txn.ModelContext(span.Context(), &Spending{}).
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
 		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
 		Where(`"spending"."spending_id" = ?`, spendingId).

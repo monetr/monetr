@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/mail"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -62,20 +61,6 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 	})
 }
 
-// Login
-// @Summary Login
-// @id login
-// @tags Authentication
-// @description Authenticate a user.
-// @Accept json
-// @Produce json
-// @Param Login body swag.LoginRequest true "User Login Request"
-// @Router /authentication/login [post]
-// @Success 200 {object} swag.LoginResponse
-// @Failure 400 {object} swag.LoginInvalidRequestResponse Required data is missing.
-// @Failure 401 {object} swag.LoginInvalidCredentialsResponse Invalid credentials.
-// @Failure 428 {object} swag.LoginPreconditionRequiredResponse Login requirements are missing.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) loginEndpoint(ctx echo.Context) error {
 	var loginRequest struct {
 		Email    string `json:"email"`
@@ -139,9 +124,9 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 			5*time.Minute, // Use a much shorter lifetime than usually would be configured.
 			security.Claims{
 				EmailAddress: login.Email,
-				UserId:       0,
-				AccountId:    0,
-				LoginId:      login.LoginId,
+				UserId:       "",
+				AccountId:    "",
+				LoginId:      login.LoginId.String(),
 			},
 		)
 		if err != nil {
@@ -180,20 +165,12 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 	case 1:
 		user := login.Users[0]
 
-		if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
-			hub.ConfigureScope(func(scope *sentry.Scope) {
-				scope.SetUser(sentry.User{
-					ID:       strconv.FormatUint(user.AccountId, 10),
-					Username: fmt.Sprintf("account:%d", user.AccountId),
-				})
-			})
-		}
-
+		crumbs.IncludeUserInScope(c.getContext(ctx), user.AccountId)
 		token, err := c.clientTokens.Create(security.AuthenticatedAudience, 14*24*time.Hour, security.Claims{
 			EmailAddress: login.Email,
-			UserId:       user.UserId,
-			AccountId:    user.AccountId,
-			LoginId:      user.LoginId,
+			UserId:       user.UserId.String(),
+			AccountId:    user.AccountId.String(),
+			LoginId:      user.LoginId.String(),
 		})
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
@@ -392,7 +369,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	}
 
 	if beta != nil {
-		if err = repo.UseBetaCode(c.getContext(ctx), beta.BetaID, user.UserId); err != nil {
+		if err = repo.UseBetaCode(c.getContext(ctx), beta.BetaId, user.UserId); err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 				"failed to use beta code",
 			)
@@ -407,9 +384,9 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 			c.configuration.Email.Verification.TokenLifetime,
 			security.Claims{
 				EmailAddress: login.Email,
-				UserId:       0,
-				AccountId:    0,
-				LoginId:      login.LoginId,
+				UserId:       "",
+				AccountId:    "",
+				LoginId:      login.LoginId.String(),
 			},
 		)
 		if err != nil {
@@ -447,9 +424,9 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	// simply return a token here for the user to be signed in.
 	token, err := c.clientTokens.Create(security.AuthenticatedAudience, 14*24*time.Hour, security.Claims{
 		EmailAddress: login.Email,
-		UserId:       user.UserId,
-		AccountId:    user.AccountId,
-		LoginId:      user.LoginId,
+		UserId:       user.UserId.String(),
+		AccountId:    user.AccountId.String(),
+		LoginId:      user.LoginId.String(),
 	})
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
@@ -468,20 +445,6 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	})
 }
 
-// Verify Email
-// @Summary Verify Email
-// @id verify-email
-// @tags Authentication
-// @description Consumes a verification token to confirm that an email does belong to a user. Verification tokens cannot
-// @description be retrieved from the API, they are generated when a user signs up; and a link including the token is
-// @description sent to their email address.
-// @Produce json
-// @Accept json
-// @Param Token body swag.VerifyRequest true "Verify Token"
-// @Router /authentication/verify [post]
-// @Success 200 {object} swag.VerifyResponse
-// @Failure 400 {object} ApiError Required data is missing. The token is invalid or expired. Or the email has already been verified.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 	if !c.configuration.Email.ShouldVerifyEmails() {
 		return c.notFound(ctx, "email verification is not enabled")
@@ -514,23 +477,6 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 	})
 }
 
-// Resend Verification Email
-// @Summary Resend Verification Email
-// @id resend-verification-email
-// @tags Authentication
-// @description This endpoint is used to generate a new verification token and email it to an address to verify that the
-// @description email address is owned by a user. This endpoint only works with addresses that are associated with a
-// @description login, and will return a successful status code **if** the provided email is associated with a login and
-// @description the email is not already verified. All other situations will return a bad request, even if the email is
-// @description valid or if the email is not associated. This is to prevent someone from being able to have relatively
-// @description easy access to an endpoint that would let them see what email addresses are associated with active users.
-// @Produce json
-// @Accept json
-// @Param Token body swag.ResendVerificationRequest true "Resend Verification Request"
-// @Router /authentication/verify/resend [post]
-// @Success 200
-// @Failure 400 {object} ApiError Cannot resend verification link.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) resendVerification(ctx echo.Context) error {
 	log := c.getLog(ctx)
 	if !c.configuration.Email.ShouldVerifyEmails() {
@@ -572,9 +518,9 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 		c.configuration.Email.ForgotPassword.TokenLifetime,
 		security.Claims{
 			EmailAddress: login.Email,
-			UserId:       0,
-			AccountId:    0,
-			LoginId:      login.LoginId,
+			UserId:       "",
+			AccountId:    "",
+			LoginId:      login.LoginId.String(),
 		},
 	)
 	if err != nil {
@@ -676,9 +622,9 @@ func (c *Controller) sendForgotPassword(ctx echo.Context) error {
 		c.configuration.Email.ForgotPassword.TokenLifetime,
 		security.Claims{
 			EmailAddress: login.Email,
-			UserId:       0,
-			AccountId:    0,
-			LoginId:      login.LoginId,
+			UserId:       "",
+			AccountId:    "",
+			LoginId:      login.LoginId.String(),
 		},
 	)
 	if err != nil {

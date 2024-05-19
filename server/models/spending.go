@@ -2,9 +2,9 @@ package models
 
 import (
 	"context"
-	"strconv"
 	"time"
 
+	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/util"
@@ -22,27 +22,48 @@ const (
 type Spending struct {
 	tableName string `pg:"spending"`
 
-	SpendingId             uint64           `json:"spendingId" pg:"spending_id,notnull,pk,type:'bigserial'"`
-	AccountId              uint64           `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
-	Account                *Account         `json:"-" pg:"rel:has-one"`
-	BankAccountId          uint64           `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank,on_delete:CASCADE,type:'bigint'"`
-	BankAccount            *BankAccount     `json:"bankAccount,omitempty" pg:"rel:has-one" swaggerignore:"true"`
-	FundingScheduleId      uint64           `json:"fundingScheduleId" pg:"funding_schedule_id,notnull,on_delete:RESTRICT"`
-	FundingSchedule        *FundingSchedule `json:"-" pg:"rel:has-one" swaggerignore:"true"`
-	SpendingType           SpendingType     `json:"spendingType" pg:"spending_type,notnull,use_zero,unique:per_bank"`
-	Name                   string           `json:"name" pg:"name,notnull,unique:per_bank"`
-	Description            string           `json:"description,omitempty" pg:"description"`
-	TargetAmount           int64            `json:"targetAmount" pg:"target_amount,notnull,use_zero"`
-	CurrentAmount          int64            `json:"currentAmount" pg:"current_amount,notnull,use_zero"`
-	UsedAmount             int64            `json:"usedAmount" pg:"used_amount,notnull,use_zero"`
-	RuleSet                *RuleSet         `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
-	LastSpentFrom          *time.Time       `json:"lastSpentFrom" pg:"last_spent_from"`
-	LastRecurrence         *time.Time       `json:"lastRecurrence" pg:"last_recurrence"`
-	NextRecurrence         time.Time        `json:"nextRecurrence" pg:"next_recurrence,notnull"`
-	NextContributionAmount int64            `json:"nextContributionAmount" pg:"next_contribution_amount,notnull,use_zero"`
-	IsBehind               bool             `json:"isBehind" pg:"is_behind,notnull,use_zero"`
-	IsPaused               bool             `json:"isPaused" pg:"is_paused,notnull,use_zero"`
-	DateCreated            time.Time        `json:"dateCreated" pg:"date_created,notnull"`
+	SpendingId             ID[Spending]        `json:"spendingId" pg:"spending_id,notnull,pk"`
+	AccountId              ID[Account]         `json:"-" pg:"account_id,notnull,pk"`
+	Account                *Account            `json:"-" pg:"rel:has-one"`
+	BankAccountId          ID[BankAccount]     `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank"`
+	BankAccount            *BankAccount        `json:"bankAccount,omitempty" pg:"rel:has-one"`
+	FundingScheduleId      ID[FundingSchedule] `json:"fundingScheduleId" pg:"funding_schedule_id,notnull"`
+	FundingSchedule        *FundingSchedule    `json:"-" pg:"rel:has-one"`
+	SpendingType           SpendingType        `json:"spendingType" pg:"spending_type,notnull,use_zero,unique:per_bank"`
+	Name                   string              `json:"name" pg:"name,notnull,unique:per_bank"`
+	Description            string              `json:"description,omitempty" pg:"description"`
+	TargetAmount           int64               `json:"targetAmount" pg:"target_amount,notnull,use_zero"`
+	CurrentAmount          int64               `json:"currentAmount" pg:"current_amount,notnull,use_zero"`
+	UsedAmount             int64               `json:"usedAmount" pg:"used_amount,notnull,use_zero"`
+	RuleSet                *RuleSet            `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
+	LastSpentFrom          *time.Time          `json:"lastSpentFrom" pg:"last_spent_from"`
+	LastRecurrence         *time.Time          `json:"lastRecurrence" pg:"last_recurrence"`
+	NextRecurrence         time.Time           `json:"nextRecurrence" pg:"next_recurrence,notnull"`
+	NextContributionAmount int64               `json:"nextContributionAmount" pg:"next_contribution_amount,notnull,use_zero"`
+	IsBehind               bool                `json:"isBehind" pg:"is_behind,notnull,use_zero"`
+	IsPaused               bool                `json:"isPaused" pg:"is_paused,notnull,use_zero"`
+	CreatedAt              time.Time           `json:"createdAt" pg:"created_at,notnull"`
+}
+
+func (Spending) IdentityPrefix() string {
+	return "spnd"
+}
+
+var (
+	_ pg.BeforeInsertHook = (*Spending)(nil)
+)
+
+func (o *Spending) BeforeInsert(ctx context.Context) (context.Context, error) {
+	if o.SpendingId.IsZero() {
+		o.SpendingId = NewID(o)
+	}
+
+	now := time.Now()
+	if o.CreatedAt.IsZero() {
+		o.CreatedAt = now
+	}
+
+	return ctx, nil
 }
 
 func (e Spending) GetIsStale(now time.Time) bool {
@@ -123,7 +144,7 @@ func CalculateNextContribution(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.SetTag("spendingId", strconv.FormatUint(spending.SpendingId, 10))
+	span.SetTag("spendingId", spending.SpendingId.String())
 
 	if spending.SpendingType == SpendingTypeOverflow {
 		crumbs.Debug(ctx, "No need to calculate contribution for overflow spending", nil)

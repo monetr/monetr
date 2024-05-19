@@ -2,9 +2,9 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/recurring"
 	"github.com/sirupsen/logrus"
 )
@@ -12,8 +12,8 @@ import (
 func (c *Controller) getRecurring(ctx echo.Context) error {
 	log := c.getLog(ctx)
 
-	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 

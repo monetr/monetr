@@ -14,7 +14,7 @@ export function useBankAccounts(): UseQueryResult<Array<BankAccount>> {
 }
 
 export interface CreateBankAccountRequest {
-  linkId: number;
+  linkId: string;
   name: string;
   mask?: string;
   availableBalance: number;
@@ -54,7 +54,7 @@ export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest)
 export function useSelectedBankAccount(): UseQueryResult<BankAccount | undefined> {
   const queryClient = useQueryClient();
   const match = useMatch('/bank/:bankId/*');
-  const bankAccountId = +match?.params?.bankId || null;
+  const bankAccountId = match?.params?.bankId || null;
 
   // If we do not have a valid numeric bank account ID, but an ID was specified then something is wrong.
   if (!bankAccountId && match?.params?.bankId) {
@@ -75,7 +75,7 @@ export function useSelectedBankAccount(): UseQueryResult<BankAccount | undefined
   );
 }
 
-export function useSelectedBankAccountId(): number | undefined {
+export function useSelectedBankAccountId(): string | undefined {
   const { data: bankAccount } = useSelectedBankAccount();
   return bankAccount?.bankAccountId;
 }
