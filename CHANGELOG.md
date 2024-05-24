@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.2](https://github.com/monetr/monetr/compare/v0.17.1...v0.17.2) (2024-05-24)
+
+
+### Bug Fixes
+
+* **billing:** Fixed subscription timestamp not being migrated ([bc5da30](https://github.com/monetr/monetr/commit/bc5da307ac80e8c5d59965e1dcaddc7503149fd2)), closes [#1758](https://github.com/monetr/monetr/issues/1758)
+
 ## [0.17.1](https://github.com/monetr/monetr/compare/v0.17.0...v0.17.1) (2024-05-24)
 
 
