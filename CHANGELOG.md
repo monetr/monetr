@@ -1,5 +1,44 @@
 # Changelog
 
+## [0.17.0](https://github.com/monetr/monetr/compare/v0.16.13...v0.17.0) (2024-05-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* **local:** Removing teller.io from local development
+* Removing teller.io
+
+### Features
+
+* **api:** Migrating to ULID instead of 64-bit integer IDs ([#1740](https://github.com/monetr/monetr/issues/1740)) ([8b673b6](https://github.com/monetr/monetr/commit/8b673b60e8e831e841286d6f4739a2936e588af9))
+
+
+### Dependencies
+
+* **api:** update module github.com/nyaruka/phonenumbers to v1.3.5 ([#1754](https://github.com/monetr/monetr/issues/1754)) ([edb5ac3](https://github.com/monetr/monetr/commit/edb5ac37f02cd4d293c05dbc8d7af5718ba80790))
+* **ui:** update dependency @fontsource-variable/inter to v5.0.18 ([#1747](https://github.com/monetr/monetr/issues/1747)) ([ab9d2ad](https://github.com/monetr/monetr/commit/ab9d2ad146e506f8fab264937dc1d177e7064861))
+* **ui:** update dependency formik to v2.4.6 ([#1755](https://github.com/monetr/monetr/issues/1755)) ([39e6fb9](https://github.com/monetr/monetr/commit/39e6fb987b10b3bdf805f5d1e42f59cfb5f546c9))
+* **ui:** update dependency next to v14.1.1 [security] ([#1753](https://github.com/monetr/monetr/issues/1753)) ([1921942](https://github.com/monetr/monetr/commit/1921942c4d37616f74eec8e13388aca3052960fb))
+* **ui:** update nextra monorepo to v2.13.4 ([#1722](https://github.com/monetr/monetr/issues/1722)) ([81afe54](https://github.com/monetr/monetr/commit/81afe54114a5e835368162436e5f14e71929cc77))
+
+
+### Bug Fixes
+
+* **ci:** Fix GitLab deploy action ([c0d1e48](https://github.com/monetr/monetr/commit/c0d1e48e0ea1381ddbb79c746d3acdec001f76ad))
+* **docs:** Fix screenshot scaling on home page ([b7344b0](https://github.com/monetr/monetr/commit/b7344b0bcdf25bccde61c1fb3d49789c541ad625))
+* **docs:** Fixed documentation homepage ([4992a7c](https://github.com/monetr/monetr/commit/4992a7cd640ebd7273491d90fc397582e29a7a16))
+* **ui:** Don't update the lockfile unless a dependency is updated ([89aac45](https://github.com/monetr/monetr/commit/89aac45398f75163a8f3ec02e6808ed8711cd051))
+
+
+### Miscellaneous
+
+* **deps:** bump axios from 0.21.4 to 1.6.8 ([#1748](https://github.com/monetr/monetr/issues/1748)) ([f8137bf](https://github.com/monetr/monetr/commit/f8137bf4cc42fdf3e482f428120883aa00304564))
+* **local:** Removing teller.io from local development ([ce0e94f](https://github.com/monetr/monetr/commit/ce0e94f6b729417f5d0986e950dd2c19092c98a5))
+* Pin helm version, dont use a container ([2f404d2](https://github.com/monetr/monetr/commit/2f404d2eb38b88dd0cc802bddbb495e660af38bb))
+* release 0.17.0 ([9470a91](https://github.com/monetr/monetr/commit/9470a91697c583f3341fe57537a76ab0c0feafa4))
+* Removing teller references in helm chart ([0a23133](https://github.com/monetr/monetr/commit/0a23133df53b8c05b2aeda6dadb1248a9a5ca80f))
+* Removing teller.io ([9d3f24b](https://github.com/monetr/monetr/commit/9d3f24badab449134a143073da4978029cb330fd))
+
 ## [0.16.13](https://github.com/monetr/monetr/compare/v0.16.12...v0.16.13) (2024-04-23)
 
 
