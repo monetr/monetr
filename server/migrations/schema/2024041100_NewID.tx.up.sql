@@ -393,13 +393,14 @@ CREATE TABLE "accounts" (
   CONSTRAINT "uq_accounts_stripe_subscription_id" UNIQUE ("stripe_subscription_id")
 );
 
-INSERT INTO "accounts" ("account_id", "timezone", "locale", "stripe_customer_id", "stripe_subscription_id", "stripe_webhook_latest_timestamp", "subscription_status", "trial_ends_at", "created_at")
+INSERT INTO "accounts" ("account_id", "timezone", "locale", "stripe_customer_id", "stripe_subscription_id", "subscription_active_until", "stripe_webhook_latest_timestamp", "subscription_status", "trial_ends_at", "created_at")
 SELECT
   "a"."account_id_new",
   "a"."timezone",
   "a"."locale",
   "a"."stripe_customer_id",
   "a"."stripe_subscription_id",
+  "a"."subscription_active_until",
   "a"."stripe_webhook_latest_timestamp",
   "a"."subscription_status",
   "a"."trial_ends_at",
