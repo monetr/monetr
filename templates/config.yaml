@@ -91,12 +91,6 @@ data:
     {{- toYaml .Values.api.plaid | nindent 6 }}
     {{- end }}
 
-    # Teller configuration if it is enabled
-    {{- if .Values.api.teller.enabled }}
-    teller:
-    {{- toYaml .Values.api.teller | nindent 6 }}
-    {{- end }}
-
     {{- if .Values.api.keyManagement }}
     keyManagement:
     {{- toYaml .Values.api.keyManagement | nindent 6 }}

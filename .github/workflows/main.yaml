@@ -147,6 +147,7 @@ jobs:
         run: |
           git config --global --add safe.directory ${PWD}
           ENVIRONMENT=my.monetr.dev DEPLOY_VERSION=latest DEPLOY_NAMESPACE=default make generate
+          ENVIRONMENT=my.monetr.app DEPLOY_VERSION=latest DEPLOY_NAMESPACE=default make generate
 
   local_dev:
     name: Local Development
