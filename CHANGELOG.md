@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.1](https://github.com/monetr/monetr/compare/v0.17.0...v0.17.1) (2024-05-24)
+
+
+### Bug Fixes
+
+* **helm:** Fixed helm template error ([1fe620a](https://github.com/monetr/monetr/commit/1fe620a5d3e79d16af07cf50c86bb0be92eb88a2))
+
 ## [0.17.0](https://github.com/monetr/monetr/compare/v0.16.13...v0.17.0) (2024-05-19)
 
 
