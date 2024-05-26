@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.17.3](https://github.com/monetr/monetr/compare/v0.17.2...v0.17.3) (2024-05-26)
+
+
+### Dependencies
+
+* **ui:** update dependency tailwindcss to v3.4.3 ([#1721](https://github.com/monetr/monetr/issues/1721)) ([accb8a2](https://github.com/monetr/monetr/commit/accb8a2f8f18f00fe3ee9124b651e3275f2892e4))
+
+
+### Bug Fixes
+
+* **ui:** Fixed mobile side bar not rendering ([4b8fc4b](https://github.com/monetr/monetr/commit/4b8fc4b208c68f76a395b0117d1e0f21aa5e0b72)), closes [#1760](https://github.com/monetr/monetr/issues/1760)
+
 ## [0.17.2](https://github.com/monetr/monetr/compare/v0.17.1...v0.17.2) (2024-05-24)
 
 
