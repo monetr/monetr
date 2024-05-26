@@ -8,7 +8,7 @@ import useStore from '@monetr/interface/hooks/store';
 
 export default function MobileSidebar(): JSX.Element {
   const match = useMatch('/bank/:bankId/*');
-  const isBankRoute = Boolean(+match?.params?.bankId || null);
+  const isBankRoute = Boolean(match?.params?.bankId || null);
   const { setMobileSidebarOpen, mobileSidebarOpen } = useStore();
   const { pathname } = useLocation();
 
