@@ -32,6 +32,7 @@ type Transaction struct {
 	// we want to make sure we return the correct amount to the expense.
 	SpendingAmount       *int64     `json:"spendingAmount,omitempty" pg:"spending_amount,use_zero"`
 	Categories           []string   `json:"categories" pg:"categories,type:'text[]'"`
+	Category             *string    `json:"category" pg:"category"`
 	Date                 time.Time  `json:"date" pg:"date,notnull"`
 	Name                 string     `json:"name,omitempty" pg:"name"`
 	OriginalName         string     `json:"originalName" pg:"original_name,notnull"`

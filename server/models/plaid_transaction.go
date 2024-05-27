@@ -18,6 +18,7 @@ type PlaidTransaction struct {
 	PlaidId            string               `json:"-" pg:"plaid_id,notnull,unique:per_bank_account"`
 	PendingPlaidId     *string              `json:"-" pg:"pending_plaid_id"`
 	Categories         []string             `json:"categories" pg:"categories,type:'text[]'"`
+	Category           *string              `json:"category" pg:"category"`
 	Date               time.Time            `json:"date" pg:"date,notnull"`
 	AuthorizedDate     *time.Time           `json:"authorizedDate" pg:"authorized_date"`
 	Name               string               `json:"name,omitempty" pg:"name,notnull"`

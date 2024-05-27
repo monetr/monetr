@@ -677,6 +677,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			PlaidId:            input.GetTransactionId(),
 			PendingPlaidId:     input.GetPendingTransactionId(),
 			Categories:         input.GetCategory(),
+			Category:           input.GetCategoryDetail(),
 			Date:               date,
 			Name:               transactionName,
 			MerchantName:       input.GetMerchantName(),
@@ -696,6 +697,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			SpendingId:           nil,
 			SpendingAmount:       nil,
 			Categories:           input.GetCategory(),
+			Category:             input.GetCategoryDetail(),
 			Date:                 date,
 			Name:                 transactionName,
 			OriginalName:         input.GetName(),
@@ -747,6 +749,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			PlaidId:            input.GetTransactionId(),
 			PendingPlaidId:     input.GetPendingTransactionId(),
 			Categories:         input.GetCategory(),
+			Category:           input.GetCategoryDetail(),
 			Date:               date,
 			Name:               transactionName,
 			MerchantName:       input.GetMerchantName(),
@@ -773,6 +776,15 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			New:   existingPlaidTransaction.Amount,
 		})
 		existingTransaction.Amount = existingPlaidTransaction.Amount
+	}
+
+	if existingPlaidTransaction.Category != existingTransaction.Category {
+		changes = append(changes, SyncChange{
+			Field: "category",
+			Old:   existingTransaction.Category,
+			New:   existingPlaidTransaction.Category,
+		})
+		existingTransaction.Category = existingPlaidTransaction.Category
 	}
 
 	if existingPlaidTransaction.Date != existingTransaction.Date {

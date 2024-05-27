@@ -12,6 +12,7 @@ type Transaction interface {
 	GetAmount() int64
 	GetBankAccountId() string
 	GetCategory() []string
+	GetCategoryDetail() *string
 	GetDate() time.Time
 	GetDateLocal(timezone *time.Location) time.Time
 	GetISOCurrencyCode() string
@@ -32,6 +33,7 @@ type PlaidTransaction struct {
 	Amount                 int64
 	BankAccountId          string
 	Category               []string
+	CategoryDetail         string
 	Date                   time.Time
 	ISOCurrencyCode        string
 	UnofficialCurrencyCode string
@@ -54,6 +56,7 @@ func NewTransactionFromPlaid(input plaid.Transaction) (Transaction, error) {
 		Amount:                 int64(input.GetAmount() * 100),
 		BankAccountId:          input.GetAccountId(),
 		Category:               input.GetCategory(),
+		CategoryDetail:         input.GetPersonalFinanceCategory().Detailed,
 		Date:                   date,
 		ISOCurrencyCode:        input.GetIsoCurrencyCode(),
 		UnofficialCurrencyCode: input.GetUnofficialCurrencyCode(),
@@ -78,6 +81,13 @@ func (p PlaidTransaction) GetBankAccountId() string {
 
 func (p PlaidTransaction) GetCategory() []string {
 	return p.Category
+}
+
+func (p PlaidTransaction) GetCategoryDetail() *string {
+	if p.CategoryDetail == "" {
+		return nil
+	}
+	return &p.CategoryDetail
 }
 
 func (p PlaidTransaction) GetDate() time.Time {
