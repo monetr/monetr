@@ -61,7 +61,7 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 	})
 }
 
-func (c *Controller) loginEndpoint(ctx echo.Context) error {
+func (c *Controller) postLogin(ctx echo.Context) error {
 	var loginRequest struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`

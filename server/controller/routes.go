@@ -209,7 +209,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	repoParty.GET("/config", c.configEndpoint)
 
 	// Authentication
-	repoParty.POST("/authentication/login", c.loginEndpoint)
+	repoParty.POST("/authentication/login", c.postLogin)
 	repoParty.GET("/authentication/logout", c.logoutEndpoint)
 	repoParty.POST("/authentication/register", c.postRegister)
 	repoParty.POST("/authentication/verify", c.verifyEndpoint)
