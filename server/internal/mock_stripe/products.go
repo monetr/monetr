@@ -10,7 +10,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
-	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v78"
 )
 
 func MockStripeListProductsSuccess(t *testing.T) {

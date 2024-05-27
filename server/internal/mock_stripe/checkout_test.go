@@ -7,7 +7,7 @@ import (
 
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
-	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v78"
 )
 
 func TestMockStripeGetCompletedCheckoutSession(t *testing.T) {

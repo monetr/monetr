@@ -13,7 +13,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v78"
 )
 
 func (m *MockStripeHelper) MockNewCheckoutSession(t *testing.T) {

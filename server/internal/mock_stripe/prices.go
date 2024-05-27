@@ -9,7 +9,7 @@ import (
 
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v78"
 )
 
 const stripeHost = "https://api.stripe.com"
