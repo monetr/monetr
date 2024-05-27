@@ -250,7 +250,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// Transactions
 	billed.GET("/bank_accounts/:bankAccountId/transactions", c.getTransactions)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/:transactionId", c.getTransactionById)
-	billed.GET("/bank_accounts/:bankAccountId/transactions/similar/:transactionId", c.getSimilarTransactionsById)
+	billed.GET("/bank_accounts/:bankAccountId/transactions/:transactionId/similar", c.getSimilarTransactionsById)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/spending/:spendingId", c.getTransactionsForSpending)
 	billed.POST("/bank_accounts/:bankAccountId/transactions", c.postTransactions)
 	billed.PUT("/bank_accounts/:bankAccountId/transactions/:transactionId", c.putTransactions)

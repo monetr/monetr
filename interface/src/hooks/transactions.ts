@@ -50,7 +50,7 @@ export function useTransaction(transactionId: string | null): UseQueryResult<Tra
 
 export function useSimilarTransactions(transaction: Transaction | null): UseQueryResult<TransactionCluster> {
   return useQuery<Partial<TransactionCluster>, unknown, TransactionCluster>(
-    [`/bank_accounts/${ transaction?.bankAccountId }/transactions/similar/${ transaction?.transactionId }`],
+    [`/bank_accounts/${ transaction?.bankAccountId }/transactions/${ transaction?.transactionId }/similar`],
     {
       enabled: Boolean(transaction),
       select: data => new TransactionCluster(data),
