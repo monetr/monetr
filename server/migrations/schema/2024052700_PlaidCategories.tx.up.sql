@@ -7,7 +7,7 @@ CREATE TEMP TABLE "tmp_plaid_mapping" (
 
 INSERT INTO "tmp_plaid_mapping" ("legacy_category_id", "legacy_category", "primary", "detailed")
 -- Extracted from https://plaid.com/documents/transactions-personal-finance-category-mapping.json
-SELECT legacy_category_id, legacy_category, possible_pfcs[0]['primary'], possible_pfcs[0]['detailed'] FROM jsonb_to_recordset($$[
+SELECT legacy_category_id, legacy_category, possible_pfcs[0]::jsonb ->> 'primary', possible_pfcs[0]::jsonb ->> 'detailed' FROM jsonb_to_recordset($$[
   {
     "legacy_category": [
       "Bank Fees"
