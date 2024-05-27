@@ -19,9 +19,10 @@ import (
 )
 
 const (
-	VerifyEmailTemplate     = "VerifyEmailAddress"
-	ForgotPasswordTemplate  = "ForgotPassword"
-	PasswordChangedTemplate = "PasswordChanged"
+	ForgotPasswordTemplate    = "ForgotPassword"
+	PasswordChangedTemplate   = "PasswordChanged"
+	PlaidDisconnectedTemplate = "PlaidDisconnected"
+	VerifyEmailTemplate       = "VerifyEmailAddress"
 )
 
 //go:embed email_templates/*
@@ -53,6 +54,16 @@ type (
 		LastName     string
 		SupportEmail string
 	}
+
+	PlaidDisconnectedParams struct {
+		BaseURL      string
+		Email        string
+		FirstName    string
+		LastName     string
+		LinkName     string
+		LinkURL      string
+		SupportEmail string
+	}
 )
 
 //go:generate go run go.uber.org/mock/mockgen@v0.4.0 -source=email.go -package=mockgen -destination=../internal/mockgen/email.go EmailCommunication
@@ -60,6 +71,7 @@ type EmailCommunication interface {
 	SendVerification(ctx context.Context, params VerifyEmailParams) error
 	SendPasswordReset(ctx context.Context, params PasswordResetParams) error
 	SendPasswordChanged(ctx context.Context, params PasswordChangedParams) error
+	SendPlaidDisconnected(ctx context.Context, params PlaidDisconnectedParams) error
 }
 
 func NewEmailCommunication(log *logrus.Entry, configuration config.Configuration) EmailCommunication {
@@ -127,6 +139,21 @@ func (e *emailCommunicationBase) SendPasswordChanged(ctx context.Context, params
 	html, text := e.getTemplates(PasswordChangedTemplate)
 	m := mail.NewMsg()
 	m.Subject("Password Updated")
+	e.toAddress(m, params.FirstName, params.LastName, params.Email)
+	e.fromAddress(m)
+	m.SetBodyTextTemplate(text, params)
+	m.AddAlternativeHTMLTemplate(html, params)
+
+	return e.sendMessage(span.Context(), m)
+}
+
+func (e *emailCommunicationBase) SendPlaidDisconnected(ctx context.Context, params PlaidDisconnectedParams) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	html, text := e.getTemplates(PlaidDisconnectedTemplate)
+	m := mail.NewMsg()
+	m.Subject("Account Disconnected")
 	e.toAddress(m, params.FirstName, params.LastName, params.Email)
 	e.fromAddress(m)
 	m.SetBodyTextTemplate(text, params)

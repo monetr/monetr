@@ -68,6 +68,20 @@ func (mr *MockEmailCommunicationMockRecorder) SendPasswordReset(ctx, params any)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendPasswordReset", reflect.TypeOf((*MockEmailCommunication)(nil).SendPasswordReset), ctx, params)
 }
 
+// SendPlaidDisconnected mocks base method.
+func (m *MockEmailCommunication) SendPlaidDisconnected(ctx context.Context, params communication.PlaidDisconnectedParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendPlaidDisconnected", ctx, params)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SendPlaidDisconnected indicates an expected call of SendPlaidDisconnected.
+func (mr *MockEmailCommunicationMockRecorder) SendPlaidDisconnected(ctx, params any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendPlaidDisconnected", reflect.TypeOf((*MockEmailCommunication)(nil).SendPlaidDisconnected), ctx, params)
+}
+
 // SendVerification mocks base method.
 func (m *MockEmailCommunication) SendVerification(ctx context.Context, params communication.VerifyEmailParams) error {
 	m.ctrl.T.Helper()

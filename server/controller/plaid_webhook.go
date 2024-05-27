@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/getsentry/sentry-go"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/background"
@@ -156,14 +155,10 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 		crumbs.Debug(c.getContext(ctx), "Handling webhook from Plaid.", fields)
 	}
 
-	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
-		hub.ConfigureScope(func(scope *sentry.Scope) {
-			scope.SetTag("webhook", "plaid")
-			scope.SetTag("plaid.item_id", hook.ItemId)
-			scope.SetTag("plaid.webhook.type", hook.WebhookType)
-			scope.SetTag("plaid.webhook.code", hook.WebhookCode)
-		})
-	}
+	crumbs.AddTag(c.getContext(ctx), "webhook", "plaid")
+	crumbs.AddTag(c.getContext(ctx), "plaid.item_id", hook.ItemId)
+	crumbs.AddTag(c.getContext(ctx), "plaid.webhook.type", hook.WebhookType)
+	crumbs.AddTag(c.getContext(ctx), "plaid.webhook.code", hook.WebhookCode)
 
 	repo := c.mustGetUnauthenticatedRepository(ctx)
 
@@ -184,6 +179,8 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 	// Set the user for this webhook for sentry.
 	crumbs.IncludeUserInScope(c.getContext(ctx), link.AccountId)
 	crumbs.AddTag(c.getContext(ctx), "linkId", link.LinkId.String())
+	crumbs.AddTag(c.getContext(ctx), "plaid.institution_id", link.PlaidLink.InstitutionId)
+	crumbs.AddTag(c.getContext(ctx), "plaid.institution_name", link.PlaidLink.InstitutionName)
 
 	if link.PlaidLink != nil {
 		// If we have the plaid link in scope then add the institution ID onto the sentry scope.
