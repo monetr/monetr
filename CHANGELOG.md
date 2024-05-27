@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.17.5](https://github.com/monetr/monetr/compare/v0.17.4...v0.17.5) (2024-05-27)
+
+
+### Features
+
+* **api:** Building out more transaction upload functionality ([284c582](https://github.com/monetr/monetr/commit/284c582fe87d7a089acdc1a356e3f1edf1459eb3))
+* **comms:** Adding email for when a Plaid link is disconnected ([5534ad1](https://github.com/monetr/monetr/commit/5534ad1e455c26ed15c58a7e88ca9978547f4559))
+* **plaid:** Migrating to personal finance categories ([#1766](https://github.com/monetr/monetr/issues/1766)) ([1b9c953](https://github.com/monetr/monetr/commit/1b9c953eff7072edb20de151c6dc2949305c162f))
+
+
+### Dependencies
+
+* **api:** update module cloud.google.com/go/kms to v1.17.1 ([#1767](https://github.com/monetr/monetr/issues/1767)) ([364b41c](https://github.com/monetr/monetr/commit/364b41cd094be48b9cb047cbc3e1b517a329b503))
+* **api:** update module cloud.google.com/go/storage to v1.41.0 ([#1768](https://github.com/monetr/monetr/issues/1768)) ([f3af448](https://github.com/monetr/monetr/commit/f3af4487ef51c2f3637c54df5d3f7bbcfb576fe0))
+* **api:** update module github.com/aws/aws-sdk-go to v1.53.10 ([#1769](https://github.com/monetr/monetr/issues/1769)) ([37f612c](https://github.com/monetr/monetr/commit/37f612cc406b5c984af62ba882872b3ecd4c64c5))
+* **api:** update module github.com/go-pg/pg/v10 to v10.13.0 ([#1770](https://github.com/monetr/monetr/issues/1770)) ([a1873e9](https://github.com/monetr/monetr/commit/a1873e9f5aebcad183450274814dc1e39732d331))
+* **api:** update module github.com/labstack/echo/v4 to v4.12.0 ([#1771](https://github.com/monetr/monetr/issues/1771)) ([e33bcae](https://github.com/monetr/monetr/commit/e33bcaea5ae41d6a8af5747611b3a0dbf4f1f74f))
+
+
+### Bug Fixes
+
+* **api:** Fixed outdated context key ([30ffc92](https://github.com/monetr/monetr/commit/30ffc92c354553bf93d702fb0556cff682132c38))
+* **api:** Fixing file API routes. ([fc5eb8f](https://github.com/monetr/monetr/commit/fc5eb8f155d1b4cb3a78dd0bbaa612804a9001d3))
+* **sync:** Improved ID generation for Plaid transactions ([eeb1a06](https://github.com/monetr/monetr/commit/eeb1a065ef7568b7afec1e751b9af8e54d6f1e3a))
+* **test:** Fixed failing test from code that was removed. ([65d93c2](https://github.com/monetr/monetr/commit/65d93c2d3b40bb85af3e8ce723f03972fdb48a6c))
+
+
+### Miscellaneous
+
+* **api:** Tweak routes ([8bd71b4](https://github.com/monetr/monetr/commit/8bd71b40f7e4632f5c056f84b4641446d1d74632))
+* **api:** Tweaked similar transactions API endpoint ([a6cbd22](https://github.com/monetr/monetr/commit/a6cbd2245f43fde52f3344772031b5dc000443e3))
+
 ## [0.17.4](https://github.com/monetr/monetr/compare/v0.17.3...v0.17.4) (2024-05-27)
 
 
