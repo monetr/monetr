@@ -1,7 +1,7 @@
 package mock_stripe
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"testing"
@@ -9,14 +9,14 @@ import (
 
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v76"
 )
 
 func (m *MockStripeHelper) MockStripeCreateCustomerSuccess(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"POST", "/v1/customers",
 		func(t *testing.T, request *http.Request) (interface{}, int) {
-			body, err := ioutil.ReadAll(request.Body)
+			body, err := io.ReadAll(request.Body)
 			require.NoError(t, err, "failed to read request body")
 
 			form, err := url.ParseQuery(string(body))

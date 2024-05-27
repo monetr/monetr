@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import axios from 'axios';
 import { useSnackbar } from 'notistack';
 
 import { MBaseButton } from '@monetr/interface/components/MButton';
@@ -7,7 +8,6 @@ import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
-import request from '@monetr/interface/util/request';
 
 export default function SubscribePage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
@@ -21,14 +21,14 @@ export default function SubscribePage(): JSX.Element {
     setLoading(true);
     let promise: Promise<any>;
     if (initialPlan && !hasSubscription) {
-      promise = request().post('/billing/create_checkout', {
+      promise = axios.post('/api/billing/create_checkout', {
         priceId: '',
         cancelPath: '/logout',
       });
     } else if (hasSubscription) {
       // If the customer has a subscription then we want to just manage it. This will allow a customer to fix a
       // subscription for a card that has failed payment or something similar.
-      promise = request().get('/billing/portal');
+      promise = axios.get('/api/billing/portal');
     }
 
     promise

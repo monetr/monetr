@@ -2,11 +2,12 @@ package mock_stripe
 
 import (
 	"fmt"
-	"github.com/jarcoal/httpmock"
-	"github.com/stretchr/testify/assert"
-	"github.com/stripe/stripe-go/v72"
 	"net/http"
 	"testing"
+
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stripe/stripe-go/v76"
 )
 
 func TestMockStripeGetCompletedCheckoutSession(t *testing.T) {

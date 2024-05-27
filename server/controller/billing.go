@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -12,7 +13,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/stripe_helper"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v76"
 )
 
 // Create Checkout Session
@@ -149,24 +150,21 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 	}
 
 	successUrl := fmt.Sprintf(
-		"%s://%s/account/subscribe/after?session={CHECKOUT_SESSION_ID}",
-		c.configuration.ExternalURLProtocol,
-		c.configuration.UIDomainName,
+		"%s/account/subscribe/after?session={CHECKOUT_SESSION_ID}",
+		c.configuration.GetUIURL(),
 	)
 	cancelUrl := fmt.Sprintf(
-		"%s://%s/account/subscribe",
-		c.configuration.ExternalURLProtocol,
-		c.configuration.UIDomainName,
+		"%s/account/subscribe",
+		c.configuration.GetUIURL(),
 	)
 	// If a custom cancel path was specified by the requester then use that path. Note: it can only be a path, not a
 	// completely custom URL.
 	// TODO This still has a code smell to it. If this isn't necessary I think we should just remove it outright.
 	if request.CancelPath != nil {
 		cancelUrl = fmt.Sprintf(
-			"%s://%s%s",
-			c.configuration.ExternalURLProtocol,
-			c.configuration.UIDomainName,
-			*request.CancelPath,
+			"%s/%s",
+			c.configuration.GetUIURL(),
+			strings.TrimPrefix(*request.CancelPath, "/"),
 		)
 	}
 
@@ -200,8 +198,6 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 		Discounts:           nil,
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
-				// Number of bank accounts?
-				Amount:   nil,
 				Quantity: stripe.Int64(1),
 				Price:    &plan.StripePriceId,
 			},
@@ -214,10 +210,8 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 		PaymentMethodOptions:      nil,
 		SetupIntentData:           nil,
 		ShippingAddressCollection: nil,
-		ShippingRates:             nil,
 		SubmitType:                nil,
 		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
-			Coupon:          nil,
 			DefaultTaxRates: nil,
 			Metadata: map[string]string{
 				"environment": c.configuration.Environment,
@@ -370,14 +364,14 @@ func (c *Controller) handleGetStripePortal(ctx echo.Context) error {
 		}
 	}
 
-	// Return the user to the UI home page when they return the monetr. If they are authenticated this will show them
-	// the transactions view, or will prompt them for credentials if they are no longer authenticated.
-	returnUrl := fmt.Sprintf("%s://%s", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName)
+	// Return the user to the UI home page when they return the monetr. If they
+	// are authenticated this will show them the transactions view, or will prompt
+	// them for credentials if they are no longer authenticated.
 	params := &stripe.BillingPortalSessionParams{
 		Configuration: nil,
 		Customer:      account.StripeCustomerId,
 		OnBehalfOf:    nil,
-		ReturnURL:     stripe.String(returnUrl),
+		ReturnURL:     stripe.String(c.configuration.GetUIURL()),
 	}
 
 	session, err := c.stripe.NewPortalSession(c.getContext(ctx), params)

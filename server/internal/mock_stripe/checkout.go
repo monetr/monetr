@@ -2,7 +2,7 @@ package mock_stripe
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -13,14 +13,14 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v76"
 )
 
 func (m *MockStripeHelper) MockNewCheckoutSession(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"POST", RegexPath(t, `/v1/checkout/sessions\z`),
 		func(t *testing.T, request *http.Request) (interface{}, int) {
-			body, err := ioutil.ReadAll(request.Body)
+			body, err := io.ReadAll(request.Body)
 			require.NoError(t, err, "failed to read request body")
 
 			form, err := url.ParseQuery(string(body))
@@ -86,7 +86,6 @@ func (m *MockStripeHelper) MockNewCheckoutSession(t *testing.T) {
 				},
 				CustomerDetails: nil,
 				CustomerEmail:   "",
-				Deleted:         false,
 				ID:              "",
 				LineItems: &stripe.LineItemList{
 					Data: lineItems,
@@ -101,7 +100,6 @@ func (m *MockStripeHelper) MockNewCheckoutSession(t *testing.T) {
 				PaymentMethodTypes:        nil,
 				PaymentStatus:             "",
 				SetupIntent:               nil,
-				Shipping:                  nil,
 				ShippingAddressCollection: nil,
 				SubmitType:                "",
 				Subscription:              nil,
@@ -193,13 +191,11 @@ func (m *MockStripeHelper) CompleteCheckoutSession(t *testing.T, checkoutSession
 		NextPendingInvoiceItemInvoice: 0,
 		Object:                        "subscription",
 		OnBehalfOf:                    nil,
-		PauseCollection:               stripe.SubscriptionPauseCollection{},
+		PauseCollection:               nil,
 		PaymentSettings:               nil,
-		PendingInvoiceItemInterval:    stripe.SubscriptionPendingInvoiceItemInterval{},
+		PendingInvoiceItemInterval:    nil,
 		PendingSetupIntent:            nil,
 		PendingUpdate:                 nil,
-		Plan:                          nil,
-		Quantity:                      0,
 		Schedule:                      nil,
 		StartDate:                     0,
 		Status:                        stripe.SubscriptionStatusActive,

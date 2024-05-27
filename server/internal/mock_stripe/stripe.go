@@ -1,10 +1,11 @@
 package mock_stripe
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stripe/stripe-go/v72"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stripe/stripe-go/v76"
 )
 
 type MockStripeHelper struct {

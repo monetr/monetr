@@ -10,7 +10,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v76"
 )
 
 func MockStripeListProductsSuccess(t *testing.T) {
@@ -43,10 +43,7 @@ func MockStripeListProductsSuccess(t *testing.T) {
 
 				products[i] = &stripe.Product{
 					Active:              true,
-					Attributes:          nil,
-					Caption:             "Test caption",
 					Created:             time.Now().Unix(),
-					DeactivateOn:        nil,
 					Deleted:             false,
 					Description:         "I am a description",
 					ID:                  id,

@@ -8,7 +8,7 @@ import (
 	"github.com/monetr/monetr/server/feature"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v76"
 )
 
 var (

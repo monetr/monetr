@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v76"
 )
 
 func (m *MockStripeHelper) MockGetSubscription(t *testing.T) {
