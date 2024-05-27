@@ -246,6 +246,7 @@ func NewSyncPlaidJob(
 func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
+	crumbs.AddTag(span.Context(), "linkId", s.args.LinkId.String())
 
 	log := s.log.WithContext(span.Context())
 
@@ -293,6 +294,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 	crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.PlaidId)
 	crumbs.AddTag(span.Context(), "plaid.institution_id", link.PlaidLink.InstitutionId)
+	crumbs.AddTag(span.Context(), "plaid.institution_name", link.PlaidLink.InstitutionName)
 
 	if len(bankAccounts) == 0 {
 		log.Warn("no bank accounts for plaid link")
@@ -669,6 +671,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 
 	if !exists {
 		plaidTransaction := PlaidTransaction{
+			PlaidTransactionId: NewID(&PlaidTransaction{}),
 			AccountId:          link.AccountId,
 			PlaidBankAccountId: plaidBankAccount.PlaidBankAccountId,
 			PlaidId:            input.GetTransactionId(),
@@ -686,6 +689,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 		}
 
 		existingTransaction = Transaction{
+			TransactionId:        NewID(&Transaction{}),
 			AccountId:            link.AccountId,
 			BankAccountId:        bankAccount.BankAccountId,
 			Amount:               amount,
@@ -737,6 +741,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 	// transaction. We need to create the new plaid transaction for this input.
 	if existingPlaidTransaction == nil {
 		existingPlaidTransaction = &PlaidTransaction{
+			PlaidTransactionId: NewID(&PlaidTransaction{}),
 			AccountId:          link.AccountId,
 			PlaidBankAccountId: plaidBankAccount.PlaidBankAccountId,
 			PlaidId:            input.GetTransactionId(),
