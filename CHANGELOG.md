@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.17.4](https://github.com/monetr/monetr/compare/v0.17.3...v0.17.4) (2024-05-27)
+
+
+### Features
+
+* **build:** Improve helm toolchain ([6f89f96](https://github.com/monetr/monetr/commit/6f89f96f44ab56a8419977f5e5849ed9c69998cf))
+
+
+### Bug Fixes
+
+* **billing:** Added a way to manage subscription from setup screen ([3952116](https://github.com/monetr/monetr/commit/39521162b9ed6299eae7084a041f19d82a334334)), closes [#1715](https://github.com/monetr/monetr/issues/1715)
+* **billing:** Upgrade from stripe v76 to v78 ([b8625b7](https://github.com/monetr/monetr/commit/b8625b7a798b4103ca3066a7be0940145eef7f51))
+* **billing:** Upgraded to stripe v76 + fixed billing portal ([f4b0460](https://github.com/monetr/monetr/commit/f4b0460340f0c4934080b6100dffcb9e9eb0da93))
+* **jobs:** Fixed process funding schedules not running ([eaecc96](https://github.com/monetr/monetr/commit/eaecc96056cdb71ce1ffc3bac098941d3f18d41b))
+
 ## [0.17.3](https://github.com/monetr/monetr/compare/v0.17.2...v0.17.3) (2024-05-26)
 
 
