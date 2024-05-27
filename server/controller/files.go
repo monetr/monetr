@@ -19,22 +19,7 @@ func (c *Controller) postFile(ctx echo.Context) error {
 
 	log := c.getLog(ctx)
 
-	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
-	if err != nil || bankAccountId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid bank account Id")
-	}
-
-	log = log.WithField("bankAccountId", bankAccountId)
-
 	repo := c.mustGetAuthenticatedRepository(ctx)
-
-	ok, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
-	if err != nil {
-		return c.wrapPgError(ctx, err, "Failed to verify bank account link type")
-	}
-	if !ok {
-		return c.badRequest(ctx, "Cannot import transactions for non-manual link.")
-	}
 
 	reader, header, err := ctx.Request().FormFile("data")
 	if err != nil {

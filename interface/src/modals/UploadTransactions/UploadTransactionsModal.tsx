@@ -8,7 +8,6 @@ import { useSnackbar } from 'notistack';
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
-import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import MonetrFile from '@monetr/interface/models/File';
 import fileSize from '@monetr/interface/util/fileSize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
@@ -57,7 +56,6 @@ interface StageProps {
 function UploadFileStage(props: StageProps) {
   const { enqueueSnackbar } = useSnackbar();
   const [file, setFile] = useState<File|null>(null);
-  const selectedBankAccountId = useSelectedBankAccountId();
   const [uploadProgress, setUploadProgress] = useState(-1);
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
     const selectedFile = acceptedFiles[0];
@@ -83,7 +81,7 @@ function UploadFileStage(props: StageProps) {
     setUploadProgress(0);
 
     return request()
-      .post(`/bank_accounts/${ selectedBankAccountId }/files`, formData, config)
+      .post('/files', formData, config)
       .then(result => {
         setTimeout(() => {
           switch (file.type) {
