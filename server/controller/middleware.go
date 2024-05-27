@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	databaseContextKey           = "_harderDatabase_"
+	databaseContextKey           = "_monetrDatabase_"
 	accountIdContextKey          = "_accountId_"
 	userIdContextKey             = "_userId_"
 	loginIdContextKey            = "_loginId_"
