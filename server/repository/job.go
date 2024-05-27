@@ -94,7 +94,7 @@ func (j *jobRepository) GetFundingSchedulesToProcess() ([]ProcessFundingSchedule
 			"funding_schedules"."bank_account_id",
 			array_agg("funding_schedules"."funding_schedule_id") AS "funding_schedule_ids"
 		FROM "funding_schedules"
-		WHERE "funding_schedules"."next_occurrence" < ?
+		WHERE "funding_schedules"."next_recurrence" < ?
 		GROUP BY "funding_schedules"."account_id", "funding_schedules"."bank_account_id"
 		`,
 		j.clock.Now(),
