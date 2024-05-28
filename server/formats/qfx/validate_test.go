@@ -12,6 +12,11 @@ func TestValidate(t *testing.T) {
 		assert.True(t, Validate(data), "nfcu QFX file should be valid")
 	})
 
+	t.Run("nfcu valid file 2", func(t *testing.T) {
+		data := GetFixtures(t, "sample-nfcu-2.qfx")
+		assert.True(t, Validate(data), "nfcu QFX file should be valid")
+	})
+
 	t.Run("us bank valid file", func(t *testing.T) {
 		data := GetFixtures(t, "sample-usbank.qfx")
 		assert.True(t, Validate(data), "us bank QFX file should be valid")

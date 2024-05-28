@@ -39,8 +39,8 @@ func (c *Controller) postFile(ctx echo.Context) error {
 	if contentType == "application/octet-stream" {
 		log.Debug("upload content type is an octet stream, detecting file type by extension")
 		switch extension {
-		case ".qfx":
-			log.Debug("detected QFX file format")
+		case ".qfx", ".ofx":
+			log.Debug("detected QFX/OFX file format")
 			contentType = string(storage.IntuitQFXContentType)
 		default:
 			log.Warn("could not determine file format by file extension")
@@ -63,7 +63,9 @@ func (c *Controller) postFile(ctx echo.Context) error {
 		c.getContext(ctx),
 		reader,
 		storage.FileInfo{
-			Name:        header.Filename,
+			Name: header.Filename,
+			// Eventually this should be one of a few different things, but should
+			// never be allowed to be a naked user input.
 			Kind:        "transactions/import", // TODO What should this be?
 			AccountId:   c.mustGetAccountId(ctx),
 			ContentType: storage.ContentType(contentType),

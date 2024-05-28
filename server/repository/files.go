@@ -12,6 +12,7 @@ import (
 type fileRepositoryInterface interface {
 	CreateFile(ctx context.Context, file *File) error
 	GetFiles(ctx context.Context) ([]File, error)
+	GetFile(ctx context.Context, fileId ID[File]) (*File, error)
 }
 
 func (r *repositoryBase) GetFiles(ctx context.Context) ([]File, error) {
@@ -61,4 +62,24 @@ func (r *repositoryBase) CreateFile(ctx context.Context, file *File) error {
 
 	return nil
 
+}
+
+func (r *repositoryBase) GetFile(
+	ctx context.Context,
+	fileId ID[File],
+) (*File, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var file File
+	err := r.txn.ModelContext(span.Context(), &file).
+		Where(`"account_id" = ?`, r.AccountId()).
+		Where(`"file_id" = ?`, fileId).
+		Limit(1).
+		Select(&file)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve file record")
+	}
+
+	return &file, nil
 }

@@ -12,8 +12,6 @@ type TransactionUploadStatus string
 const (
 	TransactionUploadStatusPending    TransactionUploadStatus = "pending"
 	TransactionUploadStatusProcessing TransactionUploadStatus = "processing"
-	TransactionUploadStatusReady      TransactionUploadStatus = "ready"
-	TransactionUploadStatusCanceled   TransactionUploadStatus = "canceled"
 	TransactionUploadStatusFailed     TransactionUploadStatus = "failed"
 	TransactionUploadStatusComplete   TransactionUploadStatus = "complete"
 )
@@ -35,13 +33,11 @@ type TransactionUpload struct {
 	File                *File                   `json:"-" pg:"rel:has-one"`
 	Status              TransactionUploadStatus `json:"status" pg:"status,notnull"`
 	Error               *string                 `json:"error,omitempty" pg:"error"`
-	Preview             []Transaction           `json:"preview" pg:"preview,type:'jsonb'"`
 	CreatedAt           time.Time               `json:"createdAt" pg:"created_at,notnull"`
 	CreatedBy           ID[User]                `json:"createdBy" pg:"created_by,notnull"`
 	CreatedByUser       *User                   `json:"-" pg:"rel:has-one,fk:created_by"`
 	ProcessedAt         *time.Time              `json:"processedAt" pg:"processed_at"`
 	CompletedAt         *time.Time              `json:"completedAt" pg:"completed_at"`
-	CanceledAt          *time.Time              `json:"canceledAt" pg:"canceled_at"`
 }
 
 func (TransactionUpload) IdentityPrefix() string {

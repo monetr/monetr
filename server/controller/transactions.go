@@ -248,22 +248,6 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, returnedObject)
 }
 
-func (c *Controller) postTransactionUpload(ctx echo.Context) error {
-	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
-	if err != nil || bankAccountId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid bank account Id")
-	}
-
-	var request struct {
-		FileId ID[File] `json:"fileId"`
-	}
-	if err := ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
-	}
-
-	return ctx.NoContent(http.StatusOK)
-}
-
 func (c *Controller) putTransactions(ctx echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {

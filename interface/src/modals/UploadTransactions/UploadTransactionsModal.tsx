@@ -33,6 +33,10 @@ function UploadTransactionsModal(): JSX.Element {
       case UploadTransactionStage.FileUpload:
         return <UploadFileStage setResult={ () => {} } setStage={ setStage } close={ modal.remove } />;
       case UploadTransactionStage.Processing:
+
+      case UploadTransactionStage.Error:
+
+      case UploadTransactionStage.Completed:
         
       default:
         return null;

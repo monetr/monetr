@@ -79,6 +79,16 @@ type BaseRepository interface {
 	// 24 hours.
 	GetRecentDepositTransactions(ctx context.Context, bankAccountId ID[BankAccount]) ([]Transaction, error)
 	GetTransactionsByPlaidId(ctx context.Context, linkId ID[Link], plaidTransactionIds []string) (map[string]Transaction, error)
+
+	// GetTransactonsByUploadIdentifier is meant to be used by the file import
+	// processing code. It will retrieve transactions that already exist in the
+	// database by their external upload identifier.
+	GetTransactonsByUploadIdentifier(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		uploadIdentifiers []string,
+	) (map[string]Transaction, error)
+
 	// Deprecated: Use GetTransactionsByPlaidId
 	GetTransactionsByPlaidTransactionId(ctx context.Context, linkId ID[Link], plaidTransactionIds []string) ([]Transaction, error)
 	GetTransactionsForSpending(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending], limit, offset int) ([]Transaction, error)
@@ -106,6 +116,17 @@ type BaseRepository interface {
 	// If no cluster can be found then nil and pg.NoRows will be returned
 	// (wrapped).
 	GetTransactionClusterByMember(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*TransactionCluster, error)
+
+	GetTransactionUpload(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionUploadId ID[TransactionUpload],
+	) (*TransactionUpload, error)
+	CreateTransactionUpload(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionUpload *TransactionUpload,
+	) error
 
 	fileRepositoryInterface
 }

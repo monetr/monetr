@@ -14,6 +14,13 @@ func TestTokenizer(t *testing.T) {
 		assert.IsType(t, new(Array), items, "Root item should be an array")
 	})
 
+	t.Run("nfcu 2", func(t *testing.T) {
+		data := GetFixtures(t, "sample-nfcu-2.qfx")
+		items := Tokenize(string(data))
+		assert.NotEmpty(t, items)
+		assert.IsType(t, new(Field), items, "Root item should be a field for nfcu 2")
+	})
+
 	t.Run("us bank", func(t *testing.T) {
 		data := GetFixtures(t, "sample-usbank.qfx")
 		items := Tokenize(string(data))

@@ -40,6 +40,7 @@ type Transaction struct {
 	OriginalMerchantName string     `json:"originalMerchantName" pg:"original_merchant_name"`
 	Currency             string     `json:"currency" pg:"currency,notnull"`
 	IsPending            bool       `json:"isPending" pg:"is_pending,notnull,use_zero"`
+	UploadIdentifier     *string    `json:"uploadIdentifier" pg:"upload_identifier"`
 	CreatedAt            time.Time  `json:"createdAt" pg:"created_at,notnull,default:now()"`
 	DeletedAt            *time.Time `json:"deletedAt" pg:"deleted_at"`
 }

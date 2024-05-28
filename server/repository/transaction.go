@@ -80,6 +80,33 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ID
 	return result, nil
 }
 
+func (r *repositoryBase) GetTransactonsByUploadIdentifier(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	uploadIdentifiers []string,
+) (map[string]Transaction, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	items := make([]Transaction, 0)
+	err := r.txn.ModelContext(span.Context(), &items).
+		Where(`"account_id" = ?`, r.AccountId()).
+		Where(`"bank_account_id" = ?`, bankAccountId).
+		WhereIn(`"upload_identifier" IN (?)`, uploadIdentifiers).
+		Select(&items)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retireve transactions by their upload identifier")
+	}
+
+	result := map[string]Transaction{}
+	for i := range items {
+		txn := items[i]
+		result[*txn.UploadIdentifier] = txn
+	}
+
+	return result, nil
+}
+
 func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId ID[BankAccount], limit, offset int) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
