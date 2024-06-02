@@ -95,15 +95,6 @@ func (h *ProcessQFXUploadHandler) updateStatus(
 		"bankAccountId":       args.BankAccountId,
 		"transactionUploadId": args.TransactionUploadId,
 	})
-	channel := fmt.Sprintf("account:%s:transaction_upload:%s:progress", args.AccountId, args.TransactionUploadId)
-	payload := string(status)
-	if err := h.publisher.Notify(ctx, channel, payload); err != nil {
-		return errors.Wrap(err, "failed to send progress notification for job")
-	}
-	log.WithFields(logrus.Fields{
-		"channel": channel,
-		"payload": payload,
-	}).Trace("sent progress notification for file upload")
 
 	query := h.db.ModelContext(ctx, &TransactionUpload{}).
 		Where(`"account_id" = ?`, args.AccountId).
@@ -112,10 +103,10 @@ func (h *ProcessQFXUploadHandler) updateStatus(
 		Set(`"status" = ?`, status)
 
 	switch status {
-	case TransactionUploadStatusComplete:
-		query = query.Set(`"completed_at" = ?`, h.clock.Now())
 	case TransactionUploadStatusProcessing:
 		query = query.Set(`"processed_at" = ?`, h.clock.Now())
+	case TransactionUploadStatusComplete:
+		query = query.Set(`"completed_at" = ?`, h.clock.Now())
 	case TransactionUploadStatusFailed:
 		query = query.Set(`"completed_at" = ?`, h.clock.Now())
 		if errorMessage != nil {
@@ -131,6 +122,16 @@ func (h *ProcessQFXUploadHandler) updateStatus(
 	if err != nil {
 		return errors.Wrap(err, "failed to update upload status")
 	}
+
+	channel := fmt.Sprintf("account:%s:transaction_upload:%s:progress", args.AccountId, args.TransactionUploadId)
+	payload := string(status)
+	if err := h.publisher.Notify(ctx, channel, payload); err != nil {
+		return errors.Wrap(err, "failed to send progress notification for job")
+	}
+	log.WithFields(logrus.Fields{
+		"channel": channel,
+		"payload": payload,
+	}).Trace("sent progress notification for file upload")
 
 	return nil
 }
@@ -154,6 +155,8 @@ func (h *ProcessQFXUploadHandler) HandleConsumeJob(ctx context.Context, data []b
 		return err
 	}
 
+	// Process the file upload inside a transaction, if there is a panic or an
+	// error here then we will catch it and update the upload status accordingly.
 	err := h.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
