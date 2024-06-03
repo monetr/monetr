@@ -561,8 +561,11 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 			timer.Stop()
 			return
 		case <-timer.C:
-			// Bump the cron we just did.
-			nextTimestamp := nextJob.schedule.Next(p.clock.Now())
+			// Bump the cron we just did. But use a slightly more future timestamp.
+			// This is to fix a bug where sometimes the cron library seems to be
+			// rounding down? Resulting in a `nextTimestamp` that is slightly in the
+			// past.
+			nextTimestamp := nextJob.schedule.Next(p.clock.Now().Add(900 * time.Millisecond))
 			crons[0].next = nextTimestamp
 			log := p.log.WithFields(logrus.Fields{
 				"queue": nextJob.queueName,
