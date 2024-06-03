@@ -2,12 +2,14 @@ import React, { FormEvent, useCallback, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Close, FilePresentOutlined, UploadFileOutlined } from '@mui/icons-material';
+import { useQueryClient } from '@tanstack/react-query';
 import axios, { AxiosProgressEvent, AxiosResponse } from 'axios';
-import { useSnackbar } from 'notistack';
 
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import ErrorFileStage from '@monetr/interface/modals/UploadTransactions/ErrorFileStage';
 import PrepareFileStage from '@monetr/interface/modals/UploadTransactions/PrepareFileStage';
 import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/ProcessingFileStage';
 import MonetrFile from '@monetr/interface/models/File';
@@ -28,10 +30,20 @@ export enum UploadTransactionStage {
 function UploadTransactionsModal(): JSX.Element {
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
+  const queryClient = useQueryClient();
+  const selectedBankAccountId = useSelectedBankAccountId();
 
   const [stage, setStage] = useState<UploadTransactionStage>(UploadTransactionStage.FileUpload);
+  const [error, setError] = useState<string|null>(null);
   const [monetrFile, setMonetrFile] = useState<MonetrFile|null>(null);
   const [monetrUpload, setMonetrUpload] = useState<TransactionUpload|null>(null);
+  const onClose = useCallback(() => {
+    if (stage === UploadTransactionStage.Processing) {
+      queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/transactions`]);
+      queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/balances`]);
+    }
+    return modal.remove();
+  }, [stage, modal, queryClient, selectedBankAccountId]);
 
   function CurrentStage(): JSX.Element {
     switch (stage) {
@@ -39,6 +51,7 @@ function UploadTransactionsModal(): JSX.Element {
         return <UploadFileStage 
           setResult={ setMonetrFile } 
           setStage={ setStage } 
+          setError={ setError }
           close={ modal.remove } 
         />;
       case UploadTransactionStage.Preparing:
@@ -46,16 +59,22 @@ function UploadTransactionsModal(): JSX.Element {
           file={ monetrFile } 
           setResult={ setMonetrUpload } 
           setStage={ setStage } 
+          setError={ setError }
           close={ modal.remove } 
         />;
       case UploadTransactionStage.Processing:
         return <ProcessingFileStage 
+          file={ monetrFile }
           upload={ monetrUpload } 
           setStage={ setStage } 
-          close={ modal.remove } 
+          close={ onClose } 
         />;
       case UploadTransactionStage.Error:
-
+        return <ErrorFileStage 
+          file={ monetrFile }
+          error={ error }
+          close={ modal.remove } 
+        />;
       case UploadTransactionStage.Completed:
         
       default:
@@ -75,10 +94,10 @@ interface StageProps {
   close: () => void;
   setResult: (file: MonetrFile) => void;
   setStage: (stage: UploadTransactionStage) => void;
+  setError: (error: string) => void;
 }
 
 function UploadFileStage(props: StageProps) {
-  const { enqueueSnackbar } = useSnackbar();
   const [file, setFile] = useState<File|null>(null);
   const [uploadProgress, setUploadProgress] = useState(-1);
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
@@ -108,17 +127,13 @@ function UploadFileStage(props: StageProps) {
       .post('/api/files', formData, config)
       .then((result: AxiosResponse<MonetrFile>) => {
         props.setResult(new MonetrFile(result.data));
-        props.setStage(UploadTransactionStage.Processing);
+        props.setStage(UploadTransactionStage.Preparing);
       })
       .catch(error => {
         console.error('file upload failed', error);
-        props.setStage(UploadTransactionStage.Error);
         const message = error.response.data.error || 'Unkown error';
-        enqueueSnackbar(`Failed to upload file: ${message}`, {
-          variant: 'error',
-          disableWindowBlurListener: true,
-        });
-        props.close();
+        props.setError(message);
+        props.setStage(UploadTransactionStage.Error);
       });
   }
 
@@ -168,7 +183,7 @@ function UploadFileStage(props: StageProps) {
             </div>
           </div>
           <MSpan>
-            Upload a QFX to import transaction data manually into your account. Maximum of 5MB.
+            Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.
           </MSpan>
 
           <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
@@ -204,7 +219,7 @@ function UploadFileStage(props: StageProps) {
           </div>
         </div>
         <MSpan>
-          Upload a QFX to import transaction data manually into your account. Maximum of 5MB.
+          Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.
         </MSpan>
 
         <div { ...getRootProps() } className={ uploadClassNames }>

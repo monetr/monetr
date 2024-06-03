@@ -1,8 +1,11 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/background"
@@ -68,41 +71,80 @@ func (c *Controller) getTransactionUploadProgress(ctx echo.Context) error {
 	}
 	defer listener.Close()
 
+	timeout := time.NewTimer(1 * time.Minute)
+	defer timeout.Stop()
+
 	websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()
-		if err := websocket.Message.Send(ws, upload); err != nil {
-			log.WithError(err).Error("failed to send transaction upload initial payload")
+
+		if err := c.sendWebsocketMessage(ctx, ws, upload); err != nil {
 			return
 		}
 
 		switch upload.Status {
 		case TransactionUploadStatusComplete, TransactionUploadStatusFailed:
 			log.WithField("status", upload.Status).Debug("upload is already in a final status, sending message then closing")
-			if err := websocket.Message.Send(ws, map[string]interface{}{
+			_ = c.sendWebsocketMessage(ctx, ws, map[string]interface{}{
 				"status": upload.Status,
-			}); err != nil {
-				log.WithError(err).Error("failed to send transaction upload status")
-				return
-			}
+			})
 			return
 		}
 
-		for status := range listener.Channel() {
-			log.WithField("status", status).Debug("sending status message for transaction upload")
-			if err := websocket.Message.Send(ws, map[string]interface{}{
-				"status": status.Payload(),
-			}); err != nil {
-				log.WithError(err).Error("failed to send transaction upload status")
-				return
+	ListenerLoop:
+		for {
+			select {
+			case <-timeout.C:
+				log.Warn("transaction upload is taking too long, websocket will be terminated")
+				_ = c.sendWebsocketMessage(ctx, ws, map[string]interface{}{
+					"status": "timed out",
+				})
+				break ListenerLoop
+			case status := <-listener.Channel():
+				log.WithField("status", status).Debug("sending status message for transaction upload")
+				if err := c.sendWebsocketMessage(ctx, ws, map[string]interface{}{
+					"status": status.Payload(),
+				}); err != nil {
+					return
+				}
+
+				switch TransactionUploadStatus(status.Payload()) {
+				case TransactionUploadStatusComplete, TransactionUploadStatusFailed:
+					log.WithField("status", status.Payload()).Debug("observed final status, ending socket")
+					break ListenerLoop
+				}
 			}
 
-			switch TransactionUploadStatus(status.Payload()) {
-			case TransactionUploadStatusComplete, TransactionUploadStatusFailed:
-				log.WithField("status", status.Payload()).Debug("observed final status, ending socket")
-				return
-			}
+		}
+
+		log.Trace("final status detected, re-reading transaction upload object")
+		upload, err := repo.GetTransactionUpload(
+			c.getContext(ctx),
+			bankAccountId,
+			transactionUploadId,
+		)
+		if err != nil {
+			return
+		}
+
+		if err := c.sendWebsocketMessage(ctx, ws, upload); err != nil {
+			return
 		}
 	}).ServeHTTP(ctx.Response(), ctx.Request())
+
+	return nil
+}
+
+func (c *Controller) sendWebsocketMessage(ctx echo.Context, ws *websocket.Conn, message any) error {
+	log := c.getLog(ctx)
+	msg, err := json.Marshal(message)
+	if err != nil {
+		log.WithField("mesasge", message).WithError(err).Error("failed to encode websocket message")
+		return err
+	}
+	if err := websocket.Message.Send(ws, string(msg)); err != nil {
+		log.WithField("mesasge", message).WithError(err).Error("failed to send websocket message")
+		return err
+	}
 
 	return nil
 }
@@ -126,7 +168,10 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "Failed to retrieve specified file")
 	}
 
-	if file.ContentType == string(storage.IntuitQFXContentType) {
+	if !strings.EqualFold(file.ContentType, string(storage.IntuitQFXContentType)) {
+		c.getLog(ctx).
+			WithField("contentType", file.ContentType).
+			Debug("could not create transaction upload because the file is not the expected content type: qfx/ofx")
 		return c.badRequest(ctx, "File is not a QFX/OFX file, and cannot be used for transaction imports")
 	}
 

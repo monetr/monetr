@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -55,13 +57,13 @@ func (a Array) XML() string {
 	return fmt.Sprintf("<%s>%s</%s>", a.Name, strings.Join(pieces, ""), a.Name)
 }
 
-func Tokenize(qfxData string) Token {
+func Tokenize(qfxData string) (Token, error) {
 	items := dataRegex.FindAllStringSubmatch(qfxData, -1)
 	if len(items) == 0 {
-		panic("QFX file provided is not valid")
+		return nil, errors.New("QFX/OFX file provided is not valid")
 	}
 	_, token := tokenizeItem(0, items)
-	return token
+	return token, nil
 }
 
 func tokenizeItem(index int, items [][]string) (i int, result Token) {

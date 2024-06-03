@@ -11,7 +11,8 @@ import (
 func TestConvertQFXToXML(t *testing.T) {
 	t.Run("nfcu", func(t *testing.T) {
 		data := GetFixtures(t, "sample-nfcu.qfx")
-		token := Tokenize(string(data))
+		token, err := Tokenize(string(data))
+		assert.NoError(t, err)
 
 		xmlString := ConvertQFXToXML(token)
 		assert.NotEmpty(t, xmlString, "must produce an xml string")
@@ -19,7 +20,8 @@ func TestConvertQFXToXML(t *testing.T) {
 
 	t.Run("nfcu 2", func(t *testing.T) {
 		data := GetFixtures(t, "sample-nfcu-2.qfx")
-		token := Tokenize(string(data))
+		token, err := Tokenize(string(data))
+		assert.NoError(t, err)
 
 		xmlString := ConvertQFXToXML(token)
 		assert.NotEmpty(t, xmlString, "must produce an xml string")
@@ -27,7 +29,8 @@ func TestConvertQFXToXML(t *testing.T) {
 
 	t.Run("us bank", func(t *testing.T) {
 		data := GetFixtures(t, "sample-usbank.qfx")
-		token := Tokenize(string(data))
+		token, err := Tokenize(string(data))
+		assert.NoError(t, err)
 
 		xmlString := ConvertQFXToXML(token)
 		assert.NotEmpty(t, xmlString, "must produce an xml string")
@@ -37,7 +40,8 @@ func TestConvertQFXToXML(t *testing.T) {
 func TestValidXMLOutput(t *testing.T) {
 	t.Run("nfcu", func(t *testing.T) {
 		data := GetFixtures(t, "sample-nfcu.qfx")
-		token := Tokenize(string(data))
+		token, err := Tokenize(string(data))
+		assert.NoError(t, err)
 
 		convertedToXml := ConvertQFXToXML(token)
 		assert.NotEmpty(t, convertedToXml, "must produce an xml string")
@@ -50,7 +54,8 @@ func TestValidXMLOutput(t *testing.T) {
 
 	t.Run("nfcu 2", func(t *testing.T) {
 		data := GetFixtures(t, "sample-nfcu-2.qfx")
-		token := Tokenize(string(data))
+		token, err := Tokenize(string(data))
+		assert.NoError(t, err)
 
 		convertedToXml := ConvertQFXToXML(token)
 		assert.NotEmpty(t, convertedToXml, "must produce an xml string")
@@ -63,7 +68,8 @@ func TestValidXMLOutput(t *testing.T) {
 
 	t.Run("us bank", func(t *testing.T) {
 		data := GetFixtures(t, "sample-usbank.qfx")
-		token := Tokenize(string(data))
+		token, err := Tokenize(string(data))
+		assert.NoError(t, err)
 
 		convertedToXml := ConvertQFXToXML(token)
 		assert.NotEmpty(t, convertedToXml, "must produce an xml string")

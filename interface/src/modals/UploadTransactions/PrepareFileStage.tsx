@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { FilePresentOutlined } from '@mui/icons-material';
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { enqueueSnackbar } from 'notistack';
 
 import MSpan from '@monetr/interface/components/MSpan';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
@@ -14,6 +13,7 @@ interface PrepareFileStageProps {
   file: MonetrFile;
   setResult: (result: TransactionUpload) => void;
   setStage: (stage: UploadTransactionStage) => void;
+  setError: (error: string) => void;
 }
 
 export default function PrepareFileStage(props: PrepareFileStageProps): JSX.Element {
@@ -22,7 +22,7 @@ export default function PrepareFileStage(props: PrepareFileStageProps): JSX.Elem
   useEffect(() => {
     if (!selectedBankAccountId) return;
 
-    axios.post(`/api/bank_accounts/${selectedBankAccountId}/transactions/uploads`, {
+    axios.post(`/api/bank_accounts/${selectedBankAccountId}/transactions/upload`, {
       fileId: props.file.fileId,
     })
       .then((result: AxiosResponse<TransactionUpload>) => {
@@ -30,13 +30,9 @@ export default function PrepareFileStage(props: PrepareFileStageProps): JSX.Elem
         props.setStage(UploadTransactionStage.Processing);
       })
       .catch((error: AxiosError<any>) => {
-        props.setStage(UploadTransactionStage.Error);
         const message = error.response.data.error || 'Unkown error';
-        enqueueSnackbar(`Failed to create upload session for file: ${message}`, {
-          variant: 'error',
-          disableWindowBlurListener: true,
-        });
-        props.close();
+        props.setError(message);
+        props.setStage(UploadTransactionStage.Error);
       });
   }, [props.file, selectedBankAccountId, props]);
 
@@ -55,10 +51,8 @@ export default function PrepareFileStage(props: PrepareFileStageProps): JSX.Elem
         <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
           <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
           <div className='flex flex-col py-1 w-full'>
-            <MSpan size='lg'>Preparing</MSpan>
-            <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
-              <div className='absolute top-0 bg-blue-600 h-1.5 rounded-full dark:bg-blue-600' style={ { width: '25%' } }></div>
-            </div>
+            <MSpan size='lg'>{ props.file.name }</MSpan>
+            <MSpan>Preparing...</MSpan>
           </div>
         </div>
       </div>

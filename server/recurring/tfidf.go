@@ -17,7 +17,8 @@ var (
 		"amazon":          10,
 		"youtube premium": 5,
 		"google":          2,
-		"pwp":             0,
+		"pwp":             0, // Paid with privacy
+		"sq":              0, // Square
 		"debit":           0,
 		"pos":             0,
 		"visa":            0,
@@ -29,6 +30,8 @@ var (
 		"deposit":         0,
 		"purchase":        0,
 		"adjustment":      0,
+		"payment":         0,
+		"to":              0,
 		"helppay":         0, // Shows up on some google transactions, not helpful.
 	}
 

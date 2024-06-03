@@ -22,7 +22,7 @@ var (
 )
 
 type TransactionUpload struct {
-	tableName string `pg:"files"`
+	tableName string `pg:"transaction_uploads"`
 
 	TransactionUploadId ID[TransactionUpload]   `json:"transactionUploadId" pg:"transaction_upload_id,notnull,pk"`
 	AccountId           ID[Account]             `json:"-" pg:"account_id,notnull,pk"`

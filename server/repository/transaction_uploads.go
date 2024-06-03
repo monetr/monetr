@@ -53,7 +53,7 @@ func (r *repositoryBase) CreateTransactionUpload(
 		return errors.Wrap(err, "failed to create transaction upload record")
 	}
 
-	span.Data["transactionUploadId"] = transactionUpload.TransactionUploadId
+	span.SetData("transactionUploadId", transactionUpload.TransactionUploadId.String())
 	span.Status = sentry.SpanStatusOK
 
 	return nil

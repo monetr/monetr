@@ -15,12 +15,18 @@ func Parse(reader io.Reader) (*gofx.OFX, error) {
 		return nil, errors.Wrap(err, "failed to read OFX buffer")
 	}
 
-	tokens := Tokenize(string(data))
-	xmlData := ConvertQFXToXML(tokens)
-
 	var ofx gofx.OFX
-	if err := xml.Unmarshal(xmlData, &ofx); err != nil {
-		return nil, errors.Wrap(err, "failed to parse OFX")
+	if originalErr := xml.Unmarshal(data, &ofx); originalErr != nil {
+		tokens, err := Tokenize(string(data))
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to parse")
+		}
+		xmlData := ConvertQFXToXML(tokens)
+		data = xmlData
+
+		if err := xml.Unmarshal(data, &ofx); err != nil {
+			return nil, errors.Wrap(err, "failed to parse OFX")
+		}
 	}
 
 	return &ofx, nil

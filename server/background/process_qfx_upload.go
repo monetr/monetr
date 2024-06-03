@@ -157,7 +157,23 @@ func (h *ProcessQFXUploadHandler) HandleConsumeJob(ctx context.Context, data []b
 
 	// Process the file upload inside a transaction, if there is a panic or an
 	// error here then we will catch it and update the upload status accordingly.
-	err := h.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
+	var err error
+	defer func() {
+		if recovery := recover(); recovery != nil {
+			h.log.WithError(err).Error("panic processing QFX/OFX file upload")
+			_ = h.updateStatus(ctx, args, TransactionUploadStatusFailed, nil)
+
+			panic(recovery)
+		}
+		if err != nil {
+			h.log.WithError(err).Error("error processing QFX/OFX file upload")
+			errorString := fmt.Sprintf("%s", err)
+			_ = h.updateStatus(ctx, args, TransactionUploadStatusFailed, &errorString)
+		} else {
+			_ = h.updateStatus(ctx, args, TransactionUploadStatusComplete, nil)
+		}
+	}()
+	err = h.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
@@ -173,15 +189,6 @@ func (h *ProcessQFXUploadHandler) HandleConsumeJob(ctx context.Context, data []b
 
 		return job.Run(span.Context())
 	})
-	if err != nil {
-		if err := h.updateStatus(ctx, args, TransactionUploadStatusFailed, nil); err != nil {
-			return err
-		}
-	} else {
-		if err := h.updateStatus(ctx, args, TransactionUploadStatusComplete, nil); err != nil {
-			return err
-		}
-	}
 
 	return nil
 }
@@ -247,6 +254,11 @@ func (j *ProcessQFXUploadJob) Run(ctx context.Context) error {
 		return err
 	}
 
+	j.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, CalculateTransactionClustersArguments{
+		AccountId:     j.args.AccountId,
+		BankAccountId: j.args.BankAccountId,
+	})
+
 	return nil
 }
 
@@ -272,6 +284,10 @@ func (j *ProcessQFXUploadJob) loadFile(ctx context.Context) error {
 	}
 	j.file = file
 
+	if file.DeletedAt != nil {
+		return errors.New("cannot import transactions from a deleted file")
+	}
+
 	fileReader, _, err := j.files.Read(span.Context(), file.BlobUri)
 	if err != nil {
 		return errors.Wrap(err, "failed to access file from storage")
@@ -280,7 +296,7 @@ func (j *ProcessQFXUploadJob) loadFile(ctx context.Context) error {
 
 	qfxData, err := qfx.Parse(fileReader)
 	if err != nil {
-		return errors.Wrap(err, "failed to parse file as QFX/OFX")
+		return err
 	}
 
 	j.data = qfxData
@@ -433,6 +449,9 @@ func (j *ProcessQFXUploadJob) syncBalances(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
+	// TODO Somehow keep track of the as of timestamp? This way if someone is
+	// importing files out of order we could potentially avoid updating the
+	// balance to an old value.
 	var currentBalance, availableBalance int64
 	var err error
 	for i := range j.data.BANKMSGSRSV1.STMTTRNRS {
