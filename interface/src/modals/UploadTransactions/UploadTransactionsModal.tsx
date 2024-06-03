@@ -2,24 +2,27 @@ import React, { FormEvent, useCallback, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Close, FilePresentOutlined, UploadFileOutlined } from '@mui/icons-material';
-import { AxiosProgressEvent } from 'axios';
+import axios, { AxiosProgressEvent, AxiosResponse } from 'axios';
 import { useSnackbar } from 'notistack';
 
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
+import PrepareFileStage from '@monetr/interface/modals/UploadTransactions/PrepareFileStage';
+import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/ProcessingFileStage';
 import MonetrFile from '@monetr/interface/models/File';
+import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 import fileSize from '@monetr/interface/util/fileSize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-import request from '@monetr/interface/util/request';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
-enum UploadTransactionStage {
+export enum UploadTransactionStage {
   FileUpload = 1,
   FieldMapping = 2,
-  Processing = 3,
-  Completed = 4,
-  Error = 5,
+  Preparing = 3,
+  Processing = 4,
+  Completed = 5,
+  Error = 6,
 }
 
 function UploadTransactionsModal(): JSX.Element {
@@ -27,13 +30,30 @@ function UploadTransactionsModal(): JSX.Element {
   const ref = useRef<MModalRef>(null);
 
   const [stage, setStage] = useState<UploadTransactionStage>(UploadTransactionStage.FileUpload);
+  const [monetrFile, setMonetrFile] = useState<MonetrFile|null>(null);
+  const [monetrUpload, setMonetrUpload] = useState<TransactionUpload|null>(null);
 
   function CurrentStage(): JSX.Element {
     switch (stage) {
       case UploadTransactionStage.FileUpload:
-        return <UploadFileStage setResult={ () => {} } setStage={ setStage } close={ modal.remove } />;
+        return <UploadFileStage 
+          setResult={ setMonetrFile } 
+          setStage={ setStage } 
+          close={ modal.remove } 
+        />;
+      case UploadTransactionStage.Preparing:
+        return <PrepareFileStage 
+          file={ monetrFile } 
+          setResult={ setMonetrUpload } 
+          setStage={ setStage } 
+          close={ modal.remove } 
+        />;
       case UploadTransactionStage.Processing:
-
+        return <ProcessingFileStage 
+          upload={ monetrUpload } 
+          setStage={ setStage } 
+          close={ modal.remove } 
+        />;
       case UploadTransactionStage.Error:
 
       case UploadTransactionStage.Completed:
@@ -84,24 +104,15 @@ function UploadFileStage(props: StageProps) {
     };
     setUploadProgress(0);
 
-    return request()
-      .post('/files', formData, config)
-      .then(result => {
-        setTimeout(() => {
-          switch (file.type) {
-            case 'text/csv':
-              props.setStage(UploadTransactionStage.FieldMapping);
-              break;
-            default:
-              props.setStage(UploadTransactionStage.Processing);
-              break;
-          }
-          props.setResult(new MonetrFile(result.data));
-        }, 1000);
+    return axios
+      .post('/api/files', formData, config)
+      .then((result: AxiosResponse<MonetrFile>) => {
+        props.setResult(new MonetrFile(result.data));
+        props.setStage(UploadTransactionStage.Processing);
       })
       .catch(error => {
         console.error('file upload failed', error);
-        // props.setStage(UploadTransactionStage.Error);
+        props.setStage(UploadTransactionStage.Error);
         const message = error.response.data.error || 'Unkown error';
         enqueueSnackbar(`Failed to upload file: ${message}`, {
           variant: 'error',
