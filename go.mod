@@ -11,7 +11,7 @@ require (
 	github.com/MicahParks/keyfunc v1.0.1
 	github.com/adrg/strutil v0.3.1
 	github.com/ahmetb/go-linq/v3 v3.2.0
-	github.com/alicebob/miniredis/v2 v2.31.1
+	github.com/alicebob/miniredis/v2 v2.33.0
 	github.com/aws/aws-sdk-go v1.53.10
 	github.com/benbjohnson/clock v1.3.5
 	github.com/brianvoe/gofakeit/v6 v6.28.0
@@ -131,7 +131,7 @@ require (
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
-	github.com/yuin/gopher-lua v1.1.0 // indirect
+	github.com/yuin/gopher-lua v1.1.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/mock v0.4.0
