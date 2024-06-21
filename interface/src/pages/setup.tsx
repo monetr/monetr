@@ -123,7 +123,7 @@ function Greeting(props: GreetingProps): JSX.Element {
       >
         Continue
       </MBaseButton>
-      <SetupBillingButton />
+      { !props.alreadyOnboarded && <SetupBillingButton /> }
       <Footer />
     </div>
   );
