@@ -24,6 +24,8 @@ export interface MSelectSpendingProps extends MSelecteSpendingBaseProps {
   excludeFrom?: string;
 }
 
+const FREE_TO_USE = 'spnd_freeToUse';
+
 export default function MSelectSpending(props: MSelectSpendingProps): JSX.Element {
   const formikContext = useFormikContext();
   const { result: spending, isLoading, isError } = useSpendingSink();
@@ -55,9 +57,9 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
 
   const freeToUse: SpendingOption = {
     label: 'Free-To-Use',
-    value: '',
+    value: FREE_TO_USE,
     spending: new Spending({
-      spendingId: '',
+      spendingId: FREE_TO_USE,
       // It is possible for the "safe" balance to not be present when switching bank accounts. This is a pseudo race
       // condition. Instead we want to gracefully handle the value not being present initially, and print a nicer string
       // until the balance is loaded.
@@ -90,17 +92,19 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
       // some other select has already picked the safe to spend option. We need to omit that
       // from our result set.
       if (props.excludeFrom && !excludedFrom) {
-        return item.value !== '';
+        return item.value !== FREE_TO_USE;
       }
 
       return true;
     });
 
   const value = formikContext.values[props.name];
-  const current = options.find(item => item.value === (value ?? -1));
+  // Determine the current value, if there is not a current value then use null. Null here represents Free to use, which
+  // is a non existant spending item that we patch in to represent an unbudgeted transaction.
+  const current = options.find(item => item.value === (value ?? FREE_TO_USE));
 
   function onSelect(newValue: { label: string, value: string }) {
-    if (newValue.value === '') {
+    if (newValue.value === FREE_TO_USE) {
       return formikContext.setFieldValue(props.name, null);
     }
 
