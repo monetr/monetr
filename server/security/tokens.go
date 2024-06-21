@@ -28,6 +28,11 @@ type Claims struct {
 	UserId       string    `json:"userId,string"`
 	AccountId    string    `json:"accountId,string"`
 	LoginId      string    `json:"loginId,string"`
+	// ReissueCount will be used to allow tokens to be reissued a certain number
+	// of times to allow users to stay logged in for a longer period of time if
+	// they are using the application frequently. Tokens will not be reissued if
+	// they have expired.
+	ReissueCount uint8 `json:"reissueCount,string"`
 }
 
 type ClientTokens interface {
@@ -51,7 +56,13 @@ type pasetoClientTokens struct {
 	pri        paseto.V4AsymmetricSecretKey
 }
 
-func NewPasetoClientTokens(log *logrus.Entry, clock clock.Clock, issuer string, public ed25519.PublicKey, private ed25519.PrivateKey) (ClientTokens, error) {
+func NewPasetoClientTokens(
+	log *logrus.Entry,
+	clock clock.Clock,
+	issuer string,
+	public ed25519.PublicKey,
+	private ed25519.PrivateKey,
+) (ClientTokens, error) {
 	pub, err := paseto.NewV4AsymmetricPublicKeyFromEd25519(public)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create asymmetric public key from ed25519 provided")
@@ -108,7 +119,11 @@ func (p *pasetoClientTokens) notExpired() paseto.Rule {
 	}
 }
 
-func (p *pasetoClientTokens) Create(audience Audience, lifetime time.Duration, claims Claims) (string, error) {
+func (p *pasetoClientTokens) Create(
+	audience Audience,
+	lifetime time.Duration,
+	claims Claims,
+) (string, error) {
 	token := paseto.NewToken()
 	now := p.clock.Now()
 	token.SetAudience(string(audience))

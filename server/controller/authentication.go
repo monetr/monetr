@@ -171,6 +171,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			UserId:       user.UserId.String(),
 			AccountId:    user.AccountId.String(),
 			LoginId:      user.LoginId.String(),
+			ReissueCount: 0, // First time the token is being issued
 		})
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
