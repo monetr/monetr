@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.17.6](https://github.com/monetr/monetr/compare/v0.17.5...v0.17.6) (2024-06-25)
+
+
+### Features
+
+* **api:** Laying some minor groundwork about extending tokens ([a7700b8](https://github.com/monetr/monetr/commit/a7700b80821e60be2c8306098cf81dbdc66117e7))
+
+
+### Dependencies
+
+* **api:** update module github.com/alicebob/miniredis/v2 to v2.33.0 ([#1777](https://github.com/monetr/monetr/issues/1777)) ([9b6192b](https://github.com/monetr/monetr/commit/9b6192b8701d57e34df10b8a70e94a02b3ee2c95))
+* **api:** update module github.com/aws/aws-sdk-go to v1.54.6 ([#1779](https://github.com/monetr/monetr/issues/1779)) ([eff9e5f](https://github.com/monetr/monetr/commit/eff9e5f7d20e5dc28931ae77be98d1e70b290bf5))
+* **api:** update module github.com/klauspost/cpuid/v2 to v2.2.8 ([#1787](https://github.com/monetr/monetr/issues/1787)) ([a2b3fe1](https://github.com/monetr/monetr/commit/a2b3fe14553117032746d5fcf980c3d30627d00c))
+* **api:** update module github.com/spf13/cobra to v1.8.1 ([#1788](https://github.com/monetr/monetr/issues/1788)) ([3b801cb](https://github.com/monetr/monetr/commit/3b801cb2b68c81bdc5c4c4c92eb5adea32149fa7))
+* **api:** update module github.com/stripe/stripe-go/v78 to v78.11.0 ([#1781](https://github.com/monetr/monetr/issues/1781)) ([eed2c76](https://github.com/monetr/monetr/commit/eed2c76722a48899ab4f27aaa23cc2cea2f7b731))
+* **api:** update module golang.org/x/crypto to v0.24.0 ([#1782](https://github.com/monetr/monetr/issues/1782)) ([570b0f5](https://github.com/monetr/monetr/commit/570b0f5ffd0f717d2704909dff4508a341401a3f))
+* **api:** update module google.golang.org/api to v0.185.0 ([#1783](https://github.com/monetr/monetr/issues/1783)) ([76eb554](https://github.com/monetr/monetr/commit/76eb554e05ad400b2b3091f7052193c2d8cd2ab7))
+* **ui:** update dependency @react-email/components to v0.0.19 ([#1750](https://github.com/monetr/monetr/issues/1750)) ([0e26aba](https://github.com/monetr/monetr/commit/0e26abaf0c6ea40702cda70d0d618e9e47f446c3))
+* **ui:** update dependency eslint-plugin-no-relative-import-paths to v1.5.4 ([#1739](https://github.com/monetr/monetr/issues/1739)) ([1258b1b](https://github.com/monetr/monetr/commit/1258b1bb206061486acaa3bf2cfaf139d80fa606))
+* **ui:** update dependency react-email to v2.1.4 ([#1776](https://github.com/monetr/monetr/issues/1776)) ([2dbba8e](https://github.com/monetr/monetr/commit/2dbba8e83a8791c8aa957fca4adc935c3ae66f4c))
+* **ui:** update dependency tailwindcss to v3.4.4 ([#1780](https://github.com/monetr/monetr/issues/1780)) ([0668cf0](https://github.com/monetr/monetr/commit/0668cf006cfd5f3742180d4d07725c47ad979015))
+
+
+### Bug Fixes
+
+* **cron:** Fixed bug that could cause duplicate cron jobs ([cd64b9b](https://github.com/monetr/monetr/commit/cd64b9b5d41f8dbe87100e4637735a6a54966541)), closes [#1774](https://github.com/monetr/monetr/issues/1774)
+* **ui:** Dont show manage subscription on setup page when not needed ([9eedfc4](https://github.com/monetr/monetr/commit/9eedfc414600e2a6c158a9692d5cb36bce0fb054))
+* **ui:** Fixed free to use not selecting properly, removed console.trace ([47ecc56](https://github.com/monetr/monetr/commit/47ecc5628e850fb12a038cafa1e6ac85c8347477))
+
+
+### Miscellaneous
+
+* **deps:** Fix local development ([10e0b81](https://github.com/monetr/monetr/commit/10e0b81dd9ebe21760c057380dbd5c63ef70bc4c))
+* **deps:** Fix mailhog again ([b5088b3](https://github.com/monetr/monetr/commit/b5088b3a56fe92349a0fdb6ad112bdccb0bb9841))
+* **encryption:** Laying groundwork for vault transit ([edfd400](https://github.com/monetr/monetr/commit/edfd400455f3e79874bc8ac237ebb19dfffd5d8d))
+
 ## [0.17.5](https://github.com/monetr/monetr/compare/v0.17.4...v0.17.5) (2024-05-27)
 
 
