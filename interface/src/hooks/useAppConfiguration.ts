@@ -20,9 +20,7 @@ export class AppConfiguration {
   billingEnabled: boolean;
   iconsEnabled: boolean;
   plaidEnabled: boolean;
-  tellerEnabled: boolean;
-  tellerApplicationId: string | null;
-  tellerEnvironment: 'sandbox' | 'development' | 'production' | null;
+  manualEnabled: boolean;
   release: string | null;
   revision: string;
   buildType: string;

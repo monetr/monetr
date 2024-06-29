@@ -4,7 +4,6 @@ import { Navigate } from 'react-router-dom';
 import { CheckCircle, EditOutlined } from '@mui/icons-material';
 
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
-import TellerLogo from '@monetr/interface/components/Logo/TellerLogo';
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -23,7 +22,6 @@ type Step = 'greeting'|'plaid'|'teller'|'manual'|'loading';
 
 export default function SetupPage(props: SetupPageProps): JSX.Element {
   const [step, setStep] = useState<Step>('greeting');
-  const tellerPath = props.alreadyOnboarded ? '/link/create/teller' : '/setup/teller';
   const plaidPath = props.alreadyOnboarded ? '/link/create/plaid' : '/setup/plaid';
   const manualPath = props.alreadyOnboarded ? '/link/create/manual' : '/setup/manual';
 
@@ -32,8 +30,6 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
       return <Greeting onContinue={ setStep } manualEnabled={ props.manualEnabled } alreadyOnboarded={ props.alreadyOnboarded } />;
     case 'plaid':
       return <Navigate to={ plaidPath } />;
-    case 'teller':
-      return <Navigate to={ tellerPath } />;
     case 'manual':
       return <Navigate to={ manualPath } />;
     case 'loading':
@@ -91,14 +87,6 @@ function Greeting(props: GreetingProps): JSX.Element {
       <MLogo className='w-16 h-16 md:w-24 md:h-24' />
       <Banner />
       <div className='flex gap-4 flex-col md:flex-row p-2'>
-        <OnboardingTile
-          icon={ <TellerLogo /> }
-          name='Teller'
-          description='Teller can provide frequent updates from your bank.'
-          active={ active === 'teller' }
-          onClick={ () => setActive('teller') }
-          disabled={ !config?.tellerEnabled }
-        />
         <OnboardingTile
           icon={ <PlaidLogo /> }
           name='Plaid'

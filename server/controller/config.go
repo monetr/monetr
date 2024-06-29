@@ -28,6 +28,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 		BillingEnabled       bool         `json:"billingEnabled"`
 		IconsEnabled         bool         `json:"iconsEnabled"`
 		PlaidEnabled         bool         `json:"plaidEnabled"`
+		ManualEnabled        bool         `json:"manualEnabled"`
 		Release              string       `json:"release"`
 		Revision             string       `json:"revision"`
 		BuildType            string       `json:"buildType"`
@@ -88,6 +89,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 
 	configuration.IconsEnabled = icons.GetIconsEnabled()
 	configuration.PlaidEnabled = c.configuration.Plaid.GetEnabled()
+	configuration.ManualEnabled = c.configuration.Storage.Enabled
 
 	return ctx.JSON(http.StatusOK, configuration)
 }

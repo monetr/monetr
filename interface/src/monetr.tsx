@@ -6,7 +6,6 @@ import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSideb
 import MobileSidebar from '@monetr/interface/components/Layout/MobileSidebar';
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
-import TellerSetup from '@monetr/interface/components/setup/TellerSetup';
 import { useBankAccounts } from '@monetr/interface/hooks/bankAccounts';
 import { useLinks } from '@monetr/interface/hooks/links';
 import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
@@ -94,8 +93,7 @@ export default function Monetr(): JSX.Element {
     return (
       <Routes>
         <Route path='/logout' element={ <LogoutPage /> } />
-        <Route path='/setup' element={ <SetupPage manualEnabled /> } />
-        <Route path='/setup/teller' element={ <TellerSetup /> } />
+        <Route path='/setup' element={ <SetupPage manualEnabled={ config?.manualEnabled } /> } />
         <Route path='/setup/plaid' element={ <PlaidSetup alreadyOnboarded /> } />
         <Route path='/setup/manual' element={ <SetupManual /> } />
         <Route path='/plaid/oauth-return' element={ <OauthReturn /> } />
@@ -131,7 +129,6 @@ export default function Monetr(): JSX.Element {
             <Route path='about' element={ <SettingsAbout /> } />
           </Route>
           <Route path='/link/create' element={ <LinkCreatePage /> } />
-          <Route path='/link/create/teller' element={ <TellerSetup /> } />
           <Route path='/link/create/plaid' element={ <PlaidSetup alreadyOnboarded /> } />
           <Route path='/link/create/manual' element={ <SetupManual alreadyOnboarded /> } />
           <Route path='/logout' element={ <LogoutPage /> } />
