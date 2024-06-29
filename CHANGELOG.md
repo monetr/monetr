@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.17.7](https://github.com/monetr/monetr/compare/v0.17.6...v0.17.7) (2024-06-29)
+
+
+### Bug Fixes
+
+* **forecast:** Fixed bug with forecasting excluded weekends ([d9b1f39](https://github.com/monetr/monetr/commit/d9b1f3959bff7fb4ca00944b8ad69b007e026beb))
+* **job:** Improving funding schedule background job ([d21e9c8](https://github.com/monetr/monetr/commit/d21e9c811a20a599ca1b34202f9ce1e771a5b528))
+* **ui:** Only show manual as a link option if its enabled. ([496001b](https://github.com/monetr/monetr/commit/496001bcea9988b027588308a6d4f4bb7d8f083b))
+
 ## [0.17.6](https://github.com/monetr/monetr/compare/v0.17.5...v0.17.6) (2024-06-25)
 
 
