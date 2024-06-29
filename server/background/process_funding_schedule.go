@@ -87,7 +87,7 @@ func (p *ProcessFundingScheduleHandler) EnqueueTriggeredJob(ctx context.Context,
 	log := p.log.WithContext(ctx)
 
 	log.Info("retrieving funding schedules to process")
-	fundingSchedules, err := p.repo.GetFundingSchedulesToProcess()
+	fundingSchedules, err := p.repo.GetFundingSchedulesToProcess(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve funding schedules to process")
 	}
@@ -150,6 +150,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 	defer span.Finish()
 
 	log := p.log.WithContext(ctx)
+	log = log.WithField("bankAccountId", p.args.BankAccountId)
 
 	account, err := p.repo.GetAccount(span.Context())
 	if err != nil {
@@ -232,11 +233,9 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 			})
 		default:
 			for i := range expenses {
-				// :shakes-fist: arrays
 				spending := expenses[i]
 				spendingLog := fundingLog.WithFields(logrus.Fields{
-					"spendingId":   spending.SpendingId,
-					"spendingName": spending.Name,
+					"spendingId": spending.SpendingId,
 				})
 
 				if spending.IsPaused {

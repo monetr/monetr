@@ -16,7 +16,7 @@ import (
 type JobRepository interface {
 	GetBankAccountsToSync() ([]BankAccount, error)
 	GetBankAccountsWithPendingTransactions() ([]CheckingPendingTransactionsItem, error)
-	GetFundingSchedulesToProcess() ([]ProcessFundingSchedulesItem, error)
+	GetFundingSchedulesToProcess(ctx context.Context) ([]ProcessFundingSchedulesItem, error)
 	GetPlaidLinksByAccount(ctx context.Context) ([]PlaidLinksForAccount, error)
 	GetLinksForExpiredAccounts(ctx context.Context) ([]Link, error)
 	GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error)
@@ -84,9 +84,13 @@ func (j *jobRepository) GetBankAccountsToSync() ([]BankAccount, error) {
 	return result, errors.Wrap(err, "failed to retrieve bank accounts to sync")
 }
 
-func (j *jobRepository) GetFundingSchedulesToProcess() ([]ProcessFundingSchedulesItem, error) {
+func (j *jobRepository) GetFundingSchedulesToProcess(ctx context.Context) ([]ProcessFundingSchedulesItem, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
 	var items []ProcessFundingSchedulesItem
-	_, err := j.txn.Query(
+	_, err := j.txn.QueryContext(
+		span.Context(),
 		&items,
 		`
 		SELECT
@@ -100,7 +104,6 @@ func (j *jobRepository) GetFundingSchedulesToProcess() ([]ProcessFundingSchedule
 		j.clock.Now(),
 	)
 	if err != nil {
-		// TODO (elliotcourant) Can pg.NoRows return here? If it can this error is useless.
 		return nil, errors.Wrap(err, "failed to retrieve accounts and their funding schedules")
 	}
 

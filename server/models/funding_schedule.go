@@ -131,12 +131,29 @@ func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, now time.
 	if now.Before(f.NextRecurrence) {
 		crumbs.Debug(span.Context(), "Skipping processing funding schedule, it does not occur yet", map[string]interface{}{
 			"fundingScheduleId": f.FundingScheduleId,
+			"now":               now,
 			"nextOccurrence":    f.NextRecurrence,
 		})
 		return false
 	}
 
 	nextFundingOccurrence, originalNextFundingOccurrence := f.GetNextContributionDateAfter(now, timezone)
+
+	crumbs.Debug(span.Context(), "Calculated next recurrence for funding schedule", map[string]interface{}{
+		"fundingScheduleId": f.FundingScheduleId,
+		"excludeWeekends":   f.ExcludeWeekends,
+		"ruleset":           f.RuleSet,
+		"before": map[string]interface{}{
+			"lastRecurrence":         f.LastRecurrence,
+			"nextRecurrence":         f.NextRecurrence,
+			"nextRecurrenceOriginal": f.NextRecurrenceOriginal,
+		},
+		"after": map[string]interface{}{
+			"lastRecurrence":         f.NextRecurrence,
+			"nextRecurrence":         nextFundingOccurrence,
+			"nextRecurrenceOriginal": originalNextFundingOccurrence,
+		},
+	})
 
 	current := f.NextRecurrence
 	f.LastRecurrence = &current
