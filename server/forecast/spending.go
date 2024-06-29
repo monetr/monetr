@@ -311,7 +311,12 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		// second to the input and keeping nextRecurrence the same we basically make
 		// this query end inclusive but start exclusive.
 		// Essentially: events > start && events <= end.
-		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(ctx, input.Add(1*time.Second), nextRecurrence, timezone)
+		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(
+			ctx,
+			input.Add(1*time.Second),
+			nextRecurrence,
+			timezone,
+		)
 		// Then determine how much we would need at each of those funding events.
 		totalContributionAmount = amountNeeded / myownsanity.Max(1, numberOfContributions)
 	}

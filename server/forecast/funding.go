@@ -186,7 +186,14 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
 	// midnight.
 	rule.DTStart(rule.GetDTStart().In(timezone))
+
+	// TODO Technically we should add 2 days to the "end" here if exclude weekend
+	// is on. Lets say the end is the 30th, but the rule recurres on the 31st. If
+	// the 31st is a sunday then the actual recurrence is the 29th and would fall
+	// within the range. But because of the window here it wouldn't be included
+	// properly.
 	items := rule.Between(start, end, true)
+
 	events := make([]FundingEvent, 0, len(items))
 	for i := range items {
 		select {
@@ -203,7 +210,10 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(
 		date := items[i]
 		nextContributionDate := date
 		weekendAvoided := false
-		if f.fundingSchedule.ExcludeWeekends {
+		// If we are excluding weekends then do that. But don't do it if the actual
+		// next recurrence for the funding schedule is hard set on a weekend. If its
+		// hard set, then just use that date.
+		if f.fundingSchedule.ExcludeWeekends && !date.Equal(f.fundingSchedule.NextRecurrence) {
 			switch date.Weekday() {
 			case time.Sunday:
 				nextContributionDate = nextContributionDate.AddDate(0, 0, -2)
