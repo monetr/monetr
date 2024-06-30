@@ -123,6 +123,15 @@ elseif("${MONETR_KMS_PROVIDER}" STREQUAL "vault")
   # If we are using the vault KMS provider, then make a vault directory in our build tree. And take the vault config
   # file and template it into that directory for later.
   file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/vault)
+  set(VAULT_TOKEN_FILE ${COMPOSE_OUTPUT_DIRECTORY}/vault/token.txt)
+  if(NOT EXISTS ${VAULT_TOKEN_FILE}) 
+    string(RANDOM LENGTH 24 ALPHABET abcdefghijklmnopqrstuvwxyz1234567890 VAULT_ROOT_TOKEN)
+    message(STATUS "  Writing vault token file: ${VAULT_ROOT_TOKEN}")
+    file(WRITE ${VAULT_TOKEN_FILE} "${VAULT_ROOT_TOKEN}")
+  else()
+    message(STATUS "  Using existing vault token file")
+  endif()
+  file(READ ${VAULT_TOKEN_FILE} VAULT_ROOT_TOKEN)
   configure_file("${CMAKE_SOURCE_DIR}/compose/vault-config.toml.in" "${COMPOSE_OUTPUT_DIRECTORY}/vault/config.toml" @ONLY)
   # And then add our vault container to our compose list.
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.vault-kms.yaml.in)
@@ -203,9 +212,10 @@ add_custom_target(
 if(DOCKER_SERVER) 
   add_custom_target(
     development.down
-    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:plaid || exit 0
-    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:stripe || exit 0
-    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} down --remove-orphans -v || exit 0
+    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:plaid || ${CMAKE_COMMAND} -E true
+    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:stripe || ${CMAKE_COMMAND} -E true
+    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} down --remove-orphans -v || ${CMAKE_COMMAND} -E true
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/development || ${CMAKE_COMMAND} -E true
     COMMAND_EXPAND_LISTS
     USES_TERMINAL
   )

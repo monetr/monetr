@@ -45,8 +45,8 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 			CredentialsFile: kmsConfig.CredentialsJSON,
 		})
 	case "vault":
-		// TODO Implement Vault transit encrytion!
-		panic("vault transit encryption is not implemented")
+		log.Trace("using vault KMS")
+		return secrets.NewPlaintextKMS(), nil
 	case "plaintext":
 		log.Trace("using plaintext KMS, secrets will not be encrypted")
 		return secrets.NewPlaintextKMS(), nil

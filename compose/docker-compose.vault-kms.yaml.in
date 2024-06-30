@@ -3,18 +3,19 @@ services:
   vault:
     image: hashicorp/vault:1.17.0
     restart: always # If something goes wrong just restart the container, this is for development only.
-    user: "${UID:-0}:${GID:-0}"
     command:
       - vault
       - server
-      - -config=/vault/config.toml
+      - -config=/data/config.toml
       - -dev
-      - -dev-skip-init
     environment:
-      VAULT_ADDR: http://127.0.0.1:80
+      VAULT_TOKEN: "@VAULT_ROOT_TOKEN@"
+      VAULT_DEV_ROOT_TOKEN_ID: "@VAULT_ROOT_TOKEN@"
     volumes:
-      - "@CMAKE_BINARY_DIR@/development/vault:/vault"
+      - "@CMAKE_BINARY_DIR@/development/vault:/data"
   monetr:
+    links:
+      - vault
     depends_on:
       vault:
         condition: service_started

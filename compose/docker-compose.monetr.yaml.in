@@ -131,12 +131,18 @@ services:
       MONETR_SENTRY_DSN: "$MONETR_SENTRY_DSN"
       MONETR_SENTRY_EXTERNAL_DSN: "@MONETR_SENTRY_DSN@"
       MONETR_EMAIL_VERIFICATION_ENABLED: "@MONETR_EMAIL_VERIFICATION_ENABLED@"
+      MONETR_VAULT_TOKEN: "@VAULT_ROOT_TOKEN@"
       AWS_ACCESS_KEY: monetr
       AWS_SECRET_KEY: password
     command:
       - bash
       - -c
       - /build/compose/api-entrypoint.sh
+    links:
+      - redis
+      - postgres
+      - s3
+      - mail
     ports:
       # This port is used for editors to connect to dlv remotely to do step debugging.
       - 2345:2345
