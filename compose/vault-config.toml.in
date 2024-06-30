@@ -1,0 +1,13 @@
+# vim: set ft=toml
+disable_mlock = true 
+ui = true
+
+storage "file" {
+  path = "/vault/data"
+}
+
+listener "tcp" {
+  address = "127.0.0.1:80"
+  tls_disable = true
+}
+

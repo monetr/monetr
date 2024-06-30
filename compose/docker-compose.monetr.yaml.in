@@ -1,10 +1,5 @@
 # vim: set ft=yaml
 services:
-  kms:
-    image: nsmithuk/local-kms
-    restart: always # If something goes wrong just restart the container, this is for development only.
-    volumes:
-      - "@CMAKE_SOURCE_DIR@/compose/kms.yaml:/init/seed.yaml"
   s3:
     image: quay.io/minio/minio:RELEASE.2023-12-09T18-17-51Z
     restart: always # If something goes wrong just restart the container, this is for development only.
@@ -120,7 +115,7 @@ services:
       MONETR_SERVER_EXTERNAL_URL: "@LOCAL_PROTOCOL@://@MONETR_LOCAL_DOMAIN@"
       # By default we want to use the AWS KMS provider as that is what we have built into the local env. But iuf the
       # developer specifies a different KMS provider we want to use that instead.
-      MONETR_KMS_PROVIDER: "aws"
+      MONETR_KMS_PROVIDER: "@MONETR_KMS_PROVIDER@"
       # # If they are developing using Google's KMS then they'll need to provide a resource name.
       # MONETR_KMS_RESOURCE_NAME: "${MONETR_KMS_RESOURCE_NAME:-}"
       # If you want to do development against Plaid you will need to provide your own secrets. Please do not modify this
@@ -142,12 +137,6 @@ services:
       - bash
       - -c
       - /build/compose/api-entrypoint.sh
-    links:
-      - redis
-      - postgres
-      - s3
-      - kms
-      - mail
     ports:
       # This port is used for editors to connect to dlv remotely to do step debugging.
       - 2345:2345
@@ -161,8 +150,8 @@ services:
         condition: service_started
       postgres:
         condition: service_started
-      kms:
-        condition: service_started
+      # kms:
+      #   condition: service_started
 
 volumes:
   kmsData:

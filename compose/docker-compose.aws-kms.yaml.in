@@ -1,0 +1,7 @@
+# vim: set ft=yaml
+services:
+  kms:
+    image: nsmithuk/local-kms
+    restart: always # If something goes wrong just restart the container, this is for development only.
+    volumes:
+      - "@CMAKE_SOURCE_DIR@/compose/kms.yaml:/init/seed.yaml"

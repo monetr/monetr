@@ -87,6 +87,14 @@ add_custom_command(
 add_custom_target(development.certificates DEPENDS ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT})
 add_custom_target(development.hostsfile DEPENDS ${LOCAL_HOSTS_MARKER})
 
+########################################################################################################################
+# This section determines which compose files will be used when the development environment is started. Compose files
+# are "merged" by docker at runtime, so this is a simple way of providing some customizability to local development.
+########################################################################################################################
+
+set(COMPOSE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/development)
+file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY})
+
 set(COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.monetr.yaml.in)
 if (NGROK_AUTH OR DEFINED ENV{NGROK_AUTH} OR NGROK_ENABLED)
   set(NGROK_AUTH "${NGROK_AUTH}")
@@ -107,8 +115,30 @@ else()
   message(STATUS "No ngrok credentials detected, webhooks will not be enabled for local development.")
 endif()
 
-set(COMPOSE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/development)
-file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY})
+if("${MONETR_KMS_PROVIDER}" STREQUAL "aws")
+  message(STATUS "AWS KMS (Local) will be used for local development as the KMS provider")
+  list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.aws-kms.yaml.in)
+elseif("${MONETR_KMS_PROVIDER}" STREQUAL "vault")
+  message(STATUS "Vault Transit (Local) will be used for local development as the KMS provider")
+  # If we are using the vault KMS provider, then make a vault directory in our build tree. And take the vault config
+  # file and template it into that directory for later.
+  file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/vault)
+  configure_file("${CMAKE_SOURCE_DIR}/compose/vault-config.toml.in" "${COMPOSE_OUTPUT_DIRECTORY}/vault/config.toml" @ONLY)
+  # And then add our vault container to our compose list.
+  list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.vault-kms.yaml.in)
+elseif("${MONETR_KMS_PROVIDER}" STREQUAL "")
+  # no-op, no KMS provider will be used.
+elseif("${MONETR_KMS_PROVIDER}" STREQUAL "none")
+  set(MONETR_KMS_PROVIDER "")
+else()
+  message(FATAL "Invalid KMS provider specified, MONETR_KMS_PROVIDER=${MONETR_KMS_PROVIDER}\nValid options are: aws, vault, none")
+endif()
+
+
+# Once the list of compose file templates has been built, actually generate the template files and build our arguments
+# for docker compose.
+
+message(DEBUG "  Compose Files: ${COMPOSE_FILE_TEMPLATES}")
 
 set(COMPOSE_FILES)
 foreach(COMPOSE_FILE_TEMPLATE ${COMPOSE_FILE_TEMPLATES})
@@ -119,6 +149,7 @@ foreach(COMPOSE_FILE_TEMPLATE ${COMPOSE_FILE_TEMPLATES})
   list(APPEND COMPOSE_FILES "-f" "${COMPOSE_FILE_OUTPUT}")
 endforeach()
 
+########################################################################################################################
 
 set(ENV{LOCAL_CERTIFICATE_DIR} ${LOCAL_CERTIFICATE_DIR})
 set(BASE_ARGS "--project-directory" "${CMAKE_SOURCE_DIR}")
