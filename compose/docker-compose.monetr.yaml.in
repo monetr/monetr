@@ -131,7 +131,11 @@ services:
       MONETR_SENTRY_DSN: "$MONETR_SENTRY_DSN"
       MONETR_SENTRY_EXTERNAL_DSN: "@MONETR_SENTRY_DSN@"
       MONETR_EMAIL_VERIFICATION_ENABLED: "@MONETR_EMAIL_VERIFICATION_ENABLED@"
+      # If vault is the KMS provider then these settings will be used
+      MONETR_VAULT_AUTH_METHOD: "token"
       MONETR_VAULT_TOKEN: "@VAULT_ROOT_TOKEN@"
+      MONETR_VAULT_ENDPOINT: "http://vault:80"
+      # Storage settings
       AWS_ACCESS_KEY: monetr
       AWS_SECRET_KEY: password
     command:

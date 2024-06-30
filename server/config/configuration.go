@@ -129,6 +129,8 @@ type VaultTransit struct {
 	AuthMethod string `yaml:"authMethod"`
 	// If the AuthMethod is `token` then this value must be specified.
 	Token *string `yaml:"token"`
+	// Vault URL to make requests to.
+	Endpoint *string `yaml:"endpoint"`
 }
 
 type Beta struct {
@@ -448,6 +450,9 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("KeyManagement.AWS.AccessKey", "AWS_ACCESS_KEY_ID")
 	_ = v.BindEnv("KeyManagement.AWS.SecretKey", "AWS_ACCESS_KEY")
 	_ = v.BindEnv("KeyManagement.Google.ResourceName", "MONETR_KMS_RESOURCE_NAME")
+	_ = v.BindEnv("KeyManagement.Vault.AuthMethod", "MONETR_VAULT_AUTH_METHOD")
+	_ = v.BindEnv("KeyManagement.Vault.Token", "MONETR_VAULT_TOKEN")
+	_ = v.BindEnv("KeyManagement.Vault.Endpoint", "MONETR_VAULT_ENDPOINT")
 	_ = v.BindEnv("Plaid.ClientID", "MONETR_PLAID_CLIENT_ID")
 	_ = v.BindEnv("Plaid.ClientSecret", "MONETR_PLAID_CLIENT_SECRET")
 	_ = v.BindEnv("Plaid.Environment", "MONETR_PLAID_ENVIRONMENT")
