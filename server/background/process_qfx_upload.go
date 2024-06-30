@@ -454,20 +454,22 @@ func (j *ProcessQFXUploadJob) syncBalances(ctx context.Context) error {
 	// balance to an old value.
 	var currentBalance, availableBalance int64
 	var err error
-	for i := range j.data.BANKMSGSRSV1.STMTTRNRS {
-		statementTransactions := j.data.BANKMSGSRSV1.STMTTRNRS[i]
-		if statementTransactions.STMTRS.LEDGERBAL != nil {
-			currentBalance, err = calc.ConvertStringToCents(statementTransactions.STMTRS.LEDGERBAL.BALAMT)
-			if err != nil {
-				return errors.Wrap(err, "failed to parse ledger balance amount")
+	if j.data.BANKMSGSRSV1 != nil {
+		for i := range j.data.BANKMSGSRSV1.STMTTRNRS {
+			statementTransactions := j.data.BANKMSGSRSV1.STMTTRNRS[i]
+			if statementTransactions.STMTRS.LEDGERBAL != nil {
+				currentBalance, err = calc.ConvertStringToCents(statementTransactions.STMTRS.LEDGERBAL.BALAMT)
+				if err != nil {
+					return errors.Wrap(err, "failed to parse ledger balance amount")
+				}
+
 			}
 
-		}
-
-		if statementTransactions.STMTRS.AVAILBAL != nil {
-			availableBalance, err = calc.ConvertStringToCents(statementTransactions.STMTRS.AVAILBAL.BALAMT)
-			if err != nil {
-				return errors.Wrap(err, "failed to parse available balance amount")
+			if statementTransactions.STMTRS.AVAILBAL != nil {
+				availableBalance, err = calc.ConvertStringToCents(statementTransactions.STMTRS.AVAILBAL.BALAMT)
+				if err != nil {
+					return errors.Wrap(err, "failed to parse available balance amount")
+				}
 			}
 		}
 	}

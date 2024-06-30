@@ -85,3 +85,30 @@ func (s *gcsStorage) Read(
 
 	return reader, ContentType(reader.Attrs.ContentType), nil
 }
+
+func (s *gcsStorage) Remove(
+	ctx context.Context,
+	uri string,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	url, err := url.Parse(uri)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse file uri")
+	}
+
+	err = s.client.
+		Bucket(url.Host).
+		Object(url.Path).
+		Delete(span.Context())
+	if err != nil {
+		return errors.Wrap(err, "failed to remove file from gcs")
+	}
+
+	s.log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"uri": uri,
+	}).Debug("file was removed from storage")
+
+	return nil
+}

@@ -101,3 +101,50 @@ func (f *filesystemStorage) Read(
 
 	return file, contentType, nil
 }
+
+func (f *filesystemStorage) Head(
+	ctx context.Context,
+	uri string,
+) (exists bool, err error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	url, err := url.Parse(uri)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to parse file uri")
+	}
+	filePath := path.Join(f.baseDirectory, url.Path)
+
+	stat, err := os.Stat(filePath)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to stat object on filesystem")
+	}
+
+	// If the path is not a directory and it exsts, then return true
+	return !stat.IsDir(), nil
+}
+
+func (f *filesystemStorage) Remove(
+	ctx context.Context,
+	uri string,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	url, err := url.Parse(uri)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse file uri")
+	}
+
+	filePath := path.Join(f.baseDirectory, url.Path)
+
+	if err := os.Remove(filePath); err != nil {
+		return errors.Wrap(err, "failed to remove file from filesystem")
+	}
+
+	f.log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"uri": uri,
+	}).Debug("file was removed from storage")
+
+	return nil
+}
