@@ -1,0 +1,21 @@
+# vim: set ft=yaml
+services:
+  vault:
+    image: hashicorp/vault:1.17.0
+    restart: always # If something goes wrong just restart the container, this is for development only.
+    user: "${UID:-0}:${GID:-0}"
+    command:
+      - vault
+      - server
+      - -config=/vault/config.toml
+      - -dev
+      - -dev-skip-init
+    environment:
+      VAULT_ADDR: http://127.0.0.1:80
+    volumes:
+      - "@CMAKE_BINARY_DIR@/development/vault:/vault"
+  monetr:
+    depends_on:
+      vault:
+        condition: service_started
+
