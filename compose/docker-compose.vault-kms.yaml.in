@@ -3,12 +3,16 @@ services:
   vault:
     image: hashicorp/vault:1.17.0
     restart: always # If something goes wrong just restart the container, this is for development only.
+    ports:
+      - 80
     command:
       - vault
       - server
       - -config=/data/config.toml
       - -dev
     environment:
+      VAULT_ADDR: http://0.0.0.0:80
+      VAULT_API_ADDR: http://0.0.0.0:80
       VAULT_TOKEN: "@VAULT_ROOT_TOKEN@"
       VAULT_DEV_ROOT_TOKEN_ID: "@VAULT_ROOT_TOKEN@"
     volumes:
@@ -19,4 +23,3 @@ services:
     depends_on:
       vault:
         condition: service_started
-
