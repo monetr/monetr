@@ -45,7 +45,7 @@ func (l Login) VerifyTOTP(input string, now time.Time) error {
 	}
 
 	loginTotp := gotp.NewDefaultTOTP(l.TOTP)
-	if loginTotp.Verify(input, int(now.Unix())) {
+	if loginTotp.Verify(input, now.Unix()) {
 		return nil
 	}
 

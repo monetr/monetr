@@ -42,7 +42,7 @@ require (
 	github.com/teambition/rrule-go v1.8.2
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/wneessen/go-mail v0.4.1
-	github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c
+	github.com/xlzd/gotp v0.1.0
 	golang.org/x/crypto v0.24.0
 	google.golang.org/api v0.185.0
 	google.golang.org/genproto v0.0.0-20240617180043-68d350f18fd4
