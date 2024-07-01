@@ -56,7 +56,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
-    image: postgres:15
+    image: postgres:16
     environment:
       # Make it so that monetr doesn't need any credentials to connect to PostgreSQL.
       POSTGRES_PASSWORD: ""
