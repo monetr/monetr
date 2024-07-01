@@ -52,7 +52,7 @@ func GivenIHaveTOTPCodeForLogin(t *testing.T, clock clock.Clock, login *models.L
 	loginTotp := GivenIHaveTOTPForLogin(t, clock, login)
 	code := loginTotp.Now()
 	// If the code would change very soon, then use the next code instead.
-	futureTimestamp := int(clock.Now().Add(1 * time.Second).Unix())
+	futureTimestamp := clock.Now().Add(1 * time.Second).Unix()
 	if loginTotp.At(futureTimestamp) != code {
 		code = loginTotp.At(futureTimestamp)
 	}
