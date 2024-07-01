@@ -77,7 +77,7 @@ func TestLogin(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"email":    user.Login.Email,
 					"password": password,
-					"totp":     loginTotp.At(int(app.Clock.Now().Unix())),
+					"totp":     loginTotp.At(app.Clock.Now().Unix()),
 				}).
 				Expect()
 
