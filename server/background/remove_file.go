@@ -2,7 +2,6 @@ package background
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
@@ -83,9 +82,18 @@ func (h *RemoveFileHandler) HandleConsumeJob(ctx context.Context, data []byte) e
 		log := h.log.WithContext(span.Context())
 		repo := repository.NewRepositoryFromSession(h.clock, "user_system", args.AccountId, txn)
 
-		fmt.Sprint(log, repo)
+		job, err := NewRemoveFileJob(
+			log,
+			repo,
+			h.clock,
+			h.files,
+			args,
+		)
+		if err != nil {
+			return err
+		}
 
-		return nil
+		return job.Run(span.Context())
 	})
 }
 
@@ -133,7 +141,14 @@ func (j *RemoveFileJob) Run(ctx context.Context) error {
 		log.WithError(err).Error("failed to remove file")
 	}
 
-	// TODO Reconciled at and deleted at
+	now := j.clock.Now()
+	file.ReconciledAt = &now
 
+	if err := j.repo.UpdateFile(span.Context(), file); err != nil {
+		log.WithError(err).Error("failed to update file's reconciled at")
+		return err
+	}
+
+	log.Debug("file successfully removed")
 	return nil
 }

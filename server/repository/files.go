@@ -13,6 +13,7 @@ type fileRepositoryInterface interface {
 	CreateFile(ctx context.Context, file *File) error
 	GetFiles(ctx context.Context) ([]File, error)
 	GetFile(ctx context.Context, fileId ID[File]) (*File, error)
+	UpdateFile(ctx context.Context, file *File) error
 }
 
 func (r *repositoryBase) GetFiles(ctx context.Context) ([]File, error) {
@@ -26,6 +27,7 @@ func (r *repositoryBase) GetFiles(ctx context.Context) ([]File, error) {
 	var items []File
 	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"account_id" = ?`, r.AccountId()).
+		Where(`"deleted_at" IS NULL`).
 		Limit(100).
 		Order(`file_id DESC`).
 		Select(&items)
@@ -82,4 +84,17 @@ func (r *repositoryBase) GetFile(
 	}
 
 	return &file, nil
+}
+
+func (r *repositoryBase) UpdateFile(
+	ctx context.Context,
+	file *File,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	file.AccountId = r.AccountId()
+
+	_, err := r.txn.ModelContext(span.Context(), file).WherePK().Update(file)
+	return errors.Wrap(err, "failed to update file")
 }

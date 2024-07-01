@@ -254,6 +254,21 @@ func (j *ProcessQFXUploadJob) Run(ctx context.Context) error {
 		return err
 	}
 
+	{ // Once we are done with the file, mark it as deleted and queue it for removal.
+		now := j.clock.Now()
+		j.file.DeletedAt = &now
+		log.Debug("processing complete, marking file as deleted and queueing removal")
+		if err := j.repo.UpdateFile(span.Context(), j.file); err != nil {
+			return err
+		}
+
+		j.enqueuer.EnqueueJob(span.Context(), RemoveFile, RemoveFileArguments{
+			AccountId: j.args.AccountId,
+			FileId:    j.file.FileId,
+		})
+	}
+
+	// Also kick off the transaction similarity job.
 	j.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, CalculateTransactionClustersArguments{
 		AccountId:     j.args.AccountId,
 		BankAccountId: j.args.BankAccountId,
