@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	. "github.com/monetr/monetr/server/models"
 )
 
 func (c *Controller) getFiles(ctx echo.Context) error {
