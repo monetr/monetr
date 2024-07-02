@@ -4,8 +4,20 @@ import (
 	"context"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
 )
+
+type Uploadable interface {
+	// FileKind can be added to a model struct, and indicates that this model can
+	// have a file associated with it. This determines the prefix to use for the
+	// file upload itself. Cannot be blank.
+	FileKind() string
+	// FileExpiration tells the uploader to mark a file to be deleted after so
+	// much time. If your model defines this, it will mark the file. Otherwise
+	// this can be nil.
+	FileExpiration(clock clock.Clock) *time.Time
+}
 
 var (
 	_ pg.BeforeInsertHook = (*File)(nil)
@@ -25,6 +37,7 @@ type File struct {
 	CreatedAt     time.Time   `json:"createdAt" pg:"created_at,notnull"`
 	CreatedBy     ID[User]    `json:"createdBy" pg:"created_by,notnull"`
 	CreatedByUser *User       `json:"-" pg:"rel:has-one,fk:created_by"`
+	ExpiresAt     *time.Time  `json:"expiresAt" pg:"expires_at"`
 	DeletedAt     *time.Time  `json:"deletedAt" pg:"deleted_at"`
 	ReconciledAt  *time.Time  `json:"-" pg:"reconciled_at"`
 }

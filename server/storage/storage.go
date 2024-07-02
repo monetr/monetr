@@ -46,6 +46,10 @@ type Storage interface {
 	// error for protocol mismatch. If a file can be read then an buffer will be
 	// returned for that file.
 	Read(ctx context.Context, uri string) (buf io.ReadCloser, contentType ContentType, err error)
+	// Remove will take a file URI and will remove it from the underlying storage
+	// system. If this function returns nil, then the file was removed
+	// successfully.
+	Remove(ctx context.Context, uri string) error
 }
 
 func getStorePath(info FileInfo) (string, error) {
@@ -57,8 +61,8 @@ func getStorePath(info FileInfo) (string, error) {
 	name = strings.ReplaceAll(name, "-", "")
 
 	key := fmt.Sprintf(
-		"uploads/%08X/%s/%s.%s",
-		info.AccountId, info.Kind, name, extension,
+		"data/%s/%08X/%s.%s",
+		info.Kind, info.AccountId, name, extension,
 	)
 	return key, nil
 }

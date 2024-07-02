@@ -97,3 +97,64 @@ func (s *s3Storage) Read(
 
 	return result.Body, ContentType(*result.ContentType), nil
 }
+
+func (s *s3Storage) Head(
+	ctx context.Context,
+	uri string,
+) (exists bool, err error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	url, err := url.Parse(uri)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to parse file uri")
+	}
+
+	result, err := s.session.HeadObjectWithContext(
+		span.Context(),
+		&s3.HeadObjectInput{
+			Bucket: aws.String(url.Host),
+			Key:    aws.String(url.Path),
+		},
+	)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to head object in s3")
+	}
+
+	return result != nil, nil
+}
+
+func (s *s3Storage) Remove(
+	ctx context.Context,
+	uri string,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	url, err := url.Parse(uri)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse file uri")
+	}
+
+	result, err := s.session.DeleteObjectWithContext(
+		span.Context(),
+		&s3.DeleteObjectInput{
+			Bucket: aws.String(url.Host),
+			Key:    aws.String(url.Path),
+		},
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to delete file from s3")
+	}
+
+	s.log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"uri": uri,
+		"s3DeleteResult": logrus.Fields{
+			"deleteMarker":   result.DeleteMarker,
+			"versionId":      result.VersionId,
+			"requestCharged": result.RequestCharged,
+		},
+	}).Debug("file was removed from storage")
+
+	return nil
+}

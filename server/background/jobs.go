@@ -85,10 +85,13 @@ func NewBackgroundJobs(
 
 	jobs := []JobHandler{
 		NewCalculateTransactionClustersHandler(log, db, clock),
+		NewCleanupFilesHandler(log, db, clock, fileStorage, enqueuer),
 		NewCleanupJobsHandler(log, db),
 		NewDeactivateLinksHandler(log, db, clock, configuration, kms, plaidPlatypus),
 		NewProcessFundingScheduleHandler(log, db, clock),
+		NewProcessQFXUploadHandler(log, db, clock, fileStorage, publisher, enqueuer),
 		NewProcessSpendingHandler(log, db, clock),
+		NewRemoveFileHandler(log, db, clock, fileStorage),
 		NewRemoveLinkHandler(log, db, clock, publisher),
 		NewSyncPlaidHandler(log, db, clock, kms, plaidPlatypus, publisher, enqueuer),
 	}

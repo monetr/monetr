@@ -2,38 +2,68 @@ import React, { FormEvent, useCallback, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Close, FilePresentOutlined, UploadFileOutlined } from '@mui/icons-material';
-import { AxiosProgressEvent } from 'axios';
-import { useSnackbar } from 'notistack';
+import { useQueryClient } from '@tanstack/react-query';
+import axios, { AxiosProgressEvent, AxiosResponse } from 'axios';
 
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
-import MonetrFile from '@monetr/interface/models/File';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import ErrorFileStage from '@monetr/interface/modals/UploadTransactions/ErrorFileStage';
+import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/ProcessingFileStage';
+import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 import fileSize from '@monetr/interface/util/fileSize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-import request from '@monetr/interface/util/request';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
-enum UploadTransactionStage {
+export enum UploadTransactionStage {
   FileUpload = 1,
   FieldMapping = 2,
-  Processing = 3,
-  Completed = 4,
-  Error = 5,
+  Preparing = 3,
+  Processing = 4,
+  Completed = 5,
+  Error = 6,
 }
 
 function UploadTransactionsModal(): JSX.Element {
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
+  const queryClient = useQueryClient();
+  const selectedBankAccountId = useSelectedBankAccountId();
 
   const [stage, setStage] = useState<UploadTransactionStage>(UploadTransactionStage.FileUpload);
+  const [error, setError] = useState<{message: string; filename: string}|null>(null);
+  const [monetrUpload, setMonetrUpload] = useState<TransactionUpload|null>(null);
+  const onClose = useCallback(() => {
+    if (stage === UploadTransactionStage.Processing) {
+      queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/transactions`]);
+      queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/balances`]);
+    }
+    return modal.remove();
+  }, [stage, modal, queryClient, selectedBankAccountId]);
 
   function CurrentStage(): JSX.Element {
     switch (stage) {
       case UploadTransactionStage.FileUpload:
-        return <UploadFileStage setResult={ () => {} } setStage={ setStage } close={ modal.remove } />;
+        return <UploadFileStage 
+          setResult={ setMonetrUpload } 
+          setStage={ setStage } 
+          setError={ setError }
+          close={ modal.remove } 
+        />;
       case UploadTransactionStage.Processing:
-        
+        return <ProcessingFileStage 
+          upload={ monetrUpload } 
+          setStage={ setStage } 
+          close={ onClose } 
+        />;
+      case UploadTransactionStage.Completed:
+        return null;       
+      case UploadTransactionStage.Error:
+        return <ErrorFileStage 
+          error={ error }
+          close={ onClose } 
+        />;
       default:
         return null;
     }
@@ -49,12 +79,13 @@ function UploadTransactionsModal(): JSX.Element {
 
 interface StageProps {
   close: () => void;
-  setResult: (file: MonetrFile) => void;
+  setResult: (result: TransactionUpload) => void;
   setStage: (stage: UploadTransactionStage) => void;
+  setError: (error: {message: string; filename: string}) => void;
 }
 
 function UploadFileStage(props: StageProps) {
-  const { enqueueSnackbar } = useSnackbar();
+  const selectedBankAccountId = useSelectedBankAccountId();
   const [file, setFile] = useState<File|null>(null);
   const [uploadProgress, setUploadProgress] = useState(-1);
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
@@ -80,30 +111,20 @@ function UploadFileStage(props: StageProps) {
     };
     setUploadProgress(0);
 
-    return request()
-      .post('/files', formData, config)
-      .then(result => {
-        setTimeout(() => {
-          switch (file.type) {
-            case 'text/csv':
-              props.setStage(UploadTransactionStage.FieldMapping);
-              break;
-            default:
-              props.setStage(UploadTransactionStage.Processing);
-              break;
-          }
-          props.setResult(new MonetrFile(result.data));
-        }, 1000);
+    return axios
+      .post(`/api/bank_accounts/${selectedBankAccountId}/transactions/upload`, formData, config)
+      .then((result: AxiosResponse<TransactionUpload>) => {
+        props.setResult(new TransactionUpload(result.data));
+        props.setStage(UploadTransactionStage.Processing);
       })
       .catch(error => {
         console.error('file upload failed', error);
-        // props.setStage(UploadTransactionStage.Error);
         const message = error.response.data.error || 'Unkown error';
-        enqueueSnackbar(`Failed to upload file: ${message}`, {
-          variant: 'error',
-          disableWindowBlurListener: true,
+        props.setError({
+          message,
+          filename: file.name,
         });
-        props.close();
+        props.setStage(UploadTransactionStage.Error);
       });
   }
 
@@ -153,7 +174,7 @@ function UploadFileStage(props: StageProps) {
             </div>
           </div>
           <MSpan>
-            Upload a QFX to import transaction data manually into your account. Maximum of 5MB.
+            Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.
           </MSpan>
 
           <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
@@ -189,7 +210,7 @@ function UploadFileStage(props: StageProps) {
           </div>
         </div>
         <MSpan>
-          Upload a QFX to import transaction data manually into your account. Maximum of 5MB.
+          Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.
         </MSpan>
 
         <div { ...getRootProps() } className={ uploadClassNames }>
