@@ -56,7 +56,7 @@ func NewCleanupFilesHandler(
 
 func (CleanupFilesHandler) DefaultSchedule() string {
 	// Every hour on the 15th minute
-	return "0 15 * * * *"
+	return "0 28 * * * *"
 }
 
 func (h *CleanupFilesHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
@@ -101,7 +101,7 @@ func (j *CleanupFilesJob) Run(ctx context.Context) error {
 
 	var expiredFiles []models.File
 	if err := j.db.ModelContext(span.Context(), &expiredFiles).
-		Where(`"expired_at" < ?`, j.clock.Now()).
+		Where(`"expires_at" < ?`, j.clock.Now()).
 		Where(`"reconciled_at" IS NULL`).
 		Select(&expiredFiles); err != nil {
 		log.WithError(err).Error("failed to retrieve expired filed")

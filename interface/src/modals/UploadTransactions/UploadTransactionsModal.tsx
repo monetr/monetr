@@ -9,6 +9,7 @@ import { MBaseButton } from '@monetr/interface/components/MButton';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import ErrorFileStage from '@monetr/interface/modals/UploadTransactions/ErrorFileStage';
 import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/ProcessingFileStage';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 import fileSize from '@monetr/interface/util/fileSize';
@@ -31,6 +32,7 @@ function UploadTransactionsModal(): JSX.Element {
   const selectedBankAccountId = useSelectedBankAccountId();
 
   const [stage, setStage] = useState<UploadTransactionStage>(UploadTransactionStage.FileUpload);
+  const [error, setError] = useState<{message: string; filename: string}|null>(null);
   const [monetrUpload, setMonetrUpload] = useState<TransactionUpload|null>(null);
   const onClose = useCallback(() => {
     if (stage === UploadTransactionStage.Processing) {
@@ -46,6 +48,7 @@ function UploadTransactionsModal(): JSX.Element {
         return <UploadFileStage 
           setResult={ setMonetrUpload } 
           setStage={ setStage } 
+          setError={ setError }
           close={ modal.remove } 
         />;
       case UploadTransactionStage.Processing:
@@ -55,7 +58,12 @@ function UploadTransactionsModal(): JSX.Element {
           close={ onClose } 
         />;
       case UploadTransactionStage.Completed:
-        
+        return null;       
+      case UploadTransactionStage.Error:
+        return <ErrorFileStage 
+          error={ error }
+          close={ onClose } 
+        />;
       default:
         return null;
     }
@@ -73,6 +81,7 @@ interface StageProps {
   close: () => void;
   setResult: (result: TransactionUpload) => void;
   setStage: (stage: UploadTransactionStage) => void;
+  setError: (error: {message: string; filename: string}) => void;
 }
 
 function UploadFileStage(props: StageProps) {
@@ -111,7 +120,10 @@ function UploadFileStage(props: StageProps) {
       .catch(error => {
         console.error('file upload failed', error);
         const message = error.response.data.error || 'Unkown error';
-        props.setError(message);
+        props.setError({
+          message,
+          filename: file.name,
+        });
         props.setStage(UploadTransactionStage.Error);
       });
   }

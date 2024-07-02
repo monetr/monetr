@@ -7,7 +7,8 @@ import MSpan from '@monetr/interface/components/MSpan';
 
 interface ErrorFileStageProps {
   close: () => void;
-  error: string;
+  error: {message: string; filename: string};
+
 }
 
 export default function ErrorFileStage(props: ErrorFileStageProps): JSX.Element {
@@ -26,8 +27,8 @@ export default function ErrorFileStage(props: ErrorFileStageProps): JSX.Element 
         <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
           <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
           <div className='flex flex-col py-1 w-full'>
-            <MSpan size='lg'>{ props.file.name }</MSpan>
-            <MSpan>Failed to import data: { props.error }</MSpan>
+            <MSpan size='lg'>{ props.error.filename }</MSpan>
+            <MSpan>Failed to import data: { props.error.message }</MSpan>
           </div>
         </div>
       </div>
