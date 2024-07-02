@@ -229,8 +229,8 @@ importers:
         specifier: 5.3.4
         version: 5.3.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-plaid-link:
-        specifier: 3.5.1
-        version: 3.5.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 3.5.2
+        version: 3.5.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-router-dom:
         specifier: 6.6.1
         version: 6.6.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -3712,14 +3712,14 @@ packages:
   '@storybook/csf@0.1.1':
     resolution: {integrity: sha512-4hE3AlNVxR60Wc5KSC68ASYzUobjPqtSKyhV6G+ge0FIXU55N5nTY7dXGRZHQGDBPq+XqchMkIdlkHPRs8nTHg==}
 
+  '@storybook/csf@0.1.11-next.0':
+    resolution: {integrity: sha512-GhkQcOLVKuCK7Zsj1xkQQSc76nHDb/3BDtyN41oDJkSRHJOqbMxT8xJ4UQbKae+VlPDhuaQbFLQmuIqL890Mfw==}
+
   '@storybook/csf@0.1.2':
     resolution: {integrity: sha512-ePrvE/pS1vsKR9Xr+o+YwdqNgHUyXvg+1Xjx0h9LrVx7Zq4zNe06pd63F5EvzTbCbJsHj7GHr9tkiaqm7U8WRA==}
 
   '@storybook/csf@0.1.8':
     resolution: {integrity: sha512-Ntab9o7LjBCbFIao5l42itFiaSh/Qu+l16l/r/9qmV9LnYZkO+JQ7tzhdlwpgJfhs+B5xeejpdAtftDRyXNajw==}
-
-  '@storybook/csf@0.1.9-next.0':
-    resolution: {integrity: sha512-8KDkBDsiX1obDfqnuBOG248W/3qK4heK88fVIZAmD8YQgTAT29+oZaY/pNduG5Fi+j8oe4/G5wFRcuvICnG+kg==}
 
   '@storybook/docs-mdx@0.1.0':
     resolution: {integrity: sha512-JDaBR9lwVY4eSH5W8EGHrhODjygPd6QImRbwjAuJNEnY0Vw4ie3bPkeGfnacB3OBW6u/agqPv2aRlR46JcAQLg==}
@@ -9851,8 +9851,8 @@ packages:
       react: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
       react-dom: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
 
-  react-plaid-link@3.5.1:
-    resolution: {integrity: sha512-OSbPVEIQY3RDroDGyimRh9vUpZfSVzKVCwrbGOSIjcmluHnPKTkvJ1BnYbvE7kH+v8urJXMHloV43uMTNY3SLg==}
+  react-plaid-link@3.5.2:
+    resolution: {integrity: sha512-/Eex/MydNg9UjSXV/1181NNRWT23N1sMq8Nyl9u5Ef89mH45YYWtOiNrA/lY7NeZkls92bP97cihFf0tsKOCkA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -15572,7 +15572,7 @@ snapshots:
       '@storybook/client-logger': 7.0.0
       '@storybook/components': 7.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.9-next.0
+      '@storybook/csf': 0.1.11-next.0
       '@storybook/docs-tools': 7.0.0
       '@storybook/global': 5.0.0
       '@storybook/manager-api': 7.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -15797,7 +15797,7 @@ snapshots:
   '@storybook/components@7.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@storybook/client-logger': 7.0.0
-      '@storybook/csf': 0.1.9-next.0
+      '@storybook/csf': 0.1.11-next.0
       '@storybook/global': 5.0.0
       '@storybook/theming': 7.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/types': 7.0.0
@@ -16055,7 +16055,7 @@ snapshots:
       '@babel/parser': 7.21.9
       '@babel/traverse': 7.21.5
       '@babel/types': 7.21.5
-      '@storybook/csf': 0.1.9-next.0
+      '@storybook/csf': 0.1.11-next.0
       '@storybook/types': 7.0.0
       fs-extra: 11.1.1
       recast: 0.23.4
@@ -16114,15 +16114,15 @@ snapshots:
     dependencies:
       type-fest: 2.19.0
 
+  '@storybook/csf@0.1.11-next.0':
+    dependencies:
+      type-fest: 2.19.0
+
   '@storybook/csf@0.1.2':
     dependencies:
       type-fest: 2.19.0
 
   '@storybook/csf@0.1.8':
-    dependencies:
-      type-fest: 2.19.0
-
-  '@storybook/csf@0.1.9-next.0':
     dependencies:
       type-fest: 2.19.0
 
@@ -16175,7 +16175,7 @@ snapshots:
       '@storybook/channels': 7.0.0
       '@storybook/client-logger': 7.0.0
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.9-next.0
+      '@storybook/csf': 0.1.11-next.0
       '@storybook/global': 5.0.0
       '@storybook/router': 7.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/theming': 7.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -16292,7 +16292,7 @@ snapshots:
       '@storybook/channels': 7.0.0
       '@storybook/client-logger': 7.0.0
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.9-next.0
+      '@storybook/csf': 0.1.11-next.0
       '@storybook/global': 5.0.0
       '@storybook/types': 7.0.0
       '@types/qs': 6.9.9
@@ -24240,7 +24240,7 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  react-plaid-link@3.5.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  react-plaid-link@3.5.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       prop-types: 15.8.1
       react: 18.2.0
