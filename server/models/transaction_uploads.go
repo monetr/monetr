@@ -40,6 +40,10 @@ type TransactionUpload struct {
 	CompletedAt         *time.Time              `json:"completedAt" pg:"completed_at"`
 }
 
+func (TransactionUpload) FileKind() string {
+	return "transactions/uploads"
+}
+
 func (TransactionUpload) IdentityPrefix() string {
 	return "txup"
 }

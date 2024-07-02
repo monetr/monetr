@@ -61,8 +61,8 @@ func getStorePath(info FileInfo) (string, error) {
 	name = strings.ReplaceAll(name, "-", "")
 
 	key := fmt.Sprintf(
-		"uploads/%08X/%s/%s.%s",
-		info.AccountId, info.Kind, name, extension,
+		"uploads/%s/%08X/%s.%s",
+		info.Kind, info.AccountId, name, extension,
 	)
 	return key, nil
 }

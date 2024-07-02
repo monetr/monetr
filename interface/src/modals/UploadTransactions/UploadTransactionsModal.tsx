@@ -92,12 +92,13 @@ function UploadTransactionsModal(): JSX.Element {
 
 interface StageProps {
   close: () => void;
-  setResult: (file: MonetrFile) => void;
+  setResult: (result: TransactionUpload) => void;
   setStage: (stage: UploadTransactionStage) => void;
   setError: (error: string) => void;
 }
 
 function UploadFileStage(props: StageProps) {
+  const selectedBankAccountId = useSelectedBankAccountId();
   const [file, setFile] = useState<File|null>(null);
   const [uploadProgress, setUploadProgress] = useState(-1);
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
@@ -124,10 +125,10 @@ function UploadFileStage(props: StageProps) {
     setUploadProgress(0);
 
     return axios
-      .post('/api/files', formData, config)
+      .post(`/api/bank_accounts/${selectedBankAccountId}/transactions/upload`, formData, config)
       .then((result: AxiosResponse<MonetrFile>) => {
-        props.setResult(new MonetrFile(result.data));
-        props.setStage(UploadTransactionStage.Preparing);
+        props.setResult(new TransactionUpload(result.data));
+        props.setStage(UploadTransactionStage.Processing);
       })
       .catch(error => {
         console.error('file upload failed', error);

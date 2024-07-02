@@ -7,6 +7,13 @@ import (
 	"github.com/go-pg/pg/v10"
 )
 
+type Uploadable interface {
+	// FileKind can be added to a model struct, and indicates that this model can
+	// have a file associated with it. This determines the prefix to use for the
+	// file upload itself. Cannot be blank.
+	FileKind() string
+}
+
 var (
 	_ pg.BeforeInsertHook = (*File)(nil)
 	_ Identifiable        = File{}

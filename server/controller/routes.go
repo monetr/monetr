@@ -259,7 +259,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.PUT("/bank_accounts/:bankAccountId/transactions/:transactionId", c.putTransactions)
 	billed.DELETE("/bank_accounts/:bankAccountId/transactions/:transactionId", c.deleteTransactions)
 	// Uploads
-	billed.POST("/files", c.postFile)
 	billed.GET("/files", c.getFiles)
 	// Funding schedules
 	billed.GET("/bank_accounts/:bankAccountId/funding_schedules", c.getFundingSchedules)

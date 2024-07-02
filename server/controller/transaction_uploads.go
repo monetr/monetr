@@ -155,31 +155,25 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	var request struct {
-		FileId ID[File] `json:"fileId"`
-	}
-	if err := ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	upload := TransactionUpload{
+		BankAccountId: bankAccountId,
+		Status:        TransactionUploadStatusPending,
+		Error:         nil,
 	}
 
-	repo := c.mustGetAuthenticatedRepository(ctx)
-	file, err := repo.GetFile(c.getContext(ctx), request.FileId)
+	// Take the body and upload it as a file
+	file, err := c.consumeFileUpload(ctx, upload)
 	if err != nil {
-		return c.wrapPgError(ctx, err, "Failed to retrieve specified file")
+		return err
 	}
+	upload.FileId = file.FileId
 
 	if !strings.EqualFold(file.ContentType, string(storage.IntuitQFXContentType)) {
 		c.getLog(ctx).
 			WithField("contentType", file.ContentType).
 			Debug("could not create transaction upload because the file is not the expected content type: qfx/ofx")
 		return c.badRequest(ctx, "File is not a QFX/OFX file, and cannot be used for transaction imports")
-	}
-
-	upload := TransactionUpload{
-		BankAccountId: bankAccountId,
-		FileId:        request.FileId,
-		Status:        TransactionUploadStatusPending,
-		Error:         nil,
 	}
 
 	if err := repo.CreateTransactionUpload(
