@@ -101,7 +101,7 @@ function Greeting(props: GreetingProps): JSX.Element {
           description='Manage your transactions and budget manually with monetr.'
           active={ active === 'manual' }
           onClick={ () => setActive('manual') }
-          comingSoon={ !props.manualEnabled }
+          disabled={ !props.manualEnabled }
         />
       </div>
       <MBaseButton
