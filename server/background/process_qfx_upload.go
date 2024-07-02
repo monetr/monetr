@@ -337,10 +337,7 @@ func (j *ProcessQFXUploadJob) hydrateTransactions(ctx context.Context) error {
 				j.statementTransactions = append(j.statementTransactions, *transaction)
 			}
 		}
-	}
-
-	// And credit card transactions
-	if bankResponse := j.data.CREDITCARDMSGSRSV1; bankResponse != nil {
+	} else if bankResponse := j.data.CREDITCARDMSGSRSV1; bankResponse != nil {
 		for _, statementTransactions := range bankResponse.CCSTMTTRNRS {
 			for _, transaction := range statementTransactions.CCSTMTRS.BANKTRANLIST.STMTTRN {
 				// Someday we might need to also consider CORRECTFITID.
@@ -482,6 +479,23 @@ func (j *ProcessQFXUploadJob) syncBalances(ctx context.Context) error {
 
 			if statementTransactions.STMTRS.AVAILBAL != nil {
 				availableBalance, err = calc.ConvertStringToCents(statementTransactions.STMTRS.AVAILBAL.BALAMT)
+				if err != nil {
+					return errors.Wrap(err, "failed to parse available balance amount")
+				}
+			}
+		}
+	} else if j.data.CREDITCARDMSGSRSV1 != nil {
+		for i := range j.data.CREDITCARDMSGSRSV1.CCSTMTTRNRS {
+			statementTransactions := j.data.CREDITCARDMSGSRSV1.CCSTMTTRNRS[i]
+			if statementTransactions.CCSTMTRS.LEDGERBAL != nil {
+				currentBalance, err = calc.ConvertStringToCents(statementTransactions.CCSTMTRS.LEDGERBAL.BALAMT)
+				if err != nil {
+					return errors.Wrap(err, "failed to parse ledger balance amount")
+				}
+			}
+
+			if statementTransactions.CCSTMTRS.AVAILBAL != nil {
+				availableBalance, err = calc.ConvertStringToCents(statementTransactions.CCSTMTRS.AVAILBAL.BALAMT)
 				if err != nil {
 					return errors.Wrap(err, "failed to parse available balance amount")
 				}
