@@ -41,7 +41,7 @@ require (
 	github.com/stripe/stripe-go/v78 v78.11.0
 	github.com/teambition/rrule-go v1.8.2
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	github.com/wneessen/go-mail v0.4.1
+	github.com/wneessen/go-mail v0.4.2
 	github.com/xlzd/gotp v0.1.0
 	golang.org/x/crypto v0.24.0
 	google.golang.org/api v0.185.0
