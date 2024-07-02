@@ -60,7 +60,6 @@ func newCleanupJobsCommand(parent *cobra.Command) {
 				clock,
 				configuration,
 				db,
-				redisController.Pool(),
 				nil,
 				nil,
 				nil,

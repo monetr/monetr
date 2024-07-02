@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,13 +17,8 @@ func TestPostgresJobProcessor_RegisterJob(t *testing.T) {
 		clock := clock.NewMock()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		log := testutils.GetLog(t)
-		configuration := config.BackgroundJobs{
-			Engine:      config.BackgroundJobEnginePostgreSQL,
-			Scheduler:   config.BackgroundJobSchedulerInternal,
-			JobSchedule: map[string]string{},
-		}
 
-		processor := NewPostgresJobProcessor(log, configuration, clock, db, nil)
+		processor := NewPostgresJobProcessor(log, clock, db, nil)
 
 		testHandler := NewTestJobHandler(
 			t,
@@ -48,13 +42,8 @@ func TestPostgresJobProcessor_RegisterJob(t *testing.T) {
 		clock := clock.NewMock()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		log := testutils.GetLog(t)
-		configuration := config.BackgroundJobs{
-			Engine:      config.BackgroundJobEnginePostgreSQL,
-			Scheduler:   config.BackgroundJobSchedulerInternal,
-			JobSchedule: map[string]string{},
-		}
 
-		processor := NewPostgresJobProcessor(log, configuration, clock, db, nil)
+		processor := NewPostgresJobProcessor(log, clock, db, nil)
 
 		testHandler := NewTestJobHandler(
 			t,
@@ -84,14 +73,8 @@ func TestPostgresJobProcessor_CronJobs(t *testing.T) {
 		clock := clock.New()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		log := testutils.GetLog(t)
-		configuration := config.BackgroundJobs{
-			Engine:      config.BackgroundJobEnginePostgreSQL,
-			Scheduler:   config.BackgroundJobSchedulerInternal,
-			JobSchedule: map[string]string{},
-		}
-
 		enqueuer := NewPostgresJobEnqueuer(log, db, clock)
-		processor := NewPostgresJobProcessor(log, configuration, clock, db, enqueuer)
+		processor := NewPostgresJobProcessor(log, clock, db, enqueuer)
 
 		var counter int32
 		testCronHandler := NewTestCronJobHandler(
@@ -122,14 +105,9 @@ func TestPostgresJobProcessor_CronJobs(t *testing.T) {
 		clock := clock.New()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		log := testutils.GetLog(t)
-		configuration := config.BackgroundJobs{
-			Engine:      config.BackgroundJobEnginePostgreSQL,
-			Scheduler:   config.BackgroundJobSchedulerInternal,
-			JobSchedule: map[string]string{},
-		}
 
 		enqueuer := NewPostgresJobEnqueuer(log, db, clock)
-		processor := NewPostgresJobProcessor(log, configuration, clock, db, enqueuer)
+		processor := NewPostgresJobProcessor(log, clock, db, enqueuer)
 
 		var counter int32
 		testCronHandler := NewTestCronJobHandler(
@@ -164,11 +142,6 @@ func TestPostgresJobProcessor_CronJobs(t *testing.T) {
 		clock := clock.New()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		log := testutils.GetLog(t)
-		configuration := config.BackgroundJobs{
-			Engine:      config.BackgroundJobEnginePostgreSQL,
-			Scheduler:   config.BackgroundJobSchedulerInternal,
-			JobSchedule: map[string]string{},
-		}
 		enqueuer := NewPostgresJobEnqueuer(log, db, clock)
 
 		idempotent := sync.Map{}
@@ -187,7 +160,7 @@ func TestPostgresJobProcessor_CronJobs(t *testing.T) {
 
 		processors := make([]JobProcessor, 4)
 		for i := range processors {
-			processors[i] = NewPostgresJobProcessor(log, configuration, clock, db, enqueuer)
+			processors[i] = NewPostgresJobProcessor(log, clock, db, enqueuer)
 			assert.NoError(t, processors[i].RegisterJob(context.Background(), testCronHandler))
 		}
 		for i := range processors {

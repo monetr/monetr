@@ -13,6 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	pg "github.com/go-pg/pg/v10"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -51,4 +52,18 @@ func (m *MockJobEnqueuer) EnqueueJob(ctx context.Context, queue string, data any
 func (mr *MockJobEnqueuerMockRecorder) EnqueueJob(ctx, queue, data any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnqueueJob", reflect.TypeOf((*MockJobEnqueuer)(nil).EnqueueJob), ctx, queue, data)
+}
+
+// EnqueueJobTxn mocks base method.
+func (m *MockJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, data any) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnqueueJobTxn", ctx, txn, queue, data)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// EnqueueJobTxn indicates an expected call of EnqueueJobTxn.
+func (mr *MockJobEnqueuerMockRecorder) EnqueueJobTxn(ctx, txn, queue, data any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnqueueJobTxn", reflect.TypeOf((*MockJobEnqueuer)(nil).EnqueueJobTxn), ctx, txn, queue, data)
 }

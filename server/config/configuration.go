@@ -34,27 +34,25 @@ type Configuration struct {
 	Environment string `yaml:"environment"`
 	// ExternalURLProtocol is used to determine what protocol should be used in things like email templates. It defaults
 	// to https.
-	ExternalURLProtocol string         `yaml:"externalUrlProtocol"`
-	UIDomainName        string         `yaml:"uiDomainName"`
-	APIDomainName       string         `yaml:"apiDomainName"`
-	AllowSignUp         bool           `yaml:"allowSignUp"`
-	BackgroundJobs      BackgroundJobs `yaml:"backgroundJobs"`
-	Beta                Beta           `yaml:"beta"`
-	CORS                CORS           `yaml:"cors"`
-	Email               Email          `yaml:"email"`
-	KeyManagement       KeyManagement  `yaml:"keyManagement"`
-	Links               Links          `yaml:"links"`
-	Logging             Logging        `yaml:"logging"`
-	Plaid               Plaid          `yaml:"plaid"`
-	PostgreSQL          PostgreSQL     `yaml:"postgreSql"`
-	RabbitMQ            RabbitMQ       `yaml:"rabbitMQ"`
-	ReCAPTCHA           ReCAPTCHA      `yaml:"reCAPTCHA"`
-	Redis               Redis          `yaml:"redis"`
-	Security            Security       `yaml:"security"`
-	Sentry              Sentry         `yaml:"sentry"`
-	Server              Server         `yaml:"server"`
-	Storage             Storage        `yaml:"storage"`
-	Stripe              Stripe         `yaml:"stripe"`
+	ExternalURLProtocol string        `yaml:"externalUrlProtocol"`
+	UIDomainName        string        `yaml:"uiDomainName"`
+	APIDomainName       string        `yaml:"apiDomainName"`
+	AllowSignUp         bool          `yaml:"allowSignUp"`
+	Beta                Beta          `yaml:"beta"`
+	CORS                CORS          `yaml:"cors"`
+	Email               Email         `yaml:"email"`
+	KeyManagement       KeyManagement `yaml:"keyManagement"`
+	Links               Links         `yaml:"links"`
+	Logging             Logging       `yaml:"logging"`
+	Plaid               Plaid         `yaml:"plaid"`
+	PostgreSQL          PostgreSQL    `yaml:"postgreSql"`
+	ReCAPTCHA           ReCAPTCHA     `yaml:"reCAPTCHA"`
+	Redis               Redis         `yaml:"redis"`
+	Security            Security      `yaml:"security"`
+	Sentry              Sentry        `yaml:"sentry"`
+	Server              Server        `yaml:"server"`
+	Storage             Storage       `yaml:"storage"`
+	Stripe              Stripe        `yaml:"stripe"`
 }
 
 func (c Configuration) GetConfigFileName() string {
@@ -378,55 +376,6 @@ func (s Stripe) IsBillingEnabled() bool {
 	return s.Enabled && s.BillingEnabled
 }
 
-type RabbitMQ struct {
-	Enabled  bool   `yaml:"enabled"`
-	Hostname string `yaml:"hostname"`
-	Port     int    `yaml:"port"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-}
-
-type BackgroundJobEngine string
-
-const (
-	// BackgroundJobEngineInMemory is ideal for self-hosted or development
-	// deployments. It is not recommended at all for any type of deployment that
-	// demands reliability or high-availability. When using this option you
-	// **cannot** deploy more than a single replica of monetr. This is because
-	// jobs will not be shared between replicas, and you can end up with problems
-	// where scheduled jobs are performed multiple times by each replica. This
-	// option must be manually specified and is only the default configuration
-	// when Redis and RabbitMQ are disabled. **NOT YET IMPLEMENTED**
-	BackgroundJobEngineInMemory BackgroundJobEngine = "memory"
-	// BackgroundJobEngineGoCraftWork will soon be deprecated as monetr moves
-	// towards using PostgreSQL as its primary job queue. It should not be used
-	// anymore and will be removed before the V1.0 release.
-	// TODO Remove before the V1.0 release.
-	BackgroundJobEngineGoCraftWork BackgroundJobEngine = "gocraft"
-	// BackgroundJobEnginePostgreSQL is the preferred option for job queues, as it
-	// provides some consistency guarantees that Redis cannot. Specifically making
-	// sure that a job is not processed more than once.
-	BackgroundJobEnginePostgreSQL BackgroundJobEngine = "postgresql"
-)
-
-type BackgroundJobScheduler string
-
-const (
-	// BackgroundJobSchedulerExternal requires that some process outside the monetr instance add scheduled jobs to the
-	// queue in order to be processed. This is required for deployments using the RabbitMQ background job engine.
-	BackgroundJobSchedulerExternal BackgroundJobScheduler = "external"
-	// BackgroundJobSchedulerInternal adds jobs to the queue within the monetr process and does not require any
-	// additional instances or external processes for jobs to be performed. This is only available for in-memory or
-	// gocraft/work job engine deployments. This also requires that the cron schedules for each queue be specified.
-	BackgroundJobSchedulerInternal BackgroundJobScheduler = "internal"
-)
-
-type BackgroundJobs struct {
-	Engine      BackgroundJobEngine    `yaml:"engine"`
-	Scheduler   BackgroundJobScheduler `yaml:"scheduler"`
-	JobSchedule map[string]string      `yaml:"jobSchedule"`
-}
-
 func getViper(configFilePath []string) *viper.Viper {
 	v := viper.GetViper()
 	v.SetConfigType("yaml")
@@ -481,30 +430,6 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 
 	config.configFile = v.ConfigFileUsed()
 
-	{ // Background job processing defaults.
-		if config.BackgroundJobs.JobSchedule == nil {
-			config.BackgroundJobs.JobSchedule = map[string]string{}
-		}
-
-		switch config.BackgroundJobs.Engine {
-		case BackgroundJobEngineInMemory:
-			log.Fatal("in-memory job scheduling is not yet implemented")
-		case BackgroundJobEngineGoCraftWork:
-			if config.BackgroundJobs.Scheduler == "" {
-				config.BackgroundJobs.Scheduler = BackgroundJobSchedulerInternal
-			}
-
-			// Make sure that the scheduler specified in the configuration is valid.
-			switch config.BackgroundJobs.Scheduler {
-			case BackgroundJobSchedulerInternal:
-			// The scheduler is configured correctly for the gocraft/work engine.
-			default:
-				log.Fatal("invalid scheduler provided to configuration for background jobs")
-				return
-			}
-		}
-	}
-
 	privateKey, err := util.ExpandHomePath(config.Security.PrivateKey)
 	if err != nil {
 		panic(err)
@@ -518,8 +443,6 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("APIDomainName", "0.0.0.0:4000")
 	v.SetDefault("AllowSignUp", true)
 	v.SetDefault("ExternalURLProtocol", "https")
-	v.SetDefault("BackgroundJobs.Engine", BackgroundJobEngineGoCraftWork)
-	v.SetDefault("BackgroundJobs.Scheduler", BackgroundJobSchedulerInternal)
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Environment", "development")
