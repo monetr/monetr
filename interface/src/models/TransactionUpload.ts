@@ -1,5 +1,7 @@
 import { parseJSON } from 'date-fns';
 
+import MonetrFile from './File';
+
 export enum TransactionUploadStatus {
   Pending = 'pending',
   Processing = 'processing',
@@ -11,6 +13,7 @@ export default class TransactionUpload {
   transactionUploadId: string;
   bankAccountId: string;
   fileId: string;
+  file?: MonetrFile;
   status: TransactionUploadStatus;
   error: string | null;
   createdAt: Date;

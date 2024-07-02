@@ -33,6 +33,7 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 		return err
 	}
 	upload.FileId = file.FileId
+	upload.File = file
 
 	if !strings.EqualFold(file.ContentType, string(storage.IntuitQFXContentType)) {
 		c.getLog(ctx).

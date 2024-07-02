@@ -9,10 +9,7 @@ import { MBaseButton } from '@monetr/interface/components/MButton';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
-import ErrorFileStage from '@monetr/interface/modals/UploadTransactions/ErrorFileStage';
-import PrepareFileStage from '@monetr/interface/modals/UploadTransactions/PrepareFileStage';
 import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/ProcessingFileStage';
-import MonetrFile from '@monetr/interface/models/File';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 import fileSize from '@monetr/interface/util/fileSize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
@@ -34,8 +31,6 @@ function UploadTransactionsModal(): JSX.Element {
   const selectedBankAccountId = useSelectedBankAccountId();
 
   const [stage, setStage] = useState<UploadTransactionStage>(UploadTransactionStage.FileUpload);
-  const [error, setError] = useState<string|null>(null);
-  const [monetrFile, setMonetrFile] = useState<MonetrFile|null>(null);
   const [monetrUpload, setMonetrUpload] = useState<TransactionUpload|null>(null);
   const onClose = useCallback(() => {
     if (stage === UploadTransactionStage.Processing) {
@@ -49,31 +44,15 @@ function UploadTransactionsModal(): JSX.Element {
     switch (stage) {
       case UploadTransactionStage.FileUpload:
         return <UploadFileStage 
-          setResult={ setMonetrFile } 
-          setStage={ setStage } 
-          setError={ setError }
-          close={ modal.remove } 
-        />;
-      case UploadTransactionStage.Preparing:
-        return <PrepareFileStage 
-          file={ monetrFile } 
           setResult={ setMonetrUpload } 
           setStage={ setStage } 
-          setError={ setError }
           close={ modal.remove } 
         />;
       case UploadTransactionStage.Processing:
         return <ProcessingFileStage 
-          file={ monetrFile }
           upload={ monetrUpload } 
           setStage={ setStage } 
           close={ onClose } 
-        />;
-      case UploadTransactionStage.Error:
-        return <ErrorFileStage 
-          file={ monetrFile }
-          error={ error }
-          close={ modal.remove } 
         />;
       case UploadTransactionStage.Completed:
         
@@ -94,7 +73,6 @@ interface StageProps {
   close: () => void;
   setResult: (result: TransactionUpload) => void;
   setStage: (stage: UploadTransactionStage) => void;
-  setError: (error: string) => void;
 }
 
 function UploadFileStage(props: StageProps) {
@@ -126,7 +104,7 @@ function UploadFileStage(props: StageProps) {
 
     return axios
       .post(`/api/bank_accounts/${selectedBankAccountId}/transactions/upload`, formData, config)
-      .then((result: AxiosResponse<MonetrFile>) => {
+      .then((result: AxiosResponse<TransactionUpload>) => {
         props.setResult(new TransactionUpload(result.data));
         props.setStage(UploadTransactionStage.Processing);
       })

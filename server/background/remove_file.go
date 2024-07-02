@@ -130,7 +130,7 @@ func (j *RemoveFileJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	if file.DeletedAt != nil {
+	if file.ReconciledAt != nil {
 		log.Info("file is already deleted")
 		return nil
 	}
@@ -143,6 +143,10 @@ func (j *RemoveFileJob) Run(ctx context.Context) error {
 
 	now := j.clock.Now()
 	file.ReconciledAt = &now
+
+	if file.DeletedAt == nil {
+		file.DeletedAt = &now
+	}
 
 	if err := j.repo.UpdateFile(span.Context(), file); err != nil {
 		log.WithError(err).Error("failed to update file's reconciled at")

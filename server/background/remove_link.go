@@ -164,6 +164,8 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	plaidLinkIds := r.getPlaidLinksToRemove(span.Context())
 
 	r.removeTransactionClusters(span.Context(), bankAccountIds)
+	// TODO Also remove any non-reconciled files
+	r.removeTransactionUploads(span.Context(), bankAccountIds)
 	r.removeTransactions(span.Context(), bankAccountIds)
 	r.removePlaidTransactions(span.Context(), plaidTransactionIds)
 	r.removeSpending(span.Context(), bankAccountIds)
@@ -199,6 +201,22 @@ func (r *RemoveLinkJob) removeTransactionClusters(
 	}
 
 	r.log.WithField("removed", result.RowsAffected()).Info("removed transaction cluster(s)")
+}
+
+func (r *RemoveLinkJob) removeTransactionUploads(
+	ctx context.Context,
+	bankAccountIds []ID[BankAccount],
+) {
+	result, err := r.db.ModelContext(ctx, &TransactionUpload{}).
+		Where(`"account_id" = ?`, r.args.AccountId).
+		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
+		Delete()
+	if err != nil {
+		r.log.WithError(err).Errorf("failed to remove transaction uploads for link")
+		panic(errors.Wrap(err, "failed to remove transaction uploads for link"))
+	}
+
+	r.log.WithField("removed", result.RowsAffected()).Info("removed transaction upload(s)")
 }
 
 func (r *RemoveLinkJob) removeTransactions(

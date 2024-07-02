@@ -30,7 +30,7 @@ type TransactionUpload struct {
 	BankAccountId       ID[BankAccount]         `json:"bankAccountId" pg:"bank_account_id,notnull"`
 	BankAccount         *BankAccount            `json:"-" pg:"rel:has-one"`
 	FileId              ID[File]                `json:"fileId" pg:"file_id,notnull"`
-	File                *File                   `json:"-" pg:"rel:has-one"`
+	File                *File                   `json:"file,omitempty" pg:"rel:has-one"`
 	Status              TransactionUploadStatus `json:"status" pg:"status,notnull"`
 	Error               *string                 `json:"error,omitempty" pg:"error"`
 	CreatedAt           time.Time               `json:"createdAt" pg:"created_at,notnull"`

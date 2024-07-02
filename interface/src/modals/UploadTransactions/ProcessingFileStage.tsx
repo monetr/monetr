@@ -5,12 +5,10 @@ import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query'
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MSpan from '@monetr/interface/components/MSpan';
 import { UploadTransactionStage } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
-import MonetrFile from '@monetr/interface/models/File';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 
 interface ProcessingFileStageProps {
   close: () => void;
-  file: MonetrFile;
   upload: TransactionUpload;
   setStage: (stage: UploadTransactionStage) => void;
 }
@@ -37,7 +35,7 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): JS
         <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
           <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
           <div className='flex flex-col py-1 w-full'>
-            <MSpan size='lg'>{ props.file.name }</MSpan>
+            <MSpan size='lg'>{ props.upload.file.name }</MSpan>
             <MSpan>Import { data?.status || 'processing' }!</MSpan>
           </div>
         </div>

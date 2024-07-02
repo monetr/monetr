@@ -3,12 +3,10 @@ import { FilePresentOutlined } from '@mui/icons-material';
 
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MSpan from '@monetr/interface/components/MSpan';
-import MonetrFile from '@monetr/interface/models/File';
 
 
 interface ErrorFileStageProps {
   close: () => void;
-  file: MonetrFile;
   error: string;
 }
 
