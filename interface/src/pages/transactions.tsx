@@ -14,10 +14,12 @@ import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTran
 import Transaction from '@monetr/interface/models/Transaction';
 import TransactionDateItem from '@monetr/interface/pages/new/TransactionDateItem';
 import TransactionItem from '@monetr/interface/pages/new/TransactionItem';
+import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
 
 let evilScrollPosition: number = 0;
 
 export default function Transactions(): JSX.Element {
+  const { result: config } = useAppConfigurationSink();
   const {
     isLoading,
     isError,
@@ -25,6 +27,7 @@ export default function Transactions(): JSX.Element {
     fetchNextPage,
     result: transactions, hasNextPage,
   } = useTransactions();
+
   const { data: link } = useCurrentLink();
 
   // Scroll restoration code.
@@ -96,6 +99,10 @@ export default function Transactions(): JSX.Element {
 
   function UploadButtonMaybe(): JSX.Element {
     if (!link?.getIsManual()) {
+      return null;
+    }
+
+    if (!config?.manualEnabled) {
       return null;
     }
 
