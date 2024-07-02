@@ -14,6 +14,56 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+func (c *Controller) postTransactionUpload(ctx echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	upload := TransactionUpload{
+		BankAccountId: bankAccountId,
+		Status:        TransactionUploadStatusPending,
+		Error:         nil,
+	}
+
+	// Take the body and upload it as a file
+	file, err := c.consumeFileUpload(ctx, upload)
+	if err != nil {
+		return err
+	}
+	upload.FileId = file.FileId
+
+	if !strings.EqualFold(file.ContentType, string(storage.IntuitQFXContentType)) {
+		c.getLog(ctx).
+			WithField("contentType", file.ContentType).
+			Debug("could not create transaction upload because the file is not the expected content type: qfx/ofx")
+		return c.badRequest(ctx, "File is not a QFX/OFX file, and cannot be used for transaction imports")
+	}
+
+	if err := repo.CreateTransactionUpload(
+		c.getContext(ctx),
+		bankAccountId,
+		&upload,
+	); err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to create transaction upload")
+	}
+
+	if err := c.jobRunner.EnqueueJob(
+		c.getContext(ctx),
+		background.ProcessQFXUpload,
+		background.ProcessQFXUploadArguments{
+			AccountId:           c.mustGetAccountId(ctx),
+			BankAccountId:       bankAccountId,
+			TransactionUploadId: upload.TransactionUploadId,
+		},
+	); err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to enqueue upload for processing")
+	}
+
+	return ctx.JSON(http.StatusOK, upload)
+}
+
 func (c *Controller) getTransactionUploadById(ctx echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
@@ -147,54 +197,4 @@ func (c *Controller) sendWebsocketMessage(ctx echo.Context, ws *websocket.Conn, 
 	}
 
 	return nil
-}
-
-func (c *Controller) postTransactionUpload(ctx echo.Context) error {
-	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
-	if err != nil || bankAccountId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid bank account Id")
-	}
-
-	repo := c.mustGetAuthenticatedRepository(ctx)
-	upload := TransactionUpload{
-		BankAccountId: bankAccountId,
-		Status:        TransactionUploadStatusPending,
-		Error:         nil,
-	}
-
-	// Take the body and upload it as a file
-	file, err := c.consumeFileUpload(ctx, upload)
-	if err != nil {
-		return err
-	}
-	upload.FileId = file.FileId
-
-	if !strings.EqualFold(file.ContentType, string(storage.IntuitQFXContentType)) {
-		c.getLog(ctx).
-			WithField("contentType", file.ContentType).
-			Debug("could not create transaction upload because the file is not the expected content type: qfx/ofx")
-		return c.badRequest(ctx, "File is not a QFX/OFX file, and cannot be used for transaction imports")
-	}
-
-	if err := repo.CreateTransactionUpload(
-		c.getContext(ctx),
-		bankAccountId,
-		&upload,
-	); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to create transaction upload")
-	}
-
-	if err := c.jobRunner.EnqueueJob(
-		c.getContext(ctx),
-		background.ProcessQFXUpload,
-		background.ProcessQFXUploadArguments{
-			AccountId:           c.mustGetAccountId(ctx),
-			BankAccountId:       bankAccountId,
-			TransactionUploadId: upload.TransactionUploadId,
-		},
-	); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to enqueue upload for processing")
-	}
-
-	return ctx.JSON(http.StatusOK, upload)
 }
