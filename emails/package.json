@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@react-email/components": "0.0.19",
+    "@react-email/components": "0.0.20",
     "@storybook/react": "7.0.18",
     "react-email": "2.1.4",
     "storybook": "7.2.1"
