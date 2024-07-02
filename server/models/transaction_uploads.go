@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
 )
 
@@ -42,6 +43,12 @@ type TransactionUpload struct {
 
 func (TransactionUpload) FileKind() string {
 	return "transactions/uploads"
+}
+
+// TransactionUpload files expire after 1 hour be default.
+func (TransactionUpload) FileExpiration(clock clock.Clock) *time.Time {
+	expiration := clock.Now().Add(1 * time.Hour)
+	return &expiration
 }
 
 func (TransactionUpload) IdentityPrefix() string {

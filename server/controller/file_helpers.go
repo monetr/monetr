@@ -79,6 +79,7 @@ func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File
 		ContentType: contentType,
 		Size:        uint64(header.Size),
 		BlobUri:     fileUri,
+		ExpiresAt:   kind.FileExpiration(c.clock),
 	}
 
 	if err := repo.CreateFile(c.getContext(ctx), &file); err != nil {
