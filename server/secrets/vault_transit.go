@@ -178,6 +178,9 @@ func NewVaultHelper(ctx context.Context, log *logrus.Entry, config VaultHelperCo
 		SRVLookup:        false,
 	}
 
+	// If we have a custom certificate authority specified then we are using
+	// custom TLS certificates too. We need to watch the certificate files to see
+	// if they change at all.
 	if helper.usingCustomTLS {
 		if err = helper.reloadTLS(); err != nil {
 			log.WithError(err).Errorf("failed to configure TLS")
@@ -206,13 +209,42 @@ func NewVaultHelper(ctx context.Context, log *logrus.Entry, config VaultHelperCo
 	return helper, nil
 }
 
-func (v *vaultBase) dialTLS(ctx context.Context, network, addr string) (net.Conn, error) {
+// dialTLS is a middleware function that is added to allow monetr to easily
+// rotate the TLS certificates for the vault server without downtime.
+func (v *vaultBase) dialTLS(
+	ctx context.Context,
+	network, addr string,
+) (net.Conn, error) {
 	v.lock.RLock()
 	defer v.lock.RUnlock()
 
 	return tls.Dial(network, addr, v.tls)
 }
 
+// This function sets up a file system watcher to monitor changes in TLS
+// certificate files. When changes are detected, it calls reloadTLS which
+// atomically swaps the TLS config that is used to establish new connections to
+// the vault server.
+//
+//	watchCertificates()
+//	├── Uses sync.Once to ensure the watcher setup runs only once
+//	│   └── tlsWatch.Do()
+//	│       └── go routine for asynchronous execution
+//	│           ├── Initializes the logger and file watcher
+//	│           ├── Sets up a channel for closing the watcher
+//	│           ├── Defines paths to be watched:
+//	│           │   ├── TLSCertificatePath
+//	│           │   ├── TLSKeyPath
+//	│           │   └── TLSCAPath
+//	│           ├── Adds paths to the watcher
+//	│           └── Event loop:
+//	│               ├── Handles errors from watcher.Errors
+//	│               ├── Handles events from watcher.Events
+//	│               │   └── Calls reloadTLS() on file changes
+//	│               └── Handles closure of the watcher via v.closer channel
+//
+// This function is called when the client is initialized and runs until Close()
+// is called on the client.
 func (v *vaultBase) watchCertificates() {
 	v.tlsWatch.Do(func() {
 		go func() {
@@ -257,6 +289,26 @@ func (v *vaultBase) watchCertificates() {
 	})
 }
 
+// This function reloads the TLS configuration by reading the certificate files
+// and updating the TLS configuration to be used for subsequent requests.
+//
+//	reloadTLS()
+//	├── Reads CA certificate from file
+//	│   ├── Adds CA certificate to a new cert pool
+//	├── Configures tls.Config with:
+//	│   ├── CA certificate pool
+//	│   ├── InsecureSkipVerify from config
+//	│   ├── ServerName from host
+//	│   └── Renegotiation setting
+//	├── If key and certificate paths are provided:
+//	│   ├── Loads TLS key pair
+//	│   └── Adds key pair to tls.Config
+//	├── Acquires lock on v.lock
+//	│   └── Updates v.tls with new tls.Config
+//	└── Returns nil if successful, otherwise an error
+//
+// This function is called when the vault client is initialized and every time a
+// certificate change is detected.
 func (v *vaultBase) reloadTLS() error {
 	log := v.log
 	log.Debugf("reloading vault TLS config")
@@ -304,6 +356,26 @@ func (v *vaultBase) reloadTLS() error {
 	return nil
 }
 
+// This function sets up a worker that periodically checks the expiration status
+// of the Vault token and refreshes it if necessary.
+//
+//	authenticationWorker()
+//	├── Uses sync.Once to ensure the worker setup runs only once
+//	│   └── tokenTTL.Do()
+//	│       └── Checks if the token will never expire
+//	│           └── If true, logs the info and exits
+//	│       └── go routine for asynchronous execution
+//	│           ├── Initializes a channel for closing the worker
+//	│           ├── Sets the check frequency to 30 seconds
+//	│           ├── Creates a ticker to trigger checks at the defined frequency
+//	│           └── Event loop:
+//	│               ├── Checks token expiration status at each tick
+//	│               │   └── If token will expire before the next check, refreshes the token
+//	│               │       └── Calls authenticate() to refresh the token
+//	│               └── Handles closure of the worker via v.tokenCloser channel
+//
+// This function is called once when the client is created and runs a background
+// job until Close() is called.
 func (v *vaultBase) authenticationWorker() {
 	v.tokenTTL.Do(func() {
 		log := v.log
@@ -344,6 +416,35 @@ func (v *vaultBase) authenticationWorker() {
 	})
 }
 
+// This function handles the authentication process to Vault using different
+// methods based on the configuration.
+//
+//	authenticate(ctx context.Context) error
+//	├── Acquires lock on v.tokenSync
+//	├── Switches on v.config.Auth for different authentication methods:
+//	│   ├── "userpass":
+//	│   │   ├── Authenticates using username and password
+//	│   │   ├── If successful, retrieves auth information
+//	│   │   └── If failed, logs error and returns error
+//	│   ├── "token":
+//	│   │   └── Uses the provided token for authentication
+//	│   ├── "kubernetes":
+//	│   │   ├── Retrieves token from file or config
+//	│   │   ├── Authenticates using the token
+//	│   │   ├── If successful, retrieves auth information
+//	│   │   └── If failed, logs error and returns error
+//	│   └── default:
+//	│       └── Logs an error and returns it if the auth method is not implemented
+//	├── Logs fatal error if no authentication is returned
+//	├── Calculates next token expiration time based on LeaseDuration
+//	│   └── If LeaseDuration is 0, sets expiration to a far future timestamp
+//	│   └── If LeaseDuration is not 0, sets expiration with a 1-minute buffer
+//	├── Stores the new token expiration time atomically
+//	├── Atomically updates the client's token with the new one
+//	└── Returns nil if successful, otherwise an error
+//
+// This function is called by the authenticationWorker and simply refreshes the
+// currently used authentication for communication with the vault server.
 func (v *vaultBase) authenticate(ctx context.Context) error {
 	v.tokenSync.Lock()
 	defer v.tokenSync.Unlock()
