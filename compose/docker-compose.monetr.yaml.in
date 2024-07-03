@@ -154,7 +154,6 @@ services:
     volumes:
       - goData:/go/pkg/mod
       - "@CMAKE_SOURCE_DIR@:/build"
-      # - ./compose/monetr.yaml:/etc/monetr/config.yaml
     depends_on:
       mail:
         condition: service_started
