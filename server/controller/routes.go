@@ -153,7 +153,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 
 				hub.AddBreadcrumb(&sentry.Breadcrumb{
 					Type:     "http",
-					Category: c.configuration.APIDomainName,
+					Category: ctx.Request().URL.Hostname(),
 					Data: map[string]interface{}{
 						"url":    ctx.Request().URL.String(),
 						"method": ctx.Request().Method,
@@ -214,7 +214,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	repoParty.POST("/authentication/register", c.postRegister)
 	repoParty.POST("/authentication/verify", c.verifyEndpoint)
 	repoParty.POST("/authentication/verify/resend", c.resendVerification)
-	repoParty.POST("/authentication/forgot", c.sendForgotPassword)
+	repoParty.POST("/authentication/forgot", c.postForgotPassword)
 	repoParty.POST("/authentication/reset", c.resetPassword)
 
 	authed := repoParty.Group("", c.authenticationMiddleware)

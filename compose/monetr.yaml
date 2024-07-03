@@ -1,5 +1,5 @@
 allowsignup: true
-externalUrlProtocol: https
+environment: development
 plaid:
   environment: https://sandbox.plaid.com
 backgroundjobs:
@@ -22,7 +22,6 @@ email:
   verification:
     enabled: true
     tokenLifetime: 10m0s
-environment: development
 logging:
   format: text
   level: trace

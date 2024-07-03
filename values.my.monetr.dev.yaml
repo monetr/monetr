@@ -68,13 +68,9 @@ api:
     - name: MONETR_ENVIRONMENT
       value: "my.monetr.dev"
   additionalConfigFilePaths: []
-  uiDomainName: my.monetr.dev
-  apiDomainName: my.monetr.dev
   allowSignUp: true
-  enableWebhooks: true # Will be deprecated soon.
-  backgroundJobs:
-    engine: postgresql
-    scheduler: internal
+  server:
+    externalUrl: https://my.monetr.dev
   beta:
     enableBetaCodes: true
   postgreSql:

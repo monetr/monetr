@@ -112,7 +112,7 @@ func (c *Controller) changePassword(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusUnauthorized, "current password provided is not correct")
 	case nil:
 		if err := c.email.SendPasswordChanged(c.getContext(ctx), communication.PasswordChangedParams{
-			BaseURL:      c.configuration.GetUIURL(),
+			BaseURL:      c.configuration.Server.GetBaseURL().String(),
 			Email:        user.Login.Email,
 			FirstName:    user.Login.FirstName,
 			LastName:     user.Login.LastName,

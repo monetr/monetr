@@ -73,7 +73,13 @@ func RunServer() error {
 		return err
 	}
 
-	clientTokens, err := security.NewPasetoClientTokens(log, clock, configuration.APIDomainName, publicKey, privateKey)
+	clientTokens, err := security.NewPasetoClientTokens(
+		log,
+		clock,
+		configuration.Server.GetBaseURL().String(),
+		publicKey,
+		privateKey,
+	)
 	if err != nil {
 		log.WithError(err).Fatal("failed to init paseto client tokens interface")
 		return err
@@ -273,8 +279,10 @@ func RunServer() error {
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
-	log.WithField("address", fmt.Sprintf("http://%s", listenAddress)).
-		Info("monetr is running")
+	log.WithFields(logrus.Fields{
+		"listenAddress":   fmt.Sprintf("http://%s", listenAddress),
+		"externalAddress": configuration.Server.GetBaseURL().String(),
+	}).Info("monetr is running")
 
 	<-quit
 	log.Info("shutting down")

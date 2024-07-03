@@ -1,10 +1,8 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -149,23 +147,17 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 		log.Info("successfully created stripe customer for account")
 	}
 
-	successUrl := fmt.Sprintf(
-		"%s/account/subscribe/after?session={CHECKOUT_SESSION_ID}",
-		c.configuration.GetUIURL(),
-	)
-	cancelUrl := fmt.Sprintf(
-		"%s/account/subscribe",
-		c.configuration.GetUIURL(),
-	)
-	// If a custom cancel path was specified by the requester then use that path. Note: it can only be a path, not a
-	// completely custom URL.
-	// TODO This still has a code smell to it. If this isn't necessary I think we should just remove it outright.
+	successUrl := c.configuration.Server.GetURL("/account/subscribe/after", map[string]string{
+		"session": "{CHECKOUT_SESSION_ID}",
+	})
+	cancelUrl := c.configuration.Server.GetURL("/account/subscribe", nil)
+
+	// If a custom cancel path was specified by the requester then use that path.
+	// Note: it can only be a path, not a completely custom URL.
+	// TODO This still has a code smell to it. If this isn't necessary I think we
+	// should just remove it outright.
 	if request.CancelPath != nil {
-		cancelUrl = fmt.Sprintf(
-			"%s/%s",
-			c.configuration.GetUIURL(),
-			strings.TrimPrefix(*request.CancelPath, "/"),
-		)
+		cancelUrl = c.configuration.Server.GetURL(*request.CancelPath, nil)
 	}
 
 	crumbs.Debug(c.getContext(ctx), "Creating Stripe Checkout Session", map[string]interface{}{
@@ -371,7 +363,7 @@ func (c *Controller) handleGetStripePortal(ctx echo.Context) error {
 		Configuration: nil,
 		Customer:      account.StripeCustomerId,
 		OnBehalfOf:    nil,
-		ReturnURL:     stripe.String(c.configuration.GetUIURL()),
+		ReturnURL:     stripe.String(c.configuration.Server.GetBaseURL().String()),
 	}
 
 	session, err := c.stripe.NewPortalSession(c.getContext(ctx), params)

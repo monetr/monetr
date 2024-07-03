@@ -57,12 +57,6 @@ metadata:
   {{- include "api.labels" . | nindent 4 }}
 data:
   config.yaml: |
-    backgroundJobs:
-      engine: {{ quote .Values.api.backgroundJobs.engine }}
-      scheduler: {{ quote .Values.api.backgroundJobs.scheduler }}
-      jobSchedule:
-    {{- toYaml .Values.api.backgroundJobs.jobSchedule | nindent 8 }}
-
     reCaptcha:
       enabled: {{ .Values.api.reCaptcha.enabled }}
       verifyLogin: {{ .Values.api.reCaptcha.verifyLogin }}

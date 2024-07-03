@@ -16,10 +16,9 @@ import (
 func TestNewApp(t *testing.T) {
 	log := testutils.GetLog(t)
 	conf := config.Configuration{
-		UIDomainName:  "monetr.local",
-		APIDomainName: "monetr.local",
-		AllowSignUp:   true,
+		AllowSignUp: true,
 		Server: config.Server{
+			ExternalURL: "https://monetr.local",
 			Cookies: config.Cookies{
 				SameSiteStrict: true,
 				Secure:         true,

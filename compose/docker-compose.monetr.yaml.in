@@ -89,7 +89,7 @@ services:
       retries: 12
       start_period: 60s
     environment:
-      WS_PROTO: 'wss'
+      WS_PROTO: 'wss' # TODO Make this based on the local protocol
       INSECURE_WS: "false" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
       NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
       IS_COMPOSE: "true" # Makes it so that the WebPack progress bar is disabled.
@@ -117,9 +117,7 @@ services:
       air_wd: /build
       DISABLE_GO_RELOAD: "@DISABLE_GO_RELOAD@"
       CLOUD_MAGIC: "@CLOUD_MAGIC@"
-      MONETR_EXTERNAL_PROTOCOL: "@LOCAL_PROTOCOL@"
-      MONETR_UI_DOMAIN_NAME: "@MONETR_LOCAL_DOMAIN@"
-      MONETR_API_DOMAIN_NAME: "@MONETR_LOCAL_DOMAIN@"
+      MONETR_SERVER_EXTERNAL_URL: "@LOCAL_PROTOCOL@://@MONETR_LOCAL_DOMAIN@"
       # By default we want to use the AWS KMS provider as that is what we have built into the local env. But iuf the
       # developer specifies a different KMS provider we want to use that instead.
       MONETR_KMS_PROVIDER: "aws"
@@ -156,7 +154,6 @@ services:
     volumes:
       - goData:/go/pkg/mod
       - "@CMAKE_SOURCE_DIR@:/build"
-      # - ./compose/monetr.yaml:/etc/monetr/config.yaml
     depends_on:
       mail:
         condition: service_started
