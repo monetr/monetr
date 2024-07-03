@@ -224,7 +224,6 @@ func RunServer() error {
 			clock,
 			configuration,
 			db,
-			redisController.Pool(),
 			pubsub.NewPostgresPubSub(log, db),
 			plaidClient,
 			kms,

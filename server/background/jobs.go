@@ -5,13 +5,11 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
-	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/storage"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,9 +29,12 @@ type (
 	// this interface as an argument. This is to keep interaction with the background job processing to a minimum by
 	// code outside this package.
 	JobController interface {
-		// TriggerJob is used internally to allow other areas of monetr to trigger jobs safely. This must be called by a
-		// wrapping function for the specific job.
+		// TriggerJob is used internally to allow other areas of monetr to trigger
+		// jobs safely. This must be called by a wrapping function for the specific
+		// job.
+		// Deprecated: Use EnqueueJobTxn instead.
 		EnqueueJob(ctx context.Context, queue string, data interface{}) error
+		EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, data interface{}) error
 	}
 
 	BackgroundJobs struct {
@@ -50,7 +51,6 @@ func NewBackgroundJobs(
 	clock clock.Clock,
 	configuration config.Configuration,
 	db *pg.DB,
-	redisPool *redis.Pool,
 	publisher pubsub.Publisher,
 	plaidPlatypus platypus.Platypus,
 	kms secrets.KeyManagement,
@@ -58,30 +58,17 @@ func NewBackgroundJobs(
 ) (*BackgroundJobs, error) {
 	var enqueuer JobEnqueuer
 	var processor JobProcessor
-
-	switch configuration.BackgroundJobs.Engine {
-	case config.BackgroundJobEngineInMemory:
-		panic("in-memory job engine not implemented")
-	case config.BackgroundJobEngineGoCraftWork:
-		enqueuer = NewGoCraftWorkJobEnqueuer(log, redisPool)
-		craftProcessor := NewGoCraftWorkJobProcessor(log, configuration.BackgroundJobs, redisPool, enqueuer)
-		processor = craftProcessor
-	case config.BackgroundJobEnginePostgreSQL:
-		enqueuer = NewPostgresJobEnqueuer(
-			log,
-			db,
-			clock,
-		)
-		processor = NewPostgresJobProcessor(
-			log,
-			configuration.BackgroundJobs,
-			clock,
-			db,
-			enqueuer, // TODO
-		)
-	default:
-		return nil, errors.New("invalid background job engine specified")
-	}
+	enqueuer = NewPostgresJobEnqueuer(
+		log,
+		db,
+		clock,
+	)
+	processor = NewPostgresJobProcessor(
+		log,
+		clock,
+		db,
+		enqueuer,
+	)
 
 	jobs := []JobHandler{
 		NewCalculateTransactionClustersHandler(log, db, clock),
@@ -143,4 +130,8 @@ func (b *BackgroundJobs) Close() error {
 
 func (b *BackgroundJobs) EnqueueJob(ctx context.Context, queue string, data interface{}) error {
 	return b.enqueuer.EnqueueJob(ctx, queue, data)
+}
+
+func (b *BackgroundJobs) EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, data interface{}) error {
+	return b.enqueuer.EnqueueJobTxn(ctx, txn, queue, data)
 }

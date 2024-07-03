@@ -13,7 +13,6 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
@@ -55,7 +54,12 @@ func NewPostgresJobEnqueuer(
 	}
 }
 
+// Deprecated: Use EnqueueJobTxn instead.
 func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, arguments interface{}) error {
+	return p.EnqueueJobTxn(ctx, p.db, queue, arguments)
+}
+
+func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, arguments interface{}) error {
 	span := sentry.StartSpan(ctx, "topic.send")
 	defer span.Finish()
 	span.Description = "postgres Enqueue"
@@ -106,7 +110,7 @@ func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, argu
 		StartedAt:   nil,
 		CompletedAt: nil,
 	}
-	_, err = p.db.ModelContext(span.Context(), &job).Insert(&job)
+	_, err = txn.ModelContext(span.Context(), &job).Insert(&job)
 	if err != nil {
 		if pgErr, ok := err.(pg.Error); ok && pgErr.Field(67) == "23505" {
 			// Do nothing. It is a duplicate enqueue.
@@ -138,7 +142,6 @@ type postgresJobProcessor struct {
 	registeredJobs          map[string]postgresJobFunction
 	jobQuery                *pg.Query
 	clock                   clock.Clock
-	configuration           config.BackgroundJobs
 	log                     *logrus.Entry
 	db                      pg.DBI
 	enqueuer                JobEnqueuer
@@ -147,7 +150,6 @@ type postgresJobProcessor struct {
 
 func NewPostgresJobProcessor(
 	log *logrus.Entry,
-	configuration config.BackgroundJobs,
 	clock clock.Clock,
 	db pg.DBI,
 	enqueuer JobEnqueuer,
@@ -160,7 +162,6 @@ func NewPostgresJobProcessor(
 		queues:                  []string{},
 		registeredJobs:          map[string]postgresJobFunction{},
 		clock:                   clock,
-		configuration:           configuration,
 		log:                     log,
 		db:                      db,
 		enqueuer:                enqueuer,
@@ -189,13 +190,11 @@ func (p *postgresJobProcessor) RegisterJob(
 	p.registeredJobs[handler.QueueName()] = p.buildJobExecutor(handler)
 	p.queues = append(p.queues, handler.QueueName())
 
-	if p.configuration.Scheduler == config.BackgroundJobSchedulerInternal {
-		if scheduledJob, ok := handler.(ScheduledJobHandler); ok {
-			schedule := scheduledJob.DefaultSchedule()
-			log.WithField("schedule", schedule).
-				Trace("job will be run on a schedule automatically")
-			p.cronJobQueues = append(p.cronJobQueues, scheduledJob)
-		}
+	if scheduledJob, ok := handler.(ScheduledJobHandler); ok {
+		schedule := scheduledJob.DefaultSchedule()
+		log.WithField("schedule", schedule).
+			Trace("job will be run on a schedule automatically")
+		p.cronJobQueues = append(p.cronJobQueues, scheduledJob)
 	}
 
 	return nil
