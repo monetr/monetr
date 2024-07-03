@@ -84,7 +84,6 @@ type S3Storage struct {
 }
 
 type GCSStorage struct {
-	URL             *string `yaml:"url"`
 	Bucket          string  `yaml:"bucket"`
 	APIKey          *string `yaml:"apiKey"`
 	CredentialsJSON *string `yaml:"credentialsFile"`
