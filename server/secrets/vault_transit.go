@@ -31,7 +31,7 @@ type VaultTransitConfig struct {
 	KeyID              string
 	Address            string
 	Role               string
-	Auth               string
+	AuthMethod         string
 	Token              string
 	TokenFile          string
 	Username, Password string
@@ -44,96 +44,12 @@ type VaultTransitConfig struct {
 }
 
 type VaultTransit struct {
-	log    *logrus.Entry
-	config VaultTransitConfig
-	client *vault.Client
-}
-
-func NewVaultTransit(ctx context.Context, config VaultTransitConfig) (KeyManagement, error) {
-	vaultConfig := vault.DefaultConfig()
-	client, err := vault.NewClient(vaultConfig)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create vault client")
-	}
-
-	// Do a health check against the vault server to make sure verything is
-	// working.
-	_, err = client.Sys().HealthWithContext(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "vault is not healthy")
-	}
-
-	return &VaultTransit{
-		log:    config.Log,
-		config: config,
-		client: client,
-	}, nil
-}
-
-// Decrypt implements KeyManagement.
-func (*VaultTransit) Decrypt(
-	ctx context.Context,
-	keyID *string,
-	version *string,
-	input string,
-) (result string, _ error) {
-	panic("unimplemented")
-}
-
-// Encrypt implements KeyManagement.
-func (v *VaultTransit) Encrypt(
-	ctx context.Context,
-	input string,
-) (keyID *string, version *string, result string, _ error) {
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-
-	secret, err := v.client.Logical().WriteWithContext(
-		span.Context(),
-		fmt.Sprintf("transit/encrypt/%s", v.config.KeyID),
-		map[string]interface{}{
-			"plaintext": input,
-		},
-	)
-	if err != nil {
-		return nil, nil, "", errors.Wrap(err, "vault failed to encrypt secret")
-	}
-
-	return &v.config.KeyID, nil, secret.Data["ciphertext"].(string), nil
-}
-
-type VaultHelperConfig struct {
-	Address            string
-	Role               string
-	Auth               string
-	Token              string
-	TokenFile          string
-	Username, Password string
-	Timeout            time.Duration
-	TLSCertificatePath string
-	TLSKeyPath         string
-	TLSCAPath          string
-	InsecureSkipVerify bool
-	IdleConnTimeout    time.Duration
-}
-
-type VaultHelper interface {
-	Write(ctx context.Context, key string, value map[string]interface{}) (*vault.Secret, error)
-	Read(ctx context.Context, key string) (*vault.Secret, error)
-	Close() error
-}
-
-var (
-	_ VaultHelper = &vaultBase{}
-)
-
-type vaultBase struct {
 	tokenTTL        sync.Once
 	tokenSync       sync.RWMutex
 	tokenExpiration int64
 	tokenCloser     chan chan error
 	host            string
-	config          VaultHelperConfig
+	config          VaultTransitConfig
 	log             *logrus.Entry
 	client          *vault.Client
 	usingCustomTLS  bool
@@ -143,14 +59,18 @@ type vaultBase struct {
 	closer          chan chan error
 }
 
-func NewVaultHelper(ctx context.Context, log *logrus.Entry, config VaultHelperConfig) (VaultHelper, error) {
+func NewVaultTransit(
+	ctx context.Context,
+	config VaultTransitConfig,
+) (*VaultTransit, error) {
+	log := config.Log
 	host, err := url.Parse(config.Address)
 	if err != nil {
 		log.WithField("url", config.Address).WithError(err).Errorf("failed to parse vault URL")
 		return nil, errors.Wrap(err, "failed to parse vault URL")
 	}
 
-	helper := &vaultBase{
+	helper := &VaultTransit{
 		host:           host.Host,
 		config:         config,
 		log:            log,
@@ -211,7 +131,7 @@ func NewVaultHelper(ctx context.Context, log *logrus.Entry, config VaultHelperCo
 
 // dialTLS is a middleware function that is added to allow monetr to easily
 // rotate the TLS certificates for the vault server without downtime.
-func (v *vaultBase) dialTLS(
+func (v *VaultTransit) dialTLS(
 	ctx context.Context,
 	network, addr string,
 ) (net.Conn, error) {
@@ -245,7 +165,7 @@ func (v *vaultBase) dialTLS(
 //
 // This function is called when the client is initialized and runs until Close()
 // is called on the client.
-func (v *vaultBase) watchCertificates() {
+func (v *VaultTransit) watchCertificates() {
 	v.tlsWatch.Do(func() {
 		go func() {
 			log := v.log
@@ -309,7 +229,7 @@ func (v *vaultBase) watchCertificates() {
 //
 // This function is called when the vault client is initialized and every time a
 // certificate change is detected.
-func (v *vaultBase) reloadTLS() error {
+func (v *VaultTransit) reloadTLS() error {
 	log := v.log
 	log.Debugf("reloading vault TLS config")
 
@@ -376,7 +296,7 @@ func (v *vaultBase) reloadTLS() error {
 //
 // This function is called once when the client is created and runs a background
 // job until Close() is called.
-func (v *vaultBase) authenticationWorker() {
+func (v *VaultTransit) authenticationWorker() {
 	v.tokenTTL.Do(func() {
 		log := v.log
 		if atomic.LoadInt64(&v.tokenExpiration) == math.MaxInt64 {
@@ -445,13 +365,13 @@ func (v *vaultBase) authenticationWorker() {
 //
 // This function is called by the authenticationWorker and simply refreshes the
 // currently used authentication for communication with the vault server.
-func (v *vaultBase) authenticate(ctx context.Context) error {
+func (v *VaultTransit) authenticate(ctx context.Context) error {
 	v.tokenSync.Lock()
 	defer v.tokenSync.Unlock()
-	log := v.log.WithField("method", v.config.Auth)
+	log := v.log.WithField("method", v.config.AuthMethod)
 
 	var auth *vault.SecretAuth
-	switch v.config.Auth {
+	switch v.config.AuthMethod {
 	case "userpass":
 		log.Trace("authenticating to vault")
 		result, err := v.client.Logical().WriteWithContext(ctx, "auth/userpass/login/"+v.config.Username, map[string]interface{}{
@@ -506,7 +426,7 @@ func (v *vaultBase) authenticate(ctx context.Context) error {
 		}
 		auth = result.Auth
 	default:
-		return errors.Errorf("%s authentication not implemented", v.config.Auth)
+		return errors.Errorf("%s authentication not implemented", v.config.AuthMethod)
 	}
 
 	if auth == nil {
@@ -532,7 +452,11 @@ func (v *vaultBase) authenticate(ctx context.Context) error {
 	return nil
 }
 
-func (v *vaultBase) Write(ctx context.Context, key string, value map[string]interface{}) (*vault.Secret, error) {
+func (v *VaultTransit) Write(
+	ctx context.Context,
+	key string,
+	value map[string]interface{},
+) (*vault.Secret, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
@@ -557,7 +481,10 @@ func (v *vaultBase) Write(ctx context.Context, key string, value map[string]inte
 	return secret, nil
 }
 
-func (v *vaultBase) Read(ctx context.Context, key string) (*vault.Secret, error) {
+func (v *VaultTransit) Read(
+	ctx context.Context,
+	key string,
+) (*vault.Secret, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
@@ -577,7 +504,7 @@ func (v *vaultBase) Read(ctx context.Context, key string) (*vault.Secret, error)
 	return secret, nil
 }
 
-func (v *vaultBase) Delete(ctx context.Context, key string) error {
+func (v *VaultTransit) Delete(ctx context.Context, key string) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
@@ -597,8 +524,40 @@ func (v *vaultBase) Delete(ctx context.Context, key string) error {
 	return nil
 }
 
+// Decrypt implements KeyManagement.
+func (v *VaultTransit) Decrypt(
+	ctx context.Context,
+	keyID *string,
+	version *string,
+	input string,
+) (result string, _ error) {
+	panic("unimplemented")
+}
+
+// Encrypt implements KeyManagement.
+func (v *VaultTransit) Encrypt(
+	ctx context.Context,
+	input string,
+) (keyID *string, version *string, result string, _ error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	secret, err := v.Write(
+		span.Context(),
+		fmt.Sprintf("transit/encrypt/%s", v.config.KeyID),
+		map[string]interface{}{
+			"plaintext": input,
+		},
+	)
+	if err != nil {
+		return nil, nil, "", errors.Wrap(err, "vault failed to encrypt secret")
+	}
+
+	return &v.config.KeyID, nil, secret.Data["ciphertext"].(string), nil
+}
+
 // TODO Add a timeout to closing this, and test it
-func (v *vaultBase) Close() error {
+func (v *VaultTransit) Close() error {
 	var err error
 	if v.closer != nil {
 		promise := make(chan error)

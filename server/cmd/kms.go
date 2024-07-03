@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/secrets"
@@ -45,8 +46,27 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 			CredentialsFile: kmsConfig.CredentialsJSON,
 		})
 	case "vault":
-		log.Trace("using vault KMS")
-		return secrets.NewPlaintextKMS(), nil
+		vaultConfig := configuration.KeyManagement.Vault
+		log.WithFields(logrus.Fields{
+			"keyId": vaultConfig.KeyID,
+		}).Trace("using vault transit KMS")
+		kms, err = secrets.NewVaultTransit(context.Background(), secrets.VaultTransitConfig{
+			Log:                log,
+			KeyID:              vaultConfig.KeyID,
+			Address:            vaultConfig.Endpoint,
+			Role:               vaultConfig.Role,
+			AuthMethod:         vaultConfig.AuthMethod,
+			Token:              vaultConfig.Token,
+			TokenFile:          vaultConfig.TokenFile,
+			Username:           vaultConfig.Username,
+			Password:           vaultConfig.Password,
+			Timeout:            15 * time.Second,
+			TLSCertificatePath: vaultConfig.TLSCertificatePath,
+			TLSKeyPath:         vaultConfig.TLSKeyPath,
+			TLSCAPath:          vaultConfig.TLSCAPath,
+			InsecureSkipVerify: vaultConfig.InsecureSkipVerify,
+			IdleConnTimeout:    15 * time.Second,
+		})
 	case "plaintext":
 		log.Trace("using plaintext KMS, secrets will not be encrypted")
 		return secrets.NewPlaintextKMS(), nil
