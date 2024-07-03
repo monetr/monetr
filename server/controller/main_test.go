@@ -45,19 +45,15 @@ const (
 )
 
 const (
-	TestEmailDomain   = "monetr.mini"
-	TestUIDomainName  = "app.monetr.mini"
-	TestAPIDomainName = "api.monetr.mini"
-	TestCookieName    = "M-Token"
+	TestEmailDomain = "monetr.mini"
+	TestCookieName  = "M-Token"
 )
 
 func NewTestApplicationConfig(t *testing.T) config.Configuration {
 	return config.Configuration{
-		UIDomainName:        TestUIDomainName,
-		APIDomainName:       TestAPIDomainName,
-		AllowSignUp:         true,
-		ExternalURLProtocol: "https",
+		AllowSignUp: true,
 		Server: config.Server{
+			ExternalURL: "http://monetr.local",
 			Cookies: config.Cookies{
 				SameSiteStrict: true,
 				Secure:         true,
@@ -122,7 +118,13 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
 	require.NoError(t, err, "must be able to generate keys")
 
-	clientTokens, err := security.NewPasetoClientTokens(log, clock, configuration.APIDomainName, publicKey, privateKey)
+	clientTokens, err := security.NewPasetoClientTokens(
+		log,
+		clock,
+		configuration.Server.GetBaseURL().String(),
+		publicKey,
+		privateKey,
+	)
 	require.NoError(t, err, "must be able to init the client tokens interface")
 
 	miniRedis := miniredis.NewMiniRedis()
@@ -335,7 +337,7 @@ func AssertSetTokenCookie(t *testing.T, response *httpexpect.Response) string {
 	cookie := response.Cookie(TestCookieName)
 	require.NotNil(t, cookie, "auth cookie must not be nil if they were authenticated")
 	cookie.Path().IsEqual("/")
-	cookie.Domain().IsEqual(TestAPIDomainName)
+	cookie.Domain().IsEqual("monetr.local")
 	raw := cookie.Raw()
 	require.NotNil(t, raw, "raw cookie must not be nil if authentication was successful, or you werent authenticated")
 	assert.True(t, raw.Secure, "cookie must be secure")

@@ -31,44 +31,27 @@ type Configuration struct {
 	// configuration.
 	configFile string `yaml:"-"`
 
-	Environment string `yaml:"environment"`
-	// ExternalURLProtocol is used to determine what protocol should be used in things like email templates. It defaults
-	// to https.
-	ExternalURLProtocol string        `yaml:"externalUrlProtocol"`
-	UIDomainName        string        `yaml:"uiDomainName"`
-	APIDomainName       string        `yaml:"apiDomainName"`
-	AllowSignUp         bool          `yaml:"allowSignUp"`
-	Beta                Beta          `yaml:"beta"`
-	CORS                CORS          `yaml:"cors"`
-	Email               Email         `yaml:"email"`
-	KeyManagement       KeyManagement `yaml:"keyManagement"`
-	Links               Links         `yaml:"links"`
-	Logging             Logging       `yaml:"logging"`
-	Plaid               Plaid         `yaml:"plaid"`
-	PostgreSQL          PostgreSQL    `yaml:"postgreSql"`
-	ReCAPTCHA           ReCAPTCHA     `yaml:"reCAPTCHA"`
-	Redis               Redis         `yaml:"redis"`
-	Security            Security      `yaml:"security"`
-	Sentry              Sentry        `yaml:"sentry"`
-	Server              Server        `yaml:"server"`
-	Storage             Storage       `yaml:"storage"`
-	Stripe              Stripe        `yaml:"stripe"`
+	Environment   string        `yaml:"environment"`
+	AllowSignUp   bool          `yaml:"allowSignUp"`
+	Beta          Beta          `yaml:"beta"`
+	CORS          CORS          `yaml:"cors"`
+	Email         Email         `yaml:"email"`
+	KeyManagement KeyManagement `yaml:"keyManagement"`
+	Links         Links         `yaml:"links"`
+	Logging       Logging       `yaml:"logging"`
+	Plaid         Plaid         `yaml:"plaid"`
+	PostgreSQL    PostgreSQL    `yaml:"postgreSql"`
+	ReCAPTCHA     ReCAPTCHA     `yaml:"reCAPTCHA"`
+	Redis         Redis         `yaml:"redis"`
+	Security      Security      `yaml:"security"`
+	Sentry        Sentry        `yaml:"sentry"`
+	Server        Server        `yaml:"server"`
+	Storage       Storage       `yaml:"storage"`
+	Stripe        Stripe        `yaml:"stripe"`
 }
 
 func (c Configuration) GetConfigFileName() string {
 	return c.configFile
-}
-
-func (c Configuration) GetUIDomainName() string {
-	return c.UIDomainName
-}
-
-func (c Configuration) GetHTTPSecureCookie() bool {
-	return c.ExternalURLProtocol == "https" && c.Server.Cookies.Secure
-}
-
-func (c Configuration) GetUIURL() string {
-	return fmt.Sprintf("%s://%s", c.ExternalURLProtocol, c.UIDomainName)
 }
 
 type Storage struct {
@@ -147,39 +130,6 @@ type VaultTransit struct {
 	AuthMethod string `yaml:"authMethod"`
 	// If the AuthMethod is `token` then this value must be specified.
 	Token *string `yaml:"token"`
-}
-
-type Server struct {
-	// ListenPort defines the port that monetr will listen for HTTP requests on. This port should be forwarded such that
-	// it is accessible to the desired clients. Be that on a local network, or forwarded to the public internet.
-	ListenPort int `yaml:"listenPort"`
-	// ListenAddress defines the IP address that monetr should listen on for HTTP requests.
-	ListenAddress string `yaml:"listenAddress"`
-	// StatsPort is the port that our prometheus metrics are served on. This port should not be publicly accessible and
-	// should only be accessible by the prometheus server scraping for metrics. It is not an endpoint that needs to be
-	// secured as no sensitive client information will be served by it; but it should not be accessible publicly.
-	StatsPort int `yaml:"statsPort"`
-	// Cookies defines the parameters used for issuing and processing cookies from clients. Cookies are used for
-	// authentication.
-	Cookies Cookies `yaml:"cookies"`
-	// UICacheHours is the number of hours that UI files should be cached by the client. This is done by including an
-	// Expires and Cache-Control header in the response for all UI related requests. If this is 0 then the headers will
-	// not be included. Defaults to 12 hours.
-	UICacheHours int `yaml:"uiCacheHours"`
-}
-
-type Cookies struct {
-	// SameSiteStrict allows the host of monetr to define whether the cookie used for authentication is limited to same
-	// site. This might impact use cases where the UI is on a different domain than the API. In general, it is
-	// recommended that this is enabled and that the UI and API are served from the same domain.
-	SameSiteStrict bool `yaml:"sameSiteStrict"`
-	// Secure specifies that the authentication cookie issued and required by API endpoints is a secure cookie. This
-	// defaults to true, but requires that the host of monetr use HTTPS. If you are not using HTTPS then this must be
-	// disabled for API calls to succeed.
-	Secure bool `yaml:"secure"`
-	// Name defines the name of the cookie to use for authentication. This defaults to `M-Token` but can be customized
-	// if the host wants to.
-	Name string `yaml:"name"`
 }
 
 type Beta struct {
@@ -440,9 +390,7 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 }
 
 func setupDefaults(v *viper.Viper) {
-	v.SetDefault("APIDomainName", "0.0.0.0:4000")
 	v.SetDefault("AllowSignUp", true)
-	v.SetDefault("ExternalURLProtocol", "https")
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Environment", "development")
@@ -473,16 +421,11 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.StatsPort", 9000)
 	v.SetDefault("Server.UICacheHours", 12)
 	v.SetDefault("Stripe.FreeTrialDays", 30)
-	v.SetDefault("UIDomainName", "0.0.0.0:4000")
 }
 
 func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Environment", "MONETR_ENVIRONMENT")
-	_ = v.BindEnv("UIDomainName", "MONETR_UI_DOMAIN_NAME")
-	_ = v.BindEnv("APIDomainName", "MONETR_API_DOMAIN_NAME")
 	_ = v.BindEnv("AllowSignUp", "MONETR_ALLOW_SIGN_UP")
-	_ = v.BindEnv("ExternalURLProtocol", "MONETR_EXTERNAL_PROTOCOL")
-	_ = v.BindEnv("EnableWebhooks", "MONETR_ENABLE_WEBHOOKS")
 	_ = v.BindEnv("Beta.EnableBetaCodes", "MONETR_ENABLE_BETA_CODES")
 	_ = v.BindEnv("Cors.AllowedOrigins", "MONETR_CORS_ALLOWED_ORIGINS")
 	_ = v.BindEnv("Cors.Debug", "MONETR_CORS_DEBUG")
@@ -537,6 +480,7 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Sentry.ExternalDSN", "MONETR_SENTRY_EXTERNAL_DSN")
 	_ = v.BindEnv("Sentry.SampleRate", "MONETR_SENTRY_SAMPLE_RATE")
 	_ = v.BindEnv("Sentry.TraceSampleRate", "MONETR_SENTRY_TRACE_SAMPLE_RATE")
+	_ = v.BindEnv("Server.ExternalURL", "MONETR_SERVER_EXTERNAL_URL")
 	_ = v.BindEnv("Stripe.Enabled", "MONETR_STRIPE_ENABLED")
 	_ = v.BindEnv("Stripe.APIKey", "MONETR_STRIPE_API_KEY")
 	_ = v.BindEnv("Stripe.PublicKey", "MONETR_STRIPE_PUBLIC_KEY")

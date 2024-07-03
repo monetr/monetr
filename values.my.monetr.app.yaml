@@ -56,15 +56,11 @@ api:
   customEnv:
     - name: MONETR_ENVIRONMENT
       value: "my.monetr.app"
-  uiDomainName: my.monetr.app
-  apiDomainName: my.monetr.app
   allowSignUp: true
-  enableWebhooks: true # Will be deprecated soon.
+  server:
+    externalUrl: https://my.monetr.app
   beta:
     enableBetaCodes: true
-  backgroundJobs:
-    engine: postgresql
-    scheduler: internal
   postgreSql:
     address: postgres.production.monetr.in
     port: 5432

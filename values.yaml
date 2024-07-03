@@ -94,14 +94,9 @@ api:
   additionalConfigFilePaths: [ ]
   includeSecrets: false
   name: monetr
-  uiDomainName: localhost:4000
-  apiDomainName: localhost:4000
   allowSignUp: true
-  backgroundJobs:
-    engine: gocraft
-    scheduler: internal
-    jobSchedule: { }
   server:
+    externalUrl: http://localhost:4000
     listenPort: 4000
     statsPort: 9000
     cookies:

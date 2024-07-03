@@ -18,9 +18,14 @@ func (c *Controller) wrapPgError(ctx echo.Context, err error, msg string, args .
 	case pg.ErrNoRows:
 		friendlyError := fmt.Sprintf("%s: record does not exist", fmt.Sprintf(msg, args...))
 
-		crumbs.Error(c.getContext(ctx), fmt.Sprintf(msg, args...), c.configuration.APIDomainName, map[string]interface{}{
-			"error": friendlyError,
-		})
+		crumbs.Error(
+			c.getContext(ctx),
+			fmt.Sprintf(msg, args...),
+			ctx.Request().URL.Hostname(),
+			map[string]interface{}{
+				"error": friendlyError,
+			},
+		)
 
 		return echo.NewHTTPError(
 			http.StatusNotFound,
@@ -64,7 +69,7 @@ func (c *Controller) wrapAndReturnError(ctx echo.Context, err error, status int,
 		crumbs.Error(
 			c.getContext(ctx),
 			fmt.Sprintf(msg, args...),
-			c.configuration.APIDomainName,
+			ctx.Request().URL.Hostname(),
 			map[string]interface{}{
 				"error": wrapped.Error(),
 			},
@@ -74,9 +79,14 @@ func (c *Controller) wrapAndReturnError(ctx echo.Context, err error, status int,
 }
 
 func (c *Controller) failure(ctx echo.Context, status int, error GenericAPIError) error {
-	crumbs.Error(c.getContext(ctx), error.FriendlyMessage(), c.configuration.APIDomainName, map[string]interface{}{
-		"error": error,
-	})
+	crumbs.Error(
+		c.getContext(ctx),
+		error.FriendlyMessage(),
+		ctx.Request().URL.Hostname(),
+		map[string]interface{}{
+			"error": error,
+		},
+	)
 
 	return echo.NewHTTPError(status, error.Error()).WithInternal(error)
 }
@@ -87,7 +97,7 @@ func (c *Controller) returnError(ctx echo.Context, status int, msg string, args 
 	crumbs.Error(
 		c.getContext(ctx),
 		fmt.Sprintf(msg, args...),
-		c.configuration.APIDomainName,
+		ctx.Request().URL.Hostname(),
 		map[string]interface{}{
 			"error": err.Error(),
 		},

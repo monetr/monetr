@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/mail"
-	"net/url"
 	"strings"
 	"time"
 
@@ -42,20 +41,14 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 		panic("authentication cookie name is blank")
 	}
 
-	hostname := c.configuration.APIDomainName
-	parts := strings.SplitN(c.configuration.APIDomainName, ":", 2)
-	if len(parts) > 1 {
-		hostname = parts[0]
-	}
-
 	ctx.SetCookie(&http.Cookie{
 		Name:     c.configuration.Server.Cookies.Name,
 		Value:    token,
 		Path:     "/",
-		Domain:   hostname,
+		Domain:   c.configuration.Server.GetHostname(),
 		Expires:  expiration,
 		MaxAge:   0,
-		Secure:   c.configuration.GetHTTPSecureCookie(),
+		Secure:   c.configuration.Server.GetIsCookieSecure(),
 		HttpOnly: true,
 		SameSite: sameSite,
 	})
@@ -399,20 +392,12 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 			)
 		}
 
-		if err = c.email.SendVerification(c.getContext(ctx), communication.VerifyEmailParams{
-			BaseURL:      c.configuration.GetUIURL(),
-			Email:        login.Email,
-			FirstName:    login.FirstName,
-			LastName:     login.LastName,
-			SupportEmail: "support@monetr.app",
-			VerifyURL:    fmt.Sprintf("%s/verify/email?token=%s", c.configuration.GetUIURL(), url.QueryEscape(verificationToken)),
-		}); err != nil {
-			return c.wrapAndReturnError(
-				ctx,
-				err,
-				http.StatusInternalServerError,
-				"failed to send verification email",
-			)
+		if err = c.sendVerificationEmail(
+			ctx,
+			login,
+			verificationToken,
+		); err != nil {
+			return err
 		}
 
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
@@ -529,35 +514,18 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusOK)
 	}
 
-	if err = c.email.SendVerification(c.getContext(ctx), communication.VerifyEmailParams{
-		BaseURL:      c.configuration.GetUIURL(),
-		Email:        login.Email,
-		FirstName:    login.FirstName,
-		LastName:     login.LastName,
-		SupportEmail: "support@monetr.app",
-		VerifyURL:    fmt.Sprintf("%s/verify/email?token=%s", c.configuration.GetUIURL(), url.QueryEscape(verificationToken)),
-	}); err != nil {
-		c.reportWrappedError(ctx, err, "failed to send (re-send) verification email")
-		return ctx.NoContent(http.StatusOK)
+	if err = c.sendVerificationEmail(
+		ctx,
+		login,
+		verificationToken,
+	); err != nil {
+		return err
 	}
 
 	return ctx.NoContent(http.StatusOK)
 }
 
-// Send Password Reset Link
-// @Summary Send Password Reset Link
-// @id send-password-reset-link
-// @tags Authentication
-// @description This endpoint should be used to send password reset links to clients who have forgotten their password.
-// @Produce json
-// @Accept json
-// @Param Token body swag.ForgotPasswordRequest true "Forgot Password Request"
-// @Router /authentication/forgot [post]
-// @Success 200
-// @Failure 400 {object} swag.ForgotPasswordBadRequest
-// @Failure 428 {object} swag.ForgotPasswordEmailNotVerifiedError Email verification required.
-// @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) sendForgotPassword(ctx echo.Context) error {
+func (c *Controller) postForgotPassword(ctx echo.Context) error {
 	if !c.configuration.Email.AllowPasswordReset() {
 		return c.notFound(ctx, "password reset not enabled")
 	}
@@ -637,20 +605,12 @@ func (c *Controller) sendForgotPassword(ctx echo.Context) error {
 		)
 	}
 
-	if err = c.email.SendPasswordReset(c.getContext(ctx), communication.PasswordResetParams{
-		BaseURL:      c.configuration.GetUIURL(),
-		Email:        login.Email,
-		FirstName:    login.FirstName,
-		LastName:     login.LastName,
-		SupportEmail: "support@monetr.app",
-		ResetURL:     fmt.Sprintf("%s/password/reset?token=%s", c.configuration.GetUIURL(), url.QueryEscape(passwordResetToken)),
-	}); err != nil {
-		return c.wrapAndReturnError(
-			ctx,
-			err,
-			http.StatusInternalServerError,
-			"Failed to send password reset email",
-		)
+	if err = c.sendPasswordReset(
+		ctx,
+		login,
+		passwordResetToken,
+	); err != nil {
+		return err
 	}
 
 	return ctx.NoContent(http.StatusOK)
@@ -735,7 +695,7 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 	}
 
 	if err := c.email.SendPasswordChanged(c.getContext(ctx), communication.PasswordChangedParams{
-		BaseURL:      c.configuration.GetUIURL(),
+		BaseURL:      c.configuration.Server.GetBaseURL().String(),
 		Email:        login.Email,
 		FirstName:    login.FirstName,
 		LastName:     login.LastName,
