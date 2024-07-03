@@ -18,7 +18,7 @@ func TestNewApp(t *testing.T) {
 	conf := config.Configuration{
 		AllowSignUp: true,
 		Server: config.Server{
-			ExternalURL: "http://monetr.local",
+			ExternalURL: "https://monetr.local",
 			Cookies: config.Cookies{
 				SameSiteStrict: true,
 				Secure:         true,
