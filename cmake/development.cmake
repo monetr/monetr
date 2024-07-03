@@ -137,11 +137,11 @@ elseif("${MONETR_KMS_PROVIDER}" STREQUAL "vault")
   # And then add our vault container to our compose list.
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.vault-kms.yaml.in)
 elseif("${MONETR_KMS_PROVIDER}" STREQUAL "")
-  # no-op, no KMS provider will be used.
-elseif("${MONETR_KMS_PROVIDER}" STREQUAL "none")
-  set(MONETR_KMS_PROVIDER "")
+  set(MONETR_KMS_PROVIDER "plaintext")
+elseif("${MONETR_KMS_PROVIDER}" STREQUAL "plaintext")
+  set(MONETR_KMS_PROVIDER "plaintext")
 else()
-  message(FATAL "Invalid KMS provider specified, MONETR_KMS_PROVIDER=${MONETR_KMS_PROVIDER}\nValid options are: aws, vault, none")
+  message(FATAL "Invalid KMS provider specified, MONETR_KMS_PROVIDER=${MONETR_KMS_PROVIDER}\nValid options are: aws, vault, plaintext")
 endif()
 
 

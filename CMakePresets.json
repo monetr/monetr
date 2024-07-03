@@ -20,7 +20,7 @@
         "MONETR_LOCAL_DOMAIN": "monetr.local",
         "MONETR_EMAIL_VERIFICATION_ENABLED": "true",
         "MONETR_STRIPE_TAXES_ENABLED": "true",
-        "MONETR_KMS_PROVIDER": "vault",
+        "MONETR_KMS_PROVIDER": "plaintext",
         "DISABLE_GO_RELOAD": "false"
       }
     },

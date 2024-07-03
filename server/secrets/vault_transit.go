@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"fmt"
 	"math"
 	"net"
@@ -463,15 +464,15 @@ func (v *VaultTransit) Write(
 		"key": key,
 	}
 
-	log := v.log.WithField("key", key).WithContext(span.Context())
-
-	log.Trace("writing secret")
+	log := v.log.WithFields(logrus.Fields{
+		"key":    key,
+		"action": "write",
+	}).WithContext(span.Context())
+	log.Trace("handling secret with vault")
 	secret, err := v.client.Logical().WriteWithContext(
 		span.Context(),
 		key,
-		map[string]interface{}{
-			"data": value,
-		},
+		value,
 	)
 	if err != nil {
 		log.WithError(err).Errorf("failed to write secret to vault")
@@ -492,9 +493,6 @@ func (v *VaultTransit) Read(
 	}
 
 	log := v.log.WithField("key", key).WithContext(span.Context())
-
-	log.Trace("reading secret")
-
 	secret, err := v.client.Logical().ReadWithContext(span.Context(), key)
 	if err != nil {
 		log.WithError(err).Errorf("failed to read secret from vault")
@@ -531,7 +529,26 @@ func (v *VaultTransit) Decrypt(
 	version *string,
 	input string,
 ) (result string, _ error) {
-	panic("unimplemented")
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	secret, err := v.Write(
+		span.Context(),
+		fmt.Sprintf("transit/decrypt/%s", v.config.KeyID),
+		map[string]interface{}{
+			"ciphertext": input,
+		},
+	)
+	if err != nil {
+		return "", errors.Wrap(err, "vault failed to decrypt secret")
+	}
+
+	value, err := base64.StdEncoding.DecodeString(secret.Data["plaintext"].(string))
+	if err != nil {
+		return "", errors.Wrap(err, "failed to decode decrypted secret")
+	}
+
+	return string(value), nil
 }
 
 // Encrypt implements KeyManagement.
@@ -546,7 +563,7 @@ func (v *VaultTransit) Encrypt(
 		span.Context(),
 		fmt.Sprintf("transit/encrypt/%s", v.config.KeyID),
 		map[string]interface{}{
-			"plaintext": input,
+			"plaintext": base64.StdEncoding.EncodeToString([]byte(input)),
 		},
 	)
 	if err != nil {

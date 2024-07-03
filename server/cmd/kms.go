@@ -17,6 +17,9 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 		return nil, errors.New("a key management provider must be specified")
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	var kms secrets.KeyManagement
 	var err error
 	switch strings.ToLower(configuration.KeyManagement.Provider) {
@@ -25,7 +28,7 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 		log.WithFields(logrus.Fields{
 			"keyId": kmsConfig.KeyID,
 		}).Trace("using AWS KMS")
-		kms, err = secrets.NewAWSKMS(context.Background(), secrets.AWSKMSConfig{
+		kms, err = secrets.NewAWSKMS(ctx, secrets.AWSKMSConfig{
 			Log:       log,
 			KeyID:     kmsConfig.KeyID,
 			Region:    kmsConfig.Region,
@@ -38,7 +41,7 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 		log.WithFields(logrus.Fields{
 			"keyName": kmsConfig.ResourceName,
 		}).Trace("using Google KMS")
-		kms, err = secrets.NewGoogleKMS(context.Background(), secrets.GoogleKMSConfig{
+		kms, err = secrets.NewGoogleKMS(ctx, secrets.GoogleKMSConfig{
 			Log:             log,
 			KeyName:         kmsConfig.ResourceName,
 			URL:             nil,
@@ -50,7 +53,7 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 		log.WithFields(logrus.Fields{
 			"keyId": vaultConfig.KeyID,
 		}).Trace("using vault transit KMS")
-		kms, err = secrets.NewVaultTransit(context.Background(), secrets.VaultTransitConfig{
+		kms, err = secrets.NewVaultTransit(ctx, secrets.VaultTransitConfig{
 			Log:                log,
 			KeyID:              vaultConfig.KeyID,
 			Address:            vaultConfig.Endpoint,
@@ -69,7 +72,7 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 		})
 	case "plaintext":
 		log.Trace("using plaintext KMS, secrets will not be encrypted")
-		return secrets.NewPlaintextKMS(), nil
+		kms = secrets.NewPlaintextKMS()
 	default:
 		return nil, errors.Errorf("invalid kms provider: %s", configuration.KeyManagement.Provider)
 	}
@@ -77,6 +80,31 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 	if err != nil {
 		log.WithError(err).Fatalf("failed to configure KMS interface")
 		return nil, err
+	}
+
+	{ // Test the KMS provider
+		testText := "Hello World!"
+		keyId, keyVersion, cipherText, err := kms.Encrypt(ctx, testText)
+		if err != nil {
+			log.WithError(err).Fatalf("failed to test KMS, encryption failed; is everything configured properly?")
+			return nil, err
+		}
+		if len(cipherText) == 0 {
+			log.Fatalf("ciphertext returned from KMS test was empty, something is very wrong!")
+			return nil, errors.Errorf("ciphertext returned from KMS test was empty, something is very wrong!")
+		}
+
+		decrypted, err := kms.Decrypt(ctx, keyId, keyVersion, cipherText)
+		if err != nil {
+			log.WithError(err).Fatalf("failed to test KMS, decryption failed; is everything configured properly?")
+			return nil, err
+		}
+
+		if testText != decrypted {
+			log.Fatalf("failed to test KMS, decrypted value is different from the original!")
+			return nil, errors.New("failed to test KMS, decrypted value is different from the original!")
+		}
+		log.Debug("KMS test succeeded")
 	}
 
 	return kms, nil

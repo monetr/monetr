@@ -39,7 +39,7 @@ recaptcha:
 server:
   cookies:
     name: M-Token
-    samesitestrict: true
+    sameSiteStrict: true
     secure: false # Cant use secure over http.
   listenport: 4000
   statsport: 9000
@@ -54,6 +54,10 @@ keyManagement:
   google:
     credentialsJson: /etc/monetr/google-service-account.json
     # Resource name must be specified using MONETR_KMS_RESOURCE_NAME
+  vault:
+    keyId: monetr
+    authMethod: token
+    endpoint: http://vault:80
 storage:
   enabled: true
   provider: s3
