@@ -99,6 +99,7 @@ if(DOCKER_EXECUTABLE)
     COMMAND ${DOCKER_EXECUTABLE} build
         --iidfile ${DOCKER_CONTAINER}
         -f ${CMAKE_SOURCE_DIR}/Dockerfile
+        --platform linux/amd64
         --build-arg GOFLAGS=-tags=icons,simple_icons
         --build-arg RELEASE=$(RELEASE_VERSION)
         --build-arg REVISION=$(RELEASE_REVISION)

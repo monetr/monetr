@@ -1,17 +1,18 @@
 FROM debian:12-slim AS base_builder
 WORKDIR /work
-RUN apt-get update && apt-get install -y \
-  git \
-  curl \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  build-essential \
   ca-certificates \
-  gnupg \
-  wget \
-  pkg-config \
   cmake \
-  ruby-full \
+  curl \
+  git \
+  gnupg \
   libssl-dev \
   nodejs=18.* \
-  npm
+  npm \
+  pkg-config \
+  ruby-full \
+  wget
 
 RUN npm install -g pnpm
 RUN wget -c https://golang.org/dl/go1.21.9.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
