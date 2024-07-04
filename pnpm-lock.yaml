@@ -112,8 +112,8 @@ importers:
   emails:
     dependencies:
       '@react-email/components':
-        specifier: 0.0.20
-        version: 0.0.20(@types/react@18.2.47)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.0.21
+        version: 0.0.21(@types/react@18.2.47)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/react':
         specifier: 7.0.18
         version: 7.0.18(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.1.3)
@@ -3351,8 +3351,8 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
-  '@react-email/code-block@0.0.4':
-    resolution: {integrity: sha512-xjVLi/9dFNJ70N7hYme+21eQWa3b9/kgp4V+FKQJkQCuIMobxPRCIGM5jKD/0Vo2OqrE5chYv/dkg/aP8a8sPg==}
+  '@react-email/code-block@0.0.5':
+    resolution: {integrity: sha512-mmInpZsSIkNaYC1y40/S0XXrIqbTzrpllP6J1JMJuDOBG8l5T7pNl4V+gwfsSTvy9hVsuzQFmhHK8kVb1UXv3A==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^18.2.0
@@ -3369,8 +3369,8 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
-  '@react-email/components@0.0.20':
-    resolution: {integrity: sha512-9grJ90RLv5ZPXq07YyQZ9A/OaM6QvGOD41Pl31I6s3UjFp7Jmxqr0wSUpuPhl0eKWriJU42E48okt4ugz29/hQ==}
+  '@react-email/components@0.0.21':
+    resolution: {integrity: sha512-fwGfH7FF+iuq+IdPcbEO5HoF0Pakk9big+fFW9+3kiyvbSNuo8Io1rhPTMLd8q41XomN4g7mgWovdAeS/8PHrA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^18.2.0
@@ -16076,7 +16076,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@react-email/code-block@0.0.4(react@18.3.1)':
+  '@react-email/code-block@0.0.5(react@18.3.1)':
     dependencies:
       prismjs: 1.29.0
       react: 18.3.1
@@ -16089,11 +16089,11 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@react-email/components@0.0.20(@types/react@18.2.47)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@react-email/components@0.0.21(@types/react@18.2.47)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@react-email/body': 0.0.8(react@18.3.1)
       '@react-email/button': 0.0.15(react@18.3.1)
-      '@react-email/code-block': 0.0.4(react@18.3.1)
+      '@react-email/code-block': 0.0.5(react@18.3.1)
       '@react-email/code-inline': 0.0.2(react@18.3.1)
       '@react-email/column': 0.0.10(react@18.3.1)
       '@react-email/container': 0.0.12(react@18.3.1)
