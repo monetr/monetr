@@ -59,11 +59,15 @@ keyManagement:
     authMethod: token
     endpoint: http://vault:80
 storage:
-  enabled: true
-  provider: s3
+  # Enabled will be specified via MONETR_STORAGE_ENABLED
+  # enabled: true
+  # Provider will be specified via MONETR_STORAGE_PROVIDER
+  # provider: s3
   s3:
     endpoint: http://s3:9000
     bucket: monetr-storage
     region: us-east-1
     forcePathStyle: true
     useEnvCredentials: true # Use the AWS_ACCESS_KEY and AWS_SECRET_KEY env variables in development.
+  filesystem:
+    basePath: /build/build/development/storage 
