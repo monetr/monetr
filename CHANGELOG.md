@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.17.8](https://github.com/monetr/monetr/compare/v0.17.7...v0.17.8) (2024-07-04)
+
+
+### Features
+
+* **api:** Adding QFX processing to import transactions ([#1773](https://github.com/monetr/monetr/issues/1773)) ([09604d9](https://github.com/monetr/monetr/commit/09604d9521f5eb30a48923ce654dc744a91502f4))
+* **kms:** Adding vault transit support ([#1791](https://github.com/monetr/monetr/issues/1791)) ([098e590](https://github.com/monetr/monetr/commit/098e590b116442e1f76696cb98e4add58d680c27))
+
+
+### Dependencies
+
+* **api:** update module github.com/fsnotify/fsnotify to v1.7.0 ([#1592](https://github.com/monetr/monetr/issues/1592)) ([ed2c32d](https://github.com/monetr/monetr/commit/ed2c32d48ceb90c3ce6d83598aa9b5e2f643ea14))
+* **api:** update module github.com/micahparks/keyfunc to v1.9.0 ([#807](https://github.com/monetr/monetr/issues/807)) ([b8fd048](https://github.com/monetr/monetr/commit/b8fd048be7e991228ca99813eb4a47918f20044d))
+* **api:** update module github.com/spf13/viper to v1.19.0 ([#1807](https://github.com/monetr/monetr/issues/1807)) ([e931418](https://github.com/monetr/monetr/commit/e931418fcd90c3d11e2e036a233254648efc26c9))
+* **api:** update module github.com/stripe/stripe-go/v78 to v78.12.0 ([#1808](https://github.com/monetr/monetr/issues/1808)) ([66676d0](https://github.com/monetr/monetr/commit/66676d03a3287236d3ee8b459dc5ecd7a7d40a91))
+* **api:** update module github.com/wneessen/go-mail to v0.4.2 ([#1794](https://github.com/monetr/monetr/issues/1794)) ([3ea6670](https://github.com/monetr/monetr/commit/3ea66701fcfb8d8ac46314dece05a45f1429162d))
+* **api:** update module github.com/xlzd/gotp to v0.1.0 ([#1303](https://github.com/monetr/monetr/issues/1303)) ([3d5934f](https://github.com/monetr/monetr/commit/3d5934fdeba8dd07267df2111c1d5b04a7d1df1e))
+* **db:** Bumping to postgresql:16 ([fab6fd2](https://github.com/monetr/monetr/commit/fab6fd2a665908ce25c0c7bf6815054d7c62d990))
+* **ui:** update dependency @react-email/components to v0.0.20 ([#1795](https://github.com/monetr/monetr/issues/1795)) ([c85db7e](https://github.com/monetr/monetr/commit/c85db7e4fc7e5fa0a3fb39e8ab2aea9bfeb5e27d))
+* **ui:** update dependency @types/react-google-recaptcha to v2.1.9 ([#1589](https://github.com/monetr/monetr/issues/1589)) ([1ec0d6d](https://github.com/monetr/monetr/commit/1ec0d6de46662ff57d498a49575c27aaa635249f))
+* **ui:** update dependency eslint-plugin-no-relative-import-paths to v1.5.5 ([#1796](https://github.com/monetr/monetr/issues/1796)) ([a496e39](https://github.com/monetr/monetr/commit/a496e39a537c62fb4e6a8604d4de2b09a2d08d4a))
+* **ui:** update dependency input-otp to v1.2.4 ([#1756](https://github.com/monetr/monetr/issues/1756)) ([f654f09](https://github.com/monetr/monetr/commit/f654f09280c9c9298b1a0e562dce7ac38e04f91f))
+* **ui:** update dependency path-to-regexp to v6.2.2 ([#1762](https://github.com/monetr/monetr/issues/1762)) ([6e972f7](https://github.com/monetr/monetr/commit/6e972f7fa53e862d9e13849d734fb76cb60a6270))
+* **ui:** update dependency postcss to v8.4.39 ([#1797](https://github.com/monetr/monetr/issues/1797)) ([1bf93f7](https://github.com/monetr/monetr/commit/1bf93f7428bc834276291ca8ba5ec285a80ed69e))
+* **ui:** update dependency react-email to v2.1.5 ([#1801](https://github.com/monetr/monetr/issues/1801)) ([14e3b76](https://github.com/monetr/monetr/commit/14e3b76d0abf09a03f3052f15ce65c9f25c2e66b))
+* **ui:** update dependency react-plaid-link to v3.5.2 ([#1789](https://github.com/monetr/monetr/issues/1789)) ([98b7a44](https://github.com/monetr/monetr/commit/98b7a44851e40aecf3e38ed3df365eb2c1c2cc6a))
+
+
+### Bug Fixes
+
+* **config:** Fixed how the external URL and protocol was determined ([#1816](https://github.com/monetr/monetr/issues/1816)) ([bafa1e9](https://github.com/monetr/monetr/commit/bafa1e95455a025ace1c92030586e90f7836d0d0))
+* **dev:** Remove support for gitpod ([8b2b517](https://github.com/monetr/monetr/commit/8b2b5171ec73d337d55b00ab853b6a64dd42b9cd)), closes [#1639](https://github.com/monetr/monetr/issues/1639)
+* **gcs:** Removed support for specifying a GCS url ([2a1a103](https://github.com/monetr/monetr/commit/2a1a103b5f53a2317093355ad3d27642ef54af28)), closes [#1799](https://github.com/monetr/monetr/issues/1799)
+* **plaid:** Reduce number of Plaid API calls necessary for syncing ([#1818](https://github.com/monetr/monetr/issues/1818)) ([f691158](https://github.com/monetr/monetr/commit/f69115894d20a958fd7d9b024f9f77d2b46d1843)), closes [#1809](https://github.com/monetr/monetr/issues/1809)
+* **staging:** Staging can not use development credentials anymore ([a033c9f](https://github.com/monetr/monetr/commit/a033c9f759137356845546d0e84a3d2dd906d0af)), closes [#1815](https://github.com/monetr/monetr/issues/1815)
+* **test:** Fixed broken tests due to TOTP update ([8a6b271](https://github.com/monetr/monetr/commit/8a6b271d996ac11d1a514e4410f1128ce27390bc))
+* **test:** Fixing more tests from TOTP update ([b2cfe02](https://github.com/monetr/monetr/commit/b2cfe0238d38f9682c40dff57695616c2464e386))
+* **ui:** Don't show manual on setup page if its not enabled ([394ceda](https://github.com/monetr/monetr/commit/394ceda879e8e2275854ee3148490affd20dab71))
+* **ui:** Don't show transaction upload button unless storage is enabled ([4ac3561](https://github.com/monetr/monetr/commit/4ac3561861d1325d955a49201220ba5075b1cd9d))
+* **ui:** Fix `coming soon` text on manual link setup ([3464539](https://github.com/monetr/monetr/commit/3464539df93fcb292408c6c9aec8aad81f225351))
+
+
+### Miscellaneous
+
+* **container:** Tweaking container build ([d7c010e](https://github.com/monetr/monetr/commit/d7c010e5dafb4245b4f91cf77e4e7c951c358a9f))
+* **deps:** bump github.com/hashicorp/go-retryablehttp ([#1817](https://github.com/monetr/monetr/issues/1817)) ([91daac5](https://github.com/monetr/monetr/commit/91daac5dab90dee16ba15ddbe284cb851b415645))
+
 ## [0.17.7](https://github.com/monetr/monetr/compare/v0.17.6...v0.17.7) (2024-06-29)
 
 
