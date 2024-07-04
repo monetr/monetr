@@ -256,11 +256,15 @@ type StackDriverLogging struct {
 }
 
 type Sentry struct {
-	Enabled         bool    `yaml:"enabled"`
-	DSN             string  `yaml:"dsn"`
-	ExternalDSN     string  `yaml:"externalDSN"`
-	SampleRate      float64 `yaml:"sampleRate"`
-	TraceSampleRate float64 `yaml:"traceSampleRate"`
+	Enabled     bool   `yaml:"enabled"`
+	DSN         string `yaml:"dsn"`
+	ExternalDSN string `yaml:"externalDSN"`
+	// SecurityHeaderEndpoint tells monetr that CSP policy information can be
+	// passed on to Sentry. If this value is provided, this will be included in
+	// the CSP header.
+	SecurityHeaderEndpoint string  `yaml:"securityHeaderEndpoint"`
+	SampleRate             float64 `yaml:"sampleRate"`
+	TraceSampleRate        float64 `yaml:"traceSampleRate"`
 }
 
 func (s Sentry) ExternalSentryEnabled() bool {

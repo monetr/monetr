@@ -9,9 +9,11 @@ import (
 	"io/fs"
 	"net/http"
 	"path"
+	"runtime/debug"
 	"strings"
 	"time"
 
+	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -58,6 +60,14 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 	c.registerIndexRenderer(app)
 
 	app.GET("/*", func(ctx echo.Context) error {
+		defer func(ctx echo.Context) {
+			if err := recover(); err != nil {
+				hub := sentryecho.GetHubFromContext(ctx)
+				hub.Recover(err)
+				c.log.Errorf("panic for request: %+v\n%s", err, string(debug.Stack()))
+				_ = ctx.String(http.StatusInternalServerError, "Something went very wrong!")
+			}
+		}(ctx)
 		requestedPath := ctx.Request().URL.Path
 
 		// If they request `/index.html` simply redirect them to `/`.
