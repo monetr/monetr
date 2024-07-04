@@ -9,7 +9,7 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/ui"
-	"github.com/plaid/plaid-go/v20/plaid"
+	"github.com/plaid/plaid-go/v26/plaid"
 	"github.com/stretchr/testify/assert"
 )
 

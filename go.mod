@@ -31,7 +31,7 @@ require (
 	github.com/mileusna/useragent v1.3.4
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
-	github.com/plaid/plaid-go/v20 v20.1.0
+	github.com/plaid/plaid-go/v26 v26.0.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
