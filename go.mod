@@ -8,7 +8,7 @@ require (
 	aidanwoods.dev/go-paseto v1.5.1
 	cloud.google.com/go/kms v1.17.1
 	cloud.google.com/go/storage v1.41.0
-	github.com/MicahParks/keyfunc v1.0.1
+	github.com/MicahParks/keyfunc v1.9.0
 	github.com/adrg/strutil v0.3.1
 	github.com/ahmetb/go-linq/v3 v3.2.0
 	github.com/alicebob/miniredis/v2 v2.33.0
