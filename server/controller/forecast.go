@@ -61,22 +61,12 @@ func (c *Controller) getForecast(ctx echo.Context) error {
 	timeout, cancel := context.WithTimeout(c.getContext(ctx), 15*time.Second)
 	defer cancel()
 
-	result, err := func() (result forecast.Forecast, err error) {
-		defer func() {
-			switch panicResult := recover().(type) {
-			case error:
-				err = panicResult
-				return
-			}
-		}()
-		result = forecaster.GetForecast(
-			timeout,
-			now,
-			endDate,
-			timezone,
-		)
-		return result, nil
-	}()
+	result, err := forecaster.GetForecast(
+		timeout,
+		now,
+		endDate,
+		timezone,
+	)
 	if err == context.DeadlineExceeded {
 		return c.returnError(ctx, http.StatusRequestTimeout, "timeout forecasting")
 	} else if err != nil {
@@ -149,22 +139,12 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 	timeout, cancel := context.WithTimeout(c.getContext(ctx), 25*time.Second)
 	defer cancel()
 
-	result, err := func() (result int64, err error) {
-		defer func() {
-			switch panicResult := recover().(type) {
-			case error:
-				err = panicResult
-				return
-			}
-		}()
-		result = afterForecast.GetAverageContribution(
-			timeout,
-			request.NextRecurrence.AddDate(0, 0, -1),
-			end,
-			timezone,
-		)
-		return result, nil
-	}()
+	result, err := afterForecast.GetAverageContribution(
+		timeout,
+		request.NextRecurrence.AddDate(0, 0, -1),
+		end,
+		timezone,
+	)
 	if err == context.DeadlineExceeded {
 		return c.returnError(ctx, http.StatusRequestTimeout, "timeout forecasting")
 	} else if err != nil {
@@ -216,22 +196,12 @@ func (c *Controller) postForecastNextFunding(ctx echo.Context) error {
 	timezone := c.mustGetTimezone(ctx)
 	timeout, cancel := context.WithTimeout(c.getContext(ctx), 25*time.Second)
 	defer cancel()
-	result, err := func() (result int64, err error) {
-		defer func() {
-			switch panicResult := recover().(type) {
-			case error:
-				err = panicResult
-				return
-			}
-		}()
-		result = fundingForecast.GetNextContribution(
-			timeout,
-			time.Now(),
-			request.FundingScheduleId,
-			timezone,
-		)
-		return result, nil
-	}()
+	result, err := fundingForecast.GetNextContribution(
+		timeout,
+		c.clock.Now(),
+		request.FundingScheduleId,
+		timezone,
+	)
 	if err == context.DeadlineExceeded {
 		return c.returnError(ctx, http.StatusRequestTimeout, "timeout forecasting")
 	} else if err != nil {
