@@ -8,6 +8,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/teambition/rrule-go"
 )
@@ -26,8 +27,8 @@ var (
 )
 
 type SpendingInstructions interface {
-	GetNextNSpendingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []SpendingEvent
-	GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []SpendingEvent
+	GetNextNSpendingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) ([]SpendingEvent, error)
+	GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) ([]SpendingEvent, error)
 }
 
 type spendingInstructionBase struct {
@@ -44,9 +45,14 @@ func NewSpendingInstructions(log *logrus.Entry, spending Spending, fundingInstru
 	}
 }
 
-func (s *spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []SpendingEvent {
+func (s *spendingInstructionBase) GetSpendingEventsBetween(
+	ctx context.Context,
+	start, end time.Time,
+	timezone *time.Location,
+) ([]SpendingEvent, error) {
 	events := make([]SpendingEvent, 0)
 
+	var err error
 	log := s.log.
 		WithContext(ctx).
 		WithFields(logrus.Fields{
@@ -68,10 +74,10 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, 
 					"timezone": timezone.String(),
 					"i":        i,
 				})
-				panic(err)
+				return nil, errors.WithStack(err)
 			}
 			crumbs.Warn(ctx, "Received done context signal with no error", "spending", nil)
-			return events
+			return events, nil
 		default:
 			// Do nothing
 		}
@@ -85,7 +91,10 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, 
 		}
 
 		ilog = ilog.WithField("after", start)
-		event = s.getNextSpendingEventAfter(ctx, afterDate, timezone, allocation)
+		event, err = s.getNextSpendingEventAfter(ctx, afterDate, timezone, allocation)
+		if err != nil {
+			return nil, err
+		}
 
 		// No event returned means there are no more.
 		if event == nil {
@@ -98,8 +107,9 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, 
 			break
 		}
 
-		// This should not happen, and to some degree there are now tests to prove this. But if it does happen that means
-		// there has been a regression. Send something to sentry with some contextual data so it can be diagnosted.
+		// This should not happen, and to some degree there are now tests to prove
+		// this. But if it does happen that means there has been a regression. Send
+		// something to sentry with some contextual data so it can be diagnosted.
 		if !event.Date.After(afterDate) {
 			ilog.Error("calculated a spending event that does not come after the after date specified! there is a bug somewhere!!!")
 			crumbs.IndicateBug(ctx, "Calculated a spending event that does not come after the after date specified", map[string]interface{}{
@@ -123,28 +133,39 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, 
 
 	log.WithField("count", len(events)).Trace("returning calculated events")
 
-	return events
+	return events, nil
 }
 
-func (s spendingInstructionBase) GetNextNSpendingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []SpendingEvent {
+func (s spendingInstructionBase) GetNextNSpendingEventsAfter(
+	ctx context.Context,
+	n int,
+	input time.Time,
+	timezone *time.Location,
+) ([]SpendingEvent, error) {
 	events := make([]SpendingEvent, 0, n)
+	var err error
 	for i := 0; i < n; i++ {
 		select {
 		case <-ctx.Done():
 			if err := ctx.Err(); err != nil {
-				panic(err)
+				return nil, errors.WithStack(err)
 			}
 			crumbs.Warn(ctx, "Received done context signal with no error", "spending", nil)
-			return events
+			return events, nil
 		default:
 			// Do nothing
 		}
 
 		var event *SpendingEvent
 		if i == 0 {
-			event = s.getNextSpendingEventAfter(ctx, input, timezone, s.spending.CurrentAmount)
+			event, err = s.getNextSpendingEventAfter(ctx, input, timezone, s.spending.CurrentAmount)
 		} else {
-			event = s.getNextSpendingEventAfter(ctx, events[i-1].Date, timezone, events[i-1].RollingAllocation)
+			event, err = s.getNextSpendingEventAfter(ctx, events[i-1].Date, timezone, events[i-1].RollingAllocation)
+		}
+
+		// If there was a problem or a timeout, just return
+		if err != nil {
+			return nil, err
 		}
 
 		// No event returned means there are no more.
@@ -155,10 +176,14 @@ func (s spendingInstructionBase) GetNextNSpendingEventsAfter(ctx context.Context
 		events = append(events, *event)
 	}
 
-	return events
+	return events, nil
 }
 
-func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []time.Time {
+func (s *spendingInstructionBase) GetRecurrencesBetween(
+	ctx context.Context,
+	start, end time.Time,
+	timezone *time.Location,
+) ([]time.Time, error) {
 	switch s.spending.SpendingType {
 	case SpendingTypeExpense:
 		rule := s.spending.RuleSet.Set
@@ -170,22 +195,27 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, sta
 		// end being the next funding event immediately after that. We can't control what happens after the later
 		// funding event, so we need to know how much will be spent before then, so we know how much to allocate.
 		items := rule.Between(start, end.Add(-1*time.Second), true)
-		return items
+		return items, nil
 	case SpendingTypeGoal:
 		if s.spending.NextRecurrence.After(start) && s.spending.NextRecurrence.Before(end) {
-			return []time.Time{s.spending.NextRecurrence}
+			return []time.Time{s.spending.NextRecurrence}, nil
 		}
 		fallthrough
 	default:
-		return nil
+		return nil, nil
 	}
 }
 
-func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context, input time.Time, timezone *time.Location, balance int64) *SpendingEvent {
+func (s *spendingInstructionBase) getNextSpendingEventAfter(
+	ctx context.Context,
+	input time.Time,
+	timezone *time.Location,
+	balance int64,
+) (*SpendingEvent, error) {
 	// If the spending object is paused then there wont be any events for it at
 	// all.
 	if s.spending.IsPaused {
-		return nil
+		return nil, nil
 	}
 
 	input = util.Midnight(input, timezone)
@@ -199,13 +229,13 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 	nextRecurrence := util.Midnight(s.spending.NextRecurrence, timezone)
 	switch s.spending.SpendingType {
 	case SpendingTypeOverflow:
-		return nil
+		return nil, nil
 	case SpendingTypeGoal:
 		// If we are working with a goal and it has already "completed" then there
 		// is nothing more to do, no more events will come up for this spending
 		// object.
 		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
-			return nil
+			return nil, nil
 		}
 	case SpendingTypeExpense:
 		if rule == nil {
@@ -220,7 +250,10 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 
 	var fundingFirst, fundingSecond FundingEvent
 	{ // Get our next two funding events
-		fundingEvents := s.funding.GetNFundingEventsAfter(ctx, 2, input, timezone)
+		fundingEvents, err := s.funding.GetNFundingEventsAfter(ctx, 2, input, timezone)
+		if err != nil {
+			return nil, err
+		}
 		if len(fundingEvents) != 2 {
 			// TODO, if there are multiple funding schedules and they land on the same
 			// day, this will happen.
@@ -230,17 +263,30 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		fundingFirst, fundingSecond = fundingEvents[0], fundingEvents[1]
 	}
 
-	// The number of times this item will be spent before it receives funding
-	// again. This is considered the current funding period. This is used to
-	// determine if the spending is currently behind. As the total amount that
-	// will be spent must be <= the amount currently allocated to this spending
-	// item. If it is not then there will not be enough funds to cover each
-	// spending event between now and the next funding event.
-	eventsBeforeFirst := int64(len(s.GetRecurrencesBetween(ctx, input, fundingFirst.Date, timezone)))
-	// The number of times this item will be spent in the subsequent funding
-	// period. This is used to determine how much needs to be allocated at the
-	// beginning of the next funding period.
-	eventsBeforeSecond := int64(len(s.GetRecurrencesBetween(ctx, fundingFirst.Date, fundingSecond.Date, timezone)))
+	var eventsBeforeFirst, eventsBeforeSecond int64
+	{
+		beforeFirst, err := s.GetRecurrencesBetween(ctx, input, fundingFirst.Date, timezone)
+		if err != nil {
+			return nil, err
+		}
+
+		// The number of times this item will be spent before it receives funding
+		// again. This is considered the current funding period. This is used to
+		// determine if the spending is currently behind. As the total amount that
+		// will be spent must be <= the amount currently allocated to this spending
+		// item. If it is not then there will not be enough funds to cover each
+		// spending event between now and the next funding event.
+		eventsBeforeFirst = int64(len(beforeFirst))
+
+		beforeSecond, err := s.GetRecurrencesBetween(ctx, fundingFirst.Date, fundingSecond.Date, timezone)
+		if err != nil {
+			return nil, err
+		}
+		// The number of times this item will be spent in the subsequent funding
+		// period. This is used to determine how much needs to be allocated at the
+		// beginning of the next funding period.
+		eventsBeforeSecond = int64(len(beforeSecond))
+	}
 
 	// The amount of funds needed for each individual spending event.
 	var perSpendingAmount int64
@@ -311,12 +357,15 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		// second to the input and keeping nextRecurrence the same we basically make
 		// this query end inclusive but start exclusive.
 		// Essentially: events > start && events <= end.
-		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(
+		numberOfContributions, err := s.funding.GetNumberOfFundingEventsBetween(
 			ctx,
 			input.Add(1*time.Second),
 			nextRecurrence,
 			timezone,
 		)
+		if err != nil {
+			return nil, err
+		}
 		// Then determine how much we would need at each of those funding events.
 		totalContributionAmount = amountNeeded / myownsanity.Max(1, numberOfContributions)
 	}
@@ -352,5 +401,5 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		}
 	}
 
-	return &event
+	return &event, nil
 }

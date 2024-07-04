@@ -7,6 +7,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -23,10 +24,10 @@ var (
 )
 
 type FundingInstructions interface {
-	GetNFundingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingEvent
-	GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64
-	GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent
-	GetFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingEvent
+	GetNFundingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) ([]FundingEvent, error)
+	GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) (int64, error)
+	GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) (FundingEvent, error)
+	GetFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) ([]FundingEvent, error)
 }
 
 type fundingScheduleBase struct {
@@ -48,7 +49,7 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(
 	ctx context.Context,
 	input time.Time,
 	timezone *time.Location,
-) FundingEvent {
+) (FundingEvent, error) {
 	input = util.Midnight(input, timezone)
 	rule := f.fundingSchedule.RuleSet.Set
 	// This does not change the timezone or the date start of the ruleset. It just corrects it. The date start is
@@ -68,7 +69,7 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(
 			WeekendAvoided:    false,
 			Date:              nextContributionDate,
 			OriginalDate:      nextContributionDate,
-		}
+		}, nil
 	}
 
 	nextContributionRule := rule
@@ -88,7 +89,7 @@ AfterLoop:
 		select {
 		case <-ctx.Done():
 			if err := ctx.Err(); err != nil {
-				panic(err)
+				return FundingEvent{}, errors.WithStack(err)
 			}
 			crumbs.Warn(ctx, "Received done context signal with no error", "funding", nil)
 			break AfterLoop
@@ -126,7 +127,7 @@ AfterLoop:
 		WeekendAvoided:    weekendAvoided,
 		Date:              nextContributionDate,
 		OriginalDate:      actualNextContributionDate,
-	}
+	}, nil
 }
 
 func (f *fundingScheduleBase) GetNFundingEventsAfter(
@@ -134,7 +135,7 @@ func (f *fundingScheduleBase) GetNFundingEventsAfter(
 	n int,
 	input time.Time,
 	timezone *time.Location,
-) []FundingEvent {
+) ([]FundingEvent, error) {
 	events := make([]FundingEvent, n)
 	for i := 0; i < n; i++ {
 		select {
@@ -156,23 +157,30 @@ func (f *fundingScheduleBase) GetNFundingEventsAfter(
 					"timezone": timezone.String(),
 					"i":        i,
 				})
-				panic(err)
+				return events, errors.WithStack(err)
 			}
 			crumbs.Warn(ctx, "Received done context signal with no error", "funding", nil)
-			return events
+			return events, nil
 		default:
 			// Do nothing
 		}
 
+		var err error
 		if i == 0 {
-			events[i] = f.GetNextFundingEventAfter(ctx, input, timezone)
+			events[i], err = f.GetNextFundingEventAfter(ctx, input, timezone)
+			if err != nil {
+				return events, err
+			}
 			continue
 		}
 
-		events[i] = f.GetNextFundingEventAfter(ctx, events[i-1].Date, timezone)
+		events[i], err = f.GetNextFundingEventAfter(ctx, events[i-1].Date, timezone)
+		if err != nil {
+			return events, err
+		}
 	}
 
-	return events
+	return events, nil
 }
 
 func (f *fundingScheduleBase) GetFundingEventsBetween(
@@ -180,7 +188,7 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(
 	start,
 	end time.Time,
 	timezone *time.Location,
-) []FundingEvent {
+) ([]FundingEvent, error) {
 	rule := f.fundingSchedule.RuleSet.Set
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
@@ -199,10 +207,10 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(
 		select {
 		case <-ctx.Done():
 			if err := ctx.Err(); err != nil {
-				panic(err)
+				return nil, errors.WithStack(err)
 			}
 			crumbs.Warn(ctx, "Received done context signal with no error", "funding", nil)
-			return events
+			return events, nil
 		default:
 			// Do nothing
 		}
@@ -239,15 +247,16 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(
 			WeekendAvoided:    weekendAvoided,
 		})
 	}
-	return events
+	return events, nil
 }
 
 func (f *fundingScheduleBase) GetNumberOfFundingEventsBetween(
 	ctx context.Context,
 	start, end time.Time,
 	timezone *time.Location,
-) int64 {
-	return int64(len(f.GetFundingEventsBetween(ctx, start, end, timezone)))
+) (int64, error) {
+	events, err := f.GetFundingEventsBetween(ctx, start, end, timezone)
+	return int64(len(events)), err
 }
 
 // multipleFundingInstructions isn't in use yet. It's kind of a proof of concept that with the funding instruction
@@ -271,62 +280,82 @@ func (m *multipleFundingInstructions) GetNFundingEventsAfter(
 	n int,
 	input time.Time,
 	timezone *time.Location,
-) []FundingEvent {
+) ([]FundingEvent, error) {
 	events := make([]FundingEvent, n)
+	var err error
 	for i := 0; i < n; i++ {
 		if i == 0 {
-			events[i] = m.GetNextFundingEventAfter(ctx, input, timezone)
+			events[i], err = m.GetNextFundingEventAfter(ctx, input, timezone)
+			if err != nil {
+				return nil, err
+			}
 			continue
 		}
 
-		events[i] = m.GetNextFundingEventAfter(ctx, events[i-1].Date, timezone)
+		events[i], err = m.GetNextFundingEventAfter(ctx, events[i-1].Date, timezone)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return events
+	return events, nil
 }
 
 func (m *multipleFundingInstructions) GetFundingEventsBetween(
 	ctx context.Context,
 	start, end time.Time,
 	timezone *time.Location,
-) []FundingEvent {
+) ([]FundingEvent, error) {
 	result := make([]FundingEvent, 0)
 	for _, instruction := range m.instructions {
-		result = append(result, instruction.GetFundingEventsBetween(ctx, start, end, timezone)...)
+		events, err := instruction.GetFundingEventsBetween(ctx, start, end, timezone)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, events...)
 	}
 
-	return result
+	return result, nil
 }
 
 func (m *multipleFundingInstructions) GetNumberOfFundingEventsBetween(
 	ctx context.Context,
 	start, end time.Time,
 	timezone *time.Location,
-) int64 {
-	return int64(len(m.GetFundingEventsBetween(ctx, start, end, timezone)))
+) (int64, error) {
+	events, err := m.GetFundingEventsBetween(ctx, start, end, timezone)
+	return int64(len(events)), err
 }
 
 func (m *multipleFundingInstructions) GetNextFundingEventAfter(
 	ctx context.Context,
 	input time.Time,
 	timezone *time.Location,
-) FundingEvent {
+) (FundingEvent, error) {
 	var earliest FundingEvent
+	var err error
 	for _, instruction := range m.instructions {
 		if earliest.Date.IsZero() {
-			earliest = instruction.GetNextFundingEventAfter(ctx, input, timezone)
+			earliest, err = instruction.GetNextFundingEventAfter(ctx, input, timezone)
+			if err != nil {
+				return earliest, err
+			}
 			continue
 		}
 
 		// If one of our instructions happens before the earliest one we've seen, then use that one instead.
-		if next := instruction.GetNextFundingEventAfter(ctx, input, timezone); next.Date.Before(earliest.Date) {
+		next, err := instruction.GetNextFundingEventAfter(ctx, input, timezone)
+		if err != nil {
+			return next, err
+		}
+		if next.Date.Before(earliest.Date) {
 			earliest = next
 		}
 	}
 
 	if earliest.Date.IsZero() {
-		panic("the earliest next contribution cannot be zero, something is wrong with the provided instructions")
+		return earliest, errors.New("the earliest next contribution cannot be zero, something is wrong with the provided instructions")
 	}
 
-	return earliest
+	return earliest, nil
 }

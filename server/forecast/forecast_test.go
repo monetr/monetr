@@ -67,9 +67,11 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		var firstAverage, secondAverage int64
 		{ // Initial
 			forecaster := NewForecaster(log, spending, fundingSchedules)
-			forecast := forecaster.GetForecast(context.Background(), now, now.AddDate(0, 1, 4), timezone)
+			forecast, err := forecaster.GetForecast(context.Background(), now, now.AddDate(0, 1, 4), timezone)
+			assert.NoError(t, err, "should not return an error")
 			assert.Greater(t, forecast.StartingBalance, int64(0))
-			firstAverage = forecaster.GetAverageContribution(context.Background(), now, now.AddDate(0, 1, 4), timezone)
+			firstAverage, err = forecaster.GetAverageContribution(context.Background(), now, now.AddDate(0, 1, 4), timezone)
+			assert.NoError(t, err, "should not return an error")
 		}
 
 		{ // With added expense
@@ -79,9 +81,11 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				CurrentAmount:  0,
 				NextRecurrence: util.Midnight(now.AddDate(1, 0, 0), timezone),
 			}), fundingSchedules)
-			forecast := forecaster.GetForecast(context.Background(), now, now.AddDate(0, 1, 4), timezone)
+			forecast, err := forecaster.GetForecast(context.Background(), now, now.AddDate(0, 1, 4), timezone)
+			assert.NoError(t, err, "should not return an error")
 			assert.Greater(t, forecast.StartingBalance, int64(0))
-			secondAverage = forecaster.GetAverageContribution(context.Background(), now, now.AddDate(0, 1, 4), timezone)
+			secondAverage, err = forecaster.GetAverageContribution(context.Background(), now, now.AddDate(0, 1, 4), timezone)
+			assert.NoError(t, err, "should not return an error")
 		}
 		assert.Greater(t, secondAverage, firstAverage, "should need to contribute more per funding")
 	})
@@ -120,7 +124,8 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		assert.NotPanics(t, func() {
-			result := forecaster.GetForecast(ctx, now, end, timezone)
+			result, err := forecaster.GetForecast(ctx, now, end, timezone)
+			assert.NoError(t, err, "should not return an error")
 			assert.NotNil(t, result, "just make sure something is returned, this is to make sure we dont timeout")
 		})
 	})
@@ -165,7 +170,8 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		//ctx := context.Background()
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		result := forecaster.GetForecast(ctx, now, end, timezone)
+		result, err := forecaster.GetForecast(ctx, now, end, timezone)
+		assert.NoError(t, err, "should not return an error")
 		expected := Forecast{
 			StartingTime:    now,
 			EndingTime:      end,
@@ -287,7 +293,8 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		forecaster := NewForecaster(log, spending, funding)
 		ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Second)
 		defer cancel()
-		result := forecaster.GetForecast(ctx, now, end, timezone)
+		result, err := forecaster.GetForecast(ctx, now, end, timezone)
+		assert.NoError(t, err, "should not return an error")
 		assert.NotNil(t, result, "just make sure something is returned, this is to make sure we dont timeout")
 		pretty, err := json.MarshalIndent(result, "", "  ")
 		assert.NoError(t, err, "must be able to convert the forecast into a pretty json")
@@ -332,7 +339,8 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		forecaster := NewForecaster(log, spending, fundingSchedules)
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		result := forecaster.GetForecast(ctx, now, end, timezone)
+		result, err := forecaster.GetForecast(ctx, now, end, timezone)
+		assert.NoError(t, err, "should not return an error")
 		expected := Forecast{
 			StartingTime:    now,
 			EndingTime:      end,
