@@ -319,62 +319,8 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	plaidBankAccounts, err := plaidClient.GetAccounts(
-		span.Context(),
-	)
-	if err != nil {
-		log.WithError(err).Error("failed to retrieve bank accounts from plaid")
-		return errors.Wrap(err, "failed to retrieve bank accounts from plaid")
-	}
-
-	if len(plaidBankAccounts) == 0 {
-		log.Warn("no bank accounts returned by plaid, nothing to sync?")
-		crumbs.IndicateBug(span.Context(), "no bank accounts were returned from plaid", nil)
-		return nil
-	}
-
-	for x := range bankAccounts {
-		bankAccount := bankAccounts[x]
-		for y := range plaidBankAccounts {
-			plaidBankAccount := plaidBankAccounts[y]
-			if plaidBankAccount.GetAccountId() == bankAccount.PlaidBankAccount.PlaidId {
-				s.bankAccounts[bankAccount.PlaidBankAccount.PlaidId] = bankAccount
-				break
-			}
-		}
-
-		// If an account is no longer visible in plaid that means that we won't receive updates for that account anymore. If
-		// this happens, log something and mark that account as inactive. This way we can inform the user that the account
-		// is no longer receiving updates.
-		if _, ok := s.bankAccounts[bankAccount.PlaidBankAccount.PlaidId]; !ok {
-			log.WithFields(logrus.Fields{
-				"bankAccountId": bankAccount.BankAccountId,
-			}).Info("found bank account that is no longer present in plaid, it will be updated as inactive")
-			crumbs.Warn(span.Context(), "Found bank account that is no longer present in Plaid", "plaid", map[string]interface{}{
-				"bankAccountId": bankAccount.BankAccountId,
-			})
-			if err := s.syncPlaidBankAccount(
-				span.Context(),
-				link,
-				&bankAccount,
-				plaidLink,
-				bankAccount.PlaidBankAccount,
-				nil, // Not visible via sync anymore
-			); err != nil {
-				log.WithFields(logrus.Fields{
-					"bankAccountId": bankAccount.BankAccountId,
-				}).
-					WithError(err).
-					Error("failed to update bank account as inactive")
-			}
-		}
-	}
-
-	if len(s.bankAccounts) == 0 {
-		log.Warn("none of the linked bank accounts are active at plaid")
-		crumbs.IndicateBug(span.Context(), "none of the linked bank accounts are active at plaid", nil)
-		return nil
-	}
+	// Declare this ahead of the sync below.
+	var plaidBankAccounts []platypus.BankAccount
 
 	lastSync, err := s.repo.GetLastPlaidSync(span.Context(), *link.PlaidLinkId)
 	if err != nil {
@@ -390,6 +336,53 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		syncData, err := plaidClient.Sync(span.Context(), cursor)
 		if err != nil {
 			return errors.Wrap(err, "failed to sync with plaid")
+		}
+
+		// On our first iteration, gather bank accounts
+		if iter == 0 {
+			plaidBankAccounts = syncData.Accounts
+			for x := range bankAccounts {
+				bankAccount := bankAccounts[x]
+				for y := range plaidBankAccounts {
+					plaidBankAccount := plaidBankAccounts[y]
+					if plaidBankAccount.GetAccountId() == bankAccount.PlaidBankAccount.PlaidId {
+						s.bankAccounts[bankAccount.PlaidBankAccount.PlaidId] = bankAccount
+						break
+					}
+				}
+
+				// If an account is no longer visible in plaid that means that we won't receive updates for that account anymore. If
+				// this happens, log something and mark that account as inactive. This way we can inform the user that the account
+				// is no longer receiving updates.
+				if _, ok := s.bankAccounts[bankAccount.PlaidBankAccount.PlaidId]; !ok {
+					log.WithFields(logrus.Fields{
+						"bankAccountId": bankAccount.BankAccountId,
+					}).Info("found bank account that is no longer present in plaid, it will be updated as inactive")
+					crumbs.Warn(span.Context(), "Found bank account that is no longer present in Plaid", "plaid", map[string]interface{}{
+						"bankAccountId": bankAccount.BankAccountId,
+					})
+					if err := s.syncPlaidBankAccount(
+						span.Context(),
+						link,
+						&bankAccount,
+						plaidLink,
+						bankAccount.PlaidBankAccount,
+						nil, // Not visible via sync anymore
+					); err != nil {
+						log.WithFields(logrus.Fields{
+							"bankAccountId": bankAccount.BankAccountId,
+						}).
+							WithError(err).
+							Error("failed to update bank account as inactive")
+					}
+				}
+			}
+
+			if len(s.bankAccounts) == 0 {
+				log.Warn("none of the linked bank accounts are active at plaid")
+				crumbs.IndicateBug(span.Context(), "none of the linked bank accounts are active at plaid", nil)
+				return nil
+			}
 		}
 
 		// If we received nothing to insert/update/remove then do nothing

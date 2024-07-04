@@ -54,26 +54,6 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			Return(plaidClient, nil).
 			AnyTimes()
 
-		plaidClient.EXPECT().
-			GetAccounts(
-				gomock.Any(),
-			).
-			Return([]platypus.BankAccount{
-				platypus.PlaidBankAccount{
-					AccountId: plaidBankAccount.PlaidBankAccount.PlaidId,
-					Balances: platypus.PlaidBankAccountBalances{
-						Available: 100,
-						Current:   100,
-					},
-					Mask:         plaidBankAccount.Mask,
-					Name:         plaidBankAccount.Name,
-					OfficialName: plaidBankAccount.PlaidBankAccount.OfficialName,
-					Type:         "depository",
-					SubType:      "checking",
-				},
-			}, nil).
-			AnyTimes()
-
 		nextCursor := gofakeit.UUID()
 		pendingTxnId := gofakeit.UUID()
 		firstSyncCall := plaidClient.EXPECT().
@@ -102,6 +82,20 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 				},
 				Updated: []platypus.Transaction{},
 				Deleted: []string{},
+				Accounts: []platypus.BankAccount{
+					platypus.PlaidBankAccount{
+						AccountId: plaidBankAccount.PlaidBankAccount.PlaidId,
+						Balances: platypus.PlaidBankAccountBalances{
+							Available: 100,
+							Current:   100,
+						},
+						Mask:         plaidBankAccount.Mask,
+						Name:         plaidBankAccount.Name,
+						OfficialName: plaidBankAccount.PlaidBankAccount.OfficialName,
+						Type:         "depository",
+						SubType:      "checking",
+					},
+				},
 			}, nil)
 
 		firstCalculateCall := enqueuer.EXPECT().
@@ -179,6 +173,20 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 				Updated: []platypus.Transaction{},
 				Deleted: []string{
 					pendingTxnId,
+				},
+				Accounts: []platypus.BankAccount{
+					platypus.PlaidBankAccount{
+						AccountId: plaidBankAccount.PlaidBankAccount.PlaidId,
+						Balances: platypus.PlaidBankAccountBalances{
+							Available: 100,
+							Current:   100,
+						},
+						Mask:         plaidBankAccount.Mask,
+						Name:         plaidBankAccount.Name,
+						OfficialName: plaidBankAccount.PlaidBankAccount.OfficialName,
+						Type:         "depository",
+						SubType:      "checking",
+					},
 				},
 			}, nil)
 

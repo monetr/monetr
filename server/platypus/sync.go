@@ -5,7 +5,7 @@ import (
 
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/plaid/plaid-go/v20/plaid"
+	"github.com/plaid/plaid-go/v26/plaid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,6 +15,7 @@ type SyncResult struct {
 	New        []Transaction
 	Updated    []Transaction
 	Deleted    []string
+	Accounts   []BankAccount
 }
 
 func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, error) {
@@ -85,6 +86,26 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 		removed[i] = transaction.GetTransactionId()
 	}
 
+	plaidAccounts := result.GetAccounts()
+	accounts := make([]BankAccount, len(plaidAccounts))
+
+	// Once we have our data, convert all of the results from our request to our own bank account interface.
+	for i, plaidAccount := range plaidAccounts {
+		accounts[i], err = NewPlaidBankAccount(plaidAccount)
+		if err != nil {
+			log.WithError(err).
+				WithField("bankAccountId", plaidAccount.GetAccountId()).
+				Errorf("failed to convert bank account")
+			crumbs.Error(span.Context(), "failed to convert bank account", "debug", map[string]interface{}{
+				// Maybe we don't want to report the entire account object here, but it'll sure save us a ton of time
+				// if there is ever a problem with actually converting the account. This way we can actually see the
+				// account object that caused the problem -> when it caused the problem.
+				"bankAccount": plaidAccount,
+			})
+			return nil, err
+		}
+	}
+
 	if len(added)+len(modified)+len(removed) == 0 {
 		log.Debug("no changes observed from Plaid via sync")
 	} else {
@@ -101,5 +122,6 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 		New:        added,
 		Updated:    modified,
 		Deleted:    removed,
+		Accounts:   accounts,
 	}, nil
 }
