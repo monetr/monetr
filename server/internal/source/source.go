@@ -24,5 +24,5 @@ func init() {
 
 func transformFileName(filePath string) string {
 	newPath := strings.TrimPrefix(filePath, basePath)
-	return fmt.Sprintf("%s.txt", path.Join("/embed/", newPath))
+	return fmt.Sprintf("%s.txt", path.Join("embed", newPath))
 }

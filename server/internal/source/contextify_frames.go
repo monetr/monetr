@@ -45,7 +45,7 @@ type ContextifyFramesIntegration struct {
 }
 
 func (cfi *ContextifyFramesIntegration) Name() string {
-	return "ContextifyFrames"
+	return "MonetrContextifyFrames"
 }
 
 func (cfi *ContextifyFramesIntegration) SetupOnce(client *sentry.Client) {

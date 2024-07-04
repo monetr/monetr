@@ -36,6 +36,8 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 		}))
 	}
 
+	api := app.Group(APIPath)
+
 	if c.stats != nil {
 		app.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 			return func(ctx echo.Context) error {
@@ -47,8 +49,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 			}
 		})
 	}
-
-	api := app.Group(APIPath)
 
 	// Generic request logger, log the request being made with a debug level.
 	api.Use(func(next echo.HandlerFunc) echo.HandlerFunc {

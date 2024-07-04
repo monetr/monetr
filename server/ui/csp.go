@@ -53,6 +53,8 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 			Self:    noop,
 			"data:": noop,
 		},
+		"report-uri": {},
+		"report-to":  {},
 	}
 
 	if c.configuration.Plaid.GetEnabled() {
@@ -73,14 +75,25 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 		policies["connect-src"]["https://sentry.io"] = noop
 		if c.configuration.Sentry.ExternalDSN != "" {
 			if dsn, err := url.Parse(c.configuration.Sentry.ExternalDSN); err == nil {
-				policies["connect-src"][fmt.Sprintf("https://%s", dsn.Hostname())] = noop
-				policies["script-src-elem"][fmt.Sprintf("https://%s", dsn.Hostname())] = noop
+				policies["connect-src"][fmt.Sprintf("%s://%s", dsn.Scheme, dsn.Hostname())] = noop
+				policies["script-src-elem"][fmt.Sprintf("%s://%s", dsn.Scheme, dsn.Hostname())] = noop
 			}
 		} else if c.configuration.Sentry.DSN != "" {
 			if dsn, err := url.Parse(c.configuration.Sentry.DSN); err == nil {
-				policies["connect-src"][fmt.Sprintf("https://%s", dsn.Hostname())] = noop
-				policies["script-src-elem"][fmt.Sprintf("https://%s", dsn.Hostname())] = noop
+				policies["connect-src"][fmt.Sprintf("%s://%s", dsn.Scheme, dsn.Hostname())] = noop
+				policies["script-src-elem"][fmt.Sprintf("%s://%s", dsn.Scheme, dsn.Hostname())] = noop
 			}
+		}
+
+		if c.configuration.Sentry.SecurityHeaderEndpoint != "" {
+			policies["report-uri"][c.configuration.Sentry.SecurityHeaderEndpoint] = noop
+			policies["report-to"]["csp-endpoint"] = noop
+			ctx.Response().Header().Set(
+				"Report-To",
+				// TODO properly json encode this before hand, atm the security header
+				// endpoint is not properly escaped.
+				fmt.Sprintf(`{"group":"csp-endpoint","max_age":1800,"endpoints":[{"url":"%s"}],"include_subdomains":true}`, c.configuration.Sentry.SecurityHeaderEndpoint),
+			)
 		}
 	}
 
@@ -88,6 +101,10 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 		policyParts := make([]string, 0, len(policies))
 
 		for kind, items := range policies {
+			if len(items) == 0 {
+				continue
+			}
+
 			part := make([]string, 0, len(items)+1)
 			part = append(part, kind)
 			for item := range items {
