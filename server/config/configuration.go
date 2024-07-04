@@ -445,6 +445,8 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Sentry.SampleRate", "MONETR_SENTRY_SAMPLE_RATE")
 	_ = v.BindEnv("Sentry.TraceSampleRate", "MONETR_SENTRY_TRACE_SAMPLE_RATE")
 	_ = v.BindEnv("Server.ExternalURL", "MONETR_SERVER_EXTERNAL_URL")
+	_ = v.BindEnv("Storage.Enabled", "MONETR_STORAGE_ENABLED")
+	_ = v.BindEnv("Storage.Provider", "MONETR_STORAGE_PROVIDER")
 	_ = v.BindEnv("Stripe.Enabled", "MONETR_STRIPE_ENABLED")
 	_ = v.BindEnv("Stripe.APIKey", "MONETR_STRIPE_API_KEY")
 	_ = v.BindEnv("Stripe.PublicKey", "MONETR_STRIPE_PUBLIC_KEY")

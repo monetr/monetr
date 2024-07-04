@@ -25,11 +25,10 @@ func TestFilesystemStorage(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		tempDir, err := os.MkdirTemp("", "monetr")
 		require.NoError(t, err, "must create temp directory")
+		log := testutils.GetLog(t)
 
-		fs := &filesystemStorage{
-			log:           testutils.GetLog(t),
-			baseDirectory: tempDir,
-		}
+		fs, err := NewFilesystemStorage(log, tempDir)
+		assert.NoError(t, err, "must not have an error creating the filesystem storage interface")
 
 		input := []byte("i am a test string")
 		buf := &bufferWrapper{bytes.NewReader(input)}
@@ -51,5 +50,35 @@ func TestFilesystemStorage(t *testing.T) {
 		allContent, err := io.ReadAll(content)
 		assert.NoError(t, err, "should read all file content without error")
 		assert.EqualValues(t, input, allContent, "file content should match input")
+	})
+
+	t.Run("blank base path", func(t *testing.T) {
+		log := testutils.GetLog(t)
+
+		fs, err := NewFilesystemStorage(log, "")
+		assert.EqualError(t, err, "base directory for filesystem storage must be an absolute path")
+		assert.Nil(t, fs, "filesystem interface should not be returned if path is invalid")
+	})
+
+	t.Run("non-existant base directory", func(t *testing.T) {
+		log := testutils.GetLog(t)
+
+		fs, err := NewFilesystemStorage(log, "/foo/bar")
+		assert.EqualError(t, err, "must provide a valid base directory for filesystem storage: stat /foo/bar: no such file or directory")
+		assert.Nil(t, fs, "filesystem interface should not be returned if path is invalid")
+	})
+
+	t.Run("base directory is actually a file", func(t *testing.T) {
+		tempDir, err := os.MkdirTemp("", "monetr")
+		require.NoError(t, err, "must create temp directory")
+		tempFile, err := os.CreateTemp(tempDir, "temp-*")
+		require.NoError(t, err, "must create a temp file")
+		require.NotNil(t, tempFile, "temp file must be valid")
+
+		log := testutils.GetLog(t)
+
+		fs, err := NewFilesystemStorage(log, tempFile.Name())
+		assert.EqualError(t, err, "filesystem base directory specified is not a directory, it is a file")
+		assert.Nil(t, fs, "filesystem interface should not be returned if path is invalid")
 	})
 }

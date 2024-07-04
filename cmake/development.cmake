@@ -115,6 +115,7 @@ else()
   message(STATUS "No ngrok credentials detected, webhooks will not be enabled for local development.")
 endif()
 
+# Setup the KMS backend based on the config.
 if("${MONETR_KMS_PROVIDER}" STREQUAL "aws")
   message(STATUS "AWS KMS (Local) will be used for local development as the KMS provider")
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.aws-kms.yaml.in)
@@ -144,6 +145,21 @@ else()
   message(FATAL "Invalid KMS provider specified, MONETR_KMS_PROVIDER=${MONETR_KMS_PROVIDER}\nValid options are: aws, vault, plaintext")
 endif()
 
+# Setup the storage backend based on the config.
+if("${MONETR_STORAGE_PROVIDER}" STREQUAL "s3")
+  set(MONETR_STORAGE_ENABLED "true")
+  message(STATUS "S3 storage will be used for local development")
+  message(STATUS "  Uploaded files will be available at: http://localhost:9001")
+  message(STATUS "  Username: monetr Password: password")
+  list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.s3-storage.yaml.in)
+elseif("${MONETR_STORAGE_PROVIDER}" STREQUAL "filesystem")
+  set(MONETR_STORAGE_ENABLED "true")
+  file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/storage)
+  message(STATUS "Filesystem storage will be used for local development")
+  message(STATUS "  Uploaded files will be available at: ${COMPOSE_OUTPUT_DIRECTORY}/storage")
+elseif("${MONETR_STORAGE_PROVIDER}" STREQUAL "")
+  set(MONETR_STORAGE_ENABLED "false")
+endif()
 
 # Once the list of compose file templates has been built, actually generate the template files and build our arguments
 # for docker compose.

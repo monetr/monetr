@@ -21,11 +21,27 @@ type filesystemStorage struct {
 func NewFilesystemStorage(
 	log *logrus.Entry,
 	baseDirectory string,
-) Storage {
+) (Storage, error) {
+	// This will make it so that the base directory path cannot be a relative path
+	// or be blank.
+	if !path.IsAbs(baseDirectory) {
+		return nil, errors.New("base directory for filesystem storage must be an absolute path")
+	}
+
+	// The base directory path must also exist and be accessible.
+	stat, err := os.Stat(baseDirectory)
+	if err != nil {
+		return nil, errors.Wrap(err, "must provide a valid base directory for filesystem storage")
+	}
+	// If the path exists and is not a directory then that's a problem.
+	if !stat.IsDir() {
+		return nil, errors.New("filesystem base directory specified is not a directory, it is a file")
+	}
+
 	return &filesystemStorage{
 		log:           log,
 		baseDirectory: baseDirectory,
-	}
+	}, nil
 }
 
 func (f *filesystemStorage) Store(

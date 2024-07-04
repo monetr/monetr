@@ -1,26 +1,5 @@
 # vim: set ft=yaml
 services:
-  s3:
-    image: quay.io/minio/minio:RELEASE.2023-12-09T18-17-51Z
-    restart: always # If something goes wrong just restart the container, this is for development only.
-    volumes:
-      - s3Data:/data
-    ports:
-      - 9001:9001
-    healthcheck:
-      test: timeout 10s bash -c ':> /dev/tcp/127.0.0.1/9000' || exit 1
-      interval: 3s
-      timeout: 15s
-      retries: 10
-      start_period: 5s
-    environment:
-      MINIO_ROOT_USER: monetr
-      MINIO_ROOT_PASSWORD: password
-    entrypoint: >
-      /bin/sh -c "
-      mkdir -p /data/monetr-storage;
-      minio server /data --console-address ':9001';
-      "
   mail:
     # Mailhog is used for testing email sending from the application. This is for things like forgot password or email
     # verification. It can be accessed by navigating to `http://localhost/mail`
@@ -132,12 +111,9 @@ services:
       MONETR_SENTRY_EXTERNAL_DSN: "@MONETR_SENTRY_DSN@"
       MONETR_EMAIL_VERIFICATION_ENABLED: "@MONETR_EMAIL_VERIFICATION_ENABLED@"
       # If vault is the KMS provider then these settings will be used
-      MONETR_VAULT_AUTH_METHOD: "token"
       MONETR_VAULT_TOKEN: "@VAULT_ROOT_TOKEN@"
-      MONETR_VAULT_ENDPOINT: "http://vault:80"
-      # Storage settings
-      AWS_ACCESS_KEY: monetr
-      AWS_SECRET_KEY: password
+      MONETR_STORAGE_ENABLED: "@MONETR_STORAGE_ENABLED@"
+      MONETR_STORAGE_PROVIDER: "@MONETR_STORAGE_PROVIDER@"
     command:
       - bash
       - -c
@@ -145,7 +121,6 @@ services:
     links:
       - redis
       - postgres
-      - s3
       - mail
     ports:
       # This port is used for editors to connect to dlv remotely to do step debugging.
@@ -160,11 +135,8 @@ services:
         condition: service_started
       postgres:
         condition: service_started
-      # kms:
-      #   condition: service_started
 
 volumes:
   kmsData:
   tmpData:
   goData:
-  s3Data:

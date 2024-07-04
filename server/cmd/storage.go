@@ -16,6 +16,10 @@ import (
 	"google.golang.org/api/option"
 )
 
+// setupStorage is called when the monetr application starts running, it takes
+// the configuration and sets up the appropriate storage interface based on that
+// config. It also performs some basic validation of that storage configuration
+// and if there is a problem it will return an error.
 func setupStorage(
 	log *logrus.Entry,
 	configuration config.Configuration,
@@ -106,7 +110,7 @@ func setupStorage(
 		fileStorage = storage.NewGCSStorageBackend(log, gcsConfig.Bucket, client)
 	case "filesystem":
 		log.Trace("setting up file storage interface using local filesystem")
-		fileStorage = storage.NewFilesystemStorage(
+		fileStorage, err = storage.NewFilesystemStorage(
 			log,
 			configuration.Storage.Filesystem.BasePath,
 		)

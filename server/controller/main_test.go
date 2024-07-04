@@ -144,7 +144,8 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	require.NoError(t, err, "must be able to create a temp directory for uploads")
 	log.Debugf("[TEST] created temporary directory for uploads: %s", tempDirectory)
 
-	fileStorage := storage.NewFilesystemStorage(log, tempDirectory)
+	fileStorage, err := storage.NewFilesystemStorage(log, tempDirectory)
+	require.NoError(t, err, "must not have an error when creating the filesystem storage")
 
 	var jobRunner background.JobController
 	if patched.JobController != nil {
