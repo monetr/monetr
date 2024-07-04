@@ -98,7 +98,7 @@ api:
   links:
     maxNumberOfLinks: 8
   plaid:
-    environment: "https://development.plaid.com"
+    environment: "https://production.plaid.com"
     enableReturningUserExperience: true
     webhooksEnabled: true
     webhooksDomain: my.monetr.dev
