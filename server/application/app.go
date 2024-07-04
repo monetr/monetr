@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"time"
 
-	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/internal/sentryecho"
 )
 
 type Controller interface {

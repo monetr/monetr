@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
+	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/util"
 	"github.com/sirupsen/logrus"
 )

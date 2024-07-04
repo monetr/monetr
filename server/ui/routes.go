@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
