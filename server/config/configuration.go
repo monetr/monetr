@@ -93,44 +93,6 @@ type FilesystemStorage struct {
 	BasePath string `yaml:"basePath"`
 }
 
-// KeyManagement specifies the properties required to securely encrypt and
-// decrypt stored secrets. It is not recommended to change providers.
-type KeyManagement struct {
-	Provider string `yaml:"provider"`
-	// AWS provides configuration for using AWS's KMS for encrypting and
-	// decrypting secrets.
-	AWS AWSKMS `yaml:"aws"`
-	// Google provides configuration for using Google's KMS for encrypting and
-	// decrypting secrets.
-	Google GoogleKMS `yaml:"google"`
-	// Vault provides configuration for using Vault's Transit API for encrypting
-	// and decrypting secrets.
-	Vault VaultTransit `yaml:"vault"`
-}
-
-type AWSKMS struct {
-	Region    string  `yaml:"region"`
-	AccessKey string  `yaml:"accessKey"`
-	SecretKey string  `yaml:"secretKey"`
-	KeyID     string  `yaml:"keyID"`
-	Endpoint  *string `yaml:"endpoint"`
-}
-
-type GoogleKMS struct {
-	CredentialsJSON *string `yaml:"credentialsJSON"`
-	ResourceName    string  `yaml:"resourceName"`
-}
-
-type VaultTransit struct {
-	// AuthMethod tells monetr how to authenticate Vault, potential values are:
-	// - `token`: Use a token to authenticate to Vault.
-	// - `kubernetes`: Use the container's Kubernetes Service Account Token to
-	//                 authenticate to Vault.
-	AuthMethod string `yaml:"authMethod"`
-	// If the AuthMethod is `token` then this value must be specified.
-	Token *string `yaml:"token"`
-}
-
 type Beta struct {
 	EnableBetaCodes bool `yaml:"enableBetaCodes"`
 }
@@ -448,6 +410,9 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("KeyManagement.AWS.AccessKey", "AWS_ACCESS_KEY_ID")
 	_ = v.BindEnv("KeyManagement.AWS.SecretKey", "AWS_ACCESS_KEY")
 	_ = v.BindEnv("KeyManagement.Google.ResourceName", "MONETR_KMS_RESOURCE_NAME")
+	_ = v.BindEnv("KeyManagement.Vault.AuthMethod", "MONETR_VAULT_AUTH_METHOD")
+	_ = v.BindEnv("KeyManagement.Vault.Token", "MONETR_VAULT_TOKEN")
+	_ = v.BindEnv("KeyManagement.Vault.Endpoint", "MONETR_VAULT_ENDPOINT")
 	_ = v.BindEnv("Plaid.ClientID", "MONETR_PLAID_CLIENT_ID")
 	_ = v.BindEnv("Plaid.ClientSecret", "MONETR_PLAID_CLIENT_SECRET")
 	_ = v.BindEnv("Plaid.Environment", "MONETR_PLAID_ENVIRONMENT")

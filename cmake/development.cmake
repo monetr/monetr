@@ -87,6 +87,14 @@ add_custom_command(
 add_custom_target(development.certificates DEPENDS ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT})
 add_custom_target(development.hostsfile DEPENDS ${LOCAL_HOSTS_MARKER})
 
+########################################################################################################################
+# This section determines which compose files will be used when the development environment is started. Compose files
+# are "merged" by docker at runtime, so this is a simple way of providing some customizability to local development.
+########################################################################################################################
+
+set(COMPOSE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/development)
+file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY})
+
 set(COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.monetr.yaml.in)
 if (NGROK_AUTH OR DEFINED ENV{NGROK_AUTH} OR NGROK_ENABLED)
   set(NGROK_AUTH "${NGROK_AUTH}")
@@ -107,8 +115,40 @@ else()
   message(STATUS "No ngrok credentials detected, webhooks will not be enabled for local development.")
 endif()
 
-set(COMPOSE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/development)
-file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY})
+if("${MONETR_KMS_PROVIDER}" STREQUAL "aws")
+  message(STATUS "AWS KMS (Local) will be used for local development as the KMS provider")
+  list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.aws-kms.yaml.in)
+elseif("${MONETR_KMS_PROVIDER}" STREQUAL "vault")
+  message(STATUS "Vault Transit (Local) will be used for local development as the KMS provider")
+  # If we are using the vault KMS provider, then make a vault directory in our build tree. And take the vault config
+  # file and template it into that directory for later.
+  file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/vault)
+  set(VAULT_TOKEN_FILE ${COMPOSE_OUTPUT_DIRECTORY}/vault/token.txt)
+  if(NOT EXISTS ${VAULT_TOKEN_FILE}) 
+    string(RANDOM LENGTH 24 ALPHABET abcdefghijklmnopqrstuvwxyz1234567890 VAULT_ROOT_TOKEN)
+    set(VAULT_ROOT_TOKEN "dev-${VAULT_ROOT_TOKEN}")
+    message(STATUS "  Writing vault token file: ${VAULT_ROOT_TOKEN}")
+    file(WRITE ${VAULT_TOKEN_FILE} "${VAULT_ROOT_TOKEN}")
+  else()
+    message(STATUS "  Using existing vault token file")
+  endif()
+  file(READ ${VAULT_TOKEN_FILE} VAULT_ROOT_TOKEN)
+  configure_file("${CMAKE_SOURCE_DIR}/compose/vault-config.toml.in" "${COMPOSE_OUTPUT_DIRECTORY}/vault/config.toml" @ONLY)
+  # And then add our vault container to our compose list.
+  list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.vault-kms.yaml.in)
+elseif("${MONETR_KMS_PROVIDER}" STREQUAL "")
+  set(MONETR_KMS_PROVIDER "plaintext")
+elseif("${MONETR_KMS_PROVIDER}" STREQUAL "plaintext")
+  set(MONETR_KMS_PROVIDER "plaintext")
+else()
+  message(FATAL "Invalid KMS provider specified, MONETR_KMS_PROVIDER=${MONETR_KMS_PROVIDER}\nValid options are: aws, vault, plaintext")
+endif()
+
+
+# Once the list of compose file templates has been built, actually generate the template files and build our arguments
+# for docker compose.
+
+message(DEBUG "  Compose Files: ${COMPOSE_FILE_TEMPLATES}")
 
 set(COMPOSE_FILES)
 foreach(COMPOSE_FILE_TEMPLATE ${COMPOSE_FILE_TEMPLATES})
@@ -119,6 +159,7 @@ foreach(COMPOSE_FILE_TEMPLATE ${COMPOSE_FILE_TEMPLATES})
   list(APPEND COMPOSE_FILES "-f" "${COMPOSE_FILE_OUTPUT}")
 endforeach()
 
+########################################################################################################################
 
 set(ENV{LOCAL_CERTIFICATE_DIR} ${LOCAL_CERTIFICATE_DIR})
 set(BASE_ARGS "--project-directory" "${CMAKE_SOURCE_DIR}")
@@ -172,9 +213,10 @@ add_custom_target(
 if(DOCKER_SERVER) 
   add_custom_target(
     development.down
-    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:plaid || exit 0
-    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:stripe || exit 0
-    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} down --remove-orphans -v || exit 0
+    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:plaid || ${CMAKE_COMMAND} -E true
+    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:stripe || ${CMAKE_COMMAND} -E true
+    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} down --remove-orphans -v || ${CMAKE_COMMAND} -E true
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/development || ${CMAKE_COMMAND} -E true
     COMMAND_EXPAND_LISTS
     USES_TERMINAL
   )
