@@ -593,7 +593,7 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 			func(log *logrus.Entry, nextJob cronJobTracker) {
 				ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 				defer cancel()
-				ctx = sentry.SetHubOnContext(ctx, sentry.CurrentHub())
+				ctx = sentry.SetHubOnContext(ctx, sentry.CurrentHub().Clone())
 				span := sentry.StartSpan(
 					ctx,
 					"topic.process",
