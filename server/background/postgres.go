@@ -7,6 +7,7 @@ import (
 	"hash/fnv"
 	"runtime/debug"
 	"sort"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -584,20 +585,63 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 			log.Trace("consumed cron job")
 
 			// Wrap the execution of the cron
+			// This entire block of code is an absolute fucking mess. All it is really
+			// doing is wrapping the actual execution of the cron job in a timeout and
+			// a sentry span/hub. This way we can attach a ton of useful data to the
+			// event when we send it to sentry if it succeeds or fails.
+			// TODO Clean it up at some point?
 			func(log *logrus.Entry, nextJob cronJobTracker) {
 				ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 				defer cancel()
+				ctx = sentry.SetHubOnContext(ctx, sentry.CurrentHub())
 				span := sentry.StartSpan(
 					ctx,
 					"topic.process",
 					sentry.WithTransactionName(nextJob.queueName),
 				)
-				defer span.Finish()
+				slug := strings.ToLower(nextJob.queueName)
+				slug = strings.ReplaceAll(slug, "::", "-")
 
-				// TODO Handle panics, if the trigger job panics here then we will
-				// basically kill the cron job processor and it won't restart on its
-				// own, the server would need to be restarted.
-				if err := nextJob.handler.EnqueueTriggeredJob(
+				hub := sentry.GetHubFromContext(span.Context())
+				hub.ConfigureScope(func(scope *sentry.Scope) {
+					scope.SetTag("queue", nextJob.queueName)
+					scope.SetContext("monitor", sentry.Context{"slug": slug})
+				})
+				defer hub.RecoverWithContext(span.Context(), nil)
+
+				var err error
+				crontab := strings.SplitN(nextJob.handler.DefaultSchedule(), " ", 2)[1]
+				monitorSchedule := sentry.CrontabSchedule(crontab)
+				monitorConfig := &sentry.MonitorConfig{
+					Schedule:      monitorSchedule,
+					MaxRuntime:    2,
+					CheckInMargin: 1,
+				}
+				checkInId := hub.CaptureCheckIn(&sentry.CheckIn{
+					MonitorSlug: slug,
+					Status:      sentry.CheckInStatusInProgress,
+				}, monitorConfig)
+				defer func() {
+					status := sentry.CheckInStatusOK
+					span.Status = sentry.SpanStatusOK
+					if err != nil {
+						status = sentry.CheckInStatusError
+						span.Status = sentry.SpanStatusInternalError
+						hub.CaptureException(err)
+						log.WithError(err).Warn("cron job finished with an error")
+					} else {
+						log.Debug("cron job finished")
+					}
+					span.Finish()
+					hub.CaptureCheckIn(&sentry.CheckIn{
+						ID:          *checkInId,
+						MonitorSlug: slug,
+						Status:      status,
+						Duration:    span.EndTime.Sub(span.StartTime),
+					}, monitorConfig)
+				}()
+
+				if err = nextJob.handler.EnqueueTriggeredJob(
 					span.Context(),
 					p.enqueuer,
 				); err != nil {

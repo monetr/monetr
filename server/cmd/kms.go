@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
@@ -83,8 +84,11 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 	}
 
 	{ // Test the KMS provider
+		span := sentry.StartSpan(ctx, "app.bootstrap")
+		defer span.Finish()
+		span.Sampled = sentry.SampledFalse
 		testText := "Hello World!"
-		keyId, keyVersion, cipherText, err := kms.Encrypt(ctx, testText)
+		keyId, keyVersion, cipherText, err := kms.Encrypt(span.Context(), testText)
 		if err != nil {
 			log.WithError(err).Fatalf("failed to test KMS, encryption failed; is everything configured properly?")
 			return nil, err
@@ -94,7 +98,7 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 			return nil, errors.Errorf("ciphertext returned from KMS test was empty, something is very wrong!")
 		}
 
-		decrypted, err := kms.Decrypt(ctx, keyId, keyVersion, cipherText)
+		decrypted, err := kms.Decrypt(span.Context(), keyId, keyVersion, cipherText)
 		if err != nil {
 			log.WithError(err).Fatalf("failed to test KMS, decryption failed; is everything configured properly?")
 			return nil, err
