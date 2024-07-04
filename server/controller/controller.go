@@ -7,7 +7,6 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
-	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/go-pg/pg/v10"
 	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo/v4"
@@ -17,6 +16,7 @@ import (
 	"github.com/monetr/monetr/server/captcha"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
