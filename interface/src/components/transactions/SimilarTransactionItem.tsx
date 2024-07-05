@@ -1,7 +1,7 @@
 import React from 'react';
 import { format, isThisYear } from 'date-fns';
 
-import ArrowRedirect from './ArrowRedirect';
+import ArrowLink from '../ArrowLink';
 import { useTransaction } from '@monetr/interface/hooks/transactions';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import TransactionMerchantIcon from '@monetr/interface/pages/new/TransactionMerchantIcon';
@@ -71,7 +71,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
           <span className={ amountClassnames }>
             { transaction.getAmountString(user.account.locale) }
           </span>
-          <ArrowRedirect redirect={ redirectUrl } />
+          <ArrowLink redirect={ redirectUrl } />
         </div>
       </div>
     </li>

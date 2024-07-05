@@ -3,7 +3,7 @@ import React from 'react';
 
 import TransactionMerchantIcon from './TransactionMerchantIcon';
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
-import ArrowRedirect from '@monetr/interface/components/transactions/ArrowRedirect';
+import ArrowLink from '@monetr/interface/components/ArrowLink';
 import { useSpendingOld } from '@monetr/interface/hooks/spending';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Transaction from '@monetr/interface/models/Transaction';
@@ -108,7 +108,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
           <span className={ amountClassnames }>
             { transaction.getAmountString(user.account.locale) }
           </span>
-          <ArrowRedirect redirect={ detailsUrl } />
+          <ArrowLink redirect={ detailsUrl } />
         </div>
       </div>
     </li>

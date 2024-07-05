@@ -6,7 +6,7 @@ export interface ArrowRedirectProps {
   redirect: string;
 }
 
-export default function ArrowRedirect({
+export default function ArrowLink({
   redirect,
 }: ArrowRedirectProps): JSX.Element {
   const navigate: NavigateFunction = useNavigate();
