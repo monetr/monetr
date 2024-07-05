@@ -668,7 +668,7 @@ func (p *postgresJobProcessor) consumeCronMaybe(queue string, next time.Time) (*
 	subQuery := p.db.ModelContext(ctx, new(models.CronJob)).
 		Column("queue").
 		Where(`"queue" = ?`, queue).
-		Where(`"next_run_at" <= ?`, next).
+		Where(`"next_run_at" < ?`, next).
 		For(`UPDATE SKIP LOCKED`).
 		Limit(1)
 
