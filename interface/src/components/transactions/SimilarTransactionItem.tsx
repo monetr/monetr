@@ -1,6 +1,7 @@
 import React from 'react';
 import { format, isThisYear } from 'date-fns';
 
+import ArrowLink from '../ArrowLink';
 import { useTransaction } from '@monetr/interface/hooks/transactions';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import TransactionMerchantIcon from '@monetr/interface/pages/new/TransactionMerchantIcon';
@@ -46,6 +47,8 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
     'font-semibold',
   );
 
+  const redirectUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
+
   const dateString =  isThisYear(transaction.date) ?
     format(transaction.date, 'MMMM do') :
     format(transaction.date, 'MMMM do, yyyy');
@@ -68,6 +71,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
           <span className={ amountClassnames }>
             { transaction.getAmountString(user.account.locale) }
           </span>
+          <ArrowLink redirect={ redirectUrl } />
         </div>
       </div>
     </li>

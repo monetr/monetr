@@ -97,6 +97,7 @@ export default function TransactionDetails(): JSX.Element {
   return (
     <MForm
       initialValues={ initialValues }
+      enableReinitialize={ true }
       onSubmit={ submit }
       className='flex w-full h-full flex-col'
     >
