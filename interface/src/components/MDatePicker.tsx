@@ -59,12 +59,12 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
 
   const [selectedValue, setSelectedValue] = useState<Date | null>(value);
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
-  const open = Boolean(anchorEl);
 
-  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  }, [setAnchorEl]);
-  const handleClose = useCallback(() => setAnchorEl(null), [setAnchorEl]);
+  React.useEffect(() => {
+    setSelectedValue(value);
+  }, [value]);
+
+  const open = Boolean(anchorEl);
 
   const disabledDays = useMemo(() => {
     const disabledDays = [];
@@ -77,9 +77,15 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   const formattedSelection = hasValue
     ? formatSelectedDates(selectedValue, undefined, enUS)
     : placeholder;
-  const defaultMonth = startOfMonth(selectedValue ?? maxDate ?? today);
 
+  const defaultMonth = startOfMonth(selectedValue ?? maxDate ?? today);
   const isClearEnabled = enableClear && !disabled;
+
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  }, [setAnchorEl]);
+
+  const handleClose = useCallback(() => setAnchorEl(null), [setAnchorEl]);
 
   const handleReset = useCallback(() => {
     if (formikContext) {
