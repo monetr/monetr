@@ -41,10 +41,18 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 		panic("authentication cookie name is blank")
 	}
 
+	// Set the path to be `/` unless the external URL has specified a prefix. For
+	// example, if the external URL is `http://homelab.local/monetr` then we would
+	// only want to set cookies for `/monetr` as the path.
+	path := c.configuration.Server.GetBaseURL().Path
+	if path == "" {
+		path = "/"
+	}
+
 	ctx.SetCookie(&http.Cookie{
 		Name:     c.configuration.Server.Cookies.Name,
 		Value:    token,
-		Path:     "/",
+		Path:     path,
 		Domain:   c.configuration.Server.GetHostname(),
 		Expires:  expiration,
 		MaxAge:   0,

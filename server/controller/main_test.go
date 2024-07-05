@@ -342,10 +342,10 @@ func AssertSetTokenCookie(t *testing.T, response *httpexpect.Response) string {
 	raw := cookie.Raw()
 	require.NotNil(t, raw, "raw cookie must not be nil if authentication was successful, or you werent authenticated")
 	assert.True(t, raw.Secure, "cookie must be secure")
-	assert.True(t, raw.HttpOnly, "cookie must be secure")
+	assert.True(t, raw.HttpOnly, "cookie should always be http only")
 
-	// This assertion is here to prevent a regression. We want to make sure that requests that would previously
-	// return a token in the body, do not anymore.
+	// This assertion is here to prevent a regression. We want to make sure that
+	// requests that would previously return a token in the body, do not anymore.
 	response.JSON().Object().NotContainsKey("token")
 	return cookie.Value().Raw()
 }

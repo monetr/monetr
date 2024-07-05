@@ -16,6 +16,7 @@ import (
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/security"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLogin(t *testing.T) {
@@ -32,6 +33,32 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		AssertSetTokenCookie(t, response)
+	})
+
+	t.Run("subpath cookie", func(t *testing.T) {
+		configuration := NewTestApplicationConfig(t)
+		configuration.Server.ExternalURL = "http://homelab.local/monetr"
+		_, e := NewTestApplicationWithConfig(t, configuration)
+		email, password := GivenIHaveLogin(t, e)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]interface{}{
+				"email":    email,
+				"password": password,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		{ // Validate the cookie was set in the correct way for an odd external url
+			cookie := response.Cookie(TestCookieName)
+			require.NotNil(t, cookie, "auth cookie must not be nil if they were authenticated")
+			cookie.Path().IsEqual("/monetr")
+			cookie.Domain().IsEqual("homelab.local")
+			raw := cookie.Raw()
+			require.NotNil(t, raw, "raw cookie must not be nil if authentication was successful, or you werent authenticated")
+			assert.False(t, raw.Secure, "cookie should not be secure for not https external url")
+			assert.True(t, raw.HttpOnly, "cookie should always be http only")
+		}
 	})
 
 	t.Run("cannot login without TOTP when enabled", func(t *testing.T) {
