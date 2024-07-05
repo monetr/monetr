@@ -227,16 +227,25 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	unauthed.POST("/authentication/reset", c.resetPassword)
 
 	// These endpoints are only accessible if you have a token scoped for MFA.
-	multiFactorRequired := repoParty.Group("", c.requireToken(security.MultiFactorAudience))
+	multiFactorRequired := repoParty.Group("",
+		c.maybeTokenMiddleware,
+		c.requireToken(security.MultiFactorAudience),
+	)
 	multiFactorRequired.POST("/authentication/multifactor", c.postMultifactor)
 
 	// You are allowed to request your own user info if you have a token scoped to
 	// MFA or just a normally authenticated token.
-	userInfo := repoParty.Group("", c.requireToken(security.AuthenticatedAudience, security.MultiFactorAudience))
+	userInfo := repoParty.Group("",
+		c.maybeTokenMiddleware,
+		c.requireToken(security.AuthenticatedAudience, security.MultiFactorAudience),
+	)
 	userInfo.GET("/users/me", c.getMe)
 
 	// These endpoints all require a fully authenticated token
-	authed := repoParty.Group("", c.requireToken(security.AuthenticatedAudience))
+	authed := repoParty.Group("",
+		c.maybeTokenMiddleware,
+		c.requireToken(security.AuthenticatedAudience),
+	)
 	// User
 	authed.PUT("/users/security/password", c.changePassword)
 	authed.POST("/users/security/totp", c.postSetupTOTP)

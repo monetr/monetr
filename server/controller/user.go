@@ -45,6 +45,15 @@ func (c *Controller) getMe(ctx echo.Context) error {
 		"hasSubscription": false,
 	}
 
+	// If the "me" endpoint was called after they authenticated, but they still
+	// need to provide MFA, then direct them to that page regardless of their
+	// subscription status.
+	claims := c.mustGetClaims(ctx)
+	if claims.Scope == security.MultiFactorAudience {
+		me["mfaPending"] = true
+		me["nextUrl"] = "/login/multifactor"
+	}
+
 	if !c.configuration.Stripe.IsBillingEnabled() {
 		// When billing is not enabled we will always return the user state such that they are seen as active forever and
 		// not trialing.
@@ -67,15 +76,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	me["trialingUntil"] = user.Account.TrialEndsAt
 	me["hasSubscrption"] = hasSubscrption
 
-	claims := c.mustGetClaims(ctx)
-
-	// If the "me" endpoint was called after they authenticated, but they still
-	// need to provide MFA, then direct them to that page regardless of their
-	// subscription status.
-	if claims.Scope == security.MultiFactorAudience {
-		me["mfaPending"] = true
-		me["nextUrl"] = "/login/multifactor"
-	} else if !subscriptionIsActive {
+	if claims.Scope != security.MultiFactorAudience && !subscriptionIsActive {
 		// But if they are not currently required to provide MFA AND their
 		// subscription is not active. Then redirect them to the account subscribe
 		// endpoint.

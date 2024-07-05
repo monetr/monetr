@@ -82,8 +82,7 @@ func TestMe(t *testing.T) {
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
 			response.JSON().Path("$.trialingUntil").IsNull()
-			// Should not have the nextUrl key when billing is not enabled.
-			response.JSON().Object().NotContainsKey("nextUrl")
+			response.JSON().Path("$.nextUrl").IsEqual("/login/multifactor")
 		}
 	})
 

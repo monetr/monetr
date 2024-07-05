@@ -109,92 +109,99 @@ func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) 
 
 func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) (err error) {
-		now := c.clock.Now()
-		log := c.getLog(ctx)
-		var token string
-		data := map[string]interface{}{
-			"source": "none",
-		}
-		breadcrumbMessage := "Request did not have valid auth"
-
-		if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
-			defer func() {
-				hub.AddBreadcrumb(&sentry.Breadcrumb{
-					Type:      "debug",
-					Category:  "authentication",
-					Message:   breadcrumbMessage,
-					Data:      data,
-					Level:     sentry.LevelDebug,
-					Timestamp: now,
-				}, nil)
-			}()
-		}
-
-		{ // Try to retrieve the cookie from the request with the options.
-			if tokenCookie, err := ctx.Cookie(
-				c.configuration.Server.Cookies.Name,
-			); err == nil && tokenCookie.Value != "" {
-				token = tokenCookie.Value
-				data["source"] = "cookie"
+		err = func(ctx echo.Context) error {
+			now := c.clock.Now()
+			log := c.getLog(ctx)
+			var token string
+			data := map[string]interface{}{
+				"source": "none",
 			}
-		}
+			breadcrumbMessage := "Request did not have valid auth"
 
-		if token == "" {
-			if token = ctx.Request().Header.Get(c.configuration.Server.Cookies.Name); token != "" {
-				data["source"] = "header"
+			if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
+				defer func() {
+					hub.AddBreadcrumb(&sentry.Breadcrumb{
+						Type:      "debug",
+						Category:  "authentication",
+						Message:   breadcrumbMessage,
+						Data:      data,
+						Level:     sentry.LevelDebug,
+						Timestamp: now,
+					}, nil)
+				}()
 			}
-		}
 
-		// If there is still no token then we don't have one. Return nothing.
-		if token == "" {
+			{ // Try to retrieve the cookie from the request with the options.
+				if tokenCookie, err := ctx.Cookie(
+					c.configuration.Server.Cookies.Name,
+				); err == nil && tokenCookie.Value != "" {
+					token = tokenCookie.Value
+					data["source"] = "cookie"
+				}
+			}
+
+			if token == "" {
+				if token = ctx.Request().Header.Get(c.configuration.Server.Cookies.Name); token != "" {
+					data["source"] = "header"
+				}
+			}
+
+			// If there is still no token then we don't have one. Return nothing.
+			if token == "" {
+				return nil
+			}
+
+			claims, err := c.clientTokens.Parse(token)
+			if err != nil {
+				c.updateAuthenticationCookie(ctx, ClearAuthentication)
+				crumbs.Error(c.getContext(ctx), "failed to parse token", "authentication", map[string]interface{}{
+					"error": err,
+				})
+				log.WithError(err).Warn("invalid token provided")
+				return nil
+			}
+
+			// If we can pull the hub from the current context, then we want to try to set some of our user data on it so that
+			// way we can grab it later if there is an error.
+			if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
+				hub.Scope().SetUser(sentry.User{
+					ID:        claims.AccountId,
+					Username:  claims.AccountId,
+					IPAddress: util.GetForwardedFor(ctx),
+					Data: map[string]string{
+						"userId":  claims.UserId,
+						"loginId": claims.LoginId,
+					},
+				})
+				hub.Scope().SetTag("userId", claims.UserId)
+				hub.Scope().SetTag("accountId", claims.AccountId)
+				hub.Scope().SetTag("loginId", claims.LoginId)
+			}
+
+			// Store the authentication claims on the request context so we can use it
+			// later.
+			ctx.Set(authenticationKey, *claims)
+
+			{ // Add some basic values onto our context for logging later on.
+				spanContext := ctx.Get(spanContextKey).(context.Context)
+				spanContext = context.WithValue(spanContext, ctxkeys.AccountID, claims.AccountId)
+				spanContext = context.WithValue(spanContext, ctxkeys.UserID, claims.UserId)
+				spanContext = context.WithValue(spanContext, ctxkeys.LoginID, claims.LoginId)
+				ctx.Set(spanContextKey, spanContext)
+			}
+
+			breadcrumbMessage = "Auth is valid"
+			data["accountId"] = claims.AccountId
+			data["userId"] = claims.UserId
+			data["loginId"] = claims.LoginId
+
 			return nil
-		}
-
-		claims, err := c.clientTokens.Parse(token)
+		}(ctx)
 		if err != nil {
-			c.updateAuthenticationCookie(ctx, ClearAuthentication)
-			crumbs.Error(c.getContext(ctx), "failed to parse token", "authentication", map[string]interface{}{
-				"error": err,
-			})
-			log.WithError(err).Warn("invalid token provided")
-			return nil
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Internal error")
 		}
 
-		// If we can pull the hub from the current context, then we want to try to set some of our user data on it so that
-		// way we can grab it later if there is an error.
-		if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
-			hub.Scope().SetUser(sentry.User{
-				ID:        claims.AccountId,
-				Username:  claims.AccountId,
-				IPAddress: util.GetForwardedFor(ctx),
-				Data: map[string]string{
-					"userId":  claims.UserId,
-					"loginId": claims.LoginId,
-				},
-			})
-			hub.Scope().SetTag("userId", claims.UserId)
-			hub.Scope().SetTag("accountId", claims.AccountId)
-			hub.Scope().SetTag("loginId", claims.LoginId)
-		}
-
-		// Store the authentication claims on the request context so we can use it
-		// later.
-		ctx.Set(authenticationKey, *claims)
-
-		{ // Add some basic values onto our context for logging later on.
-			spanContext := ctx.Get(spanContextKey).(context.Context)
-			spanContext = context.WithValue(spanContext, ctxkeys.AccountID, claims.AccountId)
-			spanContext = context.WithValue(spanContext, ctxkeys.UserID, claims.UserId)
-			spanContext = context.WithValue(spanContext, ctxkeys.LoginID, claims.LoginId)
-			ctx.Set(spanContextKey, spanContext)
-		}
-
-		breadcrumbMessage = "Auth is valid"
-		data["accountId"] = claims.AccountId
-		data["userId"] = claims.UserId
-		data["loginId"] = claims.LoginId
-
-		return nil
+		return next(ctx)
 	}
 }
 
