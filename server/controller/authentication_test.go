@@ -59,6 +59,7 @@ func TestLogin(t *testing.T) {
 		// Then configure the login fixture with TOTP.
 		loginTotp := fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
 
+		var token string
 		{ // Send the initial request and make sure it responds with the error.
 			response := e.POST("/api/authentication/login").
 				WithJSON(map[string]interface{}{
@@ -70,7 +71,9 @@ func TestLogin(t *testing.T) {
 			response.Status(http.StatusPreconditionRequired)
 			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
 			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			token = AssertSetTokenCookie(t, response)
 		}
+		assert.NotEmpty(t, token)
 
 		{ // Then try to authenticate using the code.
 			response := e.POST("/api/authentication/login").
@@ -913,9 +916,9 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Then generate a verification token and try to use it.
 			verificationToken, err := app.Tokens.Create(
-				security.VerifyEmailAudience,
 				5*time.Minute,
 				security.Claims{
+					Scope:        security.VerifyEmailAudience,
 					EmailAddress: registerRequest.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -992,9 +995,9 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Then generate a verification token and try to use it.
 			verificationToken, err := tokenGenerator.Create(
-				security.VerifyEmailAudience,
 				5*time.Minute,
 				security.Claims{
+					Scope:        security.VerifyEmailAudience,
 					EmailAddress: registerRequest.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -1065,9 +1068,9 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Then generate a verification token and try to use it.
 			verificationToken, err := app.Tokens.Create(
-				security.VerifyEmailAudience,
 				5*time.Minute,
 				security.Claims{
+					Scope:        security.VerifyEmailAudience,
 					EmailAddress: registerRequest.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -1322,9 +1325,9 @@ func TestSendForgotPassword(t *testing.T) {
 
 		{ // Then generate a verification token and try to use it.
 			verificationToken, err := app.Tokens.Create(
-				security.VerifyEmailAudience,
 				5*time.Minute,
 				security.Claims{
+					Scope:        security.VerifyEmailAudience,
 					EmailAddress: email,
 					UserId:       "",
 					AccountId:    "",
@@ -1451,9 +1454,9 @@ func TestResetPassword(t *testing.T) {
 
 		{ // Reset the password.
 			token, err := app.Tokens.Create(
-				security.ResetPasswordAudience,
 				5*time.Minute,
 				security.Claims{
+					Scope:        security.ResetPasswordAudience,
 					EmailAddress: user.Login.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -1506,9 +1509,9 @@ func TestResetPassword(t *testing.T) {
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
 		firstToken, err := app.Tokens.Create(
-			security.ResetPasswordAudience,
 			5*time.Minute,
 			security.Claims{
+				Scope:        security.ResetPasswordAudience,
 				EmailAddress: user.Login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -1520,9 +1523,9 @@ func TestResetPassword(t *testing.T) {
 		app.Clock.Add(1 * time.Second)
 
 		secondToken, err := app.Tokens.Create(
-			security.ResetPasswordAudience,
 			5*time.Minute,
 			security.Claims{
+				Scope:        security.ResetPasswordAudience,
 				EmailAddress: user.Login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -1571,12 +1574,16 @@ func TestResetPassword(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
-		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
-			EmailAddress: user.Login.Email,
-			UserId:       "",
-			AccountId:    "",
-			LoginId:      user.LoginId.String(),
-		})
+		token, err := app.Tokens.Create(
+			5*time.Second,
+			security.Claims{
+				Scope:        security.ResetPasswordAudience,
+				EmailAddress: user.Login.Email,
+				UserId:       "",
+				AccountId:    "",
+				LoginId:      user.LoginId.String(),
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		// Generate a new password to reset to.
@@ -1616,12 +1623,16 @@ func TestResetPassword(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
-		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
-			EmailAddress: user.Login.Email,
-			UserId:       "",
-			AccountId:    "",
-			LoginId:      user.LoginId.String(),
-		})
+		token, err := app.Tokens.Create(
+			5*time.Second,
+			security.Claims{
+				Scope:        security.ResetPasswordAudience,
+				EmailAddress: user.Login.Email,
+				UserId:       "",
+				AccountId:    "",
+				LoginId:      user.LoginId.String(),
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		// Wait for the token to expire.
@@ -1651,12 +1662,16 @@ func TestResetPassword(t *testing.T) {
 	t.Run("reset password login does not exist", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		email := testutils.GetUniqueEmail(t)
-		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
-			EmailAddress: email,
-			UserId:       "",
-			AccountId:    "",
-			LoginId:      "lgn_bogus",
-		})
+		token, err := app.Tokens.Create(
+			5*time.Second,
+			security.Claims{
+				Scope:        security.ResetPasswordAudience,
+				EmailAddress: email,
+				UserId:       "",
+				AccountId:    "",
+				LoginId:      "lgn_bogus",
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		MustSendPasswordChangedEmail(t, app, 0)
@@ -1707,12 +1722,16 @@ func TestResetPassword(t *testing.T) {
 	t.Run("password too short", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		email := testutils.GetUniqueEmail(t)
-		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
-			EmailAddress: email,
-			UserId:       "user_bogus",
-			AccountId:    "acct_bogus",
-			LoginId:      "lgn_bogus",
-		})
+		token, err := app.Tokens.Create(
+			5*time.Second,
+			security.Claims{
+				Scope:        security.ResetPasswordAudience,
+				EmailAddress: email,
+				UserId:       "user_bogus",
+				AccountId:    "acct_bogus",
+				LoginId:      "lgn_bogus",
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		MustSendPasswordChangedEmail(t, app, 0)

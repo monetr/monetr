@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/security"
 	"github.com/pkg/errors"
 	"github.com/xlzd/gotp"
 )
@@ -33,18 +34,21 @@ func (c *Controller) getMe(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine if account is setup")
 	}
 
+	me := map[string]interface{}{
+		"user":            user,
+		"mfaPending":      false,
+		"isSetup":         isSetup,
+		"isActive":        true,
+		"isTrialing":      false,
+		"activeUntil":     nil,
+		"trialingUntil":   nil,
+		"hasSubscription": false,
+	}
+
 	if !c.configuration.Stripe.IsBillingEnabled() {
 		// When billing is not enabled we will always return the user state such that they are seen as active forever and
 		// not trialing.
-		return ctx.JSON(http.StatusOK, map[string]interface{}{
-			"user":            user,
-			"isSetup":         isSetup,
-			"isActive":        true,
-			"isTrialing":      false,
-			"activeUntil":     nil,
-			"trialingUntil":   nil,
-			"hasSubscription": false,
-		})
+		return ctx.JSON(http.StatusOK, me)
 	}
 
 	// But when billing is enabled we need to handle what is basically three states.
@@ -55,28 +59,31 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	subscriptionIsActive := user.Account.IsSubscriptionActive(c.clock.Now())
 	subscriptionIsTrial := user.Account.IsTrialing(c.clock.Now())
 
-	if !subscriptionIsActive {
-		return ctx.JSON(http.StatusOK, map[string]interface{}{
-			"user":            user,
-			"isSetup":         isSetup,
-			"isActive":        subscriptionIsActive,
-			"isTrialing":      subscriptionIsTrial,
-			"activeUntil":     user.Account.SubscriptionActiveUntil,
-			"trialingUntil":   user.Account.TrialEndsAt,
-			"hasSubscription": hasSubscrption,
-			"nextUrl":         "/account/subscribe",
-		})
+	// If billing is enabled then we want to populate these fields with real
+	// values.
+	me["isActive"] = subscriptionIsActive
+	me["IsTrialing"] = subscriptionIsTrial
+	me["activeUntil"] = user.Account.SubscriptionActiveUntil
+	me["trialingUntil"] = user.Account.TrialEndsAt
+	me["hasSubscrption"] = hasSubscrption
+
+	claims := c.mustGetClaims(ctx)
+
+	// If the "me" endpoint was called after they authenticated, but they still
+	// need to provide MFA, then direct them to that page regardless of their
+	// subscription status.
+	if claims.Scope == security.MultiFactorAudience {
+		me["mfaPending"] = true
+		me["nextUrl"] = "/login/multifactor"
+	} else if !subscriptionIsActive {
+		// But if they are not currently required to provide MFA AND their
+		// subscription is not active. Then redirect them to the account subscribe
+		// endpoint.
+		// TODO Make sure to implement this logic in the MFA endpoint as well!
+		me["nextUrl"] = "/account/subscribe"
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"user":            user,
-		"isSetup":         isSetup,
-		"isActive":        subscriptionIsActive,
-		"isTrialing":      subscriptionIsTrial,
-		"activeUntil":     user.Account.SubscriptionActiveUntil,
-		"trialingUntil":   user.Account.TrialEndsAt,
-		"hasSubscription": hasSubscrption,
-	})
+	return ctx.JSON(http.StatusOK, me)
 }
 
 func (c *Controller) changePassword(ctx echo.Context) error {

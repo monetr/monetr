@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
 )
@@ -39,13 +40,31 @@ func (c *Controller) midnightInLocal(ctx echo.Context, input time.Time) (time.Ti
 	return util.Midnight(input, timezone), nil
 }
 
-func (c *Controller) getLoginId(ctx echo.Context) (ID[Login], error) {
-	loginId, ok := ctx.Get(loginIdContextKey).(string)
-	if loginId == "" || !ok {
-		return "", errors.New("unauthorized: no loginId present on request")
+func (c *Controller) getClaims(ctx echo.Context) (security.Claims, error) {
+	claims, ok := ctx.Get(authenticationKey).(security.Claims)
+	if !ok {
+		return claims, errors.New("unauthorized: claims not present on request")
 	}
 
-	parsed, err := ParseID[Login](loginId)
+	return claims, claims.Valid()
+}
+
+func (c *Controller) mustGetClaims(ctx echo.Context) security.Claims {
+	claims, err := c.getClaims(ctx)
+	if err != nil {
+		panic("unauthorized: claims on request are invalid")
+	}
+
+	return claims
+}
+
+func (c *Controller) getLoginId(ctx echo.Context) (ID[Login], error) {
+	claims, err := c.getClaims(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	parsed, err := ParseID[Login](claims.LoginId)
 	if err != nil {
 		return "", errors.Wrap(err, "unauthorized: loginId on request is invalid")
 	}
@@ -58,12 +77,16 @@ func (c *Controller) getLoginId(ctx echo.Context) (ID[Login], error) {
 // present or if it is not in the correct format then an error will be returned
 // and a "zero" ID will be returned instead.
 func (c *Controller) getUserId(ctx echo.Context) (ID[User], error) {
-	userId, ok := ctx.Get(userIdContextKey).(string)
-	if userId == "" || !ok {
+	claims, err := c.getClaims(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	if claims.UserId == "" {
 		return "", errors.New("unauthorized: no userId present on request")
 	}
 
-	parsed, err := ParseID[User](userId)
+	parsed, err := ParseID[User](claims.UserId)
 	if err != nil {
 		return "", errors.Wrap(err, "unauthorized: userId on request is invalid")
 	}
@@ -81,12 +104,16 @@ func (c *Controller) mustGetUserId(ctx echo.Context) ID[User] {
 }
 
 func (c *Controller) getAccountId(ctx echo.Context) (ID[Account], error) {
-	accountId, ok := ctx.Get(accountIdContextKey).(string)
-	if accountId == "" || !ok {
+	claims, err := c.getClaims(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	if claims.AccountId == "" {
 		return "", errors.New("unauthorized: no accountId present on request")
 	}
 
-	parsed, err := ParseID[Account](accountId)
+	parsed, err := ParseID[Account](claims.AccountId)
 	if err != nil {
 		return "", errors.Wrap(err, "unauthorized: accountId on request is invalid")
 	}
