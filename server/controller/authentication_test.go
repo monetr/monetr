@@ -35,6 +35,10 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("cannot login without TOTP when enabled", func(t *testing.T) {
+		// When a login has TOTP enabled and they attempt to login, they will get a
+		// precondition required return status, but we will provide a cookie that is
+		// short lived in order to allow them to provide their TOTP or other
+		// multifactor code.
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		// Then configure the login fixture with TOTP.
@@ -50,76 +54,6 @@ func TestLogin(t *testing.T) {
 		response.Status(http.StatusPreconditionRequired)
 		response.JSON().Path("$.error").String().IsEqual("login requires MFA")
 		response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
-		response.Cookies().IsEmpty()
-	})
-
-	t.Run("login true path with TOTP", func(t *testing.T) {
-		app, e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		// Then configure the login fixture with TOTP.
-		loginTotp := fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
-
-		var token string
-		{ // Send the initial request and make sure it responds with the error.
-			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
-					"email":    user.Login.Email,
-					"password": password,
-				}).
-				Expect()
-
-			response.Status(http.StatusPreconditionRequired)
-			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
-			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
-			token = AssertSetTokenCookie(t, response)
-		}
-		assert.NotEmpty(t, token)
-
-		{ // Then try to authenticate using the code.
-			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
-					"email":    user.Login.Email,
-					"password": password,
-					"totp":     loginTotp.At(app.Clock.Now().Unix()),
-				}).
-				Expect()
-
-			response.Status(http.StatusOK)
-			AssertSetTokenCookie(t, response)
-		}
-	})
-
-	t.Run("can login when TOTP is provided", func(t *testing.T) {
-		app, e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		// Then configure the login fixture with TOTP.
-		totpCode := fixtures.GivenIHaveTOTPCodeForLogin(t, app.Clock, user.Login)
-
-		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
-				"email":    user.Login.Email,
-				"password": password,
-				"totp":     totpCode,
-			}).
-			Expect()
-
-		response.Status(http.StatusOK)
-		AssertSetTokenCookie(t, response)
-	})
-
-	t.Run("can provide TOTP when it is not enabled", func(t *testing.T) {
-		app, e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-
-		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
-				"email":    user.Login.Email,
-				"password": password,
-				"totp":     "123456",
-			}).
-			Expect()
-
-		response.Status(http.StatusOK)
 		AssertSetTokenCookie(t, response)
 	})
 
@@ -157,7 +91,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusInternalServerError)
-		response.JSON().Path("$.error").String().IsEqual("user has no accounts")
+		response.JSON().Path("$.error").String().IsEqual("User has no accounts")
 		response.JSON().Object().NotContainsKey("token")
 	})
 

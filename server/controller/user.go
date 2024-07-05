@@ -71,10 +71,10 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	// If billing is enabled then we want to populate these fields with real
 	// values.
 	me["isActive"] = subscriptionIsActive
-	me["IsTrialing"] = subscriptionIsTrial
+	me["isTrialing"] = subscriptionIsTrial
 	me["activeUntil"] = user.Account.SubscriptionActiveUntil
 	me["trialingUntil"] = user.Account.TrialEndsAt
-	me["hasSubscrption"] = hasSubscrption
+	me["hasSubscription"] = hasSubscrption
 
 	if claims.Scope != security.MultiFactorAudience && !subscriptionIsActive {
 		// But if they are not currently required to provide MFA AND their
