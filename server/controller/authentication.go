@@ -234,7 +234,7 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 	}
 
 	if err := me.Login.VerifyTOTP(request.TOTP, c.clock.Now()); err != nil {
-		return c.returnError(ctx, http.StatusUnauthorized, "invalid TOTP code")
+		return c.returnError(ctx, http.StatusUnauthorized, "Invalid TOTP code")
 	}
 
 	token, err := c.clientTokens.Create(

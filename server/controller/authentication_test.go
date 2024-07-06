@@ -421,12 +421,112 @@ func TestMultifactor(t *testing.T) {
 		}
 	})
 
+	t.Run("multifactor token should expire", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
+
+		var token string
+		{ // Login, this should return an MFA required error.
+			response := e.POST("/api/authentication/login").
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
+				}).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // Parse the token we received to make sure it's correct.
+			claims, err := app.Tokens.Parse(token)
+			assert.NoError(t, err, "must be able to parse the token returned from login")
+			assert.Equal(t, security.MultiFactorScope, claims.Scope, "token must have the multifactor authentication scope")
+		}
+
+		app.Clock.Add(6 * time.Minute)
+
+		{ // Parse the token we received to make sure it's correct.
+			claims, err := app.Tokens.Parse(token)
+			assert.EqualError(t, err, "failed to parse token: this token has expired")
+			assert.Nil(t, claims, "claims should be nil if there is an error")
+		}
+
+		{ // Then try to retrieve me using the expired token.
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusUnauthorized)
+		}
+	})
+
 	t.Run("login doesnt have MFA enabled", func(t *testing.T) {
 		t.Skip("todo")
 	})
 
 	t.Run("mfa is wrong by time", func(t *testing.T) {
-		t.Skip("todo")
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		totp := fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
+
+		var token string
+		{ // Login, this should return an MFA required error.
+			response := e.POST("/api/authentication/login").
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
+				}).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // Parse the token we received to make sure it's correct.
+			claims, err := app.Tokens.Parse(token)
+			assert.NoError(t, err, "must be able to parse the token returned from login")
+			assert.Equal(t, security.MultiFactorScope, claims.Scope, "token must have the multifactor authentication scope")
+		}
+
+		{ // Then retrieve "me". This will need to happen for the frontend.
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").String().IsASCII()
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
+			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
+			response.JSON().Path("$.trialingUntil").IsNull()
+			response.JSON().Path("$.nextUrl").IsEqual("/login/multifactor")
+		}
+
+		{ // Provide an MFA token that is old
+			// Grab a timestamp
+			timestamp := app.Clock.Now()
+			// Progress the application's clock by 1 minute, making our timestamp old.
+			app.Clock.Add(1 * time.Minute)
+			response := e.POST("/api/authentication/multifactor").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					// Generate a code with the old timestamp, this will be considered
+					// wrong by the server.
+					"totp": totp.AtTime(timestamp),
+				}).
+				Expect()
+
+			response.Status(http.StatusUnauthorized)
+			response.JSON().Path("$.error").String().IsEqual("Invalid TOTP code")
+			response.Cookies().IsEmpty()
+		}
 	})
 }
 func TestRegister(t *testing.T) {
