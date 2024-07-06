@@ -338,51 +338,22 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 			return errors.Wrap(err, "failed to sync with plaid")
 		}
 
-		// On our first iteration, gather bank accounts
-		if iter == 0 {
-			plaidBankAccounts = syncData.Accounts
-			for x := range bankAccounts {
-				bankAccount := bankAccounts[x]
-				for y := range plaidBankAccounts {
-					plaidBankAccount := plaidBankAccounts[y]
-					if plaidBankAccount.GetAccountId() == bankAccount.PlaidBankAccount.PlaidId {
-						s.bankAccounts[bankAccount.PlaidBankAccount.PlaidId] = bankAccount
-						break
-					}
-				}
-
-				// If an account is no longer visible in plaid that means that we won't receive updates for that account anymore. If
-				// this happens, log something and mark that account as inactive. This way we can inform the user that the account
-				// is no longer receiving updates.
-				if _, ok := s.bankAccounts[bankAccount.PlaidBankAccount.PlaidId]; !ok {
-					log.WithFields(logrus.Fields{
-						"bankAccountId": bankAccount.BankAccountId,
-					}).Info("found bank account that is no longer present in plaid, it will be updated as inactive")
-					crumbs.Warn(span.Context(), "Found bank account that is no longer present in Plaid", "plaid", map[string]interface{}{
-						"bankAccountId": bankAccount.BankAccountId,
-					})
-					if err := s.syncPlaidBankAccount(
-						span.Context(),
-						link,
-						&bankAccount,
-						plaidLink,
-						bankAccount.PlaidBankAccount,
-						nil, // Not visible via sync anymore
-					); err != nil {
-						log.WithFields(logrus.Fields{
-							"bankAccountId": bankAccount.BankAccountId,
-						}).
-							WithError(err).
-							Error("failed to update bank account as inactive")
-					}
+		plaidBankAccounts = syncData.Accounts
+		for x := range bankAccounts {
+			bankAccount := bankAccounts[x]
+			for y := range plaidBankAccounts {
+				plaidBankAccount := plaidBankAccounts[y]
+				if plaidBankAccount.GetAccountId() == bankAccount.PlaidBankAccount.PlaidId {
+					s.bankAccounts[bankAccount.PlaidBankAccount.PlaidId] = bankAccount
+					break
 				}
 			}
+		}
 
-			if len(s.bankAccounts) == 0 {
-				log.Warn("none of the linked bank accounts are active at plaid")
-				crumbs.IndicateBug(span.Context(), "none of the linked bank accounts are active at plaid", nil)
-				return nil
-			}
+		if len(s.bankAccounts) == 0 {
+			log.Warn("none of the linked bank accounts are active at plaid")
+			crumbs.IndicateBug(span.Context(), "none of the linked bank accounts are active at plaid", nil)
+			return nil
 		}
 
 		// If we received nothing to insert/update/remove then do nothing
@@ -475,10 +446,6 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 				return transactionsToInsert[i].Date.Before(transactionsToInsert[j].Date)
 			})
 
-			// // Reverse the list so the oldest records are inserted first.
-			// for i, j := 0, len(transactionsToInsert)-1; i < j; i, j = i+1, j-1 {
-			// 	transactionsToInsert[i], transactionsToInsert[j] = transactionsToInsert[j], transactionsToInsert[i]
-			// }
 			log.Infof("creating %d transactions", len(transactionsToInsert))
 			crumbs.Debug(span.Context(), "Creating transactions.", map[string]interface{}{
 				"count": len(transactionsToInsert),
@@ -922,16 +889,29 @@ func (s *SyncPlaidJob) syncPlaidBankAccount(
 	plaidBankAccount *PlaidBankAccount,
 	input platypus.BankAccount,
 ) error {
+	changes := make([]SyncChange, 0)
+
 	// If input is nil that means we are no longer seeing this specific account
 	// and we should mark it as inactive.
-	if input == nil {
-		// TODO, should we add a similar status to the plaid bank account?
+	if input == nil && bankAccount.Status != InactiveBankAccountStatus {
+		changes = append(changes, SyncChange{
+			Field: "status",
+			Old:   ActiveBankAccountStatus,
+			New:   InactiveBankAccountStatus,
+		})
 		bankAccount.Status = InactiveBankAccountStatus
-		bankAccount.LastUpdated = s.clock.Now().UTC()
-		return s.repo.UpdateBankAccounts(ctx, *bankAccount)
 	}
 
-	changes := make([]SyncChange, 0)
+	// If we observe the account again, then change it back to active.
+	if input != nil && bankAccount.Status == ActiveBankAccountStatus {
+		changes = append(changes, SyncChange{
+			Field: "status",
+			Old:   InactiveBankAccountStatus,
+			New:   ActiveBankAccountStatus,
+		})
+		bankAccount.Status = ActiveBankAccountStatus
+	}
+
 	if input.GetName() != plaidBankAccount.Name {
 		changes = append(changes, SyncChange{
 			Field: "name",
@@ -963,6 +943,7 @@ func (s *SyncPlaidJob) syncPlaidBankAccount(
 	}
 
 	if len(changes) > 0 {
+		bankAccount.LastUpdated = s.clock.Now().UTC()
 		s.log.WithContext(ctx).WithFields(logrus.Fields{
 			"plaidId": input.GetAccountId(),
 			"kind":    "bankAccount",
