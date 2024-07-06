@@ -1,9 +1,10 @@
 /* eslint-disable max-len */
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import TransactionMerchantIcon from './TransactionMerchantIcon';
-import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
 import ArrowLink from '@monetr/interface/components/ArrowLink';
+import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
 import { useSpendingOld } from '@monetr/interface/hooks/spending';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Transaction from '@monetr/interface/models/Transaction';
@@ -16,6 +17,7 @@ export interface TransactionItemProps {
 export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
   const user = useAuthentication();
   const spending = useSpendingOld(transaction.spendingId);
+  const navigate = useNavigate();
   const detailsUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
 
   const amountClassnames = mergeTailwind(
@@ -84,6 +86,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
     <li className='group relative w-full px-1 md:px-2'>
       <div
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
+        onClick={ () => navigate(detailsUrl) }
       />
       <div className='group flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4'>
         <div className='flex w-full min-w-0 flex-1 flex-row items-center gap-4 md:w-1/2'>
