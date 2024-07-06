@@ -229,7 +229,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// These endpoints are only accessible if you have a token scoped for MFA.
 	multiFactorRequired := repoParty.Group("",
 		c.maybeTokenMiddleware,
-		c.requireToken(security.MultiFactorAudience),
+		c.requireToken(security.MultiFactorScope),
 	)
 	multiFactorRequired.POST("/authentication/multifactor", c.postMultifactor)
 
@@ -237,14 +237,14 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// MFA or just a normally authenticated token.
 	userInfo := repoParty.Group("",
 		c.maybeTokenMiddleware,
-		c.requireToken(security.AuthenticatedAudience, security.MultiFactorAudience),
+		c.requireToken(security.AuthenticatedScope, security.MultiFactorScope),
 	)
 	userInfo.GET("/users/me", c.getMe)
 
 	// These endpoints all require a fully authenticated token
 	authed := repoParty.Group("",
 		c.maybeTokenMiddleware,
-		c.requireToken(security.AuthenticatedAudience),
+		c.requireToken(security.AuthenticatedScope),
 	)
 	// User
 	authed.PUT("/users/security/password", c.changePassword)

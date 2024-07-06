@@ -361,6 +361,74 @@ func TestLogout(t *testing.T) {
 	})
 }
 
+func TestMultifactor(t *testing.T) {
+	t.Run("simple multifactor", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		totp := fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
+
+		var token string
+		{ // Login, this should return an MFA required error.
+			response := e.POST("/api/authentication/login").
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
+				}).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // Parse the token we received to make sure it's correct.
+			claims, err := app.Tokens.Parse(token)
+			assert.NoError(t, err, "must be able to parse the token returned from login")
+			assert.Equal(t, security.MultiFactorScope, claims.Scope, "token must have the multifactor authentication scope")
+		}
+
+		{ // Then retrieve "me". This will need to happen for the frontend.
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").String().IsASCII()
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
+			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
+			response.JSON().Path("$.trialingUntil").IsNull()
+			response.JSON().Path("$.nextUrl").IsEqual("/login/multifactor")
+		}
+
+		{ // Now actually provide the MFA token
+			response := e.POST("/api/authentication/multifactor").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					"totp": totp.AtTime(app.Clock.Now()),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			finalToken := AssertSetTokenCookie(t, response)
+
+			claims, err := app.Tokens.Parse(finalToken)
+			assert.NoError(t, err, "must be able to parse the token returned from multifactor")
+			assert.Equal(t, security.AuthenticatedScope, claims.Scope, "token must have the authenticated scope")
+		}
+	})
+
+	t.Run("login doesnt have MFA enabled", func(t *testing.T) {
+		t.Skip("todo")
+	})
+
+	t.Run("mfa is wrong by time", func(t *testing.T) {
+		t.Skip("todo")
+	})
+}
 func TestRegister(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		_, e := NewTestApplication(t)
@@ -852,7 +920,7 @@ func TestVerifyEmail(t *testing.T) {
 			verificationToken, err := app.Tokens.Create(
 				5*time.Minute,
 				security.Claims{
-					Scope:        security.VerifyEmailAudience,
+					Scope:        security.VerifyEmailScope,
 					EmailAddress: registerRequest.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -931,7 +999,7 @@ func TestVerifyEmail(t *testing.T) {
 			verificationToken, err := tokenGenerator.Create(
 				5*time.Minute,
 				security.Claims{
-					Scope:        security.VerifyEmailAudience,
+					Scope:        security.VerifyEmailScope,
 					EmailAddress: registerRequest.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -1004,7 +1072,7 @@ func TestVerifyEmail(t *testing.T) {
 			verificationToken, err := app.Tokens.Create(
 				5*time.Minute,
 				security.Claims{
-					Scope:        security.VerifyEmailAudience,
+					Scope:        security.VerifyEmailScope,
 					EmailAddress: registerRequest.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -1261,7 +1329,7 @@ func TestSendForgotPassword(t *testing.T) {
 			verificationToken, err := app.Tokens.Create(
 				5*time.Minute,
 				security.Claims{
-					Scope:        security.VerifyEmailAudience,
+					Scope:        security.VerifyEmailScope,
 					EmailAddress: email,
 					UserId:       "",
 					AccountId:    "",
@@ -1390,7 +1458,7 @@ func TestResetPassword(t *testing.T) {
 			token, err := app.Tokens.Create(
 				5*time.Minute,
 				security.Claims{
-					Scope:        security.ResetPasswordAudience,
+					Scope:        security.ResetPasswordScope,
 					EmailAddress: user.Login.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -1445,7 +1513,7 @@ func TestResetPassword(t *testing.T) {
 		firstToken, err := app.Tokens.Create(
 			5*time.Minute,
 			security.Claims{
-				Scope:        security.ResetPasswordAudience,
+				Scope:        security.ResetPasswordScope,
 				EmailAddress: user.Login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -1459,7 +1527,7 @@ func TestResetPassword(t *testing.T) {
 		secondToken, err := app.Tokens.Create(
 			5*time.Minute,
 			security.Claims{
-				Scope:        security.ResetPasswordAudience,
+				Scope:        security.ResetPasswordScope,
 				EmailAddress: user.Login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -1511,7 +1579,7 @@ func TestResetPassword(t *testing.T) {
 		token, err := app.Tokens.Create(
 			5*time.Second,
 			security.Claims{
-				Scope:        security.ResetPasswordAudience,
+				Scope:        security.ResetPasswordScope,
 				EmailAddress: user.Login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -1560,7 +1628,7 @@ func TestResetPassword(t *testing.T) {
 		token, err := app.Tokens.Create(
 			5*time.Second,
 			security.Claims{
-				Scope:        security.ResetPasswordAudience,
+				Scope:        security.ResetPasswordScope,
 				EmailAddress: user.Login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -1599,7 +1667,7 @@ func TestResetPassword(t *testing.T) {
 		token, err := app.Tokens.Create(
 			5*time.Second,
 			security.Claims{
-				Scope:        security.ResetPasswordAudience,
+				Scope:        security.ResetPasswordScope,
 				EmailAddress: email,
 				UserId:       "",
 				AccountId:    "",
@@ -1659,7 +1727,7 @@ func TestResetPassword(t *testing.T) {
 		token, err := app.Tokens.Create(
 			5*time.Second,
 			security.Claims{
-				Scope:        security.ResetPasswordAudience,
+				Scope:        security.ResetPasswordScope,
 				EmailAddress: email,
 				UserId:       "user_bogus",
 				AccountId:    "acct_bogus",

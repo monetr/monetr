@@ -49,7 +49,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	// need to provide MFA, then direct them to that page regardless of their
 	// subscription status.
 	claims := c.mustGetClaims(ctx)
-	if claims.Scope == security.MultiFactorAudience {
+	if claims.Scope == security.MultiFactorScope {
 		me["mfaPending"] = true
 		me["nextUrl"] = "/login/multifactor"
 	}
@@ -76,7 +76,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	me["trialingUntil"] = user.Account.TrialEndsAt
 	me["hasSubscription"] = hasSubscrption
 
-	if claims.Scope != security.MultiFactorAudience && !subscriptionIsActive {
+	if claims.Scope != security.MultiFactorScope && !subscriptionIsActive {
 		// But if they are not currently required to provide MFA AND their
 		// subscription is not active. Then redirect them to the account subscribe
 		// endpoint.

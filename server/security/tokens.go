@@ -15,10 +15,10 @@ import (
 type Scope string
 
 const (
-	AuthenticatedAudience Scope = "authenticated"
-	MultiFactorAudience   Scope = "multiFactor"
-	ResetPasswordAudience Scope = "resetPassword"
-	VerifyEmailAudience   Scope = "verifyEmail"
+	AuthenticatedScope Scope = "authenticated"
+	MultiFactorScope   Scope = "multiFactor"
+	ResetPasswordScope Scope = "resetPassword"
+	VerifyEmailScope   Scope = "verifyEmail"
 )
 
 type Claims struct {
@@ -70,7 +70,7 @@ func (c Claims) Valid() error {
 		return errors.New("claims invalid: scope is not defined")
 	}
 
-	if c.Scope == AuthenticatedAudience {
+	if c.Scope == AuthenticatedScope {
 		if c.AccountId == "" {
 			return errors.New("claims invalid: account Id is not defined")
 		}

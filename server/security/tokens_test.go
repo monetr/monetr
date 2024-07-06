@@ -25,7 +25,7 @@ func TestPasetoClientTokens(t *testing.T) {
 		assert.NoError(t, err, "must be able to init the client tokens interface")
 
 		token, err := clientTokens.Create(5*time.Second, security.Claims{
-			Scope:        security.AuthenticatedAudience,
+			Scope:        security.AuthenticatedScope,
 			EmailAddress: gofakeit.Email(),
 			UserId:       "user_1",
 			AccountId:    "acct_2",
@@ -53,7 +53,7 @@ func TestPasetoClientTokens(t *testing.T) {
 		assert.NoError(t, err, "must be able to init the client tokens interface")
 
 		token, err := clientTokens.Create(5*time.Second, security.Claims{
-			Scope:        security.AuthenticatedAudience,
+			Scope:        security.AuthenticatedScope,
 			EmailAddress: gofakeit.Email(),
 			UserId:       "user_1",
 			AccountId:    "acct_2",
@@ -86,7 +86,7 @@ func TestPasetoClientTokens(t *testing.T) {
 		assert.NoError(t, err, "must be able to init the client tokens interface")
 
 		token, err := clientTokens1.Create(5*time.Second, security.Claims{
-			Scope:        security.AuthenticatedAudience,
+			Scope:        security.AuthenticatedScope,
 			EmailAddress: gofakeit.Email(),
 			UserId:       "user_1",
 			AccountId:    "acct_2",
@@ -113,7 +113,7 @@ func TestClaimsRequiredScope(t *testing.T) {
 		assert.NoError(t, err, "must be able to init the client tokens interface")
 
 		token, err := clientTokens.Create(5*time.Second, security.Claims{
-			Scope:        security.AuthenticatedAudience,
+			Scope:        security.AuthenticatedScope,
 			EmailAddress: gofakeit.Email(),
 			UserId:       "user_1",
 			AccountId:    "acct_2",
@@ -124,9 +124,9 @@ func TestClaimsRequiredScope(t *testing.T) {
 
 		claims, err := clientTokens.Parse(token)
 		assert.NoError(t, err, "should be able to parse token into claims")
-		assert.NoError(t, claims.RequireScope(security.AuthenticatedAudience), "claims should have the AuthenticatedAudience scope")
-		assert.EqualError(t, claims.RequireScope(security.ResetPasswordAudience), "authentication does not have required scope; has: [authenticated] required: [resetPassword]")
-		assert.EqualError(t, claims.RequireScope(security.VerifyEmailAudience), "authentication does not have required scope; has: [authenticated] required: [verifyEmail]")
-		assert.EqualError(t, claims.RequireScope(security.VerifyEmailAudience, security.ResetPasswordAudience), "authentication does not have required scope; has: [authenticated] required: [verifyEmail resetPassword]")
+		assert.NoError(t, claims.RequireScope(security.AuthenticatedScope), "claims should have the AuthenticatedAudience scope")
+		assert.EqualError(t, claims.RequireScope(security.ResetPasswordScope), "authentication does not have required scope; has: [authenticated] required: [resetPassword]")
+		assert.EqualError(t, claims.RequireScope(security.VerifyEmailScope), "authentication does not have required scope; has: [authenticated] required: [verifyEmail]")
+		assert.EqualError(t, claims.RequireScope(security.VerifyEmailScope, security.ResetPasswordScope), "authentication does not have required scope; has: [authenticated] required: [verifyEmail resetPassword]")
 	})
 }

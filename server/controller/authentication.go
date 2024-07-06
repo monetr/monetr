@@ -120,7 +120,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		passwordResetToken, err := c.clientTokens.Create(
 			5*time.Minute, // Use a much shorter lifetime than usually would be configured.
 			security.Claims{
-				Scope:        security.ResetPasswordAudience,
+				Scope:        security.ResetPasswordScope,
 				EmailAddress: login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -153,7 +153,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			token, err := c.clientTokens.Create(
 				5*time.Minute,
 				security.Claims{
-					Scope:        security.MultiFactorAudience,
+					Scope:        security.MultiFactorScope,
 					EmailAddress: login.Email,
 					UserId:       user.UserId.String(),
 					AccountId:    user.AccountId.String(),
@@ -171,7 +171,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		token, err := c.clientTokens.Create(
 			14*24*time.Hour,
 			security.Claims{
-				Scope:        security.AuthenticatedAudience,
+				Scope:        security.AuthenticatedScope,
 				EmailAddress: login.Email,
 				UserId:       user.UserId.String(),
 				AccountId:    user.AccountId.String(),
@@ -240,7 +240,7 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 	token, err := c.clientTokens.Create(
 		14*24*time.Hour,
 		security.Claims{
-			Scope:        security.AuthenticatedAudience,
+			Scope:        security.AuthenticatedScope,
 			EmailAddress: me.Login.Email,
 			UserId:       me.UserId.String(),
 			AccountId:    me.AccountId.String(),
@@ -447,7 +447,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		verificationToken, err := c.clientTokens.Create(
 			c.configuration.Email.Verification.TokenLifetime,
 			security.Claims{
-				Scope:        security.VerifyEmailAudience,
+				Scope:        security.VerifyEmailScope,
 				EmailAddress: login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -482,7 +482,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	token, err := c.clientTokens.Create(
 		14*24*time.Hour,
 		security.Claims{
-			Scope:        security.AuthenticatedAudience,
+			Scope:        security.AuthenticatedScope,
 			EmailAddress: login.Email,
 			UserId:       user.UserId.String(),
 			AccountId:    user.AccountId.String(),
@@ -526,7 +526,7 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
 	}
 
-	if err := claims.RequireScope(security.VerifyEmailAudience); err != nil {
+	if err := claims.RequireScope(security.VerifyEmailScope); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
 	}
 
@@ -580,7 +580,7 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 	verificationToken, err := c.clientTokens.Create(
 		c.configuration.Email.Verification.TokenLifetime,
 		security.Claims{
-			Scope:        security.VerifyEmailAudience,
+			Scope:        security.VerifyEmailScope,
 			EmailAddress: login.Email,
 			UserId:       "",
 			AccountId:    "",
@@ -667,7 +667,7 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 	passwordResetToken, err := c.clientTokens.Create(
 		c.configuration.Email.ForgotPassword.TokenLifetime,
 		security.Claims{
-			Scope:        security.ResetPasswordAudience,
+			Scope:        security.ResetPasswordScope,
 			EmailAddress: login.Email,
 			UserId:       "",
 			AccountId:    "",
@@ -741,7 +741,7 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 
 	// Make sure the token has the correct scope on it. Otherwise a user should
 	// not be able to use it to reset their password.
-	if err := resetClaims.RequireScope(security.ResetPasswordAudience); err != nil {
+	if err := resetClaims.RequireScope(security.ResetPasswordScope); err != nil {
 		return c.badRequestError(ctx, err, "Failed to validate password reset token")
 	}
 

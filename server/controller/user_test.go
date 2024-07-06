@@ -409,7 +409,7 @@ func TestChangePassword(t *testing.T) {
 		token, err := app.Tokens.Create(
 			10*time.Minute,
 			security.Claims{
-				Scope:        security.AuthenticatedAudience,
+				Scope:        security.AuthenticatedScope,
 				EmailAddress: gofakeit.Email(),
 				UserId:       "user_bogus",
 				AccountId:    "acct_bogus",
