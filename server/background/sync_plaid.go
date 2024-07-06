@@ -922,16 +922,29 @@ func (s *SyncPlaidJob) syncPlaidBankAccount(
 	plaidBankAccount *PlaidBankAccount,
 	input platypus.BankAccount,
 ) error {
+	changes := make([]SyncChange, 0)
+
 	// If input is nil that means we are no longer seeing this specific account
 	// and we should mark it as inactive.
-	if input == nil {
-		// TODO, should we add a similar status to the plaid bank account?
+	if input == nil && bankAccount.Status != InactiveBankAccountStatus {
+		changes = append(changes, SyncChange{
+			Field: "status",
+			Old:   ActiveBankAccountStatus,
+			New:   InactiveBankAccountStatus,
+		})
 		bankAccount.Status = InactiveBankAccountStatus
-		bankAccount.LastUpdated = s.clock.Now().UTC()
-		return s.repo.UpdateBankAccounts(ctx, *bankAccount)
 	}
 
-	changes := make([]SyncChange, 0)
+	// If we observe the account again, then change it back to active.
+	if input != nil && bankAccount.Status == ActiveBankAccountStatus {
+		changes = append(changes, SyncChange{
+			Field: "status",
+			Old:   InactiveBankAccountStatus,
+			New:   ActiveBankAccountStatus,
+		})
+		bankAccount.Status = ActiveBankAccountStatus
+	}
+
 	if input.GetName() != plaidBankAccount.Name {
 		changes = append(changes, SyncChange{
 			Field: "name",
@@ -963,6 +976,7 @@ func (s *SyncPlaidJob) syncPlaidBankAccount(
 	}
 
 	if len(changes) > 0 {
+		bankAccount.LastUpdated = s.clock.Now().UTC()
 		s.log.WithContext(ctx).WithFields(logrus.Fields{
 			"plaidId": input.GetAccountId(),
 			"kind":    "bankAccount",
