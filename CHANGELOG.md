@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.17.9](https://github.com/monetr/monetr/compare/v0.17.8...v0.17.9) (2024-07-06)
+
+
+### Features
+
+* **csp:** Allowing reporting CSP violations to Sentry. ([#1823](https://github.com/monetr/monetr/issues/1823)) ([8c50b2f](https://github.com/monetr/monetr/commit/8c50b2f3ca15d0178f139f22f269802c7758f681))
+* **sentry:** Improving sentry reporting of crons ([243ab95](https://github.com/monetr/monetr/commit/243ab95da1761ea8a1cf8ac52eacce615b1734a2))
+* **ui:** Link similar transactions ([#1828](https://github.com/monetr/monetr/issues/1828)) ([21a1f24](https://github.com/monetr/monetr/commit/21a1f2466053796704428b26236e3d44514535de))
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.28.1 ([#1778](https://github.com/monetr/monetr/issues/1778)) ([f714a62](https://github.com/monetr/monetr/commit/f714a62fb1abb5f139b3ab5d5af6202da7dc1762))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.6.1 ([#1824](https://github.com/monetr/monetr/issues/1824)) ([834aebb](https://github.com/monetr/monetr/commit/834aebbd294650715da541818de79442cde6bab8))
+* **ui:** update dependency @react-email/components to v0.0.21 ([#1819](https://github.com/monetr/monetr/issues/1819)) ([402fc2a](https://github.com/monetr/monetr/commit/402fc2aee318c3c3f671942a3e63bf51f09d2f4f))
+* **ui:** update react monorepo ([#1723](https://github.com/monetr/monetr/issues/1723)) ([e38dd42](https://github.com/monetr/monetr/commit/e38dd42cd36efdd5063f08ded12243461fee368e))
+
+
+### Bug Fixes
+
+* **api:** Fixed not setting cookie on subpath properly ([c8b3e1d](https://github.com/monetr/monetr/commit/c8b3e1da26a1c101a04adcdea2ecf434f58da7a9))
+* **cron:** Fixed cron jobs being consumed by multiple workers ([29b9a87](https://github.com/monetr/monetr/commit/29b9a8731040dc0bb4caf9947b3904ef121e1bd4))
+* **forecast:** Make the forecasting code return a proper error ([#1822](https://github.com/monetr/monetr/issues/1822)) ([cca4257](https://github.com/monetr/monetr/commit/cca425716031439be50df6d4fe25c1f98cd5a42a)), closes [#1793](https://github.com/monetr/monetr/issues/1793)
+* **plaid:** Fixing plaid sync incorrectly marking accounts as inactive ([#1831](https://github.com/monetr/monetr/issues/1831)) ([16a930b](https://github.com/monetr/monetr/commit/16a930b598f3b4025015ce34af511de0f232918f))
+* **sentry:** Clone hub before setting it for cron job ([207ca07](https://github.com/monetr/monetr/commit/207ca07ede34a7fb6287560885b158a12ed052e7))
+* **storage:** Improved path validation in filesystem storage provider ([#1820](https://github.com/monetr/monetr/issues/1820)) ([db992c6](https://github.com/monetr/monetr/commit/db992c6f75886282c1ba4b8e678b38d47b4334c6)), closes [#1798](https://github.com/monetr/monetr/issues/1798)
+* **ui:** Fixed mobile transactions items not be clickable ([#1832](https://github.com/monetr/monetr/issues/1832)) ([0ebd42b](https://github.com/monetr/monetr/commit/0ebd42bf8423cac5729a6afba01ca75ef633f70c))
+
+
+### Miscellaneous
+
+* **dev:** Tweak nginx cloud config ([b1b842c](https://github.com/monetr/monetr/commit/b1b842c39ccb593961ed09bb6dc481cdab563369))
+
 ## [0.17.8](https://github.com/monetr/monetr/compare/v0.17.7...v0.17.8) (2024-07-04)
 
 
