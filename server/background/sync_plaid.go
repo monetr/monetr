@@ -903,7 +903,7 @@ func (s *SyncPlaidJob) syncPlaidBankAccount(
 	}
 
 	// If we observe the account again, then change it back to active.
-	if input != nil && bankAccount.Status == ActiveBankAccountStatus {
+	if input != nil && bankAccount.Status == InactiveBankAccountStatus {
 		changes = append(changes, SyncChange{
 			Field: "status",
 			Old:   InactiveBankAccountStatus,
