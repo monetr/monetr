@@ -303,6 +303,10 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 		updatedSpending.RuleSet = nil
 	}
 
+	if updatedSpending.SpendingType == SpendingTypeExpense && updatedSpending.RuleSet == nil {
+		return c.badRequest(ctx, "Expense must have a recurrence rule provided")
+	}
+
 	recalculateSpending := false
 	if updatedSpending.NextRecurrence != existingSpending.NextRecurrence {
 		newNext, err := c.midnightInLocal(ctx, updatedSpending.NextRecurrence)
