@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.17.10](https://github.com/monetr/monetr/compare/v0.17.9...v0.17.10) (2024-07-09)
+
+
+### Bug Fixes
+
+* **api:** Fix nil panic when a bad `put` is sent ([73d0976](https://github.com/monetr/monetr/commit/73d09767a42c37b0adaa2c2597b9d662d71dc424))
+* **plaid:** Fixed marking account as active ([e1a8c4f](https://github.com/monetr/monetr/commit/e1a8c4f9683607a080a4bfc77cba91fc49c7d7c8))
+
 ## [0.17.9](https://github.com/monetr/monetr/compare/v0.17.8...v0.17.9) (2024-07-06)
 
 
