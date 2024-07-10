@@ -25,6 +25,7 @@ type Job struct {
 	Input       string     `json:"-" pg:"input"`
 	Output      string     `json:"-" pg:"output"`
 	Status      JobStatus  `json:"-" pg:"status,notnull"`
+	TraceId     *string    `json:"-" pg:"trace_id"`
 	CreatedAt   time.Time  `json:"-" pg:"created_at,notnull"`
 	UpdatedAt   time.Time  `json:"-" pg:"updated_at,notnull"`
 	StartedAt   *time.Time `json:"-" pg:"started_at"`

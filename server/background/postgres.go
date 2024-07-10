@@ -100,12 +100,14 @@ func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, que
 		signature = hex.EncodeToString(signatureBuilder.Sum(nil))
 	}
 
+	traceId := span.TraceID.String()
 	job := models.Job{
 		Queue:       queue,
 		Signature:   signature,
 		Input:       string(encodedArguments),
 		Output:      "",
 		Status:      models.PendingJobStatus,
+		TraceId:     &traceId,
 		CreatedAt:   timestamp,
 		UpdatedAt:   timestamp,
 		StartedAt:   nil,
@@ -771,10 +773,16 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		// order to do this we need to inject a sentry hub into the context and
 		// create a new span using that context.
 		highContext := sentry.SetHubOnContext(ctx, sentry.CurrentHub().Clone())
+		options := []sentry.SpanOption{
+			sentry.WithTransactionName(handler.QueueName()),
+		}
+		if job.TraceId != nil {
+			options = append(options, sentry.ContinueFromTrace(*job.TraceId))
+		}
 		span := sentry.StartSpan(
 			highContext,
 			"topic.process",
-			sentry.WithTransactionName(handler.QueueName()),
+			options...,
 		)
 		span.Description = handler.QueueName()
 		jobLog := p.log.WithContext(span.Context())
