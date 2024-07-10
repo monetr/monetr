@@ -1,5 +1,3 @@
-
-
 set(GO_SRC_DIR "${CMAKE_SOURCE_DIR}/server")
 file(GLOB_RECURSE APP_GO_FILES
   "${GO_SRC_DIR}/*.go"
