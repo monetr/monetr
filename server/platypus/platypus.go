@@ -73,6 +73,10 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 			data["X-RequestId"] = requestId
 			span.Data["plaidRequestId"] = requestId
 			span.SetTag("plaidRequestId", requestId)
+			span.SetTag("http.request.method", response.Request.Method)
+			span.SetTag("server.address", response.Request.URL.Hostname())
+			span.SetTag("url.full", response.Request.URL.String())
+			span.SetTag("http.response.status_code", fmt.Sprint(response.StatusCode))
 		}
 
 		crumbs.HTTP(
