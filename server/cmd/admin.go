@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/config"
@@ -12,6 +13,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -141,6 +143,7 @@ func newSecretsCommand(parent *cobra.Command) {
 
 	newViewSecretCommand(command)
 	newTestKMSCommand(command)
+	newMigrateKMSCommand(command)
 
 	parent.AddCommand(command)
 }
@@ -235,8 +238,8 @@ func newTestKMSCommand(parent *cobra.Command) {
 			}
 
 			fmt.Printf("Successfully encrypted test string!\n")
-			fmt.Printf("Key ID: %s\n", keyId)
-			fmt.Printf("Version: %s\n", version)
+			fmt.Printf("Key ID: %+v\n", keyId)
+			fmt.Printf("Version: %+v\n", version)
 			fmt.Printf("Result Binary -----------\n")
 			fmt.Println()
 			fmt.Println(hex.Dump([]byte(result)))
@@ -265,6 +268,167 @@ func newTestKMSCommand(parent *cobra.Command) {
 			return nil
 		},
 	}
+
+	parent.AddCommand(command)
+}
+
+func newMigrateKMSCommand(parent *cobra.Command) {
+	var fromKms string
+	var dryRun bool
+
+	command := &cobra.Command{
+		Use:   "migrate-kms",
+		Short: "Migrate all stored secrets from one method of encryption to another.",
+		Long:  "Migrate all stored secrets from one method of encryption to another. This can be used to go from plaintext secret storage to an encrypted storage setup or vice versa. It can also allow you to easily migrate from one encrypted KMS provider to another. In order to perform the migration, specify the configuration for both KMS providers you require, and specify the new one as the provider in the config. Specify the old one as an argument to this command `--from-provider=`.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			configuration := config.LoadConfiguration()
+			fromConfiguration := configuration
+			fromConfiguration.KeyManagement.Provider = fromKms
+
+			log := logging.NewLoggerWithConfig(configuration.Logging)
+
+			kms, err := getKMS(log, configuration)
+			if err != nil {
+				log.WithError(err).Fatal("failed to setup new KMS")
+				return err
+			}
+
+			oldKms, err := getKMS(log, fromConfiguration)
+			if err != nil {
+				log.WithError(err).Fatal("failed to setup old KMS")
+				return err
+			}
+
+			db, err := getDatabase(log, configuration, nil)
+			if err != nil {
+				log.WithError(err).Fatalf("failed to initialze database")
+				return errors.Wrap(err, "failed to initialize database")
+			}
+
+			txn, err := db.Begin()
+			if err != nil {
+				log.WithError(err).Fatal("failed to begin database transaction")
+				return errors.Wrap(err, "failed to being database transaction")
+			}
+
+			offset := 0
+			for {
+				log.WithField("offset", offset).Trace("querying batch of 100 secrets")
+				var secrets []models.Secret
+				err := txn.Model(&secrets).
+					Order(`secret_id ASC`).
+					Limit(100).
+					Offset(offset).
+					Select(&secrets)
+				if err != nil {
+					log.WithField("offset", offset).
+						WithError(err).
+						Fatal("failed to retrieve batch of secrets")
+					return err
+				}
+
+				for i := range secrets {
+					secret := secrets[i]
+					func() {
+						ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+						defer cancel()
+
+						plaintext, err := oldKms.Decrypt(ctx, secret.KeyID, secret.Version, secret.Secret)
+						if err != nil {
+							log.
+								WithFields(logrus.Fields{
+									"secretId":  secret.SecretId,
+									"accountId": secret.AccountId,
+									"keyId":     secret.KeyID,
+									"version":   secret.Version,
+								}).
+								WithError(err).
+								Fatal("failed to decrypt secret using old provider")
+							panic(err)
+						}
+
+						newKeyId, newVersion, newCiphertext, err := kms.Encrypt(ctx, plaintext)
+						if err != nil {
+							log.
+								WithFields(logrus.Fields{
+									"secretId":  secret.SecretId,
+									"accountId": secret.AccountId,
+								}).
+								WithError(err).
+								Fatal("failed to re-encrypt secret using new provider")
+							panic(err)
+						}
+
+						if dryRun {
+							log.
+								WithFields(logrus.Fields{
+									"secretId":  secret.SecretId,
+									"accountId": secret.AccountId,
+									"old": logrus.Fields{
+										"keyId":   secret.KeyID,
+										"version": secret.Version,
+									},
+									"new": logrus.Fields{
+										"keyId":   newKeyId,
+										"version": newVersion,
+									},
+								}).
+								Info("successfully re-encrypted secret with new kms, changes wont be persisted due to dry run")
+							return
+						}
+
+						secret.KeyID = newKeyId
+						secret.Version = newVersion
+						secret.Secret = newCiphertext
+						_, err = txn.Model(&secret).WherePK().Update(&secret)
+						if err != nil {
+							log.WithFields(logrus.Fields{
+								"secretId":  secret.SecretId,
+								"accountId": secret.AccountId,
+							}).
+								WithError(err).
+								Fatal("failed to update secret with rotated ciphertext")
+							panic(err)
+						}
+
+						log.
+							WithFields(logrus.Fields{
+								"secretId":  secret.SecretId,
+								"accountId": secret.AccountId,
+								"old": logrus.Fields{
+									"keyId":   secret.KeyID,
+									"version": secret.Version,
+								},
+								"new": logrus.Fields{
+									"keyId":   newKeyId,
+									"version": newVersion,
+								},
+							}).
+							Info("successfully re-encrypted secret with new kms")
+					}()
+				}
+
+				if len(secrets) < 100 {
+					log.Info("no more secrets to update")
+					break
+				}
+
+				offset += len(secrets)
+			}
+
+			if dryRun {
+				log.Info("dry run! changes will not be persisted!")
+				txn.Rollback()
+				return nil
+			}
+
+			log.Info("all changes will now be committed!")
+			return txn.Commit()
+		},
+	}
+
+	command.PersistentFlags().StringVar(&fromKms, "from-provider", "", "Specify the KMS provider you are migrating from. Valid values are: plaintext, aws, google, vault")
+	command.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Don't persist the changes to the database, but still perform all the rotations in memory to ensure they all succeed.")
 
 	parent.AddCommand(command)
 }
