@@ -23,10 +23,7 @@ then
   bash -c $PWD/compose/api-builder.sh # Build the executable
   bash -c $PWD/compose/api-wrapper.sh # Execute the executable
 else
-  # Air gives us a hot reloader for golang. I'm doing this instead of using the container as this will support other
-  # architectures a bit more gracefully at the moment.
-  mkdir -p /build/tmp
-  chown -R $UID:$GID /build/tmp
+  # Air gives us a hot reloader for golang.
   air -c /build/air.toml
 fi
 

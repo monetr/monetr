@@ -1,7 +1,7 @@
 # Config file for [Air](https://github.com/cosmtrek/air) in TOML format
 
 root = "/build"
-tmp_dir = "/tmp"
+tmp_dir = "/build/development"
 
 [build]
 # Build monetr with the mini tag, this will allow insecure SMTP communication for working with emails locally.
