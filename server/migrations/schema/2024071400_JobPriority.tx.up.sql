@@ -1,4 +1,4 @@
-ALTER TABLE "jobs" ADD COLUMN "priority" BIGINT;
+ALTER TABLE "jobs" ADD COLUMN "priority" BIGINT DEFAULT extract(epoch from now() at time zone 'utc')::integer;
 
 UPDATE "jobs" 
 SET "priority" = extract(epoch from "created_at" at time zone 'utc')::integer
