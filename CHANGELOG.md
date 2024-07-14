@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.17.11](https://github.com/monetr/monetr/compare/v0.17.10...v0.17.11) (2024-07-14)
+
+
+### Features
+
+* **cmd:** Adding admin command to migrate between KMS providers ([#1837](https://github.com/monetr/monetr/issues/1837)) ([9d896a3](https://github.com/monetr/monetr/commit/9d896a3b1de97df6f3437464eeffdf3168e32371))
+* **devops:** Adding min4 datacenter deployment ([c27e962](https://github.com/monetr/monetr/commit/c27e962dd742950133791dcf6f0f20695943d191))
+* **jobs:** Include trace ID in jobs to see parent span ([5fd85ac](https://github.com/monetr/monetr/commit/5fd85ac4e6e8263826f04a9c4935fc881d25728d))
+* **sentry:** Adding more details to sentry spans ([d524a82](https://github.com/monetr/monetr/commit/d524a826c5051eec687d7c2ee5fb904dac4c017d))
+
+
+### Miscellaneous
+
+* Cleaning up cmake file for go source maps ([d5adede](https://github.com/monetr/monetr/commit/d5adede55e7f233a3b19d3cf85d3cde01c54ba7a))
+* **deps:** bump google.golang.org/grpc from 1.64.0 to 1.64.1 ([#1834](https://github.com/monetr/monetr/issues/1834)) ([2826dbc](https://github.com/monetr/monetr/commit/2826dbce0c199167c17565888be9b4c98e6e60be))
+
 ## [0.17.10](https://github.com/monetr/monetr/compare/v0.17.9...v0.17.10) (2024-07-09)
 
 
