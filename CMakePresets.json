@@ -22,6 +22,7 @@
         "MONETR_STRIPE_TAXES_ENABLED": "true",
         "MONETR_KMS_PROVIDER": "plaintext",
         "MONETR_STORAGE_PROVIDER": "s3",
+        "MONETR_FEATURE_FLAGS_ENABLED": "true",
         "DISABLE_GO_RELOAD": "false"
       }
     },

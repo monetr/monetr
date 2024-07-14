@@ -47,6 +47,8 @@ set(NGINX_CONFIG_FILE "${CMAKE_SOURCE_DIR}/compose/nginx.conf")
 if (CLOUD_MAGIC)
   set(NGINX_PORT "80")
   set(NGINX_CONFIG_FILE "${CMAKE_SOURCE_DIR}/compose/nginx-cloud.conf")
+elseif("${LOCAL_PROTOCOL}" STREQUAL "http")
+  set(NGINX_PORT "80")
 endif()
 
 set(LOCAL_CERTIFICATE_DIR ${CMAKE_BINARY_DIR}/certificates/${MONETR_LOCAL_DOMAIN})
@@ -70,32 +72,26 @@ add_custom_command(
   OUTPUT ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT}
   BYPRODUCTS ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT}
   COMMAND ${SUDO_EXECUTABLE} ${MKCERT_EXECUTABLE} -install
-  COMMAND ${MKCERT_EXECUTABLE} -key-file ${LOCAL_CERTIFICATE_KEY} -cert-file ${LOCAL_CERTIFICATE_CERT} ${MONETR_LOCAL_DOMAIN}
+  COMMAND ${MKCERT_EXECUTABLE} -key-file ${LOCAL_CERTIFICATE_KEY} -cert-file ${LOCAL_CERTIFICATE_CERT} *.${MONETR_LOCAL_DOMAIN} ${MONETR_LOCAL_DOMAIN}
   COMMENT "Setting up local development TLS certificate, this is required for OAuth2. You may be prompted for a password"
   DEPENDS ${MKCERT_EXECUTABLE}
 )
-
-add_custom_command(
-  OUTPUT ${LOCAL_HOSTS_MARKER}
-  BYPRODUCTS ${LOCAL_HOSTS_MARKER}
-  COMMAND ${SUDO_EXECUTABLE} ${HOSTESS_EXECUTABLE} add ${MONETR_LOCAL_DOMAIN} 127.0.0.1
-  COMMAND ${CMAKE_COMMAND} -E touch ${LOCAL_HOSTS_MARKER}
-  COMMENT "Setting up ${MONETR_LOCAL_DOMAIN} domain with your /etc/hosts file. You may be prompted for a password"
-  DEPENDS ${HOSTESS_EXECUTABLE}
-)
-
 add_custom_target(development.certificates DEPENDS ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT})
-add_custom_target(development.hostsfile DEPENDS ${LOCAL_HOSTS_MARKER})
 
 ########################################################################################################################
 # This section determines which compose files will be used when the development environment is started. Compose files
 # are "merged" by docker at runtime, so this is a simple way of providing some customizability to local development.
 ########################################################################################################################
 
+# We also want to maintain a list of subdomains here. We will need to generate
+# hostfile things for each of these down below.
+set(SUBDOMAINS "my" "mail")
+
 set(COMPOSE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/development)
 file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY})
 
 set(COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.monetr.yaml.in)
+
 if (NGROK_AUTH OR DEFINED ENV{NGROK_AUTH} OR NGROK_ENABLED)
   set(NGROK_AUTH "${NGROK_AUTH}")
   if(NOT NGROK_AUTH)
@@ -111,6 +107,8 @@ if (NGROK_AUTH OR DEFINED ENV{NGROK_AUTH} OR NGROK_ENABLED)
   if(NGROK_HOSTNAME)
     message(STATUS "  Webhook domain: ${NGROK_HOSTNAME}")
   endif()
+
+  list(APPEND SUBDOMAINS "ngrok")
 else()
   message(STATUS "No ngrok credentials detected, webhooks will not be enabled for local development.")
 endif()
@@ -137,6 +135,7 @@ elseif("${MONETR_KMS_PROVIDER}" STREQUAL "vault")
   configure_file("${CMAKE_SOURCE_DIR}/compose/vault-config.toml.in" "${COMPOSE_OUTPUT_DIRECTORY}/vault/config.toml" @ONLY)
   # And then add our vault container to our compose list.
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.vault-kms.yaml.in)
+  list(APPEND SUBDOMAINS "vault")
 elseif("${MONETR_KMS_PROVIDER}" STREQUAL "")
   set(MONETR_KMS_PROVIDER "plaintext")
 elseif("${MONETR_KMS_PROVIDER}" STREQUAL "plaintext")
@@ -152,6 +151,7 @@ if("${MONETR_STORAGE_PROVIDER}" STREQUAL "s3")
   message(STATUS "  Uploaded files will be available at: http://localhost:9001")
   message(STATUS "  Username: monetr Password: password")
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.s3-storage.yaml.in)
+  list(APPEND SUBDOMAINS "s3")
 elseif("${MONETR_STORAGE_PROVIDER}" STREQUAL "filesystem")
   set(MONETR_STORAGE_ENABLED "true")
   file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/storage)
@@ -159,6 +159,14 @@ elseif("${MONETR_STORAGE_PROVIDER}" STREQUAL "filesystem")
   message(STATUS "  Uploaded files will be available at: ${COMPOSE_OUTPUT_DIRECTORY}/storage")
 elseif("${MONETR_STORAGE_PROVIDER}" STREQUAL "")
   set(MONETR_STORAGE_ENABLED "false")
+endif()
+
+# Setup feature flags based on the config
+if("${MONETR_FEATURE_FLAGS_ENABLED}" STREQUAL "true")
+  message(STATUS "Feature flags are enabled, flipt.io will be deployed with the local development environment")
+  message(STATUS "  It will be available at: http://localhost:8080")
+  list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.flipt.yaml.in)
+  list(APPEND SUBDOMAINS "flipt")
 endif()
 
 # Once the list of compose file templates has been built, actually generate the template files and build our arguments
@@ -176,6 +184,22 @@ foreach(COMPOSE_FILE_TEMPLATE ${COMPOSE_FILE_TEMPLATES})
 endforeach()
 
 ########################################################################################################################
+
+set(HOSTFILE_DOMAINS)
+foreach(SUBDOMAIN ${SUBDOMAINS})
+  list(APPEND HOSTFILE_DOMAINS "${SUBDOMAIN}.${MONETR_LOCAL_DOMAIN}")
+endforeach()
+
+add_custom_command(
+  OUTPUT ${LOCAL_HOSTS_MARKER}
+  BYPRODUCTS ${LOCAL_HOSTS_MARKER}
+  COMMAND ${SUDO_EXECUTABLE} ${HOSTESS_EXECUTABLE} add ${MONETR_LOCAL_DOMAIN} 127.0.0.1
+  COMMAND ${CMAKE_COMMAND} -E touch ${LOCAL_HOSTS_MARKER}
+  COMMENT "Setting up ${MONETR_LOCAL_DOMAIN} domain with your /etc/hosts file. You may be prompted for a password"
+  DEPENDS ${HOSTESS_EXECUTABLE}
+)
+add_custom_target(development.hostsfile DEPENDS ${LOCAL_HOSTS_MARKER})
+
 
 set(ENV{LOCAL_CERTIFICATE_DIR} ${LOCAL_CERTIFICATE_DIR})
 set(BASE_ARGS "--project-directory" "${CMAKE_SOURCE_DIR}")
@@ -215,7 +239,10 @@ add_custom_target(
 )
 
 if(NOT CLOUD_MAGIC)
-  add_dependencies(development.monetr.up development.certificates development.hostsfile)
+  add_dependencies(development.monetr.up development.hostsfile) 
+  if("${LOCAL_PROTOCOL}" STREQUAL "https")
+    add_dependencies(development.monetr.up development.certificates)
+  endif()
 endif()
 
 add_custom_target(
