@@ -283,6 +283,7 @@ func newMigrateKMSCommand(parent *cobra.Command) {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configuration := config.LoadConfiguration()
 			fromConfiguration := configuration
+			fromConfiguration.KeyManagement.Provider = fromKms
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 
@@ -315,7 +316,7 @@ func newMigrateKMSCommand(parent *cobra.Command) {
 				log.WithField("offset", offset).Trace("querying batch of 100 secrets")
 				var secrets []models.Secret
 				err := txn.Model(&secrets).
-					Order(`"secret_id" ASC`).
+					Order(`secret_id ASC`).
 					Limit(100).
 					Offset(offset).
 					Select(&secrets)
