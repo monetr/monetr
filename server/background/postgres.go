@@ -100,19 +100,21 @@ func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, que
 		signature = hex.EncodeToString(signatureBuilder.Sum(nil))
 	}
 
-	traceId := span.TraceID.String()
+	traceId := span.ToSentryTrace()
+	baggage := span.ToBaggage()
 	job := models.Job{
-		Queue:       queue,
-		Signature:   signature,
-		Priority:    uint64(timestamp.Unix()),
-		Input:       string(encodedArguments),
-		Output:      "",
-		Status:      models.PendingJobStatus,
-		TraceId:     &traceId,
-		CreatedAt:   timestamp,
-		UpdatedAt:   timestamp,
-		StartedAt:   nil,
-		CompletedAt: nil,
+		Queue:         queue,
+		Signature:     signature,
+		Priority:      uint64(timestamp.Unix()),
+		Input:         string(encodedArguments),
+		Output:        "",
+		Status:        models.PendingJobStatus,
+		SentryTraceId: &traceId,
+		SentryBaggage: &baggage,
+		CreatedAt:     timestamp,
+		UpdatedAt:     timestamp,
+		StartedAt:     nil,
+		CompletedAt:   nil,
 	}
 	_, err = txn.ModelContext(span.Context(), &job).Insert(&job)
 	if err != nil {
@@ -781,8 +783,11 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		options := []sentry.SpanOption{
 			sentry.WithTransactionName(handler.QueueName()),
 		}
-		if job.TraceId != nil {
-			options = append(options, sentry.ContinueFromTrace(*job.TraceId))
+		if job.SentryTraceId != nil && job.SentryBaggage != nil {
+			options = append(options, sentry.ContinueFromHeaders(
+				*job.SentryTraceId,
+				*job.SentryBaggage,
+			))
 		}
 		span := sentry.StartSpan(
 			highContext,
@@ -790,6 +795,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 			options...,
 		)
 		span.Description = handler.QueueName()
+		span.SetData("input", job.Input)
 		jobLog := p.log.WithContext(span.Context())
 		hub := sentry.GetHubFromContext(span.Context())
 		hub.ConfigureScope(func(scope *sentry.Scope) {
