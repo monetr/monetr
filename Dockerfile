@@ -38,6 +38,8 @@ RUN apt-get update && \
       tzdata \
       ca-certificates \
       locales-all \
+      # Required for backups
+      postgresql-client \
     && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
