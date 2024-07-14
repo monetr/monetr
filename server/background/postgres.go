@@ -104,6 +104,7 @@ func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, que
 	job := models.Job{
 		Queue:       queue,
 		Signature:   signature,
+		Priority:    uint64(timestamp.Unix()),
 		Input:       string(encodedArguments),
 		Output:      "",
 		Status:      models.PendingJobStatus,
@@ -226,7 +227,11 @@ func (p *postgresJobProcessor) Start() error {
 	// retrieve jobs for the queues that have been reigstered.
 	p.jobQuery = p.db.Model(new(models.Job)).
 		Column("job_id").
+		// Only get jobs that are pending.
 		Where(`"status" = ?`, models.PendingJobStatus).
+		// Only get jobs that have a priority that is now or in the past.
+		Where(`"priority" <= extract(epoch from now() at time zone 'utc')::integer`).
+		// Only consume jobs we recognize.
 		WhereIn(`"queue" IN (?)`, p.queues).
 		Order(`created_at ASC`).
 		For(`UPDATE SKIP LOCKED`).

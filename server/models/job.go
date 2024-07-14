@@ -20,6 +20,7 @@ type Job struct {
 	tableName string `pg:"jobs"`
 
 	JobId       ID[Job]    `json:"-" pg:"job_id,notnull,pk"`
+	Priority    uint64     `json:"-" pg:"priority,notnull"`
 	Queue       string     `json:"-" pg:"queue,notnull"`
 	Signature   string     `json:"-" pg:"signature,notnull"`
 	Input       string     `json:"-" pg:"input"`
