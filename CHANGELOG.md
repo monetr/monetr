@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.17.12](https://github.com/monetr/monetr/compare/v0.17.11...v0.17.12) (2024-07-15)
+
+
+### Features
+
+* **jobs:** Adding a job priority field. ([d6b0e7e](https://github.com/monetr/monetr/commit/d6b0e7ea74377af1091a6e5c8cab58a9e9223832))
+* **sentry:** Get sentry span/transaction linking working ([2ac7197](https://github.com/monetr/monetr/commit/2ac7197b13ba2e590ad86d27c77369d581024a12))
+
+
+### Bug Fixes
+
+* **dev:** Fixed `tmp` directory being created for local dev ([a51e4ea](https://github.com/monetr/monetr/commit/a51e4eab457cfda7a7525980a008305f1cb6953e))
+* **job:** Fixed job priority not working. ([f74216a](https://github.com/monetr/monetr/commit/f74216a4c853670b73290757dddef2cface2efe2))
+
 ## [0.17.11](https://github.com/monetr/monetr/compare/v0.17.10...v0.17.11) (2024-07-14)
 
 
