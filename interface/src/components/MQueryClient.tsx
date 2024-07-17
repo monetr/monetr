@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { ReactElement } from './types';
@@ -9,7 +9,7 @@ export interface MQueryClientProps {
 }
 
 export default function MQueryClient(props: MQueryClientProps): JSX.Element {
-  const queryClient = new QueryClient({
+  const queryClient = useMemo(() => new QueryClient({
     // TODO make this configurable somehow? Its annoying in tests but maybe good for local dev?
     logger: {
       log: () => { },
@@ -22,10 +22,10 @@ export default function MQueryClient(props: MQueryClientProps): JSX.Element {
         queryFn: Query,
       },
     },
-  });
+  }), []);
 
   return (
-    <QueryClientProvider client={ queryClient }>
+    <QueryClientProvider client={queryClient}>
       {props.children}
     </QueryClientProvider>
   );
