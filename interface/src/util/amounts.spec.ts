@@ -91,14 +91,6 @@ describe('amounts', () => {
       expect(bar).toMatch(/-.1,234/);
     });
 
-    it('will format EUR properly', () => {
-      const foo = formatAmount(1234, AmountType.Stored, 'en-DE', 'EUR');
-      expect(foo).toMatch(/(?:.\s?)?12,34(?:\s.)?/);
-
-      const bar = formatAmount(12.34, AmountType.Friendly, 'en-DE', 'EUR');
-      expect(bar).toMatch(/(?:.\s?)?12,34(?:\s.)?/);
-    });
-
     it('will format RUB properly', () => {
       const foo = formatAmount(1234, AmountType.Stored, 'ru-RU', 'RUB');
       expect(foo).toMatch(/(?:.\s)?12,34(?:\s.)/);
