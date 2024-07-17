@@ -92,9 +92,13 @@ storybook: | $(CMAKE_CONFIGURATION_DIRECTORY)
 migrate: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.migrate $(BUILD_ARGS)
 
+# If the user provides a pattern, then pass that through to CTest
+ifdef PATTERN
+PATTERN_ARG=-R $(PATTERN)
+endif
 test:
 	cmake --preset testing
-	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure -j $(CONCURRENCY)
+	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure -j $(CONCURRENCY) $(PATTERN_ARG)
 
 develop: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.monetr.up $(BUILD_ARGS)
