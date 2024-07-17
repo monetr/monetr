@@ -143,6 +143,10 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
           SKIP_REGULAR_EXPRESSION " SKIP: "
           TIMEOUT 45
         )
+        set_property(
+          TEST ${PACKAGE}/${FRIENDLY_TEST_NAME}
+          PROPERTY LABELS "server"
+        )
       endforeach()
     endif()
   endif()
