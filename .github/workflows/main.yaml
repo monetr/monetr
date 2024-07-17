@@ -132,7 +132,7 @@ jobs:
 
       - name: CodeCov
         if: always()
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           name: monetr
           directory: ${{ github.workspace }}/build/tests

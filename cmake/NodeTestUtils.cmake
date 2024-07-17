@@ -14,12 +14,13 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
     foreach(SPEC_FILE IN LISTS SPEC_FILES)
       string(REGEX REPLACE "([a-zA-Z0-9_]+)\\.spec.+" "\\1" SPEC_NAME "${SPEC_FILE}")
 
-      # set(TEST_ARGS "--maxWorkers=1" "--config" "${UI_SRC_DIR}/jest.config.ts")
-      # if(TEST_COVERAGE)
-      #   # If we are collecting code coverage then we want to add these flags to jest. Because we are running tests one
-      #   # file at a time we need to pass --watchAll=false in order for jest to properly collect coverage.
-      #   list(APPEND TEST_ARGS "--coverage" "--coverageDirectory=${PACKAGE_COVERAGE_DIRECTORY}/${SPEC_NAME}" "--watchAll=false")
-      # endif()
+
+      set(TEST_ARGS "--timeout=5000" "--preload=${CMAKE_SOURCE_DIR}/interface/src/setupTests.ts")
+      if(TEST_COVERAGE)
+        # If we are collecting code coverage then we want to add these flags to jest. Because we are running tests one
+        # file at a time we need to pass --watchAll=false in order for jest to properly collect coverage.
+        list(APPEND TEST_ARGS "--coverage" "--coverage-reporter=lcov" "--coverage-dir=${PACKAGE_COVERAGE_DIRECTORY}/${SPEC_NAME}")
+      endif()
 
       set(COMMAND_PREFIX)
       if(NOT DEFINED ENV{CI})
@@ -28,7 +29,7 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
 
       add_test(
         NAME ${PACKAGE}/${SPEC_NAME}
-        COMMAND ${COMMAND_PREFIX} ${BUN_EXECUTABLE} test ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
+        COMMAND ${COMMAND_PREFIX} ${BUN_EXECUTABLE} test ${TEST_ARGS} ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/interface
       )
       set_tests_properties(${PACKAGE}/${SPEC_NAME} PROPERTIES FIXTURES_REQUIRED node_modules)
