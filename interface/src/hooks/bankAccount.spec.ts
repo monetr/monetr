@@ -1,6 +1,6 @@
-import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
+import monetrClient from '@monetr/interface/api/api';
 import { useSelectedBankAccount, useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 
@@ -11,7 +11,7 @@ describe('bank account hooks', () => {
     let mockAxios: MockAdapter;
 
     beforeEach(() => {
-      mockAxios = new MockAdapter(axios);
+      mockAxios = new MockAdapter(monetrClient);
     });
     afterEach(() => {
       mockAxios.reset();

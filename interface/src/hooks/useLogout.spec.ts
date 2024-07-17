@@ -1,15 +1,17 @@
 import { act } from '@testing-library/react-hooks';
-import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
+import monetrClient from '@monetr/interface/api/api';
 import useLogout from '@monetr/interface/hooks/useLogout';
 import testRenderHook from '@monetr/interface/testutils/hooks';
+
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
 describe('logout', () => {
   let mockAxios: MockAdapter;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(axios);
+    mockAxios = new MockAdapter(monetrClient);
   });
   afterEach(() => {
     mockAxios.reset();
@@ -29,6 +31,6 @@ describe('logout', () => {
 
     // Make sure that we did make the API call.
     expect(mockAxios.history['get']).toHaveLength(1);
-    expect(mockAxios.history['get'][0]).toMatchObject({ url: '/api/authentication/logout' });
+    expect(mockAxios.history['get'][0]).toMatchObject({ url: '/authentication/logout' });
   });
 });

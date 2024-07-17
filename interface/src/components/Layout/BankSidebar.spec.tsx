@@ -1,8 +1,8 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
+import monetrClient from '@monetr/interface/api/api';
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
@@ -12,7 +12,7 @@ describe('bank sidebar', () => {
   let mockAxios: MockAdapter;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(axios);
+    mockAxios = new MockAdapter(monetrClient);
   });
   afterEach(() => {
     mockAxios.reset();

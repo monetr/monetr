@@ -5,7 +5,6 @@
 
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { cleanup, configure  } from '@testing-library/react';
-import axios from 'axios';
 
 // import { server } from '@monetr/interface/testutils/server';
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
@@ -13,7 +12,7 @@ import { afterEach, expect } from 'bun:test';
 
 GlobalRegistrator.register();;
 
-expect.extend(matchers);
+expect.extend(matchers as any);
 
 // import { Window } from 'happy-dom';
 //
@@ -34,9 +33,6 @@ expect.extend(matchers);
 
 // axios.defaults.adapter = 'http';
 // location.href = 'https://monetr.local';
-window.API = axios.create({
-  baseURL: '/api',
-});
 
 configure({
   asyncUtilTimeout: 10000,

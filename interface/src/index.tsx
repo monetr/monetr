@@ -5,7 +5,6 @@ import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import { Integrations } from '@sentry/tracing';
 
-import { NewClient } from '@monetr/interface/api/api';
 import RelayTransport from '@monetr/interface/relay/transport';
 import reportWebVitals from '@monetr/interface/reportWebVitals';
 import Root from '@monetr/interface/Root';
@@ -49,10 +48,6 @@ if (window?.__MONETR__?.SENTRY_DSN) {
     },
   });
 }
-
-window.API = NewClient({
-  baseURL: '/api',
-});
 
 root.render(
   <Root />,

@@ -21,9 +21,14 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
       #   list(APPEND TEST_ARGS "--coverage" "--coverageDirectory=${PACKAGE_COVERAGE_DIRECTORY}/${SPEC_NAME}" "--watchAll=false")
       # endif()
 
+      set(COMMAND_PREFIX)
+      if(NOT DEFINED ENV{CI})
+        set(COMMAND_PREFIX ${CMAKE_COMMAND} -E env FORCE_COLOR=1 --)
+      endif()
+
       add_test(
         NAME ${PACKAGE}/${SPEC_NAME}
-        COMMAND ${BUN_EXECUTABLE} test ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
+        COMMAND ${COMMAND_PREFIX} ${BUN_EXECUTABLE} test ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/interface
       )
       set_tests_properties(${PACKAGE}/${SPEC_NAME} PROPERTIES FIXTURES_REQUIRED node_modules)

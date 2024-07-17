@@ -1,9 +1,10 @@
+/* eslint-disable max-len */
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
 import FundingDetails from './details';
+import monetrClient from '@monetr/interface/api/api';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
@@ -12,7 +13,7 @@ describe('funding schedule details view', () => {
   let mockAxios: MockAdapter;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(axios);
+    mockAxios = new MockAdapter(monetrClient);
   });
   afterEach(() => {
     mockAxios.reset();

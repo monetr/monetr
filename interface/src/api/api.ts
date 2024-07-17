@@ -3,7 +3,6 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 declare global {
   interface Window {
-    API: AxiosInterface;
     __MONETR__: {
       SENTRY_DSN: string | null;
     }
@@ -28,7 +27,6 @@ export interface AxiosInterface {
   patch<T = any, R = AxiosResponse<T>, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>): Promise<R>;
 }
 
-export default axios;
 
 export function NewClient(config: AxiosRequestConfig): AxiosInstance {
   const client = axios.create(config);
@@ -49,5 +47,12 @@ export function NewClient(config: AxiosRequestConfig): AxiosInstance {
     return Promise.reject(error);
   });
 
+
   return client;
 }
+
+const monetrClient = NewClient({
+  baseURL: '/api',
+});
+
+export default monetrClient;

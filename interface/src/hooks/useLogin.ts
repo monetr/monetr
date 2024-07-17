@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+
+import request from '@monetr/interface/util/request';
 
 export interface LoginArguments {
   email: string;
@@ -14,7 +15,8 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
   const queryClient = useQueryClient();
 
   return async (loginArgs: LoginArguments): Promise<void> => {
-    return axios.post('/api/authentication/login', loginArgs)
+    return request()
+      .post('/authentication/login', loginArgs)
       .then(async result => {
         // Then bootstrap the authentication, once it's bootstrapped we want to consider the `nextUrl` field from the
         // login response above. If the nextUrl is present, then we want to navigate the user to that path. If it is not

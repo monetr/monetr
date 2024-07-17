@@ -1,8 +1,8 @@
 import * as reactRouter from 'react-router-dom';
 import { act } from '@testing-library/react';
-import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
+import monetrClient from '@monetr/interface/api/api';
 import useLogin from '@monetr/interface/hooks/useLogin';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 
@@ -18,7 +18,7 @@ describe('login', () => {
   let mockAxios: MockAdapter;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(axios);
+    mockAxios = new MockAdapter(monetrClient);
     mockUseNavigate.mockReset();
   });
   afterEach(() => {

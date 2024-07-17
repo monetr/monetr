@@ -1,20 +1,29 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { rest } from 'msw';
+import MockAdapter from 'axios-mock-adapter';
 
 import ResendVerificationPage from './resend';
+import monetrClient from '@monetr/interface/api/api';
 import testRenderer from '@monetr/interface/testutils/renderer';
-import { server } from '@monetr/interface/testutils/server';
+
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
 describe('resend verification email', () => {
+  let mockAxios: MockAdapter;
+  
+  beforeEach(() => {
+    mockAxios = new MockAdapter(monetrClient);
+  });
+  afterEach(() => {
+    mockAxios.reset();
+  });
+  
+  afterAll(() => mockAxios.restore());
+
   it('will render without ReCAPTCHA', () => {
-    server.use(
-      rest.get('/api/config', (_req, res, ctx) => {
-        return res(ctx.json({
-          ReCAPTCHAKey: null,
-        }));
-      }),
-    );
+    mockAxios.onGet('/api/config').reply(200, {
+      ReCAPTCHAKey: null,
+    });
 
     const world = testRenderer(<ResendVerificationPage />, { initialRoute: '/verify/email/resend' });
 
@@ -25,13 +34,9 @@ describe('resend verification email', () => {
   });
 
   it('will render with ReCAPTCHA', async () => {
-    server.use(
-      rest.get('/api/config', (_req, res, ctx) => {
-        return res(ctx.json({
-          ReCAPTCHAKey: '6LfL3vcgAAAAALlJNxvUPdgrbzH_ca94YTCqso6L',
-        }));
-      }),
-    );
+    mockAxios.onGet('/api/config').reply(200, {
+      ReCAPTCHAKey: '6LfL3vcgAAAAALlJNxvUPdgrbzH_ca94YTCqso6L',
+    });
 
     const world = testRenderer(<ResendVerificationPage />, { initialRoute: '/verify/email/resend' });
 
@@ -42,13 +47,9 @@ describe('resend verification email', () => {
   });
 
   it('will render with provided email', async () => {
-    server.use(
-      rest.get('/api/config', (_req, res, ctx) => {
-        return res(ctx.json({
-          ReCAPTCHAKey: null,
-        }));
-      }),
-    );
+    mockAxios.onGet('/api/config').reply(200, {
+      ReCAPTCHAKey: null,
+    });
 
     const world = testRenderer(
       <ResendVerificationPage />,

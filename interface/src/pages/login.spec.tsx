@@ -2,9 +2,9 @@ import React from 'react';
 import * as reactRouter from 'react-router-dom';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
+import monetrClient from '@monetr/interface/api/api';
 import Login from '@monetr/interface/pages/login';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
@@ -20,7 +20,7 @@ describe('login page', () => {
   let mockAxios: MockAdapter;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(axios);
+    mockAxios = new MockAdapter(monetrClient);
     mockUseNavigate.mockReset();
   });
   afterEach(() => {
