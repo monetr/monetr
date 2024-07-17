@@ -1,53 +1,62 @@
+/* eslint-disable max-len */
 import { act } from '@testing-library/react-hooks';
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
 import { parseJSON } from 'date-fns';
-import { rest } from 'msw';
 
 import { FundingScheduleUpdateResponse, useCreateFundingSchedule, useFundingSchedule, useFundingSchedulesSink, useUpdateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import testRenderHook from '@monetr/interface/testutils/hooks';
-import { server } from '@monetr/interface/testutils/server';
+
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
 describe('funding schedule hooks', () => {
   describe('read funding schedules', () => {
-    it('will request all funding schedules', async () => {
-      server.use(
-        rest.get('/api/bank_accounts/12', (_req, res, ctx) => {
-          return res(ctx.json({
-            'bankAccountId': 12,
-            'linkId': 4,
-            'availableBalance': 48635,
-            'currentBalance': 48635,
-            'mask': '2982',
-            'name': 'Mercury Checking',
-            'originalName': 'Mercury Checking',
-            'officialName': 'Mercury Checking',
-            'accountType': 'depository',
-            'accountSubType': 'checking',
-            'status': 'active',
-            'lastUpdated': '2023-07-02T04:22:52.48118Z',
-          }));
-        }),
-        rest.get('/api/bank_accounts/12/funding_schedules', (_req, res, ctx) => {
-          return res(ctx.json([
-            {
-              'bankAccountId': 12,
-              'dateStarted': '2023-02-28T06:00:00Z',
-              'description': '15th and last day of every month',
-              'estimatedDeposit': null,
-              'excludeWeekends': true,
-              'fundingScheduleId': 3,
-              'lastOccurrence': '2023-07-14T05:00:00Z',
-              'name': 'Elliot\'s Contribution',
-              'nextOccurrence': '2023-07-31T05:00:00Z',
-              'nextOccurrenceOriginal': '2023-07-31T05:00:00Z',
-              'rule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
-              'waitForDeposit': false,
-            },
-          ]));
-        }),
-      );
+    let mockAxios: MockAdapter;
 
-      const world = testRenderHook(useFundingSchedulesSink, { initialRoute: '/bank/12/funding' });
+    beforeEach(() => {
+      mockAxios = new MockAdapter(axios);
+    });
+    afterEach(() => {
+      mockAxios.reset();
+    });
+
+    afterAll(() => mockAxios.restore());
+
+    it('will request all funding schedules', async () => {
+      mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+        'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
+        'availableBalance': 48635,
+        'currentBalance': 48635,
+        'mask': '2982',
+        'name': 'Mercury Checking',
+        'originalName': 'Mercury Checking',
+        'officialName': 'Mercury Checking',
+        'accountType': 'depository',
+        'accountSubType': 'checking',
+        'status': 'active',
+        'lastUpdated': '2023-07-02T04:22:52.48118Z',
+      });
+
+      mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules').reply(200, [
+        {
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+          'dateStarted': '2023-02-28T06:00:00Z',
+          'description': '15th and last day of every month',
+          'estimatedDeposit': null,
+          'excludeWeekends': true,
+          'fundingScheduleId': 'fund_01hy4re7c1xc2v44cf6kx302jx', // 3,
+          'lastRecurrence': '2023-09-29T05:00:00Z',
+          'name': 'Elliot\'s Contribution',
+          'nextRecurrence': '2023-10-13T05:00:00Z',
+          'nextRecurrenceOriginal': '2023-10-15T05:00:00Z',
+          'ruleset': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+          'waitForDeposit': false,
+        },
+      ]);
+
+      const world = testRenderHook(useFundingSchedulesSink, { initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding' });
       await world.waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
       await world.waitForNextUpdate();
       await world.waitFor(() => expect(world.result.current.isFetching).toBeTruthy());
@@ -57,42 +66,37 @@ describe('funding schedule hooks', () => {
     });
 
     it('will request a single funding schedule', async () => {
-      server.use(
-        rest.get('/api/bank_accounts/12', (_req, res, ctx) => {
-          return res(ctx.json({
-            'bankAccountId': 12,
-            'linkId': 4,
-            'availableBalance': 48635,
-            'currentBalance': 48635,
-            'mask': '2982',
-            'name': 'Mercury Checking',
-            'originalName': 'Mercury Checking',
-            'officialName': 'Mercury Checking',
-            'accountType': 'depository',
-            'accountSubType': 'checking',
-            'status': 'active',
-            'lastUpdated': '2023-07-02T04:22:52.48118Z',
-          }));
-        }),
-        rest.get('/api/bank_accounts/12/funding_schedules/3', (_req, res, ctx) => {
-          return res(ctx.json({
-            'bankAccountId': 12,
-            'dateStarted': '2023-02-28T06:00:00Z',
-            'description': '15th and last day of every month',
-            'estimatedDeposit': null,
-            'excludeWeekends': true,
-            'fundingScheduleId': 3,
-            'lastOccurrence': '2023-07-14T05:00:00Z',
-            'name': 'Elliot\'s Contribution',
-            'nextOccurrence': '2023-07-31T05:00:00Z',
-            'nextOccurrenceOriginal': '2023-07-31T05:00:00Z',
-            'rule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
-            'waitForDeposit': false,
-          }));
-        }),
-      );
+      mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+        'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
+        'availableBalance': 48635,
+        'currentBalance': 48635,
+        'mask': '2982',
+        'name': 'Mercury Checking',
+        'originalName': 'Mercury Checking',
+        'officialName': 'Mercury Checking',
+        'accountType': 'depository',
+        'accountSubType': 'checking',
+        'status': 'active',
+        'lastUpdated': '2023-07-02T04:22:52.48118Z',
+      });
 
-      const world = testRenderHook(() => useFundingSchedule(3), { initialRoute: '/bank/12/funding' });
+      mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules/fund_01hy4re7c1xc2v44cf6kx302jx').reply(200, {
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+        'dateStarted': '2023-02-28T06:00:00Z',
+        'description': '15th and last day of every month',
+        'estimatedDeposit': null,
+        'excludeWeekends': true,
+        'fundingScheduleId': 'fund_01hy4re7c1xc2v44cf6kx302jx', // 3,
+        'lastRecurrence': '2023-09-29T05:00:00Z',
+        'name': 'Elliot\'s Contribution',
+        'nextRecurrence': '2023-10-13T05:00:00Z',
+        'nextRecurrenceOriginal': '2023-10-15T05:00:00Z',
+        'ruleset': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+        'waitForDeposit': false,
+      });
+
+      const world = testRenderHook(() => useFundingSchedule('fund_01hy4re7c1xc2v44cf6kx302jx'), { initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding' });
       await world.waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
       await world.waitForNextUpdate();
       await world.waitFor(() => expect(world.result.current.isFetching).toBeTruthy());
@@ -103,47 +107,53 @@ describe('funding schedule hooks', () => {
   });
 
   describe('create funding schedule', () => {
-    it('will create a funding schedule', async () => {
-      server.use(
-        rest.get('/api/bank_accounts/12', (_req, res, ctx) => {
-          return res(ctx.json({
-            'bankAccountId': 12,
-            'linkId': 4,
-            'availableBalance': 48635,
-            'currentBalance': 48635,
-            'mask': '2982',
-            'name': 'Mercury Checking',
-            'originalName': 'Mercury Checking',
-            'officialName': 'Mercury Checking',
-            'accountType': 'depository',
-            'accountSubType': 'checking',
-            'status': 'active',
-            'lastUpdated': '2023-07-02T04:22:52.48118Z',
-          }));
-        }),
-        rest.post('/api/bank_accounts/12/funding_schedules', (_req, res, ctx) => {
-          return res(ctx.json({
-            'bankAccountId': 12,
-            'dateStarted': '2023-02-28T06:00:00Z',
-            'description': '15th and last day of every month',
-            'estimatedDeposit': null,
-            'excludeWeekends': true,
-            'fundingScheduleId': 3,
-            'lastOccurrence': '2023-07-14T05:00:00Z',
-            'name': 'Elliot\'s Contribution',
-            'nextOccurrence': '2023-07-31T05:00:00Z',
-            'nextOccurrenceOriginal': '2023-07-31T05:00:00Z',
-            'rule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
-            'waitForDeposit': false,
-          }));
-        }),
-      );
+    let mockAxios: MockAdapter;
 
-      const world = testRenderHook(useCreateFundingSchedule, { initialRoute: '/bank/12/funding' });
+    beforeEach(() => {
+      mockAxios = new MockAdapter(axios);
+    });
+    afterEach(() => {
+      mockAxios.reset();
+    });
+
+    afterAll(() => mockAxios.restore());
+
+    it('will create a funding schedule', async () => {
+      mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+        'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
+        'availableBalance': 48635,
+        'currentBalance': 48635,
+        'mask': '2982',
+        'name': 'Mercury Checking',
+        'originalName': 'Mercury Checking',
+        'officialName': 'Mercury Checking',
+        'accountType': 'depository',
+        'accountSubType': 'checking',
+        'status': 'active',
+        'lastUpdated': '2023-07-02T04:22:52.48118Z',
+      });
+
+      mockAxios.onPost('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules').reply(200, {
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+        'dateStarted': '2023-02-28T06:00:00Z',
+        'description': '15th and last day of every month',
+        'estimatedDeposit': null,
+        'excludeWeekends': true,
+        'fundingScheduleId': 'fund_01hy4re7c1xc2v44cf6kx302jx', // 3,
+        'lastRecurrence': '2023-09-29T05:00:00Z',
+        'name': 'Elliot\'s Contribution',
+        'nextRecurrence': '2023-10-13T05:00:00Z',
+        'nextRecurrenceOriginal': '2023-10-15T05:00:00Z',
+        'ruleset': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+        'waitForDeposit': false,
+      });
+
+      const world = testRenderHook(useCreateFundingSchedule, { initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding' });
       let result: FundingSchedule;
       await act(async () => {
         result = await world.result.current(new FundingSchedule({
-          bankAccountId: 12,
+          bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
           description: 'something',
           name: 'Elliot\'s Contribution',
           nextRecurrence: parseJSON('2023-07-31T05:00:00Z'),
@@ -157,35 +167,30 @@ describe('funding schedule hooks', () => {
     });
 
     it('it will fail to create a funding schedule', async () => {
-      server.use(
-        rest.get('/api/bank_accounts/12', (_req, res, ctx) => {
-          return res(ctx.json({
-            'bankAccountId': 12,
-            'linkId': 4,
-            'availableBalance': 48635,
-            'currentBalance': 48635,
-            'mask': '2982',
-            'name': 'Mercury Checking',
-            'originalName': 'Mercury Checking',
-            'officialName': 'Mercury Checking',
-            'accountType': 'depository',
-            'accountSubType': 'checking',
-            'status': 'active',
-            'lastUpdated': '2023-07-02T04:22:52.48118Z',
-          }));
-        }),
-        rest.post('/api/bank_accounts/12/funding_schedules', (_req, res, ctx) => {
-          return res(ctx.status(400), ctx.json({
-            'error': 'Invalid funding schedule or something',
-          }));
-        }),
-      );
+      mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+        'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
+        'availableBalance': 48635,
+        'currentBalance': 48635,
+        'mask': '2982',
+        'name': 'Mercury Checking',
+        'originalName': 'Mercury Checking',
+        'officialName': 'Mercury Checking',
+        'accountType': 'depository',
+        'accountSubType': 'checking',
+        'status': 'active',
+        'lastUpdated': '2023-07-02T04:22:52.48118Z',
+      });
 
-      const world = testRenderHook(useCreateFundingSchedule, { initialRoute: '/bank/12/funding' });
+      mockAxios.onPost('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules').reply(400, {
+        'error': 'Invalid funding schedule or something',
+      });
+
+      const world = testRenderHook(useCreateFundingSchedule, { initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding' });
       await act(async () => {
         expect(async () => {
           return world.result.current(new FundingSchedule({
-            bankAccountId: 12,
+            bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
             description: 'something',
             name: 'Elliot\'s Contribution',
             nextRecurrence: parseJSON('2023-07-31T05:00:00Z'),
@@ -201,51 +206,56 @@ describe('funding schedule hooks', () => {
   });
 
   describe('update funding schedule', () => {
+    let mockAxios: MockAdapter;
+
+    beforeEach(() => {
+      mockAxios = new MockAdapter(axios);
+    });
+    afterEach(() => {
+      mockAxios.reset();
+    });
+
+    afterAll(() => mockAxios.restore());
+
     it('will update a funding schedule', async () => {
-      server.use(
-        rest.get('/api/bank_accounts/12', (_req, res, ctx) => {
-          return res(ctx.json({
-            'bankAccountId': 12,
-            'linkId': 4,
-            'availableBalance': 48635,
-            'currentBalance': 48635,
-            'mask': '2982',
-            'name': 'Mercury Checking',
-            'originalName': 'Mercury Checking',
-            'officialName': 'Mercury Checking',
-            'accountType': 'depository',
-            'accountSubType': 'checking',
-            'status': 'active',
-            'lastUpdated': '2023-07-02T04:22:52.48118Z',
-          }));
-        }),
-        rest.put('/api/bank_accounts/12/funding_schedules/3', (_req, res, ctx) => {
-          return res(ctx.json({
-            'fundingSchedule': {
-              'bankAccountId': 12,
-              'dateStarted': '2023-02-28T06:00:00Z',
-              'description': '15th and last day of every month',
-              'estimatedDeposit': null,
-              'excludeWeekends': true,
-              'fundingScheduleId': 3,
-              'lastOccurrence': '2023-07-14T05:00:00Z',
-              'name': 'Elliot\'s Contribution',
-              'nextOccurrence': '2023-07-31T05:00:00Z',
-              'nextOccurrenceOriginal': '2023-07-31T05:00:00Z',
-              'rule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
-              'waitForDeposit': false,
-            },
-            'spending': [],
-          }));
-        }),
-      );
+      mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+        'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
+        'availableBalance': 48635,
+        'currentBalance': 48635,
+        'mask': '2982',
+        'name': 'Mercury Checking',
+        'originalName': 'Mercury Checking',
+        'officialName': 'Mercury Checking',
+        'accountType': 'depository',
+        'accountSubType': 'checking',
+        'status': 'active',
+        'lastUpdated': '2023-07-02T04:22:52.48118Z',
+      });
+      mockAxios.onPut('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules/fund_01hy4re7c1xc2v44cf6kx302jx').reply(200, {
+        'fundingSchedule': {
+          'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+          'dateStarted': '2023-02-28T06:00:00Z',
+          'description': '15th and last day of every month',
+          'estimatedDeposit': null,
+          'excludeWeekends': true,
+          'fundingScheduleId': 'fund_01hy4re7c1xc2v44cf6kx302jx', // 3,
+          'lastRecurrence': '2023-09-29T05:00:00Z',
+          'name': 'Elliot\'s Contribution',
+          'nextRecurrence': '2023-10-13T05:00:00Z',
+          'nextRecurrenceOriginal': '2023-10-15T05:00:00Z',
+          'ruleset': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+          'waitForDeposit': false,
+        },
+        'spending': [],
+      });
 
       const world = testRenderHook(useUpdateFundingSchedule, { initialRoute: '/bank/12/funding' });
       let result: FundingScheduleUpdateResponse;
       await act(async () => {
         result = await world.result.current(new FundingSchedule({
-          fundingScheduleId: 3,
-          bankAccountId: 12,
+          fundingScheduleId: 'fund_01hy4re7c1xc2v44cf6kx302jx', // 3,
+          bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
           description: 'something',
           name: 'Elliot\'s Contribution',
           nextRecurrence: parseJSON('2023-07-31T05:00:00Z'),
@@ -260,36 +270,30 @@ describe('funding schedule hooks', () => {
     });
 
     it('it will fail to update a funding schedule', async () => {
-      server.use(
-        rest.get('/api/bank_accounts/12', (_req, res, ctx) => {
-          return res(ctx.json({
-            'bankAccountId': 12,
-            'linkId': 4,
-            'availableBalance': 48635,
-            'currentBalance': 48635,
-            'mask': '2982',
-            'name': 'Mercury Checking',
-            'originalName': 'Mercury Checking',
-            'officialName': 'Mercury Checking',
-            'accountType': 'depository',
-            'accountSubType': 'checking',
-            'status': 'active',
-            'lastUpdated': '2023-07-02T04:22:52.48118Z',
-          }));
-        }),
-        rest.put('/api/bank_accounts/12/funding_schedules/3', (_req, res, ctx) => {
-          return res(ctx.status(400), ctx.json({
-            'error': 'Invalid funding schedule or something',
-          }));
-        }),
-      );
+      mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
+        'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+        'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
+        'availableBalance': 48635,
+        'currentBalance': 48635,
+        'mask': '2982',
+        'name': 'Mercury Checking',
+        'originalName': 'Mercury Checking',
+        'officialName': 'Mercury Checking',
+        'accountType': 'depository',
+        'accountSubType': 'checking',
+        'status': 'active',
+        'lastUpdated': '2023-07-02T04:22:52.48118Z',
+      });
+      mockAxios.onPut('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules/fund_01hy4re7c1xc2v44cf6kx302jx').reply(400, {
+        'error': 'Invalid funding schedule or something',
+      });
 
-      const world = testRenderHook(useUpdateFundingSchedule, { initialRoute: '/bank/12/funding' });
+      const world = testRenderHook(useUpdateFundingSchedule, { initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding' });
       await act(async () => {
         await expect(async () => {
-          return world.result.current(new FundingSchedule({
-            fundingScheduleId: 3,
-            bankAccountId: 12,
+          const result = await world.result.current(new FundingSchedule({
+            fundingScheduleId: 'fund_01hy4re7c1xc2v44cf6kx302jx', // 3,
+            bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
             description: 'something',
             name: 'Elliot\'s Contribution',
             nextRecurrence: parseJSON('2023-07-31T05:00:00Z'),
@@ -297,6 +301,10 @@ describe('funding schedule hooks', () => {
             estimatedDeposit: null,
             excludeWeekends: true,
           }));
+
+          console.log(result);
+
+          return result;
         }).rejects.toMatchObject({
           message: 'Request failed with status code 400',
         });

@@ -27,6 +27,10 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/interface
       )
       set_tests_properties(${PACKAGE}/${SPEC_NAME} PROPERTIES FIXTURES_REQUIRED node_modules)
+      set_property(
+        TEST ${PACKAGE}/${SPEC_NAME}
+        PROPERTY LABELS "interface"
+      )
     endforeach()
   endif()
 endmacro()
