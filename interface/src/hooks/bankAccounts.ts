@@ -28,7 +28,7 @@ export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest)
 
   async function createBankAccount(newBankAccount: CreateBankAccountRequest): Promise<BankAccount> {
     return request()
-      .post<Partial<BankAccount>>('/bank_accounts', newBankAccount)
+      .post<Partial<BankAccount>>('/api/bank_accounts', newBankAccount)
       .then(result => new BankAccount(result?.data));
   }
 

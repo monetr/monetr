@@ -17,6 +17,8 @@
     }
   },
   "include": [
+    "types/bun.d.ts",
+    "src/setupTests.ts",
     "src/**/*",
     "../tailwind.config.cjs",
     "../../tailwind.config.js"

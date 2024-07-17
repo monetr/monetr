@@ -1,5 +1,6 @@
 import Link, { LinkType } from '@monetr/interface/models/Link';
 
+import { describe, expect, it } from 'bun:test';
 
 describe('links', () => {
   it('will detect manual', () => {

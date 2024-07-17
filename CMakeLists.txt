@@ -240,6 +240,10 @@ if(BUILD_TESTING)
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
     set_tests_properties(migrate.db PROPERTIES FIXTURES_SETUP DB)
+    set_property(
+      TEST migrate.db
+      PROPERTY LABELS "bootstrap"
+    )
   else()
     message(STATUS "Go tests will not be run since Go installation could not be found.")
   endif()
@@ -250,6 +254,10 @@ if(BUILD_TESTING)
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   )
   set_tests_properties(ui.dependencies PROPERTIES FIXTURES_SETUP node_modules DEPENDS ${PNPM_EXECUTABLE})
+  set_property(
+    TEST ui.dependencies
+    PROPERTY LABELS "bootstrap"
+  )
 endif()
 
 file(GLOB_RECURSE SUB_PACKAGES RELATIVE ${CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/server/*CMakeLists.txt")

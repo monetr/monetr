@@ -1,29 +1,39 @@
 import React from 'react';
-import { act, fireEvent, waitFor } from '@testing-library/react';
-import { rest } from 'msw';
+import * as reactRouter from 'react-router-dom';
+import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import MockAdapter from 'axios-mock-adapter';
 
+import monetrClient from '@monetr/interface/api/api';
 import Login from '@monetr/interface/pages/login';
 import testRenderer from '@monetr/interface/testutils/renderer';
-import { server } from '@monetr/interface/testutils/server';
 
-const mockUseNavigate = jest.fn((_url: string) => { });
-jest.mock('react-router-dom', () => ({
-  __esModule: true,
-  ...jest.requireActual('react-router-dom'),
+import { afterAll, afterEach, beforeEach, describe, expect, it, mock, test } from 'bun:test';
+
+const mockUseNavigate = mock((_url: string) => { });
+mock.module('react-router-dom', () => ({
+  ...reactRouter,
   useNavigate: () => mockUseNavigate,
 }));
 
 describe('login page', () => {
+  let mockAxios: MockAdapter;
+
+  beforeEach(() => {
+    mockAxios = new MockAdapter(monetrClient);
+    mockUseNavigate.mockReset();
+  });
+  afterEach(() => {
+    mockAxios.reset();
+  });
+  afterAll(() => mockAxios.restore());
+
   it('will render with default options', async () => {
-    server.use(
-      rest.get('/api/config', (_req, res, ctx) => {
-        return res(ctx.json({
-          allowForgotPassword: true,
-          allowSignUp: true,
-          verifyLogin: false,
-        }));
-      }),
-    );
+    mockAxios.onGet('/api/config').reply(200, {
+      allowForgotPassword: true,
+      allowSignUp: true,
+      verifyLogin: false,
+    });
 
     const world = testRenderer(<Login />, { initialRoute: '/login' });
 
@@ -34,16 +44,12 @@ describe('login page', () => {
     await waitFor(() => expect(world.getByTestId('login-forgot')).toBeVisible());
   });
 
-  it('without signup', async () => {
-    server.use(
-      rest.get('/api/config', (_req, res, ctx) => {
-        return res(ctx.json({
-          allowForgotPassword: true,
-          allowSignUp: false,
-          verifyLogin: false,
-        }));
-      }),
-    );
+  test('without signup', async () => {
+    mockAxios.onGet('/api/config').reply(200, {
+      allowForgotPassword: true,
+      allowSignUp: false,
+      verifyLogin: false,
+    });
 
     const world = testRenderer(<Login />, { initialRoute: '/login' });
 
@@ -55,16 +61,12 @@ describe('login page', () => {
     await waitFor(() => expect(world.queryByTestId('login-signup')).not.toBeInTheDocument());
   });
 
-  it('without forgot password', async () => {
-    server.use(
-      rest.get('/api/config', (_req, res, ctx) => {
-        return res(ctx.json({
-          allowForgotPassword: false,
-          allowSignUp: false,
-          verifyLogin: false,
-        }));
-      }),
-    );
+  test('without forgot password', async () => {
+    mockAxios.onGet('/api/config').reply(200, {
+      allowForgotPassword: false,
+      allowSignUp: false,
+      verifyLogin: false,
+    });
 
     const world = testRenderer(<Login />, { initialRoute: '/login' });
 
@@ -76,23 +78,19 @@ describe('login page', () => {
     await waitFor(() => expect(world.queryByTestId('login-signup')).not.toBeInTheDocument());
   });
 
-  it('will submit login', async () => {
-    server.use(
-      rest.get('/api/config', (_req, res, ctx) => {
-        return res(ctx.json({
-          allowForgotPassword: false,
-          allowSignUp: false,
-          verifyLogin: false,
-        }));
-      }),
-      rest.post('/api/authentication/login', (_req, res, ctx) => {
-        return res(ctx.json({
-          isActive: true,
-        }));
-      }),
-    );
+  test('will submit login', async () => {
+    mockAxios.onGet('/api/config').reply(200, {
+      allowForgotPassword: false,
+      allowSignUp: false,
+      verifyLogin: false,
+    });
+
+    mockAxios.onPost('/api/authentication/login').reply(200, {
+      isActive: true,
+    });
 
     const world = testRenderer(<Login />, { initialRoute: '/login' });
+    const user = userEvent.setup();
 
     await waitFor(() => expect(world.getByTestId('login-email')).toBeVisible());
     await waitFor(() => expect(world.getByTestId('login-password')).toBeVisible());
@@ -101,32 +99,26 @@ describe('login page', () => {
     await waitFor(() => expect(world.queryByTestId('login-forgot')).not.toBeInTheDocument());
     await waitFor(() => expect(world.queryByTestId('login-signup')).not.toBeInTheDocument());
 
-    act(() => {
-      fireEvent.change(world.getByTestId('login-email'), { target: { value: 'test@test.com' } });
-      fireEvent.change(world.getByTestId('login-password'), { target: { value: 'password' } });
-      world.getByTestId('login-submit').click();
-    });
+
+    await user.type(world.getByTestId('login-email'), 'test@test.com');
+    await user.type(world.getByTestId('login-password'), 'password');
+    await user.click(world.getByTestId('login-submit'));
 
     // When we login we should be redirected to this route.
     await waitFor(() => expect(mockUseNavigate).toBeCalledWith('/'));
   });
 
-  it('will submit login and require subscription', async () => {
-    server.use(
-      rest.get('/api/config', (_req, res, ctx) => {
-        return res(ctx.json({
-          allowForgotPassword: false,
-          allowSignUp: false,
-          verifyLogin: false,
-        }));
-      }),
-      rest.post('/api/authentication/login', (_req, res, ctx) => {
-        return res(ctx.json({
-          isActive: false,
-          nextUrl: '/account/subscribe',
-        }));
-      }),
-    );
+  test('will submit login and require subscription', async () => {
+    mockAxios.onGet('/api/config').reply(200, {
+      allowForgotPassword: false,
+      allowSignUp: false,
+      verifyLogin: false,
+    });
+
+    mockAxios.onPost('/api/authentication/login').reply(200, {
+      isActive: false,
+      nextUrl: '/account/subscribe',
+    });
 
     const world = testRenderer(<Login />, { initialRoute: '/login' });
 
@@ -137,13 +129,12 @@ describe('login page', () => {
     await waitFor(() => expect(world.queryByTestId('login-forgot')).not.toBeInTheDocument());
     await waitFor(() => expect(world.queryByTestId('login-signup')).not.toBeInTheDocument());
 
-    act(() => {
-      fireEvent.change(world.getByTestId('login-email'), { target: { value: 'test@test.com' } });
-      fireEvent.change(world.getByTestId('login-password'), { target: { value: 'password' } });
-      world.getByTestId('login-submit').click();
-    });
+    const user = userEvent.setup();
+    await user.type(world.getByTestId('login-email'), 'test@test.com');
+    await user.type(world.getByTestId('login-password'), 'password');
+    await user.click(world.getByTestId('login-submit'));
 
-    // When we login we should be redirected to the subscribe page
+    // When we login we should be redirected to this route.
     await waitFor(() => expect(mockUseNavigate).toBeCalledWith('/account/subscribe'));
   });
 });

@@ -1,27 +1,36 @@
 import { act } from '@testing-library/react-hooks';
-import { rest } from 'msw';
+import MockAdapter from 'axios-mock-adapter';
 
+import monetrClient from '@monetr/interface/api/api';
 import useLogout from '@monetr/interface/hooks/useLogout';
 import testRenderHook from '@monetr/interface/testutils/hooks';
-import { server } from '@monetr/interface/testutils/server';
+
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
 describe('logout', () => {
+  let mockAxios: MockAdapter;
+
+  beforeEach(() => {
+    mockAxios = new MockAdapter(monetrClient);
+  });
+  afterEach(() => {
+    mockAxios.reset();
+  });
+  afterAll(() => mockAxios.restore());
+
   it('will logout successfully', async () => {
-    server.use(
-      rest.get('/api/authentication/logout', (_req, res, ctx) => {
-        expect(_req).toBeDefined();
-        return res(ctx.status(200));
-      }),
-    );
+    mockAxios.onGet('/api/authentication/logout').reply(200);
 
     const { result: { current: logout } } = testRenderHook(useLogout, { initialRoute: '/' });
+
+    expect(mockAxios.history['get']).toHaveLength(0);
 
     await act(() => {
       return logout();
     });
-    // This test is really dumb? It basically just adds code coverage lol.
-    // The real logout endpoint just removes a cookie, the redirect from logging out happens separately from this hook.
-    // Just make sure that we did actually call the endpoint.
-    expect.assertions(1);
+
+    // Make sure that we did make the API call.
+    expect(mockAxios.history['get']).toHaveLength(1);
+    expect(mockAxios.history['get'][0]).toMatchObject({ url: '/authentication/logout' });
   });
 });

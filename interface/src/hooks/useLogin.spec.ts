@@ -1,27 +1,36 @@
-import { act } from '@testing-library/react-hooks';
-import { rest } from 'msw';
+import * as reactRouter from 'react-router-dom';
+import { act } from '@testing-library/react';
+import MockAdapter from 'axios-mock-adapter';
 
+import monetrClient from '@monetr/interface/api/api';
 import useLogin from '@monetr/interface/hooks/useLogin';
 import testRenderHook from '@monetr/interface/testutils/hooks';
-import { server } from '@monetr/interface/testutils/server';
 
-const mockUseNavigate = jest.fn((_url: string) => {});
-jest.mock('react-router-dom', () => ({
-  __esModule: true,
-  ...jest.requireActual('react-router-dom'),
+import { afterAll, afterEach, beforeEach, describe, expect, it, mock } from 'bun:test';
+
+const mockUseNavigate = mock((_url: string) => { });
+mock.module('react-router-dom', () => ({
+  ...reactRouter,
   useNavigate: () => mockUseNavigate,
 }));
 
 describe('login', () => {
+  let mockAxios: MockAdapter;
+
+  beforeEach(() => {
+    mockAxios = new MockAdapter(monetrClient);
+    mockUseNavigate.mockReset();
+  });
+  afterEach(() => {
+    mockAxios.reset();
+  });
+  afterAll(() => mockAxios.restore());
+
   it('will authenticate successfully', async () => {
-    server.use(
-      rest.post('/api/authentication/login', (_req, res, ctx) => {
-        return res(ctx.json({
-          isActive: false,
-          nextUrl: '/account/subscribe',
-        }));
-      }),
-    );
+    mockAxios.onPost('/api/authentication/login').reply(200, {
+      isActive: false,
+      nextUrl: '/account/subscribe',
+    });
 
     const { result: { current: login } } = testRenderHook(useLogin, { initialRoute: '/login' });
 
@@ -37,13 +46,9 @@ describe('login', () => {
   });
 
   it('will navigate without a next url', async () => {
-    server.use(
-      rest.post('/api/authentication/login', (_req, res, ctx) => {
-        return res(ctx.json({
-          isActive: true,
-        }));
-      }),
-    );
+    mockAxios.onPost('/api/authentication/login').reply(200, {
+      isActive: true,
+    });
 
     const { result: { current: login } } = testRenderHook(useLogin, { initialRoute: '/login' });
 
@@ -59,14 +64,10 @@ describe('login', () => {
   });
 
   it('will require a password reset', async () => {
-    server.use(
-      rest.post('/api/authentication/login', (_req, res, ctx) => {
-        return res(ctx.status(428), ctx.json({
-          code: 'PASSWORD_CHANGE_REQUIRED',
-          resetToken: 'abc123',
-        }));
-      }),
-    );
+    mockAxios.onPost('/api/authentication/login').reply(428, {
+      code: 'PASSWORD_CHANGE_REQUIRED',
+      resetToken: 'abc123',
+    });
 
     const { result: { current: login } } = testRenderHook(useLogin, { initialRoute: '/login' });
 
@@ -88,13 +89,9 @@ describe('login', () => {
   });
 
   it('email has not been verified', async () => {
-    server.use(
-      rest.post('/api/authentication/login', (_req, res, ctx) => {
-        return res(ctx.status(428), ctx.json({
-          code: 'EMAIL_NOT_VERIFIED',
-        }));
-      }),
-    );
+    mockAxios.onPost('/api/authentication/login').reply(428, {
+      code: 'EMAIL_NOT_VERIFIED',
+    });
 
     const { result: { current: login } } = testRenderHook(useLogin, { initialRoute: '/login' });
 

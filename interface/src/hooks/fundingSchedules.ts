@@ -131,7 +131,7 @@ export function useRemoveFundingSchedule(): (_fundingSchedule: FundingSchedule) 
   async function removeFundingSchedule(fundingSchedule: FundingSchedule): Promise<FundingSchedule> {
     return request()
       .delete(
-        `/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules/${fundingSchedule.fundingScheduleId}`,
+        `/api/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules/${fundingSchedule.fundingScheduleId}`,
       )
       .then(() => fundingSchedule);
   }

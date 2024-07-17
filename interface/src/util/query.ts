@@ -1,12 +1,14 @@
 import { QueryFunctionContext, QueryKey } from '@tanstack/query-core';
-import axios from 'axios';
+
+import request from '@monetr/interface/util/request';
 
 export default async function Query<T = unknown, TQueryKey extends QueryKey = QueryKey>(
   context: QueryFunctionContext<TQueryKey>,
 ): Promise<T> {
-  const { data } = await axios.request<T>({
-    url: `/api${context.queryKey[0]}`,
-    method: context.queryKey.length === 1 ? 'GET' : 'POST',
+  const method = context.queryKey.length === 1 ? 'GET' : 'POST';
+  const { data } = await request().request<T>({
+    url: `${context.queryKey[0]}`,
+    method: method,
     params: context.pageParam && {
       offset: context.pageParam,
     },
