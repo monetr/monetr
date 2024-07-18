@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { act } from '@testing-library/react';
+import { act } from 'react';
 import MockAdapter from 'axios-mock-adapter';
 import { parseJSON } from 'date-fns';
 
