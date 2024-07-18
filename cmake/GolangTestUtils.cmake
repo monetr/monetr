@@ -9,13 +9,7 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
       string(REPLACE "${CMAKE_SOURCE_DIR}/" "" PACKAGE "${CMAKE_CURRENT_SOURCE_DIR}")
       message(STATUS "Preparing tests for: ${PACKAGE}")
 
-      execute_process(
-        COMMAND ${CMAKE_Go_COMPILER} run ${CMAKE_SOURCE_DIR}/cmake/find_tests.go ${CURRENT_SOURCE_DIR}
-        OUTPUT_VARIABLE RAW_TEST_LIST
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
-      )
-
+      string(JSON PACKAGE_TESTS ERROR_VARIABLE _ GET "${GOLANG_TEST_LIST}" "${CMAKE_CURRENT_SOURCE_DIR}")
       set(PACKAGE_TEST_DIRECTORY ${CMAKE_BINARY_DIR}/tests/${PACKAGE})
       set(PACKAGE_COVERAGE_DIRECTORY ${PACKAGE_TEST_DIRECTORY}/coverage)
       file(MAKE_DIRECTORY ${PACKAGE_COVERAGE_DIRECTORY})
@@ -67,87 +61,92 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
         RESOURCE_LOCK GO_BUILD_LOCK
       )
 
-      string(REPLACE "\n" ";" RAW_TEST_LIST "${RAW_TEST_LIST}")
-      foreach(TEST ${RAW_TEST_LIST})
-        # Convert the bar delimited test name into two names or a single high level test.
-        string(REPLACE "|" ";" TEST_PARTS "${TEST}")
-        list(LENGTH TEST_PARTS TEST_PARTS_COUNT)
-        set(REGEX_TEST_NAME)
-        set(FRIENDLY_TEST_NAME)
-        set(TEST_OUTPUT_FILE_NAME)
-        # If the test has two name parts then it is a name and a sub-test
-        if("${TEST_PARTS_COUNT}" STREQUAL "2")
-          # Break out the parts into their own things.
-          list(GET TEST_PARTS 0 TEST_NAMESPACE)
-          list(GET TEST_PARTS 1 SUB_TEST)
-          string(REPLACE " " "_" SUB_TEST_REGEX "${SUB_TEST}")
-          # Build a regex that will only match this one specific test.
-          set(REGEX_TEST_NAME "^\\Q${TEST_NAMESPACE}\\E$/^\\Q${SUB_TEST_REGEX}\\E$")
-          set(FRIENDLY_TEST_NAME "${TEST_NAMESPACE}/${SUB_TEST}")
-          set(TEST_OUTPUT_FILE_NAME "${TEST_NAMESPACE}-${SUB_TEST}")
-        else()
-          # If there is only a single part, then build a regex for only that test.
-          set(REGEX_TEST_NAME "^\\Q${TEST}\\E$")
-          set(FRIENDLY_TEST_NAME "${TEST}")
-          set(TEST_OUTPUT_FILE_NAME "${TEST}")
-        endif()
-        string(REPLACE "/" "-" TEST_OUTPUT_FILE_NAME "${TEST_OUTPUT_FILE_NAME}")
+      if(NOT "${PACKAGE_TESTS}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}-NOTFOUND")
+        # Get the number of tests in our current package.
+        string(JSON L LENGTH "${PACKAGE_TESTS}")
+        math(EXPR L "${L}-1") # Subtract one because we are 0 indexed.
 
-        # TODO gotestsum is not included by default, test2json might not be either. So these need to be provisioned
-        # before they can be used properly. This is basically just messing around.
-        # Conditionally configure gotestsum and its arguments.
-        set(GOTESTSUM_MAYBE "")
-        if(TEST_USE_GOTESTSUM)
-          list(APPEND GOTESTSUM_MAYBE "gotestsum")
+        foreach(I RANGE ${L})
+          string(JSON TEST_PARTS GET "${PACKAGE_TESTS}" ${I})
+          string(JSON TEST_PARTS_COUNT LENGTH "${TEST_PARTS}")
+          set(REGEX_TEST_NAME)
+          set(FRIENDLY_TEST_NAME)
+          set(TEST_OUTPUT_FILE_NAME)
+          if("${TEST_PARTS_COUNT}" STREQUAL "2")
+            # First item is always the test name
+            string(JSON TEST_NAMESPACE GET "${TEST_PARTS}" 0)
+            string(JSON SUB_TEST GET "${TEST_PARTS}" 1)
+            string(REPLACE " " "_" SUB_TEST_REGEX "${SUB_TEST}")
+            # Build a regex that will only match this one specific test.
+            set(REGEX_TEST_NAME "^\\Q${TEST_NAMESPACE}\\E$/^\\Q${SUB_TEST_REGEX}\\E$")
+            set(FRIENDLY_TEST_NAME "${TEST_NAMESPACE}/${SUB_TEST}")
+            set(TEST_OUTPUT_FILE_NAME "${TEST_NAMESPACE}-${SUB_TEST}")
+          else()
+            # First item is always the test name
+            string(JSON TEST GET "${TEST_PARTS}" 0)
+            # If there is only a single part, then build a regex for only that test.
+            set(REGEX_TEST_NAME "^\\Q${TEST}\\E$")
+            set(FRIENDLY_TEST_NAME "${TEST}")
+            set(TEST_OUTPUT_FILE_NAME "${TEST}")
+          endif()
+          string(REPLACE "/" "-" TEST_OUTPUT_FILE_NAME "${TEST_OUTPUT_FILE_NAME}")
 
-          # When we are using gotestsum we want to produce json output files
-          file(MAKE_DIRECTORY "${PACKAGE_TEST_DIRECTORY}/json")
-          list(APPEND GOTESTSUM_MAYBE "--jsonfile=${PACKAGE_TEST_DIRECTORY}/json/${TEST_OUTPUT_FILE_NAME}.json")
+          # TODO gotestsum is not included by default, test2json might not be either. So these need to be provisioned
+          # before they can be used properly. This is basically just messing around.
+          # Conditionally configure gotestsum and its arguments.
+          set(GOTESTSUM_MAYBE "")
+          if(TEST_USE_GOTESTSUM)
+            list(APPEND GOTESTSUM_MAYBE "gotestsum")
 
-          if(TEST_JUNIT)
-            # When we are using gotestsum and we want to output junit files, they should go in their own directory
-            file(MAKE_DIRECTORY "${PACKAGE_TEST_DIRECTORY}/junit")
-            list(APPEND GOTESTSUM_MAYBE "--junitfile=${PACKAGE_TEST_DIRECTORY}/junit/${TEST_OUTPUT_FILE_NAME}.xml")
+            # When we are using gotestsum we want to produce json output files
+            file(MAKE_DIRECTORY "${PACKAGE_TEST_DIRECTORY}/json")
+            list(APPEND GOTESTSUM_MAYBE "--jsonfile=${PACKAGE_TEST_DIRECTORY}/json/${TEST_OUTPUT_FILE_NAME}.json")
+
+            if(TEST_JUNIT)
+              # When we are using gotestsum and we want to output junit files, they should go in their own directory
+              file(MAKE_DIRECTORY "${PACKAGE_TEST_DIRECTORY}/junit")
+              list(APPEND GOTESTSUM_MAYBE "--junitfile=${PACKAGE_TEST_DIRECTORY}/junit/${TEST_OUTPUT_FILE_NAME}.xml")
+            endif()
+
+            # Since we are executing a raw test binary using gotestsum, we need to pass it as a raw command.
+            list(APPEND GOTESTSUM_MAYBE "--raw-command" "--")
+
+            # When we are using gotestsum, we need to also format test output for it to be consumed easily.
+            list(APPEND GOTESTSUM_MAYBE "${CMAKE_Go_COMPILER}" "tool" "test2json" "-t")
           endif()
 
-          # Since we are executing a raw test binary using gotestsum, we need to pass it as a raw command.
-          list(APPEND GOTESTSUM_MAYBE "--raw-command" "--")
+          # Now we need to actually build our test arguments. We want to have count=1 to make sure that tests are not
+          # cached. This could maybe be turned into an option though? And we _need_ v=true in order to have any usable
+          # output for gotestsum or if a test fails in general.
+          set(TEST_ARGS "-test.count=1" "-test.v" "-test.timeout=30s")
+          set(COVERAGE_FILE ${PACKAGE_COVERAGE_DIRECTORY}/${TEST_OUTPUT_FILE_NAME}.coverage.txt)
+          if(TEST_COVERAGE)
+            # Since we arent using the goofy binary format this might not be necessary?
+            list(APPEND TEST_ARGS -test.coverprofile=${COVERAGE_FILE})
+          endif()
+          if(TEST_SHORT)
+            list(APPEND TEST_ARGS "-test.short")
+          endif()
 
-          # When we are using gotestsum, we need to also format test output for it to be consumed easily.
-          list(APPEND GOTESTSUM_MAYBE "${CMAKE_Go_COMPILER}" "tool" "test2json" "-t")
-        endif()
-
-        # Now we need to actually build our test arguments. We want to have count=1 to make sure that tests are not
-        # cached. This could maybe be turned into an option though? And we _need_ v=true in order to have any usable
-        # output for gotestsum or if a test fails in general.
-        set(TEST_ARGS "-test.count=1" "-test.v" "-test.timeout=30s")
-        set(COVERAGE_FILE ${PACKAGE_COVERAGE_DIRECTORY}/${TEST_OUTPUT_FILE_NAME}.coverage.txt)
-        if(TEST_COVERAGE)
-          # Since we arent using the goofy binary format this might not be necessary?
-          list(APPEND TEST_ARGS -test.coverprofile=${COVERAGE_FILE})
-        endif()
-        if(TEST_SHORT)
-          list(APPEND TEST_ARGS "-test.short")
-        endif()
-
-        add_test(
-          NAME ${PACKAGE}/${FRIENDLY_TEST_NAME}
-          COMMAND ${GOTESTSUM_MAYBE} ${PACKAGE_TEST_BINARY} ${TEST_ARGS} -test.run ${REGEX_TEST_NAME}
-          WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
-        )
-        set_tests_properties(
-          ${PACKAGE}/${FRIENDLY_TEST_NAME}
-          PROPERTIES
-          FIXTURES_REQUIRED "DB;${PACKAGE};go.mocks"
-          ENVIRONMENT "GOCOVERDIR=${PACKAGE_COVERAGE_DIRECTORY}"
-          SKIP_REGULAR_EXPRESSION " SKIP: "
-          TIMEOUT 45
-        )
-        set_property(
-          TEST ${PACKAGE}/${FRIENDLY_TEST_NAME}
-          PROPERTY LABELS "server"
-        )
-      endforeach()
+          add_test(
+            NAME ${PACKAGE}/${FRIENDLY_TEST_NAME}
+            COMMAND ${GOTESTSUM_MAYBE} ${PACKAGE_TEST_BINARY} ${TEST_ARGS} -test.run ${REGEX_TEST_NAME}
+            WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
+          )
+          set_tests_properties(
+            ${PACKAGE}/${FRIENDLY_TEST_NAME}
+            PROPERTIES
+            FIXTURES_REQUIRED "DB;${PACKAGE};go.mocks"
+            ENVIRONMENT "GOCOVERDIR=${PACKAGE_COVERAGE_DIRECTORY}"
+            SKIP_REGULAR_EXPRESSION " SKIP: "
+            TIMEOUT 45
+          )
+          set_property(
+            TEST ${PACKAGE}/${FRIENDLY_TEST_NAME}
+            PROPERTY LABELS "server"
+          )
+        endforeach()
+      endif()
     endif()
   endif()
 endmacro()

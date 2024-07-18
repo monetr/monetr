@@ -234,6 +234,14 @@ include(GolangTestUtils)
 
 if(BUILD_TESTING)
   if(CMAKE_Go_COMPILER)
+    execute_process(
+      COMMAND ${CMAKE_Go_COMPILER} run ${CMAKE_SOURCE_DIR}/cmake/find_tests.go ${CMAKE_SOURCE_DIR}/server
+      OUTPUT_VARIABLE GOLANG_TEST_LIST
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+    set(GOLANG_TEST_LIST "${GOLANG_TEST_LIST}" CACHE STRING "All Golang unit tests in json format." FORCE)
+
     add_test(
       NAME migrate.db
       COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} -t development.migrate
