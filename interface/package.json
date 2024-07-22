@@ -70,7 +70,7 @@
   "devDependencies": {
     "@happy-dom/global-registrator": "14.3.9",
     "@rspack/binding-linux-arm64-gnu": "0.3.6",
-    "@rspack/binding-linux-x64-gnu": "0.3.6",
+    "@rspack/binding-linux-x64-gnu": "0.7.5",
     "@rspack/cli": "0.3.6",
     "@testing-library/jest-dom": "6.4.6",
     "@testing-library/react": "13.4.0",
