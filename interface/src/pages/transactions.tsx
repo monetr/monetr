@@ -1,6 +1,5 @@
-import React, { Fragment, useCallback, useEffect, useRef } from 'react';
+import React, { Fragment, useRef } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
-import { useNavigationType } from 'react-router-dom';
 import { HeartBroken, ShoppingCartOutlined, UploadOutlined } from '@mui/icons-material';
 import { format, getUnixTime, parse } from 'date-fns';
 import * as R from 'ramda';
@@ -10,13 +9,13 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransactions } from '@monetr/interface/hooks/transactions';
+import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
+import { useScrollRestoration } from '@monetr/interface/hooks/useScrollRestoration';
 import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import Transaction from '@monetr/interface/models/Transaction';
 import TransactionDateItem from '@monetr/interface/pages/new/TransactionDateItem';
 import TransactionItem from '@monetr/interface/pages/new/TransactionItem';
-import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
 
-let evilScrollPosition: number = 0;
 
 export default function Transactions(): JSX.Element {
   const { result: config } = useAppConfigurationSink();
@@ -29,31 +28,10 @@ export default function Transactions(): JSX.Element {
   } = useTransactions();
 
   const { data: link } = useCurrentLink();
-
-  // Scroll restoration code.
-  const ref = useRef<HTMLUListElement>(null);
-  const navigationType = useNavigationType();
-  const onScroll = useCallback(() => {
-    evilScrollPosition = ref.current.scrollTop;
-  }, [ref]);
-  useEffect(() => {
-    if (!ref.current) {
-      return undefined;
-    }
-
-    if (navigationType === 'POP') {
-      ref.current.scrollTop = evilScrollPosition;
-    }
-    const current = ref.current;
-    ref.current.addEventListener('scroll', onScroll);
-    return () => {
-      current.removeEventListener('scroll', onScroll);
-    };
-  // Fix bug with current impl.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref.current, navigationType, onScroll]);
-
   const loading = isLoading || isFetching;
+
+  const ref = useRef<HTMLUListElement>(null);
+  useScrollRestoration(ref, !loading);
 
   const [sentryRef] = useInfiniteScroll({
     loading,
