@@ -63,8 +63,8 @@ importers:
   docs:
     dependencies:
       '@fontsource-variable/inter':
-        specifier: 5.0.18
-        version: 5.0.18
+        specifier: 5.0.20
+        version: 5.0.20
       next:
         specifier: 14.1.1
         version: 14.1.1(@babel/core@7.24.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.55.0)
@@ -136,8 +136,8 @@ importers:
         specifier: 11.10.6
         version: 11.10.6(@emotion/react@11.10.6(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1)
       '@fontsource-variable/inter':
-        specifier: 5.0.18
-        version: 5.0.18
+        specifier: 5.0.20
+        version: 5.0.20
       '@mui/icons-material':
         specifier: 5.11.0
         version: 5.11.0(@mui/material@5.11.3(@emotion/react@11.10.6(@types/react@18.3.3)(react@18.3.1))(@emotion/styled@11.10.6(@emotion/react@11.10.6(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.3)(react@18.3.1)
@@ -362,8 +362,8 @@ importers:
   stories:
     dependencies:
       '@fontsource-variable/inter':
-        specifier: 5.0.18
-        version: 5.0.18
+        specifier: 5.0.20
+        version: 5.0.20
       '@monetr/interface':
         specifier: workspace:*
         version: link:../interface
@@ -1953,8 +1953,8 @@ packages:
   '@floating-ui/utils@0.2.2':
     resolution: {integrity: sha512-J4yDIIthosAsRZ5CPYP/jQvUAQtlZTTD/4suA08/FEnlxqW3sKS9iAhgsa9VYLZ6vDHn/ixJgIqRQPotoBjxIw==}
 
-  '@fontsource-variable/inter@5.0.18':
-    resolution: {integrity: sha512-rJzSrtJ3b7djiGFvRuTe6stDfbYJGhdQSfn2SI2WfXviee7Er0yKAHE5u7FU7OWVQQQ1x3+cxdmx9NdiAkcrcA==}
+  '@fontsource-variable/inter@5.0.20':
+    resolution: {integrity: sha512-dhzG4Zls/tIrf8h0FhTNi8jT/uFwNhdTY2vKe6DYqoXDYOfEcTVZDyh1hKml1rlLT44Y7OoKoGz8w7czDW7twQ==}
 
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
@@ -3997,8 +3997,8 @@ packages:
   '@storybook/csf@0.0.1':
     resolution: {integrity: sha512-USTLkZze5gkel8MYCujSRBVIrUQ3YPBrLOx7GNk/0wttvVtlzWXAq9eLbQ4p/NicGxP+3T7KPEMVV//g+yubpw==}
 
-  '@storybook/csf@0.1.11-next.0':
-    resolution: {integrity: sha512-GhkQcOLVKuCK7Zsj1xkQQSc76nHDb/3BDtyN41oDJkSRHJOqbMxT8xJ4UQbKae+VlPDhuaQbFLQmuIqL890Mfw==}
+  '@storybook/csf@0.1.12-next.0':
+    resolution: {integrity: sha512-Re9xOqN+/2SGI/GzonzYtOIawRKKzBfZhcneV3PjdfbGqyXlNarJqtjqxYnrs5SRZfGjzon8nxv6yGdVdlbEtA==}
 
   '@storybook/csf@0.1.7':
     resolution: {integrity: sha512-53JeLZBibjQxi0Ep+/AJTfxlofJlxy1jXcSKENlnKxHjWEYyHQCumMP5yTFjf7vhNnMjEpV3zx6t23ssFiGRyw==}
@@ -13517,7 +13517,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.2': {}
 
-  '@fontsource-variable/inter@5.0.18': {}
+  '@fontsource-variable/inter@5.0.20': {}
 
   '@hapi/hoek@9.3.0': {}
 
@@ -15985,7 +15985,7 @@ snapshots:
       '@storybook/client-logger': 7.0.0
       '@storybook/components': 7.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.11-next.0
+      '@storybook/csf': 0.1.12-next.0
       '@storybook/docs-tools': 7.0.0
       '@storybook/global': 5.0.0
       '@storybook/manager-api': 7.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -16210,7 +16210,7 @@ snapshots:
   '@storybook/components@7.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@storybook/client-logger': 7.0.0
-      '@storybook/csf': 0.1.11-next.0
+      '@storybook/csf': 0.1.12-next.0
       '@storybook/global': 5.0.0
       '@storybook/theming': 7.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/types': 7.0.0
@@ -16450,7 +16450,7 @@ snapshots:
       '@babel/parser': 7.21.9
       '@babel/traverse': 7.21.5
       '@babel/types': 7.21.5
-      '@storybook/csf': 0.1.11-next.0
+      '@storybook/csf': 0.1.12-next.0
       '@storybook/types': 7.0.0
       fs-extra: 11.2.0
       recast: 0.23.6
@@ -16505,7 +16505,7 @@ snapshots:
     dependencies:
       lodash: 4.17.21
 
-  '@storybook/csf@0.1.11-next.0':
+  '@storybook/csf@0.1.12-next.0':
     dependencies:
       type-fest: 2.19.0
 
@@ -16564,7 +16564,7 @@ snapshots:
       '@storybook/channels': 7.0.0
       '@storybook/client-logger': 7.0.0
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.11-next.0
+      '@storybook/csf': 0.1.12-next.0
       '@storybook/global': 5.0.0
       '@storybook/router': 7.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/theming': 7.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -16681,7 +16681,7 @@ snapshots:
       '@storybook/channels': 7.0.0
       '@storybook/client-logger': 7.0.0
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.11-next.0
+      '@storybook/csf': 0.1.12-next.0
       '@storybook/global': 5.0.0
       '@storybook/types': 7.0.0
       '@types/qs': 6.9.15
