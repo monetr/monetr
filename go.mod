@@ -42,7 +42,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/wneessen/go-mail v0.4.2
 	github.com/xlzd/gotp v0.1.0
-	golang.org/x/crypto v0.24.0
+	golang.org/x/crypto v0.25.0
 	google.golang.org/api v0.185.0
 	google.golang.org/genproto v0.0.0-20240617180043-68d350f18fd4
 	google.golang.org/protobuf v1.34.2
@@ -150,7 +150,7 @@ require (
 	golang.org/x/net v0.26.0
 	golang.org/x/oauth2 v0.21.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240610135401-a8a62080eff3 // indirect
