@@ -7,6 +7,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/gomodule/redigo/redis"
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/vmihailenco/msgpack/v5"
@@ -71,27 +72,30 @@ func (r *redisCache) do(ctx context.Context, commandName string, args ...interfa
 }
 
 func (r *redisCache) Set(ctx context.Context, key string, value []byte) error {
-	span := sentry.StartSpan(ctx, "cache.save")
-	defer span.Finish()
-
 	if key == "" {
 		return errors.WithStack(ErrBlankKey)
 	}
-
+	span := sentry.StartSpan(ctx, "cache.put")
+	defer span.Finish()
 	span.Description = key
+	span.SetTag("db.system", "redis")
+	span.SetTag("cache.key", key)
+	span.SetTag("cache.item_size", fmt.Sprint(len(value)))
 
 	return errors.Wrap(r.send(span.Context(), "SET", key, value), "failed to store item in cache")
 }
 
 func (r *redisCache) SetTTL(ctx context.Context, key string, value []byte, lifetime time.Duration) error {
-	span := sentry.StartSpan(ctx, "cache.save")
-	defer span.Finish()
-
 	if key == "" {
 		return errors.WithStack(ErrBlankKey)
 	}
-
+	span := sentry.StartSpan(ctx, "cache.put")
+	defer span.Finish()
 	span.Description = key
+	span.SetTag("db.system", "redis")
+	span.SetTag("cache.key", key)
+	span.SetTag("cache.item_size", fmt.Sprint(len(value)))
+	span.SetTag("cache.ttl", fmt.Sprint(lifetime.Seconds()))
 
 	return errors.Wrap(
 		r.send(
@@ -116,9 +120,8 @@ func (r *redisCache) SetEz(ctx context.Context, key string, object interface{}) 
 }
 
 func (r *redisCache) SetEzTTL(ctx context.Context, key string, object interface{}, lifetime time.Duration) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Redis - SetEzTTL"
 
 	data, err := msgpack.Marshal(object)
 	if err != nil {
@@ -129,7 +132,7 @@ func (r *redisCache) SetEzTTL(ctx context.Context, key string, object interface{
 }
 
 func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
-	span := sentry.StartSpan(ctx, "cache.get_item")
+	span := sentry.StartSpan(ctx, "cache.get")
 	defer span.Finish()
 
 	if key == "" {
@@ -139,24 +142,31 @@ func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
 
 	span.Status = sentry.SpanStatusOK
 	span.Description = key
+	span.SetTag("cache.key", key)
+	span.SetTag("db.system", "redis")
 
 	result, err := r.do(span.Context(), "GET", key)
 	if err != nil {
 		span.SetTag("cache", "failure")
+		span.SetTag("cache.success", "false")
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve item from cache")
 	}
+	span.SetTag("cache.success", "true")
 
 	switch raw := result.(type) {
 	case nil:
 		span.SetTag("cache", "miss")
+		span.SetTag("cache.hit", "false")
 		span.Status = sentry.SpanStatusNotFound
 		return nil, nil
 	case string:
 		span.SetTag("cache", "hit")
+		span.SetTag("cache.hit", "true")
 		return []byte(raw), nil
 	case []byte:
 		span.SetTag("cache", "hit")
+		span.SetTag("cache.hit", "true")
 		return raw, nil
 	default:
 		span.Status = sentry.SpanStatusUnimplemented
@@ -165,10 +175,9 @@ func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
 }
 
 func (r *redisCache) GetEz(ctx context.Context, key string, output interface{}) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Status = sentry.SpanStatusOK
-	span.Description = "Redis - GetEz"
 
 	data, err := r.Get(span.Context(), key)
 	if err != nil {
@@ -189,15 +198,16 @@ func (r *redisCache) GetEz(ctx context.Context, key string, output interface{}) 
 }
 
 func (r *redisCache) Delete(ctx context.Context, key string) error {
-	span := sentry.StartSpan(ctx, "cache.delete_item")
-	defer span.Finish()
-
 	if key == "" {
 		return errors.WithStack(ErrBlankKey)
 	}
 
+	span := sentry.StartSpan(ctx, "cache.remove")
+	defer span.Finish()
 	span.Description = key
 	span.Status = sentry.SpanStatusOK
+	span.SetTag("db.system", "redis")
+	span.SetTag("cache.key", key)
 
 	return errors.Wrap(r.send(span.Context(), "DEL", key), "failed to delete item from cache")
 }

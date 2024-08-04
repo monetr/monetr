@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/MicahParks/keyfunc"
-	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/v26/plaid"
@@ -92,7 +92,7 @@ func (m *memoryWebhookVerification) GetVerificationKey(ctx context.Context, keyI
 		return nil, errors.New("webhook verification is closed")
 	}
 
-	span := sentry.StartSpan(ctx, "GetVerificationKey [InMemory]")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	log := m.log.WithField("keyId", keyId).WithContext(ctx)
