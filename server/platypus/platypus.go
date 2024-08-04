@@ -16,6 +16,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/round"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/v26/plaid"
@@ -40,55 +41,60 @@ type (
 // want to keep track of things like the request Id and some information about the request itself. It also handles error
 // wrapping.
 func after(span *sentry.Span, response *http.Response, err error, message, errorMessage string) error {
-	if response != nil {
-		requestId := response.Header.Get("X-Request-Id")
-		if span.Data == nil {
-			span.Data = map[string]interface{}{}
-		}
-
-		data := map[string]interface{}{}
-
-		// With plaid responses we can actually still use the body of the response :tada:. The request Id is also stored on
-		// the response body itself in most of my testing. I could have sworn the documentation cited X-Request-Id as being
-		// a possible source for it, but I have not seen that yet. This bit of code extracts the body into a map. I know to
-		// some degree of certainty that the response will always be an object and not an array. So a map with a string key
-		// is safe. I can then extract the request Id and store that with my logging and diagnostic data.
-		{
-			var extractedResponseBody map[string]interface{}
-			if e := json.NewDecoder(response.Body).Decode(&extractedResponseBody); e == nil {
-				if requestId == "" {
-					requestId = extractedResponseBody["request_id"].(string)
-				}
-
-				// But if our request was not successful, then I also want to yoink that body and throw it into my diagnostic
-				// data as well. This will help me if I ever need to track down bugs with Plaid's API or problems with requests
-				// that I am making incorrectly.
-				if response.StatusCode != http.StatusOK {
-					data["body"] = extractedResponseBody
-				}
-			}
-		}
-
-		{ // Make sure we put the request ID everywhere, this is easily the most important diagnostic data we need.
-			data["X-RequestId"] = requestId
-			span.Data["plaidRequestId"] = requestId
-			span.SetTag("plaidRequestId", requestId)
-			span.SetTag("http.request.method", response.Request.Method)
-			span.SetTag("server.address", response.Request.URL.Hostname())
-			span.SetTag("url.full", response.Request.URL.String())
-			span.SetTag("http.response.status_code", fmt.Sprint(response.StatusCode))
-		}
-
-		crumbs.HTTP(
-			span.Context(),
-			message,
-			"plaid",
-			response.Request.URL.String(),
-			response.Request.Method,
-			response.StatusCode,
-			data,
-		)
-	}
+	// if response != nil {
+	// 	requestId := response.Header.Get("X-Request-Id")
+	// 	if span.Data == nil {
+	// 		span.Data = map[string]interface{}{}
+	// 	}
+	// 	span.Description = fmt.Sprintf(
+	// 		"%s %s",
+	// 		response.Request.Method,
+	// 		response.Request.URL.String(),
+	// 	)
+	//
+	// 	data := map[string]interface{}{}
+	//
+	// 	// With plaid responses we can actually still use the body of the response :tada:. The request Id is also stored on
+	// 	// the response body itself in most of my testing. I could have sworn the documentation cited X-Request-Id as being
+	// 	// a possible source for it, but I have not seen that yet. This bit of code extracts the body into a map. I know to
+	// 	// some degree of certainty that the response will always be an object and not an array. So a map with a string key
+	// 	// is safe. I can then extract the request Id and store that with my logging and diagnostic data.
+	// 	{
+	// 		var extractedResponseBody map[string]interface{}
+	// 		if e := json.NewDecoder(response.Body).Decode(&extractedResponseBody); e == nil {
+	// 			if requestId == "" {
+	// 				requestId = extractedResponseBody["request_id"].(string)
+	// 			}
+	//
+	// 			// But if our request was not successful, then I also want to yoink that body and throw it into my diagnostic
+	// 			// data as well. This will help me if I ever need to track down bugs with Plaid's API or problems with requests
+	// 			// that I am making incorrectly.
+	// 			if response.StatusCode != http.StatusOK {
+	// 				data["body"] = extractedResponseBody
+	// 			}
+	// 		}
+	// 	}
+	//
+	// 	{ // Make sure we put the request ID everywhere, this is easily the most important diagnostic data we need.
+	// 		data["X-RequestId"] = requestId
+	// 		span.Data["plaidRequestId"] = requestId
+	// 		span.SetTag("plaidRequestId", requestId)
+	// 		span.SetTag("http.request.method", response.Request.Method)
+	// 		span.SetTag("server.address", response.Request.URL.Hostname())
+	// 		span.SetTag("url.full", response.Request.URL.String())
+	// 		span.SetTag("http.response.status_code", fmt.Sprint(response.StatusCode))
+	// 	}
+	//
+	// 	crumbs.HTTP(
+	// 		span.Context(),
+	// 		message,
+	// 		"plaid",
+	// 		response.Request.URL.String(),
+	// 		response.Request.Method,
+	// 		response.StatusCode,
+	// 		data,
+	// 	)
+	// }
 
 	switch e := err.(type) {
 	case nil:
@@ -131,6 +137,34 @@ func NewPlaid(
 ) *Plaid {
 	httpClient := &http.Client{
 		Timeout: 60 * time.Second,
+		Transport: round.NewObservabilityRoundTripper(http.DefaultTransport,
+			func(
+				ctx context.Context,
+				request *http.Request,
+				response *http.Response,
+				err error,
+			) {
+				// No-op at the moment, still using the after function
+				var statusCode int
+				var requestId string
+				if response != nil {
+					statusCode = response.StatusCode
+					requestId = response.Header.Get("X-Request-Id")
+				}
+
+				// If you get a nil reference panic here during testing, its probably because you forgot to mock a certain endpoint.
+				// Check to see if the error is a "no responder found" error.
+				crumbs.HTTP(ctx,
+					"Plaid API Call",
+					"plaid",
+					request.URL.String(),
+					request.Method,
+					statusCode,
+					map[string]interface{}{
+						"X-Request-Id": requestId,
+					},
+				)
+			}),
 	}
 
 	conf := plaid.NewConfiguration()
@@ -163,9 +197,8 @@ type Plaid struct {
 }
 
 func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (LinkToken, error) {
-	span := sentry.StartSpan(ctx, "http.client")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Plaid - CreateLinkToken"
 
 	log := p.log.WithContext(span.Context())
 
@@ -236,9 +269,8 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 }
 
 func (p *Plaid) ExchangePublicToken(ctx context.Context, publicToken string) (*ItemToken, error) {
-	span := sentry.StartSpan(ctx, "http.client")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Plaid - ExchangePublicToken"
 
 	log := p.log.WithContext(span.Context())
 
@@ -269,9 +301,8 @@ func (p *Plaid) ExchangePublicToken(ctx context.Context, publicToken string) (*I
 }
 
 func (p *Plaid) GetWebhookVerificationKey(ctx context.Context, keyId string) (*WebhookVerificationKey, error) {
-	span := sentry.StartSpan(ctx, "http.client")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Plaid - GetWebhookVerificationKey"
 
 	log := p.log.WithContext(span.Context())
 
@@ -302,9 +333,8 @@ func (p *Plaid) GetWebhookVerificationKey(ctx context.Context, keyId string) (*W
 }
 
 func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plaid.Institution, error) {
-	span := sentry.StartSpan(ctx, "http.client")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Plaid - GetInstitution"
 
 	log := p.log.WithContext(span.Context())
 
