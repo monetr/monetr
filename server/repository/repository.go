@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 )
 
@@ -184,7 +184,7 @@ func (r *repositoryBase) AccountIdStr() string {
 }
 
 func (r *repositoryBase) GetIsSetup(ctx context.Context) (bool, error) {
-	span := sentry.StartSpan(ctx, "GetIsSetup")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	return r.txn.ModelContext(span.Context(), &Link{}).
