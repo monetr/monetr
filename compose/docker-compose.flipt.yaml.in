@@ -1,0 +1,17 @@
+services:
+  flipt:
+    image: ghcr.io/flipt-io/flipt:v1.44.1
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      FLIPT_LOG_LEGEL: "debug"
+    volumes:
+      - fliptData:/var/opt/flipt
+
+  monetr:
+    links:
+      - flipt
+
+volumes:
+  fliptData:
