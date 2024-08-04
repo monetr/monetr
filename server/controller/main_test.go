@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"net/http/httputil"
 	"os"
 	"strings"
 	"testing"
@@ -33,7 +32,6 @@ import (
 	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/plaid/plaid-go/v26/plaid"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -208,10 +206,8 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 		},
 
 		Printers: []httpexpect.Printer{
-			NewDebugPrinter(log, true),
+			testutils.NewDebugPrinter(log, true),
 		},
-		// Reporter: httpexpect.NewAssertReporter(t),
-		// Formatter: ,
 		Context: context.WithValue(context.Background(), "test", t.Name()),
 	})
 
@@ -221,47 +217,6 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 		Clock:         clock,
 		Tokens:        clientTokens,
 	}, expect
-}
-
-type DebugPrinter struct {
-	logger *logrus.Entry
-	body   bool
-}
-
-// NewDebugPrinter returns a new DebugPrinter given a logger and body
-// flag. If body is true, request and response body is also printed.
-func NewDebugPrinter(logger *logrus.Entry, body bool) DebugPrinter {
-	return DebugPrinter{logger, body}
-}
-
-// Request implements Printer.Request.
-func (p DebugPrinter) Request(req *http.Request) {
-	if req == nil {
-		return
-	}
-
-	dump, err := httputil.DumpRequest(req, p.body)
-	if err != nil {
-		panic(err)
-	}
-	p.logger.Debug("Logging Request\n" + string(dump) + "\n\t")
-}
-
-// Response implements Printer.Response.
-func (p DebugPrinter) Response(resp *http.Response, duration time.Duration) {
-	if resp == nil {
-		return
-	}
-
-	dump, err := httputil.DumpResponse(resp, p.body)
-	if err != nil {
-		panic(err)
-	}
-
-	text := strings.Replace(string(dump), "\r\n", "\n", -1)
-	lines := strings.SplitN(text, "\n", 2)
-
-	p.logger.Debugf("Logging Response\n%s %s\n%s\t", lines[0], duration, lines[1])
 }
 
 func GivenIHaveToken(t *testing.T, e *httpexpect.Expect) string {
