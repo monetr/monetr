@@ -70,6 +70,12 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 		}(ctx)
 		requestedPath := ctx.Request().URL.Path
 
+		// Even though we are using an embedded filesystem for the UI, we still want
+		// to make sure we do not use relative paths.
+		if !path.IsAbs(requestedPath) {
+			return ctx.NoContent(http.StatusNotFound)
+		}
+
 		// If they request `/index.html` simply redirect them to `/`.
 		if requestedPath == indexFile {
 			url := ctx.Request().URL.String()
