@@ -110,6 +110,8 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 			span.StartTime = event.StartTime
 			span.Description = queryString
 			span.SetTag("query", queryType)
+			span.SetTag("db.system", "postgresql")
+			span.SetTag("db.operation", queryType)
 
 			if event.Err == nil {
 				span.Status = sentry.SpanStatusOK

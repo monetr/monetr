@@ -61,10 +61,12 @@ func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, argu
 }
 
 func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, arguments interface{}) error {
-	span := sentry.StartSpan(ctx, "topic.send")
+	span := sentry.StartSpan(ctx, "queue.create")
 	defer span.Finish()
-	span.Description = "postgres Enqueue"
+	span.Description = queue
 	span.SetTag("queue", queue)
+	span.SetTag("messaging.destination.name", queue)
+	span.SetTag("messaging.system", "postgresql")
 	span.Data = map[string]interface{}{
 		"queue":     queue,
 		"arguments": arguments,
@@ -125,6 +127,7 @@ func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, que
 		}
 		return errors.Wrap(err, "failed to enqueue job for postgres")
 	}
+	span.SetTag("messaging.message.id", string(job.JobId))
 
 	log.WithFields(logrus.Fields{
 		"jobId":     job.JobId,
@@ -605,9 +608,12 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 				ctx = sentry.SetHubOnContext(ctx, sentry.CurrentHub().Clone())
 				span := sentry.StartSpan(
 					ctx,
-					"topic.process",
+					"queue.receive",
 					sentry.WithTransactionName(nextJob.queueName),
 				)
+				span.SetTag("messaging.destination.name", string(nextJob.queueName))
+				span.SetTag("messaging.system", "postgresql")
+
 				slug := strings.ToLower(nextJob.queueName)
 				slug = strings.ReplaceAll(slug, "::", "-")
 
@@ -791,11 +797,14 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		}
 		span := sentry.StartSpan(
 			highContext,
-			"topic.process",
+			"queue.process",
 			options...,
 		)
 		span.Description = handler.QueueName()
 		span.SetData("input", job.Input)
+		span.SetTag("messaging.message.id", string(job.JobId))
+		span.SetTag("messaging.destination.name", string(job.Queue))
+		span.SetTag("messaging.system", "postgresql")
 		jobLog := p.log.WithContext(span.Context())
 		hub := sentry.GetHubFromContext(span.Context())
 		hub.ConfigureScope(func(scope *sentry.Scope) {
