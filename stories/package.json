@@ -21,7 +21,7 @@
     "@storybook/blocks": "7.0.18",
     "@storybook/react": "7.0.18",
     "@storybook/test-runner": "0.10.0",
-    "@storybook/testing-library": "0.0.14-next.2",
+    "@storybook/testing-library": "0.2.2",
     "msw": "1.2.2",
     "msw-storybook-addon": "1.8.0",
     "postcss": "8.4.40",
