@@ -266,8 +266,8 @@ importers:
         specifier: 14.12.3
         version: 14.12.3
       '@rspack/binding-linux-arm64-gnu':
-        specifier: 0.3.6
-        version: 0.3.6
+        specifier: 0.7.5
+        version: 0.7.5
       '@rspack/binding-linux-x64-gnu':
         specifier: 0.3.6
         version: 0.3.6
@@ -3461,6 +3461,11 @@ packages:
 
   '@rspack/binding-linux-arm64-gnu@0.3.6':
     resolution: {integrity: sha512-nBm1ifhD7Y/NSNZsklvOjX9g2xs+k5axJIOia66KJO6/gygcOX0E1tsSeFWJLT98Pwewn3zIUobaq/eYF6b86w==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@rspack/binding-linux-arm64-gnu@0.7.5':
+    resolution: {integrity: sha512-/24UytJXrK+7CsucDb30GCKYIJ8nG6ceqbJyOtsJv9zeArNLHkxrYGSyjHJIpQfwVN17BPP4RNOi+yIZ3ZgDyA==}
     cpu: [arm64]
     os: [linux]
 
@@ -14940,7 +14945,10 @@ snapshots:
   '@rspack/binding-linux-arm64-gnu@0.1.12':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@0.3.6': {}
+  '@rspack/binding-linux-arm64-gnu@0.3.6':
+    optional: true
+
+  '@rspack/binding-linux-arm64-gnu@0.7.5': {}
 
   '@rspack/binding-linux-arm64-musl@0.1.12':
     optional: true
