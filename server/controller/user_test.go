@@ -49,6 +49,43 @@ func TestMe(t *testing.T) {
 		}
 	})
 
+	t.Run("authenticated pending MFA", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		// Then configure the login fixture with TOTP.
+		_ = fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
+
+		var token string
+		{ // Send the initial request and make sure it responds with the error.
+			response := e.POST("/api/authentication/login").
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
+				}).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // Then retrieve "me".
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").String().IsASCII()
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
+			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
+			response.JSON().Path("$.trialingUntil").IsNull()
+			response.JSON().Path("$.nextUrl").IsEqual("/login/multifactor")
+		}
+	})
+
 	t.Run("bad token", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 
@@ -369,12 +406,16 @@ func TestChangePassword(t *testing.T) {
 	t.Run("token for a non-existent user", func(t *testing.T) {
 		conf := NewTestApplicationConfig(t)
 		app, e := NewTestApplicationWithConfig(t, conf)
-		token, err := app.Tokens.Create(security.AuthenticatedAudience, 10*time.Minute, security.Claims{
-			EmailAddress: gofakeit.Email(),
-			UserId:       "user_bogus",
-			AccountId:    "acct_bogus",
-			LoginId:      "lgn_bogus",
-		})
+		token, err := app.Tokens.Create(
+			10*time.Minute,
+			security.Claims{
+				Scope:        security.AuthenticatedScope,
+				EmailAddress: gofakeit.Email(),
+				UserId:       "user_bogus",
+				AccountId:    "acct_bogus",
+				LoginId:      "lgn_bogus",
+			},
+		)
 		assert.NoError(t, err, "should not have an error generating a bogus token")
 
 		bogusCurrentPassword := gofakeit.Generate("????????")

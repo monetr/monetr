@@ -62,6 +62,10 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("cannot login without TOTP when enabled", func(t *testing.T) {
+		// When a login has TOTP enabled and they attempt to login, they will get a
+		// precondition required return status, but we will provide a cookie that is
+		// short lived in order to allow them to provide their TOTP or other
+		// multifactor code.
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		// Then configure the login fixture with TOTP.
@@ -77,73 +81,6 @@ func TestLogin(t *testing.T) {
 		response.Status(http.StatusPreconditionRequired)
 		response.JSON().Path("$.error").String().IsEqual("login requires MFA")
 		response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
-		response.Cookies().IsEmpty()
-	})
-
-	t.Run("login true path with TOTP", func(t *testing.T) {
-		app, e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		// Then configure the login fixture with TOTP.
-		loginTotp := fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
-
-		{ // Send the initial request and make sure it responds with the error.
-			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
-					"email":    user.Login.Email,
-					"password": password,
-				}).
-				Expect()
-
-			response.Status(http.StatusPreconditionRequired)
-			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
-			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
-		}
-
-		{ // Then try to authenticate using the code.
-			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
-					"email":    user.Login.Email,
-					"password": password,
-					"totp":     loginTotp.At(app.Clock.Now().Unix()),
-				}).
-				Expect()
-
-			response.Status(http.StatusOK)
-			AssertSetTokenCookie(t, response)
-		}
-	})
-
-	t.Run("can login when TOTP is provided", func(t *testing.T) {
-		app, e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		// Then configure the login fixture with TOTP.
-		totpCode := fixtures.GivenIHaveTOTPCodeForLogin(t, app.Clock, user.Login)
-
-		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
-				"email":    user.Login.Email,
-				"password": password,
-				"totp":     totpCode,
-			}).
-			Expect()
-
-		response.Status(http.StatusOK)
-		AssertSetTokenCookie(t, response)
-	})
-
-	t.Run("can provide TOTP when it is not enabled", func(t *testing.T) {
-		app, e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-
-		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
-				"email":    user.Login.Email,
-				"password": password,
-				"totp":     "123456",
-			}).
-			Expect()
-
-		response.Status(http.StatusOK)
 		AssertSetTokenCookie(t, response)
 	})
 
@@ -181,7 +118,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusInternalServerError)
-		response.JSON().Path("$.error").String().IsEqual("user has no accounts")
+		response.JSON().Path("$.error").String().IsEqual("User has no accounts")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -451,6 +388,174 @@ func TestLogout(t *testing.T) {
 	})
 }
 
+func TestMultifactor(t *testing.T) {
+	t.Run("simple multifactor", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		totp := fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
+
+		var token string
+		{ // Login, this should return an MFA required error.
+			response := e.POST("/api/authentication/login").
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
+				}).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // Parse the token we received to make sure it's correct.
+			claims, err := app.Tokens.Parse(token)
+			assert.NoError(t, err, "must be able to parse the token returned from login")
+			assert.Equal(t, security.MultiFactorScope, claims.Scope, "token must have the multifactor authentication scope")
+		}
+
+		{ // Then retrieve "me". This will need to happen for the frontend.
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").String().IsASCII()
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
+			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
+			response.JSON().Path("$.trialingUntil").IsNull()
+			response.JSON().Path("$.nextUrl").IsEqual("/login/multifactor")
+		}
+
+		{ // Now actually provide the MFA token
+			response := e.POST("/api/authentication/multifactor").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					"totp": totp.AtTime(app.Clock.Now()),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			finalToken := AssertSetTokenCookie(t, response)
+
+			claims, err := app.Tokens.Parse(finalToken)
+			assert.NoError(t, err, "must be able to parse the token returned from multifactor")
+			assert.Equal(t, security.AuthenticatedScope, claims.Scope, "token must have the authenticated scope")
+		}
+	})
+
+	t.Run("multifactor token should expire", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
+
+		var token string
+		{ // Login, this should return an MFA required error.
+			response := e.POST("/api/authentication/login").
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
+				}).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // Parse the token we received to make sure it's correct.
+			claims, err := app.Tokens.Parse(token)
+			assert.NoError(t, err, "must be able to parse the token returned from login")
+			assert.Equal(t, security.MultiFactorScope, claims.Scope, "token must have the multifactor authentication scope")
+		}
+
+		app.Clock.Add(6 * time.Minute)
+
+		{ // Parse the token we received to make sure it's correct.
+			claims, err := app.Tokens.Parse(token)
+			assert.EqualError(t, err, "failed to parse token: this token has expired")
+			assert.Nil(t, claims, "claims should be nil if there is an error")
+		}
+
+		{ // Then try to retrieve me using the expired token.
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusUnauthorized)
+		}
+	})
+
+	t.Run("login doesnt have MFA enabled", func(t *testing.T) {
+		t.Skip("todo")
+	})
+
+	t.Run("mfa is wrong by time", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		totp := fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
+
+		var token string
+		{ // Login, this should return an MFA required error.
+			response := e.POST("/api/authentication/login").
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
+				}).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // Parse the token we received to make sure it's correct.
+			claims, err := app.Tokens.Parse(token)
+			assert.NoError(t, err, "must be able to parse the token returned from login")
+			assert.Equal(t, security.MultiFactorScope, claims.Scope, "token must have the multifactor authentication scope")
+		}
+
+		{ // Then retrieve "me". This will need to happen for the frontend.
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").String().IsASCII()
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
+			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
+			response.JSON().Path("$.trialingUntil").IsNull()
+			response.JSON().Path("$.nextUrl").IsEqual("/login/multifactor")
+		}
+
+		{ // Provide an MFA token that is old
+			// Grab a timestamp
+			timestamp := app.Clock.Now()
+			// Progress the application's clock by 1 minute, making our timestamp old.
+			app.Clock.Add(1 * time.Minute)
+			response := e.POST("/api/authentication/multifactor").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					// Generate a code with the old timestamp, this will be considered
+					// wrong by the server.
+					"totp": totp.AtTime(timestamp),
+				}).
+				Expect()
+
+			response.Status(http.StatusUnauthorized)
+			response.JSON().Path("$.error").String().IsEqual("Invalid TOTP code")
+			response.Cookies().IsEmpty()
+		}
+	})
+}
 func TestRegister(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		_, e := NewTestApplication(t)
@@ -940,9 +1045,9 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Then generate a verification token and try to use it.
 			verificationToken, err := app.Tokens.Create(
-				security.VerifyEmailAudience,
 				5*time.Minute,
 				security.Claims{
+					Scope:        security.VerifyEmailScope,
 					EmailAddress: registerRequest.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -1019,9 +1124,9 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Then generate a verification token and try to use it.
 			verificationToken, err := tokenGenerator.Create(
-				security.VerifyEmailAudience,
 				5*time.Minute,
 				security.Claims{
+					Scope:        security.VerifyEmailScope,
 					EmailAddress: registerRequest.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -1092,9 +1197,9 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Then generate a verification token and try to use it.
 			verificationToken, err := app.Tokens.Create(
-				security.VerifyEmailAudience,
 				5*time.Minute,
 				security.Claims{
+					Scope:        security.VerifyEmailScope,
 					EmailAddress: registerRequest.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -1349,9 +1454,9 @@ func TestSendForgotPassword(t *testing.T) {
 
 		{ // Then generate a verification token and try to use it.
 			verificationToken, err := app.Tokens.Create(
-				security.VerifyEmailAudience,
 				5*time.Minute,
 				security.Claims{
+					Scope:        security.VerifyEmailScope,
 					EmailAddress: email,
 					UserId:       "",
 					AccountId:    "",
@@ -1478,9 +1583,9 @@ func TestResetPassword(t *testing.T) {
 
 		{ // Reset the password.
 			token, err := app.Tokens.Create(
-				security.ResetPasswordAudience,
 				5*time.Minute,
 				security.Claims{
+					Scope:        security.ResetPasswordScope,
 					EmailAddress: user.Login.Email,
 					UserId:       "",
 					AccountId:    "",
@@ -1533,9 +1638,9 @@ func TestResetPassword(t *testing.T) {
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
 		firstToken, err := app.Tokens.Create(
-			security.ResetPasswordAudience,
 			5*time.Minute,
 			security.Claims{
+				Scope:        security.ResetPasswordScope,
 				EmailAddress: user.Login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -1547,9 +1652,9 @@ func TestResetPassword(t *testing.T) {
 		app.Clock.Add(1 * time.Second)
 
 		secondToken, err := app.Tokens.Create(
-			security.ResetPasswordAudience,
 			5*time.Minute,
 			security.Claims{
+				Scope:        security.ResetPasswordScope,
 				EmailAddress: user.Login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -1598,12 +1703,16 @@ func TestResetPassword(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
-		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
-			EmailAddress: user.Login.Email,
-			UserId:       "",
-			AccountId:    "",
-			LoginId:      user.LoginId.String(),
-		})
+		token, err := app.Tokens.Create(
+			5*time.Second,
+			security.Claims{
+				Scope:        security.ResetPasswordScope,
+				EmailAddress: user.Login.Email,
+				UserId:       "",
+				AccountId:    "",
+				LoginId:      user.LoginId.String(),
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		// Generate a new password to reset to.
@@ -1643,12 +1752,16 @@ func TestResetPassword(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
-		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
-			EmailAddress: user.Login.Email,
-			UserId:       "",
-			AccountId:    "",
-			LoginId:      user.LoginId.String(),
-		})
+		token, err := app.Tokens.Create(
+			5*time.Second,
+			security.Claims{
+				Scope:        security.ResetPasswordScope,
+				EmailAddress: user.Login.Email,
+				UserId:       "",
+				AccountId:    "",
+				LoginId:      user.LoginId.String(),
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		// Wait for the token to expire.
@@ -1678,12 +1791,16 @@ func TestResetPassword(t *testing.T) {
 	t.Run("reset password login does not exist", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		email := testutils.GetUniqueEmail(t)
-		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
-			EmailAddress: email,
-			UserId:       "",
-			AccountId:    "",
-			LoginId:      "lgn_bogus",
-		})
+		token, err := app.Tokens.Create(
+			5*time.Second,
+			security.Claims{
+				Scope:        security.ResetPasswordScope,
+				EmailAddress: email,
+				UserId:       "",
+				AccountId:    "",
+				LoginId:      "lgn_bogus",
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		MustSendPasswordChangedEmail(t, app, 0)
@@ -1734,12 +1851,16 @@ func TestResetPassword(t *testing.T) {
 	t.Run("password too short", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		email := testutils.GetUniqueEmail(t)
-		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
-			EmailAddress: email,
-			UserId:       "user_bogus",
-			AccountId:    "acct_bogus",
-			LoginId:      "lgn_bogus",
-		})
+		token, err := app.Tokens.Create(
+			5*time.Second,
+			security.Claims{
+				Scope:        security.ResetPasswordScope,
+				EmailAddress: email,
+				UserId:       "user_bogus",
+				AccountId:    "acct_bogus",
+				LoginId:      "lgn_bogus",
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		MustSendPasswordChangedEmail(t, app, 0)

@@ -12,22 +12,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Audience string
+type Scope string
 
 const (
-	AuthenticatedAudience Audience = "authenticated"
-	ResetPasswordAudience Audience = "resetPassword"
-	VerifyEmailAudience   Audience = "verifyEmail"
+	AuthenticatedScope Scope = "authenticated"
+	MultiFactorScope   Scope = "multiFactor"
+	ResetPasswordScope Scope = "resetPassword"
+	VerifyEmailScope   Scope = "verifyEmail"
 )
 
 type Claims struct {
-	// CreatedAt represents the timestamp the token was created, if this field is provided by a caller it will be
-	// overwritten.
+	// CreatedAt represents the timestamp the token was created, if this field is
+	// provided by a caller it will be overwritten.
 	CreatedAt    time.Time `json:"createdAt"`
-	EmailAddress string    `json:"string"`
+	EmailAddress string    `json:"email,string"`
 	UserId       string    `json:"userId,string"`
 	AccountId    string    `json:"accountId,string"`
 	LoginId      string    `json:"loginId,string"`
+	Scope        Scope     `json:"scope,string"`
 	// ReissueCount will be used to allow tokens to be reissued a certain number
 	// of times to allow users to stay logged in for a longer period of time if
 	// they are using the application frequently. Tokens will not be reissued if
@@ -35,9 +37,55 @@ type Claims struct {
 	ReissueCount uint8 `json:"reissueCount,string"`
 }
 
+// RequireScope takes an array of allowed scopes. If the claim is any one of the
+// specified scopes then this function will return nil. If the claim does not
+// contain any of the specified scopes then this will return an error.
+func (c Claims) RequireScope(scopes ...Scope) error {
+	if c.Scope == "" {
+		return errors.New("authentication is missing scope")
+	}
+
+	for i := range scopes {
+		scope := scopes[i]
+		// If the claims have one of the scopes then just return nil. The claims are
+		// valid.
+		if scope == c.Scope {
+			return nil
+		}
+	}
+
+	return errors.Errorf("authentication does not have required scope; has: [%s] required: %v", c.Scope, scopes)
+}
+
+func (c Claims) Valid() error {
+	if c.CreatedAt.IsZero() {
+		return errors.New("claims invalid: created at is zero")
+	}
+
+	if c.LoginId == "" {
+		return errors.New("claims invalid: login Id is not defined")
+	}
+
+	if c.Scope == "" {
+		return errors.New("claims invalid: scope is not defined")
+	}
+
+	if c.Scope == AuthenticatedScope {
+		if c.AccountId == "" {
+			return errors.New("claims invalid: account Id is not defined")
+		}
+
+		if c.UserId == "" {
+			return errors.New("claims invalid: userId Id is not defined")
+		}
+	}
+
+	return nil
+}
+
 type ClientTokens interface {
-	Parse(audience Audience, token string) (*Claims, error)
-	Create(audience Audience, lifetime time.Duration, claims Claims) (string, error)
+	Parse(token string) (*Claims, error)
+	Create(lifetime time.Duration, claims Claims) (string, error)
 }
 
 // In order to generate the public and private keys you will need to do this:
@@ -84,9 +132,8 @@ func NewPasetoClientTokens(
 	}, nil
 }
 
-func (p *pasetoClientTokens) Parse(audience Audience, token string) (*Claims, error) {
+func (p *pasetoClientTokens) Parse(token string) (*Claims, error) {
 	parser := paseto.NewParserWithoutExpiryCheck()
-	parser.AddRule(paseto.ForAudience(string(audience)))
 	parser.AddRule(paseto.IssuedBy(p.issuer))
 	parser.AddRule(p.notExpired())
 	parser.AddRule(paseto.ValidAt(p.clock.Now()))
@@ -120,13 +167,11 @@ func (p *pasetoClientTokens) notExpired() paseto.Rule {
 }
 
 func (p *pasetoClientTokens) Create(
-	audience Audience,
 	lifetime time.Duration,
 	claims Claims,
 ) (string, error) {
 	token := paseto.NewToken()
 	now := p.clock.Now()
-	token.SetAudience(string(audience))
 	token.SetExpiration(now.Add(lifetime))
 	token.SetIssuedAt(now)
 	token.SetNotBefore(now)

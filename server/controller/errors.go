@@ -106,10 +106,28 @@ func (c *Controller) returnError(ctx echo.Context, status int, msg string, args 
 	return echo.NewHTTPError(status, fmt.Sprintf(msg, args...)).WithInternal(err)
 }
 
+func (c *Controller) unauthorized(ctx echo.Context) error {
+	c.getSpan(ctx).Status = sentry.SpanStatusUnauthenticated
+	c.updateAuthenticationCookie(ctx, ClearAuthentication)
+	return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
+}
+
+func (c *Controller) unauthorizedError(ctx echo.Context, err error) error {
+	c.getSpan(ctx).Status = sentry.SpanStatusUnauthenticated
+	c.updateAuthenticationCookie(ctx, ClearAuthentication)
+	return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
+}
+
 func (c *Controller) badRequest(ctx echo.Context, msg string, args ...interface{}) error {
 	requestSpan := c.getSpan(ctx)
 	requestSpan.Status = sentry.SpanStatusInvalidArgument
 	return c.returnError(ctx, http.StatusBadRequest, msg, args...)
+}
+
+func (c *Controller) badRequestError(ctx echo.Context, err error, msg string, args ...interface{}) error {
+	requestSpan := c.getSpan(ctx)
+	requestSpan.Status = sentry.SpanStatusInvalidArgument
+	return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, msg, args...)
 }
 
 func (c *Controller) invalidJson(ctx echo.Context) error {

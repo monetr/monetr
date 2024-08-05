@@ -24,7 +24,8 @@ func TestPasetoClientTokens(t *testing.T) {
 		clientTokens, err := security.NewPasetoClientTokens(log, clock, "monetr.local", publicKey, privateKey)
 		assert.NoError(t, err, "must be able to init the client tokens interface")
 
-		token, err := clientTokens.Create(security.AuthenticatedAudience, 5*time.Second, security.Claims{
+		token, err := clientTokens.Create(5*time.Second, security.Claims{
+			Scope:        security.AuthenticatedScope,
 			EmailAddress: gofakeit.Email(),
 			UserId:       "user_1",
 			AccountId:    "acct_2",
@@ -33,7 +34,7 @@ func TestPasetoClientTokens(t *testing.T) {
 		assert.NoError(t, err, "must be able to create a token successfully")
 		assert.NotEmpty(t, token, "token must not be empty")
 
-		claims, err := clientTokens.Parse(security.AuthenticatedAudience, token)
+		claims, err := clientTokens.Parse(token)
 		assert.NoError(t, err, "should be able to parse the token it just generated")
 		assert.NotNil(t, claims, "parsed token should not be nil")
 		assert.EqualValues(t, "user_1", claims.UserId, "user Id should match expected")
@@ -51,7 +52,8 @@ func TestPasetoClientTokens(t *testing.T) {
 		clientTokens, err := security.NewPasetoClientTokens(log, clock, "monetr.local", publicKey, privateKey)
 		assert.NoError(t, err, "must be able to init the client tokens interface")
 
-		token, err := clientTokens.Create(security.AuthenticatedAudience, 5*time.Second, security.Claims{
+		token, err := clientTokens.Create(5*time.Second, security.Claims{
+			Scope:        security.AuthenticatedScope,
 			EmailAddress: gofakeit.Email(),
 			UserId:       "user_1",
 			AccountId:    "acct_2",
@@ -62,32 +64,8 @@ func TestPasetoClientTokens(t *testing.T) {
 
 		clock.Add(10 * time.Second)
 
-		claims, err := clientTokens.Parse(security.AuthenticatedAudience, token)
+		claims, err := clientTokens.Parse(token)
 		assert.EqualError(t, err, "failed to parse token: this token has expired")
-		assert.Nil(t, claims, "token should be nil when expired")
-	})
-
-	t.Run("different audience", func(t *testing.T) {
-		clock := clock.NewMock()
-		log := testutils.GetLog(t)
-
-		publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
-		assert.NoError(t, err, "must be able to generate keys")
-
-		clientTokens, err := security.NewPasetoClientTokens(log, clock, "monetr.local", publicKey, privateKey)
-		assert.NoError(t, err, "must be able to init the client tokens interface")
-
-		token, err := clientTokens.Create(security.VerifyEmailAudience, 5*time.Second, security.Claims{
-			EmailAddress: gofakeit.Email(),
-			UserId:       "user_1",
-			AccountId:    "acct_2",
-			LoginId:      "lgn_3",
-		})
-		assert.NoError(t, err, "must be able to create a token successfully")
-		assert.NotEmpty(t, token, "token must not be empty")
-
-		claims, err := clientTokens.Parse(security.AuthenticatedAudience, token)
-		assert.EqualError(t, err, "failed to parse token: this token is not intended for `authenticated'. `verifyEmail' found")
 		assert.Nil(t, claims, "token should be nil when expired")
 	})
 
@@ -107,7 +85,8 @@ func TestPasetoClientTokens(t *testing.T) {
 		clientTokens2, err := security.NewPasetoClientTokens(log, clock, "monetr.local", publicKey2, privateKey2)
 		assert.NoError(t, err, "must be able to init the client tokens interface")
 
-		token, err := clientTokens1.Create(security.AuthenticatedAudience, 5*time.Second, security.Claims{
+		token, err := clientTokens1.Create(5*time.Second, security.Claims{
+			Scope:        security.AuthenticatedScope,
 			EmailAddress: gofakeit.Email(),
 			UserId:       "user_1",
 			AccountId:    "acct_2",
@@ -116,8 +95,38 @@ func TestPasetoClientTokens(t *testing.T) {
 		assert.NoError(t, err, "must be able to create a token successfully")
 		assert.NotEmpty(t, token, "token must not be empty")
 
-		claims, err := clientTokens2.Parse(security.AuthenticatedAudience, token)
+		claims, err := clientTokens2.Parse(token)
 		assert.EqualError(t, err, "failed to parse token: bad signature")
 		assert.Nil(t, claims, "token should be nil when it is not valid")
+	})
+}
+
+func TestClaimsRequiredScope(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+
+		publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
+		assert.NoError(t, err, "must be able to generate keys")
+
+		clientTokens, err := security.NewPasetoClientTokens(log, clock, "monetr.local", publicKey, privateKey)
+		assert.NoError(t, err, "must be able to init the client tokens interface")
+
+		token, err := clientTokens.Create(5*time.Second, security.Claims{
+			Scope:        security.AuthenticatedScope,
+			EmailAddress: gofakeit.Email(),
+			UserId:       "user_1",
+			AccountId:    "acct_2",
+			LoginId:      "lgn_3",
+		})
+		assert.NoError(t, err, "must be able to create a token successfully")
+		assert.NotEmpty(t, token, "token must not be empty")
+
+		claims, err := clientTokens.Parse(token)
+		assert.NoError(t, err, "should be able to parse token into claims")
+		assert.NoError(t, claims.RequireScope(security.AuthenticatedScope), "claims should have the AuthenticatedAudience scope")
+		assert.EqualError(t, claims.RequireScope(security.ResetPasswordScope), "authentication does not have required scope; has: [authenticated] required: [resetPassword]")
+		assert.EqualError(t, claims.RequireScope(security.VerifyEmailScope), "authentication does not have required scope; has: [authenticated] required: [verifyEmail]")
+		assert.EqualError(t, claims.RequireScope(security.VerifyEmailScope, security.ResetPasswordScope), "authentication does not have required scope; has: [authenticated] required: [verifyEmail resetPassword]")
 	})
 }
