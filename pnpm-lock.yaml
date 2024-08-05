@@ -263,8 +263,8 @@ importers:
         version: 4.1.4(react@18.3.1)
     devDependencies:
       '@happy-dom/global-registrator':
-        specifier: 14.3.9
-        version: 14.3.9
+        specifier: 14.12.3
+        version: 14.12.3
       '@rspack/binding-linux-arm64-gnu':
         specifier: 0.3.6
         version: 0.3.6
@@ -1952,8 +1952,8 @@ packages:
   '@hapi/topo@5.1.0':
     resolution: {integrity: sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==}
 
-  '@happy-dom/global-registrator@14.3.9':
-    resolution: {integrity: sha512-sOQQ56IY3IphSdUpCvOJxh300tzJ8+kI2QiIeUlOrojhOsCR+gu+sPP8PiGQKi6S41tyhDijT/C9vdvejyWfFQ==}
+  '@happy-dom/global-registrator@14.12.3':
+    resolution: {integrity: sha512-VL6mjnIhqD1l9zYBmdIx5Q3qNiNY0ZBByrDV2Z7hHDMsjhqwaVI2/uQZ7uyCsgRWvubSG1yZ74sEK2inDBBw/w==}
     engines: {node: '>=16.0.0'}
 
   '@headlessui/react@1.7.19':
@@ -7200,6 +7200,10 @@ packages:
     resolution: {integrity: sha512-vafaFqs8MZkRrSX7sFVUdo3ap/eNiLnb4IakshzvP56X5Nr1iGKAIqdX6tMlm6HcNRIkr6AxO5jFEoJzzpT8aQ==}
     engines: {node: '>=0.4.7'}
     hasBin: true
+
+  happy-dom@14.12.3:
+    resolution: {integrity: sha512-vsYlEs3E9gLwA1Hp+w3qzu+RUDFf4VTT8cyKqVICoZ2k7WM++Qyd2LwzyTi5bqMJFiIC/vNpTDYuxdreENRK/g==}
+    engines: {node: '>=16.0.0'}
 
   happy-dom@14.3.9:
     resolution: {integrity: sha512-0kPQchwthekcYpYN8CvCiq+/z5bqFYDLbTxZ+yDLwT8AFRVJDFadShHRxp3VAZRy7a5isOZ1j/LzsU1dtAIZMQ==}
@@ -13311,9 +13315,9 @@ snapshots:
     dependencies:
       '@hapi/hoek': 9.3.0
 
-  '@happy-dom/global-registrator@14.3.9':
+  '@happy-dom/global-registrator@14.12.3':
     dependencies:
-      happy-dom: 14.3.9
+      happy-dom: 14.12.3
 
   '@headlessui/react@1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -20324,6 +20328,12 @@ snapshots:
       wordwrap: 1.0.0
     optionalDependencies:
       uglify-js: 3.17.4
+
+  happy-dom@14.12.3:
+    dependencies:
+      entities: 4.5.0
+      webidl-conversions: 7.0.0
+      whatwg-mimetype: 3.0.0
 
   happy-dom@14.3.9:
     dependencies:
