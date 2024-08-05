@@ -37,7 +37,7 @@
     "@sentry/react": "6.19.7",
     "@sentry/tracing": "6.19.7",
     "@sentry/utils": "6.19.7",
-    "@tanstack/react-query": "4.32.1",
+    "@tanstack/react-query": "4.36.1",
     "axios": "1.6.8",
     "bun": "1.1.21",
     "cmdk": "1.0.0",
