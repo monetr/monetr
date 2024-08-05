@@ -68,7 +68,7 @@
     "zustand": "4.1.4"
   },
   "devDependencies": {
-    "@happy-dom/global-registrator": "14.3.9",
+    "@happy-dom/global-registrator": "14.12.3",
     "@rspack/binding-linux-arm64-gnu": "0.3.6",
     "@rspack/binding-linux-x64-gnu": "0.3.6",
     "@rspack/cli": "0.3.6",
