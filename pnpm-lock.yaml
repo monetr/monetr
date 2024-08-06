@@ -386,8 +386,8 @@ importers:
         specifier: 7.0.18
         version: 7.0.18(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/addon-styling':
-        specifier: 1.0.8
-        version: 1.0.8(@rspack/core@0.1.12(@types/webpack@5.28.5(@swc/core@1.3.101)(esbuild@0.17.19))(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19)))(@types/react-dom@18.3.0)(@types/react@18.3.3)(less@4.2.0)(postcss@8.4.41)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.55.0)(typescript@5.1.3)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19))
+        specifier: 1.3.7
+        version: 1.3.7(@rspack/core@0.1.12(@types/webpack@5.28.5(@swc/core@1.3.101)(esbuild@0.17.19))(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19)))(@types/react-dom@18.3.0)(@types/react@18.3.3)(less@4.2.0)(postcss@8.4.41)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.55.0)(typescript@5.1.3)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19))
       '@storybook/addon-viewport':
         specifier: 7.0.18
         version: 7.0.18(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3742,16 +3742,26 @@ packages:
       react-dom:
         optional: true
 
-  '@storybook/addon-styling@1.0.8':
-    resolution: {integrity: sha512-Ubi75gHNFO60Sjti2n/i3f0utERNOYcpsRkWHdzV+C26kUemLG+2riKHUt8zVbNskyJxA0EZxh84HYItRe4coA==}
+  '@storybook/addon-styling@1.3.7':
+    resolution: {integrity: sha512-JSBZMOrSw/3rlq5YoEI7Qyq703KSNP0Jd+gxTWu3/tP6245mpjn2dXnR8FvqVxCi+FG4lt2kQyPzgsuwEw1SSA==}
     deprecated: 'This package has been split into @storybook/addon-styling-webpack and @storybook/addon-themes. More info: https://github.com/storybookjs/addon-styling'
+    hasBin: true
     peerDependencies:
+      less: ^3.5.0 || ^4.0.0
+      postcss: ^7.0.0 || ^8.0.1
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      webpack: ^5.0.0
     peerDependenciesMeta:
+      less:
+        optional: true
+      postcss:
+        optional: true
       react:
         optional: true
       react-dom:
+        optional: true
+      webpack:
         optional: true
 
   '@storybook/addon-toolbars@7.0.18':
@@ -11967,7 +11977,7 @@ snapshots:
 
   '@babel/helper-module-imports@7.24.3':
     dependencies:
-      '@babel/types': 7.24.5
+      '@babel/types': 7.24.7
 
   '@babel/helper-module-imports@7.24.7':
     dependencies:
@@ -12067,7 +12077,7 @@ snapshots:
 
   '@babel/highlight@7.24.5':
     dependencies:
-      '@babel/helper-validator-identifier': 7.24.5
+      '@babel/helper-validator-identifier': 7.24.7
       chalk: 2.4.2
       js-tokens: 4.0.0
       picocolors: 1.0.1
@@ -15540,10 +15550,13 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@storybook/addon-styling@1.0.8(@rspack/core@0.1.12(@types/webpack@5.28.5(@swc/core@1.3.101)(esbuild@0.17.19))(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19)))(@types/react-dom@18.3.0)(@types/react@18.3.3)(less@4.2.0)(postcss@8.4.41)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.55.0)(typescript@5.1.3)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19))':
+  '@storybook/addon-styling@1.3.7(@rspack/core@0.1.12(@types/webpack@5.28.5(@swc/core@1.3.101)(esbuild@0.17.19))(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19)))(@types/react-dom@18.3.0)(@types/react@18.3.3)(less@4.2.0)(postcss@8.4.41)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.55.0)(typescript@5.1.3)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19))':
     dependencies:
+      '@babel/template': 7.24.7
+      '@babel/types': 7.24.7
       '@storybook/api': 7.6.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/components': 7.6.19(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/core-common': 7.6.19
       '@storybook/core-events': 7.6.19
       '@storybook/manager-api': 7.6.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/node-logger': 7.6.19
@@ -15553,24 +15566,27 @@ snapshots:
       css-loader: 6.11.0(@rspack/core@0.1.12(@types/webpack@5.28.5(@swc/core@1.3.101)(esbuild@0.17.19))(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19)))(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19))
       less-loader: 11.1.4(less@4.2.0)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19))
       postcss-loader: 7.3.4(postcss@8.4.41)(typescript@5.1.3)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19))
+      prettier: 2.8.8
       resolve-url-loader: 5.0.0
       sass-loader: 13.3.3(sass@1.55.0)(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19))
       style-loader: 3.3.4(webpack@5.91.0(@swc/core@1.3.101)(esbuild@0.17.19))
     optionalDependencies:
+      less: 4.2.0
+      postcss: 8.4.41
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+      webpack: 5.91.0(@swc/core@1.3.101)(esbuild@0.17.19)
     transitivePeerDependencies:
       - '@rspack/core'
       - '@types/react'
       - '@types/react-dom'
+      - encoding
       - fibers
-      - less
       - node-sass
-      - postcss
       - sass
       - sass-embedded
+      - supports-color
       - typescript
-      - webpack
 
   '@storybook/addon-toolbars@7.0.18(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
