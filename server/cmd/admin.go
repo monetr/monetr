@@ -51,7 +51,7 @@ func newPlaidCommand(parent *cobra.Command) {
 }
 
 func newPlaidRefreshTransactionsCommand(parent *cobra.Command) {
-	var linkId uint64
+	var linkId string
 	command := &cobra.Command{
 		Use:   "refresh-transactions",
 		Short: "Trigger a transaction refresh for a Plaid link",
@@ -64,7 +64,7 @@ func newPlaidRefreshTransactionsCommand(parent *cobra.Command) {
 				log.WithField("config", configFileName).Info("config file loaded")
 			}
 
-			if linkId == 0 {
+			if linkId == "" {
 				log.Fatal("link ID must be specified via --link")
 				return cmd.Help()
 			}
@@ -127,7 +127,7 @@ func newPlaidRefreshTransactionsCommand(parent *cobra.Command) {
 			return nil
 		},
 	}
-	command.PersistentFlags().Uint64Var(&linkId, "link", 0, "Link Id to trigger the Plaid refresh on")
+	command.PersistentFlags().StringVar(&linkId, "link", "", "Link Id to trigger the Plaid refresh on")
 
 	parent.AddCommand(command)
 }
