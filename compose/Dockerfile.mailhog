@@ -1,4 +1,4 @@
-FROM golang:1.21.11-alpine3.20
+FROM golang:1.21.12-alpine3.20
 # Copied from the mailhog dockerfile.
 RUN apk --no-cache add --virtual build-dependencies \
         git \
