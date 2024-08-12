@@ -23,12 +23,17 @@ func init() {
 	JobCommand.AddCommand(RunJobCommand)
 	newCleanupJobsCommand(RunJobCommand)
 	RunJobCommand.AddCommand(RunSyncPlaidCommand)
+	RunJobCommand.AddCommand(RunRemoveLinkCommand)
 
 	RunSyncPlaidCommand.PersistentFlags().BoolVar(&AllFlag, "all", false, "Pull transactions for all accounts. This job should not be run locally unless you are debugging as it may take a very long time. Will ignore 'account' and 'link' flags.")
 	RunSyncPlaidCommand.PersistentFlags().StringVarP(&AccountIDFlag, "account", "a", "", "Account ID to target for the task. Will only run against this account. (required)")
 	RunSyncPlaidCommand.PersistentFlags().StringVarP(&LinkIDFlag, "link", "l", "", "Link ID to target for the task. Will only affect objects for this Link. Must belong to the account specified. (required)")
 	RunSyncPlaidCommand.PersistentFlags().BoolVarP(&DryRunFlag, "dry-run", "d", false, "Dry run the retrieval of transactions, this will log what transactions might be changed or created. No changes will be persisted. [local]")
 	RunSyncPlaidCommand.PersistentFlags().BoolVar(&LocalFlag, "local", false, "Run the job locally, this means the job is not dispatched to the external scheduler like RabbitMQ or Redis. This defaults to true when dry running or when the job engine is in-memory.")
+
+	RunRemoveLinkCommand.PersistentFlags().StringVarP(&LinkIDFlag, "link", "l", "", "Link ID that will be removed forcefully from the database.")
+	RunRemoveLinkCommand.PersistentFlags().BoolVarP(&DryRunFlag, "dry-run", "d", false, "Dry run removing the link. No changes will be persisted.")
+	RunRemoveLinkCommand.PersistentFlags().BoolVar(&LocalFlag, "local", false, "Run the job locally.")
 }
 
 var (
@@ -247,6 +252,100 @@ var (
 			}
 
 			return nil
+		},
+	}
+
+	RunRemoveLinkCommand = &cobra.Command{
+		Use:   "remove-link",
+		Short: "Remove a link from an account, this is a dangerous command and deletes data completely! Be careful!",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clock := clock.New()
+			if LinkIDFlag == "" {
+				return errors.New("--link must be specified")
+			}
+
+			configuration := config.LoadConfiguration()
+			log := logging.NewLoggerWithConfig(configuration.Logging)
+
+			db, err := getDatabase(log, configuration, nil)
+			if err != nil {
+				return errors.Wrap(err, "failed to get database instance")
+			}
+
+			ctx := context.Background()
+
+			redisController, err := cache.NewRedisCache(log, configuration.Redis)
+			if err != nil {
+				log.WithError(err).Fatalf("failed to create redis cache: %+v", err)
+				return err
+			}
+			defer redisController.Close()
+
+			backgroundJobs, err := background.NewBackgroundJobs(
+				cmd.Context(),
+				log,
+				clock,
+				configuration,
+				db,
+				nil,
+				nil,
+				nil,
+				nil,
+			)
+			if err != nil {
+				return err
+			}
+
+			var link models.Link
+			if err := db.ModelContext(cmd.Context(), &link).
+				Where(`"link"."link_id" = ?`, LinkIDFlag).
+				Limit(1).
+				Select(&link); err != nil {
+				return errors.Wrap(err, "failed to retrieve link specified")
+			}
+
+			jobArgs := background.RemoveLinkArguments{
+				AccountId: link.AccountId,
+				LinkId:    link.LinkId,
+			}
+
+			if DryRunFlag {
+				log.Info("dry run removing link")
+			}
+
+			if LocalFlag || DryRunFlag {
+				txn, err := db.BeginContext(ctx)
+				if err != nil {
+					log.WithError(err).Fatalf("failed to begin transaction to remove link")
+					return err
+				}
+
+				job, err := background.NewRemoveLinkJob(
+					log,
+					txn,
+					clock,
+					pubsub.NewPostgresPubSub(log, db),
+					jobArgs,
+				)
+				if err != nil {
+					return errors.Wrap(err, "failed to create remove link job")
+				}
+
+				if err := job.Run(ctx); err != nil {
+					log.WithError(err).Fatalf("failed to run remove link job")
+					_ = txn.RollbackContext(ctx)
+					return err
+				}
+
+				if DryRunFlag {
+					log.Info("dry run... rolling changes back")
+					return txn.RollbackContext(ctx)
+				} else {
+					return txn.CommitContext(ctx)
+				}
+			} else {
+				return background.TriggerRemoveLink(ctx, backgroundJobs, jobArgs)
+			}
 		},
 	}
 )
