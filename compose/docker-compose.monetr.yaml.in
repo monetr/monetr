@@ -1,20 +1,20 @@
 # vim: set ft=yaml
 services:
   mail:
-    # Mailhog is used for testing email sending from the application. This is for things like forgot password or email
-    # verification. It can be accessed by navigating to `http://localhost/mail`
-    build:
-      dockerfile: "@CMAKE_SOURCE_DIR@/compose/Dockerfile.mailhog"
-      context: .
+    # Mailpit is used for testing email sending from the application. This is
+    # for things like forgot password or email verification. It can be accessed
+    # by navigating to `http://localhost/mail`
+    image: axllent/mailpit
+    environment:
+      MP_WEBROOT: "mail"
+      MP_SMTP_AUTH: "monetr:mailpassword"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
     healthcheck:
-      test: [ "CMD", "wget", "http://localhost:8025", "-q", "-O", "-" ]
+      test: [ "CMD", "wget", "http://localhost:8025/mail", "-q", "-O", "-" ]
       interval: 10s
       timeout: 10s
       retries: 12
-      start_period: 60s
-    environment:
-      MH_CORES_ORIGIN: "@MONETR_LOCAL_DOMAIN@"
-      MH_HOSTNAME: "@MONETR_LOCAL_DOMAIN@"
+      start_period: 30s
   redis:
     image: redis:6.2.7-alpine
     healthcheck:
