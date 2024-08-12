@@ -241,11 +241,14 @@ func (r *RemoveLinkJob) getPlaidTransactionsToRemove(
 ) []ID[PlaidTransaction] {
 	plaidTransactionIds := make([]ID[PlaidTransaction], 0)
 	err := r.db.ModelContext(ctx, &PlaidTransaction{}).
-		Join(`INNER JOIN "transactions" AS "transaction"`).
-		JoinOn(`"plaid_transaction"."plaid_transaction_id" IN ("transaction"."plaid_transaction_id", "transaction"."pending_plaid_transaction_id")`).
-		JoinOn(`"plaid_transaction"."account_id" = "transaction"."account_id"`).
-		Where(`"transaction"."account_id" = ?`, r.args.AccountId).
-		WhereIn(`"transaction"."bank_account_id" IN (?)`, bankAccountIds).
+		Join(`INNER JOIN "plaid_bank_accounts" AS "plaid_bank_account"`).
+		JoinOn(`"plaid_bank_account"."plaid_bank_account_id" = "plaid_transaction"."plaid_bank_account_id"`).
+		JoinOn(`"plaid_bank_account"."account_id" = "plaid_transaction"."account_id"`).
+		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
+		JoinOn(`"bank_account"."plaid_bank_account_id" = "plaid_bank_account"."plaid_bank_account_id"`).
+		JoinOn(`"bank_account"."account_id" = "plaid_bank_account"."account_id"`).
+		Where(`"plaid_transaction"."account_id" = ?`, r.args.AccountId).
+		WhereIn(`"bank_account"."bank_account_id" IN (?)`, bankAccountIds).
 		Column("plaid_transaction.plaid_transaction_id").
 		Select(&plaidTransactionIds)
 	if err != nil {
