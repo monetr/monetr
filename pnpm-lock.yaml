@@ -103,8 +103,8 @@ importers:
         specifier: 8.4.41
         version: 8.4.41
       tailwindcss:
-        specifier: 3.4.7
-        version: 3.4.7(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.12.11)(typescript@5.1.3))
+        specifier: 3.4.9
+        version: 3.4.9(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.12.11)(typescript@5.1.3))
       typescript:
         specifier: 5.1.3
         version: 5.1.3
@@ -247,11 +247,11 @@ importers:
         specifier: 1.13.2
         version: 1.13.2
       tailwindcss:
-        specifier: 3.4.7
-        version: 3.4.7(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.3))
+        specifier: 3.4.9
+        version: 3.4.9(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.3))
       tailwindcss-animate:
         specifier: 1.0.7
-        version: 1.0.7(tailwindcss@3.4.7(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.3)))
+        version: 1.0.7(tailwindcss@3.4.9(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.3)))
       teller-connect-react:
         specifier: 0.1.0
         version: 0.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -10850,8 +10850,8 @@ packages:
     engines: {node: '>=14.0.0'}
     hasBin: true
 
-  tailwindcss@3.4.7:
-    resolution: {integrity: sha512-rxWZbe87YJb4OcSopb7up2Ba4U82BoiSGUdoDr3Ydrg9ckxFS/YWsvhN323GMcddgU65QRy7JndC7ahhInhvlQ==}
+  tailwindcss@3.4.9:
+    resolution: {integrity: sha512-1SEOvRr6sSdV5IDf9iC+NU4dhwdqzF4zKKq3sAbasUWHEM6lsMhX+eNN5gkPx1BvLFEnZQEUFbXnGj8Qlp83Pg==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -25217,9 +25217,9 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.24.7
 
-  tailwindcss-animate@1.0.7(tailwindcss@3.4.7(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.3))):
+  tailwindcss-animate@1.0.7(tailwindcss@3.4.9(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.3))):
     dependencies:
-      tailwindcss: 3.4.7(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.3))
+      tailwindcss: 3.4.9(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.3))
 
   tailwindcss@3.4.0(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.6)):
     dependencies:
@@ -25248,7 +25248,7 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  tailwindcss@3.4.7(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.12.11)(typescript@5.1.3)):
+  tailwindcss@3.4.9(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.12.11)(typescript@5.1.3)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
       arg: 5.0.2
@@ -25275,7 +25275,7 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  tailwindcss@3.4.7(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.3)):
+  tailwindcss@3.4.9(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.3)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
       arg: 5.0.2
