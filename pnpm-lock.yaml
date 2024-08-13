@@ -401,8 +401,8 @@ importers:
         specifier: 0.10.0
         version: 0.10.0(@types/node@20.14.9)(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.14.9)(typescript@5.1.3))
       '@storybook/testing-library':
-        specifier: 0.0.14-next.2
-        version: 0.0.14-next.2
+        specifier: 0.2.2
+        version: 0.2.2
       msw:
         specifier: 1.2.2
         version: 1.2.2(typescript@5.1.3)
@@ -3956,9 +3956,6 @@ packages:
   '@storybook/instrumenter@7.0.18':
     resolution: {integrity: sha512-fyQxeuVC0H+w3oyTuByE95xnAQ+l/WhUBVkHV2X+PWjg9vg9Y9JmrbNWynlvz5HLFlsY3qAWJh+ciVRVSvY5Jw==}
 
-  '@storybook/instrumenter@7.6.19':
-    resolution: {integrity: sha512-chPRR8/N1fMss4gSOiEbLzDFqA+0tinnrrFeUSHhvadf+VqUcA/G72sf4b3C/jxBDdK6WPC6L+A3pFR/C1dN5A==}
-
   '@storybook/manager-api@7.0.0':
     resolution: {integrity: sha512-A4OQXPUvaOT9mp+sXxq5CveIrq1luYDiK9H3k0eUqIgI8nS6+FonaLqouJchUMeYZ3CbHtKLMtkzLJKGfUGjjQ==}
     peerDependencies:
@@ -4090,8 +4087,9 @@ packages:
     resolution: {integrity: sha512-37xgdNcba5tJgEZa//S4ooh52hKgXoKvNWC+CZJRksKFlFObzhlCstTo4q9SSkX6LNTXiEj174eZBBa/Yd28JQ==}
     hasBin: true
 
-  '@storybook/testing-library@0.0.14-next.2':
-    resolution: {integrity: sha512-i/SLSGm0o978ELok/SB4Qg1sZ3zr+KuuCkzyFqcCD0r/yf+bG35aQGkFqqxfSAdDxuQom0NO02FE+qys5Eapdg==}
+  '@storybook/testing-library@0.2.2':
+    resolution: {integrity: sha512-L8sXFJUHmrlyU2BsWWZGuAjv39Jl1uAqUHdxmN42JY15M4+XCMjGlArdCCjDe1wpTSW6USYISA9axjZojgtvnw==}
+    deprecated: In Storybook 8, this package functionality has been integrated to a new package called @storybook/test, which uses Vitest APIs for an improved experience. When upgrading to Storybook 8 with 'npx storybook@latest upgrade', you will get prompted and will get an automigration for the new package. Please migrate when you can.
 
   '@storybook/theming@7.0.0':
     resolution: {integrity: sha512-bLNt9FrYBh95/YBJSJPMoXpuHCb21O/Zy/XgoCDrkXFxcDwapanFs2nzmavevq1Aev8WyMIGBJjcMZDpYtY63A==}
@@ -4245,6 +4243,10 @@ packages:
     resolution: {integrity: sha512-/DiOQ5xBxgdYRC8LNk7U+RWat0S3qRLeIw3ZIkMQ9kkVlRmwD/Eg8k8CqIpD6GW7u20JIUOfMKbxtiLutpjQ4g==}
     engines: {node: '>=12'}
 
+  '@testing-library/dom@9.3.4':
+    resolution: {integrity: sha512-FlS4ZWlp97iiNWig0Muq8p+3rVDjRiYE+YKGbAqXOu9nwJFFOdL00kFpz42M+4huzYi86vAK1sOOfyOG45muIQ==}
+    engines: {node: '>=14'}
+
   '@testing-library/jest-dom@6.4.8':
     resolution: {integrity: sha512-JD0G+Zc38f5MBHA4NgxQMR5XtO5Jx9g86jqturNTt2WUfRmLDIY7iKkWHDCCTiDuFMre6nxAD5wHw9W5kI4rGw==}
     engines: {node: '>=14', npm: '>=6', yarn: '>=1'}
@@ -4271,12 +4273,6 @@ packages:
     peerDependencies:
       react: ^18.0.0
       react-dom: ^18.0.0
-
-  '@testing-library/user-event@13.5.0':
-    resolution: {integrity: sha512-5Kwtbo3Y/NowpkbRuSepbyMFkZmHgD+vPzYB/RJ4oxt5Gj/avFFBYjhw27cqSVPVw/3a67NK1PbiIr9k4Gwmdg==}
-    engines: {node: '>=10', npm: '>=6'}
-    peerDependencies:
-      '@testing-library/dom': '>=7.21.4'
 
   '@testing-library/user-event@14.5.2':
     resolution: {integrity: sha512-YAh82Wh4TIrxYLmfGcixwD18oIjyC1pFQC2Y01F2lzV2HTMiYrI0nze0FD0ocB//CKS/7jIUgae+adPqxK5yCQ==}
@@ -4721,9 +4717,6 @@ packages:
 
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
-
-  '@vitest/utils@0.34.7':
-    resolution: {integrity: sha512-ziAavQLpCYS9sLOorGrFFKmy2gnfiNU0ZJ15TsMz/K92NAPS/rp9K4z6AJQQk5Y8adCy4Iwpxy7pQumQ/psnRg==}
 
   '@webassemblyjs/ast@1.11.1':
     resolution: {integrity: sha512-ukBh14qFLjxTQNTXocdyksN5QdM28S1CxHt2rdskFyL+xFV7VremuBLVbmCePj+URalXBENx/9Lm7lnhihtCSw==}
@@ -6175,10 +6168,6 @@ packages:
     resolution: {integrity: sha512-FU0iFaH/E23a+a718l8Qa/19bF9p06kgE0KipMOMadwa3SjnaElKzPaUC0vnibs6/B/9ni97s61mcejk8W1fQw==}
     engines: {node: ^12.13.0 || ^14.15.0 || ^16.10.0 || >=17.0.0}
 
-  diff-sequences@29.6.3:
-    resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-
   diff@4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
@@ -7035,9 +7024,6 @@ packages:
   get-caller-file@2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
     engines: {node: 6.* || 8.* || >= 10.*}
-
-  get-func-name@2.0.2:
-    resolution: {integrity: sha512-8vXOvuE167CtIc3OyItco7N/dpRtBbYOsPsXCz7X/PMnlGjYjSGuZJgM1Y7mmew7BKf9BqvLX2tnOVy1BBUsxQ==}
 
   get-intrinsic@1.2.4:
     resolution: {integrity: sha512-5uYhsJH8VJBTv7oslg4BznJYhDoRI6waYCxMmCdnTrcCrHA/fCFKoTFz2JKKE0HdDFUF7/oQuhzumXJK7paBRQ==}
@@ -8310,9 +8296,6 @@ packages:
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
-
-  loupe@2.3.7:
-    resolution: {integrity: sha512-zSMINGVYkdpYSOBmLi0D1Uo7JU9nVdQKrHxC8eYlV+9YKK9WePqAlL7lSlorG/U2Fw1w0hTBmaa/jrQ3UbPHtA==}
 
   lower-case@2.0.2:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
@@ -16213,16 +16196,6 @@ snapshots:
       '@storybook/global': 5.0.0
       '@storybook/preview-api': 7.0.18
 
-  '@storybook/instrumenter@7.6.19':
-    dependencies:
-      '@storybook/channels': 7.6.19
-      '@storybook/client-logger': 7.6.19
-      '@storybook/core-events': 7.6.19
-      '@storybook/global': 5.0.0
-      '@storybook/preview-api': 7.6.19
-      '@vitest/utils': 0.34.7
-      util: 0.12.5
-
   '@storybook/manager-api@7.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@storybook/channels': 7.0.0
@@ -16612,12 +16585,10 @@ snapshots:
       - supports-color
       - ts-node
 
-  '@storybook/testing-library@0.0.14-next.2':
+  '@storybook/testing-library@0.2.2':
     dependencies:
-      '@storybook/client-logger': 7.6.19
-      '@storybook/instrumenter': 7.6.19
-      '@testing-library/dom': 8.20.1
-      '@testing-library/user-event': 13.5.0(@testing-library/dom@8.20.1)
+      '@testing-library/dom': 9.3.4
+      '@testing-library/user-event': 14.5.2(@testing-library/dom@9.3.4)
       ts-dedent: 2.2.0
 
   '@storybook/theming@7.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
@@ -16792,6 +16763,17 @@ snapshots:
       lz-string: 1.5.0
       pretty-format: 27.5.1
 
+  '@testing-library/dom@9.3.4':
+    dependencies:
+      '@babel/code-frame': 7.24.7
+      '@babel/runtime': 7.24.7
+      '@types/aria-query': 5.0.4
+      aria-query: 5.1.3
+      chalk: 4.1.2
+      dom-accessibility-api: 0.5.16
+      lz-string: 1.5.0
+      pretty-format: 27.5.1
+
   '@testing-library/jest-dom@6.4.8':
     dependencies:
       '@adobe/css-tools': 4.4.0
@@ -16821,14 +16803,13 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@testing-library/user-event@13.5.0(@testing-library/dom@8.20.1)':
-    dependencies:
-      '@babel/runtime': 7.24.7
-      '@testing-library/dom': 8.20.1
-
   '@testing-library/user-event@14.5.2(@testing-library/dom@10.1.0)':
     dependencies:
       '@testing-library/dom': 10.1.0
+
+  '@testing-library/user-event@14.5.2(@testing-library/dom@9.3.4)':
+    dependencies:
+      '@testing-library/dom': 9.3.4
 
   '@theguild/remark-mermaid@0.0.5(react@18.3.1)':
     dependencies:
@@ -17380,12 +17361,6 @@ snapshots:
       eslint-visitor-keys: 3.4.3
 
   '@ungap/structured-clone@1.2.0': {}
-
-  '@vitest/utils@0.34.7':
-    dependencies:
-      diff-sequences: 29.6.3
-      loupe: 2.3.7
-      pretty-format: 29.7.0
 
   '@webassemblyjs/ast@1.11.1':
     dependencies:
@@ -18997,8 +18972,6 @@ snapshots:
 
   diff-sequences@28.1.1: {}
 
-  diff-sequences@29.6.3: {}
-
   diff@4.0.2: {}
 
   diff@5.2.0: {}
@@ -20193,8 +20166,6 @@ snapshots:
   gensync@1.0.0-beta.2: {}
 
   get-caller-file@2.0.5: {}
-
-  get-func-name@2.0.2: {}
 
   get-intrinsic@1.2.4:
     dependencies:
@@ -21843,10 +21814,6 @@ snapshots:
   loose-envify@1.4.0:
     dependencies:
       js-tokens: 4.0.0
-
-  loupe@2.3.7:
-    dependencies:
-      get-func-name: 2.0.2
 
   lower-case@2.0.2:
     dependencies:
