@@ -21,7 +21,7 @@ type SyncResult struct {
 func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
+	span.SetTag("itemId", p.itemId)
 	span.Data = map[string]interface{}{
 		"cursor": cursor,
 	}
@@ -64,6 +64,7 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 		log.WithError(err).Error("failed to sync data with Plaid")
 		return nil, err
 	}
+	span.SetTag("plaid.requestId", result.GetRequestId())
 
 	added := make([]Transaction, len(result.Added))
 	for i, transaction := range result.Added {

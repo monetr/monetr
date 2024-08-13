@@ -37,6 +37,8 @@ func (o *ObservabilityRoundTripper) RoundTrip(request *http.Request) (*http.Resp
 	span.SetTag("http.response.body.size", fmt.Sprint(response.ContentLength))
 	span.SetTag("http.response_content_length", fmt.Sprint(response.ContentLength))
 
+	span.Status = sentry.HTTPtoSpanStatus(response.StatusCode)
+
 	o.handler(request.Context(), request, response, err)
 
 	if err != nil || response.StatusCode > http.StatusPermanentRedirect {
