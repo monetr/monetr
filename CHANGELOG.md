@@ -1,5 +1,57 @@
 # Changelog
 
+## [0.17.13](https://github.com/monetr/monetr/compare/v0.17.12...v0.17.13) (2024-08-13)
+
+
+### Features
+
+* **api:** Improving sentry traces. ([5893c89](https://github.com/monetr/monetr/commit/5893c897333dd72fe2d8a0976f010f4fa71668c7))
+* **cmd:** Adding command to remove a link manually. ([d96ae49](https://github.com/monetr/monetr/commit/d96ae49a94c0d6483ef4446ea57106335eef6361))
+* **dev:** Migrate away from mailhog, instead use mailpit ([68febcd](https://github.com/monetr/monetr/commit/68febcd68261615b96d1c50f320025ed8adea849))
+* **plaid:** Improving sentry data in plaid code ([a78b68d](https://github.com/monetr/monetr/commit/a78b68d0381612e86f011b00de83ab8f673bdbf6))
+* **sentry:** Improve caching sentry reporting ([691beb7](https://github.com/monetr/monetr/commit/691beb7d670269881ad3b3e411efa799a9193227))
+* **sentry:** Improving sentry job queue reporting ([5935bb9](https://github.com/monetr/monetr/commit/5935bb99a3442ac270f6f00d94ffaab544e192a2))
+* **sentry:** More sentry improvements ([910ba28](https://github.com/monetr/monetr/commit/910ba280a4fe8ed5e3051a2906f09d4dc6d48178))
+* **ui:** Migrating UI tests to use bun instead. ([#1716](https://github.com/monetr/monetr/issues/1716)) ([0d1bd23](https://github.com/monetr/monetr/commit/0d1bd238232b4214b041ca7fdfaf270250836de9))
+
+
+### Dependencies
+
+* **api:** update module aidanwoods.dev/go-paseto to v1.5.2 ([#1867](https://github.com/monetr/monetr/issues/1867)) ([ebf3ddb](https://github.com/monetr/monetr/commit/ebf3ddbf87160863bab56b5c75695cb1c8c13267))
+* **api:** update module cloud.google.com/go/storage to v1.43.0 ([#1803](https://github.com/monetr/monetr/issues/1803)) ([c884ba1](https://github.com/monetr/monetr/commit/c884ba1ba3f5dd2574338135fa044808e2697878))
+* **api:** update module golang.org/x/crypto to v0.25.0 ([#1846](https://github.com/monetr/monetr/issues/1846)) ([a6ad63b](https://github.com/monetr/monetr/commit/a6ad63bc8652466f2819e112b324748f22d78dde))
+* **api:** update module golang.org/x/net to v0.27.0 ([#1858](https://github.com/monetr/monetr/issues/1858)) ([c5ad1b2](https://github.com/monetr/monetr/commit/c5ad1b26bd0becd6b227a0c21bbe0e44b0a716b5))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.6.3 ([#1844](https://github.com/monetr/monetr/issues/1844)) ([7a61da5](https://github.com/monetr/monetr/commit/7a61da5a11d87cb0358749fd7238f0bfd5b2f27f))
+* **ui:** update dependency @happy-dom/global-registrator to v14.12.3 ([#1859](https://github.com/monetr/monetr/issues/1859)) ([1f08fc5](https://github.com/monetr/monetr/commit/1f08fc5d32f60ed78f628e826a9a43404a39f7e0))
+* **ui:** update dependency @react-email/components to v0.0.22 ([#1849](https://github.com/monetr/monetr/issues/1849)) ([4d0eb18](https://github.com/monetr/monetr/commit/4d0eb181ef350ed0116d6ea51b5e0e8b84a5fe29))
+* **ui:** update dependency @tanstack/react-query to v4.36.1 ([#1861](https://github.com/monetr/monetr/issues/1861)) ([b7315e4](https://github.com/monetr/monetr/commit/b7315e40bb09dd6d769bca785fa14a4671d8b437))
+* **ui:** update dependency autoprefixer to v10.4.20 ([#1851](https://github.com/monetr/monetr/issues/1851)) ([9bc8eb1](https://github.com/monetr/monetr/commit/9bc8eb151e2f0a88687d34aa128dae7b17979bb2))
+* **ui:** update dependency bun to v1.1.21 ([#1852](https://github.com/monetr/monetr/issues/1852)) ([e642c47](https://github.com/monetr/monetr/commit/e642c47cfccf4ce3359f8a08ec709506de38dd3b))
+* **ui:** update dependency bun to v1.1.22 ([#1868](https://github.com/monetr/monetr/issues/1868)) ([be5f33f](https://github.com/monetr/monetr/commit/be5f33f998b503369c5931bd80ddd49443a6325e))
+* **ui:** update dependency postcss to v8.4.40 ([#1854](https://github.com/monetr/monetr/issues/1854)) ([d8fae50](https://github.com/monetr/monetr/commit/d8fae505ee92ae5e76dc046d8bca28ea7034479a))
+* **ui:** update dependency postcss to v8.4.41 ([#1862](https://github.com/monetr/monetr/issues/1862)) ([1905bc6](https://github.com/monetr/monetr/commit/1905bc61e13a52c965cbf2187bfddf4528cd6f1e))
+* **ui:** update dependency react-email to v2.1.6 ([#1855](https://github.com/monetr/monetr/issues/1855)) ([97c5a76](https://github.com/monetr/monetr/commit/97c5a76e95952ae7cdb04866d0cdf724b5c62983))
+* **ui:** update dependency tailwindcss to v3.4.6 ([#1845](https://github.com/monetr/monetr/issues/1845)) ([acd22c7](https://github.com/monetr/monetr/commit/acd22c7ef87f654a17a8f9f24cad9c252b846209))
+* **ui:** update dependency tailwindcss to v3.4.7 ([#1856](https://github.com/monetr/monetr/issues/1856)) ([d655147](https://github.com/monetr/monetr/commit/d65514700f566621d34d117a0d3e4e7587499cf0))
+* **ui:** update testing-library monorepo ([#1857](https://github.com/monetr/monetr/issues/1857)) ([fe0aec3](https://github.com/monetr/monetr/commit/fe0aec3bd17d30e3740f1947d91207b5db57f05f))
+
+
+### Bug Fixes
+
+* **cmd:** Fix refresh plaid command ([50fd21a](https://github.com/monetr/monetr/commit/50fd21ac94e0dc8c452b1249607408bf1249f73f))
+* **job:** Fixed how remove link job found plaid transactions ([ce4bb8d](https://github.com/monetr/monetr/commit/ce4bb8d454c9adfbfc3ba5e159290d7a705af192))
+* **plaid:** Fixed logging around plaid webhook controller ([681a63a](https://github.com/monetr/monetr/commit/681a63a145e8b3ee6a9796fe018faf9afe014aac))
+* **plaid:** Fixing an issue causing duplicate plaid transactions ([#1865](https://github.com/monetr/monetr/issues/1865)) ([5043677](https://github.com/monetr/monetr/commit/5043677b1245a994b6009a86af4ee371b880df85))
+* **test:** Improved speed of detecting Go tests ([6eabfde](https://github.com/monetr/monetr/commit/6eabfdee83bbd9292e41e1604c21d578663448b6))
+* **test:** Use `act` from react instead of test library ([2e744da](https://github.com/monetr/monetr/commit/2e744daa0fa7d56e72542be7e941cf40debcf6b8))
+* **ui:** Fix unstable QueryClient issue ([#1842](https://github.com/monetr/monetr/issues/1842)) ([b65a70a](https://github.com/monetr/monetr/commit/b65a70aa1dcc462335a06c1a6128eef42daf95d4)), closes [#1841](https://github.com/monetr/monetr/issues/1841)
+* **ui:** Fixing uncontrolled path bug in UI router ([#1853](https://github.com/monetr/monetr/issues/1853)) ([3bdc910](https://github.com/monetr/monetr/commit/3bdc91093db5966e1bccaba0e3515af3b34b6b63))
+
+
+### Miscellaneous
+
+* **dev:** Adding ssh server to devcontainer ([0165fa5](https://github.com/monetr/monetr/commit/0165fa574a99116bb7251a73022d8e9294a1312b))
+
 ## [0.17.12](https://github.com/monetr/monetr/compare/v0.17.11...v0.17.12) (2024-07-15)
 
 
