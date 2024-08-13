@@ -135,7 +135,7 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 }
 
 func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
-	log := c.log.WithFields(logrus.Fields{
+	log := c.getLog(ctx).WithFields(logrus.Fields{
 		"webhookType": hook.WebhookType,
 		"webhookCode": hook.WebhookCode,
 	})
