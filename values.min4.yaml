@@ -120,6 +120,10 @@ api:
     google:
       resourceName: projects/production-362403/locations/us/keyRings/monetr-production-362403-monetr-in/cryptoKeys/monetr-secrets-monetr-production-362403-monetr-in
       credentialsJSON: /etc/monetr/google/service-account.json
+    vault:
+      keyID: monetr
+      authMethod: kubernetes
+      role: monetr
   security:
     privateKey: /etc/monetr/certs/tls.key
   storage:
