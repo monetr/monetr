@@ -155,7 +155,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		crumbs.IncludeUserInScope(c.getContext(ctx), user.AccountId)
 
 		// Check if the login requires MFA in order to authenticate.
-		if login.TOTP != "" {
+		if login.TOTPEnabledAt != nil {
 			log.Debug("login requires TOTP MFA")
 
 			token, err := c.clientTokens.Create(

@@ -72,6 +72,15 @@ func (c *Controller) getLoginId(ctx echo.Context) (ID[Login], error) {
 	return parsed, nil
 }
 
+func (c *Controller) mustGetLoginId(ctx echo.Context) ID[Login] {
+	loginId, err := c.getLoginId(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	return loginId
+}
+
 // getUserId will take the current request context and will look for a user ID
 // on the context. If one is present it will be returned. If there is not one
 // present or if it is not in the correct format then an error will be returned
