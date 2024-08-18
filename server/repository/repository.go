@@ -30,6 +30,7 @@ type BaseRepository interface {
 	// account ID and the created at timestamp are properly set then stores the
 	// transaction in the database.
 	CreatePlaidTransaction(ctx context.Context, transaction *PlaidTransaction) error
+	CreatePlaidTransactions(ctx context.Context, transactions ...*PlaidTransaction) error
 
 	// DeleteAccount removes all of the records from the database related to the current account. This action cannot be
 	// undone. Any Plaid links should be removed BEFORE calling this function.

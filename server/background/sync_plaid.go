@@ -248,7 +248,10 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	defer span.Finish()
 	crumbs.AddTag(span.Context(), "linkId", s.args.LinkId.String())
 
-	log := s.log.WithContext(span.Context())
+	log := s.log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"accountId": s.args.AccountId,
+		"linkId":    s.args.LinkId,
+	})
 
 	link, err := s.repo.GetLink(span.Context(), s.args.LinkId)
 	if err = errors.Wrap(err, "failed to retrieve link to sync with plaid"); err != nil {
@@ -268,6 +271,15 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		span.Status = sentry.SpanStatusFailedPrecondition
 		return nil
 	}
+
+	log = log.WithFields(logrus.Fields{
+		"plaidLinkId": link.PlaidLink.PlaidLinkId,
+		"plaid": logrus.Fields{
+			"institutionId":   link.PlaidLink.InstitutionId,
+			"institutionName": link.PlaidLink.InstitutionName,
+			"itemId":          link.PlaidLink.PlaidId,
+		},
+	})
 
 	account, err := s.repo.GetAccount(span.Context())
 	if err != nil {
@@ -398,11 +410,12 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 		transactionsToUpdate := make([]*Transaction, 0)
 		transactionsToInsert := make([]Transaction, 0)
+		plaidTransactionsToInsert := make([]*PlaidTransaction, 0)
 		for i := range plaidTransactions {
 			plaidTransaction := plaidTransactions[i]
 			bankAccount := s.bankAccounts[plaidTransaction.GetBankAccountId()]
 
-			created, updated, err := s.syncPlaidTransaction(
+			created, updated, plaidCreated, err := s.syncPlaidTransaction(
 				span.Context(),
 				link,
 				&bankAccount,
@@ -422,7 +435,19 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 				s.tagBankAccountForSimilarityRecalc(bankAccount.BankAccountId)
 			}
 
+			if plaidCreated != nil {
+				plaidTransactionsToInsert = append(plaidTransactionsToInsert, plaidCreated)
+			}
+
 			continue
+		}
+
+		if len(plaidTransactionsToInsert) > 0 {
+			log.Infof("creating %d plaid transactions", len(plaidTransactionsToInsert))
+			if err := s.repo.CreatePlaidTransactions(span.Context(), plaidTransactionsToInsert...); err != nil {
+				log.WithError(err).Errorf("failed to create plaid transactions for job")
+				return err
+			}
 		}
 
 		if len(transactionsToUpdate) > 0 {
@@ -609,7 +634,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 	plaidLink *PlaidLink,
 	plaidBankAccount *PlaidBankAccount,
 	input platypus.Transaction,
-) (created, updated *Transaction, err error) {
+) (created, updated *Transaction, plaidCreated *PlaidTransaction, err error) {
 	existingTransaction, exists := s.lookupTransaction(
 		input.GetTransactionId(),
 		input.GetPendingTransactionId(),
@@ -644,9 +669,10 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			Currency:           input.GetISOCurrencyCode(),
 			IsPending:          input.GetIsPending(),
 		}
-		if err := s.repo.CreatePlaidTransaction(ctx, &plaidTransaction); err != nil {
-			return nil, nil, errors.Wrap(err, "failed to store new plaid transaction")
-		}
+
+		// if err := s.repo.CreatePlaidTransaction(ctx, &plaidTransaction); err != nil {
+		// 	return nil, nil, errors.Wrap(err, "failed to store new plaid transaction")
+		// }
 
 		existingTransaction = Transaction{
 			TransactionId:        NewID(&Transaction{}),
@@ -672,7 +698,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			existingTransaction.PlaidTransactionId = &plaidTransaction.PlaidTransactionId
 		}
 
-		return &existingTransaction, nil, nil
+		return &existingTransaction, nil, &plaidTransaction, nil
 	}
 
 	var existingPlaidTransaction *PlaidTransaction
@@ -700,6 +726,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 	// If the existing plaid transaction is nil and we are not pending that means
 	// we have transitioned from a pending status to a cleared status for this
 	// transaction. We need to create the new plaid transaction for this input.
+	create := existingPlaidTransaction == nil
 	if existingPlaidTransaction == nil {
 		existingPlaidTransaction = &PlaidTransaction{
 			PlaidTransactionId: NewID(&PlaidTransaction{}),
@@ -716,9 +743,9 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			Currency:           input.GetISOCurrencyCode(),
 			IsPending:          input.GetIsPending(),
 		}
-		if err := s.repo.CreatePlaidTransaction(ctx, existingPlaidTransaction); err != nil {
-			return nil, nil, errors.Wrap(err, "failed to store new plaid transaction")
-		}
+		// if err := s.repo.CreatePlaidTransaction(ctx, existingPlaidTransaction); err != nil {
+		// 	return nil, nil, errors.Wrap(err, "failed to store new plaid transaction")
+		// }
 
 		existingTransaction.PlaidTransactionId = &existingPlaidTransaction.PlaidTransactionId
 		changes = append(changes, SyncChange{
@@ -804,11 +831,19 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			"kind":    "transaction",
 			"changes": changes,
 		}).Debug("detected transaction updates from plaid")
-		return nil, &existingTransaction, nil
+		if create {
+			return nil, &existingTransaction, existingPlaidTransaction, nil
+		} else {
+			return nil, &existingTransaction, nil, nil
+		}
 	}
 
 	// There were no changes but no errors.
-	return nil, nil, nil
+	if create {
+		return nil, nil, existingPlaidTransaction, nil
+	} else {
+		return nil, nil, nil, nil
+	}
 }
 
 func (s *SyncPlaidJob) syncRemovedTransaction(
