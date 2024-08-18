@@ -338,6 +338,11 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 			return errors.Wrap(err, "failed to sync with plaid")
 		}
 
+		if len(syncData.Accounts) == 0 {
+			log.Debug("there are no updates for any bank accounts from plaid")
+			break // Break instead of returning so we still log the attempt
+		}
+
 		plaidBankAccounts = syncData.Accounts
 		for x := range bankAccounts {
 			bankAccount := bankAccounts[x]
@@ -348,12 +353,6 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 					break
 				}
 			}
-		}
-
-		if len(s.bankAccounts) == 0 {
-			log.Warn("none of the linked bank accounts are active at plaid")
-			crumbs.IndicateBug(span.Context(), "none of the linked bank accounts are active at plaid", nil)
-			return nil
 		}
 
 		// If we received nothing to insert/update/remove then do nothing
