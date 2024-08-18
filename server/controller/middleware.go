@@ -205,6 +205,9 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 	}
 }
 
+// requireToken is an echo middleware that requires that the current HTTTP
+// request has a token with one of the provided scopes. Any of the specified
+// scopes are valid.
 func (c *Controller) requireToken(scopes ...security.Scope) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
