@@ -56,6 +56,8 @@ spec:
           env:
           {{- toYaml .Values.api.customEnv | nindent 10 }}
           {{- end }}
+          {{- toYaml .Values.extraEnv | nindent 10 }}
+          {{- end }}
           volumeMounts:
             - mountPath: /etc/monetr
               name: config-file
@@ -89,6 +91,8 @@ spec:
           {{- if .Values.api.customEnv }}
           env:
           {{- toYaml .Values.api.customEnv | nindent 10 }}
+          {{- end }}
+          {{- toYaml .Values.extraEnv | nindent 10 }}
           {{- end }}
           ports:
             - name: http

@@ -81,6 +81,7 @@ tolerations: [ ]
 
 affinity: { }
 
+extraEnv: [ ]
 extraVolumes: [ ]
 extraVolumeMounts: [ ]
 
@@ -90,7 +91,6 @@ databaseMigrations:
 customEnvFrom: [ ]
 
 api:
-  customEnv: [ ]
   additionalConfigFilePaths: [ ]
   includeSecrets: false
   name: monetr

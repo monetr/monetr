@@ -41,6 +41,22 @@ customEnvFrom:
   - secretRef:
       name: monetr-config-secrets
 
+extraEnv:
+  - name: MONETR_ENVIRONMENT
+    value: "my.monetr.app"
+  - name: AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        key: AccessKey
+        name: rook-ceph-object-user-rados-monetr
+        optional: false
+  - name: AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        key: SecretKey
+        name: rook-ceph-object-user-rados-monetr
+        optional: false
+
 extraVolumes:
   - name: certificates
     secret:
@@ -59,9 +75,6 @@ extraVolumeMounts:
 
 api:
   name: monetr
-  customEnv:
-    - name: MONETR_ENVIRONMENT
-      value: "my.monetr.app"
   allowSignUp: true
   server:
     externalUrl: https://my.monetr.app
@@ -127,7 +140,13 @@ api:
   security:
     privateKey: /etc/monetr/certs/tls.key
   storage:
-    enabled: false
+    enabled: true
+    provider: s3
+    s3:
+      endpoint: http://rook-ceph-rgw-rados.ceph.svc.cluster.local
+      bucket: monetr-objects
+      forcePathStyle: true
+      useEnvCredentials: true
   stripe:
     enabled: true
     webhooksEnabled: true # Still working on this for now.
