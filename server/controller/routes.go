@@ -205,7 +205,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	repoParty.POST("/stripe/webhook", c.handleStripeWebhook)
 
 	// Endpoints used by the client/UI.
-	repoParty.GET("/sentry", c.getSentryUI)
 	repoParty.GET("/config", c.configEndpoint)
 
 	// Authentication

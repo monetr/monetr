@@ -93,14 +93,3 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, configuration)
 }
-
-func (c *Controller) getSentryUI(ctx echo.Context) error {
-	if !c.configuration.Sentry.ExternalSentryEnabled() {
-		// If the UI sentry key is not enabled, then return no conent.
-		return ctx.NoContent(http.StatusNoContent)
-	}
-
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"dsn": c.configuration.Sentry.ExternalDSN,
-	})
-}
