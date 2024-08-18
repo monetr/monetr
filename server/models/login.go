@@ -25,7 +25,7 @@ type Login struct {
 	IsEmailVerified   bool       `json:"isEmailVerified" pg:"is_email_verified,notnull,use_zero"`
 	EmailVerifiedAt   *time.Time `json:"emailVerifiedAt" pg:"email_verified_at"`
 	TOTP              string     `json:"-" pg:"totp"`
-	TOTPRecoveryCodes []string   `json:"-" pg:"totp_recovery_codes"`
+	TOTPRecoveryCodes []string   `json:"-" pg:"totp_recovery_codes,type:'text[]'"`
 	TOTPEnabledAt     *time.Time `json:"totpEnabledAt" pg:"totp_enabled_at"`
 
 	Users []User `json:"-" pg:"rel:has-many"`
