@@ -115,8 +115,8 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 			log.WithFields(logrus.Fields{
 				"numberOfLinks": numberOfLinks,
 				"trialing":      trialing,
-			}).Debug("cannot add more Plaid links during trial")
-			return c.badRequest(ctx, "cannot add additional Plaid links during trial")
+			}).Warn("cannot add more Plaid links during trial")
+			return c.badRequest(ctx, "Cannot add additional Plaid links during trial")
 		}
 	}
 
