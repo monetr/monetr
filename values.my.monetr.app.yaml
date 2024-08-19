@@ -41,6 +41,10 @@ customEnvFrom:
   - secretRef:
       name: monetr-config-secrets
 
+extraEnv:
+  - name: MONETR_ENVIRONMENT
+    value: "my.monetr.app"
+
 extraVolumes:
   - name: certificates
     secret:
@@ -53,9 +57,6 @@ extraVolumeMounts:
 
 api:
   name: monetr
-  customEnv:
-    - name: MONETR_ENVIRONMENT
-      value: "my.monetr.app"
   allowSignUp: true
   server:
     externalUrl: https://my.monetr.app

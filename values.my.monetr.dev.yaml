@@ -52,6 +52,11 @@ customEnvFrom:
   - secretRef:
       name: monetr-config-secrets
 
+extraEnv:
+  - name: MONETR_ENVIRONMENT
+    value: "my.monetr.dev"
+
+
 extraVolumes:
   - name: certificates
     secret:
@@ -64,9 +69,6 @@ extraVolumeMounts:
 
 api:
   name: monetr
-  customEnv:
-    - name: MONETR_ENVIRONMENT
-      value: "my.monetr.dev"
   additionalConfigFilePaths: []
   allowSignUp: true
   server:
