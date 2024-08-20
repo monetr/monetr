@@ -30,6 +30,8 @@ func (c *Controller) getMe(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine if account is setup")
 	}
 
+	claims := c.mustGetClaims(ctx)
+
 	me := map[string]interface{}{
 		"user":            user,
 		"mfaPending":      false,
@@ -44,7 +46,6 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	// If the "me" endpoint was called after they authenticated, but they still
 	// need to provide MFA, then direct them to that page regardless of their
 	// subscription status.
-	claims := c.mustGetClaims(ctx)
 	if claims.Scope == security.MultiFactorScope {
 		me["mfaPending"] = true
 		me["nextUrl"] = "/login/multifactor"
@@ -142,6 +143,8 @@ func (c *Controller) changePassword(ctx echo.Context) error {
 
 func (c *Controller) postSetupTOTP(ctx echo.Context) error {
 	secureRepo := c.mustGetSecurityRepository(ctx)
+	// Try to actually setup TOTP for the current login. This will return an error
+	// if they already have it setup.
 	secret, recoveryCodes, err := secureRepo.SetupTOTP(
 		c.getContext(ctx),
 		c.mustGetLoginId(ctx),
