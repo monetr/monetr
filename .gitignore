@@ -22,6 +22,8 @@ server/icons/sources/*
 !server/icons/sources/README.md
 server/internal/source/embed/*
 !server/internal/source/embed/README.md
+server/legal/data/*
+!server/legal/data/README.md
 tmp
 local
 values.local.yaml

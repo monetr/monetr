@@ -1,3 +1,0 @@
-[submodule "server/legal/data/legal"]
-	path = server/legal/data/legal
-	url = https://github.com/monetr/legal.git

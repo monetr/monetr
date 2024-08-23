@@ -60,7 +60,6 @@ clean:
 	-cmake -E remove_directory $(CMAKE_CONFIGURATION_DIRECTORY) $(BUILD_ARGS)
 	-git clean -f -X server/ui/static
 	-git clean -f -X server/internal/source/embed
-	-git submodule deinit -f server/legal/data/legal
 
 dependencies: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t dependencies $(BUILD_ARGS)
