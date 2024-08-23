@@ -1,6 +1,3 @@
-[submodule "server/icons/sources/simple-icons"]
-	path = server/icons/sources/simple-icons
-	url = https://github.com/simple-icons/simple-icons.git
 [submodule "server/legal/data/legal"]
 	path = server/legal/data/legal
 	url = https://github.com/monetr/legal.git

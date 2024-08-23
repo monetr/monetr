@@ -2,15 +2,32 @@ include(GolangTestUtils)
 
 provision_golang_tests(${CMAKE_CURRENT_SOURCE_DIR})
 
-set(SIMPLE_ICONS ${CMAKE_CURRENT_SOURCE_DIR}/sources/simple-icons/icons)
-add_custom_command(
-  OUTPUT ${SIMPLE_ICONS}
-  COMMAND ${GIT_EXECUTABLE} submodule update --init server/icons/sources/simple-icons
-  COMMENT "Retrieving simple-icons"
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+# set(SIMPLE_ICONS ${CMAKE_CURRENT_SOURCE_DIR}/sources/simple-icons/icons)
+# add_custom_command(
+#   OUTPUT ${SIMPLE_ICONS}
+#   COMMAND ${GIT_EXECUTABLE} submodule update --init server/icons/sources/simple-icons
+#   COMMENT "Retrieving simple-icons"
+#   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+# )
+
+
+include(ExternalProject)
+ExternalProject_Add(simple-icons
+  GIT_REPOSITORY https://github.com/simple-icons/simple-icons.git
+  GIT_TAG 13.6.0
+  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/sources/simple-icons"
+  BINARY_DIR ""
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+  TEST_COMMAND ""
 )
 
 add_custom_target(
   download.simple-icons
-  DEPENDS ${SIMPLE_ICONS}
+  # By having the byproducts here, cmake will automatically clean up this directory when the clean target is run.
+  BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/sources/simple-icons
+  # Essentially a no-op
+  COMMAND ${CMAKE_COMMAND} -E true
+  DEPENDS simple-icons
 )
