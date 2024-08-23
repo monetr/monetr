@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.17.14](https://github.com/monetr/monetr/compare/v0.17.13...v0.17.14) (2024-08-23)
+
+
+### Features
+
+* **build:** Icons are no longer a submodule ([2e9d2b4](https://github.com/monetr/monetr/commit/2e9d2b4edfadf356ff766b72e2ba5b9cda16f4e3))
+* **build:** No more git submodules :tada: ([99498fc](https://github.com/monetr/monetr/commit/99498fc25820a4ac1c1a753e746a37bd89d3fcd2))
+* **deploy:** Adding basic vault params for min4 ([10b896f](https://github.com/monetr/monetr/commit/10b896fb6c174476754fa8891c9246f9a5201a5d))
+* **sync:** Improve syncing marking accounts as inactive ([08d644d](https://github.com/monetr/monetr/commit/08d644d224d016f5651f53856e2546b1d422260c))
+
+
+### Dependencies
+
+* **api:** update module golang.org/x/crypto to v0.26.0 ([#1872](https://github.com/monetr/monetr/issues/1872)) ([048e1a9](https://github.com/monetr/monetr/commit/048e1a925c1a9579217c2b6f838aef882768e087))
+* **api:** update module golang.org/x/net to v0.28.0 ([#1873](https://github.com/monetr/monetr/issues/1873)) ([97e486b](https://github.com/monetr/monetr/commit/97e486bb4703200cc30d0aaa68d595e03c1c42fb))
+* **ui:** update dependency @storybook/testing-library to v0.2.2 ([#1860](https://github.com/monetr/monetr/issues/1860)) ([90bef91](https://github.com/monetr/monetr/commit/90bef91f2bcf7146bb09949c91560b749515f019))
+* **ui:** update dependency @types/node to v20.14.15 ([#1864](https://github.com/monetr/monetr/issues/1864)) ([70b4843](https://github.com/monetr/monetr/commit/70b48430272a1ba62cab81827f7eb37681a2d2a3))
+* **ui:** update dependency axios to v1.7.3 ([#1874](https://github.com/monetr/monetr/issues/1874)) ([68adf0a](https://github.com/monetr/monetr/commit/68adf0a816bb6b9d08c1952265d88661f52b835b))
+* **ui:** update dependency axios to v1.7.4 [security] ([#1878](https://github.com/monetr/monetr/issues/1878)) ([0c5908b](https://github.com/monetr/monetr/commit/0c5908b55967d4e399ea5e32e36db2754b3f0f0d))
+* **ui:** update dependency cheerio to v1.0.0 ([#1869](https://github.com/monetr/monetr/issues/1869)) ([e49b535](https://github.com/monetr/monetr/commit/e49b5350ef500ad3113573ee41197ce2b398dcb7))
+* **ui:** update dependency lucide-react to v0.427.0 ([#1879](https://github.com/monetr/monetr/issues/1879)) ([ce80bc4](https://github.com/monetr/monetr/commit/ce80bc4a1a44c6c4523af84f83534e91cf229890))
+* **ui:** update dependency react-day-picker to v8.10.1 ([#1880](https://github.com/monetr/monetr/issues/1880)) ([57e6dd9](https://github.com/monetr/monetr/commit/57e6dd93113d013011aad6f1539f418e02fd9565))
+* **ui:** update dependency react-select to v5.8.0 ([#1881](https://github.com/monetr/monetr/issues/1881)) ([d8668b0](https://github.com/monetr/monetr/commit/d8668b02a25b8dbf4f6d31af4f11c44e933de747))
+* **ui:** update dependency tailwindcss to v3.4.9 ([#1871](https://github.com/monetr/monetr/issues/1871)) ([79d682b](https://github.com/monetr/monetr/commit/79d682b66832e73a0f14464149dada7233e40423))
+
+
+### Bug Fixes
+
+* **api:** Removing unused sentry api ([eba662c](https://github.com/monetr/monetr/commit/eba662ce183e236d41a45dc63a6bdf14896e4beb))
+* **deploy:** Tweaking min4 deployment options ([c920bbf](https://github.com/monetr/monetr/commit/c920bbf4ed236d3270b95ad1197c18e16d3db3c7))
+* **dev:** Fixing local development for documentation ([539a47a](https://github.com/monetr/monetr/commit/539a47a85b82a5bb67fe1cb872b5423ab8be25fa)), closes [#1883](https://github.com/monetr/monetr/issues/1883)
+* **helm:** Fixing invalid helm chart templating ([8eac860](https://github.com/monetr/monetr/commit/8eac860b68d72b9e7ab8157afef2701ac3c2b440))
+* **plaid:** Batch write plaid transactions ([308415d](https://github.com/monetr/monetr/commit/308415d2440184354391dff7c8a77a9c855a11c6)), closes [#1863](https://github.com/monetr/monetr/issues/1863)
+* **ui:** Fixed issue adding plaid or manual links ([503489f](https://github.com/monetr/monetr/commit/503489fe0263c5b015cba8fb748f42a3bae1e142))
+
+
+### Miscellaneous
+
+* **deploy:** Tweaking min4 deployment ([bc30967](https://github.com/monetr/monetr/commit/bc3096727099e4dbc2f4c41d479e0141e51ed89f))
+* Tweak logging settings for min4. ([978434e](https://github.com/monetr/monetr/commit/978434e6a6b06530bd1c378c6f045fed654fe58a))
+* Tweaking min4 values ([7f3f46b](https://github.com/monetr/monetr/commit/7f3f46bb10dc072bae3033d3bcf31a8aa50c0828))
+
 ## [0.17.13](https://github.com/monetr/monetr/compare/v0.17.12...v0.17.13) (2024-08-13)
 
 
