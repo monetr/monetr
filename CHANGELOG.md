@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.17.15](https://github.com/monetr/monetr/compare/v0.17.14...v0.17.15) (2024-08-24)
+
+
+### Dependencies
+
+* **sentry:** Upgrading the lates sentry JS SDK. ([8d11d7f](https://github.com/monetr/monetr/commit/8d11d7f8c3b1d65df01c2e994b22999da2454cbe))
+
+
+### Miscellaneous
+
+* Reduce frontend sample rate ([a8a814b](https://github.com/monetr/monetr/commit/a8a814ba9a2139e5855ca47604d30eafb91667ee))
+
 ## [0.17.14](https://github.com/monetr/monetr/compare/v0.17.13...v0.17.14) (2024-08-23)
 
 
