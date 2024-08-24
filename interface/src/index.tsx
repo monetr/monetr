@@ -3,9 +3,8 @@ import '@fontsource-variable/inter';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
-import { Integrations } from '@sentry/tracing';
 
-import RelayTransport from '@monetr/interface/relay/transport';
+import { makeSneakyFetchTransport } from '@monetr/interface/relay/transport';
 import reportWebVitals from '@monetr/interface/reportWebVitals';
 import Root from '@monetr/interface/Root';
 
@@ -18,15 +17,13 @@ const root = createRoot(container);
 if (window?.__MONETR__?.SENTRY_DSN) {
   Sentry.init({
     dsn: window?.__MONETR__?.SENTRY_DSN,
-    transport: RelayTransport,
+    transport: makeSneakyFetchTransport,
     integrations: [
-      new Integrations.BrowserTracing({
-        startTransactionOnPageLoad: false,
-        startTransactionOnLocationChange: false,
+      Sentry.browserTracingIntegration({
+        instrumentPageLoad: true,
+        instrumentNavigation: true,
         traceXHR: true,
-        tracingOrigins: [
-          window.location.hostname,
-        ],
+        traceFetch: true,
       }),
     ],
     release: RELEASE,
