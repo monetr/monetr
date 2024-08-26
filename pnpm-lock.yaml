@@ -238,8 +238,8 @@ importers:
         specifier: 5.8.0
         version: 5.8.0(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rrule:
-        specifier: 2.7.2
-        version: 2.7.2
+        specifier: 2.8.1
+        version: 2.8.1
       tailwind-merge:
         specifier: 1.13.2
         version: 1.13.2
@@ -10210,8 +10210,8 @@ packages:
   robust-predicates@3.0.2:
     resolution: {integrity: sha512-IXgzBWvWQwE6PrDI05OvmXUIruQTcoMDzRsOd5CDvHCVLcLHMTSYvOK5Cm46kWqlV3yAbuSpBZdJ5oP5OUoStg==}
 
-  rrule@2.7.2:
-    resolution: {integrity: sha512-NkBsEEB6FIZOZ3T8frvEBOB243dm46SPufpDckY/Ap/YH24V1zLeMmDY8OA10lk452NdrF621+ynDThE7FQU2A==}
+  rrule@2.8.1:
+    resolution: {integrity: sha512-hM3dHSBMeaJ0Ktp7W38BJZ7O1zOgaFEsn41PDk+yHoEtfLV+PoJt9E9xAlZiWgf/iqEqionN0ebHFZIDAp+iGw==}
 
   run-async@2.4.1:
     resolution: {integrity: sha512-tvVnVv01b8c1RrA6Ep7JkStj85Guv/YrMcwqYQnwjsAS2cTmmPGBBjAjpCW7RrSodNSoE2/qg9O4bceNvUuDgQ==}
@@ -24393,9 +24393,9 @@ snapshots:
 
   robust-predicates@3.0.2: {}
 
-  rrule@2.7.2:
+  rrule@2.8.1:
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   run-async@2.4.1: {}
 
