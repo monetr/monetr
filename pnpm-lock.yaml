@@ -175,8 +175,8 @@ importers:
         specifier: 4.36.1
         version: 4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       axios:
-        specifier: 1.7.4
-        version: 1.7.4
+        specifier: 1.7.5
+        version: 1.7.5
       bun:
         specifier: 1.1.22
         version: 1.1.22
@@ -285,7 +285,7 @@ importers:
         version: 14.5.2(@testing-library/dom@10.1.0)
       '@types/bun':
         specifier: latest
-        version: 1.1.7
+        version: 1.1.8
       '@types/ramda':
         specifier: 0.28.23
         version: 0.28.23
@@ -303,7 +303,7 @@ importers:
         version: 10.4.20(postcss@8.4.41)
       axios-mock-adapter:
         specifier: 1.22.0
-        version: 1.22.0(axios@1.7.4)
+        version: 1.22.0(axios@1.7.5)
       happy-dom:
         specifier: 14.3.9
         version: 14.3.9
@@ -4332,8 +4332,8 @@ packages:
   '@types/bonjour@3.5.13':
     resolution: {integrity: sha512-z9fJ5Im06zvUL548KvYNecEVlA7cVDkGUi6kZusb04mpyEFKCIZJvloCcmpmLaIahDpOQGHaHmG6imtPMmPXGQ==}
 
-  '@types/bun@1.1.7':
-    resolution: {integrity: sha512-iIIn26SOX8qI5E8Juh+0rUgBmFHvll1akscwerhp9O/fHZGdQBWNLJkkRg/3z2Mh6a3ZgWUIkXViLZZYg47TXw==}
+  '@types/bun@1.1.8':
+    resolution: {integrity: sha512-PIwVFQKPviksiibobyvcWtMvMFMTj91T8dQEh9l1P3Ypr3ZuVn9w7HSr+5mTNrPqD1xpdDLEErzZPU8gqHBu6g==}
 
   '@types/connect-history-api-fallback@1.5.4':
     resolution: {integrity: sha512-n6Cr2xS1h4uAulPRdlw6Jl6s1oG8KrVilPN2yUITEs+K48EzMJJ3W1xy8K5eWuFvjp3R74AOIGSmp2UfBJ8HFw==}
@@ -5136,8 +5136,8 @@ packages:
   axios@0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
 
-  axios@1.7.4:
-    resolution: {integrity: sha512-DukmaFRnY6AzAALSH4J2M3k6PkaC+MfaAGdEERRWcC9q3/TWQwLpHR8ZRLKTdQ3aBDL64EdluRDjJqKw+BPZEw==}
+  axios@1.7.5:
+    resolution: {integrity: sha512-fZu86yCo+svH3uqJ/yTdQ0QHpQu5oL+/QE+QPSv6BZSkDAoky9vytxp7u5qk83OJFS3kEBcesWni9WTZAv3tSw==}
 
   axobject-query@3.2.1:
     resolution: {integrity: sha512-jsyHu61e6N4Vbz/v18DHwWYKK0bSWLqn47eeDSKPB7m8tqMHF9YJ+mhIk2lVteyZrY8tnSj/jHOv4YiTCuCJgg==}
@@ -5323,8 +5323,8 @@ packages:
   buffer@5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
 
-  bun-types@1.1.25:
-    resolution: {integrity: sha512-WpRb8/N3S5IE8UYdIn39+0Is1XzxsC78+MCe5cIdaer0lfFs6+DREtQH9TM6KJNKTxBYDvbx81RwbvxS5+CkVQ==}
+  bun-types@1.1.26:
+    resolution: {integrity: sha512-n7jDe62LsB2+WE8Q8/mT3azkPaatKlj/2MyP6hi3mKvPz9oPpB6JW/Ll6JHtNLudasFFuvfgklYSE+rreGvBjw==}
 
   bun@1.1.22:
     resolution: {integrity: sha512-G2HCPhzhjDc2jEDkZsO9vwPlpHrTm7a8UVwx9oNS5bZqo5OcSK5GPuWYDWjj7+37bRk5OVLfeIvUMtSrbKeIjQ==}
@@ -14074,7 +14074,7 @@ snapshots:
       webpack-dev-server: 4.13.1(webpack@5.91.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))
       webpack-hot-middleware: 2.26.1
 
-  '@pmmmwh/react-refresh-webpack-plugin@0.5.10(@types/webpack@5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))':
+  '@pmmmwh/react-refresh-webpack-plugin@0.5.10(@types/webpack@5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.91.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))':
     dependencies:
       ansi-html-community: 0.0.8
       common-path-prefix: 3.0.0
@@ -14090,7 +14090,7 @@ snapshots:
     optionalDependencies:
       '@types/webpack': 5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19)
       type-fest: 2.19.0
-      webpack-dev-server: 4.13.1(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))
+      webpack-dev-server: 4.13.1(webpack@5.91.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))
       webpack-hot-middleware: 2.26.1
 
   '@pmmmwh/react-refresh-webpack-plugin@0.5.10(@types/webpack@5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5)))(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))))(webpack-hot-middleware@2.26.1)(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5)))':
@@ -15176,7 +15176,7 @@ snapshots:
   '@rspack/dev-server@0.3.6(@rspack/core@0.3.6)(@swc/core@1.3.101(@swc/helpers@0.5.5))(@types/express@4.17.21)(@types/webpack@5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))(esbuild@0.17.19)(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-hot-middleware@2.26.1)':
     dependencies:
       '@rspack/core': 0.3.6
-      '@rspack/plugin-react-refresh': 0.3.6(@types/webpack@5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))
+      '@rspack/plugin-react-refresh': 0.3.6(@types/webpack@5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.91.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))
       chokidar: 3.5.3
       connect-history-api-fallback: 2.0.0
       express: 4.18.1
@@ -15243,9 +15243,9 @@ snapshots:
     optionalDependencies:
       '@rspack/core': 0.1.12(@types/webpack@5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.91.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.91.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))
 
-  '@rspack/plugin-react-refresh@0.3.6(@types/webpack@5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))':
+  '@rspack/plugin-react-refresh@0.3.6(@types/webpack@5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.91.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))':
     dependencies:
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.10(@types/webpack@5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.10(@types/webpack@5.28.5(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))(react-refresh@0.14.2)(type-fest@2.19.0)(webpack-dev-server@4.13.1(webpack@5.91.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19)))(webpack-hot-middleware@2.26.1)(webpack@5.76.0(@swc/core@1.3.101(@swc/helpers@0.5.5))(esbuild@0.17.19))
       schema-utils: 4.2.0
     optionalDependencies:
       react-refresh: 0.14.2
@@ -16902,9 +16902,9 @@ snapshots:
     dependencies:
       '@types/node': 20.14.15
 
-  '@types/bun@1.1.7':
+  '@types/bun@1.1.8':
     dependencies:
-      bun-types: 1.1.25
+      bun-types: 1.1.26
 
   '@types/connect-history-api-fallback@1.5.4':
     dependencies:
@@ -17844,9 +17844,9 @@ snapshots:
 
   axe-core@4.9.1: {}
 
-  axios-mock-adapter@1.22.0(axios@1.7.4):
+  axios-mock-adapter@1.22.0(axios@1.7.5):
     dependencies:
-      axios: 1.7.4
+      axios: 1.7.5
       fast-deep-equal: 3.1.3
       is-buffer: 2.0.5
 
@@ -17856,7 +17856,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  axios@1.7.4:
+  axios@1.7.5:
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
@@ -18143,7 +18143,7 @@ snapshots:
       base64-js: 1.5.1
       ieee754: 1.2.1
 
-  bun-types@1.1.25:
+  bun-types@1.1.26:
     dependencies:
       '@types/node': 20.12.14
       '@types/ws': 8.5.10
@@ -26083,7 +26083,7 @@ snapshots:
 
   wait-on@7.2.0:
     dependencies:
-      axios: 1.7.4
+      axios: 1.7.5
       joi: 17.13.1
       lodash: 4.17.21
       minimist: 1.2.8
