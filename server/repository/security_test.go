@@ -173,6 +173,30 @@ func TestBaseSecurityRepository_SetupTOTP(t *testing.T) {
 		assert.Nil(t, afterSetup.TOTPEnabledAt, "TOTP enabled at should still be nil")
 	})
 
+	t.Run("setup multiple times before enabled", func(t *testing.T) {
+		clock := clock.NewMock()
+		login, _ := fixtures.GivenIHaveLogin(t, clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
+
+		ctx1, cancel1 := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel1()
+		initialUri, initialRecovery, err := repo.SetupTOTP(ctx1, login.LoginId)
+		assert.NoError(t, err, "should setup TOTP without an error")
+		assert.Len(t, initialRecovery, 10, "should return 10 recovery codes")
+		assert.NotEmpty(t, initialUri, "should return a TOTP uri")
+
+		// Now try to setup TOTP again, we should get an error.
+		ctx2, cancel2 := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel2()
+		secondUri, secondRecovery, err := repo.SetupTOTP(ctx2, login.LoginId)
+		assert.NoError(t, err, "should setup TOTP without an error")
+		assert.Len(t, secondRecovery, 10, "should return 10 recovery codes")
+		assert.NotEmpty(t, secondUri, "should return a TOTP uri")
+
+		assert.NotEqualValues(t, initialRecovery, secondRecovery, "recovery codes should have been regenerated")
+		assert.NotEqualValues(t, initialUri, secondUri, "TOTP URI should have been regenerated")
+	})
+
 	t.Run("already has TOTP enabled", func(t *testing.T) {
 		clock := clock.NewMock()
 		login, _ := fixtures.GivenIHaveLogin(t, clock)

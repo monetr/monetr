@@ -145,7 +145,7 @@ func (c *Controller) postSetupTOTP(ctx echo.Context) error {
 	secureRepo := c.mustGetSecurityRepository(ctx)
 	// Try to actually setup TOTP for the current login. This will return an error
 	// if they already have it setup.
-	secret, recoveryCodes, err := secureRepo.SetupTOTP(
+	uri, recoveryCodes, err := secureRepo.SetupTOTP(
 		c.getContext(ctx),
 		c.mustGetLoginId(ctx),
 	)
@@ -154,7 +154,7 @@ func (c *Controller) postSetupTOTP(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"secret":        secret,
+		"uri":           uri,
 		"recoveryCodes": recoveryCodes,
 	})
 }
