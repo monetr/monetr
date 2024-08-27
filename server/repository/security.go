@@ -14,6 +14,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
+	"github.com/xlzd/gotp"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -55,7 +56,7 @@ type SecurityRepository interface {
 
 	// SetupTOTP takes a login ID and begins the process of enabling TOTP for that
 	// login. If the login already has TOTP enabled then an error will be
-	// returned. Otherwise the TOTP secret and several recovery codes will be
+	// returned. Otherwise the TOTP URI and several recovery codes will be
 	// returned. Calling this function does not require TOTP upon login, the TOTP
 	// must be enabled by having the user confirm their code on the frontend.
 	SetupTOTP(ctx context.Context, loginId ID[Login]) (secret string, recoveryCodes []string, err error)
@@ -144,7 +145,7 @@ func (b *baseSecurityRepository) ChangePassword(ctx context.Context, loginId ID[
 func (b *baseSecurityRepository) SetupTOTP(
 	ctx context.Context,
 	loginId ID[Login],
-) (secret string, recoveryCodes []string, err error) {
+) (uri string, recoveryCodes []string, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -164,11 +165,18 @@ func (b *baseSecurityRepository) SetupTOTP(
 	if _, err := rand.Read(randBytes); err != nil {
 		return "", nil, errors.Wrap(err, "failed to generate TOTP secret")
 	}
-	login.TOTP = base32.StdEncoding.EncodeToString(randBytes)
-	// Generate 10, 8 digit recovery codes
-	login.TOTPRecoveryCodes = make([]string, 10)
+
+	secret := base32.StdEncoding.EncodeToString(randBytes)
+	login.TOTP = secret
+
+	// Generate 10, 6 digit recovery codes
+	digits := 6
+	recoveryCount := 10
+	login.TOTPRecoveryCodes = make([]string, recoveryCount)
+	// TODO Technically it should be rare but possible for this to generate
+	// duplicate recovery codes. It would be super rare, but possible.
 	for i := range login.TOTPRecoveryCodes {
-		for x := 0; x < 8; x++ {
+		for x := 0; x < digits; x++ {
 			digit, err := rand.Int(rand.Reader, big.NewInt(9))
 			if err != nil {
 				return "", nil, errors.Wrap(err, "failed to generate recovery codes")
@@ -183,7 +191,7 @@ func (b *baseSecurityRepository) SetupTOTP(
 	// can simply set the enabled at date.
 	_, err = b.db.ModelContext(span.Context(), &login).
 		Set(`"totp" = ?`, login.TOTP).
-		Set(`"totp_recovery_codes" = ?`, login.TOTPRecoveryCodes).
+		Set(`"totp_recovery_codes" = ?`, pg.Array(login.TOTPRecoveryCodes)).
 		Set(`"totp_enabled_at" = ?`, login.TOTPEnabledAt).
 		WherePK().
 		Update(&login)
@@ -191,5 +199,18 @@ func (b *baseSecurityRepository) SetupTOTP(
 		return "", nil, errors.Wrap(err, "failed to save TOTP settings")
 	}
 
-	return login.TOTP, login.TOTPRecoveryCodes, nil
+	// Generate the URI to return to the caller. This is what the client needs for
+	// the QR code.
+	uri = gotp.BuildUri(
+		"totp",      // Kind
+		secret,      // Secret
+		login.Email, // Account namem
+		"monetr",    // Issuer
+		"",          // Algorithm
+		0,           // Initial count
+		6,           // Digits
+		30,          // Period in seconds
+	)
+
+	return uri, login.TOTPRecoveryCodes, nil
 }

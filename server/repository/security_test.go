@@ -4,10 +4,12 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
@@ -145,5 +147,55 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 
 		err := repo.ChangePassword(context.Background(), "user_bogus", bogusPassword, newPassword)
 		assert.EqualError(t, err, "failed to find login record to change password: forcing a bad connection")
+	})
+}
+
+func TestBaseSecurityRepository_SetupTOTP(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		clock := clock.NewMock()
+		login, _ := fixtures.GivenIHaveLogin(t, clock)
+		assert.Empty(t, login.TOTP, "login should not have a TOTP secret initially")
+		assert.Empty(t, login.TOTPRecoveryCodes, "login should have no TOTP recovery codes")
+		assert.Nil(t, login.TOTPEnabledAt, "login should have a nil TOTP enabled at")
+
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+		uri, recoveryCodes, err := repo.SetupTOTP(ctx, login.LoginId)
+		assert.NoError(t, err, "should setup TOTP without an error")
+		assert.Len(t, recoveryCodes, 10, "should return 10 recovery codes")
+		assert.NotEmpty(t, uri, "should return a TOTP uri")
+
+		afterSetup := testutils.MustDBRead(t, login)
+		assert.NotEmpty(t, afterSetup.TOTP, "login should have a TOTP secret after setup")
+		assert.EqualValues(t, recoveryCodes, afterSetup.TOTPRecoveryCodes, "login should have the returned TOTP recovery codes")
+		assert.Nil(t, afterSetup.TOTPEnabledAt, "TOTP enabled at should still be nil")
+	})
+
+	t.Run("already has TOTP enabled", func(t *testing.T) {
+		clock := clock.NewMock()
+		login, _ := fixtures.GivenIHaveLogin(t, clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
+
+		{ // Initially setup the TOTP stuff.
+			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+			defer cancel()
+			_, _, err := repo.SetupTOTP(ctx, login.LoginId)
+			assert.NoError(t, err, "should setup TOTP without an error")
+		}
+
+		{ // Enable the TOTP
+			login.TOTPEnabledAt = myownsanity.TimeP(clock.Now())
+			testutils.MustDBUpdate(t, &login)
+		}
+
+		// Now try to setup TOTP again, we should get an error.
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+		uri, recoveryCodes, err := repo.SetupTOTP(ctx, login.LoginId)
+		assert.EqualError(t, err, "login already has TOTP enabled")
+		assert.Empty(t, recoveryCodes, "should not return any recovery codes")
+		assert.Empty(t, uri, "should not return a TOTP URI")
 	})
 }
