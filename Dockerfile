@@ -1,5 +1,6 @@
 FROM debian:12-slim AS base_builder
-WORKDIR /work
+ARG GO_VERSION=1.21.13
+WORKDIR /monetr
 RUN apt-get update && apt-get install -y --no-install-recommends \
   build-essential \
   ca-certificates \
@@ -15,11 +16,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   wget
 
 RUN npm install -g pnpm
-RUN wget -c https://golang.org/dl/go1.21.9.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
-ENV GOPATH /home/go
+RUN wget -c https://golang.org/dl/go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz && tar -C /usr/local -xzf go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz
+ENV GOPATH=/home/go
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH:
-RUN git config --global --add safe.directory /work
+ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH:
+RUN git config --global --add safe.directory /monetr
 
 FROM base_builder AS monetr_builder
 ARG REVISION
@@ -28,7 +29,7 @@ ARG BUILD_HOST
 
 ARG GOFLAGS
 ENV GOFLAGS=$GOFLAGS
-COPY . /work
+COPY . /monetr
 RUN make monetr-release
 
 FROM debian:12-slim
@@ -65,4 +66,4 @@ LABEL org.opencontainers.image.description="monetr's budgeting application"
 LABEL org.opencontainers.image.version=${RELEASE}
 LABEL org.opencontainers.image.revision=${REVISION}
 
-COPY --from=monetr_builder /work/build/monetr /usr/bin/monetr
+COPY --from=monetr_builder /monetr/build/monetr /usr/bin/monetr
