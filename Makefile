@@ -58,8 +58,6 @@ clean:
 	-@$(MAKE) shutdown CMAKE_OPTIONS="$(CMAKE_OPTIONS) -DBUILD_TESTING=OFF"
 	-cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t clean $(BUILD_ARGS)
 	-cmake -E remove_directory $(CMAKE_CONFIGURATION_DIRECTORY) $(BUILD_ARGS)
-	-git clean -f -X server/ui/static
-	-git clean -f -X server/internal/source/embed
 
 dependencies: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t dependencies $(BUILD_ARGS)

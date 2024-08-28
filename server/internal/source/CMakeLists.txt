@@ -23,7 +23,7 @@ foreach(FILE ${APP_GO_FILES})
   get_filename_component(OUTPUT_GO_DIRECTORY ${OUTPUT_GO_FILE} DIRECTORY)
   add_custom_command(
     OUTPUT ${OUTPUT_GO_FILE}.txt
-    BYPRODUCTS ${OUTPUT_GO_FILE}.txt
+    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/embed/server ${OUTPUT_GO_FILE}.txt
     COMMAND ${CMAKE_COMMAND} -E make_directory ${OUTPUT_GO_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${FILE} ${OUTPUT_GO_FILE}.txt
     COMMENT "Generating source map for ${FILE_FRIENDLY}"
