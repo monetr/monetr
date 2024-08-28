@@ -76,7 +76,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
 
-		err = handler.HandleConsumeJob(context.Background(), argsEncoded)
+		err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
 		assert.NoError(t, err, "should run job successfully")
 		testutils.MustHaveLogMessage(t, hook, "preparing to update 1 spending(s)")
 
@@ -102,7 +102,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
 
-		err = handler.HandleConsumeJob(context.Background(), argsEncoded)
+		err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
 		assert.EqualError(t, err, "failed to retrieve account: pg: no rows in result set")
 		testutils.MustHaveLogMessage(t, hook, "could not retrieve account for funding schedule processing")
 	})
@@ -133,7 +133,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
 
-		err = handler.HandleConsumeJob(context.Background(), argsEncoded)
+		err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
 		assert.NoError(t, err, "should run job successfully")
 		testutils.MustHaveLogMessage(t, hook, "skipping processing funding schedule, it does not occur yet")
 	})

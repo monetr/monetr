@@ -63,11 +63,21 @@ func (h *CleanupFilesHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer 
 	return enqueuer.EnqueueJob(ctx, h.QueueName(), nil)
 }
 
-func (h *CleanupFilesHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+func (h *CleanupFilesHandler) HandleConsumeJob(
+	ctx context.Context,
+	log *logrus.Entry,
+	data []byte,
+) error {
 	span := sentry.StartSpan(ctx, "db.transaction")
 	defer span.Finish()
 
-	job := NewCleanupFilesJob(h.log, h.db, h.clock, h.fileStorage, h.enqueuer)
+	job := NewCleanupFilesJob(
+		log.WithContext(span.Context()),
+		h.db,
+		h.clock,
+		h.fileStorage,
+		h.enqueuer,
+	)
 	return job.Run(span.Context())
 }
 

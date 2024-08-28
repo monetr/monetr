@@ -48,11 +48,15 @@ func (c CleanupJobsHandler) QueueName() string {
 	return CleanupJobs
 }
 
-func (c *CleanupJobsHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+func (c *CleanupJobsHandler) HandleConsumeJob(
+	ctx context.Context,
+	log *logrus.Entry,
+	data []byte,
+) error {
 	span := sentry.StartSpan(ctx, "db.transaction")
 	defer span.Finish()
 
-	job := NewCleanupJobsJob(c.log, c.db)
+	job := NewCleanupJobsJob(log.WithContext(span.Context()), c.db)
 	return job.Run(span.Context())
 }
 

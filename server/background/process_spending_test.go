@@ -59,7 +59,7 @@ func TestProcessSpendingJob_Run(t *testing.T) {
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
 
-		err = handler.HandleConsumeJob(context.Background(), argsEncoded)
+		err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
 		assert.NoError(t, err, "should run job successfully")
 		testutils.MustHaveLogMessage(t, hook, "updating stale spending objects")
 

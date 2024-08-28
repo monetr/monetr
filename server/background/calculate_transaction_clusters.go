@@ -69,6 +69,7 @@ func (c CalculateTransactionClustersHandler) QueueName() string {
 
 func (c *CalculateTransactionClustersHandler) HandleConsumeJob(
 	ctx context.Context,
+	log *logrus.Entry,
 	data []byte,
 ) error {
 	var args CalculateTransactionClustersArguments
@@ -86,7 +87,7 @@ func (c *CalculateTransactionClustersHandler) HandleConsumeJob(
 		defer span.Finish()
 
 		job, err := NewCalculateTransactionClustersJob(
-			c.log.WithContext(span.Context()),
+			log.WithContext(span.Context()),
 			txn,
 			c.clock,
 			args,

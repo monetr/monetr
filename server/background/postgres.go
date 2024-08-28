@@ -805,7 +805,10 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		span.SetTag("messaging.message.id", string(job.JobId))
 		span.SetTag("messaging.destination.name", string(job.Queue))
 		span.SetTag("messaging.system", "postgresql")
-		jobLog := p.log.WithContext(span.Context())
+		jobLog := p.log.WithContext(span.Context()).WithFields(logrus.Fields{
+			"jobId": job.JobId,
+			"queue": job.Queue,
+		})
 		hub := sentry.GetHubFromContext(span.Context())
 		hub.ConfigureScope(func(scope *sentry.Scope) {
 			scope.SetTag("queue", handler.QueueName())
@@ -848,7 +851,11 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		jobLog.Trace("handling job")
 
 		// Set err outright to make sentry reporting easier.
-		err = handler.HandleConsumeJob(span.Context(), []byte(job.Input))
+		err = handler.HandleConsumeJob(
+			span.Context(),
+			jobLog,
+			[]byte(job.Input),
+		)
 		return
 	}
 }

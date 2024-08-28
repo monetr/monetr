@@ -21,7 +21,7 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
 
-		err = handler.HandleConsumeJob(context.Background(), argsEncoded)
+		err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
 		assert.NoError(t, err, "should not return an error when there are no jobs to cleanup")
 	})
 
@@ -49,7 +49,7 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
 
-		err = handler.HandleConsumeJob(context.Background(), argsEncoded)
+		err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
 		assert.NoError(t, err, "should not return an error when there are no jobs to cleanup")
 
 		exists, err := db.Model(&models.Job{}).Where(`"job"."job_id" = ?`, job.JobId).Exists()
@@ -81,7 +81,7 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
 
-		err = handler.HandleConsumeJob(context.Background(), argsEncoded)
+		err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
 		assert.NoError(t, err, "should not return an error when there are no jobs to cleanup")
 
 		exists, err := db.Model(&models.Job{}).Where(`"job"."job_id" = ?`, job.JobId).Exists()

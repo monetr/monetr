@@ -57,7 +57,11 @@ func (p ProcessSpendingHandler) QueueName() string {
 	return ProcessSpending
 }
 
-func (p *ProcessSpendingHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+func (p *ProcessSpendingHandler) HandleConsumeJob(
+	ctx context.Context,
+	log *logrus.Entry,
+	data []byte,
+) error {
 	var args ProcessSpendingArguments
 	if err := errors.Wrap(p.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
 		crumbs.Error(ctx, "Failed to unmarshal arguments for Process Spending job.", "job", map[string]interface{}{
@@ -74,7 +78,7 @@ func (p *ProcessSpendingHandler) HandleConsumeJob(ctx context.Context, data []by
 
 		repo := repository.NewRepositoryFromSession(p.clock, "user_system", args.AccountId, txn)
 		job, err := NewProcessSpendingJob(
-			p.log.WithContext(span.Context()),
+			log.WithContext(span.Context()),
 			repo,
 			args,
 			p.clock,

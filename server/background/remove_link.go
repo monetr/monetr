@@ -73,7 +73,11 @@ func (r RemoveLinkHandler) QueueName() string {
 	return RemoveLink
 }
 
-func (r *RemoveLinkHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+func (r *RemoveLinkHandler) HandleConsumeJob(
+	ctx context.Context,
+	log *logrus.Entry,
+	data []byte,
+) error {
 	var args RemoveLinkArguments
 	if err := errors.Wrap(r.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
 		crumbs.Error(ctx, "Failed to unmarshal arguments for Remove Link job.", "job", map[string]interface{}{
@@ -89,7 +93,7 @@ func (r *RemoveLinkHandler) HandleConsumeJob(ctx context.Context, data []byte) e
 		defer span.Finish()
 
 		job, err := NewRemoveLinkJob(
-			r.log.WithContext(span.Context()),
+			log.WithContext(span.Context()),
 			txn,
 			r.clock,
 			r.publisher,

@@ -92,6 +92,7 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 	}
 
 	logger.Formatter = NewContextFormatterWrapper(logger.Formatter)
+	logger.ReportCaller = true
 
 	return logrus.NewEntry(logger)
 }

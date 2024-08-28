@@ -71,7 +71,11 @@ func (d DeactivateLinksHandler) QueueName() string {
 	return DeactivateLinks
 }
 
-func (d *DeactivateLinksHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+func (d *DeactivateLinksHandler) HandleConsumeJob(
+	ctx context.Context,
+	log *logrus.Entry,
+	data []byte,
+) error {
 	var args DeactivateLinksArguments
 	if err := errors.Wrap(d.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
 		crumbs.Error(ctx, "Failed to unmarshal arguments for Deactivate Links job.", "job", map[string]interface{}{
@@ -86,7 +90,7 @@ func (d *DeactivateLinksHandler) HandleConsumeJob(ctx context.Context, data []by
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := d.log.WithContext(span.Context())
+		log := log.WithContext(span.Context())
 		repo := repository.NewRepositoryFromSession(d.clock, "user_system", args.AccountId, txn)
 		secretsRepo := repository.NewSecretsRepository(
 			log,

@@ -132,7 +132,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			// Make sure that before we start there isn't anything in the database.
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
 
-			err = handler.HandleConsumeJob(context.Background(), argsEncoded)
+			err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
 			assert.NoError(t, err, "must process job successfully")
 		}
 
@@ -212,7 +212,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			argsEncoded, err := DefaultJobMarshaller(args)
 			assert.NoError(t, err, "must be able to marshal arguments")
 
-			err = handler.HandleConsumeJob(context.Background(), argsEncoded)
+			err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
 			assert.NoError(t, err, "must process job successfully")
 		}
 

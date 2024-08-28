@@ -51,11 +51,15 @@ func (p ProcessFundingScheduleHandler) QueueName() string {
 	return ProcessFundingSchedules
 }
 
-func (p *ProcessFundingScheduleHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+func (p *ProcessFundingScheduleHandler) HandleConsumeJob(
+	ctx context.Context,
+	log *logrus.Entry,
+	data []byte,
+) error {
 	// TODO Move this into a constructor to make it consistent with the other job code.
 	job := &ProcessFundingScheduleJob{
 		args:  ProcessFundingScheduleArguments{},
-		log:   p.log.WithContext(ctx),
+		log:   log.WithContext(ctx),
 		repo:  nil,
 		clock: p.clock,
 	}
@@ -73,7 +77,12 @@ func (p *ProcessFundingScheduleHandler) HandleConsumeJob(ctx context.Context, da
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		job.repo = repository.NewRepositoryFromSession(p.clock, "user_system", job.args.AccountId, txn)
+		job.repo = repository.NewRepositoryFromSession(
+			p.clock,
+			"user_system",
+			job.args.AccountId,
+			txn,
+		)
 		return job.Run(span.Context())
 	})
 }

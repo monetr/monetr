@@ -64,7 +64,11 @@ func (h *RemoveFileHandler) QueueName() string {
 	return RemoveFile
 }
 
-func (h *RemoveFileHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+func (h *RemoveFileHandler) HandleConsumeJob(
+	ctx context.Context,
+	log *logrus.Entry,
+	data []byte,
+) error {
 	var args RemoveFileArguments
 	if err := errors.Wrap(h.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
 		crumbs.Error(ctx, "Failed to unmarshal arguments for Remove File job.", "job", map[string]interface{}{
@@ -79,7 +83,7 @@ func (h *RemoveFileHandler) HandleConsumeJob(ctx context.Context, data []byte) e
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := h.log.WithContext(span.Context())
+		log := log.WithContext(span.Context())
 		repo := repository.NewRepositoryFromSession(h.clock, "user_system", args.AccountId, txn)
 
 		job, err := NewRemoveFileJob(

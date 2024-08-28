@@ -116,7 +116,11 @@ func (s SyncPlaidHandler) QueueName() string {
 	return SyncPlaid
 }
 
-func (s *SyncPlaidHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+func (s *SyncPlaidHandler) HandleConsumeJob(
+	ctx context.Context,
+	log *logrus.Entry,
+	data []byte,
+) error {
 	var args SyncPlaidArguments
 	if err := errors.Wrap(s.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
 		crumbs.Error(ctx, "Failed to unmarshal arguments for Sync Plaid job.", "job", map[string]interface{}{
@@ -131,7 +135,7 @@ func (s *SyncPlaidHandler) HandleConsumeJob(ctx context.Context, data []byte) er
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := s.log.WithContext(span.Context())
+		log := log.WithContext(span.Context())
 
 		repo := repository.NewRepositoryFromSession(s.clock, "user_plaid", args.AccountId, txn)
 		secretsRepo := repository.NewSecretsRepository(

@@ -140,7 +140,11 @@ func (h *ProcessQFXUploadHandler) QueueName() string {
 	return ProcessQFXUpload
 }
 
-func (h *ProcessQFXUploadHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+func (h *ProcessQFXUploadHandler) HandleConsumeJob(
+	ctx context.Context,
+	log *logrus.Entry,
+	data []byte,
+) error {
 	var args ProcessQFXUploadArguments
 	if err := errors.Wrap(h.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
 		crumbs.Error(ctx, "Failed to unmarshal arguments for Processing QFX Upload job.", "job", map[string]interface{}{
@@ -155,18 +159,17 @@ func (h *ProcessQFXUploadHandler) HandleConsumeJob(ctx context.Context, data []b
 		return err
 	}
 
-	// Process the file upload inside a transaction, if there is a panic or an
 	// error here then we will catch it and update the upload status accordingly.
 	var err error
 	defer func() {
 		if recovery := recover(); recovery != nil {
-			h.log.WithError(err).Error("panic processing QFX/OFX file upload")
+			log.WithError(err).Error("panic processing QFX/OFX file upload")
 			_ = h.updateStatus(ctx, args, TransactionUploadStatusFailed, nil)
 
 			panic(recovery)
 		}
 		if err != nil {
-			h.log.WithError(err).Error("error processing QFX/OFX file upload")
+			log.WithError(err).Error("error processing QFX/OFX file upload")
 			errorString := fmt.Sprintf("%s", err)
 			_ = h.updateStatus(ctx, args, TransactionUploadStatusFailed, &errorString)
 		} else {
@@ -177,7 +180,7 @@ func (h *ProcessQFXUploadHandler) HandleConsumeJob(ctx context.Context, data []b
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := h.log.WithContext(span.Context())
+		log := log.WithContext(span.Context())
 		repo := repository.NewRepositoryFromSession(h.clock, "user_system", args.AccountId, txn)
 
 		job, err := NewProcessQFXUploadJob(

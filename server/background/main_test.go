@@ -3,6 +3,8 @@ package background
 import (
 	"context"
 	"testing"
+
+	"github.com/sirupsen/logrus"
 )
 
 type TestJobFunction func(t *testing.T, ctx context.Context, data []byte) error
@@ -20,7 +22,11 @@ func (h TestJobHandler) QueueName() string {
 	return h.t.Name()
 }
 
-func (h TestJobHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+func (h TestJobHandler) HandleConsumeJob(
+	ctx context.Context,
+	log *logrus.Entry,
+	data []byte,
+) error {
 	return h.inner(h.t, ctx, data)
 }
 
@@ -49,7 +55,11 @@ func (h TestCronJobHandler) QueueName() string {
 	return h.t.Name()
 }
 
-func (h TestCronJobHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+func (h TestCronJobHandler) HandleConsumeJob(
+	ctx context.Context,
+	log *logrus.Entry,
+	data []byte,
+) error {
 	return h.inner(h.t, ctx, data)
 }
 
