@@ -63,8 +63,8 @@ importers:
   docs:
     dependencies:
       '@fontsource-variable/inter':
-        specifier: 5.0.18
-        version: 5.0.18
+        specifier: 5.0.20
+        version: 5.0.20
       next:
         specifier: 14.2.7
         version: 14.2.7(@babel/core@7.24.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.55.0)
@@ -136,8 +136,8 @@ importers:
         specifier: 11.10.6
         version: 11.10.6(@emotion/react@11.10.6(@types/react@18.3.4)(react@18.3.1))(@types/react@18.3.4)(react@18.3.1)
       '@fontsource-variable/inter':
-        specifier: 5.0.18
-        version: 5.0.18
+        specifier: 5.0.20
+        version: 5.0.20
       '@mui/icons-material':
         specifier: 5.11.0
         version: 5.11.0(@mui/material@5.11.3(@emotion/react@11.10.6(@types/react@18.3.4)(react@18.3.1))(@emotion/styled@11.10.6(@emotion/react@11.10.6(@types/react@18.3.4)(react@18.3.1))(@types/react@18.3.4)(react@18.3.1))(@types/react@18.3.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.4)(react@18.3.1)
@@ -359,8 +359,8 @@ importers:
   stories:
     dependencies:
       '@fontsource-variable/inter':
-        specifier: 5.0.18
-        version: 5.0.18
+        specifier: 5.0.20
+        version: 5.0.20
       '@monetr/interface':
         specifier: workspace:*
         version: link:../interface
@@ -1952,8 +1952,8 @@ packages:
   '@floating-ui/utils@0.2.2':
     resolution: {integrity: sha512-J4yDIIthosAsRZ5CPYP/jQvUAQtlZTTD/4suA08/FEnlxqW3sKS9iAhgsa9VYLZ6vDHn/ixJgIqRQPotoBjxIw==}
 
-  '@fontsource-variable/inter@5.0.18':
-    resolution: {integrity: sha512-rJzSrtJ3b7djiGFvRuTe6stDfbYJGhdQSfn2SI2WfXviee7Er0yKAHE5u7FU7OWVQQQ1x3+cxdmx9NdiAkcrcA==}
+  '@fontsource-variable/inter@5.0.20':
+    resolution: {integrity: sha512-dhzG4Zls/tIrf8h0FhTNi8jT/uFwNhdTY2vKe6DYqoXDYOfEcTVZDyh1hKml1rlLT44Y7OoKoGz8w7czDW7twQ==}
 
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
@@ -13343,7 +13343,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.2': {}
 
-  '@fontsource-variable/inter@5.0.18': {}
+  '@fontsource-variable/inter@5.0.20': {}
 
   '@hapi/hoek@9.3.0': {}
 
