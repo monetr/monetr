@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.17.16](https://github.com/monetr/monetr/compare/v0.17.15...v0.17.16) (2024-08-28)
+
+
+### Features
+
+* **log:** Significantly improve logging for background jobs ([0fcf81a](https://github.com/monetr/monetr/commit/0fcf81ad796575cb9af168a20e0cc211acc4d96d))
+
+
+### Dependencies
+
+* **ui:** Require node 18 as a minimum version ([6f9cf65](https://github.com/monetr/monetr/commit/6f9cf65ae967c5bbc6e31ff842541ef4f849d13d))
+* **ui:** update dependency @react-email/components to v0.0.23 ([#1885](https://github.com/monetr/monetr/issues/1885)) ([2a09c50](https://github.com/monetr/monetr/commit/2a09c50ea647e9adcacc399458210188a6f17cd8))
+* **ui:** update dependency @testing-library/jest-dom to v6.5.0 ([#1892](https://github.com/monetr/monetr/issues/1892)) ([33da180](https://github.com/monetr/monetr/commit/33da1803de0549d9b64413bda78c8b9dc8686d3f))
+* **ui:** update dependency @types/react to v18.3.4 ([#1887](https://github.com/monetr/monetr/issues/1887)) ([6b5187d](https://github.com/monetr/monetr/commit/6b5187d46f52a7217ab2d7a0fb83881afc58ad49))
+* **ui:** update dependency axios to v1.7.5 ([#1888](https://github.com/monetr/monetr/issues/1888)) ([aab542b](https://github.com/monetr/monetr/commit/aab542b5ce7e57830920ef508848d72d52e863ec))
+* **ui:** update dependency bun to v1.1.26 ([#1889](https://github.com/monetr/monetr/issues/1889)) ([4de8434](https://github.com/monetr/monetr/commit/4de8434d49711122b49d70a9191018a0553747b8))
+* **ui:** update dependency eslint to v8.57.0 ([#1876](https://github.com/monetr/monetr/issues/1876)) ([3c83ee1](https://github.com/monetr/monetr/commit/3c83ee1d965ab037570446138088b6df83c3d23e))
+* **ui:** update dependency eslint-plugin-import to v2.29.1 ([#1877](https://github.com/monetr/monetr/issues/1877)) ([11b3795](https://github.com/monetr/monetr/commit/11b379568419ca415e6bc4b5bb616a19204c4d30))
+* **ui:** update dependency next to v14.2.7 ([#1890](https://github.com/monetr/monetr/issues/1890)) ([2fd6823](https://github.com/monetr/monetr/commit/2fd6823d597c247240359d3bfb92bf46cd9f7908))
+* **ui:** update dependency rrule to v2.8.1 ([#1875](https://github.com/monetr/monetr/issues/1875)) ([7a2417d](https://github.com/monetr/monetr/commit/7a2417dbf02d9063af1983f9ebe02361ea847550))
+* **ui:** update dependency tailwindcss to v3.4.10 ([#1891](https://github.com/monetr/monetr/issues/1891)) ([29fb1d5](https://github.com/monetr/monetr/commit/29fb1d5909499119a3e8f9669e53c84d78a0088d))
+
+
+### Bug Fixes
+
+* **container:** Improving containerfile ([f69adc0](https://github.com/monetr/monetr/commit/f69adc0c66ebf40ff5d38e8e5d428c533ab9cb27))
+* **http:** Tweaking round tripper for golang ([1ec0b2a](https://github.com/monetr/monetr/commit/1ec0b2ac7e5e2a46b2043e95eed7bc1e726dd1da))
+
+
+### Miscellaneous
+
+* **dev:** Improve clean command ([2429a24](https://github.com/monetr/monetr/commit/2429a24f05751d3cfe8b51546e2e8df383972239))
+
 ## [0.17.15](https://github.com/monetr/monetr/compare/v0.17.14...v0.17.15) (2024-08-24)
 
 
