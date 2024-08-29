@@ -11,8 +11,6 @@ import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport';
 import { useEffect, useGlobals } from '@storybook/addons';
 import type { Preview } from '@storybook/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import axios from 'axios';
-import { initialize, mswLoader } from 'msw-storybook-addon';
 import { SnackbarProvider, VariantType } from 'notistack';
 
 import { newTheme } from '@monetr/interface/src/theme';
@@ -24,14 +22,6 @@ import { ScreenshotOptions, withScreenshot } from 'storycap';
 import '@monetr/interface/src/styles/styles.css';
 import './preview.css';
 
-initialize({
-  onUnhandledRequest: 'bypass',
-});
-
-// @ts-ignore
-window.API = axios.create({
-  baseURL: '/api',
-});
 
 export const useTheme = (StoryFn: () => unknown) => {
   const [{ theme }] = useGlobals();
@@ -49,10 +39,10 @@ const preview: Preview = {
     useTheme,
     (Story, _context) => {
       const snackbarIcons: Partial<Record<VariantType, React.ReactNode>> = {
-        error: <ErrorIcon className="mr-2.5" />,
-        success: <DoneIcon className="mr-2.5" />,
-        warning: <WarningIcon className="mr-2.5" />,
-        info: <InfoIcon className="mr-2.5" />,
+        error: <ErrorIcon className='mr-2.5' />,
+        success: <DoneIcon className='mr-2.5' />,
+        warning: <WarningIcon className='mr-2.5' />,
+        info: <InfoIcon className='mr-2.5' />,
       };
 
       const queryClient = new QueryClient({
@@ -112,7 +102,6 @@ const preview: Preview = {
       },
     },
   },
-  loaders: [mswLoader],
 };
 
 export default preview;

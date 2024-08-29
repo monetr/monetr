@@ -88,7 +88,7 @@ export default function Monetr(): JSX.Element {
     );
   }
 
-  const hasAnyLinks = links.length > 0;
+  const hasAnyLinks = links?.length > 0;
   if (!hasAnyLinks) {
     return (
       <Routes>

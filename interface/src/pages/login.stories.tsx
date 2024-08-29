@@ -1,6 +1,8 @@
+import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
-import { rest } from 'msw';
+import MockAdapter from 'axios-mock-adapter';
 
+import monetrClient from '@monetr/interface/api/api';
 import LoginPage from '@monetr/interface/pages/login';
 
 const meta: Meta<typeof LoginPage> = {
@@ -12,76 +14,75 @@ export default meta;
 
 export const Default: StoryObj<typeof LoginPage> = {
   name: 'Default',
-  parameters: {
-    msw: {
-      handlers: [
-        rest.get('/api/config', (_req, res, ctx) => {
-          return res(ctx.json({
-            allowForgotPassword: true,
-            allowSignUp: true,
-            verifyLogin: false,
-          }));
-        }),
-        rest.post('/api/authentication/login', (_req, res, ctx) => {
-          return res(
-            ctx.delay(500),
-            ctx.status(403),
-            ctx.json({
-              error: 'Invalid credentials provided!',
-            }),
-          );
-        }),
-      ],
+  decorators: [
+    (Story, _) => {
+      const mockAxios = new MockAdapter(monetrClient);
+      mockAxios.onGet('/api/config').reply(200, {
+        allowForgotPassword: true,
+        allowSignUp: true,
+        verifyLogin: false,
+      });
+      mockAxios.onPost('/api/authentication/login').reply(403, {
+        error: 'Invalid credentials provided!',
+      });
+
+      return (<Story />);
     },
-  },
+  ],
 };
 
 export const WithReCAPTCHA: StoryObj<typeof LoginPage> = {
   name: 'With ReCAPTCHA',
-  parameters: {
-    msw: {
-      handlers: [
-        rest.get('/api/config', (_req, res, ctx) => {
-          return res(ctx.json({
-            allowForgotPassword: true,
-            allowSignUp: true,
-            ReCAPTCHAKey: '6LfL3vcgAAAAALlJNxvUPdgrbzH_ca94YTCqso6L',
-            verifyLogin: true,
-          }));
-        }),
-      ],
+  decorators: [
+    (Story, _) => {
+      const mockAxios = new MockAdapter(monetrClient);
+      mockAxios.onGet('/api/config').reply(200, {
+        allowForgotPassword: true,
+        allowSignUp: true,
+        ReCAPTCHAKey: '6LfL3vcgAAAAALlJNxvUPdgrbzH_ca94YTCqso6L',
+        verifyLogin: true,
+      });
+      mockAxios.onPost('/api/authentication/login').reply(403, {
+        error: 'Invalid credentials provided!',
+      });
+
+      return (<Story />);
     },
-  },
+  ],
 };
 
 export const NoSignup: StoryObj<typeof LoginPage> = {
   name: 'No Sign Up',
-  parameters: {
-    msw: {
-      handlers: [
-        rest.get('/api/config', (_req, res, ctx) => {
-          return res(ctx.json({
-            allowForgotPassword: true,
-            allowSignUp: false,
-          }));
-        }),
-      ],
+  decorators: [
+    (Story, _) => {
+      const mockAxios = new MockAdapter(monetrClient);
+      mockAxios.onGet('/api/config').reply(200, {
+        allowForgotPassword: true,
+        allowSignUp: false,
+      });
+      mockAxios.onPost('/api/authentication/login').reply(403, {
+        error: 'Invalid credentials provided!',
+      });
+
+      return (<Story />);
     },
-  },
+  ],
 };
 
 export const NoForgotPassword: StoryObj<typeof LoginPage> = {
   name: 'No Forgot Password',
-  parameters: {
-    msw: {
-      handlers: [
-        rest.get('/api/config', (_req, res, ctx) => {
-          return res(ctx.json({
-            allowForgotPassword: false,
-            allowSignUp: true,
-          }));
-        }),
-      ],
+  decorators: [
+    (Story, _) => {
+      const mockAxios = new MockAdapter(monetrClient);
+      mockAxios.onGet('/api/config').reply(200, {
+        allowForgotPassword: false,
+        allowSignUp: true,
+      });
+      mockAxios.onPost('/api/authentication/login').reply(403, {
+        error: 'Invalid credentials provided!',
+      });
+
+      return (<Story />);
     },
-  },
+  ],
 };

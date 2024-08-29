@@ -9,7 +9,7 @@ let stories = [
   '../emails/**/*.stories.tsx',
 ];
 if (marketingStoryOnly) {
-  stories = ['../interface/src/pages/new.stories.tsx'];
+  stories = ['../interface/src/pages/app.stories.tsx'];
 }
 
 const config: StorybookConfig = {
