@@ -20,7 +20,7 @@
     "@storybook/addon-viewport": "7.0.18",
     "@storybook/blocks": "7.0.18",
     "@storybook/react": "7.0.18",
-    "@storybook/test-runner": "0.10.0",
+    "@storybook/test-runner": "0.19.1",
     "@storybook/testing-library": "0.2.2",
     "axios-mock-adapter": "1.22.0",
     "msw": "1.2.2",
