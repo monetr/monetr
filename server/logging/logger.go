@@ -26,7 +26,7 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 	case "text":
 		logger.Formatter = &logrus.TextFormatter{
 			ForceColors:               false,
-			DisableColors:             false,
+			DisableColors:             os.Getenv("CI") != "",
 			ForceQuote:                true,
 			DisableQuote:              false,
 			EnvironmentOverrideColors: false,

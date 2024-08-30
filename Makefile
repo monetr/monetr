@@ -94,7 +94,7 @@ PATTERN_ARG=-R $(PATTERN)
 endif
 test:
 	cmake --preset testing
-	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure -j $(CONCURRENCY) $(PATTERN_ARG)
+	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure --output-junit $(PWD)/$(CMAKE_CONFIGURATION_DIRECTORY)/junit.xml -j $(CONCURRENCY) $(PATTERN_ARG)
 
 develop: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.monetr.up $(BUILD_ARGS)

@@ -49,7 +49,7 @@ func GetTestLog(t *testing.T) (*logrus.Entry, *test.Hook) {
 	both := io.MultiWriter(output, os.Stderr)
 	logger.Logger.Out = both
 	logger.Logger.Formatter = &logrus.TextFormatter{
-		ForceColors:               true,
+		ForceColors:               os.Getenv("CI") == "",
 		DisableColors:             false,
 		ForceQuote:                false,
 		DisableQuote:              true,
