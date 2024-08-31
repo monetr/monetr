@@ -103,6 +103,7 @@ api:
       sameSiteStrict: true
       secure: true
       name: M-Token
+    uiCacheHours: 336 # 14 days
   beta:
     enableBetaCodes: false
   postgreSql:

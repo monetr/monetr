@@ -46,7 +46,7 @@ type Server struct {
 	// UICacheHours is the number of hours that UI files should be cached by the
 	// client. This is done by including an Expires and Cache-Control header in
 	// the response for all UI related requests. If this is 0 then the headers
-	// will not be included. Defaults to 12 hours.
+	// will not be included. Defaults to 14 days (336 hours).
 	UICacheHours int `yaml:"uiCacheHours"`
 	// ExternalURL tells monetr what protocol, hostname and path it should expect
 	// traffic from externally. For example: `http://my.monetr.local` tells monetr
