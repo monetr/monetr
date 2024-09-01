@@ -63,7 +63,7 @@ extraVolumes:
       secretName: monetr-authentication-certificate
   - name: vault-config
     secret:
-      secretName: monetr-vault
+      configMap: monetr-vault-config
   - name: vault-tls
     csi:
       driver: csi.cert-manager.io
