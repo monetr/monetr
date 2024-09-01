@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.17.17](https://github.com/monetr/monetr/compare/v0.17.16...v0.17.17) (2024-08-31)
+
+
+### Features
+
+* **cache:** Tweaked default cache period for UI assets ([489af6e](https://github.com/monetr/monetr/commit/489af6ef1395ee1ae76735dd07e078c4244e2add))
+* **docs:** Re-add live preview of app ([4dd526f](https://github.com/monetr/monetr/commit/4dd526f14d535789da080d34c13736773ccc5a2f))
+* **test:** Produce a JUnit XML file for all tests. ([d9df0b0](https://github.com/monetr/monetr/commit/d9df0b00c0d535bd0a6309048362675323d7e0b0))
+
+
+### Bug Fixes
+
+* **test:** Fix tests I broke ([7ac8c09](https://github.com/monetr/monetr/commit/7ac8c097a285fbfe0e550d2fb4ad4981feaf8cee))
+
+
+### Miscellaneous
+
+* **docs:** Updated readme ([eced51e](https://github.com/monetr/monetr/commit/eced51e798e31a9a4bae05ed8a25c153cb96a853))
+
 ## [0.17.16](https://github.com/monetr/monetr/compare/v0.17.15...v0.17.16) (2024-08-28)
 
 
