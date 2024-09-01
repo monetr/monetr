@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.18](https://github.com/monetr/monetr/compare/v0.17.17...v0.17.18) (2024-09-01)
+
+
+### Bug Fixes
+
+* **min4:** Tweaking for new production environment ([698e3db](https://github.com/monetr/monetr/commit/698e3dbafd7b711ca2170868c2704c35d5499adf)), closes [#1899](https://github.com/monetr/monetr/issues/1899)
+
 ## [0.17.17](https://github.com/monetr/monetr/compare/v0.17.16...v0.17.17) (2024-08-31)
 
 
