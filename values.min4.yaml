@@ -144,7 +144,8 @@ api:
     provider: s3
     s3:
       endpoint: http://rook-ceph-rgw-rados.ceph.svc.cluster.local
-      bucket: monetr-objects
+      bucket: objects.monetr.min4.monetr.in
+      region: rados
       forcePathStyle: true
       useEnvCredentials: true
   stripe:

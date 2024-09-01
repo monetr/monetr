@@ -269,6 +269,8 @@ func newTestKMSCommand(parent *cobra.Command) {
 		},
 	}
 
+	command.PersistentFlags().StringVar(&kmsProvider, "provider", "", "Specify the provider to use for KMS testing.")
+
 	parent.AddCommand(command)
 }
 
