@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.19](https://github.com/monetr/monetr/compare/v0.17.18...v0.17.19) (2024-09-01)
+
+
+### Features
+
+* **server:** Tweaking vault and adding TLS support ([87cd0a9](https://github.com/monetr/monetr/commit/87cd0a96f8ab3f45b1618361850e6792669e9e45))
+
 ## [0.17.18](https://github.com/monetr/monetr/compare/v0.17.17...v0.17.18) (2024-09-01)
 
 
