@@ -57,6 +57,22 @@ type Server struct {
 	// `https://homelab.local/monetr` where monetr is on the same domain as
 	// potentially other applications, but is under a specific sub path.
 	ExternalURL string `yaml:"externalUrl"`
+	// TLS Certificate for the API server listener. This also requires TLS Key.
+	// This can be the certificate content, or a filepath to the certificate on
+	// the filesystem. If it is a filepath then monetr must have sufficient
+	// permission to access the certificate.
+	// At the moment, this certificate will not automatically rotate. If the
+	// certificate changes on the filesystem, then the server needs to be
+	// restarted.
+	TLSCertificate string `yaml:"tlsCertificate"`
+	// TLS Key for the API server listener. This also requires TLS Certificate.
+	// This can be the key content, or a filepath to the key on the filesystem. If
+	// it is a filepath then monetr must have sufficient permimssion to access the
+	// key.
+	// At the moment, this certificate will not automatically rotate. If the
+	// certificate changes on the filesystem, then the server needs to be
+	// restarted.
+	TLSKey string `yaml:"tlsKey"`
 }
 
 // GetIsSecureProtocol will return true if the ExternalURL specified is a secure

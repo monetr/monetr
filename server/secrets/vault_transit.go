@@ -72,7 +72,7 @@ func NewVaultTransit(
 	}
 
 	helper := &VaultTransit{
-		host:           host.Host,
+		host:           host.Hostname(),
 		config:         config,
 		log:            log,
 		client:         nil,

@@ -272,7 +272,18 @@ func RunServer() error {
 
 	listenAddress := fmt.Sprintf("%s:%d", configuration.Server.ListenAddress, configuration.Server.ListenPort)
 	go func() {
-		if err := app.Start(listenAddress); err != nil && err != http.ErrServerClosed {
+		var err error
+		if configuration.Server.TLSCertificate != "" && configuration.Server.TLSKey != "" {
+			log.Info("server will start a TLS listener")
+			err = app.StartTLS(
+				listenAddress,
+				configuration.Server.TLSCertificate,
+				configuration.Server.TLSKey,
+			)
+		} else {
+			err = app.Start(listenAddress)
+		}
+		if err != nil && err != http.ErrServerClosed {
 			log.WithError(err).Fatal("failed to start the server")
 		}
 	}()
