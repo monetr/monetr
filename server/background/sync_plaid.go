@@ -354,11 +354,6 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 			return errors.Wrap(err, "failed to sync with plaid")
 		}
 
-		if len(syncData.Accounts) == 0 {
-			log.Debug("there are no updates for any bank accounts from plaid")
-			break // Break instead of returning so we still log the attempt
-		}
-
 		plaidBankAccounts = syncData.Accounts
 		for x := range bankAccounts {
 			bankAccount := bankAccounts[x]
