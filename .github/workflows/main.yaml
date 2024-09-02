@@ -130,13 +130,20 @@ jobs:
         run: |
           make test
 
-      - name: CodeCov
+      - name: Code Coverage Report
         if: always()
         uses: codecov/codecov-action@v4
         with:
           name: monetr
           directory: ${{ github.workspace }}/build/tests
           root_dir: ${{ github.workspace }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Test Results Report
+        uses: codecov/test-results-action@v1
+        with:
+          name: monetr
+          files: ${{ github.workspace }}/build/junit.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   yaml:
     name: Kubernetes YAMLs
