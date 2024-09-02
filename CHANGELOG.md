@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.17.20](https://github.com/monetr/monetr/compare/v0.17.19...v0.17.20) (2024-09-02)
+
+
+### Features
+
+* **cmd:** Adding KMS features, min4 deployment tweaks ([cfffec1](https://github.com/monetr/monetr/commit/cfffec1be20f1999241dc72bdf7dcb31502e121d))
+
+
+### Bug Fixes
+
+* **chart:** Tweak min4 deployment ([5eefe36](https://github.com/monetr/monetr/commit/5eefe361e76e565d1c3f72de18656dab75e8bdcd))
+
 ## [0.17.19](https://github.com/monetr/monetr/compare/v0.17.18...v0.17.19) (2024-09-01)
 
 
