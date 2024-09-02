@@ -23,6 +23,7 @@ export function MBaseButton(props: MButtonProps = MButtonPropsDefaults): JSX.Ele
     ...MButtonPropsDefaults,
     ...props,
   };
+
   const themeClasses = {
     'primary': {
       'solid': {
