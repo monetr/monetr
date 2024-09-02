@@ -6,7 +6,7 @@ export interface MSpanStyleProps {
   color?: 'default' | 'muted' | 'subtle' | 'emphasis' | 'inherit';
   ellipsis?: boolean;
   className?: string;
-  size?: 'inherit' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  size?: 'inherit' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
   component?: React.ElementType;
 }
@@ -81,6 +81,7 @@ export function MSpanDeriveClasses(props: MSpanStyleProps): string {
       'lg': 'text-lg',
       'xl': 'text-xl',
       '2xl': 'text-2xl',
+      '3xl': 'text-3xl',
     }[props.size],
     {
       'normal': 'font-normal',

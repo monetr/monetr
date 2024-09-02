@@ -67,7 +67,6 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 		Captcha  string `json:"captcha"`
-		TOTP     string `json:"totp"`
 		IsMobile bool   `json:"isMobile"`
 	}
 	if err := ctx.Bind(&loginRequest); err != nil {
@@ -77,21 +76,27 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	// This will take the captcha from the request and validate it if the API is
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
-
 	if err := c.validateLoginCaptcha(c.getContext(ctx), loginRequest.Captcha); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 	}
 
 	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
 	loginRequest.Password = strings.TrimSpace(loginRequest.Password)
-	loginRequest.TOTP = strings.TrimSpace(loginRequest.TOTP)
 
-	if err := c.validateLogin(ctx, loginRequest.Email, loginRequest.Password); err != nil {
+	if err := c.validateLogin(
+		ctx,
+		loginRequest.Email,
+		loginRequest.Password,
+	); err != nil {
 		return err // Validate login errors are valid http errors.
 	}
 
 	secureRepo := c.mustGetSecurityRepository(ctx)
-	login, requiresPasswordChange, err := secureRepo.Login(c.getContext(ctx), loginRequest.Email, loginRequest.Password)
+	login, requiresPasswordChange, err := secureRepo.Login(
+		c.getContext(ctx),
+		loginRequest.Email,
+		loginRequest.Password,
+	)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
 		return c.returnError(ctx, http.StatusUnauthorized, "invalid email and password")
@@ -117,13 +122,13 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	if requiresPasswordChange {
 		// If the server is not configured to allow password resets return an error.
 		if !c.configuration.Email.AllowPasswordReset() {
-			return c.returnError(ctx, http.StatusNotAcceptable, "login requires password reset, but password reset is not allowed")
+			return c.returnError(ctx, http.StatusNotAcceptable, "Login requires password reset, but password reset is not allowed")
 		}
 
 		passwordResetToken, err := c.clientTokens.Create(
-			security.ResetPasswordAudience,
 			5*time.Minute, // Use a much shorter lifetime than usually would be configured.
 			security.Claims{
+				Scope:        security.ResetPasswordScope,
 				EmailAddress: login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -140,42 +145,50 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		})
 	}
 
-	// Check if the login requires MFA in order to authenticate.
-	if login.TOTP != "" && loginRequest.TOTP == "" {
-		log.Debug("login requires TOTP MFA, but none was provided")
-		return c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
-	} else if login.TOTP != "" && loginRequest.TOTP != "" {
-		// If the login does require TOTP and a code was provided in the request, then validate that the provided code is
-		// correct.
-		log.Trace("login requires TOTP MFA, and a code was provided; it will be verified")
-
-		if err := login.VerifyTOTP(loginRequest.TOTP, c.clock.Now()); err != nil {
-			log.Trace("provided TOTP MFA code is not valid")
-			return c.returnError(ctx, http.StatusUnauthorized, "invalid TOTP code")
-		}
-
-		log.Trace("provided TOTP MFA code is valid")
-	} else if login.TOTP == "" && loginRequest.TOTP != "" {
-		log.Warn("login does not require TOTP MFA, but a code was provided anyway")
-	}
-
 	switch len(login.Users) {
 	case 0:
 		// TODO (elliotcourant) Should we allow them to create an account?
-		return c.returnError(ctx, http.StatusInternalServerError, "user has no accounts")
+		return c.returnError(ctx, http.StatusInternalServerError, "User has no accounts")
 	case 1:
 		user := login.Users[0]
 
 		crumbs.IncludeUserInScope(c.getContext(ctx), user.AccountId)
-		token, err := c.clientTokens.Create(security.AuthenticatedAudience, 14*24*time.Hour, security.Claims{
-			EmailAddress: login.Email,
-			UserId:       user.UserId.String(),
-			AccountId:    user.AccountId.String(),
-			LoginId:      user.LoginId.String(),
-			ReissueCount: 0, // First time the token is being issued
-		})
+
+		// Check if the login requires MFA in order to authenticate.
+		if login.TOTPEnabledAt != nil {
+			log.Debug("login requires TOTP MFA")
+
+			token, err := c.clientTokens.Create(
+				5*time.Minute,
+				security.Claims{
+					Scope:        security.MultiFactorScope,
+					EmailAddress: login.Email,
+					UserId:       user.UserId.String(),
+					AccountId:    user.AccountId.String(),
+					LoginId:      user.LoginId.String(),
+				},
+			)
+			if err != nil {
+				return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Could not generate token")
+			}
+			c.updateAuthenticationCookie(ctx, token)
+
+			return c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
+		}
+
+		token, err := c.clientTokens.Create(
+			14*24*time.Hour,
+			security.Claims{
+				Scope:        security.AuthenticatedScope,
+				EmailAddress: login.Email,
+				UserId:       user.UserId.String(),
+				AccountId:    user.AccountId.String(),
+				LoginId:      user.LoginId.String(),
+				ReissueCount: 0, // First time the token is being issued
+			},
+		)
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Could not generate token")
 		}
 
 		result := map[string]interface{}{
@@ -195,7 +208,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 
 		subscriptionIsActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), user.AccountId)
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine whether or not subscription is active")
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to determine whether or not subscription is active")
 		}
 
 		result["isActive"] = subscriptionIsActive
@@ -209,8 +222,71 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		// If the login has more than one user then we want to generate a temp
 		// JWT that will only grant them access to API endpoints not specific to
 		// an account.
-		return c.badRequest(ctx, "multiple accounts not implemented, please contact support")
+		return c.badRequest(ctx, "Multiple accounts not implemented, please contact support")
 	}
+}
+
+func (c *Controller) postMultifactor(ctx echo.Context) error {
+	var request struct {
+		TOTP string `json:"totp"`
+	}
+	if err := ctx.Bind(&request); err != nil {
+		return c.invalidJson(ctx)
+	}
+
+	request.TOTP = strings.TrimSpace(request.TOTP)
+	if request.TOTP == "" {
+		return c.badRequest(ctx, "TOTP code is required")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	me, err := repo.GetMe(c.getContext(ctx))
+	if err != nil {
+		c.updateAuthenticationCookie(ctx, ClearAuthentication)
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Unable to retrieve current user")
+	}
+
+	if err := me.Login.VerifyTOTP(request.TOTP, c.clock.Now()); err != nil {
+		return c.returnError(ctx, http.StatusUnauthorized, "Invalid TOTP code")
+	}
+
+	token, err := c.clientTokens.Create(
+		14*24*time.Hour,
+		security.Claims{
+			Scope:        security.AuthenticatedScope,
+			EmailAddress: me.Login.Email,
+			UserId:       me.UserId.String(),
+			AccountId:    me.AccountId.String(),
+			LoginId:      me.LoginId.String(),
+		},
+	)
+	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
+	}
+
+	c.updateAuthenticationCookie(ctx, token)
+
+	result := map[string]interface{}{
+		"isActive": true,
+	}
+
+	if !c.configuration.Stripe.IsBillingEnabled() {
+		// Return their account token.
+		return ctx.JSON(http.StatusOK, result)
+	}
+
+	subscriptionIsActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), me.AccountId)
+	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine whether or not subscription is active")
+	}
+
+	result["isActive"] = subscriptionIsActive
+
+	if !subscriptionIsActive {
+		result["nextUrl"] = "/account/subscribe"
+	}
+
+	return ctx.JSON(http.StatusOK, result)
 }
 
 func (c *Controller) logoutEndpoint(ctx echo.Context) error {
@@ -382,9 +458,9 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	// registration record and send the user a verification email.
 	if c.configuration.Email.ShouldVerifyEmails() {
 		verificationToken, err := c.clientTokens.Create(
-			security.VerifyEmailAudience,
 			c.configuration.Email.Verification.TokenLifetime,
 			security.Claims{
+				Scope:        security.VerifyEmailScope,
 				EmailAddress: login.Email,
 				UserId:       "",
 				AccountId:    "",
@@ -416,12 +492,15 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 
 	// If we are not requiring email verification to activate an account we can
 	// simply return a token here for the user to be signed in.
-	token, err := c.clientTokens.Create(security.AuthenticatedAudience, 14*24*time.Hour, security.Claims{
-		EmailAddress: login.Email,
-		UserId:       user.UserId.String(),
-		AccountId:    user.AccountId.String(),
-		LoginId:      user.LoginId.String(),
-	})
+	token, err := c.clientTokens.Create(
+		14*24*time.Hour,
+		security.Claims{
+			Scope:        security.AuthenticatedScope,
+			EmailAddress: login.Email,
+			UserId:       user.UserId.String(),
+			AccountId:    user.AccountId.String(),
+			LoginId:      user.LoginId.String(),
+		})
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create token",
@@ -455,8 +534,12 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 		return c.badRequest(ctx, "Token cannot be blank")
 	}
 
-	claims, err := c.clientTokens.Parse(security.VerifyEmailAudience, verifyRequest.Token)
+	claims, err := c.clientTokens.Parse(verifyRequest.Token)
 	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
+	}
+
+	if err := claims.RequireScope(security.VerifyEmailScope); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
 	}
 
@@ -508,9 +591,9 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 	}
 
 	verificationToken, err := c.clientTokens.Create(
-		security.VerifyEmailAudience,
-		c.configuration.Email.ForgotPassword.TokenLifetime,
+		c.configuration.Email.Verification.TokenLifetime,
 		security.Claims{
+			Scope:        security.VerifyEmailScope,
 			EmailAddress: login.Email,
 			UserId:       "",
 			AccountId:    "",
@@ -595,9 +678,9 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 	//  different login. I don't think this is a security risk as the actor would need to have access to both logins to
 	//  begin with. But it might cause some goofy issues and is definitely not desired behavior.
 	passwordResetToken, err := c.clientTokens.Create(
-		security.ResetPasswordAudience,
 		c.configuration.Email.ForgotPassword.TokenLifetime,
 		security.Claims{
+			Scope:        security.ResetPasswordScope,
 			EmailAddress: login.Email,
 			UserId:       "",
 			AccountId:    "",
@@ -664,17 +747,15 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 		return c.badRequest(ctx, "Password must be at least 8 characters long.")
 	}
 
-	resetClaims, err := c.clientTokens.Parse(
-		security.ResetPasswordAudience,
-		resetPasswordRequest.Token,
-	)
+	resetClaims, err := c.clientTokens.Parse(resetPasswordRequest.Token)
 	if err != nil {
-		return c.wrapAndReturnError(
-			ctx,
-			err,
-			http.StatusBadRequest,
-			"Failed to validate password reset token",
-		)
+		return c.badRequestError(ctx, err, "Failed to validate password reset token")
+	}
+
+	// Make sure the token has the correct scope on it. Otherwise a user should
+	// not be able to use it to reset their password.
+	if err := resetClaims.RequireScope(security.ResetPasswordScope); err != nil {
+		return c.badRequestError(ctx, err, "Failed to validate password reset token")
 	}
 
 	unauthenticatedRepo := c.mustGetUnauthenticatedRepository(ctx)

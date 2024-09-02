@@ -15,6 +15,7 @@ import (
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
 	"github.com/monetr/monetr/server/internal/sentryecho"
+	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 	"github.com/sirupsen/logrus"
 )
@@ -198,28 +199,56 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 		}
 	})
 
-	repoParty := baseParty.Group("", c.databaseRepositoryMiddleware)
+	repoParty := baseParty.Group("",
+		c.databaseRepositoryMiddleware,
+	)
 
-	// Webhook endpoints
-	repoParty.POST("/plaid/webhook", c.postPlaidWebhook)
-	repoParty.POST("/stripe/webhook", c.handleStripeWebhook)
+	{ // Webhook endpoints
+		webhookParty := repoParty.Group("")
+		webhookParty.POST("/plaid/webhook", c.postPlaidWebhook)
+		webhookParty.POST("/stripe/webhook", c.handleStripeWebhook)
+	}
+
+	// unauthed are endpoints that do not require authentication directly, but can
+	// still use a token if one is provided.
+	unauthed := repoParty.Group("", c.maybeTokenMiddleware)
 
 	// Endpoints used by the client/UI.
-	repoParty.GET("/config", c.configEndpoint)
+	unauthed.GET("/config", c.configEndpoint)
 
-	// Authentication
-	repoParty.POST("/authentication/login", c.postLogin)
-	repoParty.GET("/authentication/logout", c.logoutEndpoint)
-	repoParty.POST("/authentication/register", c.postRegister)
-	repoParty.POST("/authentication/verify", c.verifyEndpoint)
-	repoParty.POST("/authentication/verify/resend", c.resendVerification)
-	repoParty.POST("/authentication/forgot", c.postForgotPassword)
-	repoParty.POST("/authentication/reset", c.resetPassword)
+	// These endpoints do not require any authentication.
+	unauthed.POST("/authentication/login", c.postLogin)
+	unauthed.GET("/authentication/logout", c.logoutEndpoint)
+	unauthed.POST("/authentication/register", c.postRegister)
+	unauthed.POST("/authentication/verify", c.verifyEndpoint)
+	unauthed.POST("/authentication/verify/resend", c.resendVerification)
+	unauthed.POST("/authentication/forgot", c.postForgotPassword)
+	unauthed.POST("/authentication/reset", c.resetPassword)
 
-	authed := repoParty.Group("", c.authenticationMiddleware)
+	// These endpoints are only accessible if you have a token scoped for MFA.
+	multiFactorRequired := repoParty.Group("",
+		c.maybeTokenMiddleware,
+		c.requireToken(security.MultiFactorScope),
+	)
+	multiFactorRequired.POST("/authentication/multifactor", c.postMultifactor)
+
+	// You are allowed to request your own user info if you have a token scoped to
+	// MFA or just a normally authenticated token.
+	userInfo := repoParty.Group("",
+		c.maybeTokenMiddleware,
+		c.requireToken(security.AuthenticatedScope, security.MultiFactorScope),
+	)
+	userInfo.GET("/users/me", c.getMe)
+
+	// These endpoints all require a fully authenticated token
+	authed := repoParty.Group("",
+		c.maybeTokenMiddleware,
+		c.requireToken(security.AuthenticatedScope),
+	)
 	// User
-	authed.GET("/users/me", c.getMe)
 	authed.PUT("/users/security/password", c.changePassword)
+	authed.POST("/users/security/totp/setup", c.postSetupTOTP)
+	authed.POST("/users/security/totp/confirm", c.postConfirmTOTP)
 	// Billing
 	authed.POST("/billing/create_checkout", c.handlePostCreateCheckout)
 	authed.GET("/billing/checkout/:checkoutSessionId", c.handleGetAfterCheckout)

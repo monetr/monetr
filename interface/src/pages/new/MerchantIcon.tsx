@@ -1,6 +1,6 @@
 import React from 'react';
-import { Avatar } from '@mui/material';
 
+import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import { useIconSearch } from '@monetr/interface/hooks/useIconSearch';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -47,8 +47,10 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
   // If we have no icon to work with then create an avatar with the first character of the transaction name.
   const letter = props?.name?.toUpperCase().charAt(0) || '?';
   return (
-    <Avatar className='dark:bg-dark-monetr-background-subtle h-10 w-10 dark:text-dark-monetr-content flex-none'>
-      {letter}
+    <Avatar className='h-10 w-10'>
+      <AvatarFallback className='dark:bg-dark-monetr-background-subtle dark:text-dark-monetr-content'>
+        { letter }
+      </AvatarFallback>
     </Avatar>
   );
 }

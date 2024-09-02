@@ -7,6 +7,7 @@ import request from '@monetr/interface/util/request';
 
 export interface AuthenticationWrapper {
   user: User;
+  mfaPending: boolean;
   isSetup: boolean;
   isActive: boolean;
   isTrialing: boolean;
@@ -24,7 +25,7 @@ export function useAuthenticationSink(): AuthenticationResult {
     onSuccess: data => {
       if (data?.user?.accountId) {
         Sentry.setUser({
-          id: data.user.accountId.toString(10),
+          id: data.user.accountId,
           username: `account:${data.user.accountId}`,
         });
       }
@@ -35,6 +36,7 @@ export function useAuthenticationSink(): AuthenticationResult {
     ...result,
     result: {
       user: result?.data?.user && new User(result?.data?.user),
+      mfaPending: Boolean(result?.data?.mfaPending),
       isSetup: Boolean(result?.data?.isSetup),
       isActive: Boolean(result?.data?.isActive),
       isTrialing: Boolean(result?.data?.isTrialing),

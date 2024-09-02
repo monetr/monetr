@@ -13,7 +13,7 @@ interface MonetrWrapperProps {
 
 export default function MonetrWrapper(props: MonetrWrapperProps): JSX.Element {
   return (
-    <div className='w-full h-full dark:bg-dark-monetr-background flex'>
+    <div className='w-full h-full bg-background flex'>
       <BankSidebar />
       <div className='w-full h-full flex min-w-0'>
         { props.children }

@@ -13,17 +13,14 @@ import (
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
-	"github.com/pkg/errors"
 )
 
 const (
 	databaseContextKey           = "_monetrDatabase_"
-	accountIdContextKey          = "_accountId_"
-	userIdContextKey             = "_userId_"
-	loginIdContextKey            = "_loginId_"
 	subscriptionStatusContextKey = "_subscriptionStatus_"
 	spanContextKey               = "_spanContext_"
 	spanKey                      = "_span_"
+	authenticationKey            = "_authentication_"
 )
 
 func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
@@ -88,109 +85,6 @@ func (c *Controller) removeCookieIfPresent(ctx echo.Context) {
 	c.updateAuthenticationCookie(ctx, ClearAuthentication)
 }
 
-func (c *Controller) authenticateUser(ctx echo.Context) (err error) {
-	now := c.clock.Now()
-	log := c.getLog(ctx)
-	var token string
-	data := map[string]interface{}{
-		"source": "none",
-	}
-
-	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
-		defer func() {
-			var message string
-			if err == nil {
-				message = "Auth is valid"
-				data["accountId"] = c.mustGetAccountId(ctx)
-				data["userId"] = c.mustGetUserId(ctx)
-			} else {
-				message = "Request did not have valid auth"
-			}
-
-			hub.AddBreadcrumb(&sentry.Breadcrumb{
-				Type:      "debug",
-				Category:  "authentication",
-				Message:   message,
-				Data:      data,
-				Level:     sentry.LevelDebug,
-				Timestamp: now,
-			}, nil)
-		}()
-	}
-
-	{ // Try to retrieve the cookie from the request with the options.
-		if tokenCookie, err := ctx.Cookie(
-			c.configuration.Server.Cookies.Name,
-		); err == nil && tokenCookie.Value != "" {
-			token = tokenCookie.Value
-			data["source"] = "cookie"
-		}
-	}
-
-	if token == "" {
-		if token = ctx.Request().Header.Get(c.configuration.Server.Cookies.Name); token != "" {
-			data["source"] = "header"
-		}
-	}
-
-	if token == "" {
-		return errors.New("token must be provided")
-	}
-
-	claims, err := c.clientTokens.Parse(security.AuthenticatedAudience, token)
-	if err != nil {
-		c.updateAuthenticationCookie(ctx, ClearAuthentication)
-		// Don't return the JWT error to the client, but throw it in Sentry so it can still be used for debugging.
-		crumbs.Error(c.getContext(ctx), "failed to validate token", "authentication", map[string]interface{}{
-			"error": err,
-		})
-		log.WithError(err).Warn("invalid token provided")
-		return errors.New("token is not valid")
-	}
-
-	// If we can pull the hub from the current context, then we want to try to set some of our user data on it so that
-	// way we can grab it later if there is an error.
-	if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
-		hub.Scope().SetUser(sentry.User{
-			ID:        claims.AccountId,
-			Username:  claims.AccountId,
-			IPAddress: util.GetForwardedFor(ctx),
-			Data: map[string]string{
-				"userId":  claims.UserId,
-				"loginId": claims.LoginId,
-			},
-		})
-		hub.Scope().SetTag("userId", claims.UserId)
-		hub.Scope().SetTag("accountId", claims.AccountId)
-		hub.Scope().SetTag("loginId", claims.LoginId)
-	}
-
-	ctx.Set(accountIdContextKey, claims.AccountId)
-	ctx.Set(userIdContextKey, claims.UserId)
-	ctx.Set(loginIdContextKey, claims.LoginId)
-
-	{ // Add some basic values onto our context for logging later on.
-		spanContext := ctx.Get(spanContextKey).(context.Context)
-		spanContext = context.WithValue(spanContext, ctxkeys.AccountID, claims.AccountId)
-		spanContext = context.WithValue(spanContext, ctxkeys.UserID, claims.UserId)
-		spanContext = context.WithValue(spanContext, ctxkeys.LoginID, claims.LoginId)
-		ctx.Set(spanContextKey, spanContext)
-	}
-
-	return nil
-}
-
-func (c *Controller) authenticationMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		if err := c.authenticateUser(ctx); err != nil {
-			c.updateAuthenticationCookie(ctx, ClearAuthentication)
-			return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
-		}
-
-		return next(ctx)
-	}
-}
-
 func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		if !c.configuration.Stripe.IsBillingEnabled() {
@@ -210,5 +104,133 @@ func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) 
 		}
 
 		return next(ctx)
+	}
+}
+
+func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) (err error) {
+		err = func(ctx echo.Context) error {
+			now := c.clock.Now()
+			log := c.getLog(ctx)
+			var token string
+			data := map[string]interface{}{
+				"source": "none",
+			}
+			breadcrumbMessage := "Request did not have valid auth"
+
+			if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
+				defer func() {
+					hub.AddBreadcrumb(&sentry.Breadcrumb{
+						Type:      "debug",
+						Category:  "authentication",
+						Message:   breadcrumbMessage,
+						Data:      data,
+						Level:     sentry.LevelDebug,
+						Timestamp: now,
+					}, nil)
+				}()
+			}
+
+			{ // Try to retrieve the cookie from the request with the options.
+				if tokenCookie, err := ctx.Cookie(
+					c.configuration.Server.Cookies.Name,
+				); err == nil && tokenCookie.Value != "" {
+					token = tokenCookie.Value
+					data["source"] = "cookie"
+				}
+			}
+
+			if token == "" {
+				if token = ctx.Request().Header.Get(c.configuration.Server.Cookies.Name); token != "" {
+					data["source"] = "header"
+				}
+			}
+
+			// If there is still no token then we don't have one. Return nothing.
+			if token == "" {
+				return nil
+			}
+
+			claims, err := c.clientTokens.Parse(token)
+			if err != nil {
+				c.updateAuthenticationCookie(ctx, ClearAuthentication)
+				crumbs.Error(c.getContext(ctx), "failed to parse token", "authentication", map[string]interface{}{
+					"error": err,
+				})
+				log.WithError(err).Warn("invalid token provided")
+				return nil
+			}
+
+			// If we can pull the hub from the current context, then we want to try to set some of our user data on it so that
+			// way we can grab it later if there is an error.
+			if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
+				hub.Scope().SetUser(sentry.User{
+					ID:        claims.AccountId,
+					Username:  claims.AccountId,
+					IPAddress: util.GetForwardedFor(ctx),
+					Data: map[string]string{
+						"userId":  claims.UserId,
+						"loginId": claims.LoginId,
+					},
+				})
+				hub.Scope().SetTag("userId", claims.UserId)
+				hub.Scope().SetTag("accountId", claims.AccountId)
+				hub.Scope().SetTag("loginId", claims.LoginId)
+			}
+
+			// Store the authentication claims on the request context so we can use it
+			// later.
+			ctx.Set(authenticationKey, *claims)
+
+			{ // Add some basic values onto our context for logging later on.
+				spanContext := ctx.Get(spanContextKey).(context.Context)
+				spanContext = context.WithValue(spanContext, ctxkeys.AccountID, claims.AccountId)
+				spanContext = context.WithValue(spanContext, ctxkeys.UserID, claims.UserId)
+				spanContext = context.WithValue(spanContext, ctxkeys.LoginID, claims.LoginId)
+				ctx.Set(spanContextKey, spanContext)
+			}
+
+			breadcrumbMessage = "Auth is valid"
+			data["accountId"] = claims.AccountId
+			data["userId"] = claims.UserId
+			data["loginId"] = claims.LoginId
+
+			return nil
+		}(ctx)
+		if err != nil {
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Internal error")
+		}
+
+		return next(ctx)
+	}
+}
+
+// requireToken is an echo middleware that requires that the current HTTTP
+// request has a token with one of the provided scopes. Any of the specified
+// scopes are valid.
+func (c *Controller) requireToken(scopes ...security.Scope) func(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			// Read the claims off of the current request context. If the claims are
+			// present and valid then this will proceed. If not then this will return
+			// an error.
+			claims, err := c.getClaims(ctx)
+			if err != nil {
+				// If there is an error then we are not fully authenticated.
+				return c.unauthorizedError(ctx, err)
+			}
+
+			// Now validate that the claims have at least one of the required scopes
+			// that was specified. If we do not have at least one of the required
+			// scopes then the client is not authorized to access the current
+			// endpoint.
+			if err := claims.RequireScope(scopes...); err != nil {
+				return c.unauthorizedError(ctx, err)
+			}
+
+			// Everything looks good, run the next middleware or the actual controller
+			// function.
+			return next(ctx)
+		}
 	}
 }
