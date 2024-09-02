@@ -18,6 +18,7 @@ service:
   port: 4000
 
 ingress:
+  # Managed elsewhere
   enabled: false
 
 resources:
@@ -58,12 +59,12 @@ extraEnv:
         optional: false
 
 extraVolumes:
-  - name: certificates
+  - name: authentication-certificates
     secret:
       secretName: monetr-authentication-certificate
   - name: vault-config
-    secret:
-      configMap: monetr-vault-config
+    configMap:
+      name: monetr-vault-config
   - name: vault-tls
     csi:
       driver: csi.cert-manager.io
@@ -75,13 +76,19 @@ extraVolumes:
         csi.cert-manager.io/dns-names: vault.security.svc.cluster.local
         csi.cert-manager.io/duration: 2160h # 90d
         csi.cert-manager.io/usages: digital signature,key encipherment
+  - name: monetr-tls
+    secret:
+      secretName: my-monetr-app-tls
   - name: google-service-account
     secret:
       secretName: monetr-google-service-account
 
 extraVolumeMounts:
-  - name: certificates
-    mountPath: /etc/monetr/certs
+  - name: authentication-certificates
+    mountPath: /etc/monetr/authentication
+    readOnly: true
+  - name: tls
+    mountPath: /etc/monetr/tls
     readOnly: true
   - name: vault-config
     mountPath: /etc/monetr/vault/config
@@ -98,6 +105,8 @@ api:
   allowSignUp: true
   server:
     externalUrl: https://my.monetr.app
+    tlsCertificate: /etc/monetr/tls/tls.crt
+    tlsKey: /etc/monetr/tls/tls.key
   beta:
     enableBetaCodes: true
   postgreSql:
@@ -149,12 +158,12 @@ api:
     traceSampleRate: 1.0
   keyManagement:
     enabled: true
-    provider: google
+    provider: vault
     google:
       resourceName: projects/production-362403/locations/us/keyRings/monetr-production-362403-monetr-in/cryptoKeys/monetr-secrets-monetr-production-362403-monetr-in
       credentialsJSON: /etc/monetr/google/service-account.json
   security:
-    privateKey: /etc/monetr/certs/tls.key
+    privateKey: /etc/monetr/authentication/tls.key
   storage:
     enabled: true
     provider: s3

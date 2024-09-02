@@ -276,6 +276,7 @@ func newTestKMSCommand(parent *cobra.Command) {
 
 func newMigrateKMSCommand(parent *cobra.Command) {
 	var fromKms string
+	var toKms string
 	var dryRun bool
 
 	command := &cobra.Command{
@@ -285,11 +286,13 @@ func newMigrateKMSCommand(parent *cobra.Command) {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configuration := config.LoadConfiguration()
 			fromConfiguration := configuration
+			toConfiguration := configuration
 			fromConfiguration.KeyManagement.Provider = fromKms
+			toConfiguration.KeyManagement.Provider = toKms
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 
-			kms, err := getKMS(log, configuration)
+			kms, err := getKMS(log, toConfiguration)
 			if err != nil {
 				log.WithError(err).Fatal("failed to setup new KMS")
 				return err
@@ -430,7 +433,10 @@ func newMigrateKMSCommand(parent *cobra.Command) {
 	}
 
 	command.PersistentFlags().StringVar(&fromKms, "from-provider", "", "Specify the KMS provider you are migrating from. Valid values are: plaintext, aws, google, vault")
+	command.PersistentFlags().StringVar(&toKms, "to-provider", "", "Specify the KMS provider you are migrating to. Valid values are: plaintext, aws, google, vault")
 	command.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Don't persist the changes to the database, but still perform all the rotations in memory to ensure they all succeed.")
+	command.MarkPersistentFlagRequired("from-provider")
+	command.MarkPersistentFlagRequired("to-provider")
 
 	parent.AddCommand(command)
 }
