@@ -138,6 +138,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 	log := c.getLog(ctx).WithFields(logrus.Fields{
 		"webhookType": hook.WebhookType,
 		"webhookCode": hook.WebhookCode,
+		"itemId":      hook.ItemId,
 	})
 
 	{
@@ -191,7 +192,8 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 			"itemId": hook.ItemId,
 			"link":   link,
 		})
-		// TODO Return here, we can't process it!
+		log.Warn("Plaid link should be in scope when retrieved by Plaid item ID")
+		return c.returnError(ctx, http.StatusFailedDependency, "failed to find record for plaid link")
 	}
 
 	log = c.log.WithFields(logrus.Fields{
