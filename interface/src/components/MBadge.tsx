@@ -12,9 +12,9 @@ export default function MBadge(props: MBadgeProps): JSX.Element {
   const classes = mergeTailwind(
     'bg-monetr-brand',
     'dark:text-dark-monetr-content-emphasis',
-    'px-1.5',
+    'px-2',
     'py-0.5',
-    'rounded-md',
+    'rounded-lg',
     props.className,
   );
 
