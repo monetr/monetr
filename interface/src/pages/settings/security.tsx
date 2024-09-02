@@ -8,6 +8,7 @@ import MFormButton, { MBaseButton } from '@monetr/interface/components/MButton';
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
+import { showChangePasswordModal } from '@monetr/interface/components/settings/security/ChangePasswordModal';
 import request from '@monetr/interface/util/request';
 
 import { Mail, RectangleEllipsis, Shield } from 'lucide-react';
@@ -79,9 +80,30 @@ export default function SettingsSecurity(): JSX.Element {
         <Card className='md:w-1/3'>
           <div className='flex justify-between items-center'>
             <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
+              <RectangleEllipsis />
+            </div>
+            <MBaseButton 
+              variant='solid' 
+              color='primary'
+              onClick={ showChangePasswordModal }
+            >
+              Change Password
+            </MBaseButton>
+          </div>
+          <MSpan size='md' weight='medium' color='emphasis'>
+            Account Password
+          </MSpan>
+          <MSpan component='p'>
+            Set a secure and unique password to make sure your account stays protected.
+          </MSpan>
+        </Card>
+
+        <Card className='md:w-1/3'>
+          <div className='flex justify-between items-center'>
+            <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
               <Mail />
             </div>
-            <MBaseButton variant='solid' color='primary'>
+            <MBaseButton variant='solid' color='primary' disabled>
               Update Email
             </MBaseButton>
           </div>
@@ -97,26 +119,9 @@ export default function SettingsSecurity(): JSX.Element {
         <Card className='md:w-1/3'>
           <div className='flex justify-between items-center'>
             <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
-              <RectangleEllipsis />
-            </div>
-            <MBaseButton variant='solid' color='primary'>
-              Change Password
-            </MBaseButton>
-          </div>
-          <MSpan size='md' weight='medium' color='emphasis'>
-            Account Password
-          </MSpan>
-          <MSpan component='p'>
-            Set a secure and unique password to make sure your account stays protected.
-          </MSpan>
-        </Card>
-
-        <Card className='md:w-1/3'>
-          <div className='flex justify-between items-center'>
-            <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
               <Shield />
             </div>
-            <MBaseButton variant='solid' color='primary'>
+            <MBaseButton variant='solid' color='primary' disabled>
               Enable TOTP
             </MBaseButton>
           </div>

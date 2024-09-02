@@ -25,7 +25,7 @@ interface NewExpenseValues {
   amount: number;
   nextOccurrence: Date;
   ruleset: string;
-  fundingScheduleId: number;
+  fundingScheduleId: string;
 }
 
 const initialValues: NewExpenseValues = {
@@ -33,7 +33,7 @@ const initialValues: NewExpenseValues = {
   amount: 0.00,
   nextOccurrence: startOfTomorrow(),
   ruleset: '',
-  fundingScheduleId: 0,
+  fundingScheduleId: '',
 };
 
 function NewExpenseModal(): JSX.Element {
