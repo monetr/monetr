@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_stripe"
 	"github.com/monetr/monetr/server/security"
 	"github.com/stretchr/testify/assert"
+	"github.com/xlzd/gotp"
 )
 
 func TestMe(t *testing.T) {
@@ -462,6 +464,251 @@ func TestChangePassword(t *testing.T) {
 			WithJSON(map[string]interface{}{
 				"currentPassword": gofakeit.Generate("????????"),
 				"newPassword":     gofakeit.Generate("????????"),
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+}
+
+func TestSetupTOTP(t *testing.T) {
+	t.Run("setup twice", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		var token string
+		{ // Login to the user with their current password.
+			response := e.POST(`/api/authentication/login`).
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": currentPassword,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Then make sure we get a token back and that it is valid.
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		var uri string
+		{ // Start the TOTP setup process.
+			response := e.POST(`/api/users/security/totp/setup`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.uri").String().NotEmpty()
+			response.JSON().Path("$.recoveryCodes").Array().NotEmpty()
+			uri = response.JSON().Path("$.uri").String().Raw()
+			// Don't do anything with this response
+		}
+
+		{ // Validate the TOTP URI
+			parsed, err := url.Parse(uri)
+			assert.NoError(t, err, "Must be able to parse the TOTP URI")
+			assert.NotNil(t, parsed)
+			assert.Equal(t, "otpauth", parsed.Scheme)
+			assert.Equal(t, "totp", parsed.Host)
+			assert.Equal(t, "monetr", parsed.Query().Get("issuer"))
+			assert.NotEmpty(t, parsed.Query().Get("secret"), "must have a secret in the URI")
+		}
+
+		{ // Start the TOTP setup process again.
+			response := e.POST(`/api/users/security/totp/setup`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.uri").String().NotEmpty()
+			response.JSON().Path("$.recoveryCodes").Array().NotEmpty()
+			secondUri := response.JSON().Path("$.uri").String().Raw()
+			assert.NotEqual(t, uri, secondUri, "Must generate a new URI each time")
+		}
+	})
+
+	t.Run("already setup", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		var token string
+		{ // Login to the user with their current password.
+			response := e.POST(`/api/authentication/login`).
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": currentPassword,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Then make sure we get a token back and that it is valid.
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		_ = fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
+
+		{ // Start the TOTP setup process.
+			response := e.POST(`/api/users/security/totp/setup`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusInternalServerError)
+			response.JSON().Path("$.error").String().IsEqual("Failed to setup TOTP")
+		}
+	})
+
+	t.Run("no token", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		response := e.POST(`/api/users/security/totp/setup`).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+	})
+}
+
+func TestConfirmTOTP(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		var token string
+		{ // Login to the user with their current password.
+			response := e.POST(`/api/authentication/login`).
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": currentPassword,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Then make sure we get a token back and that it is valid.
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		var uri string
+		{ // Start the TOTP setup process.
+			response := e.POST(`/api/users/security/totp/setup`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.uri").String().NotEmpty()
+			response.JSON().Path("$.recoveryCodes").Array().NotEmpty()
+			uri = response.JSON().Path("$.uri").String().Raw()
+		}
+
+		var totp *gotp.TOTP
+		{ // Validate the TOTP URI
+			parsed, err := url.Parse(uri)
+			assert.NoError(t, err, "Must be able to parse the TOTP URI")
+			assert.NotNil(t, parsed)
+			assert.Equal(t, "otpauth", parsed.Scheme)
+			assert.Equal(t, "totp", parsed.Host)
+			assert.Equal(t, "monetr", parsed.Query().Get("issuer"))
+			secret := parsed.Query().Get("secret")
+			assert.NotEmpty(t, secret, "must have a secret in the URI")
+			totp = gotp.NewDefaultTOTP(secret)
+		}
+
+		{ // Enable TOTP for the current login
+			response := e.POST(`/api/users/security/totp/confirm`).
+				WithJSON(map[string]any{
+					"totp": totp.AtTime(app.Clock.Now()),
+				}).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().IsEmpty()
+		}
+
+		{ // This should not return an MFA required code.
+			response := e.POST("/api/authentication/login").
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": currentPassword,
+				}).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			response.JSON().Path("$.nextUrl").IsEqual("/login/multifactor")
+		}
+	})
+
+	t.Run("cant confirm twice", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		var token string
+		{ // Login to the user with their current password.
+			response := e.POST(`/api/authentication/login`).
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": currentPassword,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Then make sure we get a token back and that it is valid.
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		var uri string
+		{ // Start the TOTP setup process.
+			response := e.POST(`/api/users/security/totp/setup`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.uri").String().NotEmpty()
+			response.JSON().Path("$.recoveryCodes").Array().NotEmpty()
+			uri = response.JSON().Path("$.uri").String().Raw()
+		}
+
+		var totp *gotp.TOTP
+		{ // Validate the TOTP URI
+			parsed, err := url.Parse(uri)
+			assert.NoError(t, err, "Must be able to parse the TOTP URI")
+			assert.NotNil(t, parsed)
+			assert.Equal(t, "otpauth", parsed.Scheme)
+			assert.Equal(t, "totp", parsed.Host)
+			assert.Equal(t, "monetr", parsed.Query().Get("issuer"))
+			secret := parsed.Query().Get("secret")
+			assert.NotEmpty(t, secret, "must have a secret in the URI")
+			totp = gotp.NewDefaultTOTP(secret)
+		}
+
+		{ // Enable TOTP for the current login
+			response := e.POST(`/api/users/security/totp/confirm`).
+				WithJSON(map[string]any{
+					"totp": totp.AtTime(app.Clock.Now()),
+				}).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().IsEmpty()
+		}
+
+		{ // Should fail to confirm the second time
+			response := e.POST(`/api/users/security/totp/confirm`).
+				WithJSON(map[string]any{
+					"totp": totp.AtTime(app.Clock.Now()),
+				}).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Failed to enable TOTP")
+		}
+	})
+
+	t.Run("no token", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		response := e.POST(`/api/users/security/totp/confirm`).
+			WithJSON(map[string]any{
+				"totp": "123456",
 			}).
 			Expect()
 

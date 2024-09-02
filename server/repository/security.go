@@ -12,6 +12,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/xlzd/gotp"
@@ -60,6 +61,12 @@ type SecurityRepository interface {
 	// returned. Calling this function does not require TOTP upon login, the TOTP
 	// must be enabled by having the user confirm their code on the frontend.
 	SetupTOTP(ctx context.Context, loginId ID[Login]) (secret string, recoveryCodes []string, err error)
+	// EnableTOTP takes a login ID and a TOTP code. If the login does not yet have
+	// TOTP enabled but is currently in the setup process then this will validate
+	// the code provided against the current TOTP settings and if they are valid
+	// will enable TOTP for the specified login. If they are not valid then this
+	// function will return an error.
+	EnableTOTP(ctx context.Context, loginId ID[Login], code string) error
 }
 
 var (
@@ -213,4 +220,46 @@ func (b *baseSecurityRepository) SetupTOTP(
 	)
 
 	return uri, login.TOTPRecoveryCodes, nil
+}
+
+func (b *baseSecurityRepository) EnableTOTP(
+	ctx context.Context,
+	loginId ID[Login],
+	code string,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	var login Login
+	err := b.db.ModelContext(span.Context(), &login).
+		Where(`"login"."login_id" = ?`, loginId).
+		Limit(1).
+		Select(&login)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrive login to enable TOTP")
+	}
+
+	if len(login.TOTPRecoveryCodes) == 0 || login.TOTP == "" {
+		return errors.New("TOTP has not been setup on this login")
+	}
+
+	if login.TOTPEnabledAt != nil {
+		return errors.New("TOTP is already enabled on this login")
+	}
+
+	err = login.VerifyTOTP(code, b.clock.Now())
+	if err != nil {
+		return err
+	}
+
+	login.TOTPEnabledAt = myownsanity.TimeP(b.clock.Now())
+
+	_, err = b.db.ModelContext(span.Context(), &login).
+		Set(`"totp_enabled_at" = ?`, login.TOTPEnabledAt).
+		WherePK().
+		Update(&login)
+	if err != nil {
+		return errors.Wrap(err, "failed to enable TOTP")
+	}
+
+	return nil
 }

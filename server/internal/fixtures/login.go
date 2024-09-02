@@ -2,7 +2,7 @@ package fixtures
 
 import (
 	"context"
-	"encoding/base32"
+	"net/url"
 	"testing"
 	"time"
 
@@ -37,13 +37,32 @@ func GivenIHaveLogin(t *testing.T, clock clock.Clock) (_ models.Login, password 
 func GivenIHaveTOTPForLogin(t *testing.T, clock clock.Clock, login *models.Login) *gotp.TOTP {
 	db := testutils.GetPgDatabase(t)
 
-	secret := base32.StdEncoding.EncodeToString([]byte(gofakeit.UUID()))
+	secureRepo := repository.NewSecurityRepository(db, clock)
+	uri, recoveryCodes, err := secureRepo.SetupTOTP(context.Background(), login.LoginId)
+	require.NoError(t, err, "Must be able to setup TOTP on login")
+	require.NotEmpty(t, uri, "Must return a TOTP URI")
+	require.NotEmpty(t, recoveryCodes, "Must return an array of TOTP recovery codes")
+
+	parsed, err := url.Parse(uri)
+	require.NoError(t, err, "Must be able to parse the TOTP URI")
+	require.NotNil(t, parsed)
+	require.Equal(t, "otpauth", parsed.Scheme)
+	require.Equal(t, "totp", parsed.Host)
+	require.Equal(t, "monetr", parsed.Query().Get("issuer"))
+
+	secret := parsed.Query().Get("secret")
+	require.NotEmpty(t, secret, "must have a secret in the URI")
+
 	loginTotp := gotp.NewDefaultTOTP(secret)
-	login.TOTP = secret
-	login.TOTPEnabledAt = myownsanity.TimeP(clock.Now())
-	result, err := db.Model(login).WherePK().Update(login)
-	require.NoError(t, err, "must be able to update login with TOTP")
-	require.Equal(t, 1, result.RowsAffected(), "must have only updated a single row")
+
+	err = secureRepo.EnableTOTP(
+		context.Background(),
+		login.LoginId,
+		loginTotp.AtTime(clock.Now()),
+	)
+	require.NoError(t, err, "Must be able to enable TOTP for login")
+
+	*login = testutils.MustRetrieve(t, *login)
 
 	return loginTotp
 }

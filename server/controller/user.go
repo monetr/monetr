@@ -160,5 +160,29 @@ func (c *Controller) postSetupTOTP(ctx echo.Context) error {
 }
 
 func (c *Controller) postConfirmTOTP(ctx echo.Context) error {
-	return nil
+	var request struct {
+		TOTP string `json:"totp"`
+	}
+	secureRepo := c.mustGetSecurityRepository(ctx)
+	if err := ctx.Bind(&request); err != nil {
+		return c.invalidJson(ctx)
+	}
+
+	request.TOTP = strings.TrimSpace(request.TOTP)
+	if request.TOTP == "" {
+		return c.badRequest(ctx, "TOTP code is required")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	me, err := repo.GetMe(c.getContext(ctx))
+	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Unable to retrieve current user")
+	}
+
+	err = secureRepo.EnableTOTP(c.getContext(ctx), me.LoginId, request.TOTP)
+	if err != nil {
+		return c.badRequestError(ctx, err, "Failed to enable TOTP")
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }

@@ -44,8 +44,9 @@ func (e MFARequiredError) FriendlyMessage() string {
 
 func (e MFARequiredError) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]interface{}{
-		"error": e.FriendlyMessage(),
-		"code":  "MFA_REQUIRED",
+		"error":   e.FriendlyMessage(),
+		"code":    "MFA_REQUIRED",
+		"nextUrl": "/login/multifactor",
 	})
 }
 

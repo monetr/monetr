@@ -406,6 +406,7 @@ func TestMultifactor(t *testing.T) {
 			response.Status(http.StatusPreconditionRequired)
 			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
 			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			response.JSON().Path("$.nextUrl").IsEqual("/login/multifactor")
 			token = AssertSetTokenCookie(t, response)
 		}
 
@@ -427,6 +428,7 @@ func TestMultifactor(t *testing.T) {
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
 			response.JSON().Path("$.trialingUntil").IsNull()
+			response.JSON().Path("$.mfaPending").Boolean().IsTrue()
 			response.JSON().Path("$.nextUrl").IsEqual("/login/multifactor")
 		}
 

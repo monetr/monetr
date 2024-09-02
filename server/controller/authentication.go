@@ -231,14 +231,19 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 		TOTP string `json:"totp"`
 	}
 	if err := ctx.Bind(&request); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
+		return c.invalidJson(ctx)
+	}
+
+	request.TOTP = strings.TrimSpace(request.TOTP)
+	if request.TOTP == "" {
+		return c.badRequest(ctx, "TOTP code is required")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	me, err := repo.GetMe(c.getContext(ctx))
 	if err != nil {
 		c.updateAuthenticationCookie(ctx, ClearAuthentication)
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "unable to retrieve current user")
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Unable to retrieve current user")
 	}
 
 	if err := me.Login.VerifyTOTP(request.TOTP, c.clock.Now()); err != nil {
