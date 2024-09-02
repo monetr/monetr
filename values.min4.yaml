@@ -87,7 +87,7 @@ extraVolumeMounts:
   - name: authentication-certificates
     mountPath: /etc/monetr/authentication
     readOnly: true
-  - name: tls
+  - name: monetr-tls
     mountPath: /etc/monetr/tls
     readOnly: true
   - name: vault-config
@@ -103,10 +103,12 @@ extraVolumeMounts:
 api:
   name: monetr
   allowSignUp: true
+  additionalConfigFilePaths:
+    - /etc/monetr/vault/config/vault.yaml
   server:
     externalUrl: https://my.monetr.app
-    tlsCertificate: /etc/monetr/tls/tls.crt
-    tlsKey: /etc/monetr/tls/tls.key
+    # tlsCertificate: /etc/monetr/tls/tls.crt
+    # tlsKey: /etc/monetr/tls/tls.key
   beta:
     enableBetaCodes: true
   postgreSql:
