@@ -221,6 +221,12 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 		}
 	case "ITEM":
 		switch hook.WebhookCode {
+		case "LOGIN_REPAIRED":
+			plaidLink.Status = models.PlaidLinkStatusSetup
+			plaidLink.ErrorCode = nil
+			plaidLink.ExpirationDate = nil
+			log.Info("plaid link has been repaired")
+			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
 		case "ERROR":
 			code := hook.Error["error_code"]
 			plaidLink.Status = models.PlaidLinkStatusError
@@ -232,7 +238,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 			plaidLink.ExpirationDate = hook.ConsentExpirationTime
 			log.Warn("plaid link is pending expiration")
 			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
-		case "USER_PERMISSION_REVOKED":
+		case "USER_PERMISSION_REVOKED", "USER_ACCOUNT_REVOKED":
 			code := hook.Error["error_code"]
 			plaidLink.Status = models.PlaidLinkStatusRevoked
 			plaidLink.ErrorCode = myownsanity.StringP(code.(string))
