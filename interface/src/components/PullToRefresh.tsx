@@ -128,7 +128,7 @@ export default function PullToRefresh(): JSX.Element {
       } }
     >
       <div
-        className='relative -top-15 h-9 w-9 rounded-full border-1 border-dark-monetr-border bg-dark-monetr-background shadow-md shadow-black ring-1 ring-dark-monetr-background flex items-center justify-center'
+        className='relative -top-16 h-9 w-9 rounded-full border-1 border-dark-monetr-border bg-dark-monetr-background shadow-md shadow-black ring-1 ring-dark-monetr-background flex items-center justify-center'
         style={ { animationDirection: 'reverse' } }
       >
         <div className={ refreshDiv.current?.classList.contains('loading') && 'animate-spin' }>
