@@ -141,20 +141,9 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 		"itemId":      hook.ItemId,
 	})
 
-	{
-		fields := map[string]interface{}{
-			"type":   hook.WebhookType,
-			"code":   hook.WebhookCode,
-			"itemId": hook.ItemId,
-		}
-		switch strings.ToUpper(fmt.Sprintf("%s.%s", hook.WebhookType, hook.WebhookCode)) {
-		case "TRANSACTIONS.DEFAULT_UPDATE":
-			fields["newTransactions"] = hook.NewTransactions
-		case "TRANSACTIONS.TRANSACTIONS_REMOVED":
-			fields["removedTransactions"] = hook.RemovedTransactions
-		}
-		crumbs.Debug(c.getContext(ctx), "Handling webhook from Plaid.", fields)
-	}
+	crumbs.Debug(c.getContext(ctx), "Handling webhook from Plaid.", map[string]any{
+		"webhook": hook,
+	})
 
 	crumbs.AddTag(c.getContext(ctx), "webhook", "plaid")
 	crumbs.AddTag(c.getContext(ctx), "plaid.item_id", hook.ItemId)
@@ -196,7 +185,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 		return c.returnError(ctx, http.StatusFailedDependency, "failed to find record for plaid link")
 	}
 
-	log = c.log.WithFields(logrus.Fields{
+	log = log.WithFields(logrus.Fields{
 		"accountId": link.AccountId,
 		"linkId":    link.LinkId,
 	})
@@ -218,11 +207,18 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 
 	switch hook.WebhookType {
 	case "TRANSACTIONS":
-		err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
-			AccountId: link.AccountId,
-			LinkId:    link.LinkId,
-			Trigger:   "webhook",
-		})
+		switch hook.WebhookCode {
+		case "SYNC_UPDATES_AVAILABLE", "INITIAL_UPDATE", "HISTORICAL_UPDATE":
+			err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+				AccountId: link.AccountId,
+				LinkId:    link.LinkId,
+				Trigger:   "webhook",
+			})
+		case "RECURRING_TRANSACTIONS_UPDATE":
+			log.Warn("received a recurring transaction update webhook, monetr does nothing with these events at this time")
+		default:
+			log.Debug("ignoring Plaid webhook to avoid double syncing")
+		}
 	case "ITEM":
 		switch hook.WebhookCode {
 		case "ERROR":
