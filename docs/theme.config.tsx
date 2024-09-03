@@ -40,10 +40,18 @@ const config: DocsThemeConfig = {
   },
   footer: {
     text: (
-      <div className='flex w-full flex-col items-center sm:items-start'>
-        <p className='mt-6 text-xs'>
+      <div className='flex w-full items-center sm:items-start justify-between'>
+        <p className='text-sm'>
           © {new Date().getFullYear()} monetr LLC.
         </p>
+        <div className='space-x-4'>
+          <a href='/policy/terms' className='hover:underline text-sm'>
+            Terms & Conditions
+          </a>
+          <a href='/policy/privacy' className='hover:underline text-sm'>
+            Privacy
+          </a>
+        </div>
       </div>
     ),
   },

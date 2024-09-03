@@ -81,7 +81,6 @@ add_custom_command(
     ${APP_GO_FILES}
     build.interface
     build.email
-    download.legal
     sourcemaps.golang
 )
 

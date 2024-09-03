@@ -107,6 +107,26 @@ export default function SettingsAbout(): JSX.Element {
           </AboutHyperlink>
         </div>
         <MDivider />
+
+        <div className='flex p-4'>
+          <MSpan className='w-1/3' size='lg' weight='semibold'>
+            Terms & Conditions
+          </MSpan>
+          <AboutHyperlink href='https://monetr.app/policy/terms'>
+            https://monetr.app/policy/terms
+          </AboutHyperlink>
+        </div>
+        <MDivider />
+
+        <div className='flex p-4'>
+          <MSpan className='w-1/3' size='lg' weight='semibold'>
+            Privacy Policy
+          </MSpan>
+          <AboutHyperlink href='https://monetr.app/policy/privacy'>
+            https://monetr.app/policy/privacy
+          </AboutHyperlink>
+        </div>
+        <MDivider />
       </div>
     </div>
   );
