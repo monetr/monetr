@@ -6,7 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -39,7 +39,7 @@ func getDatabase(log *logrus.Entry, configuration config.Configuration, stats *m
 	if configuration.PostgreSQL.CACertificatePath != "" {
 		pgOptions.MaxConnAge = 9 * time.Minute
 		{
-			caCert, err := ioutil.ReadFile(configuration.PostgreSQL.CACertificatePath)
+			caCert, err := os.ReadFile(configuration.PostgreSQL.CACertificatePath)
 			if err != nil {
 				log.WithError(err).Errorf("failed to load ca certificate")
 				return nil, errors.Wrap(err, "failed to load ca certificate")
@@ -74,11 +74,12 @@ func getDatabase(log *logrus.Entry, configuration config.Configuration, stats *m
 		pgOptions.TLSConfig = tlsConfiguration
 	}
 
-	var db *pg.DB
-	db = pg.Connect(pgOptions)
+	db := pg.Connect(pgOptions)
 	db.AddQueryHook(logging.NewPostgresHooks(log, stats))
 	pgOptions.OnConnect = func(ctx context.Context, cn *pg.Conn) error {
-		log.Trace("new connection with cert")
+		if tlsConfiguration != nil {
+			log.Trace("new connection with cert")
+		}
 
 		return nil
 	}
@@ -111,7 +112,7 @@ func getDatabase(log *logrus.Entry, configuration config.Configuration, stats *m
 				}
 
 				{
-					caCert, err := ioutil.ReadFile(configuration.PostgreSQL.CACertificatePath)
+					caCert, err := os.ReadFile(configuration.PostgreSQL.CACertificatePath)
 					if err != nil {
 						log.WithError(err).Errorf("failed to load updated ca certificate")
 						return errors.Wrap(err, "failed to load updated ca certificate")

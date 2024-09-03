@@ -270,6 +270,10 @@ func RunServer() error {
 		clock,
 	)...)
 
+	protocol := "http"
+	if configuration.Server.TLSCertificate != "" && configuration.Server.TLSKey != "" {
+		protocol = "https"
+	}
 	listenAddress := fmt.Sprintf("%s:%d", configuration.Server.ListenAddress, configuration.Server.ListenPort)
 	go func() {
 		var err error
@@ -291,7 +295,7 @@ func RunServer() error {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 	log.WithFields(logrus.Fields{
-		"listenAddress":   fmt.Sprintf("http://%s", listenAddress),
+		"listenAddress":   fmt.Sprintf("%s://%s", protocol, listenAddress),
 		"externalAddress": configuration.Server.GetBaseURL().String(),
 	}).Info("monetr is running")
 
