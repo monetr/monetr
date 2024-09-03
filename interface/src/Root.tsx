@@ -5,6 +5,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
+import PullToRefresh from '@monetr/interface/components/PullToRefresh';
 import Monetr from '@monetr/interface/monetr';
 import { newTheme } from '@monetr/interface/theme';
 
@@ -17,6 +18,7 @@ export default function Root(): JSX.Element {
           <MSnackbarProvider>
             <NiceModal.Provider>
               <CssBaseline />
+              <PullToRefresh />
               <Monetr />
             </NiceModal.Provider>
           </MSnackbarProvider>
