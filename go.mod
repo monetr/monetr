@@ -39,7 +39,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/stripe/stripe-go/v78 v78.12.0
 	github.com/teambition/rrule-go v1.8.2
-	github.com/vmihailenco/msgpack/v5 v5.3.5
+	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/wneessen/go-mail v0.4.4
 	github.com/xlzd/gotp v0.1.0
 	golang.org/x/crypto v0.26.0
