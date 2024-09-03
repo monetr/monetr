@@ -1,5 +1,57 @@
 # Changelog
 
+## [0.18.0](https://github.com/monetr/monetr/compare/v0.17.20...v0.18.0) (2024-09-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **api:** Reimplementing TOTP supporrt
+
+### Features
+
+* **api:** Reimplementing TOTP supporrt ([632dbea](https://github.com/monetr/monetr/commit/632dbea6a2f00a8f1eb6b987122c8de5bb2c3e4e))
+* Improve webhook logging for Plaid ([ad74a87](https://github.com/monetr/monetr/commit/ad74a87488b3dd0fff9fcf8eaaf60564e21ee844))
+* **plaid:** Adding handling for additional Plaid webhooks ([33823fb](https://github.com/monetr/monetr/commit/33823fbf53e724234f98c0a94faa74b1d3b1a56c))
+* **ui:** Adding pull to refresh support on PWA. ([4880ca2](https://github.com/monetr/monetr/commit/4880ca2c7fec6ee4a625f57c6e82454f1f345f03)), closes [#1539](https://github.com/monetr/monetr/issues/1539)
+
+
+### Dependencies
+
+* **api:** update google.golang.org/genproto digest to 7e3bb23 ([#1908](https://github.com/monetr/monetr/issues/1908)) ([086bd04](https://github.com/monetr/monetr/commit/086bd0400c48f0d02d1f76f42037b8570e409a60))
+* **api:** update module github.com/prometheus/client_golang to v1.20.2 ([#1806](https://github.com/monetr/monetr/issues/1806)) ([da575ed](https://github.com/monetr/monetr/commit/da575ed14b4155c6b1f97732e2efa9b2ba89230f))
+* **api:** update module github.com/wneessen/go-mail to v0.4.4 ([#1909](https://github.com/monetr/monetr/issues/1909)) ([1ca4765](https://github.com/monetr/monetr/commit/1ca4765c3fbd22c3066b1541252a177f1493f262))
+* **api:** update module google.golang.org/api to v0.195.0 ([#1812](https://github.com/monetr/monetr/issues/1812)) ([49971fa](https://github.com/monetr/monetr/commit/49971fa57bdc1d8dd595ce7fb52e85e7c325dcad))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.6.4 ([#1904](https://github.com/monetr/monetr/issues/1904)) ([ccb23e2](https://github.com/monetr/monetr/commit/ccb23e267ff161d0ec8a32ee29a21b701c4f21e1))
+* **ui:** update dependency @fontsource-variable/inter to v5.0.20 ([#1826](https://github.com/monetr/monetr/issues/1826)) ([fbe2003](https://github.com/monetr/monetr/commit/fbe2003567e65a060b914d4236db2ca6517d17e2))
+* **ui:** update dependency @react-email/components to v0.0.25 ([#1905](https://github.com/monetr/monetr/issues/1905)) ([c177db7](https://github.com/monetr/monetr/commit/c177db7d7cc81979623bd02cbd2a3f46ea48cfe8))
+* **ui:** update dependency @types/node to v20.16.3 ([#1893](https://github.com/monetr/monetr/issues/1893)) ([521ee85](https://github.com/monetr/monetr/commit/521ee85a5ac458d671732499cd594f70216edb74))
+* **ui:** update dependency @types/react to v18.3.5 ([#1906](https://github.com/monetr/monetr/issues/1906)) ([825b5dd](https://github.com/monetr/monetr/commit/825b5dd7bccdb56936545f827323e6359efa6a9c))
+* **ui:** update dependency axios to v1.7.7 ([#1910](https://github.com/monetr/monetr/issues/1910)) ([ebf704b](https://github.com/monetr/monetr/commit/ebf704b6821b207991c52ef0655af7953bc4cbdd))
+* **ui:** update dependency eslint-plugin-import to v2.30.0 ([#1913](https://github.com/monetr/monetr/issues/1913)) ([1715778](https://github.com/monetr/monetr/commit/1715778ff1643fe8230fa1b391a181a01e5a35ea))
+* **ui:** update dependency eslint-plugin-react to v7.35.1 ([#1895](https://github.com/monetr/monetr/issues/1895)) ([add2295](https://github.com/monetr/monetr/commit/add2295f768d44fcf721f21834e7bb2f362ee3ad))
+* **ui:** update dependency eslint-plugin-storybook to v0.8.0 ([#1896](https://github.com/monetr/monetr/issues/1896)) ([ad2ec32](https://github.com/monetr/monetr/commit/ad2ec3237989caa485e56999c07249baf883897c))
+* **ui:** update dependency eslint-plugin-testing-library to v5.11.1 ([#1914](https://github.com/monetr/monetr/issues/1914)) ([6a84758](https://github.com/monetr/monetr/commit/6a847581def521e8a1dfea51960c3d8ca9f36efc))
+* **ui:** update dependency postcss to v8.4.44 ([#1911](https://github.com/monetr/monetr/issues/1911)) ([767a50c](https://github.com/monetr/monetr/commit/767a50cf0c04c6ab6aa532f4c5b15a6489d82587))
+* **ui:** update dependency tailwindcss to v3.4.10 ([#1912](https://github.com/monetr/monetr/issues/1912)) ([289a0ff](https://github.com/monetr/monetr/commit/289a0ff0eac326eb8ad2ae3276511658bd2461f4))
+
+
+### Bug Fixes
+
+* **ci:** Fix code coverage not being reported ([34a19e3](https://github.com/monetr/monetr/commit/34a19e37d3488f2c6fd7685a61e5a094c160b9cc)), closes [#1898](https://github.com/monetr/monetr/issues/1898)
+* **plaid:** Fix duplicate syncing with Plaid. ([dc392fc](https://github.com/monetr/monetr/commit/dc392fce9b1eda86db3cb113e86787b9040fba27)), closes [#1810](https://github.com/monetr/monetr/issues/1810)
+* **plaid:** Improve transaction clustering for Plaid syncs ([19e75e9](https://github.com/monetr/monetr/commit/19e75e9ea1062d5fef92afeed4c7f72162589993)), closes [#1714](https://github.com/monetr/monetr/issues/1714)
+* **sync:** Tweaking how periodic syncs are marked. ([69f280d](https://github.com/monetr/monetr/commit/69f280dc9ec97d78bf1d65c4e64a2176b7577d09))
+* Tweaked min4 deployment ([5d871ce](https://github.com/monetr/monetr/commit/5d871ce13da17728e9279771b0a32e5221142f22))
+* **ui:** Fix pull to refresh icon showing incorrectly on some screens ([0b67cd1](https://github.com/monetr/monetr/commit/0b67cd16c2a978dd594f997e2d85af5a38b6d6a5))
+* **ui:** Fix wrong classname for pull to refresh ([82b4c97](https://github.com/monetr/monetr/commit/82b4c97c2898f3a5cef6a14a2f673d3192431087))
+
+
+### Miscellaneous
+
+* release 0.18.0 ([51c4d1e](https://github.com/monetr/monetr/commit/51c4d1e0295a7bdd7cc4c24d412445b5e5a009a8))
+* **server:** General logging and command cleanup ([9f3b3c4](https://github.com/monetr/monetr/commit/9f3b3c4f151c0df398667d5c1084d44089037dd4))
+* Tweaking min4 ([2121bac](https://github.com/monetr/monetr/commit/2121bac15e4e8c2e6c2d26b9dd2a6e6c0c754068))
+
 ## [0.17.20](https://github.com/monetr/monetr/compare/v0.17.19...v0.17.20) (2024-09-02)
 
 
