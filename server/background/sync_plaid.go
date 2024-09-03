@@ -652,6 +652,9 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 		transactionName = input.GetMerchantName()
 	}
 
+	// If there is not a monetr transaction record for this Plaid transaction,
+	// then we simply need to create both records. There is nothing else we need
+	// to do here.
 	if !exists {
 		plaidTransaction := PlaidTransaction{
 			PlaidTransactionId: NewID(&PlaidTransaction{}),
@@ -668,10 +671,6 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			Currency:           input.GetISOCurrencyCode(),
 			IsPending:          input.GetIsPending(),
 		}
-
-		// if err := s.repo.CreatePlaidTransaction(ctx, &plaidTransaction); err != nil {
-		// 	return nil, nil, errors.Wrap(err, "failed to store new plaid transaction")
-		// }
 
 		existingTransaction = Transaction{
 			TransactionId:        NewID(&Transaction{}),
@@ -700,6 +699,9 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 		return &existingTransaction, nil, &plaidTransaction, nil
 	}
 
+	// However, if monetr does have a transaction for this plaid transaction; then
+	// we have to establish whether or not it was a pending transaction and what
+	// things have changed since we last saw the transaction.
 	var existingPlaidTransaction *PlaidTransaction
 	if input.GetIsPending() {
 		existingPlaidTransaction = existingTransaction.PendingPlaidTransaction
@@ -742,9 +744,6 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			Currency:           input.GetISOCurrencyCode(),
 			IsPending:          input.GetIsPending(),
 		}
-		// if err := s.repo.CreatePlaidTransaction(ctx, existingPlaidTransaction); err != nil {
-		// 	return nil, nil, errors.Wrap(err, "failed to store new plaid transaction")
-		// }
 
 		existingTransaction.PlaidTransactionId = &existingPlaidTransaction.PlaidTransactionId
 		changes = append(changes, SyncChange{
@@ -763,7 +762,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 		existingTransaction.Amount = existingPlaidTransaction.Amount
 	}
 
-	if existingPlaidTransaction.Category != existingTransaction.Category {
+	if !myownsanity.StringPEqual(existingPlaidTransaction.Category, existingTransaction.Category) {
 		changes = append(changes, SyncChange{
 			Field: "category",
 			Old:   existingTransaction.Category,
@@ -788,6 +787,12 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			New:   existingPlaidTransaction.Name,
 		})
 		existingTransaction.Name = existingPlaidTransaction.Name
+		// Overwrite the original name when the transaction clears.
+		// This seems unintuitive but see
+		// https://github.com/monetr/monetr/issues/1714 for more information.
+		if !existingPlaidTransaction.IsPending {
+			existingTransaction.OriginalName = existingPlaidTransaction.Name
+		}
 	}
 
 	if existingPlaidTransaction.MerchantName != existingTransaction.MerchantName {
@@ -797,6 +802,10 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			New:   existingPlaidTransaction.MerchantName,
 		})
 		existingTransaction.MerchantName = existingPlaidTransaction.MerchantName
+		// Same as above, overwrite if we aren't pending.
+		if !existingPlaidTransaction.IsPending {
+			existingTransaction.OriginalMerchantName = existingPlaidTransaction.MerchantName
+		}
 	}
 
 	if existingPlaidTransaction.IsPending != existingTransaction.IsPending {
