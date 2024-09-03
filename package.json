@@ -21,7 +21,7 @@
     "eslint-plugin-react-hooks": "4.6.2",
     "eslint-plugin-simple-import-sort": "10.0.0",
     "eslint-plugin-storybook": "0.8.0",
-    "eslint-plugin-testing-library": "5.10.2",
+    "eslint-plugin-testing-library": "5.11.1",
     "eslint-plugin-unused-imports": "3.0.0",
     "typescript": "5.1.3"
   },
