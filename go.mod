@@ -43,7 +43,7 @@ require (
 	github.com/wneessen/go-mail v0.4.4
 	github.com/xlzd/gotp v0.1.0
 	golang.org/x/crypto v0.26.0
-	google.golang.org/api v0.193.0
+	google.golang.org/api v0.195.0
 	google.golang.org/genproto v0.0.0-20240827150818-7e3bb234dfed
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
@@ -51,7 +51,7 @@ require (
 
 require (
 	cloud.google.com/go v0.115.1 // indirect
-	cloud.google.com/go/auth v0.9.0 // indirect
+	cloud.google.com/go/auth v0.9.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
 	cloud.google.com/go/longrunning v0.6.0 // indirect
 	github.com/cenkalti/backoff/v3 v3.0.0 // indirect
