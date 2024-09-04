@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -106,7 +107,7 @@ func RunServer() error {
 			AttachStacktrace: true,
 			ServerName:       hostname,
 			Dist:             build.Revision,
-			Release:          build.Release,
+			Release:          "v" + strings.TrimPrefix(build.Release, "v"),
 			Environment:      configuration.Environment,
 			SampleRate:       configuration.Sentry.SampleRate,
 			EnableTracing:    configuration.Sentry.TraceSampleRate > 0,
