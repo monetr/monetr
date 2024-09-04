@@ -103,12 +103,12 @@ jobs:
   #         restore-keys: |
   #           ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
   #           ${{ runner.os }}-go-
-  #     - uses: actions/download-artifact@v3
+  #     - uses: actions/download-artifact@v4.1.7
   #       name: Download Compiled UI Artifacts
   #       with:
   #         name: '${{ needs.release_please.outputs.version }}-ui'
   #         path: '${{ github.workspace }}/pkg/ui/static/'
-  #     - uses: actions/download-artifact@v3
+  #     - uses: actions/download-artifact@v4.1.7
   #       name: Download Third Party Notice Artifacts
   #       with:
   #         name: '${{ needs.release_please.outputs.version }}-notice'
@@ -135,32 +135,32 @@ jobs:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - uses: actions/checkout@v3
-  #     - uses: actions/download-artifact@v3
+  #     - uses: actions/download-artifact@v4.1.7
   #       name: Download linux/amd64
   #       with:
   #         name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz'
   #         path: '/tmp'
-  #     - uses: actions/download-artifact@v3
+  #     - uses: actions/download-artifact@v4.1.7
   #       name: Download linux/arm64
   #       with:
   #         name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz'
   #         path: '/tmp'
-  #     - uses: actions/download-artifact@v3
+  #     - uses: actions/download-artifact@v4.1.7
   #       name: Download darwin/amd64
   #       with:
   #         name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz'
   #         path: '/tmp'
-  #     - uses: actions/download-artifact@v3
+  #     - uses: actions/download-artifact@v4.1.7
   #       name: Download darwin/arm64
   #       with:
   #         name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz'
   #         path: '/tmp'
-  #     - uses: actions/download-artifact@v3
+  #     - uses: actions/download-artifact@v4.1.7
   #       name: Download windows/amd64
   #       with:
   #         name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz'
   #         path: '/tmp'
-  #     - uses: actions/download-artifact@v3
+  #     - uses: actions/download-artifact@v4.1.7
   #       name: Download windows/arm64
   #       with:
   #         name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz'
@@ -221,7 +221,7 @@ jobs:
           environment: my.monetr.app
           ref: "v${{ needs.release_please.outputs.version }}"
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         name: Download UI As Artifact
         with:
           name: '${{ needs.release_please.outputs.version }}-maps'
