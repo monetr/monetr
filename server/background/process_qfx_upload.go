@@ -123,7 +123,10 @@ func (h *ProcessQFXUploadHandler) updateStatus(
 		return errors.Wrap(err, "failed to update upload status")
 	}
 
-	channel := fmt.Sprintf("account:%s:transaction_upload:%s:progress", args.AccountId, args.TransactionUploadId)
+	channel := fmt.Sprintf(
+		"account:%s:transaction_upload:%s:progress",
+		args.AccountId, args.TransactionUploadId,
+	)
 	payload := string(status)
 	if err := h.publisher.Notify(ctx, channel, payload); err != nil {
 		return errors.Wrap(err, "failed to send progress notification for job")
@@ -225,6 +228,24 @@ func (j *ProcessQFXUploadJob) Run(ctx context.Context) error {
 
 	log := j.log.WithContext(span.Context())
 
+	// No matter what, when we are finished clean up the file.
+	defer func() {
+		now := j.clock.Now()
+		j.file.DeletedAt = &now
+		log.Debug("processing complete, marking file as deleted and queueing removal")
+		if err := j.repo.UpdateFile(span.Context(), j.file); err != nil {
+			log.
+				WithField("fileId", j.file.FileId).
+				WithError(err).
+				Warn("failed to update file with deleted at")
+		}
+
+		j.enqueuer.EnqueueJob(span.Context(), RemoveFile, RemoveFileArguments{
+			AccountId: j.args.AccountId,
+			FileId:    j.file.FileId,
+		})
+	}()
+
 	account, err := j.repo.GetAccount(span.Context())
 	if err != nil {
 		log.WithError(err).Error("failed to retrieve account for job")
@@ -255,20 +276,6 @@ func (j *ProcessQFXUploadJob) Run(ctx context.Context) error {
 
 	if err := j.syncBalances(span.Context()); err != nil {
 		return err
-	}
-
-	{ // Once we are done with the file, mark it as deleted and queue it for removal.
-		now := j.clock.Now()
-		j.file.DeletedAt = &now
-		log.Debug("processing complete, marking file as deleted and queueing removal")
-		if err := j.repo.UpdateFile(span.Context(), j.file); err != nil {
-			return err
-		}
-
-		j.enqueuer.EnqueueJob(span.Context(), RemoveFile, RemoveFileArguments{
-			AccountId: j.args.AccountId,
-			FileId:    j.file.FileId,
-		})
 	}
 
 	// Also kick off the transaction similarity job.
