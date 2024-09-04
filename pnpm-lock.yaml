@@ -226,8 +226,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0(react@18.3.1)
       react-infinite-scroll-hook:
-        specifier: 4.0.4
-        version: 4.0.4(react@18.3.1)
+        specifier: 4.1.1
+        version: 4.1.1(react@18.3.1)
       react-number-format:
         specifier: 5.3.4
         version: 5.3.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -9724,8 +9724,8 @@ packages:
     peerDependencies:
       react: '>=16.4.1'
 
-  react-infinite-scroll-hook@4.0.4:
-    resolution: {integrity: sha512-fCjG9xwCfnV9GcAHVz9rXGnLqO55fcYsbeshSxgEH2biF8fVFHmfzZrfX4iTzoOWO1Rrz5hxrK4bBcqL5fAy9Q==}
+  react-infinite-scroll-hook@4.1.1:
+    resolution: {integrity: sha512-1bu2572rF3DtjFMhIOzoasLMdYW0vMWxROtl99M5FYGSxm84Ro4aNBZW6ivgE45ofus4Ymo7jIS0Be3zcuLk8g==}
     engines: {node: '>=10'}
     peerDependencies:
       react: '>=16.8.0'
@@ -23892,7 +23892,7 @@ snapshots:
       react: 18.3.1
       react-async-script: 1.2.0(react@18.3.1)
 
-  react-infinite-scroll-hook@4.0.4(react@18.3.1):
+  react-infinite-scroll-hook@4.1.1(react@18.3.1):
     dependencies:
       react: 18.3.1
       react-intersection-observer-hook: 2.1.1(react@18.3.1)
