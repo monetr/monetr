@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.18.1](https://github.com/monetr/monetr/compare/v0.18.0...v0.18.1) (2024-09-05)
+
+
+### Features
+
+* **ui:** Adding legal documents to about screen ([ec76d6d](https://github.com/monetr/monetr/commit/ec76d6d9b3793b79541e3932c7d0c4d0a1284752)), closes [#1030](https://github.com/monetr/monetr/issues/1030)
+
+
+### Dependencies
+
+* **api:** update module google.golang.org/api to v0.196.0 ([#1923](https://github.com/monetr/monetr/issues/1923)) ([ea2271b](https://github.com/monetr/monetr/commit/ea2271b039fc5fcfaa4baf55bebdd47118ec3127))
+* **ui:** update dependency happy-dom to v14.12.3 ([#1916](https://github.com/monetr/monetr/issues/1916)) ([548f3d2](https://github.com/monetr/monetr/commit/548f3d29c9868f8f0746050cfd88364435a912c3))
+* **ui:** update dependency lucide-react to v0.438.0 ([#1919](https://github.com/monetr/monetr/issues/1919)) ([b024f2f](https://github.com/monetr/monetr/commit/b024f2f54334a919c720a38e55c4f79f642a7966))
+* **ui:** update dependency ramda to v0.30.1 ([#1925](https://github.com/monetr/monetr/issues/1925)) ([6a619b0](https://github.com/monetr/monetr/commit/6a619b01c041db54742406dcc1c3143e91d3fbbc))
+* **ui:** update dependency react-infinite-scroll-hook to v4.1.1 ([#1928](https://github.com/monetr/monetr/issues/1928)) ([9099410](https://github.com/monetr/monetr/commit/9099410ca7133ac6e770a157ddb3bd7f3e9336fa))
+
+
+### Bug Fixes
+
+* **build:** Fixing github action artifact handling ([1c91262](https://github.com/monetr/monetr/commit/1c912622832087019491d0b84922537bf31ee52d))
+* **docs:** Updating readme local dev docs link ([08b353d](https://github.com/monetr/monetr/commit/08b353dcb4754a3f6729b99fc6a306277781f2f2))
+* **sentry:** Fixed version mismatching in sentry ([a756df0](https://github.com/monetr/monetr/commit/a756df0f1b4e6cd0a372b8fc684c2f0adb692050))
+* **test:** Adding additional multifactor test ([0df26b2](https://github.com/monetr/monetr/commit/0df26b23d0b125dde1d7648a239d062c12f98bd1))
+* **ui:** Don't allow pull to refresh in modals ([dfbfbd4](https://github.com/monetr/monetr/commit/dfbfbd403caac3e27290ccd0a8f95a8ca91f16b6))
+* **ui:** Fixed pull to refresh triggering on scrolling up ([ec256a9](https://github.com/monetr/monetr/commit/ec256a914d70e6c4d2a535e6b1ba6412c0890fac))
+* **upload:** Always clean up transaction uploads ([8ced569](https://github.com/monetr/monetr/commit/8ced5699eba185b330f737b3bf01acaeb6d229b9)), closes [#1930](https://github.com/monetr/monetr/issues/1930)
+
+
+### Miscellaneous
+
+* **deps:** bump actions/download-artifact in /.github/workflows ([#1926](https://github.com/monetr/monetr/issues/1926)) ([6754b6a](https://github.com/monetr/monetr/commit/6754b6a621317dff1d4baba2b8496c29f2e9fba1))
+* **docs:** Tweaking terms & conditions typo ([068c924](https://github.com/monetr/monetr/commit/068c924f390b1623755705196af68ff5031b95d7))
+
 ## [0.18.0](https://github.com/monetr/monetr/compare/v0.17.20...v0.18.0) (2024-09-03)
 
 
