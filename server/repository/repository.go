@@ -32,9 +32,6 @@ type BaseRepository interface {
 	CreatePlaidTransaction(ctx context.Context, transaction *PlaidTransaction) error
 	CreatePlaidTransactions(ctx context.Context, transactions ...*PlaidTransaction) error
 
-	// DeleteAccount removes all of the records from the database related to the current account. This action cannot be
-	// undone. Any Plaid links should be removed BEFORE calling this function.
-	DeleteAccount(ctx context.Context) error
 	DeleteFundingSchedule(ctx context.Context, bankAccountId ID[BankAccount], fundingScheduleId ID[FundingSchedule]) error
 	DeletePlaidLink(ctx context.Context, plaidLinkId ID[PlaidLink]) error
 	DeleteSpending(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending]) error

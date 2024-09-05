@@ -82,6 +82,8 @@ var (
 				nil,
 				nil,
 				nil,
+				nil,
+				nil,
 			)
 			if err != nil {
 				return err
@@ -162,6 +164,8 @@ var (
 				clock,
 				configuration,
 				db,
+				nil,
+				nil,
 				nil,
 				nil,
 				nil,
@@ -287,6 +291,8 @@ var (
 				clock,
 				configuration,
 				db,
+				nil,
+				nil,
 				nil,
 				nil,
 				nil,

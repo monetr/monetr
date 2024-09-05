@@ -100,7 +100,7 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	// Once we know that the next recurrence is not in the past we can just store
 	// it here; itll be sanitized and converted to midnight below.
 	next := spending.NextRecurrence
-	if next.Before(c.clock.Now()) {
+	if next.Before(c.Clock.Now()) {
 		return c.badRequest(ctx, "next due date cannot be in the past")
 	}
 
@@ -128,7 +128,7 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		c.getContext(ctx),
 		account.Timezone,
 		fundingSchedule,
-		c.clock.Now(),
+		c.Clock.Now(),
 	); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate the next contribution for the new spending")
 	}
@@ -175,7 +175,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 
 	spendingToUpdate := make([]Spending, 0)
 
-	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
+	account, err := c.Accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve account for transfer")
 	}
@@ -205,7 +205,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 			c.getContext(ctx),
 			account.Timezone,
 			fundingSchedule,
-			c.clock.Now(),
+			c.Clock.Now(),
 		); err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
 		}
@@ -236,7 +236,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 			c.getContext(ctx),
 			account.Timezone,
 			fundingSchedule,
-			c.clock.Now(),
+			c.Clock.Now(),
 		); err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
 		}
@@ -352,7 +352,7 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 			c.getContext(ctx),
 			account.Timezone,
 			fundingSchedule,
-			c.clock.Now(),
+			c.Clock.Now(),
 		); err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution")
 		}

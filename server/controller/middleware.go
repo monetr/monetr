@@ -30,17 +30,17 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 		var handlerError error
 		switch strings.ToUpper(ctx.Request().Method) {
 		case "GET", "OPTIONS":
-			dbi = c.db
+			dbi = c.DB
 		case "POST":
 			// Some endpoints need a POST even though they do not require data access.
 			// This is a short term fix. (Hopefully)
 			if strings.HasSuffix(ctx.Path(), "/icons/search") {
-				dbi = c.db
+				dbi = c.DB
 				break
 			}
 			fallthrough
 		case "PUT", "DELETE":
-			txn, err := c.db.BeginContext(c.getContext(ctx))
+			txn, err := c.DB.BeginContext(c.getContext(ctx))
 			if err != nil {
 				return c.wrapAndReturnError(
 					ctx,
@@ -56,7 +56,7 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 				if handlerError != nil {
 					if err := txn.RollbackContext(c.getContext(ctx)); err != nil {
 						// Rollback
-						c.log.WithError(err).Errorf("failed to rollback request")
+						c.Log.WithError(err).Errorf("failed to rollback request")
 					}
 				} else {
 					if err = txn.CommitContext(c.getContext(ctx)); err != nil {
@@ -87,13 +87,13 @@ func (c *Controller) removeCookieIfPresent(ctx echo.Context) {
 
 func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		if !c.configuration.Stripe.IsBillingEnabled() {
+		if !c.Configuration.Stripe.IsBillingEnabled() {
 			return next(ctx)
 		}
 
 		accountId := c.mustGetAccountId(ctx)
 
-		active, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), accountId)
+		active, err := c.Billing.GetSubscriptionIsActive(c.getContext(ctx), accountId)
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to validate subscription is active")
 		}
@@ -110,7 +110,7 @@ func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) 
 func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) (err error) {
 		err = func(ctx echo.Context) error {
-			now := c.clock.Now()
+			now := c.Clock.Now()
 			log := c.getLog(ctx)
 			var token string
 			data := map[string]interface{}{
@@ -133,7 +133,7 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 
 			{ // Try to retrieve the cookie from the request with the options.
 				if tokenCookie, err := ctx.Cookie(
-					c.configuration.Server.Cookies.Name,
+					c.Configuration.Server.Cookies.Name,
 				); err == nil && tokenCookie.Value != "" {
 					token = tokenCookie.Value
 					data["source"] = "cookie"
@@ -141,7 +141,7 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 			}
 
 			if token == "" {
-				if token = ctx.Request().Header.Get(c.configuration.Server.Cookies.Name); token != "" {
+				if token = ctx.Request().Header.Get(c.Configuration.Server.Cookies.Name); token != "" {
 					data["source"] = "header"
 				}
 			}
@@ -151,7 +151,7 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 				return nil
 			}
 
-			claims, err := c.clientTokens.Parse(token)
+			claims, err := c.ClientTokens.Parse(token)
 			if err != nil {
 				c.updateAuthenticationCookie(ctx, ClearAuthentication)
 				crumbs.Error(c.getContext(ctx), "failed to parse token", "authentication", map[string]interface{}{

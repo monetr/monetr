@@ -22,6 +22,9 @@ func newCleanupJobsCommand(parent *cobra.Command) {
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 
 			db, err := getDatabase(log, configuration, nil)
+			if err != nil {
+				return err
+			}
 
 			if local || dryRun {
 				log.Info("running locally")
@@ -60,6 +63,8 @@ func newCleanupJobsCommand(parent *cobra.Command) {
 				clock,
 				configuration,
 				db,
+				nil,
+				nil,
 				nil,
 				nil,
 				nil,

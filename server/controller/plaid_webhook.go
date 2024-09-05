@@ -66,7 +66,7 @@ func (c PlaidClaims) Valid() error {
 }
 
 func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
-	if !c.configuration.Plaid.Enabled || !c.configuration.Plaid.WebhooksEnabled {
+	if !c.Configuration.Plaid.Enabled || !c.Configuration.Plaid.WebhooksEnabled {
 		return c.notFound(ctx, "plaid webhooks are not enabled")
 	}
 
@@ -104,10 +104,10 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 			return nil, errors.Errorf("malformed JWT token, empty data")
 		}
 
-		log := c.log.WithField("kid", kid)
+		log := c.Log.WithField("kid", kid)
 		log.Trace("exchanging key Id for public key")
 
-		keyFunction, err := c.plaidWebhookVerification.GetVerificationKey(c.getContext(ctx), kid)
+		keyFunction, err := c.PlaidWebhookVerification.GetVerificationKey(c.getContext(ctx), kid)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get verification key for webhook")
 		}
@@ -193,7 +193,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 	log.Trace("processing webhook")
 
 	authenticatedRepo := repository.NewRepositoryFromSession(
-		c.clock,
+		c.Clock,
 		link.CreatedBy,
 		link.AccountId,
 		c.mustGetDatabase(ctx),
@@ -209,7 +209,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 	case "TRANSACTIONS":
 		switch hook.WebhookCode {
 		case "SYNC_UPDATES_AVAILABLE", "INITIAL_UPDATE", "HISTORICAL_UPDATE":
-			err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+			err = background.TriggerSyncPlaid(c.getContext(ctx), c.JobRunner, background.SyncPlaidArguments{
 				AccountId: link.AccountId,
 				LinkId:    link.LinkId,
 				Trigger:   "webhook",
@@ -244,7 +244,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 			plaidLink.ErrorCode = myownsanity.StringP(code.(string))
 			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
 		case "WEBHOOK_UPDATE_ACKNOWLEDGED":
-			err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+			err = background.TriggerSyncPlaid(c.getContext(ctx), c.JobRunner, background.SyncPlaidArguments{
 				AccountId: link.AccountId,
 				LinkId:    link.LinkId,
 				Trigger:   "webhook",

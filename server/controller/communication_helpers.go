@@ -13,11 +13,11 @@ func (c *Controller) sendVerificationEmail(
 	login *models.Login,
 	token string,
 ) error {
-	baseUrl := c.configuration.Server.GetBaseURL()
-	verifyUrl := c.configuration.Server.GetURL("/verify/email", map[string]string{
+	baseUrl := c.Configuration.Server.GetBaseURL()
+	verifyUrl := c.Configuration.Server.GetURL("/verify/email", map[string]string{
 		"token": token,
 	})
-	err := c.email.SendVerification(c.getContext(ctx), communication.VerifyEmailParams{
+	err := c.Email.SendVerification(c.getContext(ctx), communication.VerifyEmailParams{
 		BaseURL:      baseUrl.String(),
 		Email:        login.Email,
 		FirstName:    login.FirstName,
@@ -42,11 +42,11 @@ func (c *Controller) sendPasswordReset(
 	login *models.Login,
 	token string,
 ) error {
-	baseUrl := c.configuration.Server.GetBaseURL()
-	resetUrl := c.configuration.Server.GetURL("/password/reset", map[string]string{
+	baseUrl := c.Configuration.Server.GetBaseURL()
+	resetUrl := c.Configuration.Server.GetURL("/password/reset", map[string]string{
 		"token": token,
 	})
-	err := c.email.SendPasswordReset(c.getContext(ctx), communication.PasswordResetParams{
+	err := c.Email.SendPasswordReset(c.getContext(ctx), communication.PasswordResetParams{
 		BaseURL:      baseUrl.String(),
 		Email:        login.Email,
 		FirstName:    login.FirstName,

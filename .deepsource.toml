@@ -24,7 +24,6 @@ enabled = true
   [analyzers.meta]
   dockerfile_paths = [
     "Dockerfile",
-    "Dockerfile.work"
   ]
 
 [[analyzers]]

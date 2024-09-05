@@ -34,10 +34,13 @@ in you can run the following command in the project directory:
 make develop
 ```
 
-This will set pretty much everything up that you need to work on monetr. This also works out of the box inside GitHub
-Codespaces.
+This will set pretty much everything up that you need to work on monetr.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=402577348)
+When you want to tear it all down, you can run the following command:
+
+```shell
+make clean
+```
 
 ---
 

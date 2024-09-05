@@ -28,35 +28,35 @@ const ClearAuthentication = ""
 // cookie is set to blank.
 func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) {
 	sameSite := http.SameSiteDefaultMode
-	if c.configuration.Server.Cookies.SameSiteStrict {
+	if c.Configuration.Server.Cookies.SameSiteStrict {
 		sameSite = http.SameSiteStrictMode
 	}
 
-	expiration := c.clock.Now().AddDate(0, 0, 14)
+	expiration := c.Clock.Now().AddDate(0, 0, 14)
 	if token == "" {
-		expiration = c.clock.Now().Add(-1 * time.Second)
+		expiration = c.Clock.Now().Add(-1 * time.Second)
 	}
 
-	if c.configuration.Server.Cookies.Name == "" {
+	if c.Configuration.Server.Cookies.Name == "" {
 		panic("authentication cookie name is blank")
 	}
 
 	// Set the path to be `/` unless the external URL has specified a prefix. For
 	// example, if the external URL is `http://homelab.local/monetr` then we would
 	// only want to set cookies for `/monetr` as the path.
-	path := c.configuration.Server.GetBaseURL().Path
+	path := c.Configuration.Server.GetBaseURL().Path
 	if path == "" {
 		path = "/"
 	}
 
 	ctx.SetCookie(&http.Cookie{
-		Name:     c.configuration.Server.Cookies.Name,
+		Name:     c.Configuration.Server.Cookies.Name,
 		Value:    token,
 		Path:     path,
-		Domain:   c.configuration.Server.GetHostname(),
+		Domain:   c.Configuration.Server.GetHostname(),
 		Expires:  expiration,
 		MaxAge:   0,
-		Secure:   c.configuration.Server.GetIsCookieSecure(),
+		Secure:   c.Configuration.Server.GetIsCookieSecure(),
 		HttpOnly: true,
 		SameSite: sameSite,
 	})
@@ -114,18 +114,18 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 
 	// If we want to verify emails and the login does not have a verified email address, then return an error to the
 	// user.
-	if c.configuration.Email.ShouldVerifyEmails() && !login.IsEmailVerified {
+	if c.Configuration.Email.ShouldVerifyEmails() && !login.IsEmailVerified {
 		log.Debug("login email address is not verified, please verify before continuing")
 		return c.failure(ctx, http.StatusPreconditionRequired, EmailNotVerifiedError{})
 	}
 
 	if requiresPasswordChange {
 		// If the server is not configured to allow password resets return an error.
-		if !c.configuration.Email.AllowPasswordReset() {
+		if !c.Configuration.Email.AllowPasswordReset() {
 			return c.returnError(ctx, http.StatusNotAcceptable, "Login requires password reset, but password reset is not allowed")
 		}
 
-		passwordResetToken, err := c.clientTokens.Create(
+		passwordResetToken, err := c.ClientTokens.Create(
 			5*time.Minute, // Use a much shorter lifetime than usually would be configured.
 			security.Claims{
 				Scope:        security.ResetPasswordScope,
@@ -158,7 +158,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		if login.TOTPEnabledAt != nil {
 			log.Debug("login requires TOTP MFA")
 
-			token, err := c.clientTokens.Create(
+			token, err := c.ClientTokens.Create(
 				5*time.Minute,
 				security.Claims{
 					Scope:        security.MultiFactorScope,
@@ -176,7 +176,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			return c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
 		}
 
-		token, err := c.clientTokens.Create(
+		token, err := c.ClientTokens.Create(
 			14*24*time.Hour,
 			security.Claims{
 				Scope:        security.AuthenticatedScope,
@@ -201,12 +201,12 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			result["token"] = token
 		}
 
-		if !c.configuration.Stripe.IsBillingEnabled() {
+		if !c.Configuration.Stripe.IsBillingEnabled() {
 			// Return their account token.
 			return ctx.JSON(http.StatusOK, result)
 		}
 
-		subscriptionIsActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), user.AccountId)
+		subscriptionIsActive, err := c.Billing.GetSubscriptionIsActive(c.getContext(ctx), user.AccountId)
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to determine whether or not subscription is active")
 		}
@@ -245,11 +245,11 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 		return c.unauthorizedError(ctx, err)
 	}
 
-	if err := me.Login.VerifyTOTP(request.TOTP, c.clock.Now()); err != nil {
+	if err := me.Login.VerifyTOTP(request.TOTP, c.Clock.Now()); err != nil {
 		return c.returnError(ctx, http.StatusUnauthorized, "Invalid TOTP code")
 	}
 
-	token, err := c.clientTokens.Create(
+	token, err := c.ClientTokens.Create(
 		14*24*time.Hour,
 		security.Claims{
 			Scope:        security.AuthenticatedScope,
@@ -269,12 +269,12 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 		"isActive": true,
 	}
 
-	if !c.configuration.Stripe.IsBillingEnabled() {
+	if !c.Configuration.Stripe.IsBillingEnabled() {
 		// Return their account token.
 		return ctx.JSON(http.StatusOK, result)
 	}
 
-	subscriptionIsActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), me.AccountId)
+	subscriptionIsActive, err := c.Billing.GetSubscriptionIsActive(c.getContext(ctx), me.AccountId)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine whether or not subscription is active")
 	}
@@ -289,7 +289,7 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 }
 
 func (c *Controller) logoutEndpoint(ctx echo.Context) error {
-	if _, err := ctx.Cookie(c.configuration.Server.Cookies.Name); err == http.ErrNoCookie {
+	if _, err := ctx.Cookie(c.Configuration.Server.Cookies.Name); err == http.ErrNoCookie {
 		return ctx.NoContent(http.StatusOK)
 	}
 
@@ -298,7 +298,7 @@ func (c *Controller) logoutEndpoint(ctx echo.Context) error {
 }
 
 func (c *Controller) postRegister(ctx echo.Context) error {
-	if !c.configuration.AllowSignUp {
+	if !c.Configuration.AllowSignUp {
 		return c.notFound(ctx, "sign up is not enabled on this server")
 	}
 
@@ -367,7 +367,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	}
 
 	var beta *models.Beta
-	if c.configuration.Beta.EnableBetaCodes {
+	if c.Configuration.Beta.EnableBetaCodes {
 		if registerRequest.BetaCode == nil || *registerRequest.BetaCode == "" {
 			return c.badRequest(ctx, "beta code required for registration")
 		}
@@ -400,10 +400,10 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	log = log.WithField("loginId", login.LoginId)
 
 	var trialEndsAt *time.Time
-	if c.configuration.Stripe.IsBillingEnabled() {
-		expiration := c.clock.Now().AddDate(0, 0, c.configuration.Stripe.FreeTrialDays)
+	if c.Configuration.Stripe.IsBillingEnabled() {
+		expiration := c.Clock.Now().AddDate(0, 0, c.Configuration.Stripe.FreeTrialDays)
 		log.WithFields(logrus.Fields{
-			"trialDays":   c.configuration.Stripe.FreeTrialDays,
+			"trialDays":   c.Configuration.Stripe.FreeTrialDays,
 			"trialEndsAt": expiration,
 		}).Debug("billing is enabled, new account for login will be on a trial")
 
@@ -455,9 +455,9 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 
 	// If SMTP is enabled and we are verifying emails then we want to create a
 	// registration record and send the user a verification email.
-	if c.configuration.Email.ShouldVerifyEmails() {
-		verificationToken, err := c.clientTokens.Create(
-			c.configuration.Email.Verification.TokenLifetime,
+	if c.Configuration.Email.ShouldVerifyEmails() {
+		verificationToken, err := c.ClientTokens.Create(
+			c.Configuration.Email.Verification.TokenLifetime,
 			security.Claims{
 				Scope:        security.VerifyEmailScope,
 				EmailAddress: login.Email,
@@ -491,7 +491,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 
 	// If we are not requiring email verification to activate an account we can
 	// simply return a token here for the user to be signed in.
-	token, err := c.clientTokens.Create(
+	token, err := c.ClientTokens.Create(
 		14*24*time.Hour,
 		security.Claims{
 			Scope:        security.AuthenticatedScope,
@@ -518,7 +518,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 }
 
 func (c *Controller) verifyEndpoint(ctx echo.Context) error {
-	if !c.configuration.Email.ShouldVerifyEmails() {
+	if !c.Configuration.Email.ShouldVerifyEmails() {
 		return c.notFound(ctx, "email verification is not enabled")
 	}
 
@@ -533,7 +533,7 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 		return c.badRequest(ctx, "Token cannot be blank")
 	}
 
-	claims, err := c.clientTokens.Parse(verifyRequest.Token)
+	claims, err := c.ClientTokens.Parse(verifyRequest.Token)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
 	}
@@ -555,7 +555,7 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 
 func (c *Controller) resendVerification(ctx echo.Context) error {
 	log := c.getLog(ctx)
-	if !c.configuration.Email.ShouldVerifyEmails() {
+	if !c.Configuration.Email.ShouldVerifyEmails() {
 		return c.notFound(ctx, "email verification is not enabled")
 	}
 
@@ -572,7 +572,7 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 		return c.badRequest(ctx, "email must be provided to resend verification link")
 	}
 
-	if c.configuration.ReCAPTCHA.Enabled {
+	if c.Configuration.ReCAPTCHA.Enabled {
 		if request.Captcha == nil {
 			return c.badRequest(ctx, "must provide ReCAPTCHA")
 		}
@@ -589,8 +589,8 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusOK)
 	}
 
-	verificationToken, err := c.clientTokens.Create(
-		c.configuration.Email.Verification.TokenLifetime,
+	verificationToken, err := c.ClientTokens.Create(
+		c.Configuration.Email.Verification.TokenLifetime,
 		security.Claims{
 			Scope:        security.VerifyEmailScope,
 			EmailAddress: login.Email,
@@ -616,7 +616,7 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 }
 
 func (c *Controller) postForgotPassword(ctx echo.Context) error {
-	if !c.configuration.Email.AllowPasswordReset() {
+	if !c.Configuration.Email.AllowPasswordReset() {
 		return c.notFound(ctx, "password reset not enabled")
 	}
 
@@ -637,7 +637,7 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 	}
 
 	// If we require ReCAPTCHA then make sure they provide it.
-	if c.configuration.ReCAPTCHA.ShouldVerifyForgotPassword() {
+	if c.Configuration.ReCAPTCHA.ShouldVerifyForgotPassword() {
 		if sendForgotPasswordRequest.ReCAPTCHA == "" {
 			return c.badRequest(ctx, "Must provide a valid ReCAPTCHA.")
 		}
@@ -662,7 +662,7 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 	}
 
 	// If the login's email is not verified then return an error to the client.
-	if c.configuration.Email.ShouldVerifyEmails() && !login.GetEmailIsVerified() {
+	if c.Configuration.Email.ShouldVerifyEmails() && !login.GetEmailIsVerified() {
 		return c.returnError(
 			ctx,
 			http.StatusPreconditionRequired,
@@ -676,8 +676,8 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 	//  email of the login -> change the email of another login to the first email; then reset the password for a
 	//  different login. I don't think this is a security risk as the actor would need to have access to both logins to
 	//  begin with. But it might cause some goofy issues and is definitely not desired behavior.
-	passwordResetToken, err := c.clientTokens.Create(
-		c.configuration.Email.ForgotPassword.TokenLifetime,
+	passwordResetToken, err := c.ClientTokens.Create(
+		c.Configuration.Email.ForgotPassword.TokenLifetime,
 		security.Claims{
 			Scope:        security.ResetPasswordScope,
 			EmailAddress: login.Email,
@@ -721,7 +721,7 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 // @Failure 400 {object} swag.ResetPasswordBadRequest
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) resetPassword(ctx echo.Context) error {
-	if !c.configuration.Email.AllowPasswordReset() {
+	if !c.Configuration.Email.AllowPasswordReset() {
 		return c.notFound(ctx, "password reset not enabled")
 	}
 
@@ -746,7 +746,7 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 		return c.badRequest(ctx, "Password must be at least 8 characters long.")
 	}
 
-	resetClaims, err := c.clientTokens.Parse(resetPasswordRequest.Token)
+	resetClaims, err := c.ClientTokens.Parse(resetPasswordRequest.Token)
 	if err != nil {
 		return c.badRequestError(ctx, err, "Failed to validate password reset token")
 	}
@@ -782,8 +782,8 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "Failed to reset password")
 	}
 
-	if err := c.email.SendPasswordChanged(c.getContext(ctx), communication.PasswordChangedParams{
-		BaseURL:      c.configuration.Server.GetBaseURL().String(),
+	if err := c.Email.SendPasswordChanged(c.getContext(ctx), communication.PasswordChangedParams{
+		BaseURL:      c.Configuration.Server.GetBaseURL().String(),
 		Email:        login.Email,
 		FirstName:    login.FirstName,
 		LastName:     login.LastName,
@@ -817,7 +817,7 @@ func (c *Controller) validateRegistration(ctx echo.Context, email, password, fir
 }
 
 func (c *Controller) validateLoginCaptcha(ctx context.Context, captcha string) error {
-	if !c.configuration.ReCAPTCHA.ShouldVerifyLogin() {
+	if !c.Configuration.ReCAPTCHA.ShouldVerifyLogin() {
 		// If it is disabled then we don't need to do anything.
 		return nil
 	}
@@ -826,7 +826,7 @@ func (c *Controller) validateLoginCaptcha(ctx context.Context, captcha string) e
 }
 
 func (c *Controller) validateRegistrationCaptcha(ctx context.Context, captcha string) error {
-	if !c.configuration.ReCAPTCHA.ShouldVerifyRegistration() {
+	if !c.Configuration.ReCAPTCHA.ShouldVerifyRegistration() {
 		// If it is disabled then we don't need to do anything.
 		return nil
 	}
@@ -842,7 +842,7 @@ func (c *Controller) validateCaptchaMaybe(ctx context.Context, captcha string) e
 	span := sentry.StartSpan(ctx, "ReCAPTCHA")
 	defer span.Finish()
 
-	return c.captcha.VerifyCaptcha(ctx, captcha)
+	return c.Captcha.VerifyCaptcha(ctx, captcha)
 }
 
 // validateLogin takes the current request context and the provided email and password, it then validates thats the

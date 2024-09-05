@@ -50,7 +50,7 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to create transaction upload")
 	}
 
-	if err := c.jobRunner.EnqueueJob(
+	if err := c.JobRunner.EnqueueJob(
 		c.getContext(ctx),
 		background.ProcessQFXUpload,
 		background.ProcessQFXUploadArguments{
@@ -116,7 +116,7 @@ func (c *Controller) getTransactionUploadProgress(ctx echo.Context) error {
 		"account:%s:transaction_upload:%s:progress",
 		c.mustGetAccountId(ctx), transactionUploadId,
 	)
-	listener, err := c.ps.Subscribe(c.getContext(ctx), channel)
+	listener, err := c.PubSub.Subscribe(c.getContext(ctx), channel)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to subscribe to transaction upload changes")
 	}

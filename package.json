@@ -32,7 +32,7 @@
     "develop": "cmake --preset default && cmake --build build -t development.monetr.up",
     "develop-docs": "cmake --preset default && cmake --build build -t development.documentation.up",
     "shutdown": "cmake --preset default && cmake --build build -t development.down",
-    "clean": "pnpm shutdown && cmake --build build -t clean && rm -rf build && git clean -f -X server/ui/static && git submodule deinit -f server/icons/sources/simple-icons"
+    "clean": "pnpm shutdown && cmake --build build -t clean && cmake -E remove_directory build"
   },
   "eslintConfig": {
     "extends": [

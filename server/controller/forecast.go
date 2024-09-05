@@ -198,7 +198,7 @@ func (c *Controller) postForecastNextFunding(ctx echo.Context) error {
 	defer cancel()
 	result, err := fundingForecast.GetNextContribution(
 		timeout,
-		c.clock.Now(),
+		c.Clock.Now(),
 		request.FundingScheduleId,
 		timezone,
 	)

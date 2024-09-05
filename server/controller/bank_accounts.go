@@ -75,7 +75,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	bankAccount.BankAccountId = ""
 	bankAccount.Name = strings.TrimSpace(bankAccount.Name)
 	bankAccount.Mask = strings.TrimSpace(bankAccount.Mask)
-	bankAccount.LastUpdated = c.clock.Now().UTC()
+	bankAccount.LastUpdated = c.Clock.Now().UTC()
 
 	if bankAccount.Name == "" {
 		return c.badRequest(ctx, "bank account must have a name")

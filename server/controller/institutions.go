@@ -22,7 +22,7 @@ func (c *Controller) getInstitutionDetails(ctx echo.Context) error {
 		return c.badRequest(ctx, "must specify an institution ID")
 	}
 
-	plaidInstitution, err := c.plaidInstitutions.GetInstitution(c.getContext(ctx), institutionId)
+	plaidInstitution, err := c.PlaidInstitutions.GetInstitution(c.getContext(ctx), institutionId)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve institution details")
 	}

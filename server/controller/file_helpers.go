@@ -13,7 +13,7 @@ import (
 )
 
 func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File, error) {
-	if !c.configuration.Storage.Enabled {
+	if !c.Configuration.Storage.Enabled {
 		return nil, c.notFound(ctx, "File uploads are not enabled on this server")
 	}
 
@@ -59,7 +59,7 @@ func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File
 		return nil, c.badRequest(ctx, "Unsupported file type!")
 	}
 
-	fileUri, err := c.fileStorage.Store(
+	fileUri, err := c.FileStorage.Store(
 		c.getContext(ctx),
 		reader,
 		storage.FileInfo{
@@ -79,7 +79,7 @@ func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File
 		ContentType: contentType,
 		Size:        uint64(header.Size),
 		BlobUri:     fileUri,
-		ExpiresAt:   kind.FileExpiration(c.clock),
+		ExpiresAt:   kind.FileExpiration(c.Clock),
 	}
 
 	if err := repo.CreateFile(c.getContext(ctx), &file); err != nil {

@@ -6,7 +6,6 @@ option(BUILD_NOSIMD "Disable SIMD support at compile time." OFF)
 option(BUILD_DEPLOYMENT_TARGETS "Include targets for deploying monetr using helm and kubectl" OFF)
 option(BUILD_CONTAINER_TAG_LATEST "Tag containers with latest when building them." ON)
 
-option(TEST_JUNIT "Tests should produce a JUnit XML file" OFF)
 option(TEST_RACE "Go tests should be run with the -race flag" ON)
 option(TEST_COVERAGE "Coverage data should be collected from tests" ON)
 option(TEST_USE_GOTESTSUM "Wrap test execution in gotestsum" OFF)
@@ -40,6 +39,8 @@ find_package(Git REQUIRED)
 set(DOCKER_MIN_VERSION "20.0.0")
 find_package(Docker QUIET)
 
+set(MONETR_PKG_ROOT github.com/monetr/monetr CACHE INTERNAL "Base go package for monetr.")
+
 # The UI tasks are split out into their own file.
 # Import this _after_ we have found all the packages above.
 include(NodeModules)
@@ -48,7 +49,6 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/interface")
 add_subdirectory("${CMAKE_SOURCE_DIR}/stories")
 add_subdirectory("${CMAKE_SOURCE_DIR}/docs")
 add_subdirectory("${CMAKE_SOURCE_DIR}/emails")
-include("${CMAKE_SOURCE_DIR}/cmake/backend.cmake")
 
 if(BUILD_DEPLOYMENT_TARGETS)
   include("${CMAKE_SOURCE_DIR}/cmake/deploy.cmake")
@@ -135,93 +135,6 @@ if(DOCKER_EXECUTABLE)
     endforeach()
   endforeach()
 endif()
-
-set(LICENSED_VERSION "4.4.0")
-if(BUILD_THIRD_PARTY_NOTICE)
-  find_package(Ruby REQUIRED)
-  set(GEM_HOME ${CMAKE_BINARY_DIR}/ruby)
-  set(RUBY_BIN ${GEM_HOME}/bin)
-  set(LICENSED_EXECUTABLE ${RUBY_BIN}/licensed)
-  file(MAKE_DIRECTORY ${RUBY_BIN})
-  add_custom_command(
-    OUTPUT ${LICENSED_EXECUTABLE}
-    BYPRODUCTS ${GEM_HOME}
-    COMMAND GEM_HOME=${GEM_HOME} gem install licensed -v ${LICENSED_VERSION}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Setting up licensed"
-  )
-
-  set(LICENSED_CACHE ${CMAKE_BINARY_DIR}/license.cache)
-  add_custom_command(
-    OUTPUT ${LICENSED_CACHE}
-    BYPRODUCTS ${LICENSED_CACHE}
-    COMMAND GEM_HOME=${GEM_HOME} ${LICENSED_EXECUTABLE} cache
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Caching dependency licenses"
-    DEPENDS
-      ${LICENSED_EXECUTABLE}
-      dependencies.node_modules
-      ${CMAKE_SOURCE_DIR}/package.json
-      ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
-      ${CMAKE_SOURCE_DIR}/go.mod
-      ${CMAKE_SOURCE_DIR}/go.sum
-  )
-
-  set(LICENSED_INDIVIDUAL_NOTICES
-    ${LICENSED_CACHE}/monetr-API/NOTICE
-    ${LICENSED_CACHE}/monetr-UI/NOTICE
-  )
-  add_custom_command(
-    OUTPUT ${LICENSED_INDIVIDUAL_NOTICES}
-    BYPRODUCTS ${LICENSED_INDIVIDUAL_NOTICES}
-    COMMAND GEM_HOME=${GEM_HOME} ${LICENSED_EXECUTABLE} notices
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Gathering license information from dependencies"
-    DEPENDS
-      download.simple-icons
-      ${LICENSED_EXECUTABLE}
-      ${LICENSED_CACHE}
-      ${CMAKE_SOURCE_DIR}/package.json
-      ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
-      ${CMAKE_SOURCE_DIR}/go.mod
-      ${CMAKE_SOURCE_DIR}/go.sum
-  )
-
-  set(THIRD_PARTY_NOTICE ${CMAKE_SOURCE_DIR}/server/build/NOTICE.md)
-  add_custom_command(
-    OUTPUT ${THIRD_PARTY_NOTICE}
-    BYPRODUCTS ${THIRD_PARTY_NOTICE}
-    COMMAND ${CMAKE_COMMAND} -E cat ${LICENSED_INDIVIDUAL_NOTICES} > ${THIRD_PARTY_NOTICE}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Generating a third party notice file from dependency license data"
-    DEPENDS
-      ${LICENSED_INDIVIDUAL_NOTICES}
-  )
-
-  # Since we have ruby available then we want to build the third party notice file as part of the
-  # binary build process.
-  add_custom_command(
-    OUTPUT ${MONETR_EXECUTABLE} APPEND
-    DEPENDS ${THIRD_PARTY_NOTICE}
-  )
-
-  add_custom_target(
-    license.cache
-    DEPENDS ${LICENSED_CACHE}
-  )
-else()
-  # If ruby is not detected, print something saying that third party notices cannot be generated.
-  message(STATUS "======================================================================")
-  message(STATUS "Third party notice disabled, you can enable this by passing:")
-  message(STATUS "  CMAKE_OPTIONS=-DBUILD_THIRD_PARTY_NOTICE=ON")
-  message(STATUS "  When you execute make monetr")
-  message(STATUS "======================================================================")
-endif()
-
-add_custom_target(
-  build.monetr
-  DEPENDS ${MONETR_EXECUTABLE}
-)
 
 ################################################################################
 #                                     TESTING                                  #

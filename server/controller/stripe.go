@@ -10,7 +10,7 @@ import (
 )
 
 func (c *Controller) handleStripeWebhook(ctx echo.Context) error {
-	if !c.configuration.Stripe.Enabled || !c.configuration.Stripe.WebhooksEnabled {
+	if !c.Configuration.Stripe.Enabled || !c.Configuration.Stripe.WebhooksEnabled {
 		return c.notFound(ctx, "stripe webhooks not enabled on this server")
 	}
 
@@ -31,12 +31,15 @@ func (c *Controller) handleStripeWebhook(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to read request body")
 	}
 
-	stripeEvent, err := webhook.ConstructEvent(requestBody, stripeSignature, c.configuration.Stripe.WebhookSecret)
+	stripeEvent, err := webhook.ConstructEvent(requestBody, stripeSignature, c.Configuration.Stripe.WebhookSecret)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to validate stripe event")
 	}
 
-	if err = c.stripeWebhooks.HandleWebhook(c.getContext(ctx), stripeEvent); err != nil {
+	if err = c.Billing.HandleStripeWebhook(
+		c.getContext(ctx),
+		stripeEvent,
+	); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to handle stripe webhook")
 	}
 

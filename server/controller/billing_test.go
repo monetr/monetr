@@ -24,13 +24,10 @@ func TestGetAfterCheckout(t *testing.T) {
 
 		conf := NewTestApplicationConfig(t)
 		conf.Stripe.Enabled = true
-		conf.Stripe.BillingEnabled = true
 		conf.Stripe.APIKey = gofakeit.UUID()
 		conf.Stripe.FreeTrialDays = -1
 		conf.Stripe.InitialPlan = &config.Plan{
-			Visible:       true,
 			StripePriceId: mock_stripe.FakeStripePriceId(t),
-			Default:       true,
 		}
 
 		_, e := NewTestApplicationWithConfig(t, conf)
@@ -51,6 +48,7 @@ func TestGetAfterCheckout(t *testing.T) {
 				Expect()
 
 			result.Status(http.StatusOK)
+			result.JSON().Path("$.url").String().NotEmpty()
 			result.JSON().Path("$.sessionId").String().NotEmpty()
 			checkoutSessionId = result.JSON().Path("$.sessionId").String().Raw()
 		}
@@ -84,13 +82,10 @@ func TestGetAfterCheckout(t *testing.T) {
 
 		conf := NewTestApplicationConfig(t)
 		conf.Stripe.Enabled = true
-		conf.Stripe.BillingEnabled = true
 		conf.Stripe.APIKey = gofakeit.UUID()
 		conf.Stripe.FreeTrialDays = -1
 		conf.Stripe.InitialPlan = &config.Plan{
-			Visible:       true,
 			StripePriceId: mock_stripe.FakeStripePriceId(t),
-			Default:       true,
 		}
 
 		_, e := NewTestApplicationWithConfig(t, conf)
@@ -120,6 +115,7 @@ func TestGetAfterCheckout(t *testing.T) {
 				Expect()
 
 			result.Status(http.StatusOK)
+			result.JSON().Path("$.url").String().NotEmpty()
 			result.JSON().Path("$.sessionId").String().NotEmpty()
 			checkoutSessionId = result.JSON().Path("$.sessionId").String().Raw()
 		}
@@ -162,7 +158,7 @@ func TestGetAfterCheckout(t *testing.T) {
 				Expect()
 
 			result.Status(http.StatusBadRequest)
-			result.JSON().Path("$.error").String().IsEqual("there is already an active subscription for your account")
+			result.JSON().Path("$.error").String().IsEqual("There is already an active subscription for your account")
 		}
 	})
 }

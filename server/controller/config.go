@@ -42,54 +42,51 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 
 	// If ReCAPTCHA is enabled then we want to provide the UI our public key as
 	// well as whether or not we want it to verify logins and registrations.
-	if c.configuration.ReCAPTCHA.Enabled {
-		configuration.ReCAPTCHAKey = c.configuration.ReCAPTCHA.PublicKey
-		configuration.VerifyLogin = c.configuration.ReCAPTCHA.VerifyLogin
-		configuration.VerifyRegister = c.configuration.ReCAPTCHA.VerifyRegister
+	if c.Configuration.ReCAPTCHA.Enabled {
+		configuration.ReCAPTCHAKey = c.Configuration.ReCAPTCHA.PublicKey
+		configuration.VerifyLogin = c.Configuration.ReCAPTCHA.VerifyLogin
+		configuration.VerifyRegister = c.Configuration.ReCAPTCHA.VerifyRegister
 	}
 
 	// We can only allow forgot password if SMTP is enabled. Otherwise we have
 	// no way of sending an email to the user.
-	if c.configuration.Email.AllowPasswordReset() {
+	if c.Configuration.Email.AllowPasswordReset() {
 		configuration.AllowForgotPassword = true
-		configuration.VerifyForgotPassword = c.configuration.ReCAPTCHA.ShouldVerifyForgotPassword()
+		configuration.VerifyForgotPassword = c.Configuration.ReCAPTCHA.ShouldVerifyForgotPassword()
 	}
 
-	configuration.VerifyEmailAddress = c.configuration.Email.ShouldVerifyEmails()
+	configuration.VerifyEmailAddress = c.Configuration.Email.ShouldVerifyEmails()
 
-	configuration.AllowSignUp = c.configuration.AllowSignUp
+	configuration.AllowSignUp = c.Configuration.AllowSignUp
 
-	if c.configuration.Plaid.EnableReturningUserExperience {
+	if c.Configuration.Plaid.EnableReturningUserExperience {
 		configuration.RequireLegalName = true
 		configuration.RequirePhoneNumber = true
 	}
 
-	if c.configuration.Stripe.Enabled {
-		if c.configuration.Stripe.IsBillingEnabled() && c.configuration.Stripe.InitialPlan != nil {
-			price, err := c.stripe.GetPriceById(
-				c.getContext(ctx),
-				c.configuration.Stripe.InitialPlan.StripePriceId,
-			)
-			if err != nil {
-				c.getLog(ctx).Warn("failed to retrieve stripe price for initial plan")
-			} else {
-				configuration.InitialPlan = &InitialPlan{
-					Price: price.UnitAmount,
-				}
+	configuration.BillingEnabled = c.Configuration.Stripe.IsBillingEnabled()
+	if c.Configuration.Stripe.IsBillingEnabled() && c.Configuration.Stripe.InitialPlan != nil {
+		price, err := c.Stripe.GetPriceById(
+			c.getContext(ctx),
+			c.Configuration.Stripe.InitialPlan.StripePriceId,
+		)
+		if err != nil {
+			c.getLog(ctx).Warn("failed to retrieve stripe price for initial plan")
+		} else {
+			configuration.InitialPlan = &InitialPlan{
+				Price: price.UnitAmount,
 			}
 		}
-
-		configuration.BillingEnabled = c.configuration.Stripe.BillingEnabled
 	}
 
-	configuration.RequireBetaCode = c.configuration.Beta.EnableBetaCodes
+	configuration.RequireBetaCode = c.Configuration.Beta.EnableBetaCodes
 
 	// Just make this true for now, this might change in the future as I do websockets.
 	configuration.LongPollPlaidSetup = true
 
 	configuration.IconsEnabled = icons.GetIconsEnabled()
-	configuration.PlaidEnabled = c.configuration.Plaid.GetEnabled()
-	configuration.ManualEnabled = c.configuration.Storage.Enabled
+	configuration.PlaidEnabled = c.Configuration.Plaid.GetEnabled()
+	configuration.ManualEnabled = c.Configuration.Storage.Enabled
 
 	return ctx.JSON(http.StatusOK, configuration)
 }
