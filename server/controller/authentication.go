@@ -242,8 +242,7 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	me, err := repo.GetMe(c.getContext(ctx))
 	if err != nil {
-		c.updateAuthenticationCookie(ctx, ClearAuthentication)
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Unable to retrieve current user")
+		return c.unauthorizedError(ctx, err)
 	}
 
 	if err := me.Login.VerifyTOTP(request.TOTP, c.clock.Now()); err != nil {
