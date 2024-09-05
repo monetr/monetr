@@ -58,6 +58,9 @@ export default function PullToRefresh(): JSX.Element {
     // Determines if we are at the top of the page
     // Locks or unlocks page when pulling down to refresh
     const pullStart = (e: TouchEvent) => {
+      // If there is a dialog open, then do nothing.
+      if (document.querySelectorAll('[role="dialog"]').length > 0) return;
+
       setPullStartPoint(e.targetTouches[0].screenY);
 
       if (window.scrollY === 0 && window.scrollX === 0) {
