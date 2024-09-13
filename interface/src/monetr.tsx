@@ -10,6 +10,7 @@ import { useBankAccounts } from '@monetr/interface/hooks/bankAccounts';
 import { useLinks } from '@monetr/interface/hooks/links';
 import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { ScrollPositionProvider } from '@monetr/interface/hooks/useScrollRestoration';
 import Loading from '@monetr/interface/loading';
 import SubscribePage from '@monetr/interface/pages/account/subscribe';
 import AfterCheckoutPage from '@monetr/interface/pages/account/subscribe/after';
@@ -152,7 +153,9 @@ function BudgetingLayout(): JSX.Element {
     <Fragment>
       <BudgetingSidebar className='hidden lg:flex' />
       <div className='w-full h-full min-w-0 flex flex-col'>
-        <Outlet />
+        <ScrollPositionProvider>
+          <Outlet />
+        </ScrollPositionProvider>
       </div>
     </Fragment>
   );
