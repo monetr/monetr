@@ -72,110 +72,6 @@ jobs:
           path: '${{ github.workspace }}/server/ui/static'
           retention-days: 7
 
-  # build_binary:
-  #   if: ${{ needs.release_please.outputs.release_created }}
-  #   needs:
-  #     - release_please
-  #     - build_ui
-  #     - build_notice
-  #   name: Build Binary
-  #   runs-on: ubuntu-latest
-  #   container: ghcr.io/monetr/build-containers/golang:1.19.4
-  #   continue-on-error: true
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os:
-  #         - linux
-  #         - darwin
-  #         - windows
-  #       architecture:
-  #         - amd64
-  #         - arm64
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/cache@v3
-  #       with:
-  #         path: |
-  #           ~/.cache/go-build
-  #           ~/go/pkg/mod
-  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-  #           ${{ runner.os }}-go-
-  #     - uses: actions/download-artifact@v4.1.7
-  #       name: Download Compiled UI Artifacts
-  #       with:
-  #         name: '${{ needs.release_please.outputs.version }}-ui'
-  #         path: '${{ github.workspace }}/pkg/ui/static/'
-  #     - uses: actions/download-artifact@v4.1.7
-  #       name: Download Third Party Notice Artifacts
-  #       with:
-  #         name: '${{ needs.release_please.outputs.version }}-notice'
-  #         path: '${{ github.workspace }}/pkg/build/'
-  #     - name: Build # I hate so much that I have to do this, but GitHub actions are awful at network connections.
-  #       uses: nick-invision/retry@v2
-  #       with:
-  #         timeout_minutes: 10
-  #         max_attempts: 3
-  #         command: |
-  #           RELEASE_VERSION=v${{ needs.release_please.outputs.version }} GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make tar
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-${{ matrix.os }}-${{ matrix.architecture }}.tar.gz'
-  #         path: '${{ github.workspace }}/build/monetr-v${{ needs.release_please.outputs.version }}-${{ matrix.os }}-${{ matrix.architecture }}.tar.gz'
-  #         retention-days: 7
-
-  # upload-artifacts:
-  #   needs:
-  #     - release_please
-  #     - build_ui
-  #     - build_binary
-  #   name: Upload Artifacts
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/download-artifact@v4.1.7
-  #       name: Download linux/amd64
-  #       with:
-  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz'
-  #         path: '/tmp'
-  #     - uses: actions/download-artifact@v4.1.7
-  #       name: Download linux/arm64
-  #       with:
-  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz'
-  #         path: '/tmp'
-  #     - uses: actions/download-artifact@v4.1.7
-  #       name: Download darwin/amd64
-  #       with:
-  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz'
-  #         path: '/tmp'
-  #     - uses: actions/download-artifact@v4.1.7
-  #       name: Download darwin/arm64
-  #       with:
-  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz'
-  #         path: '/tmp'
-  #     - uses: actions/download-artifact@v4.1.7
-  #       name: Download windows/amd64
-  #       with:
-  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz'
-  #         path: '/tmp'
-  #     - uses: actions/download-artifact@v4.1.7
-  #       name: Download windows/arm64
-  #       with:
-  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz'
-  #         path: '/tmp'
-  #     - name: Upload Artifacts
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: |
-  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz --clobber
-  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz --clobber
-  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz --clobber
-  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz --clobber
-  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz --clobber
-  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz --clobber
-
   docker:
     if: ${{ needs.release_please.outputs.release_created }}
     needs:
@@ -237,16 +133,7 @@ jobs:
           version: 'v${{ needs.release_please.outputs.version }}'
           sourcemaps: 'server/ui/static/assets/scripts'
           url_prefix: 'https://my.monetr.app'
-      - name: Trigger Deployment Production
-        run: |
-          curl -X POST \
-            --fail \
-            -F token=${{ secrets.GITLAB_CI_TOKEN }} \
-            -F "ref=v${{ needs.release_please.outputs.version }}" \
-            -F "variables[ENVIRONMENT]=my.monetr.app" \
-            -F "variables[DEPLOY_VERSION]=v${{ needs.release_please.outputs.version }}" \
-            https://gitlab.com/api/v4/projects/46647440/trigger/pipeline
-      - name: Trigger Deployment MIN4
+      - name: Trigger Deployment
         run: |
           curl -X POST \
             --fail \
