@@ -71,34 +71,14 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	})
 
 	// TODO implement not found error handler.
-
 	api.GET("/NOTICE", func(ctx echo.Context) error {
 		return ctx.String(http.StatusOK, build.GetNotice())
 	})
-	api.GET("/health", func(ctx echo.Context) error {
-		status := http.StatusOK
-		err := c.DB.Ping(ctx.Request().Context())
-		if err != nil {
-			c.getLog(ctx).WithError(err).Warn("failed to ping database")
-			status = http.StatusInternalServerError
-		}
 
-		result := map[string]interface{}{
-			"dbHealthy":  err == nil,
-			"apiHealthy": true,
-			"revision":   build.Revision,
-			"buildTime":  build.BuildTime,
-			"serverTime": c.Clock.Now().UTC(),
-		}
-
-		if build.Release != "" {
-			result["release"] = build.Release
-		} else {
-			result["release"] = nil
-		}
-
-		return ctx.JSON(status, result)
-	})
+	// Handle both GET and HEAD requests so that uptimerobot doesn't spam error
+	// logs.
+	api.GET("/health", c.handleHealth)
+	api.HEAD("/health", c.handleHealth)
 
 	baseParty := api.Group("", func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) (returnErr error) {
