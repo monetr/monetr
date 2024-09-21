@@ -58,13 +58,33 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				return next(ctx)
 			}
 
-			log := c.Log.WithFields(logrus.Fields{
-				"method":    ctx.Request().Method,
-				"path":      ctx.Path(),
-				"requestId": util.GetRequestID(ctx),
-			})
+			// Log after the request completes, this way we have information about the
+			// authenticated user (if there is one).
+			defer func(ctx echo.Context) {
+				log := c.Log.WithFields(logrus.Fields{
+					"method":    ctx.Request().Method,
+					"path":      ctx.Path(),
+					"requestId": util.GetRequestID(ctx),
+				})
 
-			log.Debugf("%s %s", ctx.Request().Method, ctx.Path())
+				claims, err := c.getClaims(ctx)
+				if err == nil {
+					if claims.LoginId != "" {
+						log = log.WithField("loginId", claims.LoginId)
+					}
+					if claims.AccountId != "" {
+						log = log.WithField("accountId", claims.AccountId)
+					}
+					if claims.UserId != "" {
+						log = log.WithField("userId", claims.UserId)
+					}
+					if claims.Scope != "" {
+						log = log.WithField("scope", claims.Scope)
+					}
+				}
+
+				log.Debugf("%s %s", ctx.Request().Method, ctx.Path())
+			}(ctx)
 
 			return next(ctx)
 		}
