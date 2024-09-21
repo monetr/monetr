@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.18.3](https://github.com/monetr/monetr/compare/v0.18.2...v0.18.3) (2024-09-21)
+
+
+### Features
+
+* **api:** Improve request logging ([350117c](https://github.com/monetr/monetr/commit/350117c40d13059865f139acea5e42b62f39e0a5))
+
+
+### Dependencies
+
+* **api:** update module github.com/prometheus/client_golang to v1.20.4 ([#1946](https://github.com/monetr/monetr/issues/1946)) ([0e978ee](https://github.com/monetr/monetr/commit/0e978ee2ba05d630b67ac1325701ae5205b68a17))
+
+
+### Bug Fixes
+
+* **api:** Reduce log noise. ([4ac4d21](https://github.com/monetr/monetr/commit/4ac4d21d1d031c335cf3d4276b48b118634e0508))
+
 ## [0.18.2](https://github.com/monetr/monetr/compare/v0.18.1...v0.18.2) (2024-09-21)
 
 
