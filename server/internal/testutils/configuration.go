@@ -30,7 +30,6 @@ func GetConfig(t *testing.T) config.Configuration {
 			Verification: config.EmailVerification{
 				Enabled:       false,
 				TokenLifetime: 10 * time.Second,
-				TokenSecret:   gofakeit.Generate("????????????????"),
 			},
 			Domain: TestEmailDomain,
 			SMTP:   config.SMTPClient{},
@@ -50,4 +49,3 @@ func GetConfig(t *testing.T) config.Configuration {
 		},
 	}
 }
-

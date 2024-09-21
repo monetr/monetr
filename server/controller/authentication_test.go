@@ -322,7 +322,6 @@ func TestLogin(t *testing.T) {
 		config.Email.Enabled = true
 		config.Email.Verification.Enabled = true
 		config.Email.Verification.TokenLifetime = 5 * time.Second
-		config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????/")
 		config.Email.Domain = "monetr.mini"
 		app, e := NewTestApplicationWithConfig(t, config)
 
@@ -954,7 +953,6 @@ func TestRegister(t *testing.T) {
 		config.Email.Enabled = true
 		config.Email.Verification.Enabled = true
 		config.Email.Verification.TokenLifetime = 5 * time.Second
-		config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????")
 		config.Email.Domain = "monetr.mini"
 		app, e := NewTestApplicationWithConfig(t, config)
 
@@ -1041,7 +1039,6 @@ func TestVerifyEmail(t *testing.T) {
 	config.Email.Enabled = true
 	config.Email.Verification.Enabled = true
 	config.Email.Verification.TokenLifetime = 5 * time.Second
-	config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????")
 	config.Email.Domain = "monetr.mini"
 
 	t.Run("happy path", func(t *testing.T) {
@@ -1316,7 +1313,6 @@ func TestResendVerificationEmail(t *testing.T) {
 	config.Email.Enabled = true
 	config.Email.Verification.Enabled = true
 	config.Email.Verification.TokenLifetime = 2 * time.Second
-	config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????")
 	config.Email.Domain = "monetr.local"
 
 	t.Run("happy path", func(t *testing.T) {
@@ -1402,7 +1398,6 @@ func TestSendForgotPassword(t *testing.T) {
 	conf.Email.Enabled = true
 	conf.Email.ForgotPassword.Enabled = true
 	conf.Email.ForgotPassword.TokenLifetime = 5 * time.Second
-	conf.Email.ForgotPassword.TokenSecret = gofakeit.Generate("????????????????????????")
 	conf.Email.Domain = "monetr.mini"
 
 	t.Run("sends email for real login", func(t *testing.T) {
@@ -1452,7 +1447,6 @@ func TestSendForgotPassword(t *testing.T) {
 		verificationConf := conf
 		verificationConf.Email.Verification.Enabled = true
 		verificationConf.Email.Verification.TokenLifetime = time.Second * 10
-		verificationConf.Email.Verification.TokenSecret = gofakeit.UUID()
 		app, e := NewTestApplicationWithConfig(t, verificationConf)
 
 		// There should be one email sent for verification
@@ -1486,7 +1480,6 @@ func TestSendForgotPassword(t *testing.T) {
 		verificationConf := conf
 		verificationConf.Email.Verification.Enabled = true
 		verificationConf.Email.Verification.TokenLifetime = time.Second * 10
-		verificationConf.Email.Verification.TokenSecret = gofakeit.UUID()
 		app, e := NewTestApplicationWithConfig(t, verificationConf)
 
 		MustSendVerificationEmail(t, app, 1)
@@ -1604,7 +1597,6 @@ func TestResetPassword(t *testing.T) {
 	conf.Email.Enabled = true
 	conf.Email.ForgotPassword.Enabled = true
 	conf.Email.ForgotPassword.TokenLifetime = 5 * time.Second
-	conf.Email.ForgotPassword.TokenSecret = gofakeit.Generate("????????????????????????")
 	conf.Email.Domain = "monetr.mini"
 
 	t.Run("happy path", func(t *testing.T) {

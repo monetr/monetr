@@ -31,7 +31,6 @@ func TestNewApp(t *testing.T) {
 			Verification: config.EmailVerification{
 				Enabled:       false,
 				TokenLifetime: 10 * time.Second,
-				TokenSecret:   gofakeit.Generate("????????????????"),
 			},
 			Domain: "monetr.local",
 			SMTP:   config.SMTPClient{},

@@ -66,10 +66,6 @@ func setupStorage(
 		gcsConfig := configuration.Storage.GCS
 
 		options := make([]option.ClientOption, 0)
-		if gcsConfig.APIKey != nil && *gcsConfig.APIKey != "" {
-			options = append(options, option.WithAPIKey(*gcsConfig.APIKey))
-		}
-
 		if gcsConfig.CredentialsJSON != nil && *gcsConfig.CredentialsJSON != "" {
 			options = append(options, option.WithCredentialsFile(*gcsConfig.CredentialsJSON))
 		}

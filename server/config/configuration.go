@@ -74,19 +74,19 @@ type Storage struct {
 }
 
 type S3Storage struct {
+	AccessKey         *string `yaml:"accessKey"`
 	Endpoint          *string `yaml:"endpoint"`
-	Bucket            string  `yaml:"bucket"`
-	UseEnvCredentials bool    `yaml:"useEnvCredentials"`
 	Region            string  `yaml:"region"`
-	ForcePathStyle    bool    `yaml:"forcePathStyle"`
-	AccessKey         *string `yaml:"accessKeyId"`
-	SecretKey         *string `yaml:"secretAccessKey"`
+	SecretKey         *string `yaml:"secretKey"`
+	UseEnvCredentials bool    `yaml:"useEnvCredentials"`
+
+	Bucket         string `yaml:"bucket"`
+	ForcePathStyle bool   `yaml:"forcePathStyle"`
 }
 
 type GCSStorage struct {
 	Bucket          string  `yaml:"bucket"`
-	APIKey          *string `yaml:"apiKey"`
-	CredentialsJSON *string `yaml:"credentialsFile"`
+	CredentialsJSON *string `yaml:"credentialsJSON"`
 }
 
 type FilesystemStorage struct {
@@ -139,8 +139,6 @@ type EmailVerification struct {
 	Enabled bool `yaml:"enabled"`
 	// Specify the amount of time that an email verification link is valid.
 	TokenLifetime time.Duration `yaml:"tokenLifetime"`
-	// The secret used to generate verification tokens and validate them.
-	TokenSecret string `yaml:"tokenSecret"`
 }
 
 type ForgotPassword struct {
@@ -148,8 +146,6 @@ type ForgotPassword struct {
 	Enabled bool `yaml:"enabled"`
 	// Specify the amount of time that a password reset link will be valid.
 	TokenLifetime time.Duration `yaml:"tokenLifetime"`
-	// Specify a secret used to generate the password reset links as well as validate them.
-	TokenSecret string `yaml:"tokenSecret"`
 }
 
 type SMTPClient struct {
@@ -197,21 +193,12 @@ type Plaid struct {
 	ClientID     string            `yaml:"clientId"`
 	ClientSecret string            `yaml:"clientSecret"`
 	Environment  plaid.Environment `yaml:"environment"`
-	// This does not seem to be a scope within the documentation. Per the
-	// documentation "balance is not a valid product" and is enabled
-	// automatically. It is not clear if that includes this beta feature though.
-	EnableBalanceTransfers bool `yaml:"enableBalanceTransfers"`
 
 	// EnableReturningUserExperience changes the required data for sign up. If
 	// this is enabled then the user must provide their full legal name as well
 	// as their phone number.
 	// If enabled; email address and phone number verification is REQUIRED.
 	EnableReturningUserExperience bool `yaml:"enableReturningUserExperience"`
-
-	// EnableBirthdatePrompt will allow users to provide their birthday during
-	// sign up or afterwards in their user settings. This is used by plaid for
-	// future products. At the time of writing this it does not do anything.
-	EnableBirthdatePrompt bool `yaml:"enableBirthdatePrompt"`
 
 	WebhooksEnabled bool   `yaml:"webhooksEnabled"`
 	WebhooksDomain  string `yaml:"webhooksDomain"`
@@ -235,14 +222,15 @@ type CORS struct {
 	Debug          bool     `yaml:"debug"`
 }
 
-// Redis defines the config used to connect to a redis for our worker pool. If these are left blank or default then we
-// will instead use a mock redis pool that is internal only. This is fine for single instance deployments, but anytime
-// more than one instance of the API is running a redis instance will be required.
+// Redis defines the config used to connect to a redis for our worker pool. If
+// these are left blank or default then we will instead use a mock redis pool
+// that is internal only. This is fine for single instance deployments, but
+// anytime more than one instance of the API is running a redis instance will be
+// required.
 type Redis struct {
-	Enabled   bool   `yaml:"enabled"`
-	Address   string `yaml:"address"`
-	Port      int    `yaml:"port"`
-	Namespace string `yaml:"namespace"`
+	Enabled bool   `yaml:"enabled"`
+	Address string `yaml:"address"`
+	Port    int    `yaml:"port"`
 }
 
 type Logging struct {
