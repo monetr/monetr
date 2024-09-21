@@ -12,7 +12,6 @@ import (
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v78"
@@ -28,7 +27,6 @@ type (
 		db           *pg.DB
 		publisher    pubsub.Publisher
 		billing      billing.Billing
-		stripe       stripe_helper.Stripe
 		enqueuer     JobEnqueuer
 		unmarshaller JobUnmarshaller
 		clock        clock.Clock
@@ -44,7 +42,6 @@ type (
 		repo      repository.BaseRepository
 		publisher pubsub.Publisher
 		billing   billing.Billing
-		stripe    stripe_helper.Stripe
 		clock     clock.Clock
 	}
 )
@@ -63,14 +60,12 @@ func NewReconcileSubscriptionHandler(
 	clock clock.Clock,
 	publisher pubsub.Publisher,
 	billing billing.Billing,
-	stripe stripe_helper.Stripe,
 	enqueuer JobEnqueuer,
 ) *ReconcileSubscriptionHandler {
 	return &ReconcileSubscriptionHandler{
 		log:          log,
 		db:           db,
 		publisher:    publisher,
-		stripe:       stripe,
 		enqueuer:     enqueuer,
 		unmarshaller: DefaultJobUnmarshaller,
 		clock:        clock,
@@ -108,7 +103,6 @@ func (h *ReconcileSubscriptionHandler) HandleConsumeJob(
 		h.clock,
 		h.publisher,
 		h.billing,
-		h.stripe,
 		args,
 	)
 	if err != nil {
@@ -131,6 +125,7 @@ func (h *ReconcileSubscriptionHandler) EnqueueTriggeredJob(
 	var accounts []Account
 	cutoff := h.clock.Now().Add(-12 * time.Hour)
 	err := h.db.ModelContext(ctx, &accounts).
+		Where(`"account"."stripe_customer_id" IS NOT NULL`).
 		Where(`"account"."stripe_subscription_id" IS NOT NULL`).
 		Where(`"account"."subscription_active_until" < now()`).
 		Where(`"account"."subscription_status" = ?`, stripe.SubscriptionStatusActive).
@@ -178,7 +173,6 @@ func NewReoncileSubscriptionJob(
 	clock clock.Clock,
 	publisher pubsub.Publisher,
 	billing billing.Billing,
-	stripe stripe_helper.Stripe,
 	args ReconcileSubscriptionArguments,
 ) (*ReconcileSubscriptionJob, error) {
 	return &ReconcileSubscriptionJob{
@@ -187,7 +181,6 @@ func NewReoncileSubscriptionJob(
 		repo:      repo,
 		publisher: publisher,
 		billing:   billing,
-		stripe:    stripe,
 		clock:     clock,
 	}, nil
 }
@@ -196,67 +189,5 @@ func (j *ReconcileSubscriptionJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
-	log := j.log.WithContext(ctx).WithFields(logrus.Fields{
-		"accountId": j.args.AccountId,
-	})
-
-	account, err := j.repo.GetAccount(span.Context())
-	if err != nil {
-		return err
-	}
-
-	if account.StripeSubscriptionId == nil {
-		log.Warn("stripe subscription ID is nil, cannot reconcile account's subscription")
-		return nil
-	}
-
-	subscription, err := j.stripe.GetSubscription(
-		span.Context(),
-		*account.StripeSubscriptionId,
-	)
-	if err != nil {
-		log.WithError(err).Error("failed to retrieve subscription from stripe for recon")
-		return err
-	}
-
-	currentStatus := *account.SubscriptionStatus
-	actualStatus := subscription.Status
-
-	currentActiveUntil := *account.SubscriptionActiveUntil
-	actualActiveUntil := time.Unix(subscription.CurrentPeriodEnd, 0)
-
-	currentSubscriptionId := *account.StripeSubscriptionId
-	actualSubscriptionId := account.StripeSubscriptionId
-	if actualStatus == stripe.SubscriptionStatusCanceled {
-		actualSubscriptionId = nil
-	}
-
-	log.WithFields(logrus.Fields{
-		"status": map[string]any{
-			"old": currentStatus,
-			"new": actualStatus,
-		},
-		"activeUntil": map[string]any{
-			"old": currentActiveUntil,
-			"new": actualActiveUntil,
-		},
-		"subscriptionId": map[string]any{
-			"old": currentSubscriptionId,
-			"new": actualSubscriptionId,
-		},
-	}).Info("subscription is being reconciled")
-
-	if err := j.billing.UpdateCustomerSubscription(
-		span.Context(),
-		account,
-		*account.StripeCustomerId,
-		currentSubscriptionId,
-		subscription.Status,
-		&actualActiveUntil,
-		j.clock.Now(),
-	); err != nil {
-		return err
-	}
-
-	return nil
+	return j.billing.ReconcileSubscription(span.Context(), j.args.AccountId)
 }

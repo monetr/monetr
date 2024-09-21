@@ -11,7 +11,6 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/storage"
-	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/sirupsen/logrus"
 )
 
@@ -58,7 +57,6 @@ func NewBackgroundJobs(
 	kms secrets.KeyManagement,
 	fileStorage storage.Storage,
 	billing billing.Billing,
-	stripe stripe_helper.Stripe,
 ) (*BackgroundJobs, error) {
 	var enqueuer JobEnqueuer
 	var processor JobProcessor
@@ -97,7 +95,6 @@ func NewBackgroundJobs(
 				clock,
 				publisher,
 				billing,
-				stripe,
 				enqueuer,
 			),
 		)

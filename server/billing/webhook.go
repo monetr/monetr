@@ -63,6 +63,11 @@ func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Even
 			log.WithError(err).Errorf("failed to extract customer from json")
 			return errors.Wrap(err, "failed to extract customer from json")
 		}
+		log = log.WithFields(logrus.Fields{
+			"stripe": logrus.Fields{
+				"customerId": customer.ID,
+			},
+		})
 
 		account, err := b.accounts.GetAccountByCustomerId(span.Context(), customer.ID)
 		if err != nil {
@@ -74,6 +79,10 @@ func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Even
 			// We don't want this to be treated as an error. There is nothing we can do about it.
 			return nil
 		}
+
+		log = log.WithFields(logrus.Fields{
+			"accountId": account.AccountId,
+		})
 
 		crumbs.IncludeUserInScope(span.Context(), account.AccountId)
 
@@ -90,6 +99,8 @@ func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Even
 			log.WithError(err).Errorf("failed to remove customer Id from account")
 			return errors.Wrap(err, "failed to remove customer Id from account")
 		}
+
+		log.Info("removed stripe customer details from account")
 
 		return nil
 	default:

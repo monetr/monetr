@@ -113,6 +113,13 @@ type Billing interface {
 	// account. It then returns true or false indicating whether the subscription is
 	// now active.
 	AfterCheckout(ctx context.Context, accountId ID[Account], checkoutSessionId string) (active bool, _ error)
+
+	// ReconcileSubscription takes an account who _should_ have a subscription
+	// associated with it but might not. If the account does not have a subscription
+	// then nothing is done and nil is returned. If the account does have a
+	// subscription then the subscription is retrieved from stripe and the details
+	// of the subscription are persisted to the account as represented by stripe.
+	ReconcileSubscription(ctx context.Context, accountId ID[Account]) error
 }
 
 // SubscriptionIsActive is a helper function that takes in a Stripe subscription
