@@ -2,6 +2,7 @@ package billing
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"time"
 
@@ -77,10 +78,12 @@ func (b *baseBilling) CreateCheckout(
 	}
 
 	// Success url is the URL they'll be brought to after they complete the
-	// checkout.
-	successUrl := b.config.Server.GetURL("/account/subscribe/after", map[string]string{
-		"session": "{CHECKOUT_SESSION_ID}",
-	})
+	// checkout. Don't URL encode the checkout session ID because stripe needs it
+	// directly.
+	successUrl := fmt.Sprintf(
+		"%s?session={CHECKOUT_SESSION_ID}",
+		b.config.Server.GetURL("/account/subscribe/after", nil),
+	)
 	// Cancel URL is where they will be brought if they chose to not complete the
 	// checkout.
 	cancelUrl := b.config.Server.GetURL("/account/subscribe", nil)

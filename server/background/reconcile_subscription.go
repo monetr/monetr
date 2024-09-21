@@ -66,6 +66,7 @@ func NewReconcileSubscriptionHandler(
 		log:          log,
 		db:           db,
 		publisher:    publisher,
+		billing:      billing,
 		enqueuer:     enqueuer,
 		unmarshaller: DefaultJobUnmarshaller,
 		clock:        clock,
@@ -97,7 +98,7 @@ func (h *ReconcileSubscriptionHandler) HandleConsumeJob(
 		args.AccountId,
 		h.db,
 	)
-	job, err := NewReoncileSubscriptionJob(
+	job, err := NewReconcileSubscriptionJob(
 		log,
 		repo,
 		h.clock,
@@ -167,7 +168,7 @@ func (h *ReconcileSubscriptionHandler) EnqueueTriggeredJob(
 	return nil
 }
 
-func NewReoncileSubscriptionJob(
+func NewReconcileSubscriptionJob(
 	log *logrus.Entry,
 	repo repository.BaseRepository,
 	clock clock.Clock,

@@ -335,15 +335,24 @@ func (p *postgresJobProcessor) prepareCronJobTable() error {
 			}).
 				OnConflict(`("queue") DO UPDATE`).
 				Set(`"cron_schedule" = ?`, cronJob.DefaultSchedule()).
+				// If a cron schedule is updated such that it should execute sooner,
+				// then update the next run at to be that sooner timestamp. Otherwise
+				// keep the current timestamp if it is sooner.
+				Set(`"next_run_at" = least(EXCLUDED."next_run_at", ?)`, nextRunAt).
+				// But only update the cron job if the next run at or cron schedule
+				// field would actually change.
+				Where(`"cron_job"."next_run_at" != least("cron_job"."next_run_at", ?)`, nextRunAt).
+				WhereOr(`"cron_job"."cron_schedule" != ?`, cronJob.DefaultSchedule()).
+				Returning("NULL").
 				Insert()
 			if err != nil {
 				return errors.Wrapf(err, "failed to provision cron job: %s", cronJob)
 			}
 
 			if result.RowsAffected() == 0 {
-				log.Trace("cron job already exists and did not need updating")
+				log.Debug("cron job already exists and did not need updating")
 			} else {
-				log.Debug("cron job was updated")
+				log.Info("cron job was updated")
 			}
 		}
 
