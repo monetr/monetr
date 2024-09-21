@@ -160,7 +160,7 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 
 	c := &controller.Controller{
 		Accounts:                 accountsRepo,
-		Billing:                  bill, // TODO Setup billing
+		Billing:                  bill,
 		Cache:                    cachePool,
 		Captcha:                  recaptcha,
 		ClientTokens:             clientTokens,
