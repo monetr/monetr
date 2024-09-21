@@ -19,8 +19,9 @@ import (
 	"github.com/stripe/stripe-go/v78"
 )
 
-// Billing is used by the Stripe webhooks to maintain a subscription's status within our application. As the status
-// of subscription's change or update these functions can be used to keep the status up to date within monetr.
+// Billing is used by the Stripe webhooks to maintain a subscription's status
+// within our application. As the status of subscription's change or update
+// these functions can be used to keep the status up to date within monetr.
 type Billing interface {
 	// UpdateSubscription will set the Stripe customer Id and subscription Id on
 	// the account object. It will also set the active until date for the account.
@@ -89,6 +90,44 @@ type Billing interface {
 	// object. If the account provided already has a Stripe customer associated
 	// with it then this function will do nothing and return nil.
 	CreateCustomer(ctx context.Context, owner Login, account *Account) error
+
+	// CreateCheckout takes a Login object that represents the "billing owner" as
+	// well as an account ID and an optional cancel path. If the specified account
+	// has a subscription at all then this function will return an error. If the
+	// subscription is active it will return an `ErrSubscriptionAlreadyActive` and
+	// if the subscription is not active but exists it will return
+	// `ErrSubscriptionAlreadyExists`. Both of these errors should be treated as an
+	// indication that the user cannot use the checkout to establish billing.
+	// Instead a billing portal should be created. If the optional cancel path is
+	// specified then that will be used for the non-success return route from the
+	// checkout. The default is `/account/subscribe` if one is not provided. The
+	// success path of the checkout will always be `/account/subscribe/after` and
+	// cannot be overwritten.
+	CreateCheckout(ctx context.Context, owner Login, accountId ID[Account], cancelPath *string) (*stripe.CheckoutSession, error)
+
+	// AfterCheckout is called when the user is directed back to the application
+	// after completing a checkout in stripe. This function takes the checkout
+	// session ID that is returned during the success redirect from stripe. This
+	// function then checks to see if the user completed their subscription as part
+	// of the checkout and takes their subscription status and stores it on the
+	// account. It then returns true or false indicating whether the subscription is
+	// now active.
+	AfterCheckout(ctx context.Context, accountId ID[Account], checkoutSessionId string) (active bool, _ error)
+}
+
+// SubscriptionIsActive is a helper function that takes in a Stripe subscription
+// object and returns true or false based on the state of that object's
+// subscription. This is used to handle scenarios where multiple factors could
+// lead to a subscription being active or inactive. At the time of writing this
+// it will return active if the subscription is in an active state, or is
+// trialing.
+func SubscriptionIsActive(subscription stripe.Subscription) bool {
+	switch subscription.Status {
+	case stripe.SubscriptionStatusActive, stripe.SubscriptionStatusTrialing:
+		return true
+	default:
+		return false
+	}
 }
 
 var (
@@ -172,14 +211,15 @@ func (b *baseBilling) UpdateCustomerSubscription(
 		"accountId":      account.AccountId,
 	})
 
-	// Set the user for this event, this way webhooks are properly associated with the destination user in our
-	// application.
+	// Set the user for this event, this way webhooks are properly associated with
+	// the destination user in our application.
 	crumbs.IncludeUserInScope(span.Context(), account.AccountId)
 
 	currentlyActive := account.IsSubscriptionActive(b.clock.Now())
 
-	// If the timestamp for the last webhook is not nil, and the provided timestamp is not after (<= basically) then
-	// perform the update. This is to solve potential race conditions in the order we receive webhooks from Stripe.
+	// If the timestamp for the last webhook is not nil, and the provided
+	// timestamp is not after (<= basically) then perform the update. This is to
+	// solve potential race conditions in the order we receive webhooks from Stripe.
 	if account.StripeWebhookLatestTimestamp != nil {
 		if timestamp.Before(*account.StripeWebhookLatestTimestamp) {
 			crumbs.Debug(span.Context(), "Provided timestamp is older than the current subscription timestamp", map[string]interface{}{
@@ -221,10 +261,12 @@ func (b *baseBilling) UpdateCustomerSubscription(
 		// Otherwise do this. If its adding a value great, otherwise itll update the existing value and overwrite it.
 		account.StripeSubscriptionId = &subscriptionId
 	}
-	// Add 24 hours to the subscription window. This way Stripe has time to process the subscription payment and update
-	// the status for us even if things are running a bit slow. This resolves an issue where the active until date can
-	// pass before Stripe has processed the renewal. Causing (usually) around an hour or more of time where monetr
-	// believed the subscription to not be active anymore.
+	// Add 24 hours to the subscription window. This way Stripe has time to
+	// process the subscription payment and update the status for us even if things
+	// are running a bit slow. This resolves an issue where the active until date
+	// can pass before Stripe has processed the renewal. Causing (usually) around an
+	// hour or more of time where monetr believed the subscription to not be active
+	// anymore.
 	account.SubscriptionActiveUntil = myownsanity.TimeP(activeUntil.Add(24 * time.Hour))
 	account.StripeWebhookLatestTimestamp = &timestamp
 	account.SubscriptionStatus = &status
