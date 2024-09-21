@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/go-pg/pg/v10"
@@ -51,6 +52,13 @@ func (l Login) VerifyTOTP(input string, now time.Time) error {
 	}
 
 	return errors.WithStack(ErrTOTPNotValid)
+}
+
+func (l Login) Name() string {
+	return strings.TrimSpace(strings.Join([]string{
+		l.FirstName,
+		l.LastName,
+	}, " "))
 }
 
 type LoginWithHash struct {

@@ -5,46 +5,15 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/monetr/monetr/server/pubsub"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v78"
 )
 
-type StripeWebhookHandler interface {
-	HandleWebhook(ctx context.Context, event stripe.Event) error
-}
-
-var (
-	_ StripeWebhookHandler = &baseStripeWebhookHandler{}
-)
-
-type baseStripeWebhookHandler struct {
-	log                  *logrus.Entry
-	repo                 AccountRepository
-	billing              BasicBilling
-	billingNotifications pubsub.PublishSubscribe
-}
-
-func NewStripeWebhookHandler(
-	log *logrus.Entry,
-	accountRepo AccountRepository,
-	billing BasicBilling,
-	publisher pubsub.PublishSubscribe,
-) StripeWebhookHandler {
-	return &baseStripeWebhookHandler{
-		log:                  log,
-		repo:                 accountRepo,
-		billing:              billing,
-		billingNotifications: publisher,
-	}
-}
-
-func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stripe.Event) error {
-	span := sentry.StartSpan(ctx, "Stripe - Handle Webhook")
+func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Event) error {
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	log := b.log.WithContext(span.Context()).WithFields(logrus.Fields{
@@ -75,7 +44,7 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 
 		validUntil := myownsanity.TimeP(time.Unix(subscription.CurrentPeriodEnd, 0))
 
-		if err := b.billing.UpdateSubscription(
+		if err := b.UpdateSubscription(
 			span.Context(),
 			subscription.Customer.ID, subscription.ID,
 			subscription.Status,
@@ -94,8 +63,13 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 			log.WithError(err).Errorf("failed to extract customer from json")
 			return errors.Wrap(err, "failed to extract customer from json")
 		}
+		log = log.WithFields(logrus.Fields{
+			"stripe": logrus.Fields{
+				"customerId": customer.ID,
+			},
+		})
 
-		account, err := b.repo.GetAccountByCustomerId(span.Context(), customer.ID)
+		account, err := b.accounts.GetAccountByCustomerId(span.Context(), customer.ID)
 		if err != nil {
 			log.WithError(err).Warn("failed to retrieve account by customer Id")
 			crumbs.Warn(span.Context(), "Failed to retrieve an account for this provided customer Id", "stripe", map[string]interface{}{
@@ -105,6 +79,10 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 			// We don't want this to be treated as an error. There is nothing we can do about it.
 			return nil
 		}
+
+		log = log.WithFields(logrus.Fields{
+			"accountId": account.AccountId,
+		})
 
 		crumbs.IncludeUserInScope(span.Context(), account.AccountId)
 
@@ -117,10 +95,12 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 		account.StripeSubscriptionId = nil
 		account.StripeWebhookLatestTimestamp = &timestamp
 
-		if err = b.repo.UpdateAccount(span.Context(), account); err != nil {
+		if err = b.accounts.UpdateAccount(span.Context(), account); err != nil {
 			log.WithError(err).Errorf("failed to remove customer Id from account")
 			return errors.Wrap(err, "failed to remove customer Id from account")
 		}
+
+		log.Info("removed stripe customer details from account")
 
 		return nil
 	default:

@@ -17,15 +17,19 @@ import (
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/cache"
+	"github.com/monetr/monetr/server/captcha"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/controller"
 	"github.com/monetr/monetr/server/internal/source"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/stripe_helper"
+	"github.com/monetr/monetr/server/ui"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -179,9 +183,23 @@ func RunServer() error {
 		return err
 	}
 
+	var pubSub pubsub.PublishSubscribe
+	{ // At the moment only postgresql publish and subscribe is supported.
+		pubSub = pubsub.NewPostgresPubSub(log, db)
+	}
+
+	var accountsRepo repository.AccountsRepository
+	{ // Create the accounts repository that will be used by many things.
+		accountsRepo = repository.NewAccountRepository(
+			log,
+			redisCache,
+			db,
+		)
+	}
+
 	var stripe stripe_helper.Stripe
-	var basicPaywall billing.BasicPayWall
-	if configuration.Stripe.Enabled {
+	var bill billing.Billing
+	if configuration.Stripe.IsBillingEnabled() {
 		log.Debug("stripe is enabled, creating client")
 		stripe = stripe_helper.NewStripeHelperWithCache(
 			log,
@@ -189,17 +207,14 @@ func RunServer() error {
 			redisCache,
 		)
 
-		accountRepo := billing.NewAccountRepository(
+		bill = billing.NewBilling(
 			log,
-			redisCache,
-			db,
+			clock,
+			configuration,
+			accountsRepo,
+			stripe,
+			pubSub,
 		)
-
-		basicPaywall = billing.NewBasicPaywall(log, clock, accountRepo)
-	}
-
-	if configuration.Stripe.Enabled && configuration.Stripe.WebhooksEnabled {
-		log.Debugf("stripe webhooks are enabled and will be sent to: %s", configuration.Stripe.WebhooksDomain)
 	}
 
 	kms, err := getKMS(log, configuration)
@@ -217,6 +232,28 @@ func RunServer() error {
 		plaidClient = platypus.NewPlaid(log, clock, kms, db, configuration.Plaid)
 	}
 
+	plaidInstitutions := platypus.NewPlaidInstitutionWrapper(
+		log,
+		plaidClient,
+		redisCache,
+	)
+
+	plaidWebhooks := platypus.NewInMemoryWebhookVerification(
+		log,
+		plaidClient,
+		1*time.Hour,
+	)
+
+	var recaptcha captcha.Verification
+	if configuration.ReCAPTCHA.Enabled {
+		recaptcha, err = captcha.NewReCAPTCHAVerification(
+			configuration.ReCAPTCHA.PrivateKey,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	var email communication.EmailCommunication
 	if configuration.Email.Enabled {
 		email = communication.NewEmailCommunication(log, configuration)
@@ -231,10 +268,11 @@ func RunServer() error {
 			clock,
 			configuration,
 			db,
-			pubsub.NewPostgresPubSub(log, db),
+			pubSub,
 			plaidClient,
 			kms,
 			fileStorage,
+			bill,
 		)
 		if err != nil {
 			cancel()
@@ -254,22 +292,33 @@ func RunServer() error {
 		}
 	}()
 
-	app := application.NewApp(configuration, getControllers(
-		log,
-		configuration,
-		db,
-		backgroundJobs,
-		plaidClient,
-		stats,
-		stripe,
-		redisController.Pool(),
-		kms,
-		basicPaywall,
-		email,
-		clientTokens,
-		fileStorage,
-		clock,
-	)...)
+	applicationControllers := []application.Controller{
+		&controller.Controller{
+			Accounts:                 accountsRepo,
+			Billing:                  bill,
+			Cache:                    redisCache,
+			Captcha:                  recaptcha,
+			ClientTokens:             clientTokens,
+			Clock:                    clock,
+			Configuration:            configuration,
+			DB:                       db,
+			Email:                    email,
+			FileStorage:              fileStorage,
+			JobRunner:                backgroundJobs,
+			KMS:                      kms,
+			Log:                      log,
+			Plaid:                    plaidClient,
+			PlaidInstitutions:        plaidInstitutions,
+			PlaidWebhookVerification: plaidWebhooks,
+			PubSub:                   pubSub,
+			Stats:                    stats,
+			Stripe:                   stripe,
+		},
+		ui.NewUIController(log, configuration),
+	}
+
+	// Create the actual application for echo to run.
+	app := application.NewApp(configuration, applicationControllers...)
 
 	protocol := "http"
 	if configuration.Server.TLSCertificate != "" && configuration.Server.TLSKey != "" {

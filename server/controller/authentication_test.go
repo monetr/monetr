@@ -190,7 +190,6 @@ func TestLogin(t *testing.T) {
 	t.Run("trialing login", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Stripe.Enabled = true
-		config.Stripe.BillingEnabled = true
 		// Force the trial to be expired immediately.
 		config.Stripe.FreeTrialDays = 4
 		_, e := NewTestApplicationWithConfig(t, config)
@@ -212,7 +211,6 @@ func TestLogin(t *testing.T) {
 	t.Run("inactive subscription", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Stripe.Enabled = true
-		config.Stripe.BillingEnabled = true
 		// Force the trial to be expired immediately.
 		config.Stripe.FreeTrialDays = -1
 		_, e := NewTestApplicationWithConfig(t, config)
@@ -899,13 +897,10 @@ func TestRegister(t *testing.T) {
 	t.Run("with billing", func(t *testing.T) {
 		conf := NewTestApplicationConfig(t)
 		conf.Stripe.Enabled = true
-		conf.Stripe.BillingEnabled = true
 		conf.Stripe.APIKey = gofakeit.UUID()
 		conf.Stripe.FreeTrialDays = 30
 		conf.Stripe.InitialPlan = &config.Plan{
-			Visible:       true,
 			StripePriceId: mock_stripe.FakeStripePriceId(t),
-			Default:       true,
 		}
 
 		app, e := NewTestApplicationWithConfig(t, conf)

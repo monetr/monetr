@@ -160,7 +160,7 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve the specified link")
 	}
 
-	link.DeletedAt = myownsanity.TimeP(c.clock.Now().UTC())
+	link.DeletedAt = myownsanity.TimeP(c.Clock.Now().UTC())
 	if err := repo.UpdateLink(c.getContext(ctx), link); err != nil {
 		return c.wrapPgError(ctx, err, "failed to mark the link as deleted")
 	}
@@ -181,7 +181,7 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
 		}
 
-		client, err := c.plaid.NewClient(
+		client, err := c.Plaid.NewClient(
 			c.getContext(ctx),
 			link,
 			secret.Value,
@@ -202,7 +202,7 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		}
 	}
 
-	if err = background.TriggerRemoveLink(c.getContext(ctx), c.jobRunner, background.RemoveLinkArguments{
+	if err = background.TriggerRemoveLink(c.getContext(ctx), c.JobRunner, background.RemoveLinkArguments{
 		AccountId: link.AccountId,
 		LinkId:    link.LinkId,
 	}); err != nil {
@@ -238,7 +238,7 @@ func (c *Controller) waitForDeleteLink(ctx echo.Context) error {
 
 	channelName := fmt.Sprintf("link:remove:%s:%s", repo.AccountId(), linkId)
 
-	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
+	listener, err := c.PubSub.Subscribe(c.getContext(ctx), channelName)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to listen on channel")
 	}

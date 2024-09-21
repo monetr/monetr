@@ -35,7 +35,7 @@ func (c *Controller) storeLinkTokenInCache(
 	return errors.Wrap(
 		// Cache TTL's should not use the internal clock. Because redis has it's own
 		// clock.
-		c.cache.SetEzTTL(span.Context(), key, linkToken, time.Until(expiration)),
+		c.Cache.SetEzTTL(span.Context(), key, linkToken, time.Until(expiration)),
 		"failed to cache link token",
 	)
 }
@@ -50,7 +50,7 @@ func (c *Controller) checkCacheForLinkToken(
 
 	key := fmt.Sprintf("plaid:in_progress:%s:%s", userId, linkId)
 	var token string
-	if err := c.cache.GetEz(span.Context(), key, &token); err != nil {
+	if err := c.Cache.GetEz(span.Context(), key, &token); err != nil {
 		return "", errors.Wrap(err, "failed to retrieve cached link token")
 	}
 	return token, nil
@@ -66,7 +66,7 @@ func (c *Controller) removeLinkTokenFromCache(
 
 	key := fmt.Sprintf("plaid:in_progress:%s:%s", userId, linkId)
 	return errors.Wrap(
-		c.cache.Delete(span.Context(), key),
+		c.Cache.Delete(span.Context(), key),
 		"failed to remove cached link token",
 	)
 }
@@ -81,7 +81,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get user details for link")
 	}
 
-	if !c.configuration.Plaid.Enabled {
+	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 
@@ -99,14 +99,17 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 	}
 
 	// If there is a configured limit on Plaid links then enforce that limit.
-	if maxLinks := c.configuration.Links.MaxNumberOfLinks; maxLinks > 0 && numberOfLinks >= maxLinks {
+	if maxLinks := c.Configuration.Links.MaxNumberOfLinks; maxLinks > 0 && numberOfLinks >= maxLinks {
 		return c.badRequest(ctx, "max number of Plaid links already reached")
 	}
 
 	// If billing is enabled and the current account is trialing, then limit them to a single Plaid link until their
 	// trial has expired.
-	if c.configuration.Stripe.IsBillingEnabled() {
-		trialing, err := c.paywall.GetSubscriptionIsTrialing(c.getContext(ctx), c.mustGetAccountId(ctx))
+	if c.Configuration.Stripe.IsBillingEnabled() {
+		trialing, err := c.Billing.GetSubscriptionIsTrialing(
+			c.getContext(ctx),
+			c.mustGetAccountId(ctx),
+		)
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine trial status")
 		}
@@ -142,7 +145,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 	}
 
 	log.Trace("creating Plaid link token")
-	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), platypus.LinkTokenOptions{
+	token, err := c.Plaid.CreateLinkToken(c.getContext(ctx), platypus.LinkTokenOptions{
 		ClientUserID:             userId.String(),
 		LegalName:                legalName,
 		EmailAddress:             me.Login.Email,
@@ -168,7 +171,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 }
 
 func (c *Controller) putUpdatePlaidLink(ctx echo.Context) error {
-	if !c.configuration.Plaid.Enabled {
+	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 
@@ -202,7 +205,7 @@ func (c *Controller) putUpdatePlaidLink(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve user details")
 	}
 
-	client, err := c.plaid.NewClientFromLink(c.getContext(ctx), me.AccountId, linkId)
+	client, err := c.Plaid.NewClientFromLink(c.getContext(ctx), me.AccountId, linkId)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid client for link")
 	}
@@ -228,7 +231,7 @@ func (c *Controller) putUpdatePlaidLink(ctx echo.Context) error {
 }
 
 func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
-	if !c.configuration.Plaid.Enabled {
+	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 
@@ -257,7 +260,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		log.WithError(err).Warn("failed to remove link token from cache")
 	}
 
-	result, err := c.plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
+	result, err := c.Plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
 	}
@@ -304,7 +307,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 
 	// If there are any new bank accounts due to the updated selection.
 	if len(newBankAccountPlaidIds) > 0 {
-		client, err := c.plaid.NewClientFromLink(c.getContext(ctx), link.AccountId, link.LinkId)
+		client, err := c.Plaid.NewClientFromLink(c.getContext(ctx), link.AccountId, link.LinkId)
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client for link")
 		}
@@ -353,7 +356,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		}
 	}
 
-	err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+	err = background.TriggerSyncPlaid(c.getContext(ctx), c.JobRunner, background.SyncPlaidArguments{
 		AccountId: link.AccountId,
 		LinkId:    link.LinkId,
 	})
@@ -365,7 +368,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 }
 
 func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
-	if !c.configuration.Plaid.Enabled {
+	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 
@@ -399,7 +402,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	}
 
 	log.Debug("exchanging public token for plaid access token")
-	result, err := c.plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
+	result, err := c.Plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
 	}
@@ -407,8 +410,8 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	var webhook string
-	if c.configuration.Plaid.WebhooksEnabled {
-		webhook = c.configuration.Plaid.GetWebhooksURL()
+	if c.Configuration.Plaid.WebhooksEnabled {
+		webhook = c.Configuration.Plaid.GetWebhooksURL()
 		if webhook == "" {
 			log.Errorf("plaid webhooks are enabled, but they cannot be registered with without a domain")
 		}
@@ -448,7 +451,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	}
 
 	// Create a plaid client for the new link.
-	client, err := c.plaid.NewClient(c.getContext(ctx), &link, result.AccessToken, result.ItemId)
+	client, err := c.Plaid.NewClient(c.getContext(ctx), &link, result.AccessToken, result.ItemId)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid client")
 	}
@@ -463,7 +466,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusInternalServerError, "could not retrieve details for any accounts")
 	}
 
-	now := c.clock.Now().UTC()
+	now := c.Clock.Now().UTC()
 	accounts := make([]*BankAccount, len(plaidAccounts))
 	for i := range plaidAccounts {
 		plaidAccount := plaidAccounts[i]
@@ -501,8 +504,8 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create bank accounts")
 	}
 
-	if !c.configuration.Plaid.WebhooksEnabled {
-		err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+	if !c.Configuration.Plaid.WebhooksEnabled {
+		err = background.TriggerSyncPlaid(c.getContext(ctx), c.JobRunner, background.SyncPlaidArguments{
 			AccountId: link.AccountId,
 			LinkId:    link.LinkId,
 		})
@@ -518,7 +521,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 }
 
 func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
-	if !c.configuration.Plaid.Enabled {
+	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 	linkId, err := ParseID[Link](ctx.Param("linkId"))
@@ -526,7 +529,7 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 		return c.badRequest(ctx, "must specify a valid link Id")
 	}
 
-	log := c.log.WithFields(logrus.Fields{
+	log := c.Log.WithFields(logrus.Fields{
 		"accountId": c.mustGetAccountId(ctx),
 		"linkId":    linkId,
 	})
@@ -549,7 +552,7 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 
 	channelName := fmt.Sprintf("initial:plaid:link:%s:%s", link.AccountId, link.LinkId)
 
-	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
+	listener, err := c.PubSub.Subscribe(c.getContext(ctx), channelName)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to listen on channel")
 	}
@@ -586,7 +589,7 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 }
 
 func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
-	if !c.configuration.Plaid.Enabled {
+	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 
@@ -620,16 +623,16 @@ func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
 	}
 
 	plaidLink := link.PlaidLink
-	if lastManualSync := plaidLink.LastManualSync; lastManualSync != nil && lastManualSync.After(c.clock.Now().Add(-30*time.Minute)) {
+	if lastManualSync := plaidLink.LastManualSync; lastManualSync != nil && lastManualSync.After(c.Clock.Now().Add(-30*time.Minute)) {
 		return c.returnError(ctx, http.StatusTooEarly, "link has been manually synced too recently")
 	}
 
-	plaidLink.LastManualSync = myownsanity.TimeP(c.clock.Now().UTC())
+	plaidLink.LastManualSync = myownsanity.TimeP(c.Clock.Now().UTC())
 	if err := repo.UpdatePlaidLink(c.getContext(ctx), plaidLink); err != nil {
 		return c.wrapPgError(ctx, err, "could not manually sync link")
 	}
 
-	err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+	err = background.TriggerSyncPlaid(c.getContext(ctx), c.JobRunner, background.SyncPlaidArguments{
 		AccountId: link.AccountId,
 		LinkId:    link.LinkId,
 	})

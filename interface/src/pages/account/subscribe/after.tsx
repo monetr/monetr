@@ -9,25 +9,7 @@ import { Logo } from 'assets';
 export default function AfterCheckoutPage(): JSX.Element {
   const { search } = useLocation();
   const navigate = useNavigate();
-
   const afterCheckout = useAfterCheckout();
-
-  async function setupFromCheckout(): Promise<void> {
-    const params = new URLSearchParams(search);
-    const checkoutSessionId = params.get('session');
-    return afterCheckout(checkoutSessionId)
-      .then(result => {
-        // If the user's subscription is now active then redirect them to the main view of the authenticated
-        // application.
-        if (result.isActive) {
-          return navigate('/');
-        }
-
-        // Otherwise, dispaly the message from the result of the afterCheckout call.
-        alert(result?.message || 'Subscription is not active');
-      })
-      .catch(() => alert('Unable to determine your subscription state, please contact support@monetr.app'));
-  }
 
   // As soon as the component mounts, call setup from checkout to get the subscription sorted out.
   useEffect(() => {

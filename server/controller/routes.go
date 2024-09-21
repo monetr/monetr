@@ -39,12 +39,12 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 
 	api := app.Group(APIPath)
 
-	if c.stats != nil {
+	if c.Stats != nil {
 		app.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 			return func(ctx echo.Context) error {
 				start := time.Now()
 				defer func() {
-					c.stats.FinishedRequest(ctx, time.Since(start))
+					c.Stats.FinishedRequest(ctx, time.Since(start))
 				}()
 				return next(ctx)
 			}
@@ -58,7 +58,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				return next(ctx)
 			}
 
-			log := c.log.WithFields(logrus.Fields{
+			log := c.Log.WithFields(logrus.Fields{
 				"method":    ctx.Request().Method,
 				"path":      ctx.Path(),
 				"requestId": util.GetRequestID(ctx),
@@ -77,7 +77,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	})
 	api.GET("/health", func(ctx echo.Context) error {
 		status := http.StatusOK
-		err := c.db.Ping(ctx.Request().Context())
+		err := c.DB.Ping(ctx.Request().Context())
 		if err != nil {
 			c.getLog(ctx).WithError(err).Warn("failed to ping database")
 			status = http.StatusInternalServerError
@@ -88,7 +88,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 			"apiHealthy": true,
 			"revision":   build.Revision,
 			"buildTime":  build.BuildTime,
-			"serverTime": c.clock.Now().UTC(),
+			"serverTime": c.Clock.Now().UTC(),
 		}
 
 		if build.Release != "" {
@@ -252,7 +252,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// Billing
 	authed.POST("/billing/create_checkout", c.handlePostCreateCheckout)
 	authed.GET("/billing/checkout/:checkoutSessionId", c.handleGetAfterCheckout)
-	authed.GET("/billing/portal", c.handleGetStripePortal)
+	authed.GET("/billing/portal", c.getBillingPortal)
 
 	billed := authed.Group("", c.requireActiveSubscriptionMiddleware)
 	// Icons

@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/monetr/monetr/server/feature"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v78"
@@ -57,13 +56,9 @@ func (a *Account) GetTimezone() (*time.Location, error) {
 	return location, nil
 }
 
-func (a *Account) HasFeature(feature feature.Feature) bool {
-	// TODO Implement feature system with accounts.
-	return true
-}
-
-// IsSubscriptionActive will return true if the SubscriptionActiveUntil date is not nill and is in the future. Even if
-// the StripeSubscriptionId or StripeCustomerId is nil.
+// IsSubscriptionActive will return true if the SubscriptionActiveUntil date is
+// not nill and is in the future. Even if the StripeSubscriptionId or
+// StripeCustomerId is nil.
 func (a *Account) IsSubscriptionActive(now time.Time) bool {
 	activeUntil := myownsanity.MaxNonNilTime(
 		a.SubscriptionActiveUntil,
@@ -72,13 +67,15 @@ func (a *Account) IsSubscriptionActive(now time.Time) bool {
 
 	consideredActive := activeUntil != nil && activeUntil.After(now)
 
-	// If for some reason the account does not have a subscription status, then only consider the timestamps.
+	// If for some reason the account does not have a subscription status, then
+	// only consider the timestamps.
 	if a.SubscriptionStatus == nil {
 		return consideredActive
 	}
 
-	// If they do have a subscription status then only consider these two statuses as active. All other statuses should be
-	// considered an inactive subscription.
+	// If they do have a subscription status then only consider these two statuses
+	// as active. All other statuses should be considered an inactive
+	// subscription.
 	switch *a.SubscriptionStatus {
 	case stripe.SubscriptionStatusActive, stripe.SubscriptionStatusTrialing:
 		return consideredActive
@@ -87,10 +84,12 @@ func (a *Account) IsSubscriptionActive(now time.Time) bool {
 	}
 }
 
-// HasSubscription is used to determine if a "active" subscription has already been established for the account. This is
-// active in the sense that the subscription is an accurate representation of their payment status for the application.
-// The subscription could be past due, which would put the application in a "not usable" state; but the subscription
-// would still be "active" because we would not want to create a new subscription.
+// HasSubscription is used to determine if a "active" subscription has already
+// been established for the account. This is active in the sense that the
+// subscription is an accurate representation of their payment status for the
+// application. The subscription could be past due, which would put the
+// application in a "not usable" state; but the subscription would still be
+// "active" because we would not want to create a new subscription.
 func (a *Account) HasSubscription() bool {
 	if a.SubscriptionStatus == nil {
 		return false
@@ -102,13 +101,15 @@ func (a *Account) HasSubscription() bool {
 		stripe.SubscriptionStatusPastDue,
 		stripe.SubscriptionStatusIncomplete,
 		stripe.SubscriptionStatusUnpaid:
-		// When the subscription is one of these statuses, then the current subscription object should be used in stripe
-		// and a new object should not be created.
+		// When the subscription is one of these statuses, then the current
+		// subscription object should be used in stripe and a new object should not
+		// be created.
 		return a.StripeSubscriptionId != nil
 	case
 		stripe.SubscriptionStatusCanceled,
 		stripe.SubscriptionStatusTrialing:
-		// When the customer's subscription is canceled, it will not be re-used. A new subscription should be created.
+		// When the customer's subscription is canceled, it will not be re-used. A
+		// new subscription should be created.
 		return false
 	default:
 		return false

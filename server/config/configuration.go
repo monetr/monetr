@@ -276,19 +276,16 @@ type Stripe struct {
 	APIKey          string `yaml:"apiKey"`
 	PublicKey       string `yaml:"publicKey"`
 	WebhooksEnabled bool   `yaml:"webhooksEnabled"`
-	// DEPRECATED: This does not matter to the application. This must be set inside Stripe.
-	WebhooksDomain string `yaml:"webhooksDomain"`
-	WebhookSecret  string `yaml:"webhookSecret"`
-	InitialPlan    *Plan  `yaml:"initialPlan"`
-	Plans          []Plan `yaml:"plans"`
-	BillingEnabled bool   `yaml:"billingEnabled"`
-	TaxesEnabled   bool   `yaml:"taxesEnabled"`
-	FreeTrialDays  int    `yaml:"freeTrialDays"`
+	WebhookSecret   string `yaml:"webhookSecret"`
+	InitialPlan     *Plan  `yaml:"initialPlan"`
+	TaxesEnabled    bool   `yaml:"taxesEnabled"`
+	FreeTrialDays   int    `yaml:"freeTrialDays"`
 }
 
-// IsBillingEnabled will return true if both Stripe and Billing are enabled. It will return false any other time.
+// IsBillingEnabled will return true if both Stripe and Billing are enabled. It
+// will return false any other time.
 func (s Stripe) IsBillingEnabled() bool {
-	return s.Enabled && s.BillingEnabled
+	return s.Enabled
 }
 
 func getViper(configFilePath []string) *viper.Viper {

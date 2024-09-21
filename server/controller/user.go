@@ -51,7 +51,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 		me["nextUrl"] = "/login/multifactor"
 	}
 
-	if !c.configuration.Stripe.IsBillingEnabled() {
+	if !c.Configuration.Stripe.IsBillingEnabled() {
 		// When billing is not enabled we will always return the user state such that they are seen as active forever and
 		// not trialing.
 		return ctx.JSON(http.StatusOK, me)
@@ -62,8 +62,8 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	// - They have no subscription at all, or their trial has expired and they need to start one.
 	// - They have a subscription but it has lapsed or has been cancelled.
 	hasSubscrption := user.Account.HasSubscription()
-	subscriptionIsActive := user.Account.IsSubscriptionActive(c.clock.Now())
-	subscriptionIsTrial := user.Account.IsTrialing(c.clock.Now())
+	subscriptionIsActive := user.Account.IsSubscriptionActive(c.Clock.Now())
+	subscriptionIsTrial := user.Account.IsTrialing(c.Clock.Now())
 
 	// If billing is enabled then we want to populate these fields with real
 	// values.
@@ -120,8 +120,8 @@ func (c *Controller) changePassword(ctx echo.Context) error {
 	case repository.ErrInvalidCredentials:
 		return c.returnError(ctx, http.StatusUnauthorized, "current password provided is not correct")
 	case nil:
-		if err := c.email.SendPasswordChanged(c.getContext(ctx), communication.PasswordChangedParams{
-			BaseURL:      c.configuration.Server.GetBaseURL().String(),
+		if err := c.Email.SendPasswordChanged(c.getContext(ctx), communication.PasswordChangedParams{
+			BaseURL:      c.Configuration.Server.GetBaseURL().String(),
 			Email:        user.Login.Email,
 			FirstName:    user.Login.FirstName,
 			LastName:     user.Login.LastName,

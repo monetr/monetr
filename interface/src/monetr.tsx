@@ -137,6 +137,7 @@ export default function Monetr(): JSX.Element {
           <Route path='/logout' element={ <LogoutPage /> } />
           <Route path='/plaid/oauth-return' element={ <OauthReturn /> } />
           <Route path='/subscription' element={ <SubscriptionPage /> } />
+          <Route path='/account/subscribe' element={ <Navigate replace to='/' /> } />
           <Route path='/account/subscribe/after' element={ <Navigate replace to='/' /> } />
           <Route path='/setup' element={ <Navigate replace to='/' /> } />
           <Route path='/password/reset' element={ <Navigate replace to='/' /> } />

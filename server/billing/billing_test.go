@@ -6,23 +6,29 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/pubsub"
+	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stripe/stripe-go/v78"
 )
 
-func TestBaseBasicPaywall_GetHasSubscription(t *testing.T) {
+func TestBilling_GetHasSubscription(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		clock := clock.NewMock()
 		db := testutils.GetPgDatabase(t)
 		memoryCache := testutils.GetCache(t)
 		log := testutils.GetLog(t)
 
-		accountRepo := NewAccountRepository(log, memoryCache, db)
-
-		paywall := NewBasicPaywall(log, clock, accountRepo)
+		accountRepo := repository.NewAccountRepository(log, memoryCache, db)
+		stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
+		pubSub := pubsub.NewPostgresPubSub(log, db)
+		conf := testutils.GetConfig(t)
+		paywall := NewBilling(log, clock, conf, accountRepo, stripeHelper, pubSub)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
@@ -49,9 +55,11 @@ func TestBaseBasicPaywall_GetHasSubscription(t *testing.T) {
 		memoryCache := testutils.GetCache(t)
 		log := testutils.GetLog(t)
 
-		accountRepo := NewAccountRepository(log, memoryCache, db)
-
-		paywall := NewBasicPaywall(log, clock, accountRepo)
+		accountRepo := repository.NewAccountRepository(log, memoryCache, db)
+		stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
+		pubSub := pubsub.NewPostgresPubSub(log, db)
+		conf := testutils.GetConfig(t)
+		paywall := NewBilling(log, clock, conf, accountRepo, stripeHelper, pubSub)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		account := user.Account
@@ -73,9 +81,11 @@ func TestBaseBasicPaywall_GetHasSubscription(t *testing.T) {
 		memoryCache := testutils.GetCache(t)
 		log := testutils.GetLog(t)
 
-		accountRepo := NewAccountRepository(log, memoryCache, db)
-
-		paywall := NewBasicPaywall(log, clock, accountRepo)
+		accountRepo := repository.NewAccountRepository(log, memoryCache, db)
+		stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
+		pubSub := pubsub.NewPostgresPubSub(log, db)
+		conf := testutils.GetConfig(t)
+		paywall := NewBilling(log, clock, conf, accountRepo, stripeHelper, pubSub)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		account := user.Account
@@ -97,9 +107,11 @@ func TestBaseBasicPaywall_GetHasSubscription(t *testing.T) {
 		memoryCache := testutils.GetCache(t)
 		log := testutils.GetLog(t)
 
-		accountRepo := NewAccountRepository(log, memoryCache, db)
-
-		paywall := NewBasicPaywall(log, clock, accountRepo)
+		accountRepo := repository.NewAccountRepository(log, memoryCache, db)
+		stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
+		pubSub := pubsub.NewPostgresPubSub(log, db)
+		conf := testutils.GetConfig(t)
+		paywall := NewBilling(log, clock, conf, accountRepo, stripeHelper, pubSub)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
@@ -124,9 +136,11 @@ func TestBaseBasicPaywall_GetHasSubscription(t *testing.T) {
 		memoryCache := testutils.GetCache(t)
 		log := testutils.GetLog(t)
 
-		accountRepo := NewAccountRepository(log, memoryCache, db)
-
-		paywall := NewBasicPaywall(log, clock, accountRepo)
+		accountRepo := repository.NewAccountRepository(log, memoryCache, db)
+		stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
+		pubSub := pubsub.NewPostgresPubSub(log, db)
+		conf := testutils.GetConfig(t)
+		paywall := NewBilling(log, clock, conf, accountRepo, stripeHelper, pubSub)
 
 		hasSubscription, err := paywall.GetHasSubscription(context.Background(), "acct_bogus")
 		assert.EqualError(t, err, "could not determine whether subscription was present: failed to retrieve account by Id: pg: no rows in result set")

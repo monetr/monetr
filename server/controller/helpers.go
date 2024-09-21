@@ -13,7 +13,7 @@ import (
 )
 
 func (c *Controller) mustGetTimezone(ctx echo.Context) *time.Location {
-	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
+	account, err := c.Accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
 		panic(err)
 	}
@@ -27,7 +27,7 @@ func (c *Controller) mustGetTimezone(ctx echo.Context) *time.Location {
 }
 
 func (c *Controller) midnightInLocal(ctx echo.Context, input time.Time) (time.Time, error) {
-	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
+	account, err := c.Accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
 		return input, errors.Wrap(err, "failed to retrieve account's timezone")
 	}
@@ -158,7 +158,7 @@ func (c *Controller) mustGetSecurityRepository(ctx echo.Context) repository.Secu
 		panic("failed to retrieve database object from controller context")
 	}
 
-	return repository.NewSecurityRepository(db, c.clock)
+	return repository.NewSecurityRepository(db, c.Clock)
 }
 
 func (c *Controller) getUnauthenticatedRepository(ctx echo.Context) (repository.UnauthenticatedRepository, error) {
@@ -167,7 +167,7 @@ func (c *Controller) getUnauthenticatedRepository(ctx echo.Context) (repository.
 		return nil, errors.Errorf("no transaction for request")
 	}
 
-	return repository.NewUnauthenticatedRepository(c.clock, txn), nil
+	return repository.NewUnauthenticatedRepository(c.Clock, txn), nil
 }
 
 func (c *Controller) mustGetUnauthenticatedRepository(ctx echo.Context) repository.UnauthenticatedRepository {
@@ -195,7 +195,7 @@ func (c *Controller) getAuthenticatedRepository(ctx echo.Context) (repository.Re
 		return nil, errors.Errorf("no transaction for request")
 	}
 
-	return repository.NewRepositoryFromSession(c.clock, userId, accountId, txn), nil
+	return repository.NewRepositoryFromSession(c.Clock, userId, accountId, txn), nil
 }
 
 func (c *Controller) mustGetAuthenticatedRepository(ctx echo.Context) repository.Repository {
@@ -222,9 +222,9 @@ func (c *Controller) getSecretsRepository(ctx echo.Context) (repository.SecretsR
 
 	return repository.NewSecretsRepository(
 		log,
-		c.clock,
+		c.Clock,
 		txn,
-		c.kms,
+		c.KMS,
 		accountId,
 	), nil
 }

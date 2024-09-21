@@ -21,17 +21,19 @@ import (
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/cache"
+	"github.com/monetr/monetr/server/captcha"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/controller"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/platypus"
+	"github.com/monetr/monetr/server/pubsub"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
-	"github.com/plaid/plaid-go/v26/plaid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -43,46 +45,11 @@ const (
 )
 
 const (
-	TestEmailDomain = "monetr.mini"
-	TestCookieName  = "M-Token"
+	TestCookieName = "M-Token"
 )
 
 func NewTestApplicationConfig(t *testing.T) config.Configuration {
-	return config.Configuration{
-		AllowSignUp: true,
-		Server: config.Server{
-			ExternalURL: "https://monetr.local",
-			Cookies: config.Cookies{
-				SameSiteStrict: true,
-				Secure:         true,
-				Name:           TestCookieName,
-			},
-		},
-		PostgreSQL: config.PostgreSQL{},
-		Email: config.Email{
-			Enabled: false,
-			Verification: config.EmailVerification{
-				Enabled:       false,
-				TokenLifetime: 10 * time.Second,
-				TokenSecret:   gofakeit.Generate("????????????????"),
-			},
-			Domain: TestEmailDomain,
-			SMTP:   config.SMTPClient{},
-		},
-		ReCAPTCHA: config.ReCAPTCHA{},
-		Plaid: config.Plaid{
-			Enabled:      true,
-			ClientID:     gofakeit.UUID(),
-			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
-		},
-		CORS: config.CORS{
-			Debug: false,
-		},
-		Logging: config.Logging{
-			Level: "trace",
-		},
-	}
+	return testutils.GetConfig(t)
 }
 
 func NewTestApplication(t *testing.T) (*TestApp, *httpexpect.Expect) {
@@ -112,6 +79,12 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	db := testutils.GetPgDatabase(t)
 	kms := secrets.NewPlaintextKMS()
 	plaidClient := platypus.NewPlaid(log, clock, kms, db, configuration.Plaid)
+
+	plaidWebhooks := platypus.NewInMemoryWebhookVerification(
+		log,
+		plaidClient,
+		1*time.Hour,
+	)
 
 	publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
 	require.NoError(t, err, "must be able to generate keys")
@@ -156,26 +129,57 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	})
 	email := mockgen.NewMockEmailCommunication(emailMockController)
 
-	c := controller.NewController(
+	var recaptcha captcha.Verification
+	if configuration.ReCAPTCHA.Enabled {
+		recaptcha, err = captcha.NewReCAPTCHAVerification(
+			configuration.ReCAPTCHA.PrivateKey,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	cachePool := cache.NewCache(log, redisPool)
+	accountsRepo := repository.NewAccountRepository(log, cachePool, db)
+	stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
+	pubSub := pubsub.NewPostgresPubSub(log, db)
+	plaidInstitutions := platypus.NewPlaidInstitutionWrapper(
 		log,
-		configuration,
-		db,
-		jobRunner,
 		plaidClient,
-		nil,
-		stripe_helper.NewStripeHelper(log, gofakeit.UUID()),
-		redisPool,
-		kms,
-		billing.NewBasicPaywall(
-			log,
-			clock,
-			billing.NewAccountRepository(log, cache.NewCache(log, redisPool), db),
-		),
-		email,
-		clientTokens,
-		fileStorage,
-		clock,
+		cachePool,
 	)
+
+	bill := billing.NewBilling(
+		log,
+		clock,
+		configuration,
+		accountsRepo,
+		stripeHelper,
+		pubSub,
+	)
+
+	c := &controller.Controller{
+		Accounts:                 accountsRepo,
+		Billing:                  bill,
+		Cache:                    cachePool,
+		Captcha:                  recaptcha,
+		ClientTokens:             clientTokens,
+		Clock:                    clock,
+		Configuration:            configuration,
+		DB:                       db,
+		Email:                    email,
+		FileStorage:              fileStorage,
+		JobRunner:                jobRunner,
+		KMS:                      kms,
+		Log:                      log,
+		Plaid:                    plaidClient,
+		PlaidInstitutions:        plaidInstitutions,
+		PlaidWebhookVerification: plaidWebhooks,
+		PubSub:                   pubSub,
+		Stats:                    nil,
+		Stripe:                   stripeHelper,
+	}
+
 	app := application.NewApp(configuration, c)
 
 	// run server using httptest

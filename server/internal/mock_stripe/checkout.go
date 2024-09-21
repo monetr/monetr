@@ -156,6 +156,9 @@ func (m *MockStripeHelper) CreateCheckoutSession(t *testing.T, checkoutSession *
 		}
 	}
 
+	// Store a URL on the object as well.
+	checkoutSession.URL = fmt.Sprintf("https://checkout.stripe.bogus/checkout/%s", checkoutSession.ID)
+
 	m.checkoutSessions[checkoutSession.ID] = *checkoutSession
 }
 

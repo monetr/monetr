@@ -1,8 +1,3 @@
-# We can only produce junit files if we are using gotestsum.
-if((TEST_JUNIT) AND (NOT TEST_USE_GOTESTSUM))
-  message(FATAL_ERROR "gotestsum must be enabled for JUnit XML output. Please rerun with -DTEST_USE_GOTESTSUM=ON or -DTEST_JUNIT=OFF")
-endif()
-
 macro(provision_golang_tests CURRENT_SOURCE_DIR)
   if (BUILD_TESTING)
     if(CMAKE_Go_COMPILER)
@@ -101,12 +96,6 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
             # When we are using gotestsum we want to produce json output files
             file(MAKE_DIRECTORY "${PACKAGE_TEST_DIRECTORY}/json")
             list(APPEND GOTESTSUM_MAYBE "--jsonfile=${PACKAGE_TEST_DIRECTORY}/json/${TEST_OUTPUT_FILE_NAME}.json")
-
-            if(TEST_JUNIT)
-              # When we are using gotestsum and we want to output junit files, they should go in their own directory
-              file(MAKE_DIRECTORY "${PACKAGE_TEST_DIRECTORY}/junit")
-              list(APPEND GOTESTSUM_MAYBE "--junitfile=${PACKAGE_TEST_DIRECTORY}/junit/${TEST_OUTPUT_FILE_NAME}.xml")
-            endif()
 
             # Since we are executing a raw test binary using gotestsum, we need to pass it as a raw command.
             list(APPEND GOTESTSUM_MAYBE "--raw-command" "--")

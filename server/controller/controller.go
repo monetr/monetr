@@ -3,12 +3,10 @@ package controller
 import (
 	"context"
 	"strconv"
-	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/billing"
@@ -20,6 +18,7 @@ import (
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/storage"
@@ -30,96 +29,30 @@ import (
 )
 
 type Controller struct {
-	accounts                 billing.AccountRepository
-	billing                  billing.BasicBilling
-	cache                    cache.Cache
-	captcha                  captcha.Verification
-	clientTokens             security.ClientTokens
-	clock                    clock.Clock
-	configuration            config.Configuration
-	db                       *pg.DB
-	email                    communication.EmailCommunication
-	fileStorage              storage.Storage
-	jobRunner                background.JobController
-	log                      *logrus.Entry
-	paywall                  billing.BasicPayWall
-	plaid                    platypus.Platypus
-	plaidInstitutions        platypus.PlaidInstitutions
-	kms                      secrets.KeyManagement
-	plaidWebhookVerification platypus.WebhookVerification
-	ps                       pubsub.PublishSubscribe
-	stats                    *metrics.Stats
-	stripe                   stripe_helper.Stripe
-	stripeWebhooks           billing.StripeWebhookHandler
-}
-
-func NewController(
-	log *logrus.Entry,
-	configuration config.Configuration,
-	db *pg.DB,
-	jobRunner background.JobController,
-	plaidClient platypus.Platypus,
-	stats *metrics.Stats,
-	stripe stripe_helper.Stripe,
-	cachePool *redis.Pool,
-	kms secrets.KeyManagement,
-	basicPaywall billing.BasicPayWall,
-	email communication.EmailCommunication,
-	clientTokens security.ClientTokens,
-	fileStorage storage.Storage,
-	clock clock.Clock,
-) *Controller {
-	var recaptcha captcha.Verification
-	var err error
-	if configuration.ReCAPTCHA.Enabled {
-		recaptcha, err = captcha.NewReCAPTCHAVerification(
-			configuration.ReCAPTCHA.PrivateKey,
-		)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	caching := cache.NewCache(log, cachePool)
-
-	accountsRepo := billing.NewAccountRepository(log, caching, db)
-	pubSub := pubsub.NewPostgresPubSub(log, db)
-	basicBilling := billing.NewBasicBilling(log, clock, accountsRepo, pubSub)
-
-	plaidWebhookVerification := platypus.NewInMemoryWebhookVerification(
-		log,
-		plaidClient,
-		1*time.Hour,
-	)
-
-	return &Controller{
-		accounts:                 accountsRepo,
-		billing:                  basicBilling,
-		cache:                    caching,
-		captcha:                  recaptcha,
-		clientTokens:             clientTokens,
-		clock:                    clock,
-		configuration:            configuration,
-		db:                       db,
-		email:                    email,
-		fileStorage:              fileStorage,
-		jobRunner:                jobRunner,
-		log:                      log,
-		paywall:                  basicPaywall,
-		plaid:                    plaidClient,
-		plaidInstitutions:        platypus.NewPlaidInstitutionWrapper(log, plaidClient, caching),
-		kms:                      kms,
-		plaidWebhookVerification: plaidWebhookVerification,
-		ps:                       pubSub,
-		stats:                    stats,
-		stripe:                   stripe,
-		stripeWebhooks:           billing.NewStripeWebhookHandler(log, accountsRepo, basicBilling, pubSub),
-	}
+	Accounts                 repository.AccountsRepository
+	Billing                  billing.Billing
+	Cache                    cache.Cache
+	Captcha                  captcha.Verification
+	ClientTokens             security.ClientTokens
+	Clock                    clock.Clock
+	Configuration            config.Configuration
+	DB                       *pg.DB
+	Email                    communication.EmailCommunication
+	FileStorage              storage.Storage
+	JobRunner                background.JobController
+	KMS                      secrets.KeyManagement
+	Log                      *logrus.Entry
+	Plaid                    platypus.Platypus
+	PlaidInstitutions        platypus.PlaidInstitutions
+	PlaidWebhookVerification platypus.WebhookVerification
+	PubSub                   pubsub.PublishSubscribe
+	Stats                    *metrics.Stats
+	Stripe                   stripe_helper.Stripe
 }
 
 func (c *Controller) Close() error {
-	if err := c.plaidWebhookVerification.Close(); err != nil {
-		c.log.WithError(err).Error("failed to dispose of plaid webhook verification gracefully")
+	if err := c.PlaidWebhookVerification.Close(); err != nil {
+		c.Log.WithError(err).Error("failed to dispose of plaid webhook verification gracefully")
 		return err
 	}
 
@@ -139,7 +72,7 @@ func (c *Controller) getSpan(ctx echo.Context) *sentry.Span {
 }
 
 func (c *Controller) getLog(ctx echo.Context) *logrus.Entry {
-	log := c.log.WithContext(c.getContext(ctx)).WithFields(logrus.Fields{
+	log := c.Log.WithContext(c.getContext(ctx)).WithFields(logrus.Fields{
 		"requestId": util.GetRequestID(ctx),
 	})
 

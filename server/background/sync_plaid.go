@@ -163,8 +163,9 @@ func (s *SyncPlaidHandler) HandleConsumeJob(
 }
 
 func (s SyncPlaidHandler) DefaultSchedule() string {
-	// Run every 12 hours. Links that have not received any updates in the last 13 hours will be synced with Plaid. If no
-	// updates have been detected then nothing will happen.
+	// Run every 12 hours. Links that have not received any updates in the last 13
+	// hours will be synced with Plaid. If no updates have been detected then
+	// nothing will happen.
 	return "0 0 */12 * * *"
 }
 
