@@ -150,7 +150,15 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 			log := c.getLog(ctx)
 			err := next(ctx)
 			if err != nil { // Log the error for the request.
-				log.WithError(err).Errorf("%s", err.Error())
+				level := logrus.ErrorLevel
+				switch raw := err.(type) {
+				case *echo.HTTPError:
+					// If this is an error for the user, then don't log at an error level.
+					if raw.Code < 500 {
+						level = logrus.WarnLevel
+					}
+				}
+				log.WithError(err).Logf(level, "%s", err.Error())
 			}
 
 			switch actualError := err.(type) {
