@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.18.2](https://github.com/monetr/monetr/compare/v0.18.1...v0.18.2) (2024-09-21)
+
+
+### Features
+
+* **billing:** Reconcile subscriptions periodically ([#1933](https://github.com/monetr/monetr/issues/1933)) ([1d5a9ac](https://github.com/monetr/monetr/commit/1d5a9acd1ada3f402b6e3612825474a5f1d252de))
+* Don't deploy to the old production environment anymore ([49375ac](https://github.com/monetr/monetr/commit/49375ac6a066dfc70aaefa3cbdfc914dfa33f219))
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.29.0 ([#1940](https://github.com/monetr/monetr/issues/1940)) ([9d8316f](https://github.com/monetr/monetr/commit/9d8316f17c569b58236a583e1e632ade79a2b4e3))
+* **api:** update module github.com/hashicorp/vault/api to v1.15.0 ([#1942](https://github.com/monetr/monetr/issues/1942)) ([0d093de](https://github.com/monetr/monetr/commit/0d093de4ce27f8aae1e13e3fd13ac5f74bfd9cd9))
+* **api:** update module github.com/mileusna/useragent to v1.3.5 ([#1941](https://github.com/monetr/monetr/issues/1941)) ([2eefb6f](https://github.com/monetr/monetr/commit/2eefb6fab219468aafdab6795692e755614ade80))
+* **ui:** update dependency eslint-plugin-unused-imports to v3.2.0 ([#1915](https://github.com/monetr/monetr/issues/1915)) ([8b33fd8](https://github.com/monetr/monetr/commit/8b33fd806c7e5adddc3a19d1af4c6da00e40e328))
+* **ui:** update dependency next to v14.2.10 [security] ([#1938](https://github.com/monetr/monetr/issues/1938)) ([3351c52](https://github.com/monetr/monetr/commit/3351c5239e8f93295dbac90d265a23158852d15d))
+* **ui:** update dependency path-to-regexp to v6.3.0 [security] ([#1935](https://github.com/monetr/monetr/issues/1935)) ([d078f96](https://github.com/monetr/monetr/commit/d078f964bc07ee2ffe859091826a563edbe1d029))
+* **ui:** update dependency react-number-format to v5.4.2 ([#1929](https://github.com/monetr/monetr/issues/1929)) ([3b2f7f6](https://github.com/monetr/monetr/commit/3b2f7f619ac74a05af0e30db1f4bb2778d4a1ee7))
+* **ui:** update sentry-javascript monorepo to v8.30.0 ([#1944](https://github.com/monetr/monetr/issues/1944)) ([f99eb46](https://github.com/monetr/monetr/commit/f99eb463f81c45ec199bb9c22ff250b79c5b977c))
+
+
+### Bug Fixes
+
+* **api:** Fixed noisy healthcheck logs. ([757b496](https://github.com/monetr/monetr/commit/757b49684973e627bcb7db5b90a28aa41cc221e4)), closes [#1939](https://github.com/monetr/monetr/issues/1939)
+
 ## [0.18.1](https://github.com/monetr/monetr/compare/v0.18.0...v0.18.1) (2024-09-05)
 
 
