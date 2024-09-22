@@ -77,16 +77,3 @@ add_custom_target(
   build.yaml
   DEPENDS ${GENERATED_YAML}
 )
-
-add_custom_target(
-  deploy.dry
-  COMMAND ${KUBECTL_EXECUTABLE} apply -f ${GENERATED_YAML} -n ${DEPLOY_NAMESPACE} --dry-run=server
-  DEPENDS ${GENERATED_YAML}
-)
-
-add_custom_target(
-  deploy.apply
-  COMMAND ${KUBECTL_EXECUTABLE} apply -f ${GENERATED_YAML} -n ${DEPLOY_NAMESPACE}
-  COMMAND ${KUBECTL_EXECUTABLE} rollout status deploy/monetr -n ${DEPLOY_NAMESPACE} --timeout=600s
-  DEPENDS ${GENERATED_YAML}
-)

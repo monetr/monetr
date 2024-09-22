@@ -1,5 +1,0 @@
-my.monetr.app:
-  environment: my.monetr.app
-  production_environment: true
-  required_contexts: [ ]
-  auto_merge: false

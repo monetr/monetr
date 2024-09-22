@@ -140,11 +140,3 @@ container-push: $(CMAKE_CONFIGURATION_DIRECTORY)
 generate:
 	cmake --preset deploy
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.yaml
-
-dry:
-	cmake --preset deploy
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t deploy.dry
-
-deploy:
-	cmake --preset deploy
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t deploy.apply
