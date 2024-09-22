@@ -2,9 +2,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import TransactionMerchantIcon from './TransactionMerchantIcon';
 import ArrowLink from '@monetr/interface/components/ArrowLink';
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
+import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { useSpendingOld } from '@monetr/interface/hooks/spending';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Transaction from '@monetr/interface/models/Transaction';

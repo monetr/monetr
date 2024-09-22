@@ -8,13 +8,13 @@ import * as R from 'ramda';
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import TransactionDateItem from '@monetr/interface/components/transactions/TransactionDateItem';
+import TransactionItem from '@monetr/interface/components/transactions/TransactionItem';
 import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransactions } from '@monetr/interface/hooks/transactions';
 import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
 import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import Transaction from '@monetr/interface/models/Transaction';
-import TransactionDateItem from '@monetr/interface/pages/new/TransactionDateItem';
-import TransactionItem from '@monetr/interface/pages/new/TransactionItem';
 
 let evilScrollPosition: number = 0;
 

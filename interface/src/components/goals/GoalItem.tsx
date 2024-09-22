@@ -3,8 +3,8 @@ import React, { Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 
-import MerchantIcon from './MerchantIcon';
 import MBadge from '@monetr/interface/components/MBadge';
+import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import Spending from '@monetr/interface/models/Spending';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
@@ -38,7 +38,7 @@ export default function GoalItem({ spending }: GoalItemProps): JSX.Element {
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
         onClick={ openDetails }
       />
-      <div className='w-full flex rounded-lg group-hover:bg-zinc-600 gap-2 items-center px-2 py-1 cursor-pointer md:cursor-auto'>
+      <div className='w-full flex rounded-lg group-hover:bg-zinc-600 gap-2 md:gap-4 items-center px-2 py-1 cursor-pointer md:cursor-auto'>
         <MerchantIcon name={ spending.name } />
         <div className='w-full flex flex-col min-w-0'>
           <div className='w-full flex gap-2 items-center min-w-0 justify-between md:justify-normal'>
