@@ -261,6 +261,7 @@ jobs:
           token: "${{ github.token }}"
           target_url: https://my.monetr.dev
           environment: my.monetr.dev
+          production-environment: false
           ref: ${{ github.sha }}
       - uses: actions/checkout@v4
         with:
