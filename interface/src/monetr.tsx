@@ -22,6 +22,7 @@ import Goals from '@monetr/interface/pages/goals';
 import GoalDetails from '@monetr/interface/pages/goals/details';
 import LinkCreatePage from '@monetr/interface/pages/link/create';
 import Login from '@monetr/interface/pages/login';
+import MultifactorAuthenticationPage from '@monetr/interface/pages/login/multifactor';
 import LogoutPage from '@monetr/interface/pages/logout';
 import ForgotPasswordNew from '@monetr/interface/pages/password/forgot';
 import PasswordResetNew from '@monetr/interface/pages/password/reset';
@@ -46,7 +47,7 @@ export default function Monetr(): JSX.Element {
     isLoading: configIsLoading,
     isError: configIsError,
   } = useAppConfigurationSink();
-  const { isLoading: authIsLoading, result: { user, isActive } } = useAuthenticationSink();
+  const { isLoading: authIsLoading, result: { user, isActive, mfaPending } } = useAuthenticationSink();
   const { isLoading: linksIsLoading, data: links } = useLinks();
   const isAuthenticated = !!user;
   // If the config or authentication is loading just show a loading page.
@@ -78,11 +79,21 @@ export default function Monetr(): JSX.Element {
     );
   }
 
+  // If the currently authenticated user requires MFA then only allow them to access the MFA pages.
+  if (mfaPending) {
+    return (
+      <Routes>
+        <Route path='/login/multifactor' element={ <MultifactorAuthenticationPage /> } />
+        <Route path='/logout' element={ <LogoutPage /> } />
+        <Route path='*' element={ <Navigate replace to='/login/mmultifactor' /> } />
+      </Routes>
+    );
+  }
+
   if (!isActive) {
     return (
       <Routes>
         <Route path='/logout' element={ <LogoutPage /> } />
-        <Route path='/login/multifactor' element={ <h1>test</h1> } />
         <Route path='/account/subscribe' element={ <SubscribePage /> } />
         <Route path='/account/subscribe/after' element={ <AfterCheckoutPage /> } />
         <Route path='*' element={ <Navigate replace to='/account/subscribe' /> } />
@@ -95,7 +106,6 @@ export default function Monetr(): JSX.Element {
     return (
       <Routes>
         <Route path='/logout' element={ <LogoutPage /> } />
-        <Route path='/login/multifactor' element={ <h1>test</h1> } />
         <Route path='/setup' element={ <SetupPage manualEnabled={ config?.manualEnabled } /> } />
         <Route path='/setup/plaid' element={ <PlaidSetup alreadyOnboarded /> } />
         <Route path='/setup/manual' element={ <SetupManual /> } />
@@ -141,6 +151,9 @@ export default function Monetr(): JSX.Element {
           <Route path='/account/subscribe/after' element={ <Navigate replace to='/' /> } />
           <Route path='/setup' element={ <Navigate replace to='/' /> } />
           <Route path='/password/reset' element={ <Navigate replace to='/' /> } />
+
+          <Route path='/login' element={ <Navigate replace to='/' /> } />
+          <Route path='/login/multifactor' element={ <Navigate replace to='/' /> } />
           <Route index path='/' element={ <RedirectToBank /> } />
         </Routes>
       </div>
