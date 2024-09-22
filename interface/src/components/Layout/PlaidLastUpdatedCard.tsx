@@ -6,7 +6,7 @@ import MSpan from '@monetr/interface/components/MSpan';
 import { useLink } from '@monetr/interface/hooks/links';
 
 interface PlaidLastUpdatedCardProps {
-  linkId: number | null;
+  linkId: string | null;
 }
 
 export default function PlaidLastUpdatedCard(props: PlaidLastUpdatedCardProps): JSX.Element {
@@ -25,11 +25,11 @@ export default function PlaidLastUpdatedCard(props: PlaidLastUpdatedCardProps): 
     'Never';
 
   return (
-    <div className='p-2 group border-[thin] dark:border-dark-monetr-border rounded-lg w-full ease-in-out transition-[height] h-10 hover:h-16 hover:delay-0 delay-500 hover:dark:border-dark-monetr-border-string' >
+    <div className='p-2 group border-[thin] dark:border-dark-monetr-border rounded-lg w-full ease-in-out transition-[height] h-16 lg:h-10 lg:hover:h-16 hover:delay-0 delay-500 hover:dark:border-dark-monetr-border-string' >
       <MSpan size='sm' color='subtle'>
         Last Updated: { lastUpdateString } ago
       </MSpan>
-      <MSpan size='sm' color='subtle' className='transition-opacity opacity-0 group-hover:opacity-100 delay-500 group-hover:delay-0'>
+      <MSpan size='sm' color='subtle' className='transition-opacity opacity-100 lg:opacity-0 lg:group-hover:opacity-100 delay-500 group-hover:delay-0'>
         Last Attempt: { lastAttemptString } ago
       </MSpan>
     </div>
