@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.18.5](https://github.com/monetr/monetr/compare/v0.18.4...v0.18.5) (2024-09-22)
+
+
+### Features
+
+* **ui:** Adding basic forecasting details to funding view. ([09e8734](https://github.com/monetr/monetr/commit/09e87344bb1d1e0a3e0ce4ddc4d47c274882e4ce)), closes [#1698](https://github.com/monetr/monetr/issues/1698)
+* **ui:** Adding support for TOTP in the interface ([#1949](https://github.com/monetr/monetr/issues/1949)) ([ec6eff8](https://github.com/monetr/monetr/commit/ec6eff85d8941dec82bcdba0c1fef8ba4d1f05a7))
+
+
+### Bug Fixes
+
+* **docs:** Updating local development docs ([71b0959](https://github.com/monetr/monetr/commit/71b095978b438037a7d818f23cbeef5ddd91339d))
+
 ## [0.18.4](https://github.com/monetr/monetr/compare/v0.18.3...v0.18.4) (2024-09-22)
 
 
