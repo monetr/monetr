@@ -1,11 +1,9 @@
 import React, { ForwardedRef } from 'react';
 import { Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
 
-import { ReactElement } from './types';
-
 interface MFormProps<Values extends FormikValues = FormikValues> extends FormikConfig<Values> {
   className?: string;
-  children: ReactElement;
+  children?: ((props: FormikProps<Values>) => React.ReactNode) | React.ReactNode;
 }
 
 export type MFormRef = HTMLFormElement;
@@ -26,7 +24,7 @@ export default React.forwardRef<MFormRef, MFormProps<FormikValues>>(
             data-testid={ props['data-testid'] }
             ref={ ref }
           >
-            {children}
+            { typeof children === 'function' ? children(formik) : children }
           </form>
         )}
       </Formik>

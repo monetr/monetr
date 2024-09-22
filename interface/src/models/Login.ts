@@ -3,6 +3,7 @@ export default class Login {
   email: string;
   firstName: string;
   lastName: string;
+  totpEnabledAt: Date | null;
 
   constructor(data?: Partial<Login>) {
     if (data) Object.assign(this, data);

@@ -168,7 +168,8 @@ func (b *baseSecurityRepository) SetupTOTP(
 		return "", nil, errors.Errorf("login already has TOTP enabled")
 	}
 
-	randBytes := make([]byte, 64)
+	// Needs to be long enough that there is no padding or something?
+	randBytes := make([]byte, 10)
 	if _, err := rand.Read(randBytes); err != nil {
 		return "", nil, errors.Wrap(err, "failed to generate TOTP secret")
 	}
