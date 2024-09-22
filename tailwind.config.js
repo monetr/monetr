@@ -58,7 +58,7 @@ module.exports = {
           '--destructive': '0 62.8% 30.6%',
           '--destructive-foreground': '210 20% 98%',
           '--border': '215 27.9% 16.9%',
-          '--input': '215 27.9% 16.9%',
+          '--input': '#71717a',
           '--ring': '263.4 70% 50.4%',
           '--chart-1': '220 70% 50%',
           '--chart-2': '160 60% 45%',
@@ -100,7 +100,7 @@ module.exports = {
       },
       colors: {
         border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
+        input: 'var(--input)',
         ring: 'hsl(var(--ring))',
         background: 'var(--background)',
         foreground: 'hsl(var(--foreground))',

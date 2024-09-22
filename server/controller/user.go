@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/communication"
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/security"
 	"github.com/pkg/errors"
@@ -181,7 +182,12 @@ func (c *Controller) postConfirmTOTP(ctx echo.Context) error {
 
 	err = secureRepo.EnableTOTP(c.getContext(ctx), me.LoginId, request.TOTP)
 	if err != nil {
-		return c.badRequestError(ctx, err, "Failed to enable TOTP")
+		switch errors.Cause(err) {
+		case models.ErrTOTPNotValid:
+			return c.badRequestError(ctx, err, "Failed to enable TOTP, invalid code provided")
+		default:
+			return c.badRequestError(ctx, err, "Failed to enable TOTP")
+		}
 	}
 
 	return ctx.NoContent(http.StatusOK)

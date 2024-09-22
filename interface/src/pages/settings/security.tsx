@@ -9,9 +9,10 @@ import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { showChangePasswordModal } from '@monetr/interface/components/settings/security/ChangePasswordModal';
+import TOTPCard from '@monetr/interface/components/settings/security/TOTPCard';
 import request from '@monetr/interface/util/request';
 
-import { Mail, RectangleEllipsis, Shield } from 'lucide-react';
+import { Mail, RectangleEllipsis } from 'lucide-react';
 
 interface ChangePasswordValues {
   currentPassword: string;
@@ -115,24 +116,8 @@ export default function SettingsSecurity(): JSX.Element {
             your acount.
           </MSpan>
         </Card>
-
-        <Card className='md:w-1/3'>
-          <div className='flex justify-between items-center'>
-            <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
-              <Shield />
-            </div>
-            <MBaseButton variant='solid' color='primary' disabled>
-              Enable TOTP
-            </MBaseButton>
-          </div>
-          <MSpan size='md' weight='medium' color='emphasis'>
-            Authenticator App (TOTP)
-          </MSpan>
-          <MSpan component='p'>
-            Get verification codes from an authenticator app such as 1Password or Google Authenticator. It works even if
-            your phone is offline.
-          </MSpan>
-        </Card>
+        
+        <TOTPCard />
       </div>
     </div>
   );

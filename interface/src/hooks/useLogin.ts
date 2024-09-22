@@ -24,7 +24,7 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
         return queryClient.invalidateQueries(['/users/me'])
           .then(() => navigate(result?.data?.nextUrl || '/'));
       })
-      .catch(error => {
+      .catch(async error => {
         // More important than the message though is the status of the response. If the status code was 428 then that
         // means the credentials are valid, but the user has not verified their email yet. If this is the case we want
         // to redirect them to the resend email verification page and autofill that user's email address.
@@ -39,13 +39,10 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
                   },
                 });
               case 'MFA_REQUIRED':
-                return navigate('/login/mfa', {
-                  state: {
-                    'emailAddress': loginArgs.email,
-                    'password': loginArgs.password,
-                    // TODO ReCAPTCHA?
-                  },
-                });
+                // If we are required to provide multifactor authentication then we should be able to retrieve our user
+                // details at least.
+                return queryClient.invalidateQueries(['/users/me'])
+                  .then(() => navigate('/login/multifactor'));
               case 'EMAIL_NOT_VERIFIED':
                 return navigate('/verify/email/resend', {
                   state: {
