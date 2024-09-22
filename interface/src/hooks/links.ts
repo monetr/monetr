@@ -8,11 +8,11 @@ import Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
 
 export function useLinks(): UseQueryResult<Array<Link>> {
-  const { result: { user, isActive } } = useAuthenticationSink();
+  const { result: { user, isActive, mfaPending } } = useAuthenticationSink();
   return useQuery<Array<Partial<Link>>, unknown, Array<Link>>(
     ['/links'], {
     // Only request links if there is an authenticated user.
-      enabled: !!user && isActive,
+      enabled: !!user && isActive && !mfaPending,
       select: data => {
         if (Array.isArray(data)) {
           return data.map(item => new Link(item));

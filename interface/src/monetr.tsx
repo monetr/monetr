@@ -53,7 +53,7 @@ export default function Monetr(): JSX.Element {
   // If the config or authentication is loading just show a loading page.
   // Links is loading is weird becuase the loading state will be true until we actually request links. But links won't
   // be requested until we are authenticated with an active subscription.
-  if (configIsLoading || authIsLoading || (linksIsLoading && isActive)) {
+  if (configIsLoading || authIsLoading || (linksIsLoading && isActive && !mfaPending)) {
     return <Loading />;
   }
 
@@ -66,7 +66,6 @@ export default function Monetr(): JSX.Element {
     return (
       <Routes>
         <Route path='/login' element={ <Login /> } />
-        <Route path='/login/multifactor' element={ <h1>test</h1> } />
         <Route path='/logout' element={ <LogoutPage /> } />
         {config?.allowSignUp && <Route path='/register' element={ <Register /> } />}
         {config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } />}
@@ -85,7 +84,7 @@ export default function Monetr(): JSX.Element {
       <Routes>
         <Route path='/login/multifactor' element={ <MultifactorAuthenticationPage /> } />
         <Route path='/logout' element={ <LogoutPage /> } />
-        <Route path='*' element={ <Navigate replace to='/login/mmultifactor' /> } />
+        <Route path='*' element={ <Navigate replace to='/login/multifactor' /> } />
       </Routes>
     );
   }
