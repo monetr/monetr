@@ -289,6 +289,5 @@ jobs:
             -F "ref=main" \
             -F "variables[ENVIRONMENT]=my.monetr.dev" \
             -F "variables[GH_DEPLOYMENT_ID]=${{ steps.deployment.outputs.deployment_id }}" \
-            -F "variables[GH_TOKEN]=${{ github.token }}" \
             -F "variables[DEPLOY_VERSION]=${{ needs.docker.outputs.post-tag }}" \
             https://gitlab.com/api/v4/projects/61422476/trigger/pipeline
