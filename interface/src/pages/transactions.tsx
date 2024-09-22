@@ -10,11 +10,11 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransactions } from '@monetr/interface/hooks/transactions';
+import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
 import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import Transaction from '@monetr/interface/models/Transaction';
 import TransactionDateItem from '@monetr/interface/pages/new/TransactionDateItem';
 import TransactionItem from '@monetr/interface/pages/new/TransactionItem';
-import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
 
 let evilScrollPosition: number = 0;
 
