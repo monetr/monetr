@@ -11,6 +11,7 @@ import MAmountField from '@monetr/interface/components/MAmountField';
 import MFormButton, { MBaseButton } from '@monetr/interface/components/MButton';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MDivider from '@monetr/interface/components/MDivider';
+import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
@@ -20,7 +21,6 @@ import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useRemoveSpending, useSpending, useUpdateSpending } from '@monetr/interface/hooks/spending';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
-import MerchantIcon from '@monetr/interface/pages/new/MerchantIcon';
 import { amountToFriendly, friendlyToAmount } from '@monetr/interface/util/amounts';
 import { APIError } from '@monetr/interface/util/request';
 
@@ -28,7 +28,7 @@ interface ExpenseValues {
   name: string;
   amount: number;
   nextRecurrence: Date;
-  fundingScheduleId: number;
+  fundingScheduleId: string;
   recurrenceRule: string;
 }
 

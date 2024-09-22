@@ -7,6 +7,7 @@ import MAmountField from '@monetr/interface/components/MAmountField';
 import MFormButton from '@monetr/interface/components/MButton';
 import MCheckbox from '@monetr/interface/components/MCheckbox';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
+import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -16,14 +17,13 @@ import SimilarTransactions from '@monetr/interface/components/transactions/Simil
 import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Transaction from '@monetr/interface/models/Transaction';
-import MerchantIcon from '@monetr/interface/pages/new/MerchantIcon';
 import { amountToFriendly } from '@monetr/interface/util/amounts';
 
 interface TransactionValues {
   name: string;
   originalName: string;
   date: Date;
-  spendingId: number | null;
+  spendingId: string | null;
   isPending: boolean;
   amount: number;
 }

@@ -2,9 +2,9 @@ import { parseJSON } from 'date-fns';
 
 export default class TransactionCluster {
   transactionClusterId: string;
-  bankAccountId: number;
+  bankAccountId: string;
   name: string;
-  members: Array<number>;
+  members: Array<string>;
   createdAt: Date;
 
   constructor(data?: Partial<TransactionCluster>) {

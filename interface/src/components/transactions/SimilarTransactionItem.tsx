@@ -1,14 +1,14 @@
 import React from 'react';
 import { format, isThisYear } from 'date-fns';
 
-import ArrowLink from '../ArrowLink';
+import ArrowLink from '@monetr/interface/components/ArrowLink';
+import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { useTransaction } from '@monetr/interface/hooks/transactions';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
-import TransactionMerchantIcon from '@monetr/interface/pages/new/TransactionMerchantIcon';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface SimilarTransactionItemProps {
-  transactionId: number;
+  transactionId: string;
 }
 
 export default function SimilarTransactionItem(props: SimilarTransactionItemProps): JSX.Element {
