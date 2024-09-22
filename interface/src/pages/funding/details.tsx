@@ -6,10 +6,12 @@ import { format, isEqual, startOfDay } from 'date-fns';
 import { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
+import FundingTimeline from '@monetr/interface/components/funding/FundingTimeline';
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MFormButton, { MBaseButton } from '@monetr/interface/components/MButton';
 import MCheckbox from '@monetr/interface/components/MCheckbox';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
+import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -184,6 +186,13 @@ export default function FundingDetails(): JSX.Element {
               name='estimatedDeposit'
               placeholder='Example: $ 1,000.00'
             />
+          </div>
+          <MDivider className='block md:hidden w-1/2' />
+          <div className='w-full md:w-1/2 flex flex-col gap-2'>
+            <MSpan className='text-xl my-2'>
+              Funding Timeline
+            </MSpan>
+            <FundingTimeline fundingScheduleId={ funding.fundingScheduleId } />
           </div>
         </div>
       </div>

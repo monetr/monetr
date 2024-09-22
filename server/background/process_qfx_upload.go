@@ -445,7 +445,6 @@ func (j *ProcessQFXUploadJob) syncTransactions(ctx context.Context) error {
 		}
 
 		// TODO Process changes to an existing transaction.
-
 	}
 
 	// Persist any new transactions.
