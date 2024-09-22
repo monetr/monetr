@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.18.4](https://github.com/monetr/monetr/compare/v0.18.3...v0.18.4) (2024-09-22)
+
+
+### Features
+
+* **ui:** Adding ViewManager ([047690b](https://github.com/monetr/monetr/commit/047690b7e54a60c21856746ba602f7d1a3c3cf93))
+* **ui:** Cleaning up UI components, fixing inconsistent spacing ([c034405](https://github.com/monetr/monetr/commit/c034405a36f380319e5872588ea21e5b0900d54c))
+* **ui:** Show full last updated card on mobile ([1d4c94b](https://github.com/monetr/monetr/commit/1d4c94bd1438455b0d04398d1288e86a6d10a5f7))
+
+
+### Bug Fixes
+
+* **ui:** Fix mobile scrollbar rendering oddly ([f38855d](https://github.com/monetr/monetr/commit/f38855da9b0e0f8d569ccee60df5d0d1e04771b7)), closes [#1517](https://github.com/monetr/monetr/issues/1517)
+* **ui:** Fixed bad UI references ([e0bf1b0](https://github.com/monetr/monetr/commit/e0bf1b0621fbe1d0151b7d9b5acf72cbd0e79ff1))
+
 ## [0.18.3](https://github.com/monetr/monetr/compare/v0.18.2...v0.18.3) (2024-09-21)
 
 
