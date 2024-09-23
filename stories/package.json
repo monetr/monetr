@@ -27,7 +27,7 @@
     "msw-storybook-addon": "1.8.0",
     "postcss": "8.4.47",
     "postcss-flexbugs-fixes": "5.0.2",
-    "postcss-loader": "7.0.2",
+    "postcss-loader": "7.3.4",
     "postcss-normalize": "10.0.1",
     "postcss-preset-env": "7.8.3",
     "postcss-safe-parser": "6.0.0",
