@@ -122,9 +122,7 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
             COMMAND ${GOTESTSUM_MAYBE} ${PACKAGE_TEST_BINARY} ${TEST_ARGS} -test.run ${REGEX_TEST_NAME}
             WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
           )
-          set_tests_properties(
-            ${PACKAGE}/${FRIENDLY_TEST_NAME}
-            PROPERTIES
+          set_tests_properties(${PACKAGE}/${FRIENDLY_TEST_NAME} PROPERTIES
             FIXTURES_REQUIRED "DB;${PACKAGE};go.mocks"
             ENVIRONMENT "GOCOVERDIR=${PACKAGE_COVERAGE_DIRECTORY}"
             SKIP_REGULAR_EXPRESSION " SKIP: "

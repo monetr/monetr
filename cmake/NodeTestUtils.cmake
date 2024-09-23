@@ -32,7 +32,10 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
         COMMAND ${COMMAND_PREFIX} ${BUN_EXECUTABLE} test ${TEST_ARGS} ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/interface
       )
-      set_tests_properties(${PACKAGE}/${SPEC_NAME} PROPERTIES FIXTURES_REQUIRED node_modules)
+      set_tests_properties(${PACKAGE}/${SPEC_NAME} PROPERTIES 
+        FIXTURES_REQUIRED node_modules
+        TIMEOUT 45
+      )
       set_property(
         TEST ${PACKAGE}/${SPEC_NAME}
         PROPERTY LABELS "interface"
