@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.7](https://github.com/monetr/monetr/compare/v0.18.6...v0.18.7) (2024-09-23)
+
+
+### Dependencies
+
+* **api:** update module golang.org/x/crypto to v0.27.0 ([#1968](https://github.com/monetr/monetr/issues/1968)) ([b083344](https://github.com/monetr/monetr/commit/b083344b484ff70b11f7326c387edb77ddcb2010))
+
 ## [0.18.6](https://github.com/monetr/monetr/compare/v0.18.5...v0.18.6) (2024-09-23)
 
 
