@@ -25,7 +25,7 @@
     "axios-mock-adapter": "1.22.0",
     "msw": "1.2.2",
     "msw-storybook-addon": "1.8.0",
-    "postcss": "8.4.44",
+    "postcss": "8.4.47",
     "postcss-flexbugs-fixes": "5.0.2",
     "postcss-loader": "7.0.2",
     "postcss-normalize": "10.0.1",
