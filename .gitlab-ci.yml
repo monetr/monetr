@@ -3,7 +3,7 @@ stages:
 
 Deploy Staging:
   stage: Deploy
-  image: ghcr.io/monetr/build-containers/debian:12.1
+  image: ghcr.io/monetr/build-containers/debian:12.7
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.dev"
       when: always
@@ -22,7 +22,7 @@ Deploy Staging:
 
 Deploy Production:
   stage: Deploy
-  image: ghcr.io/monetr/build-containers/debian:12.1
+  image: ghcr.io/monetr/build-containers/debian:12.7
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.app"
       when: always
@@ -43,7 +43,7 @@ Deploy Production:
 
 Deploy MIN4:
   stage: Deploy
-  image: ghcr.io/monetr/build-containers/debian:12.1
+  image: ghcr.io/monetr/build-containers/debian:12.7
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "min4"
       when: always
