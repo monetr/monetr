@@ -30,6 +30,9 @@ const config: DocsThemeConfig = {
   navbar: {
     extraContent: <SignUp />,
   },
+  sidebar: {
+    defaultMenuCollapseLevel: 1,
+  },
   chat: {
     link: 'https://discord.gg/68wTCXrhuq',
     icon: (

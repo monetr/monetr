@@ -1,5 +1,14 @@
 {
   "index": "Introduction",
   "getting_started": "",
-  "development": "Development"
+  "-- Help": {
+    "type": "separator",
+    "title": "Help"
+  },
+  "use": "",
+  "-- Contributing": {
+    "type": "separator",
+    "title": "Contributing"
+  },
+  "development": ""
 }
