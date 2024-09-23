@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.18.6](https://github.com/monetr/monetr/compare/v0.18.5...v0.18.6) (2024-09-23)
+
+
+### Features
+
+* **ci:** Fancier deployment scripts ([412290e](https://github.com/monetr/monetr/commit/412290e42435d0cf083b62713f7a231407d3ea31))
+* **deploy:** Use new deployment process ([c4b2c0d](https://github.com/monetr/monetr/commit/c4b2c0d8c80f9e04a2cf024d9970abf9accf0830))
+* **docs:** Adding documentation on user passwords ([08d5093](https://github.com/monetr/monetr/commit/08d50933228cde3c20f0ee81b5691cc3b7ad6ad0))
+
+
+### Dependencies
+
+* **api:** update module github.com/aws/aws-sdk-go to v1.55.5 ([#1959](https://github.com/monetr/monetr/issues/1959)) ([8699cac](https://github.com/monetr/monetr/commit/8699cacb6d5f659201a46fee1fcec5edcd8c4dea))
+* **ui:** update dependency @types/react to v18.3.8 ([#1947](https://github.com/monetr/monetr/issues/1947)) ([33124fd](https://github.com/monetr/monetr/commit/33124fd08e6dc4f4cdfa75c6f96ca1c22942737d))
+* **ui:** update dependency eslint to v8.57.1 ([#1955](https://github.com/monetr/monetr/issues/1955)) ([618d0b2](https://github.com/monetr/monetr/commit/618d0b25eff0dab00f5f0deacc1a018b64fb9741))
+* **ui:** update dependency lucide-react to v0.445.0 ([#1961](https://github.com/monetr/monetr/issues/1961)) ([bce4f82](https://github.com/monetr/monetr/commit/bce4f82c04515a2c6441e27c1e6930b1313b2790))
+* **ui:** update dependency next to v14.2.13 ([#1932](https://github.com/monetr/monetr/issues/1932)) ([08d6f1e](https://github.com/monetr/monetr/commit/08d6f1ef9e250b8c098ca468b18dedb760cb47ca))
+* **ui:** update dependency postcss to v8.4.47 ([#1956](https://github.com/monetr/monetr/issues/1956)) ([92403fa](https://github.com/monetr/monetr/commit/92403fa2ec2442fbfceafefef07a655c7d93d9c5))
+* **ui:** update dependency react-plaid-link to v3.6.0 ([#1962](https://github.com/monetr/monetr/issues/1962)) ([477219a](https://github.com/monetr/monetr/commit/477219a1dce4b537fedc2c480b70a4be370825c1))
+* **ui:** update dependency react-router-dom to v6.26.2 ([#1963](https://github.com/monetr/monetr/issues/1963)) ([7c49d5d](https://github.com/monetr/monetr/commit/7c49d5de07279005ca03e95e6694a3bc2bda1a97))
+* **ui:** update dependency react-select to v5.8.1 ([#1957](https://github.com/monetr/monetr/issues/1957)) ([f2dbb1f](https://github.com/monetr/monetr/commit/f2dbb1faa2100ac41e076b32a2a95883a076c657))
+* **ui:** update dependency tailwind-merge to v1.14.0 ([#1964](https://github.com/monetr/monetr/issues/1964)) ([0673ed1](https://github.com/monetr/monetr/commit/0673ed1f5a936144d2be404b662e00d375585854))
+* **ui:** update dependency tailwindcss to v3.4.12 ([#1958](https://github.com/monetr/monetr/issues/1958)) ([5fe3fd1](https://github.com/monetr/monetr/commit/5fe3fd1d7b84d3a036f6864a79ddc32a4dc6db05))
+* **ui:** update dependency zustand to v4.5.5 ([#1965](https://github.com/monetr/monetr/issues/1965)) ([046f006](https://github.com/monetr/monetr/commit/046f00628240499087eee45ac00ff4b383607ccd))
+
+
+### Bug Fixes
+
+* **build:** More tweaks to deployments ([023c2b4](https://github.com/monetr/monetr/commit/023c2b495ed28bd995eec12589d38d941d247085))
+* **build:** Removing unused deploy scripts ([1d1de06](https://github.com/monetr/monetr/commit/1d1de060e2d7758657cfbfb36829c2ea85e503d7))
+* **deploy:** Tweak gitlab deployment settings ([7c58cbe](https://github.com/monetr/monetr/commit/7c58cbe0fc5d18f4ae8eb902e0bbf78c0cb8f3c8))
+* **test:** Adding timeout to interface tests ([d8fa840](https://github.com/monetr/monetr/commit/d8fa840a59565ec4be0c2bd34fbf59e9fa7baf6c))
+* **ui:** Cleaning up unused dependencies ([165d3fc](https://github.com/monetr/monetr/commit/165d3fcf2c239c31978d63e45c33530c0ff2006b))
+
+
+### Miscellaneous
+
+* **build:** Environments are not transient ([7efb6d4](https://github.com/monetr/monetr/commit/7efb6d4a1882b02795be930807562da6237a1c62))
+* Removing gitlab ci ([e2fc2fe](https://github.com/monetr/monetr/commit/e2fc2fe722cda6674744af55e63da325eaf83439))
+* Tweak how deployments are created ([665d457](https://github.com/monetr/monetr/commit/665d457b38a6c4510e6cc317d28c3f79bf72067d))
+
 ## [0.18.5](https://github.com/monetr/monetr/compare/v0.18.4...v0.18.5) (2024-09-22)
 
 
