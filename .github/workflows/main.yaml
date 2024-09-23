@@ -253,13 +253,13 @@ jobs:
     name: Deploy my.monetr.dev
     runs-on: ubuntu-latest
     steps:
-      - uses: chrnorm/deployment-action@releases/v1
+      - uses: chrnorm/deployment-action@v2
         name: Create my.monetr.dev Deployment
         id: deployment
         with:
-          initial_status: pending
+          initial-status: queued
           token: "${{ github.token }}"
-          target_url: https://my.monetr.dev
+          environment-url: https://my.monetr.dev
           environment: my.monetr.dev
           transient-environment: false
           production-environment: false
