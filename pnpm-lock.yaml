@@ -232,8 +232,8 @@ importers:
         specifier: 5.4.2
         version: 5.4.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-plaid-link:
-        specifier: 3.5.2
-        version: 3.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 3.6.0
+        version: 3.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-qr-code:
         specifier: 2.0.15
         version: 2.0.15(react@18.3.1)
@@ -9758,8 +9758,8 @@ packages:
       react: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
       react-dom: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
 
-  react-plaid-link@3.5.2:
-    resolution: {integrity: sha512-/Eex/MydNg9UjSXV/1181NNRWT23N1sMq8Nyl9u5Ef89mH45YYWtOiNrA/lY7NeZkls92bP97cihFf0tsKOCkA==}
+  react-plaid-link@3.6.0:
+    resolution: {integrity: sha512-aLI5e+87xxA2LJMtlXG6IssU+uh5VAth9dAet4fIaXJ9TM3TRwfgNGR6MuXKZ55DvDW/RbkXc0xVNGS+7MB/8A==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -23918,7 +23918,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  react-plaid-link@3.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-plaid-link@3.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       prop-types: 15.8.1
       react: 18.3.1
