@@ -145,17 +145,6 @@ jobs:
           files: ${{ github.workspace }}/build/junit.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  yaml:
-    name: Kubernetes YAMLs
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Generate kubernetes yamls
-        run: |
-          git config --global --add safe.directory ${PWD}
-          ENVIRONMENT=my.monetr.dev DEPLOY_VERSION=latest DEPLOY_NAMESPACE=default make generate
-          ENVIRONMENT=my.monetr.app DEPLOY_VERSION=latest DEPLOY_NAMESPACE=default make generate
-
   local_dev:
     name: Local Development
     runs-on: ubuntu-latest
