@@ -48,6 +48,9 @@ const config: DocsThemeConfig = {
           © {new Date().getFullYear()} monetr LLC.
         </p>
         <div className='space-x-4'>
+          <a href='https://status.monetr.app/' target='_blank' className='hover:underline text-sm'>
+            Status
+          </a>
           <a href='/policy/terms' className='hover:underline text-sm'>
             Terms & Conditions
           </a>
