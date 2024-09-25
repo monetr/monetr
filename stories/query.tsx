@@ -8,6 +8,7 @@ export interface MockRequest {
   path: string;
   status: number;
   response: Object | Array<unknown>;
+  once?: boolean;
 }
 
 export interface MockQueryClientProps {
@@ -16,7 +17,7 @@ export interface MockQueryClientProps {
 }
 
 export default function MockQueryClient(props: MockQueryClientProps): JSX.Element {
-  const { requests } = props;
+  let { requests } = props;
   async function queryFn<T = unknown, TQueryKey extends QueryKey = QueryKey>(
     context: QueryFunctionContext<TQueryKey>,
   ): Promise<T> {
@@ -31,15 +32,21 @@ export default function MockQueryClient(props: MockQueryClientProps): JSX.Elemen
       },
       data: context.queryKey.length === 2 && context.queryKey[1],
     };
-    const response = requests.find(item => {
+    const index = requests.findIndex(item => {
       // TODO Implement params matching.
       return item.path === request.url && item.method === request.method;
     });
+    const response = requests[index];
     if (!response) {
       console.warn(`No response found for: ${ request.method } ${ request.url }`);
       return Promise.reject<T>({
         error: 'No response found!',
       });
+    }
+
+    // If the request is intended to only be handled a single time then remove the request from the stack.
+    if (response.once) {
+      requests = requests.splice(index, 1);
     }
 
     // Add a tiny bit of latency, as a treat.
