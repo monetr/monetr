@@ -138,6 +138,10 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to generate a password reset token")
 		}
+		ctx.Set(authenticationKey, security.Claims{
+			LoginId: login.LoginId.String(),
+			Scope:   security.ResetPasswordScope,
+		})
 
 		log.Info("login requires a password change")
 		return c.failure(ctx, http.StatusPreconditionRequired, PasswordResetRequiredError{
@@ -157,6 +161,12 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		// Check if the login requires MFA in order to authenticate.
 		if login.TOTPEnabledAt != nil {
 			log.Debug("login requires TOTP MFA")
+			ctx.Set(authenticationKey, security.Claims{
+				LoginId:   login.LoginId.String(),
+				AccountId: user.AccountId.String(),
+				UserId:    user.UserId.String(),
+				Scope:     security.MultiFactorScope,
+			})
 
 			token, err := c.ClientTokens.Create(
 				5*time.Minute,
@@ -175,6 +185,13 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 
 			return c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
 		}
+
+		ctx.Set(authenticationKey, security.Claims{
+			LoginId:   login.LoginId.String(),
+			AccountId: user.AccountId.String(),
+			UserId:    user.UserId.String(),
+			Scope:     security.AuthenticatedScope,
+		})
 
 		token, err := c.ClientTokens.Create(
 			14*24*time.Hour,
