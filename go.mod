@@ -9,6 +9,7 @@ require (
 	cloud.google.com/go/kms v1.20.0
 	cloud.google.com/go/storage v1.43.0
 	github.com/MicahParks/keyfunc v1.9.0
+	github.com/MicahParks/keyfunc/v3 v3.3.5
 	github.com/adrg/strutil v0.3.1
 	github.com/ahmetb/go-linq/v3 v3.2.0
 	github.com/alicebob/miniredis/v2 v2.33.0
