@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import type { DocsThemeConfig } from 'nextra-theme-docs';
 
 import Logo from '@monetr/docs/assets/logo.svg';
@@ -9,8 +10,13 @@ const branch = process.env.GIT_BRANCH ?? 'main';
 
 const config: DocsThemeConfig = {
   useNextSeoProps() {
+    const { asPath } = useRouter();
+    if (asPath !== '/') {
+      return {
+        titleTemplate: '%s – monetr',
+      };
+    }
     return {
-      // TODO improve this title template
       titleTemplate: 'monetr',
     };
   },
@@ -19,6 +25,7 @@ const config: DocsThemeConfig = {
       <meta name='viewport' content='width=device-width, initial-scale=1.0' />
       <meta property='og:title' content='monetr' />
       <meta property='og:description' content='Transparent financial planning' />
+      <script defer src='https://a.monetr.app/script.js' data-website-id='ccbdfaf9-683f-4487-b97f-5516e1353715' />
     </React.Fragment>
   ),
   darkMode: false,
