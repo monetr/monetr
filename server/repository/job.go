@@ -14,10 +14,7 @@ import (
 )
 
 type JobRepository interface {
-	GetBankAccountsToSync() ([]BankAccount, error)
-	GetBankAccountsWithPendingTransactions() ([]CheckingPendingTransactionsItem, error)
 	GetFundingSchedulesToProcess(ctx context.Context) ([]ProcessFundingSchedulesItem, error)
-	GetPlaidLinksByAccount(ctx context.Context) ([]PlaidLinksForAccount, error)
 	GetLinksForExpiredAccounts(ctx context.Context) ([]Link, error)
 	GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error)
 	GetAccountsWithTooManyFiles(ctx context.Context) ([]AccountWithTooManyFiles, error)
@@ -58,32 +55,6 @@ func NewJobRepository(db pg.DBI, clock clock.Clock) JobRepository {
 	}
 }
 
-func (j *jobRepository) GetPlaidLinksByAccount(ctx context.Context) ([]PlaidLinksForAccount, error) {
-	links := make([]PlaidLinksForAccount, 0)
-	err := j.txn.ModelContext(ctx, &links).
-		ColumnExpr(`"account_id"`).
-		ColumnExpr(`array_agg("link_id") "link_ids"`).
-		Where(`"link_type" = ?`, PlaidLinkType).
-		Where(`"plaid_link_id" IS NOT NULL`).
-		Group("account_id").
-		Select(&links)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to query plaid links by account")
-	}
-
-	return links, nil
-}
-
-func (j *jobRepository) GetBankAccountsToSync() ([]BankAccount, error) {
-	var result []BankAccount
-	err := j.txn.Model(&result).
-		Relation("Link").
-		Relation("Link.PlaidLink").
-		Where(`"link"."link_type" = ?`, PlaidLinkType).
-		Select(&result)
-	return result, errors.Wrap(err, "failed to retrieve bank accounts to sync")
-}
-
 func (j *jobRepository) GetFundingSchedulesToProcess(ctx context.Context) ([]ProcessFundingSchedulesItem, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -105,26 +76,6 @@ func (j *jobRepository) GetFundingSchedulesToProcess(ctx context.Context) ([]Pro
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve accounts and their funding schedules")
-	}
-
-	return items, nil
-}
-
-func (j *jobRepository) GetBankAccountsWithPendingTransactions() ([]CheckingPendingTransactionsItem, error) {
-	var items []CheckingPendingTransactionsItem
-	_, err := j.txn.Query(&items, `
-		SELECT DISTINCT
-			"bank_account"."account_id",
-			"bank_account"."link_id"
-		FROM "transactions" AS "transaction"
-		INNER JOIN "bank_accounts" AS "bank_account" ON "bank_account"."account_id" = "transaction"."account_id" AND "bank_account"."bank_account_id" = "transaction"."bank_account_id"
-		INNER JOIN "links" AS "link" ON "link"."account_id" = "bank_account"."account_id" AND "link"."link_id" = "bank_account"."link_id"
-		WHERE
-			"link"."link_type" = ? AND
-			"transaction"."is_pending" = true
-	`, PlaidLinkType)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve bank accounts with pending transactions")
 	}
 
 	return items, nil

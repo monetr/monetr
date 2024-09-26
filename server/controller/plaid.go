@@ -498,8 +498,8 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 			LastUpdated:        now,
 			Status:             ActiveBankAccountStatus,
 		}
-
 	}
+
 	if err = repo.CreateBankAccounts(c.getContext(ctx), accounts...); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create bank accounts")
 	}

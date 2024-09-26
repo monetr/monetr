@@ -15,24 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestJobRepository_GetPlaidLinksByAccount(t *testing.T) {
-	t.Run("simple", func(t *testing.T) {
-		clock := clock.NewMock()
-		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
-
-		jobRepo := repository.NewJobRepository(db, clock)
-
-		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
-		_ = fixtures.GivenIHaveAPlaidLink(t, clock, user)
-		_ = fixtures.GivenIHaveAPlaidLink(t, clock, user)
-
-		plaidLinks, err := jobRepo.GetPlaidLinksByAccount(context.Background())
-		assert.NoError(t, err, "should be able to retrieve the two links")
-		assert.Len(t, plaidLinks, 1, "should retrieve the one account")
-		assert.Len(t, plaidLinks[0].LinkIds, 2, "should have two links for the one account")
-	})
-}
-
 func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		clock := clock.NewMock()

@@ -1,0 +1,1 @@
+ALTER TABLE "plaid_links" ADD COLUMN "deleted_at" TIMESTAMP WITH TIME ZONE;

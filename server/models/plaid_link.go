@@ -43,6 +43,7 @@ type PlaidLink struct {
 	CreatedAt            time.Time       `json:"createdAt" pg:"created_at,notnull"`
 	CreatedBy            ID[User]        `json:"createdBy" pg:"created_by,notnull"`
 	CreatedByUser        *User           `json:"-" pg:"rel:has-one,fk:created_by"`
+	DeletedAt            *time.Time      `json:"deletedAt" pg:"deleted_at"`
 }
 
 func (PlaidLink) IdentityPrefix() string {
