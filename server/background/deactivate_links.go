@@ -142,8 +142,6 @@ func (d *DeactivateLinksHandler) EnqueueTriggeredJob(ctx context.Context, enqueu
 
 	log.WithField("count", len(expiredLinks)).Info("preparing to enqueue jobs to remove expired links")
 
-	jobErrors := make([]error, 0)
-
 	for _, item := range expiredLinks {
 		itemLog := log.WithFields(logrus.Fields{
 			"accountId": item.AccountId,
@@ -159,7 +157,6 @@ func (d *DeactivateLinksHandler) EnqueueTriggeredJob(ctx context.Context, enqueu
 			crumbs.Warn(ctx, "Failed to enqueue job to remove expired link", "job", map[string]interface{}{
 				"error": err,
 			})
-			jobErrors = append(jobErrors, err)
 			continue
 		}
 
