@@ -1,9 +1,11 @@
 package platypus
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -144,12 +146,30 @@ func NewPlaid(
 				response *http.Response,
 				err error,
 			) {
-				// No-op at the moment, still using the after function
+				requestLog := log.WithContext(ctx).WithFields(logrus.Fields{
+					"plaid_method": request.Method,
+					"plaid_url":    request.URL.String(),
+				})
 				var statusCode int
 				var requestId string
 				if response != nil {
 					statusCode = response.StatusCode
-					requestId = response.Header.Get("X-Request-Id")
+					requestLog = requestLog.WithField("plaid_statusCode", statusCode)
+
+					var responseData map[string]any
+					buffer := bytes.NewBuffer(nil)
+					tee := io.TeeReader(response.Body, buffer)
+					if err := json.NewDecoder(tee).Decode(&responseData); err != nil {
+						log.WithError(err).Warn("failed to decode plaid response as json for logging")
+					} else if id, ok := responseData["request_id"].(string); ok {
+						requestId = id
+						requestLog = requestLog.WithField("plaid_requestId", requestId)
+					}
+
+					// Close the existing body before we replace it.
+					response.Body.Close()
+					// Then swap out the body
+					response.Body = io.NopCloser(buffer)
 				}
 
 				// If you get a nil reference panic here during testing, its probably because you forgot to mock a certain endpoint.
@@ -161,9 +181,10 @@ func NewPlaid(
 					request.Method,
 					statusCode,
 					map[string]interface{}{
-						"X-Request-Id": requestId,
+						"Request-Id": requestId,
 					},
 				)
+				requestLog.Debug("Plaid API call")
 			}),
 	}
 
