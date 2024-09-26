@@ -1,8 +1,8 @@
 module github.com/monetr/monetr
 
-go 1.21.1
+go 1.22
 
-toolchain go1.21.7
+toolchain go1.23.1
 
 require (
 	aidanwoods.dev/go-paseto v1.5.2
@@ -15,6 +15,7 @@ require (
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/benbjohnson/clock v1.3.5
 	github.com/brianvoe/gofakeit/v6 v6.28.0
+	github.com/brianvoe/gofakeit/v7 v7.0.4
 	github.com/elliotcourant/go-lclocale v0.0.3
 	github.com/elliotcourant/gofx v0.0.1
 	github.com/fsnotify/fsnotify v1.7.0
