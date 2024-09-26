@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.18.8](https://github.com/monetr/monetr/compare/v0.18.7...v0.18.8) (2024-09-26)
+
+
+### Features
+
+* **api:** Adding more tests for deactivating links ([e4821e6](https://github.com/monetr/monetr/commit/e4821e6412588f51b747b894f41e825c51b9c93e))
+* **api:** Include user/account IDs on authentication API calls ([62e4f9b](https://github.com/monetr/monetr/commit/62e4f9b8b9e505549aa0cca6d7249719bae3c79b))
+* **api:** Plaid link soft delete for deactivation, cleanup ([8ecb443](https://github.com/monetr/monetr/commit/8ecb443cf366247169728c09e4de9bbb56580600))
+* **docs:** Adding status page to doc site footer ([55ce059](https://github.com/monetr/monetr/commit/55ce059a8a60345de83c287d2ef097dd99014909))
+* **ui:** Adding an error boundary ([d4d978e](https://github.com/monetr/monetr/commit/d4d978e0ead6c40199aea14c94b8bfd5cf45942e)), closes [#1531](https://github.com/monetr/monetr/issues/1531)
+
+
+### Dependencies
+
+* **api:** update module cloud.google.com/go/kms to v1.20.0 ([#1967](https://github.com/monetr/monetr/issues/1967)) ([dd00def](https://github.com/monetr/monetr/commit/dd00def50dbb29fa69f77e2f0e19712105742a22))
+* **ui:** update dependency tailwindcss to v3.4.13 ([#1973](https://github.com/monetr/monetr/issues/1973)) ([482494e](https://github.com/monetr/monetr/commit/482494e56352c103d8a72aa2ea04b20d906a5357))
+
+
+### Bug Fixes
+
+* **api:** Make sure Plaid request ID is included in logging ([94739b9](https://github.com/monetr/monetr/commit/94739b9116fec6ba5831920eaedb685faaa42084))
+* **build:** Remove unused steps ([960c73a](https://github.com/monetr/monetr/commit/960c73a9e8e11c2e680e2322a2505cf22eecc719))
+
+
+### Miscellaneous
+
+* Cleaning up old deployment files ([7fb8a64](https://github.com/monetr/monetr/commit/7fb8a64d121928a917edea619e3db2e37b2164e0))
+* **ui:** Tweak mock query client ([68f2993](https://github.com/monetr/monetr/commit/68f299355c9e3cdb9d249c21ea0e77f017d7f21b))
+
 ## [0.18.7](https://github.com/monetr/monetr/compare/v0.18.6...v0.18.7) (2024-09-23)
 
 
