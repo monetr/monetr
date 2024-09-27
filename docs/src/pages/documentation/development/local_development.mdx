@@ -8,7 +8,7 @@ Windows, it is still possible to run the development environment locally. Howeve
 ## Prerequisites
 
 At the time of writing this, monetr requires Plaid credentials for development. Among other credentials, documentation
-on how to retrieve them can be found here: [Developing > Credentials](credentials.md)
+on how to retrieve them can be found here: [Credentials](credentials.md)
 
 ## Clone the repository
 
@@ -23,7 +23,7 @@ The rest of the commands in this guide are issued from this directory.
 
 ## Dependencies
 
-monetr does require a few tools to be installed locally in order to develop or build it. These tools are outlines below:
+monetr does require a few tools to be installed locally in order to develop or build it. These tools are outlined below:
 
 ### Required
 
@@ -43,13 +43,11 @@ the complete development environment locally or if you plan on creating release 
   allowing you to have the entire application and all of it's features with hot-reloading.
 - Ruby (`>= 2.7`): Ruby is required to run `licensed` which is used to generate third-party-notice files, these show all
   of the dependencies of monetr and their licenses. This is embeded at build time for releases.
-- Kubectl (`>= 1.23.0`): Kubectl is used to deploy monetr to a Kubernetes cluster. At the moment this is _only_ used in
-  CI/CD pipelines for deployying monetr to the Staging and Production clusters.
 
 ### Mac Specific
 
 macOS can ship with a version of `make` that is outdated. It is recommended that you use `brew` or any other preferred
-method to install the most recent version of GNUMake on your Mac. This will not break anything that is already using
+method to install the most recent version of **GNUMake** on your Mac. This will not break anything that is already using
 make, but will make sure that your version is compatible with the monetr Makefiles.
 
 For example; you should see something like this for your make version.
@@ -83,6 +81,10 @@ vim $HOME/.monetr/development.env
 Once you've opened this file you'll need to provide the Plaid Client ID as `PLAID_CLIENT_ID` and Plaid Client Secret as
 `PLAID_CLIENT_SECRET` here.
 
+Please do not store credentials in the project directory for monetr, it is much easier to accidentally commit secrets to
+git when they are in your project directory. Keeping sensitive development credentials outside of the project makes it
+much harder to accidentally push them to a public repository.
+
 ### CMake
 
 monetr uses CMake as the primary build system, it is also used for running the tasks for local development. If you want
@@ -93,9 +95,60 @@ that file you can put the name of the preset you want to use by default. Or you 
 a make target. 
 
 <Callout type="info">
-  `CMAKE_PRESET` is ignored for some make targets, such as `release`, `test` and `deploy`. As each of those targets have
-  a specific preset that they are expected to use.
+  `CMAKE_PRESET` is ignored for some make targets, such as `release` and `test`. As each of those targets have a
+  specific preset that they are expected to use.
 </Callout>
+
+Here is a sample of a user presets file with a few customized options:
+
+```json filename="CMakeUserPresets.json
+{
+  "version": 5,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "developer",
+      "displayName": "Developer's custom config",
+      "description": "Customized configuration for developer",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "BUILD_THIRD_PARTY_NOTICE": "OFF",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "MONETR_LOCAL_DOMAIN": "monetr.local",
+        "MONETR_EMAIL_VERIFICATION_ENABLED": "true",
+        "MONETR_KMS_PROVIDER": "vault",
+        "MONETR_STORAGE_PROVIDER": "s3",
+        "DISABLE_GO_RELOAD": "false"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "developer",
+      "configurePreset": "developer"
+    }
+  ]
+}
+```
+
+This config specifically changes the following options:
+
+- `MONETR_EMAIL_VERIFICATION_ENABLED`: By setting this to true the developer is required to use the local SMTP server to
+  verify their email address when creating a new user. Valid values are `true` or `false`.
+- `MONETR_KMS_PROVIDER`: As configured, enables a local instance of [Hashicorp Vault](https://www.vaultproject.io/) as
+  well as configures monetr to use Vault Transit for secret encryption and decryption. Valid values are `plaintext`,
+  `aws` or `vault`. **Note:** The AWS setting runs a local KMS service compatible with AWS KMS's API.
+- `MONETR_STORAGE_PROVIDER`: A minio instance will be run as part of the local development stack. Valid values are `s3`
+  or `filesystem`. When using `filesystem` uploaded files will be stored in your `$PWD/build/development/storage`
+  folder.
+
+There are other options here that will be documented later, as well as other options that have not been covered here at
+all, but those options are the primary ones that change the local development stack the most.
 
 ## Starting It Up
 
@@ -109,6 +162,13 @@ into the `monetr` container where the API is running.
 make develop
 ```
 
+<Callout type="warning">
+  This command may prompt you for an administrator password, this is because monetr is using `mkcert` and `hostess` to
+  setup TLS certificates as well as the `monetr.local` domain name in your `/etc/hosts` file.
+
+  Disabling this will be available in the future, but has been required in order to integrate with Plaid's OAuth2 flow.
+</Callout>
+
 This will install node modules in the project's directory, as well as start up the containers needed for monetr to run
 locally. This command will exit automatically once all the containers are healthy. If you want to follow along while it
 is starting up you can use the `make logs` command in another terminal inside the project directory.
@@ -116,9 +176,10 @@ is starting up you can use the `make logs` command in another terminal inside th
 ## Working
 
 Congratulations, you should now have monetr running locally on your computer. The `develop` task will print out some
-basic information for you. But if you missed it, you can access the development version of monetr at `http://monetr.local`.
+basic information for you. But if you missed it, you can access the development version of monetr at
+`https://monetr.local`.
 
-If you are working on documentation then that can be accessed at `http://monetr.local/documentation`.
+If you are working on documentation then that can be accessed at `https://monetr.local/documentation`.
 
 Almost all of monetr's code is setup to hot-reload as you make changes. The documentation, Go code and React UI will all
 automatically reload as changes are made. Changes to the Go code will not invoke a browser refresh of any sort though,
@@ -140,6 +201,8 @@ As part of the local development stack, several services are run to support mone
 - [Mailpit](https://github.com/axllent/mailpit) An SMTP server that allows emails to be sent without really sending
   them. This is used to validate and test communication functionality locally. This service is accessible via
   `https://monetr.local/mail` when the local environment is running.
+- [Vault](https://www.vaultproject.io/) Vault secret management and encryption, Transit is used by monetr for storing
+  secrets securely. Available at `http://localhost:80` if you have Vault enabled in your user preset.
 
 ### Debugging
 
@@ -152,13 +215,13 @@ connect to it; but this is a screenshot of IntellJ IDEA's configuration for remo
 
 ![IntellJ IDEA Configuration](./assets/IntellJ_IDEA_Go_Debugging.png)
 
-### Running Tests
+### Tests
 
 monetr requires a PostgreSQL instance to be available for Go tests to be run. At the moment there isn't a shorthand
 script to provision this instance. But an easy way to do so is this:
 
 ```shell filename="Shell"
-docker run -e POSTGRES_HOST_AUTH_METHOD=trust --name postgres --rm -d -p 5432:5432 postgres:14
+docker run -e POSTGRES_HOST_AUTH_METHOD=trust --name postgres --rm -d -p 5432:5432 postgres:16
 ```
 
 This will start a PostgreSQL instance in Docker (or remove an existing one) and make it available on `locahost:5432` as
@@ -181,20 +244,63 @@ Tests can be run using the `go test` CLI, or all tests can be run using:
 make test
 ```
 
-### Running Storybook
+### Storybook
 
 monetr now provides a storybook setup for working on UI components outside of running the entire application locally. To
 start storybook you can run the following command.
 
 ```shell filename="Shell"
+make develop-storybook
+```
+
+This will kick off the storybook development server. You can make modifications to the stories locally or components
+used in stories and see the changes reflected with hot-reloading.
+
+To build the storybook as a static set of assets, you can run the following command:
+
+```shell filename="Shell"
 make storybook
 ```
 
-This will kick off the storybook server and build process. Once it is ready it will open the storybook in your default
-browser. You can then make changes to the components in the stories and see the changes in real time without needing to
-run the entire application stack locally.
+This will output the storybook assets in `$PWD/build/stories/dist`
 
-**NOTE** At the moment storybook does not work with the CMake development tooling.
+### Documentation
+
+monetr's documentation is built using Next.js and Nextra, it can be developed locally using the following command:
+
+```shell filename="Shell"
+make develop-docs
+```
+
+This will setup everything the documentation site needs and run the Next.JS development server locally, you can now make
+changes to the documentation and see those changes reflected in your browser.
+
+**Note:** The "hero" or interface example on the documentation site's homepage _does not work_ in development mode.
+    
+In order to build the complete documentation site as it is hosted online you can run the follow command:
+
+```shell filename="Shell"
+make docs
+```
+
+This will compile the documentation and output to `$PWD/docs/out`.
+
+If you want you can then run the entire site using the command: `npx http-server docs/out -c-1`.
+
+### Emails
+
+monetr's email templates are generated using [react-email](https://github.com/resend/react-email). They can be found in
+the `emails/` directory in the project folder. These emails are compiled at buildtime and include some 
+[go templating](https://pkg.go.dev/html/template) in their output in order to be useful for the server.
+
+In order to develop or make changes to the email templates and see your changes, you can run the following command:
+
+```shell filename="Shell"
+make develop-email
+```
+
+This will start the react email development server, allowing you to preview the email templates in your browser with
+some preset values (instead of the go template placeholders).
 
 ## Cleaning Up
 
@@ -225,3 +331,8 @@ make clean
 ```
 
 This should leave the project directory in a state similar to when it was initially cloned.
+
+Clean will not remove your `CMakeUserPresets.json` or `.cmakepreset` files.
+
+It is recommended to run `make clean` before performing a `git pull` when working from the main branch, this way changes
+in the build system or significant changes to project layout or the application will be applied properly.
