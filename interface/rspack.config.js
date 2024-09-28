@@ -1,8 +1,10 @@
 const path = require('path');
+const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
+const rspack = require('@rspack/core');
 
 module.exports = (env, _argv) => {
-  const envName = Object.keys(env).pop() ?? process.env.NODE_ENV;
-  const isDevelopment = envName === 'development';
+  const envName = process.env.NODE_ENV ?? 'development';
+  const isDevelopment = envName !== 'production';
   console.log(`environment: ${envName}`);
 
   if (!env.PUBLIC_URL) {
@@ -22,85 +24,20 @@ module.exports = (env, _argv) => {
     websocketUrl = `${wsProto}://${ process.env.MONETR_UI_DOMAIN_NAME }/ws`;
   }
 
-  const config = {
-    experiments: {
-      incrementalRebuild: true,
-    },
-    builtins: {
-      react: {
-        runtime: 'automatic',
-        development: isDevelopment,
-        refresh: isDevelopment,
-      },
-      presetEnv: {
-        coreJs: '3',
-      },
-      define: {
-        CONFIG: JSON.stringify({}),
-        REVISION: JSON.stringify(process.env.RELEASE_REVISION),
-        RELEASE: JSON.stringify(process.env.RELEASE_VERSION),
-        NODE_VERSION: process.version,
-      },
-      copy: {
-        patterns: [
-          {
-            from: 'public/logo192.png',
-            to: 'logo192.png',
-          },
-          {
-            from: 'public/manifest.json',
-            to: 'manifest.json',
-          },
-          {
-            from: 'public/logo512.png',
-            to: 'logo512.png',
-          },
-          {
-            from: 'public/robots.txt',
-            to: 'robots.txt',
-          },
-        ],
-      },
-      html: [
-        {
-          template: 'public/index.html',
-          filename: 'index.html',
-          favicon: 'public/favicon.ico',
-          templateParameters: {
-            // When we are doing local dev then don't use anything, maybe use an env var in the future but thats it. But
-            // for a production build add the go template string in so that the server can provide the DSN.
-            SENTRY_DSN: isDevelopment ? '' : '{{ .SentryDSN }}',
-          },
-        },
-      ],
-    },
+  /** @type {import('@rspack/cli').Configuration} */
+  const rspackConfig = {
     mode: isDevelopment ? 'development' : 'production',
     target: 'web',
     entry: './src/index.tsx',
-    output: {
+    experiments: {
+      css: true,
+    },
+    output:{
       publicPath: '/',
-      path: '../server/ui/static',
+      path: path.resolve(__dirname, '../server/ui/static'),
       filename: `assets/scripts/${filename}.js`,
       cssFilename: `assets/styles/${filename}.css`,
       cssChunkFilename: `assets/styles/${filename}.css`,
-    },
-    resolve: {
-      preferRelative: false,
-      extensions: [
-        '.js',
-        '.jsx',
-        '.tsx',
-        '.ts',
-        '.svg',
-      ],
-      modules: [
-        // This makes the absolute imports work properly.
-        path.resolve(__dirname, 'src'),
-        'node_modules',
-      ],
-      alias: {
-        '@monetr/interface': path.resolve(__dirname, 'src'),
-      },
     },
     devtool: isDevelopment ? 'inline-source-map' : 'source-map',
     devServer: {
@@ -117,6 +54,26 @@ module.exports = (env, _argv) => {
         webSocketTransport: 'ws',
         webSocketURL: websocketUrl,
         progress: true,
+      }
+    },
+    resolve: {
+      preferRelative: false,
+      extensions: [
+        '.js',
+        '.jsx',
+        '.tsx',
+        '.ts',
+        '.svg',
+        '.scss',
+        '.css',
+      ],
+      modules: [
+        // This makes the absolute imports work properly.
+        path.resolve(__dirname, 'src'),
+        'node_modules',
+      ],
+      alias: {
+        '@monetr/interface': path.resolve(__dirname, 'src'),
       },
     },
     optimization: {
@@ -144,12 +101,48 @@ module.exports = (env, _argv) => {
     module: {
       rules: [
         {
-          test: /\.(ts |jsx?)$/,
-          type: 'jsx',
-          exclude: /node_modules/,
+          test: /\.(js|jsx)$/,
+          use: {
+            loader: 'builtin:swc-loader',
+            options: {
+              jsc: {
+                parser: {
+                  syntax: 'ecmascript',
+                  jsx: true,
+                },
+                transform: {
+                  react: {
+                    development: isDevelopment,
+                    refresh: isDevelopment,
+                  },
+                },
+              },
+            },
+          },
         },
         {
-          test: /\.scss$/,
+          test: /\.(ts|tsx)$/,
+          use: {
+            loader: 'builtin:swc-loader',
+            options: {
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                },
+                transform: {
+                  react: {
+                    development: isDevelopment,
+                    refresh: isDevelopment,
+                  },
+                },
+              },
+            },
+          },
+          type: 'javascript/auto',
+        },
+        {
+          test: /\.(sass|scss)$/,
           use: [
             {
               loader: 'sass-loader',
@@ -163,7 +156,7 @@ module.exports = (env, _argv) => {
               loader: 'postcss-loader',
             },
           ],
-          type: 'css',
+          type: 'css/auto',
         },
         {
           test: /\.css$/,
@@ -172,7 +165,7 @@ module.exports = (env, _argv) => {
               loader: 'postcss-loader',
             },
           ],
-          type: 'css',
+          type: 'css/auto',
         },
         {
           test: /\.(woff|woff2|eot|ttf)$/,
@@ -191,7 +184,7 @@ module.exports = (env, _argv) => {
           type: 'asset',
           parser: {
             dataUrlCondition: {
-              maxSize: 1 * 1024 * 1024, // 1MB
+              maxSize: 8 * 1024, // 8KB
             },
           },
           generator: {
@@ -203,7 +196,7 @@ module.exports = (env, _argv) => {
           type: 'asset',
           parser: {
             dataUrlCondition: {
-              maxSize: 8 * 1024,
+              maxSize: 8 * 1024, 
             },
           },
           generator: {
@@ -212,7 +205,47 @@ module.exports = (env, _argv) => {
         },
       ],
     },
+    plugins: [
+      isDevelopment && new ReactRefreshPlugin(),
+      new rspack.DefinePlugin({
+        CONFIG: JSON.stringify({}),
+        REVISION: JSON.stringify(process.env.RELEASE_REVISION),
+        RELEASE: JSON.stringify(process.env.RELEASE_VERSION),
+        NODE_VERSION: process.version,
+      }),
+      new rspack.CopyRspackPlugin({
+        patterns: [
+          {
+            from: 'public/logo192.png',
+            to: 'logo192.png',
+          },
+          {
+            from: 'public/manifest.json',
+            to: 'manifest.json',
+          },
+          {
+            from: 'public/logo512.png',
+            to: 'logo512.png',
+          },
+          {
+            from: 'public/robots.txt',
+            to: 'robots.txt',
+          },
+        ],
+      }),
+      new rspack.HtmlRspackPlugin({
+        minify: true,
+        template: 'public/index.html',
+        filename: 'index.html',
+        favicon: 'public/favicon.ico',
+        templateParameters: {
+          // When we are doing local dev then don't use anything, maybe use an env var in the future but thats it. But
+          // for a production build add the go template string in so that the server can provide the DSN.
+          SENTRY_DSN: isDevelopment ? '' : '{{ .SentryDSN }}',
+        },
+      }),
+    ].filter(Boolean),
   };
 
-  return config;
+  return rspackConfig;
 };
