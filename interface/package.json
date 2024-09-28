@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "rspack build",
+    "build": "rspack build --mode=production",
     "start": "MONETR_ENV=${MONETR_ENV:=local} rspack serve --mode development",
     "test": "bun test",
     "coverage": "bun test"

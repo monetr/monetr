@@ -3,8 +3,8 @@ const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 const rspack = require('@rspack/core');
 
 module.exports = (env, _argv) => {
-  const envName = Object.keys(env).pop() ?? process.env.NODE_ENV;
-  const isDevelopment = envName === 'development';
+  const envName = process.env.NODE_ENV ?? 'development';
+  const isDevelopment = envName !== 'production';
   console.log(`environment: ${envName}`);
 
   if (!env.PUBLIC_URL) {
@@ -40,6 +40,22 @@ module.exports = (env, _argv) => {
       cssChunkFilename: `assets/styles/${filename}.css`,
     },
     devtool: isDevelopment ? 'inline-source-map' : 'source-map',
+    devServer: {
+      allowedHosts: 'all',
+      static: {
+        directory: 'public',
+      },
+      historyApiFallback: true,
+      host: '0.0.0.0',
+      port: 30000,
+      webSocketServer: 'ws',
+      liveReload: true,
+      client: {
+        webSocketTransport: 'ws',
+        webSocketURL: websocketUrl,
+        progress: true,
+      }
+    },
     resolve: {
       preferRelative: false,
       extensions: [

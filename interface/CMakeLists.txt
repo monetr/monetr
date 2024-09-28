@@ -28,6 +28,7 @@ set(UI_DIST
   ${UI_DIST_DIR}/assets
   ${UI_DIST_DIR}/index.html
   ${UI_DIST_DIR}/public
+  ${UI_DIST_DIR}/favicon.ico
   ${UI_DIST_DIR}/logo192.png
   ${UI_DIST_DIR}/logo512.png
   ${UI_DIST_DIR}/manifest.json
