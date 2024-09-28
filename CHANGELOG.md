@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.18.10](https://github.com/monetr/monetr/compare/v0.18.9...v0.18.10) (2024-09-28)
+
+
+### Features
+
+* **ui:** Minify CSS files ([4dc5928](https://github.com/monetr/monetr/commit/4dc59282a36b1fb3af9e914cac5d7bfd3e77cb15))
+* **ui:** Upgrading to rspack v1.0 ([#1996](https://github.com/monetr/monetr/issues/1996)) ([43c3146](https://github.com/monetr/monetr/commit/43c3146e3c657913b5bc40ca5d7f30f295a1c905))
+
+
+### Dependencies
+
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.6.7 ([#1997](https://github.com/monetr/monetr/issues/1997)) ([96cd564](https://github.com/monetr/monetr/commit/96cd5645d090a9f70409003671d1944cc5b42a63))
+
+
+### Bug Fixes
+
+* **api:** Use memo field from QFX/OFX upload ([194f622](https://github.com/monetr/monetr/commit/194f6228ddbc12e9369f240d4bf8ca2905f3c7c9))
+* **docs:** Don't include analytics for local development ([#1993](https://github.com/monetr/monetr/issues/1993)) ([50b0393](https://github.com/monetr/monetr/commit/50b0393c04ec33400c2b6648e25bb1ef53401f98))
+
 ## [0.18.9](https://github.com/monetr/monetr/compare/v0.18.8...v0.18.9) (2024-09-28)
 
 
