@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -140,5 +141,5 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 		}
 		log.WithField("contentType", contentType).Tracef("%s %s", ctx.Request().Method, ctx.Request().URL.Path)
 		return ctx.Blob(http.StatusOK, contentType, data)
-	})
+	}, middleware.Gzip())
 }
