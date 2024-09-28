@@ -13,6 +13,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/formats/qfx"
 	"github.com/monetr/monetr/server/internal/calc"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
@@ -416,6 +417,13 @@ func (j *ProcessQFXUploadJob) syncTransactions(ctx context.Context) error {
 		// reference numbers that might be useful internally? But are definitely
 		// not helpful here.
 		name := strings.TrimSpace(externalTransaction.NAME)
+		originalName := strings.TrimSpace(externalTransaction.MEMO)
+
+		// Make sure that the original name and name are set. This way if name is
+		// blank it will use the original name. And if original name is blank it
+		// will use the name.
+		name = myownsanity.CoalesceStrings(name, originalName)
+		originalName = myownsanity.CoalesceStrings(originalName, name)
 
 		// TODO Also parse DTAVAIL at some point
 		date, err := qfx.ParseDate(externalTransaction.DTPOSTED, j.timezone)
@@ -435,7 +443,7 @@ func (j *ProcessQFXUploadJob) syncTransactions(ctx context.Context) error {
 				Amount:           amount,
 				Date:             date,
 				Name:             name,
-				OriginalName:     name,
+				OriginalName:     originalName,
 				Currency:         "USD", // TODO Derive from file
 				IsPending:        false, // QFX files don't show pending?
 				UploadIdentifier: &uploadIdentifier,
