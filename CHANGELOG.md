@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.18.9](https://github.com/monetr/monetr/compare/v0.18.8...v0.18.9) (2024-09-28)
+
+
+### Features
+
+* **docs:** Get umami setup. ([26fc5e7](https://github.com/monetr/monetr/commit/26fc5e7e87e1f312a9f0a9f0fcf889be3f44a13d))
+* **docs:** Polishing the local development guide ([c9d4ead](https://github.com/monetr/monetr/commit/c9d4eadf5ad05358bc692e9c137ee21421d0aba8)), closes [#473](https://github.com/monetr/monetr/issues/473)
+* **ui:** Enabling gzip compression for UI routes ([57d8a9d](https://github.com/monetr/monetr/commit/57d8a9df171ecd639f47f513413ffb54657ce547)), closes [#1994](https://github.com/monetr/monetr/issues/1994)
+
+
+### Dependencies
+
+* **api:** update module github.com/gomodule/redigo to v1.9.2 ([#1804](https://github.com/monetr/monetr/issues/1804)) ([16e4c64](https://github.com/monetr/monetr/commit/16e4c6477cc5c4fed7709f0fb22de742fb12ccec))
+* **api:** update module github.com/vmihailenco/msgpack/v5 to v5.4.1 ([#1565](https://github.com/monetr/monetr/issues/1565)) ([cbbd1cd](https://github.com/monetr/monetr/commit/cbbd1cddabfb9fe605cb9aec3349c617bda59f05))
+* **api:** update module google.golang.org/api to v0.199.0 ([#1976](https://github.com/monetr/monetr/issues/1976)) ([8445e8d](https://github.com/monetr/monetr/commit/8445e8de577d11f642508e4d66eddf652b010f99))
+* **ui:** update dependency @fontsource-variable/inter to v5.1.0 ([#1989](https://github.com/monetr/monetr/issues/1989)) ([48219aa](https://github.com/monetr/monetr/commit/48219aa0fcf789d8848718b6c45931b0e51734da))
+* **ui:** update dependency @types/node to v20.16.6 ([#1927](https://github.com/monetr/monetr/issues/1927)) ([56be0b2](https://github.com/monetr/monetr/commit/56be0b2c77768d168077257007239b6026c3b7d4))
+* **ui:** update dependency @types/node to v20.16.6 ([#1981](https://github.com/monetr/monetr/issues/1981)) ([995a5ef](https://github.com/monetr/monetr/commit/995a5ef81265162c9b95711a4bb8966651adf053))
+* **ui:** update dependency @types/react to v18.3.9 ([#1980](https://github.com/monetr/monetr/issues/1980)) ([d7fface](https://github.com/monetr/monetr/commit/d7fface6558310d6f2b573b98c2274c0a1b0ab3b))
+* **ui:** update dependency eslint-plugin-react to v7.36.1 ([#1921](https://github.com/monetr/monetr/issues/1921)) ([0dcb014](https://github.com/monetr/monetr/commit/0dcb01407ca72da5097771301d86be8e9241aca2))
+* **ui:** update dependency lucide-react to v0.446.0 ([#1982](https://github.com/monetr/monetr/issues/1982)) ([f72be79](https://github.com/monetr/monetr/commit/f72be79ac1d7018836a3d26a822aaed0550c40c9))
+* **ui:** update dependency postcss-loader to v7.3.4 ([#1924](https://github.com/monetr/monetr/issues/1924)) ([ed06204](https://github.com/monetr/monetr/commit/ed06204d6912621c40903878fd2919f879262e2b))
+* **ui:** update dependency typescript to v5.6.2 ([#1983](https://github.com/monetr/monetr/issues/1983)) ([2731f1a](https://github.com/monetr/monetr/commit/2731f1a696a9d932c6ef73fef4a86a19d6bb1945))
+* **ui:** update radix-ui-primitives monorepo ([#1943](https://github.com/monetr/monetr/issues/1943)) ([bb6e07b](https://github.com/monetr/monetr/commit/bb6e07b3a8131700792a3f350588ccb6fd7db0e6))
+
+
+### Bug Fixes
+
+* **docs:** Fix cmake user presets file name ([f3e2efe](https://github.com/monetr/monetr/commit/f3e2efeff5523aaaad4f88fee50faa96cd1b0a15))
+* **docs:** Tweaking interface example ([03da2cb](https://github.com/monetr/monetr/commit/03da2cb02a4d8d795e76e2d5f5373bf9d6eac40c))
+
 ## [0.18.8](https://github.com/monetr/monetr/compare/v0.18.7...v0.18.8) (2024-09-26)
 
 
