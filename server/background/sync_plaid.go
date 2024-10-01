@@ -287,6 +287,9 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		},
 	})
 
+	// This way other methods will have these log fields too.
+	s.log = log
+
 	account, err := s.repo.GetAccount(span.Context())
 	if err != nil {
 		log.WithError(err).Error("failed to retrieve account for job")
