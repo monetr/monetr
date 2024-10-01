@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.18.11](https://github.com/monetr/monetr/compare/v0.18.10...v0.18.11) (2024-10-01)
+
+
+### Features
+
+* **docs:** Still tweaking BIMI SVG file ([50ce29f](https://github.com/monetr/monetr/commit/50ce29f65db7eebac9af5df7382f942e90b496f3))
+* **docs:** Testing BIMI DNS things ([9d30228](https://github.com/monetr/monetr/commit/9d30228dfd71ee024cfd5f520d2dd086ac53d776))
+* **email:** Make logo in email transparent ([f59fedb](https://github.com/monetr/monetr/commit/f59fedb47b4ed465818b1a75f69e0e72c601f743))
+
+
+### Bug Fixes
+
+* **ui:** Fix transparent logos not being copied properly ([b856765](https://github.com/monetr/monetr/commit/b856765780c48bf9c0f648923adfe237629653b5))
+
+
+### Miscellaneous
+
+* Adding title to BIMI SVG ([acefb72](https://github.com/monetr/monetr/commit/acefb72c9373d6500c64a8e96f85d8a02853dedf))
+* Tweaking BIMI files ([ccd6a3b](https://github.com/monetr/monetr/commit/ccd6a3b533e8993b321b6d9e823a0100b8aed121))
+
 ## [0.18.10](https://github.com/monetr/monetr/compare/v0.18.9...v0.18.10) (2024-09-28)
 
 
