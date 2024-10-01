@@ -44,7 +44,7 @@ export const ForgotPassword = ({
           <Container className='border border-solid border-[#eaeaea] rounded my-10 mx-auto p-5 max-w-xl'>
             <Section className='mt-8'>
               <Img
-                src={ `${baseUrl}/logo512.png` }
+                src={ `${baseUrl}/logo192transparent.png` }
                 width='64'
                 height='64'
                 alt='monetr'
