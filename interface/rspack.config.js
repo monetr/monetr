@@ -216,16 +216,24 @@ module.exports = (env, _argv) => {
       new rspack.CopyRspackPlugin({
         patterns: [
           {
-            from: 'public/logo192.png',
-            to: 'logo192.png',
-          },
-          {
             from: 'public/manifest.json',
             to: 'manifest.json',
           },
           {
+            from: 'public/logo192.png',
+            to: 'logo192.png',
+          },
+          {
             from: 'public/logo512.png',
             to: 'logo512.png',
+          },
+          {
+            from: 'public/logo192transparent.png',
+            to: 'logo192transparent.png',
+          },
+          {
+            from: 'public/logo512transparent.png',
+            to: 'logo512transparent.png',
           },
           {
             from: 'public/robots.txt',
