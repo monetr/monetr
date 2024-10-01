@@ -60,7 +60,7 @@ function EnableTOTPModal(): JSX.Element {
         disableWindowBlurListener: true,
       }))
       .then(() => modal.remove())
-      .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to enabled TOTP.', {
+      .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to enable TOTP.', {
         variant: 'error',
         disableWindowBlurListener: true,
       }));

@@ -30,7 +30,7 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
       totp: values.totp,
     })
       .then(() => queryClient.invalidateQueries(['/users/me']))
-      .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to enabled TOTP.', {
+      .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to validate TOTP code.', {
         variant: 'error',
         disableWindowBlurListener: true,
       }));
