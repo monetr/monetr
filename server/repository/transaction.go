@@ -206,7 +206,12 @@ func (r *repositoryBase) GetPendingTransactions(
 	return items, nil
 }
 
-func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending], limit, offset int) ([]Transaction, error) {
+func (r *repositoryBase) GetTransactionsForSpending(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	spendingId ID[Spending],
+	limit, offset int,
+) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -218,7 +223,7 @@ func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAcc
 		"offset":        offset,
 	}
 
-	var items []Transaction
+	items := make([]Transaction, 0)
 	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).

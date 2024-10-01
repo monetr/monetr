@@ -287,7 +287,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/bank_accounts/:bankAccountId/transactions", c.getTransactions)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/:transactionId", c.getTransactionById)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/:transactionId/similar", c.getSimilarTransactionsById)
-	billed.GET("/bank_accounts/:bankAccountId/transactions/spending/:spendingId", c.getTransactionsForSpending)
 	billed.POST("/bank_accounts/:bankAccountId/transactions", c.postTransactions)
 	billed.POST("/bank_accounts/:bankAccountId/transactions/upload", c.postTransactionUpload)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId", c.getTransactionUploadById)
@@ -309,6 +308,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.POST("/bank_accounts/:bankAccountId/spending/transfer", c.postSpendingTransfer)
 	billed.PUT("/bank_accounts/:bankAccountId/spending/:spendingId", c.putSpending)
 	billed.DELETE("/bank_accounts/:bankAccountId/spending/:spendingId", c.deleteSpending)
+	billed.GET("/bank_accounts/:bankAccountId/spending/:spendingId/transactions", c.getSpendingTransactions)
 	// Forecasting
 	billed.GET("/bank_accounts/:bankAccountId/forecast", c.getForecast)
 	billed.POST("/bank_accounts/:bankAccountId/forecast/spending", c.postForecastNewSpending)

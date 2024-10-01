@@ -59,6 +59,16 @@ export function useSimilarTransactions(transaction: Transaction | null): UseQuer
   );
 }
 
+export function useSpendingTransactions(spending?: Spending): UseQueryResult<Array<Transaction>> {
+  return useQuery<Array<Partial<Transaction>>, unknown, Array<Transaction>>(
+    [`/bank_accounts/${ spending?.bankAccountId }/spending/${ spending?.spendingId }/transactions`],
+    {
+      enabled: Boolean(spending),
+      select: data => data.map(item => new Transaction(item)),
+    },
+  );
+}
+
 export interface TransactionUpdateResponse {
   transaction: Partial<Transaction>;
   spending: Array<Partial<Spending>>;

@@ -747,3 +747,121 @@ func TestGetSpendingByID(t *testing.T) {
 		}
 	})
 }
+
+func TestGetSpendingTransactions(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank models.BankAccount
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		token = GivenILogin(t, e, user.Login.Email, password)
+		{ // Seed the data for the test.
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
+		}
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Array().Length().IsEqual(10)
+
+		transactionResponse := response.JSON().Array().Value(0)
+		// Make sure there is not already a spending object on the transaction.
+		transactionResponse.Path("$.spendingId").IsNull()
+		transaction := transactionResponse.Object().Raw()
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
+
+		var spendingId ID[Spending]
+		{ // Create an expense
+			now := app.Clock.Now()
+			timezone := testutils.MustEz(t, user.Account.GetTimezone)
+			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
+			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
+			nextRecurrence = util.Midnight(nextRecurrence, timezone)
+
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					"name":              "Some Monthly Expense",
+					"ruleset":           FirstDayOfEveryMonth,
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      1000,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
+			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+			assert.False(t, spendingId.IsZero(), "must be able to extract the spending ID")
+		}
+
+		{ // Before we use the expense, check to make sure there are no transactions.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().IsEmpty()
+		}
+
+		// Now spend the transaction from the expense we just created.
+		transaction["spendingId"] = spendingId.String()
+		{
+			response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transaction["transactionId"]).
+				WithCookie(TestCookieName, token).
+				WithJSON(transaction).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transaction.transactionId").IsEqual(transaction["transactionId"])
+			response.JSON().Path("$.transaction.spendingId").IsEqual(spendingId.String())
+		}
+
+		// Now query transactions for the spending object and we should see the
+		// transaction we used above.
+		{
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$[0].transactionId").IsEqual(transaction["transactionId"])
+		}
+	})
+}

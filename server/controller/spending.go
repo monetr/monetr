@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 )
 
@@ -384,4 +385,56 @@ func (c *Controller) deleteSpending(ctx echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusOK)
+}
+
+func (c *Controller) getSpendingTransactions(ctx echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	spendingId, err := ParseID[Spending](ctx.Param("spendingId"))
+	if err != nil || spendingId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid spending Id")
+	}
+
+	limit := urlParamIntDefault(ctx, "limit", 25)
+	offset := urlParamIntDefault(ctx, "offset", 0)
+
+	if limit < 1 {
+		return c.badRequest(ctx, "limit must be at least 1")
+	} else if limit > 100 {
+		return c.badRequest(ctx, "limit cannot be greater than 100")
+	}
+
+	if offset < 0 {
+		return c.badRequest(ctx, "offset cannot be less than 0")
+	}
+
+	// Only let a maximum of 100 transactions be requested at a time.
+	limit = myownsanity.Min(100, limit)
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	ok, err := repo.GetSpendingExists(c.getContext(ctx), bankAccountId, spendingId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to verify spending exists")
+	}
+
+	if !ok {
+		return c.returnError(ctx, http.StatusNotFound, "spending object does not exist")
+	}
+
+	transactions, err := repo.GetTransactionsForSpending(
+		c.getContext(ctx),
+		bankAccountId,
+		spendingId,
+		limit,
+		offset,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve transactions for spending")
+	}
+
+	return ctx.JSON(http.StatusOK, transactions)
 }
