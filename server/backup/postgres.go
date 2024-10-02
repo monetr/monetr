@@ -2,10 +2,9 @@ package backup
 
 import (
 	"archive/tar"
+	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"sync"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
@@ -92,7 +91,6 @@ func (s *postgresBackupSource) getTableOrder(ctx context.Context) ([]string, err
 
 func (s *postgresBackupSource) start(
 	ctx context.Context,
-	snapshotId string,
 	writer *tar.Writer,
 ) error {
 	log := s.log.WithContext(ctx)
@@ -104,68 +102,35 @@ func (s *postgresBackupSource) start(
 
 	for i := range tables {
 		tablename := tables[i]
-
-		pipeReader, pipeWriter := io.Pipe()
-		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			defer pipeWriter.Close()
-			result, err := s.db.CopyTo(pipeWriter, fmt.Sprintf("COPY %s TO STDOUT", tablename))
+		numberOfChunks := 1
+		for chunk := 0; chunk < numberOfChunks; chunk++ {
+			buffer := bytes.NewBuffer(nil)
+			result, err := s.db.CopyTo(buffer, fmt.Sprintf("COPY %s TO STDOUT", tablename))
 			if err != nil {
-				panic(err)
+				return errors.Wrapf(err, "failed to copy data from table [%s]", tablename)
 			}
-			fmt.Println("RESULT", result.RowsReturned(), result.RowsAffected())
-			pipeWriter.Close()
-		}()
-
-		part := 0
-		chunk := make([]byte, s.chunkSize)
-		for {
-			// Read our chunk from the STDOUT stream of pg_dump.
-			n, err := pipeReader.Read(chunk)
-			if err != nil && err != io.EOF {
-				return errors.Wrap(err, "failed to read chunk from pg_dump")
-			}
-
-			// If there wasn't a problem, and the chunk is not empty. Then we need to
-			// write this chunk to the tar file.
-			if n == 0 {
-				break
-			}
-
-			log.WithField("bytes", n).Debug("data exported from PostgreSQL")
 
 			// Write the header for this chunk.
 			header := &tar.Header{
-				Name: fmt.Sprintf("data/database/%s/%08d.bin", tablename, part),
+				Name: fmt.Sprintf("data/database/%s/%08d.bin", tablename, chunk),
 				Mode: 0600,
 				// The size will be the number of bytes read, for most chunks this
 				// _should_ be the same as the chunk size. But at the very end it is
 				// unlikely that it will match up.
-				Size: int64(n),
+				Size: int64(buffer.Len()),
 			}
 			if err := writer.WriteHeader(header); err != nil {
 				return errors.Wrap(err, "failed to write tar header for pg_dump chunk")
 			}
-
+			buffer.WriteTo(writer)
 			log.WithFields(logrus.Fields{
-				"bytes": n,
-				"name":  header.Name,
-				"mode":  header.Mode,
-			}).Trace("writing PostgreSQL export chunk")
-
-			// Write the chunk dynamically sized to the tar file.
-			if w, err := writer.Write(chunk[:n]); err != nil {
-				return errors.Wrap(err, "failed to write chunk to tar for pg_dump")
-			} else if w != n {
-				return errors.Errorf("write mismatch, expected: %d bytes, got %d bytes", n, w)
-			}
-
-			// Make sure we increment the part we are on.
-			part++
+				"rowCount": result.RowsReturned(),
+				"table":    tablename,
+				"chunk":    chunk,
+				"size":     header.Size,
+				"path":     header.Name,
+			}).Info("wrote chunk to tar")
 		}
-		wg.Wait()
 	}
 
 	log.Info("PostgreSQL data export completed")

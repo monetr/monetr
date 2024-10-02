@@ -73,17 +73,12 @@ func (b *BackupManager) Backup(ctx context.Context) error {
 	// TODO before writing any data to the tarball, we need to persist information
 	// about the monetr instance like the version, timestamp of the backup etc.
 
-	go func() {
-		defer tarWriter.Close()
-		defer gzipWriter.Close()
-		defer writer.Close()
-
-		// Backup the PostgreSQL database first.
-		if err := postgresBackup.start(ctx, snapshot.SnapshotID, tarWriter); err != nil {
-			log.WithError(err).Fatal("failed to backup database")
-			return
-		}
-	}()
+	// Need to do this async somehow
+	// Backup the PostgreSQL database first.
+	if err := postgresBackup.start(ctx, tarWriter); err != nil {
+		log.WithError(err).Fatal("failed to backup database")
+		return err
+	}
 
 	// As we read data from our data stores, write that data in a stream to the
 	// destination.
