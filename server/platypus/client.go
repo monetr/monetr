@@ -80,22 +80,23 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 		"accountIds": "ALL_BANK_ACCOUNTS",
 	}
 
+	log.Trace("retrieving bank accounts from plaid")
+
+	var options *plaid.AccountsGetRequestOptions
 	// If however we are requesting specific accounts, overwrite the value.
 	if len(accountIds) > 0 {
 		span.Data["accountIds"] = accountIds
+		options = &plaid.AccountsGetRequestOptions{
+			AccountIds: &accountIds,
+		}
 	}
-
-	log.Trace("retrieving bank accounts from plaid")
 
 	// Build the get accounts request.
 	request := p.client.PlaidApi.
 		AccountsGet(span.Context()).
 		AccountsGetRequest(plaid.AccountsGetRequest{
 			AccessToken: p.accessToken,
-			Options: &plaid.AccountsGetRequestOptions{
-				// This might not work, if it does not we should just add a nil check somehow here.
-				AccountIds: &accountIds,
-			},
+			Options:     options,
 		})
 
 	// Send the request.
