@@ -68,7 +68,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
       });
       Sentry.captureEvent({
         message: 'Plaid link exited with error',
-        level: Sentry.Severity.Error,
+        level: 'error',
         tags: {
           'plaid.request_id': metadata.request_id,
           'plaid.link_session_id': metadata.link_session_id,
@@ -76,7 +76,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
         breadcrumbs: [
           {
             type: 'info',
-            level: Sentry.Severity.Info,
+            level: 'info',
             message: 'Error from Plaid link',
             data: error,
           },

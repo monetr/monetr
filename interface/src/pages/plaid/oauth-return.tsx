@@ -3,7 +3,6 @@ import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } f
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import * as Sentry from '@sentry/react';
-import { Severity } from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { OAuthRedirectPlaidLink } from '@monetr/interface/components/Plaid/OAuthRedirectPlaidLink';
@@ -63,7 +62,7 @@ export default function OauthReturn(): JSX.Element {
     if (error) {
       Sentry.captureEvent({
         message: 'Plaid link exited with error',
-        level: Severity.Error,
+        level: 'error',
         tags: {
           'plaid.request_id': metadata.request_id,
           'plaid.link_session_id': metadata.link_session_id,
@@ -71,7 +70,7 @@ export default function OauthReturn(): JSX.Element {
         breadcrumbs: [
           {
             type: 'info',
-            level: Severity.Info,
+            level: 'info',
             message: 'Error from Plaid link',
             data: error,
           },
