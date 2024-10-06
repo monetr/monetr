@@ -2,6 +2,7 @@ package background
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
@@ -41,6 +42,9 @@ type (
 		secrets       repository.SecretsRepository
 		plaidPlatypus platypus.Platypus
 		clock         clock.Clock
+
+		bankAccounts      []BankAccount
+		plaidBankAccounts []platypus.BankAccount
 	}
 )
 
@@ -73,18 +77,18 @@ func (s SyncPlaidAccountsHandler) QueueName() string {
 	return SyncPlaidAccounts
 }
 
-func (s *SyncPlaidAccountsJob) Run(ctx context.Context) error {
+func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
-	crumbs.AddTag(span.Context(), "accountId", s.args.AccountId.String())
-	crumbs.AddTag(span.Context(), "linkId", s.args.LinkId.String())
+	crumbs.AddTag(span.Context(), "accountId", j.args.AccountId.String())
+	crumbs.AddTag(span.Context(), "linkId", j.args.LinkId.String())
 
-	log := s.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"accountId": s.args.AccountId,
-		"linkId":    s.args.LinkId,
+	log := j.log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"accountId": j.args.AccountId,
+		"linkId":    j.args.LinkId,
 	})
 
-	link, err := s.repo.GetLink(span.Context(), s.args.LinkId)
+	link, err := j.repo.GetLink(span.Context(), j.args.LinkId)
 	if err = errors.Wrap(err, "failed to retrieve link to sync with plaid"); err != nil {
 		log.WithError(err).Error("cannot sync without link")
 		return err
@@ -113,11 +117,11 @@ func (s *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 	})
 
 	// This way other methods will have these log fields too.
-	s.log = log
+	j.log = log
 
 	plaidLink := link.PlaidLink
 
-	bankAccounts, err := s.repo.GetBankAccountsWithPlaidByLinkId(
+	j.bankAccounts, err = j.repo.GetBankAccountsWithPlaidByLinkId(
 		span.Context(),
 		link.LinkId,
 	)
@@ -129,19 +133,19 @@ func (s *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 	crumbs.AddTag(span.Context(), "plaid.institution_id", link.PlaidLink.InstitutionId)
 	crumbs.AddTag(span.Context(), "plaid.institution_name", link.PlaidLink.InstitutionName)
 
-	if len(bankAccounts) == 0 {
+	if len(j.bankAccounts) == 0 {
 		log.Warn("no bank accounts for plaid link")
 		crumbs.Debug(span.Context(), "No bank accounts setup for plaid link", nil)
 		return nil
 	}
 
-	secret, err := s.secrets.Read(span.Context(), plaidLink.SecretId)
+	secret, err := j.secrets.Read(span.Context(), plaidLink.SecretId)
 	if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
 		log.WithError(err).Error("could not retrieve API credentials for Plaid for link, this job will be retried")
 		return err
 	}
 
-	plaidClient, err := s.plaidPlatypus.NewClient(
+	plaidClient, err := j.plaidPlatypus.NewClient(
 		span.Context(),
 		link,
 		secret.Value,
@@ -152,41 +156,95 @@ func (s *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	plaidBankAccounts, err := plaidClient.GetAccounts(span.Context())
+	j.plaidBankAccounts, err = plaidClient.GetAccounts(span.Context())
 	if err != nil {
 		log.WithError(err).Error("failed to retrieve bank accounts from plaid")
 		return err
 	}
 
-	{ // Handle missing or inactive accounts
-		missingAccounts := map[ID[BankAccount]]*BankAccount{}
-	MissingAccounts:
-		for x := range bankAccounts {
-			bankAccount := bankAccounts[x]
-			for y := range plaidBankAccounts {
-				plaidBankAccount := plaidBankAccounts[y]
-				if plaidBankAccount.GetAccountId() == bankAccount.PlaidBankAccount.PlaidId {
-					log.WithFields(logrus.Fields{
-						"bankAccountId": bankAccount.BankAccountId,
-					}).Debug("bank account is still present in plaid and is considered active")
-					// TODO Check bank account status here too, if the status is inactive
-					// but we see the account again then that means it is active again.
-					continue MissingAccounts
-				}
-			}
+	missingAccounts := j.findMissingAccounts()
+	if len(missingAccounts) > 0 {
+		log.WithFields(logrus.Fields{
+			"count": len(missingAccounts),
+		}).Info("found newly inactive accounts, updating status")
 
-			if bankAccount.Status == InactiveBankAccountStatus {
-				// Bank account is already considered missing, skip it.
+		for _, bankAccount := range missingAccounts {
+			bankAccount.Status = InactiveBankAccountStatus
+			if err := j.repo.UpdateBankAccounts(span.Context(), bankAccount); err != nil {
+				log.WithError(err).Error("failed to mark account as inactive")
 				continue
 			}
+		}
+	} else {
+		log.Info("no accounts to mark as inactive")
+	}
 
-			log.WithFields(logrus.Fields{
+	activeAccounts := j.findActiveAccounts()
+	fmt.Sprint(activeAccounts)
+
+	return nil
+}
+
+func (j *SyncPlaidAccountsJob) findMissingAccounts() (missingAccounts map[ID[BankAccount]]BankAccount) {
+	missingAccounts = make(map[ID[BankAccount]]BankAccount)
+MissingAccounts:
+	for x := range j.bankAccounts {
+		bankAccount := j.bankAccounts[x]
+		for y := range j.plaidBankAccounts {
+			plaidBankAccount := j.plaidBankAccounts[y]
+			if plaidBankAccount.GetAccountId() == bankAccount.PlaidBankAccount.PlaidId {
+				j.log.WithFields(logrus.Fields{
+					"bankAccountId":       bankAccount.BankAccountId,
+					"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
+				}).Debug("bank account is still present in plaid and is considered active")
+				// TODO Check bank account status here too, if the status is inactive
+				// but we see the account again then that means it is active again.
+				continue MissingAccounts
+			}
+		}
+
+		if bankAccount.Status == InactiveBankAccountStatus {
+			// Bank account is already considered missing, skip it.
+			j.log.WithFields(logrus.Fields{
 				"bankAccountId":       bankAccount.BankAccountId,
 				"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
-			}).Info("bank account is no longer present in plaid and is considered inactive")
-			missingAccounts[bankAccount.BankAccountId] = &bankAccount
+			}).Trace("bank account is already inactive, it does not need to be updated")
+			continue
+		}
+
+		j.log.WithFields(logrus.Fields{
+			"bankAccountId":       bankAccount.BankAccountId,
+			"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
+		}).Info("bank account is no longer present in plaid and is considered inactive")
+		missingAccounts[bankAccount.BankAccountId] = bankAccount
+	}
+
+	return missingAccounts
+}
+
+func (j *SyncPlaidAccountsJob) findActiveAccounts() (activeAcounts map[ID[BankAccount]]BankAccount) {
+	activeAcounts = make(map[ID[BankAccount]]BankAccount)
+ActiveAccounts:
+	for x := range j.bankAccounts {
+		bankAccount := j.bankAccounts[x]
+
+		// If the account is already marked as active then skip it.
+		if bankAccount.Status == ActiveBankAccountStatus {
+			continue ActiveAccounts
+		}
+
+		for y := range j.plaidBankAccounts {
+			plaidBankAccount := j.plaidBankAccounts[y]
+			if plaidBankAccount.GetAccountId() == bankAccount.PlaidBankAccount.PlaidId {
+				activeAcounts[bankAccount.BankAccountId] = bankAccount
+				j.log.WithFields(logrus.Fields{
+					"bankAccountId":       bankAccount.BankAccountId,
+					"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
+				}).Info("found inactive account that is present in Plaid again, will be updated to show as active")
+				continue ActiveAccounts
+			}
 		}
 	}
 
-	return nil
+	return activeAcounts
 }
