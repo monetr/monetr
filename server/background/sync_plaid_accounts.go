@@ -7,6 +7,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/repository"
@@ -227,12 +228,10 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 	}
 
 	log = log.WithFields(logrus.Fields{
-		"plaidLinkId": link.PlaidLink.PlaidLinkId,
-		"plaid": logrus.Fields{
-			"institutionId":   link.PlaidLink.InstitutionId,
-			"institutionName": link.PlaidLink.InstitutionName,
-			"itemId":          link.PlaidLink.PlaidId,
-		},
+		"plaidLinkId":           link.PlaidLink.PlaidLinkId,
+		"plaid_institutionId":   link.PlaidLink.InstitutionId,
+		"plaid_institutionName": link.PlaidLink.InstitutionName,
+		"plaid_itemId":          link.PlaidLink.PlaidId,
 	})
 
 	// This way other methods will have these log fields too.
@@ -323,9 +322,19 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 		log.Info("no accounts to mark as reactivated")
 	}
 
+	log.Trace("updating plaid link's last account sync timestamp")
+	plaidLink.LastAccountSync = myownsanity.TimeP(j.clock.Now())
+	if err := j.repo.UpdatePlaidLink(span.Context(), plaidLink); err != nil {
+		log.WithError(err).Error("failed to update plaid link's last account sync timestamp")
+		return err
+	}
+
 	return nil
 }
 
+// findMissingAccounts will return a map of all the bank accounts who are
+// currently in an active status, but who are no longer being returned by Plaid.
+// These accounts will be marked as inactive.
 func (j *SyncPlaidAccountsJob) findMissingAccounts() (missingAccounts map[ID[BankAccount]]BankAccount) {
 	missingAccounts = make(map[ID[BankAccount]]BankAccount)
 MissingAccounts:
@@ -363,6 +372,9 @@ MissingAccounts:
 	return missingAccounts
 }
 
+// findActiveAccounts will return a map of all the accounts who were previously
+// marked as inactive but are now being seen in plaid's API responses again.
+// This would be extremely unusual.
 func (j *SyncPlaidAccountsJob) findActiveAccounts() (activeAcounts map[ID[BankAccount]]BankAccount) {
 	activeAcounts = make(map[ID[BankAccount]]BankAccount)
 ActiveAccounts:
