@@ -39,6 +39,7 @@ type PlaidLink struct {
 	LastManualSync       *time.Time      `json:"lastManualSync" pg:"last_manual_sync"`
 	LastSuccessfulUpdate *time.Time      `json:"lastSuccessfulUpdate" pg:"last_successful_update"`
 	LastAttemptedUpdate  *time.Time      `json:"lastAttemptedUpdate" pg:"last_attempted_update"`
+	LastAccountSync      *time.Time      `json:"lastAccountSync" pg:"last_account_sync"`
 	UpdatedAt            time.Time       `json:"updatedAt" pg:"updated_at,notnull"`
 	CreatedAt            time.Time       `json:"createdAt" pg:"created_at,notnull"`
 	CreatedBy            ID[User]        `json:"createdBy" pg:"created_by,notnull"`
