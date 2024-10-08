@@ -151,10 +151,10 @@ func CalculateNextContribution(
 		return spending
 	}
 
-	// Don't change the time by convert it to the account timezone. This will make debugging easier if there is a
-	// problem.
-	// It's possible that the time was already in the account's timezone, but this still is good to have because it makes
-	// this function consistent.
+	// Don't change the time by convert it to the account timezone. This will make
+	// debugging easier if there is a problem.
+	// It's possible that the time was already in the account's timezone, but this
+	// still is good to have because it makes this function consistent.
 	now = now.In(timezone)
 
 	fundingFirst, fundingSecond := fundingSchedule.GetNextTwoContributionDatesAfter(now, timezone)

@@ -238,10 +238,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 			return nil, nil
 		}
 	case SpendingTypeExpense:
-		if rule == nil {
-			panic("expense spending type must have a recurrence rule!")
-		}
-
+		myownsanity.ASSERT_NOTNIL(rule, "expense spending type must have a recurrence rule!")
 		rule.DTStart(rule.GetDTStart().In(timezone))
 		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
 			nextRecurrence = rule.After(input, false)
