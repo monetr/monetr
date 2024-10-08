@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.18.12](https://github.com/monetr/monetr/compare/v0.18.11...v0.18.12) (2024-10-08)
+
+
+### Features
+
+* **api:** Improve logging in the sync plaid background job ([fd9dd13](https://github.com/monetr/monetr/commit/fd9dd13f8605a9dd8152683661038feccd78988c))
+* **api:** Transactions for a spending object ([9826f54](https://github.com/monetr/monetr/commit/9826f5457c97f9f0f158d15f66b817b5736732bd))
+
+
+### Dependencies
+
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.6.8 ([#2007](https://github.com/monetr/monetr/issues/2007)) ([1aaf84b](https://github.com/monetr/monetr/commit/1aaf84b3aad44399b30e9dabce9274809228102e))
+* **ui:** update dependency @sentry/browser to v8.33.0 [security] ([#2005](https://github.com/monetr/monetr/issues/2005)) ([01865b4](https://github.com/monetr/monetr/commit/01865b4f1e3b3676acdcee8e4ca7a14a39b113c9))
+* **ui:** update dependency sass to v1.79.4 ([#1992](https://github.com/monetr/monetr/issues/1992)) ([dcaa99d](https://github.com/monetr/monetr/commit/dcaa99df9846b456f04ab298003830eb05f2231a))
+
+
+### Bug Fixes
+
+* **docs:** Adding notes about mkcert being odd ([2d0ea42](https://github.com/monetr/monetr/commit/2d0ea42a49e16810f04c60b2cd9d05674ec36f72))
+* **ui:** Fix build warnings for user interface ([a25c58b](https://github.com/monetr/monetr/commit/a25c58b5d17c9bc841174d27310749c8b5651e2c))
+* **ui:** Fixed incorrect error message when authenticating with TOTP. ([696896f](https://github.com/monetr/monetr/commit/696896f5780aecd768b0a1364428ead151467d24)), closes [#2000](https://github.com/monetr/monetr/issues/2000)
+
 ## [0.18.11](https://github.com/monetr/monetr/compare/v0.18.10...v0.18.11) (2024-10-01)
 
 
