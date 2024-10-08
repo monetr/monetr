@@ -205,7 +205,7 @@ jobs:
       - name: Build
         run: make docs
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.6.7
+        uses: JamesIves/github-pages-deploy-action@v4.6.8
         with:
           branch: monetr.app
           folder: docs/out
