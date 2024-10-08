@@ -266,8 +266,8 @@ importers:
         specifier: 14.12.3
         version: 14.12.3
       '@rspack/binding-linux-arm64-gnu':
-        specifier: 1.0.7
-        version: 1.0.7
+        specifier: 1.0.8
+        version: 1.0.8
       '@rspack/binding-linux-x64-gnu':
         specifier: 1.0.7
         version: 1.0.7
@@ -3362,6 +3362,11 @@ packages:
 
   '@rspack/binding-linux-arm64-gnu@1.0.7':
     resolution: {integrity: sha512-FHS1cU5MzXijVKQ7xW2Rpp0wvtN0BQYbouT3Yx6DNrdtE3P4i/XHnol8zdHkpHeSCOP/p0bnyO+Q/BbXXr4XSw==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@rspack/binding-linux-arm64-gnu@1.0.8':
+    resolution: {integrity: sha512-QnqCL0wmwYqT/IFx5q0aw7DsIOr8oYUa4+7JI8iiqRf3RuuRJExesVW9VuWr0jS2UvChKgmb8PvRtDy/0tshFw==}
     cpu: [arm64]
     os: [linux]
 
@@ -6676,6 +6681,7 @@ packages:
   eslint@8.57.1:
     resolution: {integrity: sha512-ypowyDxpVSYpkXr9WPv2PAZCtNip1Mv5KTW0SCurXv/9iOpcrH9PaqUElksqEB6pChqHGDRCFTyrZlGhnLNGiA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   espree@9.6.1:
@@ -15333,7 +15339,10 @@ snapshots:
   '@rspack/binding-linux-arm64-gnu@0.3.6':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@1.0.7': {}
+  '@rspack/binding-linux-arm64-gnu@1.0.7':
+    optional: true
+
+  '@rspack/binding-linux-arm64-gnu@1.0.8': {}
 
   '@rspack/binding-linux-arm64-musl@0.1.12':
     optional: true
