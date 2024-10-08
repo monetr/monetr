@@ -143,8 +143,9 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 
 	t.Run("timezone near midnight", func(t *testing.T) {
 		// This test is here to prove a fix for https://github.com/monetr/monetr/issues/937
-		// Basically, we want to make sure that if the user is close to their funding schedule such that the server is
-		// already on the next day; that we still calculate everything correctly. This was not happening, this test
+		// Basically, we want to make sure that if the user is close to their
+		// funding schedule such that the server is already on the next day; that we
+		// still calculate everything correctly. This was not happening, this test
 		// accompanies a fix to remedy that situation.
 		central, err := time.LoadLocation("America/Chicago")
 		require.NoError(t, err, "must be able to load timezone")
@@ -174,11 +175,14 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 	})
 
 	t.Run("spend from a day early falls behind", func(t *testing.T) {
-		// This test is a placeholder for now. Recurring expenses are not always consistent about the day they come in.
-		// If we try to process an expense early then it can sometimes misrepresent that expense for the next cycle. In
-		// this example, the expense was processed on April 9th, whereas it is due on the 10th. Because the expense is
-		// funded on the 15th and last day of each month, the contribution code believes that this expense has fallen
-		// behind, when in fact it has not. This test simply proves this behavior for now, until I find a way to fix it.
+		// This test is a placeholder for now. Recurring expenses are not always
+		// consistent about the day they come in. If we try to process an expense
+		// early then it can sometimes misrepresent that expense for the next cycle.
+		// In this example, the expense was processed on April 9th, whereas it is
+		// due on the 10th. Because the expense is funded on the 15th and last day
+		// of each month, the contribution code believes that this expense has
+		// fallen behind, when in fact it has not. This test simply proves this
+		// behavior for now, until I find a way to fix it.
 		now := time.Date(2022, 4, 9, 12, 0, 0, 0, time.UTC)
 		nextDueDate := time.Date(2022, 4, 10, 0, 0, 0, 0, time.UTC)
 
@@ -208,8 +212,9 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 	})
 
 	t.Run("spent the day after properly recalculates", func(t *testing.T) {
-		// This test is similar to the one above, but makes sure that if the spending is calculated the day after it is
-		// due, that it will recalculate properly.
+		// This test is similar to the one above, but makes sure that if the
+		// spending is calculated the day after it is due, that it will recalculate
+		// properly.
 		now := time.Date(2022, 4, 11, 12, 0, 0, 0, time.UTC)
 		nextDueDate := time.Date(2022, 4, 10, 0, 0, 0, 0, time.UTC)
 		subsequentDueDate := time.Date(2022, 5, 10, 0, 0, 0, 0, time.UTC)
