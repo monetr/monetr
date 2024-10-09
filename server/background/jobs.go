@@ -82,6 +82,7 @@ func NewBackgroundJobs(
 		NewProcessSpendingHandler(log, db, clock),
 		NewRemoveFileHandler(log, db, clock, fileStorage),
 		NewRemoveLinkHandler(log, db, clock, publisher),
+		NewSyncPlaidAccountsHandler(log, db, clock, kms, plaidPlatypus),
 		NewSyncPlaidHandler(log, db, clock, kms, plaidPlatypus, publisher, enqueuer),
 	}
 
