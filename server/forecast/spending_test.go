@@ -646,6 +646,40 @@ func TestSpendingInstructionBase_GetNextInflowEventAfter(t *testing.T) {
 		assert.EqualValues(t, spending.TargetAmount, event.ContributionAmount, "next contribution should be the entire amount")
 	})
 
+	t.Run("next funding in the past is behind", func(t *testing.T) {
+		log := testutils.GetLog(t)
+		today := util.Midnight(time.Now(), time.UTC)
+		dayAfterTomorrow := util.Midnight(time.Now().Add(48*time.Hour), time.UTC)
+		assert.True(t, dayAfterTomorrow.After(today), "dayAfterTomorrow timestamp must come after today's")
+		ruleset := testutils.RuleToSet(t, time.UTC, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR", today)
+
+		spending := models.Spending{
+			SpendingType:   models.SpendingTypeGoal,
+			TargetAmount:   100,
+			CurrentAmount:  0,
+			NextRecurrence: dayAfterTomorrow,
+		}
+
+		fundingInstructions := NewFundingScheduleFundingInstructions(log, models.FundingSchedule{
+			FundingScheduleId: "fund_bogus",
+			Name:              "Bogus Funding Schedule",
+			Description:       "Bogus",
+			RuleSet:           ruleset,
+			NextRecurrence:    dayAfterTomorrow.AddDate(0, 0, 1),
+		})
+		spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Hour)
+		defer cancel()
+		event, err := spendingInstructions.GetNextInflowEventAfter(
+			ctx,
+			time.Now(),
+			time.UTC,
+		)
+		assert.NoError(t, err, "must be able to calculate the next spending event")
+		assert.Nil(t, event, "the goal finishes before the next funding date")
+	})
+
 	t.Run("timezone near midnight", func(t *testing.T) {
 		log := testutils.GetLog(t)
 		// This test is here to prove a fix for https://github.com/monetr/monetr/issues/937

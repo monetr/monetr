@@ -436,6 +436,10 @@ func (s *spendingInstructionBase) GetNextInflowEventAfter(
 			return nil, err
 		}
 
+		if event == nil {
+			return nil, nil
+		}
+
 		// If the event we found is an actual contribution then return it.
 		if event.ContributionAmount > 0 {
 			return event, nil
