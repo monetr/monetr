@@ -160,17 +160,16 @@ func CalculateNextContribution(
 
 	var rule *rrule.Set
 	if spending.RuleSet != nil {
-		// This is terrible and I hate it :tada:
-		rule = &(*spending.RuleSet).Set
+		rule = &spending.RuleSet.Set
 		rule.DTStart(rule.GetDTStart().In(timezone))
 	}
 
 	fundingFirst, fundingSecond := fundingSchedule.GetNextTwoContributionDatesAfter(now, timezone)
 	nextRecurrence := util.Midnight(spending.NextRecurrence, timezone)
-	if spending.RuleSet != nil {
+	if rule != nil {
 		// If the next recurrence of the spending is in the past, then bump it as well.
 		if nextRecurrence.Before(now) {
-			nextRecurrence = spending.RuleSet.After(now, false)
+			nextRecurrence = rule.After(now, false)
 		}
 	}
 

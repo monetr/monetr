@@ -556,6 +556,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			GiveMeAFundingSchedule(nextFundingDate, contributionRule),
 			now,
 		)
+		assert.NoError(t, err)
 		assert.EqualValues(t, 12500, spending.NextContributionAmount, "should be half of the target amount")
 	})
 
@@ -582,6 +583,48 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			GiveMeAFundingSchedule(nextFundingDate, contributionRule),
 			now,
 		)
+		assert.NoError(t, err)
 		assert.EqualValues(t, 500, spending.NextContributionAmount, "should be 12000/24")
+	})
+
+	t.Run("daylight savings time fix", func(t *testing.T) {
+		timezone, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must be able to load timezone")
+		now, err := time.Parse(time.RFC3339, "2024-10-08T22:15:04.541Z")
+		assert.NoError(t, err, "must be able to get now")
+
+		expectedNextDate := time.Date(2025, 01, 01, 0, 0, 0, 0, timezone)
+
+		spendingString := "DTSTART:20230401T050000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1"
+		spendingRule, err := NewRuleSet(spendingString)
+		assert.NoError(t, err, "must be able to parse the rule")
+
+		contributionString := "DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1"
+		contributionRule, err := NewRuleSet(contributionString)
+		assert.NoError(t, err, "must be able to parse the rule")
+
+		spending := Spending{
+			SpendingType:           SpendingTypeExpense,
+			TargetAmount:           20000,
+			CurrentAmount:          0,
+			NextContributionAmount: 0,
+			NextRecurrence:         time.Date(2024, 10, 1, 0, 0, 0, 0, timezone).UTC(),
+			RuleSet:                spendingRule,
+		}
+		err = spending.CalculateNextContribution(
+			context.Background(),
+			timezone.String(),
+			&FundingSchedule{
+				FundingScheduleId: "fund_bogus",
+				Name:              "Bogus Funding Schedule",
+				Description:       "Bogus",
+				RuleSet:           contributionRule,
+				NextRecurrence:    time.Date(2024, 10, 15, 0, 0, 0, 0, timezone).UTC(),
+			},
+			now,
+		)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 3333, spending.NextContributionAmount)
+		assert.EqualValues(t, expectedNextDate.UTC(), spending.NextRecurrence.UTC(), "next recurrence should handle DST transition")
 	})
 }

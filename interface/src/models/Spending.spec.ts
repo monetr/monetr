@@ -1,4 +1,3 @@
-import { enUS } from 'date-fns/locale';
 
 import Spending from '@monetr/interface/models/Spending';
 
@@ -20,28 +19,16 @@ describe('spending', () => {
       'ruleset': 'DTSTART:20230401T000000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1',
       'lastSpentFrom': null,
       'lastRecurrence': '2024-10-01T05:00:00Z',
-      'nextRecurrence': '2025-01-01T05:00:00Z',
+      'nextRecurrence': '2025-01-01T06:00:00Z',
       'nextContributionAmount': 2974,
       'isBehind': false,
       'isPaused': false,
       'createdAt': '2021-11-06T22:07:41Z',
     };
     const spending = new Spending(object as any);
-
-    const locale = enUS;
-    const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      timeZone: 'America/Chicago',
-    };
-    const next = spending.nextRecurrence.toLocaleDateString(locale.code, options);
-
     const rule = rrulestr(spending.ruleset, { tzid: 'America/Chicago' });
     const now = new Date('2024-10-08T22:15:04.541Z');
     const nextAfter = rule.after(now);
-    expect(spending.nextRecurrence).toEqual(nextAfter.toISOString());
-
+    expect(spending.nextRecurrence.toISOString()).toEqual(nextAfter.toISOString());
   });
-
 });
