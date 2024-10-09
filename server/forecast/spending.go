@@ -450,3 +450,39 @@ func (s *spendingInstructionBase) GetNextInflowEventAfter(
 		allocation = event.RollingAllocation
 	}
 }
+
+type SpendingContribution struct {
+	Amount int64
+}
+
+func CalculateSpendingContributionAfter(
+	ctx context.Context,
+	log *logrus.Entry,
+	spending Spending,
+	funding FundingSchedule,
+	input time.Time,
+	timezone *time.Location,
+) (SpendingContribution, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	fundingInstructions := NewFundingScheduleFundingInstructions(log, funding)
+	spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
+
+	result, err := spendingInstructions.GetNextInflowEventAfter(ctx, input, timezone)
+	if err != nil {
+		return SpendingContribution{
+			Amount: 0,
+		}, err
+	}
+
+	if result == nil {
+		return SpendingContribution{
+			Amount: 0,
+		}, nil
+	}
+
+	return SpendingContribution{
+		Amount: result.ContributionAmount,
+	}, nil
+}

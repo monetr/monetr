@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
+	"github.com/teambition/rrule-go"
 )
 
 type SpendingType uint8
@@ -156,6 +157,13 @@ func CalculateNextContribution(
 	// It's possible that the time was already in the account's timezone, but this
 	// still is good to have because it makes this function consistent.
 	now = now.In(timezone)
+
+	var rule *rrule.Set
+	if spending.RuleSet != nil {
+		// This is terrible and I hate it :tada:
+		rule = &(*spending.RuleSet).Set
+		rule.DTStart(rule.GetDTStart().In(timezone))
+	}
 
 	fundingFirst, fundingSecond := fundingSchedule.GetNextTwoContributionDatesAfter(now, timezone)
 	nextRecurrence := util.Midnight(spending.NextRecurrence, timezone)
