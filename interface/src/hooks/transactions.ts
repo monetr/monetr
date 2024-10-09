@@ -7,6 +7,7 @@ import {
   useQueryClient,
   UseQueryResult,
 } from '@tanstack/react-query';
+import { isEqual, startOfDay } from 'date-fns';
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import Balance from '@monetr/interface/models/Balance';
@@ -17,7 +18,6 @@ import request from '@monetr/interface/util/request';
 
 export type TransactionsResult = {
   result: Array<Transaction>;
-  hasNextPage: boolean;
 } & UseInfiniteQueryResult<Array<Partial<Transaction>>>;
 
 export function useTransactions(): TransactionsResult {
@@ -34,6 +34,42 @@ export function useTransactions(): TransactionsResult {
     hasNextPage: !result?.data?.pages.some(page => page.length < 25),
     // Take all the pages and build an array. Make sure we actually return an array here even if it's empty.
     result: result?.data?.pages.flatMap(x => x).map(item => new Transaction(item)) || [],
+  };
+}
+
+type GroupedTransactions = Array<[Date, Array<Transaction>]>;
+
+export type GroupedTransactionsResult = {
+  result: GroupedTransactions;
+} & UseInfiniteQueryResult<Array<Partial<Transaction>>>;
+
+export function useTransactionsGrouped(): GroupedTransactionsResult {
+  const selectedBankAccountId = useSelectedBankAccountId();
+  const result = useInfiniteQuery<Array<Partial<Transaction>>>(
+    [`/bank_accounts/${ selectedBankAccountId }/transactions`],
+    {
+      getNextPageParam: (_, pages) => pages.length * 25,
+      enabled: !!selectedBankAccountId,
+    },
+  );
+  return {
+    ...result,
+    // Overwrite the has next page value with our own.
+    hasNextPage: !result?.data?.pages.some(page => page.length < 25),
+    // Take all the pages and build an array. Make sure we actually return an array here even if it's empty.
+    result: result?.data?.pages
+      .flatMap(item => item)
+      .reduce<GroupedTransactions>((accumulator, item) => {
+        const txn = new Transaction(item);
+        const group = startOfDay(txn.date);
+        const index = accumulator.findIndex(([date, _]) => isEqual(date, group));
+        if (index == -1) {
+          accumulator.push([group, [txn]]);
+        } else {
+          accumulator[index][1].push(txn);
+        }
+        return accumulator;
+      }, []),
   };
 }
 

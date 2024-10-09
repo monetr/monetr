@@ -1,9 +1,7 @@
 import React, { Fragment, useCallback, useEffect, useRef } from 'react';
-import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { useNavigationType } from 'react-router-dom';
+import { GroupedVirtuoso } from 'react-virtuoso';
 import { HeartBroken, ShoppingCartOutlined, UploadOutlined } from '@mui/icons-material';
-import { format, getUnixTime, parse } from 'date-fns';
-import * as R from 'ramda';
 
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -11,10 +9,9 @@ import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import TransactionDateItem from '@monetr/interface/components/transactions/TransactionDateItem';
 import TransactionItem from '@monetr/interface/components/transactions/TransactionItem';
 import { useCurrentLink } from '@monetr/interface/hooks/links';
-import { useTransactions } from '@monetr/interface/hooks/transactions';
+import { useTransactionsGrouped } from '@monetr/interface/hooks/transactions';
 import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
 import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
-import Transaction from '@monetr/interface/models/Transaction';
 
 let evilScrollPosition: number = 0;
 
@@ -26,12 +23,13 @@ export default function Transactions(): JSX.Element {
     isFetching,
     fetchNextPage,
     result: transactions, hasNextPage,
-  } = useTransactions();
+  } = useTransactionsGrouped();
+  console.log('TXN', hasNextPage, transactions);
 
   const { data: link } = useCurrentLink();
 
   // Scroll restoration code.
-  const ref = useRef<HTMLUListElement>(null);
+  const ref = useRef<HTMLElement>(null);
   const navigationType = useNavigationType();
   const onScroll = useCallback(() => {
     evilScrollPosition = ref.current.scrollTop;
@@ -55,18 +53,18 @@ export default function Transactions(): JSX.Element {
 
   const loading = isLoading || isFetching;
 
-  const [sentryRef] = useInfiniteScroll({
-    loading,
-    hasNextPage,
-    onLoadMore: fetchNextPage,
-    // When there is an error, we stop infinite loading.
-    // It can be reactivated by setting "error" state as undefined.
-    disabled: isError,
-    // `rootMargin` is passed to `IntersectionObserver`.
-    // We can use it to trigger 'onLoadMore' when the sentry comes near to become
-    // visible, instead of becoming fully visible on the screen.
-    rootMargin: '0px 0px 0px 0px',
-  });
+  // const [sentryRef] = useInfiniteScroll({
+  //   loading,
+  //   hasNextPage,
+  //   onLoadMore: fetchNextPage,
+  //   // When there is an error, we stop infinite loading.
+  //   // It can be reactivated by setting "error" state as undefined.
+  //   disabled: isError,
+  //   // `rootMargin` is passed to `IntersectionObserver`.
+  //   // We can use it to trigger 'onLoadMore' when the sentry comes near to become
+  //   // visible, instead of becoming fully visible on the screen.
+  //   rootMargin: '500px 500px 500px 500px',
+  // });
 
   // Uncomment this to make it so that transaction data is removed from memory upon navigating away.
   // useEffect(() => {
@@ -114,30 +112,30 @@ export default function Transactions(): JSX.Element {
     );
   }
 
-  function TransactionItems() {
-    interface TransactionGroup {
-      transactions: Array<Transaction>;
-      group: Date;
-    }
-    return R.pipe(
-      R.groupBy((item: Transaction) => format(item.date, 'yyyy-MM-dd')),
-      R.mapObjIndexed((transactions, date) => ({
-        transactions: transactions,
-        group: parse(date, 'yyyy-MM-dd', new Date()),
-      })),
-      R.values,
-      R.map(({ transactions, group }: TransactionGroup): JSX.Element => (
-        <li key={ getUnixTime(group) }>
-          <ul className='flex gap-2 flex-col'>
-            <TransactionDateItem date={ group } />
-            { transactions .map(transaction => (
-              <TransactionItem key={ transaction.transactionId } transaction={ transaction } />
-            )) }
-          </ul>
-        </li>
-      )),
-    )(transactions);
-  }
+  // function TransactionItems() {
+  //   interface TransactionGroup {
+  //     transactions: Array<Transaction>;
+  //     group: Date;
+  //   }
+  //   return R.pipe(
+  //     R.groupBy((item: Transaction) => format(item.date, 'yyyy-MM-dd')),
+  //     R.mapObjIndexed((transactions, date) => ({
+  //       transactions: transactions,
+  //       group: parse(date, 'yyyy-MM-dd', new Date()),
+  //     })),
+  //     R.values,
+  //     R.map(({ transactions, group }: TransactionGroup): JSX.Element => (
+  //       <li key={ getUnixTime(group) }>
+  //         <ul className='flex gap-2 flex-col'>
+  //           <TransactionDateItem date={ group } />
+  //           { transactions .map(transaction => (
+  //             <TransactionItem key={ transaction.transactionId } transaction={ transaction } />
+  //           )) }
+  //         </ul>
+  //       </li>
+  //     )),
+  //   )(transactions);
+  // }
 
   let message = 'No more transactions...';
   if (loading) {
@@ -173,7 +171,10 @@ export default function Transactions(): JSX.Element {
     );
   }
 
+  const items = transactions.map(([_, items]) => items).flatMap(items => items);
+
   return (
+
     <Fragment>
       <MTopNavigation
         icon={ ShoppingCartOutlined }
@@ -181,32 +182,87 @@ export default function Transactions(): JSX.Element {
       >
         <UploadButtonMaybe />
       </MTopNavigation>
-      <div className='flex flex-grow min-w-0 min-h-0'>
-        <ul className='w-full overflow-y-auto' ref={ ref }>
-          <TransactionItems />
-          {loading && (
-            <li ref={ sentryRef }>
-              <div className='w-full flex justify-center p-5 opacity-70'>
-                <h1>{message}</h1>
+      <ul className='flex flex-grow min-w-0 min-h-0'>
+        <GroupedVirtuoso
+          className='h-full w-full'
+          groupCounts={ transactions.map(([_, group]) => group.length) }
+          groupContent={ groupIndex => (
+            <TransactionDateItem 
+              key={ groupIndex } 
+              date={ transactions[groupIndex][0] } 
+            />
+          ) }
+          itemContent={ (index, groupIndex) => {
+            const txn = items[index];
+            if (!txn) {
+              console.warn('BROKEN', {
+                index, groupIndex,
+              });
+            }
+
+            return (
+              <TransactionItem 
+                key={ `${index}/${groupIndex}` } 
+                transaction={ txn } 
+              />
+            );
+          } }
+          endReached={ () => fetchNextPage() }
+          components={ {
+            ScrollSeekPlaceholder: () => (
+              <div className='h-[60px] bg-black w-full'>
+                Placeholder
               </div>
-            </li>
-          )}
-          {(!loading && hasNextPage) && (
-            <li ref={ sentryRef }>
-              <div className='w-full flex justify-center p-5 opacity-70'>
-                <h1>{message}</h1>
-              </div>
-            </li>
-          )}
-          {(!loading && !hasNextPage) && (
-            <li>
-              <div className='w-full flex justify-center p-5 opacity-70'>
-                <h1>{message}</h1>
-              </div>
-            </li>
-          )}
-        </ul>
-      </div>
+            ),
+            Footer: () => (
+              <Fragment>
+                <li>
+                  <div className='w-full flex justify-center p-5 opacity-70'>
+                    <h1>{message}</h1>
+                  </div>
+                </li>
+              </Fragment>
+            ),
+          } }
+        />
+      </ul>
     </Fragment>
   );
+
+  // return (
+  //   <Fragment>
+  //     <MTopNavigation
+  //       icon={ ShoppingCartOutlined }
+  //       title='Transactions'
+  //     >
+  //       <UploadButtonMaybe />
+  //     </MTopNavigation>
+  //     <div className='flex flex-grow min-w-0 min-h-0'>
+  //       <ul className='w-full overflow-y-auto' ref={ ref }>
+  //         <TransactionItems />
+  //         {loading && (
+  //           <li ref={ sentryRef }>
+  //             <div className='w-full flex justify-center p-5 opacity-70'>
+  //               <h1>{message}</h1>
+  //             </div>
+  //           </li>
+  //         )}
+  //         {(!loading && hasNextPage) && (
+  //           <li ref={ sentryRef }>
+  //             <div className='w-full flex justify-center p-5 opacity-70'>
+  //               <h1>{message}</h1>
+  //             </div>
+  //           </li>
+  //         )}
+  //         {(!loading && !hasNextPage) && (
+  //           <li>
+  //             <div className='w-full flex justify-center p-5 opacity-70'>
+  //               <h1>{message}</h1>
+  //             </div>
+  //           </li>
+  //         )}
+  //       </ul>
+  //     </div>
+  //   </Fragment>
+  // );
 }
