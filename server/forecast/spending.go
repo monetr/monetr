@@ -29,6 +29,7 @@ var (
 type SpendingInstructions interface {
 	GetNextNSpendingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) ([]SpendingEvent, error)
 	GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) ([]SpendingEvent, error)
+	GetNextInflowEventAfter(ctx context.Context, input time.Time, timezone *time.Location) (*SpendingEvent, error)
 }
 
 type spendingInstructionBase struct {
@@ -238,10 +239,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 			return nil, nil
 		}
 	case SpendingTypeExpense:
-		if rule == nil {
-			panic("expense spending type must have a recurrence rule!")
-		}
-
+		myownsanity.ASSERT_NOTNIL(rule, "expense spending type must have a recurrence rule!")
 		rule.DTStart(rule.GetDTStart().In(timezone))
 		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
 			nextRecurrence = rule.After(input, false)
@@ -402,4 +400,89 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 	}
 
 	return &event, nil
+}
+
+func (s *spendingInstructionBase) GetNextInflowEventAfter(
+	ctx context.Context,
+	input time.Time,
+	timezone *time.Location,
+) (*SpendingEvent, error) {
+	log := s.log.
+		WithContext(ctx).
+		WithFields(logrus.Fields{
+			"input":    input,
+			"timezone": timezone.String(),
+		})
+
+	afterDate := input
+	allocation := s.spending.CurrentAmount
+	for {
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != nil {
+				log.
+					WithError(err).
+					Error("timed out while trying to determine next inflow event")
+				return nil, errors.WithStack(err)
+			}
+			crumbs.Warn(ctx, "Received done context signal with no error", "spending", nil)
+			return nil, nil
+		default:
+			// Do nothing
+		}
+
+		event, err := s.getNextSpendingEventAfter(ctx, afterDate, timezone, allocation)
+		if err != nil {
+			return nil, err
+		}
+
+		if event == nil {
+			return nil, nil
+		}
+
+		// If the event we found is an actual contribution then return it.
+		if event.ContributionAmount > 0 {
+			return event, nil
+		}
+
+		// Otherwise we have to go around again, update our baseline and continue.
+		afterDate = event.Date
+		allocation = event.RollingAllocation
+	}
+}
+
+type SpendingContribution struct {
+	Amount int64
+}
+
+func CalculateSpendingContributionAfter(
+	ctx context.Context,
+	log *logrus.Entry,
+	spending Spending,
+	funding FundingSchedule,
+	input time.Time,
+	timezone *time.Location,
+) (SpendingContribution, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	fundingInstructions := NewFundingScheduleFundingInstructions(log, funding)
+	spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
+
+	result, err := spendingInstructions.GetNextInflowEventAfter(ctx, input, timezone)
+	if err != nil {
+		return SpendingContribution{
+			Amount: 0,
+		}, err
+	}
+
+	if result == nil {
+		return SpendingContribution{
+			Amount: 0,
+		}, nil
+	}
+
+	return SpendingContribution{
+		Amount: result.ContributionAmount,
+	}, nil
 }

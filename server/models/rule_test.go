@@ -60,3 +60,27 @@ func TestRuleSet_UnmarshalJSON(t *testing.T) {
 		assert.Equal(t, time.Date(2023, 9, 30, 5, 0, 0, 0, time.UTC), after, "should end up being the 30th with a 5am offset")
 	})
 }
+
+func TestRuleSet_DaylightSavingsTime(t *testing.T) {
+	t.Run("2024 daylight savings time transition", func(t *testing.T) {
+		ruleString := "DTSTART:20230401T050000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1"
+		rule, err := NewRuleSet(ruleString)
+		assert.NoError(t, err, "must be able to parse the rule")
+
+		timezone, err := time.LoadLocation("America/Chicago")
+		assert.NoError(t, err, "must be able to load the central time timezone")
+
+		expected := time.Date(2025, 01, 01, 0, 0, 0, 0, timezone)
+		now, err := time.Parse(time.RFC3339, "2024-10-08T22:15:04.541Z")
+		assert.NoError(t, err, "must be able to get now")
+
+		// Without the fix
+		assert.NotEqual(t, expected.UTC(), rule.After(now, false).UTC(), "does not handle the DST transition properly")
+
+		// Fix for bug
+		rule.DTStart(rule.GetDTStart().In(timezone))
+
+		// With the fix
+		assert.Equal(t, expected.UTC(), rule.After(now, false).UTC(), "DST transition is now correct")
+	})
+}

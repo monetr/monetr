@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
+	"github.com/teambition/rrule-go"
 )
 
 type SpendingType uint8
@@ -151,18 +152,24 @@ func CalculateNextContribution(
 		return spending
 	}
 
-	// Don't change the time by convert it to the account timezone. This will make debugging easier if there is a
-	// problem.
-	// It's possible that the time was already in the account's timezone, but this still is good to have because it makes
-	// this function consistent.
+	// Don't change the time by convert it to the account timezone. This will make
+	// debugging easier if there is a problem.
+	// It's possible that the time was already in the account's timezone, but this
+	// still is good to have because it makes this function consistent.
 	now = now.In(timezone)
+
+	var rule *rrule.Set
+	if spending.RuleSet != nil {
+		rule = &spending.RuleSet.Set
+		rule.DTStart(rule.GetDTStart().In(timezone))
+	}
 
 	fundingFirst, fundingSecond := fundingSchedule.GetNextTwoContributionDatesAfter(now, timezone)
 	nextRecurrence := util.Midnight(spending.NextRecurrence, timezone)
-	if spending.RuleSet != nil {
+	if rule != nil {
 		// If the next recurrence of the spending is in the past, then bump it as well.
 		if nextRecurrence.Before(now) {
-			nextRecurrence = spending.RuleSet.After(now, false)
+			nextRecurrence = rule.After(now, false)
 		}
 	}
 
