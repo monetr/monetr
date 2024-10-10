@@ -9,7 +9,6 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
-	"github.com/teambition/rrule-go"
 )
 
 type SpendingType uint8
@@ -158,9 +157,9 @@ func CalculateNextContribution(
 	// still is good to have because it makes this function consistent.
 	now = now.In(timezone)
 
-	var rule *rrule.Set
+	var rule *RuleSet
 	if spending.RuleSet != nil {
-		rule = &spending.RuleSet.Set
+		rule = spending.RuleSet.Clone()
 		rule.DTStart(rule.GetDTStart().In(timezone))
 	}
 

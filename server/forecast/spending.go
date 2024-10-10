@@ -10,7 +10,6 @@ import (
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/teambition/rrule-go"
 )
 
 type SpendingEvent struct {
@@ -187,7 +186,7 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(
 ) ([]time.Time, error) {
 	switch s.spending.SpendingType {
 	case SpendingTypeExpense:
-		rule := s.spending.RuleSet.Set
+		rule := s.spending.RuleSet.Clone()
 		rule.DTStart(rule.GetDTStart().In(timezone))
 
 		// This little bit is really confusing. Basically we want to know how many times this spending boi happens
@@ -221,10 +220,9 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 
 	input = util.Midnight(input, timezone)
 
-	var rule *rrule.Set
+	var rule *RuleSet
 	if s.spending.RuleSet != nil {
-		// This is terrible and I hate it :tada:
-		rule = &(*s.spending.RuleSet).Set
+		rule = s.spending.RuleSet.Clone()
 	}
 
 	nextRecurrence := util.Midnight(s.spending.NextRecurrence, timezone)

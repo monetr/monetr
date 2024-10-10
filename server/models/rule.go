@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/go-pg/pg/v10/types"
@@ -82,4 +83,20 @@ func (r *RuleSet) UnmarshalJSON(input []byte) error {
 
 	r.Set = *set
 	return nil
+}
+
+// Clone will make a complete copy of the rule set, this is necessary because
+// even though the top level rule set object is not typically a pointer. The
+// ruleset object itself contains pointers and these cannot be controlled. As a
+// result; simply dereferencing and passing a pointer to the new "object" of the
+// ruleset can still cause some odd back-propagation. Like if DTSTART is
+// changed, that change will cascade back up. This clone will prevent that by
+// creating a copy from the string representation of the rule.
+func (r *RuleSet) Clone() *RuleSet {
+	ruleset, err := rrule.StrToRRuleSet(r.String())
+	if err != nil {
+		panic(fmt.Sprintf("failed to clone rule set! %+v", err))
+	}
+
+	return &RuleSet{*ruleset}
 }

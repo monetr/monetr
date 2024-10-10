@@ -68,6 +68,7 @@ func TestPostSpending(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
+			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
 		}
 	})
 
