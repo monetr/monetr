@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.18.13](https://github.com/monetr/monetr/compare/v0.18.12...v0.18.13) (2024-10-10)
+
+
+### Dependencies
+
+* **ui:** update dependency @rspack/binding-linux-arm64-gnu to v1.0.8 ([#2011](https://github.com/monetr/monetr/issues/2011)) ([ea2ecac](https://github.com/monetr/monetr/commit/ea2ecacb9757f5849fb6c065a9a00b702a36c100))
+* **ui:** update dependency @rspack/core to v1.0.8 ([#2013](https://github.com/monetr/monetr/issues/2013)) ([460bbfa](https://github.com/monetr/monetr/commit/460bbfa49b1993d51a52e436489466981284b6e1))
+* **ui:** Updating rspack ([02483ae](https://github.com/monetr/monetr/commit/02483aef43129422a7869dc8e7eb573ab5c6d721))
+
+
+### Bug Fixes
+
+* **api:** Fixing daylight savings bug in forecasting ([#2012](https://github.com/monetr/monetr/issues/2012)) ([aace7b2](https://github.com/monetr/monetr/commit/aace7b2f86aa1b4c35980c4f862b5d8d3064d225))
+
 ## [0.18.12](https://github.com/monetr/monetr/compare/v0.18.11...v0.18.12) (2024-10-08)
 
 
