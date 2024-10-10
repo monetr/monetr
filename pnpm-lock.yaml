@@ -266,8 +266,8 @@ importers:
         specifier: 14.12.3
         version: 14.12.3
       '@rspack/binding-linux-arm64-gnu':
-        specifier: 1.0.7
-        version: 1.0.7
+        specifier: 1.0.8
+        version: 1.0.8
       '@rspack/binding-linux-x64-gnu':
         specifier: 1.0.7
         version: 1.0.7
@@ -15344,7 +15344,10 @@ snapshots:
   '@rspack/binding-linux-arm64-gnu@0.3.6':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@1.0.7': {}
+  '@rspack/binding-linux-arm64-gnu@1.0.7':
+    optional: true
+
+  '@rspack/binding-linux-arm64-gnu@1.0.8': {}
 
   '@rspack/binding-linux-arm64-gnu@1.0.8':
     optional: true
