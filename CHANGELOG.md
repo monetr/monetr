@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.18.13](https://github.com/monetr/monetr/compare/v0.18.12...v0.18.13) (2024-10-11)
+
+
+### Dependencies
+
+* **ui:** update dependency @rspack/binding-linux-arm64-gnu to v1.0.8 ([#2011](https://github.com/monetr/monetr/issues/2011)) ([ea2ecac](https://github.com/monetr/monetr/commit/ea2ecacb9757f5849fb6c065a9a00b702a36c100))
+* **ui:** update dependency @rspack/core to v1.0.8 ([#2013](https://github.com/monetr/monetr/issues/2013)) ([460bbfa](https://github.com/monetr/monetr/commit/460bbfa49b1993d51a52e436489466981284b6e1))
+* **ui:** update dependency next to v14.2.15 ([#2015](https://github.com/monetr/monetr/issues/2015)) ([9b291fd](https://github.com/monetr/monetr/commit/9b291fd1a193a35829c44e5bbdeb01600b5bde81))
+* **ui:** update dependency react-dropzone to v14.2.9 ([#2016](https://github.com/monetr/monetr/issues/2016)) ([f885ccd](https://github.com/monetr/monetr/commit/f885ccd1a13bbee9f3f01f3c0cc99fa9e41ae88a))
+* **ui:** Updating rspack ([02483ae](https://github.com/monetr/monetr/commit/02483aef43129422a7869dc8e7eb573ab5c6d721))
+
+
+### Bug Fixes
+
+* **api:** Fixed timezone being stored on the spending ruleset. ([8c5b3ce](https://github.com/monetr/monetr/commit/8c5b3ceea3f9ddd090633f49239a2f9f797b0d3f))
+* **api:** Fixing daylight savings bug in forecasting ([#2012](https://github.com/monetr/monetr/issues/2012)) ([aace7b2](https://github.com/monetr/monetr/commit/aace7b2f86aa1b4c35980c4f862b5d8d3064d225))
+
 ## [0.18.12](https://github.com/monetr/monetr/compare/v0.18.11...v0.18.12) (2024-10-08)
 
 
