@@ -3,7 +3,7 @@ import { render } from '@react-email/components';
 import { Meta, StoryObj } from '@storybook/react';
 
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import ForgotPassword from '../src/ForgotPassword';
+import ForgotPassword from '../src/emails/ForgotPassword';
 
 const meta: Meta<typeof ForgotPassword> = {
   title: 'Email/Forgot Password',
@@ -18,9 +18,9 @@ export const Config: StoryObj<typeof ForgotPassword> = {
     const html = render(
       <ForgotPassword
         baseUrl='https://my.monetr.dev'
-        firstName="Elliot"
-        lastName="Courant"
-        supportEmail="support@monetr.app"
+        firstName='Elliot'
+        lastName='Courant'
+        supportEmail='support@monetr.app'
         resetUrl='https://monetr.app'
       />,
       {
