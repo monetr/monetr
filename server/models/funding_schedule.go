@@ -48,16 +48,18 @@ func (o *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, er
 // Deprecated: Use the forecasting package funding instructions interface instead.
 func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, timezone *time.Location) int64 {
 	rule := f.RuleSet.Set
-	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
-	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
-	// midnight.
+	// Make sure that the rule is using the timezone of the dates provided. This
+	// is an easy way to force that. We also need to truncate the hours on the
+	// start time. To make sure that we are operating relative to midnight.
 	items := rule.Between(start, end, true)
 	return int64(len(items))
 }
 
-// GetNextTwoContributionDatesAfter returns the next two contribution dates relative to the timestamp provided. This is
-// used to better calculate contributions to funds that recur more frequently than they can be funded.
-// Deprecated: Use the forecasting package funding instructions interface instead.
+// GetNextTwoContributionDatesAfter returns the next two contribution dates
+// relative to the timestamp provided. This is used to better calculate
+// contributions to funds that recur more frequently than they can be funded.
+// Deprecated: Use the forecasting package funding instructions interface
+// instead.
 func (f *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezone *time.Location) (time.Time, time.Time) {
 	nextOne, _ := f.GetNextContributionDateAfter(now, timezone)
 	subsequent, _ := f.GetNextContributionDateAfter(nextOne, timezone)
@@ -69,24 +71,23 @@ func (f *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezo
 func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) (actual, original time.Time) {
 	// Make debugging easier.
 	now = now.In(timezone)
+	nextContributionRule := f.RuleSet.Clone()
+	// Force the start of the rule to be the next contribution date. This fixes a
+	// bug where the rule would increment properly, but would include the current
+	// timestamp in that increment causing incorrect comparisons below. This makes
+	// sure that the rule will increment in the user's timezone as intended.
+	nextContributionRule.DTStart(nextContributionRule.GetDTStart().In(timezone))
 	var nextContributionDate time.Time
 	if !f.NextRecurrence.IsZero() {
 		nextContributionDate = util.Midnight(f.NextRecurrence, timezone)
 	} else {
-		nextContributionDate = util.Midnight(f.RuleSet.Before(now, false), timezone)
+		nextContributionDate = util.Midnight(nextContributionRule.Before(now, false), timezone)
 	}
 	if now.Before(nextContributionDate) {
 		// If now is before the already established next occurrence, then just return that.
 		// This might be goofy if we want to test stuff in the distant past?
 		return nextContributionDate, nextContributionDate
 	}
-
-	nextContributionRule := f.RuleSet.Set
-
-	// Force the start of the rule to be the next contribution date. This fixes a bug where the rule would increment
-	// properly, but would include the current timestamp in that increment causing incorrect comparisons below. This
-	// makes sure that the rule will increment in the user's timezone as intended.
-	nextContributionRule.DTStart(nextContributionDate)
 
 	// Keep track of an un-adjusted next contribution date. Because we might subtract days to account for early
 	// funding, we need to make sure we are still incrementing relative to the _real_ contribution dates. Not the
