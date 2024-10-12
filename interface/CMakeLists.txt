@@ -60,3 +60,15 @@ add_custom_target(
   DEPENDS ${UI_DIST}
 )
 
+add_custom_target(
+  development.lite
+  COMMAND ${CMAKE_COMMAND} -E env MONETR_DEVELOPMENT_LITE=true MONETR_DEVELOPMENT_LITE_TARGET=${MONETR_DEVELOPMENT_LITE_TARGET} ${RSPACK_EXECUTABLE} serve --mode development
+  COMMENT "Starting frontend lite local development"
+  WORKING_DIRECTORY ${UI_SRC_DIR}
+  DEPENDS
+    dependencies.node_modules
+    tools.rspack
+    ${APP_UI_FILES}
+    ${PUBLIC_FILES}
+    ${UI_CONFIG_FILES}
+)

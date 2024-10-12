@@ -11,17 +11,26 @@ module.exports = (env, _argv) => {
     env.PUBLIC_URL = '';
   }
 
+  // If we are using development lite, then this changes the behavior of the config significantly. We instead proxy the
+  // staging or production API here to allow for frontend development only against real data. Requires a staging or
+  // production account.
+  const developmentLite = Boolean(process.env.MONETR_DEVELOPMENT_LITE ?? 'false');
+  const developmentLiteTarget = process.env.MONETR_DEVELOPMENT_LITE_TARGET ?? 'my.monetr.dev';
+
+  // Domain name for local dev, only when running in docker.
+  const domainName = process.env.MONETR_UI_DOMAIN_NAME ?? 'monetr.local';
+
   // HMR replacement gets **fucked** if we are using content hash. So use name when we are
   // in development mode.
   let filename = isDevelopment ? '[name]' : '[contenthash]';
 
   // Make it so that the websocket still works if we are running yarn start normally.
   const wsProto = process.env.WS_PROTO || 'ws';
-  let websocketUrl = `${wsProto}://monetr.local/ws`;
+  let websocketUrl = `${wsProto}://${domainName}/ws`;
 
   // This is used for GitPod and CodeSpaces editor environments. Allowing hot reloading when working in the cloud.
   if (process.env.CLOUD_MAGIC === 'magic' && process.env.MONETR_UI_DOMAIN_NAME) {
-    websocketUrl = `${wsProto}://${ process.env.MONETR_UI_DOMAIN_NAME }/ws`;
+    websocketUrl = `${wsProto}://${domainName}/ws`;
   }
 
   /** @type {import('@rspack/cli').Configuration} */
@@ -46,15 +55,24 @@ module.exports = (env, _argv) => {
         directory: 'public',
       },
       historyApiFallback: true,
-      host: '0.0.0.0',
-      port: 30000,
+      host: developmentLite ? 'localhost' : '0.0.0.0',
+      port: 3000,
       webSocketServer: 'ws',
       liveReload: true,
       client: {
         webSocketTransport: 'ws',
-        webSocketURL: websocketUrl,
+        webSocketURL: developmentLite ? undefined : websocketUrl,
         progress: true,
-      }
+      },
+      proxy: developmentLite ? [
+        { // When we are in development-lite mode, proxy API calls to the upstream API server that they have specified.
+          context: ['/api'],
+          target: `https://${developmentLiteTarget}`,
+          changeOrigin: true,
+          cookieDomainRewrite: 'localhost',
+          ws: true, // For file uploads
+        }
+      ] : undefined,
     },
     resolve: {
       preferRelative: false,
