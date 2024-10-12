@@ -103,13 +103,13 @@ func GivenIHaveAnAccount(t *testing.T, clock clock.Clock, login models.Login) mo
 	require.NoError(t, err, "must be able to seed basic account")
 
 	user := models.User{
-		LoginId:          login.LoginId,
-		Login:            &login,
-		AccountId:        account.AccountId,
-		Account:          &account,
-		StripeCustomerId: account.StripeCustomerId,
+		LoginId:   login.LoginId,
+		Login:     &login,
+		AccountId: account.AccountId,
+		Account:   &account,
+		Role:      models.UserRoleOwner,
 	}
-	err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
+	err = repo.CreateUser(context.Background(), &user)
 	require.NoError(t, err, "must be able to see user for basic account")
 
 	return user
@@ -120,24 +120,25 @@ func GivenIHaveATrialingAccount(t *testing.T, clock clock.Clock, login models.Lo
 	repo := repository.NewUnauthenticatedRepository(clock, db)
 	account := models.Account{
 		Timezone:                     gofakeit.TimeZoneRegion(),
+		Locale:                       "en_US",
 		StripeCustomerId:             nil,
 		StripeSubscriptionId:         nil,
 		StripeWebhookLatestTimestamp: nil,
 		SubscriptionActiveUntil:      nil,
 		SubscriptionStatus:           nil,
-		TrialEndsAt:                  myownsanity.TimeP(clock.Now().AddDate(0, 0, 1)),
+		TrialEndsAt:                  myownsanity.TimeP(clock.Now().AddDate(0, 0, 30)),
 	}
 	err := repo.CreateAccountV2(context.Background(), &account)
 	require.NoError(t, err, "must be able to seed basic account")
 
 	user := models.User{
-		LoginId:          login.LoginId,
-		Login:            &login,
-		AccountId:        account.AccountId,
-		Account:          &account,
-		StripeCustomerId: account.StripeCustomerId,
+		LoginId:   login.LoginId,
+		Login:     &login,
+		AccountId: account.AccountId,
+		Account:   &account,
+		Role:      models.UserRoleOwner,
 	}
-	err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
+	err = repo.CreateUser(context.Background(), &user)
 	require.NoError(t, err, "must be able to see user for basic account")
 
 	return user

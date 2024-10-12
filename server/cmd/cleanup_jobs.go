@@ -68,6 +68,7 @@ func newCleanupJobsCommand(parent *cobra.Command) {
 				nil,
 				nil,
 				nil,
+				nil,
 			)
 			if err != nil {
 				return err

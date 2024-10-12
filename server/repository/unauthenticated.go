@@ -94,18 +94,19 @@ func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *Acco
 	return errors.Wrap(err, "failed to create account")
 }
 
-func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId ID[Login], accountId ID[Account], user *User) error {
-	span := sentry.StartSpan(ctx, "CreateAccount")
+func (u *unauthenticatedRepo) CreateUser(
+	ctx context.Context,
+	user *User,
+) error {
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Data = map[string]interface{}{
-		"loginId":   loginId,
-		"accountId": accountId,
+		"loginId":   user.LoginId,
+		"accountId": user.AccountId,
 	}
 
 	user.UserId = ""
-	user.AccountId = accountId
-	user.LoginId = loginId
 
 	if _, err := u.txn.ModelContext(span.Context(), user).Insert(user); err != nil {
 		span.Status = sentry.SpanStatusInternalError

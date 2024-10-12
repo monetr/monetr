@@ -273,6 +273,7 @@ func RunServer() error {
 			kms,
 			fileStorage,
 			bill,
+			email,
 		)
 		if err != nil {
 			cancel()

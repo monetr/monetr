@@ -18,60 +18,12 @@ import (
 	"github.com/wneessen/go-mail"
 )
 
-const (
-	ForgotPasswordTemplate    = "ForgotPassword"
-	PasswordChangedTemplate   = "PasswordChanged"
-	PlaidDisconnectedTemplate = "PlaidDisconnected"
-	VerifyEmailTemplate       = "VerifyEmailAddress"
-)
-
 //go:embed email_templates/*
 var templates embed.FS
 
-type (
-	VerifyEmailParams struct {
-		BaseURL      string
-		Email        string
-		FirstName    string
-		LastName     string
-		SupportEmail string
-		VerifyURL    string
-	}
-
-	PasswordResetParams struct {
-		BaseURL      string
-		Email        string
-		FirstName    string
-		LastName     string
-		SupportEmail string
-		ResetURL     string
-	}
-
-	PasswordChangedParams struct {
-		BaseURL      string
-		Email        string
-		FirstName    string
-		LastName     string
-		SupportEmail string
-	}
-
-	PlaidDisconnectedParams struct {
-		BaseURL      string
-		Email        string
-		FirstName    string
-		LastName     string
-		LinkName     string
-		LinkURL      string
-		SupportEmail string
-	}
-)
-
 //go:generate go run go.uber.org/mock/mockgen@v0.4.0 -source=email.go -package=mockgen -destination=../internal/mockgen/email.go EmailCommunication
 type EmailCommunication interface {
-	SendVerification(ctx context.Context, params VerifyEmailParams) error
-	SendPasswordReset(ctx context.Context, params PasswordResetParams) error
-	SendPasswordChanged(ctx context.Context, params PasswordChangedParams) error
-	SendPlaidDisconnected(ctx context.Context, params PlaidDisconnectedParams) error
+	SendEmail(ctx context.Context, email Email) error
 }
 
 func NewEmailCommunication(log *logrus.Entry, configuration config.Configuration) EmailCommunication {
@@ -102,59 +54,17 @@ func (e *emailCommunicationBase) toAddress(msg *mail.Msg, firstName, lastName, e
 	return msg.AddToFormat(name, emailAddress)
 }
 
-func (e *emailCommunicationBase) SendVerification(ctx context.Context, params VerifyEmailParams) error {
+func (e *emailCommunicationBase) SendEmail(ctx context.Context, params Email) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	html, text := e.getTemplates(VerifyEmailTemplate)
+	crumbs.AddTag(span.Context(), "email.template", params.Template())
+
+	html, text := e.getTemplates(params.Template())
 	m := mail.NewMsg()
-	m.Subject("Verify Your Email Address")
-	e.toAddress(m, params.FirstName, params.LastName, params.Email)
-	e.fromAddress(m)
-	m.SetBodyTextTemplate(text, params)
-	m.AddAlternativeHTMLTemplate(html, params)
-
-	return e.sendMessage(span.Context(), m)
-}
-
-func (e *emailCommunicationBase) SendPasswordReset(ctx context.Context, params PasswordResetParams) error {
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-
-	html, text := e.getTemplates(ForgotPasswordTemplate)
-	m := mail.NewMsg()
-	m.Subject("Reset Your Password")
-	e.toAddress(m, params.FirstName, params.LastName, params.Email)
-	e.fromAddress(m)
-	m.SetBodyTextTemplate(text, params)
-	m.AddAlternativeHTMLTemplate(html, params)
-
-	return e.sendMessage(span.Context(), m)
-}
-
-func (e *emailCommunicationBase) SendPasswordChanged(ctx context.Context, params PasswordChangedParams) error {
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-
-	html, text := e.getTemplates(PasswordChangedTemplate)
-	m := mail.NewMsg()
-	m.Subject("Password Updated")
-	e.toAddress(m, params.FirstName, params.LastName, params.Email)
-	e.fromAddress(m)
-	m.SetBodyTextTemplate(text, params)
-	m.AddAlternativeHTMLTemplate(html, params)
-
-	return e.sendMessage(span.Context(), m)
-}
-
-func (e *emailCommunicationBase) SendPlaidDisconnected(ctx context.Context, params PlaidDisconnectedParams) error {
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-
-	html, text := e.getTemplates(PlaidDisconnectedTemplate)
-	m := mail.NewMsg()
-	m.Subject("Account Disconnected")
-	e.toAddress(m, params.FirstName, params.LastName, params.Email)
+	m.Subject(params.Subject())
+	first, last := params.Name()
+	e.toAddress(m, first, last, params.EmailAddress())
 	e.fromAddress(m)
 	m.SetBodyTextTemplate(text, params)
 	m.AddAlternativeHTMLTemplate(html, params)
@@ -228,6 +138,7 @@ func (e *emailCommunicationBase) sendMessage(ctx context.Context, payload *mail.
 	payload.SetDate()
 	payload.SetUserAgent(strings.TrimSpace(fmt.Sprintf("monetr %s", build.Release)))
 
+	e.log.WithContext(span.Context()).Debug("sending email message")
 	if err := c.DialAndSendWithContext(span.Context(), payload); err != nil {
 		return errors.Wrap(err, "failed to send email")
 	}

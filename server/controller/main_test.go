@@ -312,9 +312,9 @@ func AssertSetTokenCookie(t *testing.T, response *httpexpect.Response) string {
 func MustSendVerificationEmail(t *testing.T, app *TestApp, n int) {
 	app.Email.
 		EXPECT().
-		SendVerification(
+		SendEmail(
 			gomock.Any(),
-			gomock.Any(),
+			gomock.AssignableToTypeOf(communication.VerifyEmailParams{}),
 		).
 		Return(nil).
 		Times(n).
@@ -332,9 +332,9 @@ func MustSendVerificationEmail(t *testing.T, app *TestApp, n int) {
 func MustSendPasswordResetEmail(t *testing.T, app *TestApp, n int, emails ...string) {
 	app.Email.
 		EXPECT().
-		SendPasswordReset(
+		SendEmail(
 			gomock.Any(),
-			gomock.Any(),
+			gomock.AssignableToTypeOf(communication.PasswordResetParams{}),
 		).
 		Return(nil).
 		Times(n).
@@ -365,18 +365,18 @@ func MustSendPasswordResetEmail(t *testing.T, app *TestApp, n int, emails ...str
 func MustSendPasswordChangedEmail(t *testing.T, app *TestApp, n int, emails ...string) {
 	app.Email.
 		EXPECT().
-		SendPasswordChanged(
+		SendEmail(
 			gomock.Any(),
-			gomock.Any(),
+			gomock.AssignableToTypeOf(communication.PasswordChangedParams{}),
 		).
 		Return(nil).
 		Times(n).
 		Do(func(ctx context.Context, params communication.PasswordChangedParams) error {
 			require.NotNil(t, ctx, "email context cannot be nil")
-			require.NotEmpty(t, params.Email, "password reset email address cannot be empty")
-			require.NotEmpty(t, params.FirstName, "password reset email first name cannot be empty")
-			require.NotEmpty(t, params.LastName, "password reset email last name cannot be empty")
-			require.NotEmpty(t, params.BaseURL, "password reset email base url must be defined")
+			require.NotEmpty(t, params.Email, "password changed email address cannot be empty")
+			require.NotEmpty(t, params.FirstName, "password changed email first name cannot be empty")
+			require.NotEmpty(t, params.LastName, "password changed email last name cannot be empty")
+			require.NotEmpty(t, params.BaseURL, "password changed email base url must be defined")
 			if len(emails) > 0 {
 				for _, email := range emails {
 					if strings.EqualFold(email, params.Email) {

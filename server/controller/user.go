@@ -121,13 +121,16 @@ func (c *Controller) changePassword(ctx echo.Context) error {
 	case repository.ErrInvalidCredentials:
 		return c.returnError(ctx, http.StatusUnauthorized, "current password provided is not correct")
 	case nil:
-		if err := c.Email.SendPasswordChanged(c.getContext(ctx), communication.PasswordChangedParams{
-			BaseURL:      c.Configuration.Server.GetBaseURL().String(),
-			Email:        user.Login.Email,
-			FirstName:    user.Login.FirstName,
-			LastName:     user.Login.LastName,
-			SupportEmail: "support@monetr.app",
-		}); err != nil {
+		if err := c.Email.SendEmail(
+			c.getContext(ctx),
+			communication.PasswordChangedParams{
+				BaseURL:      c.Configuration.Server.GetBaseURL().String(),
+				Email:        user.Login.Email,
+				FirstName:    user.Login.FirstName,
+				LastName:     user.Login.LastName,
+				SupportEmail: "support@monetr.app",
+			},
+		); err != nil {
 			return c.wrapAndReturnError(
 				ctx,
 				err,

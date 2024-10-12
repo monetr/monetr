@@ -446,14 +446,13 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	user := models.User{
 		LoginId:   login.LoginId,
 		AccountId: account.AccountId,
+		Role:      models.UserRoleOwner,
 	}
 
 	// Now that we have an accountId we can create the user object which will
 	// bind the login and the account together.
 	err = repo.CreateUser(
 		c.getContext(ctx),
-		login.LoginId,
-		account.AccountId,
 		&user,
 	)
 	if err != nil {
@@ -799,13 +798,16 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "Failed to reset password")
 	}
 
-	if err := c.Email.SendPasswordChanged(c.getContext(ctx), communication.PasswordChangedParams{
-		BaseURL:      c.Configuration.Server.GetBaseURL().String(),
-		Email:        login.Email,
-		FirstName:    login.FirstName,
-		LastName:     login.LastName,
-		SupportEmail: "support@monetr.app",
-	}); err != nil {
+	if err := c.Email.SendEmail(
+		c.getContext(ctx),
+		communication.PasswordChangedParams{
+			BaseURL:      c.Configuration.Server.GetBaseURL().String(),
+			Email:        login.Email,
+			FirstName:    login.FirstName,
+			LastName:     login.LastName,
+			SupportEmail: "support@monetr.app",
+		},
+	); err != nil {
 		return c.wrapAndReturnError(
 			ctx,
 			err,

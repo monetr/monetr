@@ -46,7 +46,7 @@ func TestReconcileSubscriptionHandler_EnqueueTriggeredJob(t *testing.T) {
 
 		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
 		handler := background.NewReconcileSubscriptionHandler(
-			log, db, clock, pubSub, bill, enqueuer,
+			log, db, clock, pubSub, bill,
 		)
 
 		// Now we want to actually trigger the handler, and see if it enqueus the
@@ -91,7 +91,7 @@ func TestReconcileSubscriptionHandler_EnqueueTriggeredJob(t *testing.T) {
 		// subscription should still be viewed as active.
 		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
 		handler := background.NewReconcileSubscriptionHandler(
-			log, db, clock, pubSub, bill, enqueuer,
+			log, db, clock, pubSub, bill,
 		)
 
 		// Now we want to trigger the handler and make sure that it does not enqueue any
