@@ -3,7 +3,7 @@ import { render } from '@react-email/components';
 import { Meta, StoryObj } from '@storybook/react';
 
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import VerifyEmailAddress from '../src/VerifyEmailAddress';
+import VerifyEmailAddress from '../src/emails/VerifyEmailAddress';
 
 const meta: Meta<typeof VerifyEmailAddress> = {
   title: 'Email/Verify Email Address',
@@ -18,9 +18,9 @@ export const Config: StoryObj<typeof VerifyEmailAddress> = {
     const html = render(
       <VerifyEmailAddress
         baseUrl='https://my.monetr.dev'
-        firstName="Elliot"
-        lastName="Courant"
-        supportEmail="support@monetr.app"
+        firstName='Elliot'
+        lastName='Courant'
+        supportEmail='support@monetr.app'
         verifyLink='https://monetr.app'
       />,
       {

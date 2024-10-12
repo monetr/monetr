@@ -2,3 +2,4 @@
 pkg/**/*.html
 *.config.js
 !.storybook
+emails/src/emails/**
