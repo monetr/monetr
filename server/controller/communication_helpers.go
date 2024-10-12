@@ -17,14 +17,17 @@ func (c *Controller) sendVerificationEmail(
 	verifyUrl := c.Configuration.Server.GetURL("/verify/email", map[string]string{
 		"token": token,
 	})
-	err := c.Email.SendVerification(c.getContext(ctx), communication.VerifyEmailParams{
-		BaseURL:      baseUrl.String(),
-		Email:        login.Email,
-		FirstName:    login.FirstName,
-		LastName:     login.LastName,
-		SupportEmail: "support@monetr.app",
-		VerifyURL:    verifyUrl,
-	})
+	err := c.Email.SendEmail(
+		c.getContext(ctx),
+		communication.VerifyEmailParams{
+			BaseURL:      baseUrl.String(),
+			Email:        login.Email,
+			FirstName:    login.FirstName,
+			LastName:     login.LastName,
+			SupportEmail: "support@monetr.app",
+			VerifyURL:    verifyUrl,
+		},
+	)
 	if err != nil {
 		return c.wrapAndReturnError(
 			ctx,
@@ -46,14 +49,17 @@ func (c *Controller) sendPasswordReset(
 	resetUrl := c.Configuration.Server.GetURL("/password/reset", map[string]string{
 		"token": token,
 	})
-	err := c.Email.SendPasswordReset(c.getContext(ctx), communication.PasswordResetParams{
-		BaseURL:      baseUrl.String(),
-		Email:        login.Email,
-		FirstName:    login.FirstName,
-		LastName:     login.LastName,
-		SupportEmail: "support@monetr.app",
-		ResetURL:     resetUrl,
-	})
+	err := c.Email.SendEmail(
+		c.getContext(ctx),
+		communication.PasswordResetParams{
+			BaseURL:      baseUrl.String(),
+			Email:        login.Email,
+			FirstName:    login.FirstName,
+			LastName:     login.LastName,
+			SupportEmail: "support@monetr.app",
+			ResetURL:     resetUrl,
+		},
+	)
 	if err != nil {
 		return c.wrapAndReturnError(
 			ctx,

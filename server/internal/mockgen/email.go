@@ -40,58 +40,16 @@ func (m *MockEmailCommunication) EXPECT() *MockEmailCommunicationMockRecorder {
 	return m.recorder
 }
 
-// SendPasswordChanged mocks base method.
-func (m *MockEmailCommunication) SendPasswordChanged(ctx context.Context, params communication.PasswordChangedParams) error {
+// SendEmail mocks base method.
+func (m *MockEmailCommunication) SendEmail(ctx context.Context, email communication.Email) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendPasswordChanged", ctx, params)
+	ret := m.ctrl.Call(m, "SendEmail", ctx, email)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// SendPasswordChanged indicates an expected call of SendPasswordChanged.
-func (mr *MockEmailCommunicationMockRecorder) SendPasswordChanged(ctx, params any) *gomock.Call {
+// SendEmail indicates an expected call of SendEmail.
+func (mr *MockEmailCommunicationMockRecorder) SendEmail(ctx, email any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendPasswordChanged", reflect.TypeOf((*MockEmailCommunication)(nil).SendPasswordChanged), ctx, params)
-}
-
-// SendPasswordReset mocks base method.
-func (m *MockEmailCommunication) SendPasswordReset(ctx context.Context, params communication.PasswordResetParams) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendPasswordReset", ctx, params)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SendPasswordReset indicates an expected call of SendPasswordReset.
-func (mr *MockEmailCommunicationMockRecorder) SendPasswordReset(ctx, params any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendPasswordReset", reflect.TypeOf((*MockEmailCommunication)(nil).SendPasswordReset), ctx, params)
-}
-
-// SendPlaidDisconnected mocks base method.
-func (m *MockEmailCommunication) SendPlaidDisconnected(ctx context.Context, params communication.PlaidDisconnectedParams) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendPlaidDisconnected", ctx, params)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SendPlaidDisconnected indicates an expected call of SendPlaidDisconnected.
-func (mr *MockEmailCommunicationMockRecorder) SendPlaidDisconnected(ctx, params any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendPlaidDisconnected", reflect.TypeOf((*MockEmailCommunication)(nil).SendPlaidDisconnected), ctx, params)
-}
-
-// SendVerification mocks base method.
-func (m *MockEmailCommunication) SendVerification(ctx context.Context, params communication.VerifyEmailParams) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendVerification", ctx, params)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SendVerification indicates an expected call of SendVerification.
-func (mr *MockEmailCommunicationMockRecorder) SendVerification(ctx, params any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendVerification", reflect.TypeOf((*MockEmailCommunication)(nil).SendVerification), ctx, params)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendEmail", reflect.TypeOf((*MockEmailCommunication)(nil).SendEmail), ctx, email)
 }

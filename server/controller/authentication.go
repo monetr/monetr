@@ -799,13 +799,16 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "Failed to reset password")
 	}
 
-	if err := c.Email.SendPasswordChanged(c.getContext(ctx), communication.PasswordChangedParams{
-		BaseURL:      c.Configuration.Server.GetBaseURL().String(),
-		Email:        login.Email,
-		FirstName:    login.FirstName,
-		LastName:     login.LastName,
-		SupportEmail: "support@monetr.app",
-	}); err != nil {
+	if err := c.Email.SendEmail(
+		c.getContext(ctx),
+		communication.PasswordChangedParams{
+			BaseURL:      c.Configuration.Server.GetBaseURL().String(),
+			Email:        login.Email,
+			FirstName:    login.FirstName,
+			LastName:     login.LastName,
+			SupportEmail: "support@monetr.app",
+		},
+	); err != nil {
 		return c.wrapAndReturnError(
 			ctx,
 			err,
