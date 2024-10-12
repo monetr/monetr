@@ -14,9 +14,11 @@ module.exports = (env, _argv) => {
   // If we are using development lite, then this changes the behavior of the config significantly. We instead proxy the
   // staging or production API here to allow for frontend development only against real data. Requires a staging or
   // production account.
-  const developmentLite = Boolean(process.env.MONETR_DEVELOPMENT_LITE ?? 'false');
+  const developmentLite = Boolean(process.env.MONETR_DEVELOPMENT_LITE ?? false);
   const developmentLiteTarget = process.env.MONETR_DEVELOPMENT_LITE_TARGET ?? 'my.monetr.dev';
-
+  if (developmentLite) {
+    console.log(`development lite environment will be used, upstream: ${developmentLiteTarget}`);
+  }
   // Domain name for local dev, only when running in docker.
   const domainName = process.env.MONETR_UI_DOMAIN_NAME ?? 'monetr.local';
 
