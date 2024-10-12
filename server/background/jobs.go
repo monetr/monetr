@@ -6,6 +6,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
+	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
@@ -57,6 +58,7 @@ func NewBackgroundJobs(
 	kms secrets.KeyManagement,
 	fileStorage storage.Storage,
 	billing billing.Billing,
+	email communication.EmailCommunication,
 ) (*BackgroundJobs, error) {
 	var enqueuer JobEnqueuer
 	var processor JobProcessor
@@ -86,18 +88,11 @@ func NewBackgroundJobs(
 		NewSyncPlaidHandler(log, db, clock, kms, plaidPlatypus, publisher, enqueuer),
 	}
 
-	// If billing is enabled, enqueue the job to periodically check to make sure
-	// we havent missed any stripe webhooks.
+	// When billing is enabled, periodically perform billing upkeep tasks.
 	if configuration.Stripe.IsBillingEnabled() {
 		jobs = append(jobs,
-			NewReconcileSubscriptionHandler(
-				log,
-				db,
-				clock,
-				publisher,
-				billing,
-				enqueuer,
-			),
+			NewNotificationTrialExpiryHandler(log, db, clock, configuration, email),
+			NewReconcileSubscriptionHandler(log, db, clock, publisher, billing),
 		)
 	}
 

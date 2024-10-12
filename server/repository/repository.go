@@ -37,6 +37,10 @@ type BaseRepository interface {
 	DeleteSpending(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending]) error
 	DeleteTransaction(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) error
 	GetAccount(ctx context.Context) (*Account, error)
+	// GetAccountOwner will return a User object for the currently authenticated
+	// account, as well as the Login and Account sub object for that user. If one
+	// is not found then an error is returned.
+	GetAccountOwner(ctx context.Context) (*User, error)
 	GetBalances(ctx context.Context, bankAccountId ID[BankAccount]) (*Balances, error)
 	GetBankAccount(ctx context.Context, bankAccountId ID[BankAccount]) (*BankAccount, error)
 	GetBankAccounts(ctx context.Context) ([]BankAccount, error)

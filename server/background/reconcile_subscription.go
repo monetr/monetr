@@ -27,7 +27,6 @@ type (
 		db           *pg.DB
 		publisher    pubsub.Publisher
 		billing      billing.Billing
-		enqueuer     JobEnqueuer
 		unmarshaller JobUnmarshaller
 		clock        clock.Clock
 	}
@@ -60,14 +59,12 @@ func NewReconcileSubscriptionHandler(
 	clock clock.Clock,
 	publisher pubsub.Publisher,
 	billing billing.Billing,
-	enqueuer JobEnqueuer,
 ) *ReconcileSubscriptionHandler {
 	return &ReconcileSubscriptionHandler{
 		log:          log,
 		db:           db,
 		publisher:    publisher,
 		billing:      billing,
-		enqueuer:     enqueuer,
 		unmarshaller: DefaultJobUnmarshaller,
 		clock:        clock,
 	}

@@ -6,11 +6,11 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
-func (r *repositoryBase) UpdateUser(ctx context.Context, user *models.User) error {
+func (r *repositoryBase) UpdateUser(ctx context.Context, user *User) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -31,7 +31,7 @@ func (r *repositoryBase) UpdateUser(ctx context.Context, user *models.User) erro
 	return nil
 }
 
-func (r *repositoryBase) GetMe(ctx context.Context) (*models.User, error) {
+func (r *repositoryBase) GetMe(ctx context.Context) (*User, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -40,7 +40,7 @@ func (r *repositoryBase) GetMe(ctx context.Context) (*models.User, error) {
 		"userId":    r.UserId(),
 	}
 
-	var user models.User
+	var user User
 	err := r.txn.ModelContext(span.Context(), &user).
 		Relation("Login").
 		Relation("Account").
@@ -59,6 +59,32 @@ func (r *repositoryBase) GetMe(ctx context.Context) (*models.User, error) {
 	}
 
 	span.Status = sentry.SpanStatusOK
+
+	return &user, nil
+}
+
+// GetAccountOwner will return a User object for the currently authenticated
+// account, as well as the Login and Account sub object for that user. If one is
+// not found then an error is returned.
+func (r *repositoryBase) GetAccountOwner(ctx context.Context) (*User, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"accountId": r.AccountId(),
+	}
+
+	var user User
+	err := r.txn.ModelContext(span.Context(), &user).
+		Relation("Login").
+		Relation("Account").
+		Where(`"user"."account_id" = ?`, r.AccountId()).
+		Where(`"user"."role" = ?`, UserRoleOwner).
+		Limit(1).
+		Select(&user)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to find account owner")
+	}
 
 	return &user, nil
 }

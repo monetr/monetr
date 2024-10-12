@@ -72,22 +72,6 @@ func (e *emailCommunicationBase) SendEmail(ctx context.Context, params Email) er
 	return e.sendMessage(span.Context(), m)
 }
 
-func (e *emailCommunicationBase) SendVerification(ctx context.Context, params VerifyEmailParams) error {
-	return e.SendEmail(ctx, params)
-}
-
-func (e *emailCommunicationBase) SendPasswordReset(ctx context.Context, params PasswordResetParams) error {
-	return e.SendEmail(ctx, params)
-}
-
-func (e *emailCommunicationBase) SendPasswordChanged(ctx context.Context, params PasswordChangedParams) error {
-	return e.SendEmail(ctx, params)
-}
-
-func (e *emailCommunicationBase) SendPlaidDisconnected(ctx context.Context, params PlaidDisconnectedParams) error {
-	return e.SendEmail(ctx, params)
-}
-
 func (e *emailCommunicationBase) getTemplates(name string) (html *htmlTemplate.Template, text *textTemplate.Template) {
 	{ // HTML template
 		data, err := templates.ReadFile(fmt.Sprintf("email_templates/%s.html", name))
