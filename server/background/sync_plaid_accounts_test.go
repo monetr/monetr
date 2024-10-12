@@ -3,6 +3,7 @@ package background_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/background"
@@ -15,9 +16,21 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/plaid/plaid-go/v26/plaid"
+	"github.com/robfig/cron"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
+
+func TestSyncPlaidAccountsHandler_DefaultSchedule(t *testing.T) {
+	t.Run("validate cron schedule", func(t *testing.T) {
+		handler := &background.SyncPlaidAccountsHandler{}
+		schedule, err := cron.Parse(handler.DefaultSchedule())
+		assert.NoError(t, err, "must be able too parse the schedule")
+		now := time.Now()
+		next := schedule.Next(now)
+		assert.GreaterOrEqual(t, next, now, "next cron should always be greater or equal than now")
+	})
+}
 
 func TestSyncPlaidAccountsHandler_EnqueueTriggeredJob(t *testing.T) {
 	t.Run("will sync accounts who have never been synced", func(t *testing.T) {
