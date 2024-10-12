@@ -57,7 +57,7 @@ services:
     working_dir: /build
     restart: always
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:30000" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
       interval: 10s
       timeout: 10s
       retries: 12

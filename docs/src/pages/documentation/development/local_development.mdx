@@ -123,6 +123,7 @@ Here is a sample of a user presets file with a few customized options:
         "MONETR_EMAIL_VERIFICATION_ENABLED": "true",
         "MONETR_KMS_PROVIDER": "vault",
         "MONETR_STORAGE_PROVIDER": "s3",
+        "MONETR_DEVELOPMENT_LITE_TARGET": "my.monetr.dev",
         "DISABLE_GO_RELOAD": "false"
       }
     }
@@ -146,6 +147,8 @@ This config specifically changes the following options:
 - `MONETR_STORAGE_PROVIDER`: A minio instance will be run as part of the local development stack. Valid values are `s3`
   or `filesystem`. When using `filesystem` uploaded files will be stored in your `$PWD/build/development/storage`
   folder.
+- `MONETR_DEVELOPMENT_LITE_TARGET`: When working on monetr's frontend only, specify an API server that you want to use
+  for the frontend to talk to. Requires an account on that API server.
 
 There are other options here that will be documented later, as well as other options that have not been covered here at
 all, but those options are the primary ones that change the local development stack the most.
@@ -279,6 +282,32 @@ make storybook
 ```
 
 This will output the storybook assets in `$PWD/build/stories/dist`
+
+### Frontend
+
+An alternative to running storybook to work on only the frontend components of monetr is to run a "lite" development
+environment. The lite environment only runs the frontend dev server and instead of requiring an active API server and
+additional services to be running locally, you can instead point the frontend at a desired API server.
+
+To start the "lite" development environment run the following command:
+
+```shell filename="Shell"
+make develop-lite
+```
+
+This will run the UI dev server locally and the frontend will be available at `http://localhost:3000`. You can now make
+any desired changes to monetr's frontend without needing to run all of the services monetr relies on.
+
+This development mode defaults to monetr's staging environment (`my.monetr.dev`), which while it is publicly accessible;
+you are not able to create new accounts on it at this time. If you want to change the API server that the lite
+development environment is using you can customize the domain name in your `CMakeUserPresets.json` file as noted above
+in the [CMake](#cmake) section.
+
+<Callout type="warning">
+    Be extremely conscious about what actions you perform in the lite development environment, if you have your
+    development environment pointed at the production instance for example; any actions you take locally will affect 
+    your real account. Any data modified or deleted will not be recoverable.
+</Callout>
 
 ### Documentation
 
