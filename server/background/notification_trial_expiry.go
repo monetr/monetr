@@ -209,9 +209,9 @@ func (j *NotificationTrialExpiryJob) Run(ctx context.Context) error {
 	// should be in its own table somehow? Maybe in the long run the billing
 	// interface should handle this expiry email notification as well, then we
 	// don't need to prop-drill the account repo everywhere?
-	_, err = j.db.ModelContext(span.Context(), &owner.Account).
+	_, err = j.db.ModelContext(span.Context(), owner.Account).
 		WherePK().
-		Update(&owner.Account)
+		Update(owner.Account)
 	if err != nil {
 		return errors.Wrap(err, "failed to mark account as notified about trial expiration")
 	}
@@ -223,7 +223,7 @@ func (j *NotificationTrialExpiryJob) Run(ctx context.Context) error {
 		Email:                 owner.Login.Email,
 		FirstName:             owner.Login.FirstName,
 		LastName:              owner.Login.LastName,
-		TrialExpirationDate:   expiration.Format("Monday January 2nd, 2006"),
+		TrialExpirationDate:   expiration.Format("Monday January 2, 2006"),
 		TrialExpirationWindow: fmt.Sprintf("%d days", days),
 		SupportEmail:          "support@monetr.app",
 	}
