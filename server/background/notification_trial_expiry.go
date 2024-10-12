@@ -3,6 +3,7 @@ package background
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
@@ -217,6 +218,16 @@ func (j *NotificationTrialExpiryJob) Run(ctx context.Context) error {
 	}
 
 	expiration := *owner.Account.TrialEndsAt
+
+	timezone, err := owner.Account.GetTimezone()
+	if err != nil {
+		log.WithError(err).Warn("failed to get timezone for account trial notification")
+		timezone = time.UTC
+	}
+
+	expiration = expiration.In(timezone)
+	now = now.In(timezone)
+
 	days := int(expiration.Sub(now).Hours() / 24)
 	email := communication.TrialAboutToExpireParams{
 		BaseURL:               j.config.Server.GetBaseURL().String(),
