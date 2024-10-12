@@ -120,12 +120,13 @@ func GivenIHaveATrialingAccount(t *testing.T, clock clock.Clock, login models.Lo
 	repo := repository.NewUnauthenticatedRepository(clock, db)
 	account := models.Account{
 		Timezone:                     gofakeit.TimeZoneRegion(),
+		Locale:                       "en_US",
 		StripeCustomerId:             nil,
 		StripeSubscriptionId:         nil,
 		StripeWebhookLatestTimestamp: nil,
 		SubscriptionActiveUntil:      nil,
 		SubscriptionStatus:           nil,
-		TrialEndsAt:                  myownsanity.TimeP(clock.Now().AddDate(0, 0, 1)),
+		TrialEndsAt:                  myownsanity.TimeP(clock.Now().AddDate(0, 0, 30)),
 	}
 	err := repo.CreateAccountV2(context.Background(), &account)
 	require.NoError(t, err, "must be able to seed basic account")
