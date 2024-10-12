@@ -96,11 +96,11 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
 
 		user := models.User{
-			LoginId:          login.LoginId,
-			AccountId:        account.AccountId,
-			StripeCustomerId: nil,
+			LoginId:   login.LoginId,
+			AccountId: account.AccountId,
+			Role:      models.UserRoleOwner,
 		}
-		err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
+		err = repo.CreateUser(context.Background(), &user)
 		assert.NoError(t, err, "should successfully create user")
 		assert.NotEmpty(t, user, "new user should not be empty")
 		assert.NotEmpty(t, user.UserId, "user Id should have been generated")
@@ -129,11 +129,11 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
 
 		user := models.User{
-			LoginId:          login.LoginId,
-			AccountId:        account.AccountId,
-			StripeCustomerId: nil,
+			LoginId:   login.LoginId,
+			AccountId: account.AccountId,
+			Role:      models.UserRoleOwner,
 		}
-		err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
+		err = repo.CreateUser(context.Background(), &user)
 		assert.NoError(t, err, "should successfully create user")
 		assert.NotEmpty(t, user, "new user should not be empty")
 		assert.NotEmpty(t, user.UserId, "user Id should have been generated")
@@ -141,8 +141,96 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		// Try to create another user with the same login and account, this should fail.
 		userAgain := user
 		userAgain.UserId = ""
-		err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &userAgain)
+		err = repo.CreateUser(context.Background(), &userAgain)
 		assert.Error(t, err, "should not create duplicate login for account")
+	})
+
+	t.Run("unique owner per account", func(t *testing.T) {
+		clock := clock.NewMock()
+		repo := GetTestUnauthenticatedRepository(t, clock)
+
+		account := models.Account{
+			Timezone:                time.UTC.String(),
+			Locale:                  "en_US",
+			StripeCustomerId:        nil,
+			StripeSubscriptionId:    nil,
+			SubscriptionActiveUntil: nil,
+		}
+		err := repo.CreateAccountV2(context.Background(), &account)
+		assert.NoError(t, err, "should successfully create account")
+		assert.NotEmpty(t, account, "new account should not be empty")
+		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
+
+		{ // Create the first user, and make it the owner.
+			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
+			login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+			assert.NoError(t, err, "should successfully create login")
+			assert.NotEmpty(t, login, "new login should not be empty")
+			assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
+
+			user := models.User{
+				LoginId:   login.LoginId,
+				AccountId: account.AccountId,
+				Role:      models.UserRoleOwner,
+			}
+			err = repo.CreateUser(context.Background(), &user)
+			assert.NoError(t, err, "should successfully create user")
+			assert.NotEmpty(t, user, "new user should not be empty")
+			assert.NotEmpty(t, user.UserId, "user Id should have been generated")
+		}
+
+		{ // Now create a different user and try to make it the owner as well.
+			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
+			login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+			assert.NoError(t, err, "should successfully create login")
+			assert.NotEmpty(t, login, "new login should not be empty")
+			assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
+
+			user := models.User{
+				LoginId:   login.LoginId,
+				AccountId: account.AccountId,
+				Role:      models.UserRoleOwner,
+			}
+			err = repo.CreateUser(context.Background(), &user)
+			assert.Error(t, err, "cannot create another user who is also an owner of the same account")
+
+			user.Role = models.UserRoleMember
+			err = repo.CreateUser(context.Background(), &user)
+			assert.NoError(t, err, "but can create the user as a member of the account")
+		}
+	})
+
+	t.Run("missing role", func(t *testing.T) {
+		clock := clock.NewMock()
+		repo := GetTestUnauthenticatedRepository(t, clock)
+
+		account := models.Account{
+			Timezone:                time.UTC.String(),
+			Locale:                  "en_US",
+			StripeCustomerId:        nil,
+			StripeSubscriptionId:    nil,
+			SubscriptionActiveUntil: nil,
+		}
+		err := repo.CreateAccountV2(context.Background(), &account)
+		assert.NoError(t, err, "should successfully create account")
+		assert.NotEmpty(t, account, "new account should not be empty")
+		assert.NotEmpty(t, account.AccountId, "account Id should have been generated")
+
+		{ // Create the first user, and make it the owner.
+			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
+			login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
+			assert.NoError(t, err, "should successfully create login")
+			assert.NotEmpty(t, login, "new login should not be empty")
+			assert.NotEmpty(t, login.LoginId, "login Id should have been generated")
+
+			user := models.User{
+				LoginId:   login.LoginId,
+				AccountId: account.AccountId,
+				// Don't include a role
+			}
+			err = repo.CreateUser(context.Background(), &user)
+			assert.Error(t, err, "should not be able to create a user without a role")
+		}
 	})
 }
 

@@ -446,14 +446,13 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	user := models.User{
 		LoginId:   login.LoginId,
 		AccountId: account.AccountId,
+		Role:      models.UserRoleOwner,
 	}
 
 	// Now that we have an accountId we can create the user object which will
 	// bind the login and the account together.
 	err = repo.CreateUser(
 		c.getContext(ctx),
-		login.LoginId,
-		account.AccountId,
 		&user,
 	)
 	if err != nil {

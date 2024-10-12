@@ -18,16 +18,17 @@ var (
 type Account struct {
 	tableName string `pg:"accounts"`
 
-	AccountId                    ID[Account]                `json:"accountId" pg:"account_id,notnull,pk"`
-	Timezone                     string                     `json:"timezone" pg:"timezone,notnull,default:'UTC'"`
-	Locale                       string                     `json:"locale" pg:"locale,notnull"`
-	StripeCustomerId             *string                    `json:"-" pg:"stripe_customer_id"`
-	StripeSubscriptionId         *string                    `json:"-" pg:"stripe_subscription_id"`
-	StripeWebhookLatestTimestamp *time.Time                 `json:"-" pg:"stripe_webhook_latest_timestamp"`
-	SubscriptionActiveUntil      *time.Time                 `json:"subscriptionActiveUntil" pg:"subscription_active_until"`
-	SubscriptionStatus           *stripe.SubscriptionStatus `json:"subscriptionStatus" pg:"subscription_status"`
-	TrialEndsAt                  *time.Time                 `json:"trialEndsAt" pg:"trial_ends_at"`
-	CreatedAt                    time.Time                  `json:"createdAt" pg:"created_at,notnull"`
+	AccountId                     ID[Account]                `json:"accountId" pg:"account_id,notnull,pk"`
+	Timezone                      string                     `json:"timezone" pg:"timezone,notnull,default:'UTC'"`
+	Locale                        string                     `json:"locale" pg:"locale,notnull"`
+	StripeCustomerId              *string                    `json:"-" pg:"stripe_customer_id"`
+	StripeSubscriptionId          *string                    `json:"-" pg:"stripe_subscription_id"`
+	StripeWebhookLatestTimestamp  *time.Time                 `json:"-" pg:"stripe_webhook_latest_timestamp"`
+	SubscriptionActiveUntil       *time.Time                 `json:"subscriptionActiveUntil" pg:"subscription_active_until"`
+	SubscriptionStatus            *stripe.SubscriptionStatus `json:"subscriptionStatus" pg:"subscription_status"`
+	TrialEndsAt                   *time.Time                 `json:"trialEndsAt" pg:"trial_ends_at"`
+	TrialExpiryNotificationSentAt *time.Time                 `json:"-" pg:"trial_expiry_notification_sent_at"`
+	CreatedAt                     time.Time                  `json:"createdAt" pg:"created_at,notnull"`
 }
 
 func (Account) IdentityPrefix() string {

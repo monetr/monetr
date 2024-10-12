@@ -140,7 +140,7 @@ type Repository interface {
 type UnauthenticatedRepository interface {
 	CreateAccountV2(ctx context.Context, account *Account) error
 	CreateLogin(ctx context.Context, email, password string, firstName, lastName string) (*Login, error)
-	CreateUser(ctx context.Context, loginId ID[Login], accountId ID[Account], user *User) error
+	CreateUser(ctx context.Context, user *User) error
 	GetLinksForItem(ctx context.Context, itemId string) (*Link, error)
 	GetLoginForEmail(ctx context.Context, emailAddress string) (*Login, error)
 	ResetPassword(ctx context.Context, loginId ID[Login], hashedPassword string) error

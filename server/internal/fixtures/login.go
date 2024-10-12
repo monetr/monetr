@@ -103,13 +103,13 @@ func GivenIHaveAnAccount(t *testing.T, clock clock.Clock, login models.Login) mo
 	require.NoError(t, err, "must be able to seed basic account")
 
 	user := models.User{
-		LoginId:          login.LoginId,
-		Login:            &login,
-		AccountId:        account.AccountId,
-		Account:          &account,
-		StripeCustomerId: account.StripeCustomerId,
+		LoginId:   login.LoginId,
+		Login:     &login,
+		AccountId: account.AccountId,
+		Account:   &account,
+		Role:      models.UserRoleOwner,
 	}
-	err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
+	err = repo.CreateUser(context.Background(), &user)
 	require.NoError(t, err, "must be able to see user for basic account")
 
 	return user
@@ -131,13 +131,13 @@ func GivenIHaveATrialingAccount(t *testing.T, clock clock.Clock, login models.Lo
 	require.NoError(t, err, "must be able to seed basic account")
 
 	user := models.User{
-		LoginId:          login.LoginId,
-		Login:            &login,
-		AccountId:        account.AccountId,
-		Account:          &account,
-		StripeCustomerId: account.StripeCustomerId,
+		LoginId:   login.LoginId,
+		Login:     &login,
+		AccountId: account.AccountId,
+		Account:   &account,
+		Role:      models.UserRoleOwner,
 	}
-	err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
+	err = repo.CreateUser(context.Background(), &user)
 	require.NoError(t, err, "must be able to see user for basic account")
 
 	return user
