@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.18.14](https://github.com/monetr/monetr/compare/v0.18.13...v0.18.14) (2024-10-13)
+
+
+### Features
+
+* **api:** Correctly mark accounts as inactive via Plaid. ([#2003](https://github.com/monetr/monetr/issues/2003)) ([42b6e6a](https://github.com/monetr/monetr/commit/42b6e6aa3f37c943ab1252cba567f90590583829))
+* **comms:** Notify users a few days before their trial expires ([#2028](https://github.com/monetr/monetr/issues/2028)) ([04d5b96](https://github.com/monetr/monetr/commit/04d5b9664f20118e1c25f7850cffde0b1cf9d320)), closes [#2023](https://github.com/monetr/monetr/issues/2023)
+* **dev:** Adding local development "lite" environment ([#2024](https://github.com/monetr/monetr/issues/2024)) ([a904961](https://github.com/monetr/monetr/commit/a904961442d1f3d58a08eb360711c0f5e051a932))
+* **email:** Improving email templates ([#2027](https://github.com/monetr/monetr/issues/2027)) ([0ccb050](https://github.com/monetr/monetr/commit/0ccb0500105c4952379da6cf71bea48dc24ab07a))
+
+
+### Dependencies
+
+* **ui:** Removing unused dependency ([80840ec](https://github.com/monetr/monetr/commit/80840ec697fcc1e777e74fdb42519ce5afca14ac))
+* **ui:** update dependency @rspack/core to v1.0.10 ([#2020](https://github.com/monetr/monetr/issues/2020)) ([8919724](https://github.com/monetr/monetr/commit/89197247cc9e3f5f05da6741aeddb13daf71ff8f))
+* **ui:** Updating sass to a newer version. ([12ada56](https://github.com/monetr/monetr/commit/12ada56bd52ee99b40a1aa9c5cb401190b63219b))
+
+
+### Bug Fixes
+
+* **api:** Fixed migration not being applied ([ac2230e](https://github.com/monetr/monetr/commit/ac2230e1e89801d51915d7b53df799b3b09714dc))
+* **funding:** Clone ruleset when calculating funding ([a1755c1](https://github.com/monetr/monetr/commit/a1755c18af8e29b9790d4f5b246e316f3366b2a5)), closes [#2021](https://github.com/monetr/monetr/issues/2021)
+* **notification:** Fixed date formatting in trial notification ([3ba6a18](https://github.com/monetr/monetr/commit/3ba6a18008c676257259c08a7c3aa18be73abe1c))
+* **ui:** Fix local development not working properly ([722231d](https://github.com/monetr/monetr/commit/722231da3fd147ce3012e0a646073eae3a2427dc))
+
 ## [0.18.13](https://github.com/monetr/monetr/compare/v0.18.12...v0.18.13) (2024-10-11)
 
 
