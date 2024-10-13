@@ -170,10 +170,6 @@ module.exports = (env, _argv) => {
                 sassOptions: {
                   quietDeps: true,
                 },
-                // using `modern-compiler` and `sass-embedded` together significantly improve build performance,
-                // requires `sass-loader >= 14.2.1`
-                api: 'modern-compiler',
-                implementation: require.resolve('sass-embedded'),
               },
             },
             {
