@@ -32,6 +32,7 @@ var (
 		"adjustment":      0,
 		"payment":         0,
 		"to":              0,
+		"of":              0,
 		"helppay":         0, // Shows up on some google transactions, not helpful.
 	}
 
