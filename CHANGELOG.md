@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.15](https://github.com/monetr/monetr/compare/v0.18.14...v0.18.15) (2024-10-13)
+
+
+### Miscellaneous
+
+* **transactions:** Adding another stopword for transaction similarity ([26c4e50](https://github.com/monetr/monetr/commit/26c4e50fc46a3053567e1b40a8fcbe9125d54e4e))
+
 ## [0.18.14](https://github.com/monetr/monetr/compare/v0.18.13...v0.18.14) (2024-10-13)
 
 
