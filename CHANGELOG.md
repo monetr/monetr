@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.18.16](https://github.com/monetr/monetr/compare/v0.18.15...v0.18.16) (2024-10-18)
+
+
+### Bug Fixes
+
+* **build:** Including notes about requiring gcc compiler ([09eb892](https://github.com/monetr/monetr/commit/09eb892f0283e7a466d29e7bdcbd91231f7c4b69)), closes [#2031](https://github.com/monetr/monetr/issues/2031)
+* **forecast:** Improve performance of forecasting ([317c91d](https://github.com/monetr/monetr/commit/317c91db4733ecc7f36e3a0c270ef1a7113af059))
+
 ## [0.18.15](https://github.com/monetr/monetr/compare/v0.18.14...v0.18.15) (2024-10-13)
 
 
