@@ -33,16 +33,23 @@ type SpendingInstructions interface {
 
 type spendingInstructionBase struct {
 	log      *logrus.Entry
+	ruleset  *RuleSet
 	spending Spending
 	funding  FundingInstructions
 }
 
 func NewSpendingInstructions(log *logrus.Entry, spending Spending, fundingInstructions FundingInstructions) SpendingInstructions {
-	return &spendingInstructionBase{
+	instructions := &spendingInstructionBase{
 		log:      log,
+		ruleset:  nil,
 		spending: spending,
 		funding:  fundingInstructions,
 	}
+	if spending.RuleSet != nil {
+		instructions.ruleset = spending.RuleSet.Clone()
+	}
+
+	return instructions
 }
 
 func (s *spendingInstructionBase) GetSpendingEventsBetween(
@@ -186,7 +193,7 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(
 ) ([]time.Time, error) {
 	switch s.spending.SpendingType {
 	case SpendingTypeExpense:
-		rule := s.spending.RuleSet.Clone()
+		rule := s.ruleset
 		rule.DTStart(rule.GetDTStart().In(timezone))
 
 		// This little bit is really confusing. Basically we want to know how many times this spending boi happens
@@ -222,7 +229,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 
 	var rule *RuleSet
 	if s.spending.RuleSet != nil {
-		rule = s.spending.RuleSet.Clone()
+		rule = s.ruleset
 	}
 
 	nextRecurrence := util.Midnight(s.spending.NextRecurrence, timezone)

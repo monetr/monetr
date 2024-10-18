@@ -32,6 +32,7 @@ type FundingInstructions interface {
 
 type fundingScheduleBase struct {
 	log             *logrus.Entry
+	ruleset         *RuleSet
 	fundingSchedule FundingSchedule
 }
 
@@ -41,6 +42,7 @@ func NewFundingScheduleFundingInstructions(
 ) FundingInstructions {
 	return &fundingScheduleBase{
 		log:             log,
+		ruleset:         fundingSchedule.RuleSet.Clone(),
 		fundingSchedule: fundingSchedule,
 	}
 }
@@ -51,7 +53,7 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(
 	timezone *time.Location,
 ) (FundingEvent, error) {
 	input = util.Midnight(input, timezone)
-	rule := f.fundingSchedule.RuleSet.Clone()
+	rule := f.ruleset
 	// This does not change the timezone or the date start of the ruleset. It just corrects it. The date start is
 	// normally stored in UTC so this just adjusts it to be the user's current timezone.
 	rule.DTStart(rule.GetDTStart().In(timezone))
