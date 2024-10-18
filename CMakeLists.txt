@@ -33,7 +33,8 @@ else()
   execute_process(COMMAND uname -n OUTPUT_VARIABLE HOSTNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
-
+# monetr requires cgo in order to be built at this time, so if gcc is not present on the system then show a warning.
+find_package(Gcc REQUIRED)
 find_package(Git REQUIRED)
 
 set(DOCKER_MIN_VERSION "20.0.0")

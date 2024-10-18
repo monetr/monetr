@@ -6,10 +6,12 @@ Building monetr locally using CMake.
 
 ## General Requirements
 
-- `Node >= v18.0.0`
-- `Go >= 1.20.0`
-- `Git`
-- `GNUMake`
+- Node (`>= 18.0.0`)
+- Go (`>= 1.21.9`)
+- git (`>= 2.0.0`)
+- CMake (`>= 3.23.0`)
+- GNUMake (`>= 4.0`)
+- gcc (`>= 12`)
 
 monetr will also create some binaries within the CMake binary directory, these binaries may be created by `gem`, `npm`
 or `go install`. These will not be installed on the host system itself, and are automatically removed when the source
@@ -22,6 +24,7 @@ If you want to do a release build of monetr on linux, you will also need the fol
 - [`ruby-full`](https://packages.debian.org/bookworm/ruby-full)
 - [`libssl-dev`](https://packages.debian.org/bookworm/libssl-dev)
 - [`pkg-config`](https://packages.debian.org/bookworm/pkg-config)
+- [`locales-all`](https://packages.debian.org/bookworm/locales-all)
 
 These are required in order for monetr to setup [licensed](https://github.com/github/licensed). This tool is setup in
 the CMake binary directory and is not installed on the host, but is installed via gem. The tool is used to generate
