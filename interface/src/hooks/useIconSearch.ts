@@ -16,6 +16,7 @@ export function useIconSearch(name: string): Icon | null {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
+    retry: false,
   });
 
   return data;
