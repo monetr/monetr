@@ -43,21 +43,21 @@ const comboboxVariants = cva(
   },
 );
 
-export interface ComboboxOption<V = string> {
+export interface ComboboxOption<V extends string> {
   value: V;
   label: string;
   disabled?: boolean;
 }
 
-export interface ComboboxItemProps<V = string, O = ComboboxOption<V>> {
+export interface ComboboxItemProps<V extends string, O extends ComboboxOption<V>> {
   currentValue: V;
   option: O;
 }
 
-export interface ComboboxProps<V = string> extends 
+export interface ComboboxProps<V extends string, O extends ComboboxOption<V>> extends 
   VariantProps<typeof comboboxVariants> {
   disabled?: boolean;
-  options: Array<ComboboxOption<V>>;
+  options: Array<O>;
   value?: V;
   emptyString?: string;
   placeholder?: string;
@@ -65,11 +65,13 @@ export interface ComboboxProps<V = string> extends
   showSearch?: boolean;
   onSelect?: (value: V) => void;
   components?: {
-    Item?: React.ComponentType<ComboboxItemProps<V>>;
+    Item?: React.ComponentType<ComboboxItemProps<V, O>>;
   }
 }
 
-export function ComboboxItem(props: ComboboxItemProps): JSX.Element {
+export function ComboboxItem<V extends string, O extends ComboboxOption<V>>(
+  props: ComboboxItemProps<V, O>,
+): JSX.Element {
   return (
     <Fragment>
       <Check
@@ -83,7 +85,7 @@ export function ComboboxItem(props: ComboboxItemProps): JSX.Element {
   );
 }
  
-export function Combobox(props: ComboboxProps) {
+export function Combobox<V extends string, O extends ComboboxOption<V>>(props: ComboboxProps<V, O>) {
   const { Item } = {
     Item: ComboboxItem,
     ...props.components,
@@ -117,10 +119,10 @@ export function Combobox(props: ComboboxProps) {
               { props.options.map(option => (
                 <CommandItem
                   key={ option.value }
-                  value={ option.value.toString() }
+                  value={ option.label }
                   title={ option.label }
-                  onSelect={ currentValue => {
-                    props.onSelect && props.onSelect(currentValue);
+                  onSelect={ () => {
+                    props.onSelect && props.onSelect(option.value);
                     setOpen(false);
                   } }
                 >
