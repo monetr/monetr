@@ -125,7 +125,7 @@ const CommandItem = React.forwardRef<
       'text-dark-monetr-content-emphasis data-[disabled="true"]:text-dark-monetr-content-muted',
       'data-[disabled="false"]:cursor-pointer data-[disabled="true"]:cursor-default',
       'data-[disabled="true"]:pointer-events-none',
-      'relative flex cursor-default select-none items-center rounded-sm',
+      'relative flex cursor-default select-none items-center rounded-lg',
       'px-2 py-1.5',
       'text-sm outline-none',
       'aria-selected:bg-dark-monetr-background-emphasis aria-selected:text-accent-foreground',

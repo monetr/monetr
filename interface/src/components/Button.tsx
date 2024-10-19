@@ -50,7 +50,7 @@ const buttonVariants = cva(
       },
       size: {
         default: 'text-sm px-3 py-1.5',
-        md: 'px-3 py-1.5',
+        md: 'h-10 px-3 py-1.5',
       },
     },
     defaultVariants: {

@@ -11,7 +11,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
  
 const comboboxVariants = cva(
   [
-    'w-full justify-between bloc',
+    'w-full justify-between',
   ],
   {
     variants: {
@@ -22,14 +22,18 @@ const comboboxVariants = cva(
           // When it's closed, only show the border when someone hovers over.
           'data-[state="closed"]:enabled:hover:ring-1',
           'data-[state="closed"]:enabled:hover:ring-dark-monetr-border-string',
+          'data-[state="closed"]:focus:ring-0',
           // When the dropdown is closed, don't show any icons unless they are hovering.
           '[&_svg]:data-[state="closed"]:hover:block [&_svg]:data-[state="closed"]:hidden',
+
 
           // DROPDOWN IS OPEN
           // When its open, show the border all the time with the primary color.
           'data-[state="open"]:ring-dark-monetr-brand data-[state="open"]:ring-2',
           // When the dropdown is open then show icons
           '[&_svg]:data-[state="open"]:block',
+
+          '',
         ],
       },
     },

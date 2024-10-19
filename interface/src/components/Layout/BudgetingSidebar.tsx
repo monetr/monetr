@@ -5,9 +5,9 @@ import { AccountBalanceWalletOutlined, LocalAtmOutlined, PriceCheckOutlined, Sav
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
+import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
 import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
-import MSelectAccount from '@monetr/interface/components/MSelectAccount';
 import MSpan from '@monetr/interface/components/MSpan';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useCurrentBalance } from '@monetr/interface/hooks/balances';
@@ -87,7 +87,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
     <div className={ className }>
       <BudgetingSidebarTitle />
       <div className='flex h-full w-full flex-col items-center gap-4 px-2 pt-4'>
-        <MSelectAccount />
+        <SelectBankAccount />
         <MDivider className='w-1/2' />
 
         <div className='flex w-full flex-col items-center gap-2 px-2'>
