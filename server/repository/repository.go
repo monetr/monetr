@@ -191,5 +191,6 @@ func (r *repositoryBase) GetIsSetup(ctx context.Context) (bool, error) {
 
 	return r.txn.ModelContext(span.Context(), &Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
+		Where(`"link"."deleted_at" IS NULL`).
 		Exists()
 }
