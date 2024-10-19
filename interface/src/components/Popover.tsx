@@ -17,7 +17,7 @@ const PopoverContent = React.forwardRef<
       align={ align }
       sideOffset={ sideOffset }
       className={ mergeTailwind(
-        'z-50 w-72 rounded-md bg-dark-monetr-popover p-4 text-dark-monetr-content-emphasis',
+        'z-50 w-72 rounded-lg bg-dark-monetr-popover p-4 text-dark-monetr-content-emphasis',
         'border border-dark-monetr-border',
         'shadow-md outline-none',
         'data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
