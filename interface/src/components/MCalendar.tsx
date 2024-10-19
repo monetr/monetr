@@ -4,8 +4,8 @@ import { DayPicker, DayPickerRangeProps, DayPickerSingleProps, useNavigation } f
 import { ArrowLeftOutlined, ArrowRightOutlined, ChevronLeft, ChevronRight, FirstPage, LastPage } from '@mui/icons-material';
 import { addYears, format } from 'date-fns';
 
-import { MBaseButton } from './MButton';
 import MSpan from './MSpan';
+import { Button } from '@monetr/interface/components/Button';
 
 export type MCalendarProps<T extends DayPickerSingleProps | DayPickerRangeProps> = T & {
   enableYearNavigation: boolean;
@@ -63,19 +63,19 @@ export default function MCalendar<T extends DayPickerSingleProps | DayPickerRang
             <div className='flex justify-between items-center' { ...props }>
               <div className='flex items-center space-x-1'>
                 {enableYearNavigation && (
-                  <MBaseButton
+                  <Button
                     variant='text'
                     onClick={ () => currentMonth && goToMonth(addYears(currentMonth, -1)) }
                   >
                     <FirstPage className='text-lg' />
-                  </MBaseButton>
+                  </Button>
                 )}
-                <MBaseButton
+                <Button
                   variant='text'
                   onClick={ () => previousMonth && goToMonth(previousMonth) }
                 >
                   <ChevronLeft className='text-lg' />
-                </MBaseButton>
+                </Button>
               </div>
 
               <MSpan className='mx-1'>
@@ -83,19 +83,19 @@ export default function MCalendar<T extends DayPickerSingleProps | DayPickerRang
               </MSpan>
 
               <div className='flex items-center space-x-1'>
-                <MBaseButton
+                <Button
                   variant='text'
                   onClick={ () => nextMonth && goToMonth(nextMonth) }
                 >
                   <ChevronRight className='text-lg' />
-                </MBaseButton>
+                </Button>
                 {enableYearNavigation && (
-                  <MBaseButton
+                  <Button
                     variant='text'
                     onClick={ () => currentMonth && goToMonth(addYears(currentMonth, 1)) }
                   >
                     <LastPage className='text-lg' />
-                  </MBaseButton>
+                  </Button>
                 )}
               </div>
             </div>

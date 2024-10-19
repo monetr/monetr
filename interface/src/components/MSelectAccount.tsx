@@ -25,7 +25,7 @@ export default function MSelectAccount(): JSX.Element {
 
   const current = accounts?.find(account => account.value === selectedBankAccount?.bankAccountId);
 
-  function onChange({ value }: { value: number }) {
+  function onChange({ value }: { value: string }) {
     navigate(`/bank/${value}/transactions`);
   }
 

@@ -99,13 +99,29 @@ module.exports = {
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
       colors: {
+        inherit: 'inherit',
+        current: 'currentColor',
+        transparent: 'transparent',
+        black: '#000',
+        white: '#fff',
         border: 'hsl(var(--border))',
         input: 'var(--input)',
         ring: 'hsl(var(--ring))',
-        background: 'var(--background)',
-        foreground: 'hsl(var(--foreground))',
+        background: {
+          subtle: '#27272a', // zinc-800
+          DEFAULT: '#19161f',
+          emphasis: '#3f3f46', // zinc-700
+          focused: '#131118',
+          bright: '#fafafa', // zinc-50
+        },
+        foreground: {
+          muted: '#52525b',
+          subtle: '#a1a1aa', // zinc-400
+          DEFAULT: '#d4d4d8', // zinc-200
+          emphasis: '#fafafa', // zinc-50
+        },
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
+          DEFAULT: '#4E1AA0',
           foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
@@ -113,8 +129,8 @@ module.exports = {
           foreground: 'hsl(var(--secondary-foreground))',
         },
         destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
+          DEFAULT: '#ef4444',
+          foreground: '#d4d4d8',
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
@@ -199,11 +215,6 @@ module.exports = {
       'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
     },
     colors: {
-      inherit: 'inherit',
-      current: 'currentColor',
-      transparent: 'transparent',
-      black: '#000',
-      white: '#fff',
       slate: {
         50: '#f8fafc',
         100: '#f1f5f9',

@@ -2,7 +2,7 @@ import React from 'react';
 import { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MFormButton from '@monetr/interface/components/MButton';
+import FormButton from '@monetr/interface/components/FormButton';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
@@ -124,17 +124,16 @@ export default function Login(): JSX.Element {
         show={ Boolean(config?.verifyLogin) }
       />
       <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
-        <MFormButton
+        <FormButton
           data-testid='login-submit'
-          color='primary'
-          variant='solid'
+          variant='primary'
           role='form'
           type='submit'
           className='w-full'
           tabIndex={ 3 }
         >
           Sign In
-        </MFormButton>
+        </FormButton>
       </div>
       <SignUpButton />
     </MForm>

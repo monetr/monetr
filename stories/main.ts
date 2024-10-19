@@ -7,6 +7,7 @@ const marketingStoryOnly = process.env.MARKETING_STORY_ONLY === 'true';
 let stories = [
   '../interface/src/**/*.stories.@(js|jsx|ts|tsx)',
   '../emails/**/*.stories.tsx',
+  'stories/**/*.stories.tsx',
 ];
 if (marketingStoryOnly) {
   stories = ['../interface/src/pages/app.stories.tsx'];
