@@ -8,11 +8,12 @@ import { cva, type VariantProps } from 'class-variance-authority';
 const buttonVariants = cva(
   [
     'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus:outline-none',
-    'font-semibold text-sm',
+    'font-semibold',
     'inline-flex items-center gap-1 justify-center',
-    'px-3 py-1.5 rounded-lg',
+    'rounded-lg',
     'enabled:active:brightness-110',
     '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+    'disabled:pointer-events-none',
   ],
   {
     variants: {
@@ -47,8 +48,13 @@ const buttonVariants = cva(
           'focus-visible:outline-purple-200',
         ],
       },
+      size: {
+        default: 'text-sm px-3 py-1.5',
+        md: 'px-3 py-1.5',
+      },
     },
     defaultVariants: {
+      size: 'default',
       variant: 'primary',
     },
   }
@@ -61,11 +67,11 @@ export interface ButtonProps
 }
  
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant: color, asChild = false, ...props }, ref) => {
+  ({ className, variant: color, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
     return (
       <Comp
-        className={ mergeTailwind(buttonVariants({ variant: color, className })) }
+        className={ mergeTailwind(buttonVariants({ variant: color, size, className })) }
         ref={ ref }
         { ...props }
       />

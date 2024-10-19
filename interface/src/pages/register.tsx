@@ -6,7 +6,7 @@ import { AxiosError } from 'axios';
 import { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MFormButton from '@monetr/interface/components/MButton';
+import FormButton from '@monetr/interface/components/FormButton';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
@@ -223,16 +223,15 @@ export default function Register(): JSX.Element {
           name='captcha'
           show={ Boolean(config?.verifyRegister) }
         />
-        <MFormButton
+        <FormButton
           data-testid='register-submit'
           className='w-full mt-1'
-          color='primary'
           role='form'
           type='submit'
-          variant='solid'
+          variant='primary'
         >
           Sign Up
-        </MFormButton>
+        </FormButton>
         <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
           <MSpan className='gap-1 inline-block text-center' size='sm' color='subtle' component='p'>
             By signing up you agree to monetr's&nbsp;

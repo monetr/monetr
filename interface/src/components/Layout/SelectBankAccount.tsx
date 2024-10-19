@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { ComboboxDemo } from '@monetr/interface/components/Combobox';
+import { Combobox } from '@monetr/interface/components/Combobox';
 import { useBankAccounts, useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 
@@ -23,7 +23,10 @@ export default function SelectBankAccount(): JSX.Element {
   const current = accounts?.find(account => account.value === selectedBankAccount?.bankAccountId);
 
   return (
-    <ComboboxDemo />
+    <Combobox 
+      options={ accounts } 
+      value={ current?.value }
+      placeholder='Select a bank account...'
+    />
   );
-  
 }
