@@ -10,7 +10,7 @@
   "dependencies": {
     "@fontsource-variable/inter": "5.1.0",
     "@monetr/interface": "workspace:*",
-    "@rspack/binding-linux-x64-gnu": "0.3.6",
+    "@rspack/binding-linux-x64-gnu": "0.7.5",
     "@rspack/cli": "0.3.6",
     "@storybook/addon-coverage": "0.0.9",
     "@storybook/addon-essentials": "7.0.18",
