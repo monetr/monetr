@@ -37,12 +37,15 @@ export default function SelectBankAccount(): JSX.Element {
 
   if (allIsLoading || selectedIsLoading) {
     return (
-      <Skeleton className='w-full' />
+      <Skeleton className='w-full h-10' />
     );
   }
 
   return (
     <Combobox 
+      className='w-full'
+      variant='text'
+      size='md'
       options={ accounts } 
       value={ current?.value }
       placeholder='Select a bank account...'

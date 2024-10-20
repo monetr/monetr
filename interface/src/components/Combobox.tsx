@@ -11,34 +11,42 @@ import { Check, ChevronsUpDown } from 'lucide-react';
  
 const comboboxVariants = cva(
   [
-    'w-full justify-between',
+    'justify-between text-ellipsis overflow-hidden text-nowrap',
   ],
   {
     variants: {
       variant: {
+        outlined: [
+          'ring-1 enabled:ring-dark-monetr-border-string',
+        ],
         text: [
-          'ring-0 group',
+          'ring-0',
+          // Override the background color for combobox.
+          'enabled:hover:bg-transparent',
+
           // DROPDOWN IS CLOSED
           // When it's closed, only show the border when someone hovers over.
           'data-[state="closed"]:enabled:hover:ring-1',
           'data-[state="closed"]:enabled:hover:ring-dark-monetr-border-string',
           'data-[state="closed"]:focus:ring-0',
           // When the dropdown is closed, don't show any icons unless they are hovering.
-          '[&_svg]:data-[state="closed"]:hover:block [&_svg]:data-[state="closed"]:hidden',
-
+          // '[&_svg]:data-[state="closed"]:hover:opacity-50 [&_svg]:data-[state="closed"]:opacity-0',
 
           // DROPDOWN IS OPEN
           // When its open, show the border all the time with the primary color.
           'data-[state="open"]:ring-dark-monetr-brand data-[state="open"]:ring-2',
           // When the dropdown is open then show icons
-          '[&_svg]:data-[state="open"]:block',
-
-          '',
+          // '[&_svg]:data-[state="open"]:block',
         ],
+      },
+      size: {
+        default: 'h-8 text-sm',
+        md: 'h-10',
       },
     },
     defaultVariants: {
-      variant: 'text',
+      variant: 'outlined',
+      size: 'md',
     },
   },
 );
@@ -56,6 +64,7 @@ export interface ComboboxItemProps<V extends string, O extends ComboboxOption<V>
 
 export interface ComboboxProps<V extends string, O extends ComboboxOption<V>> extends 
   VariantProps<typeof comboboxVariants> {
+  className?: string;
   disabled?: boolean;
   options: Array<O>;
   value?: V;
@@ -96,16 +105,22 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
     <Popover open={ open } onOpenChange={ setOpen }>
       <PopoverTrigger asChild>
         <Button
-          size='md'
-          variant='outlined'
+          size={ props.size }
+          variant={ props.variant }
           role='combobox'
           aria-expanded={ open }
-          className={ comboboxVariants({ variant: 'text' }) }
+          disabled={ props.disabled }
+          className={ mergeTailwind(
+            comboboxVariants({ variant: props.variant, size: props.size }), 
+            props.className,
+          ) }
         >
-          {props.value
-            ? props.options.find(option => option.value === props.value)?.label
-            : props.placeholder }
-          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+          <div className='text-ellipsis text-nowrap min-w-0 overflow-hidden text-inherit'>
+            { props.value
+              ? props.options.find(option => option.value === props.value)?.label
+              : props.placeholder }
+          </div>
+          <ChevronsUpDown className='h-3 w-3 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
       <PopoverContent className='p-0'>
