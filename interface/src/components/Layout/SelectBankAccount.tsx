@@ -71,9 +71,11 @@ function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccoun
       <MSpan className='w-full pr-2' color='emphasis' ellipsis>
         { props.option.label }
       </MSpan>
-      <MBadge size='xs' className='font-mono'>
-        { props.option.mask }
-      </MBadge>
+      { props.option.mask != '' && (
+        <MBadge size='xs' className='font-mono'>
+          { props.option.mask }
+        </MBadge>
+      ) }
     </div>
   );
 }
