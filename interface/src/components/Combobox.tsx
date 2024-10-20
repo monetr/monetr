@@ -85,7 +85,7 @@ export function ComboboxItem<V extends string, O extends ComboboxOption<V>>(
     <Fragment>
       <Check
         className={ mergeTailwind(
-          'mr-2 h-4 w-4',
+          'mr-2 h-5 w-5',
           props.currentValue == props.option.value ? 'opacity-100' : 'opacity-0'
         ) }
       />
