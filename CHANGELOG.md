@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.18.16](https://github.com/monetr/monetr/compare/v0.18.15...v0.18.16) (2024-10-20)
+
+
+### Features
+
+* **ui:** Improving bank account dropdown. ([49c687a](https://github.com/monetr/monetr/commit/49c687acdd6f576a566e88cf9f8851162f251721))
+* **ui:** More improvements on bank account picker ([7263022](https://github.com/monetr/monetr/commit/7263022c5a05d617863bda6cd39ac345dcf36d00))
+* **ui:** New bank account selector ([b95c093](https://github.com/monetr/monetr/commit/b95c093669d092e00f32528b9a4b7a3a404e47f4))
+* **ui:** Refactoring button component for UI. ([1c777ab](https://github.com/monetr/monetr/commit/1c777ab1b6dc0a022e3a945e784daace294a1e15))
+* **ui:** Tweaking combobox ([0b2f807](https://github.com/monetr/monetr/commit/0b2f807914de478d6e5538eb53ec4ad9d7833afa))
+* **ui:** Working on new account selctor ([71cb686](https://github.com/monetr/monetr/commit/71cb6866d3b856e91eb60c66b4875cdd0af27564))
+
+
+### Bug Fixes
+
+* **api:** `isSetup` on user should be false when all links are deleted ([a7169de](https://github.com/monetr/monetr/commit/a7169de9cd9c5745fdca82dcb1dd5f0502059cca))
+* **build:** Including notes about requiring gcc compiler ([09eb892](https://github.com/monetr/monetr/commit/09eb892f0283e7a466d29e7bdcbd91231f7c4b69)), closes [#2031](https://github.com/monetr/monetr/issues/2031)
+* **forecast:** Improve performance of forecasting ([317c91d](https://github.com/monetr/monetr/commit/317c91db4733ecc7f36e3a0c270ef1a7113af059))
+* **ui:** Don't retry merchant icon requests ([8fcde34](https://github.com/monetr/monetr/commit/8fcde3492c82645a11e58e95e5ad42cd44031eb8))
+* **ui:** Don't show mask badge when there is no mask ([fb9094c](https://github.com/monetr/monetr/commit/fb9094cf32feb546057a3cd6d5cc1ed643b70524))
+
+
+### Miscellaneous
+
+* **ui:** Tweak dropdown icon size ([1e1fda9](https://github.com/monetr/monetr/commit/1e1fda963a49ff16bc5aafbb342bce3c56e325e7))
+
 ## [0.18.15](https://github.com/monetr/monetr/compare/v0.18.14...v0.18.15) (2024-10-13)
 
 
