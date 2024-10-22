@@ -69,7 +69,7 @@
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "14.12.3",
-    "@rspack/binding-linux-arm64-gnu": "1.0.10",
+    "@rspack/binding-linux-arm64-gnu": "1.0.14",
     "@rspack/binding-linux-x64-gnu": "1.0.10",
     "@rspack/cli": "1.0.10",
     "@rspack/core": "1.0.10",
