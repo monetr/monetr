@@ -134,7 +134,7 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
               { props.options.map(option => (
                 <CommandItem
                   key={ option.value }
-                  value={ option.label }
+                  value={ `${option.label} ${option.value}` /* makes search work properly :( */ }
                   title={ option.label }
                   onSelect={ () => {
                     props.onSelect && props.onSelect(option.value);
