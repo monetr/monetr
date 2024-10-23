@@ -7,8 +7,6 @@ services:
       timeout: 10s
       retries: 12
       start_period: 10s
-    ports:
-      - 4040:4040
     command:
       - http
       - --domain=@NGROK_HOSTNAME@

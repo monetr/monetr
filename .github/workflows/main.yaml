@@ -189,7 +189,7 @@ jobs:
         timeout-minutes: 10
         run: |
           make develop || (make logs && exit 1)
-          curl -k https://monetr.local
+          curl -k https://my.monetr.local
           make shutdown
 
   docs:

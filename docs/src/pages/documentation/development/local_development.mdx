@@ -180,7 +180,7 @@ is starting up you can use the `make logs` command in another terminal inside th
 ### Certificate Problems
 
 If you run an issue where your browser is presenting a message like `net::ERR_CERT_AUTHORITY_INVALID` when trying to
-navigate to `https://monetr.local` then please run the following commands in the monetr project directory.
+navigate to `https://my.monetr.local` then please run the following commands in the monetr project directory.
 
 ```shell filename="Shell"
 # Removes the current mkcert certificates
@@ -197,9 +197,7 @@ Once you restart your browser completely, this should correct the issue.
 
 Congratulations, you should now have monetr running locally on your computer. The `develop` task will print out some
 basic information for you. But if you missed it, you can access the development version of monetr at
-`https://monetr.local`.
-
-If you are working on documentation then that can be accessed at `https://monetr.local/documentation`.
+`https://my.monetr.local`.
 
 Almost all of monetr's code is setup to hot-reload as you make changes. The documentation, Go code and React UI will all
 automatically reload as changes are made. Changes to the Go code will not invoke a browser refresh of any sort though,
@@ -215,14 +213,14 @@ so to observe a new behavior in the API you will need to refresh or make the API
 As part of the local development stack, several services are run to support monetr. These services include:
 
 - [minio](https://github.com/minio/minio) As an S3 storage backend. The console is accessible via
-  `http://localhost:9001` when the local environment is running.
+  `https://s3.monetr.local` when the local environment is running.
 - [local-kms](https://github.com/nsmithuk/local-kms) An AWS KMS compatible local development API. This is used for
   encrypting secrets in the local development environment.
 - [Mailpit](https://github.com/axllent/mailpit) An SMTP server that allows emails to be sent without really sending
   them. This is used to validate and test communication functionality locally. This service is accessible via
-  `https://monetr.local/mail` when the local environment is running.
+  `https://mail.monetr.local` when the local environment is running.
 - [Vault](https://www.vaultproject.io/) Vault secret management and encryption, Transit is used by monetr for storing
-  secrets securely. Available at `http://localhost:80` if you have Vault enabled in your user preset.
+  secrets securely. Available at `https://vault.monetr.local` if you have Vault enabled in your user preset.
 
 ### Debugging
 

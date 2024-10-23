@@ -6,11 +6,11 @@ services:
     # by navigating to `http://localhost/mail`
     image: axllent/mailpit
     environment:
-      MP_WEBROOT: "mail"
+      # MP_WEBROOT: "mail"
       MP_SMTP_AUTH: "monetr:mailpassword"
       MP_SMTP_AUTH_ALLOW_INSECURE: "true"
     healthcheck:
-      test: [ "CMD", "wget", "http://localhost:8025/mail", "-q", "-O", "-" ]
+      test: [ "CMD", "wget", "http://localhost:8025", "-q", "-O", "-" ]
       interval: 10s
       timeout: 10s
       retries: 12
@@ -91,7 +91,7 @@ services:
       air_wd: /build
       DISABLE_GO_RELOAD: "@DISABLE_GO_RELOAD@"
       CLOUD_MAGIC: "@CLOUD_MAGIC@"
-      MONETR_SERVER_EXTERNAL_URL: "@LOCAL_PROTOCOL@://@MONETR_LOCAL_DOMAIN@"
+      MONETR_SERVER_EXTERNAL_URL: "@LOCAL_PROTOCOL@://my.@MONETR_LOCAL_DOMAIN@"
       # By default we want to use the AWS KMS provider as that is what we have built into the local env. But iuf the
       # developer specifies a different KMS provider we want to use that instead.
       MONETR_KMS_PROVIDER: "@MONETR_KMS_PROVIDER@"

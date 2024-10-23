@@ -1,5 +1,25 @@
+###############################################################################
+# This entire file contains a ton of steps that are used to create the local
+# development environment for monetr. monetr has several different options for
+# how it can be run, and as a result it needs a local development environment
+# that can be somewhat customized based on what you are working on.
+# The scripts below prepare this customization
+###############################################################################
+
 message(STATUS "Local development is available via docker compose")
 include(GolangUtils)
+
+# These two directories are used for the files generated as part of local dev.
+# The compose directory will contain a few docker compose files that have had
+# some values replaced via `configure_file`. All of the compose files in this
+# directory are eventually passed to the docker compose up command.
+set(COMPOSE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/development)
+file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY})
+# The nginx directory is a child of the development directory. This directory
+# contains stubs of templated nginx configuration as well as the final nginx
+# configuration file.
+set(NGINX_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/nginx)
+file(MAKE_DIRECTORY ${NGINX_DIRECTORY})
 
 # mkcert for local development
 set(MKCERT_EXECUTABLE ${GO_BIN_DIR}/mkcert)
@@ -19,12 +39,20 @@ go_install(
   VERSION ${HOSTESS_VERSION}
 )
 
+# If the developer has not customized the local domain in their cmake user
+# presets file or otherwise then we fall back to `monetr.local`. This is the
+# base name though and is no longer used independently. Instead it is prefixed
+# by a subdomain for each service.
 if (NOT MONETR_LOCAL_DOMAIN)
   set(MONETR_LOCAL_DOMAIN "monetr.local")
 endif()
+# The certificate we will create though will always be a wildcard certificate.
+set(WILDCARD_DOMAIN "*.${MONETR_LOCAL_DOMAIN}")
 set(LOCAL_PROTOCOL "https")
 set(CLOUD_MAGIC OFF)
 
+# If we are in gitpod or github codespaces then we have some basic handling for
+# that here. But it probably does not even work anymore.
 if(DEFINED ENV{GITPOD_WORKSPACE_ID})
   message(STATUS "Detected GitPod workspace environment, some local development settings will be adjusted.")
   set(MONETR_LOCAL_DOMAIN "80-$ENV{GITPOD_WORKSPACE_ID}.$ENV{GITPOD_WORKSPACE_CLUSTER_HOST}")
@@ -43,7 +71,7 @@ endif()
 # When we are running locally we want nginx to handle our TLS termination with a self-signed certificate. But if we are
 # using something like GitPod or Github workspaces then they will handle TLS termination for us.
 set(NGINX_PORT "443")
-set(NGINX_CONFIG_FILE "${CMAKE_SOURCE_DIR}/compose/nginx.conf")
+set(NGINX_CONFIG_FILE "${COMPOSE_OUTPUT_DIRECTORY}/nginx/nginx.conf")
 if (CLOUD_MAGIC)
   set(NGINX_PORT "80")
   set(NGINX_CONFIG_FILE "${CMAKE_SOURCE_DIR}/compose/nginx-cloud.conf")
@@ -66,34 +94,31 @@ if(WIN32)
   message(AUTHOR_WARNING "Because you are running on Windows, ${MONETR_LOCAL_DOMAIN} might not be able to be registered with the hosts file.")
 endif()
 
+# The two subdomains that we will be creating in the hosts file. Others might
+# get added to this list as we process the developer's config, but these two
+# will always be present.
+set(LOCAL_DOMAINS "my.${MONETR_LOCAL_DOMAIN}" "mail.${MONETR_LOCAL_DOMAIN}")
+
+# Create a custom command and target for provisioning the custom TLS
+# certificate that monetr will use for local development.
 add_custom_command(
   OUTPUT ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT}
   BYPRODUCTS ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT}
   COMMAND ${SUDO_EXECUTABLE} ${MKCERT_EXECUTABLE} -install
-  COMMAND ${MKCERT_EXECUTABLE} -key-file ${LOCAL_CERTIFICATE_KEY} -cert-file ${LOCAL_CERTIFICATE_CERT} ${MONETR_LOCAL_DOMAIN}
-  COMMENT "Setting up local development TLS certificate, this is required for OAuth2. You may be prompted for a password"
+  COMMAND ${MKCERT_EXECUTABLE} -key-file ${LOCAL_CERTIFICATE_KEY} -cert-file ${LOCAL_CERTIFICATE_CERT} ${WILDCARD_DOMAIN}
+  COMMENT "Setting up local development TLS certificate (*.${MONETR_LOCAL_DOMAIN}), this is required for OAuth2. You may be prompted for a password"
   DEPENDS ${MKCERT_EXECUTABLE}
 )
-
-add_custom_command(
-  OUTPUT ${LOCAL_HOSTS_MARKER}
-  BYPRODUCTS ${LOCAL_HOSTS_MARKER}
-  COMMAND ${SUDO_EXECUTABLE} ${HOSTESS_EXECUTABLE} add ${MONETR_LOCAL_DOMAIN} 127.0.0.1
-  COMMAND ${CMAKE_COMMAND} -E touch ${LOCAL_HOSTS_MARKER}
-  COMMENT "Setting up ${MONETR_LOCAL_DOMAIN} domain with your /etc/hosts file. You may be prompted for a password"
-  DEPENDS ${HOSTESS_EXECUTABLE}
-)
-
 add_custom_target(development.certificates DEPENDS ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT})
-add_custom_target(development.hostsfile DEPENDS ${LOCAL_HOSTS_MARKER})
 
 ########################################################################################################################
 # This section determines which compose files will be used when the development environment is started. Compose files
 # are "merged" by docker at runtime, so this is a simple way of providing some customizability to local development.
 ########################################################################################################################
 
-set(COMPOSE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/development)
-file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY})
+# Will be a list of template files that we are using to build our final nginx config.
+# This will always contain at least the mail config.
+set(NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/mail.nginx.conf.in)
 
 set(COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.monetr.yaml.in)
 if (NGROK_AUTH OR DEFINED ENV{NGROK_AUTH} OR NGROK_ENABLED)
@@ -111,6 +136,11 @@ if (NGROK_AUTH OR DEFINED ENV{NGROK_AUTH} OR NGROK_ENABLED)
   if(NGROK_HOSTNAME)
     message(STATUS "  Webhook domain: ${NGROK_HOSTNAME}")
   endif()
+
+  # If we have ngrok enabled then include it's nginx config in our final config.
+  list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/ngrok.nginx.conf.in)
+  # and add the domain name.
+  list(APPEND LOCAL_DOMAINS "ngrok.${MONETR_LOCAL_DOMAIN}")
 else()
   message(STATUS "No ngrok credentials detected, webhooks will not be enabled for local development.")
 endif()
@@ -131,12 +161,15 @@ elseif("${MONETR_KMS_PROVIDER}" STREQUAL "vault")
     message(STATUS "  Writing vault token file: ${VAULT_ROOT_TOKEN}")
     file(WRITE ${VAULT_TOKEN_FILE} "${VAULT_ROOT_TOKEN}")
   else()
-    message(STATUS "  Using existing vault token file")
+    file(READ ${VAULT_TOKEN_FILE} VAULT_ROOT_TOKEN)
+    message(STATUS "  Using existing vault token file": ${VAULT_ROOT_TOKEN})
   endif()
   file(READ ${VAULT_TOKEN_FILE} VAULT_ROOT_TOKEN)
   configure_file("${CMAKE_SOURCE_DIR}/compose/vault-config.toml.in" "${COMPOSE_OUTPUT_DIRECTORY}/vault/config.toml" @ONLY)
   # And then add our vault container to our compose list.
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.vault-kms.yaml.in)
+  list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/vault.nginx.conf.in)
+  list(APPEND LOCAL_DOMAINS "vault.${MONETR_LOCAL_DOMAIN}")
 elseif("${MONETR_KMS_PROVIDER}" STREQUAL "")
   set(MONETR_KMS_PROVIDER "plaintext")
 elseif("${MONETR_KMS_PROVIDER}" STREQUAL "plaintext")
@@ -152,6 +185,8 @@ if("${MONETR_STORAGE_PROVIDER}" STREQUAL "s3")
   message(STATUS "  Uploaded files will be available at: http://localhost:9001")
   message(STATUS "  Username: monetr Password: password")
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.s3-storage.yaml.in)
+  list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/s3.nginx.conf.in)
+  list(APPEND LOCAL_DOMAINS "s3.${MONETR_LOCAL_DOMAIN}")
 elseif("${MONETR_STORAGE_PROVIDER}" STREQUAL "filesystem")
   set(MONETR_STORAGE_ENABLED "true")
   file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/storage)
@@ -175,7 +210,56 @@ foreach(COMPOSE_FILE_TEMPLATE ${COMPOSE_FILE_TEMPLATES})
   list(APPEND COMPOSE_FILES "-f" "${COMPOSE_FILE_OUTPUT}")
 endforeach()
 
+foreach(NGINX_CONFIG_TEMPLATE ${NGINX_CONFIG_TEMPLATES})
+  get_filename_component(NGINX_CONFIG_TEMPLATE_OUTPUT "${NGINX_CONFIG_TEMPLATE}" NAME_WLE)
+  message(STATUS "  Using nginx config part: ${NGINX_CONFIG_TEMPLATE_OUTPUT}")
+  configure_file("${NGINX_CONFIG_TEMPLATE}" "${NGINX_DIRECTORY}/${NGINX_CONFIG_TEMPLATE_OUTPUT}" @ONLY)
+endforeach()
+
+set(S3_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/s3.nginx.conf")
+set(VAULT_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/vault.nginx.conf")
+set(NGROK_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/ngrok.nginx.conf")
+set(MAIL_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/mail.nginx.conf")
+
+if(EXISTS "${S3_NGINX_CONFIG_FILE}")
+  file(READ "${S3_NGINX_CONFIG_FILE}" S3_NGINX_CONFIG)
+endif()
+
+if(EXISTS "${VAULT_NGINX_CONFIG_FILE}")
+  file(READ "${VAULT_NGINX_CONFIG_FILE}" VAULT_NGINX_CONFIG)
+endif()
+
+if(EXISTS "${NGROK_NGINX_CONFIG_FILE}")
+  file(READ "${NGROK_NGINX_CONFIG_FILE}" NGROK_NGINX_CONFIG)
+endif()
+
+if(EXISTS "${MAIL_NGINX_CONFIG_FILE}")
+  file(READ "${MAIL_NGINX_CONFIG_FILE}" MAIL_NGINX_CONFIG)
+endif()
+
+message(STATUS "Configuring nginx for local development")
+configure_file("${CMAKE_SOURCE_DIR}/compose/nginx.conf.in" "${NGINX_CONFIG_FILE}" @ONLY)
+
 ########################################################################################################################
+
+add_custom_target(
+  development.hostsfile
+  COMMAND ${CMAKE_COMMAND} -E true
+  COMMENT "Setup local domains in /etc/hosts"
+)
+
+foreach(LOCAL_DOMAIN ${LOCAL_DOMAINS})
+  add_custom_target(
+    development.hostsfile.${LOCAL_DOMAIN}
+    BYPRODUCTS ${LOCAL_HOSTS_MARKER}-${LOCAL_DOMAIN}
+    COMMAND ${SUDO_EXECUTABLE} ${HOSTESS_EXECUTABLE} add ${LOCAL_DOMAIN} 127.0.0.1
+    COMMAND ${CMAKE_COMMAND} -E touch ${LOCAL_HOSTS_MARKER}-${LOCAL_DOMAIN}
+    COMMENT "Setting up ${LOCAL_DOMAIN} domain with your /etc/hosts file. You may be prompted for a password"
+    DEPENDS ${HOSTESS_EXECUTABLE}
+  )
+  add_dependencies(development.hostsfile development.hostsfile.${LOCAL_DOMAIN})
+endforeach()
+
 
 set(ENV{LOCAL_CERTIFICATE_DIR} ${LOCAL_CERTIFICATE_DIR})
 set(BASE_ARGS "--project-directory" "${CMAKE_SOURCE_DIR}")
@@ -197,8 +281,16 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E echo "-- ========================================================================="
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- monetr is now running locally."
-  COMMAND ${CMAKE_COMMAND} -E echo "-- You can access monetr via ${LOCAL_PROTOCOL}://${MONETR_LOCAL_DOMAIN}"
-  COMMAND ${CMAKE_COMMAND} -E echo "-- Emails sent during development can be seen at ${LOCAL_PROTOCOL}://${MONETR_LOCAL_DOMAIN}/mail"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- You can access monetr via ${LOCAL_PROTOCOL}://my.${MONETR_LOCAL_DOMAIN}"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- Emails sent during development can be seen at ${LOCAL_PROTOCOL}://mail.${MONETR_LOCAL_DOMAIN}"
+  COMMAND ${CMAKE_COMMAND} -E echo "--"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- Optional Services:"
+  COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://s3.${MONETR_LOCAL_DOMAIN} User: monetr Pass: password"
+  COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://vault.${MONETR_LOCAL_DOMAIN} Token: ${VAULT_ROOT_TOKEN}"
+  COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://ngrok.${MONETR_LOCAL_DOMAIN} External: https://${NGROK_HOSTNAME}"
+  COMMAND ${CMAKE_COMMAND} -E echo "--"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- Optional services might not all be available and depend on your personal configuration."
+  COMMAND ${CMAKE_COMMAND} -E echo "-- More information here: https://monetr.app/documentation/development/local_development/"
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- When you are done you can shutdown the local development environment using:"
   COMMAND ${CMAKE_COMMAND} -E echo "--   make shutdown"
@@ -212,6 +304,7 @@ add_custom_target(
     download.simple-icons
     dependencies.node_modules
     build.email
+    ${NGINX_CONFIG_FILE}
 )
 
 if(NOT CLOUD_MAGIC)
