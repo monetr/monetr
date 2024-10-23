@@ -26,6 +26,8 @@ http {
 
 @MAIL_NGINX_CONFIG@
 
+@FLIPT_NGINX_CONFIG@
+
     server {
         listen 443 ssl;
 

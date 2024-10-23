@@ -162,7 +162,7 @@ elseif("${MONETR_KMS_PROVIDER}" STREQUAL "vault")
     file(WRITE ${VAULT_TOKEN_FILE} "${VAULT_ROOT_TOKEN}")
   else()
     file(READ ${VAULT_TOKEN_FILE} VAULT_ROOT_TOKEN)
-    message(STATUS "  Using existing vault token file": ${VAULT_ROOT_TOKEN})
+    message(STATUS "  Using existing vault token file: ${VAULT_ROOT_TOKEN}")
   endif()
   file(READ ${VAULT_TOKEN_FILE} VAULT_ROOT_TOKEN)
   configure_file("${CMAKE_SOURCE_DIR}/compose/vault-config.toml.in" "${COMPOSE_OUTPUT_DIRECTORY}/vault/config.toml" @ONLY)
@@ -182,8 +182,6 @@ endif()
 if("${MONETR_STORAGE_PROVIDER}" STREQUAL "s3")
   set(MONETR_STORAGE_ENABLED "true")
   message(STATUS "S3 storage will be used for local development")
-  message(STATUS "  Uploaded files will be available at: http://localhost:9001")
-  message(STATUS "  Username: monetr Password: password")
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.s3-storage.yaml.in)
   list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/s3.nginx.conf.in)
   list(APPEND LOCAL_DOMAINS "s3.${MONETR_LOCAL_DOMAIN}")
@@ -194,6 +192,14 @@ elseif("${MONETR_STORAGE_PROVIDER}" STREQUAL "filesystem")
   message(STATUS "  Uploaded files will be available at: ${COMPOSE_OUTPUT_DIRECTORY}/storage")
 elseif("${MONETR_STORAGE_PROVIDER}" STREQUAL "")
   set(MONETR_STORAGE_ENABLED "false")
+endif()
+
+if("${MONETR_FEATURE_FLAG_PROVIDER}" STREQUAL "flipt")
+  # Flipt's data directory
+  file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/flipt)
+  list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.flipt.yaml.in)
+  list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/flipt.nginx.conf.in)
+  list(APPEND LOCAL_DOMAINS "flipt.${MONETR_LOCAL_DOMAIN}")
 endif()
 
 # Once the list of compose file templates has been built, actually generate the template files and build our arguments
@@ -212,7 +218,7 @@ endforeach()
 
 foreach(NGINX_CONFIG_TEMPLATE ${NGINX_CONFIG_TEMPLATES})
   get_filename_component(NGINX_CONFIG_TEMPLATE_OUTPUT "${NGINX_CONFIG_TEMPLATE}" NAME_WLE)
-  message(STATUS "  Using nginx config part: ${NGINX_CONFIG_TEMPLATE_OUTPUT}")
+  message(DEBUG "  Using nginx config part: ${NGINX_CONFIG_TEMPLATE_OUTPUT}")
   configure_file("${NGINX_CONFIG_TEMPLATE}" "${NGINX_DIRECTORY}/${NGINX_CONFIG_TEMPLATE_OUTPUT}" @ONLY)
 endforeach()
 
@@ -220,6 +226,7 @@ set(S3_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/s3.nginx.conf")
 set(VAULT_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/vault.nginx.conf")
 set(NGROK_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/ngrok.nginx.conf")
 set(MAIL_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/mail.nginx.conf")
+set(FLIPT_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/flipt.nginx.conf")
 
 if(EXISTS "${S3_NGINX_CONFIG_FILE}")
   file(READ "${S3_NGINX_CONFIG_FILE}" S3_NGINX_CONFIG)
@@ -235,6 +242,10 @@ endif()
 
 if(EXISTS "${MAIL_NGINX_CONFIG_FILE}")
   file(READ "${MAIL_NGINX_CONFIG_FILE}" MAIL_NGINX_CONFIG)
+endif()
+
+if(EXISTS "${FLIPT_NGINX_CONFIG_FILE}")
+  file(READ "${FLIPT_NGINX_CONFIG_FILE}" FLIPT_NGINX_CONFIG)
 endif()
 
 message(STATUS "Configuring nginx for local development")
@@ -285,9 +296,10 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E echo "-- Emails sent during development can be seen at ${LOCAL_PROTOCOL}://mail.${MONETR_LOCAL_DOMAIN}"
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- Optional Services:"
+  COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://ngrok.${MONETR_LOCAL_DOMAIN} External: https://${NGROK_HOSTNAME}"
   COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://s3.${MONETR_LOCAL_DOMAIN} User: monetr Pass: password"
   COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://vault.${MONETR_LOCAL_DOMAIN} Token: ${VAULT_ROOT_TOKEN}"
-  COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://ngrok.${MONETR_LOCAL_DOMAIN} External: https://${NGROK_HOSTNAME}"
+  COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://flipt.${MONETR_LOCAL_DOMAIN}"
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- Optional services might not all be available and depend on your personal configuration."
   COMMAND ${CMAKE_COMMAND} -E echo "-- More information here: https://monetr.app/documentation/development/local_development/"
