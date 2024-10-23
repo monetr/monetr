@@ -216,12 +216,15 @@ foreach(COMPOSE_FILE_TEMPLATE ${COMPOSE_FILE_TEMPLATES})
   list(APPEND COMPOSE_FILES "-f" "${COMPOSE_FILE_OUTPUT}")
 endforeach()
 
+
+# Take all of the nginx configs that we are using and template them out.
 foreach(NGINX_CONFIG_TEMPLATE ${NGINX_CONFIG_TEMPLATES})
   get_filename_component(NGINX_CONFIG_TEMPLATE_OUTPUT "${NGINX_CONFIG_TEMPLATE}" NAME_WLE)
   message(DEBUG "  Using nginx config part: ${NGINX_CONFIG_TEMPLATE_OUTPUT}")
   configure_file("${NGINX_CONFIG_TEMPLATE}" "${NGINX_DIRECTORY}/${NGINX_CONFIG_TEMPLATE_OUTPUT}" @ONLY)
 endforeach()
 
+# And then find all of the nginx configs that we generated.
 set(S3_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/s3.nginx.conf")
 set(VAULT_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/vault.nginx.conf")
 set(NGROK_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/ngrok.nginx.conf")
@@ -247,8 +250,7 @@ endif()
 if(EXISTS "${FLIPT_NGINX_CONFIG_FILE}")
   file(READ "${FLIPT_NGINX_CONFIG_FILE}" FLIPT_NGINX_CONFIG)
 endif()
-
-message(STATUS "Configuring nginx for local development")
+# And template them into the final config.
 configure_file("${CMAKE_SOURCE_DIR}/compose/nginx.conf.in" "${NGINX_CONFIG_FILE}" @ONLY)
 
 ########################################################################################################################
@@ -299,7 +301,6 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://ngrok.${MONETR_LOCAL_DOMAIN} External: https://${NGROK_HOSTNAME}"
   COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://s3.${MONETR_LOCAL_DOMAIN} User: monetr Pass: password"
   COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://vault.${MONETR_LOCAL_DOMAIN} Token: ${VAULT_ROOT_TOKEN}"
-  COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://flipt.${MONETR_LOCAL_DOMAIN}"
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- Optional services might not all be available and depend on your personal configuration."
   COMMAND ${CMAKE_COMMAND} -E echo "-- More information here: https://monetr.app/documentation/development/local_development/"
