@@ -42,6 +42,21 @@ func TestMe(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.user").Object().NotEmpty()
 			response.JSON().Path("$.user.userId").String().IsASCII()
+			response.JSON().Path("$.user.login.loginId").String().IsASCII()
+			response.JSON().Path("$.user.login").Object().Keys().IsEqualUnordered([]string{
+				// Make sure that no additional fields are exposed ever on the login
+				// object. There are some sensitive fields on the login record that
+				// should never be readable via the API. This helps make sure those stay
+				// out of API responses.
+				"loginId",
+				"email",
+				"firstName",
+				"lastName",
+				"passwordResetAt",
+				"isEmailVerified",
+				"emailVerifiedAt",
+				"totpEnabledAt",
+			})
 			response.JSON().Path("$.isActive").Boolean().IsTrue()
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
