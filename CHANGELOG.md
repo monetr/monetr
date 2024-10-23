@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.18.17](https://github.com/monetr/monetr/compare/v0.18.16...v0.18.17) (2024-10-23)
+
+
+### Features
+
+* **dev:** Adding flipt to the local development stack ([1f447ec](https://github.com/monetr/monetr/commit/1f447ecaa21b950cb80659a2a464e085ef83ba12))
+* **dev:** Significantly improve local development ([#2034](https://github.com/monetr/monetr/issues/2034)) ([966078b](https://github.com/monetr/monetr/commit/966078becb1969a48efcbcfcdced1905e38b37b2))
+
+
+### Bug Fixes
+
+* **ui:** Fix double highlighting issue with bank dropdown ([f3f6292](https://github.com/monetr/monetr/commit/f3f6292ada6c8d40823ff9bd964a67be5f879e84)), closes [#2033](https://github.com/monetr/monetr/issues/2033)
+
 ## [0.18.16](https://github.com/monetr/monetr/compare/v0.18.15...v0.18.16) (2024-10-20)
 
 
