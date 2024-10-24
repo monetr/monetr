@@ -1,8 +1,8 @@
 module github.com/monetr/monetr
 
-go 1.21.1
+go 1.22
 
-toolchain go1.21.7
+toolchain go1.23.2
 
 require (
 	aidanwoods.dev/go-paseto v1.5.2
@@ -160,7 +160,7 @@ require (
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	go.uber.org/mock v0.4.0
+	go.uber.org/mock v0.5.0
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
 	golang.org/x/net v0.30.0
