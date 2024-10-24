@@ -40,7 +40,7 @@ require (
 	github.com/stripe/stripe-go/v78 v78.12.0
 	github.com/teambition/rrule-go v1.8.2
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	github.com/wneessen/go-mail v0.4.4
+	github.com/wneessen/go-mail v0.5.1
 	github.com/xlzd/gotp v0.1.0
 	golang.org/x/crypto v0.28.0
 	google.golang.org/api v0.203.0
