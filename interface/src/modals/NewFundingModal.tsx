@@ -5,7 +5,7 @@ import { startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MFormButton from '@monetr/interface/components/MButton';
+import FormButton from '@monetr/interface/components/FormButton';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
@@ -100,12 +100,12 @@ function NewFundingModal(): JSX.Element {
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-funding-modal'>
-              Cancel
-          </MFormButton>
-          <MFormButton color='primary' type='submit'>
-              Create
-          </MFormButton>
+          <FormButton variant='destructive' onClick={ modal.remove } data-testid='close-new-funding-modal'>
+            Cancel
+          </FormButton>
+          <FormButton variant='primary' type='submit'>
+            Create
+          </FormButton>
         </div>
       </MForm>
     </MModal>

@@ -5,8 +5,8 @@ import { startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
+import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MFormButton from '@monetr/interface/components/MButton';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
@@ -23,14 +23,14 @@ interface NewGoalValues {
   name: string;
   amount: number;
   nextOccurrence: Date;
-  fundingScheduleId: number;
+  fundingScheduleId: string;
 }
 
 const initialValues: NewGoalValues = {
   name: '',
   amount: 0.00,
   nextOccurrence: startOfTomorrow(),
-  fundingScheduleId: 0,
+  fundingScheduleId: '',
 };
 
 function NewGoalModal(): JSX.Element {
@@ -109,12 +109,12 @@ function NewGoalModal(): JSX.Element {
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-goal-modal'>
+          <FormButton variant='destructive' onClick={ modal.remove } data-testid='close-new-goal-modal'>
             Cancel
-          </MFormButton>
-          <MFormButton color='primary' type='submit'>
+          </FormButton>
+          <FormButton variant='primary' type='submit'>
             Create
-          </MFormButton>
+          </FormButton>
         </div>
       </MForm>
     </MModal>
