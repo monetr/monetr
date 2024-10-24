@@ -1,5 +1,4 @@
 import React from 'react';
-import * as reactRouter from 'react-router-dom';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MockAdapter from 'axios-mock-adapter';
@@ -8,11 +7,10 @@ import monetrClient from '@monetr/interface/api/api';
 import Login from '@monetr/interface/pages/login';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-import { afterAll, afterEach, beforeEach, describe, expect, it, mock, test } from 'bun:test';
-
-const mockUseNavigate = mock((_url: string) => { });
-mock.module('react-router-dom', () => ({
-  ...reactRouter,
+const mockUseNavigate = jest.fn((_url: string) => {});
+jest.mock('react-router-dom', () => ({
+  __esModule: true,
+  ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockUseNavigate,
 }));
 

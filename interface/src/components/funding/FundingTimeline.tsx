@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { NorthEast } from '@mui/icons-material';
+import NorthEast from '@mui/icons-material/NorthEast';
 import { format, getUnixTime } from 'date-fns';
 
 import MSpan from '@monetr/interface/components/MSpan';

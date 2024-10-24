@@ -8,9 +8,7 @@ import { FundingScheduleUpdateResponse, useCreateFundingSchedule, useFundingSche
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 
-import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
-
-describe('funding schedule hooks', async () => {
+describe('funding schedule hooks', () => {
   describe('read funding schedules', () => {
     let mockAxios: MockAdapter;
   
@@ -106,7 +104,7 @@ describe('funding schedule hooks', async () => {
     });
   });
 
-  describe('create funding schedule', async () => {
+  describe('create funding schedule', () => {
     let mockAxios: MockAdapter;
 
     beforeEach(() => {

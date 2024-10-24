@@ -6,8 +6,6 @@ import MockAdapter from 'axios-mock-adapter';
 import Register from '@monetr/interface/pages/register';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
-
 describe('register page', () => {
   let mockAxios: MockAdapter;
 

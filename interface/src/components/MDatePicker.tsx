@@ -2,8 +2,9 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { DayPickerSingleProps } from 'react-day-picker';
-import { CloseOutlined, TodayOutlined } from '@mui/icons-material';
-import { Popover } from '@mui/material';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import TodayOutlined from '@mui/icons-material/TodayOutlined';
+import Popover from '@mui/material/Popover';
 import { isEqual, startOfMonth, startOfToday } from 'date-fns';
 import enUS from 'date-fns/locale/en-US';
 import { useFormikContext } from 'formik';

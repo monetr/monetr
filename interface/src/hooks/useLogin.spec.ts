@@ -1,16 +1,14 @@
-import * as reactRouter from 'react-router-dom';
-import { act } from '@testing-library/react';
+import { act } from 'react';
 import MockAdapter from 'axios-mock-adapter';
 
 import monetrClient from '@monetr/interface/api/api';
 import useLogin from '@monetr/interface/hooks/useLogin';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 
-import { afterAll, afterEach, beforeEach, describe, expect, it, mock } from 'bun:test';
-
-const mockUseNavigate = mock((_url: string) => { });
-mock.module('react-router-dom', () => ({
-  ...reactRouter,
+const mockUseNavigate = jest.fn((_url: string) => {});
+jest.mock('react-router-dom', () => ({
+  __esModule: true,
+  ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockUseNavigate,
 }));
 

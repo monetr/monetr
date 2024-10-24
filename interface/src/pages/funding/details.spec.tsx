@@ -7,8 +7,6 @@ import FundingDetails from './details';
 import monetrClient from '@monetr/interface/api/api';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
-
 describe('funding schedule details view', () => {
   let mockAxios: MockAdapter;
 
