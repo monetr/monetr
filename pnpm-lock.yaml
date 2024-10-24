@@ -214,8 +214,8 @@ importers:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
       react-dropzone:
-        specifier: 14.2.9
-        version: 14.2.9(react@18.3.1)
+        specifier: 14.2.10
+        version: 14.2.10(react@18.3.1)
       react-google-recaptcha:
         specifier: 2.1.0
         version: 2.1.0(react@18.3.1)
@@ -10046,8 +10046,8 @@ packages:
     peerDependencies:
       react: ^18.3.1
 
-  react-dropzone@14.2.9:
-    resolution: {integrity: sha512-jRZsMC7h48WONsOLHcmhyn3cRWJoIPQjPApvt/sJVfnYaB3Qltn025AoRTTJaj4WdmmgmLl6tUQg1s0wOhpodQ==}
+  react-dropzone@14.2.10:
+    resolution: {integrity: sha512-Y98LOCYxGO2jOFWREeKJlL7gbrHcOlTBp+9DCM1dh9XQ8+P/8ThhZT7kFb05C+bPcTXq/rixpU+5+LzwYrFLUw==}
     engines: {node: '>= 10.13'}
     peerDependencies:
       react: '>= 16.8 || 18.0.0'
@@ -24473,7 +24473,7 @@ snapshots:
       react: 18.3.1
       scheduler: 0.23.2
 
-  react-dropzone@14.2.9(react@18.3.1):
+  react-dropzone@14.2.10(react@18.3.1):
     dependencies:
       attr-accept: 2.2.2
       file-selector: 0.6.0
