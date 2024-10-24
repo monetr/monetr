@@ -74,7 +74,7 @@
     "@rspack/cli": "1.0.14",
     "@rspack/core": "1.0.14",
     "@rspack/plugin-react-refresh": "1.0.0",
-    "@testing-library/jest-dom": "6.5.0",
+    "@testing-library/jest-dom": "6.6.2",
     "@testing-library/react": "13.4.0",
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.5.2",
