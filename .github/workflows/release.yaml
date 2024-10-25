@@ -118,7 +118,7 @@ jobs:
           transient-environment: false
           production-environment: false
           ref: "v${{ needs.release_please.outputs.version }}"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         name: Download UI As Artifact
         with:
