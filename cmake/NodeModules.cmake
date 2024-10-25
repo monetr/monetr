@@ -15,7 +15,6 @@ else()
   set(JS_EXECUTABLE_SUFFIX "")
 endif()
 set(JEST_EXECUTABLE ${NODE_MODULES_BIN}/jest${JS_EXECUTABLE_SUFFIX})
-set(BUN_EXECUTABLE ${NODE_MODULES_BIN}/bun${JS_EXECUTABLE_SUFFIX})
 set(RSPACK_EXECUTABLE ${NODE_MODULES_BIN}/rspack${JS_EXECUTABLE_SUFFIX})
 set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES_BIN}/email${JS_EXECUTABLE_SUFFIX})
 set(NEXT_EXECUTABLE ${NODE_MODULES_BIN}/next${JS_EXECUTABLE_SUFFIX})
@@ -26,7 +25,6 @@ add_custom_command(
   OUTPUT ${NODE_MODULES}
          ${NODE_MODULES_MARKER}
          ${JEST_EXECUTABLE}
-         ${BUN_EXECUTABLE}
          ${RSPACK_EXECUTABLE}
          ${REACT_EMAIL_EXECUTABLE}
          ${NEXT_EXECUTABLE}
@@ -38,7 +36,6 @@ add_custom_command(
   BYPRODUCTS ${NODE_MODULES}
              ${NODE_MODULES_MARKER}
              ${JEST_EXECUTABLE}
-             ${BUN_EXECUTABLE}
              ${RSPACK_EXECUTABLE}
              ${REACT_EMAIL_EXECUTABLE}
              ${NEXT_EXECUTABLE}
@@ -74,11 +71,6 @@ add_custom_target(
 
 add_custom_target(
   tools.jest
-  DEPENDS dependencies.node_modules
-)
-
-add_custom_target(
-  tools.bun
   DEPENDS dependencies.node_modules
 )
 
