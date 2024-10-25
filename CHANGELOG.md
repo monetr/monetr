@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.18.18](https://github.com/monetr/monetr/compare/v0.18.17...v0.18.18) (2024-10-25)
+
+
+### Features
+
+* **build:** Improve docker engine detection ([0fdff54](https://github.com/monetr/monetr/commit/0fdff544a3aa4a3da8cb8558a2f7eb6fa6206b89))
+* **test:** Moving all interface tests back to Jest ([#2048](https://github.com/monetr/monetr/issues/2048)) ([d25272f](https://github.com/monetr/monetr/commit/d25272f16eefc4b7f44e3ab7397e5d99ad7f79d3))
+* **ui:** Moving more buttons over to the new component ([570347c](https://github.com/monetr/monetr/commit/570347ca9432e0c216df67a018bfe9ab880f46bd))
+
+
+### Dependencies
+
+* **api:** update module cloud.google.com/go/kms to v1.20.1 ([#2038](https://github.com/monetr/monetr/issues/2038)) ([9531468](https://github.com/monetr/monetr/commit/9531468558215de01c7f1cdcdeac520c26de06ad))
+* **api:** update module cloud.google.com/go/storage to v1.45.0 ([#2043](https://github.com/monetr/monetr/issues/2043)) ([ac78250](https://github.com/monetr/monetr/commit/ac782503418082ee074bcd9e1c6890b934b7b894))
+* **api:** update module github.com/prometheus/client_golang to v1.20.5 ([#2039](https://github.com/monetr/monetr/issues/2039)) ([491b667](https://github.com/monetr/monetr/commit/491b6672102c2929dac1111424451e55d3dc6bf3))
+* **ui:** update dependency @rspack/core to v1.0.14 ([#2037](https://github.com/monetr/monetr/issues/2037)) ([d9db4d9](https://github.com/monetr/monetr/commit/d9db4d93ef9c9f9f2ee4a29bc44226a0eb59939a))
+* **ui:** update dependency next to v14.2.16 ([#2040](https://github.com/monetr/monetr/issues/2040)) ([25080d9](https://github.com/monetr/monetr/commit/25080d9fc7466a5efd1334770951835c13aeec90))
+* **ui:** update dependency react-dropzone to v14.2.10 ([#2041](https://github.com/monetr/monetr/issues/2041)) ([70a3ebc](https://github.com/monetr/monetr/commit/70a3ebc741aea0edccea8eb2add394c88ec377fd))
+* **ui:** update dependency tailwindcss to v3.4.14 ([#2042](https://github.com/monetr/monetr/issues/2042)) ([df32a72](https://github.com/monetr/monetr/commit/df32a72f672718ce6b70609716660c15136bcd17))
+* **ui:** update dependency typescript to v5.6.3 ([#2026](https://github.com/monetr/monetr/issues/2026)) ([2a43f6a](https://github.com/monetr/monetr/commit/2a43f6acc55c58ba0fffe123a26ef1abadd6c46b))
+* **ui:** update radix-ui-primitives monorepo ([#2029](https://github.com/monetr/monetr/issues/2029)) ([d9e6d4a](https://github.com/monetr/monetr/commit/d9e6d4a28ad439d1a5acc9deb972e1ea845727b1))
+* **ui:** update react monorepo ([#1998](https://github.com/monetr/monetr/issues/1998)) ([dfb235f](https://github.com/monetr/monetr/commit/dfb235fb82beea66b25234a1ea527a84eb50880f))
+
+
+### Miscellaneous
+
+* **dev:** Cleaning up local dev script a bit ([4d6e283](https://github.com/monetr/monetr/commit/4d6e283b5c9e52cb567a6decd89829fcc194fb68))
+* **test:** Improve test strictness of /users/me ([e909402](https://github.com/monetr/monetr/commit/e909402ea83967570fbe78177fbf31d079b1aa05))
+
 ## [0.18.17](https://github.com/monetr/monetr/compare/v0.18.16...v0.18.17) (2024-10-23)
 
 
