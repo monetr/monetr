@@ -29,6 +29,7 @@ const config: Config = {
     '<rootDir>/src/setupTests.ts',	
   ],	
   transform: {	
+    // '^.+\\.(t|j)sx?$': ['ts-jest', { isolatedModules: true }],	
     '^.+\\.(t|j)sx?$': '@swc/jest',	
   },	
   coverageReporters: [	
