@@ -37,7 +37,7 @@ endif()
 find_package(Gcc REQUIRED)
 find_package(Git REQUIRED)
 
-set(DOCKER_MIN_VERSION "20.0.0")
+set(DOCKER_MIN_VERSION "26.0.0")
 find_package(Docker QUIET)
 
 set(MONETR_PKG_ROOT github.com/monetr/monetr CACHE INTERNAL "Base go package for monetr.")

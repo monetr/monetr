@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "build": "rspack build --mode=production",
-    "start": "MONETR_ENV=${MONETR_ENV:=local} rspack serve --mode development",
+    "start": "MONETR_ENV=${MONETR_ENV:=local} rsbuild dev",
+    "startold": "MONETR_ENV=${MONETR_ENV:=local} rspack serve --mode development",
     "lite": "MONETR_ENV=${MONETR_ENV:=local} MONETR_DEVELOPMENT_LITE=true rspack serve --mode development",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
@@ -66,6 +67,9 @@
     "zustand": "4.5.5"
   },
   "devDependencies": {
+    "@rsbuild/core": "1.0.17",
+    "@rsbuild/plugin-react": "1.0.5",
+    "@rsbuild/plugin-sass": "1.0.4",
     "@rspack/binding-linux-arm64-gnu": "1.0.14",
     "@rspack/binding-linux-x64-gnu": "1.0.14",
     "@rspack/cli": "1.0.14",
@@ -99,6 +103,8 @@
     "react-refresh-typescript": "2.0.9",
     "react-test-renderer": "18.3.1",
     "sass": "1.79.4",
+    "sass-embedded-linux-arm64": "1.80.4",
+    "sass-embedded-linux-x64": "1.80.4",
     "sass-loader": "13.0.2",
     "tailwindcss": "3.4.14",
     "typescript": "5.6.3"
