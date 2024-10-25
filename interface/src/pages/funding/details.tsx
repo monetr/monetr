@@ -1,6 +1,9 @@
 import React from 'react';
 import { useMatch, useNavigate } from 'react-router-dom';
-import { DeleteOutlined, HeartBroken, SaveOutlined, TodayOutlined } from '@mui/icons-material';
+import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
+import HeartBroken from '@mui/icons-material/HeartBroken';
+import SaveOutlined from '@mui/icons-material/SaveOutlined';
+import TodayOutlined from '@mui/icons-material/TodayOutlined';
 import { AxiosError } from 'axios';
 import { format, isEqual, startOfDay } from 'date-fns';
 import { FormikErrors, FormikHelpers } from 'formik';

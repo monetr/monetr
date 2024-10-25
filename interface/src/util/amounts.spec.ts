@@ -1,7 +1,5 @@
 import { amountToFriendly, AmountType, formatAmount, friendlyToAmount } from './amounts';
 
-import { describe, expect, it } from 'bun:test';
-
 describe('amounts', () => {
   describe('amountToFriendly', () => {
     it('will convert USD cents to dollars', () => {

@@ -6,8 +6,6 @@ import monetrClient from '@monetr/interface/api/api';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
-
 describe('new funding schedule modal', () => {
   let mockAxios: MockAdapter;
 

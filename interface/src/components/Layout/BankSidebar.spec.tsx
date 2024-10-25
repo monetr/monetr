@@ -6,8 +6,6 @@ import monetrClient from '@monetr/interface/api/api';
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
-
 describe('bank sidebar', () => {
   let mockAxios: MockAdapter;
 

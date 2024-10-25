@@ -8,9 +8,7 @@ import { FundingScheduleUpdateResponse, useCreateFundingSchedule, useFundingSche
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 
-import { afterAll, afterEach, beforeEach, describe, expect, it } from 'bun:test';
-
-describe('funding schedule hooks', async () => {
+describe('funding schedule hooks', () => {
   describe('read funding schedules', () => {
     let mockAxios: MockAdapter;
   
@@ -58,9 +56,9 @@ describe('funding schedule hooks', async () => {
   
       const world = testRenderHook(useFundingSchedulesSink, { initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding' });
       await world.waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
-      await world.waitForNextUpdate();
+      // await world.waitForNextUpdate();
       await world.waitFor(() => expect(world.result.current.isFetching).toBeTruthy());
-      await world.waitForNextUpdate();
+      // await world.waitForNextUpdate();
       await world.waitFor(() => expect(world.result.current.data).toBeDefined());
       await world.waitFor(() => expect(world.result.current.data).toHaveLength(1));
     });
@@ -98,15 +96,15 @@ describe('funding schedule hooks', async () => {
   
       const world = testRenderHook(() => useFundingSchedule('fund_01hy4re7c1xc2v44cf6kx302jx'), { initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding' });
       await world.waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
-      await world.waitForNextUpdate();
+      // await world.waitForNextUpdate();
       await world.waitFor(() => expect(world.result.current.isFetching).toBeTruthy());
-      await world.waitForNextUpdate();
+      // await world.waitForNextUpdate();
       await world.waitFor(() => expect(world.result.current.data).toBeDefined());
       await world.waitFor(() => expect(world.result.current.data?.fundingScheduleId).toBe('fund_01hy4re7c1xc2v44cf6kx302jx'));
     });
   });
 
-  describe('create funding schedule', async () => {
+  describe('create funding schedule', () => {
     let mockAxios: MockAdapter;
 
     beforeEach(() => {

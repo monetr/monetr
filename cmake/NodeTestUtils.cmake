@@ -14,26 +14,30 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
     foreach(SPEC_FILE IN LISTS SPEC_FILES)
       string(REGEX REPLACE "([a-zA-Z0-9_]+)\\.spec.+" "\\1" SPEC_NAME "${SPEC_FILE}")
 
-
-      set(TEST_ARGS "--timeout=5000" "--preload=${CMAKE_SOURCE_DIR}/interface/src/setupTests.ts")
+      # pnpm jest --config=$PWD/interface/jest.config.ts --runTestsByPath $PWD/interface/src/pages/funding/details.spec.tsx --coverage --runInBand --no-cache
+      set(TEST_ARGS "--config=${CMAKE_SOURCE_DIR}/interface/jest.config.ts" "--runInBand" "--no-cache" "--forceExit" "--detectOpenHandles")
       if(TEST_COVERAGE)
         # If we are collecting code coverage then we want to add these flags to jest. Because we are running tests one
         # file at a time we need to pass --watchAll=false in order for jest to properly collect coverage.
-        list(APPEND TEST_ARGS "--coverage" "--coverage-reporter=lcov" "--coverage-dir=${PACKAGE_COVERAGE_DIRECTORY}/${SPEC_NAME}")
+        list(APPEND TEST_ARGS "--coverage" "--coverageDirectory=${PACKAGE_COVERAGE_DIRECTORY}/${SPEC_NAME}")
       endif()
 
-      set(COMMAND_PREFIX)
       if(NOT DEFINED ENV{CI})
-        set(COMMAND_PREFIX ${CMAKE_COMMAND} -E env FORCE_COLOR=1 --)
+        list(APPEND TEST_ARGS "--color")
       endif()
 
       add_test(
         NAME ${PACKAGE}/${SPEC_NAME}
-        COMMAND ${COMMAND_PREFIX} ${BUN_EXECUTABLE} test ${TEST_ARGS} ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
+        COMMAND ${NODE_EXECUTABLE} --expose-gc ${JEST_EXECUTABLE} ${TEST_ARGS} ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/interface
       )
       set_tests_properties(${PACKAGE}/${SPEC_NAME} PROPERTIES 
         FIXTURES_REQUIRED node_modules
+        # Node gets really picky about having multiple instances running at the
+        # same time, this helps a bit by making sure that we are not putting
+        # multiple node instances on the same CPU core.
+        PROCESSORS 2
+        PROCESSOR_AFFINITY ON
         TIMEOUT 45
       )
       set_property(
