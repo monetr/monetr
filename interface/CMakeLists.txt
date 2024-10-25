@@ -17,7 +17,6 @@ file(GLOB PUBLIC_FILES "${PUBLIC_DIR}/*")
 
 # Get the list of UI_CONFIG_FILES
 file(GLOB UI_CONFIG_FILES
-  "${UI_SRC_DIR}/.swcrc"
   "${UI_SRC_DIR}/*.json"
   "${UI_SRC_DIR}/*.config.*"
 )

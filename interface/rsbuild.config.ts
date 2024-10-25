@@ -5,6 +5,7 @@ import { pluginSass } from '@rsbuild/plugin-sass';
 import path from 'path';
 
 const envName = process.env.NODE_ENV ?? 'development';
+console.log(`Building for environment: ${envName}`);
 const isDevelopment = envName !== 'production';
 const interfaceSource = path.resolve(__dirname, 'src');
 
@@ -16,31 +17,16 @@ const developmentLiteTarget = process.env.MONETR_DEVELOPMENT_LITE_TARGET ?? 'my.
 if (developmentLite) {
   console.log(`development lite environment will be used, upstream: ${developmentLiteTarget}`);
 }
-// Domain name for local dev, only when running in docker.
-const domainName = process.env.MONETR_UI_DOMAIN_NAME ?? 'monetr.local';
 
-// Make it so that the websocket still works if we are running yarn start normally.
-const wsProto = process.env.WS_PROTO || 'ws';
-let websocketUrl = `${wsProto}://${domainName}/ws`;
-
-// This is used for GitPod and CodeSpaces editor environments. Allowing hot reloading when working in the cloud.
-if (process.env.CLOUD_MAGIC === 'magic' && process.env.MONETR_UI_DOMAIN_NAME) {
-  websocketUrl = `${wsProto}://${domainName}/ws`;
-}
+// HMR replacement gets **fucked** if we are using content hash. So use name when we are
+// in development mode.
+const filename = isDevelopment ? '[name]' : '[contenthash:8]';
 
 export default defineConfig({
   mode: isDevelopment ? 'development' : 'production',
   source: {
     alias: {
       '@monetr/interface': interfaceSource,
-    },
-  },
-  html: {
-    template: path.resolve(__dirname, 'public/index.html'),
-    templateParameters: {
-      // When we are doing local dev then don't use anything, maybe use an env var in the future but thats it. But
-      // for a production build add the go template string in so that the server can provide the DSN.
-      SENTRY_DSN: isDevelopment ? '' : '{{ .SentryDSN }}',
     },
   },
   dev: {
@@ -50,6 +36,7 @@ export default defineConfig({
   server: {
     publicDir: {
       name: path.resolve(__dirname, 'public'),
+      copyOnBuild: false,
     },
     port: 3000,
     historyApiFallback: true,
@@ -64,18 +51,71 @@ export default defineConfig({
       },
     ] : undefined,
   },
+  html: {
+    template: path.resolve(__dirname, 'public/index.html'),
+    templateParameters: {
+      // When we are doing local dev then don't use anything, maybe use an env var in the future but thats it. But
+      // for a production build add the go template string in so that the server can provide the DSN.
+      SENTRY_DSN: isDevelopment ? `${process.env.MONETR_SENTRY_DSN ?? ''}` : '{{ .SentryDSN }}',
+    },
+    favicon: path.resolve(__dirname, 'public/favicon.ico'),
+    mountId: 'root',
+  },
   output: {
     target: 'web',
     distPath: {
-      // TODO Chunk file names with a hash or something
       root: path.resolve(__dirname, '../server/ui/static'),
       js: 'assets/scripts',
       css: 'assets/styles',
+      image: 'assets/images',
       font: 'assets/fonts',
+    },
+    filename: isDevelopment ? undefined : {
+      js: `${filename}.js`,
+      css: `${filename}.css`,
+      image: `[name].${filename}[ext]`,
+      font: `${filename}[ext]`,
     },
     cleanDistPath: 'auto',
     charset: 'utf8',
     filenameHash: true,
+    manifest: false,
+    minify: {
+      js: true,
+      css: true,
+    },
+    copy: [
+      {
+        from: 'public/manifest.json',
+        to: 'manifest.json',
+      },
+      {
+        from: 'public/logo192.png',
+        to: 'logo192.png',
+      },
+      {
+        from: 'public/logo512.png',
+        to: 'logo512.png',
+      },
+      {
+        from: 'public/logo192transparent.png',
+        to: 'logo192transparent.png',
+      },
+      {
+        from: 'public/logo512transparent.png',
+        to: 'logo512transparent.png',
+      },
+      {
+        from: 'public/robots.txt',
+        to: 'robots.txt',
+      },
+    ],
+  },
+  security: {
+    sri: {
+      enable: true,
+      algorithm: 'sha512',
+    },
   },
   plugins: [
     pluginReact(),
