@@ -1,7 +1,14 @@
-import type { StorybookConfig } from '@storybook/types';
+import type { StorybookConfig } from '@storybook/react-webpack5';
+
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import { resolve } from 'path';
 
 const envName = process.env.NODE_ENV;
 const isDevelopment = envName !== 'production';
+
+const root = resolve(__dirname, '../');
+const uiDir = resolve(root, 'interface/src');
+const emailDir = resolve(root, 'emails/src');
 
 const marketingStoryOnly = process.env.MARKETING_STORY_ONLY === 'true';
 let stories = [
@@ -38,10 +45,74 @@ const config: StorybookConfig = {
     'storycap',
   ],
   framework: {
-    name: 'storybook-react-rspack',
+    name: '@storybook/react-webpack5',
     options: {
-      fastRefresh: isDevelopment,
+      builder: {
+        useSWC: true, 
+      }, 
+      jsc: {
+        transform: {
+          react: {
+            development: isDevelopment,
+            refresh: isDevelopment,
+          },
+        },
+      },
     },
+  },
+  webpackFinal: async config => {
+    config.mode = isDevelopment ? 'development' : 'production';
+    if (isDevelopment) {
+      //@ts-ignore
+      config.devServer = {
+        //@ts-ignore
+        ...config.devServer,
+        hot: true,
+      };
+
+      config.plugins = [
+        ...config.plugins,
+        new ReactRefreshWebpackPlugin(),
+      ];
+    }
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@monetr/interface': uiDir,
+    };
+    config.resolve.extensions = [
+      ...config.resolve.extensions,
+      '.svg',
+      '.scss',
+      '.css',
+    ];
+    config.resolve.modules = [
+      ...config.resolve.modules,
+      uiDir,
+      emailDir,
+      'node_modules',
+    ];
+    config.module.rules = [
+      ...config.module.rules,
+      {
+        test: /\.?scss$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          'postcss-loader',
+          'sass-loader',
+        ],
+      },
+      {
+        test: /\.svg$/,
+        parser: {
+          dataUrlCondition: {
+            maxSize: 1 * 1024 * 1024, // 1MB
+          },
+        },
+      },
+    ];
+
+    return config;
   },
   docs: {
     autodocs: 'tag',

@@ -5,7 +5,9 @@
   "scripts": {
     "build": "rspack build --mode=production",
     "start": "MONETR_ENV=${MONETR_ENV:=local} rspack serve --mode development",
-    "lite": "MONETR_ENV=${MONETR_ENV:=local} MONETR_DEVELOPMENT_LITE=true rspack serve --mode development"
+    "lite": "MONETR_ENV=${MONETR_ENV:=local} MONETR_DEVELOPMENT_LITE=true rspack serve --mode development",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "browserslist": {
     "production": [
