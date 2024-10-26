@@ -1,4 +1,3 @@
-
 import { Meta, StoryObj } from '@storybook/react';
 
 import TransferModal, { showTransferModal } from './TransferModal';
