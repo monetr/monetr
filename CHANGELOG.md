@@ -1,5 +1,50 @@
 # Changelog
 
+## [0.18.18](https://github.com/monetr/monetr/compare/v0.18.17...v0.18.18) (2024-10-26)
+
+
+### Features
+
+* **build:** Improve docker engine detection ([0fdff54](https://github.com/monetr/monetr/commit/0fdff544a3aa4a3da8cb8558a2f7eb6fa6206b89))
+* **build:** Moving storybook to webpack and interface to rsbuild ([#2051](https://github.com/monetr/monetr/issues/2051)) ([2113b3f](https://github.com/monetr/monetr/commit/2113b3f3aca2b45e461af249194e481461ec6816))
+* **ci:** Upgrading CodeQL ([#2056](https://github.com/monetr/monetr/issues/2056)) ([079dbc3](https://github.com/monetr/monetr/commit/079dbc3dc2e7b0ceff96c98686aef4dd3a359cb8))
+* **test:** Moving all interface tests back to Jest ([#2048](https://github.com/monetr/monetr/issues/2048)) ([d25272f](https://github.com/monetr/monetr/commit/d25272f16eefc4b7f44e3ab7397e5d99ad7f79d3))
+* **ui:** Moving more buttons over to the new component ([570347c](https://github.com/monetr/monetr/commit/570347ca9432e0c216df67a018bfe9ab880f46bd))
+
+
+### Dependencies
+
+* **api:** update module cloud.google.com/go/kms to v1.20.1 ([#2038](https://github.com/monetr/monetr/issues/2038)) ([9531468](https://github.com/monetr/monetr/commit/9531468558215de01c7f1cdcdeac520c26de06ad))
+* **api:** update module cloud.google.com/go/storage to v1.45.0 ([#2043](https://github.com/monetr/monetr/issues/2043)) ([ac78250](https://github.com/monetr/monetr/commit/ac782503418082ee074bcd9e1c6890b934b7b894))
+* **api:** update module github.com/prometheus/client_golang to v1.20.5 ([#2039](https://github.com/monetr/monetr/issues/2039)) ([491b667](https://github.com/monetr/monetr/commit/491b6672102c2929dac1111424451e55d3dc6bf3))
+* **api:** update module go.uber.org/mock to v0.5.0 ([#2045](https://github.com/monetr/monetr/issues/2045)) ([b8aa8e0](https://github.com/monetr/monetr/commit/b8aa8e021b7660ae6438b16f8c573dcb4b1ba269))
+* **go:** Upgrading go to 1.23.2 ([#2058](https://github.com/monetr/monetr/issues/2058)) ([7410ae4](https://github.com/monetr/monetr/commit/7410ae4524ceeb71ea1da9b5d3760acee1d5b924))
+* **renovate:** update actions/checkout action to v4 ([#2054](https://github.com/monetr/monetr/issues/2054)) ([b0b0054](https://github.com/monetr/monetr/commit/b0b0054d49f3cfee2aed9dded6d140fe2445fd89))
+* **ui:** update dependency @rspack/core to v1.0.14 ([#2037](https://github.com/monetr/monetr/issues/2037)) ([d9db4d9](https://github.com/monetr/monetr/commit/d9db4d93ef9c9f9f2ee4a29bc44226a0eb59939a))
+* **ui:** update dependency @types/node to v20.17.0 ([#1988](https://github.com/monetr/monetr/issues/1988)) ([84cc19f](https://github.com/monetr/monetr/commit/84cc19f9bb7d98dfbbebd46384ddf53d5ba5d0aa))
+* **ui:** update dependency lucide-react to v0.453.0 ([#2050](https://github.com/monetr/monetr/issues/2050)) ([75ae1fe](https://github.com/monetr/monetr/commit/75ae1fef748fbd1a20cd8038456413b3c80b1455))
+* **ui:** update dependency next to v14.2.16 ([#2040](https://github.com/monetr/monetr/issues/2040)) ([25080d9](https://github.com/monetr/monetr/commit/25080d9fc7466a5efd1334770951835c13aeec90))
+* **ui:** update dependency react-dropzone to v14.2.10 ([#2041](https://github.com/monetr/monetr/issues/2041)) ([70a3ebc](https://github.com/monetr/monetr/commit/70a3ebc741aea0edccea8eb2add394c88ec377fd))
+* **ui:** update dependency react-router-dom to v6.27.0 ([#2052](https://github.com/monetr/monetr/issues/2052)) ([795f1bb](https://github.com/monetr/monetr/commit/795f1bba01ac1a0320bf4ba51dda1a76ffa6d410))
+* **ui:** update dependency tailwindcss to v3.4.14 ([#2042](https://github.com/monetr/monetr/issues/2042)) ([df32a72](https://github.com/monetr/monetr/commit/df32a72f672718ce6b70609716660c15136bcd17))
+* **ui:** update dependency typescript to v5.6.3 ([#2026](https://github.com/monetr/monetr/issues/2026)) ([2a43f6a](https://github.com/monetr/monetr/commit/2a43f6acc55c58ba0fffe123a26ef1abadd6c46b))
+* **ui:** update radix-ui-primitives monorepo ([#2029](https://github.com/monetr/monetr/issues/2029)) ([d9e6d4a](https://github.com/monetr/monetr/commit/d9e6d4a28ad439d1a5acc9deb972e1ea845727b1))
+* **ui:** update react monorepo ([#1998](https://github.com/monetr/monetr/issues/1998)) ([dfb235f](https://github.com/monetr/monetr/commit/dfb235fb82beea66b25234a1ea527a84eb50880f))
+
+
+### Bug Fixes
+
+* **go:** Updating go mod file ([7226453](https://github.com/monetr/monetr/commit/722645362659539e26667423c29baf9cdf50a85f))
+* **ui:** Fixing deprecated zustand create ([78cf165](https://github.com/monetr/monetr/commit/78cf1655e25e8b48a5793eb599c8fde20648d9b5))
+* **ui:** Fixing SCSS warnings ([ab47bee](https://github.com/monetr/monetr/commit/ab47beeea2966a3048e3fcc7a007475fd6e2798a))
+
+
+### Miscellaneous
+
+* **dev:** Cleaning up local dev script a bit ([4d6e283](https://github.com/monetr/monetr/commit/4d6e283b5c9e52cb567a6decd89829fcc194fb68))
+* **go:** Tidying up the go modules ([1afd0a8](https://github.com/monetr/monetr/commit/1afd0a8b3a547dca3d6661fca9f8c4649d9f27a7))
+* **test:** Improve test strictness of /users/me ([e909402](https://github.com/monetr/monetr/commit/e909402ea83967570fbe78177fbf31d079b1aa05))
+
 ## [0.18.17](https://github.com/monetr/monetr/compare/v0.18.16...v0.18.17) (2024-10-23)
 
 
