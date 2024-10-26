@@ -50,7 +50,7 @@
     "postcss-safe-parser": "6.0.0",
     "react-refresh": "0.14.2",
     "sass": "1.79.4",
-    "sass-loader": "13.0.2",
+    "sass-loader": "13.3.3",
     "style-loader": "4.0.0"
   }
 }
