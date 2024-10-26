@@ -28,7 +28,7 @@
     "@rsbuild/plugin-sass": "1.0.4",
     "autoprefixer": "10.4.20",
     "postcss": "8.4.47",
-    "sass": "1.79.4",
+    "sass": "1.80.4",
     "storybook-react-rsbuild": "0.1.2"
   }
 }
