@@ -8,6 +8,7 @@
     "moduleResolution": "node",
     "noImplicitAny": false,
     "noImplicitReturns": true,
+    "allowImportingTsExtensions": true,
     "outDir": "../server/ui/static",
     "sourceMap": true,
     "strict": false,
@@ -17,14 +18,7 @@
     }
   },
   "include": [
-    "types/bun.d.ts",
     "src/setupTests.ts",
-    "src/**/*",
-    "../tailwind.config.cjs",
-    "../../tailwind.config.js"
-  ],
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  }
+    "src/**/*"
+  ]
 }

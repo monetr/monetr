@@ -6,7 +6,7 @@ import { ThemeConfig } from 'tailwindcss/types/config.js';
 import theme from '@monetr/interface/theme';
 
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import tailwindConfig from '../../tailwind.config.cjs';
+import tailwindConfig from '../../tailwind.config.ts';
 
 const realTailwindConfig = resolveConfig(tailwindConfig);
 

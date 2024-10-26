@@ -1,5 +1,6 @@
-/** @type {import('postcss').Postcss} */
-module.exports = {
+import type { Config } from 'postcss-load-config';
+
+const config: Config = {
   plugins: [
     require('tailwindcss/nesting'),
     require('tailwindcss'),
@@ -13,3 +14,5 @@ module.exports = {
     }),
   ],
 };
+
+export default config;

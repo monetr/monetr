@@ -9,11 +9,11 @@ import MTextField from '@monetr/interface/components/MTextField';
 const meta: Meta<typeof Component> = {
   title: 'Radix UI',
   parameters: {
-    msw: {
-      handlers: [
-        // ...GetAPIFixtures(),
-      ],
-    },
+    // msw: {
+    //   handlers: [
+    //     // ...GetAPIFixtures(),
+    //   ],
+    // },
   },
 };
 
