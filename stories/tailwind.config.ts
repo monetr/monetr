@@ -1,16 +1,20 @@
 // vim: nospell
-const baseConfig = require('../tailwind.config.js');
-const { resolve } = require('path');
+import type { Config } from 'tailwindcss';
+
+// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
+import baseConfig from '../tailwind.config.ts';
+
+import { resolve } from 'path';
 
 const root = resolve(__dirname, '../');
 const uiDir = resolve(root, 'interface/src');
 const storiesDir = resolve(root, 'stories/stories');
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+const config: Config = {
   ...baseConfig,
   content: [
     `${uiDir}/**/*.@(js|jsx|ts|tsx)`,
     `${storiesDir}/**/*.@(js|jsx|ts|tsx)`,
   ],
 };
+export default config;

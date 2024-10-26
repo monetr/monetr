@@ -1,8 +1,8 @@
 // vim: nospell
-const plugin = require('tailwindcss/plugin');
+import type { Config } from 'tailwindcss';
+import plugin from 'tailwindcss/plugin';
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+const config: Partial<Config> = {
   important: true,
   darkMode: 'class',
   future: {
@@ -485,3 +485,4 @@ module.exports = {
     },
   },
 };
+export default config;

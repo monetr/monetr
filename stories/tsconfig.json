@@ -8,6 +8,7 @@
     "moduleResolution": "node",
     "noImplicitAny": false,
     "noImplicitReturns": true,
+    "allowImportingTsExtensions": true,
     "sourceMap": true,
     "strict": false,
     "target": "ES2022",
@@ -16,11 +17,6 @@
     }
   },
   "include": [
-    "*",
-    "tailwind.config.cjs"
-  ],
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  }
+    "*"
+  ]
 }

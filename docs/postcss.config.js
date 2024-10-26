@@ -1,3 +1,4 @@
+// TODO Convert this to a typescript file: https://github.com/vercel/next.js/pull/69827
 /** @type {import('postcss').Postcss} */
 module.exports = {
   plugins: [
