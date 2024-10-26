@@ -52,7 +52,7 @@ services:
     # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
     # do `pnpm install` before doing docker compose up.
     tty: true # Color output.
-    image: node:18.12.0-buster
+    image: node:18.20.4-bookworm
     user: "${UID:-0}:${GID:-0}"
     working_dir: /build
     restart: always
@@ -69,6 +69,7 @@ services:
       IS_COMPOSE: "true" # Makes it so that the WebPack progress bar is disabled.
       MONETR_UI_DOMAIN_NAME: "@MONETR_LOCAL_DOMAIN@"
       CLOUD_MAGIC: "@CLOUD_MAGIC@"
+      MONETR_SENTRY_DSN: "${MONETR_SENTRY_DSN:-@MONETR_SENTRY_DSN@}"
     volumes:
       - ./:/build
     command:
@@ -107,8 +108,8 @@ services:
       MONETR_STRIPE_TAXES_ENABLED: "@MONETR_STRIPE_TAXES_ENABLED@"
       MONETR_CAPTCHA_PUBLIC_KEY: $MONETR_CAPTCHA_PUBLIC_KEY
       MONETR_CAPTCHA_PRIVATE_KEY: $MONETR_CAPTCHA_PRIVATE_KEY
-      MONETR_SENTRY_DSN: "$MONETR_SENTRY_DSN"
-      MONETR_SENTRY_EXTERNAL_DSN: "@MONETR_SENTRY_DSN@"
+      MONETR_SENTRY_DSN: "${MONETR_SENTRY_DSN:-@MONETR_SENTRY_DSN@}"
+      MONETR_SENTRY_EXTERNAL_DSN: "${MONETR_SENTRY_DSN:-@MONETR_SENTRY_DSN@}"
       MONETR_EMAIL_VERIFICATION_ENABLED: "@MONETR_EMAIL_VERIFICATION_ENABLED@"
       # If vault is the KMS provider then these settings will be used
       MONETR_VAULT_TOKEN: "@VAULT_ROOT_TOKEN@"

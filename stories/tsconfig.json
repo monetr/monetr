@@ -10,7 +10,10 @@
     "noImplicitReturns": true,
     "sourceMap": true,
     "strict": false,
-    "target": "ES2022"
+    "target": "ES2022",
+    "paths": {
+      "@monetr/interface/*": ["../../interface/src/*"]
+    }
   },
   "include": [
     "*",

@@ -13,13 +13,13 @@ import type { Preview } from '@storybook/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider, VariantType } from 'notistack';
 
-import { newTheme } from '@monetr/interface/src/theme';
-import Query from '@monetr/interface/src/util/query';
+import { newTheme } from '@monetr/interface/theme';
+import Query from '@monetr/interface/util/query';
 
 import { withRouter } from 'storybook-addon-react-router-v6';
 import { ScreenshotOptions, withScreenshot } from 'storycap';
 
-import '@monetr/interface/src/styles/styles.css';
+import '@monetr/interface/styles/styles.css';
 import './preview.css';
 
 

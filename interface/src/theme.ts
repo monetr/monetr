@@ -1,9 +1,8 @@
 import { createTheme, darken } from '@mui/material';
+import resolveConfig from 'tailwindcss/resolveConfig';
 
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import tailwindConfig from '../tailwind.config.cjs';
-
-import resolveConfig from 'tailwindcss/resolveConfig';
 
 const fullConfig = resolveConfig(tailwindConfig);
 const darkMode = false; // window.localStorage.getItem('darkMode') === 'true';
