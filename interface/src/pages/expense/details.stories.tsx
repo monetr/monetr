@@ -2,19 +2,12 @@ import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 
 import ExpenseDetails from './details';
-
-import Monetr from 'monetr';
-import GetAPIFixtures from 'stories/apiFixtures';
+import Monetr from '@monetr/interface/monetr';
 
 const meta: Meta<typeof ExpenseDetails> = {
   title: 'New UI/Expense',
   component: ExpenseDetails,
   parameters: {
-    msw: {
-      handlers: [
-        ...GetAPIFixtures(),
-      ],
-    },
   },
 };
 

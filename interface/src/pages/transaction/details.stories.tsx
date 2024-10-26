@@ -5,17 +5,17 @@ import { Meta, StoryObj } from '@storybook/react';
 import TransactionDetails from './details';
 import MonetrWrapper, { BankView } from '@monetr/interface/pages/app';
 
-import GetAPIFixtures from 'stories/apiFixtures';
+// import GetAPIFixtures from 'stories/apiFixtures';
 
 const meta: Meta<typeof TransactionDetails> = {
   title: 'New UI/Transaction',
   component: TransactionDetails,
   parameters: {
-    msw: {
-      handlers: [
-        ...GetAPIFixtures(),
-      ],
-    },
+    // msw: {
+    //   handlers: [
+    //     ...GetAPIFixtures(),
+    //   ],
+    // },
   },
 };
 

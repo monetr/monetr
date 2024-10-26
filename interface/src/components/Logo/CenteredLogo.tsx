@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Logo } from 'assets';
+import { Logo } from '@monetr/interface/assets';
 
 export default function CenteredLogo(): JSX.Element {
   return (
