@@ -1,4 +1,4 @@
-set(GO_MIN_VERSION "1.21.9")
+set(GO_MIN_VERSION "1.23.0")
 
 # GO_MODULES is only a marker file to indicate that modules have actually been fetched.
 set(GO_MODULES ${CMAKE_BINARY_DIR}/go-dependencies-marker.txt)
