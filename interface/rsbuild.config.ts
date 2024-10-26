@@ -28,6 +28,12 @@ export default defineConfig({
     alias: {
       '@monetr/interface': interfaceSource,
     },
+    define: {
+      CONFIG: JSON.stringify({}),
+      REVISION: JSON.stringify(process.env.RELEASE_REVISION),
+      RELEASE: JSON.stringify(process.env.RELEASE_VERSION),
+      NODE_VERSION: process.version,
+    },
   },
   dev: {
     hmr: isDevelopment,
