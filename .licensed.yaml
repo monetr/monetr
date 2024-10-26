@@ -48,6 +48,7 @@ ignored:
     - "@next/swc-*"
     - "@rspack/*"
     - "@swc/*"
+    - "@parcel/watcher-*" # https://github.com/parcel-bundler/watcher?tab=MIT-1-ov-file#readme
     - "sass-embedded-*" # MIT License https://github.com/sass/embedded-host-node/blob/main/LICENSE
     - "fsevents"  # MIT License https://github.com/fsevents/fsevents/blob/master/LICENSE
     - "@oven/bun-*" # https://github.com/oven-sh/bun/blob/main/LICENSE.md

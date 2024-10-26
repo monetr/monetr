@@ -1,6 +1,7 @@
+// vim: nospell
+import type { Config } from 'tailwindcss';
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+const config: Config =  {
   important: true,
   darkMode: 'class',
   future: {
@@ -384,3 +385,5 @@ module.exports = {
     // }
   },
 };
+export default config;
+
