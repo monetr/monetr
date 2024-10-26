@@ -3,7 +3,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import resolveConfig from 'tailwindcss/resolveConfig';
 
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import tailwindConfig from '../tailwind.config.cjs';
+import tailwindConfig from '../tailwind.config.ts';
 
 const realTailwindConfig = resolveConfig(tailwindConfig);
 
