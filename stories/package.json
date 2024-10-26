@@ -33,7 +33,7 @@
     "storybook": "7.2.1",
     "storybook-addon-react-router-v6": "1.0.2",
     "storycap": "4.2.0",
-    "ts-node": "10.9.1",
+    "ts-node": "10.9.2",
     "typescript": "5.6.3"
   },
   "devDependencies": {
