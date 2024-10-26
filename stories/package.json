@@ -8,9 +8,9 @@
     "story:shots": "storycap --serverCmd \"storybook dev -p 9001 --disable-telemetry -c . --no-open\" -o tmp"
   },
   "dependencies": {
-    "@babel/preset-env": "7.25.9",
+    "@babel/preset-env": "7.26.0",
     "@babel/preset-react": "7.25.9",
-    "@babel/preset-typescript": "7.25.9",
+    "@babel/preset-typescript": "7.26.0",
     "@fontsource-variable/inter": "5.1.0",
     "@monetr/interface": "workspace:*",
     "@storybook/addon-coverage": "0.0.9",
