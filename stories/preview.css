@@ -1,3 +1,9 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
 #storybook-root {
   height: 100%;
 }
@@ -13,9 +19,3 @@
 #storybook-root > div.email-preview > table {
   border-collapse: unset !important;
 }
-
-@tailwind base;
-
-@tailwind components;
-
-@tailwind utilities;

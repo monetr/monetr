@@ -262,8 +262,6 @@
                 "^date-fns",
                 "^formik",
                 "^history",
-                "^moment",
-                "^msw",
                 "^next",
                 "^notistack",
                 "^ramda",

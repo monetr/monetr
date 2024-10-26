@@ -5,8 +5,7 @@ import MockAdapter from 'axios-mock-adapter';
 
 import MonetrWrapper from './app';
 import monetrClient from '@monetr/interface/api/api';
-
-import Monetr from 'monetr';
+import Monetr from '@monetr/interface/monetr';
 
 const meta: Meta<typeof MonetrWrapper> = {
   title: 'New UI',

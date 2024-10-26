@@ -1,19 +1,11 @@
-
 import { Meta, StoryObj } from '@storybook/react';
 
 import TransferModal, { showTransferModal } from './TransferModal';
-
-import GetAPIFixtures from 'stories/apiFixtures';
 
 const meta: Meta<typeof TransferModal> = {
   title: 'New UI/Modals/Transfer',
   component: TransferModal,
   parameters: {
-    msw: {
-      handlers: [
-        ...GetAPIFixtures(),
-      ],
-    },
   },
 };
 

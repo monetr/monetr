@@ -1,6 +1,6 @@
 import '@fontsource-variable/inter';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import NiceModal from '@ebay/nice-modal-react';
 import DoneIcon from '@mui/icons-material/Done';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -8,7 +8,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import WarningIcon from '@mui/icons-material/Warning';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport';
-import { useEffect, useGlobals } from '@storybook/addons';
 import type { Preview } from '@storybook/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider, VariantType } from 'notistack';
@@ -17,25 +16,21 @@ import { newTheme } from '@monetr/interface/theme';
 import Query from '@monetr/interface/util/query';
 
 import { withRouter } from 'storybook-addon-react-router-v6';
-import { ScreenshotOptions, withScreenshot } from 'storycap';
 
 import '@monetr/interface/styles/styles.css';
+import '@monetr/interface/styles/index.scss';
 import './preview.css';
 
-
 export const useTheme = (StoryFn: () => unknown) => {
-  const [{ theme }] = useGlobals();
-
   useEffect(() => {
-    document.querySelector('html')?.setAttribute('class', theme || 'dark');
-  }, [theme]);
+    document.querySelector('html')?.setAttribute('class', 'dark');
+  }, []);
 
   return StoryFn();
 };
 
 const preview: Preview = {
   decorators: [
-    withScreenshot,
     useTheme,
     (Story, _context) => {
       const snackbarIcons: Partial<Record<VariantType, React.ReactNode>> = {
@@ -73,15 +68,15 @@ const preview: Preview = {
 
   },
   parameters: {
-    screenshot: {
-      viewport: {
-        width: 1280,
-        height: 720,
-        isMobile: false,
-        hasTouch: false,
-      },
-      delay: 3000,
-    } as ScreenshotOptions,
+    // screenshot: {
+    //   viewport: {
+    //     width: 1280,
+    //     height: 720,
+    //     isMobile: false,
+    //     hasTouch: false,
+    //   },
+    //   delay: 3000,
+    // } as ScreenshotOptions,
     viewport: {
       viewports: {
         desktop: {
@@ -95,28 +90,28 @@ const preview: Preview = {
       },
     },
     actions: { argTypesRegex: '^on[A-Z].*' },
-    controls: {
-      matchers: {
-        color: /(background|color)$/i,
-        date: /Date$/,
-      },
-    },
+    // controls: {
+    //   matchers: {
+    //     color: /(background|color)$/i,
+    //     date: /Date$/,
+    //   },
+    // },
   },
 };
 
 export default preview;
 
-// TODO This will sometimes crash chrome for some reason?
-export const globalTypes = {
-  theme: {
-    name: 'Toggle theme',
-    description: 'Global theme for components',
-    defaultValue: 'dark',
-    toolbar: {
-      icon: 'circlehollow',
-      items: ['dark'], // 'light',
-      showName: true,
-      dynamicTitle: true,
-    },
-  },
-};
+// // TODO This will sometimes crash chrome for some reason?
+// export const globalTypes = {
+//   theme: {
+//     name: 'Toggle theme',
+//     description: 'Global theme for components',
+//     defaultValue: 'dark',
+//     toolbar: {
+//       icon: 'circlehollow',
+//       items: ['dark'], // 'light',
+//       showName: true,
+//       dynamicTitle: true,
+//     },
+//   },
+// };

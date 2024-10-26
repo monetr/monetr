@@ -1,14 +1,4 @@
-import type { StorybookConfig } from '@storybook/react-webpack5';
-
-import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
-import { resolve } from 'path';
-
-const envName = process.env.NODE_ENV;
-const isDevelopment = envName !== 'production';
-
-const root = resolve(__dirname, '../');
-const uiDir = resolve(root, 'interface/src');
-const emailDir = resolve(root, 'emails/src');
+import type { StorybookConfig } from 'storybook-react-rsbuild';
 
 const marketingStoryOnly = process.env.MARKETING_STORY_ONLY === 'true';
 let stories = [
@@ -32,86 +22,18 @@ const config: StorybookConfig = {
     },
     '@storybook/addon-interactions',
     '@storybook/addon-viewport',
-    '@storybook/addon-coverage',
     'storybook-addon-react-router-v6',
-    {
-      name: '@storybook/addon-styling',
-      options: {
-        // Check out https://github.com/storybookjs/addon-styling/blob/main/docs/api.md
-        // For more details on this addon's options.
-        postCss: true,
-      },
-    },
-    'storycap',
+    // TODO Add storycap back in later for screenshots of stories.
+    // 'storycap',
   ],
-  framework: {
-    name: '@storybook/react-webpack5',
-    options: {
-      builder: {
-        useSWC: true, 
-      }, 
-      jsc: {
-        transform: {
-          react: {
-            development: isDevelopment,
-            refresh: isDevelopment,
-          },
-        },
-      },
-    },
-  },
-  webpackFinal: async config => {
-    config.mode = isDevelopment ? 'development' : 'production';
-    if (isDevelopment) {
-      //@ts-ignore
-      config.devServer = {
-        //@ts-ignore
-        ...config.devServer,
-        hot: true,
-      };
-
-      config.plugins = [
-        ...config.plugins,
-        new ReactRefreshWebpackPlugin(),
-      ];
+  framework: 'storybook-react-rsbuild',
+  rsbuildFinal: config => {
+    if (marketingStoryOnly) {
+      // Marketing story only merges the storybook dist with the next.js dist from docs.
+      // as a result, the subpath for storybook needs to be /_storybook in order to be served properly.
+      config.output ??= { };
+      config.output.assetPrefix = '/_storybook/';
     }
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@monetr/interface': uiDir,
-    };
-    config.resolve.extensions = [
-      ...config.resolve.extensions,
-      '.svg',
-      '.scss',
-      '.css',
-    ];
-    config.resolve.modules = [
-      ...config.resolve.modules,
-      uiDir,
-      emailDir,
-      'node_modules',
-    ];
-    config.module.rules = [
-      ...config.module.rules,
-      {
-        test: /\.?scss$/,
-        use: [
-          'style-loader',
-          'css-loader',
-          'postcss-loader',
-          'sass-loader',
-        ],
-      },
-      {
-        test: /\.svg$/,
-        parser: {
-          dataUrlCondition: {
-            maxSize: 1 * 1024 * 1024, // 1MB
-          },
-        },
-      },
-    ];
-
     return config;
   },
   docs: {
