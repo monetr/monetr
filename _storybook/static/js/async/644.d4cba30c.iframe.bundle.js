@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_monetr_stories=self.webpackChunk_monetr_stories||[]).push([["644"],{"../node_modules/storybook/core/components/index.js":function(o,e,n){n.d(e,{createCopyToClipboardFunction:function(){return s.xV}});var s=n("../node_modules/@storybook/core/dist/components/index.js")}}]);

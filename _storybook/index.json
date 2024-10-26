@@ -1,1 +1,1 @@
-{"v":4,"entries":{"new-ui--transactions":{"id":"new-ui--transactions","title":"New UI","name":"Transactions","importPath":"../interface/src/pages/app.stories.tsx","tags":["story"],"type":"story"}}}
+{"v":5,"entries":{"new-ui--transactions":{"type":"story","id":"new-ui--transactions","name":"Transactions","title":"New UI","importPath":"../interface/src/pages/app.stories.tsx","componentPath":"../interface/src/pages/app.tsx","tags":["dev","test"]}}}
