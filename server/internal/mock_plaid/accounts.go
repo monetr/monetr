@@ -11,7 +11,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/plaid/plaid-go/v26/plaid"
+	"github.com/plaid/plaid-go/v30/plaid"
 	"github.com/stretchr/testify/require"
 )
 

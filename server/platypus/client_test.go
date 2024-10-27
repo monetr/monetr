@@ -15,7 +15,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
-	"github.com/plaid/plaid-go/v26/plaid"
+	"github.com/plaid/plaid-go/v30/plaid"
 	"github.com/stretchr/testify/assert"
 )
 

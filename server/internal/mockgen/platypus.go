@@ -15,7 +15,7 @@ import (
 
 	models "github.com/monetr/monetr/server/models"
 	platypus "github.com/monetr/monetr/server/platypus"
-	plaid "github.com/plaid/plaid-go/v26/plaid"
+	plaid "github.com/plaid/plaid-go/v30/plaid"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -23,6 +23,7 @@ import (
 type MockPlatypus struct {
 	ctrl     *gomock.Controller
 	recorder *MockPlatypusMockRecorder
+	isgomock struct{}
 }
 
 // MockPlatypusMockRecorder is the mock recorder for MockPlatypus.

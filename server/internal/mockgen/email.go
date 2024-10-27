@@ -21,6 +21,7 @@ import (
 type MockEmailCommunication struct {
 	ctrl     *gomock.Controller
 	recorder *MockEmailCommunicationMockRecorder
+	isgomock struct{}
 }
 
 // MockEmailCommunicationMockRecorder is the mock recorder for MockEmailCommunication.

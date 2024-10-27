@@ -11,11 +11,11 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
-	"github.com/plaid/plaid-go/v26/plaid"
+	"github.com/plaid/plaid-go/v30/plaid"
 	"github.com/sirupsen/logrus"
 )
 
-//go:generate go run go.uber.org/mock/mockgen@v0.4.0 -source=client.go -package=mockgen -destination=../internal/mockgen/platypus_client.go Client
+//go:generate go run go.uber.org/mock/mockgen@v0.5.0 -source=client.go -package=mockgen -destination=../internal/mockgen/platypus_client.go Client
 type (
 	Client interface {
 		GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error)
