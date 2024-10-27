@@ -3,6 +3,7 @@ package calc_test
 import (
 	"fmt"
 	"math"
+	"sort"
 	"testing"
 	"time"
 
@@ -189,133 +190,207 @@ func TestFFT(t *testing.T) {
 	// more than it should.
 }
 
+type FrequencyTests struct {
+	Rule                  string
+	AcceptableFrequencies []int
+	NumberOfTransactions  int
+}
+
 func TestFFTMess(t *testing.T) {
 	t.Run("txns", func(t *testing.T) {
-		// rule, err := models.NewRuleSet("DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		// rule, err := models.NewRuleSet("DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-		// rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1")
-		// rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=1")
-		rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
-		// rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
-		assert.NoError(t, err)
-		items := make([]models.Transaction, 20)
-		date := rule.After(time.Now().AddDate(-1, 0, 0), false)
-		for i := 0; i < len(items); i++ {
-			items[i] = models.Transaction{
-				TransactionId: models.ID[models.Transaction](fmt.Sprintf("txn_%d", i)),
-				Amount:        1,
-				Date:          date,
-			}
-			date = rule.After(date, false)
+		// Number of transactions here seems to be the minimum needed to accurately
+		// detect the recurrence. So something cuold be done where we only detect
+		// transactions once there are a sufficient number of them? Like maybe we
+		// only try to detect once it reaches 6.
+		tests := []FrequencyTests{
+			{
+				Rule: "DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR",
+				AcceptableFrequencies: []int{
+					7,
+				},
+				NumberOfTransactions: 2,
+			},
+			{
+				Rule: "DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR",
+				AcceptableFrequencies: []int{
+					14, 15,
+				},
+				NumberOfTransactions: 5,
+			},
+			{
+				Rule: "DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+				AcceptableFrequencies: []int{
+					15, 16,
+				},
+				NumberOfTransactions: 2,
+			},
+			{
+				Rule: "DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+				AcceptableFrequencies: []int{
+					30,
+				},
+				NumberOfTransactions: 6,
+			},
+			{
+				Rule: "DTSTART:20230401T050000Z\nRRULE:FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=1",
+				AcceptableFrequencies: []int{
+					60,
+				},
+				NumberOfTransactions: 3,
+			},
+			{
+				Rule: "DTSTART:20230401T050000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1",
+				AcceptableFrequencies: []int{
+					90,
+				},
+				NumberOfTransactions: 4,
+			},
 		}
+		for _, test := range tests {
+			rule, err := models.NewRuleSet(test.Rule)
+			assert.NoError(t, err)
 
-		start := items[0].Date
-		end := items[len(items)-1].Date
-		diff := int64(end.Sub(start).Hours() / 24)
-		fmt.Println("number of days observed:", diff)
-		// size := nextPowerOf2(diff)
-		size := prevPowerOf2(nextPowerOf2(diff) - 1)
-		padding := 3 // len(items) // 0 // (size - diff) / 2
-		actualStart := start.AddDate(0, 0, -int(padding))
+			clampSettings := []bool{
+				// true,
+				false,
+			}
+			for _, clampWindow := range clampSettings {
+				items := make([]models.Transaction, test.NumberOfTransactions)
+				date := rule.After(time.Now().AddDate(-1, 0, 0), false)
+				for i := 0; i < len(items); i++ {
+					items[i] = models.Transaction{
+						TransactionId: models.ID[models.Transaction](fmt.Sprintf("txn_%d", i)),
+						Amount:        1,
+						Date:          date,
+					}
+					date = rule.After(date, false)
+				}
 
-		series := make([]complex128, size)
-		included := 0
-		for i := range items {
-			txn := items[i]
-			if txn.Date.After(end) {
-				continue
-			}
-			days := int64(txn.Date.Sub(actualStart).Hours() / 24)
-			if int64(size) < days {
-				fmt.Printf("[%d/%d] transaction %v [OUTSIDE WINDOW]\n", i, days, txn.Date)
-				continue
-			}
-			included++
-			series[days] = complex(float64(txn.Amount), 0)
-			fmt.Printf("[%d/%d] transaction %v\n", i, days, txn.Date)
-		}
+				start := items[0].Date
+				end := items[len(items)-1].Date
+				diff := int64(end.Sub(start).Hours() / 24)
+				fmt.Println("number of days observed:", diff)
+				size := nextPowerOf2(diff)
+				if clampWindow {
+					size = prevPowerOf2(nextPowerOf2(diff) - 1)
+				}
+				padding := 3 // len(items) // 0 // (size - diff) / 2
+				actualStart := start.AddDate(0, 0, -int(padding))
 
-		actualEnd := actualStart.AddDate(0, 0, int(size))
-		result := calc.FastFourierTransform(series)
-		fmt.Printf("Series created: %v -> %v\n", start, end)
-		fmt.Printf(" Actual window: %v -> %v\n", actualStart, actualEnd)
-		fmt.Printf("         Count: %d\n", len(series))
-		fmt.Printf("    Total Txns: %d\n", len(items))
-		fmt.Printf("      Included: %d\n", included)
-		fmt.Printf("      Result N: %d\n", len(result))
+				series := make([]complex128, size)
+				included := 0
+				for i := range items {
+					txn := items[i]
+					if txn.Date.After(end) {
+						continue
+					}
+					days := int64(txn.Date.Sub(actualStart).Hours() / 24)
+					if int64(size) < days {
+						fmt.Printf("[%d/%d] transaction %v [OUTSIDE WINDOW]\n", i, days, txn.Date)
+						continue
+					}
+					included++
+					series[days] = complex(float64(txn.Amount), 0)
+					fmt.Printf("[%d/%d] transaction %v\n", i, days, txn.Date)
+				}
 
-		maxI, maxM := 0, 0.0
-		// clamp := (size / 2) - int64(math.Ceil(math.Sqrt(float64(size))))
-		// clamp := size / int64(included)
-		for i := 0; i < int(size/2); i++ {
-			c := result[i]
-			magnitude := math.Sqrt((real(c) * real(c)) + (imag(c) * imag(c)))
-			if magnitude > maxM && i != 0 {
-				maxI = i
-				maxM = magnitude
+				actualEnd := actualStart.AddDate(0, 0, int(size))
+				result := calc.FastFourierTransform(series)
+				fmt.Printf("Series created: %v -> %v\n", start, end)
+				fmt.Printf(" Actual window: %v -> %v\n", actualStart, actualEnd)
+				fmt.Printf("         Count: %d\n", len(series))
+				fmt.Printf("    Total Txns: %d\n", len(items))
+				fmt.Printf("      Included: %d\n", included)
+				fmt.Printf("       Clamped: %t\n", clampWindow)
+				fmt.Printf("      Result N: %d\n", len(result))
+
+				// maxI, maxM := 0, 0.0
+				// // clamp := (size / 2) - int64(math.Ceil(math.Sqrt(float64(size))))
+				// // clamp := size / int64(included)
+				// for i := 0; i < int(size/2); i++ {
+				// 	c := result[i]
+				// 	magnitude := math.Sqrt((real(c) * real(c)) + (imag(c) * imag(c)))
+				// 	if magnitude > maxM && i != 0 {
+				// 		maxI = i
+				// 		maxM = magnitude
+				// 	}
+				//
+				// 	// fmt.Println("index:", i, "magnitude:", magnitude, "freq:", float64(i)/float64(size))
+				// }
+				// fmt.Printf("Best: %d %f, estimated frequency: every %d days or %d days\n", maxI, maxM, int(float64(size)*(float64(maxI)/float64(size))), int(float64(size)/float64(maxI)))
+
+				frequencies := []int{
+					7,
+					14,
+					15,
+					16,
+					30,
+					60,
+					90,
+				}
+				type Freq struct {
+					Frequency  int
+					Concluded  float64
+					Cumulative float64
+					Confidence float64
+					Magnitudes []float64
+					Indexes    []int
+				}
+				final := make([]Freq, len(frequencies))
+				for f := range frequencies {
+					frequency := frequencies[f]
+					if size < int64(frequency) {
+						fmt.Println("---------")
+						fmt.Printf("     Frequency: Every %d days\n", frequency)
+						fmt.Printf("     Skipping due to lack of data\n")
+						continue
+					}
+					estimatedCoordinates := (1 / float64(frequency)) * float64(size)
+					primary := math.Ceil(estimatedCoordinates)
+					confidence := ((float64(size) / 2) - primary) / (float64(size) / 2)
+					indicies := []int{
+						int(primary) - 1,
+						int(primary),
+						int(primary) + 1,
+					}
+					item := Freq{
+						Frequency:  frequency,
+						Confidence: confidence,
+						Magnitudes: make([]float64, len(indicies)),
+						Indexes:    indicies,
+					}
+					for i, index := range item.Indexes {
+						cplx := result[index]
+						magnitude := math.Sqrt((real(cplx) * real(cplx)) + (imag(cplx) * imag(cplx)))
+						item.Magnitudes[i] = magnitude
+						item.Concluded += magnitude
+						item.Cumulative += magnitude
+					}
+					item.Concluded /= float64(len(indicies))
+					item.Concluded *= confidence
+					final[f] = item
+				}
+				sort.Slice(final, func(i, j int) bool {
+					return final[i].Concluded > final[j].Concluded
+				})
+
+				fmt.Println(test.Rule)
+				assert.Contains(t, test.AcceptableFrequencies, final[0].Frequency, "best frequency must be one of the acceptable frequencies for this test rule")
+				for f := range final {
+					item := final[f]
+					fmt.Println("---------")
+					fmt.Printf("     Frequency: Every %d days\n", item.Frequency)
+					// fmt.Printf("    Cumulative: %f\n", item.Cumulative)
+					fmt.Printf("    Conclusion: %f\n", item.Concluded)
+					// fmt.Printf("    Confidence: %f\n", item.Confidence)
+					// fmt.Printf("    Magnitudes: %+v\n", item.Magnitudes)
+					// fmt.Printf("       Indexes: %+v\n", item.Indexes)
+				}
+				fmt.Println()
+				fmt.Println()
+				fmt.Println()
 			}
 
-			// fmt.Println("index:", i, "magnitude:", magnitude, "freq:", float64(i)/float64(size))
-		}
-		fmt.Printf("Best: %d %f, estimated frequency: every %d days or %d days\n", maxI, maxM, int(float64(size)*(float64(maxI)/float64(size))), int(float64(size)/float64(maxI)))
-
-		frequencies := []int{
-			7,
-			14,
-			15,
-			16,
-			30,
-			60,
-			90,
-		}
-		type Freq struct {
-			Frequency  int
-			Concluded  float64
-			Cumulative float64
-			Confidence float64
-			Magnitudes []float64
-			Indexes    []int
-		}
-		final := make([]Freq, len(frequencies))
-		for f := range frequencies {
-			frequency := frequencies[f]
-			if size < int64(frequency) {
-				fmt.Println("---------")
-				fmt.Printf("     Frequency: Every %d days\n", frequency)
-				fmt.Printf("     Skipping due to lack of data\n")
-				continue
-			}
-			estimatedCoordinates := (1 / float64(frequency)) * float64(size)
-			primary := math.Ceil(estimatedCoordinates)
-			confidence := ((float64(size) / 2) - primary) / (float64(size) / 2)
-			indicies := []int{
-				int(primary) - 1,
-				int(primary),
-				int(primary) + 1,
-			}
-			item := Freq{
-				Frequency:  frequency,
-				Confidence: confidence,
-				Magnitudes: make([]float64, len(indicies)),
-				Indexes:    indicies,
-			}
-			for i, index := range item.Indexes {
-				cplx := result[index]
-				magnitude := math.Sqrt((real(cplx) * real(cplx)) + (imag(cplx) * imag(cplx)))
-				item.Magnitudes[i] = magnitude
-				item.Concluded += magnitude
-				item.Cumulative += magnitude
-			}
-			item.Concluded /= float64(len(indicies))
-			item.Concluded *= confidence
-			final[f] = item
-			fmt.Println("---------")
-			fmt.Printf("     Frequency: Every %d days\n", frequency)
-			// fmt.Printf("    Cumulative: %f\n", item.Cumulative)
-			fmt.Printf("    Conclusion: %f\n", item.Concluded)
-			// fmt.Printf("    Confidence: %f\n", item.Confidence)
-			// fmt.Printf("    Magnitudes: %+v\n", item.Magnitudes)
-			// fmt.Printf("       Indexes: %+v\n", item.Indexes)
 		}
 	})
 }
