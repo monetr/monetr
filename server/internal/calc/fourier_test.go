@@ -225,6 +225,13 @@ func TestFFTMess(t *testing.T) {
 				NumberOfTransactions: 2,
 			},
 			{
+				Rule: "DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=-1",
+				AcceptableFrequencies: []int{
+					30,
+				},
+				NumberOfTransactions: 6,
+			},
+			{
 				Rule: "DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
 				AcceptableFrequencies: []int{
 					30,
