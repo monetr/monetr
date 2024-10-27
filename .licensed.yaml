@@ -44,12 +44,13 @@ reviewed:
 ignored:
   npm: # Silence warning about missing license. Its not missing.
     - "@esbuild/*"
+    - "@img/sharp-*" # https://github.com/lovell/sharp?tab=Apache-2.0-1-ov-file#readme
     - "@napi-rs/simple-git-*" # MIT License https://github.com/Brooooooklyn/simple-git/blob/main/LICENSE
     - "@next/swc-*"
+    - "@oven/bun-*" # https://github.com/oven-sh/bun/blob/main/LICENSE.md
+    - "@parcel/watcher-*" # https://github.com/parcel-bundler/watcher?tab=MIT-1-ov-file#readme
     - "@rspack/*"
     - "@swc/*"
-    - "@parcel/watcher-*" # https://github.com/parcel-bundler/watcher?tab=MIT-1-ov-file#readme
-    - "sass-embedded-*" # MIT License https://github.com/sass/embedded-host-node/blob/main/LICENSE
     - "fsevents"  # MIT License https://github.com/fsevents/fsevents/blob/master/LICENSE
-    - "@oven/bun-*" # https://github.com/oven-sh/bun/blob/main/LICENSE.md
+    - "sass-embedded-*" # MIT License https://github.com/sass/embedded-host-node/blob/main/LICENSE
 
