@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.18.19](https://github.com/monetr/monetr/compare/v0.18.18...v0.18.19) (2024-10-26)
+
+
+### Features
+
+* **ui:** A ton of typescript improvements ([#2065](https://github.com/monetr/monetr/issues/2065)) ([3c146f4](https://github.com/monetr/monetr/commit/3c146f461c42ea89cdc6fa794c80eaaadbd95751))
+* **ui:** Moving email tailwind config to typescript + fixing licensed ([fcbb91b](https://github.com/monetr/monetr/commit/fcbb91bff0a56e6b4eb7dbbf1974615051b59f8a))
+* **ui:** Moving storybook over to rsbuild ([#2061](https://github.com/monetr/monetr/issues/2061)) ([dd8b57d](https://github.com/monetr/monetr/commit/dd8b57dd2e25c627338d5e491408c92f4b809b2c))
+
+
+### Dependencies
+
+* **ui:** update dependency @rsbuild/core to v1.0.18 ([#2063](https://github.com/monetr/monetr/issues/2063)) ([8537473](https://github.com/monetr/monetr/commit/853747349e3f8e735ae37381d579450d4dccb982))
+* **ui:** update dependency react-select to v5.8.2 ([#2066](https://github.com/monetr/monetr/issues/2066)) ([db5bd9b](https://github.com/monetr/monetr/commit/db5bd9b3e3a1c76abb70b3a5c505847abbd42bf9))
+* **ui:** update dependency sass to v1.80.4 ([#2025](https://github.com/monetr/monetr/issues/2025)) ([dc2898e](https://github.com/monetr/monetr/commit/dc2898e0a44a82a5f965a4f0f42786b8b8f83c9e))
+
+
+### Bug Fixes
+
+* **ui:** A few more typescript migrations ([4fcd19d](https://github.com/monetr/monetr/commit/4fcd19d2c25b7a6be9f86f65e7f764c0fef0746d))
+
 ## [0.18.18](https://github.com/monetr/monetr/compare/v0.18.17...v0.18.18) (2024-10-26)
 
 
