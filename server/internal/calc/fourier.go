@@ -93,4 +93,3 @@ func cmplxExp(theta float64) complex128 {
 func cmplxAbs(c complex128) float64 {
 	return cmplx.Abs(c)
 }
-

@@ -28,6 +28,12 @@ func TestFourierImplementation(t *testing.T) {
 		fmt.Println(result)
 	})
 
+	// This test does not work because gonum has a different fourier transform
+	// implementation from mine. I'm using one that requires the input be a length
+	// that is a power of 2. The implementation they are using seems to just
+	// double the length of the input and pad it that way instead. So as a result
+	// they are not quite the same. I don't understand it enough to adjust my
+	// input to match their output yet.
 	t.Run("known #2", func(t *testing.T) {
 		input := []float64{
 			1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 2, 0, 1, 0,
@@ -76,7 +82,7 @@ func TestFourierImplementation(t *testing.T) {
 				magnitude := math.Sqrt(real(v)*real(v) + imag(v)*imag(v))
 				sum += magnitude * magnitude
 			}
-			return sum / float64(n) // Scale by 1/N
+			return sum / float64(n)
 		}
 
 		sampleRate := 128.0
@@ -98,6 +104,10 @@ func TestFourierImplementation(t *testing.T) {
 		fmt.Printf("Energy in time domain: %.6f\n", timeDomain)
 		fmt.Printf("Energy in frequency domain: %.6f\n", frequencyDomain)
 
+		// This is based on https://en.wikipedia.org/wiki/Parseval%27s_theorem and
+		// should be a way to validate that my implementation is still correct
+		// without needing to have some predefined expected input and output
+		// results?
 		assert.InDeltaf(t, timeDomain, frequencyDomain, 1e-6, "must validate Parseval's theorem")
 	})
 }
