@@ -2,6 +2,7 @@ package calc
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -49,6 +50,55 @@ func TestFourierImplementation(t *testing.T) {
 		result := fft(series)
 		assert.EqualValues(t, expected, result)
 		fmt.Println(result)
+	})
+
+	t.Run("parsevals theorem", func(t *testing.T) {
+		sineWave := func(length int, freq float64, sampleRate float64) []float64 {
+			signal := make([]float64, length)
+			for i := 0; i < length; i++ {
+				t := float64(i) / sampleRate
+				signal[i] = math.Sin(2 * math.Pi * freq * t)
+			}
+			return signal
+		}
+
+		sumOfSquaresSignal := func(signal []float64) float64 {
+			sum := 0.0
+			for _, v := range signal {
+				sum += v * v
+			}
+			return sum
+		}
+
+		sumOfSquaresFrequency := func(result []complex128, n int) float64 {
+			sum := 0.0
+			for _, v := range result {
+				magnitude := math.Sqrt(real(v)*real(v) + imag(v)*imag(v))
+				sum += magnitude * magnitude
+			}
+			return sum / float64(n) // Scale by 1/N
+		}
+
+		sampleRate := 128.0
+		frequency := 5.0
+		length := 2048
+
+		signal := sineWave(length, frequency, sampleRate)
+
+		series := make([]complex128, len(signal))
+		for x := range signal {
+			series[x] = complex(signal[x], 0)
+		}
+
+		result := fft(series)
+
+		timeDomain := sumOfSquaresSignal(signal)
+		frequencyDomain := sumOfSquaresFrequency(result, len(series))
+
+		fmt.Printf("Energy in time domain: %.6f\n", timeDomain)
+		fmt.Printf("Energy in frequency domain: %.6f\n", frequencyDomain)
+
+		assert.InDeltaf(t, timeDomain, frequencyDomain, 1e-6, "must validate Parseval's theorem")
 	})
 }
 
