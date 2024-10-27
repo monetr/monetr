@@ -24,8 +24,9 @@ DATA  CalcCosinePI4+8(SB)/8,  $0x3e64442d00000000 // B
 DATA  CalcCosinePI4+16(SB)/8, $0x3ce8469898cc5170 // C
 GLOBL CalcCosinePI4(SB),      RODATA, $24
 
-DATA Float64ABSMask+0(SB)/8, $0x7FFFFFFFFFFFFFFF
-GLOBL Float64ABSMask(SB),      RODATA, $8
+// Mask for doing the absolute value of a floating point 64 bit number.
+DATA  Float64ABSMask+0(SB)/8, $0x7FFFFFFFFFFFFFFF
+GLOBL Float64ABSMask(SB),     RODATA, $8
 
 // func __cosine64(input float64) float64
 TEXT ·__cosine64(SB), NOSPLIT, $16-8

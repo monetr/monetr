@@ -6,7 +6,7 @@ import (
 )
 
 // FFT function (recursive implementation)
-func fft(a []complex128) []complex128 {
+func FastFourierTransform(a []complex128) []complex128 {
 	n := len(a)
 	if n <= 1 {
 		return a
@@ -51,14 +51,14 @@ func fft(a []complex128) []complex128 {
 		odd[i] = a[i*2+1]
 	}
 
-	fftEven := fft(even)
-	fftOdd := fft(odd)
+	fftEven := FastFourierTransform(even)
+	fftOdd := FastFourierTransform(odd)
 
 	result := make([]complex128, n)
 	for k := 0; k < n/2; k++ {
 		// -2 * math.Pi comes out to:
 		// MOVSD   $f64.c01921fb54442d18(SB), X1 = -6.283185307179586
-		t := cmplxExp(-2*math.Pi*float64(k)/float64(n)) * fftOdd[k]
+		t := complexExponential(-2*math.Pi*float64(k)/float64(n)) * fftOdd[k]
 		result[k] = fftEven[k] + t
 		result[k+n/2] = fftEven[k] - t
 	}
@@ -66,7 +66,7 @@ func fft(a []complex128) []complex128 {
 }
 
 // IFFT function (recursive implementation)
-func ifft(a []complex128) []complex128 {
+func InverseFastFourierTransform(a []complex128) []complex128 {
 	n := len(a)
 
 	// Conjugate the input
@@ -76,7 +76,7 @@ func ifft(a []complex128) []complex128 {
 	}
 
 	// Apply FFT to the conjugated input
-	fftConjugated := fft(conjugated)
+	fftConjugated := FastFourierTransform(conjugated)
 
 	// Conjugate the result and scale by 1/n
 	for i := range fftConjugated {
@@ -87,11 +87,10 @@ func ifft(a []complex128) []complex128 {
 }
 
 // Compute complex exponential (Euler's formula)
-func cmplxExp(theta float64) complex128 {
+func complexExponential(theta float64) complex128 {
 	return complex(math.Cos(theta), math.Sin(theta))
 }
 
-// Magnitude helper function
-func cmplxAbs(c complex128) float64 {
+func complexAbsolute(c complex128) float64 {
 	return cmplx.Abs(c)
 }
