@@ -45,7 +45,7 @@ export default function SelectBankAccount(): JSX.Element {
     <Combobox 
       className='w-full'
       variant='text'
-      size='md'
+      size='select'
       options={ accounts } 
       value={ current?.value }
       placeholder='Select a bank account...'

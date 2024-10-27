@@ -3,7 +3,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { DayPickerSingleProps } from 'react-day-picker';
 import CloseOutlined from '@mui/icons-material/CloseOutlined';
-import TodayOutlined from '@mui/icons-material/TodayOutlined';
 import Popover from '@mui/material/Popover';
 import { isEqual, startOfMonth, startOfToday } from 'date-fns';
 import enUS from 'date-fns/locale/en-US';
@@ -12,7 +11,10 @@ import { useFormikContext } from 'formik';
 import MCalendar from './MCalendar';
 import MLabel, { MLabelDecorator } from './MLabel';
 import { ReactElement } from './types';
+import { Button } from '@monetr/interface/components/Button';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import { Calendar } from 'lucide-react';
 
 export interface MDatePickerProps extends
   Omit<React.HTMLAttributes<HTMLDivElement>, 'value' | 'defaultValue'>
@@ -141,7 +143,6 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     'dark:caret-zinc-50',
     'focus:ring-2',
     'focus:ring-inset',
-    'min-h-[38px]',
     'px-3',
     'py-1.5',
     'ring-1',
@@ -149,10 +150,11 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     'rounded-lg',
     'shadow-sm',
     'sm:leading-6',
-    'text-left',
     'text-sm',
     'w-full',
     'relative',
+    'inline-flex',
+    'justify-start'
   );
 
   const LabelDecorator = props.labelDecorator || (() => null);
@@ -181,14 +183,16 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
       >
         <LabelDecorator name={ props.name } disabled={ props.disabled } />
       </MLabel>
-      <button
+      <Button
+        variant='outlined'
+        size='select'
         type='button'
         disabled={ formikContext?.isSubmitting || disabled }
         className={ classNames }
         onClick={ handleClick }
         role='none'
       >
-        <TodayOutlined className='text-lg mr-2' />
+        <Calendar />
         <span className='truncate'>{formattedSelection}</span>
         { isClearEnabled && selectedValue ? (
           <button
@@ -204,7 +208,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
             <CloseOutlined />
           </button>
         ) : null }
-      </button>
+      </Button>
       <Popover
         open={ open }
         anchorEl={ anchorEl }

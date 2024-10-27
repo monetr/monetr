@@ -1,12 +1,13 @@
 import React from 'react';
-import { TodayOutlined } from '@mui/icons-material';
 import { useFormikContext } from 'formik';
 
-import { MBaseButton } from './MButton';
 import MLabel from './MLabel';
 import MSelect from './MSelect';
+import { Button } from '@monetr/interface/components/Button';
 import { useFundingSchedulesSink } from '@monetr/interface/hooks/fundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
+
+import { Calendar } from 'lucide-react';
 
 export interface MSelectFundingProps {
   label?: string;
@@ -61,15 +62,15 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
           label={ props.label }
           required={ props.required }
         />
-        <MBaseButton
-          color='primary'
-          variant='solid'
-          className='w-full h-[38px] font-normal text-start justify-start gap-2'
+        <Button
+          variant='primary'
+          size='select'
+          className='w-full font-normal text-start justify-start gap-2'
           onClick={ createAndSetFunding }
         >
-          <TodayOutlined />
+          <Calendar />
           Create a new funding schedule...
-        </MBaseButton>
+        </Button>
       </div>
     );
   }

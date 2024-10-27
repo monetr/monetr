@@ -11,7 +11,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
  
 const comboboxVariants = cva(
   [
-    'justify-between text-ellipsis overflow-hidden text-nowrap',
+    'justify-between text-ellipsis overflow-hidden text-nowrap flex-shrink-0',
   ],
   {
     variants: {
@@ -40,8 +40,9 @@ const comboboxVariants = cva(
         ],
       },
       size: {
-        default: 'h-8 text-sm',
-        md: 'h-10',
+        default: '',
+        select: '',
+        md: '',
       },
     },
     defaultVariants: {

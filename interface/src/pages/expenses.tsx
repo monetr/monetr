@@ -1,14 +1,16 @@
 import React, { Fragment, useCallback, useEffect, useRef } from 'react';
 import { useNavigationType } from 'react-router-dom';
-import { AccountBalance, AddOutlined, AutoModeOutlined, HeartBroken, PriceCheckOutlined } from '@mui/icons-material';
+import { AccountBalance, AutoModeOutlined, HeartBroken, PriceCheckOutlined } from '@mui/icons-material';
 
+import { Button } from '@monetr/interface/components/Button';
 import ExpenseItem from '@monetr/interface/components/expenses/ExpenseItem';
-import { MBaseButton } from '@monetr/interface/components/MButton';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useSpendingFiltered } from '@monetr/interface/hooks/spending';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import { SpendingType } from '@monetr/interface/models/Spending';
+
+import { Plus } from 'lucide-react';
 
 let evilScrollPosition: number = 0;
 
@@ -86,10 +88,10 @@ export default function Expenses(): JSX.Element {
         icon={ PriceCheckOutlined }
         title='Expenses'
       >
-        <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showNewExpenseModal }>
-          <AddOutlined />
+        <Button variant='primary' className='gap-1 py-1 px-2' onClick={ showNewExpenseModal }>
+          <Plus />
           New Expense
-        </MBaseButton>
+        </Button>
       </MTopNavigation>
       <div className='w-full h-full overflow-y-auto min-w-0' ref={ ref }>
         <ListContent />

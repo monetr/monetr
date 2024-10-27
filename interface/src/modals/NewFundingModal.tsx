@@ -73,6 +73,7 @@ function NewFundingModal(): JSX.Element {
             Create A New Funding Schedule
           </MSpan>
           <MTextField
+            autoFocus
             id='funding-name-search' // Keep's 1Pass from hijacking normal name fields.
             name='name'
             label='What do you want to call your funding schedule?'

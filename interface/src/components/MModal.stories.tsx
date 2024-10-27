@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Meta, StoryFn } from '@storybook/react';
 
-import { MBaseButton } from './MButton';
 import MModal from './MModal';
+import { Button } from '@monetr/interface/components/Button';
 
 export default {
   title: '@monetr/interface/components/Modal',
@@ -17,13 +17,13 @@ export const Default: StoryFn<typeof MModal> = () => {
     <div>
       <MModal open={ open }>
         <h1>test!</h1>
-        <MBaseButton onClick={ () => setOpen(false) }>
+        <Button onClick={ () => setOpen(false) }>
           Open!
-        </MBaseButton>
+        </Button>
       </MModal>
-      <MBaseButton onClick={ () => setOpen(!open) }>
+      <Button onClick={ () => setOpen(!open) }>
         Open!
-      </MBaseButton>
+      </Button>
     </div>
   );
 };
