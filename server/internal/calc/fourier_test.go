@@ -3,7 +3,54 @@ package calc
 import (
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
+
+func TestFourierImplementation(t *testing.T) {
+	// Based on: https://github.com/gonum/gonum/blob/1ca563a018b641e805317f1ac9ae0d37b32d162c/dsp/fourier/fourier_test.go#L65-L68
+	t.Run("known #1", func(t *testing.T) {
+		input := []float64{
+			1, 0, 1, 0, 1, 0, 1, 0,
+		}
+		expected := []complex128{
+			4, 0, 0, 0, 4,
+			0, 0, 0, // Extra zeros for some reason?
+		}
+
+		series := make([]complex128, len(input))
+		for x := range input {
+			series[x] = complex(input[x], 0)
+		}
+		result := fft(series)
+		assert.EqualValues(t, expected, result)
+		fmt.Println(result)
+	})
+
+	t.Run("known #2", func(t *testing.T) {
+		input := []float64{
+			1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 2, 0, 1, 0,
+		}
+		expected := []complex128{
+			12,
+			-2.301937735804838 - 1.108554787638881i,
+			0.7469796037174659 + 0.9366827961047095i,
+			-0.9450418679126271 - 4.140498958131061i,
+			-0.9450418679126271 + 4.140498958131061i,
+			0.7469796037174659 - 0.9366827961047095i,
+			-2.301937735804838 + 1.108554787638881i,
+			12,
+		}
+
+		series := make([]complex128, len(input))
+		for x := range input {
+			series[x] = complex(input[x], 0)
+		}
+		result := fft(series)
+		assert.EqualValues(t, expected, result)
+		fmt.Println(result)
+	})
+}
 
 func TestFFT(t *testing.T) {
 	input := []complex128{1, 1, 1, 1, 0, 0, 0, 0}
@@ -78,4 +125,3 @@ func TestFFT(t *testing.T) {
 	// that it's only writing 64 bits at a time here and thats why it doesnt write
 	// more than it should.
 }
-
