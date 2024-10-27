@@ -11,7 +11,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v26/plaid"
+	"github.com/plaid/plaid-go/v30/plaid"
 	"github.com/sirupsen/logrus"
 )
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/plaid/plaid-go/v26/plaid"
+	"github.com/plaid/plaid-go/v30/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
