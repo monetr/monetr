@@ -56,6 +56,8 @@ func fft(a []complex128) []complex128 {
 
 	result := make([]complex128, n)
 	for k := 0; k < n/2; k++ {
+		// -2 * math.Pi comes out to:
+		// MOVSD   $f64.c01921fb54442d18(SB), X1 = -6.283185307179586
 		t := cmplxExp(-2*math.Pi*float64(k)/float64(n)) * fftOdd[k]
 		result[k] = fftEven[k] + t
 		result[k+n/2] = fftEven[k] - t
