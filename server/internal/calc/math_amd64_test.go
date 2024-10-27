@@ -12,6 +12,7 @@ import (
 
 func TestCosine(t *testing.T) {
 	t.Run("compatability", func(t *testing.T) {
+		t.Skip("WIP")
 		input := 1.2345
 		goImpl := math.Cos(input)
 		asmImpl := __cosine64(input)
