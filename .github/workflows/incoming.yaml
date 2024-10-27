@@ -210,7 +210,7 @@ jobs:
           git config --global --add safe.directory ${PWD}
       - name: Build
         run: make docs
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Upload Documentation As Artifact
         with:
           name: '${{ github.sha }}-docs'
@@ -229,7 +229,7 @@ jobs:
           git config --global --add safe.directory ${PWD}
       - name: Build
         run: make storybook
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Upload Storybook As Artifact
         with:
           name: '${{ github.sha }}-storybook'
