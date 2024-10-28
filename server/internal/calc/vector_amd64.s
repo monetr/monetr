@@ -1,7 +1,7 @@
 #include "textflag.h"
 
 // func __normalizeVector64_AVX(input []float64)
-TEXT ·__normalizeVector64_AVX(SB), NOSPLIT, $0-24
+TEXT ·__normalizeVector64_AVX(SB), NOSPLIT, $24-0
   MOVQ input+0(FP), AX  // Load the pointer of the first item in the input vector array.
   MOVQ input+0(FP), BX  // Load the pointer of the first item in the input vector array.
   MOVQ input+8(FP), CX  // Load the length of the input vector into the CX register.
@@ -35,7 +35,7 @@ TEXT ·__normalizeVector64_AVX(SB), NOSPLIT, $0-24
   RET // We are done, return.
 
 // func __normalizeVector32_AVX(input []float32)
-TEXT ·__normalizeVector32_AVX(SB), NOSPLIT, $0-24
+TEXT ·__normalizeVector32_AVX(SB), NOSPLIT, $24-0
   MOVQ input+0(FP), AX  // Load the pointer of the first item in the input vector array.
   MOVQ input+0(FP), BX  // Load the pointer of the first item in the input vector array.
   MOVQ input+8(FP), CX  // Load the length of the input vector into the CX register.
@@ -69,7 +69,7 @@ TEXT ·__normalizeVector32_AVX(SB), NOSPLIT, $0-24
   RET // We are done, return.
 
 // func __normalizeVector64_AVX512(input []float64)
-TEXT ·__normalizeVector64_AVX512(SB), NOSPLIT, $0-24
+TEXT ·__normalizeVector64_AVX512(SB), NOSPLIT, $24-0
   MOVQ input+0(FP), AX  // Load the pointer of the first item in the input vector array.
   MOVQ input+0(FP), BX  // Load the pointer of the first item in the input vector array.
   MOVQ input+8(FP), CX  // Load the length of the input vector into the CX register.
@@ -107,7 +107,7 @@ TEXT ·__normalizeVector64_AVX512(SB), NOSPLIT, $0-24
   RET // We are done, return.
 
 // func __normalizeVector32_AVX512(input []float32)
-TEXT ·__normalizeVector32_AVX512(SB), NOSPLIT, $0-24
+TEXT ·__normalizeVector32_AVX512(SB), NOSPLIT, $24-0
   MOVQ input+0(FP), AX  // Load the pointer of the first item in the input vector array.
   MOVQ input+0(FP), BX  // Load the pointer of the first item in the input vector array.
   MOVQ input+8(FP), CX  // Load the length of the input vector into the CX register.

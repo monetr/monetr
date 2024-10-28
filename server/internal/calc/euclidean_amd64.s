@@ -1,7 +1,7 @@
 #include "textflag.h"
 
 // func __euclideanDistance64_AVX(a, b []float64) float64
-TEXT ·__euclideanDistance64_AVX(SB), NOSPLIT, $0-56
+TEXT ·__euclideanDistance64_AVX(SB), NOSPLIT, $56-8
   MOVQ a+8(FP), DX  // Load the length of a into the DX register.
   MOVQ a+0(FP), AX  // Load the pointer of the first array.
   MOVQ b+24(FP), BX // Load the pointer of the second array.
@@ -59,7 +59,7 @@ TEXT ·__euclideanDistance32_AVX(SB), NOSPLIT, $0-52
 
 
 // func __euclideanDistance64_AVX512(a, b []float64) float64
-TEXT ·__euclideanDistance64_AVX512(SB), NOSPLIT, $0-56
+TEXT ·__euclideanDistance64_AVX512(SB), NOSPLIT, $56-8
   MOVQ a+8(FP), DX  // Load the length of a into the DX register.
   MOVQ a+0(FP), AX  // Load the pointer of the first array.
   MOVQ b+24(FP), BX // Load the pointer of the second array.
