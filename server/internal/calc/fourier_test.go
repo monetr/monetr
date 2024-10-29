@@ -268,7 +268,7 @@ func TestFFTMess(t *testing.T) {
 				for i := 0; i < len(items); i++ {
 					items[i] = models.Transaction{
 						TransactionId: models.ID[models.Transaction](fmt.Sprintf("txn_%d", i)),
-						Amount:        1,
+						Amount:        100,
 						Date:          date,
 					}
 					date = rule.After(date, false)
@@ -430,4 +430,26 @@ func nextPowerOf2(n int64) int64 {
 	n |= n >> 8
 	n |= n >> 16
 	return n + 1
+}
+
+// This test is the same as the big test above except that this one will not
+// truncate data. Instead this one takes the dataset of transactions and spreads
+// them out evenly over the time series. With the minimum length being the
+// number of transactions * 2, then the nearest power of 2 that is greater than
+// or equal to that length. This way there is not any "padding" per se because
+// the time series has had its length adjusted for the minimum size of data. It
+// could also just always adjust to a set data length such as 2048.
+func TestFFTEvenDistribution(t *testing.T) {
+	// TODO
+	numberOfTransactions := 12
+	seriesSize := 2048
+	transactions := make([]models.Transaction, numberOfTransactions)
+	for i := range transactions {
+		transactions[i] = models.Transaction{
+			TransactionId: models.ID[models.Transaction](fmt.Sprintf("txn_%d", i)),
+			Amount:        100,
+			Date:          time.Time{},
+		}
+	}
+	fmt.Sprint(seriesSize)
 }
