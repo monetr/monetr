@@ -254,14 +254,14 @@ importers:
         version: 4.5.5(@types/react@18.3.12)(react@18.3.1)
     devDependencies:
       '@rsbuild/core':
-        specifier: 1.0.18
-        version: 1.0.18
+        specifier: 1.0.19
+        version: 1.0.19
       '@rsbuild/plugin-react':
         specifier: 1.0.5
-        version: 1.0.5(@rsbuild/core@1.0.18)
+        version: 1.0.5(@rsbuild/core@1.0.19)
       '@rsbuild/plugin-sass':
         specifier: 1.0.4
-        version: 1.0.4(@rsbuild/core@1.0.18)
+        version: 1.0.4(@rsbuild/core@1.0.19)
       '@rspack/binding-linux-arm64-gnu':
         specifier: 1.0.14
         version: 1.0.14
@@ -384,14 +384,14 @@ importers:
         version: 5.6.3
     devDependencies:
       '@rsbuild/core':
-        specifier: 1.0.18
-        version: 1.0.18
+        specifier: 1.0.19
+        version: 1.0.19
       '@rsbuild/plugin-react':
         specifier: 1.0.5
-        version: 1.0.5(@rsbuild/core@1.0.18)
+        version: 1.0.5(@rsbuild/core@1.0.19)
       '@rsbuild/plugin-sass':
         specifier: 1.0.4
-        version: 1.0.4(@rsbuild/core@1.0.18)
+        version: 1.0.4(@rsbuild/core@1.0.19)
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.4.47)
@@ -403,7 +403,7 @@ importers:
         version: 1.80.4
       storybook-react-rsbuild:
         specifier: 0.1.2
-        version: 0.1.2(@rsbuild/core@1.0.18)(@storybook/test@8.3.6(storybook@8.3.6))(esbuild@0.19.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.19.11))
+        version: 0.1.2(@rsbuild/core@1.0.19)(@storybook/test@8.3.6(storybook@8.3.6))(esbuild@0.19.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.19.11))
 
 packages:
 
@@ -2821,8 +2821,8 @@ packages:
       rollup:
         optional: true
 
-  '@rsbuild/core@1.0.18':
-    resolution: {integrity: sha512-NRdcGCAuBpzAIIdv+gVZxpgd9Cu9JSbaOC13nTbWRKXrHPpr+1iwYFBbM01KtX0Fe2TBLgmSaJfdDJAfEeZ3Dg==}
+  '@rsbuild/core@1.0.19':
+    resolution: {integrity: sha512-63DAPvYfRBoUrb51BUPb4Xoqx48MHQ0yLcmnCiqZGpMeKYtTWzD+lyx5va4cr9qvdnIFTAX2BMuYC/j5iSrtTA==}
     engines: {node: '>=16.7.0'}
     hasBin: true
 
@@ -11570,7 +11570,7 @@ snapshots:
       estree-walker: 2.0.2
       picomatch: 4.0.2
 
-  '@rsbuild/core@1.0.18':
+  '@rsbuild/core@1.0.19':
     dependencies:
       '@rspack/core': 1.0.14(@swc/helpers@0.5.13)
       '@rspack/lite-tapable': 1.0.1
@@ -11579,22 +11579,22 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  '@rsbuild/plugin-react@1.0.5(@rsbuild/core@1.0.18)':
+  '@rsbuild/plugin-react@1.0.5(@rsbuild/core@1.0.19)':
     dependencies:
-      '@rsbuild/core': 1.0.18
+      '@rsbuild/core': 1.0.19
       '@rspack/plugin-react-refresh': 1.0.0(react-refresh@0.14.2)
       react-refresh: 0.14.2
 
-  '@rsbuild/plugin-sass@1.0.4(@rsbuild/core@1.0.18)':
+  '@rsbuild/plugin-sass@1.0.4(@rsbuild/core@1.0.19)':
     dependencies:
-      '@rsbuild/core': 1.0.18
+      '@rsbuild/core': 1.0.19
       deepmerge: 4.3.1
       loader-utils: 2.0.4
       postcss: 8.4.47
       reduce-configs: 1.0.0
       sass-embedded: 1.80.4
 
-  '@rsbuild/plugin-type-check@1.0.1(@rsbuild/core@1.0.18)(esbuild@0.19.11)(typescript@5.6.3)':
+  '@rsbuild/plugin-type-check@1.0.1(@rsbuild/core@1.0.19)(esbuild@0.19.11)(typescript@5.6.3)':
     dependencies:
       deepmerge: 4.3.1
       fork-ts-checker-webpack-plugin: 9.0.2(typescript@5.6.3)(webpack@5.94.0(esbuild@0.19.11))
@@ -11602,7 +11602,7 @@ snapshots:
       reduce-configs: 1.0.0
       webpack: 5.94.0(esbuild@0.19.11)
     optionalDependencies:
-      '@rsbuild/core': 1.0.18
+      '@rsbuild/core': 1.0.19
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
@@ -17740,12 +17740,12 @@ snapshots:
     dependencies:
       tslib: 2.7.0
 
-  rsbuild-plugin-html-minifier-terser@1.1.1(@rsbuild/core@1.0.18):
+  rsbuild-plugin-html-minifier-terser@1.1.1(@rsbuild/core@1.0.19):
     dependencies:
       '@types/html-minifier-terser': 7.0.2
       html-minifier-terser: 7.2.0
     optionalDependencies:
-      '@rsbuild/core': 1.0.18
+      '@rsbuild/core': 1.0.19
 
   run-parallel@1.2.0:
     dependencies:
@@ -18134,10 +18134,10 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  storybook-builder-rsbuild@0.1.2(@rsbuild/core@1.0.18)(esbuild@0.19.11)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3):
+  storybook-builder-rsbuild@0.1.2(@rsbuild/core@1.0.19)(esbuild@0.19.11)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3):
     dependencies:
-      '@rsbuild/core': 1.0.18
-      '@rsbuild/plugin-type-check': 1.0.1(@rsbuild/core@1.0.18)(esbuild@0.19.11)(typescript@5.6.3)
+      '@rsbuild/core': 1.0.19
+      '@rsbuild/plugin-type-check': 1.0.1(@rsbuild/core@1.0.19)(esbuild@0.19.11)(typescript@5.6.3)
       '@storybook/addon-docs': 8.3.6(storybook@8.3.6)(webpack-sources@3.2.3)
       '@storybook/core-webpack': 8.3.6(storybook@8.3.6)
       browser-assert: 1.2.1
@@ -18149,7 +18149,7 @@ snapshots:
       magic-string: 0.30.12
       path-browserify: 1.0.1
       process: 0.11.10
-      rsbuild-plugin-html-minifier-terser: 1.1.1(@rsbuild/core@1.0.18)
+      rsbuild-plugin-html-minifier-terser: 1.1.1(@rsbuild/core@1.0.19)
       sirv: 2.0.4
       storybook: 8.3.6
       ts-dedent: 2.2.0
@@ -18165,10 +18165,10 @@ snapshots:
       - webpack-cli
       - webpack-sources
 
-  storybook-react-rsbuild@0.1.2(@rsbuild/core@1.0.18)(@storybook/test@8.3.6(storybook@8.3.6))(esbuild@0.19.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.19.11)):
+  storybook-react-rsbuild@0.1.2(@rsbuild/core@1.0.19)(@storybook/test@8.3.6(storybook@8.3.6))(esbuild@0.19.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.19.11)):
     dependencies:
       '@rollup/pluginutils': 5.1.3
-      '@rsbuild/core': 1.0.18
+      '@rsbuild/core': 1.0.19
       '@storybook/react': 8.3.6(@storybook/test@8.3.6(storybook@8.3.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.6)(typescript@5.6.3)
       '@storybook/react-docgen-typescript-plugin': 1.0.1(typescript@5.6.3)(webpack@5.94.0(esbuild@0.19.11))
       '@types/node': 18.19.50
@@ -18179,7 +18179,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       resolve: 1.22.8
       storybook: 8.3.6
-      storybook-builder-rsbuild: 0.1.2(@rsbuild/core@1.0.18)(esbuild@0.19.11)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)
+      storybook-builder-rsbuild: 0.1.2(@rsbuild/core@1.0.19)(esbuild@0.19.11)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)
       tsconfig-paths: 4.2.0
     optionalDependencies:
       typescript: 5.6.3
