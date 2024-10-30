@@ -447,8 +447,8 @@ func TestFFTEvenDistribution(t *testing.T) {
 	// rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
 	// rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
 	assert.NoError(t, err)
-	numberOfTransactions := 3
-	size := 2048
+	numberOfTransactions := 48
+	size := 4096
 	date := rule.After(time.Now().AddDate(-1, 0, 0), false)
 	transactions := make([]models.Transaction, numberOfTransactions)
 	for i := range transactions {
