@@ -442,12 +442,14 @@ func nextPowerOf2(n int64) int64 {
 func TestFFTEvenDistribution(t *testing.T) {
 	// rule, err := models.NewRuleSet("DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1")
 	// rule, err := models.NewRuleSet("DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=1")
-	rule, err := models.NewRuleSet("DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+	// rule, err := models.NewRuleSet("DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
 	// rule, err := models.NewRuleSet("DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+	// rule, err := models.NewRuleSet("DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=2,4,12,15,-1")
 	// rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
 	// rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
+	rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=DAILY;INTERVAL=2")
 	assert.NoError(t, err)
-	numberOfTransactions := 48
+	numberOfTransactions := 3
 	size := 4096
 	date := rule.After(time.Now().AddDate(-1, 0, 0), false)
 	transactions := make([]models.Transaction, numberOfTransactions)
@@ -488,12 +490,23 @@ func TestFFTEvenDistribution(t *testing.T) {
 
 	result := calc.FastFourierTransform(series)
 
-	// for i := 0; i < int(size/2); i++ {
+	// for i := 0; i < numberOfTransactions+2; i++ {
 	// 	c := result[i]
 	// 	magnitude := math.Sqrt((real(c) * real(c)) + (imag(c) * imag(c)))
 	//
 	// 	fmt.Println("index:", i, "magnitude:", magnitude, "freq:", float64(i)/float64(size))
 	// }
+
+	mean := meanMagnitude(result[1 : numberOfTransactions+1])
+	fmt.Println("Mean magnitude: ", mean)
+	stdDev := standardDeviation(result[1:numberOfTransactions+1], mean)
+	fmt.Println("Standard deviation: ", stdDev)
+	zScores := zScore(result[1 : numberOfTransactions+1])
+	fmt.Println("Z-Scores: ", zScores)
+	zscorePadding := 8 - len(zScores)%8
+	scores := make([]float64, len(zScores)+zscorePadding)
+	copy(scores, zScores)
+	calc.NormalizeVector64(scores)
 
 	frequencies := []int{
 		7,
@@ -505,12 +518,10 @@ func TestFFTEvenDistribution(t *testing.T) {
 		90,
 	}
 	type Freq struct {
-		Frequency int
-		Concluded float64
-		// Confidence float64
-		Peak       float64
-		Magnitudes []float64
-		Indexes    []int
+		Frequency      int
+		Concluded      float64
+		Confidence     float64
+		EstimatedIndex float64
 	}
 	final := make([]Freq, len(frequencies))
 	for f := range frequencies {
@@ -518,30 +529,19 @@ func TestFFTEvenDistribution(t *testing.T) {
 		period := ((time.Duration(frequency) * 24 * time.Hour).Seconds()) / segment
 		estimatedIndex := (1 / period) * float64(size)
 		rounded := math.Round(estimatedIndex)
-		primary := rounded
-		indicies := make([]int, 0, 3)
-		for _, index := range []int{
-			int(primary),
-		} {
-			if index < 1 {
-				continue
-			}
-			indicies = append(indicies, index)
-		}
+		primary := int(rounded)
 		item := Freq{
-			Frequency:  frequency,
-			Peak:       estimatedIndex,
-			Magnitudes: make([]float64, len(indicies)),
-			Indexes:    indicies,
+			Frequency:      frequency,
+			EstimatedIndex: estimatedIndex,
 		}
-		if rounded > float64(numberOfTransactions)+1 || len(indicies) == 0 {
+		if rounded > float64(numberOfTransactions)+1 || primary == 0 {
 			item.Concluded = 0.0
 			final[f] = item
 			continue
 		}
 		cplx := result[int(primary)]
 		magnitude := math.Sqrt((real(cplx) * real(cplx)) + (imag(cplx) * imag(cplx)))
-		item.Magnitudes[0] = magnitude
+		item.Confidence = scores[primary-1]
 		item.Concluded = magnitude
 		final[f] = item
 	}
@@ -552,9 +552,37 @@ func TestFFTEvenDistribution(t *testing.T) {
 	for f := range final {
 		item := final[f]
 		fmt.Println("---------")
-		fmt.Printf("     Frequency: Every %d days\n", item.Frequency)
-		fmt.Printf("    Conclusion: %f\n", item.Concluded)
-		fmt.Printf("          Peak: %f\n", item.Peak)
-		fmt.Printf("       Indexes: %+v\n", item.Indexes)
+		fmt.Printf("      Frequency: Every %d days\n", item.Frequency)
+		fmt.Printf("     Conclusion: %f\n", item.Concluded)
+		fmt.Printf("     Confidence: %f\n", item.Confidence)
+		fmt.Printf("Estimated Index: %f\n", item.EstimatedIndex)
 	}
+}
+
+func meanMagnitude(data []complex128) float64 {
+	sum := 0.0
+	for _, item := range data {
+		sum += math.Sqrt((real(item) * real(item)) + (imag(item) * imag(item)))
+	}
+	return sum / float64(len(data))
+}
+
+func standardDeviation(data []complex128, mean float64) float64 {
+	var varianceSum float64
+	for _, item := range data {
+		magnitude := math.Sqrt((real(item) * real(item)) + (imag(item) * imag(item)))
+		varianceSum += (magnitude - mean) * (magnitude - mean)
+	}
+	return math.Sqrt(varianceSum / float64(len(data)))
+}
+
+func zScore(data []complex128) []float64 {
+	mean := meanMagnitude(data)
+	stdDev := standardDeviation(data, mean)
+	zScores := make([]float64, len(data))
+	for i, item := range data {
+		magnitude := math.Sqrt((real(item) * real(item)) + (imag(item) * imag(item)))
+		zScores[i] = (magnitude - mean) / stdDev
+	}
+	return zScores
 }

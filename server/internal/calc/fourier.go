@@ -5,6 +5,8 @@ import (
 	"math/cmplx"
 )
 
+const FourierSize = 4096
+
 // FFT function (recursive implementation)
 func FastFourierTransform(a []complex128) []complex128 {
 	n := len(a)
