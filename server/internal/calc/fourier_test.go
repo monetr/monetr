@@ -454,15 +454,19 @@ func TestFFTEvenDistribution(t *testing.T) {
 	for i := range transactions {
 		transactions[i] = models.Transaction{
 			TransactionId: models.ID[models.Transaction](fmt.Sprintf("txn_%d", i)),
-			Amount:        100,
+			Amount:        1,
 			Date:          date,
 		}
 		date = rule.After(date, false)
 	}
 	padding := 3 // Number of days to have on each end of the series.
+	// Get the start date with the padding placed before it.
 	start := transactions[0].Date.AddDate(0, 0, -padding)
+	// And the end date with the padding placed after it.
 	end := transactions[len(transactions)-1].Date.AddDate(0, 0, padding)
+	// How many seconds between the start and end?
 	window := int64(end.Sub(start).Seconds())
+	// How many seconds elapse for each point in the series.
 	segment := float64(window) / float64(size)
 
 	fmt.Println("segment:", segment)
@@ -474,19 +478,22 @@ func TestFFTEvenDistribution(t *testing.T) {
 		// timestamp. Multiplying that by our segment size, and rounding down to
 		// get our index.
 		secondsSinceStart := float64(txn.Date.Sub(start).Seconds())
-		index := int(math.Floor(secondsSinceStart / segment))
+		// Then we can divide the number of seconds by our segment size; this will
+		// tell us the index we want to use.
+		index := int(math.Round(secondsSinceStart / segment))
+		// Store the transaction and its amount at that index in the series.
 		series[index] = complex(float64(txn.Amount), 0)
-		fmt.Printf("[%d/%d] transaction %v\n", i, index, txn.Date)
+		fmt.Printf("[%02d/%04d] transaction %v\n", i, index, txn.Date)
 	}
 
 	result := calc.FastFourierTransform(series)
 
-	for i := 0; i < int(size/2); i++ {
-		c := result[i]
-		magnitude := math.Sqrt((real(c) * real(c)) + (imag(c) * imag(c)))
-
-		fmt.Println("index:", i, "magnitude:", magnitude, "freq:", float64(i)/float64(size))
-	}
+	// for i := 0; i < int(size/2); i++ {
+	// 	c := result[i]
+	// 	magnitude := math.Sqrt((real(c) * real(c)) + (imag(c) * imag(c)))
+	//
+	// 	fmt.Println("index:", i, "magnitude:", magnitude, "freq:", float64(i)/float64(size))
+	// }
 
 	frequencies := []int{
 		7,
@@ -498,10 +505,9 @@ func TestFFTEvenDistribution(t *testing.T) {
 		90,
 	}
 	type Freq struct {
-		Frequency  int
-		Concluded  float64
-		Cumulative float64
-		Confidence float64
+		Frequency int
+		Concluded float64
+		// Confidence float64
 		Peak       float64
 		Magnitudes []float64
 		Indexes    []int
@@ -512,12 +518,8 @@ func TestFFTEvenDistribution(t *testing.T) {
 		period := ((time.Duration(frequency) * 24 * time.Hour).Seconds()) / segment
 		estimatedIndex := (1 / period) * float64(size)
 		rounded := math.Round(estimatedIndex)
-
-		// From old code
 		primary := rounded
-		confidence := ((float64(size) / 2) - primary) / (float64(size) / 2)
 		indicies := make([]int, 0, 3)
-
 		for _, index := range []int{
 			int(primary),
 		} {
@@ -528,26 +530,19 @@ func TestFFTEvenDistribution(t *testing.T) {
 		}
 		item := Freq{
 			Frequency:  frequency,
-			Confidence: confidence,
 			Peak:       estimatedIndex,
 			Magnitudes: make([]float64, len(indicies)),
 			Indexes:    indicies,
 		}
-		if rounded > float64(numberOfTransactions)+1 {
+		if rounded > float64(numberOfTransactions)+1 || len(indicies) == 0 {
 			item.Concluded = 0.0
-			item.Confidence = 0.0
 			final[f] = item
 			continue
 		}
-		for i, index := range item.Indexes {
-			cplx := result[index]
-			magnitude := math.Sqrt((real(cplx) * real(cplx)) + (imag(cplx) * imag(cplx)))
-			item.Magnitudes[i] = magnitude
-			item.Concluded += magnitude
-			item.Cumulative += magnitude
-		}
-		// item.Concluded /= float64(len(indicies))
-		// item.Concluded *= confidence
+		cplx := result[int(primary)]
+		magnitude := math.Sqrt((real(cplx) * real(cplx)) + (imag(cplx) * imag(cplx)))
+		item.Magnitudes[0] = magnitude
+		item.Concluded = magnitude
 		final[f] = item
 	}
 	sort.Slice(final, func(i, j int) bool {
@@ -560,18 +555,6 @@ func TestFFTEvenDistribution(t *testing.T) {
 		fmt.Printf("     Frequency: Every %d days\n", item.Frequency)
 		fmt.Printf("    Conclusion: %f\n", item.Concluded)
 		fmt.Printf("          Peak: %f\n", item.Peak)
-		// fmt.Printf("    Confidence: %f\n", item.Confidence)
-		// fmt.Printf("    Magnitudes: %+v\n", item.Magnitudes)
 		fmt.Printf("       Indexes: %+v\n", item.Indexes)
 	}
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-
-	// period := ((7 * 24 * time.Hour).Seconds()) / segment
-	// estimatedIndex := (1 / period) * float64(size)
-	// rounded := math.Round(estimatedIndex)
-	// fmt.Println("estiamted index:", estimatedIndex, rounded, (1 / period))
-	//
-	// fmt.Sprint(size, series, result)
 }
