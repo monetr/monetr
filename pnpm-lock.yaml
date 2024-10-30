@@ -184,8 +184,8 @@ importers:
         specifier: 2.4.6
         version: 2.4.6(react@18.3.1)
       input-otp:
-        specifier: 1.2.4
-        version: 1.2.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 1.2.5
+        version: 1.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       lodash:
         specifier: 4.17.21
         version: 4.17.21
@@ -5709,11 +5709,11 @@ packages:
   inline-style-parser@0.1.1:
     resolution: {integrity: sha512-7NXolsK4CAS5+xvdj5OMMbI962hU/wvwoxk+LWR9Ek9bVtyuuYScDN6eS0rUm6TxApFpw7CX1o4uJzcd4AyD3Q==}
 
-  input-otp@1.2.4:
-    resolution: {integrity: sha512-md6rhmD+zmMnUh5crQNSQxq3keBRYvE3odbr4Qb9g2NWzQv9azi+t1a3X4TBTbh98fsGHgEEJlzbe1q860uGCA==}
+  input-otp@1.2.5:
+    resolution: {integrity: sha512-XoRSZyr5NaK++/Ml/0bsTycKiSq9M5u6fWgG5Cqjldj6+ontrKnPRqn+6Bo4fzUwoMXRenUdacVfR7Y68gldKw==}
     peerDependencies:
-      react: ^16.8 || ^17.0 || ^18.0
-      react-dom: ^16.8 || ^17.0 || ^18.0
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0
+      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0
 
   internal-slot@1.0.7:
     resolution: {integrity: sha512-NGnrKwXzSms2qUUih/ILZ5JBqNTSa1+ZmP6flaIp6KmSElgE9qdndzS3cqjrDovwFdmwsGsLdeFgB6suw+1e9g==}
@@ -15142,7 +15142,7 @@ snapshots:
 
   inline-style-parser@0.1.1: {}
 
-  input-otp@1.2.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  input-otp@1.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
