@@ -449,7 +449,7 @@ func TestFFTEvenDistribution(t *testing.T) {
 	// rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
 	rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=DAILY;INTERVAL=2")
 	assert.NoError(t, err)
-	numberOfTransactions := 3
+	numberOfTransactions := 9
 	size := 4096
 	date := rule.After(time.Now().AddDate(-1, 0, 0), false)
 	transactions := make([]models.Transaction, numberOfTransactions)
@@ -497,16 +497,17 @@ func TestFFTEvenDistribution(t *testing.T) {
 	// 	fmt.Println("index:", i, "magnitude:", magnitude, "freq:", float64(i)/float64(size))
 	// }
 
-	mean := meanMagnitude(result[1 : numberOfTransactions+1])
+	magnitudes := magnitudes(result[1 : numberOfTransactions+1])
+	mean := meanMagnitude(magnitudes)
 	fmt.Println("Mean magnitude: ", mean)
-	stdDev := standardDeviation(result[1:numberOfTransactions+1], mean)
+	stdDev := standardDeviation(magnitudes, mean)
 	fmt.Println("Standard deviation: ", stdDev)
 	zScores := zScore(result[1 : numberOfTransactions+1])
 	fmt.Println("Z-Scores: ", zScores)
 	zscorePadding := 8 - len(zScores)%8
 	scores := make([]float64, len(zScores)+zscorePadding)
 	copy(scores, zScores)
-	calc.NormalizeVector64(scores)
+	// calc.NormalizeVector64(scores)
 
 	frequencies := []int{
 		7,
@@ -557,32 +558,68 @@ func TestFFTEvenDistribution(t *testing.T) {
 		fmt.Printf("     Confidence: %f\n", item.Confidence)
 		fmt.Printf("Estimated Index: %f\n", item.EstimatedIndex)
 	}
+
+	iqrData := make([]float64, len(final))
+	for i, item := range final {
+		iqrData[i] = item.Confidence
+	}
+
+	iqr := calculateIQR(iqrData)
+	fmt.Println("IQR: ", iqr)
 }
 
-func meanMagnitude(data []complex128) float64 {
+func magnitudes(data []complex128) []float64 {
+	result := make([]float64, len(data))
+	for i, item := range data {
+		result[i] = math.Sqrt((real(item) * real(item)) + (imag(item) * imag(item)))
+	}
+	return result
+}
+
+func meanMagnitude(data []float64) float64 {
 	sum := 0.0
 	for _, item := range data {
-		sum += math.Sqrt((real(item) * real(item)) + (imag(item) * imag(item)))
+		sum += item
 	}
 	return sum / float64(len(data))
 }
 
-func standardDeviation(data []complex128, mean float64) float64 {
+func standardDeviation(data []float64, mean float64) float64 {
 	var varianceSum float64
 	for _, item := range data {
-		magnitude := math.Sqrt((real(item) * real(item)) + (imag(item) * imag(item)))
+		magnitude := item
 		varianceSum += (magnitude - mean) * (magnitude - mean)
 	}
 	return math.Sqrt(varianceSum / float64(len(data)))
 }
 
 func zScore(data []complex128) []float64 {
-	mean := meanMagnitude(data)
-	stdDev := standardDeviation(data, mean)
-	zScores := make([]float64, len(data))
-	for i, item := range data {
-		magnitude := math.Sqrt((real(item) * real(item)) + (imag(item) * imag(item)))
-		zScores[i] = (magnitude - mean) / stdDev
+	magnitudes := magnitudes(data)
+	mean := meanMagnitude(magnitudes)
+	stdDev := standardDeviation(magnitudes, mean)
+	zScores := make([]float64, len(magnitudes))
+	for i, item := range magnitudes {
+		zScores[i] = (item - mean) / stdDev
 	}
 	return zScores
+}
+
+func calculatePercentile(data []float64, percentile float64) float64 {
+	index := percentile * float64(len(data)-1)
+	lower := int(index)
+	upper := lower + 1
+	if upper >= len(data) {
+		return data[lower]
+	}
+
+	weight := index - float64(lower)
+	return data[lower]*(1-weight) + data[upper]*weight
+}
+
+func calculateIQR(data []float64) float64 {
+	sort.Float64s(data)
+	q1 := calculatePercentile(data, 0.25)
+	q3 := calculatePercentile(data, 0.75)
+
+	return q3 - q1
 }
