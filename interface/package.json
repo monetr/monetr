@@ -71,7 +71,7 @@
     "@rsbuild/plugin-sass": "1.0.4",
     "@rspack/binding-linux-arm64-gnu": "1.0.14",
     "@rspack/binding-linux-x64-gnu": "1.0.14",
-    "@swc/core": "1.7.40",
+    "@swc/core": "1.7.42",
     "@swc/jest": "0.2.37",
     "@testing-library/jest-dom": "6.6.2",
     "@testing-library/react": "13.4.0",
