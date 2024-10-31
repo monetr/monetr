@@ -766,6 +766,12 @@ func TestFFTReverse(t *testing.T) {
 	// dataset that would be great. Another option might be to do some kind of
 	// 75th percentile measurement and then find all of the transactions that are
 	// part of the waveform where the value is above that percentile.
+
+	// TODO Implement a zscore peak detection algorithm, with the window size or
+	// lag being half the number of segments equal to the frequency size. So if
+	// the frequency is 7 days, and thats 4 segments, the the window size should
+	// be 2 segments. It wont work out exactly like that but yyou get the idea.
+	// No idea how to calculate the threshold yet.
 }
 
 func IsolateFrequencyComponent(result []complex128, index int) []complex128 {
