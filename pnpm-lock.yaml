@@ -260,8 +260,8 @@ importers:
         specifier: 1.0.6
         version: 1.0.6(@rsbuild/core@1.0.19)
       '@rsbuild/plugin-sass':
-        specifier: 1.0.4
-        version: 1.0.4(@rsbuild/core@1.0.19)
+        specifier: 1.1.0
+        version: 1.1.0(@rsbuild/core@1.0.19)
       '@rspack/binding-linux-arm64-gnu':
         specifier: 1.0.14
         version: 1.0.14
@@ -390,8 +390,8 @@ importers:
         specifier: 1.0.6
         version: 1.0.6(@rsbuild/core@1.0.19)
       '@rsbuild/plugin-sass':
-        specifier: 1.0.4
-        version: 1.0.4(@rsbuild/core@1.0.19)
+        specifier: 1.1.0
+        version: 1.1.0(@rsbuild/core@1.0.19)
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.4.47)
@@ -2669,10 +2669,10 @@ packages:
     peerDependencies:
       '@rsbuild/core': 1.x
 
-  '@rsbuild/plugin-sass@1.0.4':
-    resolution: {integrity: sha512-0eTVOgglTBf440ykuZWJQmh44S3hj/MT95K+P5XwEU8gU72MrEGTrQlZciOqFW8tVkEVmtUlHPx7YEipXhplSQ==}
+  '@rsbuild/plugin-sass@1.1.0':
+    resolution: {integrity: sha512-7vF1Bygb3R8xd1jHOv1AourxQ/751fkh9gi/WGABVFMde/OxEpw5hDiAY4Wo+zsxLXOEPHB9eUuv/5P7udwFkg==}
     peerDependencies:
-      '@rsbuild/core': 1.x || ^1.0.1-rc.0
+      '@rsbuild/core': 1.x
 
   '@rsbuild/plugin-type-check@1.0.1':
     resolution: {integrity: sha512-BahXAJNq4kWtL2dINUlrOL9UCN1t8c/qf5RW8JXx2HSSasfKPJGJ1BVfieMcIaFa/t8/QdafcwoxY1WKPTlSMg==}
@@ -11274,7 +11274,7 @@ snapshots:
       '@rspack/plugin-react-refresh': 1.0.0(react-refresh@0.14.2)
       react-refresh: 0.14.2
 
-  '@rsbuild/plugin-sass@1.0.4(@rsbuild/core@1.0.19)':
+  '@rsbuild/plugin-sass@1.1.0(@rsbuild/core@1.0.19)':
     dependencies:
       '@rsbuild/core': 1.0.19
       deepmerge: 4.3.1
