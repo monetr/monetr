@@ -329,8 +329,8 @@ importers:
         specifier: 1.80.6
         version: 1.80.6
       sass-embedded-linux-arm64:
-        specifier: 1.80.5
-        version: 1.80.5
+        specifier: 1.80.6
+        version: 1.80.6
       sass-embedded-linux-x64:
         specifier: 1.80.5
         version: 1.80.5
@@ -7606,8 +7606,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  sass-embedded-linux-arm64@1.80.5:
-    resolution: {integrity: sha512-M7YV2ZZRZ7BYnAKkFEUxguNf0HLGGu2wxait31qLLdQ3Cm8Oqdnrj4EdwqXm6umWBy9pPAOhptleo6TgxlAJgQ==}
+  sass-embedded-linux-arm64@1.80.6:
+    resolution: {integrity: sha512-n5r98pBXawrQQKaxIYCMM1zDpnngsqxTkOrmvsYLFiAMCSbR0lWf/7sBB33k/Pm0D6dsbp3jpHilCoQNKI3jIw==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
@@ -17481,7 +17481,7 @@ snapshots:
   sass-embedded-linux-arm64@1.80.4:
     optional: true
 
-  sass-embedded-linux-arm64@1.80.5: {}
+  sass-embedded-linux-arm64@1.80.6: {}
 
   sass-embedded-linux-arm@1.80.4:
     optional: true
