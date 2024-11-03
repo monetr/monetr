@@ -75,4 +75,15 @@ func TestTokenizeName(t *testing.T) {
 			"obsidianmd",
 		}, lower, "should match the cleaned string")
 	})
+
+	t.Run("dominos", func(t *testing.T) {
+		txn := models.Transaction{
+			OriginalName: "ACH Debit - Pwp  Domino's 19  Privacycom 2111508",
+		}
+
+		lower, _ := TokenizeName(&txn)
+		assert.EqualValues(t, []string{
+			"dominos",
+		}, lower, "should match the cleaned string")
+	})
 }

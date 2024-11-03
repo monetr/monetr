@@ -11,7 +11,7 @@ import (
 
 var (
 	// clusterCleanStringRegex = regexp.MustCompile(`[a-zA-Z'\.\d]+`)
-	clusterCleanStringRegex = regexp.MustCompile(`(?:\b(?:[a-zA-Z]|\d){1}(?:[a-zA-Z.]{1,})(?:\d{1}[a-zA-Z]*){0,2}\b)`)
+	clusterCleanStringRegex = regexp.MustCompile(`(?:\b(?:[a-zA-Z]|\d){1}(?:[a-zA-Z.']{1,})(?:\d{1}[a-zA-Z]*){0,2}\b)`)
 	vowelsOnly              = regexp.MustCompile(`[aeyiuo]+`)
 	numberOnly              = regexp.MustCompile(`^\d+$`)
 
