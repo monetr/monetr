@@ -31,14 +31,6 @@ func MaxTime(a, b time.Time) time.Time {
 	}
 }
 
-func MinTime(a, b time.Time) time.Time {
-	if a.Before(b) {
-		return a
-	} else {
-		return b
-	}
-}
-
 func MaxNonNilTime(times ...*time.Time) *time.Time {
 	var max *time.Time
 	for _, time := range times {
