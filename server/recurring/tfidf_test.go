@@ -53,4 +53,26 @@ func TestTokenizeName(t *testing.T) {
 			"croix", "valle",
 		}, lower, "should match the cleaned string")
 	})
+
+	t.Run("from manual import", func(t *testing.T) {
+		txn := models.Transaction{
+			OriginalName: "ACH Debit - Pwp  Obsidian.md  Privacycom 2111508",
+		}
+
+		lower, _ := TokenizeName(&txn)
+		assert.EqualValues(t, []string{
+			"obsidianmd",
+		}, lower, "should match the cleaned string")
+	})
+
+	t.Run("from manual import two", func(t *testing.T) {
+		txn := models.Transaction{
+			OriginalName: "POS DEBIT-DC    5988 PWP*OBSIDIAN.MD 844-7718229 NY null",
+		}
+
+		lower, _ := TokenizeName(&txn)
+		assert.EqualValues(t, []string{
+			"obsidianmd",
+		}, lower, "should match the cleaned string")
+	})
 }
