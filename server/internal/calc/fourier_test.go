@@ -626,17 +626,17 @@ func calculateIQR(data []float64) float64 {
 }
 
 func TestFFTReverse(t *testing.T) {
-	// rule, err := models.NewRuleSet("DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1")
+	rule, err := models.NewRuleSet("DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1")
 	// rule, err := models.NewRuleSet("DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=2;BYMONTHDAY=1")
 	// rule, err := models.NewRuleSet("DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
 	// rule, err := models.NewRuleSet("DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-	rule, err := models.NewRuleSet("DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=2,4,12,15,-1")
+	// rule, err := models.NewRuleSet("DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=4,12,15,23,-1")
 	// rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
 	// rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
 	// rule, err := models.NewRuleSet("DTSTART:20230401T050000Z\nRRULE:FREQ=DAILY;INTERVAL=2")
 	assert.NoError(t, err)
-	numberOfTransactions := 15
-	size := 256
+	numberOfTransactions := 10
+	size := 4096
 	date := rule.After(time.Now().AddDate(-1, 0, 0), false)
 	transactions := make([]models.Transaction, numberOfTransactions)
 	for i := range transactions {
@@ -683,13 +683,13 @@ func TestFFTReverse(t *testing.T) {
 	// 	fmt.Println("index:", i, "magnitude:", magnitude, "freq:", float64(i)/float64(size))
 	// }
 
-	magnitudes := magnitudes(result[1 : numberOfTransactions+1])
-	mean := meanMagnitude(magnitudes)
-	fmt.Println("Mean magnitude: ", mean)
-	stdDev := standardDeviation(magnitudes, mean)
-	fmt.Println("Standard deviation: ", stdDev)
+	// magnitudes := magnitudes(result[1 : numberOfTransactions+1])
+	// mean := meanMagnitude(magnitudes)
+	// fmt.Println("Mean magnitude: ", mean)
+	// stdDev := standardDeviation(magnitudes, mean)
+	// fmt.Println("Standard deviation: ", stdDev)
 	zScores := zScore(result[1 : numberOfTransactions+1])
-	fmt.Println("Z-Scores: ", zScores)
+	// fmt.Println("Z-Scores: ", zScores)
 	zscorePadding := 8 - len(zScores)%8
 	scores := make([]float64, len(zScores)+zscorePadding)
 	copy(scores, zScores)
@@ -746,6 +746,11 @@ func TestFFTReverse(t *testing.T) {
 	}
 
 	frequencyToIsolate := final[0]
+
+	if frequencyToIsolate.Confidence < 0 {
+		fmt.Println("Confidence is too low, frequency is likely wrong")
+	}
+
 	index := int(math.Round(frequencyToIsolate.EstimatedIndex))
 	// inverseSeries := make([]complex128, len(result))
 	// copy(inverseSeries, result)
@@ -757,8 +762,8 @@ func TestFFTReverse(t *testing.T) {
 	for i := range reconstructed {
 		reconSignal[i] = real(reconstructed[i])
 	}
-	fmt.Println("Series: ", series)
-	fmt.Println("Recons: ", reconSignal)
+	// fmt.Println("Series: ", series)
+	// fmt.Println("Recons: ", reconSignal)
 
 	// TODO Recon signal is a decent waveform showing the frequency that we want,
 	// if I can add a peak detection algorithm into it to isolate the regions of
@@ -772,6 +777,64 @@ func TestFFTReverse(t *testing.T) {
 	// the frequency is 7 days, and thats 4 segments, the the window size should
 	// be 2 segments. It wont work out exactly like that but yyou get the idea.
 	// No idea how to calculate the threshold yet.
+
+	var threshold float64
+	{
+		duplicate := make([]float64, len(reconSignal))
+		copy(duplicate, reconSignal)
+		sort.Float64s(duplicate)
+		// Sort the points from the resulting signal least to greatest, then take
+		// the value of the point at 66% through the sorted results. This value
+		// represents a point that is higher than 66% of the magnitudes, and thus
+		// any value greater than this might be considered a peak.
+		cut := int(float64(len(duplicate)) / 3)
+		threshold = duplicate[len(duplicate)-cut]
+		fmt.Println("CUT:", cut)
+	}
+	fmt.Println("Threshold:", threshold)
+	// Then build an array of ranges that are above that threshold, these are our
+	// "peaks" which we can then use to rebuild which transactions belong to which
+	// peaks.
+	ranges := make([][2]int, 0, numberOfTransactions)
+	startOfRange := -1
+	for x, y := range reconSignal {
+		// If we are under the threshold and not currently observing a range of
+		// indicies then just keep going.
+		if y < threshold && startOfRange == -1 {
+			continue
+		}
+
+		if startOfRange == -1 {
+			startOfRange = x
+		} else if threshold > y {
+			ranges = append(ranges, [2]int{
+				startOfRange,
+				x,
+			})
+			startOfRange = -1
+		}
+	}
+	if startOfRange != -1 {
+		ranges = append(ranges, [2]int{
+			startOfRange,
+			len(reconSignal) - 1,
+		})
+	}
+
+	fmt.Println(ranges)
+
+	for _, txnRange := range ranges {
+		a, b := txnRange[0], txnRange[1]
+		for i := range transactions {
+			txn := transactions[i]
+			secondsSinceStart := float64(txn.Date.Sub(start).Seconds())
+			index := int(math.Round(secondsSinceStart / segment))
+
+			if index >= a && index <= b {
+				fmt.Printf("Transaction %02d - %s is part of %d day frequency, index: %d range: %v\n", i, txn.Date, frequencyToIsolate.Frequency, index, txnRange)
+			}
+		}
+	}
 }
 
 func IsolateFrequencyComponent(result []complex128, index int) []complex128 {
