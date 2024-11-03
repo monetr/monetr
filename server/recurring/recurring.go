@@ -1,190 +1,296 @@
 package recurring
 
 import (
+	"context"
 	"math"
 	"sort"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/calc"
 	"github.com/monetr/monetr/server/models"
+	"github.com/pkg/errors"
 )
 
-type Detection struct {
-	timezone           *time.Location
-	preprocessor       *TFIDF
-	dbscan             *DBSCAN
-	latestObservedDate time.Time
+const minimumNumberOfTransactions = 3
+const paddingDays = 3
+const individualMagnitude float64 = 1024
+const confidenceMinimum float64 = 0.2
+
+var (
+	ErrInsufficientTransactionData = errors.New("not enough transactions, minimum of 3 required to detect recurring")
+)
+
+type Frequency struct {
+	StartDate time.Time
+	Frequency int
+	Rule      models.RuleSet
 }
 
-func NewRecurringTransactionDetection(timezone *time.Location) *Detection {
-	return &Detection{
-		timezone:           timezone,
-		preprocessor:       NewTransactionTFIDF(),
-		dbscan:             nil,
-		latestObservedDate: time.Time{},
-	}
+type FrequencyScore struct {
+	Frequency      int
+	EstimatedIndex float64
+	Index          float64
+	Conclusion     float64
+	Confidence     float64
 }
 
-func (d *Detection) AddTransaction(txn *models.Transaction) {
-	d.preprocessor.AddTransaction(txn)
-	if txn.Date.After(d.latestObservedDate) {
-		d.latestObservedDate = txn.Date
-	}
+type RecurringTransactionResult struct {
+	Best    *Frequency
+	Members []models.Transaction
+	Results []FrequencyScore
 }
 
-func (d *Detection) GetRecurringTransactions() []models.TransactionRecurring {
-	type Hit struct {
-		Window models.WindowType
-		Time   time.Time
+func DetectRecurringTransactions(
+	ctx context.Context,
+	transactions []models.Transaction,
+) (*RecurringTransactionResult, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	// We need at least 3 transactions in order to detect a pattern. Fewer than
+	// this the data will be garbage.
+	if len(transactions) < minimumNumberOfTransactions {
+		return nil, errors.WithStack(ErrInsufficientTransactionData)
 	}
-	type Miss struct {
-		Window models.WindowType
-		Time   time.Time
-	}
-	type Transaction struct {
-		ID       models.ID[models.Transaction]
-		Name     string
-		Merchant string
-		Date     time.Time
-		Amount   int64
-	}
+	numberOfTransactions := len(transactions)
 
-	d.dbscan = NewDBSCAN(d.preprocessor.GetDocuments(), Epsilon, MinNeighbors)
-	result := d.dbscan.Calculate()
-	bestScores := make([]models.TransactionRecurring, 0, len(result))
-
-	for _, cluster := range result {
-		clusterAmounts := map[int64]AmountCluster{}
-		transactions := make([]*models.Transaction, 0, len(cluster.Items))
-		for index := range cluster.Items {
-			transaction := d.dbscan.dataset[index]
-			transactions = append(transactions, transaction.Transaction)
-			a, ok := clusterAmounts[transaction.Transaction.Amount]
-			if !ok {
-				a.IDs = make([]models.ID[models.Transaction], 0, 1)
-				a.Amount = transaction.Transaction.Amount
-			}
-			a.IDs = append(a.IDs, transaction.ID)
-			clusterAmounts[transaction.Transaction.Amount] = a
-		}
-		sort.Slice(transactions, func(i, j int) bool {
-			return transactions[i].Date.Before(transactions[j].Date)
-		})
-
-		start, end := transactions[0].Date, transactions[len(transactions)-1].Date
-		windows := GetWindowsForDate(transactions[0].Date, d.timezone)
-		scores := make([]models.TransactionRecurring, 0, len(windows))
-		for _, window := range windows {
-			var lastAmount int64 = 0
-			misses := make([]Miss, 0)
-			hits := make([]Hit, 0, len(transactions))
-			ids := make([]models.ID[models.Transaction], 0, len(transactions))
-			amounts := make(map[int64]int, len(transactions))
-			occurrences := window.Rule.Between(start.AddDate(0, 0, -window.Fuzzy), end.AddDate(0, 0, window.Fuzzy), false)
-			if len(occurrences) == 1 {
-				continue
-			}
-			for x := range occurrences {
-				occurrence := occurrences[x]
-				foundAny := false
-				for i := range transactions {
-					transaction := transactions[i]
-					delta := math.Abs(transaction.Date.Sub(occurrence).Hours())
-					fuzz := float64(window.Fuzzy) * 24
-					if fuzz >= delta {
-						foundAny = true
-						hits = append(hits, Hit{
-							Window: window.Type,
-							Time:   occurrence,
-						})
-						amounts[transaction.Amount] += 1
-						ids = append(ids, transaction.TransactionId)
-						lastAmount = transaction.Amount
-						continue
-					}
-				}
-				if !foundAny {
-					misses = append(misses, Miss{
-						Window: window.Type,
-						Time:   occurrence,
-					})
-				}
-			}
-
-			if len(hits) == 0 {
-				continue
-			}
-			next := window.Rule.After(hits[len(hits)-1].Time, false)
-			countHits := float32(len(hits))
-			countMisses := float32(len(misses)) * 1.1
-			countTxns := float32(len(transactions))
-			ended := next.Before(d.latestObservedDate.AddDate(0, 0, -window.Fuzzy*2))
-			latestTxn := transactions[len(transactions)-1]
-			name := latestTxn.OriginalName
-			if latestTxn.OriginalMerchantName != "" {
-				name = latestTxn.OriginalMerchantName
-			}
-
-			scores = append(scores, models.TransactionRecurring{
-				TransactionRecurringId: uuid.NewString(),
-				Name:                   name,
-				Window:                 window.Type,
-				RuleSet:                &models.RuleSet{Set: *window.Rule},
-				First:                  hits[0].Time,
-				Last:                   hits[len(hits)-1].Time,
-				Next:                   next,
-				Ended:                  ended,
-				Confidence:             (countHits - countMisses) / countTxns,
-				Members:                ids,
-				Amounts:                amounts,
-				LastAmount:             lastAmount,
-			})
-		}
-
-		if len(scores) > 0 {
-			sort.Slice(scores, func(i, j int) bool {
-				return scores[i].Confidence > scores[j].Confidence
-			})
-
-			if scores[0].Confidence > 0.65 {
-				bestScores = append(bestScores, scores[0])
-			}
-		}
-	}
-
-	return bestScores
-}
-
-type AmountCluster struct {
-	Amount int64
-	IDs    []models.ID[models.Transaction]
-}
-
-func findBuckets(clusterAmounts map[int64]AmountCluster) []AmountCluster {
-	amountsSorted := make([]AmountCluster, 0, len(clusterAmounts))
-	for i := range clusterAmounts {
-		amountsSorted = append(amountsSorted, clusterAmounts[i])
-	}
-	sort.Slice(amountsSorted, func(i, j int) bool {
-		return amountsSorted[i].Amount < amountsSorted[j].Amount
+	// We need to make sure that the transactions are sorted in ascending order
+	// before we begin. This makes sure our start and end calculations are
+	// correct.
+	sort.Slice(transactions, func(i, j int) bool {
+		return transactions[i].Date.Before(transactions[j].Date)
 	})
 
-	if len(amountsSorted) <= 16 {
-		return amountsSorted
+	// Size is the number of items in the time series we are going to build for
+	// the fourier transform.
+	size := calc.FourierSize
+	padding := paddingDays
+
+	// Start and end are the earliest and latest dates in the transaction dataset
+	// with the padding added on.
+	start := transactions[0].Date.AddDate(0, 0, -padding)
+	end := transactions[numberOfTransactions-1].Date.AddDate(0, 0, padding)
+
+	// How many total seconds between the start and the end.
+	window := int64(end.Sub(start).Seconds())
+
+	// How many seconds elapse for each data point in the time series.
+	segment := float64(window) / float64(size)
+
+	crumbs.Debug(span.Context(), "Detecting recurring transactions", map[string]interface{}{
+		"start":   start,
+		"end":     end,
+		"segment": segment,
+		"window":  window,
+		"size":    size,
+		"padding": padding,
+		"count":   len(transactions),
+	})
+
+	// Build our time series of transaction items.
+	series := make([]complex128, size)
+	for i := range transactions {
+		txn := transactions[i]
+		// Calculate the index by taking the number of seconds after the start
+		// timestamp. Multiplying that by our segment size, and rounding down to get
+		// our index.
+		secondsSinceStart := float64(txn.Date.Sub(start).Seconds())
+		// Then we can divide the number of seconds by our segment size; this will
+		// tell us the index we want to use.
+		index := int(math.Round(secondsSinceStart / segment))
+		// Store the transaction at it's index, if there are multiple transactions
+		// on the same "day" then this will increment the "count" of the
+		// transactions on that day by incrementing the real part of the complex
+		// number.
+		series[index] += complex(individualMagnitude, 0)
 	}
 
-	bottom, top := amountsSorted[:len(amountsSorted)/2], amountsSorted[len(amountsSorted)/2:]
-	bottomScore, topScore := 0, 0
-	for _, bottomItem := range bottom {
-		bottomScore += len(bottomItem.IDs)
-	}
-	for _, topItem := range top {
-		topScore += len(topItem.IDs)
+	// Frequencies represents the number of days between each transaction, we will
+	// evaluate the resulting frequency spectrum from the fourier transform for
+	// these specific frequencies. If a group of transactions clearly show a
+	// specific frequency then that will be the end result. Some frequencies are
+	// allowed to overlap or tie for "first". Like 14,15,16.
+	frequencies := []int{
+		7,
+		14,
+		15,
+		16,
+		30,
+		60,
+		90,
 	}
 
-	if bottomScore > topScore {
-		return bottom
+	result := calc.FastFourierTransform(series)
+
+	scores := make([]FrequencyScore, len(frequencies))
+	for f := range frequencies {
+		frequency := frequencies[f]
+		// Period is the frequency adjusted to the scale of our current time series.
+		period := ((time.Duration(frequency) * 24 * time.Hour).Seconds()) / segment
+		// Estimated index is a floating point number which indicates where in the
+		// resulting frequency spectrum this frequency would be located.
+		estimatedIndex := (1 / period) * float64(size)
+		// Index is the actual index we will use for this frequency, this index
+		// might be the same for multiple frequencies depending on the number of
+		// transactions in the time series. We round so that we favor the higher or
+		// lower index depending on the decimal of the estimated index that we
+		// calculated above.
+		index := math.Round(estimatedIndex)
+		score := FrequencyScore{
+			Frequency:      frequency,
+			EstimatedIndex: estimatedIndex,
+			Index:          index,
+			Conclusion:     0,
+			Confidence:     0,
+		}
+
+		// We will only have valid magnitudes up to N + 1 where N is the number of
+		// transactions we provided to the time series. This way we eliminate a ton
+		// of extra data that might be misleading. Also if our index ends up being 0
+		// then this frequency is definitely not valid as 0 is always a useless
+		// frequency on the spectrum.
+		if index > float64(numberOfTransactions)+1 || index == 0 {
+			scores[f] = score
+			continue
+		}
+
+		value := result[int(index)]
+		real := real(value)
+		imaginary := imag(value)
+		magnitude := math.Sqrt((real * real) + (imaginary * imaginary))
+		score.Conclusion = magnitude
+		// Confidence is the magnitude over the maximum potential magnitude. If we
+		// have 3 transactions each with an individual magnitude of 1024, then the
+		// maximum achievable magnitude is 3072. So we can take the magnitude of the
+		// frequency we are checking against over the maximum magnitude possible and
+		// determine how much of the transaction data is represented by that
+		// frequency. We can then throw out frequencies that represent a lower
+		// portion of the overall transaction dataset.
+		score.Confidence = magnitude / (individualMagnitude * float64(numberOfTransactions))
+		scores[f] = score
+	}
+	sort.Slice(scores, func(i, j int) bool {
+		return scores[i].Confidence > scores[j].Confidence
+	})
+
+	frequency := scores[0]
+	if frequency.Confidence < confidenceMinimum {
+		return &RecurringTransactionResult{
+			Best:    nil,
+			Members: nil,
+			Results: scores,
+		}, nil
 	}
 
-	return top
+	// This index represents the spike in the frequency spectrum for the frequency
+	// that we want to isolate.
+	index := int(math.Round(frequency.EstimatedIndex))
+
+	// Create a new series based on the output of the original fourier transform.
+	n := len(result)
+	isolatedSeries := make([]complex128, n)
+	copy(isolatedSeries, result)
+
+	// Then zero out everything in the isolated series except for the index that
+	// we want to isolate. We need to isolate the mirror of our index as well
+	// because the result of a fourier transform is symetrical. Isolating only one
+	// side will fuck up the results of the inverse transform we will be
+	// performing below.
+	for i := range isolatedSeries {
+		if i == index || i == (n-index)%n {
+			continue
+		}
+		isolatedSeries[i] = complex(0, 0)
+	}
+
+	// Now we perform the inverse fourier transform on our data. This will return
+	// a waveform that only represents the frequency we have selected above.
+	invertedSeries := calc.InverseFastFourierTransform(isolatedSeries)
+	// Take only the real portion of our inverted series and put that into its own
+	// array.
+	signal := make([]float64, len(invertedSeries))
+	for i := range signal {
+		signal[i] = real(invertedSeries[i])
+	}
+
+	// Now we need to calculate a threshold for peak detection of our waveform.
+	// Peaks represent the actually recurrences in our original dataset.
+	var threshold float64
+	{
+		duplicate := make([]float64, len(signal))
+		copy(duplicate, signal)
+		sort.Float64s(duplicate)
+		// Sort the points from the resulting signal least to greatest, then take
+		// the value of the point at 66% through the sorted results. This value
+		// represents a point that is higher than 66% of the magnitudes, and thus
+		// any value greater than this might be considered a peak. Essentially we
+		// want to isolate the top 33% of the waveform.
+		cut := int(float64(len(duplicate)) / 3)
+		threshold = duplicate[len(duplicate)-cut]
+	}
+
+	// Now we can scan over the waveform and find all of the ranges of peaks on
+	// the wave. These peaks should correlate strongly with indicies of
+	// transactions in our original dataset when converted to a time series.
+	ranges := make([][2]int, 0, numberOfTransactions)
+	startOfRange := -1
+	for x, y := range signal {
+		// If we are under the threshold and not currently observing a range of
+		// indicies then just keep going.
+		if y < threshold && startOfRange == -1 {
+			continue
+		}
+
+		if startOfRange == -1 {
+			startOfRange = x
+		} else if threshold > y {
+			ranges = append(ranges, [2]int{
+				startOfRange,
+				x,
+			})
+			startOfRange = -1
+		}
+	}
+	if startOfRange != -1 {
+		ranges = append(ranges, [2]int{
+			startOfRange,
+			len(signal) - 1,
+		})
+	}
+
+	// Now take our ranges and isolate the transactions that belong to this
+	// frequency so we can include those in our result.
+	members := make([]models.Transaction, 0, numberOfTransactions)
+	lastIndex := 0
+	for _, txnRange := range ranges {
+		a, b := txnRange[0], txnRange[1]
+		for i := lastIndex; i < numberOfTransactions; i++ {
+			txn := transactions[i]
+			secondsSinceStart := float64(txn.Date.Sub(start).Seconds())
+			index := int(math.Round(secondsSinceStart / segment))
+
+			if index >= a && index <= b {
+				// If the transaction falls in our peak range then add it to the member
+				// array.
+				members = append(members, txn)
+				// This way on the next range we don't need to reread transactions, we
+				// can just jump right to the spot we havent read.
+				lastIndex = i
+			}
+		}
+	}
+
+	// TODO Determine if the top score is actually the best, or if it is tied with
+	// other scores. If its tied but its a compatible score (such as 14, 15 and
+	// 16) then use the top score. Otherwise return no recurrence detected.
+
+	return &RecurringTransactionResult{
+		Best: &Frequency{
+			StartDate: members[0].Date,
+			Frequency: frequency.Frequency,
+		},
+		Members: members,
+		Results: scores,
+	}, nil
 }

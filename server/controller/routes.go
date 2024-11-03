@@ -313,8 +313,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/bank_accounts/:bankAccountId/forecast", c.getForecast)
 	billed.POST("/bank_accounts/:bankAccountId/forecast/spending", c.postForecastNewSpending)
 	billed.POST("/bank_accounts/:bankAccountId/forecast/next_funding", c.postForecastNextFunding)
-	// Recurring
-	billed.GET("/bank_accounts/:bankAccountId/recurring", c.getRecurring)
 	// Plaid Link
 	billed.PUT("/plaid/link/update/:linkId", c.putUpdatePlaidLink)
 	billed.POST("/plaid/link/update/callback", c.updatePlaidTokenCallback)
