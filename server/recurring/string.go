@@ -27,6 +27,11 @@ func CleanNameRegex(transaction *models.Transaction) (lower []string, normal []s
 		if len(numbers) > 0 {
 			continue
 		}
+		// Throw out words with no vowels
+		vowels := vowelsOnly.FindAllString(strings.ToLower(word), len(word))
+		if len(vowels) == 0 {
+			continue
+		}
 		lower = append(lower, strings.ToLower(word))
 		normal = append(normal, word)
 	}

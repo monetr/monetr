@@ -3,6 +3,7 @@ package recurring
 import (
 	"math"
 	"regexp"
+	"strings"
 
 	"github.com/monetr/monetr/server/internal/calc"
 	"github.com/monetr/monetr/server/models"
@@ -11,6 +12,7 @@ import (
 var (
 	// clusterCleanStringRegex = regexp.MustCompile(`[a-zA-Z'\.\d]+`)
 	clusterCleanStringRegex = regexp.MustCompile(`(?:\b(?:[a-zA-Z]|\d){1}(?:[a-zA-Z.]{1,})(?:\d{1}[a-zA-Z]*){0,2}\b)`)
+	vowelsOnly              = regexp.MustCompile(`[aeyiuo]+`)
 	numberOnly              = regexp.MustCompile(`^\d+$`)
 
 	specialWeights = map[string]float32{
@@ -18,6 +20,7 @@ var (
 		"youtube premium": 5,
 		"google":          2,
 		"pwp":             0, // Paid with privacy
+		"privacycom":      0, // Same as pwp
 		"sq":              0, // Square
 		"debit":           0,
 		"pos":             0,
@@ -79,21 +82,31 @@ func (p *TFIDF) indexWords() map[string]int {
 	return result
 }
 
-func (p *TFIDF) AddTransaction(txn *models.Transaction) {
-	lower, normal := CleanNameRegex(txn)
-	name := make([]string, 0, len(lower))
-	wordCounts := make(map[string]float32, len(lower))
-	for i, word := range lower {
+func TokenizeName(txn *models.Transaction) (lower, normal []string) {
+	lowerIn, normalIn := CleanNameRegex(txn)
+	lower = make([]string, 0, len(lowerIn))
+	normal = make([]string, 0, len(lowerIn))
+	for i, word := range lowerIn {
+		item := normalIn[i]
 		// If there is a synonym for the current word use that instead.
 		if synonym, ok := synonyms[word]; ok {
-			word = synonym
+			item = synonym
 		}
 		if multiplier, ok := specialWeights[word]; ok && multiplier == 0 {
 			continue
 		}
+		lower = append(lower, strings.ToLower(item))
+		normal = append(normal, item)
+	}
+	return lower, normal
+}
+
+func (p *TFIDF) AddTransaction(txn *models.Transaction) {
+	lower, upper := TokenizeName(txn)
+	wordCounts := make(map[string]float32, len(lower))
+	for _, word := range lower {
 		wordCounts[word]++
 		p.wc[word]++
-		name = append(name, normal[i])
 	}
 
 	tf := make(map[string]float32, len(wordCounts))
@@ -103,7 +116,7 @@ func (p *TFIDF) AddTransaction(txn *models.Transaction) {
 
 	p.documents = append(p.documents, Document{
 		ID:          txn.TransactionId,
-		Parts:       name,
+		Parts:       upper,
 		Transaction: txn,
 		TF:          tf,
 		TFIDF:       map[string]float32{},

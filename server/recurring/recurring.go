@@ -176,8 +176,11 @@ func DetectRecurringTransactions(
 
 	frequency := scores[0]
 	if frequency.Confidence < confidenceMinimum {
-		// TODO Still return the result
-		return nil, nil
+		return &RecurringTransactionResult{
+			Best:    nil,
+			Members: nil,
+			Results: scores,
+		}, nil
 	}
 
 	// This index represents the spike in the frequency spectrum for the frequency
