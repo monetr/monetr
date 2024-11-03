@@ -38,6 +38,7 @@ var (
 		"of":              0,
 		"helppay":         0, // Shows up on some google transactions, not helpful.
 		"null":            0, // Shows up in manual imports somtimes
+		"us":              0,
 	}
 
 	states = map[string]float32{
@@ -96,6 +97,7 @@ var (
 	synonyms = map[string]string{
 		"amzn":       "amazon",
 		"youtubepre": "youtube premium",
+		"coffe":      "coffee",
 	}
 )
 

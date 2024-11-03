@@ -86,4 +86,37 @@ func TestTokenizeName(t *testing.T) {
 			"dominos",
 		}, lower, "should match the cleaned string")
 	})
+
+	t.Run("pet supplies", func(t *testing.T) {
+		txn := models.Transaction{
+			OriginalName: "POS DEBIT-DC    5988 CHUCK&DONS FOREST LAKE FOREST LAKE null US",
+		}
+
+		lower, _ := TokenizeName(&txn)
+		assert.EqualValues(t, []string{
+			"chuck", "dons", "forest", "lake", "forest", "lake",
+		}, lower, "should match the cleaned string")
+	})
+
+	t.Run("market", func(t *testing.T) {
+		txn := models.Transaction{
+			OriginalName: "POS DEBIT-DC    5988 BRINKS MARKET CHISAGO CITY MN US",
+		}
+
+		lower, _ := TokenizeName(&txn)
+		assert.EqualValues(t, []string{
+			"brinks", "market", "chisago", "city",
+		}, lower, "should match the cleaned string")
+	})
+
+	t.Run("toast pos", func(t *testing.T) {
+		txn := models.Transaction{
+			OriginalName: "POS DEBIT-DC    5988 TST* CARIBOU COFFE NORTH BRANCH MN",
+		}
+
+		lower, _ := TokenizeName(&txn)
+		assert.EqualValues(t, []string{
+			"caribou", "coffee", "north", "branch",
+		}, lower, "should match the cleaned string")
+	})
 }

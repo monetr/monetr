@@ -437,16 +437,17 @@ func (j *ProcessQFXUploadJob) syncTransactions(ctx context.Context) error {
 		transaction, ok := j.existingTransactions[uploadIdentifier]
 		if !ok {
 			transaction = Transaction{
-				TransactionId:    NewID(&transaction),
-				AccountId:        j.args.AccountId,
-				BankAccountId:    j.args.BankAccountId,
-				Amount:           amount,
-				Date:             date,
-				Name:             name,
-				OriginalName:     originalName,
-				Currency:         "USD", // TODO Derive from file
-				IsPending:        false, // QFX files don't show pending?
-				UploadIdentifier: &uploadIdentifier,
+				TransactionId:        NewID(&transaction),
+				AccountId:            j.args.AccountId,
+				BankAccountId:        j.args.BankAccountId,
+				Amount:               amount,
+				Date:                 date,
+				Name:                 name,
+				OriginalName:         originalName,
+				OriginalMerchantName: name,
+				Currency:             "USD", // TODO Derive from file
+				IsPending:            false, // QFX files don't show pending?
+				UploadIdentifier:     &uploadIdentifier,
 			}
 			transactionsToCreate = append(transactionsToCreate, transaction)
 			continue
