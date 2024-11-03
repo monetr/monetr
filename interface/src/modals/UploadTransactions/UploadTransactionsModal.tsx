@@ -92,7 +92,12 @@ function UploadFileStage(props: StageProps) {
     const selectedFile = acceptedFiles[0];
     setFile(selectedFile);
   }, []);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
+    onDrop,
+    accept: {
+      'application/vnd.intu.QFX': ['.ofx', '.qfx'],
+    },
+  });
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
