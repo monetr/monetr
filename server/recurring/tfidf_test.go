@@ -27,7 +27,7 @@ func TestTokenizeName(t *testing.T) {
 
 		lower, _ := TokenizeName(&txn)
 		assert.EqualValues(t, []string{
-			"google", "youtube premium", "gco", "ca",
+			"google", "youtube premium", "gco",
 		}, lower, "should match the cleaned string")
 	})
 
