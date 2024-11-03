@@ -14,6 +14,8 @@ import (
 
 const minimumNumberOfTransactions = 3
 const paddingDays = 3
+const individualMagnitude float64 = 1024
+const confidenceMinimum float64 = 0.2
 
 var (
 	ErrInsufficientTransactionData = errors.New("not enough transactions, minimum of 3 required to detect recurring")
@@ -35,6 +37,7 @@ type FrequencyScore struct {
 
 type RecurringTransactionResult struct {
 	Best    *Frequency
+	Members []models.Transaction
 	Results []FrequencyScore
 }
 
@@ -50,12 +53,13 @@ func DetectRecurringTransactions(
 	if len(transactions) < minimumNumberOfTransactions {
 		return nil, errors.WithStack(ErrInsufficientTransactionData)
 	}
+	numberOfTransactions := len(transactions)
 
 	// We need to make sure that the transactions are sorted in ascending order
 	// before we begin. This makes sure our start and end calculations are
 	// correct.
 	sort.Slice(transactions, func(i, j int) bool {
-		return transactions[i].Date.After(transactions[j].Date)
+		return transactions[i].Date.Before(transactions[j].Date)
 	})
 
 	// Size is the number of items in the time series we are going to build for
@@ -66,7 +70,7 @@ func DetectRecurringTransactions(
 	// Start and end are the earliest and latest dates in the transaction dataset
 	// with the padding added on.
 	start := transactions[0].Date.AddDate(0, 0, -padding)
-	end := transactions[len(transactions)-1].Date.AddDate(0, 0, padding)
+	end := transactions[numberOfTransactions-1].Date.AddDate(0, 0, padding)
 
 	// How many total seconds between the start and the end.
 	window := int64(end.Sub(start).Seconds())
@@ -99,7 +103,7 @@ func DetectRecurringTransactions(
 		// on the same "day" then this will increment the "count" of the
 		// transactions on that day by incrementing the real part of the complex
 		// number.
-		series[index] += complex(1, 0)
+		series[index] += complex(individualMagnitude, 0)
 	}
 
 	// Frequencies represents the number of days between each transaction, we will
@@ -134,7 +138,7 @@ func DetectRecurringTransactions(
 		// calculated above.
 		index := math.Round(estimatedIndex)
 		score := FrequencyScore{
-			Frequency:      f,
+			Frequency:      frequency,
 			EstimatedIndex: estimatedIndex,
 			Index:          index,
 			Conclusion:     0,
@@ -146,7 +150,7 @@ func DetectRecurringTransactions(
 		// of extra data that might be misleading. Also if our index ends up being 0
 		// then this frequency is definitely not valid as 0 is always a useless
 		// frequency on the spectrum.
-		if index > float64(len(transactions))+1 || index == 0 {
+		if index > float64(numberOfTransactions)+1 || index == 0 {
 			scores[f] = score
 			continue
 		}
@@ -156,19 +160,134 @@ func DetectRecurringTransactions(
 		imaginary := imag(value)
 		magnitude := math.Sqrt((real * real) + (imaginary * imaginary))
 		score.Conclusion = magnitude
-		// TODO Add some form of confidence calculation
+		// Confidence is the magnitude over the maximum potential magnitude. If we
+		// have 3 transactions each with an individual magnitude of 1024, then the
+		// maximum achievable magnitude is 3072. So we can take the magnitude of the
+		// frequency we are checking against over the maximum magnitude possible and
+		// determine how much of the transaction data is represented by that
+		// frequency. We can then throw out frequencies that represent a lower
+		// portion of the overall transaction dataset.
+		score.Confidence = magnitude / (individualMagnitude * float64(numberOfTransactions))
 		scores[f] = score
 	}
 	sort.Slice(scores, func(i, j int) bool {
-		return scores[i].Conclusion > scores[j].Conclusion
+		return scores[i].Confidence > scores[j].Confidence
 	})
+
+	frequency := scores[0]
+	if frequency.Confidence < confidenceMinimum {
+		// TODO Still return the result
+		return nil, nil
+	}
+
+	// This index represents the spike in the frequency spectrum for the frequency
+	// that we want to isolate.
+	index := int(math.Round(frequency.EstimatedIndex))
+
+	// Create a new series based on the output of the original fourier transform.
+	n := len(result)
+	isolatedSeries := make([]complex128, n)
+	copy(isolatedSeries, result)
+
+	// Then zero out everything in the isolated series except for the index that
+	// we want to isolate. We need to isolate the mirror of our index as well
+	// because the result of a fourier transform is symetrical. Isolating only one
+	// side will fuck up the results of the inverse transform we will be
+	// performing below.
+	for i := range isolatedSeries {
+		if i == index || i == (n-index)%n {
+			continue
+		}
+		isolatedSeries[i] = complex(0, 0)
+	}
+
+	// Now we perform the inverse fourier transform on our data. This will return
+	// a waveform that only represents the frequency we have selected above.
+	invertedSeries := calc.InverseFastFourierTransform(isolatedSeries)
+	// Take only the real portion of our inverted series and put that into its own
+	// array.
+	signal := make([]float64, len(invertedSeries))
+	for i := range signal {
+		signal[i] = real(invertedSeries[i])
+	}
+
+	// Now we need to calculate a threshold for peak detection of our waveform.
+	// Peaks represent the actually recurrences in our original dataset.
+	var threshold float64
+	{
+		duplicate := make([]float64, len(signal))
+		copy(duplicate, signal)
+		sort.Float64s(duplicate)
+		// Sort the points from the resulting signal least to greatest, then take
+		// the value of the point at 66% through the sorted results. This value
+		// represents a point that is higher than 66% of the magnitudes, and thus
+		// any value greater than this might be considered a peak. Essentially we
+		// want to isolate the top 33% of the waveform.
+		cut := int(float64(len(duplicate)) / 3)
+		threshold = duplicate[len(duplicate)-cut]
+	}
+
+	// Now we can scan over the waveform and find all of the ranges of peaks on
+	// the wave. These peaks should correlate strongly with indicies of
+	// transactions in our original dataset when converted to a time series.
+	ranges := make([][2]int, 0, numberOfTransactions)
+	startOfRange := -1
+	for x, y := range signal {
+		// If we are under the threshold and not currently observing a range of
+		// indicies then just keep going.
+		if y < threshold && startOfRange == -1 {
+			continue
+		}
+
+		if startOfRange == -1 {
+			startOfRange = x
+		} else if threshold > y {
+			ranges = append(ranges, [2]int{
+				startOfRange,
+				x,
+			})
+			startOfRange = -1
+		}
+	}
+	if startOfRange != -1 {
+		ranges = append(ranges, [2]int{
+			startOfRange,
+			len(signal) - 1,
+		})
+	}
+
+	// Now take our ranges and isolate the transactions that belong to this
+	// frequency so we can include those in our result.
+	members := make([]models.Transaction, 0, numberOfTransactions)
+	lastIndex := 0
+	for _, txnRange := range ranges {
+		a, b := txnRange[0], txnRange[1]
+		for i := lastIndex; i < numberOfTransactions; i++ {
+			txn := transactions[i]
+			secondsSinceStart := float64(txn.Date.Sub(start).Seconds())
+			index := int(math.Round(secondsSinceStart / segment))
+
+			if index >= a && index <= b {
+				// If the transaction falls in our peak range then add it to the member
+				// array.
+				members = append(members, txn)
+				// This way on the next range we don't need to reread transactions, we
+				// can just jump right to the spot we havent read.
+				lastIndex = i
+			}
+		}
+	}
 
 	// TODO Determine if the top score is actually the best, or if it is tied with
 	// other scores. If its tied but its a compatible score (such as 14, 15 and
 	// 16) then use the top score. Otherwise return no recurrence detected.
 
-	// TODO Try to determine which transactions are part of the recurrence as well
-	// as what the start date for the actual recurrence is.
-
-	return nil, nil
+	return &RecurringTransactionResult{
+		Best: &Frequency{
+			StartDate: members[0].Date,
+			Frequency: frequency.Frequency,
+		},
+		Members: members,
+		Results: scores,
+	}, nil
 }

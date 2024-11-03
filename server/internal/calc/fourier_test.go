@@ -637,12 +637,13 @@ func TestFFTReverse(t *testing.T) {
 	assert.NoError(t, err)
 	numberOfTransactions := 10
 	size := 4096
+	individualMagnitude := 1024
 	date := rule.After(time.Now().AddDate(-1, 0, 0), false)
 	transactions := make([]models.Transaction, numberOfTransactions)
 	for i := range transactions {
 		transactions[i] = models.Transaction{
 			TransactionId: models.ID[models.Transaction](fmt.Sprintf("txn_%d", i)),
-			Amount:        1024,
+			Amount:        int64(individualMagnitude),
 			Date:          date,
 		}
 		date = rule.After(date, false)
@@ -670,7 +671,7 @@ func TestFFTReverse(t *testing.T) {
 		// tell us the index we want to use.
 		index := int(math.Round(secondsSinceStart / segment))
 		// Store the transaction and its amount at that index in the series.
-		series[index] = complex(float64(txn.Amount), 0)
+		series[index] = complex(float64(individualMagnitude), 0)
 		fmt.Printf("[%02d/%04d] transaction %v\n", i, index, txn.Date)
 	}
 
@@ -728,12 +729,13 @@ func TestFFTReverse(t *testing.T) {
 		}
 		cplx := result[int(primary)]
 		magnitude := math.Sqrt((real(cplx) * real(cplx)) + (imag(cplx) * imag(cplx)))
-		item.Confidence = scores[primary-1]
+		//  scores[primary-1]
+		item.Confidence = magnitude / (float64(individualMagnitude) * float64(numberOfTransactions))
 		item.Concluded = magnitude
 		final[f] = item
 	}
 	sort.Slice(final, func(i, j int) bool {
-		return final[i].Concluded > final[j].Concluded
+		return final[i].Confidence > final[j].Confidence
 	})
 
 	for f := range final {
@@ -747,7 +749,7 @@ func TestFFTReverse(t *testing.T) {
 
 	frequencyToIsolate := final[0]
 
-	if frequencyToIsolate.Confidence < 0 {
+	if frequencyToIsolate.Confidence < 0.2 {
 		fmt.Println("Confidence is too low, frequency is likely wrong")
 	}
 
