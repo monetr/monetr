@@ -2,7 +2,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
+import { format, isThisYear } from 'date-fns';
 
+import MBadge from '@monetr/interface/components/MBadge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import Spending from '@monetr/interface/models/Spending';
@@ -32,6 +34,10 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
     navigate(`/bank/${spending.bankAccountId}/expenses/${spending.spendingId}/details`);
   }
 
+  const dateString =  isThisYear(spending.nextRecurrence) ?
+    format(spending.nextRecurrence, 'MMM do') :
+    format(spending.nextRecurrence, 'MMM do, yyyy');
+
   return (
     <li className='group relative w-full px-1 md:px-2'>
       <div
@@ -42,9 +48,15 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
         <div className='flex items-center flex-1 w-full md:w-1/2 gap-4 min-w-0 pr-1'>
           <MerchantIcon name={ spending.name } />
           <div className='flex flex-col overflow-hidden min-w-0'>
-            <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
-              { spending.name }
-            </span>
+            <div className='flex'>
+              <span className='text-zinc-50 font-semibold text-base overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
+                { spending.name }
+              </span>
+              <MBadge className='flex-none text-xs ml-1'>
+                { dateString }
+              </MBadge>
+            </div>
+            { /* This block only shows on desktops or larger screens */ }
             <span className='hidden md:block text-zinc-200 font-sm text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
               { rule.toText() }
             </span>
@@ -53,11 +65,15 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
             </span>
           </div>
         </div>
+
+        { /* This block only shows on mobile screens */ }
         <div className='hidden md:flex w-1/2 overflow-hidden flex-1 min-w-0 items-center'>
           <span className='text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
             { spending.getNextContributionAmountString() } / { fundingSchedule?.name }
           </span>
         </div>
+
+        { /* This block only shows on mobile screens */ }
         <div className='flex md:hidden shrink-0 items-center gap-2'>
           <div className='flex flex-col'>
             <span className={ amountClass }>
@@ -70,6 +86,8 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
           </div>
           <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50 flex-none md:cursor-pointer' />
         </div>
+
+        { /* This block only shows on desktops or larger screens */ }
         <div className='hidden md:flex md:min-w-[12em] shrink-0 justify-end gap-2 items-center'>
           <div className='flex flex-col'>
             <div className='flex justify-end'>

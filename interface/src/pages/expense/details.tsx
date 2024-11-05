@@ -7,7 +7,6 @@ import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import ExpenseTimeline from './ExpenseTimeline';
-import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
 import { MBaseButton } from '@monetr/interface/components/MButton';
@@ -169,10 +168,10 @@ export default function ExpenseDetails(): JSX.Element {
           <SwapVertOutlined />
             Transfer
         </MBaseButton>
-        <Button variant='destructive' onClick={ deleteExpense } >
+        <MBaseButton color='cancel' className='gap-1 py-1 px-2' onClick={ deleteExpense } >
           <DeleteOutlined />
           Remove
-        </Button>
+        </MBaseButton>
         <FormButton variant='primary' type='submit' role='form'>
           <SaveOutlined />
           Save
