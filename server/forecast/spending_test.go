@@ -573,6 +573,8 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 	})
 
 	t.Run("odd goal contribution repro", func(t *testing.T) {
+		// This test makes sure that even when we are avoiding weekends that we are
+		// staying consistent in how we are contributing to a budget.
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		fundingRule := testutils.NewRuleSet(t, 2021, 12, 31, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		now := time.Date(2024, 3, 28, 0, 0, 0, 0, timezone)
@@ -606,8 +608,69 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 
 		events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 8, now, timezone)
 		assert.NoError(t, err, "should not return an error")
-		j, _ := json.MarshalIndent(events, "", "  ")
-		fmt.Println(string(j))
+		assert.Equal(t, []SpendingEvent{
+			{
+				Date:               time.Date(2024, 3, 29, 0, 0, 0, 0, timezone),
+				TransactionAmount:  0,
+				ContributionAmount: 157936,
+				RollingAllocation:  206330,
+				Funding: []FundingEvent{
+					{
+						Date:           time.Date(2024, 3, 29, 0, 0, 0, 0, timezone),
+						OriginalDate:   time.Date(2024, 3, 31, 0, 0, 0, 0, timezone),
+						WeekendAvoided: true,
+					},
+				},
+			},
+			{
+				Date:               time.Date(2024, 4, 15, 0, 0, 0, 0, timezone),
+				TransactionAmount:  0,
+				ContributionAmount: 157936,
+				RollingAllocation:  364266,
+				Funding: []FundingEvent{
+					{
+						Date:           time.Date(2024, 4, 15, 0, 0, 0, 0, timezone),
+						OriginalDate:   time.Date(2024, 4, 15, 0, 0, 0, 0, timezone),
+						WeekendAvoided: false,
+					},
+				},
+			},
+			{
+				Date:               time.Date(2024, 4, 30, 0, 0, 0, 0, timezone),
+				TransactionAmount:  0,
+				ContributionAmount: 157936,
+				RollingAllocation:  522202,
+				Funding: []FundingEvent{
+					{
+						Date:           time.Date(2024, 4, 30, 0, 0, 0, 0, timezone),
+						OriginalDate:   time.Date(2024, 4, 30, 0, 0, 0, 0, timezone),
+						WeekendAvoided: false,
+					},
+				},
+			},
+			{
+				Date:               time.Date(2024, 5, 15, 0, 0, 0, 0, timezone),
+				TransactionAmount:  0,
+				ContributionAmount: 157937,
+				RollingAllocation:  680139,
+				Funding: []FundingEvent{
+					{
+						Date:           time.Date(2024, 5, 15, 0, 0, 0, 0, timezone),
+						OriginalDate:   time.Date(2024, 5, 15, 0, 0, 0, 0, timezone),
+						WeekendAvoided: false,
+					},
+				},
+			},
+			{
+				Date:               time.Date(2024, 5, 16, 0, 0, 0, 0, timezone),
+				TransactionAmount:  1000000,
+				ContributionAmount: 0,
+				// TODO This is the same as the used amount, so what gives? Should this
+				// be 0? Should it take into account the used amount?
+				RollingAllocation: -319861,
+				Funding:           []FundingEvent{},
+			},
+		}, events)
 	})
 }
 
