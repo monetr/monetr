@@ -10,23 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// List Transactions
-// @Summary List Transactions
-// @ID list-transactions
-// @tags Transactions
-// @description Lists the transactions for the specified bank account Id. Transactions are returned sorted by the date
-// @description they were authorized (descending) and then by their numeric Id (descending). This means that
-// @description transactions that were first seen later will be higher in the list than they may have actually occurred.
-// @Security ApiKeyAuth
-// @Produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Param limit query int false "Specifies the number of transactions to return in the result, default is 25. Max is 100."
-// @Param offset query int false "The number of transactions to skip before returning any."
-// @Router /bank_accounts/{bankAccountId}/transactions [get]
-// @Success 200 {array} swag.TransactionResponse
-// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getTransactions(ctx echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
