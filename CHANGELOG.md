@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.18.21](https://github.com/monetr/monetr/compare/v0.18.20...v0.18.21) (2024-11-05)
+
+
+### Features
+
+* **docs:** Adding specific notes on where to store credentials ([86c6ee3](https://github.com/monetr/monetr/commit/86c6ee380e7311ba4344e8fbebf1e9a6728227cc))
+* **ui:** Add next due date to expense list view ([fb59ab4](https://github.com/monetr/monetr/commit/fb59ab436e3c6990b34ada57e4fad3dc7e004c73)), closes [#1501](https://github.com/monetr/monetr/issues/1501)
+* **ui:** Show allocated amount on goal details page ([d82acf3](https://github.com/monetr/monetr/commit/d82acf33e29de2dc7dd1e61c42351d4b3d85b0d0)), closes [#1503](https://github.com/monetr/monetr/issues/1503)
+* **ui:** Show amount allocated on expense details page ([85906c3](https://github.com/monetr/monetr/commit/85906c3079dedb5df71f5d131b4f73292a189573)), closes [#1500](https://github.com/monetr/monetr/issues/1500)
+
+
+### Dependencies
+
+* **api:** update module github.com/golang-jwt/jwt/v4 to v4.5.1 [security] ([#2106](https://github.com/monetr/monetr/issues/2106)) ([f172c23](https://github.com/monetr/monetr/commit/f172c233bdca52f6c16d67c2ae59ef755615d772))
+* **ui:** update sentry-javascript monorepo to v8.36.0 ([#2105](https://github.com/monetr/monetr/issues/2105)) ([6fe5cb7](https://github.com/monetr/monetr/commit/6fe5cb71e318939ee0b60da776a84805e0d2edcc))
+
+
+### Bug Fixes
+
+* **forecast:** Fixing assertion in forecasting test ([451cbe8](https://github.com/monetr/monetr/commit/451cbe816cbe13a7f7ec5cf7d11e8285cb149f29)), closes [#1720](https://github.com/monetr/monetr/issues/1720)
+* **sentry:** Include assembly files in golang sourcemap ([6f73b5e](https://github.com/monetr/monetr/commit/6f73b5eb4976b145852b7307c0a7d0a98044c41a))
+* **ui:** Fix pull to refresh on detail pages ([3c9b1a6](https://github.com/monetr/monetr/commit/3c9b1a62d6dad8bc7c117d4f7c291ed4555f8d16))
+* **ui:** Fixed console error about passing `false` as class name. ([6db2b33](https://github.com/monetr/monetr/commit/6db2b338f3379084a937bb755bc1607f9bc7046c))
+* **ui:** Indicate if a bank account is inactive ([4263242](https://github.com/monetr/monetr/commit/42632427f6320be152721e0867f3be4227cc8f4e)), closes [#1082](https://github.com/monetr/monetr/issues/1082)
+
 ## [0.18.20](https://github.com/monetr/monetr/compare/v0.18.19...v0.18.20) (2024-11-03)
 
 
