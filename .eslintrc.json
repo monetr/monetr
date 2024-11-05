@@ -262,6 +262,7 @@
                 "^date-fns",
                 "^formik",
                 "^history",
+                "^lucide-react",
                 "^next",
                 "^notistack",
                 "^ramda",

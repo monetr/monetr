@@ -1,11 +1,12 @@
 import React, { Fragment, useCallback, useEffect, useRef } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { useNavigationType } from 'react-router-dom';
-import { HeartBroken, ShoppingCartOutlined, UploadOutlined } from '@mui/icons-material';
+import { HeartBroken, ShoppingCartOutlined } from '@mui/icons-material';
 import { format, getUnixTime, parse } from 'date-fns';
+import { Plus, Upload } from 'lucide-react';
 import * as R from 'ramda';
 
-import { MBaseButton } from '@monetr/interface/components/MButton';
+import { Button } from '@monetr/interface/components/Button';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import TransactionDateItem from '@monetr/interface/components/transactions/TransactionDateItem';
@@ -13,6 +14,7 @@ import TransactionItem from '@monetr/interface/components/transactions/Transacti
 import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransactions } from '@monetr/interface/hooks/transactions';
 import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
+import { showNewTransactionModal } from '@monetr/interface/modals/NewTransactionModal';
 import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import Transaction from '@monetr/interface/models/Transaction';
 
@@ -107,10 +109,10 @@ export default function Transactions(): JSX.Element {
     }
 
     return (
-      <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showUploadTransactionsModal }>
-        <UploadOutlined />
+      <Button variant='primary' onClick={ showUploadTransactionsModal } className='hidden md:flex'>
+        <Upload />
         Upload
-      </MBaseButton>
+      </Button>
     );
   }
 
@@ -154,6 +156,7 @@ export default function Transactions(): JSX.Element {
           title='Transactions'
         >
           <UploadButtonMaybe />
+          <AddTransactionButton />
         </MTopNavigation>
         <div className='w-full h-full flex justify-center items-center'>
           <div className='flex flex-col gap-2 items-center max-w-md'>
@@ -180,9 +183,10 @@ export default function Transactions(): JSX.Element {
         title='Transactions'
       >
         <UploadButtonMaybe />
+        <AddTransactionButton />
       </MTopNavigation>
       <div className='flex flex-grow min-w-0 min-h-0'>
-        <ul className='w-full overflow-y-auto' ref={ ref }>
+        <ul className='w-full overflow-y-auto pb-16' ref={ ref }>
           <TransactionItems />
           {loading && (
             <li ref={ sentryRef }>
@@ -208,5 +212,22 @@ export default function Transactions(): JSX.Element {
         </ul>
       </div>
     </Fragment>
+  );
+}
+
+function AddTransactionButton(): JSX.Element {
+  const { data: link } = useCurrentLink();
+
+  if (!link || !link.getIsManual()) {
+    return null;
+  }
+
+  return (
+    <button 
+      className='fixed bottom-4 right-4 w-14 h-14 rounded-full bg-dark-monetr-background backdrop-blur-sm bg-opacity-75 backdrop-brightness-200 z-[100] flex items-center justify-center active:backdrop-brightness-50'
+      onClick={ showNewTransactionModal }
+    >
+      <Plus className='h-12 w-12 text-dark-monetr-content' />
+    </button>
   );
 }
