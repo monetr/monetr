@@ -191,6 +191,10 @@ export function useTransfer(): (transferParameters: TransferParameters) => Promi
           (previous: Array<Partial<Spending>>) => previous
             .map(item => result.spending.find(updated => updated.spendingId === item.spendingId) || item),
         ),
+        result.spending.map(updatedSpending => queryClient.setQueriesData(
+          [`/bank_accounts/${ selectedBankAccountId }/spending/${updatedSpending.spendingId}`],
+          () => updatedSpending,
+        )),
         queryClient.setQueriesData(
           [`/bank_accounts/${ selectedBankAccountId }/balances`],
           (previous: Partial<Balance>) => new Balance({

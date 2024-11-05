@@ -43,7 +43,7 @@ export default function SelectBankAccount(): JSX.Element {
 
   return (
     <Combobox 
-      className='w-full'
+      className='w-full h-[34px]'
       variant='text'
       size='select'
       options={ accounts } 

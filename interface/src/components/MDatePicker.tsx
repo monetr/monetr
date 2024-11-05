@@ -151,10 +151,11 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     'shadow-sm',
     'sm:leading-6',
     'text-sm',
+    'font-normal',
     'w-full',
     'relative',
     'inline-flex',
-    'justify-start'
+    'justify-start',
   );
 
   const LabelDecorator = props.labelDecorator || (() => null);

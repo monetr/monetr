@@ -152,6 +152,15 @@ export default function GoalDetails(): JSX.Element {
     isPaused: spending.isPaused,
   };
 
+  const usedProgress = ((Math.min(
+    spending?.usedAmount,
+    spending?.targetAmount,
+  ) / spending?.targetAmount) * 100).toFixed(0);
+  const allocatedProgress = ((Math.min(
+    spending?.currentAmount + spending?.usedAmount,
+    spending?.targetAmount,
+  ) / spending?.targetAmount) * 100).toFixed(0);
+
   return (
     <MForm initialValues={ initialValues } onSubmit={ submit } className='flex w-full h-full flex-col'>
       <MTopNavigation
@@ -180,9 +189,35 @@ export default function GoalDetails(): JSX.Element {
       <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col'>
-            <div className='w-full flex justify-center mb-2'>
-              <MerchantIcon name={ spending?.name } />
+
+            <div className='flex flex-col w-full'>
+              <div className='flex gap-4 items-center w-full overflow-hidden'>
+                <MerchantIcon name={ spending?.name } className='flex-none' />
+                <div className='flex flex-col flex-1 overflow-hidden'>
+                  <p className='text-ellipsis truncate min-w-0'>
+                    { spending?.name }
+                  </p>
+                  <MSpan weight='semibold'>
+                    { spending?.getCurrentAmountString() }
+                    <span className='font-normal'>of</span>
+                    { spending?.getTargetAmountString() }
+                  </MSpan>
+                </div>
+              </div>
+              <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
+                <div
+                  className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600'
+                  style={ { width: `${allocatedProgress}%` } }
+                />
+                <div
+                  className='absolute top-0 bg-blue-600 h-1.5 rounded-full dark:bg-blue-600'
+                  style={ { width: `${usedProgress}%` } }
+                />
+              </div>
             </div>
+
+            <MDivider className='w-1/2 my-4' />
+
             <MTextField className='w-full' label='Expense' name='name' required />
             <MAmountField allowNegative={ false } className='w-full' label='Amount' name='amount' required />
             <MDatePicker
