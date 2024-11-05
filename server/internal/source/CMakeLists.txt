@@ -1,6 +1,7 @@
 set(GO_SRC_DIR "${CMAKE_SOURCE_DIR}/server")
 file(GLOB_RECURSE APP_GO_FILES
   "${GO_SRC_DIR}/*.go"
+  "${GO_SRC_DIR}/*.s"
 )
 list(FILTER APP_GO_FILES EXCLUDE REGEX ".+_test\\.go")
 list(FILTER APP_GO_FILES EXCLUDE REGEX "source/embed")
