@@ -11,7 +11,7 @@ import { formatAmount } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface ExpenseTimelineProps {
-  spendingId: number;
+  spendingId: string;
 }
 
 interface TimelineItemData {

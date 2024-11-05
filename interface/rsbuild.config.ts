@@ -119,7 +119,7 @@ export default defineConfig({
   },
   security: {
     sri: {
-      enable: true,
+      enable: !isDevelopment,
       algorithm: 'sha512',
     },
   },

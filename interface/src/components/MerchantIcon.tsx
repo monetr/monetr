@@ -6,6 +6,7 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MerchantIconProps {
   name?: string;
+  className?: string;
 }
 
 export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
@@ -21,6 +22,7 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
       'w-10',
       'rounded-full',
       'flex-none',
+      props.className,
     );
 
     // It is possible for colors to be missing for a given icon. When this happens just fall back to a black color.
@@ -44,10 +46,12 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
     );
   }
 
+  const classNames = mergeTailwind('h-10 w-10', props.className);
+
   // If we have no icon to work with then create an avatar with the first character of the transaction name.
   const letter = props?.name?.toUpperCase().charAt(0) || '?';
   return (
-    <Avatar className='h-10 w-10'>
+    <Avatar className={ classNames }>
       <AvatarFallback className='dark:bg-dark-monetr-background-subtle dark:text-dark-monetr-content'>
         { letter }
       </AvatarFallback>

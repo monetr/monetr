@@ -7,8 +7,10 @@ import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import ExpenseTimeline from './ExpenseTimeline';
+import { Button } from '@monetr/interface/components/Button';
+import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MFormButton, { MBaseButton } from '@monetr/interface/components/MButton';
+import { MBaseButton } from '@monetr/interface/components/MButton';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MDivider from '@monetr/interface/components/MDivider';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
@@ -146,6 +148,11 @@ export default function ExpenseDetails(): JSX.Element {
     recurrenceRule: spending.ruleset,
   };
 
+  const progress = ((Math.min(
+    spending?.currentAmount,
+    spending?.targetAmount,
+  ) / spending?.targetAmount) * 100).toFixed(0);
+
   return (
     <MForm initialValues={ initialValues } onSubmit={ submit } className='flex w-full h-full flex-col'>
       <MTopNavigation
@@ -162,22 +169,44 @@ export default function ExpenseDetails(): JSX.Element {
           <SwapVertOutlined />
             Transfer
         </MBaseButton>
-        <MBaseButton color='cancel' className='gap-1 py-1 px-2' onClick={ deleteExpense } >
+        <Button variant='destructive' onClick={ deleteExpense } >
           <DeleteOutlined />
-            Remove
-        </MBaseButton>
-        <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit' role='form'>
+          Remove
+        </Button>
+        <FormButton variant='primary' type='submit' role='form'>
           <SaveOutlined />
-            Save
-        </MFormButton>
+          Save
+        </FormButton>
       </MTopNavigation>
       <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
-            <div className='w-full flex justify-center mb-2'>
-              <MerchantIcon name={ spending?.name } />
+
+            <div className='flex flex-col w-full'>
+              <div className='flex gap-4 items-center w-full overflow-hidden'>
+                <MerchantIcon name={ spending?.name } className='flex-none' />
+                <div className='flex flex-col flex-1 overflow-hidden'>
+                  <p className='text-ellipsis truncate min-w-0'>
+                    { spending?.name }
+                  </p>
+                  <MSpan weight='semibold'>
+                    { spending?.getCurrentAmountString() }
+                    <span className='font-normal'>of</span>
+                    { spending?.getTargetAmountString() }
+                  </MSpan>
+                </div>
+              </div>
+              <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
+                <div
+                  className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600'
+                  style={ { width: `${progress}%` } }
+                />
+              </div>
             </div>
-            <MTextField className='w-full' label='Expense' name='name' required />
+
+            <MDivider className='w-1/2 my-4' />
+
+            <MTextField className='w-full' label='Expense' name='name' required data-1p-ignore />
             <MAmountField allowNegative={ false } className='w-full' label='Amount' name='amount' required />
             <MDatePicker
               label='Next Occurrence'
