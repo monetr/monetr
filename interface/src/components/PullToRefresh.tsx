@@ -146,7 +146,7 @@ export default function PullToRefresh(): JSX.Element {
         className='relative -top-16 h-9 w-9 rounded-full border-1 border-dark-monetr-border bg-dark-monetr-background shadow-md shadow-black ring-1 ring-dark-monetr-background flex items-center justify-center'
         style={ { animationDirection: 'reverse' } }
       >
-        <div className={ refreshDiv.current?.classList.contains('loading') && 'animate-spin' }>
+        <div className={ refreshDiv.current?.classList.contains('loading') ? 'animate-spin' : undefined }>
           <RefreshCcw
             className={ `rounded-full ${
               pullDownReloadThreshold && 'rotate-180'
