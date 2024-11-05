@@ -10,6 +10,7 @@ import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
+import { Switch } from '@monetr/interface/components/Switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monetr/interface/components/Tabs';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
@@ -45,7 +46,7 @@ function NewTransactionModal(): JSX.Element {
         className='h-full flex flex-col gap-2 p-2 justify-between'
         initialValues={ initialValues }
       >
-        { ({ setFieldValue }) => (
+        { ({ setFieldValue, values }) => (
           <Fragment>
             <div className='flex flex-col'>
               <MSpan weight='bold' size='xl' className='mb-2'>
@@ -100,6 +101,20 @@ function NewTransactionModal(): JSX.Element {
                     menuPortalTarget={ document.body }
                     menuPlacement='bottom'
                   />
+                  <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-4 ring-dark-monetr-border-string mb-4'>
+                    <div className='space-y-0.5'>
+                      <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>
+                        Adjust Balance
+                      </label>
+                      <p className='text-sm text-dark-monetr-content'>
+                        Update your account balance for this transaction?
+                      </p>
+                    </div>
+                    <Switch
+                      checked={ values['adjustsBalance'] }
+                      onCheckedChange={ () => setFieldValue('adjustsBalance', !values['adjustsBalance']) }
+                    />
+                  </div>
                 </TabsContent>
                 <TabsContent value='credit'> 
                   <MTextField
@@ -126,9 +141,22 @@ function NewTransactionModal(): JSX.Element {
                       required
                     />
                   </div>
+                  <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-4 ring-dark-monetr-border-string mb-4'>
+                    <div className='space-y-0.5'>
+                      <label className='text-sm font-medium text-dark-monetr-content-emphasis'>
+                        Adjust Balance
+                      </label>
+                      <p className='text-sm text-dark-monetr-content'>
+                        Update your account balance for this transaction?
+                      </p>
+                    </div>
+                    <Switch
+                      checked={ values['adjustsBalance'] }
+                      onCheckedChange={ () => setFieldValue('adjustsBalance', !values['adjustsBalance']) }
+                    />
+                  </div>
                 </TabsContent>
               </Tabs>
-
             </div>
             <div className='flex justify-end gap-2'>
               <FormButton variant='destructive' onClick={ modal.remove } data-testid='close-new-transaction-modal'>
