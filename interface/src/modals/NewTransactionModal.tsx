@@ -1,6 +1,9 @@
 import React, { Fragment, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
+import { AxiosError } from 'axios';
 import { startOfToday } from 'date-fns';
+import { FormikHelpers } from 'formik';
+import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
@@ -12,6 +15,9 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { Switch } from '@monetr/interface/components/Switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monetr/interface/components/Tabs';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import { CreateTransactionRequest, useCreateTransaction } from '@monetr/interface/hooks/transactions';
+import { friendlyToAmount } from '@monetr/interface/util/amounts';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewTransactionValues {
@@ -38,11 +44,41 @@ const initialValues: NewTransactionValues = {
 function NewTransactionModal(): JSX.Element {
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
+  const { enqueueSnackbar } = useSnackbar();
+  const selectedBankAccountId = useSelectedBankAccountId();
+  const createTransaction = useCreateTransaction();
+
+  async function submit(
+    values: NewTransactionValues,
+    helper: FormikHelpers<NewTransactionValues>,
+  ): Promise<void> {
+    const newTransactionRequest: CreateTransactionRequest = {
+      bankAccountId: selectedBankAccountId,
+      amount: friendlyToAmount(values.kind === 'credit' ? values.amount * -1 : values.amount),
+      name: values.name,
+      merchantName: null,
+      date: values.date,
+      isPending: values.isPending,
+      spendingId: values.spendingId,
+      adjustsBalance: values.adjustsBalance,
+    };
+
+    helper.setSubmitting(true);
+
+    return createTransaction(newTransactionRequest)
+      // TODO Show toast that the transaction was created, include button to "view transaction".
+      .then(() => modal.remove())
+      .catch((error: AxiosError) => void enqueueSnackbar(error.response.data['error'], {
+        variant: 'error',
+        disableWindowBlurListener: true,
+      }))
+      .finally(() => helper.setSubmitting(false));
+  }
 
   return (
     <MModal open={ modal.visible } ref={ ref } className='sm:max-w-xl'>
       <MForm
-        onSubmit={ () => {} }
+        onSubmit={ submit }
         className='h-full flex flex-col gap-2 p-2 justify-between'
         initialValues={ initialValues }
       >
@@ -50,7 +86,7 @@ function NewTransactionModal(): JSX.Element {
           <Fragment>
             <div className='flex flex-col'>
               <MSpan weight='bold' size='xl' className='mb-2'>
-                  Create A New Transaction
+                Create A New Transaction
               </MSpan>
 
               { /* 
@@ -87,7 +123,6 @@ function NewTransactionModal(): JSX.Element {
                     <MDatePicker
                       className='w-full md:w-1/2'
                       label='Date'
-                      min={ startOfToday() }
                       name='date'
                       required
                     />
@@ -136,7 +171,6 @@ function NewTransactionModal(): JSX.Element {
                     <MDatePicker
                       className='w-full md:w-1/2'
                       label='Date'
-                      min={ startOfToday() }
                       name='date'
                       required
                     />

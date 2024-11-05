@@ -131,3 +131,61 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<T
 
   return mutateAsync;
 }
+
+export interface CreateTransactionRequest {
+  name: string;
+  bankAccountId: string;
+  amount: number;
+  spendingId: string | null;
+  date: Date;
+  merchantName: string | null;
+  isPending: boolean;
+  adjustsBalance: boolean;
+}
+
+export interface CreateTransactionResponse {
+  transaction: Partial<Transaction>;
+  balance: Partial<Balance>;
+  spending: Partial<Spending> | null;
+}
+
+export function useCreateTransaction(): (_: CreateTransactionRequest) => Promise<CreateTransactionResponse> {
+  const queryClient = useQueryClient();
+
+  async function createTransaction(transaction: CreateTransactionRequest): Promise<CreateTransactionResponse> {
+    return request()
+      .post<CreateTransactionResponse>(
+        `/bank_accounts/${ transaction.bankAccountId }/transactions`,
+        transaction,
+      )
+      .then(result => result.data);
+  }
+
+  const { mutateAsync } = useMutation(
+    createTransaction,
+    {
+      onSuccess: (response: CreateTransactionResponse) => Promise.all([
+        // TODO this might not be how you invalidate an infinite query
+        queryClient.invalidateQueries([`/bank_accounts/${ response.transaction.bankAccountId }/transactions`]),
+        queryClient.setQueriesData(
+          [`/bank_accounts/${response.transaction.bankAccountId}/spending`],
+          (previous: Array<Partial<Spending>>) => previous
+            .map(item => response?.spending?.spendingId == item.spendingId ? response?.spending : item),
+        ),
+        response.spending != null && queryClient.setQueriesData(
+          [`/bank_accounts/${response.transaction.bankAccountId}/spending/${response.spending.spendingId}`],
+          response.spending,
+        ),
+        queryClient.setQueriesData(
+          [`/bank_accounts/${response.transaction.bankAccountId}/balances`],
+          (previous: Partial<Balance>) => new Balance({
+            ...previous,
+            ...response.balance,
+          }),
+        ),
+      ]),
+    }
+  );
+
+  return mutateAsync;
+}
