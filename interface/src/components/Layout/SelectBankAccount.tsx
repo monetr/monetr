@@ -61,16 +61,21 @@ export default function SelectBankAccount(): JSX.Element {
 
 function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccountItem>): JSX.Element {
   return (
-    <div className='flex items-center w-full'>
+    <div className='flex items-center w-full gap-1'>
       <Check
         className={ mergeTailwind(
-          'mr-2 h-5 w-5',
+          'mr-1 h-5 w-5 flex-none',
           props.currentValue == props.option.value ? 'opacity-100' : 'opacity-0'
         ) }
       />
-      <MSpan className='w-full pr-2' color='emphasis' ellipsis>
+      <MSpan className='w-full' color='emphasis' ellipsis>
         { props.option.label }
       </MSpan>
+      { props.option.status === 'inactive' && (
+        <MBadge size='xs' className='bg-dark-monetr-border-subtle'>
+          Inactive
+        </MBadge>
+      ) }
       { props.option.mask != '' && (
         <MBadge size='xs' className='font-mono'>
           { props.option.mask }
