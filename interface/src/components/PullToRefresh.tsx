@@ -85,6 +85,8 @@ export default function PullToRefresh(): JSX.Element {
       if (document.querySelectorAll('[role="dialog"]').length > 0) return;
       // Prevent accidently pull to refresh on the wrong main view.
       if (document.querySelector('ul')?.scrollTop > 0) return;
+      // On the details pages don't allow pull to refresh either
+      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) return;
 
       const screenY = e.targetTouches[0].screenY;
 
@@ -97,10 +99,9 @@ export default function PullToRefresh(): JSX.Element {
     // Will reload the page if we are past the threshold
     // Otherwise, we reset the pull
     const pullFinish = () => {
-      // If there is a dialog open, then do nothing.
       if (document.querySelectorAll('[role="dialog"]').length > 0) return;
-      // Prevent accidently pull to refresh on the wrong main view.
       if (document.querySelector('ul')?.scrollTop > 0) return;
+      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) return;
 
       setPullStartPoint(0);
 
