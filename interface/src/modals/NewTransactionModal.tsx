@@ -136,7 +136,7 @@ function NewTransactionModal(): JSX.Element {
                     menuPortalTarget={ document.body }
                     menuPlacement='bottom'
                   />
-                  <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-4 ring-dark-monetr-border-string mb-4'>
+                  <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'>
                     <div className='space-y-0.5'>
                       <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>
                         Adjust Balance
@@ -175,7 +175,7 @@ function NewTransactionModal(): JSX.Element {
                       required
                     />
                   </div>
-                  <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-4 ring-dark-monetr-border-string mb-4'>
+                  <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'>
                     <div className='space-y-0.5'>
                       <label className='text-sm font-medium text-dark-monetr-content-emphasis'>
                         Adjust Balance
