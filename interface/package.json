@@ -31,6 +31,8 @@
     "@radix-ui/react-avatar": "1.1.1",
     "@radix-ui/react-dialog": "1.1.2",
     "@radix-ui/react-popover": "1.1.2",
+    "@radix-ui/react-switch": "1.1.1",
+    "@radix-ui/react-tabs": "1.1.1",
     "@sentry/browser": "8.36.0",
     "@sentry/core": "8.36.0",
     "@sentry/react": "8.36.0",

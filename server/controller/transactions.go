@@ -10,23 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// List Transactions
-// @Summary List Transactions
-// @ID list-transactions
-// @tags Transactions
-// @description Lists the transactions for the specified bank account Id. Transactions are returned sorted by the date
-// @description they were authorized (descending) and then by their numeric Id (descending). This means that
-// @description transactions that were first seen later will be higher in the list than they may have actually occurred.
-// @Security ApiKeyAuth
-// @Produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Param limit query int false "Specifies the number of transactions to return in the result, default is 25. Max is 100."
-// @Param offset query int false "The number of transactions to skip before returning any."
-// @Router /bank_accounts/{bankAccountId}/transactions [get]
-// @Success 200 {array} swag.TransactionResponse
-// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getTransactions(ctx echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
@@ -134,31 +117,37 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 		return c.badRequest(ctx, "cannot create transactions for non-manual links")
 	}
 
-	var transaction Transaction
-	if err = ctx.Bind(&transaction); err != nil {
+	var request struct {
+		// Inherit all the fields from the transaction object
+		Transaction
+
+		AdjustsBalance bool `json:"adjustsBalance"`
+	}
+	if err = ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
 	}
 
-	transaction.TransactionId = ""
-	transaction.BankAccountId = bankAccountId
-	transaction.Name = strings.TrimSpace(transaction.Name)
-	transaction.MerchantName = strings.TrimSpace(transaction.MerchantName)
-	transaction.OriginalName = transaction.Name
+	request.TransactionId = ""
+	request.BankAccountId = bankAccountId
+	request.Name = strings.TrimSpace(request.Name)
+	request.MerchantName = strings.TrimSpace(request.MerchantName)
+	request.OriginalName = request.Name
+	// No support for allowing these to be provided yet.
+	request.Categories = nil
+	request.Category = nil
+	// TODO Allow this to be customized
+	request.Currency = "USD"
 
-	if transaction.Name == "" {
+	if request.Name == "" {
 		return c.badRequest(ctx, "transaction must have a name")
 	}
 
-	if transaction.Amount <= 0 {
-		return c.badRequest(ctx, "transaction amount must be greater than 0")
-	}
-
 	var updatedSpending *Spending
-	if transaction.SpendingId != nil && !(*transaction.SpendingId).IsZero() {
+	if request.SpendingId != nil && !(*request.SpendingId).IsZero() {
 		updatedSpending, err = repo.GetSpendingById(
 			c.getContext(ctx),
 			bankAccountId,
-			*transaction.SpendingId,
+			*request.SpendingId,
 		)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "could not get spending provided for transaction")
@@ -166,7 +155,7 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 
 		if err = repo.AddExpenseToTransaction(
 			c.getContext(ctx),
-			&transaction,
+			&request.Transaction,
 			updatedSpending,
 		); err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to add expense to transaction")
@@ -179,16 +168,55 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 		}
 	}
 
-	if err = repo.CreateTransaction(c.getContext(ctx), bankAccountId, &transaction); err != nil {
+	if request.AdjustsBalance {
+		bankAccount, err := repo.GetBankAccount(
+			c.getContext(ctx),
+			request.BankAccountId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "could not find the bank account specified")
+		}
+
+		// Always subtract from our available balance. Subtract because credits are
+		// represented as negative values in monetr.
+		bankAccount.AvailableBalance -= request.Amount
+
+		// But if the transaction is not pending then also deduct from the current
+		// balance.
+		if !request.IsPending {
+			bankAccount.CurrentBalance -= request.Amount
+		}
+
+		// Then store our bank account object with the updated balance.
+		// Note, if balance is ever something monetr has to rely on for ANYTHING
+		// IMPORTANT; then this should be done in a serializable transaction to make
+		// sure that we are properly handling concurrency.
+		if err := repo.UpdateBankAccounts(c.getContext(ctx), *bankAccount); err != nil {
+			return c.wrapPgError(ctx, err, "could not update bank account balance for transaction")
+		}
+	}
+
+	if err = repo.CreateTransaction(
+		c.getContext(ctx),
+		bankAccountId,
+		&request.Transaction,
+	); err != nil {
 		return c.wrapPgError(ctx, err, "could not create transaction")
 	}
 
-	returnedObject := map[string]interface{}{
-		"transaction": transaction,
+	balance, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "could not get updated balances")
 	}
 
-	// If an expense was updated as part of this transaction being created then we want to include that updated expense
-	// in our response so the UI can update its redux store.
+	returnedObject := map[string]interface{}{
+		"transaction": request.Transaction,
+		"balance":     balance,
+	}
+
+	// If an expense was updated as part of this transaction being created then we
+	// want to include that updated expense in our response so the UI can update
+	// its state without needing to make a follow up API call.
 	if updatedSpending != nil {
 		returnedObject["spending"] = *updatedSpending
 	}

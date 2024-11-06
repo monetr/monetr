@@ -8,7 +8,6 @@ import (
 
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
 	"github.com/stretchr/testify/assert"
@@ -121,7 +120,7 @@ func TestPostSpending(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId models.ID[models.FundingSchedule]
+		var fundingScheduleId ID[FundingSchedule]
 		{ // Create the funding schedule
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -137,7 +136,7 @@ func TestPostSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
-			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
@@ -173,7 +172,7 @@ func TestPostSpending(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId models.ID[models.FundingSchedule]
+		var fundingScheduleId ID[FundingSchedule]
 		{ // Create the funding schedule
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -189,7 +188,7 @@ func TestPostSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
-			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
@@ -225,7 +224,7 @@ func TestPostSpending(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId models.ID[models.FundingSchedule]
+		var fundingScheduleId ID[FundingSchedule]
 		{ // Create the funding schedule
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -241,7 +240,7 @@ func TestPostSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
-			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
@@ -311,7 +310,7 @@ func TestPostSpending(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId models.ID[models.FundingSchedule]
+		var fundingScheduleId ID[FundingSchedule]
 		{ // Create the funding schedule
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -327,7 +326,7 @@ func TestPostSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
-			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
@@ -357,7 +356,7 @@ func TestPostSpending(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId models.ID[models.FundingSchedule]
+		var fundingScheduleId ID[FundingSchedule]
 		{ // Create the funding schedule
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -373,7 +372,7 @@ func TestPostSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
-			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
@@ -409,7 +408,7 @@ func TestPostSpending(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId models.ID[models.FundingSchedule]
+		var fundingScheduleId ID[FundingSchedule]
 		{ // Create the funding schedule
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -425,7 +424,7 @@ func TestPostSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
-			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
@@ -462,7 +461,7 @@ func TestPostSpending(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId models.ID[models.FundingSchedule]
+		var fundingScheduleId ID[FundingSchedule]
 		{ // Create the funding schedule
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -478,7 +477,7 @@ func TestPostSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
-			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
@@ -538,7 +537,7 @@ func TestGetSpending(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId models.ID[models.FundingSchedule]
+		var fundingScheduleId ID[FundingSchedule]
 		{ // Create the funding schedule
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -554,11 +553,11 @@ func TestGetSpending(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
-			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
-		var spendingId models.ID[models.Spending]
+		var spendingId ID[Spending]
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
@@ -585,7 +584,7 @@ func TestGetSpending(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			spendingId = models.ID[models.Spending](response.JSON().Path("$.spendingId").String().Raw())
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 			assert.NotZero(t, spendingId, "must be able to extract the spending ID")
 		}
 
@@ -628,7 +627,7 @@ func TestGetSpendingByID(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		var fundingScheduleId models.ID[models.FundingSchedule]
+		var fundingScheduleId ID[FundingSchedule]
 		{ // Create the funding schedule
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -644,11 +643,11 @@ func TestGetSpendingByID(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
-			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
 			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
 		}
 
-		var spendingId models.ID[models.Spending]
+		var spendingId ID[Spending]
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
@@ -675,7 +674,7 @@ func TestGetSpendingByID(t *testing.T) {
 			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
 			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
 			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
-			spendingId = models.ID[models.Spending](response.JSON().Path("$.spendingId").String().Raw())
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
 			assert.NotZero(t, spendingId, "must be able to extract the spending ID")
 		}
 
@@ -753,12 +752,12 @@ func TestGetSpendingTransactions(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string
-		var bank models.BankAccount
+		var bank BankAccount
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		token = GivenILogin(t, e, user.Login.Email, password)
 		{ // Seed the data for the test.
 			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
-			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
 		}
 
