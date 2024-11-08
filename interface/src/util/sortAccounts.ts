@@ -34,7 +34,7 @@ export default function sortAccounts(bankAccounts: Array<BankAccount> | undefine
       ];
       for (let i = 0; i < 2; i++) {
         // Put inactive items last.
-        const multiplier = items[i].status === 'inactive' ? -2 : 1;
+        const multiplier = items[i].status === 'inactive' ? -10 : 1;
         values[i] += accountTypeOrder.indexOf(items[i].accountType);
         values[i] += accountSubTypeOrder.indexOf(items[i].accountSubType);
         values[i] *= multiplier;
