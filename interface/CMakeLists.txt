@@ -54,6 +54,10 @@ add_custom_command(
     ${UI_CONFIG_FILES}
 )
 
+if (BUILD_PWA_IMAGES)
+  add_custom_command(OUTPUT ${UI_DIST} APPEND DEPENDS images)
+endif()
+
 add_custom_target(
   build.interface ALL
   DEPENDS ${UI_DIST}
