@@ -263,8 +263,8 @@ importers:
         specifier: 1.0.19
         version: 1.0.19
       '@rsbuild/plugin-react':
-        specifier: 1.0.6
-        version: 1.0.6(@rsbuild/core@1.0.19)
+        specifier: 1.0.7
+        version: 1.0.7(@rsbuild/core@1.0.19)
       '@rsbuild/plugin-sass':
         specifier: 1.1.0
         version: 1.1.0(@rsbuild/core@1.0.19)
@@ -393,8 +393,8 @@ importers:
         specifier: 1.0.19
         version: 1.0.19
       '@rsbuild/plugin-react':
-        specifier: 1.0.6
-        version: 1.0.6(@rsbuild/core@1.0.19)
+        specifier: 1.0.7
+        version: 1.0.7(@rsbuild/core@1.0.19)
       '@rsbuild/plugin-sass':
         specifier: 1.1.0
         version: 1.1.0(@rsbuild/core@1.0.19)
@@ -2711,8 +2711,8 @@ packages:
     engines: {node: '>=16.7.0'}
     hasBin: true
 
-  '@rsbuild/plugin-react@1.0.6':
-    resolution: {integrity: sha512-k2VS7nvNm74DlVQROK+w+Ua1j60n3qSnVFva8zjmj6uakLCxxp85aRwfEHzaVP/YdDLffweypROuQPYvTZ57ew==}
+  '@rsbuild/plugin-react@1.0.7':
+    resolution: {integrity: sha512-t7T/GqDwodusTAnxGpqVRnQ/G+HYh98zk71qIg19WkjVJJGv57AC1Ppx0/6zzbZAbxU60bfK8TeEEXjhXCdSxA==}
     peerDependencies:
       '@rsbuild/core': 1.x
 
@@ -11384,7 +11384,7 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  '@rsbuild/plugin-react@1.0.6(@rsbuild/core@1.0.19)':
+  '@rsbuild/plugin-react@1.0.7(@rsbuild/core@1.0.19)':
     dependencies:
       '@rsbuild/core': 1.0.19
       '@rspack/plugin-react-refresh': 1.0.0(react-refresh@0.14.2)
