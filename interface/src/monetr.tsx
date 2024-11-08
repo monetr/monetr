@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
@@ -41,6 +42,8 @@ import VerifyEmail from '@monetr/interface/pages/verify/email';
 import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 
+const RoutesImpl = Sentry.withSentryReactRouterV6Routing(Routes);
+
 export default function Monetr(): JSX.Element {
   const {
     result: config,
@@ -64,7 +67,7 @@ export default function Monetr(): JSX.Element {
 
   if (!isAuthenticated) {
     return (
-      <Routes>
+      <RoutesImpl>
         <Route path='/login' element={ <Login /> } />
         <Route path='/logout' element={ <LogoutPage /> } />
         {config?.allowSignUp && <Route path='/register' element={ <Register /> } />}
@@ -74,36 +77,36 @@ export default function Monetr(): JSX.Element {
         <Route path='/verify/email/resend' element={ <ResendVerificationPage /> } />
         <Route path='/' element={ <Navigate replace to='/login' /> } />
         <Route path='*' element={ <Navigate replace to='/login' /> } />
-      </Routes>
+      </RoutesImpl>
     );
   }
 
   // If the currently authenticated user requires MFA then only allow them to access the MFA pages.
   if (mfaPending) {
     return (
-      <Routes>
+      <RoutesImpl>
         <Route path='/login/multifactor' element={ <MultifactorAuthenticationPage /> } />
         <Route path='/logout' element={ <LogoutPage /> } />
         <Route path='*' element={ <Navigate replace to='/login/multifactor' /> } />
-      </Routes>
+      </RoutesImpl>
     );
   }
 
   if (!isActive) {
     return (
-      <Routes>
+      <RoutesImpl>
         <Route path='/logout' element={ <LogoutPage /> } />
         <Route path='/account/subscribe' element={ <SubscribePage /> } />
         <Route path='/account/subscribe/after' element={ <AfterCheckoutPage /> } />
         <Route path='*' element={ <Navigate replace to='/account/subscribe' /> } />
-      </Routes>
+      </RoutesImpl>
     );
   }
 
   const hasAnyLinks = links?.length > 0;
   if (!hasAnyLinks) {
     return (
-      <Routes>
+      <RoutesImpl>
         <Route path='/logout' element={ <LogoutPage /> } />
         <Route path='/setup' element={ <SetupPage manualEnabled={ config?.manualEnabled } /> } />
         <Route path='/setup/plaid' element={ <PlaidSetup alreadyOnboarded /> } />
@@ -111,7 +114,7 @@ export default function Monetr(): JSX.Element {
         <Route path='/plaid/oauth-return' element={ <OauthReturn /> } />
         <Route path='/account/subscribe/after' element={ <Navigate replace to='/setup' /> } />
         <Route index path='*' element={ <Navigate replace to='/setup' /> } />
-      </Routes>
+      </RoutesImpl>
     );
   }
 
@@ -120,7 +123,7 @@ export default function Monetr(): JSX.Element {
       <BankSidebar className='hidden lg:flex' />
       <MobileSidebar />
       <div className='w-full h-full flex min-w-0 overflow-y-auto'>
-        <Routes>
+        <RoutesImpl>
           <Route path='/bank/:bankAccountId' element={ <BudgetingLayout /> }>
             <Route path='transactions' element={ <Transactions /> } />
             <Route path='transactions/:transactionId/details' element={ <TransactionDetails /> } />
@@ -154,7 +157,7 @@ export default function Monetr(): JSX.Element {
           <Route path='/login' element={ <Navigate replace to='/' /> } />
           <Route path='/login/multifactor' element={ <Navigate replace to='/' /> } />
           <Route index path='/' element={ <RedirectToBank /> } />
-        </Routes>
+        </RoutesImpl>
       </div>
     </div>
   );

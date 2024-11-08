@@ -2,6 +2,7 @@ import '@fontsource-variable/inter';
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { createRoutesFromChildren, matchRoutes, useLocation, useNavigationType } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 
 import { makeSneakyFetchTransport } from '@monetr/interface/relay/transport';
@@ -19,11 +20,12 @@ if (window?.__MONETR__?.SENTRY_DSN) {
     dsn: window?.__MONETR__?.SENTRY_DSN,
     transport: makeSneakyFetchTransport,
     integrations: [
-      Sentry.browserTracingIntegration({
-        instrumentPageLoad: true,
-        instrumentNavigation: true,
-        traceXHR: true,
-        traceFetch: true,
+      Sentry.reactRouterV6BrowserTracingIntegration({
+        useEffect: React.useEffect,
+        useLocation,
+        useNavigationType,
+        createRoutesFromChildren,
+        matchRoutes,
       }),
     ],
     release: RELEASE,
