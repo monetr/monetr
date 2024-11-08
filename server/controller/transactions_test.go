@@ -111,6 +111,90 @@ func TestPostTransactions(t *testing.T) {
 		response.JSON().Path("$.error").IsEqual("must specify a valid bank account Id")
 	})
 
+	t.Run("name is required", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"amount": 1200,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("Transaction must have a name")
+	})
+
+	t.Run("date is required", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "Foobar",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("Transaction must have a date")
+	})
+
+	t.Run("amount is required", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "Foobar",
+				"date": app.Clock.Now(),
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("Transaction must have a non-zero amount")
+	})
+
+	t.Run("bogus spending object", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":       "Foobar",
+				"date":       app.Clock.Now(),
+				"amount":     100,
+				"spendingId": "spnd_bogus",
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").IsEqual("Could not get spending provided for transaction: record does not exist")
+	})
+
 	t.Run("adjusts balance", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string
@@ -258,6 +342,7 @@ func TestPostTransactions(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").IsEqual("Cannot create transactions for non-manual links")
 		}
 	})
 

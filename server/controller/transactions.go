@@ -114,7 +114,7 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 	}
 
 	if !isManual {
-		return c.badRequest(ctx, "cannot create transactions for non-manual links")
+		return c.badRequest(ctx, "Cannot create transactions for non-manual links")
 	}
 
 	var request struct {
@@ -139,7 +139,15 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 	request.Currency = "USD"
 
 	if request.Name == "" {
-		return c.badRequest(ctx, "transaction must have a name")
+		return c.badRequest(ctx, "Transaction must have a name")
+	}
+
+	if request.Date.IsZero() {
+		return c.badRequest(ctx, "Transaction must have a date")
+	}
+
+	if request.Amount == 0 {
+		return c.badRequest(ctx, "Transaction must have a non-zero amount")
 	}
 
 	var updatedSpending *Spending
@@ -150,7 +158,7 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 			*request.SpendingId,
 		)
 		if err != nil {
-			return c.wrapPgError(ctx, err, "could not get spending provided for transaction")
+			return c.wrapPgError(ctx, err, "Could not get spending provided for transaction")
 		}
 
 		if err = repo.AddExpenseToTransaction(
