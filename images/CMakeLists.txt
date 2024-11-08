@@ -1,7 +1,6 @@
-find_program(IMAGEMAGICK_EXECUTABLE NAMES magick)
 find_package(ImageMagick COMPONENTS convert)
-if (IMAGEMAGICK_EXECUTABLE)
-  message(STATUS "Found ImageMagick: ${IMAGEMAGICK_EXECUTABLE} (found version \"${ImageMagick_VERSION_STRING}\")")
+if (ImageMagick_FOUNDD)
+  message(STATUS "Found ImageMagick: ${IMAGEMAGICK_CONVERT_EXECUTABLE} (found version \"${ImageMagick_VERSION_STRING}\")")
 else()
   message(AUTHOR_WARNING "ImageMagick was not detected, generating image assets is not available.")
 endif()
@@ -59,7 +58,7 @@ foreach(APPLE_SIZE IN ITEMS ${APPLE_SPLASH_SIZES})
   add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/images/output/apple-splash-${WIDTH}-${HEIGHT}.jpg
     BYPRODUCTS ${CMAKE_BINARY_DIR}/images/output/apple-splash-${WIDTH}-${HEIGHT}.jpg
-    COMMAND ${IMAGEMAGICK_EXECUTABLE} ${BASE_LOGO} -gravity center -resize ${LOGO_WIDTH}x${LOGO_HEIGHT} -background "\#19161f" -extent "${WIDTH}x${HEIGHT}" "${CMAKE_BINARY_DIR}/images/output/apple-splash-${WIDTH}-${HEIGHT}.jpg"
+    COMMAND ${IMAGEMAGICK_CONVERT_EXECUTABLE} ${BASE_LOGO} -gravity center -resize ${LOGO_WIDTH}x${LOGO_HEIGHT} -background "\#19161f" -extent "${WIDTH}x${HEIGHT}" "${CMAKE_BINARY_DIR}/images/output/apple-splash-${WIDTH}-${HEIGHT}.jpg" > /dev/null 2>&1
     COMMENT "Generating ${WIDTH}x${HEIGHT} Apple splash image"
     DEPENDS ${BASE_LOGO}
     VERBATIM
@@ -70,35 +69,44 @@ endforeach()
 add_custom_target(
   images.apple-touch-icon
   BYPRODUCTS ${CMAKE_BINARY_DIR}/images/output/apple-touch-icon.jpg
-  COMMAND ${IMAGEMAGICK_EXECUTABLE} ${BASE_LOGO} -gravity center -resize 150x150 -background "\#19161f" -extent "180x180" "${CMAKE_BINARY_DIR}/images/output/apple-touch-icon.jpg"
+  COMMAND ${IMAGEMAGICK_CONVERT_EXECUTABLE} ${BASE_LOGO} -gravity center -resize 150x150 -background "\#19161f" -extent "180x180" "${CMAKE_BINARY_DIR}/images/output/apple-touch-icon.jpg" > /dev/null 2>&1
   VERBATIM
   COMMENT "Generating Apple touch icon"
 )
 
-add_custom_target(
-  images.favicon-16x16
-  BYPRODUCTS ${CMAKE_BINARY_DIR}/images/output/favicon-16x16.png
-  COMMAND ${IMAGEMAGICK_EXECUTABLE} ${BASE_LOGO} -gravity center -resize 16x16 -background transparent -extent "16x16" "${CMAKE_BINARY_DIR}/images/output/favicon-16x16.png"
-  VERBATIM
-  COMMENT "Generating 16x16 favicon"
+set(FAVICON_SIZES 
+  "16x16" 
+  "32x32" 
+  "64x64" 
+)
+
+set(FAVICON_MARKER ${CMAKE_BINARY_DIR}/images/favicon.txt)
+add_custom_command(
+  OUTPUT ${FAVICON_MARKER}
+  COMMENT "Finished generating favicons"
+  COMMAND ${CMAKE_COMMAND} -E touch ${FAVICON_MARKER}
 )
 
 add_custom_target(
-  images.favicon-32x32
-  BYPRODUCTS ${CMAKE_BINARY_DIR}/images/output/favicon-32x32.png
-  COMMAND ${IMAGEMAGICK_EXECUTABLE} ${BASE_LOGO} -gravity center -resize 32x32 -background transparent -extent "32x32" "${CMAKE_BINARY_DIR}/images/output/favicon-32x32.png"
-  VERBATIM
-  COMMENT "Generating 13x13 favicon"
+  images.favicons
+  DEPENDS ${FAVICON_MARKER}
 )
 
-# https://gist.github.com/pfig/1808188
-add_custom_target(
-  images.favicon
-  BYPRODUCTS ${CMAKE_BINARY_DIR}/images/output/favicon.ico
-  COMMAND ${IMAGEMAGICK_EXECUTABLE} ${BASE_LOGO} -gravity center -resize 64x64 -background transparent -extent "64x64" "${CMAKE_BINARY_DIR}/images/output/favicon.ico"
-  VERBATIM
-  COMMENT "Generating favicon"
-)
+foreach(FAVICON_SIZE IN ITEMS ${FAVICON_SIZES})
+  # Extract the width and height from the current image size.
+  string(REGEX REPLACE "([0-9]+)[x]([0-9]+)" "\\1" WIDTH "${FAVICON_SIZE}")
+  string(REGEX REPLACE "([0-9]+)[x]([0-9]+)" "\\2" HEIGHT "${FAVICON_SIZE}")
+  # Generate that image.
+  add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/images/output/favicon-${WIDTH}x${HEIGHT}.png
+    BYPRODUCTS ${CMAKE_BINARY_DIR}/images/output/favicon-${WIDTH}x${HEIGHT}.png
+    COMMAND ${IMAGEMAGICK_CONVERT_EXECUTABLE} ${BASE_LOGO} -gravity center -resize ${WIDTH}x${HEIGHT} -background transparent -extent "${WIDTH}x${HEIGHT}" "${CMAKE_BINARY_DIR}/images/output/favicon-${WIDTH}x${HEIGHT}.png" > /dev/null 2>&1
+    COMMENT "Generating ${WIDTH}x${HEIGHT} favicon"
+    DEPENDS ${BASE_LOGO}
+    VERBATIM
+  )
+  add_custom_command(OUTPUT ${FAVICON_MARKER} APPEND DEPENDS ${CMAKE_BINARY_DIR}/images/output/favicon-${WIDTH}x${HEIGHT}.png)
+endforeach()
 
-add_custom_target(images DEPENDS images.apple-touch-icon images.apple-splash-screen images.favicon-16x16 images.favicon-32x32 images.favicon)
+add_custom_target(images DEPENDS images.apple-touch-icon images.apple-splash-screen images.favicons)
 
