@@ -32,7 +32,7 @@
       "description": "Release configuration, will require additional tooling but creates a complete monetr build",
       "inherits": "default",
       "cacheVariables": {
-        "BUILD_THIRD_PARTY_NOTICE": "ON",
+        "BUILD_THIRD_PARTY_NOTICE": "OFF",
         "CMAKE_BUILD_TYPE": "Release"
       }
     },

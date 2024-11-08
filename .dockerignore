@@ -2,6 +2,7 @@
 node_modules
 tmp
 .licenses
+.pnpm-store
 pkg/ui/static
 !pkg/ui/static/README.md
 pkg/icons/sources
