@@ -165,6 +165,17 @@ if(BUILD_TESTING)
       TEST migrate.db
       PROPERTY LABELS "bootstrap"
     )
+
+    # If this test fails that means you need to run `go mod tidy`.
+    add_test(
+      NAME go.mod.tidy
+      COMMAND ${CMAKE_Go_COMPILER} mod tidy --diff
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+    set_property(
+      TEST go.mod.tidy
+      PROPERTY LABELS "bootstrap"
+    )
   else()
     message(STATUS "Go tests will not be run since Go installation could not be found.")
   endif()

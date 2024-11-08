@@ -8,6 +8,9 @@
   "semanticCommitScope": "Renovate",
   "branchConcurrentLimit": 20,
   "prConcurrentLimit": 20,
+  "postUpdateOptions": [
+    "gomodTidy",
+  ],
   "packageRules": [
     {
       "matchPackageNames": [
