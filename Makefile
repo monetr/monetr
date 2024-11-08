@@ -143,3 +143,6 @@ container-push: $(CMAKE_CONFIGURATION_DIRECTORY)
 generate:
 	cmake --preset deploy
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.yaml
+
+images: $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t images $(BUILD_ARGS)
