@@ -657,6 +657,11 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 		transactionName = input.GetMerchantName()
 	}
 
+	originalName := input.GetOriginalDescription()
+	if originalName == "" {
+		originalName = transactionName
+	}
+
 	// If there is not a monetr transaction record for this Plaid transaction,
 	// then we simply need to create both records. There is nothing else we need
 	// to do here.
@@ -688,7 +693,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			Category:             input.GetCategoryDetail(),
 			Date:                 date,
 			Name:                 transactionName,
-			OriginalName:         input.GetName(),
+			OriginalName:         originalName,
 			MerchantName:         input.GetMerchantName(),
 			OriginalMerchantName: input.GetMerchantName(),
 			Currency:             input.GetISOCurrencyCode(),
