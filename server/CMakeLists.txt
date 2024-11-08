@@ -19,10 +19,12 @@ set(MONETR_CLI_PKG ${MONETR_PKG_ROOT}/server/cmd CACHE INTERNAL "")
 set(GO_SRC_DIR "${CMAKE_SOURCE_DIR}/server")
 file(GLOB_RECURSE ALL_GO_FILES
   "${GO_SRC_DIR}/*.go"
+  "${GO_SRC_DIR}/*.s"
   "${GO_SRC_DIR}/*.sql"
 )
 file(GLOB_RECURSE APP_GO_FILES
   "${GO_SRC_DIR}/*.go"
+  "${GO_SRC_DIR}/*.s"
   "${GO_SRC_DIR}/*.sql"
 )
 list(FILTER APP_GO_FILES EXCLUDE REGEX ".+_test\\.go")
