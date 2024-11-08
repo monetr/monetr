@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   git \
   gnupg \
   libssl-dev \
+  locales-all \
   nodejs=18.* \
   npm \
   pkg-config \
