@@ -129,6 +129,21 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
           }))),
         );
 
+        compilation.emitAsset(
+          'assets/resources/transparent-128.png',
+          new sources.RawSource(Buffer.from(ImageMagick.read(sourceBytes, image => {
+            const width = 128;
+            const height = 128;
+            const padding = 1.0;
+            const logoWidth = +((width * padding).toFixed(0));
+            const logoHeight = +((height * padding).toFixed(0));
+            image.resize(logoWidth, logoHeight);
+            image.extent(new MagickGeometry(width, height), Gravity.Center, MagickColors.Transparent);
+            image.quality = 90;
+            return image.write(MagickFormat.Png, data => data);
+          }))),
+        );
+
         const mstileSizes: Array<[number, number]> = [
           [128, 128], 
           [270, 270], 
