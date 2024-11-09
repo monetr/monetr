@@ -8,7 +8,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   curl \
   git \
   gnupg \
-  imagemagick \
   libssl-dev \
   locales-all \
   nodejs=18.* \
