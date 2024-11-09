@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
 option(BUILD_THIRD_PARTY_NOTICE "Generate a third party notice as part of the build stage, requires Ruby." OFF)
-option(BUILD_PWA_IMAGES "Generate images required for the progressive web app, such as splash screens and maskable icons, requires ImageMagick" OFF)
-option(BUILD_THIRD_PARTY_NOTICE "Generate a third party notice as part of the build stage, requires Ruby." OFF)
 option(BUILD_SIMPLE_ICONS "Embed simple-icons into the final binary, used for providing icons for transactions." ON)
 option(BUILD_NOSIMD "Disable SIMD support at compile time." OFF)
 option(BUILD_DEPLOYMENT_TARGETS "Include targets for deploying monetr using helm and kubectl" OFF)

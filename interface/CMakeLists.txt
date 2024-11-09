@@ -14,8 +14,6 @@ set(APP_UI_FILES ${ALL_UI_FILES})
 
 # Get all files in the PUBLIC_DIR (non-recursive)
 file(GLOB PUBLIC_FILES "${PUBLIC_DIR}/*")
-# Get all the images that the application uses
-file(GLOB IMAGE_FILES "${CMAKE_SOURCE_DIR}/images/generated/*")
 
 # Get the list of UI_CONFIG_FILES
 file(GLOB UI_CONFIG_FILES
@@ -51,7 +49,6 @@ add_custom_command(
     ${APP_UI_FILES}
     ${PUBLIC_FILES}
     ${UI_CONFIG_FILES}
-    ${IMAGE_FILES}
 )
 
 add_custom_target(

@@ -1,4 +1,6 @@
 /* eslint-disable no-console */
+import { pluginPWA } from './pluginPWA';
+
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
@@ -8,8 +10,6 @@ const envName = process.env.NODE_ENV ?? 'development';
 console.log(`Building for environment: ${envName}`);
 const isDevelopment = envName !== 'production';
 const interfaceSource = path.resolve(__dirname, 'src');
-
-const imagesDirectory = path.resolve(__dirname, '../build/images/output');
 
 // If we are using development lite, then this changes the behavior of the config significantly. We instead proxy the
 // staging or production API here to allow for frontend development only against real data. Requires a staging or
@@ -66,7 +66,7 @@ export default defineConfig({
       // for a production build add the go template string in so that the server can provide the DSN.
       SENTRY_DSN: isDevelopment ? `${process.env.MONETR_SENTRY_DSN ?? ''}` : '{{ .SentryDSN }}',
     },
-    favicon: path.resolve(`${imagesDirectory}/favicon.ico`),
+    favicon: path.resolve(__dirname, '../images/favicon.ico'),
     mountId: 'root',
   },
   output: {
@@ -98,10 +98,6 @@ export default defineConfig({
         to: 'manifest.json',
       },
       {
-        from: imagesDirectory,
-        to: 'assets/resources',
-      },
-      {
         from: 'public/robots.txt',
         to: 'robots.txt',
       },
@@ -116,5 +112,9 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginSass(),
+    pluginPWA({
+      logo: path.resolve(__dirname, '../images/logo.png'),
+      background: '#19161f',
+    }),
   ],
 });
