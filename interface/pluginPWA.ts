@@ -153,7 +153,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
         mstileSizes.forEach(([width, height]) => compilation.emitAsset(
           `assets/resources/mstile-icon-${width}-${height}.png`,
           new sources.RawSource(Buffer.from(ImageMagick.read(sourceBytes, image => {
-            const padding = 0.9;
+            const padding = 0.75;
             const logoWidth = +((width * padding).toFixed(0));
             const logoHeight = +((height * padding).toFixed(0));
             image.resize(logoWidth, logoHeight);
@@ -176,7 +176,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
             const logoWidth = +((width * padding).toFixed(0));
             const logoHeight = +((height * padding).toFixed(0));
             image.resize(logoWidth, logoHeight);
-            image.extent(new MagickGeometry(width, height), Gravity.Center, maskable ? backgroundColor : MagickColors.Transparent);
+            image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
             image.quality = 90;
             return image.write(MagickFormat.Png, data => data);
           }))),
