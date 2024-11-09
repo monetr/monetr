@@ -30,6 +30,8 @@ set(UI_DIST
   ${UI_DIST_DIR}/favicon.ico
   ${UI_DIST_DIR}/manifest.json
   ${UI_DIST_DIR}/robots.txt
+  ${UI_DIST_DIR}/apple-touch-icon.png
+  ${UI_DIST_DIR}/apple-touch-icon-precomposed.png
   CACHE INTERNAL ""
 )
 add_custom_command(
