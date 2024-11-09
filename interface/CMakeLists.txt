@@ -14,6 +14,8 @@ set(APP_UI_FILES ${ALL_UI_FILES})
 
 # Get all files in the PUBLIC_DIR (non-recursive)
 file(GLOB PUBLIC_FILES "${PUBLIC_DIR}/*")
+# Get all the images that the application uses
+file(GLOB IMAGE_FILES "${CMAKE_SOURCE_DIR}/images/generated/*")
 
 # Get the list of UI_CONFIG_FILES
 file(GLOB UI_CONFIG_FILES
@@ -26,12 +28,7 @@ set(UI_DIST_DIR ${CMAKE_SOURCE_DIR}/server/ui/static)
 set(UI_DIST
   ${UI_DIST_DIR}/assets
   ${UI_DIST_DIR}/index.html
-  ${UI_DIST_DIR}/public
   ${UI_DIST_DIR}/favicon.ico
-  ${UI_DIST_DIR}/logo192.png
-  ${UI_DIST_DIR}/logo512.png
-  ${UI_DIST_DIR}/logo192transparent.png
-  ${UI_DIST_DIR}/logo512transparent.png
   ${UI_DIST_DIR}/manifest.json
   ${UI_DIST_DIR}/robots.txt
   CACHE INTERNAL ""
@@ -43,20 +40,19 @@ add_custom_command(
   # in the output directory.
   COMMAND ${GIT_EXECUTABLE} clean -f -X ${UI_DIST_DIR}
   # Once the output directory is clean, then actually build the user interface.
-  COMMAND ${CMAKE_COMMAND} -E env BUILD_PWA_IMAGES=${BUILD_PWA_IMAGES} ${RSBUILD_EXECUTABLE} build --mode production
+  COMMAND ${RSBUILD_EXECUTABLE} build --mode production
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${UI_DIST_DIR}/assets/resources
   COMMENT "Building monetr's user interface"
   WORKING_DIRECTORY ${UI_SRC_DIR}
+  VERBATIM
   DEPENDS
     dependencies.node_modules
     tools.rsbuild
     ${APP_UI_FILES}
     ${PUBLIC_FILES}
     ${UI_CONFIG_FILES}
+    ${IMAGE_FILES}
 )
-
-if (BUILD_PWA_IMAGES)
-  add_custom_command(OUTPUT ${UI_DIST} APPEND DEPENDS images)
-endif()
 
 add_custom_target(
   build.interface ALL

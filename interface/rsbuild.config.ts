@@ -9,10 +9,7 @@ console.log(`Building for environment: ${envName}`);
 const isDevelopment = envName !== 'production';
 const interfaceSource = path.resolve(__dirname, 'src');
 
-
-const cmakeBinaryDir = path.resolve(__dirname, '../build');
-
-const includePWA = process.env.BUILD_PWA_IMAGES?.toLowerCase() === 'on';
+const imagesDirectory = path.resolve(__dirname, '../build/images/output');
 
 // If we are using development lite, then this changes the behavior of the config significantly. We instead proxy the
 // staging or production API here to allow for frontend development only against real data. Requires a staging or
@@ -69,51 +66,8 @@ export default defineConfig({
       // for a production build add the go template string in so that the server can provide the DSN.
       SENTRY_DSN: isDevelopment ? `${process.env.MONETR_SENTRY_DSN ?? ''}` : '{{ .SentryDSN }}',
     },
-    favicon: includePWA ?
-      path.resolve(`${cmakeBinaryDir}/images/output/favicon.ico`) :
-      path.resolve(__dirname, 'public/favicon.ico'),
+    favicon: path.resolve(`${imagesDirectory}/favicon.ico`),
     mountId: 'root',
-    tags: includePWA ? [
-      {
-        tag: 'link',
-        attrs: { 
-          rel: 'apple-touch-icon',
-          sizes: '180x180',
-          href: '/assets/resources/apple-touch-icon.png',
-        },
-        head: true,
-      },
-      {
-        tag: 'link',
-        attrs: { 
-          rel: 'icon',
-          type: 'image/png',
-          href: '/assets/resources/favicon-16x16.png',
-          sizes: '16x16',
-        },
-        head: true,
-      },
-      {
-        tag: 'link',
-        attrs: { 
-          rel: 'icon',
-          type: 'image/png',
-          href: '/assets/resources/favicon-32x32.png',
-          sizes: '32x32',
-        },
-        head: true,
-      },
-      {
-        tag: 'link',
-        attrs: { 
-          rel: 'icon',
-          type: 'image/png',
-          href: '/assets/resources/favicon-64x64.png',
-          sizes: '64x64',
-        },
-        head: true,
-      },
-    ] : [],
   },
   output: {
     target: 'web',
@@ -144,25 +98,9 @@ export default defineConfig({
         to: 'manifest.json',
       },
       {
-        from: `${cmakeBinaryDir}/images/output`,
+        from: imagesDirectory,
         to: 'assets/resources',
       },
-      // {
-      //   from: 'public/logo192.png',
-      //   to: 'logo192.png',
-      // },
-      // {
-      //   from: 'public/logo512.png',
-      //   to: 'logo512.png',
-      // },
-      // {
-      //   from: 'public/logo192transparent.png',
-      //   to: 'logo192transparent.png',
-      // },
-      // {
-      //   from: 'public/logo512transparent.png',
-      //   to: 'logo512transparent.png',
-      // },
       {
         from: 'public/robots.txt',
         to: 'robots.txt',
