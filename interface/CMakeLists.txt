@@ -19,6 +19,7 @@ file(GLOB PUBLIC_FILES "${PUBLIC_DIR}/*")
 file(GLOB UI_CONFIG_FILES
   "${UI_SRC_DIR}/*.json"
   "${UI_SRC_DIR}/*.config.*"
+  "${UI_SRC_DIR}/pluginPWA.ts"
 )
 
 set(UI_DIST_DIR ${CMAKE_SOURCE_DIR}/server/ui/static)
@@ -26,12 +27,7 @@ set(UI_DIST_DIR ${CMAKE_SOURCE_DIR}/server/ui/static)
 set(UI_DIST
   ${UI_DIST_DIR}/assets
   ${UI_DIST_DIR}/index.html
-  ${UI_DIST_DIR}/public
   ${UI_DIST_DIR}/favicon.ico
-  ${UI_DIST_DIR}/logo192.png
-  ${UI_DIST_DIR}/logo512.png
-  ${UI_DIST_DIR}/logo192transparent.png
-  ${UI_DIST_DIR}/logo512transparent.png
   ${UI_DIST_DIR}/manifest.json
   ${UI_DIST_DIR}/robots.txt
   CACHE INTERNAL ""
@@ -44,8 +40,10 @@ add_custom_command(
   COMMAND ${GIT_EXECUTABLE} clean -f -X ${UI_DIST_DIR}
   # Once the output directory is clean, then actually build the user interface.
   COMMAND ${RSBUILD_EXECUTABLE} build --mode production
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${UI_DIST_DIR}/assets/resources
   COMMENT "Building monetr's user interface"
   WORKING_DIRECTORY ${UI_SRC_DIR}
+  VERBATIM
   DEPENDS
     dependencies.node_modules
     tools.rsbuild

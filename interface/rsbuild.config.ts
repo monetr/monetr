@@ -1,4 +1,6 @@
 /* eslint-disable no-console */
+import { pluginPWA } from './pluginPWA';
+
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
@@ -64,7 +66,7 @@ export default defineConfig({
       // for a production build add the go template string in so that the server can provide the DSN.
       SENTRY_DSN: isDevelopment ? `${process.env.MONETR_SENTRY_DSN ?? ''}` : '{{ .SentryDSN }}',
     },
-    favicon: path.resolve(__dirname, 'public/favicon.ico'),
+    favicon: path.resolve(__dirname, '../images/favicon.ico'),
     mountId: 'root',
   },
   output: {
@@ -82,7 +84,7 @@ export default defineConfig({
       image: `[name].${filename}[ext]`,
       font: `${filename}[ext]`,
     },
-    cleanDistPath: 'auto',
+    cleanDistPath: false, // Handled by cmake
     charset: 'utf8',
     filenameHash: true,
     manifest: false,
@@ -94,22 +96,6 @@ export default defineConfig({
       {
         from: 'public/manifest.json',
         to: 'manifest.json',
-      },
-      {
-        from: 'public/logo192.png',
-        to: 'logo192.png',
-      },
-      {
-        from: 'public/logo512.png',
-        to: 'logo512.png',
-      },
-      {
-        from: 'public/logo192transparent.png',
-        to: 'logo192transparent.png',
-      },
-      {
-        from: 'public/logo512transparent.png',
-        to: 'logo512transparent.png',
       },
       {
         from: 'public/robots.txt',
@@ -126,5 +112,9 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginSass(),
-  ],
+    !isDevelopment && pluginPWA({
+      logo: path.resolve(__dirname, '../images/logo.png'),
+      background: '#19161f',
+    }),
+  ].filter(item => Boolean(item)),
 });

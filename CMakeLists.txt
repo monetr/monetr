@@ -45,6 +45,7 @@ set(MONETR_PKG_ROOT github.com/monetr/monetr CACHE INTERNAL "Base go package for
 # Import this _after_ we have found all the packages above.
 include(NodeModules)
 include(GolangUtils)
+add_subdirectory("${CMAKE_SOURCE_DIR}/images")
 add_subdirectory("${CMAKE_SOURCE_DIR}/interface")
 add_subdirectory("${CMAKE_SOURCE_DIR}/stories")
 add_subdirectory("${CMAKE_SOURCE_DIR}/docs")

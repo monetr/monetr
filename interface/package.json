@@ -68,6 +68,7 @@
     "zustand": "4.5.5"
   },
   "devDependencies": {
+    "@imagemagick/magick-wasm": "0.0.31",
     "@rsbuild/core": "1.0.19",
     "@rsbuild/plugin-react": "1.0.7",
     "@rsbuild/plugin-sass": "1.1.0",
