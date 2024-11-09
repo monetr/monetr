@@ -112,9 +112,9 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginSass(),
-    pluginPWA({
+    !isDevelopment && pluginPWA({
       logo: path.resolve(__dirname, '../images/logo.png'),
       background: '#19161f',
     }),
-  ],
+  ].filter(item => Boolean(item)),
 });
