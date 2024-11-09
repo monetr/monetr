@@ -101,10 +101,29 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
 
         // Apple touch icon
         compilation.emitAsset(
-          'assets/resources/apple-touch-icon.png',
+          'apple-touch-icon.png',
           new sources.RawSource(Buffer.from(ImageMagick.read(sourceBytes, image => {
-            image.resize(150, 150);
-            image.extent(new MagickGeometry(180, 180), Gravity.Center, backgroundColor);
+            const width = 180;
+            const height = 180;
+            const padding = 0.75;
+            const logoWidth = +((width * padding).toFixed(0));
+            const logoHeight = +((height * padding).toFixed(0));
+            image.resize(logoWidth, logoHeight);
+            image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
+            image.quality = 90;
+            return image.write(MagickFormat.Png, data => data);
+          }))),
+        );
+        compilation.emitAsset(
+          'apple-touch-icon-precomposed.png',
+          new sources.RawSource(Buffer.from(ImageMagick.read(sourceBytes, image => {
+            const width = 180;
+            const height = 180;
+            const padding = 0.75;
+            const logoWidth = +((width * padding).toFixed(0));
+            const logoHeight = +((height * padding).toFixed(0));
+            image.resize(logoWidth, logoHeight);
+            image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
             image.quality = 90;
             return image.write(MagickFormat.Png, data => data);
           }))),
@@ -138,7 +157,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
         androidChromeSizes.forEach(([width, height, maskable]) => compilation.emitAsset(
           `assets/resources/android-chrome-${width}-${height}${maskable ? '_maskable' : ''}.png`,
           new sources.RawSource(Buffer.from(ImageMagick.read(sourceBytes, image => {
-            const padding = 0.9;
+            const padding = 0.75;
             const logoWidth = +((width * padding).toFixed(0));
             const logoHeight = +((height * padding).toFixed(0));
             image.resize(logoWidth, logoHeight);

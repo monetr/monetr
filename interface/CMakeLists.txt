@@ -19,6 +19,7 @@ file(GLOB PUBLIC_FILES "${PUBLIC_DIR}/*")
 file(GLOB UI_CONFIG_FILES
   "${UI_SRC_DIR}/*.json"
   "${UI_SRC_DIR}/*.config.*"
+  "${UI_SRC_DIR}/pluginPWA.ts"
 )
 
 set(UI_DIST_DIR ${CMAKE_SOURCE_DIR}/server/ui/static)
