@@ -69,7 +69,9 @@ export default defineConfig({
       // for a production build add the go template string in so that the server can provide the DSN.
       SENTRY_DSN: isDevelopment ? `${process.env.MONETR_SENTRY_DSN ?? ''}` : '{{ .SentryDSN }}',
     },
-    favicon: path.resolve(__dirname, 'public/favicon.ico'),
+    favicon: includePWA ?
+      path.resolve(`${cmakeBinaryDir}/images/output/favicon.ico`) :
+      path.resolve(__dirname, 'public/favicon.ico'),
     mountId: 'root',
     tags: includePWA ? [
       {
@@ -98,6 +100,16 @@ export default defineConfig({
           type: 'image/png',
           href: '/assets/resources/favicon-32x32.png',
           sizes: '32x32',
+        },
+        head: true,
+      },
+      {
+        tag: 'link',
+        attrs: { 
+          rel: 'icon',
+          type: 'image/png',
+          href: '/assets/resources/favicon-64x64.png',
+          sizes: '64x64',
         },
         head: true,
       },
