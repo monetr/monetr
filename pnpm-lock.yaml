@@ -417,8 +417,8 @@ importers:
         specifier: 1.80.6
         version: 1.80.6
       storybook-react-rsbuild:
-        specifier: 0.1.2
-        version: 0.1.2(@rsbuild/core@1.0.19)(@storybook/test@8.3.6(storybook@8.3.6))(esbuild@0.19.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.19.11))
+        specifier: 0.1.3
+        version: 0.1.3(@rsbuild/core@1.0.19)(@storybook/test@8.3.6(storybook@8.3.6))(esbuild@0.19.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.19.11))
 
 packages:
 
@@ -7949,8 +7949,8 @@ packages:
       react-dom:
         optional: true
 
-  storybook-builder-rsbuild@0.1.2:
-    resolution: {integrity: sha512-dR1t0bq5AMNGY4bk2/x0EZPOn+Zhga5iH8RSbMUuPmRKbU4C/PzoIpv5immdekotM9LEYeGMi6dSb2MiqpkSdw==}
+  storybook-builder-rsbuild@0.1.3:
+    resolution: {integrity: sha512-/W+FE1dkLB9qeLBu1S2lVoAKPgMXCmbtnVaQ985f/F800SjcGY2MWzgvWOw8VdifVSQ0MrmhOwxRUin/C7XMZQ==}
     peerDependencies:
       '@rsbuild/core': ^1.0.1
       storybook: ^8.2.1
@@ -7959,8 +7959,8 @@ packages:
       typescript:
         optional: true
 
-  storybook-react-rsbuild@0.1.2:
-    resolution: {integrity: sha512-q94ojdNy5dEoyG64AVJIsLYbJmYt/v5Mcq8y9d6+tQyugdUBIQTLiK7PM1UfGgkwB+DLrpXZbwrUzU3LgbkHMg==}
+  storybook-react-rsbuild@0.1.3:
+    resolution: {integrity: sha512-yBNofOrqizWvhnvXdw/mpndeXpJKpz4BcFbHtixjTvEe2LZI4xV7k9JXuj+UjF6KMweOw2noRQOWGwfpwOQstw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@rsbuild/core': ^1.0.1
@@ -9063,7 +9063,7 @@ snapshots:
 
   '@babel/parser@7.25.4':
     dependencies:
-      '@babel/types': 7.25.4
+      '@babel/types': 7.25.9
 
   '@babel/parser@7.25.9':
     dependencies:
@@ -12073,8 +12073,8 @@ snapshots:
 
   '@types/babel__core@7.20.5':
     dependencies:
-      '@babel/parser': 7.25.4
-      '@babel/types': 7.25.4
+      '@babel/parser': 7.25.9
+      '@babel/types': 7.25.9
       '@types/babel__generator': 7.6.8
       '@types/babel__template': 7.4.4
       '@types/babel__traverse': 7.20.6
@@ -12085,7 +12085,7 @@ snapshots:
 
   '@types/babel__template@7.4.4':
     dependencies:
-      '@babel/parser': 7.25.4
+      '@babel/parser': 7.25.9
       '@babel/types': 7.25.9
 
   '@types/babel__traverse@7.20.6':
@@ -15149,7 +15149,7 @@ snapshots:
   istanbul-lib-instrument@5.2.1:
     dependencies:
       '@babel/core': 7.25.2
-      '@babel/parser': 7.25.4
+      '@babel/parser': 7.25.9
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.2
       semver: 6.3.1
@@ -17945,7 +17945,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  storybook-builder-rsbuild@0.1.2(@rsbuild/core@1.0.19)(esbuild@0.19.11)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3):
+  storybook-builder-rsbuild@0.1.3(@rsbuild/core@1.0.19)(esbuild@0.19.11)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3):
     dependencies:
       '@rsbuild/core': 1.0.19
       '@rsbuild/plugin-type-check': 1.0.1(@rsbuild/core@1.0.19)(esbuild@0.19.11)(typescript@5.6.3)
@@ -17976,7 +17976,7 @@ snapshots:
       - webpack-cli
       - webpack-sources
 
-  storybook-react-rsbuild@0.1.2(@rsbuild/core@1.0.19)(@storybook/test@8.3.6(storybook@8.3.6))(esbuild@0.19.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.19.11)):
+  storybook-react-rsbuild@0.1.3(@rsbuild/core@1.0.19)(@storybook/test@8.3.6(storybook@8.3.6))(esbuild@0.19.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.19.11)):
     dependencies:
       '@rollup/pluginutils': 5.1.3
       '@rsbuild/core': 1.0.19
@@ -17990,7 +17990,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       resolve: 1.22.8
       storybook: 8.3.6
-      storybook-builder-rsbuild: 0.1.2(@rsbuild/core@1.0.19)(esbuild@0.19.11)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)
+      storybook-builder-rsbuild: 0.1.3(@rsbuild/core@1.0.19)(esbuild@0.19.11)(storybook@8.3.6)(typescript@5.6.3)(webpack-sources@3.2.3)
       tsconfig-paths: 4.2.0
     optionalDependencies:
       typescript: 5.6.3
