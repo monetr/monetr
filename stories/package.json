@@ -31,6 +31,6 @@
     "sass": "1.80.6",
     "sass-embedded-linux-arm64": "1.80.6",
     "sass-embedded-linux-x64": "1.80.6",
-    "storybook-react-rsbuild": "0.1.2"
+    "storybook-react-rsbuild": "0.1.3"
   }
 }
