@@ -7,11 +7,6 @@
       "layout": "raw"
     }
   },
-  "policy": {
-    "type": "page",
-    "title": "Policies",
-    "display": "hidden"
-  },
   "documentation": {
     "type": "page",
     "title": "Documentation"
@@ -19,5 +14,10 @@
   "contact": {
     "type": "page",
     "title": "Contact"
+  },
+  "policy": {
+    "type": "page",
+    "title": "Policies",
+    "display": "hidden"
   }
 }
