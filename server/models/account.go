@@ -7,7 +7,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v81"
 )
 
 var (

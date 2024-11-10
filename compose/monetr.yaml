@@ -71,3 +71,5 @@ storage:
     useEnvCredentials: true # Use the AWS_ACCESS_KEY and AWS_SECRET_KEY env variables in development.
   filesystem:
     basePath: /build/build/development/storage 
+stripe:
+  freeTrialDays: 1 # For testing

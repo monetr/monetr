@@ -9,7 +9,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v81"
 )
 
 func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Event) error {
