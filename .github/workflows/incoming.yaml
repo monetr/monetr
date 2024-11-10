@@ -13,6 +13,13 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fix dumb git issue
+        run: |
+          git config --global --add safe.directory ${PWD}
+
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.2'
@@ -24,12 +31,6 @@ jobs:
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Fix dumb git issue
-        run: |
-          git config --global --add safe.directory ${PWD}
 
       # - name: Go Build Cache
       #   uses: actions/cache@v4
@@ -44,15 +45,14 @@ jobs:
       #     restore-keys: |
       #       ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
       #       ${{ runner.os }}-go-mod
-
-      - name: pnpm Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            ${{ runner.os }}-pnpm-store
+      # - name: pnpm Cache
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ${{ env.STORE_PATH }}
+      #     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+      #       ${{ runner.os }}-pnpm-store
 
       - name: Build
         run: |
