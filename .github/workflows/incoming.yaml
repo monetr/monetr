@@ -163,6 +163,11 @@ jobs:
         run: |
           git config --global --add safe.directory ${PWD}
 
+      - name: Setup golang
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.2'
+
       - name: Setup local development environment
         timeout-minutes: 15
         run: |
