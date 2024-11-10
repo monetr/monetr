@@ -272,11 +272,11 @@ importers:
         specifier: 1.1.0
         version: 1.1.0(@rsbuild/core@1.1.0)
       '@rspack/binding-linux-arm64-gnu':
-        specifier: 1.0.14
-        version: 1.0.14
+        specifier: 1.1.0
+        version: 1.1.0
       '@rspack/binding-linux-x64-gnu':
-        specifier: 1.0.14
-        version: 1.0.14
+        specifier: 1.1.0
+        version: 1.1.0
       '@swc/core':
         specifier: 1.9.1
         version: 1.9.1(@swc/helpers@0.5.13)
@@ -401,6 +401,12 @@ importers:
       '@rsbuild/plugin-sass':
         specifier: 1.1.0
         version: 1.1.0(@rsbuild/core@1.1.0)
+      '@rspack/binding-linux-arm64-gnu':
+        specifier: 1.1.0
+        version: 1.1.0
+      '@rspack/binding-linux-x64-gnu':
+        specifier: 1.1.0
+        version: 1.1.0
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.4.47)
@@ -2745,11 +2751,6 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@rspack/binding-linux-arm64-gnu@1.0.14':
-    resolution: {integrity: sha512-JogYtL3VQS9wJ3p3FNhDqinm7avrMsdwz4erP7YCjD7idob93GYAE7dPrHUzSNVnCBYXRaHJYZHDQs7lKVcYZw==}
-    cpu: [arm64]
-    os: [linux]
-
   '@rspack/binding-linux-arm64-gnu@1.1.0':
     resolution: {integrity: sha512-Q/i50Pieii3akdv5Q6my6QelV5Dpc8O/Ir4udpjYl0pbSdKamdI8M85fxrMxGAGcoNSD+X52fDvxJujXWMcP0w==}
     cpu: [arm64]
@@ -2758,11 +2759,6 @@ packages:
   '@rspack/binding-linux-arm64-musl@1.1.0':
     resolution: {integrity: sha512-H7Eu3xC7LWPpxrI47n8X361eEGGpQOjZIWTz8tLdn4oNS2D9kqsBYES7LsuuLTTH4ueHTDuEtDdfZpBsE+qesw==}
     cpu: [arm64]
-    os: [linux]
-
-  '@rspack/binding-linux-x64-gnu@1.0.14':
-    resolution: {integrity: sha512-5vzaDRw3/sGKo3ax/1cU3/cxqNjajwlt2LU288vXNe1/n8oe/pcDfYcTugpOe/A1DqzadanudJszLpFcKsaFtQ==}
-    cpu: [x64]
     os: [linux]
 
   '@rspack/binding-linux-x64-gnu@1.1.0':
@@ -11439,18 +11435,12 @@ snapshots:
   '@rspack/binding-darwin-x64@1.1.0':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@1.0.14': {}
-
-  '@rspack/binding-linux-arm64-gnu@1.1.0':
-    optional: true
+  '@rspack/binding-linux-arm64-gnu@1.1.0': {}
 
   '@rspack/binding-linux-arm64-musl@1.1.0':
     optional: true
 
-  '@rspack/binding-linux-x64-gnu@1.0.14': {}
-
-  '@rspack/binding-linux-x64-gnu@1.1.0':
-    optional: true
+  '@rspack/binding-linux-x64-gnu@1.1.0': {}
 
   '@rspack/binding-linux-x64-musl@1.1.0':
     optional: true
