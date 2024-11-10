@@ -105,7 +105,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
           new sources.RawSource(Buffer.from(ImageMagick.read(sourceBytes, image => {
             const width = 180;
             const height = 180;
-            const padding = 0.75;
+            const padding = 0.70;
             const logoWidth = +((width * padding).toFixed(0));
             const logoHeight = +((height * padding).toFixed(0));
             image.resize(logoWidth, logoHeight);
@@ -119,7 +119,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
           new sources.RawSource(Buffer.from(ImageMagick.read(sourceBytes, image => {
             const width = 180;
             const height = 180;
-            const padding = 0.75;
+            const padding = 0.70;
             const logoWidth = +((width * padding).toFixed(0));
             const logoHeight = +((height * padding).toFixed(0));
             image.resize(logoWidth, logoHeight);
@@ -153,7 +153,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
         mstileSizes.forEach(([width, height]) => compilation.emitAsset(
           `assets/resources/mstile-icon-${width}-${height}.png`,
           new sources.RawSource(Buffer.from(ImageMagick.read(sourceBytes, image => {
-            const padding = 0.75;
+            const padding = 0.70;
             const logoWidth = +((width * padding).toFixed(0));
             const logoHeight = +((height * padding).toFixed(0));
             image.resize(logoWidth, logoHeight);
@@ -172,7 +172,7 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
         androidChromeSizes.forEach(([width, height, maskable]) => compilation.emitAsset(
           `assets/resources/android-chrome-${width}-${height}${maskable ? '_maskable' : ''}.png`,
           new sources.RawSource(Buffer.from(ImageMagick.read(sourceBytes, image => {
-            const padding = 0.75;
+            const padding = 0.70;
             const logoWidth = +((width * padding).toFixed(0));
             const logoHeight = +((height * padding).toFixed(0));
             image.resize(logoWidth, logoHeight);
