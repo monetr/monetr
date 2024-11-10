@@ -110,10 +110,10 @@ export function useDetectDuplicateLink(): (_metadata: PlaidLinkOnSuccessMetadata
   };
 }
 
-export function useTriggerManualPlaidSync(): (_linkId: number) => Promise<void> {
+export function useTriggerManualPlaidSync(): (_linkId: string) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
-  return async (linkId: number): Promise<void> => {
+  return async (linkId: string): Promise<void> => {
     return request()
       .post('/plaid/link/sync', {
         linkId,

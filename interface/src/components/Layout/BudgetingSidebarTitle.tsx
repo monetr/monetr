@@ -12,7 +12,7 @@ import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePlaidAccountOverlay';
 
 export default function BudgetingSidebarTitle(): JSX.Element {
-  const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
+  const { data: bankAccount } = useSelectedBankAccount();
   const { data: link } = useLink(bankAccount?.linkId);
   const triggerSync = useTriggerManualPlaidSync();
 
@@ -79,7 +79,10 @@ export default function BudgetingSidebarTitle(): JSX.Element {
         className='ml-[5px]'
       >
         <div className='flex flex-col dark:bg-dark-monetr-background rounded-lg border dark:border-dark-monetr-border-subtle dark:shadow-2xl' style={ { width: `${anchorEl?.offsetWidth - 10}px` } }>
-          <MenuItem visible={ link.getIsPlaid() && link.getIsError() } onClick={ handleReauthenticateLink }>
+          <MenuItem 
+            visible={ link.getIsPlaid() && (link.getIsError() || link.getIsPendingExpiration()) } 
+            onClick={ handleReauthenticateLink }
+          >
             <Autorenew className='mr-1 mb-0.5' />
             Reauthenticate
           </MenuItem>

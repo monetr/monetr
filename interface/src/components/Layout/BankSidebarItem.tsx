@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { AccountBalance } from '@mui/icons-material';
-import { Tooltip } from '@mui/material';
+import { Landmark } from 'lucide-react';
 
+import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useBankAccounts, useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useInstitution } from '@monetr/interface/hooks/institutions';
 import MonetrLink from '@monetr/interface/models/Link';
@@ -28,9 +28,9 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
   const InstitutionLogo = () => {
     if (!institution?.logo) {
       return (
-        <AccountBalance
+        <Landmark
           data-testid={ `bank-sidebar-item-${link.linkId}-logo-missing` }
-          color='info'
+          className='text-blue-500'
         />
       );
     }
@@ -44,7 +44,8 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
   };
 
   const LinkWarningIndicator = () => {
-    if (!link.getIsError()) return null;
+    const isWarning = link.getIsError() || link.getIsPendingExpiration();
+    if (!isWarning) return null;
 
     return (
       <span className='absolute flex h-3 w-3 right-0 bottom-0'>
@@ -77,13 +78,13 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
   let tooltip: string = link.getName();
   if (link.getIsError()) {
     tooltip = `${tooltip} (Error)`;
+  } else if (link.getIsPendingExpiration()) {
+    tooltip = `${tooltip} (Pending Expiration)`;
   }
 
   return (
-    <Tooltip title={ tooltip } arrow placement='right' classes={ {
-      tooltip: 'text-base font-medium',
-    } }>
-      <div
+    <Tooltip delayDuration={ 100 }>
+      <TooltipTrigger
         className='w-full h-12 flex items-center justify-center relative group'
         data-testid={ `bank-sidebar-item-${link.linkId}` }
       >
@@ -95,7 +96,10 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
           <InstitutionLogo />
           <LinkWarningIndicator />
         </Link>
-      </div>
+      </TooltipTrigger>
+      <TooltipContent side='right'>
+        { tooltip }
+      </TooltipContent>
     </Tooltip>
   );
 }
