@@ -7,7 +7,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v81"
 )
 
 // CreateCustomer takes an account object and will create a stripe customer for

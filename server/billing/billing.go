@@ -16,7 +16,7 @@ import (
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v81"
 )
 
 // Billing is used by the Stripe webhooks to maintain a subscription's status

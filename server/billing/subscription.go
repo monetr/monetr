@@ -9,7 +9,7 @@ import (
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v81"
 )
 
 // ReconcileSubscription takes an account who _should_ have a subscription

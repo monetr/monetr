@@ -14,7 +14,7 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/stretchr/testify/assert"
-	"github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v81"
 )
 
 func TestBilling_GetHasSubscription(t *testing.T) {
