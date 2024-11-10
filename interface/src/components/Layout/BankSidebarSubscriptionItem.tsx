@@ -1,18 +1,15 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import styled from '@emotion/styled';
-import { CreditCard } from '@mui/icons-material';
-import { Badge, Tooltip } from '@mui/material';
-import { differenceInDays } from 'date-fns';
+import { formatDistance } from 'date-fns';
+import { CreditCard } from 'lucide-react';
 
+import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
-import useTheme from '@monetr/interface/hooks/useTheme';
 
 export default function BankSidebarSubscriptionItem(): JSX.Element {
   const config = useAppConfiguration();
-  const theme = useTheme();
   const { result } = useAuthenticationSink();
   const path = '/settings/billing';
 
@@ -20,61 +17,22 @@ export default function BankSidebarSubscriptionItem(): JSX.Element {
     return null;
   }
 
-  const StyledBadge = styled(Badge)(() => ({
-    '& .MuiBadge-badge': {
-      opacity: '90%',
-      backgroundColor: theme.tailwind.colors['yellow']['600'],
-      boxShadow: `0 0 0 2px ${theme.tailwind.colors['dark-monetr']['background']['DEFAULT']}`,
-      '&::after': {
-        color:  theme.tailwind.colors['yellow']['600'],
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        borderRadius: '100%',
-        animation: 'ripple-trial 3s infinite ease-in-out',
-        border: '1px solid currentColor',
-        content: '""',
-      },
-    },
-    '@keyframes ripple-trial': {
-      '0%': {
-        transform: 'scale(.8)',
-        opacity: 1,
-      },
-      '70%': {
-        transform: 'scale(.9)',
-        opacity: 1,
-      },
-      '100%': {
-        transform: 'scale(2.4)',
-        opacity: 0,
-      },
-    },
-  }));
-
   if (result?.isTrialing) {
     return (
-      <Link to={ path } data-testid='bank-sidebar-subscription'>
-        <Tooltip
-          title={ `Your trial ends in ${ differenceInDays(result.trialingUntil, new Date())} day(s).` }
-          arrow
-          placement='right'
-          classes={ {
-            tooltip: 'text-base font-medium',
-          } }
-        >
-          <StyledBadge
-            overlap='circular'
-            anchorOrigin={ { vertical: 'top', horizontal: 'right' } }
-            badgeContent={ differenceInDays(result.trialingUntil, new Date()) }
-            classes={ { badge: 'left-1 top-1 text-[11px]' } }
-          >
-            <CreditCard className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer mt-1.5' />
-          </StyledBadge>
-        </Tooltip>
-      </Link>
+      <Tooltip delayDuration={ 100 }>
+        <TooltipTrigger>
+          <Link to={ path } data-testid='bank-sidebar-subscription' className='relative group'>
+            <CreditCard className='dark:group-hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer mt-1.5' />
+            <span className='absolute flex h-2 w-2 right-0 bottom-0'>
+              <span className='animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-yellow-400' />
+              <span className='relative inline-flex rounded-full h-2 w-2 bg-yellow-500' />
+            </span>
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent side='right'>
+          Your trial ends in { formatDistance(result.trialingUntil, new Date())}.
+        </TooltipContent>
+      </Tooltip>
     );
   }
 

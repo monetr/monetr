@@ -7,6 +7,7 @@ import * as Sentry from '@sentry/react';
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
 import PullToRefresh from '@monetr/interface/components/PullToRefresh';
+import { TooltipProvider } from '@monetr/interface/components/Tooltip';
 import Monetr from '@monetr/interface/monetr';
 import { newTheme } from '@monetr/interface/theme';
 
@@ -17,11 +18,13 @@ export default function Root(): JSX.Element {
         <MQueryClient>
           <ThemeProvider theme={ newTheme }>
             <MSnackbarProvider>
-              <NiceModal.Provider>
-                <CssBaseline />
-                <PullToRefresh />
-                <Monetr />
-              </NiceModal.Provider>
+              <TooltipProvider>
+                <NiceModal.Provider>
+                  <CssBaseline />
+                  <PullToRefresh />
+                  <Monetr />
+                </NiceModal.Provider>
+              </TooltipProvider>
             </MSnackbarProvider>
           </ThemeProvider>
         </MQueryClient>
