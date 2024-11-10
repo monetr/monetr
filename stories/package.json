@@ -26,6 +26,8 @@
     "@rsbuild/core": "1.1.0",
     "@rsbuild/plugin-react": "1.0.7",
     "@rsbuild/plugin-sass": "1.1.0",
+    "@rspack/binding-linux-arm64-gnu": "1.1.0",
+    "@rspack/binding-linux-x64-gnu": "1.1.0",
     "autoprefixer": "10.4.20",
     "postcss": "8.4.47",
     "sass": "1.80.6",

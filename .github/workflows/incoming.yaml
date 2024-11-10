@@ -151,16 +151,11 @@ jobs:
 
   local_dev:
     name: Local Development
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - id: go-cache-paths
-        name: Install pnpm and configure cache
-        run: |
-          npm install -g pnpm
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
-          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
-
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -168,34 +163,12 @@ jobs:
         run: |
           git config --global --add safe.directory ${PWD}
 
-      # Cache go build cache, used to speedup go test
-      - name: Go Build Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-localdev-go-build-${{ hashFiles('**/go.sum') }}
-
-      # Cache go mod cache, used to speedup builds
-      - name: Go Mod Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.GOMODCACHE }}
-          key: ${{ runner.os }}-localdev-go-mod-${{ hashFiles('**/go.sum') }}
-
-      - name: pnpm Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-localdev-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-localdev-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            ${{ runner.os }}-localdev-pnpm-store
-
       - name: Setup local development environment
-        timeout-minutes: 10
+        timeout-minutes: 15
         run: |
           make develop || (make logs && exit 1)
-          curl -k https://my.monetr.local
+          curl -k -v https://my.monetr.local
+          curl -k -v https://my.monetr.local/api/health
           make shutdown
 
   docs:
