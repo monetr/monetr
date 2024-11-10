@@ -77,7 +77,7 @@
     "@swc/core": "1.9.1",
     "@swc/jest": "0.2.37",
     "@testing-library/jest-dom": "6.6.2",
-    "@testing-library/react": "13.4.0",
+    "@testing-library/react": "16.0.1",
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.5.2",
     "@types/jest": "latest",
