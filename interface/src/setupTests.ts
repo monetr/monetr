@@ -9,6 +9,22 @@ import { cleanup, configure } from '@testing-library/react';
 configure({
   asyncUtilTimeout: 10000,
 });
+
+beforeAll(() => {
+  // https://github.com/jsdom/jsdom/issues/3368
+  global.ResizeObserver = class ResizeObserver {
+    public observe() {
+      // do nothing
+    }
+    public unobserve() {
+      // do nothing
+    }
+    public disconnect() {
+      // do nothing
+    }
+  };
+});
+
 afterEach(() => {
   cleanup();
 });
