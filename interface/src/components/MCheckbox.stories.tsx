@@ -4,7 +4,7 @@ import { Meta, StoryFn } from '@storybook/react';
 import MCheckbox from './MCheckbox';
 
 export default {
-  title: '@monetr/interface/components/Checkbox',
+  title: '@monetr/interface/components/MCheckbox',
   component: MCheckbox,
 } as Meta<typeof MCheckbox>;
 
