@@ -1,8 +1,8 @@
 import React from 'react';
-import { Divider } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 
 import MTextField from './MTextField';
+import MDivider from '@monetr/interface/components/MDivider';
 
 
 export default {
@@ -17,7 +17,7 @@ export const Default: StoryFn<typeof MTextField> = () => (
       <MTextField label='Email Address' type='email' name='email' />
       <MTextField label='Password' type='password' name='password' />
       <MTextField label='Amount' type='number' name='amount' />
-      <Divider />
+      <MDivider />
       <MTextField label='Required' type='text' name='name' required />
       <MTextField label='Disabled' type='text' name='name' disabled />
       <MTextField label='With An Error' type='text' name='name' error='Cannot be left blank!' />
