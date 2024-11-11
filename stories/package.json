@@ -15,7 +15,7 @@
     "@storybook/addon-viewport": "8.4.2",
     "@storybook/blocks": "8.4.2",
     "@storybook/react": "8.4.2",
-    "axios-mock-adapter": "1.22.0",
+    "axios-mock-adapter": "2.1.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "storybook": "8.4.2",

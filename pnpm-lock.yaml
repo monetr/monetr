@@ -314,8 +314,8 @@ importers:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.4.48)
       axios-mock-adapter:
-        specifier: 1.22.0
-        version: 1.22.0(axios@1.7.7)
+        specifier: 2.1.0
+        version: 2.1.0(axios@1.7.7)
       cssnano:
         specifier: 7.0.6
         version: 7.0.6(postcss@8.4.48)
@@ -374,8 +374,8 @@ importers:
         specifier: 8.4.2
         version: 8.4.2(@storybook/test@8.4.2(storybook@8.4.2(prettier@2.8.8)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.2(prettier@2.8.8))(typescript@5.6.3)
       axios-mock-adapter:
-        specifier: 1.22.0
-        version: 1.22.0(axios@1.7.7)
+        specifier: 2.1.0
+        version: 2.1.0(axios@1.7.7)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -3914,8 +3914,8 @@ packages:
     resolution: {integrity: sha512-Mr2ZakwQ7XUAjp7pAwQWRhhK8mQQ6JAaNWSjmjxil0R8BPioMtQsTLOolGYkji1rcL++3dCqZA3zWqpT+9Ew6g==}
     engines: {node: '>=4'}
 
-  axios-mock-adapter@1.22.0:
-    resolution: {integrity: sha512-dmI0KbkyAhntUR05YY96qg2H6gg0XMl2+qTW0xmYg6Up+BFBAJYRLROMXRdDEL06/Wqwa0TJThAYvFtSFdRCZw==}
+  axios-mock-adapter@2.1.0:
+    resolution: {integrity: sha512-AZUe4OjECGCNNssH8SOdtneiQELsqTsat3SQQCWLPjN436/H+L9AjWfV7bF+Zg/YL9cgbhrz5671hoh+Tbn98w==}
     peerDependencies:
       axios: '>= 0.17.0'
 
@@ -12670,7 +12670,7 @@ snapshots:
 
   axe-core@4.10.0: {}
 
-  axios-mock-adapter@1.22.0(axios@1.7.7):
+  axios-mock-adapter@2.1.0(axios@1.7.7):
     dependencies:
       axios: 1.7.7
       fast-deep-equal: 3.1.3
