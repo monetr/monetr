@@ -1,7 +1,8 @@
-const path = require('path');
+import { NextConfig } from 'next';
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import path from 'path';
+
+const nextConfig: NextConfig = {
   reactStrictMode: false,
   output: 'export',
   distDir: './out',
@@ -22,7 +23,7 @@ const nextConfig = {
   },
   webpack: (
     config,
-    nextShit,
+    _,
   ) => {
     // Important: return the modified config
     config.resolve = {
@@ -42,22 +43,22 @@ const nextConfig = {
       ],
       extensionAlias: {
         ...config?.resolve?.extensionAlias,
-        ".js": [".ts", ".tsx", ".js", ".jsx"],
-        ".mjs": [".mts", ".mjs"],
-        ".cjs": [".cts", ".cjs"],
-        ".svg": [".svg"],
-      }
+        '.js': ['.ts', '.tsx', '.js', '.jsx'],
+        '.mjs': ['.mts', '.mjs'],
+        '.cjs': ['.cts', '.cjs'],
+        '.svg': ['.svg'],
+      },
     };
-    return config
+    return config;
   },
-}
+};
 
 const withNextra = require('nextra')({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.tsx',
   flexsearch: {
     codeblocks: false,
-  }
+  },
 });
 
 module.exports = withNextra(nextConfig);
