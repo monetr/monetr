@@ -12,8 +12,7 @@ describe('sort accounts', () => {
 
   it('will make sure that checking is the highest priority', () => {
     const checkingAccount = new BankAccount({
-      'bankAccountId': 2,
-      'linkId': 1,
+      'bankAccountId': 'abc',
       'availableBalance': 1234,
       'currentBalance': 1234,
       'mask': '1234',
@@ -22,8 +21,7 @@ describe('sort accounts', () => {
       'accountSubType': 'checking',
     });
     const savingsAccount = new BankAccount({
-      'bankAccountId': 1,
-      'linkId': 1,
+      'bankAccountId': 'abd',
       'availableBalance': 1234,
       'currentBalance': 1234,
       'mask': '1234',
@@ -43,8 +41,7 @@ describe('sort accounts', () => {
 
   it('will also handle credit card', () => {
     const checkingAccount = new BankAccount({
-      'bankAccountId': 2,
-      'linkId': 1,
+      'bankAccountId': 'abc',
       'availableBalance': 1234,
       'currentBalance': 1234,
       'mask': '1234',
@@ -53,8 +50,7 @@ describe('sort accounts', () => {
       'accountSubType': 'checking',
     });
     const savingsAccount = new BankAccount({
-      'bankAccountId': 1,
-      'linkId': 1,
+      'bankAccountId': 'abd',
       'availableBalance': 1234,
       'currentBalance': 1234,
       'mask': '1234',
@@ -63,8 +59,7 @@ describe('sort accounts', () => {
       'accountSubType': 'savings',
     });
     const creditCard = new BankAccount({
-      'bankAccountId': 3,
-      'linkId': 1,
+      'bankAccountId': 'abe',
       'availableBalance': 1234,
       'currentBalance': 1234,
       'mask': '1234',
@@ -82,5 +77,81 @@ describe('sort accounts', () => {
     expect(result[0]).toBe(checkingAccount);
     expect(result[1]).toBe(savingsAccount);
     expect(result[2]).toBe(creditCard);
+  });
+
+  it('will put inactive last', () => {
+    const checkingAccount = new BankAccount({
+      'bankAccountId': 'abc',
+      'availableBalance': 1234,
+      'currentBalance': 1234,
+      'mask': '1234',
+      'name': 'Generic Checking',
+      'accountType': 'depository',
+      'accountSubType': 'checking',
+    });
+    const checkingAccountInactive = new BankAccount({
+      'bankAccountId': 'abcinactive',
+      'availableBalance': 1234,
+      'currentBalance': 1234,
+      'mask': '1234',
+      'name': 'Generic Checking',
+      'accountType': 'depository',
+      'accountSubType': 'checking',
+      'status': 'inactive',
+    });
+    const savingsAccount = new BankAccount({
+      'bankAccountId': 'abd',
+      'availableBalance': 1234,
+      'currentBalance': 1234,
+      'mask': '1234',
+      'name': 'Generic Savings',
+      'accountType': 'depository',
+      'accountSubType': 'savings',
+    });
+    const savingsAccountInactive = new BankAccount({
+      'bankAccountId': 'abdinactive',
+      'availableBalance': 1234,
+      'currentBalance': 1234,
+      'mask': '1234',
+      'name': 'Generic Savings',
+      'accountType': 'depository',
+      'accountSubType': 'savings',
+      'status': 'inactive',
+    });
+    const creditCard = new BankAccount({
+      'bankAccountId': 'abe',
+      'availableBalance': 1234,
+      'currentBalance': 1234,
+      'mask': '1234',
+      'name': 'Generic Credit Card',
+      'accountType': 'credit',
+      'accountSubType': 'credit card',
+    });
+    const autoInactive = new BankAccount({
+      'bankAccountId': 'autoinactive',
+      'availableBalance': 1234,
+      'currentBalance': 1234,
+      'mask': '1234',
+      'name': 'Generic Auto Loan',
+      'accountType': 'loan',
+      'accountSubType': 'auto',
+      'status': 'inactive',
+    });
+    const accounts = [
+      autoInactive,
+      checkingAccount,
+      checkingAccountInactive,
+      creditCard,
+      savingsAccount,
+      savingsAccountInactive,
+    ];
+
+    const result = sortAccounts(accounts);
+    expect(result[0]).toBe(checkingAccount);
+    expect(result[1]).toBe(savingsAccount);
+    expect(result[2]).toBe(creditCard);
+    expect(result[3]).toBe(autoInactive);
+    expect(result[4]).toBe(savingsAccountInactive);
+    expect(result[5]).toBe(checkingAccountInactive);
   });
 });
