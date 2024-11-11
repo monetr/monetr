@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.18.24](https://github.com/monetr/monetr/compare/v0.18.23...v0.18.24) (2024-11-11)
+
+
+### Features
+
+* **docs:** Don't use storybook for docs anymore ([#2157](https://github.com/monetr/monetr/issues/2157)) ([3b0578a](https://github.com/monetr/monetr/commit/3b0578adb28205df800f0a8d0ba9d92efbdf88a1))
+* **docs:** Messing around with more embedding ([3561f42](https://github.com/monetr/monetr/commit/3561f429c42c13cfced28ae538fd3307e3add7a0))
+* **docs:** Move next config to typescript ([c7b123f](https://github.com/monetr/monetr/commit/c7b123fd0bdb3ae4dd6939729c8804aff6754da9))
+* **docs:** Updating Terms of Use ahead of v1.0 release ([38b54fe](https://github.com/monetr/monetr/commit/38b54fe86bbfd5694557b23f2b82d39a9ca3aa01))
+* **ui:** Building out new datepicker component ([d8c7a94](https://github.com/monetr/monetr/commit/d8c7a943b20aac60153d89e9f8f4eedbcbc294e5))
+* **ui:** Moving budget sidebar menu away from MUI ([9f93f79](https://github.com/monetr/monetr/commit/9f93f7970a7a9386d62fdb72ddcf31109bb75690))
+* **ui:** Removing web-vitals, should be handled by Sentry ([6cb5a1a](https://github.com/monetr/monetr/commit/6cb5a1a0bf487b88a1a60a5c4888a322d69fcaf2))
+
+
+### Dependencies
+
+* **ui:** update dependency @swc/core to v1.9.2 ([#2155](https://github.com/monetr/monetr/issues/2155)) ([87cc06c](https://github.com/monetr/monetr/commit/87cc06ca3ded303c124befcc30f8d9f860e2b031))
+* **ui:** update dependency zustand to v5 ([#2154](https://github.com/monetr/monetr/issues/2154)) ([582ef51](https://github.com/monetr/monetr/commit/582ef51a81ef1c4f718f34d0561b5d029530d017))
+
+
+### Bug Fixes
+
+* **docs:** Fixed readme image URL ([fe3f290](https://github.com/monetr/monetr/commit/fe3f290218ca7d78509f96a5e2d2a33feb5d507e))
+* **ui:** Fixed storybook wrapper + removed unused code ([8729f2a](https://github.com/monetr/monetr/commit/8729f2a39568212ada303b39a7ea971066150af4))
+* **ui:** Trying to fix issue with text fields ([df73fc6](https://github.com/monetr/monetr/commit/df73fc6d39678c8a046ea1b33792945503cdc147))
+
 ## [0.18.23](https://github.com/monetr/monetr/compare/v0.18.22...v0.18.23) (2024-11-11)
 
 
