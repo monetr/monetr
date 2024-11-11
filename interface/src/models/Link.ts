@@ -1,6 +1,6 @@
-import { parseJSON } from 'date-fns';
 
 import PlaidLink, { PlaidLinkStatus } from '@monetr/interface/models/PlaidLink';
+import parseDate from '@monetr/interface/util/parseDate';
 
 export enum LinkType {
   Unknown = 0,
@@ -35,8 +35,8 @@ export default class Link {
     if (data) Object.assign(this, {
       ...data,
       plaidLink: data?.plaidLink && new PlaidLink(data.plaidLink),
-      updatedAt: data.updatedAt && parseJSON(data.updatedAt),
-      createdAt: data.createdAt && parseJSON(data.createdAt),
+      updatedAt: parseDate(data?.updatedAt),
+      createdAt: parseDate(data?.createdAt),
     });
   }
 

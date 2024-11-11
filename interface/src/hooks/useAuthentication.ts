@@ -1,8 +1,8 @@
 import * as Sentry from '@sentry/react';
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
-import { parseJSON } from 'date-fns';
 
 import User from '@monetr/interface/models/User';
+import parseDate from '@monetr/interface/util/parseDate';
 import request from '@monetr/interface/util/request';
 
 export interface AuthenticationWrapper {
@@ -40,8 +40,8 @@ export function useAuthenticationSink(): AuthenticationResult {
       isSetup: Boolean(result?.data?.isSetup),
       isActive: Boolean(result?.data?.isActive),
       isTrialing: Boolean(result?.data?.isTrialing),
-      activeUntil: result?.data?.activeUntil && parseJSON(result.data.activeUntil),
-      trialingUntil: result?.data?.trialingUntil && parseJSON(result.data.trialingUntil),
+      activeUntil: parseDate(result?.data?.activeUntil),
+      trialingUntil: parseDate(result?.data?.trialingUntil),
       hasSubscription: Boolean(result?.data?.hasSubscription),
     },
   };

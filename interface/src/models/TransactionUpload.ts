@@ -1,6 +1,5 @@
-import { parseJSON } from 'date-fns';
-
 import MonetrFile from './File';
+import parseDate from '@monetr/interface/util/parseDate';
 
 export enum TransactionUploadStatus {
   Pending = 'pending',
@@ -24,9 +23,9 @@ export default class TransactionUpload {
   constructor(data?: Partial<TransactionUpload>) {
     if (data) Object.assign(this, {
       ...data,
-      createdAt: data?.createdAt && parseJSON(data?.createdAt),
-      processedAt: data?.processedAt && parseJSON(data?.processedAt),
-      completedAt: data?.completedAt && parseJSON(data?.completedAt),
+      createdAt: parseDate(data?.createdAt),
+      processedAt: parseDate(data?.processedAt),
+      completedAt: parseDate(data?.completedAt),
     });
   }
 }

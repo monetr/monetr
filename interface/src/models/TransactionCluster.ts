@@ -1,4 +1,4 @@
-import { parseJSON } from 'date-fns';
+import parseDate from '@monetr/interface/util/parseDate';
 
 export default class TransactionCluster {
   transactionClusterId: string;
@@ -11,7 +11,7 @@ export default class TransactionCluster {
     if (data) {
       Object.assign(this, {
         ...data,
-        createdAt: data.createdAt ?? parseJSON(data.createdAt),
+        createdAt: parseDate(data?.createdAt),
       });
     } else {
       Object.assign(this, {

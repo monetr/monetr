@@ -1,7 +1,7 @@
-import { parseJSON } from 'date-fns';
 
 import PlaidBankAccount from '@monetr/interface/models/PlaidBankAccount';
 import { formatAmount } from '@monetr/interface/util/amounts';
+import parseDate from '@monetr/interface/util/parseDate';
 
 export type BankAccountStatus = 'unknown' | 'active' | 'inactive';
 
@@ -27,8 +27,8 @@ export default class BankAccount {
       Object.assign(this, {
         ...data,
         plaidBankAccount: data?.plaidBankAccount && new PlaidBankAccount(data.plaidBankAccount),
-        lastUpdated: data?.lastUpdated && parseJSON(data.lastUpdated),
-        createdAt: data?.createdAt && parseJSON(data.createdAt),
+        lastUpdated: parseDate(data?.lastUpdated),
+        createdAt: parseDate(data?.createdAt),
       });
     }
   }

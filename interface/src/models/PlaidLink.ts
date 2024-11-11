@@ -1,4 +1,4 @@
-import { parseJSON } from 'date-fns';
+import parseDate from '@monetr/interface/util/parseDate';
 
 export enum PlaidLinkStatus {
   Unknown = 0,
@@ -28,12 +28,12 @@ export default class PlaidLink {
     if (data) {
       Object.assign(this, {
         ...data,
-        expirationDate: data?.expirationDate && parseJSON(data.expirationDate),
-        lastManualSync: data?.lastManualSync && parseJSON(data.lastManualSync),
-        lastSuccessfulUpdate: data?.lastSuccessfulUpdate && parseJSON(data.lastSuccessfulUpdate),
-        lastAttemptedUpdate: data?.lastAttemptedUpdate && parseJSON(data.lastAttemptedUpdate),
-        updatedAt: data?.updatedAt && parseJSON(data.updatedAt),
-        createdAt: data?.createdAt && parseJSON(data.createdAt),
+        expirationDate: parseDate(data?.expirationDate),
+        lastManualSync: parseDate(data?.lastManualSync),
+        lastSuccessfulUpdate:  parseDate(data?.lastSuccessfulUpdate),
+        lastAttemptedUpdate: parseDate(data?.lastAttemptedUpdate),
+        updatedAt: parseDate(data?.updatedAt),
+        createdAt: parseDate(data?.createdAt),
       });
     }
   }

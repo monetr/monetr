@@ -1,7 +1,8 @@
 
-import { format, isThisYear, parseJSON } from 'date-fns';
+import { format, isThisYear } from 'date-fns';
 
 import { amountToFriendly, AmountType, formatAmount } from '@monetr/interface/util/amounts';
+import parseDate from '@monetr/interface/util/parseDate';
 
 export enum SpendingType {
   Expense = 0,
@@ -30,9 +31,9 @@ export default class Spending {
     if (data) {
       Object.assign(this, {
         ...data,
-        lastRecurrence: data.lastRecurrence && parseJSON(data.lastRecurrence),
-        nextRecurrence: data.nextRecurrence && parseJSON(data.nextRecurrence),
-        dateCreated: data.dateCreated && parseJSON(data.dateCreated),
+        lastRecurrence: parseDate(data.lastRecurrence),
+        nextRecurrence: parseDate(data.nextRecurrence),
+        dateCreated: parseDate(data.dateCreated),
       });
     }
   }
