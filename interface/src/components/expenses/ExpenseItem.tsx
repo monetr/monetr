@@ -19,7 +19,7 @@ export interface ExpenseItemProps {
 export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element {
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
   const navigate = useNavigate();
-  const rule = rrulestr(spending.ruleset);
+  const rule = rrulestr(spending.ruleset!);
 
   const amountClass = mergeTailwind(
     {
@@ -34,9 +34,9 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
     navigate(`/bank/${spending.bankAccountId}/expenses/${spending.spendingId}/details`);
   }
 
-  const dateString =  isThisYear(spending.nextRecurrence) ?
-    format(spending.nextRecurrence, 'MMM do') :
-    format(spending.nextRecurrence, 'MMM do, yyyy');
+  const dateString = isThisYear(spending.nextRecurrence!) ?
+    format(spending.nextRecurrence!, 'MMM do') :
+    format(spending.nextRecurrence!, 'MMM do, yyyy');
 
   return (
     <li className='group relative w-full px-1 md:px-2'>

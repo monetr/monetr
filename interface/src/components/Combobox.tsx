@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Fragment } from 'react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@monetr/interface/components/Command';
@@ -7,7 +8,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/compo
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import { cva, VariantProps } from 'class-variance-authority';
-import { Check, ChevronsUpDown } from 'lucide-react';
  
 const comboboxVariants = cva(
   [
@@ -59,7 +59,7 @@ export interface ComboboxOption<V extends string> {
 }
 
 export interface ComboboxItemProps<V extends string, O extends ComboboxOption<V>> {
-  currentValue: V;
+  currentValue: V | undefined;
   option: O;
 }
 

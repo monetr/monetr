@@ -54,8 +54,6 @@ add_custom_command(
   COMMAND ${NODE_EXECUTABLE} ${DOCS_SRC_DIR}/intl-temp.js ${CMAKE_CURRENT_SOURCE_DIR}/out
   # This fixes an issue with github pages not liking underscore prefixed directories.
   COMMAND ${CMAKE_COMMAND} -E touch ${DOCUMENTATION_OUT_DIR}/.nojekyll
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${STORYBOOK_DOCS}
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${STORY_OUTPUT}/ ${STORYBOOK_DOCS}
   COMMENT "Building monetr.app documentation and website"
   WORKING_DIRECTORY ${DOCS_SRC_DIR}
   DEPENDS
@@ -64,8 +62,6 @@ add_custom_command(
     ${ALL_DOCS_FILES}
     ${PUBLIC_FILES}
     ${DOCS_CONFIG_FILES}
-    ${STORY_FILES}
-    build.stories.marketing
 )
 
 add_custom_target(

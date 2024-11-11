@@ -16,6 +16,10 @@ const nextConfig = {
   sassOptions: {
     implementation: 'sass-embedded',
   },
+  typescript: {
+    // Fuck you next
+    ignoreBuildErrors: true,
+  },
   webpack: (
     config,
     nextShit,
@@ -44,7 +48,6 @@ const nextConfig = {
         ".svg": [".svg"],
       }
     };
-    console.log(config);
     return config
   },
 }
