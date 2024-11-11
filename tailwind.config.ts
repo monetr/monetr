@@ -137,12 +137,12 @@ const config: Partial<Config> = {
           foreground: 'hsl(var(--muted-foreground))',
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
+          DEFAULT: '#3f3f46', // background-emphasis
+          foreground: '#fafafa', // content-emphasis
         },
         popover: {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
+          DEFAULT: '#19161f', // background-DEFAULT
+          foreground: '#fafafa', // content-emphasis
         },
         card: {
           DEFAULT: 'hsl(var(--card))',

@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { type DialogProps } from '@radix-ui/react-dialog';
+import { Search } from 'lucide-react';
 
 import { Dialog, DialogContent } from '@monetr/interface/components/Dialog';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import { Command as CommandPrimitive } from 'cmdk';
-import { Search } from 'lucide-react';
  
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -127,7 +127,7 @@ const CommandItem = React.forwardRef<
       'data-[disabled="true"]:pointer-events-none',
       'relative flex cursor-default select-none items-center rounded-lg',
       'px-2 py-1.5',
-      'text-sm outline-none',
+      'text- outline-none',
       'aria-selected:bg-dark-monetr-background-emphasis aria-selected:text-accent-foreground',
     ], className) }
     { ...props }

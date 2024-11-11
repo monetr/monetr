@@ -1,10 +1,9 @@
 /* eslint-disable max-len */
-import React, { Fragment, useCallback, useState } from 'react';
-import { Autorenew, AutorenewOutlined, DeleteOutline, MoreVert, PriceChangeOutlined } from '@mui/icons-material';
-import { Popover } from '@mui/material';
+import React, { Fragment, useCallback } from 'react';
+import { EllipsisVertical, LogIn, Plug, RefreshCw, Trash2 } from 'lucide-react';
 
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@monetr/interface/components/DropdownMenu';
 import MDivider from '@monetr/interface/components/MDivider';
-import MSpan from '@monetr/interface/components/MSpan';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useLink, useTriggerManualPlaidSync } from '@monetr/interface/hooks/links';
@@ -16,40 +15,26 @@ export default function BudgetingSidebarTitle(): JSX.Element {
   const { data: link } = useLink(bankAccount?.linkId);
   const triggerSync = useTriggerManualPlaidSync();
 
-  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
-  const open = Boolean(anchorEl);
-
-  const closeMenu = useCallback(() => setAnchorEl(null), [setAnchorEl]);
-
-  const handleClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    setAnchorEl(event.currentTarget);
-  }, [setAnchorEl]);
-  const handleClose = useCallback(() => setAnchorEl(null), [setAnchorEl]);
-
   const handleReauthenticateLink = useCallback(() => {
-    closeMenu();
     showUpdatePlaidAccountOverlay({
       link: link,
     });
-  }, [closeMenu, link]);
+  }, [link]);
 
   const handleTriggerResync = useCallback(() => {
-    closeMenu();
     triggerSync(bankAccount?.linkId);
-  }, [bankAccount?.linkId, closeMenu, triggerSync]);
+  }, [bankAccount?.linkId, triggerSync]);
 
   const handleUpdateAccountSelection = useCallback(() => {
-    closeMenu();
     showUpdatePlaidAccountOverlay({
       link: link,
       updateAccountSelection: true,
     });
-  }, [closeMenu, link]);
+  }, [link]);
 
   const handleRemoveLink = useCallback(() => {
-    closeMenu();
     showRemoveLinkModal({ link: link });
-  }, [closeMenu, link]);
+  }, [link]);
 
   if (!link) {
     return null;
@@ -57,50 +42,39 @@ export default function BudgetingSidebarTitle(): JSX.Element {
 
   return (
     <Fragment>
-      <div
-        onClick={ handleClick }
-        className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis dark:hover:bg-dark-monetr-background-emphasis cursor-pointer'
-      >
-        <span className='truncate text-xl font-semibold'>
-          {link?.getName()}
-        </span>
-        <MoreVert className='ml-auto' />
-      </div>
-      <MDivider className='w-1/2' />
-      <Popover
-        open={ open }
-        anchorEl={ anchorEl }
-        onClose={ handleClose }
-        transitionDuration={ 100 }
-        anchorOrigin={ {
-          vertical: 'bottom',
-          horizontal: 'left',
-        } }
-        className='ml-[5px]'
-      >
-        <div className='flex flex-col dark:bg-dark-monetr-background rounded-lg border dark:border-dark-monetr-border-subtle dark:shadow-2xl' style={ { width: `${anchorEl?.offsetWidth - 10}px` } }>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis dark:hover:bg-dark-monetr-background-emphasis'
+        >
+          <span className='truncate text-xl font-semibold'>
+            { link?.getName() }
+          </span>
+          <EllipsisVertical className='ml-auto shrink-0' />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className='w-72'>
           <MenuItem 
             visible={ link.getIsPlaid() && (link.getIsError() || link.getIsPendingExpiration()) } 
             onClick={ handleReauthenticateLink }
           >
-            <Autorenew className='mr-1 mb-0.5' />
+            <LogIn />
             Reauthenticate
           </MenuItem>
           <MenuItem visible={ link.getIsPlaid() } onClick={ handleUpdateAccountSelection }>
-            <PriceChangeOutlined className='mr-1 mb-0.5' />
+            <Plug />
             Update Account Selection
           </MenuItem>
           <MenuItem visible={ link.getIsPlaid() } onClick={ handleTriggerResync }>
-            <AutorenewOutlined className='mr-1 mb-0.5' />
+            <RefreshCw />
             Manually Resync
           </MenuItem>
           <MDivider />
           <MenuItem visible onClick={ handleRemoveLink }>
-            <DeleteOutline className='mr-1 mb-0.5 dark:text-dark-monetr-red' />
-            Remove {link?.getName()}
+            <Trash2 className='text-dark-monetr-red' />
+            Remove { link?.getName() }
           </MenuItem>
-        </div>
-      </Popover>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <MDivider className='w-1/2' />
     </Fragment>
   );
 }
@@ -117,15 +91,10 @@ function MenuItem({ visible, onClick, children }: MenuItemProps): JSX.Element {
   }
 
   return (
-    <MSpan
-      size='md'
-      weight='medium'
-      className='p-2 cursor-pointer dark:hover:bg-dark-monetr-background-emphasis dark:hover:text-dark-monetr-content-emphasis'
-      component='a'
-      ellipsis
+    <DropdownMenuItem
       onClick={ onClick }
     >
       { children }
-    </MSpan>
+    </DropdownMenuItem>
   );
 }
