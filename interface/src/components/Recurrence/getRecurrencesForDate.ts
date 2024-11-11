@@ -1,18 +1,15 @@
 /* eslint-disable id-length */
-import { endOfMonth, format, getDate, getMonth, isEqual, parseJSON, startOfDay, startOfMonth } from 'date-fns';
+import { endOfMonth, format, getDate, getMonth, isEqual, startOfDay, startOfMonth } from 'date-fns';
 
 import Recurrence from '@monetr/interface/components/Recurrence/Recurrence';
+import parseDate from '@monetr/interface/util/parseDate';
 
 import { RRule, Weekday } from 'rrule';
 
 export default function getRecurrencesForDate(inputDate: Date | string | null): Array<Recurrence> {
-  let date: Date;
-  if (typeof inputDate === 'string') {
-    date = parseJSON(inputDate);
-  } else if (!inputDate) {
+  const date = parseDate(inputDate);
+  if (!date) {
     return [];
-  } else {
-    date = inputDate;
   }
 
   const input = startOfDay(date);

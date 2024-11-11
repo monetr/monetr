@@ -1,5 +1,4 @@
-import { parseJSON } from 'date-fns';
-
+import parseDate from '@monetr/interface/util/parseDate';
 
 export default class FundingSchedule {
   fundingScheduleId: string;
@@ -17,9 +16,9 @@ export default class FundingSchedule {
     if (data) {
       Object.assign(this, {
         ...data,
-        lastRecurrence: data.lastRecurrence && parseJSON(data.lastRecurrence),
-        nextRecurrence: parseJSON(data.nextRecurrence),
-        nextRecurrenceOriginal: parseJSON(data.nextRecurrenceOriginal),
+        lastRecurrence: parseDate(data?.lastRecurrence),
+        nextRecurrence: parseDate(data?.nextRecurrence),
+        nextRecurrenceOriginal: parseDate(data?.nextRecurrenceOriginal),
       });
     }
   }

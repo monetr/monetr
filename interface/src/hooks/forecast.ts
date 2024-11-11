@@ -1,8 +1,8 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { parseJSON } from 'date-fns';
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import { SpendingType } from '@monetr/interface/models/Spending';
+import parseDate from '@monetr/interface/util/parseDate';
 import request from '@monetr/interface/util/request';
 
 interface SpendingBareMinimum {
@@ -53,8 +53,8 @@ export class Forecast {
   constructor(data?: Partial<Forecast>) {
     if (data) Object.assign(this, {
       ...data,
-      startingTime: parseJSON(data.startingTime),
-      endingTime: parseJSON(data.endingTime),
+      startingTime: parseDate(data.startingTime),
+      endingTime: parseDate(data.endingTime),
       events: (data?.events || []).map(item => new Event(item)),
     });
   }
@@ -72,7 +72,7 @@ export class Event {
   constructor(data?: Partial<Event>) {
     if (data) Object.assign(this, {
       ...data,
-      date: parseJSON(data.date),
+      date: parseDate(data.date),
       funding: (data?.funding || []).map(item => new FundingEvent(item)),
       spending: (data?.spending || []).map(item => new SpendingEvent(item)),
     });
@@ -90,7 +90,7 @@ export class SpendingEvent {
   constructor(data?: Partial<SpendingEvent>) {
     if (data) Object.assign(this, {
       ...data,
-      date: parseJSON(data.date),
+      date: parseDate(data.date),
       funding: (data?.funding || []).map(item => new FundingEvent(item)),
     });
   }
@@ -105,8 +105,8 @@ export class FundingEvent {
   constructor(data?: Partial<FundingEvent>) {
     if (data) Object.assign(this, {
       ...data,
-      date: parseJSON(data.date),
-      originalDate: parseJSON(data.originalDate),
+      date: parseDate(data.date),
+      originalDate: parseDate(data.originalDate),
     });
   }
 }

@@ -1,6 +1,6 @@
-import { parseJSON } from 'date-fns';
 
 import { AmountType, formatAmount } from '@monetr/interface/util/amounts';
+import parseDate from '@monetr/interface/util/parseDate';
 
 export default class Transaction {
   transactionId: string;
@@ -23,9 +23,9 @@ export default class Transaction {
     if (data) {
       Object.assign(this, {
         ...data,
-        date: parseJSON(data.date),
-        authorizedDate: data.authorizedDate ?? parseJSON(data.authorizedDate),
-        createdAt: parseJSON(data.createdAt),
+        date: parseDate(data?.date),
+        authorizedDate: parseDate(data?.authorizedDate),
+        createdAt: parseDate(data?.createdAt),
       });
     }
   }

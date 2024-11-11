@@ -1,4 +1,4 @@
-import { parseJSON } from 'date-fns';
+import parseDate from '@monetr/interface/util/parseDate';
 
 export default class Institution {
   name: string;
@@ -56,8 +56,8 @@ export class InstitutionPlaidIncident {
     if (data) {
       Object.assign(this, {
         ...data,
-        start: parseJSON(data.start),
-        end: data.end && parseJSON(data.end),
+        start: parseDate(data?.start),
+        end: parseDate(data?.end),
       });
     }
   }

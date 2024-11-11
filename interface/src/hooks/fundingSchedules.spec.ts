@@ -1,12 +1,12 @@
 /* eslint-disable max-len */
 import { act } from 'react';
 import MockAdapter from 'axios-mock-adapter';
-import { parseJSON } from 'date-fns';
 
 import monetrClient from '@monetr/interface/api/api';
 import { FundingScheduleUpdateResponse, useCreateFundingSchedule, useFundingSchedule, useFundingSchedulesSink, useUpdateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import testRenderHook from '@monetr/interface/testutils/hooks';
+import parseDate from '@monetr/interface/util/parseDate';
 
 describe('funding schedule hooks', () => {
   describe('read funding schedules', () => {
@@ -154,7 +154,7 @@ describe('funding schedule hooks', () => {
           bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
           description: 'something',
           name: 'Elliot\'s Contribution',
-          nextRecurrence: parseJSON('2023-07-31T05:00:00Z'),
+          nextRecurrence: parseDate('2023-07-31T05:00:00Z'),
           ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           estimatedDeposit: null,
           excludeWeekends: true,
@@ -190,7 +190,7 @@ describe('funding schedule hooks', () => {
           bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
           description: 'something',
           name: 'Elliot\'s Contribution',
-          nextRecurrence: parseJSON('2023-07-31T05:00:00Z'),
+          nextRecurrence: parseDate('2023-07-31T05:00:00Z'),
           ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           estimatedDeposit: null,
           excludeWeekends: true,
@@ -259,7 +259,7 @@ describe('funding schedule hooks', () => {
           bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
           description: 'something',
           name: 'Elliot\'s Contribution',
-          nextRecurrence: parseJSON('2023-07-31T05:00:00Z'),
+          nextRecurrence: parseDate('2023-07-31T05:00:00Z'),
           ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           estimatedDeposit: null,
           excludeWeekends: true,
@@ -296,7 +296,7 @@ describe('funding schedule hooks', () => {
           bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
           description: 'something',
           name: 'Elliot\'s Contribution',
-          nextRecurrence: parseJSON('2023-07-31T05:00:00Z'),
+          nextRecurrence: parseDate('2023-07-31T05:00:00Z'),
           ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           estimatedDeposit: null,
           excludeWeekends: true,

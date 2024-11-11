@@ -1,4 +1,4 @@
-import { parseJSON } from 'date-fns';
+import parseDate from '@monetr/interface/util/parseDate';
 
 export default class File {
   fileId: string;
@@ -12,7 +12,7 @@ export default class File {
     if (data) {
       Object.assign(this, {
         ...data,
-        createdAt: data?.createdAt ?? parseJSON(data?.createdAt),
+        createdAt: parseDate(data?.createdAt),
       });
     }
   }
