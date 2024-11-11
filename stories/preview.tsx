@@ -12,6 +12,7 @@ import type { Preview } from '@storybook/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider, VariantType } from 'notistack';
 
+import { TooltipProvider } from '@monetr/interface/components/Tooltip';
 import { newTheme } from '@monetr/interface/theme';
 import Query from '@monetr/interface/util/query';
 
@@ -53,10 +54,12 @@ const preview: Preview = {
         <QueryClientProvider client={ queryClient }>
           <ThemeProvider theme={ newTheme }>
             <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-              <NiceModal.Provider>
-                <CssBaseline />
-                <Story />
-              </NiceModal.Provider>
+              <TooltipProvider>
+                <NiceModal.Provider>
+                  <CssBaseline />
+                  <Story />
+                </NiceModal.Provider>
+              </TooltipProvider>
             </SnackbarProvider>
           </ThemeProvider>
         </QueryClientProvider>
