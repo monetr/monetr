@@ -9,12 +9,11 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport';
 import type { Preview } from '@storybook/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider, VariantType } from 'notistack';
 
+import MQueryClient from '@monetr/interface/components/MQueryClient';
 import { TooltipProvider } from '@monetr/interface/components/Tooltip';
 import { newTheme } from '@monetr/interface/theme';
-import Query from '@monetr/interface/util/query';
 
 import { withRouter } from 'storybook-addon-react-router-v6';
 
@@ -41,17 +40,8 @@ const preview: Preview = {
         info: <InfoIcon className='mr-2.5' />,
       };
 
-      const queryClient = new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 10 * 60 * 1000, // 10 minute default stale time,
-            queryFn: Query,
-          },
-        },
-      });
-
       return (
-        <QueryClientProvider client={ queryClient }>
+        <MQueryClient>
           <ThemeProvider theme={ newTheme }>
             <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
               <TooltipProvider>
@@ -62,7 +52,7 @@ const preview: Preview = {
               </TooltipProvider>
             </SnackbarProvider>
           </ThemeProvider>
-        </QueryClientProvider>
+        </MQueryClient>
       );
     },
     withRouter,

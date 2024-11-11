@@ -210,6 +210,7 @@ const config: Partial<Config> = {
     },
     aspectRatio: {
       'video-vertical': '9/16',
+      'video': '16/9',
     },
     animation: {
       'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',

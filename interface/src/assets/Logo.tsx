@@ -48,13 +48,13 @@ export default function Logo(props: LogoProps): JSX.Element {
         }
         `} </style>
         <linearGradient id='a' x1='441.63' y1='444.08' x2='448.03' y2='521.51' gradientUnits='userSpaceOnUse'>
-          <stop offset='0' stop-color='#829aff' />
-          <stop offset='1' stop-color='#2cedff' />
+          <stop offset='0' stopColor='#829aff' />
+          <stop offset='1' stopColor='#2cedff' />
         </linearGradient>
         <linearGradient id='b' x1='561.57' y1='446.54' x2='551.09' y2='519.31' xlinkHref='#a' />
         <linearGradient id='c' x1='433.74' y1='408.17' x2='504.48' y2='503.36' gradientUnits='userSpaceOnUse'>
-          <stop offset='0' stop-color='#7200e1' />
-          <stop offset='1' stop-color='#f056a3' />
+          <stop offset='0' stopColor='#7200e1' />
+          <stop offset='1' stopColor='#f056a3' />
         </linearGradient>
         <linearGradient id='d' x1='569.82' y1='404.95' x2='480.31' y2='511.49' xlinkHref='#c' />
       </defs>
