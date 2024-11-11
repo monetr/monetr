@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.23](https://github.com/monetr/monetr/compare/v0.18.22...v0.18.23) (2024-11-11)
+
+
+### Bug Fixes
+
+* **ui:** Fixed bug in how bank accounts were sorted in the UI. ([abcdcc8](https://github.com/monetr/monetr/commit/abcdcc8cc370ce0bacc07223803573273e3f3bdd))
+
 ## [0.18.22](https://github.com/monetr/monetr/compare/v0.18.21...v0.18.22) (2024-11-11)
 
 
