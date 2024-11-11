@@ -9,13 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ebay/nice-modal-react": "1.2.13",
     "@fontsource-variable/inter": "5.1.0",
+    "@monetr/interface": "workspace:*",
+    "@mui/material": "5.11.3",
+    "axios-mock-adapter": "2.1.0",
     "next": "15.0.3",
     "next-sitemap": "4.2.3",
     "nextra": "2.13.4",
     "nextra-theme-docs": "2.13.4",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.28.0"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -25,6 +30,7 @@
     "cheerio": "1.0.0",
     "cssnano": "7.0.6",
     "postcss": "8.4.48",
+    "sass": "1.80.6",
     "tailwindcss": "3.4.14",
     "typescript": "5.6.3"
   }

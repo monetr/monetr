@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { ErrorOutline, Logout, PlusOne, Settings } from '@mui/icons-material';
 
 import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
-import { Logo } from '@monetr/interface/assets';
+import Logo from '@monetr/interface/assets/Logo';
 import BankSidebarItem from '@monetr/interface/components/Layout/BankSidebarItem';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
@@ -99,7 +99,7 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
     <div className={ className } data-testid='bank-sidebar'>
       <MSidebarToggle className='flex lg:hidden' />
       <div className='h-10 w-10'>
-        <img src={ Logo } className='w-full' />
+        <Logo className='w-full' />
       </div>
       <MDivider className='w-1/2' />
       <div className='h-full w-full flex items-center flex-col overflow-y-auto'>

@@ -39,11 +39,11 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
   }
 
   // Keep only the events that have spending or contributions for this spending object.
-  const events: Array<Event> = forecast.events
+  const events: Array<Event> = (forecast?.events || [])
     .filter(event => event.funding.some(funding => funding.fundingScheduleId === props.fundingScheduleId))
     .map(event => ({
       ...event,
-      funding: event.funding.filter(funding => funding.fundingScheduleId === props.fundingScheduleId),
+      funding: event.funding.filter(funding => funding.fundingScheduleId === props.fundingScheduleId) || [],
     }));
 
   // Take all of those events and prepare our data for the timeline.

@@ -7,8 +7,7 @@ import { Queries, queries, render, RenderOptions, RenderResult } from '@testing-
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
 import { TooltipProvider } from '@monetr/interface/components/Tooltip';
-
-import { newTheme } from 'theme';
+import { newTheme } from '@monetr/interface/theme';
 
 export interface Options<
   Q extends Queries = typeof queries,
