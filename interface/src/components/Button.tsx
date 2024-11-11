@@ -74,6 +74,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         className={ mergeTailwind(buttonVariants({ variant: color, size, className })) }
         ref={ ref }
+        tabIndex={ 0 }
+        type='button'
         { ...props }
       />
     );

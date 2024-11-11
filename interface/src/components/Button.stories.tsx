@@ -1,8 +1,13 @@
 import React from 'react';
-import { AddOutlined } from '@mui/icons-material';
 import { Meta, StoryFn } from '@storybook/react';
+import { Plus } from 'lucide-react';
+import { useSnackbar } from 'notistack';
 
 import { Button } from './Button';
+import FormButton from '@monetr/interface/components/FormButton';
+import MForm from '@monetr/interface/components/MForm';
+import MSpan from '@monetr/interface/components/MSpan';
+import MTextField from '@monetr/interface/components/MTextField';
 
 export default {
   title: '@monetr/interface/components/Button',
@@ -25,18 +30,18 @@ export const Default: StoryFn<typeof Button> = () => (
         Primary
       </Button>
       <Button variant='primary'>
-        <AddOutlined />
+        <Plus />
         New Expense
       </Button>
       <Button variant='primary' disabled>
-        <AddOutlined />
+        <Plus />
         New Expense
       </Button>
       <Button variant='primary'>
-        <AddOutlined />
+        <Plus />
       </Button>
       <Button variant='primary' disabled>
-        <AddOutlined />
+        <Plus />
       </Button>
 
       <Button variant='secondary'>
@@ -46,18 +51,18 @@ export const Default: StoryFn<typeof Button> = () => (
         Secondary
       </Button>
       <Button variant='secondary'>
-        <AddOutlined />
+        <Plus />
         Secondary
       </Button>
       <Button variant='secondary' disabled>
-        <AddOutlined />
+        <Plus />
         Secondary
       </Button>
       <Button variant='secondary'>
-        <AddOutlined />
+        <Plus />
       </Button>
       <Button variant='secondary' disabled>
-        <AddOutlined />
+        <Plus />
       </Button>
 
       <Button variant='outlined'>
@@ -67,18 +72,18 @@ export const Default: StoryFn<typeof Button> = () => (
         Outlined
       </Button>
       <Button variant='outlined'>
-        <AddOutlined />
+        <Plus />
         Outlined
       </Button>
       <Button variant='outlined' disabled>
-        <AddOutlined />
+        <Plus />
         Outlined
       </Button>
       <Button variant='outlined'>
-        <AddOutlined />
+        <Plus />
       </Button>
       <Button variant='outlined' disabled>
-        <AddOutlined />
+        <Plus />
       </Button>
 
       <Button variant='text'>
@@ -88,18 +93,18 @@ export const Default: StoryFn<typeof Button> = () => (
         Text
       </Button>
       <Button variant='text'>
-        <AddOutlined />
+        <Plus />
         Text
       </Button>
       <Button variant='text' disabled>
-        <AddOutlined />
+        <Plus />
         Text
       </Button>
       <Button variant='text'>
-        <AddOutlined />
+        <Plus />
       </Button>
       <Button variant='text' disabled>
-        <AddOutlined />
+        <Plus />
       </Button>
 
       <Button variant='destructive'>
@@ -109,20 +114,74 @@ export const Default: StoryFn<typeof Button> = () => (
         Destructive
       </Button>
       <Button  variant='destructive'>
-        <AddOutlined />
+        <Plus />
         Destructive
       </Button>
       <Button  variant='destructive' disabled>
-        <AddOutlined />
+        <Plus />
         Destructive
       </Button>
       <Button  variant='destructive'>
-        <AddOutlined />
+        <Plus />
       </Button>
       <Button  variant='destructive' disabled>
-        <AddOutlined />
+        <Plus />
       </Button>
     </div>
   </div>
 );
 
+
+interface FormValues {
+  name: string;
+}
+
+const initialValues: FormValues = {
+  name: '',
+};
+
+export const Form: StoryFn<typeof Button> = () => {
+  const { enqueueSnackbar } = useSnackbar();
+
+  async function submit(values: FormValues) {
+    enqueueSnackbar(`Form submitted: ${JSON.stringify(values)}`, {
+      variant: 'success',
+      disableWindowBlurListener: true,
+    });
+  }
+
+  async function cancel() {
+    enqueueSnackbar('Form canceled', {
+      variant: 'warning',
+      disableWindowBlurListener: true,
+    });
+  }
+
+  return (
+    <MForm
+      initialValues={ initialValues }
+      onSubmit={ submit  }
+      className='flex max-w-lg flex-col p-4'
+    >
+      <MSpan size='lg'>
+        Hit enter should show submitted, not canceled
+      </MSpan>
+      <MTextField
+        name='name'
+        label='Name / Description'
+        required
+        autoComplete='off'
+        placeholder='Amazon, Netflix...'
+        data-1p-ignore 
+      />
+      <div className='flex justify-end gap-2'>
+        <Button variant='destructive' onClick={ cancel }>
+          Cancel
+        </Button>
+        <FormButton variant='primary' type='submit'>
+          Create
+        </FormButton>
+      </div>
+    </MForm>
+  );
+};
