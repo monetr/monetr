@@ -155,6 +155,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     'w-full',
     'relative',
     'inline-flex',
+    'gap-2',
     'justify-start',
   );
 

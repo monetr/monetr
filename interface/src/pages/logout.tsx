@@ -1,5 +1,6 @@
 import React from 'react';
-import { Backdrop, CircularProgress } from '@mui/material';
+import { Backdrop } from '@mui/material';
+import { LoaderCircle } from 'lucide-react';
 
 import useLogout from '@monetr/interface/hooks/useLogout';
 import useMountEffect from '@monetr/interface/hooks/useMountEffect';
@@ -12,7 +13,7 @@ export default function LogoutPage(): JSX.Element {
 
   return (
     <Backdrop open={ true }>
-      <CircularProgress color='inherit' />
+      <LoaderCircle className='spin' />
     </Backdrop>
   );
 }

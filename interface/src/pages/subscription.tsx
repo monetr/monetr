@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CircularProgress, Typography } from '@mui/material';
+import { LoaderCircle } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import CenteredLogo from '@monetr/interface/components/Logo/CenteredLogo';
+import MSpan from '@monetr/interface/components/MSpan';
 import useMountEffect from '@monetr/interface/hooks/useMountEffect';
 import request from '@monetr/interface/util/request';
 
@@ -30,15 +31,15 @@ export default function SubscriptionPage(): JSX.Element {
       <div className='w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0'>
         <CenteredLogo />
         <div className='w-full pt-2.5 pb-2.5'>
-          <Typography
-            variant='h5'
+          <MSpan
+            size='xl'
             className='w-full text-center'
           >
             Loading the billing portal...
-          </Typography>
+          </MSpan>
         </div>
         <div className='w-full pt-2.5 pb-2.5 flex justify-center'>
-          <CircularProgress />
+          <LoaderCircle className='spin' />
         </div>
       </div>
     </div>

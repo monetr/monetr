@@ -1,7 +1,7 @@
 import React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
-import { CircularProgress } from '@mui/material';
 import { useFormikContext } from 'formik';
+import { LoaderCircle } from 'lucide-react';
 
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
@@ -42,12 +42,12 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
 
   return (
     <div className={ classes }>
-      {!loading && <ReCAPTCHA
+      { !loading && <ReCAPTCHA
         data-testid={ props['data-testid'] }
         sitekey={ config.ReCAPTCHAKey }
         onChange={ onVerify }
-      />}
-      {loading && <CircularProgress />}
+      /> }
+      { loading && <LoaderCircle className='spin' /> }
     </div>
   );
 

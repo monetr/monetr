@@ -12,7 +12,7 @@ const buttonVariants = cva(
     'inline-flex items-center gap-1 justify-center',
     'rounded-lg',
     'enabled:active:brightness-110',
-    '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:mr-1',
+    '[&_svg]:pointer-events-none [&_svg]:size-4',
     'disabled:pointer-events-none',
   ],
   {

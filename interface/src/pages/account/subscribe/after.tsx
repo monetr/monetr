@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CircularProgress, Typography } from '@mui/material';
+import { LoaderCircle } from 'lucide-react';
 
 import Logo from '@monetr/interface/assets/Logo';
+import MSpan from '@monetr/interface/components/MSpan';
 import { useAfterCheckout } from '@monetr/interface/hooks/useAuthentication';
 
 export default function AfterCheckoutPage(): JSX.Element {
@@ -35,15 +36,15 @@ export default function AfterCheckoutPage(): JSX.Element {
           <Logo className='w-1/3' />
         </div>
         <div className='w-full pt-2.5 pb-2.5'>
-          <Typography
-            variant='h5'
+          <MSpan
+            size='xl'
             className='w-full text-center'
           >
             Getting your account setup...
-          </Typography>
+          </MSpan>
         </div>
         <div className='w-full pt-2.5 pb-2.5 flex justify-center'>
-          <CircularProgress />
+          <LoaderCircle className='spin' />
         </div>
       </div>
     </div>
