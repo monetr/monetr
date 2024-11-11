@@ -12,6 +12,10 @@ const nextConfig = {
   generateBuildId: async () => {
     return 'monetr.app';
   },
+  transpilePackages: ['@monetr/interface'],
+  sassOptions: {
+    implementation: 'sass-embedded',
+  },
   webpack: (
     config,
     nextShit,
@@ -23,8 +27,24 @@ const nextConfig = {
         ...config?.resolve?.alias,
         '@monetr/docs': path.resolve(__dirname, 'src'),
         '@monetr/interface': path.resolve(__dirname, '../interface/src'),
+      },
+      modules: [
+        ...config?.resolve?.modules,
+        path.resolve(__dirname, '../interface/src'),
+      ],
+      extensions: [
+        ...config?.resolve?.extensions,
+        '.svg',
+      ],
+      extensionAlias: {
+        ...config?.resolve?.extensionAlias,
+        ".js": [".ts", ".tsx", ".js", ".jsx"],
+        ".mjs": [".mts", ".mjs"],
+        ".cjs": [".cts", ".cjs"],
+        ".svg": [".svg"],
       }
-    }
+    };
+    console.log(config);
     return config
   },
 }

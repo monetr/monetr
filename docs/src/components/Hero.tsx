@@ -33,6 +33,7 @@ export default function Hero(): JSX.Element {
             focused on helping you plan and budget for recurring expenses, or future goals.
           </h2>
         </div>
+
         <InterfaceExample />
       </div>
     </div>

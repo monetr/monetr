@@ -25,8 +25,8 @@ export default function MQueryClient(props: MQueryClientProps): JSX.Element {
   }), []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {props.children}
+    <QueryClientProvider client={ queryClient }>
+      { props.children }
     </QueryClientProvider>
   );
 }

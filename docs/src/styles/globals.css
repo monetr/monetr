@@ -9,3 +9,27 @@
 .m-view-width {
   @apply max-w-[90rem] pr-[max(env(safe-area-inset-right),1.5rem)] pl-[max(env(safe-area-inset-left),1.5rem)]
 }
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+    width: 16px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: inherit;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-zinc-700;
+    border-radius: 20px;
+    border: 6px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-500;
+}
+
+.monetr {
+  border-radius: 1em !important;
+}
