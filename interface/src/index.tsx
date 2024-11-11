@@ -6,7 +6,6 @@ import { createRoutesFromChildren, matchRoutes, useLocation, useNavigationType }
 import * as Sentry from '@sentry/react';
 
 import { makeSneakyFetchTransport } from '@monetr/interface/relay/transport';
-import reportWebVitals from '@monetr/interface/reportWebVitals';
 import Root from '@monetr/interface/Root';
 
 import '@monetr/interface/styles/styles.css';
@@ -51,8 +50,3 @@ if (window?.__MONETR__?.SENTRY_DSN) {
 root.render(
   <Root />,
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
