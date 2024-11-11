@@ -12,7 +12,7 @@ const buttonVariants = cva(
     'inline-flex items-center gap-1 justify-center',
     'rounded-lg',
     'enabled:active:brightness-110',
-    '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+    '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:mr-1',
     'disabled:pointer-events-none',
   ],
   {
@@ -74,7 +74,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         className={ mergeTailwind(buttonVariants({ variant: color, size, className })) }
         ref={ ref }
-        tabIndex={ 0 }
+        tabIndex={ -1 /* Default to -1, it can be overridden below */ }
         type='button'
         { ...props }
       />

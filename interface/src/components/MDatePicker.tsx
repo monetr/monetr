@@ -1,18 +1,16 @@
 /* eslint-disable max-len */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { DayPickerSingleProps } from 'react-day-picker';
-import CloseOutlined from '@mui/icons-material/CloseOutlined';
-import Popover from '@mui/material/Popover';
-import { isEqual, startOfMonth, startOfToday } from 'date-fns';
-import enUS from 'date-fns/locale/en-US';
+import { isEqual, Locale, startOfMonth, startOfToday } from 'date-fns';
+import { enUS } from 'date-fns/locale/en-US';
 import { useFormikContext } from 'formik';
-import { Calendar } from 'lucide-react';
+import { Calendar as CalendarIcon, X } from 'lucide-react';
 
-import MCalendar from './MCalendar';
 import MLabel, { MLabelDecorator } from './MLabel';
 import { ReactElement } from './types';
 import { Button } from '@monetr/interface/components/Button';
+import { Calendar } from '@monetr/interface/components/Calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MDatePickerProps extends
@@ -186,57 +184,49 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
       >
         <LabelDecorator name={ props.name } disabled={ props.disabled } />
       </MLabel>
-      <Button
-        variant='outlined'
-        size='select'
-        type='button'
-        disabled={ formikContext?.isSubmitting || disabled }
-        className={ classNames }
-        onClick={ handleClick }
-        role='none'
-      >
-        <Calendar />
-        <span className='truncate'>{formattedSelection}</span>
-        { isClearEnabled && selectedValue ? (
-          <button
-            type='button'
-            className={ mergeTailwind(
-              'absolute outline-none inset-y-0 right-2 flex items-center transition duration-100 dark:text-dark-monetr-content-subtle',
-            ) }
-            onClick={ e => {
-              e.preventDefault();
-              handleReset();
-            } }
+      <Popover open={ open }>
+        <PopoverTrigger asChild>
+          <Button
+            variant='outlined'
+            size='select'
+            disabled={ formikContext?.isSubmitting || disabled }
+            className={ classNames }
+            onClick={ handleClick }
           >
-            <CloseOutlined />
-          </button>
-        ) : null }
-      </Button>
-      <Popover
-        open={ open }
-        anchorEl={ anchorEl }
-        onClose={ handleClose }
-        transitionDuration={ 200 }
-      >
-        <MCalendar<DayPickerSingleProps>
-          showOutsideDays={ true }
-          mode='single'
-          defaultMonth={ defaultMonth }
-          selected={ selectedValue }
-          onSelect={ (value: Date) => {
-            handleSelect(value);
-            handleClose();
-          } }
-          locale={ enUS }
-          disabled={ disabledDays }
-          enableYearNavigation={ enableYearNavigation }
-          className={ mergeTailwind(
-            // common
-            'z-50 overflow-y-auto outline-none rounded-lg p-3 border',
-            // dark
-            'dark:bg-dark-monetr-background dark:border-dark-monetr-border-subtle dark:shadow-2xl',
-          ) }
-        />
+            <CalendarIcon />
+            <span className='truncate'>{formattedSelection}</span>
+            { isClearEnabled && selectedValue ? (
+              <button
+                type='button'
+                className={ mergeTailwind(
+                  'absolute outline-none inset-y-0 right-2 flex items-center transition duration-100 dark:text-dark-monetr-content-subtle',
+                ) }
+                onClick={ e => {
+                  e.preventDefault();
+                  handleReset();
+                } }
+              >
+                <X />
+              </button>
+            ) : null }
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent onPointerDownOutside={ handleClose }>
+          <Calendar
+            showOutsideDays={ true }
+            mode='single'
+            defaultMonth={ defaultMonth }
+            selected={ selectedValue }
+            onSelect={ (value: Date) => {
+              handleSelect(value);
+              handleClose();
+            } }
+            locale={ enUS }
+            disabled={ disabledDays }
+            enableYearNavigation={ enableYearNavigation }
+            className='overflow-y-auto outline-none rounded-lg p-3 bg-dark-monetr-background'
+          />
+        </PopoverContent>
       </Popover>
       <Error />
     </div>

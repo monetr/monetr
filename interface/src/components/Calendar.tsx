@@ -7,23 +7,24 @@ import { Button, buttonVariants } from '@monetr/interface/components/Button';
 import MSpan from '@monetr/interface/components/MSpan';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-export type CalendarProps<T extends DayPickerSingleProps> = T & {
+export type CalendarProps = DayPickerSingleProps & {
   enableYearNavigation?: boolean;
 }
 
-function Calendar<T extends DayPickerSingleProps>({
+function Calendar({
   className,
   classNames,
   locale,
   showOutsideDays = true,
   enableYearNavigation = true,
   ...props
-}: CalendarProps<T>) {
+}: CalendarProps) {
   return (
     <DayPicker
       showOutsideDays={ showOutsideDays }
       locale={ locale }
       className={ mergeTailwind('p-3', className) }
+      mode='single'
       classNames={ {
         months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
         month: 'space-y-4',

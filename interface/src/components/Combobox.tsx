@@ -124,7 +124,7 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
           <ChevronsUpDown className='h-3 w-3 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='p-0'>
+      <PopoverContent>
         <Command>
           { ((props.options.length > 1 && props.showSearch !== false) || props.showSearch) && (
             <CommandInput placeholder={ props.searchPlaceholder } />
