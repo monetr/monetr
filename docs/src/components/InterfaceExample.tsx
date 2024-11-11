@@ -52,7 +52,7 @@ export default function InterfaceExample(): JSX.Element {
       'loginId': 'lgn_01hym36d96ze86vz5g7883vcwg',
       'login': {
         'loginId': 'lgn_01hym36d96ze86vz5g7883vcwg',
-        'email': 'me@elliotcourant.dev',
+        'email': 'example@example.com',
         'firstName': 'Elliot',
         'lastName': 'Courant',
         'passwordResetAt': null,
@@ -1027,15 +1027,5 @@ export default function InterfaceExample(): JSX.Element {
         </MQueryClient>
       </MemoryRouter>
     </div>
-  );
-
-  
-  return (
-    <iframe
-      title='monetr interface'
-      loading='lazy'
-      className='w-full h-full rounded-2xl mt-8 shadow-2xl z-10 backdrop-blur-md bg-black/90 pointer-events-none select-none max-w-[1280px] max-h-[720px] aspect-video-vertical md:aspect-video'
-      src='/_storybook/iframe.html?viewMode=story&id=new-ui--transactions&shortcuts=false&singleStory=true&args='
-    />
   );
 }
