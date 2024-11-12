@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.18.25](https://github.com/monetr/monetr/compare/v0.18.24...v0.18.25) (2024-11-12)
+
+
+### Features
+
+* **ui:** Improving drawer component ([#2159](https://github.com/monetr/monetr/issues/2159)) ([7e3e150](https://github.com/monetr/monetr/commit/7e3e1501ba2b97bc839f8b44b528fdb452ec624e))
+* **ui:** Migrate away from old calendar component ([0b13c17](https://github.com/monetr/monetr/commit/0b13c1753b2028648efa6665084bb914e4635c9d))
+* **ui:** Removing more mui component usage ([ded8f30](https://github.com/monetr/monetr/commit/ded8f300e16ec812fe37d99026f60ca996d89a3b))
+
+
+### Bug Fixes
+
+* **test:** I hate javascript development so much ([53e2317](https://github.com/monetr/monetr/commit/53e231728666fce28b5e0e0aa77045308e8c80bf))
+* **ui:** Fixed enter canceling form sometimes ([75e0554](https://github.com/monetr/monetr/commit/75e0554c7bbdec2c7c134a1ae247aa9563f0ac7f))
+
+
+### Miscellaneous
+
+* Updating readme ([b1879bd](https://github.com/monetr/monetr/commit/b1879bd38103934cac4f0cca01f3263d222d06e5))
+
 ## [0.18.24](https://github.com/monetr/monetr/compare/v0.18.23...v0.18.24) (2024-11-11)
 
 
