@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Check } from 'lucide-react';
 
 import { Combobox, ComboboxItemProps, ComboboxOption } from '@monetr/interface/components/Combobox';
 import MBadge from '@monetr/interface/components/MBadge';
@@ -9,8 +10,6 @@ import { useBankAccounts, useSelectedBankAccount } from '@monetr/interface/hooks
 import { BankAccountStatus } from '@monetr/interface/models/BankAccount';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
-
-import { Check } from 'lucide-react';
 
 interface SelectBankAccountItem extends ComboboxOption<string> {
   type: string;
@@ -43,7 +42,7 @@ export default function SelectBankAccount(): JSX.Element {
 
   return (
     <Combobox 
-      className='w-full h-[34px]'
+      className='w-full h-[34px] test'
       variant='text'
       size='select'
       options={ accounts } 
