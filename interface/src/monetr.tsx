@@ -2,10 +2,9 @@ import React, { Fragment } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 
-import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
-import MobileSidebar from '@monetr/interface/components/Layout/MobileSidebar';
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
+import Sidebar from '@monetr/interface/components/Layout/Sidebar';
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
 import { useBankAccounts } from '@monetr/interface/hooks/bankAccounts';
 import { useLinks } from '@monetr/interface/hooks/links';
@@ -120,8 +119,7 @@ export default function Monetr(): JSX.Element {
 
   return (
     <div className='monetr max-w-screen max-h-screen h-full w-full bg-background flex'>
-      <BankSidebar className='hidden lg:flex' />
-      <MobileSidebar />
+      <Sidebar />
       <div className='w-full h-full flex min-w-0 overflow-y-auto'>
         <RoutesImpl>
           <Route path='/bank/:bankAccountId' element={ <BudgetingLayout /> }>
