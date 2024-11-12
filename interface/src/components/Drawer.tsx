@@ -42,17 +42,39 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ ref }
       className={ mergeTailwind(
-        'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background',
-        className
+        'fixed',
+        'inset-x-0 bottom-0',
+        'z-50', // mt-24',
+        'flex h-auto flex-col',
+        'rounded-t-[10px]',
+        'border border-b-0 border-dark-monetr-border bg-dark-monetr-background',
+        'max-h-screen',
+        className,
       ) }
       { ...props }
     >
-      <div className='mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted' />
+      <div className='mx-auto mt-4 h-2 w-[100px] rounded-full bg-dark-monetr-content-muted' />
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ));
 DrawerContent.displayName = 'DrawerContent';
+
+// Wrapper component goes after the header and before the footer in the content and makes the drawer scrollable
+// properly.
+const DrawerWrapper = React.forwardRef<
+  HTMLDivElement,
+  React.ButtonHTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div
+    ref={ ref } 
+    className={ mergeTailwind('h-full flex-shrink overflow-y-auto', className) }
+    { ...props }
+  >
+    { children }
+  </div>
+));
+DrawerWrapper.displayName = 'DrawerWrapper';
  
 const DrawerHeader = ({
   className,
@@ -114,4 +136,5 @@ export {
   DrawerPortal,
   DrawerTitle,
   DrawerTrigger,
+  DrawerWrapper,
 };

@@ -25,7 +25,7 @@ export default function MobileSidebar(): JSX.Element {
   }
 
   return (
-    <div className='fixed z-40 w-screen h-screen top-0 left-0 lg:hidden bg-background flex flex-row backdrop-blur-sm dark:bg-opacity-50 backdrop-brightness-50'>
+    <div className='fixed z-40 w-screen h-screen top-0 left-0 bg-background flex flex-row backdrop-blur-sm dark:bg-opacity-50 backdrop-brightness-50'>
       <BankSidebar />
       { isBankRoute && <BudgetingSidebar className='w-auto flex-auto border-none overflow-y-auto' /> }
     </div>
