@@ -16,7 +16,7 @@ services:
       start_period: 30s
     restart: unless-stopped
   redis:
-    image: redis:6.2.7-alpine
+    image: redis:6.2.16-alpine
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 30s
