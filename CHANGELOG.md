@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.26](https://github.com/monetr/monetr/compare/v0.18.25...v0.18.26) (2024-11-15)
+
+
+### Bug Fixes
+
+* **ui:** Fixed bug with checkbox implementation ([e0692e4](https://github.com/monetr/monetr/commit/e0692e41a344bbcabc8e1174e7e44fca162ae571)), closes [#2160](https://github.com/monetr/monetr/issues/2160)
+
 ## [0.18.25](https://github.com/monetr/monetr/compare/v0.18.24...v0.18.25) (2024-11-12)
 
 
