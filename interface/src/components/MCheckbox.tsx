@@ -13,10 +13,6 @@ export interface MCheckboxProps {
   name?: string;
   disabled?: boolean;
   checked?: boolean;
-  onChange?: {
-    /** Classic React change handler, keyed by input name */
-    (e: React.ChangeEvent<any>): void;
-  }
   className?: string;
 }
 
@@ -56,7 +52,6 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
   props = {
     ...props,
     disabled: props?.disabled || formikContext?.isSubmitting,
-    onChange: props?.onChange || formikContext?.handleChange,
     checked: props?.checked || formikContext.values[props.name],
   };
 
@@ -75,7 +70,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
           name={ props.name }
           disabled={ props.disabled }
           checked={ props.checked }
-          onChange={ props.onChange }
+          onCheckedChange={ state => formikContext?.setFieldValue(props.name, Boolean(state)) }
           onBlur={ formikContext?.handleBlur }
         />
       </div>
