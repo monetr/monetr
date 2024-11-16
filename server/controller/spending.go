@@ -167,7 +167,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 
 	if (transfer.FromSpendingId == nil || (*transfer.FromSpendingId).IsZero()) &&
 		(transfer.ToSpendingId == nil || (*transfer.ToSpendingId).IsZero()) {
-		return c.badRequest(ctx, "both a from and a to must be specified to transfer allocated funds")
+		return c.badRequest(ctx, "Both a from and a to must be specified to transfer allocated funds")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -176,7 +176,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 
 	account, err := c.Accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to retrieve account for transfer")
+		return c.wrapPgError(ctx, err, "Failed to retrieve account for transfer")
 	}
 
 	var fundingSchedule *FundingSchedule
@@ -184,16 +184,16 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 	if transfer.FromSpendingId != nil {
 		fromExpense, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transfer.FromSpendingId)
 		if err != nil {
-			return c.wrapPgError(ctx, err, "failed to retrieve source expense for transfer")
+			return c.wrapPgError(ctx, err, "Failed to retrieve source expense for transfer")
 		}
 
 		if fromExpense.CurrentAmount < transfer.Amount {
-			return c.badRequest(ctx, "cannot transfer more than is available in source goal/expense")
+			return c.badRequest(ctx, "Cannot transfer more than is available in source goal/expense")
 		}
 
 		fundingSchedule, err = repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, fromExpense.FundingScheduleId)
 		if err != nil {
-			return c.wrapPgError(ctx, err, "failed to retrieve funding schedule for source goal/expense")
+			return c.wrapPgError(ctx, err, "Failed to retrieve funding schedule for source goal/expense")
 		}
 
 		fromExpense.CurrentAmount -= transfer.Amount
@@ -220,7 +220,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 			*transfer.ToSpendingId,
 		)
 		if err != nil {
-			return c.wrapPgError(ctx, err, "failed to get destination goal/expense for transfer")
+			return c.wrapPgError(ctx, err, "Failed to get destination goal/expense for transfer")
 		}
 
 		// If the funding schedule that we already have put aside is not the same as
@@ -233,7 +233,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 				toExpense.FundingScheduleId,
 			)
 			if err != nil {
-				return c.wrapPgError(ctx, err, "failed to retrieve funding schedule for destination goal/expense")
+				return c.wrapPgError(ctx, err, "Failed to retrieve funding schedule for destination goal/expense")
 			}
 		}
 

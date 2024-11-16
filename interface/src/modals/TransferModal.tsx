@@ -33,7 +33,6 @@ function TransferModal(props: TransferModalProps): JSX.Element {
   const ref = useRef<MModalRef>(null);
   const transfer = useTransfer();
   const { enqueueSnackbar } = useSnackbar();
-  const balance = useCurrentBalance();
   const { result: spending } = useSpendingSink();
 
   const initialValues: TransferValues = {
@@ -50,13 +49,9 @@ function TransferModal(props: TransferModalProps): JSX.Element {
       errors['amount'] = 'Amount must be greater than zero';
     }
 
-    // If the source is null that means it is the free to use budget.
-    if (values.fromSpendingId === null) {
-      // But don't let them move more than is available in that budget.
-      if (amount > balance?.free) {
-        errors['amount'] = 'Cannot move more than is available from Free-To-Use';
-      }
-    } else {
+    // If we are moving an allocation out of an existing budget, do not let us overdraw that budget. We can only really
+    // overdraw free to use.
+    if (values.fromSpendingId !== null) {
       // Otherwise we are moving funds out of an actual budget. Find that budget.
       const from = spending?.find(item => item.spendingId === values.fromSpendingId);
       // And make sure that we are not moving more than that budget has.
