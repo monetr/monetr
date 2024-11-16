@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/background"
@@ -58,68 +57,6 @@ var (
 		Short: "Run a specific job.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
-			clock := clock.New()
-
-			configuration := config.LoadConfiguration()
-			log := logging.NewLoggerWithConfig(configuration.Logging)
-
-			db, err := getDatabase(log, configuration, nil)
-
-			redisController, err := cache.NewRedisCache(log, configuration.Redis)
-			if err != nil {
-				log.WithError(err).Fatalf("failed to create redis cache: %+v", err)
-				return err
-			}
-			defer redisController.Close()
-
-			backgroundJobs, err := background.NewBackgroundJobs(
-				cmd.Context(),
-				log,
-				clock,
-				configuration,
-				db,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-			)
-			if err != nil {
-				return err
-			}
-
-			triggerableJobNames := backgroundJobs.GetTriggerableJobNames()
-			commands := map[string]*cobra.Command{}
-			for _, jobName := range triggerableJobNames {
-				name := jobName
-				command := &cobra.Command{
-					Use:   jobName,
-					Short: "Trigger the job",
-					RunE: func(cmdInner *cobra.Command, argsInner []string) error {
-						fmt.Println(name)
-
-						return nil
-					},
-				}
-
-				commands[jobName] = command
-				cmd.AddCommand(command)
-			}
-
-			switch len(args) {
-			case 0:
-				return cmd.Help()
-			case 1:
-				command, ok := commands[args[0]]
-				if !ok {
-					return cmd.Help()
-				}
-
-				return command.Execute()
-			default:
-				return cmd.Help()
-			}
 		},
 	}
 
