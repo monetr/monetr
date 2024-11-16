@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.18.28](https://github.com/monetr/monetr/compare/v0.18.27...v0.18.28) (2024-11-16)
+
+
+### Features
+
+* Improve self hosting via compose ([04de881](https://github.com/monetr/monetr/commit/04de881d5e0cbfd2bfafc47da1166037abfe97cb))
+
+
+### Dependencies
+
+* **ui:** update dependency postcss to v8.4.49 ([#2168](https://github.com/monetr/monetr/issues/2168)) ([e660420](https://github.com/monetr/monetr/commit/e660420a304734e3950bf6811e3dd4ffb5691f62))
+* **ui:** update dependency tailwindcss to v3.4.15 ([#2173](https://github.com/monetr/monetr/issues/2173)) ([708fa5f](https://github.com/monetr/monetr/commit/708fa5f3eb9df08d726ba6d393d286c66745a8a7))
+
+
+### Miscellaneous
+
+* **api:** Improving authentication error messages ([b3338c7](https://github.com/monetr/monetr/commit/b3338c7399977f7f68898c62f177b389682dc865))
+
 ## [0.18.27](https://github.com/monetr/monetr/compare/v0.18.26...v0.18.27) (2024-11-16)
 
 
