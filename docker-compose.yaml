@@ -24,9 +24,7 @@ services:
       start_period: 30s
     restart: unless-stopped
   monetr:
-    build:
-      dockerfile: Dockerfile
-      context: .
+    image: ghcr.io/monetr/monetr:latest
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:4000/api/health" ]
       interval: 5s
