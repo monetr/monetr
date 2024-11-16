@@ -240,7 +240,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").IsEqual("invalid email and password")
+		response.JSON().Path("$.error").IsEqual("Invalid email and password")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -299,7 +299,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("valid ReCAPTCHA is required")
+		response.JSON().Path("$.error").IsEqual("Valid ReCAPTCHA is required")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -1654,7 +1654,7 @@ func TestResetPassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusUnauthorized)
-			response.JSON().Path("$.error").String().IsEqual("invalid email and password")
+			response.JSON().Path("$.error").String().IsEqual("Invalid email and password")
 			response.Cookies().IsEmpty()
 		}
 

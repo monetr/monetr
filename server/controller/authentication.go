@@ -77,7 +77,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
 	if err := c.validateLoginCaptcha(c.getContext(ctx), loginRequest.Captcha); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Valid ReCAPTCHA is required")
 	}
 
 	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
@@ -99,12 +99,12 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
-		return c.returnError(ctx, http.StatusUnauthorized, "invalid email and password")
+		return c.returnError(ctx, http.StatusUnauthorized, "Invalid email and password")
 	case nil:
 		// If no error was returned then do nothing.
 		break
 	default:
-		return c.wrapPgError(ctx, err, "failed to authenticate")
+		return c.wrapPgError(ctx, err, "Failed to authenticate")
 	}
 
 	// I want to track how many of these types of things we get.
