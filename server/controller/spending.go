@@ -157,7 +157,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 		ToSpendingId   *ID[Spending] `json:"toSpendingId"`
 		Amount         int64         `json:"amount"`
 	}
-	if err := ctx.Bind(transfer); err != nil {
+	if err := ctx.Bind(&transfer); err != nil {
 		return c.invalidJson(ctx)
 	}
 
