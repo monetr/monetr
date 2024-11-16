@@ -23,8 +23,8 @@ type fsnotifyCertificateWatcher struct {
 	log           *logrus.Entry
 	once          sync.Once
 	cancelChannel chan chan error
-	watcher  *fsnotify.Watcher
-	callback Callback
+	watcher       *fsnotify.Watcher
+	callback      Callback
 }
 
 func NewFileCertificateHelper(log *logrus.Entry, paths []string, callback Callback) (CertificateWatcher, error) {

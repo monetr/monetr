@@ -9,7 +9,6 @@ import (
 )
 
 type structTest struct {
-
 }
 
 func (s *structTest) Foo(ctx context.Context) *sentry.Span {

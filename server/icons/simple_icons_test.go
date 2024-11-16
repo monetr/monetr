@@ -1,4 +1,5 @@
 //go:build icons && simple_icons
+
 package icons
 
 import (
@@ -14,4 +15,3 @@ func TestSimpleIconsSearch(t *testing.T) {
 		assert.NotNil(t, icon, "should find an amazon icon")
 	})
 }
-
