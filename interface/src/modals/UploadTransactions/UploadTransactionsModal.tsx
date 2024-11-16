@@ -5,7 +5,7 @@ import { Close, FilePresentOutlined, UploadFileOutlined } from '@mui/icons-mater
 import { useQueryClient } from '@tanstack/react-query';
 import axios, { AxiosProgressEvent, AxiosResponse } from 'axios';
 
-import { MBaseButton } from '@monetr/interface/components/MButton';
+import { Button } from '@monetr/interface/components/Button';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
@@ -157,7 +157,10 @@ function UploadFileStage(props: StageProps) {
             <div className='flex flex-col py-1 w-full'>
               <MSpan size='lg'>{ file.name }</MSpan>
               <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
-                <div className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600' style={ { width: `${uploadProgress}%` } }></div>
+                <div
+                  className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600'
+                  style={ { width: `${uploadProgress}%` } }
+                />
               </div>
             </div>
           </div>
@@ -192,12 +195,12 @@ function UploadFileStage(props: StageProps) {
           </div>
         </div>
         <div className='flex justify-end gap-2 mt-2'>
-          <MBaseButton color='secondary' onClick={ props.close }>
+          <Button variant='secondary' onClick={ props.close }>
             Cancel
-          </MBaseButton>
-          <MBaseButton color='primary' type='submit'>
+          </Button>
+          <Button variant='primary' type='submit'>
             Upload
-          </MBaseButton>
+          </Button>
         </div>
       </form>
     );
@@ -226,12 +229,12 @@ function UploadFileStage(props: StageProps) {
         </div>
       </div>
       <div className='flex justify-end gap-2 mt-2'>
-        <MBaseButton color='secondary' onClick={ props.close }>
+        <Button variant='secondary' onClick={ props.close }>
           Cancel
-        </MBaseButton>
-        <MBaseButton color='primary' type='submit'>
+        </Button>
+        <Button variant='primary' type='submit'>
           Upload
-        </MBaseButton>
+        </Button>
       </div>
     </form>
   );
