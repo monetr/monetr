@@ -1,9 +1,10 @@
 import React, { Fragment, useCallback, useEffect, useRef } from 'react';
 import { useNavigationType } from 'react-router-dom';
-import { AddOutlined, HeartBroken, SavingsOutlined } from '@mui/icons-material';
+import { HeartBroken, SavingsOutlined } from '@mui/icons-material';
+import { Plus } from 'lucide-react';
 
+import { Button } from '@monetr/interface/components/Button';
 import GoalItem from '@monetr/interface/components/goals/GoalItem';
-import { MBaseButton } from '@monetr/interface/components/MButton';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useSpendingFiltered } from '@monetr/interface/hooks/spending';
@@ -83,10 +84,10 @@ export default function Goals(): JSX.Element {
   return (
     <Fragment>
       <MTopNavigation icon={ SavingsOutlined } title='Goals' >
-        <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showNewGoalModal }>
-          <AddOutlined />
+        <Button variant='primary' onClick={ showNewGoalModal }>
+          <Plus />
           New Goal
-        </MBaseButton>
+        </Button>
       </MTopNavigation>
       <div className='w-full h-full overflow-y-auto min-w-0' ref={ ref }>
         <ListContent />

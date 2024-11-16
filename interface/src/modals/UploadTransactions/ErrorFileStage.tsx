@@ -1,14 +1,12 @@
 import React from 'react';
 import { FilePresentOutlined } from '@mui/icons-material';
 
-import { MBaseButton } from '@monetr/interface/components/MButton';
+import { Button } from '@monetr/interface/components/Button';
 import MSpan from '@monetr/interface/components/MSpan';
-
 
 interface ErrorFileStageProps {
   close: () => void;
-  error: {message: string; filename: string};
-
+  error: { message: string; filename: string };
 }
 
 export default function ErrorFileStage(props: ErrorFileStageProps): JSX.Element {
@@ -33,9 +31,9 @@ export default function ErrorFileStage(props: ErrorFileStageProps): JSX.Element 
         </div>
       </div>
       <div className='flex justify-end gap-2 mt-2'>
-        <MBaseButton color='secondary' onClick={ props.close }>
+        <Button variant='secondary' onClick={ props.close }>
           Close
-        </MBaseButton>
+        </Button>
       </div>
     </div>
   );

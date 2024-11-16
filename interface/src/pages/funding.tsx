@@ -1,8 +1,9 @@
 import React, { Fragment } from 'react';
-import { AccountBalance, AddOutlined, ArrowForward, Today, TodayOutlined } from '@mui/icons-material';
+import { AccountBalance, ArrowForward, Today, TodayOutlined } from '@mui/icons-material';
+import { Plus } from 'lucide-react';
 
+import { Button } from '@monetr/interface/components/Button';
 import FundingItem from '@monetr/interface/components/funding/FundingItem';
-import { MBaseButton } from '@monetr/interface/components/MButton';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useFundingSchedulesSink } from '@monetr/interface/hooks/fundingSchedules';
@@ -39,10 +40,10 @@ export default function Funding(): JSX.Element {
         icon={ TodayOutlined }
         title='Funding Schedules'
       >
-        <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showNewFundingModal }>
-          <AddOutlined />
+        <Button variant='primary' onClick={ showNewFundingModal }>
+          <Plus />
           New Funding Schedule
-        </MBaseButton>
+        </Button>
       </MTopNavigation>
       <div className='w-full h-full overflow-y-auto min-w-0'>
         <ListContent />
@@ -61,10 +62,10 @@ function EmptyState(): JSX.Element {
           <AccountBalance className='h-full text-5xl dark:text-dark-monetr-content-muted' />
         </div>
         <MSpan size='xl' color='subtle' className='text-center'>
-            You don't have any funding schedules yet...
+          You don't have any funding schedules yet...
         </MSpan>
         <MSpan size='lg' color='subtle' className='text-center'>
-            Funding schedules tell monetr when to allocate funds towards your expenses and goals.
+          Funding schedules tell monetr when to allocate funds towards your expenses and goals.
         </MSpan>
       </div>
     </div>

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { FilePresentOutlined } from '@mui/icons-material';
 import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
-import { MBaseButton } from '@monetr/interface/components/MButton';
+import { Button } from '@monetr/interface/components/Button';
 import MSpan from '@monetr/interface/components/MSpan';
 import { UploadTransactionStage } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
@@ -41,9 +41,9 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): JS
         </div>
       </div>
       <div className='flex justify-end gap-2 mt-2'>
-        <MBaseButton color='secondary' onClick={ props.close }>
+        <Button variant='secondary' onClick={ props.close }>
           Done
-        </MBaseButton>
+        </Button>
       </div>
     </div>
   );
@@ -57,6 +57,7 @@ function useTransactionUploadProgress(
   // Bootstrap the socket to listen for the actual changes.
   useEffect(() => {
     const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+    // eslint-disable-next-line max-len
     const socket = new WebSocket(`${protocol}://${ location.host }/api/bank_accounts/${ bankAccountId }/transactions/upload/${ transactionUploadId }/progress`);
     socket.onopen = () => {
       // eslint-disable-next-line no-console
