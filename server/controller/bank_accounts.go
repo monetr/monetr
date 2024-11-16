@@ -49,19 +49,6 @@ func (c *Controller) getBalances(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, balances)
 }
 
-// Create Bank Account
-// @Summary Create Bank Account
-// @ID create-bank-account
-// @tags Bank Accounts
-// @description Create a bank account for the provided link. Note: Bank accounts can only be created this way for manual links. Attempting to create a bank account for a link that is associated with Plaid will result in an error.
-// @Security ApiKeyAuth
-// @Accept json
-// @Produce json
-// @Param newBankAccount body swag.CreateBankAccountRequest true "New Bank Account"
-// @Router /bank_accounts [post]
-// @Success 200 {object} swag.BankAccountResponse
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	var bankAccount BankAccount
 	if err := ctx.Bind(&bankAccount); err != nil {
@@ -72,9 +59,22 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 		return c.badRequest(ctx, "link ID must be provided")
 	}
 
+	var err error
 	bankAccount.BankAccountId = ""
-	bankAccount.Name = strings.TrimSpace(bankAccount.Name)
-	bankAccount.Mask = strings.TrimSpace(bankAccount.Mask)
+	bankAccount.Name, err = c.cleanString(ctx, "Name", bankAccount.Name)
+	if err != nil {
+		return err
+	}
+
+	// TODO Should mask be enforced to have a max of 4 characters?
+	bankAccount.Mask, err = c.cleanString(ctx, "Mask", bankAccount.Mask)
+	if err != nil {
+		return err
+	}
+
+	bankAccount.Status = ParseBankAccountStatus(bankAccount.Status)
+	bankAccount.Type = ParseBankAccountType(bankAccount.Type)
+	bankAccount.SubType = ParseBankAccountSubType(bankAccount.SubType)
 	bankAccount.LastUpdated = c.Clock.Now().UTC()
 
 	if bankAccount.Name == "" {
@@ -114,11 +114,13 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 	}
 
 	var request struct {
-		AvailableBalance int64             `json:"availableBalance"`
-		CurrentBalance   int64             `json:"currentBalance"`
-		Mask             string            `json:"mask"`
-		Name             string            `json:"name"`
-		Status           BankAccountStatus `json:"status"`
+		AvailableBalance int64              `json:"availableBalance"`
+		CurrentBalance   int64              `json:"currentBalance"`
+		Mask             string             `json:"mask"`
+		Name             string             `json:"name"`
+		Status           BankAccountStatus  `json:"status"`
+		Type             BankAccountType    `json:"accountType"`
+		SubType          BankAccountSubType `json:"accountSubType"`
 	}
 	if err = ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
@@ -132,15 +134,22 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 	} else {
 		existingBankAccount.AvailableBalance = request.AvailableBalance
 		existingBankAccount.CurrentBalance = request.CurrentBalance
-		existingBankAccount.Name = strings.TrimSpace(request.Name)
-		existingBankAccount.Mask = strings.TrimSpace(request.Mask)
-		// TODO Verify the provided status string is correct.
-		existingBankAccount.Status = request.Status
+		existingBankAccount.Name, err = c.cleanString(ctx, "Name", request.Name)
+		if err != nil {
+			return err
+		}
+
+		// TODO Should mask be enforced to have a max of 4 characters?
+		existingBankAccount.Mask, err = c.cleanString(ctx, "Mask", request.Mask)
+		if err != nil {
+			return err
+		}
+		existingBankAccount.Status = ParseBankAccountStatus(request.Status)
+		existingBankAccount.Type = ParseBankAccountType(request.Type)
+		existingBankAccount.SubType = ParseBankAccountSubType(request.SubType)
 	}
 
-	// TODO This might not reflect a correct updatedAt in the resulting value. Because this is not being passed by
-	//   reference.
-	if err = repo.UpdateBankAccounts(c.getContext(ctx), *existingBankAccount); err != nil {
+	if err = repo.UpdateBankAccount(c.getContext(ctx), existingBankAccount); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update bank account")
 	}
 

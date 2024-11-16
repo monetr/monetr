@@ -96,7 +96,7 @@ type BaseRepository interface {
 	GetTransactionsForSpending(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending], limit, offset int) ([]Transaction, error)
 	InsertTransactions(ctx context.Context, transactions []Transaction) error
 	ProcessTransactionSpentFrom(ctx context.Context, bankAccountId ID[BankAccount], input, existing *Transaction) (updatedExpenses []Spending, _ error)
-	UpdateBankAccounts(ctx context.Context, accounts ...BankAccount) error
+	UpdateBankAccount(ctx context.Context, bankAccount *BankAccount) error
 	UpdateSpending(ctx context.Context, bankAccountId ID[BankAccount], updates []Spending) error
 	UpdateLink(ctx context.Context, link *Link) error
 	UpdateFundingSchedule(ctx context.Context, fundingSchedule *FundingSchedule) error

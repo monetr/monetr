@@ -530,7 +530,7 @@ func (j *ProcessQFXUploadJob) syncBalances(ctx context.Context) error {
 	bankAccount.CurrentBalance = currentBalance
 	bankAccount.AvailableBalance = availableBalance
 
-	if err := j.repo.UpdateBankAccounts(span.Context(), *bankAccount); err != nil {
+	if err := j.repo.UpdateBankAccount(span.Context(), bankAccount); err != nil {
 		return errors.Wrap(err, "failed to update bank account balances")
 	}
 

@@ -199,7 +199,7 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 		// Note, if balance is ever something monetr has to rely on for ANYTHING
 		// IMPORTANT; then this should be done in a serializable transaction to make
 		// sure that we are properly handling concurrency.
-		if err := repo.UpdateBankAccounts(c.getContext(ctx), *bankAccount); err != nil {
+		if err := repo.UpdateBankAccount(c.getContext(ctx), bankAccount); err != nil {
 			return c.wrapPgError(ctx, err, "could not update bank account balance for transaction")
 		}
 	}

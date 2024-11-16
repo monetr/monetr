@@ -1,6 +1,5 @@
 import type { Config } from 'jest';
-	
-const path = require('path');
+import path from 'path';
 
 const config: Config = {	
   rootDir: path.resolve(__dirname),
@@ -16,6 +15,9 @@ const config: Config = {
     '^.+\\.(css|scss|less)$': '<rootDir>/src/testutils/mocks/styleMock.js',
     '^@monetr/interface/(.*)$': '<rootDir>/src/$1',	
   },	
+  testPathIgnorePatterns: [
+    'node_modules',
+  ],
   resetMocks: false,	
   collectCoverageFrom: [	
     'src/**/*.{js,jsx,ts,tsx}',	

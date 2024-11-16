@@ -17,6 +17,17 @@ const (
 	OtherBankAccountType      BankAccountType = "other"
 )
 
+func ParseBankAccountType[T string | BankAccountType](input T) BankAccountType {
+	value := BankAccountType(input)
+	switch value {
+	case DepositoryBankAccountType, CreditBankAccountType, LoanBankAccountType,
+		InvestmentBankAccountType:
+		return value
+	default:
+		return OtherBankAccountType
+	}
+}
+
 type BankAccountSubType string
 
 const (
@@ -33,10 +44,25 @@ const (
 	CreditCardBankAccountSubType BankAccountSubType = "credit card"
 
 	AutoBankAccountSubType BankAccountSubType = "auto"
-	// I'll add other bank account sub types later. Right now I'm really only working with depository anyway.
+	// I'll add other bank account sub types later. Right now I'm really only
+	// working with depository anyway.
 
 	OtherBankAccountSubType BankAccountSubType = "other"
 )
+
+func ParseBankAccountSubType[T string | BankAccountSubType](input T) BankAccountSubType {
+	value := BankAccountSubType(input)
+	switch value {
+	case CheckingBankAccountSubType, SavingsBankAccountSubType,
+		HSABankAccountSubType, CDBankAccountSubType, MoneyMarketBankAccountSubType,
+		PayPalBankAccountSubType, PrepaidBankAccountSubType,
+		CashManagementBankAccountSubType, EBTBankAccountSubType,
+		CreditCardBankAccountSubType, AutoBankAccountSubType:
+		return value
+	default:
+		return OtherBankAccountSubType
+	}
+}
 
 type BankAccountStatus string
 
@@ -45,6 +71,20 @@ const (
 	ActiveBankAccountStatus   BankAccountStatus = "active"
 	InactiveBankAccountStatus BankAccountStatus = "inactive"
 )
+
+// ParseBankAccountStatus takes a string or a BankAccountStatus value and
+// validates it against the known values. If the status is valid then it is
+// returned as a BankAccountStatus. If it is invalid it is returned as
+// UnknownBankAccountStatus.
+func ParseBankAccountStatus[T string | BankAccountStatus](input T) BankAccountStatus {
+	value := BankAccountStatus(input)
+	switch value {
+	case ActiveBankAccountStatus, InactiveBankAccountStatus:
+		return value
+	default:
+		return UnknownBankAccountStatus
+	}
+}
 
 var (
 	_ pg.BeforeInsertHook = (*BankAccount)(nil)

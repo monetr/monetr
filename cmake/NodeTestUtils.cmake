@@ -14,8 +14,7 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
     foreach(SPEC_FILE IN LISTS SPEC_FILES)
       string(REGEX REPLACE "([a-zA-Z0-9_]+)\\.spec.+" "\\1" SPEC_NAME "${SPEC_FILE}")
 
-      # pnpm jest --config=$PWD/interface/jest.config.ts --runTestsByPath $PWD/interface/src/pages/funding/details.spec.tsx --coverage --runInBand --no-cache
-      set(TEST_ARGS "--config=${CMAKE_SOURCE_DIR}/interface/jest.config.ts" "--runInBand" "--no-cache" "--forceExit" "--detectOpenHandles")
+      set(TEST_ARGS "--no-watchman" "--config=${CMAKE_SOURCE_DIR}/interface/jest.config.ts" "--runInBand" "--forceExit" "--detectOpenHandles")
       if(TEST_COVERAGE)
         # If we are collecting code coverage then we want to add these flags to jest. Because we are running tests one
         # file at a time we need to pass --watchAll=false in order for jest to properly collect coverage.
@@ -28,7 +27,7 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
 
       add_test(
         NAME ${PACKAGE}/${SPEC_NAME}
-        COMMAND ${NODE_EXECUTABLE} --expose-gc ${JEST_EXECUTABLE} ${TEST_ARGS} ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
+        COMMAND ${JEST_EXECUTABLE} ${TEST_ARGS} --runTestsByPath ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/interface
       )
       set_tests_properties(${PACKAGE}/${SPEC_NAME} PROPERTIES 
@@ -36,7 +35,7 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
         # Node gets really picky about having multiple instances running at the
         # same time, this helps a bit by making sure that we are not putting
         # multiple node instances on the same CPU core.
-        PROCESSORS 2
+        PROCESSORS 4
         PROCESSOR_AFFINITY ON
         TIMEOUT 45
       )

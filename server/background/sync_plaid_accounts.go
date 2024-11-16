@@ -292,7 +292,7 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 				"bankAccountId":       bankAccount.BankAccountId,
 				"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
 			}).Debug("updating account to be inactive")
-			if err := j.repo.UpdateBankAccounts(span.Context(), bankAccount); err != nil {
+			if err := j.repo.UpdateBankAccount(span.Context(), &bankAccount); err != nil {
 				log.WithError(err).Error("failed to mark account as inactive")
 				continue
 			}
@@ -313,7 +313,7 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 				"bankAccountId":       bankAccount.BankAccountId,
 				"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
 			}).Debug("updating account to be reactivated")
-			if err := j.repo.UpdateBankAccounts(span.Context(), bankAccount); err != nil {
+			if err := j.repo.UpdateBankAccount(span.Context(), &bankAccount); err != nil {
 				log.WithError(err).Error("failed to mark account as active")
 				continue
 			}

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"strings"
 	"time"
 
 	"github.com/go-pg/pg/v10"
@@ -11,6 +12,20 @@ import (
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
 )
+
+// cleanString takes the current request context, the name of a field and the
+// user input for that field. It will validate that the input is not longer than
+// 250 characters and will return a bad request error if it is. It will also
+// return a whitespace trimmed version of the provided input.
+func (c *Controller) cleanString(ctx echo.Context, name string, input string) (string, error) {
+	if len(input) > 250 {
+		return input, c.badRequest(ctx, "%s must not be longer than 250 characters", name)
+	}
+	// Trim after asserting length. This way if they send an incredibly long
+	// string we are not wasting time only to return an error.
+	input = strings.TrimSpace(input)
+	return input, nil
+}
 
 func (c *Controller) mustGetTimezone(ctx echo.Context) *time.Location {
 	account, err := c.Accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))

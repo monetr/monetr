@@ -1002,7 +1002,7 @@ func (s *SyncPlaidJob) syncPlaidBankAccount(
 			"changes": changes,
 		}).Debug("detected bank account updates from plaid")
 
-		if err := s.repo.UpdateBankAccounts(ctx, *bankAccount); err != nil {
+		if err := s.repo.UpdateBankAccount(ctx, bankAccount); err != nil {
 			return errors.Wrap(err, "failed to persists bank account changes from plaid sync")
 		}
 

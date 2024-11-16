@@ -156,32 +156,24 @@ func (r *repositoryBase) GetBankAccount(ctx context.Context, bankAccountId ID[Ba
 	return &result, nil
 }
 
-func (r *repositoryBase) UpdateBankAccounts(ctx context.Context, accounts ...BankAccount) error {
-	if len(accounts) == 0 {
-		return nil
-	}
-
+func (r *repositoryBase) UpdateBankAccount(ctx context.Context, bankAccount *BankAccount) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	// Make sure each of the accounts has the correct accountId.
-	bankAccountIds := make([]ID[BankAccount], len(accounts))
-	for i := range accounts {
-		accounts[i].AccountId = r.AccountId()
-		bankAccountIds[i] = accounts[i].BankAccountId
-	}
+	bankAccount.AccountId = r.AccountId()
+	bankAccount.UpdatedAt = r.clock.Now()
 
 	span.Data = map[string]interface{}{
-		"accountId":      r.AccountId(),
-		"bankAccountIds": bankAccountIds,
+		"accountId":     r.AccountId(),
+		"bankAccountId": bankAccount.BankAccountId,
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &accounts).
+	_, err := r.txn.ModelContext(span.Context(), bankAccount).
 		WherePK().
-		UpdateNotZero(&accounts)
+		UpdateNotZero(bankAccount)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
-		return errors.Wrap(err, "failed to update bank accounts")
+		return errors.Wrap(err, "failed to update bank account")
 	}
 
 	span.Status = sentry.SpanStatusOK
