@@ -6,7 +6,8 @@
 if [[ ${CLOUD_MAGIC} == "magic" ]]; then
   echo "[wrapper] Cloud magic detected, will use GitPod/CodeSpaces URL for webhooks instead."
 
-  export MONETR_PLAID_WEBHOOKS_DOMAIN="https://${MONETR_API_DOMAIN_NAME}";
+  # TODO MONETR_API_DOMAIN_NAME is no longer valid.
+  export MONETR_PLAID_WEBHOOKS_DOMAIN="https://${MONETR_API_DOMAIN_NAME}"; 
   export MONETR_PLAID_WEBHOOKS_ENABLED="true";
 else
   WEBHOOKS_DOMAIN=$(curl http://ngrok:4040/api/tunnels -s -m 0.1 | perl -pe '/\"public_url\":\"https:\/\/(\S*?)\",/g; print $1;' | cut -d "{" -f1);

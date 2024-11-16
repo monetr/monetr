@@ -13,6 +13,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const filesystemPermissions = 0755
+
 type filesystemStorage struct {
 	log           *logrus.Entry
 	baseDirectory string
@@ -31,10 +33,18 @@ func NewFilesystemStorage(
 	// The base directory path must also exist and be accessible.
 	stat, err := os.Stat(baseDirectory)
 	if err != nil {
-		return nil, errors.Wrap(err, "must provide a valid base directory for filesystem storage")
+		// If the directory does not exist
+		if os.IsNotExist(err) {
+			// Then create it using the same permissions we would use for the files.
+			if err := os.MkdirAll(baseDirectory, filesystemPermissions); err != nil {
+				return nil, errors.Wrap(err, "failed to create storage directory")
+			}
+		} else {
+			return nil, errors.Wrap(err, "must provide a valid base directory for filesystem storage")
+		}
 	}
 	// If the path exists and is not a directory then that's a problem.
-	if !stat.IsDir() {
+	if stat != nil && !stat.IsDir() {
 		return nil, errors.New("filesystem base directory specified is not a directory, it is a file")
 	}
 
@@ -110,7 +120,7 @@ func (f *filesystemStorage) Read(
 		return nil, "", errors.Wrap(err, "failed to determine content type")
 	}
 
-	file, err := os.OpenFile(filePath, os.O_RDONLY, 0755)
+	file, err := os.OpenFile(filePath, os.O_RDONLY, filesystemPermissions)
 	if err != nil {
 		return nil, "", errors.Wrap(err, "failed to open file")
 	}

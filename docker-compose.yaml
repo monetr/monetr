@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   postgres:
     image: postgres:17
@@ -55,21 +54,24 @@ services:
       # Contains certificates generated on startup as well as config
       - monetrData:/etc/monetr
     environment:
+      # After creating your own user, it is recommended to disable sign ups if
+      # your monetr instance is exposed to the public internet. Otherwise
+      # strangers may be able to use your instance themselves.
+      MONETR_ALLOW_SIGN_UP: ${MONETR_ALLOW_SIGN_UP:-true}
       MONETR_PG_USERNAME: postgres
       MONETR_PG_PASSWORD: superSecretPasswordPleaseChangeMe
       MONETR_PG_DATABASE: monetr
       MONETR_PG_ADDRESS: postgres
       MONETR_REDIS_ENABLED: "true"
       MONETR_REDIS_ADDRESS: redis
-      MONETR_EXTERNAL_PROTOCOL: ${MONETR_EXTERNAL_PROTOCOL:-http}
-      MONETR_UI_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-localhost:4000}
-      MONETR_API_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-localhost:4000}
       MONETR_PLAID_CLIENT_ID: ${MONETR_PLAID_CLIENT_ID}
       MONETR_PLAID_CLIENT_SECRET: ${MONETR_PLAID_CLIENT_SECRET}
       MONETR_PLAID_ENVIRONMENT: ${MONETR_PLAID_ENVIRONMENT}
       MONETR_SENTRY_DSN: ${MONETR_SENTRY_DSN}
       MONETR_SENTRY_EXTERNAL_DSN: ${MONETR_SENTRY_EXTERNAL_DSN:-${MONETR_SENTRY_DSN}}
-      MONETR_JWT_LOGIN_SECRET: "pleaseAlsoChangeMe"
+      MONETR_SERVER_EXTERNAL_URL: ${MONETR_SERVER_EXTERNAL_URL:-http://localhost:4000}
+      MONETR_STORAGE_ENABLED: ${MONETR_STORAGE_ENABLED:-true}
+      MONETR_STORAGE_PROVIDER: ${MONETR_STORAGE_PROVIDER:-filesystem}
 
 volumes:
   monetrData:

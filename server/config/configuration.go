@@ -370,6 +370,9 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.ListenAddress", "0.0.0.0")
 	v.SetDefault("Server.StatsPort", 9000)
 	v.SetDefault("Server.UICacheHours", 14*24)
+	v.SetDefault("Storage.Enabled", false)
+	v.SetDefault("Storage.Provider", "filesystem")
+	v.SetDefault("Storage.Filesystem.BasePath", "/etc/monetr/storage")
 	v.SetDefault("Stripe.FreeTrialDays", 30)
 }
 

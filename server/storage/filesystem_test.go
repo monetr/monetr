@@ -5,7 +5,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/monetr/monetr/server/internal/testutils"
@@ -61,11 +63,16 @@ func TestFilesystemStorage(t *testing.T) {
 	})
 
 	t.Run("non-existant base directory", func(t *testing.T) {
+		tempDir, err := os.MkdirTemp("", "monetr")
+		require.NoError(t, err, "must create temp directory")
 		log := testutils.GetLog(t)
 
-		fs, err := NewFilesystemStorage(log, "/foo/bar")
-		assert.EqualError(t, err, "must provide a valid base directory for filesystem storage: stat /foo/bar: no such file or directory")
-		assert.Nil(t, fs, "filesystem interface should not be returned if path is invalid")
+		// Add something onto the end of the temp dir path so that we know it does
+		// not already exist.
+		fsPath := path.Join(tempDir, "storage")
+		fs, err := NewFilesystemStorage(log, fsPath)
+		assert.NoError(t, err, "no error should be returne for a non-existant path")
+		assert.NotNil(t, fs, "fs interface should be returned if we made a directory")
 	})
 
 	t.Run("base directory is actually a file", func(t *testing.T) {
@@ -80,5 +87,32 @@ func TestFilesystemStorage(t *testing.T) {
 		fs, err := NewFilesystemStorage(log, tempFile.Name())
 		assert.EqualError(t, err, "filesystem base directory specified is not a directory, it is a file")
 		assert.Nil(t, fs, "filesystem interface should not be returned if path is invalid")
+	})
+}
+
+func TestFilesystemStorageStore(t *testing.T) {
+	t.Run("store file", func(t *testing.T) {
+		buf := &bufferWrapper{bytes.NewReader([]byte("I am the contents of a file"))}
+		tempDir, err := os.MkdirTemp("", "monetr")
+		require.NoError(t, err, "must create temp directory")
+		log := testutils.GetLog(t)
+
+		fs, err := NewFilesystemStorage(log, tempDir)
+		assert.NoError(t, err, "must not have an error creating the filesystem storage interface")
+
+		uri, err := fs.Store(context.Background(), buf, FileInfo{
+			Name:        "Test file.csv",
+			Kind:        "transaction/uploads",
+			AccountId:   "acct_01jcvdac6dzbrzm1ht90zyt65r",
+			ContentType: TextCSVContentType,
+		})
+		assert.NoError(t, err, "should be able to store file successfully")
+		assert.NotEmpty(t, uri, "URI returned should not be blank")
+
+		parsed, err := url.Parse(uri)
+		assert.NoError(t, err, "store must return a valid URI")
+		assert.Equal(t, "file", parsed.Scheme, "URI scheme should be file")
+		assert.Empty(t, parsed.Host, "URI host should be empty for filesystem")
+		assert.NotEmpty(t, parsed.Path, "URI path should not be empty")
 	})
 }
