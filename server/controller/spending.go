@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/internal/myownsanity"
@@ -64,8 +63,14 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 
 	spending.SpendingId = "" // Make sure we create a new spending.
 	spending.BankAccountId = bankAccountId
-	spending.Name = strings.TrimSpace(spending.Name)
-	spending.Description = strings.TrimSpace(spending.Description)
+	spending.Name, err = c.cleanString(ctx, "Name", spending.Name)
+	if err != nil {
+		return err
+	}
+	spending.Description, err = c.cleanString(ctx, "Description", spending.Description)
+	if err != nil {
+		return err
+	}
 
 	if spending.Name == "" {
 		return c.badRequest(ctx, "spending must have a name")
@@ -141,19 +146,17 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, spending)
 }
 
-type SpendingTransfer struct {
-	FromSpendingId *ID[Spending] `json:"fromSpendingId"`
-	ToSpendingId   *ID[Spending] `json:"toSpendingId"`
-	Amount         int64         `json:"amount"`
-}
-
 func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	transfer := &SpendingTransfer{}
+	var transfer struct {
+		FromSpendingId *ID[Spending] `json:"fromSpendingId"`
+		ToSpendingId   *ID[Spending] `json:"toSpendingId"`
+		Amount         int64         `json:"amount"`
+	}
 	if err := ctx.Bind(transfer); err != nil {
 		return c.invalidJson(ctx)
 	}
@@ -169,12 +172,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	balances, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
-	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to get balances for transfer")
-	}
-
-	spendingToUpdate := make([]Spending, 0)
+	spendingToUpdate := make([]Spending, 0, 2)
 
 	account, err := c.Accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
@@ -183,9 +181,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 
 	var fundingSchedule *FundingSchedule
 
-	if transfer.FromSpendingId == nil && balances.Free < transfer.Amount {
-		return c.badRequest(ctx, "cannot transfer more than is available in safe to spend")
-	} else if transfer.FromSpendingId != nil {
+	if transfer.FromSpendingId != nil {
 		fromExpense, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transfer.FromSpendingId)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "failed to retrieve source expense for transfer")
@@ -214,18 +210,28 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 		spendingToUpdate = append(spendingToUpdate, *fromExpense)
 	}
 
-	// If we are transferring the allocated funds to another spending object then we need to update that object. If we
-	// are transferring it back to "Safe to spend" then we can just subtract the allocation from the source.
+	// If we are transferring the allocated funds to another spending object then
+	// we need to update that object. If we are transferring it back to "Safe to
+	// spend" then we can just subtract the allocation from the source.
 	if transfer.ToSpendingId != nil {
-		toExpense, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transfer.ToSpendingId)
+		toExpense, err := repo.GetSpendingById(
+			c.getContext(ctx),
+			bankAccountId,
+			*transfer.ToSpendingId,
+		)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "failed to get destination goal/expense for transfer")
 		}
 
-		// If the funding schedule that we already have put aside is not the same as the one we need for this spending
-		// then we need to retrieve the proper one.
+		// If the funding schedule that we already have put aside is not the same as
+		// the one we need for this spending then we need to retrieve the proper
+		// one.
 		if fundingSchedule == nil || fundingSchedule.FundingScheduleId != toExpense.FundingScheduleId {
-			fundingSchedule, err = repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, toExpense.FundingScheduleId)
+			fundingSchedule, err = repo.GetFundingSchedule(
+				c.getContext(ctx),
+				bankAccountId,
+				toExpense.FundingScheduleId,
+			)
 			if err != nil {
 				return c.wrapPgError(ctx, err, "failed to retrieve funding schedule for destination goal/expense")
 			}
@@ -277,6 +283,14 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 	}
 	updatedSpending.SpendingId = spendingId
 	updatedSpending.BankAccountId = bankAccountId
+	updatedSpending.Name, err = c.cleanString(ctx, "Name", updatedSpending.Name)
+	if err != nil {
+		return err
+	}
+	updatedSpending.Description, err = c.cleanString(ctx, "Description", updatedSpending.Description)
+	if err != nil {
+		return err
+	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
@@ -344,7 +358,11 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 			return c.wrapPgError(ctx, err, "failed to retrieve account details")
 		}
 
-		fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, updatedSpending.FundingScheduleId)
+		fundingSchedule, err := repo.GetFundingSchedule(
+			c.getContext(ctx),
+			bankAccountId,
+			updatedSpending.FundingScheduleId,
+		)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "failed to retrieve funding schedule")
 		}
