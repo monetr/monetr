@@ -45,7 +45,7 @@ require (
 	golang.org/x/crypto v0.29.0
 	google.golang.org/api v0.206.0
 	google.golang.org/genproto v0.0.0-20241104194629-dd2ea8efbc28
-	google.golang.org/protobuf v1.35.1
+	google.golang.org/protobuf v1.35.2
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
 
