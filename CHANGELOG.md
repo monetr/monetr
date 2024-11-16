@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.18.27](https://github.com/monetr/monetr/compare/v0.18.26...v0.18.27) (2024-11-16)
+
+
+### Features
+
+* **api:** Added sensible limits to more string fields on spending ([13a4734](https://github.com/monetr/monetr/commit/13a4734c690543e4626b46c083c0d6b661bb03de))
+* Improving bank account endpoints + interface tests ([6b4e7d7](https://github.com/monetr/monetr/commit/6b4e7d762ccdcd54af3c19ab6decb5a8c8376cae))
+* **spending:** Allow free-to-use to be overuser for budgets ([236e6be](https://github.com/monetr/monetr/commit/236e6be52d648bb40e06d1bb1e1b53f538a6586e)), closes [#2161](https://github.com/monetr/monetr/issues/2161)
+
+
+### Dependencies
+
+* **containers:** update redis docker tag to v6.2.16 ([#1275](https://github.com/monetr/monetr/issues/1275)) ([2ab28f7](https://github.com/monetr/monetr/commit/2ab28f7f1105989209d279f6474da739c755c09a))
+* **ui:** update dependency @radix-ui/react-tooltip to v1.1.4 ([#2165](https://github.com/monetr/monetr/issues/2165)) ([9711bc8](https://github.com/monetr/monetr/commit/9711bc8b3357022ecce822a0bbe04af37e01b876))
+* **ui:** update dependency @testing-library/jest-dom to v6.6.3 ([#2046](https://github.com/monetr/monetr/issues/2046)) ([b7fe642](https://github.com/monetr/monetr/commit/b7fe6423bcc1893cd1c21b1f876ed5af1fe4adca))
+* **ui:** update rsbuild ([#2169](https://github.com/monetr/monetr/issues/2169)) ([7457d7d](https://github.com/monetr/monetr/commit/7457d7dcc05010497a7baa29c80f9aa88c654772))
+* **ui:** update sass to v1.81.0 ([#2170](https://github.com/monetr/monetr/issues/2170)) ([2dfe3de](https://github.com/monetr/monetr/commit/2dfe3dee7cc37849e927db22627159e5bf463da1))
+* **ui:** update sentry-javascript monorepo to v8.38.0 ([#2166](https://github.com/monetr/monetr/issues/2166)) ([81ce86a](https://github.com/monetr/monetr/commit/81ce86a16022b4d816b520caded8ee3d1380c762))
+
+
+### Bug Fixes
+
+* **api:** Fixed transfer API not working ([b2ff432](https://github.com/monetr/monetr/commit/b2ff4322616aafb76b3241ad3445e306387600f1)), closes [#2171](https://github.com/monetr/monetr/issues/2171)
+* **calc:** Fixed assembly vet warnings ([d4af444](https://github.com/monetr/monetr/commit/d4af44426f004d1ee7d6ab936e00d31450d279cc))
+* **cli:** Cleaning up jobs command ([a258cf5](https://github.com/monetr/monetr/commit/a258cf57439ba38e881941709271cbe49c68ca08))
+* **ui:** Move upload modal buttons to new component ([487285c](https://github.com/monetr/monetr/commit/487285c252a21dc397a9aac83b9e9adbf6cc0913))
+
+
+### Miscellaneous
+
+* **deps:** Updating renovate config ([b2cf42a](https://github.com/monetr/monetr/commit/b2cf42ac9cd2a23a2c381380b09bd7d825718bb9))
+* **server:** Go formatting ([085d7f7](https://github.com/monetr/monetr/commit/085d7f707742ca5336fd1cdb1561616f471c2c43))
+
 ## [0.18.26](https://github.com/monetr/monetr/compare/v0.18.25...v0.18.26) (2024-11-15)
 
 
