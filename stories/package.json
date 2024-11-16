@@ -30,9 +30,9 @@
     "@rspack/binding-linux-x64-gnu": "1.1.1",
     "autoprefixer": "10.4.20",
     "postcss": "8.4.48",
-    "sass": "1.80.6",
-    "sass-embedded-linux-arm64": "1.80.6",
-    "sass-embedded-linux-x64": "1.80.6",
+    "sass": "1.81.0",
+    "sass-embedded-linux-arm64": "1.81.0",
+    "sass-embedded-linux-x64": "1.81.0",
     "storybook-react-rsbuild": "0.1.4"
   }
 }
