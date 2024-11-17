@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.18.29](https://github.com/monetr/monetr/compare/v0.18.28...v0.18.29) (2024-11-17)
+
+
+### Features
+
+* **ui:** More UI improvements around old components ([ad08c6f](https://github.com/monetr/monetr/commit/ad08c6f6771a8db10aeee22533cf3998e67e9793))
+* **ui:** Revamping manual link setup flow ([a936492](https://github.com/monetr/monetr/commit/a936492d0465cc7d8d497ca18de0a4203cd7661a))
+* Use latest container instead of building for self hosted ([1857a54](https://github.com/monetr/monetr/commit/1857a54eb12a644d90164b03c69b0343e098d67c))
+
+
+### Dependencies
+
+* **api:** update module cloud.google.com/go/storage to v1.47.0 ([#2176](https://github.com/monetr/monetr/issues/2176)) ([a8e18e7](https://github.com/monetr/monetr/commit/a8e18e76870a6b91d2b327dcc2b5acb3e472cd7a))
+* **api:** update module google.golang.org/api to v0.206.0 ([#2177](https://github.com/monetr/monetr/issues/2177)) ([7c1dc14](https://github.com/monetr/monetr/commit/7c1dc141e4de03f389b68380862423d433c1cfbd))
+* **ui:** update dependency react-dropzone to v14.3.5 ([#2101](https://github.com/monetr/monetr/issues/2101)) ([3cf2a16](https://github.com/monetr/monetr/commit/3cf2a16ea570fe896f8ae6b023e2800035420365))
+* **ui:** update storybook monorepo to v8.4.4 ([#2174](https://github.com/monetr/monetr/issues/2174)) ([c3a9f00](https://github.com/monetr/monetr/commit/c3a9f00e2c318f1563fb1cdb89da9cdffe45a7af))
+
+
+### Bug Fixes
+
+* **ui:** Fixed tab order in some modals, fixed autofocus. ([6f8cb6a](https://github.com/monetr/monetr/commit/6f8cb6a6b1a0439d9e89e7339b91607c281084e3))
+* **ui:** Trying to fix keyboard avoiding view ([a228759](https://github.com/monetr/monetr/commit/a22875971bf64d76a8a89a5cc98c4cbaf5692be9))
+
 ## [0.18.28](https://github.com/monetr/monetr/compare/v0.18.27...v0.18.28) (2024-11-16)
 
 
