@@ -105,12 +105,13 @@ function NewTransactionModal(): JSX.Element {
                 </TabsList>
                 <TabsContent value='debit'>
                   <MTextField
-                    name='name'
-                    label='Name / Description'
-                    required
                     autoComplete='off'
-                    placeholder='Amazon, Netflix...'
+                    autoFocus
                     data-1p-ignore 
+                    label='Name / Description'
+                    name='name'
+                    placeholder='Amazon, Netflix...'
+                    required
                   />
                   <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
                     <MAmountField

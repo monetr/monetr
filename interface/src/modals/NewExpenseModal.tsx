@@ -86,6 +86,7 @@ function NewExpenseModal(): JSX.Element {
             name='name'
             label='What are you budgeting for?'
             required
+            autoFocus
             autoComplete='off'
             placeholder='Amazon, Netflix...'
           />

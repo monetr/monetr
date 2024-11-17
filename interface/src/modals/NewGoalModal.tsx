@@ -82,6 +82,7 @@ function NewGoalModal(): JSX.Element {
             name='name'
             label='What are you budgeting for?'
             required
+            autoFocus
             autoComplete='off'
             placeholder='Vacation, Furniture, Car...'
           />

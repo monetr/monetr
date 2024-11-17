@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/compo
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MDatePickerProps extends
-  Omit<React.HTMLAttributes<HTMLDivElement>, 'value' | 'defaultValue'>
+  Omit<React.HTMLAttributes<HTMLButtonElement>, 'value' | 'defaultValue'>
 {
   value?: Date;
   min?: Date;
