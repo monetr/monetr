@@ -1,0 +1,51 @@
+import React from 'react';
+import { FormikHelpers } from 'formik';
+
+import MForm from '@monetr/interface/components/MForm';
+import MSpan from '@monetr/interface/components/MSpan';
+import MTextField from '@monetr/interface/components/MTextField';
+import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
+import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
+import { useViewContext } from '@monetr/interface/components/ViewManager';
+
+interface Values {
+  budgetName: string;
+}
+
+export default function ManualLinkSetupIntroName(): JSX.Element {
+  const viewContext = useViewContext<ManualLinkSetupSteps, {}>();
+  const initialValues: Values = {
+    budgetName: '',
+    ...viewContext.formData,
+  };
+
+  function submit(values: Values, helpers: FormikHelpers<Values>) {
+    helpers.setSubmitting(true);
+    viewContext.updateFormData(values);
+    viewContext.goToView(ManualLinkSetupSteps.AccountName);
+  }
+
+  return (
+    <MForm
+      initialValues={ initialValues }
+      onSubmit={ submit }
+      className='w-full flex flex-col justify-center items-center gap-2'
+    >
+      <MSpan size='2xl' weight='medium'>
+        Welcome to monetr!
+      </MSpan>
+      <MSpan size='lg' color='subtle' className='text-center'>
+        Let's create a new budget to get started. What do you want to call this budget?
+      </MSpan>
+      <MTextField
+        name='budgetName'
+        label='Bank or Budget Name'
+        className='w-full'
+        placeholder='My Primary Bank'
+        autoFocus
+        required
+      />
+      <ManualLinkSetupButtons />
+    </MForm>
+  );
+}

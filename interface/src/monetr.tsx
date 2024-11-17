@@ -21,6 +21,7 @@ import FundingDetails from '@monetr/interface/pages/funding/details';
 import Goals from '@monetr/interface/pages/goals';
 import GoalDetails from '@monetr/interface/pages/goals/details';
 import LinkCreatePage from '@monetr/interface/pages/link/create';
+import CreateManualLinkPage from '@monetr/interface/pages/link/create/manual';
 import Login from '@monetr/interface/pages/login';
 import MultifactorAuthenticationPage from '@monetr/interface/pages/login/multifactor';
 import LogoutPage from '@monetr/interface/pages/logout';
@@ -33,7 +34,7 @@ import SettingsBilling from '@monetr/interface/pages/settings/billing';
 import SettingsOverview from '@monetr/interface/pages/settings/overview';
 import SettingsSecurity from '@monetr/interface/pages/settings/security';
 import SetupPage from '@monetr/interface/pages/setup';
-import SetupManual from '@monetr/interface/pages/setup/manual';
+import SetupManualLinkPage from '@monetr/interface/pages/setup/manual';
 import SubscriptionPage from '@monetr/interface/pages/subscription';
 import TransactionDetails from '@monetr/interface/pages/transaction/details';
 import Transactions from '@monetr/interface/pages/transactions';
@@ -109,7 +110,7 @@ export default function Monetr(): JSX.Element {
         <Route path='/logout' element={ <LogoutPage /> } />
         <Route path='/setup' element={ <SetupPage manualEnabled={ config?.manualEnabled } /> } />
         <Route path='/setup/plaid' element={ <PlaidSetup alreadyOnboarded /> } />
-        <Route path='/setup/manual' element={ <SetupManual /> } />
+        <Route path='/setup/manual' element={ <SetupManualLinkPage /> } />
         <Route path='/plaid/oauth-return' element={ <OauthReturn /> } />
         <Route path='/account/subscribe/after' element={ <Navigate replace to='/setup' /> } />
         <Route index path='*' element={ <Navigate replace to='/setup' /> } />
@@ -143,7 +144,7 @@ export default function Monetr(): JSX.Element {
           </Route>
           <Route path='/link/create' element={ <LinkCreatePage /> } />
           <Route path='/link/create/plaid' element={ <PlaidSetup alreadyOnboarded /> } />
-          <Route path='/link/create/manual' element={ <SetupManual alreadyOnboarded /> } />
+          <Route path='/link/create/manual' element={ <CreateManualLinkPage /> } />
           <Route path='/logout' element={ <LogoutPage /> } />
           <Route path='/plaid/oauth-return' element={ <OauthReturn /> } />
           <Route path='/subscription' element={ <SubscriptionPage /> } />

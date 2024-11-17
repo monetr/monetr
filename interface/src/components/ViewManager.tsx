@@ -1,10 +1,11 @@
-import React, { type ComponentType, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+// eslint-disable-next-line max-len
+import React, { type ComponentType, createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
 import { usePrevious } from '@monetr/interface/hooks/usePrevious';
 
 type ViewComponent = ComponentType<any>;
 
-interface ViewContextType<T extends string, M extends Record<string, any>> {
+export interface ViewContextType<T extends string, M extends Record<string, any>> {
   currentView: T;
   formData: Record<string, any>;
   metadata: M;
@@ -31,20 +32,21 @@ interface ViewManagerProps<T extends string, M extends Record<string, any>> {
   viewComponents: Record<T, ViewComponent>;
   initialView: T;
   initialMetadata?: M;
+  // Layout is an optional wrapper component that can accept the view context as a property.
+  layout?: React.FC<{
+    children: ReactNode | undefined,
+  }>;
 }
 
 function ViewManager<T extends string, M extends Record<string, any>>({
   viewComponents,
   initialView,
   initialMetadata = {} as M,
+  layout = null,
 }: ViewManagerProps<T, M>) {
   const [currentView, setCurrentView] = useState<T>(initialView);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [metadata, setMetadata] = useState<M>(initialMetadata);
-
-  useEffect(() => {
-    setMetadata(initialMetadata);
-  }, [initialMetadata]);
 
   const viewOrder = useMemo(() => Object.keys(viewComponents) as T[], [viewComponents]);
 
@@ -98,6 +100,17 @@ function ViewManager<T extends string, M extends Record<string, any>>({
   );
 
   const CurrentViewComponent: ViewComponent = viewComponents[currentView];
+
+  if (layout) {
+    const Layout = layout;
+    return (
+      <ViewContext.Provider value={ value }>
+        <Layout>
+          <CurrentViewComponent />
+        </Layout>
+      </ViewContext.Provider>
+    );
+  }
 
   return (
     <ViewContext.Provider value={ value }>
