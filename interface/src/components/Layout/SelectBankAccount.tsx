@@ -49,7 +49,7 @@ export default function SelectBankAccount(): JSX.Element {
       value={ current?.value }
       placeholder='Select a bank account...'
       searchPlaceholder='Search for an account...'
-      showSearch
+      showSearch={ false }
       onSelect={ value => navigate(`/bank/${value}/transactions`) } 
       components={ {
         Item: BankAccountSelectItem,
