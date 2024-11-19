@@ -1,7 +1,9 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { HeartBroken, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
+import { AxiosError } from 'axios';
 import { FormikHelpers } from 'formik';
+import { useSnackbar } from 'notistack';
 
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MFormButton from '@monetr/interface/components/MButton';
@@ -18,6 +20,7 @@ import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/tr
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Transaction from '@monetr/interface/models/Transaction';
 import { amountToFriendly } from '@monetr/interface/util/amounts';
+import { APIError } from '@monetr/interface/util/request';
 
 interface TransactionValues {
   name: string;
@@ -29,6 +32,7 @@ interface TransactionValues {
 }
 
 export default function TransactionDetails(): JSX.Element {
+  const { enqueueSnackbar } = useSnackbar();
   const user = useAuthentication();
   const { transactionId: id } = useParams();
   const updateTransaction = useUpdateTransaction();
@@ -82,6 +86,20 @@ export default function TransactionDetails(): JSX.Element {
 
     helpers.setSubmitting(true);
     return updateTransaction(updatedTransaction)
+      .then(() => enqueueSnackbar(
+        'Updated transaction successfully',
+        {
+          variant: 'success',
+          disableWindowBlurListener: true,
+        },
+      ))
+      .catch((error: AxiosError<APIError>) => enqueueSnackbar(
+        error?.response?.data?.error || 'Failed to update transaction',
+        {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        },
+      ))
       .finally(() => helpers.setSubmitting(false));
   }
 

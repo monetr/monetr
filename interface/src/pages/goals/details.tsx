@@ -134,13 +134,20 @@ export default function GoalDetails(): JSX.Element {
     });
 
     return updateSpending(updatedSpending)
-      .catch((error: AxiosError<APIError>) => {
-        const message = error.response.data.error || 'Failed to update expense.';
-        enqueueSnackbar(message, {
+      .then(() => void enqueueSnackbar(
+        'Updated goal successfully',
+        {
+          variant: 'success',
+          disableWindowBlurListener: true,
+        },
+      ))
+      .catch((error: AxiosError<APIError>) => void enqueueSnackbar(
+        error.response.data.error || 'Failed to update goal',
+        {
           variant: 'error',
           disableWindowBlurListener: true,
-        });
-      })
+        },
+      ))
       .finally(() => helpers.setSubmitting(false));
   }
 

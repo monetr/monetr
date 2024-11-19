@@ -84,13 +84,20 @@ export default function FundingDetails(): JSX.Element {
     });
 
     return updateFundingSchedule(updatedFunding)
-      .catch((error: AxiosError<APIError>) => {
-        const message = error.response.data.error || 'Failed to update funding schedule.';
-        enqueueSnackbar(message, {
+      .then(() => void enqueueSnackbar(
+        'Updated funding schedule successfully',
+        {
+          variant: 'success',
+          disableWindowBlurListener: true,
+        },
+      ))
+      .catch((error: AxiosError<APIError>) => void enqueueSnackbar(
+        error.response.data.error || 'Failed to update funding schedule',
+        {
           variant: 'error',
           disableWindowBlurListener: true,
-        });
-      })
+        },
+      ))
       .finally(() => helpers.setSubmitting(false));
   }
 
