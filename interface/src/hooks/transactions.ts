@@ -165,7 +165,6 @@ export function useCreateTransaction(): (_: CreateTransactionRequest) => Promise
     createTransaction,
     {
       onSuccess: (response: CreateTransactionResponse) => Promise.all([
-        // TODO this might not be how you invalidate an infinite query
         queryClient.invalidateQueries([`/bank_accounts/${ response.transaction.bankAccountId }/transactions`]),
         queryClient.setQueriesData(
           [`/bank_accounts/${response.transaction.bankAccountId}/spending`],

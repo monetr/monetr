@@ -1,12 +1,13 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { HeartBroken, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
+import { HeartBroken, ShoppingCartOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { FormikHelpers } from 'formik';
+import { Save } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
+import { Button } from '@monetr/interface/components/Button';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MFormButton from '@monetr/interface/components/MButton';
 import MCheckbox from '@monetr/interface/components/MCheckbox';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
@@ -16,6 +17,7 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
+import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Transaction from '@monetr/interface/models/Transaction';
@@ -32,6 +34,7 @@ interface TransactionValues {
 }
 
 export default function TransactionDetails(): JSX.Element {
+  const { data: link } = useCurrentLink();
   const { enqueueSnackbar } = useSnackbar();
   const user = useAuthentication();
   const { transactionId: id } = useParams();
@@ -125,10 +128,10 @@ export default function TransactionDetails(): JSX.Element {
         base={ `/bank/${transaction.bankAccountId}/transactions` }
         breadcrumb={ transaction?.name }
       >
-        <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit'>
-          <SaveOutlined />
-            Save Changes
-        </MFormButton>
+        <Button variant='primary' className='gap-1 py-1 px-2' type='submit'>
+          <Save />
+          Save Changes
+        </Button>
       </MTopNavigation>
       <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
@@ -160,7 +163,7 @@ export default function TransactionDetails(): JSX.Element {
               label='Date'
               name='date'
               className='w-full'
-              disabled
+              disabled={ !link.getIsManual() }
             />
             <MCheckbox
               id='transaction-details-pending'
@@ -169,7 +172,7 @@ export default function TransactionDetails(): JSX.Element {
               label='Is Pending'
               description='Transaction has not yet cleared, the name or amount may change.'
               className='w-full'
-              disabled
+              disabled={ !link.getIsManual() }
             />
             { !transaction.getIsAddition() && (
               <MSelectSpending

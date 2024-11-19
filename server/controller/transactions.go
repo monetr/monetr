@@ -269,15 +269,17 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 
 	transaction.PlaidTransactionId = existingTransaction.PlaidTransactionId
 	transaction.PendingPlaidTransactionId = existingTransaction.PendingPlaidTransactionId
+	transaction.OriginalName = existingTransaction.OriginalName
+	transaction.OriginalMerchantName = existingTransaction.OriginalMerchantName
 
 	if !isManual {
 		// Prevent the user from attempting to change a transaction's amount if we are on a plaid link.
 		if existingTransaction.Amount != transaction.Amount {
-			return c.badRequest(ctx, "cannot change transaction amount on non-manual links")
+			return c.badRequest(ctx, "Cannot change transaction amount on non-manual links")
 		}
 
 		if existingTransaction.IsPending != transaction.IsPending {
-			return c.badRequest(ctx, "cannot change transaction pending state on non-manual links")
+			return c.badRequest(ctx, "Cannot change transaction pending state on non-manual links")
 		}
 
 		if !existingTransaction.Date.Equal(transaction.Date) {
@@ -285,11 +287,8 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 				"existingDate": existingTransaction.Date,
 				"newDate":      transaction.Date,
 			}).Warn("cannot change transaction date on non-manual links")
-			return c.badRequest(ctx, "cannot change transaction date on non-manual links")
+			return c.badRequest(ctx, "Cannot change transaction date on non-manual links")
 		}
-
-		transaction.OriginalName = existingTransaction.OriginalName
-		transaction.OriginalMerchantName = existingTransaction.OriginalMerchantName
 	}
 
 	updatedExpenses, err := repo.ProcessTransactionSpentFrom(c.getContext(ctx), bankAccountId, &transaction, existingTransaction)
@@ -337,13 +336,16 @@ func (c *Controller) deleteTransactions(ctx echo.Context) error {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
+	isManual, err := repo.GetLinkIsManualByBankAccountId(
+		c.getContext(ctx),
+		bankAccountId,
+	)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to validate if link is manual")
 	}
 
 	if !isManual {
-		return c.returnError(ctx, http.StatusBadRequest, "cannot delete transactions for non-manual links")
+		return c.badRequest(ctx, "Cannot delete transactions for non-manual links")
 	}
 
 	return ctx.NoContent(http.StatusOK)
