@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.18.30](https://github.com/monetr/monetr/compare/v0.18.29...v0.18.30) (2024-11-21)
+
+
+### Features
+
+* **api:** Provide a source of a transaction. ([6092b1a](https://github.com/monetr/monetr/commit/6092b1ae984dda16b3afe205335c2d0ceb7a50ce))
+* **ui:** Allow more transaction modifications ([67fa96f](https://github.com/monetr/monetr/commit/67fa96ff6f82f2f0900fbecb3b02393e7a0a66cd))
+* **ui:** Improve feedback when saving changes ([9c38738](https://github.com/monetr/monetr/commit/9c3873876469af7e5b741846c088b8ed1f0265f8))
+
+
+### Dependencies
+
+* **ui:** update dependency @rsbuild/plugin-sass to v1.1.1 ([#2182](https://github.com/monetr/monetr/issues/2182)) ([92b3480](https://github.com/monetr/monetr/commit/92b3480ad5783900d1542bd44c0452d031e6833b))
+* **ui:** update rsbuild ([#2183](https://github.com/monetr/monetr/issues/2183)) ([16a55fc](https://github.com/monetr/monetr/commit/16a55fc2eb0820f75e899b59afae82e9dd9261c0))
+
+
+### Bug Fixes
+
+* **ui:** Fixing scaling on PWA ([8f82805](https://github.com/monetr/monetr/commit/8f82805091c849544733bbb92db34150de58cd70))
+* **ui:** Testing something to fix PWA scrolling ([11d3a08](https://github.com/monetr/monetr/commit/11d3a08753b1c9306329917aa057fc1b962ae78a))
+
+
+### Miscellaneous
+
+* **api:** Removing unused code ([a642ea0](https://github.com/monetr/monetr/commit/a642ea0a72e2d748a4e8bf326f10df8a793300e2))
+
 ## [0.18.29](https://github.com/monetr/monetr/compare/v0.18.28...v0.18.29) (2024-11-17)
 
 
