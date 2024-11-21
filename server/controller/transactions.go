@@ -16,8 +16,6 @@ func (c *Controller) getTransactions(ctx echo.Context) error {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	ctx.QueryParam("limit")
-
 	limit := urlParamIntDefault(ctx, "limit", 25)
 	offset := urlParamIntDefault(ctx, "offset", 0)
 
