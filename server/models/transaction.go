@@ -11,6 +11,14 @@ import (
 	"github.com/pkg/errors"
 )
 
+type TransactionSource string
+
+const (
+	TransactionSourcePlaid  TransactionSource = "plaid"
+	TransactionSourceUpload TransactionSource = "upload"
+	TransactionSourceManual TransactionSource = "manual"
+)
+
 type Transaction struct {
 	tableName string `pg:"transactions"`
 
@@ -30,19 +38,20 @@ type Transaction struct {
 	// spent from. This is used when a transaction is more than the expense
 	// currently has allocated. If the transaction were to be deleted or changed
 	// we want to make sure we return the correct amount to the expense.
-	SpendingAmount       *int64     `json:"spendingAmount,omitempty" pg:"spending_amount,use_zero"`
-	Categories           []string   `json:"categories" pg:"categories,type:'text[]'"`
-	Category             *string    `json:"category" pg:"category"`
-	Date                 time.Time  `json:"date" pg:"date,notnull"`
-	Name                 string     `json:"name,omitempty" pg:"name"`
-	OriginalName         string     `json:"originalName" pg:"original_name,notnull"`
-	MerchantName         string     `json:"merchantName,omitempty" pg:"merchant_name"`
-	OriginalMerchantName string     `json:"originalMerchantName" pg:"original_merchant_name"`
-	Currency             string     `json:"currency" pg:"currency,notnull"`
-	IsPending            bool       `json:"isPending" pg:"is_pending,notnull,use_zero"`
-	UploadIdentifier     *string    `json:"uploadIdentifier" pg:"upload_identifier"`
-	CreatedAt            time.Time  `json:"createdAt" pg:"created_at,notnull,default:now()"`
-	DeletedAt            *time.Time `json:"deletedAt" pg:"deleted_at"`
+	SpendingAmount       *int64            `json:"spendingAmount,omitempty" pg:"spending_amount,use_zero"`
+	Categories           []string          `json:"categories" pg:"categories,type:'text[]'"`
+	Category             *string           `json:"category" pg:"category"`
+	Date                 time.Time         `json:"date" pg:"date,notnull"`
+	Name                 string            `json:"name,omitempty" pg:"name"`
+	OriginalName         string            `json:"originalName" pg:"original_name,notnull"`
+	MerchantName         string            `json:"merchantName,omitempty" pg:"merchant_name"`
+	OriginalMerchantName string            `json:"originalMerchantName" pg:"original_merchant_name"`
+	Currency             string            `json:"currency" pg:"currency,notnull"`
+	IsPending            bool              `json:"isPending" pg:"is_pending,notnull,use_zero"`
+	UploadIdentifier     *string           `json:"uploadIdentifier" pg:"upload_identifier"`
+	Source               TransactionSource `json:"source" pg:"source"`
+	CreatedAt            time.Time         `json:"createdAt" pg:"created_at,notnull,default:now()"`
+	DeletedAt            *time.Time        `json:"deletedAt" pg:"deleted_at"`
 }
 
 func (Transaction) IdentityPrefix() string {

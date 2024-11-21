@@ -122,6 +122,7 @@ func TestCountPendingTransactions(t *testing.T) {
 			MerchantName:         company,
 			OriginalMerchantName: company,
 			IsPending:            true,
+			Source:               models.TransactionSourceManual,
 			CreatedAt:            clock.Now(),
 		}
 

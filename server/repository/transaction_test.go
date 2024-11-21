@@ -64,6 +64,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			MerchantName:         "Wendy's",
 			OriginalMerchantName: "Wendy's",
 			IsPending:            false,
+			Source:               models.TransactionSourcePlaid,
 			CreatedAt:            clock.Now(),
 		}
 
@@ -150,6 +151,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			MerchantName:         "Wendy's",
 			OriginalMerchantName: "Wendy's",
 			IsPending:            false,
+			Source:               models.TransactionSourcePlaid,
 			CreatedAt:            clock.Now(),
 		}
 

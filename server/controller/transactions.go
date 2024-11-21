@@ -137,6 +137,7 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 	request.Category = nil
 	// TODO Allow this to be customized
 	request.Currency = "USD"
+	request.Source = TransactionSourceManual
 
 	if request.Name == "" {
 		return c.badRequest(ctx, "Transaction must have a name")

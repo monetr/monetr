@@ -448,6 +448,7 @@ func (j *ProcessQFXUploadJob) syncTransactions(ctx context.Context) error {
 				Currency:             "USD", // TODO Derive from file
 				IsPending:            false, // QFX files don't show pending?
 				UploadIdentifier:     &uploadIdentifier,
+				Source:               TransactionSourceUpload,
 			}
 			transactionsToCreate = append(transactionsToCreate, transaction)
 			continue

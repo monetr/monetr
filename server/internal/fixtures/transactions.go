@@ -61,6 +61,7 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount BankAc
 		name, company := GivenIHaveATransactionName(t, clock)
 		amount := int64(gofakeit.Number(100, 10000))
 
+		var source TransactionSource = TransactionSourceUpload
 		var plaidTransaction *PlaidTransaction
 		if plaidBankAccount := bankAccount.PlaidBankAccount; plaidBankAccount != nil {
 			plaidTransaction = &PlaidTransaction{
@@ -79,6 +80,7 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount BankAc
 				CreatedAt:          clock.Now().UTC(),
 				DeletedAt:          nil,
 			}
+			source = TransactionSourcePlaid
 
 			require.NoError(
 				t,
@@ -104,6 +106,7 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount BankAc
 			MerchantName:              company,
 			OriginalMerchantName:      company,
 			IsPending:                 false,
+			Source:                    source,
 			CreatedAt:                 clock.Now(),
 		}
 		if plaidTransaction != nil {
