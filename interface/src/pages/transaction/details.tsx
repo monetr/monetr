@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { HeartBroken, ShoppingCartOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
+import { startOfDay } from 'date-fns';
 import { FormikHelpers } from 'formik';
 import { Save } from 'lucide-react';
 import { useSnackbar } from 'notistack';
@@ -21,7 +22,7 @@ import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Transaction from '@monetr/interface/models/Transaction';
-import { amountToFriendly } from '@monetr/interface/util/amounts';
+import { amountToFriendly, friendlyToAmount } from '@monetr/interface/util/amounts';
 import { APIError } from '@monetr/interface/util/request';
 
 interface TransactionValues {
@@ -85,6 +86,9 @@ export default function TransactionDetails(): JSX.Element {
       ...transaction,
       name: values.name,
       spendingId: values.spendingId,
+      amount: friendlyToAmount(values.amount),
+      date: startOfDay(values.date),
+      isPending: values.isPending,
     });
 
     helpers.setSubmitting(true);
