@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.31](https://github.com/monetr/monetr/compare/v0.18.30...v0.18.31) (2024-11-21)
+
+
+### Bug Fixes
+
+* **ui:** Send transaction changes when saving details ([0276787](https://github.com/monetr/monetr/commit/027678787447688b13e5099b308a46ab9263b4f1))
+
 ## [0.18.30](https://github.com/monetr/monetr/compare/v0.18.29...v0.18.30) (2024-11-21)
 
 
