@@ -1,0 +1,115 @@
+import { Callout } from 'nextra/components'
+import { Steps } from 'nextra/components'
+
+# Docker
+
+Self-hosting monetr via Docker or a container is the easiest way to run monetr yourself. This guide does not cover how
+to install Docker itself; please follow [Docker's Installation Guide](https://docs.docker.com/engine/install/) to get it
+setup on your own computer.
+
+Container images are built for monetr with every tagged release and pushed to both
+[DockerHub](https://hub.docker.com/r/monetr/monetr) and [GitHub Container
+Registry](https://github.com/monetr/monetr/pkgs/container/monetr).
+
+Images from both registry's should be identical for the same image tag, so you can use whichever registry you prefer.
+
+## Image Tags
+
+Every release monetr will create two tags for the container image. The example `docker-compose.yaml` file defaults to
+using the `latest` tag for maintainability reasons, but it is recommended to use a pinned version and leverage tools to
+perform automatic updates. This makes it easier to rollback to a previous version if needed.
+
+### `latest` Tag
+
+The `latest` tag will always be the most recent tagged version of monetr. For example: `ghcr.io/monetr/monetr:latest`.
+
+### Versioned Tag
+
+There will always be a versioned tag such as `0.18.31`. For example `ghcr.io/monetr/monetr:0.18.31`. monetr's versions
+will generally have a `v` prefix (`v0.18.31`), but images will not have this prefix in their tag.
+
+## Docker Compose
+
+The easiest way to start monetr is to use the provided
+[`docker-compose.yaml`](https://github.com/monetr/monetr/blob/main/docker-compose.yaml) located in the project's root
+directory.
+
+<Steps>
+
+### Clone The Repository
+
+To get the compose file, first clone the monetr repository:
+
+```shell filename="Clone monetr"
+git clone https://github.com/monetr/monetr.git
+```
+
+### Start The Server
+
+To run monetr, execute the following command in your terminal from the root directory of monetr's repository.
+
+```shell filename="Start monetr"
+docker compose up -d
+```
+
+This will start the monetr server, as well as the database it needs and a redis server.
+
+### Open monetr
+
+Once monetr is finished starting, you should be able to access it in your browser via `http://localhost:4000`.
+
+</Steps>
+
+<Callout type="warning">
+  Sign ups are enabled by default from the `docker-compose.yaml` provided. If you are exposing your monetr instance to
+  the public internet; it is recommended you disable sign ups after you have created your own login.
+</Callout>
+
+## Updating Via Docker Compose
+
+If you are already running monetr and want to upgrade to a more recent version you can perform the following steps.
+
+Please make sure to review the release notes for monter before upgrading, as it will include any breaking changes you
+should be aware of.
+
+<Steps>
+
+### Update The Repository
+
+In your cloned monetr directory, run the following command to retrieve the latest changes.
+
+```shell filename="Retrieve changes"
+git pull --rebase
+```
+
+If you encounter a conflict while performing the pull, this means that some changes you may have made locally might
+cause problems with the latest version of monetr. Make sure to resolve these conflicts before moving onto the next step.
+
+### Stop The Containers
+
+You'll need to stop the containers running before upgrading to make sure there are not conflicts.
+
+```shell filename="Stop monetr"
+docker compose stop
+```
+
+### Pull New Images
+
+Once the containers have stopped you can run the following command to update the monetr image:
+
+```shell filename="Docker pull"
+docker compose pull
+```
+
+### Start monter Again
+
+Once the new images have been pulled onto your local machine you can restart the server via docker compose:
+
+```shell filename="Docker start"
+docker compose start
+```
+
+Things like database migrations are automatically run when using the provided compose file.
+
+</Steps>
+

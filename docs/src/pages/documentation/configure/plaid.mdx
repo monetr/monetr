@@ -1,0 +1,17 @@
+# Plaid Configuration
+
+This guide shows you how to configure Plaid for your self hosted monetr instance. This will require Plaid credentials
+which can be obtained by following the [Plaid Credentials Guide](../development/credentials#plaid).
+
+## Environment Variables
+
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable                        | Config File Field       |
+|---------------------------------|-------------------------|
+| `MONETR_PLAID_CLIENT_ID`        | `plaid.clientId`        |
+| `MONETR_PLAID_CLIENT_SECRET`    | `plaid.clientSecret`    |
+| `MONETR_PLAID_ENVIRONMENT`      | `plaid.environment`     |
+| `MONETR_PLAID_WEBHOOKS_ENABLED` | `plaid.webhooksEnabled` |
+| `MONETR_PLAID_WEBHOOKS_DOMAIN`  | `plaid.webhooksDomain`  |
+| `MONETR_PLAID_OAUTH_DOMAIN`     | `plaid.oauthDomain`     |

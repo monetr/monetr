@@ -33,3 +33,7 @@
 .monetr {
   border-radius: 1em !important;
 }
+
+p > img {
+  @apply rounded-md
+}

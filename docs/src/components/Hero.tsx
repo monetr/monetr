@@ -1,8 +1,8 @@
 import Image from 'next/image';
 
-import InterfaceExample from './InterfaceExample';
 import Particles from './Particles';
 import Logo from '@monetr/docs/assets/logo.svg';
+import TransactionsExampleFull from '@monetr/docs/components/TransactionsExampleFull';
 
 export default function Hero(): JSX.Element {
   return (
@@ -24,7 +24,8 @@ export default function Hero(): JSX.Element {
         </svg>
       </div>
       <Particles className='absolute inset-0 -z-10' />
-      <div className='m-view-height m-view-width flex flex-col py-8 mx-auto items-center justify-center'>
+
+      <div className='m-view-height m-view-width flex flex-col py-8 mx-auto items-center justify-center gap-8'>
         <div className='max-w-3xl flex flex-col'>
           <Image src={ Logo } alt='monetr logo' width={ 75 } height={ 75 } />
           <h1 className='text-5xl font-bold'>monetr</h1>
@@ -33,8 +34,7 @@ export default function Hero(): JSX.Element {
             focused on helping you plan and budget for recurring expenses, or future goals.
           </h2>
         </div>
-
-        <InterfaceExample />
+        <TransactionsExampleFull />
       </div>
     </div>
   );

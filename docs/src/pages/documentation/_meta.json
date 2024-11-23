@@ -1,11 +1,18 @@
 {
   "index": "Introduction",
-  "getting_started": "",
   "-- Help": {
     "type": "separator",
     "title": "Help"
   },
-  "use": "",
+  "use": "Using monetr",
+
+  "-- Installation": {
+    "type": "separator",
+    "title": "Installation"
+  },
+  "install": "",
+  "configure": "",
+
   "-- Contributing": {
     "type": "separator",
     "title": "Contributing"

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import MockAdapter from 'axios-mock-adapter';
 
 // apiSampleResponses will fill the mock adapter with most of the API calls that the application needs to render most
@@ -191,6 +192,19 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
       'nextRecurrenceOriginal': '2024-08-31T05:00:00Z',
     },
   ]);
+  mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules/fund_01hym37k3kj4ghv67nfx7vkvr0').reply(200, {
+    'fundingScheduleId': 'fund_01hym37k3kj4ghv67nfx7vkvr0',
+    'bankAccountId': 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
+    'name': 'Elliot\'s Contribution',
+    'description': '15th and last day of every month',
+    'ruleset': 'DTSTART:20230228T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+    'excludeWeekends': true,
+    'waitForDeposit': false,
+    'estimatedDeposit': 22000,
+    'lastRecurrence': '2024-08-15T05:00:00Z',
+    'nextRecurrence': '2024-08-30T05:00:00Z',
+    'nextRecurrenceOriginal': '2024-08-31T05:00:00Z',
+  });
   mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/balances').reply(200, {
     'bankAccountId': 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
     'current': 47986,

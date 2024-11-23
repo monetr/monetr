@@ -83,7 +83,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
   }
 
   return (
-    <li className='group relative w-full px-1 md:px-2' data-testid={ transaction.transactionId }>
+    <li className='group relative w-full px-1 md:px-2' id={ transaction.transactionId } data-testid={ transaction.transactionId }>
       <div
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
         onClick={ () => navigate(detailsUrl) }
