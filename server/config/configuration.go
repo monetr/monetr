@@ -340,16 +340,17 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 }
 
 func setupDefaults(v *viper.Viper) {
+	v.SetDefault("Environment", "development")
 	v.SetDefault("AllowSignUp", true)
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
-	v.SetDefault("Environment", "development")
 	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("Logging.Level", LogLevel) // Info
 	v.SetDefault("Logging.StackDriver.Enabled", false)
 	v.SetDefault("KeyManagement.Provider", "plaintext")
 	v.SetDefault("KeyManagement.AWS", nil)
 	v.SetDefault("KeyManagement.Google", nil)
+	v.SetDefault("KeyManagement.Vault", nil)
 	v.SetDefault("Plaid.Enabled", true)
 	v.SetDefault("PostgreSQL.Address", "localhost")
 	v.SetDefault("PostgreSQL.Database", "postgres")

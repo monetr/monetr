@@ -1,0 +1,27 @@
+---
+title: "CORS"
+---
+
+# CORS (Cross Origin Resource Sharing)
+
+monetr generally is hosted on a single domain name and thus does not require CORS, however if your self hosting setup
+requires that your monetr instance be accessible from another domain name then you must configure CORS.
+
+Below is an example of the CORS configuration block:
+
+```yaml filename="config.yaml"
+cors:
+  # allowedOrigins determines the value of the `Access-Control-Allow-Origin` response header. In monetr this defaults to
+  # an empty list. This default forbids all cross origin access.
+  allowedOrigins: 
+    - https://your.monetr.local
+  # Enable debug logging to help diagnose CORS issues.
+  debug: true
+```
+
+The following environment variables can be used to configure CORS options:
+
+| Variable                      | Config File Field     |
+| ---                           | ---                   |
+| `MONETR_CORS_ALLOWED_ORIGINS` | `cors.allowedOrigins` |
+| `MONETR_CORS_DEBUG`           | `cors.debug`          |

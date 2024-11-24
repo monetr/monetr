@@ -1,0 +1,32 @@
+---
+title: "Key Management"
+---
+
+import { Callout } from 'nextra/components'
+
+# Encryption (Key Management)
+
+monetr supports encrypting secrets before they are stored in PostgreSQL. Other data may support encryption in the future
+but at the moment only Plaid credentials are encrypted.
+
+To that end, monetr supports a few different providers. An outline of the configuration for key management:
+
+```yaml filename="config.yaml"
+keyManagement:
+  provider: "<plaintext|aws|google|vault>" # KMS provider, must be one of these values
+  aws: { ... }    # AWS KMS specific configuration, only used when `provider: aws`
+  google: { ... } # Google Cloud KMS specific configuration, only used when `provider: google`
+  vault: { ... }  # Hashicorp Vault configuration, only used when `provider: vault`
+```
+
+<Callout type="info">
+  If you are using the `plaintext` provider (which is the default), no additional options needs to be provided for the
+  key management configuration.
+</Callout>
+
+## AWS KMS Configuration
+
+## Google KMS Configuration
+
+## Vault Transit Configuration
+

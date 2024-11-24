@@ -1,0 +1,74 @@
+import { Callout } from 'nextra/components'
+
+# Email/SMTP Configuration
+
+monetr supports sending email notifications (and email verification) if SMTP is configured. Currently emails can be sent
+when a user creates a new account, forgets their password, or changes their password.
+
+All email features require that `enabled` is set to `true` and a valid `smtp` config is provided. monetr does not
+support specific email APIs and has no plans to. Several email providers offer an SMTP relay, this is monetr's preferred
+method of sending emails as it is the most flexible.
+
+Below is an example of the email/SMTP configuration block:
+
+```yaml filename="config.yaml"
+email:
+  enabled: true           # Can be true or false
+  verification: { ... }   # Email verification configuration
+  forgotPassword: { ... } # Password reset via email link
+  domain: "example.com"   # Email domain used to send emails, emails will always be sent from `no-reply@{DOMAIN}`
+  smtp: { ... }           # SMTP configuration
+```
+
+## Email Verification Configuration
+
+If you want to require users to verify their email address when they create a new login on monetr, you can enable email
+verification. This will email users a link that they must click after creating their login, the link's lifetime can be
+customized if needed.
+
+An example of the email verification config:
+
+```yaml filename="config.yaml"
+email:
+  verification:
+    enabled: true      # Can be true or false
+    tokenLifetime: 10m # Duration that the verification link should be valid
+```
+
+The token lifetime is parsed using [`time.ParseDuration(...)`](https://pkg.go.dev/time#ParseDuration), any value that
+can be parsed using that function is a valid configuration value.
+
+## Forgot Password Configuration
+
+If you ever lose your password and need to reset it, the easiest way is by using the forgot password form. This will
+send an email to the user (if a user with that email exists) that includes a link to reset their password. Similar to
+the [Email Verification Configuration](#email-verification-configuration), this also only requires an `enabled` and
+`tokenLifetime` value.
+
+Example of the forgot password configuration:
+
+```yaml filename="config.yaml"
+email:
+  forgotPassword:
+    enabled: true      # Can be true or false
+    tokenLifetime: 10m # Duration that the password reset link should be valid
+```
+
+## SMTP Configuration
+
+monetr only supports [PLAIN SMTP authentication](https://datatracker.ietf.org/doc/html/rfc4616) at this time. You can
+obtain all of the necessary details from your preferred email provider.
+
+<Callout type="info">
+  monetr's SMTP implementation _requires_ TLS. Your email provider must support TLS on whatever port specified below.
+</Callout>
+
+```yaml filename="config.yaml"
+email:
+  smtp:
+    identity: "..." # SMTP Identity
+    username: "..." # SMTP Username
+    password: "..." # SMTP Password or app password depending on provider
+    host: "..."     # Domain name of the SMTP server, no protocol or port specified
+    port: 587       # Use the port specified by your provider, could be 587, 465 or 25
+```

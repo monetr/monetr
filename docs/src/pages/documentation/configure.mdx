@@ -1,4 +1,96 @@
+import { Card, Cards } from 'nextra/components';
+
 # Configure
 
 Configure your monetr installation using the following guides. monetr offers many configuration options, make sure to
 read the documentation of each option thoroughly before customizing monetr.
+
+monetr is configured via a YAML file, typically located at `/etc/monetr/config.yaml`. This file allows many of the
+features that monetr offers to be tweaked and adjusted for your use case, or for development.
+
+The root structure of this YAML file is:
+
+```yaml filename="config.yaml"
+environment: "<string>" # Used for sentry and logging purposes.
+allowSignUp: <true|false>
+
+cors: { ... }          # CORS configuration
+email: { ... }         # Email/SMTP configuration
+keyManagement: { ... } # KMS/Encryption configuration
+links: { ... }         # Connected/Manual Links configuration
+logging: { ... }       # Logging configuration
+plaid: { ... }         # Plaid bank data provider configuration
+postgreSql: { ... }    # Primary database configuration
+reCAPTCHA: { ... }     # Anti-Bot, spam mitigation configuration
+redis: { ... }         # In-memory cache configuration
+security: { ... }      # Authentication, token configuration
+sentry: { ... }        # Error/trace reporting configuration
+server: { ... }        # HTTP/listener configuration
+storage: { ... }       # File/object storage
+```
+
+The two values that are at the root level of the configuration can also be specified via the following environment
+variables:
+
+| Variable               | Config File Field |
+| ---                    | ---               |
+| `MONETR_ENVIRONMENT`   | `environment`     |
+| `MONETR_ALLOW_SIGN_UP` | `allowSignUp`     |
+
+Each of the sub-configurations noted above are documented in more detail in the following guides:
+
+<Cards>
+  <Card
+    title="CORS"
+    href="/documentation/configure/cors"
+  />
+  <Card
+    title="Email"
+    href="/documentation/configure/email"
+  />
+  <Card
+    title="Encryption (Key Management)"
+    href="/documentation/configure/kms"
+  />
+  <Card
+    title="Links"
+    href="/documentation/configure/links"
+  />
+  <Card
+    title="Logging"
+    href="/documentation/configure/logging"
+  />
+  <Card
+    title="Plaid"
+    href="/documentation/configure/plaid"
+  />
+  <Card
+    title="PostgreSQL"
+    href="/documentation/configure/postgres"
+  />
+  <Card
+    title="ReCAPTCHA"
+    href="/documentation/configure/captcha"
+  />
+  <Card
+    title="Redis"
+    href="/documentation/configure/redis"
+  />
+  <Card
+    title="Security"
+    href="/documentation/configure/security"
+  />
+  <Card
+    title="Sentry"
+    href="/documentation/configure/sentry"
+  />
+  <Card
+    title="Server"
+    href="/documentation/configure/server"
+  />
+  <Card
+    title="Storage"
+    href="/documentation/configure/server"
+  />
+</Cards>
+
