@@ -20,6 +20,8 @@ if (developmentLite) {
   console.log(`development lite environment will be used, upstream: ${developmentLiteTarget}`);
 }
 
+const version = `v${process.env.RELEASE_VERSION ?? ''}`;
+
 // HMR replacement gets **fucked** if we are using content hash. So use name when we are
 // in development mode.
 const filename = isDevelopment ? '[name]' : '[contenthash:8]';
@@ -33,7 +35,7 @@ export default defineConfig({
     define: {
       CONFIG: JSON.stringify({}),
       REVISION: JSON.stringify(process.env.RELEASE_REVISION),
-      RELEASE: JSON.stringify(process.env.RELEASE_VERSION),
+      RELEASE: JSON.stringify(version),
       NODE_VERSION: process.version,
     },
   },
