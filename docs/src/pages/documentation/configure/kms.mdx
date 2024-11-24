@@ -24,9 +24,93 @@ keyManagement:
   key management configuration.
 </Callout>
 
+It is possible to migrate to another KMS provider using the monetr CLI, however this workflow is not documented at this
+time. It is recommended you pick the key management provider you want to stick with initially and not change it.
+
+## Plaintext
+
+When `plaintext` is specified as the provider, monetr will not encrypt any secrets and all items in the `secrets` table
+will be stored in plain text. This is fine for self hosted deployments or development environments.
+
 ## AWS KMS Configuration
 
-## Google KMS Configuration
+The AWS KMS will encrypt secrets using AWS's key management API. There is also an option to run a local version of AWS
+KMS for the local development environment for monetr.
+
+```yaml filename="config.yaml"
+keyManagement:
+  aws:
+    region: "us-east1"
+    accessKey: "..."
+    secretKey: "..."
+    keyID: "..."
+    endpoint: "..." # Only used in development, but can still be specified if you want.
+```
+
+| **Name**    | **Type** | **Default** | **Description**                                                                                                                                                                                                                           |
+| ----------- | -------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `region`    | String   |             | The AWS region to use for the client. May be required depending on your configuration.                                                                                                                                                    |
+| `accessKey` | String   |             | The Access Key that monetr should use to access the AWS KMS API.                                                                                                                                                                          |
+| `secretKey` | String   |             | The Secret Key that monetr should use to access the AWS KMS API.                                                                                                                                                                          |
+| `keyID`     | String   |             | The actual Key ID in AWS, this must be the ID of the key to use for encryption and decryption and should not be changed. If this ID is changed then values encrypted with another key will not be able to be decrypted with this new key. |
+| `endpoint`  | String   | `null`      | The AWS KMS API endpoint, this is intended to be used only for local development environments.                                                                                                                                            |
+
+## Google Cloud KMS Configuration
+
+Google Cloud KMS is also supported for encryption/decryption of secrets in monetr. It will require service account
+credentials in the form of a JSON file. However if you are running monetr within Google Cloud, you can typically inject
+the service account credentials directly into the VM or the GKE container. Documentation on obtaining credentials
+magically via Google Cloud will not be provided here.
+
+```yaml filename="config.yaml"
+keyManagement:
+  google:
+    resourceName: "projects/project-12345/locations/us/keyRings/your-keyring-12345/cryptoKeys/your-crypto-key-12345"
+    credentialsJSON: "/home/monetr/.config/gcloud/application_default_credentials.json" # Example path
+```
+
+| **Name**          | **Type** | **Default** | **Description**                                                                                                                                                                                                |
+| ----------------- | -------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resourceName`    | String   |             | The name of the actual keyring to use for encryption and decryption. This cannot be changed later as previously encrypted secrets cannot be decrypted with a different keyring.                                |
+| `credentialsJSON` | String   | `null`      | If you want to load credentials for your service account via a JSON file, specify the path to that file here. If left blank the Google Cloud SDK will look in default locations on the system for credentials. |
+
+More information on how credentials in Google Cloud can be found here: [How Appplication Default Credentials
+works](https://cloud.google.com/docs/authentication/application-default-credentials)
 
 ## Vault Transit Configuration
 
+[Hashicorp Vault](https://www.vaultproject.io/) is a self-hostable option for encryption. Vault keeps track of the
+encryption keys themselves while monetr leverages the
+[Transit](https://developer.hashicorp.com/vault/docs/secrets/transit) secrets engine to encrypt and decrypt data.
+
+When running inside Kubernetes, monetr can use the `kubernetes` authentication method to access Vault. When this is
+configured, monetr will automatically renew its Vault credentials a few moments before they expire. Other authentication
+methods may require a non-expiring token such as the root token.
+
+```yaml filename="config.yaml"
+keyManagement:
+  vault:
+    keyID: monetr
+    authMethod: kubernetes
+    role: monetr
+    endpoint: https://your-vault-server.local:8200
+    tlsCertificatePath: /etc/monetr/vault/tls.crt
+    tlsKeyPath: /etc/monetr/vault/tls.key
+    tlsCAPath: /etc/monetr/vault/ca.crt
+    insecureSkipVerify: false
+```
+
+| **Name**             | **Type** | **Default** | **Description**                                                                                                                                                                                            |
+| ---                  | ---      | ---         | ---                                                                                                                                                                                                        |
+| `keyID`              | String   |             | Name of the transit mount to use for KMS.                                                                                                                                                                  |
+| `authMethod`         | String   |             | Valid values are:<br/>- `token`: Use a hardcoded token to authenticate Vault.<br/>- `kubernetes`: Use the container's Kubernetes Service Account Token.<br/>- `userpass`: Provide a username and password. |
+| `token`              | String   |             | When using token authentication, you can provide the raw token here.                                                                                                                                       |
+| `tokenFile`          | String   |             | As an alternative to providing the token directly in the config file, specify a path to a file containing the token itself.                                                                                |
+| `username`           | String   |             | If you are using `userpass` authentication, then this field and the `password` field must be specified.                                                                                                    |
+| `password`           | String   |             | If you are using `userpass` authentication, then this field and the `username` field must be specified.                                                                                                    |
+| `role`               | String   |             | Role in Vault that monetr should authenticate for, decides what permissions monetr has.                                                                                                                    |
+| `endpoint`           | String   |             | The URL that Vault API requests should be made to, should be the complete URL including protocol (https), as well as port if non-standard and path if the API is on a sub-route.                           |
+| `tlsCertificatePath` | String   |             | Path to the TLS certificate file, used if Vault is being hosted with a self signed certificate.                                                                                                            |
+| `tlsKeyPath`         | String   |             | Path to the TLS key file, used if Vault is being hosted with a self signed certificate.                                                                                                                    |
+| `tlsCAPath`          | String   |             | Path to the Certificate Authority file, used if Vault is being hosted with a self signed certificate.                                                                                                      |
+| `insecureSkipVerify` | Boolean  | `false`     | When `true`, monetr will not verify the TLS certificate of the Vault server, **less secure**.                                                                                                              |

@@ -3,7 +3,26 @@
 This guide shows you how to configure Plaid for your self hosted monetr instance. This will require Plaid credentials
 which can be obtained by following the [Plaid Credentials Guide](../development/credentials#plaid).
 
-## Environment Variables
+```yaml filename="config.yaml"
+plaid:
+  enabled: <true|false>
+  clientId: "..."
+  clientSecret: "..."
+  environment: "<https://sandbox.plaid.com|https://production.plaid.com>"
+  webhooksEnabled: <true|false>
+  webhooksDomain: "..."
+  oauthDomain: "..."
+```
+
+| **Name**          | **Type** | **Default** | **Description**                                                                                                                                                                                                                   |
+| ---               | ---      | ---         | ---                                                                                                                                                                                                                               |
+| `enabled`         | Boolean  | `true`      | Are users allowed to create Plaid links on this server? Even if this value is false, it is only considered enabled if the Client ID and Client Secret are also provided.                                                          |
+| `clientId`        | String   |             | Your Plaid Client ID obtained from your Plaid account.                                                                                                                                                                            |
+| `clientSecret`    | String   |             | Your Plaid Client Secret obtained from your Plaid account.                                                                                                                                                                        |
+| `environment`     | String   |             | Plaid environment URL, must match the environment of your Plaid credentials.                                                                                                                                                      |
+| `webhooksEnabled` | Boolean  |             | If you want to allow Plaid to send updates to monetr via webhooks.                                                                                                                                                                |
+| `webhooksDomain`  | String   |             | Required if you want to receive webhooks from Plaid, must be an externally accessible domain name. Plaid also requires HTTPS for all webhooks. Only specify the domain name, not a full URL. Sub-routes are not supported here.   |
+| `oauthDomain`     | String   |             | Domain used for OAuth redirect URLs, does not necessarily need to be externally accessible, however must support HTTPS as Plaid will not redirect to a non-HTTPS URL. Only specify the domain name. Sub-routes are not supported. |
 
 The following environment variables map to the following configuration file fields. Each field is documented below.
 

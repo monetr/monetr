@@ -13,12 +13,17 @@ Below is an example of the email/SMTP configuration block:
 
 ```yaml filename="config.yaml"
 email:
-  enabled: true           # Can be true or false
+  enabled: true
+  domain: "example.com"
   verification: { ... }   # Email verification configuration
   forgotPassword: { ... } # Password reset via email link
-  domain: "example.com"   # Email domain used to send emails, emails will always be sent from `no-reply@{DOMAIN}`
   smtp: { ... }           # SMTP configuration
 ```
+
+| **Name**  | **Type** | **Default** | **Description**                                                                        |
+| ---       | ---      | ---         | ---                                                                                    |
+| `enabled` | Boolean  | `false`     | Are email notifications enabled on this server?                                        |
+| `domain`  | String   |             | Email domain used to send emails, emails will always be sent from `no-reply@{DOMAIN}`. |
 
 ## Email Verification Configuration
 
@@ -38,6 +43,11 @@ email:
 The token lifetime is parsed using [`time.ParseDuration(...)`](https://pkg.go.dev/time#ParseDuration), any value that
 can be parsed using that function is a valid configuration value.
 
+| **Name**        | **Type** | **Default** | **Description**                                              |
+| ---             | ---      | ---         | ---                                                          |
+| `enabled`       | Boolean  | `false`     | Is email verification enabled/required on this server?       |
+| `tokenLifetime` | Duration | `10m`       | How long should the link in the verification email be valid? |
+
 ## Forgot Password Configuration
 
 If you ever lose your password and need to reset it, the easiest way is by using the forgot password form. This will
@@ -53,6 +63,11 @@ email:
     enabled: true      # Can be true or false
     tokenLifetime: 10m # Duration that the password reset link should be valid
 ```
+
+| **Name**        | **Type** | **Default** | **Description**                                                |
+| ---             | ---      | ---         | ---                                                            |
+| `enabled`       | Boolean  | `false`     | Are users allowed to reset their password via forgot password? |
+| `tokenLifetime` | Duration | `10m`       | How long should the password reset link be valid?              |
 
 ## SMTP Configuration
 

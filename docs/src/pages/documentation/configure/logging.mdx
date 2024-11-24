@@ -1,1 +1,22 @@
 # Logging Configuration
+
+monetr uses [logrus](https://github.com/sirupsen/logrus) for all of its logging at this time. At the moment it supports
+a text and JSON formatter. The text formatter will have colors enabled by default, unless an environment variable `CI`
+is provided with a non-empty value.
+
+```yaml filename="config.yaml"
+logging:
+  level: "<panic|fatal|error|warn|info|debug|trace>"
+  format: "<text|json>"
+  stackDriver:
+    enabled: <true|false>
+```
+
+The default log level for monetr is `info`. Lower log levels can create a lot of noise, `debug` will log each HTTP
+request that the server handles, `trace` will log every SQL query that the application performs (except as part of
+background job processing).
+
+If you are running your application on Google Cloud, it is recommended to enable StackDriver logging, as it will adjust
+the way some important fields are formatted (when the format is set to `json`) to match StackDriver's expected patterns.
+More information on the StackDriver format is available here: [Structured
+Logging](https://cloud.google.com/logging/docs/structured-logging).

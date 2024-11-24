@@ -11,7 +11,7 @@ features that monetr offers to be tweaked and adjusted for your use case, or for
 The root structure of this YAML file is:
 
 ```yaml filename="config.yaml"
-environment: "<string>" # Used for sentry and logging purposes.
+environment: "<string>"
 allowSignUp: <true|false>
 
 cors: { ... }          # CORS configuration
@@ -28,6 +28,11 @@ sentry: { ... }        # Error/trace reporting configuration
 server: { ... }        # HTTP/listener configuration
 storage: { ... }       # File/object storage
 ```
+
+| **Name**      | **Type** | **Default**   | **Description**                                               |
+| ---           | ---      | ---           | ---                                                           |
+| `environment` | String   | `development` | Environment name, used by the [Sentry](./configure/sentry) integration. |
+| `allowSignUp` | Boolean  | `true`        | Are people allowed to create new users on the server?         |
 
 The two values that are at the root level of the configuration can also be specified via the following environment
 variables:
