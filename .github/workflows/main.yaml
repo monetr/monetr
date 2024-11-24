@@ -204,7 +204,11 @@ jobs:
         run: |
           git config --global --add safe.directory ${PWD}
       - name: Build
-        run: make docs
+        env:
+          CHATWOOT_URL: ${{ secrets.CHATWOOT_URL }}
+          CHATWOOT_TOKEN: ${{ secrets.CHATWOOT_TOKEN }}
+        run: |
+          make docs
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.6.9
         with:

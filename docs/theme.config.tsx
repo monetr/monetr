@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import type { DocsThemeConfig } from 'nextra-theme-docs';
 
 import Logo from '@monetr/docs/assets/logo.svg';
+import ChatwootIntegration from '@monetr/docs/components/ChatwootIntegration';
 import SignUp from '@monetr/docs/components/SignUp';
 
 const branch = process.env.GIT_BRANCH ?? 'main';
@@ -29,17 +30,18 @@ const config: DocsThemeConfig = {
       { process.env.NODE_ENV != 'development' && 
         <script defer src='https://a.monetr.app/script.js' data-website-id='ccbdfaf9-683f-4487-b97f-5516e1353715' /> 
       }
+      <ChatwootIntegration />
     </React.Fragment>
   ),
   darkMode: false,
   logo: (
     <Fragment>
-      <Image src={ Logo } alt='monetr logo' height={ 40 } width={ 40 } />
-      <div className='flex items-center justify-center ml-3 w-28'>
-        <span className='absolute mx-auto flex border w-fit bg-gradient-to-r blur-xl opacity-50 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-3xl box-content font-extrabold text-transparent text-center select-none'>
+      <Image src={ Logo } alt='monetr logo' className='w-8 h-8 lg:w-10 lg:h-10' />
+      <div className='flex items-center justify-center ml-3'>
+        <span className='absolute mx-auto flex border w-fit bg-gradient-to-r blur-xl opacity-50 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-2xl lg:text-3xl box-content font-extrabold text-transparent text-center select-none'>
           monetr
         </span>
-        <h1 className='relative top-0 justify-center flex bg-gradient-to-r items-center from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-3xl font-extrabold text-transparent text-center select-auto'>
+        <h1 className='relative top-0 justify-center flex bg-gradient-to-r items-center from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-2xl lg:text-3xl font-extrabold text-transparent text-center select-auto'>
           monetr
         </h1>
       </div>
@@ -70,7 +72,7 @@ const config: DocsThemeConfig = {
   },
   footer: {
     text: (
-      <div className='flex w-full items-center sm:items-start justify-between'>
+      <div className='flex w-full items-center sm:items-start justify-between md:px-20'>
         <p className='text-sm'>
           © {new Date().getFullYear()} monetr LLC.
         </p>
