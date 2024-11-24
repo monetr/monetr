@@ -13,7 +13,8 @@
   },
   "contact": {
     "type": "page",
-    "title": "Contact"
+    "title": "Contact",
+    "display": "hidden"
   },
   "policy": {
     "type": "page",

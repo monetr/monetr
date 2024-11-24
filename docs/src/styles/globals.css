@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* body { */
+/*   font-family: 'Inter Variable', sans-serif; */
+/* } */
+
 .m-view-height {
   @apply min-h-[calc(100vh-var(--nextra-navbar-height))]
 }

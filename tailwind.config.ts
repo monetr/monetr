@@ -76,9 +76,10 @@ const config: Partial<Config> = {
       //   md: 'calc(var(--radius) - 2px)',
       //   sm: 'calc(var(--radius) - 4px)',
       // },
-      // fontFamily: {
-      //   sans: ['var(--font-sans)', ...fontFamily.sans],
-      // },
+      fontFamily: {
+        sans: ['Inter Variable', 'sans-serif'],
+        body: ['Inter Variable', 'sans-serif'],
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':

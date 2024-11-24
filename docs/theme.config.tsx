@@ -1,4 +1,5 @@
-import React from 'react';
+/* eslint-disable max-len */
+import React, { Fragment } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import type { DocsThemeConfig } from 'nextra-theme-docs';
@@ -25,12 +26,31 @@ const config: DocsThemeConfig = {
       <meta name='viewport' content='width=device-width, initial-scale=1.0' />
       <meta property='og:title' content='monetr' />
       <meta property='og:description' content='Transparent financial planning' />
-      { process.env.NODE_ENV != 'development' && <script defer src='https://a.monetr.app/script.js' data-website-id='ccbdfaf9-683f-4487-b97f-5516e1353715' /> }
+      { process.env.NODE_ENV != 'development' && 
+        <script defer src='https://a.monetr.app/script.js' data-website-id='ccbdfaf9-683f-4487-b97f-5516e1353715' /> 
+      }
     </React.Fragment>
   ),
   darkMode: false,
-  logo: (<Image src={ Logo } alt='monetr logo' height={ 40 } width={ 40 } />),
+  logo: (
+    <Fragment>
+      <Image src={ Logo } alt='monetr logo' height={ 40 } width={ 40 } />
+      <div className='flex items-center justify-center ml-3 w-28'>
+        <span className='absolute mx-auto flex border w-fit bg-gradient-to-r blur-xl opacity-50 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-3xl box-content font-extrabold text-transparent text-center select-none'>
+          monetr
+        </span>
+        <h1 className='relative top-0 justify-center flex bg-gradient-to-r items-center from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-3xl font-extrabold text-transparent text-center select-auto'>
+          monetr
+        </h1>
+      </div>
+    </Fragment>
+  ),
   docsRepositoryBase: `https://github.com/monetr/monetr/blob/${branch}/docs`,
+  banner: {
+    dismissible: true,
+    key: 'monetr-go-live-2025',
+    text: (<p>🎉 monetr is going live in January of 2025!</p>),
+  },
   project: {
     link: 'https://github.com/monetr/monetr',
   },
@@ -57,6 +77,9 @@ const config: DocsThemeConfig = {
         <div className='space-x-4'>
           <a href='https://status.monetr.app/' target='_blank' className='hover:underline text-sm'>
             Status
+          </a>
+          <a href='/contact' className='hover:underline text-sm'>
+            Contact
           </a>
           <a href='/policy/terms' className='hover:underline text-sm'>
             Terms & Conditions
