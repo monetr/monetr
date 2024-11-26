@@ -28,11 +28,21 @@ func (c *Controller) handleStripeWebhook(ctx echo.Context) error {
 
 	requestBody, err := io.ReadAll(body)
 	if err != nil {
+		c.reportError(ctx, err)
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to read request body")
 	}
 
-	stripeEvent, err := webhook.ConstructEvent(requestBody, stripeSignature, c.Configuration.Stripe.WebhookSecret)
+	stripeEvent, err := webhook.ConstructEventWithOptions(
+		requestBody,
+		stripeSignature,
+		c.Configuration.Stripe.WebhookSecret,
+		webhook.ConstructEventOptions{
+			Tolerance:                webhook.DefaultTolerance,
+			IgnoreAPIVersionMismatch: true,
+		},
+	)
 	if err != nil {
+		c.reportError(ctx, err)
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to validate stripe event")
 	}
 
