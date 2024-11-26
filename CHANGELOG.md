@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.18.32](https://github.com/monetr/monetr/compare/v0.18.31...v0.18.32) (2024-11-26)
+
+
+### Features
+
+* **docs:** Adding a ton more documentation ([886b291](https://github.com/monetr/monetr/commit/886b291cbfe0c5b7521af53f80fb8e09be73dd39))
+* **docs:** Adding a ton of documentation ([d4182a1](https://github.com/monetr/monetr/commit/d4182a1436337af42d1100eebd71c125c72f8af3))
+* **docs:** Adding chat support to website ([704e7c4](https://github.com/monetr/monetr/commit/704e7c49dd12dd0fa79b042e92a9be2dedc05adc))
+* **docs:** Adding even more documentation ([a429ba3](https://github.com/monetr/monetr/commit/a429ba3e2ded1322a2abb749eac237fa64dc120e))
+* **docs:** Tweaking docs theme + adding go live banner. ([0600070](https://github.com/monetr/monetr/commit/06000700d3518bf54c45e3b2338c803d59d3c736))
+
+
+### Dependencies
+
+* **ui:** update dependency @swc/core to v1.9.3 ([#2185](https://github.com/monetr/monetr/issues/2185)) ([623f51a](https://github.com/monetr/monetr/commit/623f51aaded72efe0b2844e0d2499ad4e2f1d427))
+* **ui:** update rsbuild ([#2187](https://github.com/monetr/monetr/issues/2187)) ([ebfea0b](https://github.com/monetr/monetr/commit/ebfea0be0a63efad1eb851507bd9ffe0873b7183))
+
+
+### Bug Fixes
+
+* **billing:** Fixed stripe webhooks not being received properly ([c1138c7](https://github.com/monetr/monetr/commit/c1138c77b285346178c03a10dfd3299a907e875d))
+* **ui:** Fixed UI version string ([d113b4d](https://github.com/monetr/monetr/commit/d113b4d4ff936cf6263024ed099bf30b5ab51022))
+
+
+### Miscellaneous
+
+* **docs:** Removing API docs ([daac8a6](https://github.com/monetr/monetr/commit/daac8a6860db28c2ce4b7a63d587f67e703b0971))
+
 ## [0.18.31](https://github.com/monetr/monetr/compare/v0.18.30...v0.18.31) (2024-11-21)
 
 
