@@ -76,7 +76,7 @@ const config: DocsThemeConfig = {
         <p className='text-sm'>
           © {new Date().getFullYear()} monetr LLC.
         </p>
-        <div className='space-x-4'>
+        <div className='space-y-2 sm:space-x-4 flex flex-col sm:flex-row'>
           <a href='https://status.monetr.app/' target='_blank' className='hover:underline text-sm'>
             Status
           </a>

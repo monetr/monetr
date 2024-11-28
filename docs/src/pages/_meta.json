@@ -21,6 +21,13 @@
       "layout": "raw"
     }
   },
+  "blog": {
+    "type": "page",
+    "title": "Blog",
+    "theme": {
+      "layout": "raw"
+    }
+  },
   "documentation": {
     "type": "page",
     "title": "Documentation"

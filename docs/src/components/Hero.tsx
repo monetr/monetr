@@ -1,15 +1,14 @@
 import Image from 'next/image';
 
 import Particles from './Particles';
-import Logo from '@monetr/docs/assets/logo.svg';
 import MobileTransactionScreenshot from '@monetr/docs/assets/mobile_transactions_example.png';
 import TransactionScreenshot from '@monetr/docs/assets/transactions_example.png';
 
 export default function Hero(): JSX.Element {
   return (
-    <div className='w-full'>
+    <div className='w-full relative'>
       <div className='absolute inset-0 overflow-hidden pointer-events-none -z-10' aria-hidden='true'>
-        <div className='absolute flex items-center justify-center top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 w-1/3 aspect-square'>
+        <div className='absolute flex items-center justify-center top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 w-full sm:w-1/2 aspect-square'>
           <div className='absolute inset-0 translate-z-0 bg-purple-500 rounded-full blur-[120px] opacity-50 min-h-[10vh]' />
         </div>
       </div>
@@ -26,13 +25,22 @@ export default function Hero(): JSX.Element {
       </div>
       <Particles className='absolute inset-0 -z-10' />
 
-      <div className='m-view-height m-view-width flex flex-col py-8 mx-auto items-center justify-center gap-8'>
-        <div className='max-w-3xl flex flex-col'>
-          <Image src={ Logo } alt='monetr logo' width={ 75 } height={ 75 } />
-          <h1 className='text-5xl font-bold'>monetr</h1>
-          <h2 className='text-xl font-medium'>
-            monetr is currently in a <b>closed beta</b>! We are building a source-visible financial planning application
-            focused on helping you plan and budget for recurring expenses, or future goals.
+      <div className='m-view-height m-view-width flex flex-col py-16 mx-auto items-center gap-8'>
+        <div className='max-w-3xl flex flex-col gap-8 text-center items-center'>
+          <div className='flex items-center justify-center ml-3 p-4'>
+            <span className='absolute mx-auto flex border w-fit bg-gradient-to-r blur-xl opacity-50 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-4xl sm:text-6xl font-extrabold text-transparent text-center select-none'>
+              Coming Soon
+            </span>
+            <h1 className='h-24 relative top-0 justify-center flex bg-gradient-to-r items-center from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-4xl sm:text-6xl font-extrabold text-transparent text-center select-auto'>
+              Coming Soon
+            </h1>
+          </div>
+
+          <h1 className='text-4xl sm:text-5xl font-bold'>Always know what you can spend</h1>
+
+          <h2 className='text-lg sm:text-xl font-medium'>
+            Put a bit of money aside every time you get paid. Always be sure you'll have enough to cover your bills, and
+            know what you have left-over to save or spend on whatever you'd like.
           </h2>
         </div>
 
