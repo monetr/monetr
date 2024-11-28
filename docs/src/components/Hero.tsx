@@ -2,7 +2,8 @@ import Image from 'next/image';
 
 import Particles from './Particles';
 import Logo from '@monetr/docs/assets/logo.svg';
-import TransactionsExampleFull from '@monetr/docs/components/TransactionsExampleFull';
+import MobileTransactionScreenshot from '@monetr/docs/assets/mobile_transactions_example.png';
+import TransactionScreenshot from '@monetr/docs/assets/transactions_example.png';
 
 export default function Hero(): JSX.Element {
   return (
@@ -34,7 +35,17 @@ export default function Hero(): JSX.Element {
             focused on helping you plan and budget for recurring expenses, or future goals.
           </h2>
         </div>
-        <TransactionsExampleFull />
+
+        <Image
+          src={ TransactionScreenshot }
+          alt='Easily keep track of transactions'
+          className='hidden sm:block rounded-md z-10 shadow-lg'
+        />
+        <Image
+          src={ MobileTransactionScreenshot }
+          alt='Easily keep track of transactions'
+          className='block sm:hidden rounded-md z-10 shadow-lg'
+        />
       </div>
     </div>
   );
