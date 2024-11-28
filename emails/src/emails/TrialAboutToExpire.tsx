@@ -26,7 +26,7 @@ export const TrialAboutToExpire = ({
   trialExpirationWindow = '{{ .TrialExpirationWindow }}',
   supportEmail = '{{ .SupportEmail }}',
 }: TrialAboutToExpireProps) => {
-  const previewText = 'Your password has been updated';
+  const previewText = 'Your monetr trial is about to expire';
   return (
     <EmailLayout previewText={previewText}>
       <EmailLogo baseUrl={ baseUrl } />
