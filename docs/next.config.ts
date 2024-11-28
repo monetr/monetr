@@ -1,4 +1,5 @@
 import { NextConfig } from 'next';
+import nextra from 'nextra';
 
 import path from 'path';
 
@@ -50,10 +51,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-const withNextra = require('nextra')({
+const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.tsx',
-  flexsearch: {
+  search: {
     codeblocks: false,
   },
 });

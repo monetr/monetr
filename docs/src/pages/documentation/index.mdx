@@ -1,5 +1,10 @@
+---
+title: Documentation
+description: Guides on how to use, self-host, or develop against monetr.
+---
+
 import { Fragment } from 'react';
-import { Card, Cards } from 'nextra/components';
+import { Cards } from 'nextra/components';
 
 # Introduction
 
@@ -17,17 +22,17 @@ something big, or just putting some money aside as a buffer.
 If you want to jump in and start giving monetr a try you can use one of the guides below.
 
 <Cards>
-  <Card
+  <Cards.Card
     icon={ (<Fragment>📖 </Fragment>) }
     title="Getting Started"
     href="/documentation/use"
   />
-  <Card
+  <Cards.Card
     icon={ (<Fragment>🖥️ </Fragment>) }
     title="Self-hosting"
     href="/documentation/install"
   />
-  <Card
+  <Cards.Card
     icon={ (<Fragment>🛠️ </Fragment>) }
     title="Development"
     href="/documentation/development/local_development"

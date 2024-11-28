@@ -45,11 +45,13 @@ export default function Hero(): JSX.Element {
         </div>
 
         <Image
+          priority={ true }
           src={ TransactionScreenshot }
           alt='Easily keep track of transactions'
           className='hidden sm:block rounded-md z-10 shadow-lg'
         />
         <Image
+          priority={ true }
           src={ MobileTransactionScreenshot }
           alt='Easily keep track of transactions'
           className='block sm:hidden rounded-md z-10 shadow-lg'
