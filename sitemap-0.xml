@@ -3,6 +3,7 @@
 <url><loc>https://monetr.app</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/404</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/about</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://monetr.app/blog</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/contact</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/pricing</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
