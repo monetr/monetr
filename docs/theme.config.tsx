@@ -1,38 +1,16 @@
 /* eslint-disable max-len */
 import React, { Fragment } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 import type { DocsThemeConfig } from 'nextra-theme-docs';
 
 import Logo from '@monetr/docs/assets/logo.svg';
-import ChatwootIntegration from '@monetr/docs/components/ChatwootIntegration';
+import Head from '@monetr/docs/components/Head';
 import SignUp from '@monetr/docs/components/SignUp';
 
 const branch = process.env.GIT_BRANCH ?? 'main';
 
 const config: DocsThemeConfig = {
-  useNextSeoProps() {
-    const { asPath } = useRouter();
-    if (asPath !== '/') {
-      return {
-        titleTemplate: '%s – monetr',
-      };
-    }
-    return {
-      titleTemplate: 'monetr',
-    };
-  },
-  head: (
-    <React.Fragment>
-      <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-      <meta property='og:title' content='monetr' />
-      <meta property='og:description' content='Transparent financial planning' />
-      { process.env.NODE_ENV != 'development' && 
-        <script defer src='https://a.monetr.app/script.js' data-website-id='ccbdfaf9-683f-4487-b97f-5516e1353715' /> 
-      }
-      <ChatwootIntegration />
-    </React.Fragment>
-  ),
+  head: Head,
   darkMode: false,
   logo: (
     <Fragment>
@@ -51,7 +29,7 @@ const config: DocsThemeConfig = {
   banner: {
     dismissible: true,
     key: 'monetr-go-live-2025',
-    text: (<p>🎉 monetr is going live in January of 2025!</p>),
+    content: (<p>🎉 monetr is going live in January of 2025!</p>),
   },
   project: {
     link: 'https://github.com/monetr/monetr',
@@ -71,12 +49,12 @@ const config: DocsThemeConfig = {
     ),
   },
   footer: {
-    text: (
+    content: (
       <div className='flex w-full items-center sm:items-start justify-between md:px-20'>
         <p className='text-sm'>
           © {new Date().getFullYear()} monetr LLC.
         </p>
-        <div className='space-y-2 sm:space-x-4 flex flex-col sm:flex-row'>
+        <div className='gap-2 sm:gap-4 flex flex-col sm:flex-row'>
           <a href='https://status.monetr.app/' target='_blank' className='hover:underline text-sm'>
             Status
           </a>
