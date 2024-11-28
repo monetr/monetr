@@ -62,24 +62,9 @@ importers:
 
   docs:
     dependencies:
-      '@ebay/nice-modal-react':
-        specifier: 1.2.13
-        version: 1.2.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@fontsource-variable/inter':
         specifier: 5.1.0
         version: 5.1.0
-      '@monetr/interface':
-        specifier: workspace:*
-        version: link:../interface
-      '@mui/material':
-        specifier: 5.11.3
-        version: 5.11.3(@emotion/react@11.10.6(@types/react@18.3.12)(react@18.3.1))(@emotion/styled@11.10.6(@emotion/react@11.10.6(@types/react@18.3.12)(react@18.3.1))(@types/react@18.3.12)(react@18.3.1))(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      axios-mock-adapter:
-        specifier: 2.1.0
-        version: 2.1.0(axios@1.7.8)
-      clsx:
-        specifier: 2.1.1
-        version: 2.1.1
       next:
         specifier: 15.0.3
         version: 15.0.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.81.0)
@@ -98,9 +83,6 @@ importers:
       react-dom:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
-      react-router-dom:
-        specifier: 6.28.0
-        version: 6.28.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@types/node':
         specifier: ^20
