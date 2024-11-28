@@ -1,0 +1,6 @@
+Contact: mailto:security@monetr.app
+Expires: 2025-11-01T05:00:00.000Z
+Encryption: https://monetr.app/.well-known/pgp-key.txt
+Preferred-Languages: en
+Canonical: https://monetr.app/.well-known/security.txt
+Policy: https://github.com/monetr/monetr/blob/main/SECURITY.md
