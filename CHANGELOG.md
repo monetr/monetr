@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.18.33](https://github.com/monetr/monetr/compare/v0.18.32...v0.18.33) (2024-12-02)
+
+
+### Features
+
+* **docs:** Adding .well-known directory for main site ([9cbcedc](https://github.com/monetr/monetr/commit/9cbcedce6642eed9276cd022dafe52d870a76036))
+* **docs:** Adding more screenshots for documentation ([0c3df17](https://github.com/monetr/monetr/commit/0c3df17caa0df043c40cb56eaf2a0d9506e371cb))
+* **docs:** Chaning landing page as we near launch in January ([5c1575c](https://github.com/monetr/monetr/commit/5c1575ce5f604e3de2ee67e8c674838c4fa58719))
+* **docs:** Eject embeded UI from the documentation site ([8c2174e](https://github.com/monetr/monetr/commit/8c2174efdb9a2a90abe7564b49d37fc313c90809))
+* **docs:** Upgrading to nextra v3 ([#2196](https://github.com/monetr/monetr/issues/2196)) ([4f8a0de](https://github.com/monetr/monetr/commit/4f8a0de1eedfcc50ff60016b351e70baa47c25b9))
+
+
+### Dependencies
+
+* **api:** update module github.com/stretchr/testify to v1.10.0 ([#2195](https://github.com/monetr/monetr/issues/2195)) ([32243f0](https://github.com/monetr/monetr/commit/32243f0a1ac4d1a17be21b59b917ef471eb7d9c3))
+* **api:** update module github.com/stripe/stripe-go/v81 to v81.1.0 ([#2198](https://github.com/monetr/monetr/issues/2198)) ([26a5369](https://github.com/monetr/monetr/commit/26a53694e5e580a3111b0f2d4e9a6bd41f060f55))
+* **api:** update module google.golang.org/api to v0.209.0 ([#2199](https://github.com/monetr/monetr/issues/2199)) ([0011cc6](https://github.com/monetr/monetr/commit/0011cc6c251266223ca50b55de5ad5fb824fe7fd))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.7.1 ([#2200](https://github.com/monetr/monetr/issues/2200)) ([777340e](https://github.com/monetr/monetr/commit/777340e92da68e49b25782f3aababa3a63e7ab70))
+* **ui:** update dependency @rsbuild/core to v1.1.7 ([#2203](https://github.com/monetr/monetr/issues/2203)) ([694fafe](https://github.com/monetr/monetr/commit/694fafeb2992f889ab6e65c360de7dda1514acb8))
+* **ui:** update dependency axios to v1.7.8 ([#2191](https://github.com/monetr/monetr/issues/2191)) ([ec3b18c](https://github.com/monetr/monetr/commit/ec3b18cfaadbb44da3e28b4ecaa9a7b85fea911f))
+* **ui:** update dependency class-variance-authority to v0.7.1 ([#2192](https://github.com/monetr/monetr/issues/2192)) ([d68d604](https://github.com/monetr/monetr/commit/d68d604c91cd55c2ed17c6f830a422c917e769c4))
+* **ui:** update dependency typescript to v5.7.2 ([#2201](https://github.com/monetr/monetr/issues/2201)) ([15c68ca](https://github.com/monetr/monetr/commit/15c68ca972bc27576d4ad93517ad106916c62eac))
+* **ui:** update rsbuild ([#2193](https://github.com/monetr/monetr/issues/2193)) ([af0a84e](https://github.com/monetr/monetr/commit/af0a84e67e06a718554958a7bae615e68f97c1b7))
+* **ui:** update storybook monorepo to v8.4.5 ([#2189](https://github.com/monetr/monetr/issues/2189)) ([ec62cda](https://github.com/monetr/monetr/commit/ec62cdabbba5f231cea25710c60ea7a1576f25a7))
+* **ui:** update storybook monorepo to v8.4.6 ([#2197](https://github.com/monetr/monetr/issues/2197)) ([7a84283](https://github.com/monetr/monetr/commit/7a84283c2407f59c7ed4235457dde30efbcf6763))
+
+
+### Bug Fixes
+
+* **docs:** Fix page width on the about and pricing placeholder views ([6fb4b78](https://github.com/monetr/monetr/commit/6fb4b78d5fc61477c462ad0da64b2342914f350a))
+* **email:** Fixed trial expiry email preview text ([69036c8](https://github.com/monetr/monetr/commit/69036c8c527702a729227a6a1b6dced8b9a3318b)), closes [#2194](https://github.com/monetr/monetr/issues/2194)
+
 ## [0.18.32](https://github.com/monetr/monetr/compare/v0.18.31...v0.18.32) (2024-11-26)
 
 
