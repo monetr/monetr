@@ -8,9 +8,15 @@ export default function Head(): JSX.Element {
   const { frontMatter } = useConfig();
   const { asPath } = useRouter();
 
-  let title = 'monetr';
+  let suffix = '';
+
   if (asPath !== '/') {
-    title = Boolean(frontMatter?.title) ? `${frontMatter.title} - monetr` : 'monetr';
+    suffix = '- monetr';
+  }
+
+  let title = 'monetr';
+  if (frontMatter?.title) {
+    title = `${frontMatter.title} ${suffix}`;
   }
 
   return (
@@ -18,11 +24,11 @@ export default function Head(): JSX.Element {
       <meta name='viewport' content='width=device-width, initial-scale=1.0' />
 
       <title>{ title }</title>
-      <meta property='og:title' content={ frontMatter.title || 'monetr' } />
-      <meta name='title' content={ frontMatter.title || 'monetr' } />
+      <meta property='og:title' content={ frontMatter.title || title } />
+      <meta name='title' content={ frontMatter.title || title } />
 
-      <meta property='og:description' content={ frontMatter.description || 'Transparent financial planning' } />
-      <meta name='description' content={ frontMatter.title || 'monetr' } />
+      <meta property='og:description' content={ frontMatter.description || 'Take control of your finances, paycheck by paycheck, with monetr. Put aside what you need, spend what you want, and confidently manage your money with ease. Always know you’ll have enough for your bills and what’s left to save or spend.' } />
+      <meta name='description' content={ frontMatter.description || 'monetr' } />
 
       { process.env.NODE_ENV != 'development' && 
         <script defer src='https://a.monetr.app/script.js' data-website-id='ccbdfaf9-683f-4487-b97f-5516e1353715' /> 

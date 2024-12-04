@@ -10,6 +10,10 @@
   @apply max-w-[90rem] pr-[max(env(safe-area-inset-right),1.5rem)] pl-[max(env(safe-area-inset-left),1.5rem)]
 }
 
+main > a.nextra-card {
+  @apply my-4
+}
+
 /* custom scrollbar */
 ::-webkit-scrollbar {
     width: 16px;

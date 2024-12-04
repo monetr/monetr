@@ -1,13 +1,12 @@
 import React from 'react';
 import { useFormikContext } from 'formik';
+import { Calendar } from 'lucide-react';
 
 import MLabel from './MLabel';
 import MSelect from './MSelect';
 import { Button } from '@monetr/interface/components/Button';
 import { useFundingSchedulesSink } from '@monetr/interface/hooks/fundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
-
-import { Calendar } from 'lucide-react';
 
 export interface MSelectFundingProps {
   label?: string;
@@ -88,7 +87,7 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
 
   return (
     <MSelect
-      label='When do you want to fund the expense?'
+      label={ props.label ?? 'Funding' }
       menuPlacement='auto'
       menuPortalTarget={ props.menuPortalTarget }
       menuPosition='fixed'
