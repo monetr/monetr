@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.34](https://github.com/monetr/monetr/compare/v0.18.33...v0.18.34) (2024-12-04)
+
+
+### Dependencies
+
+* **ui:** update sentry-javascript monorepo to v8.42.0 ([#2204](https://github.com/monetr/monetr/issues/2204)) ([99c756f](https://github.com/monetr/monetr/commit/99c756f137f8a5043a29472b2b596b5926014325))
+
 ## [0.18.33](https://github.com/monetr/monetr/compare/v0.18.32...v0.18.33) (2024-12-02)
 
 
