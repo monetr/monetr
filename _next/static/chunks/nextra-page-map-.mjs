@@ -1,6 +1,7 @@
 import meta from "../../../src/pages/_meta.ts";
 import documentation_meta from "../../../src/pages/documentation/_meta.ts";
 import documentation_development_meta from "../../../src/pages/documentation/development/_meta.ts";
+import documentation_install_meta from "../../../src/pages/documentation/install/_meta.ts";
 import documentation_use_meta from "../../../src/pages/documentation/use/_meta.ts";
 import policy_meta from "../../../src/pages/policy/_meta.ts";
 export const pageMap = [{
@@ -115,7 +116,7 @@ export const pageMap = [{
     route: "/documentation/configure",
     frontMatter: {
       "title": "Configuration",
-      "description": "Configure self-hosted monetr servers"
+      "description": "Learn how to configure your self-hosted monetr installation using the comprehensive YAML configuration file. Explore detailed guides for customizing server, database, email, security, and more."
     }
   }, {
     name: "development",
@@ -165,25 +166,27 @@ export const pageMap = [{
     route: "/documentation",
     frontMatter: {
       "title": "Documentation",
-      "description": "Guides on how to use, self-host, or develop against monetr."
+      "description": "Explore the monetr documentation to learn how to get started, host the application, and contribute to development. Find all the resources you need to effectively manage your finances with monetr."
     }
   }, {
     name: "install",
     route: "/documentation/install",
     children: [{
+      data: documentation_install_meta
+    }, {
       name: "docker",
       route: "/documentation/install/docker",
       frontMatter: {
-        "title": "Self-Host via Docker",
-        "description": "Self-host monetr via Docker containers"
+        "title": "Self-Host with Docker Compose",
+        "description": "Learn how to self-host monetr using Docker Compose. Follow step-by-step instructions to set up monetr, manage updates, and troubleshoot common issues for a seamless self-hosting experience."
       }
     }]
   }, {
     name: "install",
     route: "/documentation/install",
     frontMatter: {
-      "title": "Self-Host Installation",
-      "description": "Options on how to run monetr yourself for free."
+      "title": "Self-Hosted Installation",
+      "description": "Learn how to self-host monetr for free using Docker or Podman. Explore the benefits of self-hosting and get an overview of installation requirements and options."
     }
   }, {
     name: "use",
@@ -191,11 +194,18 @@ export const pageMap = [{
     children: [{
       data: documentation_use_meta
     }, {
+      name: "billing",
+      route: "/documentation/use/billing",
+      frontMatter: {
+        "title": "Billing",
+        "description": "Learn about monetr's billing process, including the 30-day free trial, subscription details, and how to manage or cancel your subscription. Stay informed about payments, access, and managing your account."
+      }
+    }, {
       name: "expense",
       route: "/documentation/use/expense",
       frontMatter: {
         "title": "Expenses",
-        "description": "Keep track of your regular or planned spending easily using expenses."
+        "description": "Learn how to manage recurring expenses like rent, subscriptions, and credit card payments with monetr. This guide covers creating, tracking, and optimizing expenses to ensure consistent budgeting and predictable Free-To-Use funds."
       }
     }, {
       name: "free_to_use",
@@ -208,13 +218,21 @@ export const pageMap = [{
       route: "/documentation/use/funding_schedule",
       frontMatter: {
         "title": "Funding Schedules",
-        "description": "Contribute to your budgets on a regular basis, like every time you get paid."
+        "description": "Discover how to set up and optimize funding schedules in monetr to manage your budgets effectively. Learn how funding schedules allocate funds for recurring expenses, ensure consistent budgeting, and maintain predictable Free-To-Use funds with every paycheck."
+      }
+    }, {
+      name: "getting_started",
+      route: "/documentation/use/getting_started",
+      frontMatter: {
+        "title": "Getting Started",
+        "description": "Learn how to set up monetr for effective financial management. This guide walks you through connecting your bank account via Plaid or setting up a manual budget, configuring budgets, and creating a funding schedule to take control of your finances."
       }
     }, {
       name: "goal",
       route: "/documentation/use/goal",
       frontMatter: {
-        "sidebarTitle": "Goal"
+        "title": "Goals",
+        "description": "Learn how to use monetr's Goals feature to save for one-time financial targets like vacations, loans, or down payments. Understand how Goals track contributions and spending, helping you plan effectively and meet your financial objectives without overfunding."
       }
     }, {
       name: "security",
@@ -227,10 +245,10 @@ export const pageMap = [{
         }
       }]
     }, {
-      name: "starting_fresh",
-      route: "/documentation/use/starting_fresh",
+      name: "transactions",
+      route: "/documentation/use/transactions",
       frontMatter: {
-        "sidebarTitle": "Starting Fresh"
+        "sidebarTitle": "Transactions"
       }
     }]
   }, {
@@ -238,15 +256,15 @@ export const pageMap = [{
     route: "/documentation/use",
     frontMatter: {
       "title": "Using monetr",
-      "description": "How to use and get the most out of monetr"
+      "description": "Discover how to use monetr to effectively manage your finances. Explore guides on setting up your account, managing recurring expenses, creating funding schedules, planning savings goals, and customizing your budget."
     }
   }]
 }, {
   name: "index",
   route: "/",
   frontMatter: {
-    "title": "monetr",
-    "description": "Always know what you can spend. Put a bit of money aside every time you get paid. Always be sure you'll have enough to cover your bills, and know what you have left-over to save or spend on whatever you'd like."
+    "title": "monetr: Take Control of Your Finances",
+    "description": "Take control of your finances, paycheck by paycheck, with monetr. Put aside what you need, spend what you want, and confidently manage your money with ease. Always know you’ll have enough for your bills and what’s left to save or spend."
   }
 }, {
   name: "policy",
