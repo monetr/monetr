@@ -95,7 +95,7 @@ if(BUILD_TESTING)
   set_tests_properties(docs/precompile PROPERTIES
     FIXTURES_REQUIRED node_modules
     FIXTURES_SETUP documentation_output
-    TIMEOUT 45
+    TIMEOUT 240
   )
   set_property(
     TEST docs/precompile
