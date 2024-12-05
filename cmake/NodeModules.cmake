@@ -20,6 +20,7 @@ set(RSPACK_EXECUTABLE ${NODE_MODULES_BIN}/rspack${JS_EXECUTABLE_SUFFIX})
 set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES_BIN}/email${JS_EXECUTABLE_SUFFIX})
 set(NEXT_EXECUTABLE ${NODE_MODULES_BIN}/next${JS_EXECUTABLE_SUFFIX})
 set(SITEMAP_EXECUTABLE ${NODE_MODULES_BIN}/next-sitemap${JS_EXECUTABLE_SUFFIX})
+set(HYPERLINK_EXECUTABLE ${NODE_MODULES_BIN}/hyperlink${JS_EXECUTABLE_SUFFIX})
 set(STORYBOOK_EXECUTABLE ${NODE_MODULES_BIN}/storybook${JS_EXECUTABLE_SUFFIX})
 
 add_custom_command(
@@ -31,6 +32,7 @@ add_custom_command(
          ${REACT_EMAIL_EXECUTABLE}
          ${NEXT_EXECUTABLE}
          ${SITEMAP_EXECUTABLE}
+         ${HYPERLINK_EXECUTABLE}
          ${CMAKE_SOURCE_DIR}/docs/node_modules
          ${CMAKE_SOURCE_DIR}/emails/node_modules
          ${CMAKE_SOURCE_DIR}/interface/node_modules
@@ -43,6 +45,7 @@ add_custom_command(
              ${REACT_EMAIL_EXECUTABLE}
              ${NEXT_EXECUTABLE}
              ${SITEMAP_EXECUTABLE}
+             ${HYPERLINK_EXECUTABLE}
              ${CMAKE_SOURCE_DIR}/docs/node_modules
              ${CMAKE_SOURCE_DIR}/emails/node_modules
              ${CMAKE_SOURCE_DIR}/interface/node_modules
@@ -94,6 +97,11 @@ add_custom_target(
 
 add_custom_target(
   tools.next-sitemap
+  DEPENDS dependencies.node_modules
+)
+
+add_custom_target(
+  tools.hyperlink
   DEPENDS dependencies.node_modules
 )
 

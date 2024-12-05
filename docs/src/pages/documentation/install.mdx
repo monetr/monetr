@@ -1,14 +1,60 @@
 ---
-title: Self-Host Installation
-description: Options on how to run monetr yourself for free.
+title: Self-Hosted Installation
+description: Learn how to self-host monetr for free using Docker or Podman. Explore the benefits of self-hosting and get an overview of installation requirements and options.
 ---
+
+import { Cards } from 'nextra/components';
+import { Container } from 'lucide-react';
 
 # Install monetr
 
-monetr is completely free to self host, if you want to run monetr on your own computer then this guide will walk you
-through how to get it running.
+monetr is completely free to self-host, giving you full control over your data and setup. This guide provides an
+overview of how to install and run monetr on your own infrastructure.
 
-At the moment the only officially supported way to run monetr is via a container (Docker or Podman). Support for
-additional installation types will be added in the future as desire to leverage those types of installation increases.
+## Why Self-Host monetr?
 
+Self-hosting monetr offers several advantages:
 
+- **Cost-Free Usage**: Run monetr without paying subscription fees.  
+  <small>_Note: If you use Plaid as a data provider, you may incur additional costs. See [Plaid’s
+  Pricing](https://plaid.com/pricing/) for details._</small>
+- **Full Data Ownership**: Keep complete control over your financial data.
+
+Whether you’re interested in hosting your own applications or prefer a private alternative to hosted services,
+self-hosting gives you more control over your data and setup.
+
+## Requirements for Self-Hosting
+
+Before you begin, ensure you have the following:
+
+- **Container Runtime**: Docker Compose is the officially supported method for running monetr.
+- **Server or Host Machine**:
+  - Recommended: A system with at least 512MB of RAM and 1GB of disk space.
+- **Database**: monetr runs with PostgreSQL, which is included in the Docker Compose setup.
+- **Domain and SSL (Optional)**: For public access, consider setting up a domain with HTTPS.
+
+## Installation Options
+
+Currently, monetr only officially supports container-based installations:
+
+### **Install via Docker Compose**
+
+The easiest way to self-host monetr is by using Docker Compose. This setup includes all necessary services, such as the
+monetr application and PostgreSQL.
+
+<Cards.Card
+  icon={<Container />}
+  title="Follow the Docker Compose Installation Guide"
+  description="Set up your monetr account, link bank accounts, or create a manual budget."
+  href="/documentation/install/docker"
+/>
+
+## What’s Next?
+
+After installing monetr, you can:
+
+- Configure it for your specific needs. See [Configuration](./configure).
+- Explore advanced hosting options like reverse proxies or custom domains.
+- Explore available resources for feedback and support, including documentation updates and support channels.
+
+For detailed steps, visit the full [Docker Compose Installation Guide](./install/docker).

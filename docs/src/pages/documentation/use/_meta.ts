@@ -1,8 +1,9 @@
 export default {
-  'starting_fresh': 'Starting Fresh',
+  'getting_started': 'Getting Started',
   'funding_schedule': 'Funding Schedules',
   'expense': 'Expenses',
   'goal': 'Goals',
+  'transactions': 'Transactions',
   'free_to_use': 'Free-To-Use',
   'security': 'Security',
 };

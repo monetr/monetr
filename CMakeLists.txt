@@ -47,7 +47,6 @@ include(GolangUtils)
 add_subdirectory("${CMAKE_SOURCE_DIR}/images")
 add_subdirectory("${CMAKE_SOURCE_DIR}/interface")
 add_subdirectory("${CMAKE_SOURCE_DIR}/stories")
-add_subdirectory("${CMAKE_SOURCE_DIR}/docs")
 add_subdirectory("${CMAKE_SOURCE_DIR}/emails")
 
 if(BUILD_DEPLOYMENT_TARGETS)
@@ -209,6 +208,9 @@ foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
   get_filename_component(DIR ${SUB_PACKAGE} DIRECTORY)
   add_subdirectory(${DIR})
 endforeach()
+
+# In order for documentation tests to work this has to be after the tests are setup.
+add_subdirectory("${CMAKE_SOURCE_DIR}/docs")
 
 # Prevent caching of this value
 unset(BUILD_TESTING)

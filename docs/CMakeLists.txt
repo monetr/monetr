@@ -81,3 +81,41 @@ add_custom_target(
     ${PUBLIC_FILES}
     ${DOCS_CONFIG_FILES}
 )
+
+###############################################################################
+# Documentation Tests                                                         #
+###############################################################################
+
+if(BUILD_TESTING)
+  add_test(
+    NAME docs/precompile
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} -t build.docs
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  )
+  set_tests_properties(docs/precompile PROPERTIES
+    FIXTURES_REQUIRED node_modules
+    FIXTURES_SETUP documentation_output
+    TIMEOUT 240
+  )
+  set_property(
+    TEST docs/precompile
+    PROPERTY LABELS "documentation"
+  )
+
+  set(HYPERLINK_GITHUB_ARGS)
+  if(DEFINED ENV{CI})
+    set(HYPERLINK_GITHUB_ARGS "--github-actions")
+  endif()
+  add_test(
+    NAME docs/check-links
+    COMMAND ${HYPERLINK_EXECUTABLE} ${CMAKE_SOURCE_DIR}/docs/out --sources ${CMAKE_SOURCE_DIR}/docs/src/pages ${HYPERLINK_GITHUB_ARGS}
+  )
+  set_tests_properties(docs/check-links PROPERTIES
+    FIXTURES_REQUIRED documentation_output
+    TIMEOUT 45
+  )
+  set_property(
+    TEST docs/check-links
+    PROPERTY LABELS "documentation"
+  )
+endif()

@@ -1,11 +1,12 @@
 ---
 title: Configuration
-description: Configure self-hosted monetr servers
+description: Learn how to configure your self-hosted monetr installation using the comprehensive YAML configuration file. Explore detailed guides for customizing server, database, email, security, and more.
 ---
 
 import { Cards } from 'nextra/components';
+import { Server, Database, Shield, Link, ClipboardList, Link2, Lock, Send, Network, AlertTriangle, Terminal, Mail, Folder } from 'lucide-react';
 
-# Configure
+# Configure monetr
 
 Configure your monetr installation using the following guides. monetr offers many configuration options, make sure to
 read the documentation of each option thoroughly before customizing monetr.
@@ -49,58 +50,82 @@ variables:
 
 Each of the sub-configurations noted above are documented in more detail in the following guides:
 
-<Cards>
-  <Cards.Card
-    title="CORS"
-    href="/documentation/configure/cors"
-  />
-  <Cards.Card
-    title="Email"
-    href="/documentation/configure/email"
-  />
-  <Cards.Card
-    title="Encryption (Key Management)"
-    href="/documentation/configure/kms"
-  />
-  <Cards.Card
-    title="Links"
-    href="/documentation/configure/links"
-  />
-  <Cards.Card
-    title="Logging"
-    href="/documentation/configure/logging"
-  />
-  <Cards.Card
-    title="Plaid"
-    href="/documentation/configure/plaid"
-  />
-  <Cards.Card
-    title="PostgreSQL"
-    href="/documentation/configure/postgres"
-  />
-  <Cards.Card
-    title="ReCAPTCHA"
-    href="/documentation/configure/captcha"
-  />
-  <Cards.Card
-    title="Redis"
-    href="/documentation/configure/redis"
-  />
-  <Cards.Card
-    title="Security"
-    href="/documentation/configure/security"
-  />
-  <Cards.Card
-    title="Sentry"
-    href="/documentation/configure/sentry"
-  />
-  <Cards.Card
-    title="Server"
-    href="/documentation/configure/server"
-  />
-  <Cards.Card
-    title="Storage"
-    href="/documentation/configure/server"
-  />
-</Cards>
+<Cards.Card
+  icon={<Network />}
+  title="CORS"
+  description="Set up cross-origin resource sharing (CORS) to manage API access from different origins."
+  href="/documentation/configure/cors"
+/>
+<Cards.Card
+  icon={<Mail />}
+  title="Email"
+  description="Configure email and SMTP settings for user notifications and password recovery."
+  href="/documentation/configure/email"
+/>
+<Cards.Card
+  icon={<Lock />}
+  title="Encryption (Key Management)"
+  description="Set up key management systems (KMS) for secure data encryption and access control."
+  href="/documentation/configure/kms"
+/>
+<Cards.Card
+  icon={<Link />}
+  title="Links"
+  description="Manage connected and manual links for account integrations and transactions."
+  href="/documentation/configure/links"
+/>
+<Cards.Card
+  icon={<ClipboardList />}
+  title="Logging"
+  description="Configure logging levels and destinations for application debugging and monitoring."
+  href="/documentation/configure/logging"
+/>
+<Cards.Card
+  icon={<Link2 />}
+  title="Plaid"
+  description="Integrate Plaid for bank data connections and financial tracking."
+  href="/documentation/configure/plaid"
+/>
+<Cards.Card
+  icon={<Database />}
+  title="PostgreSQL"
+  description="Set up and manage the primary PostgreSQL database for monetr."
+  href="/documentation/configure/postgres"
+/>
+<Cards.Card
+  icon={<Shield />}
+  title="ReCAPTCHA"
+  description="Enable reCAPTCHA to prevent bots and mitigate spam."
+  href="/documentation/configure/captcha"
+/>
+<Cards.Card
+  icon={<Terminal />}
+  title="Redis"
+  description="Configure Redis for caching and improving application performance."
+  href="/documentation/configure/redis"
+/>
+<Cards.Card
+  icon={<Lock />}
+  title="Security"
+  description="Customize authentication, token settings, and other security features."
+  href="/documentation/configure/security"
+/>
+<Cards.Card
+  icon={<AlertTriangle />}
+  title="Sentry"
+  description="Enable Sentry integration for error reporting and performance monitoring."
+  href="/documentation/configure/sentry"
+/>
+<Cards.Card
+  icon={<Server />}
+  title="Server"
+  description="Configure HTTP listener and server settings."
+  href="/documentation/configure/server"
+/>
+<Cards.Card
+  icon={<Folder />}
+  title="Storage"
+  description="Set up file and object storage for your monetr installation."
+  href="/documentation/configure/storage"
+/>
 

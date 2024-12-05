@@ -1,37 +1,43 @@
 ---
-title: Self-Host via Docker
-description: Self-host monetr via Docker containers
+title: Self-Host with Docker Compose
+description: Learn how to self-host monetr using Docker Compose. Follow step-by-step instructions to set up monetr, manage updates, and troubleshoot common issues for a seamless self-hosting experience.
 ---
 
 import { Callout } from 'nextra/components'
 import { Steps } from 'nextra/components'
 
-# Docker
+# Docker Compose
 
-Self-hosting monetr via Docker or a container is the easiest way to run monetr yourself. This guide does not cover how
-to install Docker itself; please follow [Docker's Installation Guide](https://docs.docker.com/engine/install/) to get it
-setup on your own computer.
+Self-hosting monetr via Docker Compose is the simplest and officially supported way to run monetr yourself. This guide
+assumes Docker is already installed on your system. If not, please refer to [Docker's Installation
+Guide](https://docs.docker.com/engine/install/) to set it up.
 
-Container images are built for monetr with every tagged release and pushed to both
-[DockerHub](https://hub.docker.com/r/monetr/monetr) and [GitHub Container
-Registry](https://github.com/monetr/monetr/pkgs/container/monetr).
+monetr's container images are built with every tagged release and are available on both:
+- [DockerHub](https://hub.docker.com/r/monetr/monetr)
+- [GitHub Container Registry (GHCR)](https://github.com/monetr/monetr/pkgs/container/monetr)
 
-Images from both registry's should be identical for the same image tag, so you can use whichever registry you prefer.
+Images from both registries are identical for the same version tag, so feel free to use your preferred registry.
 
 ## Image Tags
 
-Every release monetr will create two tags for the container image. The example `docker-compose.yaml` file defaults to
-using the `latest` tag for maintainability reasons, but it is recommended to use a pinned version and leverage tools to
-perform automatic updates. This makes it easier to rollback to a previous version if needed.
+Each monetr release provides two types of container image tags:
 
 ### `latest` Tag
 
-The `latest` tag will always be the most recent tagged version of monetr. For example: `ghcr.io/monetr/monetr:latest`.
+The `latest` tag always points to the most recent version of monetr. For example:  
+`ghcr.io/monetr/monetr:latest`
 
-### Versioned Tag
+<Callout type="warning">
+  **Note**  
+  Using the `latest` tag is convenient but can lead to unexpected behavior if updates introduce breaking changes.
+</Callout>
 
-There will always be a versioned tag such as `0.18.31`. For example `ghcr.io/monetr/monetr:0.18.31`. monetr's versions
-will generally have a `v` prefix (`v0.18.31`), but images will not have this prefix in their tag.
+### Versioned Tags
+
+Versioned tags, such as `0.18.31`, refer to specific releases. For example:  
+`ghcr.io/monetr/monetr:0.18.31`
+
+Version tags are recommended for stability. By pinning a version, you can control updates and easily roll back if needed. monetr's version numbers use a `v` prefix (e.g., `v0.18.31`), but container tags omit this prefix.
 
 ## Docker Compose
 
@@ -117,4 +123,51 @@ docker compose start
 Things like database migrations are automatically run when using the provided compose file.
 
 </Steps>
+
+## Troubleshooting
+
+If you encounter issues while setting up or running monetr, here are some common problems and their solutions:
+
+### Containers Won’t Start
+
+If the containers fail to start or exit immediately:
+
+- Check the logs using:
+  ```shell
+  docker compose logs -f
+  ```
+
+### Cannot Access monetr in the Browser
+
+If `http://localhost:4000` doesn’t load:
+
+Verify the containers are running using:
+
+``` shell
+docker compose ps
+```
+
+Ensure no other services are using port 4000. Modify the `docker-compose.yaml` file to use a different port if needed.
+Check firewall or network settings on your machine.
+
+### Update Issues After Pulling New Images
+
+If monetr doesn't work correctly after an update:
+
+- Check for breaking changes in the [Release Notes](https://github.com/monetr/monetr/releases)
+- Run
+  ```shell
+  docker compose stop
+  docker compose up -d
+  ```
+  This should recreate the containers for monetr without deleting any data on the volumes.
+
+### Need More Help?
+
+If these solutions don't resolve your issue:
+
+- Check the [monetr GitHub Issues](https://github.com/monetr/monetr/issues) for similar problems.
+- Create a new issue with detailed logs and steps to reproduce the problem.
+- Reach out for assistance on [Discord](https://discord.gg/68wTCXrhuq).
+
 

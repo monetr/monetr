@@ -1,6 +1,6 @@
 ---
 title: Funding Schedules
-description: Contribute to your budgets on a regular basis, like every time you get paid.
+description: Discover how to set up and optimize funding schedules in monetr to manage your budgets effectively. Learn how funding schedules allocate funds for recurring expenses, ensure consistent budgeting, and maintain predictable Free-To-Use funds with every paycheck.
 ---
 
 import { Callout } from 'nextra/components'
@@ -9,44 +9,41 @@ import { Callout } from 'nextra/components'
 
 ## What Are Funding Schedules
 
-Funding schedules are how monetr knows when to put funds aside for your budgets. An easy way to think of funding
-schedules is "when do you get paid". Allocating funds to your budgets every time you get paid makes sure that you keep
-your [Free-To-Use](./free_to_use) predictable and consistent.
+Funding schedules let **monetr** know when to allocate funds for your budgets. Think of funding schedules as "when do
+you get paid." Allocating funds each time you get paid ensures that your [Free-To-Use](./free_to_use) funds remain
+predictable and consistent.
 
-You can create multiple funding schedules if you want, like if you want to put money aside for something only once a
-month or a little bit every week. Each [Expense](./expense) or [Goal](./goal) you create will always be associated with
-a funding schedule though.
+You can create multiple funding schedules if needed, such as putting money aside weekly or only once a month. Every
+[Expense](./expense) or [Goal](./goal) you create must be tied to a funding schedule.
 
-Funding schedules are unique per bank account though, not per connection. For example; if you have a checking and a
-savings account at the same bank. You may want to create a funding schedule for _each_ of those accounts if you want to
-budget within both of them. You can have as many funding schedules per bank account as you would like, but the name of
-the funding schedule must be unique within that bank account.
+Funding schedules are unique to each bank account, not to the entire bank connection. For example, if you have both a
+checking and savings account at the same bank, you may want separate funding schedules for each account. You can create
+multiple funding schedules per account, but each must have a unique name within the account.
 
-This makes it easier to have one funding schedule in your checking account, for example. With that funding schedule
-having the estimated deposit amount for most of your paycheck. Then have a secondary funding schedule for your savings
-account with an estimate of how much leftover is deposited there each time you are paid.
+This flexibility allows, for instance, a primary funding schedule for your checking account, covering most of your
+paycheck, and a secondary schedule for your savings account, allocating leftover funds.
 
-## Create A Funding Schedule
+## Create a Funding Schedule
 
-To create a funding schedule you can navigate to the funding view of your current account by clicking **Funding
-Schedules** in the sidebar.
+To create a funding schedule, navigate to the funding view of your current account by clicking **Funding Schedules** in
+the sidebar.
 
 ![Funding Schedules Empty View](./assets/funding_empty_view.png)
 
-Then click **New Funding Schedule** in the top navigation to open the create modal.
+Then, click **New Funding Schedule** in the top navigation to open the creation modal.
 
 ![New Funding Modal](./assets/funding_new_modal.png)
 
-### When do you get paid next?
+### When Do You Get Paid Next?
 
-This date is used by monetr as a baseline for repeating the funding schedule, it will affect the options presented to
-you in the [How often do you get paid?](#how-often-do-you-get-paid) dropdown.
+This date acts as a baseline for the funding schedule's recurrence. It influences the options available in the [How
+Often Do You Get Paid?](#how-often-do-you-get-paid) dropdown.
 
-For example; if you get paid every 2 weeks on Friday, you will want to choose the _next_ Friday that you get paid.
+For example, if you’re paid every two weeks on Friday, select the next Friday you’ll be paid.
 
-### How often do you get paid?
+### How Often Do You Get Paid?
 
-monetr supports a few different recurring patterns for funding schedules. Namely:
+monetr supports the following recurring patterns:
 
 - Weekly
 - Every other week
@@ -56,57 +53,57 @@ monetr supports a few different recurring patterns for funding schedules. Namely
 - Every six months
 - Yearly
 
-If the date you selected in [When do you get paid next?](#when-do-you-get-paid-next) is the 1st, 15th, or last day of
-the month; then you will also have the following options available:
+If the date chosen in [When Do You Get Paid Next?](#when-do-you-get-paid-next) is the 1st, 15th, or last day of the
+month, these additional options are available:
 
 - 1st and 15th of every month
 - 15th and last day of every month
 
 ## Additional Options
 
-Funding schedules have two additional options to provide a better budgeting experience. They can be seen on the details
-page of the funding schedule. 
+Funding schedules offer two optional features for a more tailored budgeting experience. These options are visible on the
+funding schedule’s details page.
 
 ![Funding Schedule Details](./assets/funding_details.png)
 
 ### Excluding Weekends
 
-If you get paid on the 1st and 15th, or 15th and last day of every month; then your paycheck may be available to you
-earlier than those exact days each month. This is because deposits are not usually processed on weekends or holidays. If
-you want your funding schedule to more closely align with when your paycheck may actually be deposited, then you should
-go to the details page for your funding schedule and enable **Exclude Weekends**.
+If you get paid on the 1st and 15th, or 15th and last day of the month, your paycheck may arrive earlier when the date
+falls on a weekend. Deposits aren’t typically processed on weekends or holidays. To align your funding schedule with
+when funds are likely deposited, enable **Exclude Weekends** in the details page.
 
-When exclude weekends is enabled, if your funding schedule's _next recurrence_ were to fall on a Saturday or a Sunday;
-then the date the funding schedule will be processed is adjusted to be the previous _week day_.
+When enabled, if the next scheduled funding date falls on a Saturday or Sunday, it will adjust to the previous weekday.
 
-<Callout type="info">
-  Holidays are not yet taken into account, but will be in the future. Particularly bank holidays where deposits might be
-  affected.
-</Callout>
+<Callout type="info"> Holidays are not yet accounted for, but this feature will be added in the future, particularly for
+    bank holidays that impact deposits. </Callout>
 
 ### Estimated Deposit
 
-If you provide an estimated deposit amount for the funding schedule, this will be used in monetr's forecasting tools.
-Allowing you to have visibility into how much is being put aside with each of your pay checks ahead of time. As well as
-providing insight into how much will be leftover as [Free-To-Use](./free_to_use) the next time you get paid.
+Providing an estimated deposit amount helps monetr’s forecasting tools. This allows you to:
+
+- Anticipate how much will be set aside from each paycheck.
+- See an estimate of your [Free-To-Use](./free_to_use) funds after budgeting.
 
 ### Estimated Contribution
 
-Once you have created [Expenses](./expense) or [Goals](./goal) that use your funding schedule, monetr will provide an
-"Estimated Contribution" for your funding schedule on the funding schedule page. This number is the amount of money
-monetr expects to contribute to all of your expenses and/or goals on the next date of the funding schedule. It is good
-to keep this estimated amount _below_ the amount you will actuall receive each time your funding schedule occurs. If
-this number is greater than your expected deposit, then you may not have enough funds to cover all of your expenses.
+Once you’ve linked [Expenses](./expense) or [Goals](./goal) to a funding schedule, monetr calculates an "Estimated
+Contribution" displayed on the funding schedule page. This value represents how much monetr expects to allocate toward
+your budgets on the next funding date.
+
+Ensure the estimated contribution is **less than** your expected deposit. If it exceeds your deposit, you may not have
+enough funds to cover all expenses.
 
 ![Estimated Contribution](./assets/funding_estimate_example.png)
 
 ### Funding Timeline
 
-As you create more [Expenses](./expense) and [Goals](./goal), your funding schedule can provide some high level insights
-into what your next funding events will look like.
+As you create more [Expenses](./expense) and [Goals](./goal), the funding schedule provides insights into upcoming
+funding events.
 
 ![Funding Timeline Example](./assets/funding_timeline.png)
 
-This timeline will show you roughly how much money it expects you'll need each time you get paid, and if you have
-specified an [Estimated Deposit](#estimated-deposit) it will also show you how much it expects will be left over after
-your budgets have been accommodated.
+This timeline shows:
+
+- How much money is expected to be allocated each time you’re paid.
+- If you’ve specified an [Estimated Deposit](#estimated-deposit), it also shows the leftover amount after accommodating
+your budgets.

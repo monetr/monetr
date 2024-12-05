@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@fontsource-variable/inter": "5.1.0",
+    "lucide-react": "0.456.0",
     "next": "15.0.3",
     "next-sitemap": "4.2.3",
     "nextra": "3.2.4",

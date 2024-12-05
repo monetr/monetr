@@ -1,6 +1,6 @@
 ---
 title: Expenses
-description: Keep track of your regular or planned spending easily using expenses.
+description: Learn how to manage recurring expenses like rent, subscriptions, and credit card payments with monetr. This guide covers creating, tracking, and optimizing expenses to ensure consistent budgeting and predictable Free-To-Use funds.
 ---
 
 import { Callout } from 'nextra/components'
@@ -9,61 +9,68 @@ import { Callout } from 'nextra/components'
 
 ## What Are Expenses
 
-Expenses are how monetr keeps track of things you need to spend money on on a regular basis. Things like rent, car
-payments, or subscriptions. monetr keeps track of how much you need for each of these, and when you need it by. It will
-automatically put a portion of the expense aside each time you get paid via [Funding Schedules](./funding). This way you
-are not covering an entire expense out of a single paycheck and your [Free-To-Use](./free_to_use) should be pretty
-similar each time you get paid.
+Expenses are how **monetr** helps you manage recurring financial obligations, such as rent, car payments, or
+subscriptions. The platform tracks how much money is required for each expense and when it’s due. Using [Funding
+Schedules](./funding_schedule), monetr automatically sets aside a portion of the expense from each paycheck. This
+approach ensures that you don’t need to cover the full amount from a single paycheck. As a result, your
+[Free-To-Use](./free_to_use) funds should remain consistent with every paycheck.
 
-It is recommended to create a single expense for each thing you need to spend money on. For example creating an expense
-for rent that happens every month on the first of the month will make sure you always have enough funds to cover rent.
-Expenses are less ideal for things that do not happen consistently, such as eating out or putting money aside for large
-purchases.
+This approach is similar to envelope budgeting, where funds are allocated to specific categories to ensure they’re
+available for designated expenses. Like envelope budgeting, monetr helps you plan ahead and manage your cash flow
+effectively. However, monetr automates the process by calculating how much to set aside based on your paycheck schedule
+and expense deadlines.
 
-Expenses are also unique per individual bank account. If you have regular expense that comes out of multiple accounts,
-it is recommended to create an expense in each of those accounts in monetr and set the amounts on them to be equal to
-how much each account contributes to that expense.
+It’s best to create a separate expense entry for each recurring obligation. For example, setting up a monthly expense
+for rent due on the first of the month ensures you’ll always have enough funds available to pay it on time. However,
+expenses are less suitable for irregular costs, such as dining out or saving for large, infrequent purchases.
 
-## Create An Expense
+Each expense is tied to an individual bank account. If a regular expense is paid from multiple accounts, create separate
+expense entries in monetr for each account. Assign the appropriate amount to each entry based on how much each account
+contributes to that expense.
 
-To create an expense you can navigate to the expense view of your current account by clicking **Expenses** in the
-sidebar.
+<Callout type="info">
+  **Looking for something else?**  
+  If you're trying to save for a one-time financial target or track contributions toward a larger goal, consider using
+  monetr's [Goals](./goal) feature instead. Goals are ideal for managing non-recurring targets like vacations, down
+  payments, or paying off loans, and they provide more flexibility in tracking usage over time.
+</Callout>
+
+## Create an Expense
+
+To create an expense, navigate to the expense view for your current account by clicking **Expenses** in the sidebar.
 
 ![Expenses Empty View](./assets/expense_empty.png)
 
-Then click **New Expense** in the top navigation to open the create modal.
+Then, click **New Expense** in the top navigation to open the creation modal.
 
 ![New Expense Modal](./assets/expense_new_modal.png)
 
-### How much do you need?
+### How Much Do You Need?
 
-monetr needs to know how much you'll need to spend, if your expense amount changes periodically you should set this
-amount to be the highest the expense could be (within reason). For example, a utility bill can fluctuate throughout the
-year. You can adjust the expense's amount throughout the year if you want, or you can set the amount to be on the higher
-end of what you expect the bill to be. When you use the expense monetr will then have funds leftover, which will reduce
-how much needs to be put aside each time you are paid.
+monetr needs to know the amount required for the expense. If the amount varies (e.g., utility bills), set it to the
+highest expected amount within reason. For example, you might set a utility bill to its seasonal peak. You can adjust
+the amount as needed, and any surplus funds will reduce the contribution required from future paychecks.
 
-### When do you need it next?
+### When Do You Need It Next?
 
-Similar to funding schedules, monetr needs to know when the expense is due next. This date will be the basis for how the
-spending will repeat going forward. The date can be changed afterwards if needed.
+monetr needs the next due date for the expense. This date determines how the expense repeats going forward. You can
+update it later if necessary.
 
-If your expense can fall on a few different days, its best to pick a date a few days before the expense is due. This way
-monetr will make sure the funds are available _before_ the expense is due. Contributions to the expense will still be
-balanced each time funding schedules are processed.
+If the expense’s due date varies, select a date a few days before it’s typically due. This ensures funds are available
+in advance. Contributions will still align with your funding schedule.
 
-### When do you want to fund the expense?
+### How Do You Want to Fund It?
 
-If you haven't already created a [Funding Schedule](./funding_schedule), then you'll be prompted too here. Otherwise you
-can select the funding schedule that matches how you want to contribute to this expense. If you've setup your funding
-schedule to match when you get paid, then you'll contribute to your expense a little bit every payday.
+If you haven’t already created a [Funding Schedule](./funding_schedule), you’ll be prompted to do so here. Otherwise,
+select an existing schedule to match how you want to contribute. For example, if your funding schedule aligns with your
+paychecks, you’ll contribute a portion of the expense each payday.
 
-### How frequently do you need this expense?
+### How Frequently Do You Need This Expense?
 
-Similar to funding schedules, you can select a frequency that you'll need the expense. monetr will repeat the expense on
-that frequency going forward, making sure enough funds are put aside before the date it is due.
+Choose how often the expense occurs. monetr will repeat the expense on this frequency and ensure funds are set aside
+before the due date.
 
-Supported frequencies are:
+Supported frequencies include:
 
 - Weekly
 - Every other week
@@ -73,43 +80,43 @@ Supported frequencies are:
 - Every six months
 - Yearly
 
-If the date you selected in [When do you need it next?](#when-do-you-need-it-next) is the 1st, 15th, or last day of
-the month; then you will also have the following options available:
+If the date selected in [When Do You Need It Next?](#when-do-you-need-it-next) is the 1st, 15th, or last day of the
+month, these additional options are available:
 
 - 1st and 15th of every month
 - 15th and last day of every month
 
-## How expenses help
+## How Expenses Help
 
-Once you have created your expense(s), monetr will show you how much it will contribute to each expense the next time
-your funding schedule happens.
+After creating expenses, monetr calculates contributions based on your funding schedule. For example, if you’re paid
+twice a month, half the amount will be set aside each paycheck to balance contributions.
 
 ![Expenses View Simple](./assets/expense_view_simple.png)
 
-On the overall expense view; you'll be able to see when an expense is due next. In the screenshot above it is **December
-30th**. How frequently that expense is due (every month on the 30th). How much will be contributes towards that expense
-the next time you get paid. In the example we are paid twice a month, so the expense will have half of its amount put
-aside each check to balance out the contributions. As well as how much is currently put aside for that expense
-(currently $0.00).
+In the expenses overview, you’ll see:
+
+- The next due date (e.g., **December 30th** in the screenshot above).
+- How frequently the expense occurs (e.g., monthly on the 30th).
+- The amount to be contributed next paycheck.
+- The current amount set aside for the expense (e.g., $0.00 in this example).
 
 ## Expense Details
 
-When you click on an individual expense, you can see even more information about the expense.
+Click on an individual expense to view more details.
 
 ![Expense Details Example](./assets/expense_rent_details.png)
 
-All of the details shown on this page are also available on the list view, but the expense can be modified if things
-change. You can also [Transfer](./free_to_use#transfer-allocating-funds) to manually change how much is put aside for a
-single expense.
+This page provides all the information available in the list view and allows you to modify the expense if needed. You
+can also [Transfer](./free_to_use#transfer-allocating-funds) funds to adjust the amount set aside for the expense
+manually.
 
 <Callout type="info">
-  When you remove an expense, any funds currently put aside for that expense are returned to the
-  [Free-To-Use](./free_to_use) amount.
+  When you remove an expense, any funds set aside for it are returned to your [Free-To-Use](./free_to_use) amount.
 </Callout>
 
 ## Expense Timeline
 
-Similar to funding schedules, individual expenses will show you a timeline of what monetr predicts will happen. Showing
-you when funds are contributed towards an expense, as well as when an expense is expected to be used.
+Each expense includes a timeline showing predicted contributions and expected usage. This helps you track when funds
+will be allocated and when the expense is due.
 
 ![Expense Timeline Example](./assets/expense_rent_timeline.png)

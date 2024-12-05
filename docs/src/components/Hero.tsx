@@ -1,8 +1,8 @@
 import Image from 'next/image';
 
-import Particles from './Particles';
 import MobileTransactionScreenshot from '@monetr/docs/assets/mobile_transactions_example.png';
 import TransactionScreenshot from '@monetr/docs/assets/transactions_example.png';
+import Particles from '@monetr/docs/components/Particles';
 
 export default function Hero(): JSX.Element {
   return (
@@ -36,24 +36,23 @@ export default function Hero(): JSX.Element {
             </h1>
           </div>
 
-          <h1 className='text-4xl sm:text-5xl font-bold'>Always know what you can spend</h1>
+          <h1 className='text-4xl sm:text-5xl font-bold'>Take control of your finances, paycheck by paycheck</h1>
 
-          <h2 className='text-lg sm:text-xl font-medium'>
-            Put a bit of money aside every time you get paid. Always be sure you'll have enough to cover your bills, and
-            know what you have left-over to save or spend on whatever you'd like.
+          <h2 className='text-xl sm:text-2xl font-medium'>
+            Put aside what you need, spend what you want.
           </h2>
         </div>
 
         <Image
           priority={ true }
           src={ TransactionScreenshot }
-          alt='Easily keep track of transactions'
+          alt='Screenshot of the monetr app showing the main view of transactions and balances of the budget.'
           className='hidden sm:block rounded-md z-10 shadow-lg'
         />
         <Image
           priority={ true }
           src={ MobileTransactionScreenshot }
-          alt='Easily keep track of transactions'
+          alt='Screenshot of the monetr app showing the main view of transactions and balances of the budget.'
           className='block sm:hidden rounded-md z-10 shadow-lg'
         />
       </div>
