@@ -108,7 +108,7 @@ if(BUILD_TESTING)
   endif()
   add_test(
     NAME docs/check-links
-    COMMAND ${HYPERLINK_EXECUTABLE} ${CMAKE_SOURCE_DIR}/docs/out ${HYPERLINK_GITHUB_ARGS}
+    COMMAND ${HYPERLINK_EXECUTABLE} ${CMAKE_SOURCE_DIR}/docs/out --sources ${CMAKE_SOURCE_DIR}/docs/src/pages ${HYPERLINK_GITHUB_ARGS}
   )
   set_tests_properties(docs/check-links PROPERTIES
     FIXTURES_REQUIRED documentation_output
