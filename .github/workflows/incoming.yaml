@@ -131,6 +131,7 @@ jobs:
           root_dir: ${{ github.workspace }}
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Test Results Report
+        if: always()
         uses: codecov/test-results-action@v1
         with:
           name: monetr
