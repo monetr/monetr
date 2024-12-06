@@ -269,8 +269,8 @@ importers:
         version: 5.0.1(@types/react@18.3.12)(react@18.3.1)(use-sync-external-store@1.2.2(react@18.3.1))
     devDependencies:
       '@imagemagick/magick-wasm':
-        specifier: 0.0.31
-        version: 0.0.31
+        specifier: 0.0.32
+        version: 0.0.32
       '@rsbuild/core':
         specifier: 1.1.7
         version: 1.1.7
@@ -1546,8 +1546,8 @@ packages:
   '@iconify/utils@2.1.33':
     resolution: {integrity: sha512-jP9h6v/g0BIZx0p7XGJJVtkVnydtbgTgt9mVNcGDYwaa7UhdHdI9dvoq+gKj9sijMSJKxUPEG2JyjsgXjxL7Kw==}
 
-  '@imagemagick/magick-wasm@0.0.31':
-    resolution: {integrity: sha512-QNivAUxSaItuiY8ziI/vRy6TtoecD7TOsD1LGZCG3wv8lfbdGbIj2QiJk0FlGkGwAVR966NlD3mkxPNvQrvq0w==}
+  '@imagemagick/magick-wasm@0.0.32':
+    resolution: {integrity: sha512-+niNRuJk4ZPE9PDzBg19Kjyl+CEdAgaJBXQSFXmO1CTDoYOxrZ3DBdstfs1+8r77hjoiph+4Wu4qpldfcrKm7A==}
 
   '@img/sharp-darwin-arm64@0.33.5':
     resolution: {integrity: sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ==}
@@ -10283,7 +10283,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@imagemagick/magick-wasm@0.0.31': {}
+  '@imagemagick/magick-wasm@0.0.32': {}
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:

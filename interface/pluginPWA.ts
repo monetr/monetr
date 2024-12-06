@@ -95,7 +95,10 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
             image.resize(logoWidth, logoHeight);
             image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
             image.quality = 90;
-            return image.write(MagickFormat.Png, data => data);
+            // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
+            // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
+            // See https://github.com/dlemstra/magick-wasm/issues/185
+            return image.write(MagickFormat.Png, data => [...data]);
           }))),
         ));
 
@@ -111,7 +114,10 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
             image.resize(logoWidth, logoHeight);
             image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
             image.quality = 90;
-            return image.write(MagickFormat.Png, data => data);
+            // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
+            // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
+            // See https://github.com/dlemstra/magick-wasm/issues/185
+            return image.write(MagickFormat.Png, data => [...data]);
           }))),
         );
         compilation.emitAsset(
@@ -125,7 +131,10 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
             image.resize(logoWidth, logoHeight);
             image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
             image.quality = 90;
-            return image.write(MagickFormat.Png, data => data);
+            // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
+            // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
+            // See https://github.com/dlemstra/magick-wasm/issues/185
+            return image.write(MagickFormat.Png, data => [...data]);
           }))),
         );
 
@@ -140,7 +149,10 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
             image.resize(logoWidth, logoHeight);
             image.extent(new MagickGeometry(width, height), Gravity.Center, MagickColors.Transparent);
             image.quality = 90;
-            return image.write(MagickFormat.Png, data => data);
+            // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
+            // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
+            // See https://github.com/dlemstra/magick-wasm/issues/185
+            return image.write(MagickFormat.Png, data => [...data]);
           }))),
         );
 
@@ -159,7 +171,10 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
             image.resize(logoWidth, logoHeight);
             image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
             image.quality = 90;
-            return image.write(MagickFormat.Png, data => data);
+            // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
+            // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
+            // See https://github.com/dlemstra/magick-wasm/issues/185
+            return image.write(MagickFormat.Png, data => [...data]);
           }))),
         ));
 
@@ -176,9 +191,13 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
             const logoWidth = +((width * padding).toFixed(0));
             const logoHeight = +((height * padding).toFixed(0));
             image.resize(logoWidth, logoHeight);
-            image.extent(new MagickGeometry(width, height), Gravity.Center, backgroundColor);
+            const background = maskable ? backgroundColor : MagickColors.Transparent;
+            image.extent(new MagickGeometry(width, height), Gravity.Center, background);
             image.quality = 90;
-            return image.write(MagickFormat.Png, data => data);
+            // Need to do `[...data]`. The data array is in managemend memory and may be freed after this function is
+            // complete. Unpacking it into another array copies the memory so we don't get corrupt files.
+            // See https://github.com/dlemstra/magick-wasm/issues/185
+            return image.write(MagickFormat.Png, data => [...data]);
           }))),
         ));
         return;
