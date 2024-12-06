@@ -68,7 +68,7 @@ export default defineConfig({
       // for a production build add the go template string in so that the server can provide the DSN.
       SENTRY_DSN: isDevelopment ? `${process.env.MONETR_SENTRY_DSN ?? ''}` : '{{ .SentryDSN }}',
     },
-    favicon: path.resolve(__dirname, '../images/favicon.ico'),
+    // Dont use the favicon here, favicon is handled by the PWA plugin.
     mountId: 'root',
   },
   output: {
@@ -117,6 +117,7 @@ export default defineConfig({
     !isDevelopment && pluginPWA({
       logo: path.resolve(__dirname, '../images/logo.png'),
       background: '#19161f',
+      quality: 90,
     }),
   ].filter(item => Boolean(item)),
 });
