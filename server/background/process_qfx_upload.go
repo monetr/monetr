@@ -3,6 +3,7 @@ package background
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -357,6 +358,11 @@ func (j *ProcessQFXUploadJob) hydrateTransactions(ctx context.Context) error {
 			}
 		}
 	}
+
+	// Reverse the order of the arrray we store such that the order we insert the
+	// transactions into the DB matches the order of the transactions in the
+	// actual file.
+	slices.Reverse(j.statementTransactions)
 
 	// TODO Add others as needed. Not sure what other formats we'll end up seeing
 	// over time.
