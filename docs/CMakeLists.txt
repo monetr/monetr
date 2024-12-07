@@ -109,7 +109,7 @@ if(BUILD_TESTING)
   )
   set_property(
     TEST docs/precompile
-    PROPERTY LABELS "documentation"
+    PROPERTY LABELS "docs"
   )
 
   set(HYPERLINK_GITHUB_ARGS)
@@ -126,6 +126,6 @@ if(BUILD_TESTING)
   )
   set_property(
     TEST docs/check-links
-    PROPERTY LABELS "documentation"
+    PROPERTY LABELS "docs"
   )
 endif()
