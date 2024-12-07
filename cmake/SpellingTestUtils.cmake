@@ -14,12 +14,12 @@ macro(provision_spelling_tests CURRENT_SOURCE_DIR)
       set(TEST_ARGS 
         # Language is english US
         "-l" "en-US" 
+        # Our dictionary
+        "-d" "${CMAKE_SOURCE_DIR}/.github/dictionary.txt"
         # We want all the default plugins AND frontmatter
         "-p" "spell" "indefinite-article" "repeated-words" "syntax-mentions" "syntax-urls" "frontmatter" 
         # Check the frontmatter description key
         "--frontmatter-keys" "description"
-        # Too many technical words, dont make suggestions
-        "--no-suggestions"
       )
       add_test(
         NAME ${PACKAGE}/${SPEC_NAME}
