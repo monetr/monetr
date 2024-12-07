@@ -48,6 +48,64 @@ function mstileIcons(): Array<{ name: string; asset: string, width: number, heig
   }));
 }
 
+interface AppleSplashScreenSpec {
+  name: string;
+  asset: string;
+  width: number
+  height: number;
+  ratio: number; orientation: 'portrait' | 'landscape';
+}
+
+function appleSplashScreens(): Array<AppleSplashScreenSpec> {
+  // Taken from https://developer.apple.com/design/human-interface-guidelines/layout/#Specifications
+  const spec: Array<Omit<AppleSplashScreenSpec, 'name' | 'asset'>> = [
+    { width: 2048, height: 2732, ratio: 2, orientation: 'portrait'  },
+    { width: 2732, height: 2048, ratio: 2, orientation: 'landscape' },
+    { width: 1668, height: 2388, ratio: 2, orientation: 'portrait'  },
+    { width: 2388, height: 1668, ratio: 2, orientation: 'landscape' },
+    { width: 1536, height: 2048, ratio: 2, orientation: 'portrait'  },
+    { width: 2048, height: 1536, ratio: 2, orientation: 'landscape' },
+    { width: 1488, height: 2266, ratio: 2, orientation: 'portrait'  },
+    { width: 2266, height: 1488, ratio: 2, orientation: 'landscape' },
+    { width: 1640, height: 2360, ratio: 2, orientation: 'portrait'  },
+    { width: 2360, height: 1640, ratio: 2, orientation: 'landscape' },
+    { width: 1668, height: 2224, ratio: 2, orientation: 'portrait'  },
+    { width: 2224, height: 1668, ratio: 2, orientation: 'landscape' },
+    { width: 1620, height: 2160, ratio: 2, orientation: 'portrait'  },
+    { width: 2160, height: 1620, ratio: 2, orientation: 'landscape' },
+    { width: 1320, height: 2868, ratio: 3, orientation: 'portrait'  },
+    { width: 2868, height: 1320, ratio: 3, orientation: 'landscape' },
+    { width: 1206, height: 2622, ratio: 3, orientation: 'portrait'  },
+    { width: 2622, height: 1206, ratio: 3, orientation: 'landscape' },
+    { width: 1290, height: 2796, ratio: 3, orientation: 'portrait'  },
+    { width: 2796, height: 1290, ratio: 3, orientation: 'landscape' },
+    { width: 1179, height: 2556, ratio: 3, orientation: 'portrait'  },
+    { width: 2556, height: 1179, ratio: 3, orientation: 'landscape' },
+    { width: 1284, height: 2778, ratio: 3, orientation: 'portrait'  },
+    { width: 2778, height: 1284, ratio: 3, orientation: 'landscape' },
+    { width: 1170, height: 2532, ratio: 3, orientation: 'portrait'  },
+    { width: 2532, height: 1170, ratio: 3, orientation: 'landscape' },
+    { width: 1125, height: 2436, ratio: 3, orientation: 'portrait'  },
+    { width: 2436, height: 1125, ratio: 3, orientation: 'landscape' },
+    { width: 1242, height: 2688, ratio: 3, orientation: 'portrait'  },
+    { width: 2688, height: 1242, ratio: 3, orientation: 'landscape' },
+    { width: 828,  height: 1792, ratio: 2, orientation: 'portrait'  },
+    { width: 1792, height: 828,  ratio: 2, orientation: 'landscape' },
+    { width: 1242, height: 2208, ratio: 3, orientation: 'portrait'  },
+    { width: 2208, height: 1242, ratio: 3, orientation: 'landscape' },
+    { width: 750,  height: 1334, ratio: 2, orientation: 'portrait'  },
+    { width: 1334, height: 750,  ratio: 2, orientation: 'landscape' },
+    { width: 640,  height: 1136, ratio: 2, orientation: 'portrait'  },
+    { width: 1136, height: 640,  ratio: 2, orientation: 'landscape' },
+  ];
+
+  return spec.map(item => ({
+    name: 'apple-touch-startup-image',
+    asset: `assets/resources/apple-splash-${item.width}-${item.height}.png`,
+    ...item,
+  }));
+}
+
 export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
   name: 'pwa',
 
@@ -74,48 +132,8 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
           );
         }
         const sourceBytes = Uint8Array.from(source);
-        // Taken from https://developer.apple.com/design/human-interface-guidelines/layout/#Specifications
-        const appleSplashSizes: Array<[number, number]> = [
-          [2048, 2732],
-          [2732, 2048],
-          [1668, 2388],
-          [2388, 1668],
-          [1536, 2048],
-          [2048, 1536],
-          [1488, 2266],
-          [2266, 1488],
-          [1640, 2360],
-          [2360, 1640],
-          [1668, 2224],
-          [2224, 1668],
-          [1620, 2160],
-          [2160, 1620],
-          [1320, 2868],
-          [2868, 1320],
-          [1206, 2622],
-          [2622, 1206],
-          [1290, 2796],
-          [2796, 1290],
-          [1179, 2556],
-          [2556, 1179],
-          [1284, 2778],
-          [2778, 1284],
-          [1170, 2532],
-          [2532, 1170],
-          [1125, 2436],
-          [2436, 1125],
-          [1242, 2688],
-          [2688, 1242],
-          [828, 1792],
-          [1792, 828],
-          [1242, 2208],
-          [2208, 1242],
-          [750, 1334],
-          [1334, 750],
-          [640, 1136],
-          [1136, 640],
-        ];
-        appleSplashSizes.forEach(([width, height]) => compilation.emitAsset(
+
+        appleSplashScreens().forEach(({ width, height }) => compilation.emitAsset(
           `assets/resources/apple-splash-${width}-${height}.png`,
           new sources.RawSource(Buffer.from(ImageMagick.read(sourceBytes, image => {
             const padding = 0.3;
@@ -262,11 +280,20 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
     api.modifyHTMLTags({
       order: 'post',
       handler: html => {
-        mstileIcons().forEach(({ name, asset: assetPath }) => html.headTags.push({
+        mstileIcons().forEach(({ name, asset }) => html.headTags.push({
           tag: 'meta',
           attrs: {
             name: name,
-            content: path.join('/', assetPath),
+            content: path.join('/', asset),
+          },
+        }));
+
+        appleSplashScreens().forEach(({ name, asset, width, height, ratio, orientation }) => html.headTags.push({
+          tag: 'link',
+          attrs: {
+            rel: name,
+            href: path.join('/', asset),
+            media: `(device-width: ${(orientation === 'portrait' ? width : height) / ratio}px) and (device-height: ${(orientation === 'portrait' ? height : width) / ratio}px) and (-webkit-device-pixel-ratio: ${ratio}) and (orientation: ${orientation})`,
           },
         }));
 
@@ -286,6 +313,14 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
             },
           });
         }
+
+        html.headTags.push({
+          tag: 'link',
+          attrs: {
+            rel: 'shortcut icon',
+            href: '/assets/resources/transparent-128.png',
+          },
+        });
 
         html.headTags.push({
           tag: 'link',
