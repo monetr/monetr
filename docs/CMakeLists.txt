@@ -86,6 +86,16 @@ add_custom_target(
 # Documentation Tests                                                         #
 ###############################################################################
 
+file(
+  GLOB_RECURSE SUB_PACKAGES
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/docs/src/*CMakeLists.txt"
+)
+# # Loop through the files and get their directories
+foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
+  get_filename_component(DIR ${SUB_PACKAGE} DIRECTORY)
+  add_subdirectory(${DIR})
+endforeach()
+
 if(BUILD_TESTING)
   add_test(
     NAME docs/precompile
