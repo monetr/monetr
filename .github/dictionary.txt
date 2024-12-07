@@ -1,4 +1,5 @@
 API.*
+AboutFeatures
 CLI
 CMake
 CORS
@@ -35,6 +36,7 @@ YAML
 [dD]ecrypted
 [fF]rontend
 [iI]nclusivity
+[jJ][sS]
 [kK]eyring
 [mM]ailpit
 [mM]akefile.*
@@ -80,5 +82,3 @@ severable
 sexualized
 submodule.*
 templating
-[jJ][sS]
-AboutFeatures
