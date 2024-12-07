@@ -43,7 +43,7 @@ the complete development environment locally or if you plan on creating release 
 - Docker (`>= 20.0.0`): Docker (and Docker Compose) are used to run the local development environment for monetr,
   allowing you to have the entire application and all of it's features with hot-reloading.
 - Ruby (`>= 2.7`): Ruby is required to run `licensed` which is used to generate third-party-notice files, these show all
-  of the dependencies of monetr and their licenses. This is embeded at build time for releases.
+  of the dependencies of monetr and their licenses. This is embedded at build time for releases.
 
 ### Mac Specific
 
@@ -334,8 +334,8 @@ If you want you can then run the entire site using the command: `npx http-server
 ### Emails
 
 monetr's email templates are generated using [react-email](https://github.com/resend/react-email). They can be found in
-the `emails/` directory in the project folder. These emails are compiled at buildtime and include some 
-[go templating](https://pkg.go.dev/html/template) in their output in order to be useful for the server.
+the `emails/` directory in the project folder. These emails are compiled at build-time and include some [go
+templating](https://pkg.go.dev/html/template) in their output in order to be useful for the server.
 
 In order to develop or make changes to the email templates and see your changes, you can run the following command:
 
