@@ -232,7 +232,7 @@ export const pageMap = [{
       route: "/documentation/use/goal",
       frontMatter: {
         "title": "Goals",
-        "description": "Learn how to use monetr's Goals feature to save for one-time financial targets like vacations, loans, or down payments. Understand how Goals track contributions and spending, helping you plan effectively and meet your financial objectives without overfunding."
+        "description": "Learn how to use monetr's Goals feature to save for one-time financial targets like vacations, loans, or down payments. Understand how Goals track contributions and spending, helping you plan effectively and meet your financial objectives without over-funding."
       }
     }, {
       name: "security",
