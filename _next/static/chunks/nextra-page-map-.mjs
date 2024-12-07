@@ -33,12 +33,6 @@ export const pageMap = [{
     name: "configure",
     route: "/documentation/configure",
     children: [{
-      name: "captcha",
-      route: "/documentation/configure/captcha",
-      frontMatter: {
-        "title": "ReCAPTCHA"
-      }
-    }, {
       name: "cors",
       route: "/documentation/configure/cors",
       frontMatter: {
@@ -79,6 +73,12 @@ export const pageMap = [{
       route: "/documentation/configure/postgres",
       frontMatter: {
         "sidebarTitle": "Postgres"
+      }
+    }, {
+      name: "recaptcha",
+      route: "/documentation/configure/recaptcha",
+      frontMatter: {
+        "title": "ReCAPTCHA"
       }
     }, {
       name: "redis",
