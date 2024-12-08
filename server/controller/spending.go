@@ -71,7 +71,6 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	if spending.Name == "" {
 		return c.badRequest(ctx, "spending must have a name")
 	}

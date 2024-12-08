@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -45,22 +44,30 @@ func (c *Controller) getLink(ctx echo.Context) error {
 }
 
 func (c *Controller) postLinks(ctx echo.Context) error {
+	var err error
 	var request struct {
 		InstitutionName string  `json:"institutionName"`
 		Description     *string `json:"description"`
 	}
-	if err := ctx.Bind(&request); err != nil {
+	if err = ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
 	}
 
-	request.InstitutionName = strings.TrimSpace(request.InstitutionName)
+	request.InstitutionName, err = c.cleanString(ctx, "Institution Name", request.InstitutionName)
+	if err != nil {
+		return err
+	}
 	if request.InstitutionName == "" {
 		return c.badRequest(ctx, "link must have an institution name")
 	}
 
 	// If a description is provided. Trim the space on the description.
 	if request.Description != nil {
-		request.Description = myownsanity.StringP(strings.TrimSpace(*request.Description))
+		desc, err := c.cleanString(ctx, "Description", *request.Description)
+		if err != nil {
+			return err
+		}
+		request.Description = &desc
 	}
 
 	link := Link{
@@ -83,11 +90,20 @@ func (c *Controller) putLink(ctx echo.Context) error {
 		return c.badRequest(ctx, "must specify a valid link Id to update")
 	}
 
-	var link struct {
+	var request struct {
 		Description *string `json:"description"`
 	}
-	if err := ctx.Bind(&link); err != nil {
+	if err := ctx.Bind(&request); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+	}
+
+	// If a description is provided. Trim the space on the description.
+	if request.Description != nil {
+		desc, err := c.cleanString(ctx, "Description", *request.Description)
+		if err != nil {
+			return err
+		}
+		request.Description = &desc
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -98,8 +114,8 @@ func (c *Controller) putLink(ctx echo.Context) error {
 
 	hasUpdate := false
 
-	if link.Description != nil {
-		existingLink.Description = link.Description
+	if request.Description != nil {
+		existingLink.Description = request.Description
 		hasUpdate = true
 	}
 

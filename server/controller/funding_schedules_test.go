@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -36,6 +37,48 @@ func TestPostFundingSchedules(t *testing.T) {
 		response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
 		response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 		response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
+	})
+
+	t.Run("name is too long", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]interface{}{
+				"name":        gofakeit.Sentence(250),
+				"description": "15th and the Last day of every month",
+				"ruleset":     FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Name must not be longer than 250 characters")
+	})
+
+	t.Run("description is too long", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]interface{}{
+				"name":        "Testing description",
+				"description": gofakeit.Sentence(250),
+				"ruleset":     FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Description must not be longer than 250 characters")
 	})
 
 	t.Run("create a funding schedule with excluded weekends", func(t *testing.T) {

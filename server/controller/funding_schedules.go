@@ -69,8 +69,14 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 	}
 
 	fundingSchedule.FundingScheduleId = "" // Make sure we create a new funding schedule.
-	fundingSchedule.Name = strings.TrimSpace(fundingSchedule.Name)
-	fundingSchedule.Description = strings.TrimSpace(fundingSchedule.Description)
+	fundingSchedule.Name, err = c.cleanString(ctx, "Name", fundingSchedule.Name)
+	if err != nil {
+		return err
+	}
+	fundingSchedule.Description, err = c.cleanString(ctx, "Description", fundingSchedule.Description)
+	if err != nil {
+		return err
+	}
 	fundingSchedule.BankAccountId = bankAccountId
 
 	if fundingSchedule.Name == "" {

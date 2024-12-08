@@ -137,8 +137,22 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 	request.Currency = "USD"
 	request.Source = TransactionSourceManual
 
+	request.Name, err = c.cleanString(ctx, "Name", request.Name)
+	if err != nil {
+		return err
+	}
 	if request.Name == "" {
 		return c.badRequest(ctx, "Transaction must have a name")
+	}
+
+	request.MerchantName, err = c.cleanString(ctx, "MerchantName", request.MerchantName)
+	if err != nil {
+		return err
+	}
+
+	request.OriginalName, err = c.cleanString(ctx, "OriginalName", request.OriginalName)
+	if err != nil {
+		return err
 	}
 
 	if request.Date.IsZero() {
@@ -264,6 +278,19 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 
 	if transaction.IsAddition() && transaction.SpendingId != nil {
 		return c.badRequest(ctx, "cannot specify a spent from on a deposit")
+	}
+
+	transaction.Name, err = c.cleanString(ctx, "Name", transaction.Name)
+	if err != nil {
+		return err
+	}
+	if transaction.Name == "" {
+		return c.badRequest(ctx, "Transaction must have a name")
+	}
+
+	transaction.MerchantName, err = c.cleanString(ctx, "MerchantName", transaction.MerchantName)
+	if err != nil {
+		return err
 	}
 
 	transaction.PlaidTransactionId = existingTransaction.PlaidTransactionId

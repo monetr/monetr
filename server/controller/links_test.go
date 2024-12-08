@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
@@ -41,6 +42,40 @@ func TestPostLink(t *testing.T) {
 		response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 		response.JSON().Path("$.institutionName").String().NotEmpty()
 		response.JSON().Path("$.description").String().IsEqual("My personal link")
+	})
+
+	t.Run("institution name is too long", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		link := models.Link{
+			InstitutionName: gofakeit.Sentence(250),
+			Description:     myownsanity.StringP("My personal link"),
+		}
+
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(link).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Institution Name must not be longer than 250 characters")
+	})
+
+	t.Run("description is too long", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		link := models.Link{
+			InstitutionName: "Link name",
+			Description:     myownsanity.StringP(gofakeit.Sentence(250)),
+		}
+
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(link).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Description must not be longer than 250 characters")
 	})
 
 	t.Run("missing name", func(t *testing.T) {
