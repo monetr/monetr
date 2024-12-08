@@ -18,6 +18,7 @@ interface PlaidDisconnectedProps {
   linkName?: string;
   linkURL?: string;
   supportEmail?: string;
+  goTemplate?: boolean;
 }
 
 export const PlaidDisconnected = ({
@@ -27,6 +28,7 @@ export const PlaidDisconnected = ({
   linkName = '{{ .LinkName }}',
   linkURL = '{{ .LinkURL }}',
   supportEmail = '{{ .SupportEmail }}',
+  goTemplate = true,
 }: PlaidDisconnectedProps) => {
   const previewText = 'One of your linked accounts has been disconnected';
   return (
@@ -56,6 +58,7 @@ export const PlaidDisconnected = ({
       <Text className='text-gray-500 text-xs leading-6'>
         This message was intended for{' '}
         <span className='text-black'>{firstName} {lastName}</span>.
+        { goTemplate ? '{{ if .SupportEmail }}' : '' }
         If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about
         this communication please reach out to{' '}
         <Link
@@ -64,6 +67,7 @@ export const PlaidDisconnected = ({
         >
           {supportEmail}
         </Link>.
+        { goTemplate ? '{{ end }}' : '' }
       </Text>
     </EmailLayout>
   );
@@ -76,6 +80,7 @@ PlaidDisconnected.PreviewProps = {
   linkName: 'Navy Federal Credit Union',
   linkURL: 'https://my.monetr.dev/bank_accounts/bac_123abc',
   supportEmail: 'support@monetr.local',
+  goTemplate: false,
 } as PlaidDisconnectedProps;
 
 export default PlaidDisconnected;

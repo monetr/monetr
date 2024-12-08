@@ -48,6 +48,7 @@ type Configuration struct {
 	Server        Server        `yaml:"server"`
 	Storage       Storage       `yaml:"storage"`
 	Stripe        Stripe        `yaml:"stripe"`
+	Support       Support       `yaml:"support"`
 }
 
 func (c Configuration) GetConfigFileName() string {

@@ -14,6 +14,7 @@ interface PasswordChangedProps {
   firstName?: string;
   lastName?: string;
   supportEmail?: string;
+  goTemplate?: boolean;
 }
 
 export const PasswordChanged = ({
@@ -21,10 +22,11 @@ export const PasswordChanged = ({
   firstName = '{{ .FirstName }}',
   lastName = '{{ .LastName }}',
   supportEmail = '{{ .SupportEmail }}',
+  goTemplate = true,
 }: PasswordChangedProps) => {
   const previewText = 'Your password has been updated';
   return (
-    <EmailLayout previewText={previewText}>
+    <EmailLayout previewText={ previewText }>
       <EmailLogo baseUrl={ baseUrl } />
       <Heading className='text-black text-2xl font-normal text-center p-0 my-8 mx-0'>
         Your password for <strong>monetr</strong> has been updated
@@ -46,6 +48,7 @@ export const PasswordChanged = ({
       <Text className='text-gray-500 text-xs leading-6'>
         This message was intended for{' '}
         <span className='text-black'>{firstName} {lastName}</span>.
+        { goTemplate ? '{{ if .SupportEmail }}' : '' }
         If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about
         this communication please reach out to{' '}
         <Link
@@ -54,6 +57,7 @@ export const PasswordChanged = ({
         >
           {supportEmail}
         </Link>.
+        { goTemplate ? '{{ end }}' : '' }
       </Text>
     </EmailLayout>
   );
@@ -64,6 +68,7 @@ PasswordChanged.PreviewProps = {
   firstName: 'Elliot',
   lastName: 'Courant',
   supportEmail: 'support@monetr.local',
+  goTemplate: false,
 } as PasswordChangedProps;
 
 export default PasswordChanged;

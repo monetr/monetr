@@ -24,7 +24,7 @@ func (c *Controller) sendVerificationEmail(
 			Email:        login.Email,
 			FirstName:    login.FirstName,
 			LastName:     login.LastName,
-			SupportEmail: "support@monetr.app",
+			SupportEmail: c.Configuration.Support.GetSupportEmail(),
 			VerifyURL:    verifyUrl,
 		},
 	)
@@ -56,7 +56,7 @@ func (c *Controller) sendPasswordReset(
 			Email:        login.Email,
 			FirstName:    login.FirstName,
 			LastName:     login.LastName,
-			SupportEmail: "support@monetr.app",
+			SupportEmail: c.Configuration.Support.GetSupportEmail(),
 			ResetURL:     resetUrl,
 		},
 	)
