@@ -7,7 +7,6 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/go-pg/pg/v10/orm"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
@@ -97,19 +96,14 @@ func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]Link,
 	defer span.Finish()
 
 	// Links should be seen as expired if the account subscription is not active for 90 days.
-	expirationCutoff := j.clock.Now().UTC().Add(-90 * 24 * time.Hour)
+	expirationCutoff := j.clock.Now().Add(-90 * 24 * time.Hour).UTC()
 
 	var result []Link
 	err := j.txn.ModelContext(span.Context(), &result).
 		Join(`INNER JOIN "accounts" AS "account"`).
 		JoinOn(`"account"."account_id" = "link"."account_id"`).
 		Where(`"link"."link_type" = ?`, PlaidLinkType).
-		WhereGroup(func(q *orm.Query) (*orm.Query, error) {
-			q = q.
-				Where(`"account"."subscription_active_until" IS NOT NULL AND "account"."subscription_active_until" < ?`, expirationCutoff).
-				WhereOr(`"account"."trial_ends_at" IS NOT NULL AND "account"."trial_ends_at" < ?`, expirationCutoff)
-			return q, nil
-		}).
+		Where(`GREATEST("account"."subscription_active_until", "account"."trial_ends_at") < ?`, expirationCutoff).
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve Plaid links for expired accounts")

@@ -76,10 +76,18 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 			assert.Empty(t, result, "there should not be any expired links at the moment")
 		}
 
-		// Then update the account to have a subscription that has expired more than 90 days ago.
 		account := user.Account
-		account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().AddDate(0, 0, -100))
+		account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now())
 		testutils.MustDBUpdate(t, account)
+
+		{ // After gaining a subscription, we should still not remove the account.
+			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
+			assert.Empty(t, result, "there should not be any expired links at the moment")
+		}
+
+		// But if the subscription has not been updated in 100 days, then we should.
+		clock.Add(100 * 24 * time.Hour)
 
 		{ // After updating the subscription
 			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
@@ -112,10 +120,76 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 			assert.Empty(t, result, "there should not be any expired links at the moment")
 		}
 
-		account.TrialEndsAt = myownsanity.TimeP(clock.Now().AddDate(0, 0, -100))
+		// Move the clock forward 31 days. The trial has now expired.
+		clock.Add(31 * 24 * time.Hour)
+		{ // But the account is not yet eligible for removal.
+			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
+			assert.Empty(t, result, "there should not be any expired links at the moment")
+		}
+
+		// Move the clock forward 100 days, now the account should be eligible.
+		clock.Add(100 * 24 * time.Hour)
+
+		{ // 131 days after signup the account is now eligible for removal.
+			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
+			assert.Len(t, result, 1, "should have one link that is expired")
+			assert.EqualValues(t, link.LinkId, result[0].LinkId, "expired link should be the one created for this test")
+		}
+	})
+
+	t.Run("trial then subscribe", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+
+		// Update the account to be the same as it would be in a trial state.
+		account := user.Account
+		account.SubscriptionActiveUntil = nil
+		account.SubscriptionStatus = nil
+		account.StripeCustomerId = nil
+		account.StripeSubscriptionId = nil
+		account.TrialEndsAt = myownsanity.TimeP(clock.Now().AddDate(0, 0, 30))
 		testutils.MustDBUpdate(t, account)
 
-		{ // After updating the trial end date we should see it as expired.
+		// When the account is first created and still trialing, we don't want to
+		// delete the data.
+		{ // Then check to make sure that we don't consider this an expired account.
+			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
+			assert.Empty(t, result, "there should not be any expired links at the moment")
+		}
+
+		// Move the clock forward 31 days. The trial has now expired.
+		clock.Add(31 * 24 * time.Hour)
+		{ // But the account is not yet eligible for removal.
+			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
+			assert.Empty(t, result, "there should not be any expired links at the moment")
+		}
+
+		// On the 31st day the account becomes a subscriber. So we push their active
+		// until date out 30 days.
+		account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().AddDate(0, 0, 30))
+
+		// We are now 62 days after the account was originally created. We should
+		// still not remove the account, even though their subscrition just expired
+		// yesterday.
+		clock.Add(31 * 24 * time.Hour)
+		{ // But the account is not yet eligible for removal.
+			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
+			assert.Empty(t, result, "there should not be any expired links at the moment")
+		}
+
+		// But 100 days after the subscription expires, or 162 days after the
+		// account was originally created; it is now safe to remove the link data.
+		clock.Add(100 * 24 * time.Hour)
+		{
 			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Len(t, result, 1, "should have one link that is expired")
