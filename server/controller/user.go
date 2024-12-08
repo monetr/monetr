@@ -92,7 +92,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	if claims.Scope == security.AuthenticatedScope && c.Configuration.Support.GetChatwootEnabled() {
 		secret := []byte(c.Configuration.Support.ChatwootIdentityValidation)
 		hash := hmac.New(sha256.New, secret)
-		hash.Write([]byte(user.LoginId))
+		hash.Write([]byte(user.UserId))
 		me["supportIdentity"] = hex.EncodeToString(hash.Sum(nil))
 	}
 
