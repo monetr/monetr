@@ -16,6 +16,7 @@ interface TrialAboutToExpireProps {
   trialExpirationDate?: string;
   trialExpirationWindow?: string;
   supportEmail?: string;
+  goTemplate?: boolean;
 }
 
 export const TrialAboutToExpire = ({
@@ -25,6 +26,7 @@ export const TrialAboutToExpire = ({
   trialExpirationDate = '{{ .TrialExpirationDate }}',
   trialExpirationWindow = '{{ .TrialExpirationWindow }}',
   supportEmail = '{{ .SupportEmail }}',
+  goTemplate = true,
 }: TrialAboutToExpireProps) => {
   const previewText = 'Your monetr trial is about to expire';
   return (
@@ -51,6 +53,7 @@ export const TrialAboutToExpire = ({
       <Text className='text-gray-500 text-xs leading-6'>
         This message was intended for{' '}
         <span className='text-black'>{firstName} {lastName}</span>.
+        { goTemplate ? '{{ if .SupportEmail }}' : '' }
         If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about
         this communication please reach out to{' '}
         <Link
@@ -59,6 +62,7 @@ export const TrialAboutToExpire = ({
         >
           {supportEmail}
         </Link>.
+        { goTemplate ? '{{ end }}' : '' }
       </Text>
     </EmailLayout>
   );
@@ -71,6 +75,7 @@ TrialAboutToExpire.PreviewProps = {
   trialExpirationDate: 'Monday October 1st, 2024',
   trialExpirationWindow: '3 days',
   supportEmail: 'support@monetr.local',
+  goTemplate: false,
 } as TrialAboutToExpireProps;
 
 export default TrialAboutToExpire;

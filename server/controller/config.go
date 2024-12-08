@@ -30,6 +30,9 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 		PlaidEnabled         bool         `json:"plaidEnabled"`
 		ManualEnabled        bool         `json:"manualEnabled"`
 		UploadsEnabled       bool         `json:"uploadsEnabled"`
+		SupportEnabled       bool         `json:"supportEnabled"`
+		SupportSDKURL        *string      `json:"supportSdkUrl"`
+		SupportToken         *string      `json:"supportToken"`
 		Release              string       `json:"release"`
 		Revision             string       `json:"revision"`
 		BuildType            string       `json:"buildType"`
@@ -89,6 +92,12 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 	configuration.PlaidEnabled = c.Configuration.Plaid.GetEnabled()
 	configuration.ManualEnabled = true
 	configuration.UploadsEnabled = c.Configuration.Storage.Enabled
+
+	if c.Configuration.Support.GetChatwootEnabled() {
+		configuration.SupportEnabled = true
+		configuration.SupportSDKURL = &c.Configuration.Support.ChatwootSDKURL
+		configuration.SupportToken = &c.Configuration.Support.ChatwootWebsiteToken
+	}
 
 	return ctx.JSON(http.StatusOK, configuration)
 }

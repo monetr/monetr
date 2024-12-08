@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
 	"strings"
 
@@ -42,6 +45,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 		"activeUntil":     nil,
 		"trialingUntil":   nil,
 		"hasSubscription": false,
+		"supportIdentity": nil,
 	}
 
 	// If the "me" endpoint was called after they authenticated, but they still
@@ -80,6 +84,16 @@ func (c *Controller) getMe(ctx echo.Context) error {
 		// endpoint.
 		// TODO Make sure to implement this logic in the MFA endpoint as well!
 		me["nextUrl"] = "/account/subscribe"
+	}
+
+	// If the customer support integration is enabled and they are fully
+	// authenticated. Then include the end user's support identity in the
+	// response.
+	if claims.Scope == security.AuthenticatedScope && c.Configuration.Support.GetChatwootEnabled() {
+		secret := []byte(c.Configuration.Support.ChatwootIdentityValidation)
+		hash := hmac.New(sha256.New, secret)
+		hash.Write([]byte(user.LoginId))
+		me["supportIdentity"] = hex.EncodeToString(hash.Sum(nil))
 	}
 
 	return ctx.JSON(http.StatusOK, me)

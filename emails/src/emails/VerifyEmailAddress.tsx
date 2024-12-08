@@ -17,6 +17,7 @@ interface VerifyEmailProps {
   lastName?: string;
   supportEmail?: string;
   verifyLink?: string;
+  goTemplate?: boolean;
 }
 
 export const VerifyEmailAddress = ({
@@ -25,6 +26,7 @@ export const VerifyEmailAddress = ({
   lastName = '{{ .LastName }}',
   supportEmail = '{{ .SupportEmail }}',
   verifyLink: inviteLink = '{{ .VerifyURL }}',
+  goTemplate = true,
 }: VerifyEmailProps) => {
   const previewText = 'Verify your email address for monetr';
   return (
@@ -54,6 +56,7 @@ export const VerifyEmailAddress = ({
       <Text className='text-gray-500 text-xs leading-6'>
         This message was intended for{' '}
         <span className='text-black'>{firstName} {lastName}</span>.
+        { goTemplate ? '{{ if .SupportEmail }}' : '' }
         If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about
         this communication please reach out to{' '}
         <Link
@@ -62,17 +65,19 @@ export const VerifyEmailAddress = ({
         >
           {supportEmail}
         </Link>.
+        { goTemplate ? '{{ end }}' : '' }
       </Text>
     </EmailLayout>
   );
 };
 
 VerifyEmailAddress.PreviewProps = {
-  baseUrl: 'https://my.monetr.dev', // '{{ .BaseURL }}',
+  baseUrl: 'https://my.monetr.dev',
   firstName: 'Elliot',
   lastName: 'Courant',
   supportEmail: 'support@monetr.local',
   verifyLink: 'https://monetr.local/test',
+  goTemplate: false,
 } as VerifyEmailProps;
 
 export default VerifyEmailAddress;
