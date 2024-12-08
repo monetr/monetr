@@ -104,7 +104,7 @@ export default function Transactions(): JSX.Element {
       return null;
     }
 
-    if (!config?.manualEnabled) {
+    if (!config?.uploadsEnabled) {
       return null;
     }
 

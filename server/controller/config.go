@@ -29,6 +29,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 		IconsEnabled         bool         `json:"iconsEnabled"`
 		PlaidEnabled         bool         `json:"plaidEnabled"`
 		ManualEnabled        bool         `json:"manualEnabled"`
+		UploadsEnabled       bool         `json:"uploadsEnabled"`
 		Release              string       `json:"release"`
 		Revision             string       `json:"revision"`
 		BuildType            string       `json:"buildType"`
@@ -86,7 +87,8 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 
 	configuration.IconsEnabled = icons.GetIconsEnabled()
 	configuration.PlaidEnabled = c.Configuration.Plaid.GetEnabled()
-	configuration.ManualEnabled = c.Configuration.Storage.Enabled
+	configuration.ManualEnabled = true
+	configuration.UploadsEnabled = c.Configuration.Storage.Enabled
 
 	return ctx.JSON(http.StatusOK, configuration)
 }
