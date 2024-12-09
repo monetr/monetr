@@ -17,6 +17,7 @@ const (
 	PlaidLinkStatusError             PlaidLinkStatus = 3
 	PlaidLinkStatusPendingExpiration PlaidLinkStatus = 4
 	PlaidLinkStatusRevoked           PlaidLinkStatus = 5
+	PlaidLinkStatusDeactivated       PlaidLinkStatus = 6
 )
 
 type PlaidLink struct {

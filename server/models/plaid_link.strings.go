@@ -14,11 +14,12 @@ func _() {
 	_ = x[PlaidLinkStatusError-3]
 	_ = x[PlaidLinkStatusPendingExpiration-4]
 	_ = x[PlaidLinkStatusRevoked-5]
+	_ = x[PlaidLinkStatusDeactivated-6]
 }
 
-const _PlaidLinkStatus_name = "PlaidLinkStatusUnknownPlaidLinkStatusPendingPlaidLinkStatusSetupPlaidLinkStatusErrorPlaidLinkStatusPendingExpirationPlaidLinkStatusRevoked"
+const _PlaidLinkStatus_name = "PlaidLinkStatusUnknownPlaidLinkStatusPendingPlaidLinkStatusSetupPlaidLinkStatusErrorPlaidLinkStatusPendingExpirationPlaidLinkStatusRevokedPlaidLinkStatusDeactivated"
 
-var _PlaidLinkStatus_index = [...]uint8{0, 22, 44, 64, 84, 116, 138}
+var _PlaidLinkStatus_index = [...]uint8{0, 22, 44, 64, 84, 116, 138, 164}
 
 func (i PlaidLinkStatus) String() string {
 	if i >= PlaidLinkStatus(len(_PlaidLinkStatus_index)-1) {

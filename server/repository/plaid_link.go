@@ -43,7 +43,6 @@ func (r *repositoryBase) DeletePlaidLink(
 	// Update the link record to indicate that it is no longer a Plaid link but
 	// instead a manual one. This way some data is still preserved.
 	_, err := r.txn.ModelContext(span.Context(), &Link{}).
-		Set(`"plaid_link_id" = NULL`).
 		Set(`"link_type" = ?`, ManualLinkType).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."plaid_link_id" = ?`, plaidLinkId).
@@ -55,7 +54,9 @@ func (r *repositoryBase) DeletePlaidLink(
 
 	// Then delete the Plaid link itself.
 	_, err = r.txn.ModelContext(span.Context(), &PlaidLink{}).
-		Set(`"deleted_at" = NULL`).
+		Set(`"secret_id" = NULL`).
+		Set(`"status" = ?`, PlaidLinkStatusDeactivated).
+		Set(`"deleted_at" = ?`, r.clock.Now().UTC()).
 		Where(`"plaid_link"."account_id" = ?`, r.AccountId()).
 		Where(`"plaid_link"."plaid_link_id" = ?`, plaidLinkId).
 		Update()
