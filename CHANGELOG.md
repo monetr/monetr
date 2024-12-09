@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.18.35](https://github.com/monetr/monetr/compare/v0.18.34...v0.18.35) (2024-12-09)
+
+
+### Features
+
+* **api:** Improving limits on API field lengths ([49eb2b1](https://github.com/monetr/monetr/commit/49eb2b13225636a979b07351adb1aa6da2b04544))
+* **docs:** Make documentation content width a bit bigger ([34325b7](https://github.com/monetr/monetr/commit/34325b7b13cc01e6dfac3ace5d83bf17ade8aa69))
+* **docs:** Substantial documentation improvements ([#2206](https://github.com/monetr/monetr/issues/2206)) ([6f98eaf](https://github.com/monetr/monetr/commit/6f98eaf9d1149cabf393dfac121dbc4cdaae5ef3))
+* **links:** Improve automated link deactivation ([25fc5f4](https://github.com/monetr/monetr/commit/25fc5f476b65e58cdc0595caf7972063e10de888))
+* **test:** Spellcheck documentation in tests ([#2212](https://github.com/monetr/monetr/issues/2212)) ([e981277](https://github.com/monetr/monetr/commit/e9812776812ebdd5dbbf6cdc9da6db294ba6d22d))
+* **ui:** Improving PWA image generation ([#2211](https://github.com/monetr/monetr/issues/2211)) ([5f3068a](https://github.com/monetr/monetr/commit/5f3068a1c7a890889bde16fa98aa00b986c908f5))
+
+
+### Dependencies
+
+* **ui:** update dependency @imagemagick/magick-wasm to v0.0.32 ([#2202](https://github.com/monetr/monetr/issues/2202)) ([53ffe58](https://github.com/monetr/monetr/commit/53ffe58b174ba1e99ce51b31acf77a0dba661234))
+
+
+### Bug Fixes
+
+* **link:** Fixed issue where links would not get deactivated gracefully. ([#2214](https://github.com/monetr/monetr/issues/2214)) ([a9402c5](https://github.com/monetr/monetr/commit/a9402c580d79da8b4e43438f77e364068e56bff8))
+* **manual:** Manual links are now always enabled. ([30ace95](https://github.com/monetr/monetr/commit/30ace95615e5a655a8a98d8f5451e07724f00ed5))
+* **ofx:** Fixed OFX/QFX transaction import order ([3b4a629](https://github.com/monetr/monetr/commit/3b4a6292ef9b111d2071b47a4be5c04b9ad049df)), closes [#2180](https://github.com/monetr/monetr/issues/2180)
+
+
+### Miscellaneous
+
+* Make testing labels consistent ([a8c921c](https://github.com/monetr/monetr/commit/a8c921c2340fd063d6dbe55688792db98c51ee90))
+* Tweaking captcha doc name to fix sorting ([a91f381](https://github.com/monetr/monetr/commit/a91f381f77fc5d3091f41f68110a977888252d7a))
+
 ## [0.18.34](https://github.com/monetr/monetr/compare/v0.18.33...v0.18.34) (2024-12-04)
 
 
