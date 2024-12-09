@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.18.36](https://github.com/monetr/monetr/compare/v0.18.35...v0.18.36) (2024-12-09)
+
+
+### Dependencies
+
+* **api:** update dependency go to v1.23.4 ([#2208](https://github.com/monetr/monetr/issues/2208)) ([bc427d2](https://github.com/monetr/monetr/commit/bc427d2524e676c93bae8ab0fcd49410e7e5348e))
+* **api:** update module cloud.google.com/go/kms to v1.20.2 ([#2210](https://github.com/monetr/monetr/issues/2210)) ([3305a44](https://github.com/monetr/monetr/commit/3305a4440551b5d0e802d4ae0f3f4cb03c7b2881))
+* **api:** update module github.com/stripe/stripe-go/v81 to v81.1.1 ([#2216](https://github.com/monetr/monetr/issues/2216)) ([6b03261](https://github.com/monetr/monetr/commit/6b0326184ed3647a3189cb44787bab4049edb2a5))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.7.2 ([#2217](https://github.com/monetr/monetr/issues/2217)) ([8f29a5a](https://github.com/monetr/monetr/commit/8f29a5a494b675e391a0287bf0a339ca88a2aa2a))
+
 ## [0.18.35](https://github.com/monetr/monetr/compare/v0.18.34...v0.18.35) (2024-12-09)
 
 
