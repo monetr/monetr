@@ -190,8 +190,8 @@ importers:
         specifier: 4.36.1
         version: 4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       axios:
-        specifier: 1.7.8
-        version: 1.7.8
+        specifier: 1.7.9
+        version: 1.7.9
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -327,7 +327,7 @@ importers:
         version: 10.4.20(postcss@8.4.49)
       axios-mock-adapter:
         specifier: 2.1.0
-        version: 2.1.0(axios@1.7.8)
+        version: 2.1.0(axios@1.7.9)
       cssnano:
         specifier: 7.0.6
         version: 7.0.6(postcss@8.4.49)
@@ -387,7 +387,7 @@ importers:
         version: 8.4.6(@storybook/test@8.4.6(storybook@8.4.6(prettier@2.8.8)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.6(prettier@2.8.8))(typescript@5.7.2)
       axios-mock-adapter:
         specifier: 2.1.0
-        version: 2.1.0(axios@1.7.8)
+        version: 2.1.0(axios@1.7.9)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -4158,8 +4158,8 @@ packages:
   axios-proxy-builder@0.1.2:
     resolution: {integrity: sha512-6uBVsBZzkB3tCC8iyx59mCjQckhB8+GQrI9Cop8eC7ybIsvs/KtnNgEBfRMSEa7GqK2VBGUzgjNYMdPIfotyPA==}
 
-  axios@1.7.8:
-    resolution: {integrity: sha512-Uu0wb7KNqK2t5K+YQyVCLM76prD5sRFjKHbJYCP1J7JFGEQ6nN7HWn9+04LAeiJ3ji54lgS/gZCH1oxyrf1SPw==}
+  axios@1.7.9:
+    resolution: {integrity: sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==}
 
   axobject-query@3.2.4:
     resolution: {integrity: sha512-aPTElBrbifBU1krmZxGZOlBkslORe7Ll7+BDnI50Wy4LgOt69luMgevkDfTq1O/ZgprooPCtWpjCwKSZw/iZ4A==}
@@ -13382,7 +13382,7 @@ snapshots:
 
   '@untitaker/hyperlink@0.1.43':
     dependencies:
-      axios: 1.7.8
+      axios: 1.7.9
       axios-proxy-builder: 0.1.2
       console.table: 0.10.0
       detect-libc: 2.0.3
@@ -13710,9 +13710,9 @@ snapshots:
 
   axe-core@4.10.0: {}
 
-  axios-mock-adapter@2.1.0(axios@1.7.8):
+  axios-mock-adapter@2.1.0(axios@1.7.9):
     dependencies:
-      axios: 1.7.8
+      axios: 1.7.9
       fast-deep-equal: 3.1.3
       is-buffer: 2.0.5
 
@@ -13720,7 +13720,7 @@ snapshots:
     dependencies:
       tunnel: 0.0.6
 
-  axios@1.7.8:
+  axios@1.7.9:
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
