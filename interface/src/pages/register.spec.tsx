@@ -1,16 +1,18 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
+import monetrClient from '@monetr/interface/api/api';
 import Register from '@monetr/interface/pages/register';
 import testRenderer from '@monetr/interface/testutils/renderer';
+
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('register page', () => {
   let mockAxios: MockAdapter;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(axios);
+    mockAxios = new MockAdapter(monetrClient);
   });
   afterEach(() => {
     mockAxios.reset();
