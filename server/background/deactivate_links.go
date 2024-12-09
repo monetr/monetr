@@ -196,6 +196,8 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 		return err
 	}
 
+	crumbs.IncludeUserInScope(span.Context(), link.AccountId)
+
 	if link.PlaidLink == nil {
 		log.Warn("provided link does not have any plaid credentials")
 		crumbs.Warn(span.Context(), "BUG: Link was queued to be deactivated, but has no plaid details", "jobs", map[string]interface{}{
