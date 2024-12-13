@@ -62,7 +62,7 @@
     "react-select": "5.8.3",
     "rrule": "2.8.1",
     "tailwind-merge": "1.14.0",
-    "tailwindcss": "3.4.15",
+    "tailwindcss": "3.4.16",
     "tailwindcss-animate": "1.0.7",
     "vaul": "1.1.1",
     "zustand": "5.0.1"
@@ -96,7 +96,7 @@
     "sass": "1.81.0",
     "sass-embedded-linux-arm64": "1.81.0",
     "sass-embedded-linux-x64": "1.81.0",
-    "tailwindcss": "3.4.15",
+    "tailwindcss": "3.4.16",
     "typescript": "5.7.2"
   }
 }
