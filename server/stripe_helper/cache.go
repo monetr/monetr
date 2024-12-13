@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/cache"
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v81"
 )
@@ -48,12 +48,12 @@ func NewRedisStripeCache(log *logrus.Entry, cacheClient cache.Cache) StripeCache
 }
 
 func (r *redisStripeCache) GetPriceById(ctx context.Context, id string) (*stripe.Price, bool) {
-	span := sentry.StartSpan(ctx, "Cache - GetPriceById")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	log := r.log.WithContext(span.Context()).WithField("stripePriceId", id)
 
-	log.Trace("checking redis cache for stripe price")
+	log.Trace("checking cache for stripe price")
 	var result stripe.Price
 	if err := r.cache.GetEz(span.Context(), r.cacheKey(id), &result); err != nil {
 		log.WithError(err).Warn("failed to retrieve stripe price from cache")
@@ -70,12 +70,12 @@ func (r *redisStripeCache) GetPriceById(ctx context.Context, id string) (*stripe
 }
 
 func (r *redisStripeCache) CachePrice(ctx context.Context, price stripe.Price) bool {
-	span := sentry.StartSpan(ctx, "Cache - GetPriceById")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	log := r.log.WithContext(span.Context()).WithField("stripePriceId", price.ID)
 
-	log.Trace("storing stripe price in redis cache")
+	log.Trace("storing stripe price in cache")
 	if err := r.cache.SetEzTTL(span.Context(), r.cacheKey(price.ID), price, 1*time.Hour); err != nil {
 		log.WithError(err).Warn("failed to store stripe price in cache")
 		return false

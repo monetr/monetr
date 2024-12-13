@@ -207,9 +207,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 		}
 	})
 
-	repoParty := baseParty.Group("",
-		c.databaseRepositoryMiddleware,
-	)
+	repoParty := baseParty.Group("", c.databaseRepositoryMiddleware)
 
 	{ // Webhook endpoints
 		webhookParty := repoParty.Group("")

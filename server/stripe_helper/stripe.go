@@ -16,7 +16,6 @@ import (
 )
 
 type Stripe interface {
-	GetPricesById(ctx context.Context, stripePriceIds []string) ([]stripe.Price, error)
 	GetPriceById(ctx context.Context, id string) (*stripe.Price, error)
 	GetProductsById(ctx context.Context, stripeProductIds []string) ([]stripe.Product, error)
 	CreateCustomer(ctx context.Context, customer stripe.CustomerParams) (*stripe.Customer, error)
@@ -116,25 +115,8 @@ func (s *stripeBase) stripeRoundTripper(
 	)
 }
 
-func (s *stripeBase) GetPricesById(ctx context.Context, stripePriceIds []string) ([]stripe.Price, error) {
-	span := sentry.StartSpan(ctx, "Stripe - GetPricesById")
-	defer span.Finish()
-
-	prices := make([]stripe.Price, len(stripePriceIds))
-	for i, stripePriceId := range stripePriceIds {
-		price, err := s.GetPriceById(span.Context(), stripePriceId)
-		if err != nil {
-			return nil, err
-		}
-
-		prices[i] = *price
-	}
-
-	return prices, nil
-}
-
 func (s *stripeBase) GetPriceById(ctx context.Context, id string) (*stripe.Price, error) {
-	span := sentry.StartSpan(ctx, "Stripe - GetPriceById")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	log := s.log.WithContext(span.Context()).WithField("stripePriceId", id)
@@ -159,7 +141,7 @@ func (s *stripeBase) GetPriceById(ctx context.Context, id string) (*stripe.Price
 }
 
 func (s *stripeBase) GetProductsById(ctx context.Context, stripeProductIds []string) ([]stripe.Product, error) {
-	span := sentry.StartSpan(ctx, "Stripe - GetProductsById")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	productIds := make([]*string, len(stripeProductIds))
@@ -193,7 +175,7 @@ func (s *stripeBase) GetProductsById(ctx context.Context, stripeProductIds []str
 }
 
 func (s *stripeBase) GetSubscription(ctx context.Context, stripeSubscriptionId string) (*stripe.Subscription, error) {
-	span := sentry.StartSpan(ctx, "Stripe - GetSubscription")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	result, err := s.client.Subscriptions.Get(stripeSubscriptionId, &stripe.SubscriptionParams{
@@ -209,7 +191,7 @@ func (s *stripeBase) GetSubscription(ctx context.Context, stripeSubscriptionId s
 }
 
 func (s *stripeBase) CreateCustomer(ctx context.Context, customer stripe.CustomerParams) (*stripe.Customer, error) {
-	span := sentry.StartSpan(ctx, "Stripe - CreateCustomer")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Status = sentry.SpanStatusOK
@@ -242,7 +224,7 @@ func (s *stripeBase) CreateSubscription(ctx context.Context, subscription stripe
 }
 
 func (s *stripeBase) UpdateCustomer(ctx context.Context, id string, customer stripe.CustomerParams) (*stripe.Customer, error) {
-	span := sentry.StartSpan(ctx, "Stripe - UpdateCustomer")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	customer.Context = span.Context()
@@ -256,7 +238,7 @@ func (s *stripeBase) UpdateCustomer(ctx context.Context, id string, customer str
 }
 
 func (s *stripeBase) GetCustomer(ctx context.Context, id string) (*stripe.Customer, error) {
-	span := sentry.StartSpan(ctx, "Stripe - UpdateCustomer")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	result, err := s.client.Customers.Get(id, &stripe.CustomerParams{
@@ -272,7 +254,7 @@ func (s *stripeBase) GetCustomer(ctx context.Context, id string) (*stripe.Custom
 }
 
 func (s *stripeBase) NewPortalSession(ctx context.Context, params *stripe.BillingPortalSessionParams) (*stripe.BillingPortalSession, error) {
-	span := sentry.StartSpan(ctx, "Stripe - NewPortalSession")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	params.Context = span.Context()
@@ -286,7 +268,7 @@ func (s *stripeBase) NewPortalSession(ctx context.Context, params *stripe.Billin
 }
 
 func (s *stripeBase) NewCheckoutSession(ctx context.Context, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
-	span := sentry.StartSpan(ctx, "Stripe - NewCheckoutSession")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Status = sentry.SpanStatusOK
@@ -313,7 +295,7 @@ func (s *stripeBase) NewCheckoutSession(ctx context.Context, params *stripe.Chec
 }
 
 func (s *stripeBase) GetCheckoutSession(ctx context.Context, checkoutSessionId string) (*stripe.CheckoutSession, error) {
-	span := sentry.StartSpan(ctx, "Stripe - GetCheckoutSession")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Data = map[string]interface{}{

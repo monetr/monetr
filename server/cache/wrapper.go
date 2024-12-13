@@ -78,9 +78,9 @@ func (r *redisCache) Set(ctx context.Context, key string, value []byte) error {
 	span := sentry.StartSpan(ctx, "cache.put")
 	defer span.Finish()
 	span.Description = key
-	span.SetTag("db.system", "redis")
-	span.SetTag("cache.key", key)
-	span.SetTag("cache.item_size", fmt.Sprint(len(value)))
+	span.SetData("db.system", "redis")
+	span.SetData("cache.key", key)
+	span.SetData("cache.item_size", fmt.Sprint(len(value)))
 
 	return errors.Wrap(r.send(span.Context(), "SET", key, value), "failed to store item in cache")
 }
@@ -92,10 +92,10 @@ func (r *redisCache) SetTTL(ctx context.Context, key string, value []byte, lifet
 	span := sentry.StartSpan(ctx, "cache.put")
 	defer span.Finish()
 	span.Description = key
-	span.SetTag("db.system", "redis")
-	span.SetTag("cache.key", key)
-	span.SetTag("cache.item_size", fmt.Sprint(len(value)))
-	span.SetTag("cache.ttl", fmt.Sprint(lifetime.Seconds()))
+	span.SetData("db.system", "redis")
+	span.SetData("cache.key", key)
+	span.SetData("cache.item_size", fmt.Sprint(len(value)))
+	span.SetData("cache.ttl", fmt.Sprint(lifetime.Seconds()))
 
 	return errors.Wrap(
 		r.send(
@@ -142,31 +142,31 @@ func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
 
 	span.Status = sentry.SpanStatusOK
 	span.Description = key
-	span.SetTag("cache.key", key)
-	span.SetTag("db.system", "redis")
+	span.SetData("cache.key", key)
+	span.SetData("db.system", "redis")
 
 	result, err := r.do(span.Context(), "GET", key)
 	if err != nil {
-		span.SetTag("cache", "failure")
-		span.SetTag("cache.success", "false")
+		span.SetData("cache", "failure")
+		span.SetData("cache.success", "false")
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve item from cache")
 	}
-	span.SetTag("cache.success", "true")
+	span.SetData("cache.success", "true")
 
 	switch raw := result.(type) {
 	case nil:
-		span.SetTag("cache", "miss")
-		span.SetTag("cache.hit", "false")
+		span.SetData("cache", "miss")
+		span.SetData("cache.hit", "false")
 		span.Status = sentry.SpanStatusNotFound
 		return nil, nil
 	case string:
-		span.SetTag("cache", "hit")
-		span.SetTag("cache.hit", "true")
+		span.SetData("cache", "hit")
+		span.SetData("cache.hit", "true")
 		return []byte(raw), nil
 	case []byte:
-		span.SetTag("cache", "hit")
-		span.SetTag("cache.hit", "true")
+		span.SetData("cache", "hit")
+		span.SetData("cache.hit", "true")
 		return raw, nil
 	default:
 		span.Status = sentry.SpanStatusUnimplemented
@@ -206,8 +206,8 @@ func (r *redisCache) Delete(ctx context.Context, key string) error {
 	defer span.Finish()
 	span.Description = key
 	span.Status = sentry.SpanStatusOK
-	span.SetTag("db.system", "redis")
-	span.SetTag("cache.key", key)
+	span.SetData("db.system", "redis")
+	span.SetData("cache.key", key)
 
 	return errors.Wrap(r.send(span.Context(), "DEL", key), "failed to delete item from cache")
 }
