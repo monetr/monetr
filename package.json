@@ -9,7 +9,6 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.42.0",
     "@typescript-eslint/parser": "5.42.0",
-    "@untitaker/hyperlink": "0.1.43",
     "eslint": "8.57.1",
     "eslint-config-react-app": "7.0.1",
     "eslint-plugin-flowtype": "8.0.3",

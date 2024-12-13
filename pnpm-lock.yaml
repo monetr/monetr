@@ -14,9 +14,6 @@ importers:
       '@typescript-eslint/parser':
         specifier: 5.42.0
         version: 5.42.0(eslint@8.57.1)(typescript@5.7.2)
-      '@untitaker/hyperlink':
-        specifier: 0.1.43
-        version: 0.1.43
       eslint:
         specifier: 8.57.1
         version: 8.57.1
@@ -99,6 +96,9 @@ importers:
       '@types/react-dom':
         specifier: 18.3.1
         version: 18.3.1
+      '@untitaker/hyperlink':
+        specifier: 0.1.43
+        version: 0.1.43
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.4.49)
