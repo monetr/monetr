@@ -3,6 +3,7 @@ package controller_test
 import (
 	"crypto/ed25519"
 	"crypto/rand"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -24,10 +25,11 @@ func TestLogin(t *testing.T) {
 		_, e := NewTestApplication(t)
 		email, password := GivenIHaveLogin(t, e)
 
+		fmt.Sprint(email, password)
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
-				"email":    email,
-				"password": password,
+				"email":    "foo", //email,
+				"password": "foo", // password,
 			}).
 			Expect()
 
