@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { AccountBalanceWalletOutlined, LocalAtmOutlined, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
+import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
 import MBadge from '@monetr/interface/components/MBadge';
@@ -27,7 +28,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
 
 
   const className = mergeTailwind(
-    'w-72 h-full flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center pb-6 lg:pb-4',
+    'w-72 h-full flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center pb-6 lg:pb-4 overflow-auto',
     props.className,
   );
 
@@ -138,6 +139,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
             <NextFundingBadge />
           </NavigationItem>
         </div>
+        <PlaidBankStatusCard />
         <PlaidLastUpdatedCard linkId={ bankAccount?.linkId } />
       </div>
     </div>

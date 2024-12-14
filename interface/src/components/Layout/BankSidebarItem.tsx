@@ -1,11 +1,10 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Landmark } from 'lucide-react';
 
+import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/InstitutionLogo';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useBankAccounts, useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import { useInstitution } from '@monetr/interface/hooks/institutions';
 import MonetrLink from '@monetr/interface/models/Link';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
@@ -15,7 +14,6 @@ interface BankSidebarItemProps {
 }
 
 export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Element {
-  const { result: institution } = useInstitution(link.plaidLink?.institutionId);
   const selectBankAccount = useSelectedBankAccount();
   const { data: bankAccounts } = useBankAccounts();
   const active = selectBankAccount.data?.linkId === link.linkId;
@@ -24,24 +22,6 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
     ?.filter(bankAccount => bankAccount.linkId === link.linkId));
 
   const destinationBankAccount = destinationBankAccounts.length > 0 ? destinationBankAccounts[0] : null;
-
-  const InstitutionLogo = () => {
-    if (!institution?.logo) {
-      return (
-        <Landmark
-          data-testid={ `bank-sidebar-item-${link.linkId}-logo-missing` }
-          className='text-blue-500'
-        />
-      );
-    }
-
-    return (
-      <img
-        data-testid={ `bank-sidebar-item-${link.linkId}-logo` }
-        src={ `data:image/png;base64,${institution.logo}` }
-      />
-    );
-  };
 
   const LinkWarningIndicator = () => {
     const isWarning = link.getIsError() || link.getIsPendingExpiration();
@@ -93,7 +73,7 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
           className='absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle drop-shadow-md flex justify-center items-center'
           to={ `/bank/${destinationBankAccount?.bankAccountId}/transactions` }
         >
-          <InstitutionLogo />
+          <PlaidInstitutionLogo link={ link } />
           <LinkWarningIndicator />
         </Link>
       </TooltipTrigger>

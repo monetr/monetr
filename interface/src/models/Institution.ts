@@ -34,7 +34,7 @@ export class InstitutionStatus {
 }
 
 export type PlaidStatus = 'HEALTHY' | 'DEGRADED' | 'DOWN';
-export type RefreshInterval = 'DELAYED' | 'STOPPED';
+export type RefreshInterval = 'NORMAL' | 'DELAYED' | 'STOPPED';
 
 export class PlaidProductStatus {
   status: PlaidStatus;
