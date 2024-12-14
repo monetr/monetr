@@ -40,7 +40,7 @@ require (
 	github.com/stripe/stripe-go/v81 v81.1.1
 	github.com/teambition/rrule-go v1.8.2
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	github.com/wneessen/go-mail v0.4.4
+	github.com/wneessen/go-mail v0.5.2
 	github.com/xlzd/gotp v0.1.0
 	golang.org/x/crypto v0.31.0
 	google.golang.org/api v0.209.0
@@ -177,5 +177,6 @@ require (
 
 // Fix migrations/v8 dependency
 replace github.com/go-pg/pg/v10 v10.4.0 => github.com/go-pg/pg/v10 v10.14.0
+
 // Keep everything on the same msgpack version
 replace github.com/vmihailenco/msgpack/v5 v5.3.4 => github.com/vmihailenco/msgpack/v5 v5.4.1
