@@ -21,7 +21,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/getsentry/sentry-go v0.29.1
 	github.com/go-pg/migrations/v8 v8.1.0
-	github.com/go-pg/pg/v10 v10.13.0
+	github.com/go-pg/pg/v10 v10.14.0
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/gomodule/redigo v1.9.2
 	github.com/google/uuid v1.6.0
@@ -174,3 +174,8 @@ require (
 	mellium.im/sasl v0.3.1 // indirect
 	moul.io/http2curl/v2 v2.3.0 // indirect
 )
+
+// Fix migrations/v8 dependency
+replace github.com/go-pg/pg/v10 v10.4.0 => github.com/go-pg/pg/v10 v10.14.0
+// Keep everything on the same msgpack version
+replace github.com/vmihailenco/msgpack/v5 v5.3.4 => github.com/vmihailenco/msgpack/v5 v5.4.1
