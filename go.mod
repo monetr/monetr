@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.4
 
 require (
-	aidanwoods.dev/go-paseto v1.5.2
+	aidanwoods.dev/go-paseto v1.5.3
 	cloud.google.com/go/kms v1.20.2
 	cloud.google.com/go/storage v1.47.0
 	github.com/MicahParks/keyfunc v1.9.0
