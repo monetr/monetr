@@ -82,6 +82,13 @@ function TransferModal(props: TransferModalProps): JSX.Element {
       amount: friendlyToAmount(values.amount),
     })
       .then(() => modal.remove())
+      .then(() => enqueueSnackbar(
+        'Moved funds allocated successfully',
+        {
+          variant: 'success',
+          disableWindowBlurListener: true,
+        },
+      ))
       .catch((error: AxiosError) => void enqueueSnackbar(
         error.response.data['error'], {
           variant: 'error',
