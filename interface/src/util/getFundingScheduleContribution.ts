@@ -1,7 +1,7 @@
 import Spending from '@monetr/interface/models/Spending';
 
 export default function getFundingScheduleContribution(
-  fundingScheduleId: number,
+  fundingScheduleId: string,
   spending: Array<Spending>,
 ): number {
   return spending.reduce((total: number, item: Spending) => {
