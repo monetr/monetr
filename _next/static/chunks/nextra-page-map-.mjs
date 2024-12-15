@@ -3,6 +3,7 @@ import documentation_meta from "../../../src/pages/documentation/_meta.ts";
 import documentation_development_meta from "../../../src/pages/documentation/development/_meta.ts";
 import documentation_install_meta from "../../../src/pages/documentation/install/_meta.ts";
 import documentation_use_meta from "../../../src/pages/documentation/use/_meta.ts";
+import documentation_use_transactions_meta from "../../../src/pages/documentation/use/transactions/_meta.ts";
 import policy_meta from "../../../src/pages/policy/_meta.ts";
 export const pageMap = [{
   data: meta
@@ -242,6 +243,18 @@ export const pageMap = [{
         route: "/documentation/use/security/user_password",
         frontMatter: {
           "sidebarTitle": "User Password"
+        }
+      }]
+    }, {
+      name: "transactions",
+      route: "/documentation/use/transactions",
+      children: [{
+        data: documentation_use_transactions_meta
+      }, {
+        name: "uploads",
+        route: "/documentation/use/transactions/uploads",
+        frontMatter: {
+          "sidebarTitle": "Uploads"
         }
       }]
     }, {
