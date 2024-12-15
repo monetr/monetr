@@ -71,7 +71,7 @@
     "@imagemagick/magick-wasm": "0.0.32",
     "@rsbuild/core": "1.1.10",
     "@rsbuild/plugin-react": "1.1.0",
-    "@rsbuild/plugin-sass": "1.1.1",
+    "@rsbuild/plugin-sass": "1.1.2",
     "@rspack/binding-linux-arm64-gnu": "1.1.6",
     "@rspack/binding-linux-x64-gnu": "1.1.6",
     "@swc/core": "1.9.3",
@@ -93,9 +93,9 @@
     "postcss": "8.4.49",
     "prettier": "2.8.8",
     "react-test-renderer": "18.3.1",
-    "sass": "1.81.0",
-    "sass-embedded-linux-arm64": "1.81.0",
-    "sass-embedded-linux-x64": "1.81.0",
+    "sass": "1.83.0",
+    "sass-embedded-linux-arm64": "1.83.0",
+    "sass-embedded-linux-x64": "1.83.0",
     "tailwindcss": "3.4.16",
     "typescript": "5.7.2"
   }
