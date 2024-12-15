@@ -19,7 +19,7 @@ require (
 	github.com/elliotcourant/gofx v0.0.1
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gavv/httpexpect/v2 v2.16.0
-	github.com/getsentry/sentry-go v0.29.1
+	github.com/getsentry/sentry-go v0.30.0
 	github.com/go-pg/migrations/v8 v8.1.0
 	github.com/go-pg/pg/v10 v10.14.0
 	github.com/golang-jwt/jwt/v4 v4.5.1
@@ -177,5 +177,6 @@ require (
 
 // Fix migrations/v8 dependency
 replace github.com/go-pg/pg/v10 v10.4.0 => github.com/go-pg/pg/v10 v10.14.0
+
 // Keep everything on the same msgpack version
 replace github.com/vmihailenco/msgpack/v5 v5.3.4 => github.com/vmihailenco/msgpack/v5 v5.4.1
