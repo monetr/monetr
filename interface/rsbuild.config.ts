@@ -94,6 +94,10 @@ export default defineConfig({
       js: true,
       css: true,
     },
+    sourceMap: {
+      js: isDevelopment ? 'inline-source-map' : 'source-map',
+      css: true,
+    },
     copy: [
       {
         from: 'public/manifest.json',
