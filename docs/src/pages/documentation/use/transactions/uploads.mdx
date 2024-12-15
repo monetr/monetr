@@ -1,1 +1,41 @@
+---
+title: Transaction File Uploads
+description: Uploads files to monetr
+---
+
+import { Callout } from 'nextra/components'
+
 # Transaction File Uploads
+
+monetr allows you to import transactions and balances via file upload if you prefer to not use Plaid. At the moment
+monetr only supports the OFX file format, however it will also accept QFX files but may not support all of the features
+that QFX offers compared to OFX. Currently monetr only supports importing files for Checking accounts as the structure
+of the OFX file varies for different types of accounts (savings, money market, credit card, etc). More types of accounts
+will be supported in the future however.
+
+Most US banks should offer an OFX or QFX file download option, similar to where you would download a CSV file of your
+account's transactions.
+
+monetr does not _yet_ support CSV uploads as each bank's CSV format is a bit different, and accounting for these
+differences is very tricky if we don't want users to have to modify the CSV into a standard format each time. OFX files
+require no modification on the user's part in order for monetr to make use of them.
+
+<Callout type="warning">
+  **Sensitive Information**<br/>
+  OFX and QFX files can include sensitive information about your account such as account numbers. monetr **does not**
+  process this sensitive information and **does not store account numbers in any way from file uploads**. All file
+  uploads are **deleted as soon as they are finished being processed** in order to avoid storing sensitive information.
+</Callout>
+
+When you import an OFX file into monetr, transactions that don't already exist in monetr will be created as well as
+updating the current and available balance based on the data in the file. Accidently uploading an old file will not
+cause any transactions to be removed or overwritten, however balances will be updated based on the old file. Simply
+uploading the most recent file should correct this.
+
+<Callout type="info">
+  **Manually Created Transactions**<br/>
+  monetr does not merge manually created transactions and transactions created via file uploads at this time.
+</Callout>
+
+Importing transactions is only supported on manual links. Links managed by Plaid cannot have transactions imported via
+files at this time.
