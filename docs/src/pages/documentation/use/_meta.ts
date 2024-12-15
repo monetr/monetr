@@ -5,5 +5,6 @@ export default {
   'goal': 'Goals',
   'transactions': 'Transactions',
   'free_to_use': 'Free-To-Use',
+  'plaid': 'Plaid',
   'security': 'Security',
 };
