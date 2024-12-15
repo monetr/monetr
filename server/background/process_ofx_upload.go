@@ -12,7 +12,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/formats/qfx"
+	"github.com/monetr/monetr/server/formats/ofx"
 	"github.com/monetr/monetr/server/internal/calc"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
@@ -24,16 +24,16 @@ import (
 )
 
 const (
-	ProcessQFXUpload = "ProcessQFXUpload"
+	ProcessOFXUpload = "ProcessOFXUpload"
 )
 
 var (
-	_ JobHandler        = &ProcessQFXUploadHandler{}
-	_ JobImplementation = &ProcessQFXUploadJob{}
+	_ JobHandler        = &ProcessOFXUploadHandler{}
+	_ JobImplementation = &ProcessOFXUploadJob{}
 )
 
 type (
-	ProcessQFXUploadHandler struct {
+	ProcessOFXUploadHandler struct {
 		log          *logrus.Entry
 		db           *pg.DB
 		publisher    pubsub.Publisher
@@ -43,14 +43,14 @@ type (
 		clock        clock.Clock
 	}
 
-	ProcessQFXUploadArguments struct {
+	ProcessOFXUploadArguments struct {
 		AccountId           ID[Account]           `json:"accountId"`
 		BankAccountId       ID[BankAccount]       `json:"bankAccountId"`
 		TransactionUploadId ID[TransactionUpload] `json:"transactionUploadId"`
 	}
 
-	ProcessQFXUploadJob struct {
-		args      ProcessQFXUploadArguments
+	ProcessOFXUploadJob struct {
+		args      ProcessOFXUploadArguments
 		log       *logrus.Entry
 		repo      repository.BaseRepository
 		files     storage.Storage
@@ -67,15 +67,15 @@ type (
 	}
 )
 
-func NewProcessQFXUploadHandler(
+func NewProcessOFXUploadHandler(
 	log *logrus.Entry,
 	db *pg.DB,
 	clock clock.Clock,
 	files storage.Storage,
 	publisher pubsub.Publisher,
 	enqueuer JobEnqueuer,
-) *ProcessQFXUploadHandler {
-	return &ProcessQFXUploadHandler{
+) *ProcessOFXUploadHandler {
+	return &ProcessOFXUploadHandler{
 		log:          log,
 		db:           db,
 		publisher:    publisher,
@@ -86,9 +86,9 @@ func NewProcessQFXUploadHandler(
 	}
 }
 
-func (h *ProcessQFXUploadHandler) updateStatus(
+func (h *ProcessOFXUploadHandler) updateStatus(
 	ctx context.Context,
-	args ProcessQFXUploadArguments,
+	args ProcessOFXUploadArguments,
 	status TransactionUploadStatus,
 	errorMessage *string,
 ) error {
@@ -141,18 +141,18 @@ func (h *ProcessQFXUploadHandler) updateStatus(
 	return nil
 }
 
-func (h *ProcessQFXUploadHandler) QueueName() string {
-	return ProcessQFXUpload
+func (h *ProcessOFXUploadHandler) QueueName() string {
+	return ProcessOFXUpload
 }
 
-func (h *ProcessQFXUploadHandler) HandleConsumeJob(
+func (h *ProcessOFXUploadHandler) HandleConsumeJob(
 	ctx context.Context,
 	log *logrus.Entry,
 	data []byte,
 ) error {
-	var args ProcessQFXUploadArguments
+	var args ProcessOFXUploadArguments
 	if err := errors.Wrap(h.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Processing QFX Upload job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Processing OFX Upload job.", "job", map[string]interface{}{
 			"data": data,
 		})
 		return err
@@ -168,13 +168,13 @@ func (h *ProcessQFXUploadHandler) HandleConsumeJob(
 	var err error
 	defer func() {
 		if recovery := recover(); recovery != nil {
-			log.WithError(err).Error("panic processing QFX/OFX file upload")
+			log.WithError(err).Error("panic processing OFX file upload")
 			_ = h.updateStatus(ctx, args, TransactionUploadStatusFailed, nil)
 
 			panic(recovery)
 		}
 		if err != nil {
-			log.WithError(err).Error("error processing QFX/OFX file upload")
+			log.WithError(err).Error("error processing OFX file upload")
 			errorString := fmt.Sprintf("%s", err)
 			_ = h.updateStatus(ctx, args, TransactionUploadStatusFailed, &errorString)
 		} else {
@@ -188,7 +188,7 @@ func (h *ProcessQFXUploadHandler) HandleConsumeJob(
 		log := log.WithContext(span.Context())
 		repo := repository.NewRepositoryFromSession(h.clock, "user_system", args.AccountId, txn)
 
-		job, err := NewProcessQFXUploadJob(
+		job, err := NewProcessOFXUploadJob(
 			log, repo, h.clock, h.files, h.publisher, h.enqueuer, args,
 		)
 		if err != nil {
@@ -201,16 +201,16 @@ func (h *ProcessQFXUploadHandler) HandleConsumeJob(
 	return nil
 }
 
-func NewProcessQFXUploadJob(
+func NewProcessOFXUploadJob(
 	log *logrus.Entry,
 	repo repository.BaseRepository,
 	clock clock.Clock,
 	files storage.Storage,
 	publisher pubsub.Publisher,
 	enqueuer JobEnqueuer,
-	args ProcessQFXUploadArguments,
-) (*ProcessQFXUploadJob, error) {
-	return &ProcessQFXUploadJob{
+	args ProcessOFXUploadArguments,
+) (*ProcessOFXUploadJob, error) {
+	return &ProcessOFXUploadJob{
 		args:      args,
 		log:       log,
 		repo:      repo,
@@ -221,7 +221,7 @@ func NewProcessQFXUploadJob(
 	}, nil
 }
 
-func (j *ProcessQFXUploadJob) Run(ctx context.Context) error {
+func (j *ProcessOFXUploadJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 	crumbs.AddTag(span.Context(), "bankAccountId", j.args.BankAccountId.String())
@@ -291,7 +291,7 @@ func (j *ProcessQFXUploadJob) Run(ctx context.Context) error {
 
 // loadFile will take the current arguments and load the data from the file
 // upload itself into memory for processing.
-func (j *ProcessQFXUploadJob) loadFile(ctx context.Context) error {
+func (j *ProcessOFXUploadJob) loadFile(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -301,7 +301,7 @@ func (j *ProcessQFXUploadJob) loadFile(ctx context.Context) error {
 		j.args.TransactionUploadId,
 	)
 	if err != nil {
-		return errors.Wrap(err, "failed to process qfx file upload")
+		return errors.Wrap(err, "failed to process OFX file upload")
 	}
 	j.upload = txnUpload
 
@@ -321,20 +321,20 @@ func (j *ProcessQFXUploadJob) loadFile(ctx context.Context) error {
 	}
 	defer fileReader.Close()
 
-	qfxData, err := qfx.Parse(fileReader)
+	ofxData, err := ofx.Parse(fileReader)
 	if err != nil {
 		return err
 	}
 
-	j.data = qfxData
+	j.data = ofxData
 	return nil
 }
 
 // hydrateTransactions takes all of the transactions that were present in the
-// qfx file and tries to cross reference them with transactions that already
-// exist in the database. It relies on the qfx file having a unique identifier
+// OFX file and tries to cross reference them with transactions that already
+// exist in the database. It relies on the OFX file having a unique identifier
 // for each transaction that is consistent between each download from the FI.
-func (j *ProcessQFXUploadJob) hydrateTransactions(ctx context.Context) error {
+func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -386,7 +386,7 @@ func (j *ProcessQFXUploadJob) hydrateTransactions(ctx context.Context) error {
 	return nil
 }
 
-func (j *ProcessQFXUploadJob) syncTransactions(ctx context.Context) error {
+func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -432,7 +432,7 @@ func (j *ProcessQFXUploadJob) syncTransactions(ctx context.Context) error {
 		originalName = myownsanity.CoalesceStrings(originalName, name)
 
 		// TODO Also parse DTAVAIL at some point
-		date, err := qfx.ParseDate(externalTransaction.DTPOSTED, j.timezone)
+		date, err := ofx.ParseDate(externalTransaction.DTPOSTED, j.timezone)
 		if err != nil {
 			tlog.WithError(err).
 				WithField("dtposted", externalTransaction.DTPOSTED).
@@ -452,7 +452,7 @@ func (j *ProcessQFXUploadJob) syncTransactions(ctx context.Context) error {
 				OriginalName:         originalName,
 				OriginalMerchantName: name,
 				Currency:             "USD", // TODO Derive from file
-				IsPending:            false, // QFX files don't show pending?
+				IsPending:            false, // OFX files don't show pending?
 				UploadIdentifier:     &uploadIdentifier,
 				Source:               TransactionSourceUpload,
 			}
@@ -482,7 +482,7 @@ func (j *ProcessQFXUploadJob) syncTransactions(ctx context.Context) error {
 	return nil
 }
 
-func (j *ProcessQFXUploadJob) syncBalances(ctx context.Context) error {
+func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

@@ -1,4 +1,4 @@
-package qfx
+package ofx
 
 import (
 	"encoding/xml"
@@ -8,13 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConvertQFXToXML(t *testing.T) {
+func TestConvertOFXToXML(t *testing.T) {
 	t.Run("nfcu", func(t *testing.T) {
 		data := GetFixtures(t, "sample-nfcu.qfx")
 		token, err := Tokenize(string(data))
 		assert.NoError(t, err)
 
-		xmlString := ConvertQFXToXML(token)
+		xmlString := ConvertOFXToXML(token)
 		assert.NotEmpty(t, xmlString, "must produce an xml string")
 	})
 
@@ -23,7 +23,7 @@ func TestConvertQFXToXML(t *testing.T) {
 		token, err := Tokenize(string(data))
 		assert.NoError(t, err)
 
-		xmlString := ConvertQFXToXML(token)
+		xmlString := ConvertOFXToXML(token)
 		assert.NotEmpty(t, xmlString, "must produce an xml string")
 	})
 
@@ -32,7 +32,7 @@ func TestConvertQFXToXML(t *testing.T) {
 		token, err := Tokenize(string(data))
 		assert.NoError(t, err)
 
-		xmlString := ConvertQFXToXML(token)
+		xmlString := ConvertOFXToXML(token)
 		assert.NotEmpty(t, xmlString, "must produce an xml string")
 	})
 }
@@ -43,7 +43,7 @@ func TestValidXMLOutput(t *testing.T) {
 		token, err := Tokenize(string(data))
 		assert.NoError(t, err)
 
-		convertedToXml := ConvertQFXToXML(token)
+		convertedToXml := ConvertOFXToXML(token)
 		assert.NotEmpty(t, convertedToXml, "must produce an xml string")
 
 		var ofx gofx.OFX
@@ -57,7 +57,7 @@ func TestValidXMLOutput(t *testing.T) {
 		token, err := Tokenize(string(data))
 		assert.NoError(t, err)
 
-		convertedToXml := ConvertQFXToXML(token)
+		convertedToXml := ConvertOFXToXML(token)
 		assert.NotEmpty(t, convertedToXml, "must produce an xml string")
 
 		var ofx gofx.OFX
@@ -71,7 +71,7 @@ func TestValidXMLOutput(t *testing.T) {
 		token, err := Tokenize(string(data))
 		assert.NoError(t, err)
 
-		convertedToXml := ConvertQFXToXML(token)
+		convertedToXml := ConvertOFXToXML(token)
 		assert.NotEmpty(t, convertedToXml, "must produce an xml string")
 
 		var ofx gofx.OFX

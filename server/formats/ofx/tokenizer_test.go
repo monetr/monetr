@@ -1,4 +1,4 @@
-package qfx
+package ofx
 
 import (
 	"testing"

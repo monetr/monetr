@@ -67,7 +67,7 @@
 
 * **link:** Fixed issue where links would not get deactivated gracefully. ([#2214](https://github.com/monetr/monetr/issues/2214)) ([a9402c5](https://github.com/monetr/monetr/commit/a9402c580d79da8b4e43438f77e364068e56bff8))
 * **manual:** Manual links are now always enabled. ([30ace95](https://github.com/monetr/monetr/commit/30ace95615e5a655a8a98d8f5451e07724f00ed5))
-* **ofx:** Fixed OFX/QFX transaction import order ([3b4a629](https://github.com/monetr/monetr/commit/3b4a6292ef9b111d2071b47a4be5c04b9ad049df)), closes [#2180](https://github.com/monetr/monetr/issues/2180)
+* **ofx:** Fixed OFX transaction import order ([3b4a629](https://github.com/monetr/monetr/commit/3b4a6292ef9b111d2071b47a4be5c04b9ad049df)), closes [#2180](https://github.com/monetr/monetr/issues/2180)
 
 
 ### Miscellaneous
@@ -447,9 +447,9 @@
 * **build:** Fixed licensed config ([91f51dc](https://github.com/monetr/monetr/commit/91f51dc6bdcd75982d25e0bf8d77171010ef03f5))
 * **calc:** Fixing offsets for return values in math ([7df41eb](https://github.com/monetr/monetr/commit/7df41eb31b850d5f3a67a4adf6698bc81c4aef84))
 * **dev:** Fixed local development on macOS ([a44dc29](https://github.com/monetr/monetr/commit/a44dc292999cc673230bb5034a212e08d1e5639d))
-* **similar:** Fixing similar transactions for QFX uploads. ([1ab0381](https://github.com/monetr/monetr/commit/1ab03816fb7fab0cbace58179c04c5744e487498))
+* **similar:** Fixing similar transactions for OFX uploads. ([1ab0381](https://github.com/monetr/monetr/commit/1ab03816fb7fab0cbace58179c04c5744e487498))
 * **ui:** Fixing storybook dependency in email package ([226d372](https://github.com/monetr/monetr/commit/226d372f34fb7f9c0dd47435247e3dad9178b797))
-* **ui:** Only allow OFX/QFX files to be uploaded. ([05e1543](https://github.com/monetr/monetr/commit/05e15432f097a3975aa0f550d3b025a0bb2576b8))
+* **ui:** Only allow OFX files to be uploaded. ([05e1543](https://github.com/monetr/monetr/commit/05e15432f097a3975aa0f550d3b025a0bb2576b8))
 
 
 ### Miscellaneous
@@ -668,7 +668,7 @@
 
 ### Bug Fixes
 
-* **api:** Use memo field from QFX/OFX upload ([194f622](https://github.com/monetr/monetr/commit/194f6228ddbc12e9369f240d4bf8ca2905f3c7c9))
+* **api:** Use memo field from OFX upload ([194f622](https://github.com/monetr/monetr/commit/194f6228ddbc12e9369f240d4bf8ca2905f3c7c9))
 * **docs:** Don't include analytics for local development ([#1993](https://github.com/monetr/monetr/issues/1993)) ([50b0393](https://github.com/monetr/monetr/commit/50b0393c04ec33400c2b6648e25bb1ef53401f98))
 
 ## [0.18.9](https://github.com/monetr/monetr/compare/v0.18.8...v0.18.9) (2024-09-28)
@@ -1194,7 +1194,7 @@
 
 ### Features
 
-* **api:** Adding QFX processing to import transactions ([#1773](https://github.com/monetr/monetr/issues/1773)) ([09604d9](https://github.com/monetr/monetr/commit/09604d9521f5eb30a48923ce654dc744a91502f4))
+* **api:** Adding OFX processing to import transactions ([#1773](https://github.com/monetr/monetr/issues/1773)) ([09604d9](https://github.com/monetr/monetr/commit/09604d9521f5eb30a48923ce654dc744a91502f4))
 * **kms:** Adding vault transit support ([#1791](https://github.com/monetr/monetr/issues/1791)) ([098e590](https://github.com/monetr/monetr/commit/098e590b116442e1f76696cb98e4add58d680c27))
 
 
@@ -1575,7 +1575,7 @@
 
 ### Features
 
-* **api:** Adding support for parsing QFX files. ([#1653](https://github.com/monetr/monetr/issues/1653)) ([43c9de7](https://github.com/monetr/monetr/commit/43c9de7ac9b2eeb3c0ec090751426bbb08e62c95))
+* **api:** Adding support for parsing OFX files. ([#1653](https://github.com/monetr/monetr/issues/1653)) ([43c9de7](https://github.com/monetr/monetr/commit/43c9de7ac9b2eeb3c0ec090751426bbb08e62c95))
 * **api:** Adding support for teller.io ([#1659](https://github.com/monetr/monetr/issues/1659)) ([eba6c52](https://github.com/monetr/monetr/commit/eba6c520461e40d0c0bb2621cbbcb4bb4ee55acc))
 * **api:** Building out CSV import functionality. ([#1654](https://github.com/monetr/monetr/issues/1654)) ([68cb109](https://github.com/monetr/monetr/commit/68cb10901ee55106bd4b69ec57c8c043b4b0be7c))
 * **api:** Creating the initial interface for transaction enrichment ([be16d3d](https://github.com/monetr/monetr/commit/be16d3d218dce401417ff283a61bfd0e6a971b5a))

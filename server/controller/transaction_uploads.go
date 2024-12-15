@@ -38,8 +38,8 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 	if !strings.EqualFold(file.ContentType, string(storage.IntuitQFXContentType)) {
 		c.getLog(ctx).
 			WithField("contentType", file.ContentType).
-			Debug("could not create transaction upload because the file is not the expected content type: qfx/ofx")
-		return c.badRequest(ctx, "File is not a QFX/OFX file, and cannot be used for transaction imports")
+			Debug("could not create transaction upload because the file is not the expected content type: OFX")
+		return c.badRequest(ctx, "File is not a OFX file, and cannot be used for transaction imports")
 	}
 
 	if err := repo.CreateTransactionUpload(
@@ -52,8 +52,8 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 
 	if err := c.JobRunner.EnqueueJob(
 		c.getContext(ctx),
-		background.ProcessQFXUpload,
-		background.ProcessQFXUploadArguments{
+		background.ProcessOFXUpload,
+		background.ProcessOFXUploadArguments{
 			AccountId:           c.mustGetAccountId(ctx),
 			BankAccountId:       bankAccountId,
 			TransactionUploadId: upload.TransactionUploadId,

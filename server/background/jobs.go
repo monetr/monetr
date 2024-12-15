@@ -80,7 +80,7 @@ func NewBackgroundJobs(
 		NewCleanupJobsHandler(log, db),
 		NewDeactivateLinksHandler(log, db, clock, configuration, kms, plaidPlatypus),
 		NewProcessFundingScheduleHandler(log, db, clock),
-		NewProcessQFXUploadHandler(log, db, clock, fileStorage, publisher, enqueuer),
+		NewProcessOFXUploadHandler(log, db, clock, fileStorage, publisher, enqueuer),
 		NewProcessSpendingHandler(log, db, clock),
 		NewRemoveFileHandler(log, db, clock, fileStorage),
 		NewRemoveLinkHandler(log, db, clock, publisher),

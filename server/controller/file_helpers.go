@@ -40,7 +40,7 @@ func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File
 		log.Debug("upload content type is an octet stream, detecting file type by extension")
 		switch extension {
 		case ".qfx", ".ofx":
-			log.Debug("detected QFX/OFX file format")
+			log.Debug("detected OFX file format")
 			contentType = string(storage.IntuitQFXContentType)
 		default:
 			log.Warn("could not determine file format by file extension")

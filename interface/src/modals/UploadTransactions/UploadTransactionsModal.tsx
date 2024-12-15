@@ -224,7 +224,7 @@ function UploadFileStage(props: StageProps) {
         <div { ...getRootProps() } className={ uploadClassNames }>
           <input { ...getInputProps() } />
           <UploadFileOutlined className='text-6xl text-dark-monetr-content' />
-          <MSpan size='lg' weight='semibold'>Drag QFX file here</MSpan>
+          <MSpan size='lg' weight='semibold'>Drag OFX file here</MSpan>
           <MSpan>Or click to browse</MSpan>
         </div>
       </div>

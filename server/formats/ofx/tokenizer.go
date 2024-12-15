@@ -1,4 +1,4 @@
-package qfx
+package ofx
 
 import (
 	"fmt"
@@ -57,10 +57,10 @@ func (a Array) XML() string {
 	return fmt.Sprintf("<%s>%s</%s>", a.Name, strings.Join(pieces, ""), a.Name)
 }
 
-func Tokenize(qfxData string) (Token, error) {
-	items := dataRegex.FindAllStringSubmatch(qfxData, -1)
+func Tokenize(ofxData string) (Token, error) {
+	items := dataRegex.FindAllStringSubmatch(ofxData, -1)
 	if len(items) == 0 {
-		return nil, errors.New("QFX/OFX file provided is not valid")
+		return nil, errors.New("OFX file provided is not valid")
 	}
 	_, token := tokenizeItem(0, items)
 	return token, nil

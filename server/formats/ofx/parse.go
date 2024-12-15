@@ -1,4 +1,4 @@
-package qfx
+package ofx
 
 import (
 	"encoding/xml"
@@ -21,7 +21,7 @@ func Parse(reader io.Reader) (*gofx.OFX, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse")
 		}
-		xmlData := ConvertQFXToXML(tokens)
+		xmlData := ConvertOFXToXML(tokens)
 		data = xmlData
 
 		if err := xml.Unmarshal(data, &ofx); err != nil {
@@ -34,5 +34,5 @@ func Parse(reader io.Reader) (*gofx.OFX, error) {
 
 func ParseDate(input string, timezone *time.Location) (time.Time, error) {
 	result, err := time.ParseInLocation("20060102150405.000", input, timezone)
-	return result, errors.Wrapf(err, "failed to parse QFX timestamp [%s]", input)
+	return result, errors.Wrapf(err, "failed to parse OFX timestamp [%s]", input)
 }

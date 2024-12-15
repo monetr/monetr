@@ -24,7 +24,7 @@ type FileInfo struct {
 }
 
 // Storage is the interface for reading and writing files presented to monetr by
-// clients. These files might be images, CSV files or QFX files or something
+// clients. These files might be images, CSV files or OFX files or something
 // else entirely. Files are stored in a random path that is returned when the
 // file is written. Files can only be retrieved using their path. Files cannot
 // be listed and the tree cannot be walked. Files should only be interacted with

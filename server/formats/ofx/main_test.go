@@ -1,4 +1,4 @@
-package qfx
+package ofx
 
 import (
 	"embed"
@@ -13,6 +13,6 @@ var fixtureData embed.FS
 
 func GetFixtures(t *testing.T, name string) []byte {
 	data, err := fixtureData.ReadFile(path.Join("fixtures", name))
-	require.NoError(t, err, "must be able to load fixture data for QFX parsing")
+	require.NoError(t, err, "must be able to load fixture data for OFX parsing")
 	return data
 }
