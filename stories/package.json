@@ -23,16 +23,16 @@
     "typescript": "5.7.2"
   },
   "devDependencies": {
-    "@rsbuild/core": "1.1.7",
-    "@rsbuild/plugin-react": "1.0.7",
+    "@rsbuild/core": "1.1.10",
+    "@rsbuild/plugin-react": "1.1.0",
     "@rsbuild/plugin-sass": "1.1.1",
-    "@rspack/binding-linux-arm64-gnu": "1.1.4",
-    "@rspack/binding-linux-x64-gnu": "1.1.4",
+    "@rspack/binding-linux-arm64-gnu": "1.1.6",
+    "@rspack/binding-linux-x64-gnu": "1.1.6",
     "autoprefixer": "10.4.20",
     "postcss": "8.4.49",
     "sass": "1.81.0",
     "sass-embedded-linux-arm64": "1.81.0",
     "sass-embedded-linux-x64": "1.81.0",
-    "storybook-react-rsbuild": "0.1.5"
+    "storybook-react-rsbuild": "0.1.6"
   }
 }
