@@ -3,6 +3,7 @@ import documentation_meta from "../../../src/pages/documentation/_meta.ts";
 import documentation_development_meta from "../../../src/pages/documentation/development/_meta.ts";
 import documentation_install_meta from "../../../src/pages/documentation/install/_meta.ts";
 import documentation_use_meta from "../../../src/pages/documentation/use/_meta.ts";
+import documentation_use_security_meta from "../../../src/pages/documentation/use/security/_meta.ts";
 import documentation_use_transactions_meta from "../../../src/pages/documentation/use/transactions/_meta.ts";
 import policy_meta from "../../../src/pages/policy/_meta.ts";
 export const pageMap = [{
@@ -236,13 +237,30 @@ export const pageMap = [{
         "description": "Learn how to use monetr's Goals feature to save for one-time financial targets like vacations, loans, or down payments. Understand how Goals track contributions and spending, helping you plan effectively and meet your financial objectives without over-funding."
       }
     }, {
+      name: "plaid",
+      route: "/documentation/use/plaid",
+      frontMatter: {
+        "title": "Plaid",
+        "description": "Learn how to use Plaid with monetr to connect your bank accounts, automate transaction updates, and manage balances. Explore supported account types, adding new accounts, troubleshooting connections, and removing Plaid links."
+      }
+    }, {
       name: "security",
       route: "/documentation/use/security",
       children: [{
+        data: documentation_use_security_meta
+      }, {
+        name: "mfa",
+        route: "/documentation/use/security/mfa",
+        frontMatter: {
+          "title": "Multi-Factor Authentication (MFA)",
+          "description": "Secure your monetr account with TOTP multi-factor authentication. Learn how to enable MFA using trusted apps like Google Authenticator or 1Password, and add an extra layer of protection to your financial data."
+        }
+      }, {
         name: "user_password",
         route: "/documentation/use/security/user_password",
         frontMatter: {
-          "sidebarTitle": "User Password"
+          "title": "User Password",
+          "description": "Learn how to securely manage your password in monetr. Follow step-by-step instructions to change your password, recover access if you’ve forgotten it, and ensure account security with best practices."
         }
       }]
     }, {
@@ -254,14 +272,16 @@ export const pageMap = [{
         name: "uploads",
         route: "/documentation/use/transactions/uploads",
         frontMatter: {
-          "sidebarTitle": "Uploads"
+          "title": "Transaction File Uploads",
+          "description": "Learn how to import transactions and balances into monetr using OFX files. Discover the supported file formats, step-by-step upload process, and key considerations for managing your financial data securely."
         }
       }]
     }, {
       name: "transactions",
       route: "/documentation/use/transactions",
       frontMatter: {
-        "sidebarTitle": "Transactions"
+        "title": "Transactions",
+        "description": "Learn how to manage and organize transactions in monetr. Explore assigning transactions to budgets, adding them manually, or importing via file uploads for smarter financial tracking."
       }
     }]
   }, {
