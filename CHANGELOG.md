@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.18.37](https://github.com/monetr/monetr/compare/v0.18.36...v0.18.37) (2024-12-16)
+
+
+### Features
+
+* **docs:** Adding more documentation ahead of launch ([#2236](https://github.com/monetr/monetr/issues/2236)) ([e4c0046](https://github.com/monetr/monetr/commit/e4c004666a894d25632e6ad5c840d4c242de201f))
+
+
+### Dependencies
+
+* **api:** update module cloud.google.com/go/storage to v1.48.0 ([#2233](https://github.com/monetr/monetr/issues/2233)) ([b0334a9](https://github.com/monetr/monetr/commit/b0334a9b40d5650a3da9e461a59da8dea217699c))
+* **api:** update module github.com/getsentry/sentry-go to v0.30.0 ([#2234](https://github.com/monetr/monetr/issues/2234)) ([8ef2983](https://github.com/monetr/monetr/commit/8ef29839ea5d9e7cb10ef3eaf92f65c84adc9ead))
+* **api:** update module github.com/labstack/echo/v4 to v4.13.2 ([#2237](https://github.com/monetr/monetr/issues/2237)) ([5a9a39f](https://github.com/monetr/monetr/commit/5a9a39f21262379743072dd47bc24161593c9c2e))
+* **api:** update module golang.org/x/net to v0.32.0 ([#2238](https://github.com/monetr/monetr/issues/2238)) ([32b437c](https://github.com/monetr/monetr/commit/32b437c21830202eff095785bbe8edec2bcd1bb9))
+* **api:** update module google.golang.org/api to v0.211.0 ([#2239](https://github.com/monetr/monetr/issues/2239)) ([5172e78](https://github.com/monetr/monetr/commit/5172e785ed7dc6806ad52dc93ba5c019244fafd3))
+* **ui:** update dependency @swc/core to v1.10.1 ([#2240](https://github.com/monetr/monetr/issues/2240)) ([c0c8424](https://github.com/monetr/monetr/commit/c0c842414df83fa2b830e7e1d9db6999c3dc60b2))
+* **ui:** update dependency @testing-library/react to v16.1.0 ([#2241](https://github.com/monetr/monetr/issues/2241)) ([1828a81](https://github.com/monetr/monetr/commit/1828a817720fe4aebbb04fc71a7c13f69f3d4592))
+* **ui:** update dependency react-select to v5.9.0 ([#2242](https://github.com/monetr/monetr/issues/2242)) ([b4cf668](https://github.com/monetr/monetr/commit/b4cf66890728df34cc17f2072f03cb216bcea458))
+* **ui:** update storybook monorepo to v8.4.7 ([#2232](https://github.com/monetr/monetr/issues/2232)) ([ec14606](https://github.com/monetr/monetr/commit/ec146067bbcd4d4995a8b7dc2e87e87ecc273200))
+
+
+### Bug Fixes
+
+* **sentry:** Tweaking sentry cache instrumentation ([ff351bf](https://github.com/monetr/monetr/commit/ff351bf9a2a2167ba32d9d73b9bb519f995d12b7))
+
+
+### Miscellaneous
+
+* Renaming file import packages ([17785b8](https://github.com/monetr/monetr/commit/17785b803a57de31e63503adc55892de06b4feb9))
+
 ## [0.18.36](https://github.com/monetr/monetr/compare/v0.18.35...v0.18.36) (2024-12-15)
 
 
