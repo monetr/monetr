@@ -1,6 +1,6 @@
 {
   "extends": [
-    "config:base",
+    "config:recommended",
     ":semanticCommitTypeAll(deps)"
   ],
   "semanticCommits": "enabled",
@@ -9,7 +9,7 @@
   "branchConcurrentLimit": 20,
   "prConcurrentLimit": 20,
   "postUpdateOptions": [
-    "gomodTidy",
+    "gomodTidy"
   ],
   "packageRules": [
     {
@@ -22,14 +22,14 @@
       ]
     },
     {
-      "matchLanguages": [
+      "matchCategories": [
         "go",
         "golang"
       ],
       "semanticCommitScope": "api"
     },
     {
-      "matchLanguages": [
+      "matchCategories": [
         "js",
         "javascript",
         "typescript"
@@ -37,7 +37,7 @@
       "semanticCommitScope": "ui"
     },
     {
-      "matchLanguages": [
+      "matchCategories": [
         "docker",
         "dockerfile"
       ],
@@ -46,12 +46,17 @@
     {
       "groupName": "rsbuild",
       "groupSlug": "rsbuild",
-      "matchPackageNames": ["/rspack/", "/rsbuild/"]
+      "matchPackageNames": [
+        "/rspack/",
+        "/rsbuild/"
+      ]
     },
     {
       "groupName": "sass",
       "groupSlug": "sass",
-      "matchPackageNames": ["/sass/"]
+      "matchPackageNames": [
+        "/sass/"
+      ]
     }
   ]
 }
