@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.18.38](https://github.com/monetr/monetr/compare/v0.18.37...v0.18.38) (2024-12-21)
+
+
+### Features
+
+* **docs:** Adding documentation on free-to-use ([#2264](https://github.com/monetr/monetr/issues/2264)) ([19fde81](https://github.com/monetr/monetr/commit/19fde81f157bb6e68021f7f6df410dc010aeae4f))
+* **docs:** Adding launch notification mailing list form ([170002b](https://github.com/monetr/monetr/commit/170002b77a1a8ff32b3a9c02954d8e427fcb1f88))
+
+
+### Dependencies
+
+* **api:** update module github.com/labstack/echo/v4 to v4.13.3 ([#2254](https://github.com/monetr/monetr/issues/2254)) ([1c30aaa](https://github.com/monetr/monetr/commit/1c30aaa620ecc5b963dbe4d965154e6aed865ccb))
+* **api:** update module golang.org/x/net to v0.33.0 [security] ([#2252](https://github.com/monetr/monetr/issues/2252)) ([fcfae9f](https://github.com/monetr/monetr/commit/fcfae9fa11c1d428cf8a65fc3b7b83dc1f0cdab3))
+* **config:** migrate config renovate.json ([#2256](https://github.com/monetr/monetr/issues/2256)) ([5db92be](https://github.com/monetr/monetr/commit/5db92be1e9ca74979dd5cb2a7e0f274ac90e6c75))
+* **renovate:** update codecov/codecov-action action to v5 ([#2244](https://github.com/monetr/monetr/issues/2244)) ([03feeef](https://github.com/monetr/monetr/commit/03feeef6e0bcd67bd2e1837ccad3a0c5a9b16947))
+* **ui:** update dependency next to v15.1.1 ([#2249](https://github.com/monetr/monetr/issues/2249)) ([fa27fd5](https://github.com/monetr/monetr/commit/fa27fd55c95d34d6dc82d7b3e29ecbbb7817a894))
+* **ui:** update dependency tailwindcss to v3.4.17 ([#2250](https://github.com/monetr/monetr/issues/2250)) ([fe35722](https://github.com/monetr/monetr/commit/fe35722c5d453776408c9c3931a5a0bae72271e0))
+* **ui:** update nextra monorepo to v3.3.0 ([#2262](https://github.com/monetr/monetr/issues/2262)) ([474fcb1](https://github.com/monetr/monetr/commit/474fcb1bd7ea4c79c021b33077642944cd3fb034))
+* **ui:** update sentry-javascript monorepo to v8.45.1 ([#2243](https://github.com/monetr/monetr/issues/2243)) ([b377c61](https://github.com/monetr/monetr/commit/b377c61e9b1cec0f3ab4a7f7e8c78435a0487a04))
+* **ui:** update sentry-javascript monorepo to v8.47.0 ([#2263](https://github.com/monetr/monetr/issues/2263)) ([81a60ea](https://github.com/monetr/monetr/commit/81a60ea14b4afc1174887899155978ab5c23384f))
+
+
+### Bug Fixes
+
+* **api:** Removing old deprecated API field from plaid callback ([bd216a1](https://github.com/monetr/monetr/commit/bd216a13e65c13e44f1dbeb5661e4fe8e11bf65b)), closes [#858](https://github.com/monetr/monetr/issues/858)
+
+
+### Miscellaneous
+
+* **deps:** Bump next from 14.1.4 to 15.1.1 ([#2251](https://github.com/monetr/monetr/issues/2251)) ([a955cbc](https://github.com/monetr/monetr/commit/a955cbc57ca503bcc973ad64b8cbc7994605a5de))
+* Updating plaid credentials docs ([bcd2566](https://github.com/monetr/monetr/commit/bcd256611368659110b11f05b41135e6b9e4f81b))
+
 ## [0.18.37](https://github.com/monetr/monetr/compare/v0.18.36...v0.18.37) (2024-12-16)
 
 
