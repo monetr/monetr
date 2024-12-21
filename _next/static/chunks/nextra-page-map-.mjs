@@ -9,12 +9,6 @@ import policy_meta from "../../../src/pages/policy/_meta.ts";
 export const pageMap = [{
   data: meta
 }, {
-  name: "about",
-  route: "/about",
-  frontMatter: {
-    "title": "About"
-  }
-}, {
   name: "blog",
   route: "/blog",
   frontMatter: {
