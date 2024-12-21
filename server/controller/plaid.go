@@ -515,8 +515,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"linkId":  link.LinkId,
+		"linkId": link.LinkId,
 	})
 }
 
