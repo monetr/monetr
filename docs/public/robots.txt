@@ -2,8 +2,5 @@
 User-agent: *
 Allow: /
 
-# Host
-Host: https://monetr.app
-
 # Sitemaps
 Sitemap: https://monetr.app/sitemap.xml

@@ -1,6 +1,7 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: process.env.SITE_URL || 'https://monetr.app',
+  trailingSlash: true,
   generateRobotsTxt: true, // (optional)
   exclude: ['*/_meta'],
   output: 'export',
