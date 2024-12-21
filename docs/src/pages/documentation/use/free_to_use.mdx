@@ -1,3 +1,11 @@
+---
+title: Free-To-Use and Fund Allocation Guide
+description: Learn how to manage your discretionary spending with monetr's Free-To-Use feature. Discover how to allocate funds between budgets, expenses, and goals for simplified budgeting and financial flexibility.
+---
+
+import { Callout } from 'nextra/components'
+import { Steps } from 'nextra/components'
+
 # Free-To-Use
 
 ## Understanding Free-To-Use
@@ -6,6 +14,10 @@
 how much money is available to spend after setting aside funds for your essential budgets, goals, and expenses. By
 calculating your Available Balance and subtracting the total funds allocated to your Goals and Expenses, Free-To-Use
 ensures that your essential expenses are covered, leaving you with a clear picture of your spending freedom.
+
+<div className="max-w-96 pt-4">
+  ![Free to use screenshot](./assets/free_to_use.png)
+</div>
 
 ### How Free-To-Use Works
 
@@ -38,44 +50,66 @@ ensures that your essential expenses are covered, leaving you with a clear pictu
 - **Informed Spending Decisions**: Knowing your Free-To-Use amount allows you to decide whether to save for a new goal
   or enjoy a night out, all while staying informed about your financial commitments.
 
+## Negative Free-To-Use
+
+Your **Free-To-Use** balance can become negative if the funds allocated to your budgets exceed your available balance.
+While this situation should be avoided, it can occasionally happen due to the timing of monetr's automations. For
+instance, if monetr processes your funding schedule before your paycheck's transaction or balance is updated in monetr,
+your **Free-To-Use** balance might temporarily show as negative until the update occurs.
+
+If this isn't the case, it might indicate that you're stretching your finances too thin. If your budgets require more
+than your regular income or if you're spending beyond your Free-To-Use amount, it may be time to consider reducing your
+expenses or overall spending.
+
+<div className="max-w-96 pt-4">
+  ![Negative free to use screenshot](./assets/negative_free_to_use.png)
+</div>
+
 ## Transfer (Allocating Funds)
 
-If you need to you can transfer funds from your **Free-To-Use** to your Expenses or Goals or vice versa. You can also
-move funds between Expenses and Goals directly if needed. 
+You can easily transfer funds between your **Free-To-Use** balance, Expenses, and Goals. This helps you adjust your
+budget as needed. 
 
-**Note**: This does not move any real funds, transferring is just monetr's way of moving allocations. monetr can never
-move actual funds at your bank.
+<Callout type="warning">
+  **Note**<br/>
+  This process only changes how funds are allocated within monetr. It does not move actual money in your bank account.
+</Callout>
+
+<Steps>
 
 ### 1. Navigate to the Expense or Goal you are moving funds between.
 
-Click the **Transfer** button in the top navigation bar.
+First, go to the Expense or Goal you want to adjust. Then, click the **Transfer** button located in the top navigation
+bar. This will open the transfer modal.
 
 ![Expense details showing the transfer button](./assets/transfer_expense_details.png)
 
-### 2. Select the source and destination to move funds.
+### 2: Choose Where to Move Funds
 
-The transfer modal contains two dropdowns. A **From** and a **To**. You can select any expense or goal or the
-**Free-To-Use** in these dropdowns, but the selection must be different in each of them. You can use the arrow button in
-the middle of the modal to swap the source and destination values as well.
+In the transfer modal, you'll see two dropdown menus labeled **From** and **To**. Choose where you want to move funds
+from and to. You can select any Expense, Goal, or the **Free-To-Use** balance, but make sure the selections are
+different. You can also use the arrow button to quickly swap the selections.
 
-Clicking on any of the amounts above the dropdown will autofill that amount in the form.
+For convenience, clicking on any of the amounts displayed above the dropdowns will automatically fill that amount into
+the form.
 
 ![Transfer modal screenshot](./assets/transfer_modal.png)
 
-### 3. Complete the transfer.
+### 3. Finalize the transfer.
 
-Click **Transfer** to move the funds, the modal will close and the amount allocated to the **Free-To-Use** and the
-budget you selected will be updated.
+Once you've made your selections, click the **Transfer** button to complete the process. The modal will close, and the
+allocations in your **Free-To-Use** balance and the selected budget will be updated accordingly.
 
 ![Transfer complete screenshot](./assets/transfer_complete.png)
 
+</Steps>
+
 ## The Transfer Modal
 
-The Transfer modal has a few amounts above the dropdown of the source and destination. These amounts can be used as
-shortcuts to automatically move that amount. The **Free-To-Use** will always have the current amount in the free to use
-if you want to move _all_ of it into an expense or a goal. Expenses and goals will have 3 numbers, the first being how
-much is currently allocated to the budget, the second is the target amount for the budget, and the third is the
-difference between the two.
+The Transfer modal provides quick shortcuts above the dropdowns to help you move specific amounts easily. For the
+**Free-To-Use** balance, you can see the total available amount if you want to allocate all of it. For Expenses and
+Goals, you'll see three numbers: the current allocation, the target amount, and the difference between them. These
+shortcuts make it easy to adjust your budget with just a click.
 
 <div className="max-w-96 pt-4">
   ![Transfer modal focused screenshot](./assets/transfer_modal_focused.png)
