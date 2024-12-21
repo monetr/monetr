@@ -43,6 +43,6 @@ div._max-w-\[90rem\] {
   border-radius: 1em !important;
 }
 
-p > img {
+img[data-nimg], img[data-rmiz-modal-img] {
   @apply rounded-md
 }
