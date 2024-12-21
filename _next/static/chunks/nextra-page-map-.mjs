@@ -207,7 +207,8 @@ export const pageMap = [{
       name: "free_to_use",
       route: "/documentation/use/free_to_use",
       frontMatter: {
-        "sidebarTitle": "Free to Use"
+        "title": "Free-To-Use and Fund Allocation Guide",
+        "description": "Learn how to manage your discretionary spending with monetr's Free-To-Use feature. Discover how to allocate funds between budgets, expenses, and goals for simplified budgeting and financial flexibility."
       }
     }, {
       name: "funding_schedule",
