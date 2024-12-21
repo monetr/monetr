@@ -7,13 +7,6 @@ export default {
       'layout': 'raw',
     },
   },
-  'about': {
-    'type': 'page',
-    'title': 'About',
-    'theme': {
-      'layout': 'raw',
-    },
-  },
   'pricing': {
     'type': 'page',
     'title': 'Pricing',

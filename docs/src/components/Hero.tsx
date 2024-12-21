@@ -2,6 +2,7 @@ import Image from 'next/image';
 
 import MobileTransactionScreenshot from '@monetr/docs/assets/mobile_transactions_example.png';
 import TransactionScreenshot from '@monetr/docs/assets/transactions_example.png';
+import JoinWaitlist from '@monetr/docs/components/JoinWaitlist';
 import Particles from '@monetr/docs/components/Particles';
 
 export default function Hero(): JSX.Element {
@@ -42,6 +43,8 @@ export default function Hero(): JSX.Element {
             Put aside what you need, spend what you want.
           </h2>
         </div>
+
+        <JoinWaitlist />
 
         <Image
           priority={ true }
