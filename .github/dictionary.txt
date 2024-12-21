@@ -7,7 +7,6 @@ CORS
 CSV
 Chisago
 DockerHub
-Dropdown
 GKE
 GNUMake
 GithubIssue
@@ -46,6 +45,7 @@ YAML
 [aA]uthenticator
 [cC]onfig
 [dD]ecrypted
+[dD]ropdown[s]?
 [fF]rontend
 [iI]nclusivity
 [jJ][sS]
@@ -59,6 +59,7 @@ YAML
 [rR]edis
 [wW]ebhook.*
 \d+.B
+automations
 backend
 build-time
 conveniens
