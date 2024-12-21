@@ -1,6 +1,7 @@
 1Password
 API.*
 AboutFeatures
+BackgroundGradientAnimation
 CLI
 CMake
 CORS
@@ -26,6 +27,7 @@ MONETR
 Mastercard
 OAuth.*
 OFX
+PricingPage
 QFX
 ReCAPTCHA
 S3
