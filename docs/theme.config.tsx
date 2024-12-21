@@ -28,8 +28,8 @@ const config: DocsThemeConfig = {
   docsRepositoryBase: `https://github.com/monetr/monetr/blob/${branch}/docs`,
   banner: {
     dismissible: true,
-    key: 'monetr-go-live-2025',
-    content: (<p>🎉 monetr is going live in January of 2025!</p>),
+    key: 'monetr-go-live-january-2025',
+    content: (<p>🎉 monetr is going live January 3rd, 2025!</p>),
   },
   project: {
     link: 'https://github.com/monetr/monetr',

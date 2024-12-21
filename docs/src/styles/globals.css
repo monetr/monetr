@@ -7,7 +7,7 @@
 }
 
 .m-view-width {
-  @apply max-w-[90rem] pr-[max(env(safe-area-inset-right),1.5rem)] pl-[max(env(safe-area-inset-left),1.5rem)]
+  @apply max-w-[100rem] pr-[max(env(safe-area-inset-right),1.5rem)] pl-[max(env(safe-area-inset-left),1.5rem)]
 }
 
 main > a.nextra-card {
