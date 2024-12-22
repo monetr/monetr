@@ -11,7 +11,7 @@ require (
 	github.com/MicahParks/keyfunc v1.9.0
 	github.com/adrg/strutil v0.3.1
 	github.com/ahmetb/go-linq/v3 v3.2.0
-	github.com/alicebob/miniredis/v2 v2.33.0
+	github.com/alicebob/miniredis/v2 v2.34.0
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/benbjohnson/clock v1.3.5
 	github.com/brianvoe/gofakeit/v6 v6.28.0
@@ -97,7 +97,7 @@ require (
 	cloud.google.com/go/iam v1.2.2 // indirect
 	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 // indirect
 	github.com/ajg/form v1.5.1 // indirect
-	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
+	github.com/alicebob/gopher-json v0.0.0-20230218143504-906a9b012302 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
