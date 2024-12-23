@@ -1,13 +1,15 @@
-FROM debian:12-slim AS base_builder
+FROM --platform=$BUILDPLATFORM debian:12-slim AS base_builder
 ARG GO_VERSION=1.23.2
 WORKDIR /monetr
 RUN apt-get update && apt-get install -y --no-install-recommends \
   build-essential \
   ca-certificates \
   cmake \
-  curl \
+  # gcc-x86-64-linux-gnu \ # Add these back to support arm64 hosts compiling amd64
+  # libc6-dev-amd64-cross \
+  gcc-aarch64-linux-gnu \
+  libc6-dev-arm64-cross \
   git \
-  gnupg \
   libssl-dev \
   locales-all \
   nodejs=18.* \
@@ -16,7 +18,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   ruby-full \
   wget
 
-RUN npm install -g pnpm
 RUN wget -c https://golang.org/dl/go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz && tar -C /usr/local -xzf go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz
 ENV GOPATH=/home/go
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
@@ -28,12 +29,16 @@ ARG REVISION
 ARG RELEASE
 ARG BUILD_HOST
 
+# Multi platform
+ARG TARGETOS
+ARG TARGETARCH
+
 ARG GOFLAGS
 ENV GOFLAGS=$GOFLAGS
 COPY . /monetr
-RUN make monetr-release
+RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} make release -B
 
-FROM debian:12-slim
+FROM --platform=$TARGETPLATFORM debian:12-slim
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       tzdata \

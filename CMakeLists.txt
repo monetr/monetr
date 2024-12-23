@@ -95,10 +95,10 @@ if(DOCKER_EXECUTABLE)
       ${PUBLIC_FILES}
       ${UI_CONFIG_FILES}
     COMMAND ${CMAKE_COMMAND} -E echo "-- Building monetr container: ${CONTAINER_REGISTRY} - ${CONTAINER_TAGS}"
-    COMMAND ${DOCKER_EXECUTABLE} build
+    COMMAND ${DOCKER_EXECUTABLE} buildx build
         --iidfile ${DOCKER_CONTAINER}
         -f ${CMAKE_SOURCE_DIR}/Dockerfile
-        --platform linux/amd64
+        --platform linux/amd64,linux/arm64
         --build-arg GOFLAGS=-tags=icons,simple_icons
         --build-arg RELEASE=$(RELEASE_VERSION)
         --build-arg REVISION=$(RELEASE_REVISION)

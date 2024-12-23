@@ -24,6 +24,11 @@ set(SITEMAP_EXECUTABLE ${NODE_MODULES_BIN}/next-sitemap${JS_EXECUTABLE_SUFFIX})
 set(SPELLCHECKER_EXECUTABLE ${NODE_MODULES_BIN}/spellchecker${JS_EXECUTABLE_SUFFIX})
 set(STORYBOOK_EXECUTABLE ${NODE_MODULES_BIN}/storybook${JS_EXECUTABLE_SUFFIX})
 
+set(PNPM_ARGUMENTS "--frozen-lockfile")
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+  list(APPEND PNPM_ARGUMENTS "--production")
+endif()
+
 add_custom_command(
   OUTPUT ${NODE_MODULES}
          ${NODE_MODULES_MARKER}
@@ -55,7 +60,8 @@ add_custom_command(
              ${CMAKE_SOURCE_DIR}/emails/node_modules
              ${CMAKE_SOURCE_DIR}/interface/node_modules
              ${CMAKE_SOURCE_DIR}/stories/node_modules
-  COMMAND ${PNPM_EXECUTABLE} install --frozen-lockfile
+  # Run the actual pnpm install with our args
+  COMMAND ${PNPM_EXECUTABLE} install ${PNPM_ARGUMENTS}
   # By having a marker we make sure that if we cancel the install but the node_modules dir was created we still end up
   # doing install again if we didn't finish the first time.
   COMMAND ${CMAKE_COMMAND} -E touch ${NODE_MODULES_MARKER}

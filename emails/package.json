@@ -2,9 +2,11 @@
   "name": "@monetr/emails",
   "version": "0.1.0",
   "private": true,
-  "devDependencies": {
+  "dependencies": {
     "@react-email/components": "0.0.31",
-    "@storybook/react": "8.4.7",
     "react-email": "2.1.6"
+  },
+  "devDependencies": {
+    "@storybook/react": "8.4.7"
   }
 }
