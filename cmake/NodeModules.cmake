@@ -25,9 +25,6 @@ set(SPELLCHECKER_EXECUTABLE ${NODE_MODULES_BIN}/spellchecker${JS_EXECUTABLE_SUFF
 set(STORYBOOK_EXECUTABLE ${NODE_MODULES_BIN}/storybook${JS_EXECUTABLE_SUFFIX})
 
 set(PNPM_ARGUMENTS "--frozen-lockfile")
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
-  list(APPEND PNPM_ARGUMENTS "--production")
-endif()
 
 add_custom_command(
   OUTPUT ${NODE_MODULES}
