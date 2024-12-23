@@ -1,5 +1,14 @@
 set(GO_MIN_VERSION "1.23.0")
 
+# Default to amd64 if the go arch is not specified.
+if("${GOARCH}" STREQUAL "")
+  set(GOARCH "$ENV{GOARCH}")
+endif()
+if("${GOARCH}" STREQUAL "")
+  set(GOARCH "amd64")
+endif()
+
+
 # GO_MODULES is only a marker file to indicate that modules have actually been fetched.
 set(GO_MODULES ${CMAKE_BINARY_DIR}/go-dependencies-marker.txt)
 add_custom_command(
@@ -33,6 +42,23 @@ if((WIN32) OR ("$ENV{GOOS}" STREQUAL "windows"))
   set(MONETR_EXECUTABLE ${CMAKE_BINARY_DIR}/monetr.exe)
 else()
   set(MONETR_EXECUTABLE ${CMAKE_BINARY_DIR}/monetr)
+endif()
+
+set(GO_VARIABLES "CGO_ENABLED=1" "GOARCH=${GOARCH}")
+# I don't have anything setup for doing cross compilation on macOS or Windows
+# yet.
+if(LINUX)
+  # If we are cross compiling then we need to tell Golang which gcc to use. For
+  # arm64 at least we need to use the one below.
+  set(ARM64_GCC "aarch64-linux-gnu-gcc")
+  # set(AMD64_GCC "x86_64-linux-gnu-gcc")
+  if("${GOARCH}" STREQUAL "arm64")
+    list(APPEND GO_VARIABLES "CC=${ARM64_GCC}")
+    message(STATUS "Cross-Compiling for ARM64, using alternative gcc: ${ARM64_GCC}")
+  # elseif("${GOARCH}" STREQUAL "amd64")
+  #   list(APPEND GO_VARIABLES "CC=${AMD64_GCC}")
+  #   message(STATUS "Cross-Compiling for AMD64, using alternative gcc: ${AMD64_GCC}")
+  endif()
 endif()
 
 set(MONETR_GO_TAGS "icons")
@@ -69,12 +95,12 @@ string(REPLACE " " ";" MONETR_EXECUTABLE_LD_FLAGS "${MONETR_LD_FLAGS}")
 add_custom_command(
   OUTPUT ${MONETR_EXECUTABLE}
   BYPRODUCTS ${MONETR_EXECUTABLE}
-  COMMAND ${CMAKE_Go_COMPILER} build
+  COMMAND ${GO_VARIABLES} ${CMAKE_Go_COMPILER} build
           -tags="${MONETR_EXECUTABLE_TAGS}"
           -ldflags="${MONETR_EXECUTABLE_LD_FLAGS}"
           -o ${MONETR_EXECUTABLE}
           ${MONETR_CLI_PKG}
-  COMMENT "Building monetr binary"
+  COMMENT "Building monetr binary (using ${GO_VARIABLES})"
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   # These depends can change based on some of the build options in the main file.
   DEPENDS

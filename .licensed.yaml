@@ -3,16 +3,15 @@ cache_path: ./build/license.cache
 sources:
   npm: true
   go: true
-  git_submodule: true
 
 go:
   GOPATH: ~/go
 
 npm:
-  production_only: false
+  production_only: true
 
 pnpm:
-  production_only: false
+  production_only: true
 
 apps:
   - name: monetr-API
