@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.18.38](https://github.com/monetr/monetr/compare/v0.18.37...v0.18.38) (2024-12-23)
+
+
+### Features
+
+* **build:** Adding linux/arm64 container builds ([#2266](https://github.com/monetr/monetr/issues/2266)) ([7c7d220](https://github.com/monetr/monetr/commit/7c7d22098e6590178678101bf6be0b177e7e5c46))
+* **docs:** Adding documentation on free-to-use ([#2264](https://github.com/monetr/monetr/issues/2264)) ([19fde81](https://github.com/monetr/monetr/commit/19fde81f157bb6e68021f7f6df410dc010aeae4f))
+* **docs:** Adding launch notification mailing list form ([170002b](https://github.com/monetr/monetr/commit/170002b77a1a8ff32b3a9c02954d8e427fcb1f88))
+* **docs:** Preparing for monetr's launch ([#2265](https://github.com/monetr/monetr/issues/2265)) ([8696077](https://github.com/monetr/monetr/commit/8696077af83ad205c7ea335d15e47fa5ed719193))
+* **local:** Improve self hosted docker compose file ([0a2b64f](https://github.com/monetr/monetr/commit/0a2b64fd5c9eeb337d3db338554e56912c0a8849))
+
+
+### Dependencies
+
+* **api:** update module github.com/alicebob/miniredis/v2 to v2.34.0 ([#2260](https://github.com/monetr/monetr/issues/2260)) ([7a93725](https://github.com/monetr/monetr/commit/7a93725e8c2c148bc8c13c352d282c62040e7c1d))
+* **api:** update module github.com/labstack/echo/v4 to v4.13.3 ([#2254](https://github.com/monetr/monetr/issues/2254)) ([1c30aaa](https://github.com/monetr/monetr/commit/1c30aaa620ecc5b963dbe4d965154e6aed865ccb))
+* **api:** update module golang.org/x/net to v0.33.0 [security] ([#2252](https://github.com/monetr/monetr/issues/2252)) ([fcfae9f](https://github.com/monetr/monetr/commit/fcfae9fa11c1d428cf8a65fc3b7b83dc1f0cdab3))
+* **config:** migrate config renovate.json ([#2256](https://github.com/monetr/monetr/issues/2256)) ([5db92be](https://github.com/monetr/monetr/commit/5db92be1e9ca74979dd5cb2a7e0f274ac90e6c75))
+* **renovate:** update codecov/codecov-action action to v5 ([#2244](https://github.com/monetr/monetr/issues/2244)) ([03feeef](https://github.com/monetr/monetr/commit/03feeef6e0bcd67bd2e1837ccad3a0c5a9b16947))
+* **ui:** update dependency next to v15.1.1 ([#2249](https://github.com/monetr/monetr/issues/2249)) ([fa27fd5](https://github.com/monetr/monetr/commit/fa27fd55c95d34d6dc82d7b3e29ecbbb7817a894))
+* **ui:** update dependency next to v15.1.2 ([#2257](https://github.com/monetr/monetr/issues/2257)) ([9d3c525](https://github.com/monetr/monetr/commit/9d3c52533a6070c9e8cea223b0a6e0207c6a2f70))
+* **ui:** update dependency tailwindcss to v3.4.17 ([#2250](https://github.com/monetr/monetr/issues/2250)) ([fe35722](https://github.com/monetr/monetr/commit/fe35722c5d453776408c9c3931a5a0bae72271e0))
+* **ui:** update nextra monorepo to v3.3.0 ([#2262](https://github.com/monetr/monetr/issues/2262)) ([474fcb1](https://github.com/monetr/monetr/commit/474fcb1bd7ea4c79c021b33077642944cd3fb034))
+* **ui:** update rsbuild ([#2259](https://github.com/monetr/monetr/issues/2259)) ([d5f08b3](https://github.com/monetr/monetr/commit/d5f08b34aa2e32925ab379e76e5e0f3c18b84346))
+* **ui:** update sentry-javascript monorepo to v8.45.1 ([#2243](https://github.com/monetr/monetr/issues/2243)) ([b377c61](https://github.com/monetr/monetr/commit/b377c61e9b1cec0f3ab4a7f7e8c78435a0487a04))
+* **ui:** update sentry-javascript monorepo to v8.47.0 ([#2263](https://github.com/monetr/monetr/issues/2263)) ([81a60ea](https://github.com/monetr/monetr/commit/81a60ea14b4afc1174887899155978ab5c23384f))
+
+
+### Bug Fixes
+
+* **api:** Removing old deprecated API field from plaid callback ([bd216a1](https://github.com/monetr/monetr/commit/bd216a13e65c13e44f1dbeb5661e4fe8e11bf65b)), closes [#858](https://github.com/monetr/monetr/issues/858)
+* **build:** Fixed PR container builds ([00f1e71](https://github.com/monetr/monetr/commit/00f1e71e92700fd35c7dc56dcce152d383e25d65))
+* **docs:** Fix frontmatter and head tags ([fe56bc0](https://github.com/monetr/monetr/commit/fe56bc0acc5a101ff4b3c48fd07bc11e1038bda3))
+* **docs:** Fix google search indexing complaing about redirects ([7be07de](https://github.com/monetr/monetr/commit/7be07de2d188b1d072e1969263a9a5e9b0f4c618))
+
+
+### Miscellaneous
+
+* **deps:** Bump next from 14.1.4 to 15.1.1 ([#2251](https://github.com/monetr/monetr/issues/2251)) ([a955cbc](https://github.com/monetr/monetr/commit/a955cbc57ca503bcc973ad64b8cbc7994605a5de))
+* Renaming license to markdown ([8b14952](https://github.com/monetr/monetr/commit/8b14952bafa882dfe65d855d60823d58b9a3724c))
+* Updating dockerfile ([53064a9](https://github.com/monetr/monetr/commit/53064a98ffd7c06e55c70e95f78fc7cb7b7c646a))
+* Updating plaid credentials docs ([bcd2566](https://github.com/monetr/monetr/commit/bcd256611368659110b11f05b41135e6b9e4f81b))
+
 ## [0.18.37](https://github.com/monetr/monetr/compare/v0.18.36...v0.18.37) (2024-12-16)
 
 
