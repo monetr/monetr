@@ -95,7 +95,7 @@ if(DOCKER_EXECUTABLE)
       ${PUBLIC_FILES}
       ${UI_CONFIG_FILES}
     COMMAND ${CMAKE_COMMAND} -E echo "-- Building monetr container: ${CONTAINER_REGISTRY} - ${CONTAINER_TAGS}"
-    COMMAND ${DOCKER_EXECUTABLE} buildx build --output type=docker
+    COMMAND ${DOCKER_EXECUTABLE} buildx build --push
         --iidfile ${DOCKER_CONTAINER}
         -f ${CMAKE_SOURCE_DIR}/Dockerfile
         --platform linux/amd64,linux/arm64
