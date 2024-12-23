@@ -94,8 +94,9 @@ if(DOCKER_EXECUTABLE)
       ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
       ${PUBLIC_FILES}
       ${UI_CONFIG_FILES}
+    VERBATIM
     COMMAND ${CMAKE_COMMAND} -E echo "-- Building monetr container: ${CONTAINER_REGISTRY} - ${CONTAINER_TAGS}"
-    COMMAND ${DOCKER_EXECUTABLE} buildx build --push
+    COMMAND ${DOCKER_EXECUTABLE} buildx build
         --iidfile ${DOCKER_CONTAINER}
         -f ${CMAKE_SOURCE_DIR}/Dockerfile
         --platform linux/amd64,linux/arm64
@@ -105,34 +106,60 @@ if(DOCKER_EXECUTABLE)
         --build-arg BUILD_HOST=${HOSTNAME}
         ${CONTAINER_ARGS}
         ${CMAKE_SOURCE_DIR}
-    VERBATIM
   )
   add_custom_target(
     build.container.docker
+    DEPENDS ${DOCKER_CONTAINER}
+  )
+
+  set(DOCKER_CONTAINER_PUSH ${CMAKE_BINARY_DIR}/docker-container-push-marker.txt)
+  add_custom_command(
+    OUTPUT ${DOCKER_CONTAINER_PUSH}
+    BYPRODUCTS ${DOCKER_CONTAINER_PUSH}
+    COMMENT "Building monetr container image"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS
-      ${DOCKER_CONTAINER}
+      ${APP_GO_FILES}
+      ${APP_UI_FILES}
+      ${CMAKE_SOURCE_DIR}/Dockerfile
+      ${CMAKE_SOURCE_DIR}/package.json
+      ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
+      ${PUBLIC_FILES}
+      ${UI_CONFIG_FILES}
+    VERBATIM
+    COMMAND ${CMAKE_COMMAND} -E echo "-- Building monetr container: ${CONTAINER_REGISTRY} - ${CONTAINER_TAGS}"
+    COMMAND ${DOCKER_EXECUTABLE} buildx build
+        --push
+        --iidfile ${DOCKER_CONTAINER_PUSH}
+        -f ${CMAKE_SOURCE_DIR}/Dockerfile
+        --platform linux/amd64,linux/arm64
+        --build-arg GOFLAGS=-tags=icons,simple_icons
+        --build-arg RELEASE=$(RELEASE_VERSION)
+        --build-arg REVISION=$(RELEASE_REVISION)
+        --build-arg BUILD_HOST=${HOSTNAME}
+        ${CONTAINER_ARGS}
+        ${CMAKE_SOURCE_DIR}
   )
 
   add_custom_target(
     build.container.docker.push
-    DEPENDS
-      build.container.docker
+    DEPENDS ${DOCKER_CONTAINER_PUSH}
   )
 
-  foreach(REGISTRY ${CONTAINER_REGISTRY})
-    foreach(TAG ${CONTAINER_TAGS})
-      # Create a target for each tag and make it a dependency of the overall push target.
-      # TODO Move the configuration of tags into the cmakepresets.
-      string(SHA256 PUSH_TARGET_NAME "${REGISTRY}:${TAG}")
-      add_custom_target(
-        push.${PUSH_TARGET_NAME}
-        COMMAND ${DOCKER_EXECUTABLE} push ${REGISTRY}:${TAG}
-        DEPENDS
-          build.container.docker
-      )
-      add_dependencies(build.container.docker.push push.${PUSH_TARGET_NAME})
-    endforeach()
-  endforeach()
+  # foreach(REGISTRY ${CONTAINER_REGISTRY})
+  #   foreach(TAG ${CONTAINER_TAGS})
+  #     # Create a target for each tag and make it a dependency of the overall push target.
+  #     # TODO Move the configuration of tags into the cmakepresets.
+  #     string(SHA256 PUSH_TARGET_NAME "${REGISTRY}:${TAG}")
+  #     add_custom_target(
+  #       push.${PUSH_TARGET_NAME}
+  #       COMMAND ${DOCKER_EXECUTABLE} push ${REGISTRY}:${TAG}
+  #       DEPENDS
+  #         build.container.docker
+  #     )
+  #     add_dependencies(build.container.docker.push push.${PUSH_TARGET_NAME})
+  #   endforeach()
+  # endforeach()
 endif()
 
 ################################################################################
