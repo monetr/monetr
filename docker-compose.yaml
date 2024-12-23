@@ -12,25 +12,25 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5s
     restart: unless-stopped
-  redis:
-    image: redis:6.2.16-alpine
+  valkey:
+    image: valkey/valkey:8.0.0
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: [ "CMD", "valkey-cli", "ping" ]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5s
     restart: unless-stopped
   monetr:
     image: ghcr.io/monetr/monetr:latest
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:4000/api/health" ]
-      interval: 5s
-      timeout: 5s
-      retries: 24
-      start_period: 30s
+      test: "timeout 5s bash -c ':> /dev/tcp/127.0.0.1/4000' || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 5s
     restart: unless-stopped
     command:
       - serve
@@ -41,13 +41,13 @@ services:
     ports:
       - "4000:4000"
     links:
-      - redis
+      - valkey
       - postgres
     depends_on:
-      redis:
-        condition: service_started
+      valkey:
+        condition: service_healthy
       postgres:
-        condition: service_started
+        condition: service_healthy
     volumes:
       # Contains certificates generated on startup as well as config
       - monetrData:/etc/monetr
@@ -61,7 +61,7 @@ services:
       MONETR_PG_DATABASE: monetr
       MONETR_PG_ADDRESS: postgres
       MONETR_REDIS_ENABLED: "true"
-      MONETR_REDIS_ADDRESS: redis
+      MONETR_REDIS_ADDRESS: valkey
       MONETR_PLAID_CLIENT_ID: ${MONETR_PLAID_CLIENT_ID}
       MONETR_PLAID_CLIENT_SECRET: ${MONETR_PLAID_CLIENT_SECRET}
       MONETR_PLAID_ENVIRONMENT: ${MONETR_PLAID_ENVIRONMENT}

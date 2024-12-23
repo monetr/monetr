@@ -15,10 +15,10 @@ services:
       timeout: 10s
       retries: 12
       start_period: 30s
-  redis:
-    image: redis:6.2.7-alpine
+  valkey:
+    image: valkey/valkey:8.0.0
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: [ "CMD", "valkey-cli", "ping" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -120,7 +120,7 @@ services:
       - -c
       - /build/compose/api-entrypoint.sh
     links:
-      - redis
+      - valkey
       - postgres
       - mail
     ports:
@@ -132,7 +132,7 @@ services:
     depends_on:
       mail:
         condition: service_started
-      redis:
+      valkey:
         condition: service_started
       postgres:
         condition: service_started

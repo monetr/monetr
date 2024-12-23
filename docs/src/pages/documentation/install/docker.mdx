@@ -61,10 +61,11 @@ cd monetr
 To run monetr, execute the following command in your terminal from the root directory of monetr's repository.
 
 ```shell filename="Start monetr"
-docker compose up -d
+docker compose up --wait
 ```
 
-This will start the monetr server, as well as the database it needs and a redis server.
+This will start the monetr server, as well as the database it needs and a Valkey server. It will wait for everything to
+be healthy before letting you continue.
 
 ### Open monetr
 
@@ -171,4 +172,16 @@ If these solutions don't resolve your issue:
 - Create a new issue with detailed logs and steps to reproduce the problem.
 - Reach out for assistance on [Discord](https://discord.gg/68wTCXrhuq).
 
+## Uninstalling
+
+<Callout type="warning">
+  This will remove all of your data stored for monetr, please be careful as this data cannot be recovered unless you
+  have created a backup yourself somewhere.
+</Callout>
+
+To uninstall monetr via Docker Compose you can run the following command:
+
+```shell
+docker compose down --remove-orphans -v
+```
 

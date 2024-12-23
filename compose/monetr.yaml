@@ -7,7 +7,7 @@ backgroundjobs:
   scheduler: internal
 redis:
   enabled: true
-  address: redis
+  address: valkey
 email:
   enabled: true
   domain: monetr.local
