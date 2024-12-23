@@ -43,6 +43,7 @@ TOTP
 TOTP-enabled
 UI
 VM
+Valkey
 YAML
 [aA]uthenticator
 [cC]onfig
