@@ -49,10 +49,6 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/interface")
 add_subdirectory("${CMAKE_SOURCE_DIR}/stories")
 add_subdirectory("${CMAKE_SOURCE_DIR}/emails")
 
-if(BUILD_DEPLOYMENT_TARGETS)
-  include("${CMAKE_SOURCE_DIR}/cmake/deploy.cmake")
-endif()
-
 add_custom_target(
   dependencies
   DEPENDS dependencies.node_modules ${GO_MODULES}
@@ -62,6 +58,11 @@ if(DOCKER_EXECUTABLE)
   message(STATUS "Container engine: Docker")
   message(STATUS "  Container build targets will be enabled!")
   include("${CMAKE_SOURCE_DIR}/cmake/development.cmake")
+
+  if(NOT BUILD_PLATFORMS)
+    set(BUILD_PLATFORMS "linux/amd64,linux/arm64")
+  endif()
+  message(STATUS "  Container will be built for platforms: ${BUILD_PLATFORMS}")
 
   if(NOT "$ENV{CONTAINER_REGISTRY}" STREQUAL "")
     set(CONTAINER_REGISTRY "$ENV{CONTAINER_REGISTRY}")
@@ -99,7 +100,7 @@ if(DOCKER_EXECUTABLE)
     COMMAND ${DOCKER_EXECUTABLE} buildx build
         --iidfile ${DOCKER_CONTAINER}
         -f ${CMAKE_SOURCE_DIR}/Dockerfile
-        --platform linux/amd64,linux/arm64
+        --platform ${BUILD_PLATFORMS}
         --build-arg GOFLAGS=-tags=icons,simple_icons
         --build-arg RELEASE=$(RELEASE_VERSION)
         --build-arg REVISION=$(RELEASE_REVISION)
@@ -132,7 +133,7 @@ if(DOCKER_EXECUTABLE)
         --push
         --iidfile ${DOCKER_CONTAINER_PUSH}
         -f ${CMAKE_SOURCE_DIR}/Dockerfile
-        --platform linux/amd64,linux/arm64
+        --platform ${BUILD_PLATFORMS}
         --build-arg GOFLAGS=-tags=icons,simple_icons
         --build-arg RELEASE=$(RELEASE_VERSION)
         --build-arg REVISION=$(RELEASE_REVISION)
@@ -145,21 +146,6 @@ if(DOCKER_EXECUTABLE)
     build.container.docker.push
     DEPENDS ${DOCKER_CONTAINER_PUSH}
   )
-
-  # foreach(REGISTRY ${CONTAINER_REGISTRY})
-  #   foreach(TAG ${CONTAINER_TAGS})
-  #     # Create a target for each tag and make it a dependency of the overall push target.
-  #     # TODO Move the configuration of tags into the cmakepresets.
-  #     string(SHA256 PUSH_TARGET_NAME "${REGISTRY}:${TAG}")
-  #     add_custom_target(
-  #       push.${PUSH_TARGET_NAME}
-  #       COMMAND ${DOCKER_EXECUTABLE} push ${REGISTRY}:${TAG}
-  #       DEPENDS
-  #         build.container.docker
-  #     )
-  #     add_dependencies(build.container.docker.push push.${PUSH_TARGET_NAME})
-  #   endforeach()
-  # endforeach()
 endif()
 
 ################################################################################
