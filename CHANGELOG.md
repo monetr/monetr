@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.18.39](https://github.com/monetr/monetr/compare/v0.18.38...v0.18.39) (2024-12-24)
+
+
+### Dependencies
+
+* **ui:** update radix-ui-primitives monorepo ([#2258](https://github.com/monetr/monetr/issues/2258)) ([04e9462](https://github.com/monetr/monetr/commit/04e94625ac5d5c0d47086dcd37151e61c6b0e153))
+
+
+### Bug Fixes
+
+* **icons:** Fixed icons showing in grayscale ([01dace1](https://github.com/monetr/monetr/commit/01dace1e3f1904f7aa6f5971287ae33d84b61f73)), closes [#2268](https://github.com/monetr/monetr/issues/2268)
+
 ## [0.18.38](https://github.com/monetr/monetr/compare/v0.18.37...v0.18.38) (2024-12-23)
 
 
