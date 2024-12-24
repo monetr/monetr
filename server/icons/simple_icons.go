@@ -67,10 +67,8 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 		Hex   string `json:"hex"`
 	}
 
-	var metadata struct {
-		Icons []Metadata `json:"icons"`
-	}
-	metadataBytes, _ := simpleIconsFiles.ReadFile("sources/simple-icons/_data/simple-icons.json")
+	var metadata []Metadata
+	metadataBytes, err := simpleIconsFiles.ReadFile("sources/simple-icons/_data/simple-icons.json")
 	if err == nil {
 		_ = json.Unmarshal(metadataBytes, &metadata)
 	}
@@ -91,7 +89,7 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 			Colors:  nil,
 		}
 		iconMetadata := func(name string) *Metadata {
-			for _, item := range metadata.Icons {
+			for _, item := range metadata {
 				if strings.EqualFold(item.Title, name) {
 					return &item
 				}
@@ -111,7 +109,7 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 	var packageInfo struct {
 		Version string `json:"version"`
 	}
-	packageJsonBytes, _ := simpleIconsFiles.ReadFile("sources/simple-icons/package.json")
+	packageJsonBytes, err := simpleIconsFiles.ReadFile("sources/simple-icons/package.json")
 	if err == nil {
 		_ = json.Unmarshal(packageJsonBytes, &packageInfo)
 	}
