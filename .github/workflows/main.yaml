@@ -235,7 +235,7 @@ jobs:
         run: |
           echo POST_TAG=$(git describe --tag | cut -d "v" -f 2) >> $GITHUB_OUTPUT
       - name: Login to containers.monetr.dev
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: containers.monetr.dev
           username: ${{ secrets.CONTAINERS_MONETR_DEV_USERNAME }}
