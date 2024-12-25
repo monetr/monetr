@@ -61,12 +61,12 @@ func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, argu
 }
 
 func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, arguments interface{}) error {
-	span := sentry.StartSpan(ctx, "queue.create")
+	span := sentry.StartSpan(ctx, "queue.publish")
 	defer span.Finish()
 	span.Description = queue
 	span.SetTag("queue", queue)
-	span.SetTag("messaging.destination.name", queue)
-	span.SetTag("messaging.system", "postgresql")
+	span.SetData("messaging.destination.name", queue)
+	span.SetData("messaging.system", "postgresql")
 	span.Data = map[string]interface{}{
 		"queue":     queue,
 		"arguments": arguments,
@@ -127,7 +127,8 @@ func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, que
 		}
 		return errors.Wrap(err, "failed to enqueue job for postgres")
 	}
-	span.SetTag("messaging.message.id", string(job.JobId))
+	span.SetData("messaging.message.id", string(job.JobId))
+	span.SetData("messaging.message.body.size", len(job.Input))
 
 	log.WithFields(logrus.Fields{
 		"jobId":     job.JobId,
@@ -620,9 +621,9 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 					"queue.receive",
 					sentry.WithTransactionName(nextJob.queueName),
 				)
-				span.SetTag("messaging.destination.name", string(nextJob.queueName))
-				span.SetTag("messaging.system", "postgresql")
-
+				span.SetData("messaging.message.id", fmt.Sprintf("%s::%s", nextJob.queueName, nextJob.next))
+				span.SetData("messaging.destination.name", string(nextJob.queueName))
+				span.SetData("messaging.system", "postgresql")
 				slug := strings.ToLower(nextJob.queueName)
 				slug = strings.ReplaceAll(slug, "::", "-")
 
@@ -811,9 +812,11 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		)
 		span.Description = handler.QueueName()
 		span.SetData("input", job.Input)
-		span.SetTag("messaging.message.id", string(job.JobId))
-		span.SetTag("messaging.destination.name", string(job.Queue))
-		span.SetTag("messaging.system", "postgresql")
+		span.SetData("messaging.message.id", string(job.JobId))
+		span.SetData("messaging.destination.name", string(job.Queue))
+		span.SetData("messaging.message.body.size", len(job.Input))
+		span.SetData("messaging.message.receive.latency", p.clock.Now().Sub(job.CreatedAt).Milliseconds())
+		span.SetData("messaging.system", "postgresql")
 		jobLog := p.log.WithContext(span.Context()).WithFields(logrus.Fields{
 			"jobId": job.JobId,
 			"queue": job.Queue,
