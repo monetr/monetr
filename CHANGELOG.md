@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.18.40](https://github.com/monetr/monetr/compare/v0.18.39...v0.18.40) (2024-12-25)
+
+
+### Features
+
+* **billing:** Improve subscription lapse padding ([4554dd0](https://github.com/monetr/monetr/commit/4554dd0348174be6054e03f9d777948fc6cc3eae))
+* **build:** Remove licensed from build process ([#2273](https://github.com/monetr/monetr/issues/2273)) ([1b0bff8](https://github.com/monetr/monetr/commit/1b0bff826048e330ad36ca8e77a9f4b4ac449b4a))
+* **sentry:** Fixed Queue instrumentation for Sentry ([b699dc3](https://github.com/monetr/monetr/commit/b699dc31b7dd83ceb407845c11e4024b29b13ca9))
+
+
+### Dependencies
+
+* **containers:** update valkey/valkey docker tag to v8.0.1 ([#2270](https://github.com/monetr/monetr/issues/2270)) ([0031fb7](https://github.com/monetr/monetr/commit/0031fb7c210b05a1759a16233d0c6e705f9c6618))
+* **renovate:** update docker/login-action action to v3 ([#2078](https://github.com/monetr/monetr/issues/2078)) ([8eccfed](https://github.com/monetr/monetr/commit/8eccfed9192d0d4f5e4e8071121fe3edb30850db))
+
+
+### Bug Fixes
+
+* **build:** Cleaning up container builds ([f28604a](https://github.com/monetr/monetr/commit/f28604aee77ab4e7f590e0dda134bd594bda0a5b))
+
 ## [0.18.39](https://github.com/monetr/monetr/compare/v0.18.38...v0.18.39) (2024-12-24)
 
 
