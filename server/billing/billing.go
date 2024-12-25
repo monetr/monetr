@@ -19,6 +19,14 @@ import (
 	"github.com/stripe/stripe-go/v81"
 )
 
+var (
+	// This is added onto the subscription active until timestamp. This way if the
+	// payment fails or Stripe doesn't process the payment in time, we can still
+	// have some padding. If the payment fails this is enough time for Stripe to
+	// retry the payment at least once.
+	SubscriptionPaddingDays = 4
+)
+
 // Billing is used by the Stripe webhooks to maintain a subscription's status
 // within our application. As the status of subscription's change or update
 // these functions can be used to keep the status up to date within monetr.
@@ -268,13 +276,15 @@ func (b *baseBilling) UpdateCustomerSubscription(
 		// Otherwise do this. If its adding a value great, otherwise itll update the existing value and overwrite it.
 		account.StripeSubscriptionId = &subscriptionId
 	}
-	// Add 24 hours to the subscription window. This way Stripe has time to
-	// process the subscription payment and update the status for us even if things
-	// are running a bit slow. This resolves an issue where the active until date
-	// can pass before Stripe has processed the renewal. Causing (usually) around an
-	// hour or more of time where monetr believed the subscription to not be active
-	// anymore.
-	account.SubscriptionActiveUntil = myownsanity.TimeP(activeUntil.Add(24 * time.Hour))
+	// Add padding to the subscription window. This way Stripe has time to process
+	// the subscription payment and update the status for us even if things are
+	// running a bit slow. This resolves an issue where the active until date can
+	// pass before Stripe has processed the renewal. Causing (usually) around an
+	// hour or more of time where monetr believed the subscription to not be
+	// active anymore.
+	account.SubscriptionActiveUntil = myownsanity.TimeP(
+		activeUntil.AddDate(0, 0, SubscriptionPaddingDays),
+	)
 	account.StripeWebhookLatestTimestamp = &timestamp
 	account.SubscriptionStatus = &status
 
