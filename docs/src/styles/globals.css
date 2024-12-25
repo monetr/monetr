@@ -15,7 +15,7 @@ main > a.nextra-card {
 }
 
 /* hack to make the content width a bit bigger: https://github.com/shuding/nextra/pull/3767 */
-div._max-w-\[90rem\] {
+._max-w-\[90rem\] {
   max-width: 100rem;
 }
 
