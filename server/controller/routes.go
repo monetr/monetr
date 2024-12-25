@@ -12,7 +12,6 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/security"
@@ -88,11 +87,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 
 			return next(ctx)
 		}
-	})
-
-	// TODO implement not found error handler.
-	api.GET("/NOTICE", func(ctx echo.Context) error {
-		return ctx.String(http.StatusOK, build.GetNotice())
 	})
 
 	// Handle both GET and HEAD requests so that uptimerobot doesn't spam error

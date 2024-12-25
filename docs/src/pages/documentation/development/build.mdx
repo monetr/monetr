@@ -17,20 +17,6 @@ monetr will also create some binaries within the CMake binary directory, these b
 or `go install`. These will not be installed on the host system itself, and are automatically removed when the source
 directory is cleaned.
 
-### Linux
-
-If you want to do a release build of monetr on Linux, you will also need the following packages:
-
-- [`ruby-full`](https://packages.debian.org/bookworm/ruby-full)
-- [`libssl-dev`](https://packages.debian.org/bookworm/libssl-dev)
-- [`pkg-config`](https://packages.debian.org/bookworm/pkg-config)
-- [`locales-all`](https://packages.debian.org/bookworm/locales-all)
-
-These are required in order for monetr to setup [licensed](https://github.com/github/licensed). This tool is setup in
-the CMake binary directory and is not installed on the host, but is installed via gem. The tool is used to generate
-monetr's third party notice file that is embedded in it at build time. This file contains a list of all of the licenses
-of all of monetr's Go and JS dependencies.
-
 ## Building monetr
 
 To build monetr you can simply run the following make command. This will run the CMake configuration and build steps

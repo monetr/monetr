@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
 
-option(BUILD_THIRD_PARTY_NOTICE "Generate a third party notice as part of the build stage, requires Ruby." OFF)
 option(BUILD_SIMPLE_ICONS "Embed simple-icons into the final binary, used for providing icons for transactions." ON)
 option(BUILD_NOSIMD "Disable SIMD support at compile time." OFF)
 option(BUILD_CONTAINER_TAG_LATEST "Tag containers with latest when building them." ON)

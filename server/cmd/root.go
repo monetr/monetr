@@ -32,7 +32,6 @@ func init() {
 	viper.BindPFlag("Logging.Level", rootCommand.PersistentFlags().Lookup("log-level"))
 	viper.BindPFlag("configFile", rootCommand.PersistentFlags().Lookup("config"))
 	newVersionCommand(rootCommand)
-	newNoticesCommand(rootCommand)
 }
 
 func loadCertificates(configuration config.Configuration, generateCertificates bool) (ed25519.PublicKey, ed25519.PrivateKey, error) {
