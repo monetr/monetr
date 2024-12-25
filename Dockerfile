@@ -10,12 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   gcc-aarch64-linux-gnu \
   libc6-dev-arm64-cross \
   git \
-  libssl-dev \
-  locales-all \
   nodejs=18.* \
   npm \
-  pkg-config \
-  ruby-full \
   wget
 
 RUN wget -c https://golang.org/dl/go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz && tar -C /usr/local -xzf go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz
