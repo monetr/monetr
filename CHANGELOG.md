@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.41](https://github.com/monetr/monetr/compare/v0.18.40...v0.18.41) (2024-12-26)
+
+
+### Dependencies
+
+* **ui:** update nextra monorepo to v3.3.1 ([#2272](https://github.com/monetr/monetr/issues/2272)) ([2863899](https://github.com/monetr/monetr/commit/28638992c3cf6e9bf992b5d300ad12d1ee200339))
+
 ## [0.18.40](https://github.com/monetr/monetr/compare/v0.18.39...v0.18.40) (2024-12-25)
 
 
