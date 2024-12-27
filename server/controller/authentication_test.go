@@ -603,7 +603,90 @@ func TestMultifactor(t *testing.T) {
 			response.Cookies().IsEmpty()
 		}
 	})
+
+	t.Run("mfa is valid within a small margin of error", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		totp := fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
+
+		var token string
+		{ // Login, this should return an MFA required error.
+			response := e.POST("/api/authentication/login").
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
+				}).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // Parse the token we received to make sure it's correct.
+			claims, err := app.Tokens.Parse(token)
+			assert.NoError(t, err, "must be able to parse the token returned from login")
+			assert.Equal(t, security.MultiFactorScope, claims.Scope, "token must have the multifactor authentication scope")
+		}
+
+		{ // Then retrieve "me". This will need to happen for the frontend.
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").String().IsASCII()
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
+			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
+			response.JSON().Path("$.trialingUntil").IsNull()
+			response.JSON().Path("$.nextUrl").IsEqual("/login/multifactor")
+		}
+
+		{ // Provide a slightly skewed TOTP code
+			// Grab a timestamp to begin with
+			timestamp := app.Clock.Now()
+
+			// Generate a TOTP code for the initial timestamp
+			firstTotpCode := totp.AtTime(timestamp)
+
+			// Then walk the clock forward at most 30 seconds until we have a new TOTP
+			// code. This way the old TOTP code should still be valid based on the
+			// server time. Because even if we move the clock forward 30 seconds, we
+			// are at most 1 second into the new code. So the new timestamp minus the
+			// error margin (of 5 seconds) should still produce the old code.
+			for i := 0; i < 30; i++ {
+				app.Clock.Add(1 * time.Second)
+				timestamp = app.Clock.Now()
+				newTotpCode := totp.AtTime(timestamp)
+				if newTotpCode != firstTotpCode {
+					break
+				}
+			}
+
+			// Progress the application's clock by 1 minute, making our timestamp old.
+			response := e.POST("/api/authentication/multifactor").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					// Generate a code with the old timestamp, this will be considered
+					// wrong by the server.
+					"totp": firstTotpCode,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			finalToken := AssertSetTokenCookie(t, response)
+
+			claims, err := app.Tokens.Parse(finalToken)
+			assert.NoError(t, err, "must be able to parse the token returned from multifactor")
+			assert.Equal(t, security.AuthenticatedScope, claims.Scope, "token must have the authenticated scope")
+		}
+	})
 }
+
 func TestRegister(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		_, e := NewTestApplication(t)

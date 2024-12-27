@@ -36,21 +36,39 @@ func (Login) IdentityPrefix() string {
 	return "lgn"
 }
 
-// VerifyTOTP will validate that the provided TOTP string is correct for this login. It will return ErrTOTPNotValid if
-// the provided input is not valid, or if TOTP is not configured for the login.
+// VerifyTOTP will validate that the provided TOTP string is correct for this
+// login. It will return ErrTOTPNotValid if the provided input is not valid, or
+// if TOTP is not configured for the login.
 func (l Login) VerifyTOTP(input string, now time.Time) error {
-	// If the login does not have TOTP configured, do not return a special error. To the client it should appear as if
-	// the TOTP provided is not valid. I don't know if this really makes a difference at all, but it seems like the
+	// If the login does not have TOTP configured, do not return a special error.
+	// To the client it should appear as if the TOTP provided is not valid. I
+	// don't know if this really makes a difference at all, but it seems like the
 	// intuitive thing to do.
 	if l.TOTP == "" {
 		return errors.WithStack(ErrTOTPNotValid)
 	}
 
 	loginTotp := gotp.NewDefaultTOTP(l.TOTP)
-	if loginTotp.Verify(input, now.Unix()) {
-		return nil
+
+	// Allow a margin of error of 5 seconds relative to the server time.
+	allowedError := 5 * time.Second
+	// This probably only needs two, just the negative and positive allowed error,
+	// but it's not that expensive to just have all 3 to be clear what is
+	// happening.
+	allowedTimestamps := []int64{
+		now.Unix(),
+		now.Add(-allowedError).Unix(),
+		now.Add(allowedError).Unix(),
+	}
+	// Test the valid timestamps against the provided code, if the provided code
+	// is valid for ANY of the timestamps then consider it a success.
+	for _, timestamp := range allowedTimestamps {
+		if loginTotp.Verify(input, timestamp) {
+			return nil
+		}
 	}
 
+	// Otherwise return an error indicating that the TOTP code is invalid.
 	return errors.WithStack(ErrTOTPNotValid)
 }
 
