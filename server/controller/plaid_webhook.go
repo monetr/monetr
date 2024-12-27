@@ -44,10 +44,12 @@ func (c PlaidClaims) Valid() error {
 		vErr.Errors |= jwt.ValidationErrorExpired
 	}
 
-	// I'm adding 5 seconds onto the now timestamp because I was running into an issue periodically that the clock on
-	// the server would be slightly different than the clock on Plaid's side. And the issued at was causing a conflict
-	// where it was just a few seconds (sometimes just one) out of bounds for this to be handled. So adding a buffer of
-	// 5 seconds to account for any clock drift between our servers and Plaid's.
+	// I'm adding 5 seconds onto the now timestamp because I was running into an
+	// issue periodically that the clock on the server would be slightly different
+	// than the clock on Plaid's side. And the issued at was causing a conflict
+	// where it was just a few seconds (sometimes just one) out of bounds for this
+	// to be handled. So adding a buffer of 5 seconds to account for any clock
+	// drift between our servers and Plaid's.
 	if !c.VerifyIssuedAt(now+5, false) {
 		vErr.Inner = fmt.Errorf("token used before issued, %d | %d", now, c.IssuedAt)
 		vErr.Errors |= jwt.ValidationErrorIssuedAt
@@ -78,42 +80,47 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 	var kid string
 	var claims PlaidClaims
 
-	result, err := jwt.ParseWithClaims(verification, &claims, func(token *jwt.Token) (interface{}, error) {
-		// Make sure the signing method for the JWT token is ES256 per Plaid's documentation. Anything else should be
-		// rejected.
-		method, ok := token.Method.(*jwt.SigningMethodECDSA)
-		if !ok || method.Name != "ES256" {
-			return nil, errors.Errorf("invalid signing method")
-		}
+	result, err := jwt.ParseWithClaims(
+		verification,
+		&claims,
+		func(token *jwt.Token) (interface{}, error) {
+			// Make sure the signing method for the JWT token is ES256 per Plaid's
+			// documentation. Anything else should be rejected.
+			method, ok := token.Method.(*jwt.SigningMethodECDSA)
+			if !ok || method.Name != "ES256" {
+				return nil, errors.Errorf("invalid signing method")
+			}
 
-		// Look for a kid field, we are going to use this to exchange for a public key that we can use to verify the
-		// JWT token.
-		value, ok := token.Header["kid"]
-		if !ok {
-			return nil, errors.Errorf("malformed JWT token, missing data")
-		}
+			// Look for a kid field, we are going to use this to exchange for a public
+			// key that we can use to verify the JWT token.
+			value, ok := token.Header["kid"]
+			if !ok {
+				return nil, errors.Errorf("malformed JWT token, missing data")
+			}
 
-		// Make sure the value is a string, anything else is not valid and should be thrown out.
-		kid, ok = value.(string)
-		if !ok {
-			return nil, errors.Errorf("malformed JWT token, expected string")
-		}
+			// Make sure the value is a string, anything else is not valid and should
+			// be thrown out.
+			kid, ok = value.(string)
+			if !ok {
+				return nil, errors.Errorf("malformed JWT token, expected string")
+			}
 
-		// Make sure that string has some kind of non-whitespace value.
-		if strings.TrimSpace(kid) == "" {
-			return nil, errors.Errorf("malformed JWT token, empty data")
-		}
+			// Make sure that string has some kind of non-whitespace value.
+			if strings.TrimSpace(kid) == "" {
+				return nil, errors.Errorf("malformed JWT token, empty data")
+			}
 
-		log := c.Log.WithField("kid", kid)
-		log.Trace("exchanging key Id for public key")
+			log := c.Log.WithField("kid", kid)
+			log.Trace("exchanging key Id for public key")
 
-		keyFunction, err := c.PlaidWebhookVerification.GetVerificationKey(c.getContext(ctx), kid)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to get verification key for webhook")
-		}
+			keyFunction, err := c.PlaidWebhookVerification.GetVerificationKey(c.getContext(ctx), kid)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to get verification key for webhook")
+			}
 
-		return keyFunction.Keyfunc(token)
-	})
+			return keyFunction.Keyfunc(token)
+		},
+	)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
 	}
@@ -209,11 +216,15 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 	case "TRANSACTIONS":
 		switch hook.WebhookCode {
 		case "SYNC_UPDATES_AVAILABLE", "INITIAL_UPDATE", "HISTORICAL_UPDATE":
-			err = background.TriggerSyncPlaid(c.getContext(ctx), c.JobRunner, background.SyncPlaidArguments{
-				AccountId: link.AccountId,
-				LinkId:    link.LinkId,
-				Trigger:   "webhook",
-			})
+			err = background.TriggerSyncPlaid(
+				c.getContext(ctx),
+				c.JobRunner,
+				background.SyncPlaidArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
+					Trigger:   "webhook",
+				},
+			)
 		case "RECURRING_TRANSACTIONS_UPDATE":
 			log.Warn("received a recurring transaction update webhook, monetr does nothing with these events at this time")
 		default:
@@ -244,18 +255,24 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 			plaidLink.ErrorCode = myownsanity.StringP(code.(string))
 			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
 		case "WEBHOOK_UPDATE_ACKNOWLEDGED":
-			err = background.TriggerSyncPlaid(c.getContext(ctx), c.JobRunner, background.SyncPlaidArguments{
-				AccountId: link.AccountId,
-				LinkId:    link.LinkId,
-				Trigger:   "webhook",
-			})
+			err = background.TriggerSyncPlaid(
+				c.getContext(ctx),
+				c.JobRunner,
+				background.SyncPlaidArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
+					Trigger:   "webhook",
+				},
+			)
 		case "NEW_ACCOUNTS_AVAILABLE":
 			plaidLink.NewAccountsAvailable = true
 			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
 		default:
+			log.Warn("plaid webhook will not be handled, it is not implemented")
 			crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
 		}
 	default:
+		log.Warn("plaid webhook will not be handled, it is not implemented")
 		crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
 	}
 
