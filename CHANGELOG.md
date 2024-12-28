@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.18.41](https://github.com/monetr/monetr/compare/v0.18.40...v0.18.41) (2024-12-27)
+
+
+### Dependencies
+
+* **ui:** update nextra monorepo to v3.3.1 ([#2272](https://github.com/monetr/monetr/issues/2272)) ([2863899](https://github.com/monetr/monetr/commit/28638992c3cf6e9bf992b5d300ad12d1ee200339))
+
+
+### Bug Fixes
+
+* **totp:** Improved TOTP clock drift. ([6bca612](https://github.com/monetr/monetr/commit/6bca6123f845720de12e2f64351cc55ebb8f9850)), closes [#2275](https://github.com/monetr/monetr/issues/2275)
+
+
+### Miscellaneous
+
+* Minor code cleanup ([c7320f2](https://github.com/monetr/monetr/commit/c7320f2155bcd48ae350e1b4bad00137081cd918))
+
 ## [0.18.40](https://github.com/monetr/monetr/compare/v0.18.39...v0.18.40) (2024-12-25)
 
 
