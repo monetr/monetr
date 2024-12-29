@@ -27,6 +27,7 @@ MONETR
 Mastercard
 OAuth.*
 OFX
+PiggyBank
 PricingPage
 QFX
 ReCAPTCHA
@@ -72,6 +73,7 @@ dev
 dropdown
 enforceability
 env
+forecasted
 formatter
 gcc
 hardcoded
