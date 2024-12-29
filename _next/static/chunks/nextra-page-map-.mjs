@@ -204,6 +204,13 @@ export const pageMap = [{
         "description": "Learn how to manage recurring expenses like rent, subscriptions, and credit card payments with monetr. This guide covers creating, tracking, and optimizing expenses to ensure consistent budgeting and predictable Free-To-Use funds."
       }
     }, {
+      name: "forecasting",
+      route: "/documentation/use/forecasting",
+      frontMatter: {
+        "title": "Budget Forecasting with monetr",
+        "description": "Discover how monetr's forecasting feature helps you plan your financial future by predicting expenses, goals, and funding schedules. Learn to manage your budgets effectively with detailed insights."
+      }
+    }, {
       name: "free_to_use",
       route: "/documentation/use/free_to_use",
       frontMatter: {
