@@ -113,7 +113,7 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
         ) }
         <CommandList>
           <CommandEmpty>{ props.emptyString }</CommandEmpty>
-          <CommandGroup className='pb-6 md:pb-0'>
+          <CommandGroup className='pb-6 md:pb-1'>
             { props.options.map(option => (
               <CommandItem
                 key={ option.value }

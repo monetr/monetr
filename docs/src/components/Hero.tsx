@@ -2,6 +2,14 @@ import Image from 'next/image';
 
 import MobileTransactionScreenshot from '@monetr/docs/assets/mobile_transactions_example.png';
 import TransactionScreenshot from '@monetr/docs/assets/transactions_example.png';
+import Expenses from '@monetr/docs/components/Features/Expenses';
+import FileUpload from '@monetr/docs/components/Features/FileUpload';
+import Forecasting from '@monetr/docs/components/Features/Forecasting';
+import FreeToUse from '@monetr/docs/components/Features/FreeToUse';
+import MobileFriendly from '@monetr/docs/components/Features/MobileFriendly';
+import Plaid from '@monetr/docs/components/Features/Plaid';
+import SelfHost from '@monetr/docs/components/Features/SelfHost';
+import SourceVisible from '@monetr/docs/components/Features/SourceVisible';
 import JoinWaitlist from '@monetr/docs/components/JoinWaitlist';
 
 export default function Hero(): JSX.Element {
@@ -31,7 +39,12 @@ export default function Hero(): JSX.Element {
           </h2>
         </div>
 
-        <JoinWaitlist />
+        <div className='space-y-4'>
+          <h2 className='text-xl sm:text-2xl font-medium'>
+          Get notified when monetr launches!
+          </h2>
+          <JoinWaitlist placeholder='Enter your email' />
+        </div>
 
         <Image
           priority={ true }
@@ -45,6 +58,19 @@ export default function Hero(): JSX.Element {
           alt='Screenshot of the monetr app showing the main view of transactions and balances of the budget.'
           className='block sm:hidden rounded-md z-10 shadow-lg'
         />
+
+        <h1 className='text-4xl sm:text-5xl font-bold mt-16'>Features</h1>
+
+        <div className='grid grid-cols-4 w-full gap-6'>
+          <FreeToUse />
+          <Expenses />
+          <FileUpload />
+          <Plaid />
+          <Forecasting />
+          <MobileFriendly />
+          <SelfHost />
+          <SourceVisible />
+        </div>
       </div>
     </div>
   );

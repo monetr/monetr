@@ -1,12 +1,13 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { CircleCheck } from 'lucide-react';
+import Link from 'next/link';
 
 
 export default function PricingCards(): JSX.Element {
   return (
     <div className='flex flex-wrap items-center justify-center mx-auto gap-4 md:gap-0 w-3/4 max-w-5xl'>
-      <div className='w-full p-6 bg-black border border-gray-700 rounded-lg md:w-1/2 bg-opacity-20 md:rounded-r-none md:p-8 backdrop-blur-sm'>
+      <div className='w-full p-6 bg-black border border-zinc-700 rounded-lg md:w-1/2 bg-opacity-20 md:rounded-r-none md:p-8 backdrop-blur-sm'>
         <div className='mb-6'>
           <h3 className='text-2xl font-semibold jakarta text-gray-100 md:text-4xl'>
             You Host It
@@ -31,12 +32,12 @@ export default function PricingCards(): JSX.Element {
             </span>
           </li>
         </ul>
-        <a
+        <Link
           href='/documentation/install'
           className='block px-8 py-3 text-md font-semibold text-center text-gray-100 transition duration-100 bg-white rounded-lg outline-none bg-opacity-10 hover:bg-opacity-20 md:text-base'
         >
           Get Started Now
-        </a>
+        </Link>
       </div>
 
       <div className='w-full p-6 rounded-lg shadow-xl md:w-1/2 bg-gradient-to-br from-monetr-brand to-purple-400 md:p-8'>

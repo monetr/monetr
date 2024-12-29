@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+$content-width: 100rem;
+
+.m-view-height {
+  min-height: calc(100vh - var(--nextra-navbar-height));
+}
+
+.m-view-width {
+  max-width: $content-width;
+  @apply pr-[max(env(safe-area-inset-right),1.5rem)] pl-[max(env(safe-area-inset-left),1.5rem)]
+}
+
+/* hack to make the content width a bit bigger: https://github.com/shuding/nextra/pull/3767 */
+._max-w-\[90rem\] {
+  max-width: $content-width;
+}
+
+main > a.nextra-card {
+  @apply my-4
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: inherit;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-zinc-700;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-zinc-500;
+}
+
+.monetr {
+  border-radius: 1em !important;
+}
+
+img[data-nimg], img[data-rmiz-modal-img] {
+  @apply rounded-md
+}
+
+.feature {
+  &.free-to-use {
+    @apply rounded-xl bg-dark-monetr-background shadow-lg col-span-2 relative
+  }
+}
