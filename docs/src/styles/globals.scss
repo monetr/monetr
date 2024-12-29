@@ -5,7 +5,7 @@
 $content-width: 100rem;
 
 .m-view-height {
-  min-height: calc(100vh-var(--nextra-navbar-height));
+  min-height: calc(100vh - var(--nextra-navbar-height));
 }
 
 .m-view-width {
