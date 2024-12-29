@@ -79,6 +79,13 @@ const preview: Preview = {
             height: '720px',
           },
         },
+        screenshot: {
+          name: 'Screenshot',
+          styles: {
+            width: '512px',
+            height: '512px',
+          },
+        },
         ...INITIAL_VIEWPORTS,
       },
     },

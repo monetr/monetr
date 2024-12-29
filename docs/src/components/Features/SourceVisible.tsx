@@ -1,22 +1,25 @@
+import React from 'react';
+
 import Feature from '@monetr/docs/components/Feature';
 
-export default function FreeToUse(): JSX.Element {
+export default function SourceVisible(): JSX.Element {
   return (
     <Feature
       title={ (
         <h1 className='text-2xl lg:text-3xl text-start sm:text-center font-semibold'>
-          See What's Leftover
+          Source Visible
         </h1>
       ) }
       description={ (
         <h2 className='text-lg text-start sm:text-center text-dark-monetr-content'>
-          monetr keeps track of how much you have put aside for your budgets so it can tell you exactly how much you
-          have left over to use or spend.
+          All of monetr's source code is publically available, you can see exactly how we handle your data and even
+          contribute functionality!
         </h2>
       ) }
       className='col-span-full md:col-span-2'
-      link='/documentation/use/free_to_use/'
-      linkText='Learn About Free-To-Use'
+      link='https://github.com/monetr/monetr'
+      linkText='See The Source Code'
+      linkExternal
     />
   );
 }
