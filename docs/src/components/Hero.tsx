@@ -2,6 +2,7 @@ import Image from 'next/image';
 
 import MobileTransactionScreenshot from '@monetr/docs/assets/mobile_transactions_example.png';
 import TransactionScreenshot from '@monetr/docs/assets/transactions_example.png';
+import FreeToUse from '@monetr/docs/components/Features/FreeToUse';
 import JoinWaitlist from '@monetr/docs/components/JoinWaitlist';
 
 export default function Hero(): JSX.Element {
@@ -45,6 +46,11 @@ export default function Hero(): JSX.Element {
           alt='Screenshot of the monetr app showing the main view of transactions and balances of the budget.'
           className='block sm:hidden rounded-md z-10 shadow-lg'
         />
+
+
+        <div className='grid grid-cols-4 w-full'>
+          <FreeToUse />
+        </div>
       </div>
     </div>
   );
