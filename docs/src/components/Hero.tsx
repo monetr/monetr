@@ -39,7 +39,12 @@ export default function Hero(): JSX.Element {
           </h2>
         </div>
 
-        <JoinWaitlist />
+        <div className='space-y-4'>
+          <h2 className='text-xl sm:text-2xl font-medium'>
+          Get notified when monetr launches!
+          </h2>
+          <JoinWaitlist placeholder='Enter your email' />
+        </div>
 
         <Image
           priority={ true }
@@ -54,9 +59,7 @@ export default function Hero(): JSX.Element {
           className='block sm:hidden rounded-md z-10 shadow-lg'
         />
 
-
         <h1 className='text-4xl sm:text-5xl font-bold mt-16'>Features</h1>
-
 
         <div className='grid grid-cols-4 w-full gap-6'>
           <FreeToUse />
