@@ -3,12 +3,13 @@ import { useRouter } from 'next/router';
 import { useConfig } from 'nextra-theme-docs';
 
 import ChatwootIntegration from '@monetr/docs/components/ChatwootIntegration';
+import realUrl from '@monetr/docs/components/utils/realUrl';
 
 export default function Head(): JSX.Element {
   const { frontMatter } = useConfig();
   const { asPath } = useRouter();
 
-  const url = `https://monetr.app${asPath}`;
+  const url = realUrl(asPath);
   let suffix = '';
   if (asPath !== '/') {
     suffix = '- monetr';
@@ -29,12 +30,19 @@ export default function Head(): JSX.Element {
       <meta name='viewport' content='width=device-width, initial-scale=1.0' />
 
       <title>{ title }</title>
+      <meta name='title' content={ frontMatter.title || title } />
+      <meta name='description' content={ description } />
+      { frontMatter?.author && (
+        <meta property='author' content={ frontMatter.author } />
+      ) }
+      <meta name='description' content={ description } />
       <meta property='og:title' content={ frontMatter.title || title } />
       <meta property='og:url' content={ url } />
-      <meta name='title' content={ frontMatter.title || title } />
-      <meta httpEquiv='Content-Language' content='en' />
       <meta property='og:description' content={ description } />
-      <meta name='description' content={ description } />
+      { frontMatter?.ogImage && (
+        <meta property='og:image' content={ realUrl(frontMatter.ogImage) } />
+      ) }
+      <meta httpEquiv='Content-Language' content='en' />
 
       { process.env.NODE_ENV != 'development' && 
         <script defer src='https://a.monetr.app/script.js' data-website-id='ccbdfaf9-683f-4487-b97f-5516e1353715' /> 
