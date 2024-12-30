@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import React, { Fragment } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { DocsThemeConfig } from 'nextra-theme-docs';
 
 import Logo from '@monetr/docs/assets/logo.svg';
@@ -29,7 +30,11 @@ const config: DocsThemeConfig = {
   banner: {
     dismissible: true,
     key: 'monetr-go-live-january-2025',
-    content: (<p>🎉 monetr is going live January 3rd, 2025!</p>),
+    content: (<p>
+      🎉 monetr is going live January 3rd, 2025!
+      Check out the announcement <Link className='font-bold hover:text-dark-monetr-blue hover:underline' href='/blog/2024-12-30-introduction'>here</Link>.
+    </p>
+    ),
   },
   project: {
     link: 'https://github.com/monetr/monetr',
