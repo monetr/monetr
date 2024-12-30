@@ -1,1 +1,52 @@
+import { Callout } from 'nextra/components'
+
 # PostgreSQL Configuration
+
+monetr's primary database is PostgreSQL and is required in order for monetr to run.
+
+```yaml filename="config.yaml"
+postgresql:
+  address: "localhost"
+  port: 5432
+  username: "monetr"
+  password: "..."
+  database: "monetr"
+  insecureSkipVerify: false
+  caCertificatePath: "/.../tls/ca.cert"
+  keyPath: "/.../tls/tls.key"
+  certificatePath: "/.../tls/tls.cert"
+```
+
+| **Name**             | **Type** | **Default** | **Description**                                                                                                                                                     |
+| ---                  | ---      | ---         | ---                                                                                                                                                                 |
+| `address`            | String   | `localhost` | The IP, or DNS resolvable address of your PostgreSQL database server.                                                                                               |
+| `port`               | Number   | `5432`      | Port that the PostgreSQL server can be reached at.                                                                                                                  |
+| `username`           | String   | `postgres`  | Username that monetr should use to authenticate the PostgreSQL server.                                                                                              |
+| `password`           | String   |             | Password that monetr should use to authenticate the PostgreSQL server.                                                                                              |
+| `database`           | String   | `postgres`  | Database that monetr should use, monter may attempt to run migrations on startup. The user monetr is using should have permissions to create tables and extensions. |
+| `insecureSkipVerify` | Boolean  | `false`     | If you are using TLS with PostgreSQL but are not distributing a certificate authority file, then you may need to skip TLS verification.                             |
+| `keyPath`            | String   |             | Path to the client TLS key that monetr should use to connect to the PostgreSQL server.                                                                              |
+| `certificatePath`    | String   |             | Path to the client TLS certificate that monetr should use to connect to the PostgreSQL server.                                                                      |
+
+<Callout type="info">
+  monetr does watch for certificate changes on the filesystem to facilitate certificate rotation without needing to
+  restart the server. However this functionality does not always work and should not be relied on at this time.
+</Callout>
+
+## Database Migrations
+
+The provided Docker Compose file will automatically run database migrtions on staratup as needed. However if you want to
+run the migrations manually you can remove the `--migrate` flag from the serve command in the compose file.
+
+To run database migrations manually run the following command:
+
+```shell filename="Run Database Migrations"
+monetr database migrate
+```
+
+To see the current database schema version run the following command:
+
+```shell filename="Database Schema Version"
+monetr database version
+```
+
