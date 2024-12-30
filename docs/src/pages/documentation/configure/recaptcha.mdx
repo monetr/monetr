@@ -2,4 +2,48 @@
 title: "ReCAPTCHA"
 ---
 
+import { Callout } from 'nextra/components'
+
 # ReCAPTCHA Configuration
+
+ReCAPTCHA can be enabled on monetr to help prevent spamming certain endpoints in monetr's API. Specifically it is used
+on the login, registration and forgot password endpoints. These endpoints are particularly sensitive, so a captcha can
+be a good way to reduce spam.
+
+```yaml filename="config.yaml"
+reCAPTCHA:
+  enabled: <true|false>
+  publicKey: "..."
+  privateKey: "..."
+  version: 2 # Version of the ReCAPTCHA from Google.
+  verifyLogin: <true|false> # Require a valid captcha to login to monetr.
+  verifyRegister: <true|false> # Require a valid captcha to create an account.
+  verifyForgotPassword: <true|false> # Require a valid captcha to send password reset links.
+```
+
+<Callout type="warning">
+  monetr currently only supports version **2** of ReCAPTCHA. This feature is likely to be removed in a future release or
+  migrated to a non-Google captcha provider.
+</Callout>
+
+| **Name**               | **Type** | **Default** | **Description**                                                                                                                 |
+| ---                    | ---      | ---         | ---                                                                                                                             |
+| `enabled`              | Boolean  | `false`     | Enable ReCAPTCHA for the server.                                                                                                |
+| `publicKey`            | String   |             | The public key string provided to you by ReCAPTCHA. This will also be provided to the UI at runtime.                            |
+| `privateKey`           | String   |             | The private key string provided to you by ReCAPTCHA. This is used only by the server to verify the captcha provided by clients. |
+| `version`              | Number   | `2`         | Version of ReCAPTCHA to use. **Only version `2` is supported**.                                                                 |
+| `verifyLogin`          | Boolean  | `false`     | Require a valid captcha code for requests to `/api/authentication/login`.                                                       |
+| `verifyRegister`       | Boolean  | `false`     | Require a valid captcha code for requests to `/api/authentication/register`.                                                    |
+| `verifyForgotPassword` | Boolean  | `false`     | Require a valid captcha code for requests to `/api/authentication/forgot`.                                                      |
+
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable                         | Config File Field          |
+| ---                              | ---                        |
+| `MONETR_CAPTCHA_ENABLED`         | `reCAPTCHA.enabled`        |
+| `MONETR_CAPTCHA_PUBLIC_KEY`      | `reCAPTCHA.publicKey`      |
+| `MONETR_CAPTCHA_PRIVATE_KEY`     | `reCAPTCHA.privateKey`     |
+| `MONETR_CAPTCHA_VERIFY_LOGIN`    | `reCAPTCHA.verifyLogin`    |
+| `MONETR_CAPTCHA_VERIFY_REGISTER` | `reCAPTCHA.verifyRegister` |
+
+**Note**: `verifyForgotPassword` cannot be configured via environment variables at this time.
