@@ -11,12 +11,13 @@
   <img width="460" height="300" src="https://raw.githubusercontent.com/monetr/monetr/main/docs/src/assets/logo.svg">
 </p>
 
-monetr is a budgeting application that aims to allow people to more easily plan their recurring expenses. It is
-completely free to self-host (documentation to come), but requires a Plaid account in order to communicate with banks.
+**monetr is launching publicly on January 3rd, 2025. [Read the announcement
+post!](https://monetr.app/blog/2024-12-30-introduction/)**
 
-monetr is currently still in heavy development, but working towards a v1.0.0 release. You can see what items are still
-outstanding before a v1.0.0 release for monetr will be published here: [v1.0.0
-Milestone](https://github.com/monetr/monetr/milestone/3)
+monetr is a budgeting application that aims to make it easier for people to budget around recurring expenses. While
+making it absolutely clear how much you have left over to budget or use for other unplanned spending. It is based off of
+the now defunct [Simple](https://web.archive.org/web/20201128231953/https://www.simple.com/). It is also completely free
+to [self-host](https://monetr.app/documentation/install/).
 
 ![image](https://github.com/user-attachments/assets/010648f1-829f-47a2-a408-c1d8759221ab)
 
