@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@fontsource-variable/inter": "5.1.0",
+    "@fontsource-variable/inter": "5.1.1",
     "formik": "2.4.6",
     "lucide-react": "0.468.0",
     "next": "15.1.2",
