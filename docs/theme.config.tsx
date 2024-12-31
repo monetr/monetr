@@ -14,6 +14,9 @@ const branch = process.env.GIT_BRANCH ?? 'main';
 const config: DocsThemeConfig = {
   head: Head,
   darkMode: false,
+  nextThemes: {
+    forcedTheme: 'dark',
+  },
   logo: (
     <Fragment>
       <Image src={ Logo } alt='monetr logo' className='w-8 h-8 lg:w-10 lg:h-10' />
