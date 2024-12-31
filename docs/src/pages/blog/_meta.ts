@@ -8,5 +8,6 @@ export default {
       layout: 'default',
       breadcrumb: false,
     },
+    display: 'hidden',
   },
 };

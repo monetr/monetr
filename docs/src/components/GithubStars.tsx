@@ -11,8 +11,7 @@ export default function GithubStars(): JSX.Element {
   const { data, isLoading } = useQuery<GithubRepoResponse>(['https://api.github.com/repos/monetr/monetr']);
 
   return (
-    <div className='group h-[33.5px] flex shrink-0 flex-row items-center rounded-lg border border-dark-monetr-border
-      overflow-hidden transition-opacity' >
+    <div className='group h-[33.5px] flex shrink-0 flex-row items-center rounded-lg border border-dark-monetr-border overflow-hidden transition-opacity'>
       <div className='py-1 px-1 bg-zinc-800'>
         <svg 
           fill='#FFFFFF' 
