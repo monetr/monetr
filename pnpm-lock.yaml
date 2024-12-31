@@ -259,8 +259,8 @@ importers:
         specifier: 2.0.15
         version: 2.0.15(react@18.3.1)
       react-router-dom:
-        specifier: 6.28.0
-        version: 6.28.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 6.28.1
+        version: 6.28.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-select:
         specifier: 5.9.0
         version: 5.9.0(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -411,7 +411,7 @@ importers:
         version: 8.4.7(prettier@3.3.3)
       storybook-addon-react-router-v6:
         specifier: 1.0.2
-        version: 1.0.2(@storybook/blocks@8.4.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.7(prettier@3.3.3)))(@storybook/components@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/core-events@7.6.20)(@storybook/manager-api@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/preview-api@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/theming@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/types@7.6.20)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.28.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-router@6.28.0(react@18.3.1))(react@18.3.1)
+        version: 1.0.2(@storybook/blocks@8.4.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.7(prettier@3.3.3)))(@storybook/components@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/core-events@7.6.20)(@storybook/manager-api@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/preview-api@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/theming@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/types@7.6.20)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.28.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-router@6.28.1(react@18.3.1))(react@18.3.1)
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -7882,15 +7882,15 @@ packages:
       '@types/react':
         optional: true
 
-  react-router-dom@6.28.0:
-    resolution: {integrity: sha512-kQ7Unsl5YdyOltsPGl31zOjLrDv+m2VcIEcIHqYYD3Lp0UppLjrzcfJqDJwXxFw3TH/yvapbnUvPlAj7Kx5nbg==}
+  react-router-dom@6.28.1:
+    resolution: {integrity: sha512-YraE27C/RdjcZwl5UCqF/ffXnZDxpJdk9Q6jw38SZHjXs7NNdpViq2l2c7fO7+4uWaEfcwfGCv3RSg4e1By/fQ==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       react: '>=16.8'
       react-dom: '>=16.8'
 
-  react-router@6.28.0:
-    resolution: {integrity: sha512-HrYdIFqdrnhDw0PqG/AKjAqEqM7AvxCz0DQ4h2W8k6nqmc5uRBYDag0SBxx9iYz5G8gnuNVLzUe13wl9eAsXXg==}
+  react-router@6.28.1:
+    resolution: {integrity: sha512-2omQTA3rkMljmrvvo6WtewGdVh45SpL9hGiCI9uUrwGGfNFDIvGK4gYJsKlJoNVi6AQZcopSCballL+QGOm7fA==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       react: '>=16.8'
@@ -18646,14 +18646,14 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.16
 
-  react-router-dom@6.28.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-router-dom@6.28.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@remix-run/router': 1.21.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-router: 6.28.0(react@18.3.1)
+      react-router: 6.28.1(react@18.3.1)
 
-  react-router@6.28.0(react@18.3.1):
+  react-router@6.28.1(react@18.3.1):
     dependencies:
       '@remix-run/router': 1.21.0
       react: 18.3.1
@@ -19573,7 +19573,7 @@ snapshots:
     dependencies:
       type-fest: 0.7.1
 
-  storybook-addon-react-router-v6@1.0.2(@storybook/blocks@8.4.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.7(prettier@3.3.3)))(@storybook/components@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/core-events@7.6.20)(@storybook/manager-api@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/preview-api@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/theming@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/types@7.6.20)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.28.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-router@6.28.0(react@18.3.1))(react@18.3.1):
+  storybook-addon-react-router-v6@1.0.2(@storybook/blocks@8.4.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.7(prettier@3.3.3)))(@storybook/components@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/core-events@7.6.20)(@storybook/manager-api@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/preview-api@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/theming@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@storybook/types@7.6.20)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.28.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-router@6.28.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@storybook/blocks': 8.4.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.7(prettier@3.3.3))
       '@storybook/components': 8.4.7(storybook@8.4.7(prettier@3.3.3))
@@ -19583,8 +19583,8 @@ snapshots:
       '@storybook/theming': 8.4.7(storybook@8.4.7(prettier@3.3.3))
       '@storybook/types': 7.6.20
       react-inspector: 6.0.2(react@18.3.1)
-      react-router: 6.28.0(react@18.3.1)
-      react-router-dom: 6.28.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-router: 6.28.1(react@18.3.1)
+      react-router-dom: 6.28.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     optionalDependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
