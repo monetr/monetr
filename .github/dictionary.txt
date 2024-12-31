@@ -1,3 +1,16 @@
+[fF]ilesystem
+hostname
+GCS
+RADOSGW
+miniredis
+valkey
+TCP
+PEM
+Ed25519
+CSP
+DSN
+S3-compatible
+
 1Password
 API.*
 AboutFeatures
