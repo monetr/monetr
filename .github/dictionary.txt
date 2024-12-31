@@ -11,6 +11,7 @@ CORS
 CSV
 Chatwoot
 Chisago
+DNS
 DNT
 DockerHub
 GKE
@@ -77,6 +78,7 @@ anonymized?
 automations
 backend
 build-time
+captcha
 conveniens
 cors
 decrypt.*
