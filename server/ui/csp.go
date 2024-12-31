@@ -70,16 +70,12 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 		policies["frame-src"]["https://www.google.com"] = noop
 	}
 
-	// If sentry is enabled and a DSN is configured, then setup the connect-src for sentry.
+	// If sentry is enabled and an external DSN is configured, then setup the
+	// connect-src for sentry.
 	if c.configuration.Sentry.Enabled {
-		policies["connect-src"]["https://sentry.io"] = noop
 		if c.configuration.Sentry.ExternalDSN != "" {
+			policies["connect-src"]["https://sentry.io"] = noop
 			if dsn, err := url.Parse(c.configuration.Sentry.ExternalDSN); err == nil {
-				policies["connect-src"][fmt.Sprintf("%s://%s", dsn.Scheme, dsn.Hostname())] = noop
-				policies["script-src-elem"][fmt.Sprintf("%s://%s", dsn.Scheme, dsn.Hostname())] = noop
-			}
-		} else if c.configuration.Sentry.DSN != "" {
-			if dsn, err := url.Parse(c.configuration.Sentry.DSN); err == nil {
 				policies["connect-src"][fmt.Sprintf("%s://%s", dsn.Scheme, dsn.Hostname())] = noop
 				policies["script-src-elem"][fmt.Sprintf("%s://%s", dsn.Scheme, dsn.Hostname())] = noop
 			}

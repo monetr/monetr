@@ -25,6 +25,7 @@ export default {
     'type': 'page',
     'title': 'Documentation',
   },
+  // These are linked elsewhere and should not show up in the dropdown menu or top nav.
   'contact': {
     'type': 'page',
     'title': 'Contact',

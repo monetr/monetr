@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -35,14 +34,13 @@ func init() {
 }
 
 func loadCertificates(configuration config.Configuration, generateCertificates bool) (ed25519.PublicKey, ed25519.PrivateKey, error) {
-	// TODO Add support for both the public and private key being in the same file!
 	var publicKey ed25519.PublicKey
 	var privateKey ed25519.PrivateKey
 	var ok bool
 
 	{ // Parse the private key
-		keyBytes, err := ioutil.ReadFile(configuration.Security.PrivateKey)
-		if os.IsNotExist(err) {
+		keyBytes, err := os.ReadFile(configuration.Security.PrivateKey)
+		if os.IsNotExist(err) && generateCertificates {
 			directory, err := filepath.Abs(path.Dir(configuration.Security.PrivateKey))
 			if err != nil {
 				return nil, nil, errors.Wrap(err, "public key directory is not valid")
@@ -72,7 +70,7 @@ func loadCertificates(configuration config.Configuration, generateCertificates b
 
 			return publicKey, privateKey, nil
 		} else if err != nil {
-			return nil, nil, errors.Wrap(err, "unable to read public key")
+			return nil, nil, errors.Wrap(err, "unable to read private key")
 		}
 
 		keyBlock, _ := pem.Decode(keyBytes)
@@ -92,7 +90,7 @@ func loadCertificates(configuration config.Configuration, generateCertificates b
 
 		publicKey, ok = privateKey.Public().(ed25519.PublicKey)
 		if !ok {
-			return nil, nil, errors.New("provided public key is not an ED25519 public key")
+			return nil, nil, errors.New("provided key does not contain a ED25519 public key")
 		}
 
 		return publicKey, privateKey, nil

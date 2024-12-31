@@ -23,7 +23,7 @@ export default function Hero(): JSX.Element {
 
       <div className='m-view-width flex flex-col mx-auto items-center gap-8'>
         <div className='max-w-3xl flex flex-col gap-8 text-center items-center'>
-          <div className='flex items-center justify-center ml-3 p-4'>
+          <div className='flex items-center justify-center p-4'>
             <span className='absolute mx-auto flex border w-fit bg-gradient-to-r blur-xl opacity-50 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-4xl sm:text-6xl font-extrabold text-transparent text-center select-none'>
               Coming Soon
             </span>
