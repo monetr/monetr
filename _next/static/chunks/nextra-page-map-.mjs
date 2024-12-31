@@ -1,4 +1,5 @@
 import meta from "../../../src/pages/_meta.ts";
+import blog_meta from "../../../src/pages/blog/_meta.ts";
 import documentation_meta from "../../../src/pages/documentation/_meta.ts";
 import documentation_development_meta from "../../../src/pages/documentation/development/_meta.ts";
 import documentation_install_meta from "../../../src/pages/documentation/install/_meta.ts";
@@ -11,8 +12,27 @@ export const pageMap = [{
 }, {
   name: "blog",
   route: "/blog",
+  children: [{
+    data: blog_meta
+  }, {
+    name: "2024-12-30-introduction",
+    route: "/blog/2024-12-30-introduction",
+    frontMatter: {
+      "title": "Introducing monetr",
+      "date": "2024/12/30",
+      "description": "Announcing monetr's launch, why it was built, and how it works.",
+      "tag": "Announcement",
+      "ogImage": "/blog/2024-12-30-introduction/preview.png",
+      "author": "Elliot Courant",
+      "searchable": true
+    }
+  }]
+}, {
+  name: "blog",
+  route: "/blog",
   frontMatter: {
-    "title": "Blog"
+    "title": "Blog",
+    "description": "Blog posts and announcements from monetr."
   }
 }, {
   name: "contact",
@@ -68,7 +88,7 @@ export const pageMap = [{
       name: "postgres",
       route: "/documentation/configure/postgres",
       frontMatter: {
-        "sidebarTitle": "Postgres"
+        "title": "PostgreSQL"
       }
     }, {
       name: "recaptcha",
@@ -80,13 +100,14 @@ export const pageMap = [{
       name: "redis",
       route: "/documentation/configure/redis",
       frontMatter: {
-        "sidebarTitle": "Redis"
+        "title": "Redis"
       }
     }, {
       name: "security",
       route: "/documentation/configure/security",
       frontMatter: {
-        "sidebarTitle": "Security"
+        "title": "Security",
+        "description": "monetr's security settings, configure a certificate for token issuing and verification."
       }
     }, {
       name: "sentry",
@@ -98,13 +119,15 @@ export const pageMap = [{
       name: "server",
       route: "/documentation/configure/server",
       frontMatter: {
-        "sidebarTitle": "Server"
+        "title": "Server",
+        "description": "Configure monetr's server parameters for self hosted environments."
       }
     }, {
       name: "storage",
       route: "/documentation/configure/storage",
       frontMatter: {
-        "sidebarTitle": "Storage"
+        "title": "Storage",
+        "description": "Configure your self hosted monetr instance to allow for file uploads, letting you import transactions from OFX files."
       }
     }]
   }, {
