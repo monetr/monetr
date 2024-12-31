@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { DocsThemeConfig } from 'nextra-theme-docs';
 
 import Logo from '@monetr/docs/assets/logo.svg';
+import GithubStars from '@monetr/docs/components/GithubStars';
 import Head from '@monetr/docs/components/Head';
 import SignUp from '@monetr/docs/components/SignUp';
 
@@ -37,6 +38,7 @@ const config: DocsThemeConfig = {
     ),
   },
   project: {
+    icon: GithubStars,
     link: 'https://github.com/monetr/monetr',
   },
   navbar: {
