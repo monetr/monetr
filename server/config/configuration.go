@@ -98,9 +98,8 @@ type Beta struct {
 }
 
 type Security struct {
-	// PublicKey is a path to the file containing the ED22519 public key in pem format.
-	PublicKey string `yaml:"publicKey"`
-	// PrivateKey is the path to the file containing the ED22519 private key in pem format.
+	// PrivateKey is the path to the file containing the ED22519 private key in
+	// pem format.
 	PrivateKey string `yaml:"privateKey"`
 }
 
@@ -431,7 +430,6 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Redis.Enabled", "MONETR_REDIS_ENABLED")
 	_ = v.BindEnv("Redis.Address", "MONETR_REDIS_ADDRESS")
 	_ = v.BindEnv("Redis.Port", "MONETR_REDIS_PORT")
-	_ = v.BindEnv("Redis.Namespace", "MONETR_REDIS_NAMESPACE")
 	_ = v.BindEnv("Sentry.Enabled", "MONETR_SENTRY_ENABLED")
 	_ = v.BindEnv("Sentry.DSN", "MONETR_SENTRY_DSN")
 	_ = v.BindEnv("Sentry.ExternalDSN", "MONETR_SENTRY_EXTERNAL_DSN")

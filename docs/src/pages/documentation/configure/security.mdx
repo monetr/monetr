@@ -1,1 +1,50 @@
+---
+title: Security
+description: monetr's security settings, configure a certificate for token issuing and verification.
+---
+
+import { Callout } from 'nextra/components'
+
 # Security Configuration
+
+monetr uses [Platform-Agnostic Security Tokens](https://paseto.io/) for authentication as well as other stateless
+validation. For example, the links sent for resetting your password via email include a short-lived token signed and
+scoped exclusively for password resets. This is all done using
+[github.com/aidantwoods/go-paseto](https://github.com/aidantwoods/go-paseto).
+
+These tokens require an [Ed25519](https://en.wikipedia.org/wiki/EdDSA#Ed25519) public and private key. If you are using
+the provided Docker compose file then these are generated automatically the first time the server starts (via
+`--generate-certificates` on the serve command). The generated certificate is stored in a single file
+`/etc/monetr/ed25519.key` in PEM format, containing both the public and private key.
+
+```yaml filename="config.yaml"
+security:
+  privateKey: </etc/monetr/ed25519.key> # Path to your PEM encoded certificate.
+```
+
+| **Name**     | **Type** | **Default**               | **Description**                                                                               |
+| ---          | ---      | ---                       | ---                                                                                           |
+| `privateKey` | String   | `/etc/moentr/ed25519.key` | The path to the PEM encoded Ed25519 certificate that moentr will use for all security tokens. |
+
+This configuration cannot be defined via environment variable at this time.
+
+## Generate Your Own Certificate
+
+If you want to provide your own certificate you can generate your own certificate using the following command:
+
+```shell filename="Generate your own security certificate"
+openssl genpkey -algorithm ED25519 -out ed25519.key
+```
+
+To see the public key from this generated certificate:
+
+```shell filename="Get the public key"
+openssl pkey -in ed25519.key -pubout -text
+```
+
+<Callout type="info">
+  monetr does not support certificate rotation for the security certificate. To rotate the certificate simply regenerate
+  the certificate file and restart the monetr server. Any existing tokens will no longer be considered valid, this will
+  also logout any currently active or signed on users.
+</Callout>
+

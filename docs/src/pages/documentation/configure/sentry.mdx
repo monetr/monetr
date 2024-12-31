@@ -1,1 +1,35 @@
 # Sentry Configuration
+
+monetr uses [Sentry](https://github.com/getsentry/sentry) for error reporting and performance monitoring. But it
+supports using a separate DSN for the frontend versus the backend. Or you can use the same DSN for both.
+
+```yaml filename="config.yaml"
+sentry:
+  enabled: <true|false>
+  dsn: "..."           # DSN for the backend, API and job runner.
+  externalDsn: "..."   # DSN that is used by the frontend at runtime.
+  sampleRate: 1.0      # Sample rate for errors
+  traceSampleRate: 1.0 # Sample rate for performance traces
+  securityHeaderEndpoint: "..."
+```
+
+| **Name**                 | **Type** | **Default** | **Description**                                                                                                                                                                                                             |
+| ---                      | ---      | ---         | ---                                                                                                                                                                                                                         |
+| `enabled`                | Boolean  | `false`     | Enable the Sentry integration with monetr, allowing you to gather debug information about your instance if you run into any issue.                                                                                          |
+| `dsn`                    | String   |             | Specify the DSN that the backend will use for its errors and performance traces. This DSN is never exposed publically.                                                                                                      |
+| `externalDsn`            | String   |             | Specify the DSN that the frontend portion of monetr will use. **Note**: This DSN is publically visible even without authentication as it is loaded into the `index.html` content served for the frontend with each request. |
+| `sampleRate`             | Float    | `1.0`       | Specify a sample rate for errors, `1.0` would be sampling every error where `0.0` would be sampling none of them.                                                                                                           |
+| `traceSampleRate`        | Float    | `1.0`       | Specify a sample rate for performance traces, `1.0` would be sampling every transaction span where `0.0` would be sampling none of them.                                                                                    |
+| `securityHeaderEndpoint` | String   |             | Specify a sentry URL to report CSP violations to. monetr enforces a strict CSP policy by default.                                                                                                                           |
+
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable                          | Config File Field               |
+| ---                               | ---                             |
+| `MONETR_SENTRY_ENABLED`           | `sentry.enabled`                |
+| `MONETR_SENTRY_DSN`               | `sentry.dsn`                    |
+| `MONETR_SENTRY_EXTERNAL_DSN`      | `sentry.externalDsn`            |
+| `MONETR_SENTRY_SAMPLE_RATE`       | `sentry.sampleRate`             |
+| `MONETR_SENTRY_TRACE_SAMPLE_RATE` | `sentry.traceSampleRate`        |
+| `MONETR_SENTRY_CSP_ENDPOINT`      | `sentry.securityHeaderEndpoint` |
+

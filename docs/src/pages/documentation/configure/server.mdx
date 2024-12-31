@@ -1,1 +1,66 @@
+---
+title: Server
+description: "Configure monetr's server parameters for self hosted environments."
+---
+
+import { Callout } from 'nextra/components'
+
 # Server Configuration
+
+These configuration parameters control monetr's actual HTTP server as well as some configuration around cookies.
+
+```yaml filename="config.yaml"
+server:
+  listenPort: 4000
+  listenAddress: 0.0.0.0
+  externalUrl: <http://localhost:4000>
+  statsPort: 9000
+  uiCacheHours: 336 # 14 days in hours, determines cache headers for UI assets.
+  tlsCertificate: </etc/monetr/tls.crt>
+  tlsKey: </etc/monetr/tls.key>
+  cookies:
+    sameSiteStrict: <true|false>
+    secure: <true|false>
+    name: M-Token
+```
+
+| **Name**         | **Type** | **Default** | **Description**                                                                                                                                                                                                                                                                                                    |
+| ---              | ---      | ---         | ---                                                                                                                                                                                                                                                                                                                |
+| `listenPort`     | Number   | `4000`      | The TCP port that monetr will listen for HTTP connections on.                                                                                                                                                                                                                                                      |
+| `listenAddress`  | String   | `0.0.0.0`   | The TCP address that monetr will listen for HTTP connections on. Recommended to set to your computer's IP address or `0.0.0.0` if you want to access it from outside the host's system.                                                                                                                            |
+| `externalUrl`    | String   |             | The actual external URL that monetr is accessible at, if you are exposing monetr to the internet or just your local network via a domain name you **must** specify this parameter. For example: `http://monetr.local:4000`. monetr uses this to determine how to set cookies as well as build URLs used in emails. |
+| `statsPort`      | Number   | `9000`      | The TCP port that monetr will server Prometheus metrics on. **Note**: These metrics are not well maintained at the moment.                                                                                                                                                                                         |
+| `uiCacheHours`   | Number   | `336`       | Defines the number of hours that UI assets should be cached by clients, sets the cache headers on all UI asset HTTP responses.                                                                                                                                                                                     |
+| `tlsCertificate` | String   |             | Specify the TLS certificate that the monetr HTTP server should use.                                                                                                                                                                                                                                                |
+| `tlsKey`         | String   |             | Specify the TLS key that the monetr HTTP server should use.                                                                                                                                                                                                                                                        |
+
+<Callout type="info">
+  The TLS certificate and key **do not affect the external URL**. If you specify `https://...` in the external URL and
+  omit a TLS certificate and key, monetr assumes that you have some kind of proxy layer such as Nginx providing TLS
+  termination.
+</Callout>
+
+<Callout type="info">
+  TLS certificates are also not automatically rotated for the HTTP server either. The server must be restarted after
+  certificates are changed. 
+</Callout>
+
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable                     | Config File Field    |
+| ---                          | ---                  |
+| `MONETR_SERVER_EXTERNAL_URL` | `server.externalUrl` |
+
+## Cookies
+
+monetr uses cookies for authentication, cookies can be configured depending on whether or not you are using HTTPS for
+your self hosted instance. But all cookies monetr issues are HTTP only such that they are never visible to client side
+code.
+
+| **Name**         | **Type** | **Default** | **Description**                                                                                                                                                                    |
+| ---              | ---      | ---         | ---                                                                                                                                                                                |
+| `sameSiteStrict` | Boolean  | `true`      | Should cookies be issued such that they are only usable by the exact website specified in the external URL above? (**Please always set to true**)                                  |
+| `secure`         | Boolean  | `true`      | Should cookies be issued with the secure flag. If your external URL is using an `http` protocol though, then this will be treated as `false` regardless of the setting value here. |
+| `name`           | String   | `M-Token`   | The name of the cookie that monetr should both issue for authentication and look for when authenticating requests from clients.                                                    |
+
+**Note**: None of these can be configured via environment variables at this time.

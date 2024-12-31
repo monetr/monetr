@@ -1,1 +1,122 @@
+---
+title: "Storage"
+description: Configure your self hosted monetr instance to allow for file uploads, letting you import transactions from OFX files.
+---
+
+import { Callout } from 'nextra/components'
+
 # Storage Configuration
+
+monetr allows files to be uploaded in order to import transactions using OFX files. You can find the documentation on
+that feature [here](/documentation/use/transactions/uploads). To facilitate this monetr requires a file storage backend.
+For self hosted environments the `filesystem` provider is likely sufficient. But monetr also supports S3-compatible
+object stores such as [RADOSGW](https://docs.ceph.com/en/squid/radosgw/) or [minio](https://github.com/minio/minio), as
+well as Google Cloud Storage.
+
+If you are running more than one monetr server instance, you should not use the filesystem storage provider. Instead one
+of the other two storage providers should be used.
+
+If you disable file storage, all file upload functionality will be disabled. Manual links will still work, but
+transactions must be created one by one manually instead.
+
+```yaml filename="config.yaml"
+storage:
+  enabled: <true|false>
+  provider: <filesystem|s3|gcs> # Must be `filesystem`, `s3` or `gcs`.
+  s3: { ... } # S3 specific configuration, only used when `provider: s3`.
+  gcs: { ... } # GCS specific configuration, only used when `provider: gcs`.
+  filesystem: { ... } # Filesystem specific configuration, only used when `provider: filesystem`.
+```
+
+| **Name**   | **Type** | **Default**  | **Description**                                                                                                                                                                                                                                |
+| ---        | ---      | ---          | ---                                                                                                                                                                                                                                            |
+| `enabled`  | Boolean  | `false`      | Allow monetr to store files uploaded to it. As well as allow users to upload files.                                                                                                                                                            |
+| `provider` | String   | `filesystem` | Valid values are:<br/>- `filesystem`: Store uploaded files on the local filesystem available to monetr.<br/>- `s3`: Store uploaded files on an external S3-compatible object store.<br/>- `gcs`: Store uploaded files on Google Cloud Storage. |
+
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable                  | Config File Field  |
+| ---                       | ---                |
+| `MONETR_STORAGE_ENABLED`  | `storage.enabled`  |
+| `MONETR_STORAGE_PROVIDER` | `storage.provider` |
+
+<Callout type="warning">
+  monetr does not currently have a way to migrate between storage providers. This should not be a problem immediately as
+  the only files currently being uploaded are deleted shortly after they are processed. But as monetr adds support for
+  things like transaction attachments this will become more relevant.
+</Callout>
+
+## S3 Compatible
+
+monetr supports any S3 compatible object store. Non AWS object stores will require additional configuration though, such
+as defining a custom endpoint and potentially specifying path style.
+
+```yaml filename="config.yaml"
+storage:
+  s3:
+    accessKey: "..."
+    secretKey: "..."
+    endpoint: <http://your-object-store.local>
+    bucket: "..."
+    forcePathStyle: <true|false>
+    useEnvCredentials: <true|false>
+```
+
+| **Name**            | **Type** | **Default** | **Description**                                                                                                                                                                                                     |
+| ---                 | ---      | ---         | ---                                                                                                                                                                                                                 |
+| `accessKey`         | String   |             | The access key provided to you buy your object storage system. Required when `useEnvCredentials: false`                                                                                                             |
+| `secretKey`         | String   |             | The secret key provided to you buy your object storage system. Required when `useEnvCredentials: false`                                                                                                             |
+| `endpoint`          | String   |             | The full URL of the object storage provider you are using. Required when you are not using AWS S3.                                                                                                                  |
+| `bucket`            | String   |             | The name of the bucket where files will be uploaded. This is always required. The bucket must also already exist.                                                                                                   |
+| `forcePathStyle`    | Boolean  | `false`     | If you are using a custom object storage provider you might need to set this to true, instead of prefixing the bucket name onto the hostname. It will be appended to the path of requests made to the object store. |
+| `useEnvCredentials` | Boolean  | `false`     | If this is set to `true` then the access key and secret will be loaded from the `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` environment variables respectively.                                                           |
+
+**Note**: This provider cannot be configured via environment variables outside of `useEnvCredentials: true`.
+
+## Google Cloud Storage
+
+Similar to [Google Cloud KMS](/documentation/configure/kms/#google-cloud-kms-configuration), this will also require a
+credentials JSON file from Google Cloud. However if you set the permissions for the service account correctly, the same
+file can be used for both configurations.
+
+monetr requires the following permissions to use Google Cloud Storage:
+
+- `storage.objects.create`
+- `storage.objects.delete`
+- `storage.objects.get`
+- `storage.objects.list`
+
+If you are using GCS for your storage, monetr will perform a permission check on startup to make sure that it has these
+permissions available. If it does not then it will log an error an exit.
+
+```yaml filename="config.yaml"
+storage:
+  gcs:
+    bucket: "..."
+    credentialsJSON: "/home/monetr/.config/gcloud/application_default_credentials.json" # Example path
+```
+
+| **Name**          | **Type** | **Default** | **Description**                                                                                                                                                                                                |
+| ---               | ---      | ---         | ---                                                                                                                                                                                                            |
+| `bucket`          | String   |             | The bucket in Google Cloud Storage that files should be uploaded to, monetr does not create this bucket. It must be created before-hand.                                                                       |
+| `credentialsJSON` | String   | `null`      | If you want to load credentials for your service account via a JSON file, specify the path to that file here. If left blank the Google Cloud SDK will look in default locations on the system for credentials. |
+
+**Note**: This provider cannot be configured via environment variables.
+
+## Filesystem
+
+If you are self-hosting monetr, the filesystem storage is the easiest to use and is already configured in the provided
+Docker compose file.
+
+```yaml filename="config.yaml"
+storage:
+  filesystem:
+    basePath: /etc/monetr/storage
+```
+
+| **Name**   | **Type** | **Default**           | **Description**                                                                                                                            |
+| ---        | ---      | ---                   | ---                                                                                                                                        |
+| `basePath` | String   | `/etc/monetr/storage` | A path to a directory that monetr will store uploaded files on the current system. If this directory does not exist monetr will create it. |
+
+**Note**: This provider cannot be configured via environment variables.
+

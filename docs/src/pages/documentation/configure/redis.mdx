@@ -1,1 +1,43 @@
+---
+title: "Redis"
+---
+
+import { Callout } from 'nextra/components'
+
 # Redis Configuration
+
+monetr can use any cache that is compatible with Redis's wire protocol. In the provided Docker compose file, local
+development environment as well as in production [valkey](https://github.com/valkey-io/valkey) is used.
+
+monetr only caches a few things, and for self-hosting it may not even be necessary to run a dedicated cache at this time
+as monetr also leverages [miniredis](https://github.com/alicebob/miniredis) when a cache server has not been configured.
+For a single monetr server this embedded "Redis" is sufficient.
+
+To configure a dedicated cache server though:
+
+```yaml filename="config.yaml"
+redis:
+  enabled: <true|false> # If this is set to false then miniredis is used.
+  address: "localhost"
+  port: 6379
+```
+
+| **Name**             | **Type** | **Default** | **Description**                                                                                                                                                                                       |
+| ---                  | ---      | ---         | ---                                                                                                                                                                                                   |
+| `enabled`            | Boolean   | `false` | Enable a dedicated cache server, if this is set to `false` then an embedded miniredis instance is used instead. |
+| `address`            | String   |  | The IP, or DNS resolvable address of your Redis-compatible cache server.                                                                                                                                 |
+| `port`               | Number   | `6379`      | Port that the Redis-compatible cache server can be reached at.                                                                                                                                                    |
+
+<Callout type="info">
+  monetr does not support credentials or TLS for this cache server at this time. Sensitive information is never cached
+  on this server and the use of the cache is purely for performance.
+</Callout>
+
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable               | Config File Field |
+| ---                    | ---               |
+| `MONETR_REDIS_ENABLED` | `redis.enabled`   |
+| `MONETR_REDIS_ADDRESS` | `redis.address`   |
+| `MONETR_REDIS_PORT`    | `redis.port`      |
+
