@@ -1,16 +1,3 @@
-[fF]ilesystem
-hostname
-GCS
-RADOSGW
-miniredis
-valkey
-TCP
-PEM
-Ed25519
-CSP
-DSN
-S3-compatible
-
 1Password
 API.*
 AboutFeatures
@@ -21,12 +8,16 @@ BlogIndex
 CLI
 CMake
 CORS
+CSP
 CSV
 Chatwoot
 Chisago
 DNS
 DNT
+DSN
 DockerHub
+Ed25519
+GCS
 GKE
 GNUMake
 Geolocation
@@ -48,11 +39,14 @@ MONETR
 Mastercard
 OAuth.*
 OFX
+PEM
 PiggyBank
 PricingPage
 QFX
+RADOSGW
 ReCAPTCHA
 S3
+S3-compatible
 SDK
 SMS
 SMTP
@@ -60,6 +54,7 @@ SSL
 ShoppingCart
 StackDriver.*
 Sube
+TCP
 TLS
 TODO
 TOTP
@@ -74,6 +69,7 @@ YAML
 [cC]onfig
 [dD]ecrypted
 [dD]ropdown[s]?
+[fF]ilesystem
 [fF]rontend
 [iI]nclusivity
 [jJ][sS]
@@ -104,6 +100,7 @@ forecasted
 formatter
 gcc
 hardcoded
+hostname
 href
 identityless
 integrations
@@ -115,6 +112,7 @@ logrus
 macOS
 merchantability
 minio
+miniredis
 mkcert
 monetr.*
 ngrok
@@ -129,4 +127,5 @@ sexualized
 submodule.*
 templating
 unbudgeted
+valkey
 voiceprints
