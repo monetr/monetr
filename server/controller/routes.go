@@ -121,6 +121,11 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				}
 				span.SetTag("net.host.name", ctx.Request().URL.Host)
 
+				// Don't sample traces from the icons endpoint right now
+				if ctx.Path() == APIPath+"/icons/search" {
+					span.Sampled = sentry.SampledFalse
+				}
+
 				defer func() {
 					if panicErr := recover(); panicErr != nil {
 						hub.RecoverWithContext(span.Context(), panicErr)
@@ -129,6 +134,8 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 							"error": "An internal error occurred.",
 						})
 						span.Status = sentry.SpanStatusInternalError
+						// Make sure we always sample error traces
+						span.Sampled = sentry.SampledTrue
 					} else {
 						span.Status = sentry.SpanStatusOK
 					}

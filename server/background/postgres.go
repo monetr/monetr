@@ -624,6 +624,8 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 				span.SetData("messaging.message.id", fmt.Sprintf("%s::%s", nextJob.queueName, nextJob.next))
 				span.SetData("messaging.destination.name", string(nextJob.queueName))
 				span.SetData("messaging.system", "postgresql")
+				// For now, sample all cron jobs
+				span.Sampled = sentry.SampledTrue
 				slug := strings.ToLower(nextJob.queueName)
 				slug = strings.ReplaceAll(slug, "::", "-")
 
@@ -817,6 +819,8 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		span.SetData("messaging.message.body.size", len(job.Input))
 		span.SetData("messaging.message.receive.latency", p.clock.Now().Sub(job.CreatedAt).Milliseconds())
 		span.SetData("messaging.system", "postgresql")
+		// For now, sample all background jobs
+		span.Sampled = sentry.SampledTrue
 		jobLog := p.log.WithContext(span.Context()).WithFields(logrus.Fields{
 			"jobId": job.JobId,
 			"queue": job.Queue,
