@@ -21,10 +21,7 @@ import tailwindConfig from '../../tailwind.config.ts';
 
 interface LaunchNotificationProps {
   baseUrl?: string;
-  firstName?: string;
-  lastName?: string;
   supportEmail?: string;
-  resetUrl?: string;
 }
 
 export const LaunchNotification = ({
