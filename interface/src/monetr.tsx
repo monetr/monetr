@@ -152,7 +152,7 @@ export default function Monetr(): JSX.Element {
           <Route path='/account/subscribe/after' element={ <Navigate replace to='/' /> } />
           <Route path='/setup' element={ <Navigate replace to='/' /> } />
           <Route path='/password/reset' element={ <Navigate replace to='/' /> } />
-
+          <Route path='/register' element={ <Navigate replace to='/' /> } />
           <Route path='/login' element={ <Navigate replace to='/' /> } />
           <Route path='/login/multifactor' element={ <Navigate replace to='/' /> } />
           <Route index path='/' element={ <RedirectToBank /> } />
