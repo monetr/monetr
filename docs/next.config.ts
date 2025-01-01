@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   output: 'export',
   distDir: './out',
   trailingSlash: true,
+  experimental: {
+    scrollRestoration: true,
+  },
   images: {
     unoptimized: true,
   },
