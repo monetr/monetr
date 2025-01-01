@@ -42,11 +42,12 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 		case "PUT", "DELETE":
 			txn, err := c.DB.BeginContext(c.getContext(ctx))
 			if err != nil {
+				c.Log.WithError(err).Errorf("failed to begin transaction")
 				return c.wrapAndReturnError(
 					ctx,
 					err,
 					http.StatusInternalServerError,
-					"failed to begin transaction",
+					"Internal error, try again in a few moments",
 				)
 			}
 
