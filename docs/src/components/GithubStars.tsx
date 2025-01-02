@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 
 interface GithubStarsProps {
   variant?: 'default' | 'large';
@@ -47,12 +48,12 @@ export default function GithubStars(props: GithubStarsProps): JSX.Element {
   }
 
   return (
-    <a
+    <Link
       href='https://github.com/monetr/monetr'
       target='_blank'
       className='group h-[54px] flex shrink-0 flex-row items-center rounded-lg border border-dark-monetr-border overflow-hidden transition-opacity'
     >
-      <div className='py-1 px-2 bg-zinc-800 h-full flex gap-2 items-center'>
+      <div className='py-1 px-3 bg-zinc-800 h-full flex gap-2 items-center'>
         <svg
           fill='#FFFFFF'
           role='img'
@@ -67,7 +68,7 @@ export default function GithubStars(props: GithubStarsProps): JSX.Element {
           GitHub
         </span>
       </div>
-      <div className='py-1 px-2 text-center font-medium text-xl group-hover:opacity-80 opacity-100 w-10 bg-black bg-opacity-20 backdrop-blur-sm h-full items-center flex justify-center'>
+      <div className='py-1 px-3 text-center font-medium text-xl group-hover:opacity-80 opacity-100 bg-black bg-opacity-20 backdrop-blur-sm h-full items-center flex justify-center'>
         { isLoading || !stars ?
           <span className='rounded bg-dark-monetr-background-emphasis text-dark-monetr-background-emphasis'>???</span> :
           <span>
@@ -75,7 +76,7 @@ export default function GithubStars(props: GithubStarsProps): JSX.Element {
           </span>
         }
       </div>
-    </a>
+    </Link>
   );
 
 }

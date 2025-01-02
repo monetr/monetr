@@ -1,9 +1,6 @@
 import { ArrowRight } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
-import MobileTransactionScreenshot from '@monetr/docs/assets/mobile_transactions_example.png';
-import TransactionScreenshot from '@monetr/docs/assets/transactions_example.png';
 import Expenses from '@monetr/docs/components/Features/Expenses';
 import FileUpload from '@monetr/docs/components/Features/FileUpload';
 import Forecasting from '@monetr/docs/components/Features/Forecasting';
@@ -13,6 +10,8 @@ import Plaid from '@monetr/docs/components/Features/Plaid';
 import SelfHost from '@monetr/docs/components/Features/SelfHost';
 import SourceVisible from '@monetr/docs/components/Features/SourceVisible';
 import GithubStars from '@monetr/docs/components/GithubStars';
+import ProductHunt from '@monetr/docs/components/ProductHunt';
+import ScreenshotCarousel from '@monetr/docs/components/ScreenshotCarousel';
 
 export default function Hero(): JSX.Element {
   return (
@@ -61,37 +60,10 @@ export default function Hero(): JSX.Element {
 
         <div className='flex flex-col sm:flex-row gap-4 items-center'>
           <GithubStars variant='large' />
-          <Link
-            href='https://www.producthunt.com/posts/monetr?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-monetr'
-            target='_blank'
-            data-umami-event='Product Hunt'
-            className='w-full'
-          >
-            <img
-              src='https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=656178&theme=light'
-              alt='monetr - Personal&#0032;financial&#0032;planning&#0032;focused&#0032;on&#0032;recurring&#0032;expenses&#0046; | Product Hunt'
-              style={ {
-                'width': '250px',
-                'height': '54px',
-              } }
-              width='250'
-              height='54'
-            />
-          </Link>
+          <ProductHunt />
         </div>
 
-        <Image
-          priority={ true }
-          src={ TransactionScreenshot }
-          alt='Screenshot of the monetr app showing the main view of transactions and balances of the budget.'
-          className='hidden sm:block rounded-md z-10 shadow-lg'
-        />
-        <Image
-          priority={ true }
-          src={ MobileTransactionScreenshot }
-          alt='Screenshot of the monetr app showing the main view of transactions and balances of the budget.'
-          className='block sm:hidden rounded-md z-10 shadow-lg'
-        />
+        <ScreenshotCarousel />
 
         <h1 className='text-4xl sm:text-5xl font-bold mt-16'>Features</h1>
 

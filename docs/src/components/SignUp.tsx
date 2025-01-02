@@ -5,7 +5,7 @@ export default function SignUp(): JSX.Element {
   return (
     <Link
       className='btn-sm hidden sm:block text-slate-300 hover:text-white transition duration-150 ease-in-out group relative'
-      href='https://my.monetr.app/'
+      href='https://my.monetr.app/register'
     >
       <span className='relative inline-flex items-center'>
         Sign Up
