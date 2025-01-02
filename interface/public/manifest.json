@@ -1,6 +1,4 @@
 {
-  "short_name": "monetr",
-  "name": "monetr",
   "icons": [
     {
       "src": "/assets/resources/android-chrome-192-192.png",
@@ -32,9 +30,19 @@
       "type": "image/x-icon"
     }
   ],
-  "start_url": "/",
-  "display": "standalone",
-  "theme_color": "#4E1AA0",
   "background_color": "#19161f",
-  "description": "monetr budgeting app"
+  "categories": [
+    "finance",
+    "utilities"
+  ],
+  "description": "monetr budgeting app",
+  "dir": "ltr",
+  "display": "standalone",
+  "id": "monetr",
+  "lang": "en",
+  "name": "monetr",
+  "orientation": "portrait-primary",
+  "short_name": "monetr",
+  "start_url": "/",
+  "theme_color": "#4E1AA0"
 }
