@@ -1,4 +1,6 @@
+import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 import MobileTransactionScreenshot from '@monetr/docs/assets/mobile_transactions_example.png';
 import TransactionScreenshot from '@monetr/docs/assets/transactions_example.png';
@@ -10,7 +12,7 @@ import MobileFriendly from '@monetr/docs/components/Features/MobileFriendly';
 import Plaid from '@monetr/docs/components/Features/Plaid';
 import SelfHost from '@monetr/docs/components/Features/SelfHost';
 import SourceVisible from '@monetr/docs/components/Features/SourceVisible';
-import JoinWaitlist from '@monetr/docs/components/JoinWaitlist';
+import GithubStars from '@monetr/docs/components/GithubStars';
 
 export default function Hero(): JSX.Element {
   return (
@@ -25,32 +27,45 @@ export default function Hero(): JSX.Element {
         <div className='max-w-3xl flex flex-col gap-8 text-center items-center'>
           <div className='flex items-center justify-center p-4'>
             <span className='absolute mx-auto flex border w-fit bg-gradient-to-r blur-xl opacity-50 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-4xl sm:text-6xl font-extrabold text-transparent text-center select-none'>
-              Coming Soon
+              Welcome to monetr,
             </span>
             <h1 className='h-24 relative top-0 justify-center flex bg-gradient-to-r items-center from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-4xl sm:text-6xl font-extrabold text-transparent text-center select-auto'>
-              Coming Soon
+              Welcome to monetr
             </h1>
           </div>
 
-          <h1 className='text-4xl sm:text-5xl font-bold'>Take control of your finances, paycheck by paycheck</h1>
+          <h1 className='text-4xl sm:text-5xl font-bold'>
+            Take control of your finances, paycheck by paycheck
+          </h1>
 
           <h2 className='text-xl sm:text-2xl font-medium'>
             Put aside what you need, spend what you want.
           </h2>
         </div>
 
-        <div className='space-y-4'>
-          <h2 className='text-xl sm:text-2xl font-medium'>
-            Get notified when monetr launches!
-          </h2>
-          <JoinWaitlist placeholder='Enter your email' />
+        <div className='flex flex-col sm:flex-row gap-4'>
+          <Link
+            className='flex-none inline-flex items-center gap-2 rounded-md bg-purple-500 px-3.5 py-2.5 font-semibold text-white shadow-sm hover:bg-purple-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-500 text-xl'
+            href='https://my.monetr.app/register'
+          >
+            Try Free for 30 Days
+            <ArrowRight />
+          </Link>
+          <Link
+            className='rounded-md block py-2.5 px-3.5 font-semibold text-center text-white transition duration-100 bg-white outline-none bg-opacity-10 hover:bg-opacity-20 backdrop-blur-sm text-xl '
+            href='/documentation/use/getting_started/'
+          >
+            Learn More
+          </Link>
         </div>
 
-        <div>
-          <a
+        <div className='flex flex-col sm:flex-row gap-4 items-center'>
+          <GithubStars variant='large' />
+          <Link
             href='https://www.producthunt.com/posts/monetr?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-monetr'
             target='_blank'
             data-umami-event='Product Hunt'
+            className='w-full'
           >
             <img
               src='https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=656178&theme=light'
@@ -62,7 +77,7 @@ export default function Hero(): JSX.Element {
               width='250'
               height='54'
             />
-          </a>
+          </Link>
         </div>
 
         <Image

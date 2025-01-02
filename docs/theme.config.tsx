@@ -33,10 +33,11 @@ const config: DocsThemeConfig = {
   docsRepositoryBase: `https://github.com/monetr/monetr/blob/${branch}/docs`,
   banner: {
     dismissible: true,
-    key: 'monetr-go-live-january-2025',
+    key: 'monetr-launched-january-2025',
     content: (<p>
-      🎉 monetr is going live January 3rd, 2025!
-      Check out the announcement <Link className='font-bold hover:text-dark-monetr-blue hover:underline' href='/blog/2024-12-30-introduction'>here</Link>.
+      🎉 monetr is now live!
+      Read the announcement <Link className='font-bold hover:text-dark-monetr-blue hover:underline' href='/blog/2024-12-30-introduction'>here</Link>.
+      Or <Link className='font-bold hover:text-dark-monetr-blue hover:underline' href='https://my.monetr.app/register'>Sign Up</Link>!
     </p>
     ),
   },

@@ -1,8 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { CircleCheck } from 'lucide-react';
+import { ArrowRight, CircleCheck } from 'lucide-react';
 import Link from 'next/link';
-
 
 export default function PricingCards(): JSX.Element {
   return (
@@ -78,13 +77,23 @@ export default function PricingCards(): JSX.Element {
           <li className='flex items-center gap-1.5'>
             <CircleCheck className='h-5 w-5' />
             <span className=''>
+              Import Via OFX
+            </span>
+          </li>
+          <li className='flex items-center gap-1.5'>
+            <CircleCheck className='h-5 w-5' />
+            <span className=''>
               Email Support
             </span>
           </li>
         </ul>
-        <span className='block px-8 py-3 text-md font-semibold text-center text-white transition duration-100 bg-white rounded-lg outline-none bg-opacity-20 md:text-base'>
-          Available January 3rd
-        </span>
+        <Link
+          href='https://my.monetr.app/register'
+          className='inline-flex w-full items-center justify-center gap-2 px-8 py-3 text-md font-semibold text-white transition duration-100 bg-white rounded-lg outline-none bg-opacity-10 hover:bg-opacity-20 md:text-base'
+        >
+          Try Free for 30 Days
+          <ArrowRight />
+        </Link>
       </div>
     </div>
   );
