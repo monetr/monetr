@@ -10,6 +10,8 @@ import (
 
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/getsentry/sentry-go"
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/crumbs"
@@ -63,30 +65,46 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 }
 
 func (c *Controller) postLogin(ctx echo.Context) error {
-	var loginRequest struct {
+	var request struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 		Captcha  string `json:"captcha"`
-		IsMobile bool   `json:"isMobile"`
 	}
-	if err := ctx.Bind(&loginRequest); err != nil {
+	if err := ctx.Bind(&request); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
+	}
+
+	err := validation.ValidateStruct(&request,
+		validation.Field(&request.Email,
+			validation.Required.Error("An email must be provided"),
+			is.Email.Error("A valid email must be provided"),
+		),
+		validation.Field(&request.Password,
+			validation.Required.Error("A password must be provided"),
+			validation.Length(8, 100).Error("Password must be at least 8 characters long, and not longer than 100 characters"),
+		),
+	)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":  "Invalid request",
+			"errors": err,
+		})
 	}
 
 	// This will take the captcha from the request and validate it if the API is
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
-	if err := c.validateLoginCaptcha(c.getContext(ctx), loginRequest.Captcha); err != nil {
+	if err := c.validateLoginCaptcha(c.getContext(ctx), request.Captcha); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Valid ReCAPTCHA is required")
 	}
 
-	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
-	loginRequest.Password = strings.TrimSpace(loginRequest.Password)
+	request.Email = strings.ToLower(strings.TrimSpace(request.Email))
+	request.Password = strings.TrimSpace(request.Password)
 
 	if err := c.validateLogin(
 		ctx,
-		loginRequest.Email,
-		loginRequest.Password,
+		request.Email,
+		request.Password,
 	); err != nil {
 		return err // Validate login errors are valid http errors.
 	}
@@ -94,8 +112,8 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	secureRepo := c.mustGetSecurityRepository(ctx)
 	login, requiresPasswordChange, err := secureRepo.Login(
 		c.getContext(ctx),
-		loginRequest.Email,
-		loginRequest.Password,
+		request.Email,
+		request.Password,
 	)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
@@ -212,11 +230,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			"isActive": true,
 		}
 
-		if !loginRequest.IsMobile {
-			c.updateAuthenticationCookie(ctx, token)
-		} else {
-			result["token"] = token
-		}
+		c.updateAuthenticationCookie(ctx, token)
 
 		if !c.Configuration.Stripe.IsBillingEnabled() {
 			// Return their account token.
@@ -822,6 +836,10 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 func (c *Controller) validateRegistration(ctx echo.Context, email, password, firstName string) error {
 	if email == "" {
 		return c.badRequest(ctx, "Email cannot be blank")
+	}
+
+	if len(email) > 200 {
+		return c.badRequest(ctx, "Email is too long")
 	}
 
 	if len(password) < 8 {
