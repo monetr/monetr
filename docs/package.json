@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@fontsource-variable/inter": "5.1.1",
+    "@radix-ui/react-slot": "1.1.1",
     "@tanstack/react-query": "4.36.1",
     "date-fns": "4.1.0",
+    "embla-carousel-react": "8.5.1",
     "formik": "2.4.6",
     "lucide-react": "0.468.0",
     "next": "15.1.2",
