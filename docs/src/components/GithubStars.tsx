@@ -10,11 +10,16 @@ interface GithubRepoResponse {
 export default function GithubStars(): JSX.Element {
   const { data, isLoading } = useQuery<GithubRepoResponse>(['https://api.github.com/repos/monetr/monetr']);
 
+  const stars = typeof data?.stargazers_count === 'number' ? data.stargazers_count.toLocaleString('en-US', {
+    compactDisplay: 'short',
+    notation: 'compact',
+  }) : undefined;
+
   return (
     <div className='group h-[33.5px] flex shrink-0 flex-row items-center rounded-lg border border-dark-monetr-border overflow-hidden transition-opacity'>
       <div className='py-1 px-1 bg-zinc-800'>
-        <svg 
-          fill='#FFFFFF' 
+        <svg
+          fill='#FFFFFF'
           role='img'
           viewBox='0 0 24 24'
           xmlns='http://www.w3.org/2000/svg'
@@ -25,13 +30,10 @@ export default function GithubStars(): JSX.Element {
         </svg>
       </div>
       <div className='py-1 text-center font-medium text-sm group-hover:opacity-80 opacity-100 w-10'>
-        { isLoading || !data ? 
+        { isLoading || !stars ?
           <span className='rounded bg-dark-monetr-background-emphasis text-dark-monetr-background-emphasis'>???</span> :
           <span>
-            { data.stargazers_count.toLocaleString('en-US', {
-              compactDisplay: 'short',
-              notation: 'compact',
-            }) }
+            { stars }
           </span>
         }
       </div>
