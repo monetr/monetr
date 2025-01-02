@@ -41,9 +41,28 @@ export default function Hero(): JSX.Element {
 
         <div className='space-y-4'>
           <h2 className='text-xl sm:text-2xl font-medium'>
-          Get notified when monetr launches!
+            Get notified when monetr launches!
           </h2>
           <JoinWaitlist placeholder='Enter your email' />
+        </div>
+
+        <div>
+          <a
+            href='https://www.producthunt.com/posts/monetr?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-monetr'
+            target='_blank'
+            data-umami-event='Product Hunt'
+          >
+            <img
+              src='https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=656178&theme=light'
+              alt='monetr - Personal&#0032;financial&#0032;planning&#0032;focused&#0032;on&#0032;recurring&#0032;expenses&#0046; | Product Hunt'
+              style={ {
+                'width': '250px',
+                'height': '54px',
+              } }
+              width='250'
+              height='54'
+            />
+          </a>
         </div>
 
         <Image
