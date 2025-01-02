@@ -31,6 +31,7 @@ if (window?.__MONETR__?.SENTRY_DSN) {
     // We recommend adjusting this value in production, or using tracesSampler
     // for finer control
     tracesSampleRate: 0.25,
+    sampleRate: 1.0,
     environment: window.location.hostname,
     normalizeDepth: 20,
     beforeSend(event, _) {
