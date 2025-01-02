@@ -28,7 +28,7 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
     'dark:text-dark-monetr-content-emphasis': !Boolean(props.breadcrumb),
     'dark:text-dark-monetr-content-subtle dark:hover:text-dark-monetr-content-emphasis': Boolean(props.breadcrumb),
     'cursor-pointer': Boolean(props.base),
-  }, 'w-auto order-1');
+  }, 'w-auto order-1 flex-shrink-0 md:flex-shrink');
 
   const titleClassName = mergeTailwind({
     'hidden md:inline': Boolean(props.breadcrumb),
