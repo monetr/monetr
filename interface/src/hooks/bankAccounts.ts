@@ -61,16 +61,19 @@ export function useSelectedBankAccount(): UseQueryResult<BankAccount | undefined
     throw Error(`invalid bank account ID specified: "${match?.params?.bankId}" is not a valid bank account ID`);
   }
 
+  const existingData = queryClient.getQueryData<Array<BankAccount>>(['/bank_accounts']);
+
   return useQuery<Partial<BankAccount>, unknown, BankAccount | undefined>(
     [`/bank_accounts/${bankAccountId}`],
     {
       enabled: !!bankAccountId, // Only request if we have a valid numeric bank account ID to work with.
       select: data => !!data && new BankAccount(data),
-      initialData: () => queryClient
-        .getQueryData<Array<BankAccount>>(['/bank_accounts'])
-        ?.find(item => item.bankAccountId === bankAccountId),
-      initialDataUpdatedAt: () => queryClient
-        .getQueryState(['/bank_accounts'])?.dataUpdatedAt,
+      // If the bank account is in our existing query state then use that.
+      initialData: () => Array.isArray(existingData) ?
+        existingData.find(item => item.bankAccountId === bankAccountId) :
+        // Otherwise fall back to undefined.
+        undefined,
+      initialDataUpdatedAt: () => queryClient.getQueryState(['/bank_accounts'])?.dataUpdatedAt,
     }
   );
 }
