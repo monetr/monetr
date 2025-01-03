@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.1](https://github.com/monetr/monetr/compare/v1.0.0...v1.0.1) (2025-01-03)
+
+
+### Bug Fixes
+
+* **background:** Change background job timeout to 2 minutes ([a112d8f](https://github.com/monetr/monetr/commit/a112d8f1a48f1d434a9af354d273f424d4f619d5))
+* **sentry:** Fix similar transaction sentry instrumentation missing ([a112d8f](https://github.com/monetr/monetr/commit/a112d8f1a48f1d434a9af354d273f424d4f619d5))
+* **similar:** Don't consider `merchant name` text in the name ([a112d8f](https://github.com/monetr/monetr/commit/a112d8f1a48f1d434a9af354d273f424d4f619d5))
+* **ui:** Fixed type error in selected bank account hook ([532fb9d](https://github.com/monetr/monetr/commit/532fb9db51217154237e60d6868e925b8c3068ed))
+
+
+### Miscellaneous
+
+* **api:** Several small background changes ([a112d8f](https://github.com/monetr/monetr/commit/a112d8f1a48f1d434a9af354d273f424d4f619d5))
+
 ## [1.0.0](https://github.com/monetr/monetr/compare/v0.18.41...v1.0.0) (2025-01-03)
 
 
