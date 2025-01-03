@@ -16,7 +16,7 @@ func TestTokenizeName(t *testing.T) {
 
 		lower, _ := TokenizeName(&txn)
 		assert.EqualValues(t, []string{
-			"when", "work", "inc", "courant", "elliot", "merchant", "name", "when", "work", "inc",
+			"when", "work", "inc", "courant", "elliot", "when", "work", "inc",
 		}, lower, "should match the cleaned string")
 	})
 

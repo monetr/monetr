@@ -10,7 +10,6 @@ import (
 )
 
 var (
-	// clusterCleanStringRegex = regexp.MustCompile(`[a-zA-Z'\.\d]+`)
 	clusterCleanStringRegex = regexp.MustCompile(`(?:\b(?:[a-zA-Z]|\d){1}(?:[a-zA-Z.']{1,})(?:\d{1}[a-zA-Z]*){0,2}\b)`)
 	vowelsOnly              = regexp.MustCompile(`[aeyiuo]+`)
 	numberOnly              = regexp.MustCompile(`^\d+$`)
@@ -38,7 +37,12 @@ var (
 		"of":              0,
 		"helppay":         0, // Shows up on some google transactions, not helpful.
 		"null":            0, // Shows up in manual imports somtimes
-		"us":              0,
+
+		"merchant": 0, // Shows up in almost all mercury transactions.
+		"name":     0, // Shows up in almost all mercury transactions.
+
+		// TODO, get a list of country codes to exclude?
+		"us": 0,
 	}
 
 	states = map[string]float32{

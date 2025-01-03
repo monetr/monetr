@@ -1,15 +1,17 @@
 package recurring
 
 import (
+	"context"
 	"sort"
 	"time"
 
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 )
 
 type SimilarTransactionDetection interface {
 	AddTransaction(txn *models.Transaction)
-	DetectSimilarTransactions() []models.TransactionCluster
+	DetectSimilarTransactions(ctx context.Context) []models.TransactionCluster
 }
 
 type SimilarTransactions_TFIDF_DBSCAN struct {
@@ -32,7 +34,12 @@ type memberItem struct {
 	Date time.Time
 }
 
-func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []models.TransactionCluster {
+func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
+	ctx context.Context,
+) []models.TransactionCluster {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
 	datums := s.tfidf.GetDocuments()
 	s.dbscan = NewDBSCAN(datums, Epsilon, MinNeighbors)
 	result := s.dbscan.Calculate()
@@ -71,8 +78,9 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []models.
 		for index := range cluster.Items {
 			datum, ok := s.dbscan.GetDocumentByIndex(index)
 			if !ok {
-				// I don't know what kind of information would be helpful to include here since we cannot find the data
-				// associated with the index anyway. But this would indicate a significant bug.
+				// I don't know what kind of information would be helpful to include
+				// here since we cannot find the data associated with the index anyway.
+				// But this would indicate a significant bug.
 				panic("could not find a datum with an index in a resulting cluster")
 			}
 

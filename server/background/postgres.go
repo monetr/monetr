@@ -27,6 +27,7 @@ var (
 
 const (
 	numberOfPostgresQueueWorkers = 4
+	jobTimeoutSeconds            = 120
 )
 
 const (
@@ -613,7 +614,10 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 			// event when we send it to sentry if it succeeds or fails.
 			// TODO Clean it up at some point?
 			func(log *logrus.Entry, nextJob cronJobTracker) {
-				ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+				ctx, cancel := context.WithTimeout(
+					context.Background(),
+					jobTimeoutSeconds*time.Second,
+				)
 				defer cancel()
 				ctx = sentry.SetHubOnContext(ctx, sentry.CurrentHub().Clone())
 				span := sentry.StartSpan(
@@ -740,8 +744,11 @@ func (p *postgresJobProcessor) worker(shutdown chan chan struct{}) {
 				))
 			}
 
-			// Execute the job with a 1 minute timeout.
-			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+			// Execute the job with a timeout.
+			ctx, cancel := context.WithTimeout(
+				context.Background(),
+				jobTimeoutSeconds*time.Second,
+			)
 			if err := executor(ctx, job); err != nil {
 				log.WithError(err).Error("failed to execute job")
 			}

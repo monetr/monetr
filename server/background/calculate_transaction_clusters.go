@@ -127,7 +127,7 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 
 	clustering := recurring.NewSimilarTransactions_TFIDF_DBSCAN()
 
-	limit := 100
+	limit := 500
 	offset := 0
 	for {
 		txnLog := log.WithFields(logrus.Fields{
@@ -153,12 +153,16 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 		offset += len(transactions)
 	}
 
-	result := clustering.DetectSimilarTransactions()
+	result := clustering.DetectSimilarTransactions(span.Context())
 
 	if len(result) == 0 {
 		log.Info("no similar transactions detected, nothing to persist")
 		return nil
 	}
+
+	log.WithFields(logrus.Fields{
+		"clusters": len(result),
+	}).Info("similar transaction clusters detected")
 
 	if err := repo.WriteTransactionClusters(span.Context(), bankAccountId, result); err != nil {
 		return errors.Wrap(err, "failed to persist the calculated transaction clusters")
