@@ -322,7 +322,8 @@ export const pageMap = [{
   route: "/",
   frontMatter: {
     "title": "monetr: Take Control of Your Finances",
-    "description": "Take control of your finances, paycheck by paycheck, with monetr. Put aside what you need, spend what you want, and confidently manage your money with ease. Always know you’ll have enough for your bills and what’s left to save or spend."
+    "description": "Take control of your finances, paycheck by paycheck, with monetr. Put aside what you need, spend what you want, and confidently manage your money with ease. Always know you’ll have enough for your bills and what’s left to save or spend.",
+    "ogImage": "/images/screenshot.png"
   }
 }, {
   name: "policy",
