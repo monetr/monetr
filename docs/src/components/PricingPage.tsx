@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-import JoinWaitlist from '@monetr/docs/components/JoinWaitlist';
 import PricingCards from '@monetr/docs/components/Pricing/PricingCards';
 
 
@@ -23,12 +22,6 @@ export default function PricingPage(): JSX.Element {
             </h1>
           </div>
         </div>
-
-        <h2 className='text-xl sm:text-2xl font-medium'>
-          Get notified when monetr launches!
-        </h2>
-        <JoinWaitlist placeholder='Enter your email' />
-
       </div>
 
       <div className='flex w-full'>

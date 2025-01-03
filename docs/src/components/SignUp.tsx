@@ -1,13 +1,16 @@
+import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export default function SignUp(): JSX.Element {
   return (
-    <a className='btn-sm hidden sm:block text-slate-300 hover:text-white transition duration-150 ease-in-out group relative' href='https://my.monetr.app/'>
+    <Link
+      className='btn-sm hidden sm:block text-slate-300 hover:text-white transition duration-150 ease-in-out group relative'
+      href='https://my.monetr.app/register'
+    >
       <span className='relative inline-flex items-center'>
         Sign Up
-        <span className='text-purple-500 group-hover:translate-x-0.5 transition-transform duration-150 ease-in-out ml-1'>
-          →
-        </span>
+        <ArrowRight className='h-5 w-5' />
       </span>
-    </a>
+    </Link>
   );
 }
