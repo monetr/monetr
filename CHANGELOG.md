@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.0.0](https://github.com/monetr/monetr/compare/v0.18.41...v1.0.0) (2025-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* Preparing for launch ([#2279](https://github.com/monetr/monetr/issues/2279))
+
+### Features
+
+* **docs:** Add product hunt badge to home page ([d531105](https://github.com/monetr/monetr/commit/d53110511433b62f760b49a935ffee03f57cd515))
+* **docs:** Adding more content to the landing page ([#2277](https://github.com/monetr/monetr/issues/2277)) ([43c7707](https://github.com/monetr/monetr/commit/43c7707a332acf66b0288454fceceb68d5c27f14))
+* **email:** Adding launch notification email template ([b2a4d77](https://github.com/monetr/monetr/commit/b2a4d7785dd326651022521343f4c7221e43decf))
+* Lauching monetr ([#2283](https://github.com/monetr/monetr/issues/2283)) ([c45dd15](https://github.com/monetr/monetr/commit/c45dd15e016999b8b0b1f344ed70689d2f388dfc))
+* Preparing for launch ([#2279](https://github.com/monetr/monetr/issues/2279)) ([d1a1d30](https://github.com/monetr/monetr/commit/d1a1d30f1b6eef4a7ae1db3783994d103599425b))
+
+
+### Dependencies
+
+* **ui:** update dependency @fontsource-variable/inter to v5.1.1 ([#2280](https://github.com/monetr/monetr/issues/2280)) ([60d1cb9](https://github.com/monetr/monetr/commit/60d1cb955024c7385732d83b913fce39cac00066))
+* **ui:** update dependency @swc/core to v1.10.4 ([#2281](https://github.com/monetr/monetr/issues/2281)) ([6d43e12](https://github.com/monetr/monetr/commit/6d43e127462a0160b6938f3e513f951cdad06286))
+* **ui:** update dependency react-router-dom to v6.28.1 ([#2271](https://github.com/monetr/monetr/issues/2271)) ([f6c8536](https://github.com/monetr/monetr/commit/f6c853665b181b30572ebd5f58a091bb66145af6))
+
+
+### Bug Fixes
+
+* **api:** Improved error message during DB failover ([e3a4cc8](https://github.com/monetr/monetr/commit/e3a4cc8e595b1f9275dc67743e8ec72910fcd099))
+* **docs:** Enable scroll restoration on the docs site ([0d8796a](https://github.com/monetr/monetr/commit/0d8796a57a1f72452776791d42fcf8c5a21ba6e9))
+* **docs:** Fixed application error loading github stars ([16c96b3](https://github.com/monetr/monetr/commit/16c96b3a4681e84e77cd5c8761ac9a6044751deb))
+* **docs:** Fixed docs site rendering in light mode ([8e0813e](https://github.com/monetr/monetr/commit/8e0813e62fac81a92f5f400816d94ade3308eff1))
+* **docs:** Fixed typo in introduction ([010e0e4](https://github.com/monetr/monetr/commit/010e0e447a460047b220aefdd943520868be5daa))
+* **docs:** Make blog post image smaller on larger screens ([e123c46](https://github.com/monetr/monetr/commit/e123c46b1e26cbfe30e02fe114c0d8f019a8bf29))
+* **sentry:** Improve sampling of specific traces ([3a34ad6](https://github.com/monetr/monetr/commit/3a34ad6b38eb1a0d2114bcce35d1d9ea1abd758f))
+* **ui:** Fix top nav breadcrumb flexbox ([bf1f039](https://github.com/monetr/monetr/commit/bf1f0390e7269b6e632041aebcb020ef5ca54ee6))
+* **ui:** Fixed about page width on mobile devices ([f2f50bc](https://github.com/monetr/monetr/commit/f2f50bcc93c91a4bcad3a57d529d6d40b9e1abf9))
+* **ui:** Redirect from `/register` to `/` for authenticated users ([b4106bd](https://github.com/monetr/monetr/commit/b4106bd999dfffa4a0dcea673365ccc9ccdfd104))
+* **ui:** Updating manifest.json file to be more complete ([9beb2ea](https://github.com/monetr/monetr/commit/9beb2ea5f215a5cff909c2cb9ded6fc7ed8773eb))
+
+
+### Miscellaneous
+
+* **email:** Cleaning up launch notification ([863b1a5](https://github.com/monetr/monetr/commit/863b1a56bb961eb7068bb1bbe4f055fb6b396a9e))
+* Updating README ([0136eb5](https://github.com/monetr/monetr/commit/0136eb5b89942fc1fac13a39555c57b2add28802))
+
 ## [0.18.41](https://github.com/monetr/monetr/compare/v0.18.40...v0.18.41) (2024-12-27)
 
 
