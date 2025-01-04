@@ -50,8 +50,6 @@ func (o *ObservabilityRoundTripper) RoundTrip(request *http.Request) (*http.Resp
 
 		span.Status = sentry.HTTPtoSpanStatus(response.StatusCode)
 
-		o.handler(request.Context(), request, response, err)
-
 		if err != nil || response.StatusCode > http.StatusPermanentRedirect {
 			span.Status = sentry.SpanStatusInternalError
 		} else {
@@ -61,6 +59,8 @@ func (o *ObservabilityRoundTripper) RoundTrip(request *http.Request) (*http.Resp
 		span.Status = sentry.SpanStatusUnknown
 		crumbs.ReportError(span.Context(), err, "Unknown round tripper error", "http", map[string]interface{}{})
 	}
+
+	o.handler(request.Context(), request, response, err)
 
 	return response, err
 }
