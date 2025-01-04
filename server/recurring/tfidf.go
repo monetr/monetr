@@ -18,6 +18,7 @@ var (
 		"amazon":          10,
 		"youtube premium": 5,
 		"google":          2,
+		"stripe":          2,
 		"pwp":             0, // Paid with privacy
 		"privacycom":      0, // Same as pwp
 		"sq":              0, // Square
@@ -99,9 +100,10 @@ var (
 	}
 
 	synonyms = map[string]string{
-		"amzn":       "amazon",
-		"youtubepre": "youtube premium",
-		"coffe":      "coffee",
+		"amzn":        "amazon",
+		"youtubepre":  "youtube premium",
+		"youtubeprem": "youtube premium",
+		"coffe":       "coffee",
 	}
 )
 
