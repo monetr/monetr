@@ -18,7 +18,7 @@ func WrapError(ctx context.Context, err error, message string) error {
 	return errors.Wrap(err, message)
 }
 
-func Error(ctx context.Context, message, category string, data map[string]interface{}) {
+func Error(ctx context.Context, message, category string, data map[string]any) {
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
 		hub.AddBreadcrumb(&sentry.Breadcrumb{
 			Type:      "error",
@@ -31,21 +31,23 @@ func Error(ctx context.Context, message, category string, data map[string]interf
 	}
 }
 
-func ReportError(ctx context.Context, err error, message, category string, data map[string]interface{}) {
-	if hub := sentry.GetHubFromContext(ctx); hub != nil {
-		hub.CaptureException(err)
-		hub.AddBreadcrumb(&sentry.Breadcrumb{
-			Type:      "error",
-			Category:  category,
-			Message:   message,
-			Data:      data,
-			Level:     sentry.LevelError,
-			Timestamp: time.Now(),
-		}, nil)
+func ReportError(ctx context.Context, err error, message, category string, data map[string]any) {
+	if err != nil {
+		if hub := sentry.GetHubFromContext(ctx); hub != nil {
+			hub.CaptureException(err)
+			hub.AddBreadcrumb(&sentry.Breadcrumb{
+				Type:      "error",
+				Category:  category,
+				Message:   message,
+				Data:      data,
+				Level:     sentry.LevelError,
+				Timestamp: time.Now(),
+			}, nil)
+		}
 	}
 }
 
-func Warn(ctx context.Context, message, category string, data map[string]interface{}) {
+func Warn(ctx context.Context, message, category string, data map[string]any) {
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
 		hub.AddBreadcrumb(&sentry.Breadcrumb{
 			Type:      "warning",
@@ -58,7 +60,7 @@ func Warn(ctx context.Context, message, category string, data map[string]interfa
 	}
 }
 
-func Debug(ctx context.Context, message string, data map[string]interface{}) {
+func Debug(ctx context.Context, message string, data map[string]any) {
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
 		hub.AddBreadcrumb(&sentry.Breadcrumb{
 			Type:      "debug",
@@ -71,7 +73,7 @@ func Debug(ctx context.Context, message string, data map[string]interface{}) {
 	}
 }
 
-func HTTP(ctx context.Context, message, category, url, method string, statusCode int, data map[string]interface{}) {
+func HTTP(ctx context.Context, message, category, url, method string, statusCode int, data map[string]any) {
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
 		if data == nil {
 			data = map[string]interface{}{}
@@ -106,10 +108,11 @@ func AddTag(ctx context.Context, name, value string) {
 	}
 }
 
-// IndicateBug is used to tag a trace with the bug tag. This will be used to trigger notifications via sentry for when
-// something that does not necessarily result in an "error" happens that technically should not happen, or should be
+// IndicateBug is used to tag a trace with the bug tag. This will be used to
+// trigger notifications via sentry for when something that does not necessarily
+// result in an "error" happens that technically should not happen, or should be
 // cause for concern.
-func IndicateBug(ctx context.Context, message string, details map[string]interface{}) {
+func IndicateBug(ctx context.Context, message string, details map[string]any) {
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
 		hub.ConfigureScope(func(scope *sentry.Scope) {
 			scope.SetTag("bug", "true")
