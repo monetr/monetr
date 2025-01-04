@@ -37,7 +37,8 @@ The `latest` tag always points to the most recent version of monetr. For example
 Versioned tags, such as `0.18.31`, refer to specific releases. For example:  
 `ghcr.io/monetr/monetr:0.18.31`
 
-Version tags are recommended for stability. By pinning a version, you can control updates and easily roll back if needed. monetr's version numbers use a `v` prefix (e.g., `v0.18.31`), but container tags omit this prefix.
+Version tags are recommended for stability. By pinning a version, you can control updates and easily roll back if
+needed. monetr's version numbers use a `v` prefix (e.g., `v0.18.31`), but container tags omit this prefix.
 
 ## Docker Compose
 
@@ -70,6 +71,14 @@ be healthy before letting you continue.
 ### Open monetr
 
 Once monetr is finished starting, you should be able to access it in your browser via `http://localhost:4000`.
+
+<Callout type="info">
+  monetr may be accessible from other URLs like the host's IP address, but it will only set the authentication cookie
+  (as well as other things like email links) based on the external URL configuration. If you are having trouble logging
+  in, make sure you are accessing monetr from the same URL that it logs as "externalUrl" when it starts.
+
+  You can configure the external URL here: [Server Configuration](/documentation/configure/server)
+</Callout>
 
 </Steps>
 
@@ -119,7 +128,7 @@ docker compose pull
 Once the new images have been pulled onto your local machine you can restart the server via docker compose:
 
 ```shell filename="Docker start"
-docker compose start
+docker compose up --wait
 ```
 
 Things like database migrations are automatically run when using the provided compose file.
