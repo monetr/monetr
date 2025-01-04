@@ -21,7 +21,7 @@ type PlaidBankAccount struct {
 	Mask               string               `json:"mask" pg:"mask"`
 	AvailableBalance   int64                `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
 	CurrentBalance     int64                `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
-	LimitBalance       *int64               `json:"limitBalance" pg:"limit_balance,use_zero"`
+	LimitBalance       int64                `json:"limitBalance" pg:"limit_balance,use_zero"`
 	CreatedAt          time.Time            `json:"createdAt" pg:"created_at,notnull"`
 	CreatedBy          ID[User]             `json:"createdBy" pg:"created_by,notnull"`
 	CreatedByUser      *User                `json:"-" pg:"rel:has-one,fk:created_by"`

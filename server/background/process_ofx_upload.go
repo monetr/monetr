@@ -489,7 +489,7 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 	// TODO Somehow keep track of the as of timestamp? This way if someone is
 	// importing files out of order we could potentially avoid updating the
 	// balance to an old value.
-	var currentBalance, availableBalance int64
+	var currentBalance, availableBalance, limitBalance int64
 	var err error
 	if j.data.BANKMSGSRSV1 != nil {
 		for i := range j.data.BANKMSGSRSV1.STMTTRNRS {
@@ -525,6 +525,9 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 					return errors.Wrap(err, "failed to parse available balance amount")
 				}
 			}
+			// The limit for credit cards is equal to the amount currrently available
+			// plus the inverse of any amount currently used.
+			limitBalance = availableBalance + -currentBalance
 		}
 	}
 
@@ -534,8 +537,9 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 	}
 
 	// TODO Log the previous value and the new one?
-	bankAccount.CurrentBalance = currentBalance
+	bankAccount.CurrentBalance = -currentBalance
 	bankAccount.AvailableBalance = availableBalance
+	bankAccount.LimitBalance = limitBalance
 
 	if err := j.repo.UpdateBankAccount(span.Context(), bankAccount); err != nil {
 		return errors.Wrap(err, "failed to update bank account balances")
