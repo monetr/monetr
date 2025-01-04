@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/server/crumbs"
 )
 
 var (
@@ -38,21 +39,28 @@ func (o *ObservabilityRoundTripper) RoundTrip(request *http.Request) (*http.Resp
 	span.SetData("net.peer.name", request.URL.Host)
 
 	response, err := o.inner.RoundTrip(request)
-	span.SetTag("http.response.status_code", fmt.Sprint(response.StatusCode))
-	span.SetData("http.response.status_code", fmt.Sprint(response.StatusCode))
-	// Both of these are the same, one is for opentelemetry, one is for sentry.
-	span.SetTag("http.response.body.size", fmt.Sprint(response.ContentLength))
-	span.SetTag("http.response_content_length", fmt.Sprint(response.ContentLength))
+	if response != nil {
+		span.SetTag("http.response.status_code", fmt.Sprint(response.StatusCode))
+		span.SetData("http.response.status_code", fmt.Sprint(response.StatusCode))
+		// Both of these are the same, one is for opentelemetry, one is for sentry.
+		span.SetData("http.response.body.size", response.ContentLength)
+		span.SetData("http.response_content_length", response.ContentLength)
+		span.SetTag("http.response.body.size", fmt.Sprint(response.ContentLength))
+		span.SetTag("http.response_content_length", fmt.Sprint(response.ContentLength))
 
-	span.Status = sentry.HTTPtoSpanStatus(response.StatusCode)
+		span.Status = sentry.HTTPtoSpanStatus(response.StatusCode)
+
+		if err != nil || response.StatusCode > http.StatusPermanentRedirect {
+			span.Status = sentry.SpanStatusInternalError
+		} else {
+			span.Status = sentry.SpanStatusOK
+		}
+	} else {
+		span.Status = sentry.SpanStatusUnknown
+		crumbs.ReportError(span.Context(), err, "Unknown round tripper error", "http", map[string]interface{}{})
+	}
 
 	o.handler(request.Context(), request, response, err)
-
-	if err != nil || response.StatusCode > http.StatusPermanentRedirect {
-		span.Status = sentry.SpanStatusInternalError
-	} else {
-		span.Status = sentry.SpanStatusOK
-	}
 
 	return response, err
 }
