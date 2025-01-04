@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AccountBalanceWalletOutlined, LocalAtmOutlined, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
+import { Infinity } from 'lucide-react';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
@@ -84,6 +85,25 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
     return null;
   }
 
+  function Limit(): JSX.Element {
+    switch (bankAccount?.accountSubType) {
+      case 'credit card':
+        return (
+          <div className='flex w-full justify-between'>
+            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
+              <Infinity />
+              Limit:
+            </MSpan>
+            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
+              {balance?.getAvailableString()}
+            </MSpan>
+          </div>
+        );
+    }
+
+    return null;
+  }
+
   return (
     <div className={ className }>
       <BudgetingSidebarTitle />
@@ -100,9 +120,10 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Current:
             </MSpan>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              {balance?.getCurrentString()}
+              { balance?.getCurrentString() }
             </MSpan>
           </div>
+          <Limit />
         </div>
         <MDivider className='w-1/2' />
 

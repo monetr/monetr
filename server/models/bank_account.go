@@ -20,7 +20,9 @@ const (
 func ParseBankAccountType[T string | BankAccountType](input T) BankAccountType {
 	value := BankAccountType(input)
 	switch value {
-	case DepositoryBankAccountType, CreditBankAccountType, LoanBankAccountType,
+	case DepositoryBankAccountType,
+		CreditBankAccountType,
+		LoanBankAccountType,
 		InvestmentBankAccountType:
 		return value
 	default:
@@ -53,11 +55,17 @@ const (
 func ParseBankAccountSubType[T string | BankAccountSubType](input T) BankAccountSubType {
 	value := BankAccountSubType(input)
 	switch value {
-	case CheckingBankAccountSubType, SavingsBankAccountSubType,
-		HSABankAccountSubType, CDBankAccountSubType, MoneyMarketBankAccountSubType,
-		PayPalBankAccountSubType, PrepaidBankAccountSubType,
-		CashManagementBankAccountSubType, EBTBankAccountSubType,
-		CreditCardBankAccountSubType, AutoBankAccountSubType:
+	case CheckingBankAccountSubType,
+		SavingsBankAccountSubType,
+		HSABankAccountSubType,
+		CDBankAccountSubType,
+		MoneyMarketBankAccountSubType,
+		PayPalBankAccountSubType,
+		PrepaidBankAccountSubType,
+		CashManagementBankAccountSubType,
+		EBTBankAccountSubType,
+		CreditCardBankAccountSubType,
+		AutoBankAccountSubType:
 		return value
 	default:
 		return OtherBankAccountSubType
@@ -103,6 +111,7 @@ type BankAccount struct {
 	PlaidBankAccount   *PlaidBankAccount     `json:"plaidBankAccount,omitempty" pg:"rel:has-one"`
 	AvailableBalance   int64                 `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
 	CurrentBalance     int64                 `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
+	LimitBalance       int64                 `json:"limitBalance" pg:"limit_balance,notnull,use_zero"`
 	Mask               string                `json:"mask" pg:"mask"`
 	Name               string                `json:"name,omitempty" pg:"name,notnull"`
 	OriginalName       string                `json:"originalName" pg:"original_name,notnull"`

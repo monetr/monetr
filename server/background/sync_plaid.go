@@ -995,6 +995,16 @@ func (s *SyncPlaidJob) syncPlaidBankAccount(
 		bankAccount.CurrentBalance = input.GetBalances().GetCurrent()
 	}
 
+	if input.GetBalances().GetLimit() != bankAccount.LimitBalance {
+		changes = append(changes, SyncChange{
+			Field: "limitBalance",
+			Old:   bankAccount.LimitBalance,
+			New:   input.GetBalances().GetLimit(),
+		})
+		plaidBankAccount.LimitBalance = input.GetBalances().GetLimit()
+		bankAccount.LimitBalance = input.GetBalances().GetLimit()
+	}
+
 	if len(changes) > 0 {
 		bankAccount.LastUpdated = s.clock.Now().UTC()
 		s.log.WithContext(ctx).WithFields(logrus.Fields{

@@ -5,20 +5,44 @@ import parseDate from '@monetr/interface/util/parseDate';
 
 export type BankAccountStatus = 'unknown' | 'active' | 'inactive';
 
+export enum BankAccountType {
+	Depository = 'depository',
+	Credit     = 'credit',
+	Loan       = 'loan',
+	Investment = 'investment',
+	Other      = 'other',
+}
+
+export enum BankAccountSubType {
+  Checking       = 'checking',
+  Savings        = 'savings',
+  HSA            = 'hsa',
+  CD             = 'cd',
+  MoneyMarket    = 'money market',
+  PayPal         = 'paypal',
+  Prepaid        = 'prepaid',
+  CashManagement = 'cash management',
+  EBT            = 'ebt',
+  CreditCard     = 'credit card',
+  Auto           = 'auto',
+  Other          = 'other',
+}
+
 export default class BankAccount {
   bankAccountId: string;
   linkId: string;
   availableBalance: number;
   currentBalance: number;
+  limitBalance: number;
   mask?: string;
   name: string;
   originalName: string;
   status: BankAccountStatus;
-  accountType: string;
-  accountSubType: string;
+  accountType: BankAccountType;
+  accountSubType: BankAccountSubType;
   lastUpdated: Date;
   createdAt: Date;
-  createdBy: number;
+  createdBy: string;
 
   plaidBankAccount: PlaidBankAccount | null;
 
@@ -39,5 +63,9 @@ export default class BankAccount {
 
   getCurrentBalanceString() {
     return formatAmount(this.currentBalance);
+  }
+
+  getLimitBalanceString() {
+    return formatAmount(this.limitBalance);
   }
 }
