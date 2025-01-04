@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/monetr/monetr/compare/v1.0.1...v1.0.2) (2025-01-04)
+
+
+### Bug Fixes
+
+* **similar:** More transaction similarity tuning ([2efed3a](https://github.com/monetr/monetr/commit/2efed3a1e6ee513de724eb96141ac65e49bec256))
+
 ## [1.0.1](https://github.com/monetr/monetr/compare/v1.0.0...v1.0.1) (2025-01-03)
 
 
