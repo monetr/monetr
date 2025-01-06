@@ -1,6 +1,9 @@
 package recurring
 
 import (
+	"context"
+
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/calc"
 	"github.com/monetr/monetr/server/models"
 )
@@ -45,7 +48,10 @@ func (d *DBSCAN) GetDocumentByIndex(index int) (*Document, bool) {
 	return &d.dataset[index], true
 }
 
-func (d *DBSCAN) Calculate() []Cluster {
+func (d *DBSCAN) Calculate(ctx context.Context) []Cluster {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
 	// Initialize or reinitialize the clusters. We want to start with a clean slate.
 	d.clusters = make([]Cluster, 0)
 	// From the top, take one point at a time.

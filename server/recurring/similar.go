@@ -40,9 +40,9 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	datums := s.tfidf.GetDocuments()
+	datums := s.tfidf.GetDocuments(span.Context())
 	s.dbscan = NewDBSCAN(datums, Epsilon, MinNeighbors)
-	result := s.dbscan.Calculate()
+	result := s.dbscan.Calculate(span.Context())
 	similar := make([]models.TransactionCluster, len(result))
 
 	for i, cluster := range result {

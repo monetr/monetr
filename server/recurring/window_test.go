@@ -1,6 +1,7 @@
 package recurring
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -159,8 +160,8 @@ func TestWindowExperiment(t *testing.T) {
 			}
 		}
 
-		dbscan := NewDBSCAN(processor.GetDocuments(), 0.98, 1)
-		result := dbscan.Calculate()
+		dbscan := NewDBSCAN(processor.GetDocuments(context.Background()), 0.98, 1)
+		result := dbscan.Calculate(context.Background())
 		assert.NotEmpty(t, result)
 
 		type Hit struct {

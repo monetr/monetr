@@ -123,7 +123,10 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 
 	repo := repository.NewRepositoryFromSession(c.clock, "user_system", accountId, c.db)
 
-	log := c.log.WithContext(span.Context())
+	log := c.log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"accountId":     accountId,
+		"bankAccountId": bankAccountId,
+	})
 
 	clustering := recurring.NewSimilarTransactions_TFIDF_DBSCAN()
 

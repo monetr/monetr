@@ -1,6 +1,7 @@
 package recurring
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"path"
@@ -26,7 +27,7 @@ func BenchmarkPreProcessor(b *testing.B) {
 			processor.AddTransaction(&data[i])
 		}
 
-		_ = processor.GetDocuments()
+		_ = processor.GetDocuments(context.Background())
 	}
 }
 
@@ -42,13 +43,14 @@ func BenchmarkDBSCAN(b *testing.B) {
 		processor.AddTransaction(&data[i])
 	}
 
-	datums := processor.GetDocuments()
+	datums := processor.GetDocuments(context.Background())
 
 	dbscan := NewDBSCAN(datums, 0.98, 2)
+	ctx := context.Background()
 
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		_ = dbscan.Calculate()
+		_ = dbscan.Calculate(ctx)
 	}
 }
 
@@ -61,12 +63,12 @@ func TestPreProcessor(t *testing.T) {
 		processor.AddTransaction(&data[i])
 	}
 
-	datums := processor.GetDocuments()
+	datums := processor.GetDocuments(context.Background())
 
 	// First test with 0.4 and 3 was excellent!
 	// 1.25 is also very good
 	dbscan := NewDBSCAN(datums, 0.98, 1)
-	result := dbscan.Calculate()
+	result := dbscan.Calculate(context.Background())
 	assert.NotEmpty(t, result)
 	type Presentation struct {
 		ID        models.ID[models.Transaction] `json:"id"`
@@ -105,7 +107,7 @@ func TestParameters(t *testing.T) {
 		processor.AddTransaction(&data[i])
 	}
 
-	datums := processor.GetDocuments()
+	datums := processor.GetDocuments(context.Background())
 
 	epsilons := make([]float32, 0)
 	for i := float32(0.1); i < 2.0; i += 0.1 {
@@ -119,7 +121,7 @@ func TestParameters(t *testing.T) {
 	for _, epsilon := range epsilons {
 		for _, minPoint := range minPoints {
 			dbscan := NewDBSCAN(datums, 0.39, 2)
-			result := dbscan.Calculate()
+			result := dbscan.Calculate(context.Background())
 			assert.NotEmpty(t, result)
 			avgItemsPerCluster := 0
 			for _, cluster := range result {
