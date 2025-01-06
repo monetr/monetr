@@ -527,7 +527,8 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 			}
 			// The limit for credit cards is equal to the amount currrently available
 			// plus the inverse of any amount currently used.
-			limitBalance = availableBalance + -currentBalance
+			currentBalance = -1 * currentBalance
+			limitBalance = availableBalance + currentBalance
 		}
 	}
 
@@ -537,7 +538,7 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 	}
 
 	// TODO Log the previous value and the new one?
-	bankAccount.CurrentBalance = -currentBalance
+	bankAccount.CurrentBalance = currentBalance
 	bankAccount.AvailableBalance = availableBalance
 	bankAccount.LimitBalance = limitBalance
 
