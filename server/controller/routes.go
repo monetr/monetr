@@ -36,7 +36,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 		}))
 	}
 
-	api := app.Group(APIPath)
+	api := app.Group(APIPath, middleware.Gzip())
 
 	if c.Stats != nil {
 		app.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
