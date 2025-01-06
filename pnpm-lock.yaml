@@ -88,16 +88,16 @@ importers:
         version: 0.468.0(react@18.3.1)
       next:
         specifier: 15.1.3
-        version: 15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0)
+        version: 15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1)
       next-sitemap:
         specifier: 4.2.3
-        version: 4.2.3(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0))
+        version: 4.2.3(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1))
       nextra:
         specifier: 3.3.1
-        version: 3.3.1(@types/react@18.3.16)(acorn@8.14.0)(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.2)
+        version: 3.3.1(@types/react@18.3.16)(acorn@8.14.0)(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.2)
       nextra-theme-docs:
         specifier: 3.3.1
-        version: 3.3.1(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0))(nextra@3.3.1(@types/react@18.3.16)(acorn@8.14.0)(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.2))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 3.3.1(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1))(nextra@3.3.1(@types/react@18.3.16)(acorn@8.14.0)(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.2))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -139,8 +139,8 @@ importers:
         specifier: 8.4.49
         version: 8.4.49
       sass:
-        specifier: 1.83.0
-        version: 1.83.0
+        specifier: 1.83.1
+        version: 1.83.1
       spellchecker-cli:
         specifier: 7.0.0
         version: 7.0.0
@@ -161,7 +161,7 @@ importers:
         version: 8.4.7(@storybook/test@8.4.7(storybook@8.4.7(prettier@3.3.3)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.7(prettier@3.3.3))(typescript@5.7.2)
       react-email:
         specifier: 2.1.6
-        version: 2.1.6(@swc/helpers@0.5.15)(eslint@8.57.1)(sass@1.83.0)(ts-node@10.9.1(@swc/core@1.10.4(@swc/helpers@0.5.15))(@types/node@22.8.1)(typescript@5.7.2))
+        version: 2.1.6(@swc/helpers@0.5.15)(eslint@8.57.1)(sass@1.83.1)(ts-node@10.9.1(@swc/core@1.10.4(@swc/helpers@0.5.15))(@types/node@22.8.1)(typescript@5.7.2))
 
   interface:
     dependencies:
@@ -374,14 +374,14 @@ importers:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
       sass:
-        specifier: 1.83.0
-        version: 1.83.0
+        specifier: 1.83.1
+        version: 1.83.1
       sass-embedded-linux-arm64:
-        specifier: 1.83.0
-        version: 1.83.0
+        specifier: 1.83.1
+        version: 1.83.1
       sass-embedded-linux-x64:
-        specifier: 1.83.0
-        version: 1.83.0
+        specifier: 1.83.1
+        version: 1.83.1
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -453,14 +453,14 @@ importers:
         specifier: 8.4.49
         version: 8.4.49
       sass:
-        specifier: 1.83.0
-        version: 1.83.0
+        specifier: 1.83.1
+        version: 1.83.1
       sass-embedded-linux-arm64:
-        specifier: 1.83.0
-        version: 1.83.0
+        specifier: 1.83.1
+        version: 1.83.1
       sass-embedded-linux-x64:
-        specifier: 1.83.0
-        version: 1.83.0
+        specifier: 1.83.1
+        version: 1.83.1
       storybook-react-rsbuild:
         specifier: 0.1.7
         version: 0.1.7(@rsbuild/core@1.1.13)(@rspack/core@1.1.8(@swc/helpers@0.5.15))(@storybook/test@8.4.7(storybook@8.4.7(prettier@3.3.3)))(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.7(prettier@3.3.3))(typescript@5.7.2)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.19.11))
@@ -8323,6 +8323,12 @@ packages:
     cpu: [arm64]
     os: [linux]
 
+  sass-embedded-linux-arm64@1.83.1:
+    resolution: {integrity: sha512-HVIytzj8OO18fmBY6SVRIYErcJ+Nd9a5RNF6uArav/CqvwPLATlUV8dwqSyWQIzSsQUhDF/vFIlJIoNLKKzD3A==}
+    engines: {node: '>=14.0.0'}
+    cpu: [arm64]
+    os: [linux]
+
   sass-embedded-linux-arm@1.83.0:
     resolution: {integrity: sha512-baG9RYBJxUFmqwDNC9h9ZFElgJoyO3jgHGjzEZ1wHhIS9anpG+zZQvO8bHx3dBpKEImX+DBeLX+CxsFR9n81gQ==}
     engines: {node: '>=14.0.0'}
@@ -8377,6 +8383,12 @@ packages:
     cpu: [x64]
     os: [linux]
 
+  sass-embedded-linux-x64@1.83.1:
+    resolution: {integrity: sha512-swUsMHKqlEU9dZQ/I5WADDaXz+QkmJS27x/Oeh+oz41YgZ0ppKd0l4Vwjn0LgOQn+rxH1zLFv6xXDycvj68F/w==}
+    engines: {node: '>=14.0.0'}
+    cpu: [x64]
+    os: [linux]
+
   sass-embedded-win32-arm64@1.83.0:
     resolution: {integrity: sha512-iOHw/8/t2dlTW3lOFwG5eUbiwhEyGWawivlKWJ8lkXH7fjMpVx2VO9zCFAm8RvY9xOHJ9sf1L7g5bx3EnNP9BQ==}
     engines: {node: '>=14.0.0'}
@@ -8400,8 +8412,8 @@ packages:
     engines: {node: '>=16.0.0'}
     hasBin: true
 
-  sass@1.83.0:
-    resolution: {integrity: sha512-qsSxlayzoOjdvXMVLkzF84DJFc2HZEL/rFyGIKbbilYtAvlCxyuzUeff9LawTn4btVnLKg75Z8MMr1lxU1lfGw==}
+  sass@1.83.1:
+    resolution: {integrity: sha512-EVJbDaEs4Rr3F0glJzFSOvtg2/oy2V/YrGFPqPY24UqcLDWcI9ZY5sN+qyO3c/QCZwzgfirvhXvINiJCE/OLcA==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -17698,20 +17710,20 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  next-sitemap@4.2.3(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0)):
+  next-sitemap@4.2.3(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1)):
     dependencies:
       '@corex/deepmerge': 4.0.43
       '@next/env': 13.5.6
       fast-glob: 3.3.2
       minimist: 1.2.8
-      next: 15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0)
+      next: 15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1)
 
   next-themes@0.4.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  next@14.1.4(@babel/core@7.24.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0):
+  next@14.1.4(@babel/core@7.24.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1):
     dependencies:
       '@next/env': 14.1.4
       '@swc/helpers': 0.5.2
@@ -17732,12 +17744,12 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 14.1.4
       '@next/swc-win32-ia32-msvc': 14.1.4
       '@next/swc-win32-x64-msvc': 14.1.4
-      sass: 1.83.0
+      sass: 1.83.1
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0):
+  next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1):
     dependencies:
       '@next/env': 15.1.3
       '@swc/counter': 0.1.3
@@ -17757,27 +17769,27 @@ snapshots:
       '@next/swc-linux-x64-musl': 15.1.3
       '@next/swc-win32-arm64-msvc': 15.1.3
       '@next/swc-win32-x64-msvc': 15.1.3
-      sass: 1.83.0
+      sass: 1.83.1
       sharp: 0.33.5
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
 
-  nextra-theme-docs@3.3.1(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0))(nextra@3.3.1(@types/react@18.3.16)(acorn@8.14.0)(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.2))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  nextra-theme-docs@3.3.1(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1))(nextra@3.3.1(@types/react@18.3.16)(acorn@8.14.0)(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.2))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@headlessui/react': 2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx: 2.1.1
       escape-string-regexp: 5.0.0
       flexsearch: 0.7.43
-      next: 15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0)
+      next: 15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1)
       next-themes: 0.4.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      nextra: 3.3.1(@types/react@18.3.16)(acorn@8.14.0)(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.2)
+      nextra: 3.3.1(@types/react@18.3.16)(acorn@8.14.0)(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.2)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       scroll-into-view-if-needed: 3.1.0
       zod: 3.24.1
 
-  nextra@3.3.1(@types/react@18.3.16)(acorn@8.14.0)(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.2):
+  nextra@3.3.1(@types/react@18.3.16)(acorn@8.14.0)(next@15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.2):
     dependencies:
       '@formatjs/intl-localematcher': 0.5.8
       '@headlessui/react': 2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -17800,7 +17812,7 @@ snapshots:
       mdast-util-gfm: 3.0.0
       mdast-util-to-hast: 13.2.0
       negotiator: 1.0.0
-      next: 15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0)
+      next: 15.1.3(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1)
       p-limit: 6.1.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -18500,7 +18512,7 @@ snapshots:
       prop-types: 15.8.1
       react: 18.3.1
 
-  react-email@2.1.6(@swc/helpers@0.5.15)(eslint@8.57.1)(sass@1.83.0)(ts-node@10.9.1(@swc/core@1.10.4(@swc/helpers@0.5.15))(@types/node@22.8.1)(typescript@5.7.2)):
+  react-email@2.1.6(@swc/helpers@0.5.15)(eslint@8.57.1)(sass@1.83.1)(ts-node@10.9.1(@swc/core@1.10.4(@swc/helpers@0.5.15))(@types/node@22.8.1)(typescript@5.7.2)):
     dependencies:
       '@babel/core': 7.24.5
       '@babel/parser': 7.24.5
@@ -18527,7 +18539,7 @@ snapshots:
       glob: 10.3.4
       log-symbols: 4.1.0
       mime-types: 2.1.35
-      next: 14.1.4(@babel/core@7.24.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.0)
+      next: 14.1.4(@babel/core@7.24.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.83.1)
       normalize-path: 3.0.0
       ora: 5.4.1
       postcss: 8.4.38
@@ -19262,7 +19274,10 @@ snapshots:
   sass-embedded-darwin-x64@1.83.0:
     optional: true
 
-  sass-embedded-linux-arm64@1.83.0: {}
+  sass-embedded-linux-arm64@1.83.0:
+    optional: true
+
+  sass-embedded-linux-arm64@1.83.1: {}
 
   sass-embedded-linux-arm@1.83.0:
     optional: true
@@ -19288,7 +19303,10 @@ snapshots:
   sass-embedded-linux-riscv64@1.83.0:
     optional: true
 
-  sass-embedded-linux-x64@1.83.0: {}
+  sass-embedded-linux-x64@1.83.0:
+    optional: true
+
+  sass-embedded-linux-x64@1.83.1: {}
 
   sass-embedded-win32-arm64@1.83.0:
     optional: true
@@ -19331,7 +19349,7 @@ snapshots:
       sass-embedded-win32-ia32: 1.83.0
       sass-embedded-win32-x64: 1.83.0
 
-  sass@1.83.0:
+  sass@1.83.1:
     dependencies:
       chokidar: 4.0.1
       immutable: 5.0.2
