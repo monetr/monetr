@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.0.2](https://github.com/monetr/monetr/compare/v1.0.1...v1.0.2) (2025-01-06)
+
+
+### Features
+
+* **ofx:** Add basic support for credit cards ([#2288](https://github.com/monetr/monetr/issues/2288)) ([36c680f](https://github.com/monetr/monetr/commit/36c680f017ac7afdd7c42d09f34d5e1603fced42))
+
+
+### Dependencies
+
+* **ui:** update dependency next to v15.1.3 ([#2282](https://github.com/monetr/monetr/issues/2282)) ([9c77ac0](https://github.com/monetr/monetr/commit/9c77ac0878c15e1a479a3c2b6ce1645e8fea36f6))
+
+
+### Bug Fixes
+
+* **docs:** Improve documentation around external URL ([976a1ed](https://github.com/monetr/monetr/commit/976a1edc0ad0225c5bef49a413b53d02bb27d439))
+* **local:** Remove unused nginx config from local development ([36c680f](https://github.com/monetr/monetr/commit/36c680f017ac7afdd7c42d09f34d5e1603fced42))
+* **sentry:** Adding more observability to similar transactions ([d42c3cb](https://github.com/monetr/monetr/commit/d42c3cb2478591013febac6c6ea5f9e76bbe3bae))
+* **sentry:** Fixing round tripper observability implementation ([#2289](https://github.com/monetr/monetr/issues/2289)) ([906707e](https://github.com/monetr/monetr/commit/906707e1ffaf5320a8ca3e2614369e9d17fd5e5b))
+* **similar:** More transaction similarity tuning ([2efed3a](https://github.com/monetr/monetr/commit/2efed3a1e6ee513de724eb96141ac65e49bec256))
+
+
+### Miscellaneous
+
+* release 1.0.2 ([18f6da0](https://github.com/monetr/monetr/commit/18f6da0381acc768beef7aa155313d8d1f3941fa))
+
 ## [1.0.1](https://github.com/monetr/monetr/compare/v1.0.0...v1.0.1) (2025-01-03)
 
 
