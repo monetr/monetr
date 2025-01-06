@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/monetr/monetr/compare/v1.0.2...v1.0.3) (2025-01-06)
+
+
+### Bug Fixes
+
+* **ofx:** Fixed current balance being inverted ([d00f035](https://github.com/monetr/monetr/commit/d00f0350a34cd1548357481cd91aebb91cc788f7))
+
 ## [1.0.2](https://github.com/monetr/monetr/compare/v1.0.1...v1.0.2) (2025-01-06)
 
 
