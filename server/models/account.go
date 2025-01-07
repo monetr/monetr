@@ -117,6 +117,12 @@ func (a *Account) HasSubscription() bool {
 	}
 }
 
+// IsTrialing returns true if the trial is the primary active form of access for
+// monetr. For example, if a user signs up for monetr but then subscribes
+// shortly after starting. Their trial will still be active, but they will not
+// be considered "trialing" because their subscription is active. They are
+// considered trialing only when the trial end timestamp is in the future
+// relative to the timestamp provided and there is not a subscription.
 func (a *Account) IsTrialing(now time.Time) bool {
 	// We are in a trial state when we do not have a subscription and the trial
 	// ends at date is in the future.
