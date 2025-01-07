@@ -75,14 +75,8 @@ export function useAfterCheckout(): (_checkoutSessionId: string) => Promise<Afte
   const mutation = useMutation(
     queryCheckoutSession,
     {
-      onSuccess: (result: AfterCheckoutResult) => Promise.all([
-        queryClient.setQueriesData(
-          ['/users/me'],
-          (previous: Partial<AuthenticationWrapper>) => ({
-            ...previous,
-            isActive: result.isActive,
-          })
-        ),
+      onSuccess: () => Promise.all([
+        queryClient.invalidateQueries(['/users/me']),
       ]),
     },
   );
