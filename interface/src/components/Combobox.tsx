@@ -126,7 +126,7 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
               >
                 <Item currentValue={ props.value } option={ option } />
               </CommandItem>
-            ))}
+            )) }
           </CommandGroup>
         </CommandList>
       </Command>

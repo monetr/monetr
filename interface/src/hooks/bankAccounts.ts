@@ -2,7 +2,7 @@ import { useMatch } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
 import { useLinks } from '@monetr/interface/hooks/links';
-import BankAccount from '@monetr/interface/models/BankAccount';
+import BankAccount, { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import request from '@monetr/interface/util/request';
 
 export function useBankAccounts(): UseQueryResult<Array<BankAccount>> {
@@ -19,8 +19,8 @@ export interface CreateBankAccountRequest {
   mask?: string;
   availableBalance: number;
   currentBalance: number;
-  accountType: string;
-  accountSubType: string;
+  accountType: BankAccountType;
+  accountSubType: BankAccountSubType;
 }
 
 export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest) => Promise<BankAccount> {
