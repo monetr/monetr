@@ -66,7 +66,7 @@ function NewBankAccountModal(): JSX.Element {
         data-testid='new-bank-account-modal'
       >
         <div className='flex flex-col'>
-          <MSpan className='font-bold text-xl mb-2'>
+          <MSpan weight='bold' size='xl' className='mb-2'>
             Create A New Bank Account
           </MSpan>
           <MTextField
