@@ -14,6 +14,7 @@ import { useViewContext } from '@monetr/interface/components/ViewManager';
 import { useCreateBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import { useCreateLink } from '@monetr/interface/hooks/links';
+import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { friendlyToAmount } from '@monetr/interface/util/amounts';
 
@@ -51,8 +52,8 @@ export default function ManualLinkSetupIncome(): JSX.Element {
         name: data['accountName'],
         availableBalance: friendlyToAmount(data['startingBalance']),
         currentBalance: friendlyToAmount(data['startingBalance']),
-        accountType: 'depository',
-        accountSubType: 'checking',
+        accountType: BankAccountType.Depository,
+        accountSubType: BankAccountSubType.Checking,
       }))
       .then(bankAccount => createFundingSchedule(new FundingSchedule({
         bankAccountId: bankAccount.bankAccountId,

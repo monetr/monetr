@@ -33,10 +33,8 @@ func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ..
 		"accountId": r.AccountId(),
 	}
 
-	now := r.clock.Now().UTC()
 	for i := range bankAccounts {
 		bankAccounts[i].AccountId = r.AccountId()
-		bankAccounts[i].CreatedAt = now
 		if bankAccounts[i].Status == "" {
 			bankAccounts[i].Status = ActiveBankAccountStatus
 		}
