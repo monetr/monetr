@@ -243,3 +243,52 @@ func TestGetAfterCheckout(t *testing.T) {
 		}
 	})
 }
+
+func TestGetBillingPortal(t *testing.T) {
+	t.Run("cannot create portal without subscription", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		stripeMock := mock_stripe.NewMockStripeHelper(t)
+
+		stripeMock.MockStripeCreateCustomerSuccess(t)
+		stripeMock.MockNewCheckoutSession(t)
+		stripeMock.MockGetCheckoutSession(t)
+		stripeMock.MockGetSubscription(t)
+
+		conf := NewTestApplicationConfig(t)
+		conf.Stripe.Enabled = true
+		conf.Stripe.APIKey = gofakeit.UUID()
+		conf.Stripe.FreeTrialDays = 30
+		conf.Stripe.InitialPlan = &config.Plan{
+			StripePriceId: mock_stripe.FakeStripePriceId(t),
+		}
+
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		token := GivenIHaveToken(t, e)
+
+		stripeMock.AssertNCustomersCreated(t, 0)
+
+		{ // Make sure that initially the customer's subscription is not present or active.
+			result := e.GET("/api/users/me").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			result.Status(http.StatusOK)
+			// When we initially start we are still in a trial status.
+			result.JSON().Path("$.isTrialing").Boolean().IsTrue()
+			result.JSON().Path("$.isActive").Boolean().IsTrue()
+			result.JSON().Path("$.hasSubscription").Boolean().IsFalse()
+		}
+
+		{ // Create a billing portal session
+			result := e.GET("/api/billing/portal").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			result.Status(http.StatusBadRequest)
+			result.JSON().Path("$.error").String().IsEqual("Account does not have a subscription")
+		}
+	})
+}

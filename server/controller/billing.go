@@ -101,7 +101,7 @@ func (c *Controller) getBillingPortal(ctx echo.Context) error {
 
 	if err != nil {
 		if errors.Cause(err) == billing.ErrMissingSubscription {
-			return c.badRequest(ctx, "account does not have a subscription")
+			return c.badRequest(ctx, "Account does not have a subscription")
 		}
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to create new stripe portal session")
 	}
