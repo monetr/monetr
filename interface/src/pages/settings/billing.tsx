@@ -2,11 +2,11 @@ import React, { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AccessTimeOutlined } from '@mui/icons-material';
 import { AxiosResponse } from 'axios';
-import { format, isPast, isThisYear } from 'date-fns';
+import { format, isFuture, isThisYear } from 'date-fns';
 import { useSnackbar } from 'notistack';
 
+import { Button } from '@monetr/interface/components/Button';
 import MBadge from '@monetr/interface/components/MBadge';
-import { MBaseButton } from '@monetr/interface/components/MButton';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
@@ -59,53 +59,49 @@ export default function SettingsBilling(): JSX.Element {
       </div>
       <MDivider />
 
-      <MBaseButton
+      <Button
         className='ml-auto mt-4 max-w-xs'
-        color='primary'
+        variant='primary'
         disabled={ loading }
         onClick={ handleManageSubscription }
+        data-testid='billing-subscribe'
       >
         { manageSubscriptionText }
-      </MBaseButton>
+      </Button>
     </div>
   );
 }
 
 function SubscriptionStatusBadge(): JSX.Element {
-  const { result: { hasSubscription, trialingUntil } } = useAuthenticationSink();
+  const { result: { isActive, hasSubscription, trialingUntil } } = useAuthenticationSink();
 
-  if (hasSubscription) {
+  // If they have a subscription and it is active then show active.
+  if (hasSubscription && isActive) {
     return (
-      <MBadge className='bg-green-600'>
+      <MBadge className='bg-green-600' data-testid='billing-subscription-active'>
         Active
       </MBadge>
     );
   }
 
-  if (trialingUntil && isPast(trialingUntil)) {
-    return (
-      <MBadge className='bg-red-600'>
-        Trial Expired
-      </MBadge>
-    );
-  }
-
-  if (trialingUntil) {
+  // If they have a trial end date that is in the future then they are trialing.
+  if (trialingUntil && isFuture(trialingUntil)) {
     const trialEndDate = isThisYear(trialingUntil) ?
       format(trialingUntil, 'MMMM do') :
       format(trialingUntil, 'MMMM do, yyyy');
 
     return (
-      <MBadge className='bg-yellow-600'>
+      <MBadge className='bg-yellow-600' data-testid='billing-subscription-trialing'>
         <AccessTimeOutlined />
         Trialing Until { trialEndDate }
       </MBadge>
     );
   }
 
+  // Anything else is considered expired.
   return (
-    <MBadge className='bg-pink-600'>
-      Unknown
+    <MBadge className='bg-red-600' data-testid='billing-subscription-expired'>
+      Expired
     </MBadge>
   );
 }
