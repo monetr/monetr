@@ -56,12 +56,6 @@ func (b *baseBilling) CreateCheckout(
 		return nil, errors.Wrap(err, "cannot determine if account subscription is active")
 	}
 
-	if account.IsSubscriptionActive(b.clock.Now()) {
-		// If the account's subscription is already active then we cannot use the
-		// checkout session. They instead need to create a billing portal.
-		return nil, errors.WithStack(ErrSubscriptionAlreadyActive)
-	}
-
 	if account.HasSubscription() {
 		// Even if the subscription isn't active, if they have a subscription then
 		// they need to use the billing portal instead.

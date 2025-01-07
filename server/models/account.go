@@ -118,5 +118,9 @@ func (a *Account) HasSubscription() bool {
 }
 
 func (a *Account) IsTrialing(now time.Time) bool {
-	return a.TrialEndsAt != nil && a.TrialEndsAt.After(now)
+	// We are in a trial state when we do not have a subscription and the trial
+	// ends at date is in the future.
+	return !a.HasSubscription() &&
+		a.TrialEndsAt != nil &&
+		a.TrialEndsAt.After(now)
 }
