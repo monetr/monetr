@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
@@ -34,10 +34,10 @@ function NewBankAccountModal(): JSX.Element {
   const navigate = useNavigate();
   const ref = useRef<MModalRef>(null);
 
-  async function submit(
+  const submit = useCallback(async (
     values: NewBankAccountValues,
     helper: FormikHelpers<NewBankAccountValues>,
-  ): Promise<void> {
+  ): Promise<void> => {
     helper.setSubmitting(true);
     return await createBankAccount({
       linkId: selectedBankAccount.linkId,
@@ -55,8 +55,7 @@ function NewBankAccountModal(): JSX.Element {
         disableWindowBlurListener: true,
       }))
       .finally(() => helper.setSubmitting(false));
-    ;
-  }
+  }, [createBankAccount, selectedBankAccount.linkId, navigate, modal, enqueueSnackbar]);
 
   return (
     <MModal open={ modal.visible } ref={ ref }>
@@ -86,7 +85,7 @@ function NewBankAccountModal(): JSX.Element {
             name='balance'
             label='Initial Balance'
             required
-            allowNegative={ true }
+            allowNegative
           />
         </div>
         <div className='flex justify-end gap-2'>
@@ -107,5 +106,5 @@ const newBankAccountModal = NiceModal.create(NewBankAccountModal);
 export default newBankAccountModal;
 
 export function showNewBankAccountModal(): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof newBankAccountModal>, {}>(newBankAccountModal);
+  return NiceModal.show<void, ExtractProps<typeof newBankAccountModal>, Object>(newBankAccountModal);
 }
