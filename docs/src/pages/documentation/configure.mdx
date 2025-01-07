@@ -48,6 +48,79 @@ variables:
 | `MONETR_ENVIRONMENT`   | `environment`     |
 | `MONETR_ALLOW_SIGN_UP` | `allowSignUp`     |
 
+### Example Config File
+
+Below is a complete config file example with default values set or with values commented out.
+
+```yaml filename="config.yaml"
+environment: ""
+allowSignUp: true
+
+email:
+  enabled: false
+  domain: "" # Does not need to match your `externalUrl` domain.
+  verification:
+    enabled: false
+    tokenLifetime: 10m
+  forgotPassword:
+    enabled: false
+    tokenLifetime: 10m
+  smtp:
+    identity: "..." # SMTP Identity
+    username: "..." # SMTP Username
+    password: "..." # SMTP Password or app password depending on provider
+    host: "..."     # Domain name of the SMTP server, no protocol or port specified
+    port: 587       # Use the port specified by your provider, could be 587, 465 or 25
+keyManagement:
+  # Default to plaintext, if you want to encrypt secrets you need to look at the key
+  # management configuration docs.
+  provider: "plaintext"
+links:
+  # Max number of Plaid links an account can have, `0` means unlimited Plaid links.
+  maxNumberOfLinks: 0
+logging:
+  level: "debug"
+  format: "text" # Can also be set to JSON depending on your preferences
+plaid:
+  enabled: true
+  # # Uncomment this section if you do not want to provide credentials via environment variables.
+  # clientId: ""
+  # clientSecret: ""
+  # environment: "https://sandbox.plaid.com" # Set to the production URL if you have prod API keys.
+  webhooksEnabled: false
+  # # Uncomment with the domain you want Plaid to send webhooks to, only provide the domain name.
+  # # The path cannot be customized and plaid requires HTTPS to be available for webhooks.
+  # webhooksDomain: ""
+postgres:
+  # # Uncomment this if you are not using the included PostgreSQL server in the docker compose and
+  # # Specify your own address for PostgreSQL.
+  # address: ""
+  port: 5432
+  # # Similar to address, uncomment this if you are want to customize the credentials used for
+  # # connecting to PostgreSQL.
+  # username: ""
+  # password: ""
+  # database: ""
+  insecureSkipVerify: false
+security:
+  # Only customize this if you need to load a key from a different location.
+  privateKey: "/etc/monetr/ed25519.key"
+server:
+  # YOU NEED TO CONFIGURE THIS IF YOU ARE USING SOMETHING OTHER THAN LOCALHOST TO ACCESS MONETR
+  # This config determines what URL monetr sets cookies on as well as what URL is used for links
+  # sent via email. Misconfiguring this URL may result in not being able to login to monetr.
+  externalUrl: "http://localhost:4000"
+storage:
+  # Required for file uploads to work, if you want do not need file uploads then this can be
+  # disabled.
+  enabled: true
+  provider: "filesystem"
+  filesystem:
+    basePath: "/etc/monetr/storage"
+```
+
+## Sub-Configurations
+
 Each of the sub-configurations noted above are documented in more detail in the following guides:
 
 <Cards.Card
