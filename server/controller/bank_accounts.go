@@ -56,7 +56,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	}
 
 	if bankAccount.LinkId.IsZero() {
-		return c.badRequest(ctx, "link ID must be provided")
+		return c.badRequest(ctx, "Link ID must be provided")
 	}
 
 	var err error
@@ -66,10 +66,14 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 		return err
 	}
 
-	// TODO Should mask be enforced to have a max of 4 characters?
 	bankAccount.Mask, err = c.cleanString(ctx, "Mask", bankAccount.Mask)
 	if err != nil {
 		return err
+	}
+
+	// TODO Should mask be enforced to be numeric only?
+	if len(bankAccount.Mask) > 4 {
+		return c.badRequest(ctx, "Mask cannot be more than 4 characters")
 	}
 
 	bankAccount.Status = ParseBankAccountStatus(bankAccount.Status)
@@ -78,7 +82,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	bankAccount.LastUpdated = c.Clock.Now().UTC()
 
 	if bankAccount.Name == "" {
-		return c.badRequest(ctx, "bank account must have a name")
+		return c.badRequest(ctx, "Bank account must have a name")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -87,15 +91,15 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	// management. If the link they specified does not, then a bank account cannot be created for this link.
 	isManual, err := repo.GetLinkIsManual(c.getContext(ctx), bankAccount.LinkId)
 	if err != nil {
-		return c.wrapPgError(ctx, err, "could not validate link is manual")
+		return c.wrapPgError(ctx, err, "Could not validate link is manual")
 	}
 
 	if !isManual {
-		return c.badRequest(ctx, "cannot create a bank account for a non-manual link")
+		return c.badRequest(ctx, "Cannot create a bank account for a non-manual link")
 	}
 
 	if err := repo.CreateBankAccounts(c.getContext(ctx), &bankAccount); err != nil {
-		return c.wrapPgError(ctx, err, "could not create bank account")
+		return c.wrapPgError(ctx, err, "Could not create bank account")
 	}
 
 	return ctx.JSON(http.StatusOK, bankAccount)
