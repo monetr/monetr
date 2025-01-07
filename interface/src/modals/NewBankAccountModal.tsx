@@ -55,7 +55,7 @@ function NewBankAccountModal(): JSX.Element {
         disableWindowBlurListener: true,
       }))
       .finally(() => helper.setSubmitting(false));
-  }, [createBankAccount, selectedBankAccount.linkId, navigate, modal, enqueueSnackbar]);
+  }, [createBankAccount, selectedBankAccount, navigate, modal, enqueueSnackbar]);
 
   return (
     <MModal open={ modal.visible } ref={ ref }>
