@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.1.0](https://github.com/monetr/monetr/compare/v1.0.3...v1.1.0) (2025-01-08)
+
+
+### Features
+
+* **billing:** Allow users to subscribe before their trial ends ([#2301](https://github.com/monetr/monetr/issues/2301)) ([41814b3](https://github.com/monetr/monetr/commit/41814b38a64dded93c6237ac1329e7cb3bd45636))
+* **manual:** Adding support for additional manual accounts on one link ([#2299](https://github.com/monetr/monetr/issues/2299)) ([b8c9b56](https://github.com/monetr/monetr/commit/b8c9b569185aeb00402f8103fd26067226d477e1))
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.31.1 ([#2294](https://github.com/monetr/monetr/issues/2294)) ([62f7fc2](https://github.com/monetr/monetr/commit/62f7fc23ed23ec8c71a742693f12fad9ff2a500b))
+* **api:** update module golang.org/x/crypto to v0.32.0 ([#2295](https://github.com/monetr/monetr/issues/2295)) ([9a3e10f](https://github.com/monetr/monetr/commit/9a3e10f701b1f8c93a1991ea7890fae13f51a22c))
+* **api:** update module golang.org/x/net to v0.34.0 ([#2296](https://github.com/monetr/monetr/issues/2296)) ([dff339e](https://github.com/monetr/monetr/commit/dff339eec14d9b6963bc11e04e135cd98718394a))
+* **ui:** update rsbuild ([#2292](https://github.com/monetr/monetr/issues/2292)) ([687cf3e](https://github.com/monetr/monetr/commit/687cf3eb2d133e845b98d46aefd6db29ee1da161))
+* **ui:** update sass to v1.83.1 ([#2293](https://github.com/monetr/monetr/issues/2293)) ([6821aa9](https://github.com/monetr/monetr/commit/6821aa91e54d6a5a4037e334858e644792f3a236))
+
+
+### Miscellaneous
+
+* **api:** Enable GZIP compression for API responses ([649a864](https://github.com/monetr/monetr/commit/649a864e4a322dc091f30d2951f46acde59a6559))
+
 ## [1.0.3](https://github.com/monetr/monetr/compare/v1.0.2...v1.0.3) (2025-01-06)
 
 
