@@ -10,12 +10,14 @@ import (
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/mock_stripe"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/robfig/cron"
 	"github.com/stretchr/testify/assert"
+	"github.com/stripe/stripe-go/v81"
 	"go.uber.org/mock/gomock"
 )
 
@@ -90,6 +92,119 @@ func TestNotificationTrialExpiryHandler_EnqueueTriggeredJob(t *testing.T) {
 		// notification will have already been sent.
 		err = handler.EnqueueTriggeredJob(context.Background(), enqueuer)
 		assert.NoError(t, err)
+	})
+
+	t.Run("user subscribed before trial ended", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		login, _ := fixtures.GivenIHaveLogin(t, clock)
+		user := fixtures.GivenIHaveATrialingAccount(t, clock, login)
+		config := config.Configuration{}
+		email := mockgen.NewMockEmailCommunication(ctrl)
+		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+
+		handler := background.NewNotificationTrialExpiryHandler(
+			log,
+			db,
+			clock,
+			config,
+			email,
+		)
+
+		assert.NotNil(t, user.Account, "need account to force trial scenario")
+		assert.NotNil(t, user.Account.TrialEndsAt, "trial ends at date must be present")
+		assert.Nil(t, user.Account.TrialExpiryNotificationSentAt, "trial notification email should be unsent")
+
+		clock.Add(24 * time.Hour)
+
+		// After 24 hours the user decided to subscribe early. Update the account.
+		status := stripe.SubscriptionStatusActive
+		user.Account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().AddDate(0, 0, 30))
+		user.Account.SubscriptionStatus = &status
+		user.Account.StripeCustomerId = myownsanity.StringP(mock_stripe.FakeStripeCustomerId(t))
+		user.Account.StripeSubscriptionId = myownsanity.StringP(mock_stripe.FakeStripeSubscriptionId(t))
+		testutils.MustDBUpdate(t, user.Account)
+
+		// First time, no notifications should be enqueued and we should not have an
+		// error.
+		err := handler.EnqueueTriggeredJob(context.Background(), enqueuer)
+		assert.NoError(t, err)
+
+		// Make sure that we don't send an email because the user is already
+		// subscribed.
+		enqueuer.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				gomock.Eq(background.NotificationTrialExpiry),
+				testutils.NewGenericMatcher(func(args background.NotificationTrialExpiryArguments) bool {
+					return assert.EqualValues(t, user.AccountId, args.AccountId)
+				}),
+			).
+			Return(nil).
+			Times(0)
+	})
+
+	t.Run("user subscribed after trial ended", func(t *testing.T) {
+		// This test technically should prove a behavior that should never happen.
+		// When a user has subscribed _after_ their trial has ended, but we haven't
+		// sent them a trial notification email. This way we don't send dumb emails
+		// if the job is dead for a while or something.
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		login, _ := fixtures.GivenIHaveLogin(t, clock)
+		user := fixtures.GivenIHaveATrialingAccount(t, clock, login)
+		config := config.Configuration{}
+		email := mockgen.NewMockEmailCommunication(ctrl)
+		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+
+		handler := background.NewNotificationTrialExpiryHandler(
+			log,
+			db,
+			clock,
+			config,
+			email,
+		)
+
+		assert.NotNil(t, user.Account, "need account to force trial scenario")
+		assert.NotNil(t, user.Account.TrialEndsAt, "trial ends at date must be present")
+		assert.Nil(t, user.Account.TrialExpiryNotificationSentAt, "trial notification email should be unsent")
+
+		// Move us 90 days into the future, well after the trial has ended.
+		clock.Add(90 * 24 * time.Hour)
+
+		// Setup the user as subscribed at the 90 day mark.
+		status := stripe.SubscriptionStatusActive
+		user.Account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().AddDate(0, 0, 30))
+		user.Account.SubscriptionStatus = &status
+		user.Account.StripeCustomerId = myownsanity.StringP(mock_stripe.FakeStripeCustomerId(t))
+		user.Account.StripeSubscriptionId = myownsanity.StringP(mock_stripe.FakeStripeSubscriptionId(t))
+		testutils.MustDBUpdate(t, user.Account)
+
+		// First time, no notifications should be enqueued and we should not have an
+		// error.
+		err := handler.EnqueueTriggeredJob(context.Background(), enqueuer)
+		assert.NoError(t, err)
+
+		// Make sure that we don't send an email because the user is already
+		// subscribed.
+		enqueuer.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				gomock.Eq(background.NotificationTrialExpiry),
+				testutils.NewGenericMatcher(func(args background.NotificationTrialExpiryArguments) bool {
+					return assert.EqualValues(t, user.AccountId, args.AccountId)
+				}),
+			).
+			Return(nil).
+			Times(0)
 	})
 }
 

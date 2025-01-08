@@ -1,40 +1,37 @@
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AccessTimeOutlined } from '@mui/icons-material';
-import { format, isPast, isThisYear } from 'date-fns';
+import { AxiosResponse } from 'axios';
+import { format, isFuture, isThisYear } from 'date-fns';
 import { useSnackbar } from 'notistack';
 
+import { Button } from '@monetr/interface/components/Button';
 import MBadge from '@monetr/interface/components/MBadge';
-import { MBaseButton } from '@monetr/interface/components/MButton';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
 
 export default function SettingsBilling(): JSX.Element {
-  const { result: { trialingUntil } } = useAuthenticationSink();
-
-  return (
-    <div className='w-full flex flex-col p-4 max-w-xl'>
-      <MSpan size='2xl' weight='bold' color='emphasis' className='mb-4'>
-        Billing
-      </MSpan>
-      <MDivider />
-
-      <TrialingRow trialingUntil={ trialingUntil } />
-      <ActiveSubscriptionRow />
-    </div>
-  );
-}
-
-function ActiveSubscriptionRow(): JSX.Element {
+  const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const { result: { hasSubscription } } = useAuthenticationSink();
-  const handleManageSubscription = useCallback(() => {
+  const handleManageSubscription = useCallback(async () => {
     setLoading(true);
-    // If the customer has a subscription then we want to just manage it. This will allow a customer to fix a
-    // subscription for a card that has failed payment or something similar.
-    request().get('/billing/portal')
+    let promise: Promise<AxiosResponse<{ url: string }>>;
+    if (!hasSubscription) {
+      promise = request().post('/billing/create_checkout', {
+        // If the user backs out of the stripe checkout then return them to the current URL.
+        cancelPath: location.pathname,
+      });
+    } else {
+      // If the customer has a subscription then we want to just manage it. This will allow a customer to fix a
+      // subscription for a card that has failed payment or something similar.
+      promise = request().get('/billing/portal');
+    }
+
+    await promise
       .then(result => window.location.assign(result.data.url))
       .catch(error => {
         setLoading(false);
@@ -43,67 +40,69 @@ function ActiveSubscriptionRow(): JSX.Element {
           disableWindowBlurListener: true,
         });
       });
-  }, [enqueueSnackbar]);
+  }, [enqueueSnackbar, hasSubscription, location]);
 
-  if (!hasSubscription) {
-    return null;
-  }
+  const manageSubscriptionText = hasSubscription ? 'Manage Your Subscription' : 'Subscribe Early';
 
   return (
-    <Fragment>
+    <div className='w-full flex flex-col p-4 max-w-xl'>
+      <MSpan size='2xl' weight='bold' color='emphasis' className='mb-4'>
+        Billing
+      </MSpan>
+      <MDivider />
+
       <div className='flex justify-between py-4'>
         <MSpan>
           Subscription Status
         </MSpan>
-        <MBadge className='bg-green-600'>
-          Active
-        </MBadge>
+        <SubscriptionStatusBadge />
       </div>
       <MDivider />
 
-      <MBaseButton
+      <Button
         className='ml-auto mt-4 max-w-xs'
-        color='primary'
+        variant='primary'
         disabled={ loading }
         onClick={ handleManageSubscription }
+        data-testid='billing-subscribe'
       >
-        Manage Your Subscription
-      </MBaseButton>
-    </Fragment>
+        { manageSubscriptionText }
+      </Button>
+    </div>
   );
 }
 
-interface TrialingRowProps {
-  trialingUntil: Date | null;
-}
+function SubscriptionStatusBadge(): JSX.Element {
+  const { result: { isActive, hasSubscription, trialingUntil } } = useAuthenticationSink();
 
-function TrialingRow(props: TrialingRowProps): JSX.Element {
-  if (!props.trialingUntil || isPast(props.trialingUntil)) {
-    return null;
+  // If they have a subscription and it is active then show active.
+  if (hasSubscription && isActive) {
+    return (
+      <MBadge className='bg-green-600' data-testid='billing-subscription-active'>
+        Active
+      </MBadge>
+    );
   }
 
-  const trialEndDate = isThisYear(props.trialingUntil) ?
-    format(props.trialingUntil, 'MMMM do') :
-    format(props.trialingUntil, 'MMMM do, yyyy');
+  // If they have a trial end date that is in the future then they are trialing.
+  if (trialingUntil && isFuture(trialingUntil)) {
+    const trialEndDate = isThisYear(trialingUntil) ?
+      format(trialingUntil, 'MMMM do') :
+      format(trialingUntil, 'MMMM do, yyyy');
 
+    return (
+      <MBadge className='bg-yellow-600' data-testid='billing-subscription-trialing'>
+        <AccessTimeOutlined />
+        Trialing Until { trialEndDate }
+      </MBadge>
+    );
+  }
+
+  // Anything else is considered expired.
   return (
-    <Fragment>
-      <div className='flex justify-between py-4'>
-        <MSpan>
-          Subscription Status
-        </MSpan>
-        <MBadge className='bg-yellow-600'>
-          <AccessTimeOutlined />
-          Trialing Until { trialEndDate }
-        </MBadge>
-      </div>
-      <MDivider />
-      <div className='flex justify-between py-4'>
-        <MSpan>
-          You can upgrade to a paid subscription at the end of your trial.
-        </MSpan>
-      </div>
-      <MDivider />
-    </Fragment>
+    <MBadge className='bg-red-600' data-testid='billing-subscription-expired'>
+      Expired
+    </MBadge>
   );
 }
+

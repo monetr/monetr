@@ -85,6 +85,8 @@ func (h *NotificationTrialExpiryHandler) EnqueueTriggeredJob(
 	err := h.db.ModelContext(ctx, &accounts).
 		Where(`"account"."trial_expiry_notification_sent_at" IS NULL`).
 		Where(`"account"."trial_ends_at" < ?`, cutoff).
+		// Make sure to exclude users who have subscribed before their trial ends.
+		Where(`"account"."subscription_active_until" IS NULL`).
 		Select(&accounts)
 	if err != nil {
 		return errors.Wrap(err, "failed to query accounts who need a trial expiry notification")
