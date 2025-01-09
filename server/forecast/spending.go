@@ -118,7 +118,25 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(
 		// this. But if it does happen that means there has been a regression. Send
 		// something to sentry with some contextual data so it can be diagnosted.
 		if !event.Date.After(afterDate) {
-			ilog.Error("calculated a spending event that does not come after the after date specified! there is a bug somewhere!!!")
+			// Don't log the name of the spending object, its nobodies business.
+			s.spending.Name = "[REDACTED]"
+			ilog.WithFields(logrus.Fields{
+				"bug": true,
+				"debug": logrus.Fields{
+					"badEvent":      event,
+					"previousEvent": events[i-1],
+					"spending":      s.spending,
+					"afterDate":     afterDate,
+					"timezone":      timezone,
+					"allocation":    allocation,
+					"i":             i,
+					"count":         len(events),
+					"start":         start,
+					"end":           end,
+				},
+			}).Error("calculated a spending event that does not come after the after date specified! there is a bug somewhere!!!")
+
+			// This might not make it into sentry because of sampling :(
 			crumbs.IndicateBug(ctx, "Calculated a spending event that does not come after the after date specified", map[string]interface{}{
 				"spending":   s.spending,
 				"afterDate":  afterDate,
