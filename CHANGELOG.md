@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/monetr/monetr/compare/v1.1.0...v1.1.1) (2025-01-10)
+
+
+### Bug Fixes
+
+* **forecast:** Adding debug information to forecasting code ([fe08796](https://github.com/monetr/monetr/commit/fe08796b6dab9c706a701acf2f8ffaf73fe39133))
+* **trial:** Fixed trial expiry notify for unverified emails ([baa2e87](https://github.com/monetr/monetr/commit/baa2e870ffdeabc4fd5ec172b1d9104d18130d41))
+
 ## [1.1.0](https://github.com/monetr/monetr/compare/v1.0.3...v1.1.0) (2025-01-08)
 
 
