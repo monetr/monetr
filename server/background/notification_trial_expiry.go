@@ -197,8 +197,18 @@ func (j *NotificationTrialExpiryJob) Run(ctx context.Context) error {
 		return err
 	}
 
+	log = log.WithFields(logrus.Fields{
+		"loginId": owner.LoginId,
+		"userId":  owner.UserId,
+	})
+
 	if owner.Account.TrialExpiryNotificationSentAt != nil {
 		log.Debug("notification has already been sent for account")
+		return nil
+	}
+
+	if owner.Login.EmailVerifiedAt == nil {
+		log.Info("skipping trial expiry notification, owner has not verified their email address")
 		return nil
 	}
 
