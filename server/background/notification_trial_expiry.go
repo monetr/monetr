@@ -207,7 +207,7 @@ func (j *NotificationTrialExpiryJob) Run(ctx context.Context) error {
 		return nil
 	}
 
-	if owner.Login.EmailVerifiedAt == nil {
+	if j.config.Email.Verification.Enabled && owner.Login.EmailVerifiedAt == nil {
 		log.Info("skipping trial expiry notification, owner has not verified their email address")
 		return nil
 	}
