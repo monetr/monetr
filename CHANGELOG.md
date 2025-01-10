@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/monetr/monetr/compare/v1.1.1...v1.1.2) (2025-01-10)
+
+
+### Bug Fixes
+
+* **trial:** Fix notification for trial expiry ([d32b4e0](https://github.com/monetr/monetr/commit/d32b4e0f6ab7f8668e377217bd5a9ef5007c165b))
+
 ## [1.1.1](https://github.com/monetr/monetr/compare/v1.1.0...v1.1.1) (2025-01-10)
 
 
