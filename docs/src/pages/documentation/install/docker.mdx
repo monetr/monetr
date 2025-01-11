@@ -57,6 +57,40 @@ git clone https://github.com/monetr/monetr.git
 cd monetr
 ```
 
+### Configure The Server
+
+The provided compose file includes some defaults that should be sufficient to get monetr started and to try out manual
+budgeting. But if you want to change anything; like adding Plaid credentials or setting up a proper domain name, you'll
+need to configure monetr. The recommended way to do this is to pass environment variables for the parameters you want to
+change. The easiest way to do this is to create a `.env` file somewhere outside the monetr repository folder and when
+running the Docker commands below, include the flag `--env-file=${YOUR FILE PATH}`. This will apply your customizations
+to the compose file without needing to modify the provided file.
+
+If you want to use a config file though you will need to modify the compose file to use one, or you will need to create
+a config file within the default volume mount that gets created. To use a config file adjust the `command` for the
+monetr service in the compose file to look like this:
+
+```yaml {2-3} filename="docker-compose.yaml"
+    command:
+      - -c
+      - /etc/monetr/config.yaml
+      - serve
+      # Setup the database and perform migrations.
+      - --migrate
+      # Since certificates will not have been created, make some.
+      - --generate-certificates
+```
+
+You can replace the path to the config file with any path you want as long as it is readable by monetr. You can specify
+multiple configuration file if you need to by passing `-c ${file}` multiple times _before_ the `serve` command.
+
+<Callout type="warning">
+  Environment variables can take priority over values in the configuration file. If you are not seeing the behavior
+  you're expecting with your configuration changes, make sure that the environment variable for that configuration
+  parameter is not specified with an incorrect or **blank** value. A blank value in the environment variable may cause
+  unusual behaviors.
+</Callout>
+
 ### Start The Server
 
 To run monetr, execute the following command in your terminal from the root directory of monetr's repository.
