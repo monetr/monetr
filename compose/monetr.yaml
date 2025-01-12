@@ -1,3 +1,9 @@
+###############################################################################
+# WARNING! This file is intended to be used for local development only! It    #
+# should not be used as a template for self hosted installations! Please read #
+# the configuration docs https://monetr.app/documentation/configure/ to learn #
+# more about how to configure monetr properly!                                #
+###############################################################################
 allowsignup: true
 environment: development
 plaid:
