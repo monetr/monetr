@@ -90,8 +90,11 @@ describe('amounts', () => {
     });
 
     it('US with foreign transaction', () => {
-      const euroNetherlands = formatAmount(-1001234, AmountType.Stored, 'en-US', 'EUR');
-      expect(euroNetherlands).toBe('-€10,012.34');
+      const euro = formatAmount(-1001234, AmountType.Stored, 'en-US', 'EUR');
+      expect(euro).toBe('-€10,012.34');
+
+      const yen = formatAmount(-1001234, AmountType.Stored, 'en-US', 'JPY');
+      expect(yen).toBe('-¥1,001,234');
     });
 
     it('will format JPY properly', () => {
