@@ -14,6 +14,8 @@ services:
       retries: 3
       start_period: 5s
     restart: unless-stopped
+    networks:
+      - monetr_network
   valkey:
     image: valkey/valkey:8.0.1
     healthcheck:
@@ -23,6 +25,8 @@ services:
       retries: 3
       start_period: 5s
     restart: unless-stopped
+    networks:
+      - monetr_network
   monetr:
     image: ghcr.io/monetr/monetr:latest
     healthcheck:
@@ -40,9 +44,6 @@ services:
       - --generate-certificates
     ports:
       - "4000:4000"
-    links:
-      - valkey
-      - postgres
     depends_on:
       valkey:
         condition: service_healthy
@@ -64,7 +65,11 @@ services:
       MONETR_REDIS_ADDRESS: valkey
       MONETR_STORAGE_ENABLED: ${MONETR_STORAGE_ENABLED:-true}
       MONETR_STORAGE_PROVIDER: ${MONETR_STORAGE_PROVIDER:-filesystem}
+    networks:
+      - monetr_network
 
 volumes:
   monetrData:
   postgresData:
+networks:
+  monetr_network:
