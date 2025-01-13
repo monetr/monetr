@@ -33,7 +33,8 @@ export default class Transaction {
   getAmountString(locale: string = 'en_US'): string {
     const amount = Math.abs(this.amount);
     if (this.amount < 0) {
-      return `+ ${ formatAmount(amount, AmountType.Stored, locale, this.currency) }`;
+      // Show the number sign on deposits only.
+      return formatAmount(amount, AmountType.Stored, locale, this.currency, true);
     }
 
     return formatAmount(amount, AmountType.Stored, locale, this.currency);

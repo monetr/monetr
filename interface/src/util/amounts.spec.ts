@@ -81,6 +81,19 @@ describe('amounts', () => {
       expect(foo).toBe('$12.34');
     });
 
+    it('will format euro', () => {
+      const euroNetherlands = formatAmount(-1001234, AmountType.Stored, 'nl-NL', 'EUR');
+      expect(euroNetherlands).toBe('€ -10.012,34');
+
+      const euroUK = formatAmount(-1001234, AmountType.Stored, 'en-UK', 'EUR');
+      expect(euroUK).toBe('-€10,012.34');
+    });
+
+    it('US with foreign transaction', () => {
+      const euroNetherlands = formatAmount(-1001234, AmountType.Stored, 'en-US', 'EUR');
+      expect(euroNetherlands).toBe('-€10,012.34');
+    });
+
     it('will format JPY properly', () => {
       const foo = formatAmount(1234, AmountType.Stored, 'ja-JP', 'JPY');
       expect(foo).toMatch(/.1,234/);

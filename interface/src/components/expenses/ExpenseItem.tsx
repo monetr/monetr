@@ -7,6 +7,7 @@ import { format, isThisYear } from 'date-fns';
 import MBadge from '@monetr/interface/components/MBadge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Spending from '@monetr/interface/models/Spending';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -17,6 +18,7 @@ export interface ExpenseItemProps {
 }
 
 export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element {
+  const user = useAuthentication();
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
   const navigate = useNavigate();
   const rule = rrulestr(spending.ruleset!);
@@ -61,7 +63,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
               { rule.toText() }
             </span>
             <span className='md:hidden text-zinc-200 text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
-              { spending.getNextContributionAmountString() } / { fundingSchedule?.name }
+              { spending.getNextContributionAmountString(user.account.locale) } / { fundingSchedule?.name }
             </span>
           </div>
         </div>
@@ -69,7 +71,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
         { /* This block only shows on mobile screens */ }
         <div className='hidden md:flex w-1/2 overflow-hidden flex-1 min-w-0 items-center'>
           <span className='text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
-            { spending.getNextContributionAmountString() } / { fundingSchedule?.name }
+            { spending.getNextContributionAmountString(user.account.locale) } / { fundingSchedule?.name }
           </span>
         </div>
 
@@ -77,11 +79,11 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
         <div className='flex md:hidden shrink-0 items-center gap-2'>
           <div className='flex flex-col'>
             <span className={ amountClass }>
-              { spending.getCurrentAmountString() }
+              { spending.getCurrentAmountString(user.account.locale) }
             </span>
             <hr className='w-full border-0 border-b-[thin] border-zinc-600' />
             <span className='text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>
-              { spending.getTargetAmountString() }
+              { spending.getTargetAmountString(user.account.locale) }
             </span>
           </div>
           <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50 flex-none md:cursor-pointer' />
@@ -92,7 +94,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
           <div className='flex flex-col'>
             <div className='flex justify-end'>
               <span className={ amountClass }>
-                { spending.getCurrentAmountString() }
+                { spending.getCurrentAmountString(user.account.locale) }
               </span>
               &nbsp;
               <span className='text-end text-zinc-500 group-hover:text-zinc-400 font-medium'>
@@ -100,7 +102,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
               </span>
               &nbsp;
               <span className='text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>
-                { spending.getTargetAmountString() }
+                { spending.getTargetAmountString(user.account.locale) }
               </span>
             </div>
           </div>

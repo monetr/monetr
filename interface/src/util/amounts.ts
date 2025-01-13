@@ -82,12 +82,15 @@ export enum AmountType {
  *                          then it is likely `AmountType.Friendly`.
  * @param {string} locale The locale code for the current user's perspective. Defaults to `en-US`.
  * @param {string} currency The ISO currency code of the currency the amount is in. Defaults to `USD`.
+ * @param {boolean} signDisplay Whether or not to indicate positive/negative signs on the formatted output. Will not
+ *                              apply a sign to a 0 value. `false` is equivalent to auto.
  */
 export function formatAmount(
   amount: number,
   type: AmountType = AmountType.Stored,
   locale: string = 'en_US',
   currency: string = 'USD',
+  signDisplay: boolean = false,
 ): string {
   const localeAdjusted = locale.replace('_', '-');
   const intl = new Intl.NumberFormat(
@@ -95,6 +98,7 @@ export function formatAmount(
     {
       style: 'currency',
       currency: currency,
+      signDisplay: signDisplay ? 'exceptZero' : 'auto',
     },
   );
 

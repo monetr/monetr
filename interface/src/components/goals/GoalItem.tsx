@@ -6,6 +6,7 @@ import { KeyboardArrowRight } from '@mui/icons-material';
 import MBadge from '@monetr/interface/components/MBadge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Spending from '@monetr/interface/models/Spending';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -14,6 +15,7 @@ export interface GoalItemProps {
 }
 
 export default function GoalItem({ spending }: GoalItemProps): JSX.Element {
+  const user = useAuthentication();
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
   const navigate = useNavigate();
 
@@ -24,7 +26,7 @@ export default function GoalItem({ spending }: GoalItemProps): JSX.Element {
 
   // By default the contribution string should simply be the amount that will be added to this goal per funding schedule
   // it is associated with.
-  let contributionString = `${spending.getNextContributionAmountString()} / ${ fundingSchedule?.name }`;
+  let contributionString = `${spending.getNextContributionAmountString(user.account.locale)} / ${ fundingSchedule?.name }`;
   // But if the goal is no longer in progress (it is complete). Then indicate that.
   if (!spending.getGoalIsInProgress()) {
     contributionString = 'Complete';
@@ -81,6 +83,7 @@ interface GoalProps {
 }
 
 function GoalAmount({ spending }: GoalProps): JSX.Element {
+  const user = useAuthentication();
   const amountClass = mergeTailwind(
     {
       'text-green-500': spending.targetAmount <= spending.currentAmount,
@@ -96,11 +99,11 @@ function GoalAmount({ spending }: GoalProps): JSX.Element {
         <div className='flex md:hidden shrink-0 items-center gap-2'>
           <div className='flex flex-col'>
             <span className={ amountClass }>
-              { spending.getCurrentAmountString() }
+              { spending.getCurrentAmountString(user.account.locale) }
             </span>
             <hr className='w-full border-0 border-b-[thin] border-zinc-600' />
             <span className='text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>
-              { spending.getTargetAmountString() }
+              { spending.getTargetAmountString(user.account.locale) }
             </span>
           </div>
         </div>
@@ -108,7 +111,7 @@ function GoalAmount({ spending }: GoalProps): JSX.Element {
           <div className='flex flex-col'>
             <div className='flex justify-end'>
               <span className={ amountClass }>
-                { spending.getCurrentAmountString() }
+                { spending.getCurrentAmountString(user.account.locale) }
               </span>
               &nbsp;
               <span className='text-end text-zinc-500 group-hover:text-zinc-400 font-medium'>
@@ -116,7 +119,7 @@ function GoalAmount({ spending }: GoalProps): JSX.Element {
               </span>
               &nbsp;
               <span className='text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>
-                { spending.getTargetAmountString() }
+                { spending.getTargetAmountString(user.account.locale) }
               </span>
             </div>
           </div>
@@ -128,7 +131,7 @@ function GoalAmount({ spending }: GoalProps): JSX.Element {
   return (
     <div className='flex md:min-w-[12em] shrink-0 justify-end gap-2 items-center'>
       <MBadge className='w-fit justify-end dark:bg-green-600' weight='medium'>
-        { spending.getCurrentAmountString() }
+        { spending.getCurrentAmountString(user.account.locale) }
       </MBadge>
     </div>
   );
