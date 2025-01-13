@@ -7,6 +7,7 @@ import (
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/database"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -81,7 +82,7 @@ var (
 				log.Warn("--link flag does nothing when --all is specified")
 			}
 
-			db, err := getDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
 				return errors.Wrap(err, "failed to get database instance")
 			}
@@ -208,7 +209,7 @@ var (
 			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 
-			db, err := getDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
 				return errors.Wrap(err, "failed to get database instance")
 			}

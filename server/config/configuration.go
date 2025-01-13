@@ -113,6 +113,7 @@ type PostgreSQL struct {
 	CACertificatePath  string `yaml:"caCertificatePath"`
 	KeyPath            string `yaml:"keyPath"`
 	CertificatePath    string `yaml:"certificatePath"`
+	Migrate            bool   `yaml:"migrate"`
 }
 
 func (c Configuration) GetEmail() Email {

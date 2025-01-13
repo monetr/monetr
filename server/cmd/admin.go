@@ -9,6 +9,7 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/database"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -69,7 +70,7 @@ func newPlaidRefreshTransactionsCommand(parent *cobra.Command) {
 				return cmd.Help()
 			}
 
-			db, err := getDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
 				log.WithError(err).Fatal("failed to setup database")
 				return err
@@ -164,7 +165,7 @@ func newViewSecretCommand(parent *cobra.Command) {
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 
-			db, err := getDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
 				log.WithError(err).Fatalf("failed to initialze database")
 				return errors.Wrap(err, "failed to initialize database")
@@ -304,7 +305,7 @@ func newMigrateKMSCommand(parent *cobra.Command) {
 				return err
 			}
 
-			db, err := getDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
 				log.WithError(err).Fatalf("failed to initialze database")
 				return errors.Wrap(err, "failed to initialize database")

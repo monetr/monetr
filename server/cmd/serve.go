@@ -21,6 +21,7 @@ import (
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/controller"
+	"github.com/monetr/monetr/server/database"
 	"github.com/monetr/monetr/server/internal/source"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
@@ -32,6 +33,7 @@ import (
 	"github.com/monetr/monetr/server/ui"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func init() {
@@ -39,6 +41,8 @@ func init() {
 	ServeCommand.PersistentFlags().BoolVarP(&GenerateCertificates, "generate-certificates", "g", false, "Generate certificates for authentication if they do not already exist. Defaults to: false")
 	ServeCommand.PersistentFlags().IntVarP(&PortFlag, "port", "p", 0, "Specify a port to serve HTTP traffic on for monetr.")
 	rootCommand.AddCommand(ServeCommand)
+
+	viper.BindPFlag("PostgreSQL.Migrate", ServeCommand.PersistentFlags().Lookup("migrate"))
 }
 
 var (
@@ -161,7 +165,7 @@ func RunServer() error {
 		defer sentry.Flush(10 * time.Second)
 	}
 
-	db, err := getDatabase(log, configuration, stats)
+	db, err := database.GetDatabase(log, configuration, stats)
 	if err != nil {
 		log.WithError(err).Fatalf("failed to setup database connection: %+v", err)
 		return err
