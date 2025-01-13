@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/database"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/migrations"
@@ -22,6 +23,7 @@ func init() {
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresUsername, "username", "U", "", "PostgreSQL user.")
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresPassword, "password", "W", "", "PostgreSQL password.")
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresDatabase, "database", "d", "", "PostgreSQL database.")
+
 	// TODO This doesn't account for TLS properties that would need to be set.
 	viper.BindPFlag("PostgreSQL.Address", DataCommand.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("PostgreSQL.Port", DataCommand.PersistentFlags().Lookup("port"))
@@ -45,11 +47,13 @@ var (
 		Long:  "Updates your PostgreSQL database to the latest schema version for monetr.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configuration := config.LoadConfiguration()
+			// Overwrite this value since we are managing the migration ourselves.
+			configuration.PostgreSQL.Migrate = false
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
 				log.WithField("config", configFileName).Info("config file loaded")
 			}
-			db, err := getDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
 				log.WithError(err).Fatalf("failed to establish database connection")
 				return err

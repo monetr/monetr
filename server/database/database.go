@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"context"
@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/certhelper"
 	"github.com/monetr/monetr/server/config"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/migrations"
@@ -21,7 +21,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func getDatabase(log *logrus.Entry, configuration config.Configuration, stats *metrics.Stats) (*pg.DB, error) {
+func GetDatabase(
+	log *logrus.Entry,
+	configuration config.Configuration,
+	stats *metrics.Stats,
+) (*pg.DB, error) {
 	pgOptions := &pg.Options{
 		Addr: fmt.Sprintf("%s:%d",
 			configuration.PostgreSQL.Address,
@@ -36,63 +40,63 @@ func getDatabase(log *logrus.Entry, configuration config.Configuration, stats *m
 
 	var tlsConfiguration *tls.Config
 
+	// TODO Make it so that the TLS config will work even when a CA certificate is
+	// not being provided. This would be ideal for something where the PostgreSQL
+	// TLS certificate is a well know certificate already included in the
+	// certificate authority bundle on the OS.
 	if configuration.PostgreSQL.CACertificatePath != "" {
-		pgOptions.MaxConnAge = 9 * time.Minute
-		{
-			caCert, err := os.ReadFile(configuration.PostgreSQL.CACertificatePath)
+		caCert, err := os.ReadFile(configuration.PostgreSQL.CACertificatePath)
+		if err != nil {
+			log.WithError(err).Errorf("failed to load ca certificate")
+			return nil, errors.Wrap(err, "failed to load ca certificate")
+		}
+
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		tlsConfiguration = &tls.Config{
+			Rand:               rand.Reader,
+			InsecureSkipVerify: configuration.PostgreSQL.InsecureSkipVerify,
+			RootCAs:            caCertPool,
+			ServerName:         configuration.PostgreSQL.Address,
+			Renegotiation:      tls.RenegotiateFreelyAsClient,
+		}
+
+		if configuration.PostgreSQL.KeyPath != "" {
+			tlsCert, err := tls.LoadX509KeyPair(
+				configuration.PostgreSQL.CertificatePath,
+				configuration.PostgreSQL.KeyPath,
+			)
 			if err != nil {
-				log.WithError(err).Errorf("failed to load ca certificate")
-				return nil, errors.Wrap(err, "failed to load ca certificate")
+				log.WithError(err).Errorf("failed to load client certificate")
+				return nil, errors.Wrap(err, "failed to load client certificate")
 			}
-
-			caCertPool := x509.NewCertPool()
-			caCertPool.AppendCertsFromPEM(caCert)
-
-			tlsConfiguration = &tls.Config{
-				Rand:               rand.Reader,
-				InsecureSkipVerify: configuration.PostgreSQL.InsecureSkipVerify,
-				RootCAs:            caCertPool,
-				ServerName:         configuration.PostgreSQL.Address,
-				Renegotiation:      tls.RenegotiateFreelyAsClient,
-			}
-
-			if configuration.PostgreSQL.KeyPath != "" {
-				tlsCert, err := tls.LoadX509KeyPair(
-					configuration.PostgreSQL.CertificatePath,
-					configuration.PostgreSQL.KeyPath,
-				)
-				if err != nil {
-					log.WithError(err).Errorf("failed to load client certificate")
-					return nil, errors.Wrap(err, "failed to load client certificate")
-				}
-				tlsConfiguration.Certificates = []tls.Certificate{
-					tlsCert,
-				}
+			tlsConfiguration.Certificates = []tls.Certificate{
+				tlsCert,
 			}
 		}
 
 		pgOptions.TLSConfig = tlsConfiguration
+		pgOptions.OnConnect = func(ctx context.Context, cn *pg.Conn) error {
+			if tlsConfiguration != nil {
+				log.Trace("new connection with cert")
+			}
+
+			return nil
+		}
 	}
 
 	db := pg.Connect(pgOptions)
 	db.AddQueryHook(logging.NewPostgresHooks(log, stats))
-	pgOptions.OnConnect = func(ctx context.Context, cn *pg.Conn) error {
-		if tlsConfiguration != nil {
-			log.Trace("new connection with cert")
-		}
-
-		return nil
-	}
-
 	if configuration.PostgreSQL.CACertificatePath != "" {
-		paths := make([]string, 0, 1)
+		paths := make([]string, 0, 3)
 		for _, path := range []string{
 			configuration.PostgreSQL.CACertificatePath,
 			configuration.PostgreSQL.KeyPath,
 			configuration.PostgreSQL.CertificatePath,
 		} {
 			directory := filepath.Dir(path)
-			if !myownsanity.SliceContains(paths, directory) {
+			if !slices.Contains(paths, directory) {
 				paths = append(paths, directory)
 			}
 		}
@@ -163,10 +167,9 @@ func getDatabase(log *logrus.Entry, configuration config.Configuration, stats *m
 		return db, errors.Wrap(err, "failed to ping postgresql")
 	}
 
-	if MigrateDatabaseFlag {
+	if configuration.PostgreSQL.Migrate {
+		log.Info("automatic migrations are enabled")
 		migrations.RunMigrations(log, db)
-	} else {
-		log.Info("automatic migrations are disabled")
 	}
 
 	return db, nil

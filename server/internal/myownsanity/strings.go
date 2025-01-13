@@ -12,6 +12,7 @@ func StringDefault(input *string, defaultValue string) string {
 	return defaultValue
 }
 
+// Deprecated: Use slices.Contains instead.
 func SliceContains(slice []string, item string) bool {
 	for _, sliceItem := range slice {
 		if item == sliceItem {
