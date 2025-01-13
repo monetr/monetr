@@ -109,6 +109,7 @@ type BankAccount struct {
 	Link               *Link                 `json:"-,omitempty" pg:"rel:has-one"`
 	PlaidBankAccountId *ID[PlaidBankAccount] `json:"-" pg:"plaid_bank_account_id"`
 	PlaidBankAccount   *PlaidBankAccount     `json:"plaidBankAccount,omitempty" pg:"rel:has-one"`
+	Currency           string                `json:"currency" pg:"currency,notnull"`
 	AvailableBalance   int64                 `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
 	CurrentBalance     int64                 `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
 	LimitBalance       int64                 `json:"limitBalance" pg:"limit_balance,notnull,use_zero"`

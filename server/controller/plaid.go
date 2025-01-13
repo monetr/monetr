@@ -313,8 +313,10 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		}
 
 		// Retrieve the details for those bank accounts from Plaid.
-		// TODO We should just retrieve all the accounts, any that are missing in this list were probably removed during the
-		// account update selection anyway. Don't delete those bank accounts, but mark them as no longer in sync.
+		// TODO We should just retrieve all the accounts, any that are missing in
+		// this list were probably removed during the account update selection
+		// anyway. Don't delete those bank accounts, but mark them as no longer in
+		// sync.
 		plaidAccounts, err := client.GetAccounts(c.getContext(ctx), newBankAccountPlaidIds...)
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve new bank accounts")
@@ -332,6 +334,8 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 				Mask:             plaidAccount.GetMask(),
 				AvailableBalance: plaidAccount.GetBalances().GetAvailable(),
 				CurrentBalance:   plaidAccount.GetBalances().GetCurrent(),
+				LimitBalance:     plaidAccount.GetBalances().GetLimit(),
+				Currency:         plaidAccount.GetCurrencyCode(),
 			}
 			if err := repo.CreatePlaidBankAccount(c.getContext(ctx), &plaidBankAccount); err != nil {
 				return c.wrapPgError(ctx, err, "failed to create plaid bank account")
@@ -344,10 +348,12 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 				PlaidBankAccount:   &plaidBankAccount,
 				AvailableBalance:   plaidAccount.GetBalances().GetAvailable(),
 				CurrentBalance:     plaidAccount.GetBalances().GetCurrent(),
+				LimitBalance:       plaidAccount.GetBalances().GetLimit(),
 				Name:               plaidAccount.GetName(),
 				Mask:               plaidAccount.GetMask(),
 				Type:               BankAccountType(plaidAccount.GetType()),
 				SubType:            BankAccountSubType(plaidAccount.GetSubType()),
+				Currency:           plaidAccount.GetCurrencyCode(),
 				LastUpdated:        now,
 			}
 		}
@@ -478,6 +484,8 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 			Mask:             plaidAccount.GetMask(),
 			AvailableBalance: plaidAccount.GetBalances().GetAvailable(),
 			CurrentBalance:   plaidAccount.GetBalances().GetCurrent(),
+			LimitBalance:     plaidAccount.GetBalances().GetLimit(),
+			Currency:         plaidAccount.GetCurrencyCode(),
 		}
 		if err := repo.CreatePlaidBankAccount(
 			c.getContext(ctx),
@@ -491,10 +499,12 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 			PlaidBankAccountId: &plaidBankAccount.PlaidBankAccountId,
 			AvailableBalance:   plaidAccount.GetBalances().GetAvailable(),
 			CurrentBalance:     plaidAccount.GetBalances().GetCurrent(),
+			LimitBalance:       plaidAccount.GetBalances().GetLimit(),
 			Name:               plaidAccount.GetName(),
 			Mask:               plaidAccount.GetMask(),
 			Type:               BankAccountType(plaidAccount.GetType()),
 			SubType:            BankAccountSubType(plaidAccount.GetSubType()),
+			Currency:           plaidAccount.GetCurrencyCode(),
 			LastUpdated:        now,
 			Status:             ActiveBankAccountStatus,
 		}

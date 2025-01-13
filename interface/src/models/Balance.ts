@@ -1,7 +1,8 @@
-import { formatAmount } from '@monetr/interface/util/amounts';
+import { AmountType, formatAmount } from '@monetr/interface/util/amounts';
 
 export default class Balance {
   bankAccountId: string;
+  currency: string;
   available: number;
   current: number;
   free: number;
@@ -12,23 +13,23 @@ export default class Balance {
     if (data) Object.assign(this, data);
   }
 
-  getFreeToUseString(): string {
-    return formatAmount(this.free);
+  getFreeToUseString(locale: string = 'en_US'): string {
+    return formatAmount(this.free, AmountType.Stored, locale, this.currency);
   }
 
-  getAvailableString(): string {
-    return formatAmount(this.available);
+  getAvailableString(locale: string = 'en_US'): string {
+    return formatAmount(this.available, AmountType.Stored, locale, this.currency);
   }
 
-  getCurrentString(): string {
-    return formatAmount(this.current);
+  getCurrentString(locale: string = 'en_US'): string {
+    return formatAmount(this.current, AmountType.Stored, locale, this.currency);
   }
 
-  getExpensesString(): string {
-    return formatAmount(this.expenses);
+  getExpensesString(locale: string = 'en_US'): string {
+    return formatAmount(this.expenses, AmountType.Stored, locale, this.currency);
   }
 
-  getGoalsString(): string {
-    return formatAmount(this.goals);
+  getGoalsString(locale: string = 'en_US'): string {
+    return formatAmount(this.goals, AmountType.Stored, locale, this.currency);
   }
 }
