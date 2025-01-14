@@ -47,8 +47,8 @@ export default class Spending {
       format(this.nextRecurrence, 'MMM do, yyyy');
   }
 
-  getTargetAmountString(): string {
-    return formatAmount(this.targetAmount);
+  getTargetAmountString(locale: string = 'en_US'): string {
+    return formatAmount(this.targetAmount, AmountType.Stored, locale);
   }
 
   getTargetAmountDollars(): number {
@@ -59,12 +59,12 @@ export default class Spending {
     return formatAmount(this.currentAmount, AmountType.Stored, locale);
   }
 
-  getUsedAmountString(): string {
-    return formatAmount(this.usedAmount);
+  getUsedAmountString(locale: string = 'en_US'): string {
+    return formatAmount(this.usedAmount, AmountType.Stored, locale);
   }
 
-  getNextContributionAmountString(): string {
-    return formatAmount(this.nextContributionAmount);
+  getNextContributionAmountString(locale: string = 'en_US'): string {
+    return formatAmount(this.nextContributionAmount, AmountType.Stored, locale);
   }
 
   getIsExpense(): boolean {
@@ -82,7 +82,7 @@ export default class Spending {
     return (this.currentAmount + this.usedAmount) < this.targetAmount;
   }
 
-  getGoalSavedAmountString(): string {
-    return formatAmount(this.currentAmount + this.usedAmount);
+  getGoalSavedAmountString(locale: string = 'en_US'): string {
+    return formatAmount(this.currentAmount + this.usedAmount, AmountType.Stored, locale);
   }
 }

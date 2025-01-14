@@ -1,6 +1,6 @@
 
 import PlaidBankAccount from '@monetr/interface/models/PlaidBankAccount';
-import { formatAmount } from '@monetr/interface/util/amounts';
+import { AmountType, formatAmount } from '@monetr/interface/util/amounts';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export type BankAccountStatus = 'unknown' | 'active' | 'inactive';
@@ -40,6 +40,7 @@ export default class BankAccount {
   status: BankAccountStatus;
   accountType: BankAccountType;
   accountSubType: BankAccountSubType;
+  currency: string;
   lastUpdated: Date;
   createdAt: Date;
   createdBy: string;
@@ -57,15 +58,15 @@ export default class BankAccount {
     }
   }
 
-  getAvailableBalanceString() {
-    return formatAmount(this.availableBalance);
+  getAvailableBalanceString(locale: string = 'en_US') {
+    return formatAmount(this.availableBalance, AmountType.Stored, locale, this.currency);
   }
 
-  getCurrentBalanceString() {
-    return formatAmount(this.currentBalance);
+  getCurrentBalanceString(locale: string = 'en_US') {
+    return formatAmount(this.currentBalance, AmountType.Stored, locale, this.currency);
   }
 
-  getLimitBalanceString() {
-    return formatAmount(this.limitBalance);
+  getLimitBalanceString(locale: string = 'en_US') {
+    return formatAmount(this.limitBalance, AmountType.Stored, locale, this.currency);
   }
 }

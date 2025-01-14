@@ -19,6 +19,7 @@ type PlaidBankAccount struct {
 	Name               string               `json:"name" pg:"name,notnull"`
 	OfficialName       string               `json:"officialName" pg:"official_name"`
 	Mask               string               `json:"mask" pg:"mask"`
+	Currency           string               `json:"currency" pg:"currency,notnull"`
 	AvailableBalance   int64                `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
 	CurrentBalance     int64                `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
 	LimitBalance       int64                `json:"limitBalance" pg:"limit_balance,use_zero"`

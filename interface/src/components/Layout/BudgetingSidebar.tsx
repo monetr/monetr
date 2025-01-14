@@ -16,6 +16,7 @@ import { useCurrentBalance } from '@monetr/interface/hooks/balances';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useNextFundingDate } from '@monetr/interface/hooks/fundingSchedules';
 import { useLink } from '@monetr/interface/hooks/links';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface BudgetingSidebarProps {
@@ -23,6 +24,7 @@ export interface BudgetingSidebarProps {
 }
 
 export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Element {
+  const user = useAuthentication();
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
   const { data: link } = useLink(bankAccount?.linkId);
   const balance = useCurrentBalance();
@@ -56,7 +58,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Free-To-Use:
             </MSpan>
             <MSpan size='lg' weight='semibold' className={ valueClassName }>
-              {balance?.getFreeToUseString()}
+              { balance?.getFreeToUseString(user.account.locale) }
             </MSpan>
           </div>
         );
@@ -76,7 +78,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Available:
             </MSpan>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              {balance?.getAvailableString()}
+              { balance?.getAvailableString(user.account.locale) }
             </MSpan>
           </div>
         );
@@ -95,7 +97,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Limit:
             </MSpan>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              {balance?.getAvailableString()}
+              { balance?.getAvailableString(user.account.locale) }
             </MSpan>
           </div>
         );
@@ -120,7 +122,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Current:
             </MSpan>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              { balance?.getCurrentString() }
+              { balance?.getCurrentString(user.account.locale) }
             </MSpan>
           </div>
           <Limit />
@@ -140,7 +142,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Expenses
             </MSpan>
             <MBadge className='ml-auto' size='sm'>
-              {balance?.getExpensesString()}
+              { balance?.getExpensesString(user.account.locale) }
             </MBadge>
           </NavigationItem>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/goals` }>
@@ -149,7 +151,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Goals
             </MSpan>
             <MBadge className='ml-auto' size='sm'>
-              {balance?.getGoalsString()}
+              { balance?.getGoalsString(user.account.locale) }
             </MBadge>
           </NavigationItem>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/funding` }>
@@ -199,7 +201,7 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
 
   return (
     <Link className={ className } to={ props.to }>
-      {props.children}
+      { props.children }
     </Link>
   );
 }
@@ -211,7 +213,7 @@ function NextFundingBadge(): JSX.Element {
 
   return (
     <MBadge className='ml-auto' size='sm'>
-      {next}
+      { next }
     </MBadge>
   );
 }

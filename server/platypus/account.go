@@ -1,6 +1,10 @@
 package platypus
 
-import "github.com/plaid/plaid-go/v30/plaid"
+import (
+	"github.com/monetr/monetr/server/consts"
+	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/plaid/plaid-go/v30/plaid"
+)
 
 type (
 	BankAccount interface {
@@ -8,27 +12,37 @@ type (
 		GetAccountId() string
 		// GetBalances will return the bank account's balances.
 		GetBalances() BankAccountBalances
-		// GetMask typically returns the last 4 of the bank account number. This could technically return anything that
-		// represents a small portion of the bank account's identification. I don't currently know enough about this to know
-		// what other values this might have.
+		// GetMask typically returns the last 4 of the bank account number. This
+		// could technically return anything that represents a small portion of the
+		// bank account's identification. I don't currently know enough about this
+		// to know what other values this might have.
 		GetMask() string
-		// GetName will return the name of the account specified by the user or the financial institution itself.
+		// GetName will return the name of the account specified by the user or the
+		// financial institution itself.
 		GetName() string
-		// GetOfficialName will return the name of the account specified by the financial institution itself.
+		// GetOfficialName will return the name of the account specified by the
+		// financial institution itself.
 		GetOfficialName() string
-		// GetType will return the plaid type of the account. For our use case this is typically "depository".
+		// GetType will return the plaid type of the account. For our use case this
+		// is typically "depository".
 		GetType() string
-		// GetSubType will return the sub-type of the account. This can be something like "checking" or "savings".
+		// GetSubType will return the sub-type of the account. This can be something
+		// like "checking" or "savings".
 		GetSubType() string
+		// GetCurrencyCode will return the currency code derived from Plaid directly
+		// or will fallback to monetr's global default currency code.
+		GetCurrencyCode() string
 	}
 
 	BankAccountBalances interface {
-		// GetAvailable returns the total amount available for the bank account in cents.
+		// GetAvailable returns the total amount available for the bank account in
+		// cents.
 		GetAvailable() int64
-		// GetCurrent returns the current bank account balance in cents. This is typically the total account value excluding
-		// pending transactions.
+		// GetCurrent returns the current bank account balance in cents. This is
+		// typically the total account value excluding pending transactions.
 		GetCurrent() int64
-		// GetLimit returns the limit of the account (this applies for credit accounts) in cents.
+		// GetLimit returns the limit of the account (this applies for credit
+		// accounts) in cents.
 		GetLimit() int64
 		GetIsoCurrencyCode() string
 		GetUnofficialCurrencyCode() string
@@ -97,6 +111,13 @@ func NewPlaidBankAccount(bankAccount plaid.AccountBase) (PlaidBankAccount, error
 		OfficialName: bankAccount.GetOfficialName(),
 		Type:         string(bankAccount.GetType()),
 		SubType:      string(bankAccount.GetSubtype()),
+		// Set the currency code of the bank account to be the first non-empty
+		// currency code we get from Plaid, or fall back to USD as a default.
+		Currency: myownsanity.CoalesceStrings(
+			balances.GetIsoCurrencyCode(),
+			balances.GetUnofficialCurrencyCode(),
+			consts.DefaultCurrencyCode,
+		),
 	}, nil
 }
 
@@ -108,6 +129,7 @@ type PlaidBankAccount struct {
 	OfficialName string
 	Type         string
 	SubType      string
+	Currency     string
 }
 
 func (p PlaidBankAccount) GetAccountId() string {
@@ -136,4 +158,8 @@ func (p PlaidBankAccount) GetType() string {
 
 func (p PlaidBankAccount) GetSubType() string {
 	return p.SubType
+}
+
+func (p PlaidBankAccount) GetCurrencyCode() string {
+	return p.Currency
 }

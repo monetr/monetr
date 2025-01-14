@@ -93,10 +93,10 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
           <TransactionMerchantIcon name={ transaction.getName() } pending={ transaction.isPending } />
           <div className='flex min-w-0 flex-col overflow-hidden'>
             <span className='w-full min-w-0 truncate text-base font-semibold dark:text-dark-monetr-content-emphasis'>
-              {transaction.getName()}
+              { transaction.getName() }
             </span>
             <span className='hidden w-full min-w-0 truncate text-sm font-medium dark:text-dark-monetr-content md:block'>
-              {transaction.getMainCategory()}
+              { transaction.getMainCategory() }
             </span>
             <BudgetingInfo className='flex w-full text-sm md:hidden' />
           </div>
