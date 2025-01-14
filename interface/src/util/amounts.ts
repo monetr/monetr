@@ -1,3 +1,25 @@
+
+/**
+ * intlNumberFormat takes a locale and a currency code and returns a ResolvedNumberFormatOptions object containing
+ * information about the currency and how it should be formatted for the current locale.
+ *
+ * **NOTE**: This function will eventually be replaced by a single source of truth for locale information from the
+ * backend.
+ *
+ * @param {string} locale The local code for the current user's perspective. Defaults to `en-US`.
+ * @param {string} currency The ISO currency code of the current the amount is in. Defaults to `USD`.
+ */
+export function intlNumberFormat(locale: string = 'en_US', currency: string = 'USD'): Intl.ResolvedNumberFormatOptions {
+  const localeAdjusted = locale.replace('_', '-');
+  return new Intl.NumberFormat(
+    localeAdjusted,
+    {
+      style: 'currency',
+      currency: currency,
+    },
+  ).resolvedOptions();
+}
+
 /**
  * amountToFriendly takes an amount as it is stored in the API and database and converts it to the amount that is used
  * in the UI. Amounts are stored in their smallest unit. For example; USD is stored in cents. This way the amounts are
@@ -10,14 +32,7 @@
  * @param {string} currency The ISO currency code of the current the amount is in. Defaults to `USD`.
  */
 export function amountToFriendly(amount: number, locale: string = 'en_US', currency: string = 'USD'): number {
-  const localeAdjusted = locale.replace('_', '-');
-  const specs = new Intl.NumberFormat(
-    localeAdjusted,
-    {
-      style: 'currency',
-      currency: currency,
-    },
-  ).resolvedOptions();
+  const specs = intlNumberFormat(locale, currency);
 
   // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2 decimal
   // places so this would be 10^2 or 100. Where as JPY would have 0 because it is already in the smallest increment.
@@ -41,14 +56,7 @@ export function amountToFriendly(amount: number, locale: string = 'en_US', curre
  * @param {string} currency The ISO currency code of the currency the amount is in. Defaults to `USD`.
  */
 export function friendlyToAmount(friendly: number, locale: string = 'en_US', currency: string = 'USD'): number {
-  const localeAdjusted = locale.replace('_', '-');
-  const specs = new Intl.NumberFormat(
-    localeAdjusted,
-    {
-      style: 'currency',
-      currency: currency,
-    },
-  ).resolvedOptions();
+  const specs = intlNumberFormat(locale, currency);
 
   // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2 decimal
   // places so this would be 10^2 or 100. Where as JPY would have 0 because it is already in the smallest increment.

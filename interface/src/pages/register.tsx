@@ -66,7 +66,6 @@ function validator(values: RegisterValues): FormikErrors<RegisterValues> {
     errors['confirmPassword'] = 'Password confirmation must match.';
   }
 
-  // TODO No restriction on agree?
   return errors;
 }
 
@@ -108,7 +107,7 @@ export default function Register(): JSX.Element {
   async function submit(values: RegisterValues, helpers: FormikHelpers<RegisterValues>): Promise<void> {
     helpers.setSubmitting(true);
 
-    return signUp({
+    return await signUp({
       betaCode: values.betaCode,
       captcha: values.captcha,
       email: values.email,
