@@ -14,6 +14,7 @@ import { useViewContext } from '@monetr/interface/components/ViewManager';
 import { useCreateBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import { useCreateLink } from '@monetr/interface/hooks/links';
+import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { friendlyToAmount } from '@monetr/interface/util/amounts';
@@ -25,6 +26,7 @@ interface Values {
 }
 
 export default function ManualLinkSetupIncome(): JSX.Element {
+  const { data } = useAuthenticationSink();
   const createLink = useCreateLink();
   const createBankAccount = useCreateBankAccount();
   const createFundingSchedule = useCreateFundingSchedule();
@@ -105,7 +107,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
         label='How much do you usually get paid?'
         className='w-full'
         required
-        allowNegative={ false }
+        currency={ data.defaultCurrency }
       />
       <ManualLinkSetupButtons />
     </MForm>

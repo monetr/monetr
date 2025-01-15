@@ -20,6 +20,33 @@ export function intlNumberFormat(locale: string = 'en_US', currency: string = 'U
   ).resolvedOptions();
 }
 
+export function getCurrencySymbol(locale: string = 'en_US', currency: string = 'USD') {
+  return (0).toLocaleString(
+    locale.replace('_', '-'),
+    {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }
+  ).replace(/\d/g, '').trim();
+}
+
+export function intlNumberFormatter(locale: string = 'en_US', currency: string = 'USD'): (value: string) => string {
+  const localeAdjusted = locale.replace('_', '-');
+  const formatter = new Intl.NumberFormat(
+    localeAdjusted,
+    {
+      style: 'currency',
+      currency: currency,
+    },
+  );
+  return (value: string) => {
+    if (value === '') return '';
+    return formatter.format(+value);
+  };
+}
+
 /**
  * amountToFriendly takes an amount as it is stored in the API and database and converts it to the amount that is used
  * in the UI. Amounts are stored in their smallest unit. For example; USD is stored in cents. This way the amounts are

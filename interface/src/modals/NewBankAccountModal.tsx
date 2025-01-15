@@ -12,6 +12,7 @@ import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { useCreateBankAccount, useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
+import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import { friendlyToAmount } from '@monetr/interface/util/amounts';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
@@ -27,6 +28,7 @@ const initialValues: NewBankAccountValues = {
 };
 
 function NewBankAccountModal(): JSX.Element {
+  const { data } = useAuthenticationSink();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
   const { data: selectedBankAccount } = useSelectedBankAccount();
@@ -85,7 +87,7 @@ function NewBankAccountModal(): JSX.Element {
             name='balance'
             label='Initial Balance'
             required
-            allowNegative
+            currency={ data.defaultCurrency }
           />
         </div>
         <div className='flex justify-end gap-2'>

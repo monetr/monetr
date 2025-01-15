@@ -150,8 +150,8 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/elliotcourant/go-lclocale v0.1.0 h1:MIq4O00xopZz/3FjVb3939L8t59XcfUxATMefW1HkYk=
-github.com/elliotcourant/go-lclocale v0.1.0/go.mod h1:W4obD7lN4I6+JHFJurx2YrRn4qopyfFpZ7phT8iRT+c=
+github.com/elliotcourant/go-lclocale v0.1.1 h1:80hl61egQFZqUXmZf3GcQFhmVkBJYsJKpPup+qnQh0U=
+github.com/elliotcourant/go-lclocale v0.1.1/go.mod h1:W4obD7lN4I6+JHFJurx2YrRn4qopyfFpZ7phT8iRT+c=
 github.com/elliotcourant/gofx v0.0.1 h1:vdrNB2FDfl2YEcFdP8xxOueUMC8P5vr7TaDWr5vtIGw=
 github.com/elliotcourant/gofx v0.0.1/go.mod h1:K6DMdtSu6ao458HcAhqMsq94n6AHDV9yX+LLDowiTc0=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=

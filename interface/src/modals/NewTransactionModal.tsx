@@ -15,7 +15,7 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { Switch } from '@monetr/interface/components/Switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monetr/interface/components/Tabs';
-import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { CreateTransactionRequest, useCreateTransaction } from '@monetr/interface/hooks/transactions';
 import { friendlyToAmount } from '@monetr/interface/util/amounts';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
@@ -45,7 +45,7 @@ function NewTransactionModal(): JSX.Element {
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
   const { enqueueSnackbar } = useSnackbar();
-  const selectedBankAccountId = useSelectedBankAccountId();
+  const { data: selectedBankAccount } = useSelectedBankAccount();
   const createTransaction = useCreateTransaction();
 
   async function submit(
@@ -53,7 +53,7 @@ function NewTransactionModal(): JSX.Element {
     helper: FormikHelpers<NewTransactionValues>,
   ): Promise<void> {
     const newTransactionRequest: CreateTransactionRequest = {
-      bankAccountId: selectedBankAccountId,
+      bankAccountId: selectedBankAccount.bankAccountId,
       amount: friendlyToAmount(values.kind === 'credit' ? values.amount * -1 : values.amount),
       name: values.name,
       merchantName: null,
@@ -119,7 +119,7 @@ function NewTransactionModal(): JSX.Element {
                       label='Amount'
                       required
                       className='w-full md:w-1/2'
-                      allowNegative={ false }
+                      currency={ selectedBankAccount?.currency }
                     />
                     <MDatePicker
                       className='w-full md:w-1/2'
@@ -167,7 +167,7 @@ function NewTransactionModal(): JSX.Element {
                       label='Amount'
                       required
                       className='w-full md:w-1/2'
-                      allowNegative={ false }
+                      currency={ selectedBankAccount?.currency }
                     />
                     <MDatePicker
                       className='w-full md:w-1/2'

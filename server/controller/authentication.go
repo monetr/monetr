@@ -354,7 +354,10 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		return c.badRequest(ctx, "Locale must be specified to register")
 	}
 
-	if !locale.Valid(registerRequest.Locale) {
+	if _, err := locale.GetLConv(registerRequest.Locale); err != nil {
+		log.WithFields(logrus.Fields{
+			"locale": registerRequest.Locale,
+		}).WithError(err).Warn("invalid locale in register request")
 		return c.badRequest(ctx, "Invalid or unrecognized locale")
 	}
 
