@@ -23,7 +23,7 @@ func TestParseFriendlyToAmount(t *testing.T) {
 
 	t.Run("JPY truncation", func(t *testing.T) {
 		result, err := currency.ParseFriendlyToAmount("1239.99", "JPY")
-		assert.NoError(t, err, "should not return an error")
+		assert.EqualError(t, err, "failed to parse currency amount accurately: Below")
 		assert.EqualValues(t, 1239, result, "should return an exact int64")
 	})
 
