@@ -15,6 +15,16 @@ func TestParseFriendlyToAmount(t *testing.T) {
 		assert.EqualValues(t, 123499, result, "should return an exact int64")
 	})
 
+	t.Run("USD weird", func(t *testing.T) {
+		// This test looks weird but this particular number parsed by big float and
+		// then multiplied by 100 then converted back into a regular integer results
+		// in a rounding error. Floating point numbers are the dumbest fucking thing
+		// ever.
+		result, err := currency.ParseFriendlyToAmount("4315.26", "USD")
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, 431526, result, "should return an exact int64")
+	})
+
 	t.Run("JPY", func(t *testing.T) {
 		result, err := currency.ParseFriendlyToAmount("1239", "JPY")
 		assert.NoError(t, err, "should not return an error")

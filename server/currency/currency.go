@@ -2,6 +2,7 @@ package currency
 
 import (
 	"math/big"
+	"strconv"
 
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/pkg/errors"
@@ -42,10 +43,10 @@ func ParseFriendlyToAmount(
 	// unit for that currency.
 	f = f.Mul(f, modifier)
 	// Convert that back into a regular int64.
-	amount, accuracy := f.Int64()
-	if accuracy != big.Exact {
-		return amount, errors.Errorf("failed to parse currency amount accurately: %s", accuracy.String())
-	}
-
+	// This is a really stupid approach, but we have basically gaurenteed there
+	// would not be a rounding error using the math above. But when we go from a
+	// float back to ANY INTEGER EVEN ANOTHER BIG INT it can fuck it up. floating
+	// point numbers are the dumbest thing in the entire world.
+	amount, _ := strconv.ParseInt(f.String(), 10, 64)
 	return amount, nil
 }
