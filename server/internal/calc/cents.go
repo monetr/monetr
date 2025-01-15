@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Deprecated: use the currency package instead
 func ConvertStringToCents(input string) (int64, error) {
 	f, _, err := big.ParseFloat(input, 10, 64, big.ToNearestEven)
 	if err != nil {
