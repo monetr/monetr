@@ -1,13 +1,16 @@
 import React, { useCallback } from 'react';
-import { InputAttributes, NumberFormatBase, NumberFormatBaseProps, NumberFormatValues } from 'react-number-format';
+import { InputAttributes, NumberFormatValues, NumericFormat, NumericFormatProps } from 'react-number-format';
 import { useFormikContext } from 'formik';
 
 import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
-import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
-import { getCurrencySymbol, intlNumberFormatter } from '@monetr/interface/util/amounts';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { getCurrencySymbol, getDecimalSeparator, getNumberGroupSeparator, intlNumberFormat, intlNumberFormatter } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-type NumericField = Omit<NumberFormatBaseProps<InputAttributes>, 'prefix' | 'type' | 'onChange' | 'onValueChange'>;
+type NumericField =  Omit<
+  NumericFormatProps<InputAttributes>,
+  'decimalScale' | 'fixedDecimalScale' | 'prefix' | 'type' | 'onChange' | 'onValueChange'
+>
 
 export interface MAmountFieldProps extends NumericField {
   label?: string;
@@ -20,11 +23,10 @@ const MAmountFieldPropsDefaults: MAmountFieldProps = {
   label: null,
   labelDecorator: ((_: MLabelDecoratorProps) => null),
   disabled: false,
-  currency: 'USD',
 };
 
 export default function MAmountField(props: MAmountFieldProps = MAmountFieldPropsDefaults): JSX.Element {
-  const user = useAuthentication();
+  const { data: localeInfo } = useLocaleCurrency();
   const formikContext = useFormikContext();
   const getFormikError = () => {
     if (!formikContext?.touched[props?.name]) return null;
@@ -34,10 +36,12 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
 
   props = {
     ...MAmountFieldPropsDefaults,
+    currency: localeInfo.currency ?? 'USD',
     ...props,
     disabled: props?.disabled || formikContext?.isSubmitting,
     error: props?.error || getFormikError(),
   };
+  const currencyInfo = intlNumberFormat(localeInfo.locale, props.currency);
 
   const { labelDecorator, ...otherProps } = props;
   const LabelDecorator = labelDecorator || MAmountFieldPropsDefaults.labelDecorator;
@@ -121,7 +125,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
         <LabelDecorator name={ props.name } disabled={ props.disabled } />
       </MLabel>
       <div>
-        <NumberFormatBase
+        <NumericFormat
           /* These top properties might be overwritten by the ...otherProps below, this is intended. */
           disabled={ formikContext?.isSubmitting }
           onBlur={ formikContext?.handleBlur }
@@ -129,10 +133,14 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           { ...otherProps }
           /* Properties below this point cannot be overwritten by the caller! */
           className={ classNames }
+          fixedDecimalScale
+          decimalScale={ currencyInfo.maximumFractionDigits }
+          decimalSeparator={ getDecimalSeparator(localeInfo.locale) }
+          thousandSeparator={ getNumberGroupSeparator(localeInfo.locale) }
           onValueChange={ onChange }
-          format={ intlNumberFormatter(user.account.locale, props.currency)  }
-          placeholder={ `${intlNumberFormatter(user.account.locale, props.currency)('0') }` }
-          prefix={ `${getCurrencySymbol(user.account.locale, props.currency)}` }
+          renderText={ intlNumberFormatter(localeInfo.locale, props.currency)  }
+          placeholder={ `${intlNumberFormatter(localeInfo.locale, props.currency)('0') }` }
+          prefix={ `${getCurrencySymbol(localeInfo.locale, props.currency)}` }
         />
       </div>
       <Error />

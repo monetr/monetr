@@ -14,7 +14,8 @@ import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/balances';
 import { useSpendingSink, useTransfer } from '@monetr/interface/hooks/spending';
-import { amountToFriendly, formatAmount, friendlyToAmount } from '@monetr/interface/util/amounts';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { AmountType } from '@monetr/interface/util/amounts';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface TransferModalProps {
@@ -29,6 +30,7 @@ interface TransferValues {
 }
 
 function TransferModal(props: TransferModalProps): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
   const transfer = useTransfer();
@@ -43,7 +45,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
 
   function validate(values: TransferValues): FormikErrors<TransferValues> {
     const errors: FormikErrors<TransferValues> = {};
-    const amount = friendlyToAmount(values.amount);
+    const amount = locale.friendlyToAmount(values.amount);
 
     if (amount <= 0) {
       errors['amount'] = 'Amount must be greater than zero';
@@ -79,7 +81,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
     return transfer({
       fromSpendingId: values.fromSpendingId,
       toSpendingId: values.toSpendingId,
-      amount: friendlyToAmount(values.amount),
+      amount: locale.friendlyToAmount(values.amount),
     })
       .then(() => modal.remove())
       .then(() => enqueueSnackbar(
@@ -243,12 +245,13 @@ interface AmountButtonProps {
 }
 
 function AmountButton({ amount }: AmountButtonProps): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   const formik = useFormikContext<TransferValues>();
   const onClick = useCallback(() => {
     if (typeof amount === 'number') {
-      formik?.setFieldValue('amount', amountToFriendly(amount));
+      formik?.setFieldValue('amount', locale.amountToFriendly(amount));
     }
-  }, [formik, amount]);
+  }, [amount, formik, locale]);
 
   return (
     <MSpan
@@ -257,7 +260,7 @@ function AmountButton({ amount }: AmountButtonProps): JSX.Element {
       className='cursor-pointer hover:dark:text-dark-monetr-content-emphasis'
       onClick={ onClick }
     >
-      {typeof amount === 'number' && formatAmount(amount)}
+      { typeof amount === 'number' && locale.formatAmount(amount, AmountType.Stored) }
     </MSpan>
   );
 }

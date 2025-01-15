@@ -16,8 +16,8 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useCreateSpending } from '@monetr/interface/hooks/spending';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
-import { friendlyToAmount } from '@monetr/interface/util/amounts';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewExpenseValues {
@@ -37,6 +37,7 @@ const initialValues: NewExpenseValues = {
 };
 
 function NewExpenseModal(): JSX.Element {
+  const { data: { friendlyToAmount } } = useLocaleCurrency();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
   const { data: selectedBankAccount } = useSelectedBankAccount();
@@ -96,7 +97,7 @@ function NewExpenseModal(): JSX.Element {
               label='How much do you need?'
               required
               className='w-full md:w-1/2'
-              currency={ selectedBankAccount.currency }
+              allowNegative={ false }
             />
             <MDatePicker
               className='w-full md:w-1/2'

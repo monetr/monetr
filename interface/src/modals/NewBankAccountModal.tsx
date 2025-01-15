@@ -12,9 +12,8 @@ import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { useCreateBankAccount, useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
-import { friendlyToAmount } from '@monetr/interface/util/amounts';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewBankAccountValues {
@@ -28,7 +27,7 @@ const initialValues: NewBankAccountValues = {
 };
 
 function NewBankAccountModal(): JSX.Element {
-  const { data } = useAuthenticationSink();
+  const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
   const { data: selectedBankAccount } = useSelectedBankAccount();
@@ -44,8 +43,8 @@ function NewBankAccountModal(): JSX.Element {
     return await createBankAccount({
       linkId: selectedBankAccount.linkId,
       name: values.name,
-      availableBalance: friendlyToAmount(values.balance),
-      currentBalance: friendlyToAmount(values.balance),
+      availableBalance: locale.friendlyToAmount(values.balance),
+      currentBalance: locale.friendlyToAmount(values.balance),
       // TODO Make it so these can be customized
       accountType: BankAccountType.Depository,
       accountSubType: BankAccountSubType.Checking,
@@ -57,7 +56,7 @@ function NewBankAccountModal(): JSX.Element {
         disableWindowBlurListener: true,
       }))
       .finally(() => helper.setSubmitting(false));
-  }, [createBankAccount, selectedBankAccount, navigate, modal, enqueueSnackbar]);
+  }, [createBankAccount, selectedBankAccount.linkId, locale, navigate, modal, enqueueSnackbar]);
 
   return (
     <MModal open={ modal.visible } ref={ ref }>
@@ -87,7 +86,7 @@ function NewBankAccountModal(): JSX.Element {
             name='balance'
             label='Initial Balance'
             required
-            currency={ data.defaultCurrency }
+            allowNegative
           />
         </div>
         <div className='flex justify-end gap-2'>

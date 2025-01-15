@@ -7,14 +7,12 @@ import MSpan from '@monetr/interface/components/MSpan';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
-import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
 
 interface Values {
   startingBalance: number;
 }
 
 export default function ManualLinkSetupBalances(): JSX.Element {
-  const { data } = useAuthenticationSink();
   const viewContext = useViewContext<ManualLinkSetupSteps, {}>();
   const initialValues: Values = {
     startingBalance: 0.00,
@@ -43,7 +41,7 @@ export default function ManualLinkSetupBalances(): JSX.Element {
         className='w-full'
         required
         autoFocus
-        currency={ data.defaultCurrency }
+        allowNegative
       />
       <ManualLinkSetupButtons />
     </MForm>

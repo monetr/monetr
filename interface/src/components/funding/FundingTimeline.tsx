@@ -6,7 +6,8 @@ import { format, getUnixTime } from 'date-fns';
 import MSpan from '@monetr/interface/components/MSpan';
 import { Event, useForecast } from '@monetr/interface/hooks/forecast';
 import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
-import { formatAmount } from '@monetr/interface/util/amounts';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 interface FundingTimelineProps {
@@ -23,6 +24,7 @@ interface TimelineItemData {
 }
 
 export default function FundingTimeline(props: FundingTimelineProps): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   const { data: funding } = useFundingSchedule(props.fundingScheduleId);
   const { result: forecast, isLoading, isError } = useForecast();
 
@@ -78,10 +80,10 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
     // Only contributed
     header = 'Contribution';
     icon = <NorthEast />;
-    body = `${funding.name} will contribute ${formatAmount(props.contributedAmount)} to ${props.spendingCount} budget(s), resulting in a total allocation of ${formatAmount(props.endingAllocation)}.`;
+    body = `${funding.name} will contribute ${locale.formatAmount(props.contributedAmount, AmountType.Stored)} to ${props.spendingCount} budget(s), resulting in a total allocation of ${locale.formatAmount(props.endingAllocation, AmountType.Stored)}.`;
     if (funding.estimatedDeposit) {
       body += ' ';
-      body += `An estimated ${formatAmount(funding.estimatedDeposit - props.contributedAmount)} will be left over for Free-to-Use after this contribution.`;
+      body += `An estimated ${locale.formatAmount(funding.estimatedDeposit - props.contributedAmount, AmountType.Stored)} will be left over for Free-to-Use after this contribution.`;
     }
     if (props.date.getDate() != props.originalDate.getDate()) {
       dateExtra = `(Avoided weekend or holiday on ${format(props.originalDate, 'MMMM do')})`;

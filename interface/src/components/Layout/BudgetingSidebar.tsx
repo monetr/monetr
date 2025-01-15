@@ -15,8 +15,8 @@ import { ReactElement } from '@monetr/interface/components/types';
 import { useCurrentBalance } from '@monetr/interface/hooks/balances';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useNextFundingDate } from '@monetr/interface/hooks/fundingSchedules';
-import { useLink } from '@monetr/interface/hooks/links';
-import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface BudgetingSidebarProps {
@@ -24,9 +24,8 @@ export interface BudgetingSidebarProps {
 }
 
 export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Element {
-  const user = useAuthentication();
-  const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
-  const { data: link } = useLink(bankAccount?.linkId);
+  const { data: locale } = useLocaleCurrency();
+  const { data: bankAccount, isError } = useSelectedBankAccount();
   const balance = useCurrentBalance();
 
 
@@ -58,7 +57,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Free-To-Use:
             </MSpan>
             <MSpan size='lg' weight='semibold' className={ valueClassName }>
-              { balance?.getFreeToUseString(user.account.locale) }
+              { locale.formatAmount(balance?.free, AmountType.Stored) }
             </MSpan>
           </div>
         );
@@ -78,7 +77,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Available:
             </MSpan>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              { balance?.getAvailableString(user.account.locale) }
+              { locale.formatAmount(balance?.available, AmountType.Stored) }
             </MSpan>
           </div>
         );
@@ -97,7 +96,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Limit:
             </MSpan>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              { balance?.getAvailableString(user.account.locale) }
+              { locale.formatAmount(balance?.limit, AmountType.Stored) }
             </MSpan>
           </div>
         );
@@ -122,7 +121,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Current:
             </MSpan>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              { balance?.getCurrentString(user.account.locale) }
+              { locale.formatAmount(balance?.current, AmountType.Stored) }
             </MSpan>
           </div>
           <Limit />
@@ -142,7 +141,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Expenses
             </MSpan>
             <MBadge className='ml-auto' size='sm'>
-              { balance?.getExpensesString(user.account.locale) }
+              { locale.formatAmount(balance?.expenses, AmountType.Stored) }
             </MBadge>
           </NavigationItem>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/goals` }>
@@ -151,7 +150,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Goals
             </MSpan>
             <MBadge className='ml-auto' size='sm'>
-              { balance?.getGoalsString(user.account.locale) }
+              { locale.formatAmount(balance?.goals, AmountType.Stored) }
             </MBadge>
           </NavigationItem>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/funding` }>

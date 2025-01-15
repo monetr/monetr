@@ -21,8 +21,8 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useFundingSchedule, useRemoveFundingSchedule, useUpdateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
-import { amountToFriendly, friendlyToAmount } from '@monetr/interface/util/amounts';
 import { APIError } from '@monetr/interface/util/request';
 
 interface FundingValues {
@@ -34,6 +34,7 @@ interface FundingValues {
 }
 
 export default function FundingDetails(): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   // I don't want to do it this way, but it seems like it's the only way to do it for tests without having the entire
   // router also present in the test?
   const match = useMatch('/bank/:bankId/funding/:fundingId/details');
@@ -80,7 +81,7 @@ export default function FundingDetails(): JSX.Element {
       nextRecurrence: startOfDay(values.nextRecurrence),
       ruleset: values.rule,
       excludeWeekends: values.excludeWeekends,
-      estimatedDeposit: friendlyToAmount(values.estimatedDeposit),
+      estimatedDeposit: locale.friendlyToAmount(values.estimatedDeposit),
     });
 
     return updateFundingSchedule(updatedFunding)
@@ -128,7 +129,7 @@ export default function FundingDetails(): JSX.Element {
     rule: funding.ruleset,
     excludeWeekends: funding.excludeWeekends,
     // Because we store all amounts in cents, in order to use them in the UI we need to convert them back to dollars.
-    estimatedDeposit: amountToFriendly(funding.estimatedDeposit),
+    estimatedDeposit: locale.amountToFriendly(funding.estimatedDeposit),
   };
 
   const NextOccurrenceDecorator = () => {

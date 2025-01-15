@@ -6,8 +6,9 @@ import ArrowLink from '@monetr/interface/components/ArrowLink';
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { useSpendingOld } from '@monetr/interface/hooks/spending';
-import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import Transaction from '@monetr/interface/models/Transaction';
+import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface TransactionItemProps {
@@ -15,7 +16,7 @@ export interface TransactionItemProps {
 }
 
 export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
-  const user = useAuthentication();
+  const { data: locale } = useLocaleCurrency();
   const spending = useSpendingOld(transaction.spendingId);
   const navigate = useNavigate();
   const detailsUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
@@ -109,7 +110,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
         )}
         <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
           <span className={ amountClassnames }>
-            { transaction.getAmountString(user.account.locale) }
+            { locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0) }
           </span>
           <ArrowLink redirect={ detailsUrl } />
         </div>

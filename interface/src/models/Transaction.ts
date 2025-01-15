@@ -1,5 +1,4 @@
 
-import { AmountType, formatAmount } from '@monetr/interface/util/amounts';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export default class Transaction {
@@ -28,16 +27,6 @@ export default class Transaction {
         createdAt: parseDate(data?.createdAt),
       });
     }
-  }
-
-  getAmountString(locale: string = 'en_US'): string {
-    const amount = Math.abs(this.amount);
-    if (this.amount < 0) {
-      // Show the number sign on deposits only.
-      return formatAmount(amount, AmountType.Stored, locale, this.currency, true);
-    }
-
-    return formatAmount(amount, AmountType.Stored, locale, this.currency);
   }
 
   getIsAddition(): boolean {

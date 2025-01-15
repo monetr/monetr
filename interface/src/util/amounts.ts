@@ -6,10 +6,10 @@
  * **NOTE**: This function will eventually be replaced by a single source of truth for locale information from the
  * backend.
  *
- * @param {string} locale The local code for the current user's perspective. Defaults to `en-US`.
- * @param {string} currency The ISO currency code of the current the amount is in. Defaults to `USD`.
+ * @param {string} locale The local code for the current user's perspective.
+ * @param {string} currency The ISO currency code of the current the amount is in.
  */
-export function intlNumberFormat(locale: string = 'en_US', currency: string = 'USD'): Intl.ResolvedNumberFormatOptions {
+export function intlNumberFormat(locale: string, currency: string): Intl.ResolvedNumberFormatOptions {
   const localeAdjusted = locale.replace('_', '-');
   return new Intl.NumberFormat(
     localeAdjusted,
@@ -20,7 +20,14 @@ export function intlNumberFormat(locale: string = 'en_US', currency: string = 'U
   ).resolvedOptions();
 }
 
-export function getCurrencySymbol(locale: string = 'en_US', currency: string = 'USD') {
+/**
+ * getCurrencySymbol returns the unicode character for the specified currency in the specified locale. This can be a
+ * single character or it could be something like `CAD` depending on locale.
+ *
+ * @param {string} locale The local code for the current user's perspective.
+ * @param {string} currency The ISO currency code of the current the amount is in.
+ */
+export function getCurrencySymbol(locale: string, currency: string) {
   return (0).toLocaleString(
     locale.replace('_', '-'),
     {
@@ -32,17 +39,57 @@ export function getCurrencySymbol(locale: string = 'en_US', currency: string = '
   ).replace(/\d/g, '').trim();
 }
 
+/**
+ * getDecimalSeparator will return the character for the specified locale that is used as the decimal separator. For
+ * example `,` or `.`.
+ *
+ * @param {string} locale The local code for the current user's perspective.
+ */
+export function getDecimalSeparator(locale: string): string {
+  const localeAdjusted = locale.replace('_', '-');
+  const numberWithDecimalSeparator = 1.1;
+  return Intl.NumberFormat(localeAdjusted)
+    .formatToParts(numberWithDecimalSeparator)
+    .find(part => part.type === 'decimal')
+    .value;
+}
+
+/**
+ * getNumberGroupSeparator returns the thousands separator for the specified locale, but does not return the position of
+ * the separator.
+ *
+ * @param {string} locale The local code for the current user's perspective.
+ */
+export function getNumberGroupSeparator(locale: string): string {
+  const localeAdjusted = locale.replace('_', '-');
+  const numberWithDecimalSeparator = 100000.1;
+  return Intl.NumberFormat(localeAdjusted)
+    .formatToParts(numberWithDecimalSeparator)
+    .find(part => part.type === 'group')
+    .value;
+}
+
 export function intlNumberFormatter(locale: string = 'en_US', currency: string = 'USD'): (value: string) => string {
   const localeAdjusted = locale.replace('_', '-');
+  const numbering = new Intl.Locale(localeAdjusted);
   const formatter = new Intl.NumberFormat(
     localeAdjusted,
     {
       style: 'currency',
       currency: currency,
+      compactDisplay: 'long',
+      signDisplay: 'auto',
+      currencySign: 'accounting',
+      notation: 'standard',
+      numberingSystem: numbering.numberingSystem,
     },
   );
   return (value: string) => {
     if (value === '') return '';
+    (+value).toLocaleString(localeAdjusted, {
+      style: 'currency',
+      currency: currency,
+    });
     return formatter.format(+value);
   };
 }
@@ -58,7 +105,7 @@ export function intlNumberFormatter(locale: string = 'en_US', currency: string =
  * @param {string} locale The local code for the current user's perspective. Defaults to `en-US`.
  * @param {string} currency The ISO currency code of the current the amount is in. Defaults to `USD`.
  */
-export function amountToFriendly(amount: number, locale: string = 'en_US', currency: string = 'USD'): number {
+export function amountToFriendly(amount: number, locale: string, currency: string): number {
   const specs = intlNumberFormat(locale, currency);
 
   // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2 decimal
@@ -82,7 +129,7 @@ export function amountToFriendly(amount: number, locale: string = 'en_US', curre
  * @param {string} locale The locale code for the current user's perspective. Defaults to `en-US`.
  * @param {string} currency The ISO currency code of the currency the amount is in. Defaults to `USD`.
  */
-export function friendlyToAmount(friendly: number, locale: string = 'en_US', currency: string = 'USD'): number {
+export function friendlyToAmount(friendly: number, locale: string, currency: string): number {
   const specs = intlNumberFormat(locale, currency);
 
   // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2 decimal
@@ -123,8 +170,8 @@ export enum AmountType {
 export function formatAmount(
   amount: number,
   type: AmountType = AmountType.Stored,
-  locale: string = 'en_US',
-  currency: string = 'USD',
+  locale: string,
+  currency: string,
   signDisplay: boolean = false,
 ): string {
   const localeAdjusted = locale.replace('_', '-');

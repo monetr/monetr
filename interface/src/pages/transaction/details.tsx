@@ -20,9 +20,8 @@ import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
 import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
-import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import Transaction from '@monetr/interface/models/Transaction';
-import { amountToFriendly, friendlyToAmount } from '@monetr/interface/util/amounts';
 import { APIError } from '@monetr/interface/util/request';
 
 interface TransactionValues {
@@ -35,9 +34,9 @@ interface TransactionValues {
 }
 
 export default function TransactionDetails(): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   const { data: link } = useCurrentLink();
   const { enqueueSnackbar } = useSnackbar();
-  const user = useAuthentication();
   const { transactionId: id } = useParams();
   const updateTransaction = useUpdateTransaction();
   const transactionId = id || null;
@@ -86,7 +85,7 @@ export default function TransactionDetails(): JSX.Element {
       ...transaction,
       name: values.name,
       spendingId: values.spendingId,
-      amount: friendlyToAmount(values.amount),
+      amount: locale.friendlyToAmount(values.amount),
       date: startOfDay(values.date),
       isPending: values.isPending,
     });
@@ -116,7 +115,7 @@ export default function TransactionDetails(): JSX.Element {
     date: transaction.date,
     spendingId: transaction.spendingId,
     isPending: transaction.isPending,
-    amount: amountToFriendly(transaction.amount, user.account.locale, transaction.currency),
+    amount: locale.amountToFriendly(transaction.amount),
   };
 
   return (

@@ -1,6 +1,5 @@
 
 import PlaidBankAccount from '@monetr/interface/models/PlaidBankAccount';
-import { AmountType, formatAmount } from '@monetr/interface/util/amounts';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export type BankAccountStatus = 'unknown' | 'active' | 'inactive';
@@ -31,9 +30,6 @@ export enum BankAccountSubType {
 export default class BankAccount {
   bankAccountId: string;
   linkId: string;
-  availableBalance: number;
-  currentBalance: number;
-  limitBalance: number;
   mask?: string;
   name: string;
   originalName: string;
@@ -56,17 +52,5 @@ export default class BankAccount {
         createdAt: parseDate(data?.createdAt),
       });
     }
-  }
-
-  getAvailableBalanceString(locale: string = 'en_US') {
-    return formatAmount(this.availableBalance, AmountType.Stored, locale, this.currency);
-  }
-
-  getCurrentBalanceString(locale: string = 'en_US') {
-    return formatAmount(this.currentBalance, AmountType.Stored, locale, this.currency);
-  }
-
-  getLimitBalanceString(locale: string = 'en_US') {
-    return formatAmount(this.limitBalance, AmountType.Stored, locale, this.currency);
   }
 }
