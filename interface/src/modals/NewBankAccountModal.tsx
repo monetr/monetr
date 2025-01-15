@@ -30,7 +30,7 @@ function NewBankAccountModal(): JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
-  const { data: selectedBankAccount } = useSelectedBankAccount();
+  const { data: selectedBankAccount, isLoading } = useSelectedBankAccount();
   const createBankAccount = useCreateBankAccount();
   const navigate = useNavigate();
   const ref = useRef<MModalRef>(null);
@@ -56,7 +56,13 @@ function NewBankAccountModal(): JSX.Element {
         disableWindowBlurListener: true,
       }))
       .finally(() => helper.setSubmitting(false));
-  }, [createBankAccount, selectedBankAccount.linkId, locale, navigate, modal, enqueueSnackbar]);
+  }, [createBankAccount, selectedBankAccount, locale, navigate, modal, enqueueSnackbar]);
+
+  if (isLoading) (
+    <MModal open={ modal.visible } ref={ ref }>
+      One moment...
+    </MModal>
+  );
 
   return (
     <MModal open={ modal.visible } ref={ ref }>

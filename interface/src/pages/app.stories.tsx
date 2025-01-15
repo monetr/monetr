@@ -49,12 +49,13 @@ export const Transactions: StoryObj<typeof MonetrWrapper> = {
         'isSetup': true,
         'isTrialing': false,
         'trialingUntil': null,
+        'defaultCurrency': 'USD',
         'user': {
           'userId': 'user_01hym36e8ewaq0hxssb1m3k4ha',
           'loginId': 'lgn_01hym36d96ze86vz5g7883vcwg',
           'login': {
             'loginId': 'lgn_01hym36d96ze86vz5g7883vcwg',
-            'email': 'me@elliotcourant.dev',
+            'email': 'example@example.com',
             'firstName': 'Elliot',
             'lastName': 'Courant',
             'passwordResetAt': null,

@@ -58,16 +58,16 @@ describe('amounts', () => {
 
   describe('format amount', () => {
     it('will format dollar amount with defaults', () => {
-      const foo = formatAmount(1234);
+      const foo = formatAmount(1234, AmountType.Stored, 'en_US', 'USD');
       expect(foo).toBe('$12.34');
 
-      const bar = formatAmount(1001234);
+      const bar = formatAmount(1001234, AmountType.Stored, 'en_US', 'USD');
       expect(bar).toBe('$10,012.34');
 
-      const a = formatAmount(-1234);
+      const a = formatAmount(-1234, AmountType.Stored, 'en_US', 'USD');
       expect(a).toBe('-$12.34');
 
-      const b = formatAmount(-1001234);
+      const b = formatAmount(-1001234, AmountType.Stored, 'en_US', 'USD');
       expect(b).toBe('-$10,012.34');
     });
 
