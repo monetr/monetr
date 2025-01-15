@@ -4,8 +4,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -64,6 +66,211 @@ func TestPostBankAccount(t *testing.T) {
 			response.JSON().Path("$.accountType").String().IsEqual(string(DepositoryBankAccountType))
 			response.JSON().Path("$.accountSubType").String().IsEqual(string(CheckingBankAccountSubType))
 			response.JSON().Path("$.status").String().IsEqual(string(ActiveBankAccountStatus))
+		}
+	})
+
+	t.Run("create a bank account for a special locale", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		var token string
+		{ // Register a new user
+			email := testutils.GetUniqueEmail(t)
+			password := gofakeit.Password(true, true, true, true, false, 32)
+			response := e.POST(`/api/authentication/register`).
+				WithJSON(map[string]any{
+					"email":     email,
+					"password":  password,
+					"firstName": gofakeit.FirstName(),
+					"lastName":  gofakeit.LastName(),
+					// Create an account with a non-default locale such that the currency
+					// code should be different.
+					"locale":   "ja_JP",
+					"timezone": "Asia/Tokyo",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			token = GivenILogin(t, e, email, password)
+		}
+
+		var linkId ID[Link]
+		{ // Create the manual link
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(Link{
+					LinkType:        ManualLinkType,
+					InstitutionName: "Manual Link",
+					Description:     myownsanity.StringP("My personal link"),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.linkType").IsEqual(ManualLinkType)
+			response.JSON().Path("$.institutionName").String().NotEmpty()
+			response.JSON().Path("$.description").String().IsEqual("My personal link")
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+			assert.False(t, linkId.IsZero(), "must be able to extract the link ID")
+		}
+
+		{ // Create the manual bank account
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(BankAccount{
+					LinkId:           linkId,
+					AvailableBalance: 100,
+					CurrentBalance:   100,
+					LimitBalance:     0,
+					Mask:             "1234",
+					Name:             "Checking Account",
+					OriginalName:     "PERSONAL CHECKING",
+					Type:             DepositoryBankAccountType,
+					SubType:          CheckingBankAccountSubType,
+					Status:           ActiveBankAccountStatus,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.linkId").String().IsEqual(linkId.String())
+			response.JSON().Path("$.availableBalance").Number().IsEqual(100)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(100)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(0)
+			response.JSON().Path("$.mask").String().IsEqual("1234")
+			response.JSON().Path("$.name").String().IsEqual("Checking Account")
+			response.JSON().Path("$.originalName").String().IsEqual("PERSONAL CHECKING")
+			response.JSON().Path("$.accountType").String().IsEqual(string(DepositoryBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CheckingBankAccountSubType))
+			response.JSON().Path("$.status").String().IsEqual(string(ActiveBankAccountStatus))
+			// Make sure that we do not default to USD when we have a locale with it's
+			// own currency.
+			response.JSON().Path("$.currency").String().IsEqual("JPY")
+		}
+	})
+
+	t.Run("create a bank account overriding the currency code", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		var token string
+		{ // Register a new user
+			email := testutils.GetUniqueEmail(t)
+			password := gofakeit.Password(true, true, true, true, false, 32)
+			response := e.POST(`/api/authentication/register`).
+				WithJSON(map[string]any{
+					"email":     email,
+					"password":  password,
+					"firstName": gofakeit.FirstName(),
+					"lastName":  gofakeit.LastName(),
+					// Create an account with a non-default locale such that the currency
+					// code should be different.
+					"locale":   "ja_JP",
+					"timezone": "Asia/Tokyo",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			token = GivenILogin(t, e, email, password)
+		}
+
+		var linkId ID[Link]
+		{ // Create the manual link
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(Link{
+					LinkType:        ManualLinkType,
+					InstitutionName: "Manual Link",
+					Description:     myownsanity.StringP("My personal link"),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.linkType").IsEqual(ManualLinkType)
+			response.JSON().Path("$.institutionName").String().NotEmpty()
+			response.JSON().Path("$.description").String().IsEqual("My personal link")
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+			assert.False(t, linkId.IsZero(), "must be able to extract the link ID")
+		}
+
+		{ // Create the manual bank account
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(BankAccount{
+					LinkId:           linkId,
+					AvailableBalance: 100,
+					CurrentBalance:   100,
+					LimitBalance:     0,
+					Mask:             "1234",
+					Name:             "Checking Account",
+					OriginalName:     "PERSONAL CHECKING",
+					Type:             DepositoryBankAccountType,
+					SubType:          CheckingBankAccountSubType,
+					Status:           ActiveBankAccountStatus,
+					Currency:         "EUR",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.linkId").String().IsEqual(linkId.String())
+			response.JSON().Path("$.availableBalance").Number().IsEqual(100)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(100)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(0)
+			response.JSON().Path("$.mask").String().IsEqual("1234")
+			response.JSON().Path("$.name").String().IsEqual("Checking Account")
+			response.JSON().Path("$.originalName").String().IsEqual("PERSONAL CHECKING")
+			response.JSON().Path("$.accountType").String().IsEqual(string(DepositoryBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CheckingBankAccountSubType))
+			response.JSON().Path("$.status").String().IsEqual(string(ActiveBankAccountStatus))
+			// Because we specified a currency code in our request, and the currency
+			// code is valid, we should respect it regardless of the client's actual
+			// locale.
+			response.JSON().Path("$.currency").String().IsEqual("EUR")
+		}
+	})
+
+	t.Run("invalid currency code", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId ID[Link]
+		{ // Create the manual link
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(Link{
+					LinkType:        ManualLinkType,
+					InstitutionName: "Manual Link",
+					Description:     myownsanity.StringP("My personal link"),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.linkType").IsEqual(ManualLinkType)
+			response.JSON().Path("$.institutionName").String().NotEmpty()
+			response.JSON().Path("$.description").String().IsEqual("My personal link")
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+			assert.False(t, linkId.IsZero(), "must be able to extract the link ID")
+		}
+
+		{ // Create the manual bank account
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(BankAccount{
+					LinkId:           linkId,
+					AvailableBalance: 100,
+					CurrentBalance:   100,
+					LimitBalance:     0,
+					Mask:             "1234",
+					Name:             "Checking Account",
+					OriginalName:     "PERSONAL CHECKING",
+					Type:             DepositoryBankAccountType,
+					SubType:          CheckingBankAccountSubType,
+					Status:           ActiveBankAccountStatus,
+					Currency:         "???",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Provided currency code is not valid")
 		}
 	})
 
