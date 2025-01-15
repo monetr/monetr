@@ -7,6 +7,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ParseFriendlyToAmount takes a floating point or whole number as a string,
+// this number should not have any thousands separators or currency symbols. But
+// it may have the negative symbol preceding the number. Support for more
+// flexible inputs will come at a later time.
+// This function will then take that amount plus a currency code and return an
+// int64 representing that amount in the smallest unit of that currency.
 func ParseFriendlyToAmount(
 	input string,
 	currency string,

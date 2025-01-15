@@ -11,9 +11,10 @@ import (
 	"github.com/elliotcourant/gofx"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/formats/ofx"
-	"github.com/monetr/monetr/server/internal/calc"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
@@ -62,6 +63,7 @@ type (
 		upload                *TransactionUpload
 		file                  *File
 		data                  *gofx.OFX
+		currency              string
 		statementTransactions []gofx.StatementTransaction
 		existingTransactions  map[string]Transaction
 	}
@@ -348,6 +350,9 @@ func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
 				externalTransactionIds = append(externalTransactionIds, transaction.FITID)
 				j.statementTransactions = append(j.statementTransactions, *transaction)
 			}
+			if j.currency == "" {
+				j.currency = strings.ToUpper(statementTransactions.STMTRS.CURDEF)
+			}
 		}
 	} else if bankResponse := j.data.CREDITCARDMSGSRSV1; bankResponse != nil {
 		for _, statementTransactions := range bankResponse.CCSTMTTRNRS {
@@ -356,7 +361,16 @@ func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
 				externalTransactionIds = append(externalTransactionIds, transaction.FITID)
 				j.statementTransactions = append(j.statementTransactions, *transaction)
 			}
+			if j.currency == "" {
+				j.currency = strings.ToUpper(statementTransactions.CCSTMTRS.CURDEF)
+			}
 		}
+	}
+
+	// If we are unable to derive the currency code from the file itself then we
+	// should fallback to monetr's default.
+	if j.currency == "" {
+		j.currency = consts.DefaultCurrencyCode
 	}
 
 	// Reverse the order of the arrray we store such that the order we insert the
@@ -401,10 +415,11 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 			"uploadIdentifier": uploadIdentifier,
 		})
 
-		// TODO If the currency is not USD, then this parsing might be wrong, we
-		// should eventually parse the string based on the actual locale data for
-		// a given currency?
-		amount, err := calc.ConvertStringToCents(externalTransaction.TRNAMT)
+		// Parse the amount in the specified currency.
+		amount, err := currency.ParseFriendlyToAmount(
+			externalTransaction.TRNAMT,
+			j.currency,
+		)
 		if err != nil {
 			tlog.WithError(err).
 				WithField("trnamt", externalTransaction.TRNAMT).
@@ -451,8 +466,8 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 				Name:                 name,
 				OriginalName:         originalName,
 				OriginalMerchantName: name,
-				Currency:             "USD", // TODO Derive from file
-				IsPending:            false, // OFX files don't show pending?
+				Currency:             j.currency, // TODO Derive from file
+				IsPending:            false,      // OFX files don't show pending?
 				UploadIdentifier:     &uploadIdentifier,
 				Source:               TransactionSourceUpload,
 			}
@@ -495,7 +510,10 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 		for i := range j.data.BANKMSGSRSV1.STMTTRNRS {
 			statementTransactions := j.data.BANKMSGSRSV1.STMTTRNRS[i]
 			if statementTransactions.STMTRS.LEDGERBAL != nil {
-				currentBalance, err = calc.ConvertStringToCents(statementTransactions.STMTRS.LEDGERBAL.BALAMT)
+				currentBalance, err = currency.ParseFriendlyToAmount(
+					statementTransactions.STMTRS.LEDGERBAL.BALAMT,
+					j.currency,
+				)
 				if err != nil {
 					return errors.Wrap(err, "failed to parse ledger balance amount")
 				}
@@ -503,7 +521,10 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 			}
 
 			if statementTransactions.STMTRS.AVAILBAL != nil {
-				availableBalance, err = calc.ConvertStringToCents(statementTransactions.STMTRS.AVAILBAL.BALAMT)
+				availableBalance, err = currency.ParseFriendlyToAmount(
+					statementTransactions.STMTRS.AVAILBAL.BALAMT,
+					j.currency,
+				)
 				if err != nil {
 					return errors.Wrap(err, "failed to parse available balance amount")
 				}
@@ -513,14 +534,20 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 		for i := range j.data.CREDITCARDMSGSRSV1.CCSTMTTRNRS {
 			statementTransactions := j.data.CREDITCARDMSGSRSV1.CCSTMTTRNRS[i]
 			if statementTransactions.CCSTMTRS.LEDGERBAL != nil {
-				currentBalance, err = calc.ConvertStringToCents(statementTransactions.CCSTMTRS.LEDGERBAL.BALAMT)
+				currentBalance, err = currency.ParseFriendlyToAmount(
+					statementTransactions.CCSTMTRS.LEDGERBAL.BALAMT,
+					j.currency,
+				)
 				if err != nil {
 					return errors.Wrap(err, "failed to parse ledger balance amount")
 				}
 			}
 
 			if statementTransactions.CCSTMTRS.AVAILBAL != nil {
-				availableBalance, err = calc.ConvertStringToCents(statementTransactions.CCSTMTRS.AVAILBAL.BALAMT)
+				availableBalance, err = currency.ParseFriendlyToAmount(
+					statementTransactions.CCSTMTRS.AVAILBAL.BALAMT,
+					j.currency,
+				)
 				if err != nil {
 					return errors.Wrap(err, "failed to parse available balance amount")
 				}
