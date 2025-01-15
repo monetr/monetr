@@ -14,9 +14,9 @@ import { useViewContext } from '@monetr/interface/components/ViewManager';
 import { useCreateBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import { useCreateLink } from '@monetr/interface/hooks/links';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
-import { friendlyToAmount } from '@monetr/interface/util/amounts';
 
 interface Values {
   nextPayday: Date;
@@ -25,6 +25,7 @@ interface Values {
 }
 
 export default function ManualLinkSetupIncome(): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   const createLink = useCreateLink();
   const createBankAccount = useCreateBankAccount();
   const createFundingSchedule = useCreateFundingSchedule();
@@ -50,8 +51,8 @@ export default function ManualLinkSetupIncome(): JSX.Element {
       .then(link => createBankAccount({
         linkId: link.linkId,
         name: data['accountName'],
-        availableBalance: friendlyToAmount(data['startingBalance']),
-        currentBalance: friendlyToAmount(data['startingBalance']),
+        availableBalance: locale.friendlyToAmount(data['startingBalance']),
+        currentBalance: locale.friendlyToAmount(data['startingBalance']),
         accountType: BankAccountType.Depository,
         accountSubType: BankAccountSubType.Checking,
       }))
@@ -60,7 +61,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
         name: 'Payday',
         nextRecurrence: startOfDay(values.nextPayday),
         ruleset: values.ruleset,
-        estimatedDeposit: friendlyToAmount(values.paydayAmount),
+        estimatedDeposit: locale.friendlyToAmount(values.paydayAmount),
         excludeWeekends: false,
       })))
       .then(fundingSchedule => navigate(`/bank/${fundingSchedule.bankAccountId}/transactions`))

@@ -564,6 +564,10 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 		return errors.Wrap(err, "failed to retrieve bank account for file import sync")
 	}
 
+	if j.currency != bankAccount.Currency {
+		return errors.Errorf("Currency of OFX file does not match currency of bank account, file: [%s], account: [%s]", j.currency, bankAccount.Currency)
+	}
+
 	// TODO Log the previous value and the new one?
 	bankAccount.CurrentBalance = currentBalance
 	bankAccount.AvailableBalance = availableBalance

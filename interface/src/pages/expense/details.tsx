@@ -20,9 +20,10 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useRemoveSpending, useSpending, useUpdateSpending } from '@monetr/interface/hooks/spending';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
-import { amountToFriendly, friendlyToAmount } from '@monetr/interface/util/amounts';
+import { AmountType } from '@monetr/interface/util/amounts';
 import { APIError } from '@monetr/interface/util/request';
 
 interface ExpenseValues {
@@ -34,6 +35,7 @@ interface ExpenseValues {
 }
 
 export default function ExpenseDetails(): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();
   const navigate = useNavigate();
@@ -125,7 +127,7 @@ export default function ExpenseDetails(): JSX.Element {
       nextRecurrence: startOfDay(values.nextRecurrence),
       fundingScheduleId: values.fundingScheduleId,
       ruleset: values.recurrenceRule,
-      targetAmount: friendlyToAmount(values.amount),
+      targetAmount: locale.friendlyToAmount(values.amount),
     });
 
     return updateSpending(updatedSpending)
@@ -148,7 +150,7 @@ export default function ExpenseDetails(): JSX.Element {
 
   const initialValues: ExpenseValues = {
     name: spending.name,
-    amount: amountToFriendly(spending.targetAmount),
+    amount: locale.amountToFriendly(spending.targetAmount),
     nextRecurrence: spending.nextRecurrence,
     fundingScheduleId: spending.fundingScheduleId,
     recurrenceRule: spending.ruleset,
@@ -196,9 +198,9 @@ export default function ExpenseDetails(): JSX.Element {
                     { spending?.name }
                   </p>
                   <MSpan weight='semibold'>
-                    { spending?.getCurrentAmountString() }
+                    { locale.formatAmount(spending?.currentAmount, AmountType.Stored) }
                     <span className='font-normal'>of</span>
-                    { spending?.getTargetAmountString() }
+                    { locale.formatAmount(spending?.targetAmount, AmountType.Stored) }
                   </MSpan>
                 </div>
               </div>

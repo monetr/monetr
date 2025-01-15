@@ -4,7 +4,8 @@ import { format, isThisYear } from 'date-fns';
 import ArrowLink from '@monetr/interface/components/ArrowLink';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { useTransaction } from '@monetr/interface/hooks/transactions';
-import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface SimilarTransactionItemProps {
@@ -12,7 +13,7 @@ export interface SimilarTransactionItemProps {
 }
 
 export default function SimilarTransactionItem(props: SimilarTransactionItemProps): JSX.Element {
-  const user = useAuthentication();
+  const { data: locale } = useLocaleCurrency();
   const { data: transaction, isLoading, isError } = useTransaction(props.transactionId);
 
   if (isLoading) {
@@ -81,7 +82,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
         </div>
         <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
           <span className={ amountClassnames }>
-            { transaction.getAmountString(user.account.locale) }
+            { locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0) }
           </span>
           <ArrowLink redirect={ redirectUrl } />
         </div>

@@ -15,8 +15,8 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import { useCreateSpending } from '@monetr/interface/hooks/spending';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
-import { friendlyToAmount } from '@monetr/interface/util/amounts';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewGoalValues {
@@ -34,6 +34,7 @@ const initialValues: NewGoalValues = {
 };
 
 function NewGoalModal(): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
   const selectedBankAccountId = useSelectedBankAccountId();
@@ -50,7 +51,7 @@ function NewGoalModal(): JSX.Element {
       nextRecurrence: startOfDay(new Date(values.nextOccurrence)),
       spendingType: SpendingType.Goal,
       fundingScheduleId: values.fundingScheduleId,
-      targetAmount: friendlyToAmount(values.amount),
+      targetAmount: locale.friendlyToAmount(values.amount),
       ruleset: null,
     });
 

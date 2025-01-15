@@ -1,11 +1,15 @@
 package controller
 
 import (
+	"bytes"
 	"net/http"
 	"strings"
 
+	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/consts"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/sirupsen/logrus"
 )
 
 func (c *Controller) getBankAccounts(ctx echo.Context) error {
@@ -83,6 +87,56 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 
 	if bankAccount.Name == "" {
 		return c.badRequest(ctx, "Bank account must have a name")
+	}
+
+	log := c.getLog(ctx)
+
+	// If the client has not specified a currency code then we should determine
+	// the currency code based on the user's locale.
+	if bankAccount.Currency == "" {
+		account, err := c.Accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
+		if err != nil {
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to read account details")
+		}
+
+		// If we cannot determine what currencyCode we should default to based on the
+		// locale, then fallback to monetr's global default.
+		currencyCode := consts.DefaultCurrencyCode
+		// Try to retrieve currency information for the user's locale from the
+		// operating system.
+		lconv, err := locale.GetLConv(account.Locale)
+		if err != nil || lconv == nil {
+			log.
+				WithFields(logrus.Fields{
+					"locale": account.Locale,
+				}).
+				WithError(err).
+				Warn("failed to get currency information for account's locale, application default currency will be used")
+		} else {
+			// If it worked then clean up the code from the OS and use it.
+			currencyCode = string(bytes.TrimSpace(lconv.IntCurrSymbol))
+		}
+
+		// Set the bank account's currency based on the user's locale.
+		bankAccount.Currency = currencyCode
+	} else {
+		// Clean up the currency code the user provided.
+		currencyCode := strings.ToUpper(strings.TrimSpace(bankAccount.Currency))
+		// Check to see if the system we are on supports that currency code by
+		// checking if there is fractional digit information about it.
+		if _, err := locale.GetCurrencyInternationalFractionalDigits(currencyCode); err != nil {
+			log.
+				WithFields(logrus.Fields{
+					"input":    bankAccount.Currency,
+					"currency": currencyCode,
+				}).
+				WithError(err).
+				Warn("could not find currency information for the specified currency code")
+			return c.badRequest(ctx, "Provided currency code is not valid")
+		}
+		// If the currency code specified by the client is valid then use that code
+		// for the account.
+		bankAccount.Currency = currencyCode
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)

@@ -12,8 +12,8 @@ import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { useCreateBankAccount, useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
-import { friendlyToAmount } from '@monetr/interface/util/amounts';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewBankAccountValues {
@@ -27,9 +27,10 @@ const initialValues: NewBankAccountValues = {
 };
 
 function NewBankAccountModal(): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
-  const { data: selectedBankAccount } = useSelectedBankAccount();
+  const { data: selectedBankAccount, isLoading } = useSelectedBankAccount();
   const createBankAccount = useCreateBankAccount();
   const navigate = useNavigate();
   const ref = useRef<MModalRef>(null);
@@ -42,8 +43,8 @@ function NewBankAccountModal(): JSX.Element {
     return await createBankAccount({
       linkId: selectedBankAccount.linkId,
       name: values.name,
-      availableBalance: friendlyToAmount(values.balance),
-      currentBalance: friendlyToAmount(values.balance),
+      availableBalance: locale.friendlyToAmount(values.balance),
+      currentBalance: locale.friendlyToAmount(values.balance),
       // TODO Make it so these can be customized
       accountType: BankAccountType.Depository,
       accountSubType: BankAccountSubType.Checking,
@@ -55,7 +56,13 @@ function NewBankAccountModal(): JSX.Element {
         disableWindowBlurListener: true,
       }))
       .finally(() => helper.setSubmitting(false));
-  }, [createBankAccount, selectedBankAccount, navigate, modal, enqueueSnackbar]);
+  }, [createBankAccount, selectedBankAccount, locale, navigate, modal, enqueueSnackbar]);
+
+  if (isLoading) (
+    <MModal open={ modal.visible } ref={ ref }>
+      One moment...
+    </MModal>
+  );
 
   return (
     <MModal open={ modal.visible } ref={ ref }>

@@ -29,12 +29,14 @@ describe('bank sidebar', () => {
       'hasSubscription': true,
       'isActive': true,
       'isSetup': true,
+      'defaultCurrency': 'USD',
       'user': {
         'account': {
           'accountId': 1,
           'subscriptionActiveUntil': '2023-07-26T00:31:38Z',
           'subscriptionStatus': 'active',
           'timezone': 'America/Chicago',
+          'locale': 'en_US',
         },
         'accountId': 1,
         'firstName': 'Elliot',
@@ -135,6 +137,7 @@ describe('bank sidebar', () => {
         'accountType': 'depository',
         'accountSubType': 'checking',
         'status': 'active',
+        'currency': 'USD',
         'lastUpdated': '2023-07-02T04:22:52.48118Z',
       },
     ]);
@@ -151,6 +154,7 @@ describe('bank sidebar', () => {
         'accountType': 'depository',
         'accountSubType': 'checking',
         'status': 'active',
+        'currency': 'USD',
         'lastUpdated': '2023-07-02T04:22:52.48118Z',
       },
     ]);
@@ -178,12 +182,14 @@ describe('bank sidebar', () => {
       'hasSubscription': true,
       'isActive': true,
       'isSetup': true,
+      'defaultCurrency': 'USD',
       'user': {
         'account': {
           'accountId': 1,
           'subscriptionActiveUntil': '2023-07-26T00:31:38Z',
           'subscriptionStatus': 'active',
           'timezone': 'America/Chicago',
+          'locale': 'en_US',
         },
         'accountId': 1,
         'firstName': 'Elliot',
@@ -284,6 +290,7 @@ describe('bank sidebar', () => {
         'accountType': 'depository',
         'accountSubType': 'checking',
         'status': 'active',
+        'currency': 'USD',
         'lastUpdated': '2023-07-02T04:22:52.48118Z',
       },
     ]);
@@ -300,6 +307,7 @@ describe('bank sidebar', () => {
         'accountType': 'depository',
         'accountSubType': 'checking',
         'status': 'active',
+        'currency': 'USD',
         'lastUpdated': '2023-07-02T04:22:52.48118Z',
       },
     ]);
@@ -326,12 +334,14 @@ describe('bank sidebar', () => {
       'hasSubscription': true,
       'isActive': true,
       'isSetup': true,
+      'defaultCurrency': 'USD',
       'user': {
         'account': {
           'accountId': 1,
           'subscriptionActiveUntil': '2023-07-26T00:31:38Z',
           'subscriptionStatus': 'active',
           'timezone': 'America/Chicago',
+          'locale': 'en_US',
         },
         'accountId': 1,
         'firstName': 'Elliot',
@@ -430,6 +440,7 @@ describe('bank sidebar', () => {
         'accountType': 'depository',
         'accountSubType': 'checking',
         'status': 'active',
+        'currency': 'USD',
         'lastUpdated': '2023-07-02T04:22:52.48118Z',
       },
     ]);
@@ -446,6 +457,7 @@ describe('bank sidebar', () => {
         'accountType': 'depository',
         'accountSubType': 'checking',
         'status': 'active',
+        'currency': 'USD',
         'lastUpdated': '2023-07-02T04:22:52.48118Z',
       },
     ]);

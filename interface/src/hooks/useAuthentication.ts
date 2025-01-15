@@ -7,6 +7,7 @@ import request from '@monetr/interface/util/request';
 
 export interface AuthenticationWrapper {
   user: User;
+  defaultCurrency: string;
   mfaPending: boolean;
   isSetup: boolean;
   isActive: boolean;
@@ -36,6 +37,7 @@ export function useAuthenticationSink(): AuthenticationResult {
     ...result,
     result: {
       user: result?.data?.user && new User(result?.data?.user),
+      defaultCurrency: result?.data?.defaultCurrency,
       mfaPending: Boolean(result?.data?.mfaPending),
       isSetup: Boolean(result?.data?.isSetup),
       isActive: Boolean(result?.data?.isActive),

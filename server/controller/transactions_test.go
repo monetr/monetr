@@ -7,6 +7,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
@@ -237,6 +238,7 @@ func TestPostTransactions(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
+			response.JSON().Path("$.transaction.currency").String().IsEqual("USD")
 			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance - 100)
 			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance - 100)
 		}
@@ -257,6 +259,7 @@ func TestPostTransactions(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
+			response.JSON().Path("$.transaction.currency").String().IsEqual("USD")
 			// Balance should have gone up by $2, so we should be $1 higher from when
 			// we started.
 			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance + 100)
@@ -306,6 +309,7 @@ func TestPostTransactions(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
+			response.JSON().Path("$.transaction.currency").String().IsEqual("USD")
 			// Make sure that if adjusts balance is false then we do not modify the
 			// actual balances for the account.
 			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance)
@@ -429,6 +433,105 @@ func TestPostTransactions(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
 			response.JSON().Path("$.spending.spendingId").String().NotEmpty()
+		}
+	})
+
+	t.Run("create a transaction for a non-usd bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		{ // Register a new user
+			email := testutils.GetUniqueEmail(t)
+			password := gofakeit.Password(true, true, true, true, false, 32)
+			response := e.POST(`/api/authentication/register`).
+				WithJSON(map[string]any{
+					"email":     email,
+					"password":  password,
+					"firstName": gofakeit.FirstName(),
+					"lastName":  gofakeit.LastName(),
+					// Create an account with a non-default locale such that the currency
+					// code should be different.
+					"locale":   "ja_JP",
+					"timezone": "Asia/Tokyo",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			token = GivenILogin(t, e, email, password)
+		}
+
+		var linkId ID[Link]
+		{ // Create the manual link
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(Link{
+					LinkType:        ManualLinkType,
+					InstitutionName: "Manual Link",
+					Description:     myownsanity.StringP("My personal link"),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.linkType").IsEqual(ManualLinkType)
+			response.JSON().Path("$.institutionName").String().NotEmpty()
+			response.JSON().Path("$.description").String().IsEqual("My personal link")
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+			assert.False(t, linkId.IsZero(), "must be able to extract the link ID")
+		}
+
+		var bankAccountId ID[BankAccount]
+		{ // Create the manual bank account
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(BankAccount{
+					LinkId:           linkId,
+					AvailableBalance: 100,
+					CurrentBalance:   100,
+					LimitBalance:     0,
+					Mask:             "1234",
+					Name:             "Checking Account",
+					OriginalName:     "PERSONAL CHECKING",
+					Type:             DepositoryBankAccountType,
+					SubType:          CheckingBankAccountSubType,
+					Status:           ActiveBankAccountStatus,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.linkId").String().IsEqual(linkId.String())
+			response.JSON().Path("$.availableBalance").Number().IsEqual(100)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(100)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(0)
+			response.JSON().Path("$.mask").String().IsEqual("1234")
+			response.JSON().Path("$.name").String().IsEqual("Checking Account")
+			response.JSON().Path("$.originalName").String().IsEqual("PERSONAL CHECKING")
+			response.JSON().Path("$.accountType").String().IsEqual(string(DepositoryBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CheckingBankAccountSubType))
+			response.JSON().Path("$.status").String().IsEqual(string(ActiveBankAccountStatus))
+			// Make sure that we do not default to USD when we have a locale with it's
+			// own currency.
+			response.JSON().Path("$.currency").String().IsEqual("JPY")
+			bankAccountId = ID[BankAccount](response.JSON().Path("$.bankAccountId").String().Raw())
+		}
+
+		{ // Create a transaction which should have the same currency as the bank.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"bankAccountId":  bankAccountId,
+					"amount":         100, // $1
+					"isPending":      false,
+					"name":           "I spent some money",
+					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"adjustsBalance": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
+			response.JSON().Path("$.transaction.currency").String().IsEqual("JPY")
 		}
 	})
 }

@@ -1,7 +1,6 @@
 
 import { format, isThisYear } from 'date-fns';
 
-import { amountToFriendly, AmountType, formatAmount } from '@monetr/interface/util/amounts';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum SpendingType {
@@ -47,26 +46,6 @@ export default class Spending {
       format(this.nextRecurrence, 'MMM do, yyyy');
   }
 
-  getTargetAmountString(locale: string = 'en_US'): string {
-    return formatAmount(this.targetAmount, AmountType.Stored, locale);
-  }
-
-  getTargetAmountDollars(): number {
-    return amountToFriendly(this.targetAmount);
-  }
-
-  getCurrentAmountString(locale: string = 'en_US'): string {
-    return formatAmount(this.currentAmount, AmountType.Stored, locale);
-  }
-
-  getUsedAmountString(locale: string = 'en_US'): string {
-    return formatAmount(this.usedAmount, AmountType.Stored, locale);
-  }
-
-  getNextContributionAmountString(locale: string = 'en_US'): string {
-    return formatAmount(this.nextContributionAmount, AmountType.Stored, locale);
-  }
-
   getIsExpense(): boolean {
     return this.spendingType === SpendingType.Expense;
   }
@@ -82,7 +61,7 @@ export default class Spending {
     return (this.currentAmount + this.usedAmount) < this.targetAmount;
   }
 
-  getGoalSavedAmountString(locale: string = 'en_US'): string {
-    return formatAmount(this.currentAmount + this.usedAmount, AmountType.Stored, locale);
+  getGoalSavedAmount(): number {
+    return this.currentAmount + this.usedAmount;
   }
 }

@@ -14,10 +14,10 @@ import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
-import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useCreateSpending } from '@monetr/interface/hooks/spending';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
-import { friendlyToAmount } from '@monetr/interface/util/amounts';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewExpenseValues {
@@ -37,9 +37,10 @@ const initialValues: NewExpenseValues = {
 };
 
 function NewExpenseModal(): JSX.Element {
+  const { data: { friendlyToAmount } } = useLocaleCurrency();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
-  const selectedBankAccountId = useSelectedBankAccountId();
+  const { data: selectedBankAccount } = useSelectedBankAccount();
   const createSpending = useCreateSpending();
 
   const ref = useRef<MModalRef>(null);
@@ -49,7 +50,7 @@ function NewExpenseModal(): JSX.Element {
     helper: FormikHelpers<NewExpenseValues>,
   ): Promise<void> {
     const newSpending = new Spending({
-      bankAccountId: selectedBankAccountId,
+      bankAccountId: selectedBankAccount.bankAccountId,
       name: values.name.trim(),
       nextRecurrence: startOfDay(new Date(values.nextOccurrence)),
       spendingType: SpendingType.Expense,

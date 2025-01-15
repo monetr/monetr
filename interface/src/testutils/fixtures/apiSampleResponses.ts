@@ -35,6 +35,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
     'isSetup': true,
     'isTrialing': false,
     'trialingUntil': null,
+    'defaultCurrency': 'USD',
     'user': {
       'userId': 'user_01hym36e8ewaq0hxssb1m3k4ha',
       'loginId': 'lgn_01hym36d96ze86vz5g7883vcwg',
@@ -147,6 +148,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
       'accountType': 'depository',
       'accountSubType': 'checking',
       'status': 'active',
+      'currency': 'USD',
       'lastUpdated': '2024-08-27T08:53:48.555368Z',
       'createdAt': '2022-09-25T02:08:40.758642Z',
       'updatedAt': '2024-03-19T06:17:32.335106Z',
@@ -173,6 +175,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
     'accountType': 'depository',
     'accountSubType': 'checking',
     'status': 'active',
+    'currency': 'USD',
     'lastUpdated': '2024-08-27T08:53:48.555368Z',
     'createdAt': '2022-09-25T02:08:40.758642Z',
     'updatedAt': '2024-03-19T06:17:32.335106Z',

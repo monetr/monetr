@@ -7,7 +7,8 @@ import MSpan from '@monetr/interface/components/MSpan';
 import { Event, useForecast } from '@monetr/interface/hooks/forecast';
 import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import { useSpending } from '@monetr/interface/hooks/spending';
-import { formatAmount } from '@monetr/interface/util/amounts';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface ExpenseTimelineProps {
@@ -24,6 +25,7 @@ interface TimelineItemData {
 }
 
 export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   const { data: spending } = useSpending(props.spendingId);
   const { data: fundingSchedule } = useFundingSchedule(spending?.fundingScheduleId);
   const { result: forecast, isLoading, isError } = useForecast();
@@ -85,22 +87,22 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
       // a funding schedule that is 15th and the last day of the month, landing on september 15th (friday) funding
       // an expense that is spent every friday.
       if (props.endingAllocation > 0) {
-        body = `An estimated ${formatAmount(props.spentAmount)} will be spent or be ready to spend, ${formatAmount(props.contributedAmount)} was contributed to this budget at the same time. ${formatAmount(props.endingAllocation)} is left over to use from this budget until the next contribution.`;
+        body = `An estimated ${locale.formatAmount(props.spentAmount, AmountType.Stored)} will be spent or be ready to spend, ${locale.formatAmount(props.contributedAmount, AmountType.Stored)} was contributed to this budget at the same time. ${locale.formatAmount(props.endingAllocation, AmountType.Stored)} is left over to use from this budget until the next contribution.`;
       } else {
-        body = `An estimated ${formatAmount(props.spentAmount)} will be spent or be ready to spend, included the ${formatAmount(props.contributedAmount)} that was contributed to this budget at the same time to account for the spending.`;
+        body = `An estimated ${locale.formatAmount(props.spentAmount, AmountType.Stored)} will be spent or be ready to spend, included the ${locale.formatAmount(props.contributedAmount, AmountType.Stored)} that was contributed to this budget at the same time to account for the spending.`;
       }
     } else if (props.contributedAmount === 0 && props.spentAmount > 0) {
       // Only spent
       header = 'Spending';
       icon = <SouthEast />;
-      body = `An estimated ${formatAmount(props.spentAmount)} will be spent or will be ready to spend, from your ${spending.name} budget.`;
+      body = `An estimated ${locale.formatAmount(props.spentAmount, AmountType.Stored)} will be spent or will be ready to spend, from your ${spending.name} budget.`;
     } else if (props.contributedAmount > 0 && props.spentAmount === 0) {
       // Only contributed
       header = 'Contribution';
       icon = <NorthEast />;
-      body = `${formatAmount(props.contributedAmount)} will be allocated towards ${spending.name} from ${fundingSchedule.name}, resulting in a total allocation of ${formatAmount(props.endingAllocation)}.`;
+      body = `${locale.formatAmount(props.contributedAmount, AmountType.Stored)} will be allocated towards ${spending.name} from ${fundingSchedule.name}, resulting in a total allocation of ${locale.formatAmount(props.endingAllocation, AmountType.Stored)}.`;
       if (props.totalContributedAmount > props.contributedAmount) {
-        secondaryBody = `A total of ${formatAmount(props.totalContributedAmount)} will be contributed to all budgets on this day.`;
+        secondaryBody = `A total of ${locale.formatAmount(props.totalContributedAmount, AmountType.Stored)} will be contributed to all budgets on this day.`;
       }
     } else {
       // Nothing is happening with this expense on this item.
@@ -134,7 +136,7 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
           <span className='bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300 ml-3'>Today</span>
         </h3>
         <p className='text-base font-normal text-zinc-500 dark:text-zinc-400'>
-          {spending.name} currently has {spending.getCurrentAmountString()} allocated towards it.
+          {spending.name} currently has {locale.formatAmount(spending.currentAmount, AmountType.Stored)} allocated towards it.
         </p>
         <p className='mb-4 text-base font-normal text-zinc-500 dark:text-zinc-400'>
           Below is the timeline for this expense over the next month.

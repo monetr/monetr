@@ -3,6 +3,8 @@ import { InputAttributes, NumberFormatValues, NumericFormat, NumericFormatProps 
 import { useFormikContext } from 'formik';
 
 import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { getCurrencySymbol, getDecimalSeparator, getNumberGroupSeparator, intlNumberFormat, intlNumberFormatter } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 type NumericField =  Omit<
@@ -14,6 +16,7 @@ export interface MAmountFieldProps extends NumericField {
   label?: string;
   error?: string;
   labelDecorator?: MLabelDecorator;
+  currency?: string;
 }
 
 const MAmountFieldPropsDefaults: MAmountFieldProps = {
@@ -23,6 +26,7 @@ const MAmountFieldPropsDefaults: MAmountFieldProps = {
 };
 
 export default function MAmountField(props: MAmountFieldProps = MAmountFieldPropsDefaults): JSX.Element {
+  const { data: localeInfo } = useLocaleCurrency();
   const formikContext = useFormikContext();
   const getFormikError = () => {
     if (!formikContext?.touched[props?.name]) return null;
@@ -32,10 +36,12 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
 
   props = {
     ...MAmountFieldPropsDefaults,
+    currency: localeInfo.currency ?? 'USD',
     ...props,
     disabled: props?.disabled || formikContext?.isSubmitting,
     error: props?.error || getFormikError(),
   };
+  const currencyInfo = intlNumberFormat(localeInfo.locale, props.currency);
 
   const { labelDecorator, ...otherProps } = props;
   const LabelDecorator = labelDecorator || MAmountFieldPropsDefaults.labelDecorator;
@@ -123,16 +129,18 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           /* These top properties might be overwritten by the ...otherProps below, this is intended. */
           disabled={ formikContext?.isSubmitting }
           onBlur={ formikContext?.handleBlur }
-          thousandSeparator=','
-          thousandsGroupStyle='thousand'
           value={ value }
           { ...otherProps }
           /* Properties below this point cannot be overwritten by the caller! */
           className={ classNames }
-          decimalScale={ 2 }
           fixedDecimalScale
+          decimalScale={ currencyInfo.maximumFractionDigits }
+          decimalSeparator={ getDecimalSeparator(localeInfo.locale) }
+          thousandSeparator={ getNumberGroupSeparator(localeInfo.locale) }
           onValueChange={ onChange }
-          prefix='$ '
+          renderText={ intlNumberFormatter(localeInfo.locale, props.currency)  }
+          placeholder={ `${intlNumberFormatter(localeInfo.locale, props.currency)('0') }` }
+          prefix={ `${getCurrencySymbol(localeInfo.locale, props.currency)}` }
         />
       </div>
       <Error />

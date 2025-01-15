@@ -7,10 +7,11 @@ import MSpan from './MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/balances';
 import { useSpendingSink } from '@monetr/interface/hooks/spending';
 import { useUpdateTransaction } from '@monetr/interface/hooks/transactions';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTheme from '@monetr/interface/hooks/useTheme';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import Transaction from '@monetr/interface/models/Transaction';
-import { formatAmount } from '@monetr/interface/util/amounts';
+import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import './MSelectSpendingTransaction.scss';
@@ -171,9 +172,13 @@ export interface SpendingOption {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
 export function SpendingSelectOption({ children, ...props }: OptionProps<SpendingOption>): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   // If the current amount is specified then format the amount, if it is not then use N/A.
   const notLoaded = props.data.spending?.currentAmount === undefined;
-  const amount = notLoaded ? 'N/A' : formatAmount(props.data.spending.currentAmount);
+  const amount = notLoaded ? 'N/A' : locale.formatAmount(
+    props.data.spending.currentAmount,
+    AmountType.Stored,
+  );
   return (
     <components.Option { ...props }>
       <div className='flex justify-between'>

@@ -7,8 +7,9 @@ import { format, isThisYear } from 'date-fns';
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useNextFundingForecast } from '@monetr/interface/hooks/forecast';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
-import { formatAmount } from '@monetr/interface/util/amounts';
+import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 
 import { rrulestr } from 'rrule';
@@ -18,6 +19,7 @@ export interface FundingItemProps {
 }
 
 export default function FundingItem(props: FundingItemProps): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   const navigate = useNavigate();
   const { funding } = props;
   const contributionForecast = useNextFundingForecast(funding.fundingScheduleId);
@@ -69,7 +71,7 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
               </span>
               &nbsp;
               <span className='text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>
-                { !!contributionForecast?.data ? formatAmount(contributionForecast.data) : '...' }
+                { !!contributionForecast?.data ? locale.formatAmount(contributionForecast.data, AmountType.Stored) : '...' }
               </span>
             </div>
           </div>

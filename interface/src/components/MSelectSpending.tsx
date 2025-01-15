@@ -8,8 +8,9 @@ import MSelect, { MSelectProps } from './MSelect';
 import MSpan from './MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/balances';
 import { useSpendingSink } from '@monetr/interface/hooks/spending';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
-import { formatAmount } from '@monetr/interface/util/amounts';
+import { AmountType } from '@monetr/interface/util/amounts';
 
 // Remove the props that we do not want to allow the caller to pass in.
 type MSelecteSpendingBaseProps = Omit<
@@ -132,8 +133,13 @@ interface SpendingOption {
 }
 
 function MSelectSpendingOption({ children: _, ...props }: OptionProps<SpendingOption>): JSX.Element {
+  const { data: locale } = useLocaleCurrency();
   const notLoaded = props.data.spending?.currentAmount === undefined;
-  const amount = notLoaded ? 'N/A' : formatAmount(props.data.spending.currentAmount);
+  const amount = notLoaded ? 'N/A' : locale.formatAmount(
+    props.data.spending.currentAmount,
+    AmountType.Stored,
+  );
+
   return (
     <components.Option { ...props }>
       <div className='flex justify-between'>
@@ -152,7 +158,7 @@ function MSelectSpendingOption({ children: _, ...props }: OptionProps<SpendingOp
             </MBadge>
           }
           <MBadge size='sm'>
-            {amount}
+            { amount }
           </MBadge>
         </div>
       </div>
