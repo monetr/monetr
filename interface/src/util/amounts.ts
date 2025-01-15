@@ -28,8 +28,9 @@ export function intlNumberFormat(locale: string, currency: string): Intl.Resolve
  * @param {string} currency The ISO currency code of the current the amount is in.
  */
 export function getCurrencySymbol(locale: string, currency: string) {
+  const localeAdjusted = locale.replace('_', '-');
   return (0).toLocaleString(
-    locale.replace('_', '-'),
+    localeAdjusted,
     {
       style: 'currency',
       currency: currency,
@@ -71,25 +72,15 @@ export function getNumberGroupSeparator(locale: string): string {
 
 export function intlNumberFormatter(locale: string = 'en_US', currency: string = 'USD'): (value: string) => string {
   const localeAdjusted = locale.replace('_', '-');
-  const numbering = new Intl.Locale(localeAdjusted);
   const formatter = new Intl.NumberFormat(
     localeAdjusted,
     {
       style: 'currency',
       currency: currency,
-      compactDisplay: 'long',
-      signDisplay: 'auto',
-      currencySign: 'accounting',
-      notation: 'standard',
-      numberingSystem: numbering.numberingSystem,
     },
   );
   return (value: string) => {
     if (value === '') return '';
-    (+value).toLocaleString(localeAdjusted, {
-      style: 'currency',
-      currency: currency,
-    });
     return formatter.format(+value);
   };
 }
