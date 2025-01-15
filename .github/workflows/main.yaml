@@ -83,6 +83,10 @@ jobs:
         ports:
           - 5432:5432
     steps:
+      - name: Install locales-all (Linux only)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y locales-all
+
       # Get values for cache paths to be used in later steps
       - id: go-cache-paths
         name: Install pnpm and configure cache
