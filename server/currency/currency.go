@@ -1,11 +1,17 @@
 package currency
 
 import (
+	"math"
 	"math/big"
 	"strconv"
+	"strings"
 
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/pkg/errors"
+)
+
+var (
+	biggestInt = big.NewFloat(math.MaxInt64)
 )
 
 // ParseFriendlyToAmount takes a floating point or whole number as a string,
@@ -42,11 +48,20 @@ func ParseFriendlyToAmount(
 	// Convert the provided amount to a whole number representing the smallest
 	// unit for that currency.
 	f = f.Mul(f, modifier)
+	str := f.String()
+	parts := strings.Split(str, ".")
+	switch {
+	case len(parts) == 2 && fractionalDigits == 0:
+		return 0, errors.Errorf("invalid input for currency provided, cannot have more than [%d] fractional digits, input: [%s], result: [%s]", fractionalDigits, input, str)
+	case f.Cmp(biggestInt) == 1:
+		return 0, errors.Errorf("overflow, result is larger than a 64-bit integer: [%s]", str)
+	}
+
 	// Convert that back into a regular int64.
 	// This is a really stupid approach, but we have basically gaurenteed there
 	// would not be a rounding error using the math above. But when we go from a
 	// float back to ANY INTEGER EVEN ANOTHER BIG INT it can fuck it up. floating
 	// point numbers are the dumbest thing in the entire world.
-	amount, _ := strconv.ParseInt(f.String(), 10, 64)
+	amount, _ := strconv.ParseInt(str, 10, 64)
 	return amount, nil
 }
