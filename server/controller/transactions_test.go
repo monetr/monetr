@@ -737,3 +737,95 @@ func TestPutTransactions(t *testing.T) {
 		response.JSON().Path("$.spending[0].nextContributionAmount").Number().Lt(spending.NextContributionAmount)
 	})
 }
+
+func TestDeleteTransactions(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		var startingAvailableBalance, startingCurrentBalance int64
+		{
+			response := e.GET("/api/bank_accounts/{bankAccountId}/balances").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			startingAvailableBalance = int64(response.JSON().Path("$.available").Number().Gt(0).Raw())
+			startingCurrentBalance = int64(response.JSON().Path("$.current").Number().Gt(0).Raw())
+		}
+
+		{
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"bankAccountId":  bank.BankAccountId,
+					"amount":         100, // $1
+					"isPending":      false,
+					"name":           "I spent some money",
+					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"adjustsBalance": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
+			response.JSON().Path("$.transaction.currency").String().IsEqual("USD")
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance - 100)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance - 100)
+		}
+
+		var transactionId ID[Transaction]
+		{
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"bankAccountId":  bank.BankAccountId,
+					"amount":         -200, // Earned $2
+					"isPending":      false,
+					"name":           "I earned some money",
+					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"adjustsBalance": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
+			response.JSON().Path("$.transaction.currency").String().IsEqual("USD")
+			// Balance should have gone up by $2, so we should be $1 higher from when
+			// we started.
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance + 100)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance + 100)
+			transactionId = ID[Transaction](response.JSON().Path("$.transaction.transactionId").String().Raw())
+		}
+
+		{ // Check that we can see the transaction in the API response.
+			// TODO
+		}
+
+		{ // Delete the transaction we just created
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transactionId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		{ // Check that the transaction is now missing.
+			// TODO
+		}
+	})
+}

@@ -327,8 +327,9 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 	}
 
 	// TODO Handle more complex transaction updates via the API.
-	//  I think with the way I've built this so far there might be some issues where if a field is missing during a PUT,
-	//  like the name field; we might update the name to be blank?
+	//  I think with the way I've built this so far there might be some issues
+	//  where if a field is missing during a PUT, like the name field; we might
+	//  update the name to be blank?
 
 	if err = repo.UpdateTransaction(c.getContext(ctx), bankAccountId, &transaction); err != nil {
 		return c.wrapPgError(ctx, err, "could not update transaction")
@@ -356,12 +357,12 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 func (c *Controller) deleteTransactions(ctx echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid bank account Id")
+		return c.badRequest(ctx, "Must specify a valid bank account Id")
 	}
 
 	transactionId, err := ParseID[Transaction](ctx.Param("transactionId"))
 	if err != nil || transactionId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid transaction Id")
+		return c.badRequest(ctx, "Must specify a valid transaction Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -371,11 +372,19 @@ func (c *Controller) deleteTransactions(ctx echo.Context) error {
 		bankAccountId,
 	)
 	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to validate if link is manual")
+		return c.wrapPgError(ctx, err, "Failed to validate if link is manual")
 	}
 
 	if !isManual {
 		return c.badRequest(ctx, "Cannot delete transactions for non-manual links")
+	}
+
+	if err := repo.DeleteTransaction(
+		c.getContext(ctx),
+		bankAccountId,
+		transactionId,
+	); err != nil {
+		return c.wrapPgError(ctx, err, "Failed to remove transaction")
 	}
 
 	return ctx.NoContent(http.StatusOK)
