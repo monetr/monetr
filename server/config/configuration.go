@@ -366,6 +366,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.Cookies.Name", "M-Token")
 	v.SetDefault("Server.Cookies.Secure", true)
 	v.SetDefault("Server.Cookies.SameSiteStrict", true)
+	v.SetDefault("Server.Cookies.HttpOnly", true)
 	v.SetDefault("Server.ListenPort", 4000)
 	v.SetDefault("Server.ListenAddress", "0.0.0.0")
 	v.SetDefault("Server.StatsPort", 9000)
