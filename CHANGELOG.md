@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.3](https://github.com/monetr/monetr/compare/v1.1.2...v1.1.3) (2025-01-17)
+
+
+### Dependencies
+
+* **api:** Bumping the locale go dependency ([#2317](https://github.com/monetr/monetr/issues/2317)) ([2e7c070](https://github.com/monetr/monetr/commit/2e7c070e7af33d5941e42d53f9ad1854b20214e9))
+* **ui:** update dependency react-number-format to v5.4.3 ([#2290](https://github.com/monetr/monetr/issues/2290)) ([de9ccbe](https://github.com/monetr/monetr/commit/de9ccbe8f45623a3c2d955f8b3b71a98378e7942))
+
+
+### Bug Fixes
+
+* **api:** Allow transactions to be deleted ([#2322](https://github.com/monetr/monetr/issues/2322)) ([8ad1aff](https://github.com/monetr/monetr/commit/8ad1aff355342c8c0043d15ea09b36debd715402))
+* **locale:** Improving currency formatting on the frontend ([#2308](https://github.com/monetr/monetr/issues/2308)) ([0f395b8](https://github.com/monetr/monetr/commit/0f395b8e59339fe19825f4d3f850fd730b107388))
+* **locale:** Support for non-default currency accounts ([#2318](https://github.com/monetr/monetr/issues/2318)) ([b27eaa2](https://github.com/monetr/monetr/commit/b27eaa27bce27a68d6c80e4184528fa5104824cb))
+* **ofx:** Parse currency code from the OFX file itself. ([2e7c070](https://github.com/monetr/monetr/commit/2e7c070e7af33d5941e42d53f9ad1854b20214e9))
+* **self-host:** Fixed compose file not working for Podman ([#2310](https://github.com/monetr/monetr/issues/2310)) ([4405f75](https://github.com/monetr/monetr/commit/4405f75f884328d3b685c0855f2a5316ab7bd6f7)), closes [#2309](https://github.com/monetr/monetr/issues/2309)
+* **self-host:** Improving self hosted setup and documentation ([#2300](https://github.com/monetr/monetr/issues/2300)) ([b386bee](https://github.com/monetr/monetr/commit/b386beece263ff7dd0137f9e54dff3db3a408ce1))
+
 ## [1.1.2](https://github.com/monetr/monetr/compare/v1.1.1...v1.1.2) (2025-01-10)
 
 
