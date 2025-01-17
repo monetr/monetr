@@ -922,4 +922,112 @@ func TestDeleteTransactions(t *testing.T) {
 			response.JSON().Path("$.current").Number().IsEqual(startingCurrentBalance)
 		}
 	})
+
+	t.Run("no authentication token", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.DELETE(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
+			WithJSON(map[string]any{
+				"adjustsBalance": false,
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
+	})
+
+	t.Run("bad authentication token", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.DELETE(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
+			WithCookie(TestCookieName, gofakeit.Generate("????????")).
+			WithJSON(map[string]any{
+				"adjustsBalance": false,
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
+	})
+
+	t.Run("malformed json", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.DELETE(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
+			WithCookie(TestCookieName, token).
+			WithBytes([]byte("I am not really json")).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid JSON body")
+	})
+
+	t.Run("transaction does not exist", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+
+		var token string
+		var bank BankAccount
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", "txn_bogus").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("Failed to find transaction to be removed: record does not exist")
+	})
+
+	t.Run("bank account does not exist", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+
+		var token string
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", "bac_bogus").
+			WithPath("transactionId", "txn_bogus").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Cannot delete transactions for non-manual links")
+	})
+
+	t.Run("plaid link doesnt allow transaction deletion", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+
+		var token string
+		var bank BankAccount
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		txn := fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", txn.BankAccountId).
+			WithPath("transactionId", txn.TransactionId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Cannot delete transactions for non-manual links")
+	})
 }
