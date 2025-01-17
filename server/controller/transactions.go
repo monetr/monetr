@@ -365,6 +365,26 @@ func (c *Controller) deleteTransactions(ctx echo.Context) error {
 		return c.badRequest(ctx, "Must specify a valid transaction Id")
 	}
 
+	log := c.getLog(ctx)
+
+	var request struct {
+		AdjustsBalance bool `json:"adjustsBalance"`
+	}
+	// If a body was provided then we should assume it is a JSON body and try to
+	// derive the AdjustsBalance field from it.
+	if ctx.Request().ContentLength > 0 {
+		log.Debug("delete transaction request has a body, reading json information it")
+		if err = ctx.Bind(&request); err != nil {
+			return c.invalidJson(ctx)
+		}
+	}
+
+	log = log.WithFields(logrus.Fields{
+		"adjustsBalance": request.AdjustsBalance,
+		"transactionId":  transactionId,
+		"bankAccountId":  bankAccountId,
+	})
+
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	isManual, err := repo.GetLinkIsManualByBankAccountId(
@@ -379,12 +399,43 @@ func (c *Controller) deleteTransactions(ctx echo.Context) error {
 		return c.badRequest(ctx, "Cannot delete transactions for non-manual links")
 	}
 
+	log.Debug("transaction will be removed from account")
+
+	// Retrieve the transaction from the database first, we need it if we are
+	// adjusting balance. Even if we aren't this way the API call fails nicely
+	// with a 404 if the transaction does not exist.
+	transaction, err := repo.GetTransaction(
+		c.getContext(ctx),
+		bankAccountId,
+		transactionId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to find transaction to be removed")
+	}
+
 	if err := repo.DeleteTransaction(
 		c.getContext(ctx),
 		bankAccountId,
 		transactionId,
 	); err != nil {
 		return c.wrapPgError(ctx, err, "Failed to remove transaction")
+	}
+
+	if request.AdjustsBalance {
+		bankAccount, err := repo.GetBankAccount(c.getContext(ctx), bankAccountId)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "Failed to read bank account information")
+		}
+
+		// Add the transaction amount onto the balances of the bank account. We do
+		// this because monetr's amounts are inverted. Credits are stored as
+		// negative numbers and debits are stored as positive numbers.
+		bankAccount.AvailableBalance += transaction.Amount
+		bankAccount.CurrentBalance += transaction.Amount
+
+		if err := repo.UpdateBankAccount(c.getContext(ctx), bankAccount); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update account balances")
+		}
 	}
 
 	return ctx.NoContent(http.StatusOK)
