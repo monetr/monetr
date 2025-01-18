@@ -200,7 +200,8 @@ func (h *ProcessOFXUploadHandler) HandleConsumeJob(
 		return job.Run(span.Context())
 	})
 
-	return nil
+	// Return the error anyway so we can see failed uploads in sentry.
+	return err
 }
 
 func NewProcessOFXUploadJob(
