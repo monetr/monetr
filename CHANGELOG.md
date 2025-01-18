@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.5](https://github.com/monetr/monetr/compare/v1.1.4...v1.1.5) (2025-01-18)
+
+
+### Bug Fixes
+
+* **txn:** Fixed transaction clusters for large names ([#2327](https://github.com/monetr/monetr/issues/2327)) ([9a923f0](https://github.com/monetr/monetr/commit/9a923f07e477f1dcc4d05932250290fd5ef91bbb)), closes [#2324](https://github.com/monetr/monetr/issues/2324)
+
 ## [1.1.4](https://github.com/monetr/monetr/compare/v1.1.3...v1.1.4) (2025-01-18)
 
 
