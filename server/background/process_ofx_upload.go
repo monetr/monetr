@@ -381,6 +381,10 @@ func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
 	// TODO Add others as needed. Not sure what other formats we'll end up seeing
 	// over time.
 
+	if len(externalTransactionIds) == 0 {
+		return errors.Errorf("no external transaction IDs were found in the file, account type may not be supported")
+	}
+
 	var err error
 	j.existingTransactions, err = j.repo.GetTransactonsByUploadIdentifier(
 		span.Context(),
