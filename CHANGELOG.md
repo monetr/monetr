@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/monetr/monetr/compare/v1.1.3...v1.1.4) (2025-01-18)
+
+
+### Bug Fixes
+
+* **plaid:** Allow for larger transactions from Plaid ([#2325](https://github.com/monetr/monetr/issues/2325)) ([35e3c4d](https://github.com/monetr/monetr/commit/35e3c4db77905158ca7d705f8c5b3ce16001b809))
+
 ## [1.1.3](https://github.com/monetr/monetr/compare/v1.1.2...v1.1.3) (2025-01-17)
 
 
