@@ -645,7 +645,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 	)
 
 	amount := input.GetAmount()
-	date := input.GetDateLocal(s.timezone)
+	date := input.GetDateLocal(s.timezone).UTC()
 	transactionName := input.GetName()
 
 	// We only want to make the transaction name be the merchant name if the
