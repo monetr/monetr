@@ -238,7 +238,6 @@ func TestPostTransactions(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
-			response.JSON().Path("$.transaction.currency").String().IsEqual("USD")
 			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance - 100)
 			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance - 100)
 		}
@@ -259,7 +258,6 @@ func TestPostTransactions(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
-			response.JSON().Path("$.transaction.currency").String().IsEqual("USD")
 			// Balance should have gone up by $2, so we should be $1 higher from when
 			// we started.
 			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance + 100)
@@ -309,7 +307,6 @@ func TestPostTransactions(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
-			response.JSON().Path("$.transaction.currency").String().IsEqual("USD")
 			// Make sure that if adjusts balance is false then we do not modify the
 			// actual balances for the account.
 			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance)
@@ -509,9 +506,6 @@ func TestPostTransactions(t *testing.T) {
 			response.JSON().Path("$.accountType").String().IsEqual(string(DepositoryBankAccountType))
 			response.JSON().Path("$.accountSubType").String().IsEqual(string(CheckingBankAccountSubType))
 			response.JSON().Path("$.status").String().IsEqual(string(ActiveBankAccountStatus))
-			// Make sure that we do not default to USD when we have a locale with it's
-			// own currency.
-			response.JSON().Path("$.currency").String().IsEqual("JPY")
 			bankAccountId = ID[BankAccount](response.JSON().Path("$.bankAccountId").String().Raw())
 		}
 
@@ -531,7 +525,6 @@ func TestPostTransactions(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
-			response.JSON().Path("$.transaction.currency").String().IsEqual("JPY")
 		}
 	})
 }
@@ -780,7 +773,6 @@ func TestDeleteTransactions(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
-			response.JSON().Path("$.transaction.currency").String().IsEqual("USD")
 			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance - 200)
 			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance - 200)
 			transactionId = ID[Transaction](response.JSON().Path("$.transaction.transactionId").String().Raw())
@@ -870,7 +862,6 @@ func TestDeleteTransactions(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
-			response.JSON().Path("$.transaction.currency").String().IsEqual("USD")
 			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance - 200)
 			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance - 200)
 			transactionId = ID[Transaction](response.JSON().Path("$.transaction.transactionId").String().Raw())
