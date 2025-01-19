@@ -696,7 +696,6 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 			OriginalName:         originalName,
 			MerchantName:         input.GetMerchantName(),
 			OriginalMerchantName: input.GetMerchantName(),
-			Currency:             input.GetISOCurrencyCode(),
 			IsPending:            input.GetIsPending(),
 			Source:               TransactionSourcePlaid,
 		}

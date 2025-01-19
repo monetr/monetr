@@ -46,7 +46,6 @@ type Transaction struct {
 	OriginalName         string            `json:"originalName" pg:"original_name,notnull"`
 	MerchantName         string            `json:"merchantName,omitempty" pg:"merchant_name"`
 	OriginalMerchantName string            `json:"originalMerchantName" pg:"original_merchant_name"`
-	Currency             string            `json:"currency" pg:"currency,notnull"`
 	IsPending            bool              `json:"isPending" pg:"is_pending,notnull,use_zero"`
 	UploadIdentifier     *string           `json:"uploadIdentifier" pg:"upload_identifier"`
 	Source               TransactionSource `json:"source" pg:"source"`

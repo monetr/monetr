@@ -138,7 +138,6 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 	// No support for allowing these to be provided yet.
 	request.Categories = nil
 	request.Category = nil
-	request.Currency = bankAccount.Currency
 	request.Source = TransactionSourceManual
 
 	request.Name, err = c.cleanString(ctx, "Name", request.Name)
