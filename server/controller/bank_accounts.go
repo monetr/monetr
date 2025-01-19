@@ -3,12 +3,14 @@ package controller
 import (
 	"bytes"
 	"net/http"
+	"regexp"
 	"strings"
 
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/consts"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/validation"
 	"github.com/sirupsen/logrus"
 )
 
@@ -174,14 +176,41 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 	var request struct {
 		AvailableBalance int64              `json:"availableBalance"`
 		CurrentBalance   int64              `json:"currentBalance"`
+		LimitBalance     int64              `json:"limitBalance"`
 		Mask             string             `json:"mask"`
 		Name             string             `json:"name"`
+		Currency         *string            `json:"currency"`
 		Status           BankAccountStatus  `json:"status"`
 		Type             BankAccountType    `json:"accountType"`
 		SubType          BankAccountSubType `json:"accountSubType"`
 	}
 	if err = ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
+	}
+
+	err = validation.ValidateStructWithContext(c.getContext(ctx), &request,
+		validation.Field(
+			&request.Mask,
+			validation.Match(regexp.MustCompile(`\d{4}`)).Error("Mask must be a 4 digit string"),
+		),
+		validation.Field(
+			&request.Name,
+			validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
+		),
+		validation.Field(
+			&request.Currency,
+			validation.In(locale.GetInstalledCurrencies()).Error("Currency must be one supported by the server"),
+		),
+		validation.Field(
+			&request.LimitBalance,
+			validation.Min(0).Error("Limit balance cannot be negative"),
+		),
+	)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":    "Invalid request",
+			"problems": err,
+		})
 	}
 
 	// TODO Eventually we should just query the link to see if its a manual link.
