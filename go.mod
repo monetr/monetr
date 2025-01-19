@@ -15,7 +15,7 @@ require (
 	github.com/aws/aws-sdk-go v1.55.6
 	github.com/benbjohnson/clock v1.3.5
 	github.com/brianvoe/gofakeit/v6 v6.28.0
-	github.com/elliotcourant/go-lclocale v0.1.1
+	github.com/elliotcourant/go-lclocale v0.1.2
 	github.com/elliotcourant/gofx v0.0.1
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gavv/httpexpect/v2 v2.16.0
