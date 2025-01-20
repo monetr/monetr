@@ -1,5 +1,5 @@
 FROM --platform=$BUILDPLATFORM debian:12-slim AS base_builder
-ARG GO_VERSION=1.23.2
+ARG GO_VERSION=1.23.5
 WORKDIR /monetr
 RUN apt-get update && apt-get install -y --no-install-recommends \
   build-essential \
