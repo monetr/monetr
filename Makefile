@@ -40,6 +40,13 @@ ifdef DEBUG
 	CONCURRENCY = 1
 endif
 
+ifdef SHARDS
+	ifdef CURRENT_SHARD
+		CTEST_SHARDS = -I $(CURRENT_SHARD),,$(SHARDS)
+	endif
+endif
+
+
 export RELEASE_VERSION=$(RELEASE)
 export CONTAINER_VERSION=$(CONTAINER_RELEASE)
 export RELEASE_REVISION=$(REVISION)
@@ -94,7 +101,7 @@ PATTERN_ARG=-R $(PATTERN)
 endif
 test:
 	cmake --preset testing
-	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure --output-junit $(PWD)$(CMAKE_CONFIGURATION_DIRECTORY)/junit.xml -j $(CONCURRENCY) $(PATTERN_ARG)
+	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure --output-junit $(PWD)$(CMAKE_CONFIGURATION_DIRECTORY)/junit.xml -j $(CONCURRENCY) $(PATTERN_ARG) $(CTEST_SHARDS)
 
 develop: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.monetr.up $(BUILD_ARGS)

@@ -56,6 +56,9 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [0, 1, 2, 3]
     env:
       MONETR_PG_ADDRESS: localhost
       MONETR_PG_PASSWORD: ""
@@ -124,23 +127,23 @@ jobs:
 
       - name: Test
         run: |
-          make test
+          make test SHARDS=${{ strategy.job-total }} CURRENT_SHARD=${{ matrix.shard }}
 
-      - name: Code Coverage Report
-        if: always()
-        uses: codecov/codecov-action@v5
-        with:
-          name: monetr
-          directory: ${{ github.workspace }}/build/tests
-          root_dir: ${{ github.workspace }}
-          token: ${{ secrets.CODECOV_TOKEN }}
-      - name: Test Results Report
-        if: always()
-        uses: codecov/test-results-action@v1
-        with:
-          name: monetr
-          files: ${{ github.workspace }}/build/junit.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
+      # - name: Code Coverage Report
+      #   if: always()
+      #   uses: codecov/codecov-action@v5
+      #   with:
+      #     name: monetr
+      #     directory: ${{ github.workspace }}/build/tests
+      #     root_dir: ${{ github.workspace }}
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      # - name: Test Results Report
+      #   if: always()
+      #   uses: codecov/test-results-action@v1
+      #   with:
+      #     name: monetr
+      #     files: ${{ github.workspace }}/build/junit.xml
+      #     token: ${{ secrets.CODECOV_TOKEN }}
 
   container:
     name: Container
