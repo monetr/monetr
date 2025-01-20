@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.6](https://github.com/monetr/monetr/compare/v1.1.5...v1.1.6) (2025-01-20)
+
+
+### Bug Fixes
+
+* **locale:** Don't prevent sign ups for uknown locales ([#2337](https://github.com/monetr/monetr/issues/2337)) ([4e4f58a](https://github.com/monetr/monetr/commit/4e4f58a6cdcc65c9851e34761ee05d1864a0d6ae)), closes [#2335](https://github.com/monetr/monetr/issues/2335)
+* **ofx:** Proper error for no external transactions ([0ea95a1](https://github.com/monetr/monetr/commit/0ea95a13e834536032e79461d88f76b0355a3dfa))
+* **ofx:** Return error from OFX upload job to track failures properly ([ce82bed](https://github.com/monetr/monetr/commit/ce82bed828029af39719c9ac7671cb0d962a9642))
+* **plaid:** Fixed dates always being updated on plaid sync ([9f89f5b](https://github.com/monetr/monetr/commit/9f89f5bb19816548ceba40f3da1d2597bcdef0c2))
+
+
+### Miscellaneous
+
+* **ci:** Don't create Sentry releases for Staging ([cb9545d](https://github.com/monetr/monetr/commit/cb9545d7cf4bb7d48614dd93e3887ac18b3876c5))
+
 ## [1.1.5](https://github.com/monetr/monetr/compare/v1.1.4...v1.1.5) (2025-01-18)
 
 
