@@ -83,47 +83,10 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y locales-all
 
-      - id: go-cache-paths
-        name: Install pnpm and configure cache
-        run: |
-          npm install -g pnpm
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
-          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
-
       - uses: actions/checkout@v4
       - name: Fix dumb git issue
         run: |
           git config --global --add safe.directory ${PWD}
-
-      # Cache go build cache, used to speedup go test
-      - name: Go Build Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum', '**/**.go') }}
-          restore-keys: |
-            ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum', '**/**.go') }}
-            ${{ runner.os }}-test-go-build
-
-      # Cache go mod cache, used to speedup builds
-      - name: Go Mod Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.GOMODCACHE }}
-          key: ${{ runner.os }}-test-go-mod-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-test-go-mod-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-test-go-mod
-
-      - name: pnpm Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            ${{ runner.os }}-test-pnpm-store
 
       - name: Test
         run: |
