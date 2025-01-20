@@ -24,7 +24,8 @@ export default function useLocaleCurrency(): UseQueryResult<LocaleCurrency | nul
   const bankAccount = useSelectedBankAccount();
   const locale = useMemo(() => me.data?.user?.account?.locale ?? 'en_US', [me]);
   const currency = useMemo(() => {
-    return Boolean(bankAccount.data) ? bankAccount.data.currency : (me.data?.defaultCurrency ?? 'USD');
+    // Return the first _defined_ currency.
+    return [bankAccount?.data?.currency, me?.data?.defaultCurrency, 'USD'].find(value => !!value);
   }, [me, bankAccount]);
 
   const friendlyToAmountCallback = useCallback((value: number) => {
@@ -43,7 +44,7 @@ export default function useLocaleCurrency(): UseQueryResult<LocaleCurrency | nul
     ...bankAccount as any,
     ...me as any,
     data: {
-      source: Boolean(bankAccount.data) ? CurrencySource.BankAccount : CurrencySource.UserDefault,
+      source: Boolean(bankAccount?.data) ? CurrencySource.BankAccount : CurrencySource.UserDefault,
       locale: locale,
       currency: currency,
       friendlyToAmount: friendlyToAmountCallback,
