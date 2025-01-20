@@ -12,6 +12,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/communication"
+	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -357,8 +358,8 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	if _, err := locale.GetLConv(registerRequest.Locale); err != nil {
 		log.WithFields(logrus.Fields{
 			"locale": registerRequest.Locale,
-		}).WithError(err).Warn("invalid locale in register request")
-		return c.badRequest(ctx, "Invalid or unrecognized locale")
+		}).WithError(err).Warn("invalid locale in register request, falling back to global default")
+		registerRequest.Locale = consts.DefaultLocale
 	}
 
 	if err := c.validateRegistration(

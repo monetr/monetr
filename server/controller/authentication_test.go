@@ -1108,12 +1108,29 @@ func TestRegister(t *testing.T) {
 		registerRequest.Locale = "uh-UH"
 		registerRequest.Timezone = "America/Chicago"
 
-		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
-			Expect()
+		{ // Register the user
+			response := e.POST(`/api/authentication/register`).
+				WithJSON(registerRequest).
+				Expect()
 
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Invalid or unrecognized locale")
+			response.Status(http.StatusOK)
+			response.Status(http.StatusOK)
+			AssertSetTokenCookie(t, response)
+			response.JSON().Path("$.nextUrl").String().IsEqual("/setup")
+			response.JSON().Path("$.requireVerification").Boolean().IsFalse()
+		}
+
+		token := GivenILogin(t, e, registerRequest.Email, registerRequest.Password)
+		{ // Get the current user to see what the state of the account is.
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").String().IsASCII()
+			response.JSON().Path("$.user.account.locale").String().IsEqual("en_US")
+		}
 	})
 }
 
