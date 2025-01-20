@@ -17,7 +17,7 @@ services:
     networks:
       - monetr_network
   valkey:
-    image: valkey/valkey:8.0.1
+    image: valkey/valkey:8
     healthcheck:
       test: [ "CMD", "valkey-cli", "ping" ]
       interval: 30s

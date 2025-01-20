@@ -16,7 +16,7 @@ services:
       retries: 12
       start_period: 30s
   valkey:
-    image: valkey/valkey:8.0.0
+    image: valkey/valkey:8
     healthcheck:
       test: [ "CMD", "valkey-cli", "ping" ]
       interval: 30s
