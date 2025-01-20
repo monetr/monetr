@@ -128,4 +128,50 @@ describe('use locale currency', () => {
     // But currency should come from the bank account when there is one.
     await waitFor(() => expect(result.current.data.currency).toBe('EUR'));
   });
+
+  it('will handle a bad bank ID', async () => {
+    mockAxios.onGet('/api/users/me').reply(200, {
+      'activeUntil': '2024-09-26T00:31:38Z',
+      'hasSubscription': true,
+      'isActive': true,
+      'isSetup': true,
+      'isTrialing': false,
+      'trialingUntil': null,
+      'defaultCurrency': 'JPY',
+      'user': {
+        'userId': 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        'loginId': 'lgn_01hym36d96ze86vz5g7883vcwg',
+        'login': {
+          'loginId': 'lgn_01hym36d96ze86vz5g7883vcwg',
+          'email': 'example@example.com',
+          'firstName': 'Elliot',
+          'lastName': 'Courant',
+          'passwordResetAt': null,
+          'isEmailVerified': true,
+          'emailVerifiedAt': '2022-09-25T00:24:25.976514Z',
+          'totpEnabledAt': null,
+        },
+        'accountId': 'acct_01hk84dchvxvjgp7cgap818c82',
+        'account': {
+          'accountId': 'acct_01hk84dchvxvjgp7cgap818c82',
+          'timezone': 'America/Chicago',
+          'locale': 'ja_JP',
+          'subscriptionActiveUntil': '2024-09-26T00:31:38Z',
+          'subscriptionStatus': 'active',
+          'trialEndsAt': null,
+          'createdAt': '2024-01-03T17:02:23.290914Z',
+        },
+      },
+    });
+    mockAxios.onGet('/api/bank_accounts/undefined').reply(404, {
+      'error': 'Not found',
+    });
+
+    const { result, waitFor } = testRenderHook(useLocaleCurrency, { initialRoute: '/bank/undefined/transactions' });
+    expect(result.current.isLoading).toBeTruthy();
+    // Still use the user's locale
+    await waitFor(() => expect(result.current.data.locale).toBe('en_US'));
+    // But fall back to the default if we can't load the bank currency
+    await waitFor(() => expect(result.current.data.currency).toBe('USD'));
+  });
 });
