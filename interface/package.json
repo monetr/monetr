@@ -65,7 +65,7 @@
     "tailwindcss": "3.4.17",
     "tailwindcss-animate": "1.0.7",
     "vaul": "1.1.2",
-    "zustand": "5.0.2"
+    "zustand": "5.0.3"
   },
   "devDependencies": {
     "@imagemagick/magick-wasm": "0.0.32",
