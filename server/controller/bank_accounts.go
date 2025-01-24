@@ -199,7 +199,7 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 		),
 		validation.Field(
 			&request.Currency,
-			validation.In(locale.GetInstalledCurrencies()).Error("Currency must be one supported by the server"),
+			validation.In(locale.GetInstalledCurrencies()...).Error("Currency must be one supported by the server"),
 		),
 		validation.Field(
 			&request.LimitBalance,

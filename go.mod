@@ -29,7 +29,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.9
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/mileusna/useragent v1.3.5
-	github.com/monetr/validation v1.0.0
+	github.com/monetr/validation v1.0.2
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v30 v30.0.0
