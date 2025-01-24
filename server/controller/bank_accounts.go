@@ -262,6 +262,9 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 		existingBankAccount.Status = request.Status
 		existingBankAccount.Type = request.Type
 		existingBankAccount.SubType = request.SubType
+		if request.Currency != nil {
+			existingBankAccount.Currency = *request.Currency
+		}
 	} else {
 		var request struct {
 			Name string `json:"name"`

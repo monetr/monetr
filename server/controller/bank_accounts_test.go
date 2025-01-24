@@ -374,6 +374,56 @@ func TestPutBankAccount(t *testing.T) {
 		}
 	})
 
+	t.Run("change currency", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Make sure the bank account is created in USD.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.currency").String().IsEqual("USD")
+		}
+
+		{ // Then update the bank account to be not USD.
+			response := e.PUT("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"availableBalance": 1000,
+					"currentBalance":   1000,
+					"mask":             "1234",
+					"name":             "My New Name",
+					"currency":         "EUR",
+					"status":           "active",
+					"accountType":      "depository",
+					"accountSubType":   "checking",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.availableBalance").Number().IsEqual(1000)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(1000)
+			response.JSON().Path("$.mask").String().IsEqual("1234")
+			response.JSON().Path("$.name").String().IsEqual("My New Name")
+			response.JSON().Path("$.currency").String().IsEqual("EUR")
+			response.JSON().Path("$.status").String().IsEqual("active")
+			response.JSON().Path("$.accountType").String().IsEqual("depository")
+			response.JSON().Path("$.accountSubType").String().IsEqual("checking")
+		}
+	})
+
 	t.Run("invalid currency", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string
