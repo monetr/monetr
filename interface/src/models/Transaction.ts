@@ -15,7 +15,6 @@ export default class Transaction {
   merchantName?: string;
   originalMerchantName?: string;
   isPending: boolean;
-  currency: string;
   createdAt: Date;
 
   constructor(data?: Partial<Transaction>) {

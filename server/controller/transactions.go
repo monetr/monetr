@@ -115,11 +115,6 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 		return c.badRequest(ctx, "Cannot create transactions for non-manual links")
 	}
 
-	bankAccount, err := repo.GetBankAccount(c.getContext(ctx), bankAccountId)
-	if err != nil {
-		return c.wrapPgError(ctx, err, "Failed to read bank account information")
-	}
-
 	var request struct {
 		// Inherit all the fields from the transaction object
 		Transaction
@@ -138,7 +133,6 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 	// No support for allowing these to be provided yet.
 	request.Categories = nil
 	request.Category = nil
-	request.Currency = bankAccount.Currency
 	request.Source = TransactionSourceManual
 
 	request.Name, err = c.cleanString(ctx, "Name", request.Name)

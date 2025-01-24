@@ -471,8 +471,7 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 				Name:                 name,
 				OriginalName:         originalName,
 				OriginalMerchantName: name,
-				Currency:             j.currency, // TODO Derive from file
-				IsPending:            false,      // OFX files don't show pending?
+				IsPending:            false, // OFX files don't show pending?
 				UploadIdentifier:     &uploadIdentifier,
 				Source:               TransactionSourceUpload,
 			}

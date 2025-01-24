@@ -15,7 +15,7 @@ require (
 	github.com/aws/aws-sdk-go v1.55.6
 	github.com/benbjohnson/clock v1.3.5
 	github.com/brianvoe/gofakeit/v6 v6.28.0
-	github.com/elliotcourant/go-lclocale v0.1.1
+	github.com/elliotcourant/go-lclocale v0.1.2
 	github.com/elliotcourant/gofx v0.0.1
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gavv/httpexpect/v2 v2.16.0
@@ -29,6 +29,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.9
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/mileusna/useragent v1.3.5
+	github.com/monetr/validation v1.0.2
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v30 v30.0.0
