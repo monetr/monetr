@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ed25519"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -38,6 +39,38 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
+
+func TestJsonDecode(t *testing.T) {
+	t.Run("handle merging json data", func(t *testing.T) {
+		// This might be a really useless test, but I want something that concretely
+		// proves that json decoding into a struct with existing values does not
+		// trample all of the values of that struct. Instead it just updates the
+		// values provided in the actual json.
+		type Foo struct {
+			Id        string `json:"id"`
+			Name      string `json:"name"`
+			Amount    int64  `json:"amount"`
+			Nullable  *int   `json:"nullable"`
+			Overwrite *int   `json:"overwrite"`
+		}
+		input := `{"name":"foobar", "overwrite": 5678}`
+		nullable := 12345
+		existing := Foo{
+			Id:        "foo_1234",
+			Name:      "oldname",
+			Amount:    100,
+			Nullable:  &nullable,
+			Overwrite: &nullable,
+		}
+		err := json.Unmarshal([]byte(input), &existing)
+		assert.NoError(t, err)
+		assert.EqualValues(t, "foo_1234", existing.Id)
+		assert.EqualValues(t, "foobar", existing.Name) // Changed
+		assert.EqualValues(t, 100, existing.Amount)
+		assert.EqualValues(t, nullable, *existing.Nullable)
+		assert.EqualValues(t, 5678, *existing.Overwrite)
+	})
+}
 
 const (
 	FifthteenthAndLastDayOfEveryMonth = "DTSTART:20211231T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1"

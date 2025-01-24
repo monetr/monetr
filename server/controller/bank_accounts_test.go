@@ -373,4 +373,73 @@ func TestPutBankAccount(t *testing.T) {
 			response.JSON().Path("$.accountSubType").String().IsEqual("checking")
 		}
 	})
+
+	t.Run("invalid currency", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PUT("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"availableBalance": 1000,
+					"currentBalance":   1000,
+					"mask":             "1234",
+					"name":             "My New Name",
+					"currency":         "???",
+					"status":           "active",
+					"accountType":      "depository",
+					"accountSubType":   "checking",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be one supported by the server")
+		}
+	})
+
+	t.Run("invalid account type", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PUT("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"availableBalance": 1000,
+					"currentBalance":   1000,
+					"mask":             "1234",
+					"name":             "My New Name",
+					"currency":         "USD",
+					"status":           "active",
+					"accountType":      "something",
+					"accountSubType":   "notchecking",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.accountType").String().IsEqual("Invalid bank account type")
+			response.JSON().Path("$.problems.accountSubType").String().IsEqual("Invalid bank account sub type")
+		}
+	})
 }

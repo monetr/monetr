@@ -173,70 +173,123 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve bank account")
 	}
 
-	var request struct {
-		AvailableBalance int64              `json:"availableBalance"`
-		CurrentBalance   int64              `json:"currentBalance"`
-		LimitBalance     int64              `json:"limitBalance"`
-		Mask             string             `json:"mask"`
-		Name             string             `json:"name"`
-		Currency         *string            `json:"currency"`
-		Status           BankAccountStatus  `json:"status"`
-		Type             BankAccountType    `json:"accountType"`
-		SubType          BankAccountSubType `json:"accountSubType"`
-	}
-	if err = ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
-	}
-
-	err = validation.ValidateStructWithContext(c.getContext(ctx), &request,
-		validation.Field(
-			&request.Mask,
-			validation.Match(regexp.MustCompile(`\d{4}`)).Error("Mask must be a 4 digit string"),
-		),
-		validation.Field(
-			&request.Name,
-			validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
-		),
-		validation.Field(
-			&request.Currency,
-			validation.In(locale.GetInstalledCurrencies()...).Error("Currency must be one supported by the server"),
-		),
-		validation.Field(
-			&request.LimitBalance,
-			validation.Min(0).Error("Limit balance cannot be negative"),
-		),
-	)
-	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	}
-
 	// TODO Eventually we should just query the link to see if its a manual link.
 	// But for now if the bank account has a plaid account ID then its probably
 	// safe to assume that it is a Plaid managed bank account.
-	if existingBankAccount.PlaidBankAccountId != nil {
-		existingBankAccount.Name = strings.TrimSpace(request.Name)
-	} else {
+	if existingBankAccount.PlaidBankAccountId == nil {
+		var request struct {
+			AvailableBalance int64              `json:"availableBalance"`
+			CurrentBalance   int64              `json:"currentBalance"`
+			LimitBalance     int64              `json:"limitBalance"`
+			Mask             string             `json:"mask"`
+			Name             string             `json:"name"`
+			Currency         *string            `json:"currency"`
+			Status           BankAccountStatus  `json:"status"`
+			Type             BankAccountType    `json:"accountType"`
+			SubType          BankAccountSubType `json:"accountSubType"`
+		}
+		if err = ctx.Bind(&request); err != nil {
+			return c.invalidJson(ctx)
+		}
+
+		err = validation.ValidateStructWithContext(c.getContext(ctx), &request,
+			validation.Field(
+				&request.Mask,
+				validation.Match(regexp.MustCompile(`\d{4}`)).Error("Mask must be a 4 digit string"),
+			),
+			validation.Field(
+				&request.Name,
+				validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
+			),
+			validation.Field(
+				&request.Currency,
+				validation.In(
+					locale.GetInstalledCurrencies()...,
+				).Error("Currency must be one supported by the server"),
+			),
+			validation.Field(
+				&request.LimitBalance,
+				validation.Min(0).Error("Limit balance cannot be negative"),
+			),
+			validation.Field(
+				&request.Status,
+				validation.In(
+					ActiveBankAccountStatus,
+					InactiveBankAccountStatus,
+					UnknownBankAccountStatus,
+				).Error("Invalid bank account status"),
+			),
+			validation.Field(
+				&request.Type,
+				validation.In(
+					DepositoryBankAccountType,
+					CreditBankAccountType,
+					LoanBankAccountType,
+					InvestmentBankAccountType,
+					OtherBankAccountType,
+				).Error("Invalid bank account type"),
+			),
+			validation.Field(
+				&request.SubType,
+				validation.In(
+					CheckingBankAccountSubType,
+					SavingsBankAccountSubType,
+					HSABankAccountSubType,
+					CDBankAccountSubType,
+					MoneyMarketBankAccountSubType,
+					PayPalBankAccountSubType,
+					PrepaidBankAccountSubType,
+					CashManagementBankAccountSubType,
+					EBTBankAccountSubType,
+					CreditCardBankAccountSubType,
+					AutoBankAccountSubType,
+					OtherBankAccountSubType,
+				).Error("Invalid bank account sub type"),
+			),
+		)
+		if err != nil {
+			return ctx.JSON(http.StatusBadRequest, map[string]any{
+				"error":    "Invalid request",
+				"problems": err,
+			})
+		}
+
 		existingBankAccount.AvailableBalance = request.AvailableBalance
 		existingBankAccount.CurrentBalance = request.CurrentBalance
-		existingBankAccount.Name, err = c.cleanString(ctx, "Name", request.Name)
-		if err != nil {
-			return err
+		existingBankAccount.LimitBalance = request.LimitBalance
+		existingBankAccount.Name = request.Name
+		existingBankAccount.Mask = request.Mask
+		existingBankAccount.Status = request.Status
+		existingBankAccount.Type = request.Type
+		existingBankAccount.SubType = request.SubType
+	} else {
+		var request struct {
+			Name string `json:"name"`
+		}
+		if err = ctx.Bind(&request); err != nil {
+			return c.invalidJson(ctx)
 		}
 
-		// TODO Should mask be enforced to have a max of 4 characters?
-		existingBankAccount.Mask, err = c.cleanString(ctx, "Mask", request.Mask)
+		err = validation.ValidateStructWithContext(c.getContext(ctx), &request,
+			validation.Field(
+				&request.Name,
+				validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
+			),
+		)
 		if err != nil {
-			return err
+			return ctx.JSON(http.StatusBadRequest, map[string]any{
+				"error":    "Invalid request",
+				"problems": err,
+			})
 		}
-		existingBankAccount.Status = ParseBankAccountStatus(request.Status)
-		existingBankAccount.Type = ParseBankAccountType(request.Type)
-		existingBankAccount.SubType = ParseBankAccountSubType(request.SubType)
+
+		existingBankAccount.Name = request.Name
 	}
 
-	if err = repo.UpdateBankAccount(c.getContext(ctx), existingBankAccount); err != nil {
+	if err = repo.UpdateBankAccount(
+		c.getContext(ctx),
+		existingBankAccount,
+	); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update bank account")
 	}
 
