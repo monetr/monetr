@@ -442,4 +442,45 @@ func TestPutBankAccount(t *testing.T) {
 			response.JSON().Path("$.problems.accountSubType").String().IsEqual("Invalid bank account sub type")
 		}
 	})
+
+	t.Run("only update name for plaid bank accounts", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveAPlaidBankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PUT("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"availableBalance": 1000,
+					"currentBalance":   1000,
+					"mask":             "1234",
+					"name":             "My New Name",
+					"currency":         "USD",
+					"status":           "active",
+					"accountType":      "something",
+					"accountSubType":   "notchecking",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Non-updatable fields
+			response.JSON().Path("$.availableBalance").Number().IsEqual(bank.AvailableBalance)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
+			response.JSON().Path("$.mask").String().IsEqual(bank.Mask)
+			response.JSON().Path("$.currency").String().IsEqual(bank.Currency)
+			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.Type))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.SubType))
+
+			response.JSON().Path("$.name").String().IsEqual("My New Name")
+		}
+	})
 }
