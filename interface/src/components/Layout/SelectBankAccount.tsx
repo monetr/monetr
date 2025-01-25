@@ -1,8 +1,8 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Check, ChevronsUpDown, CirclePlus } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Check, ChevronsUpDown, CirclePlus, Settings } from 'lucide-react';
 
-import { Button } from '@monetr/interface/components/Button';
+import { Button, buttonVariants } from '@monetr/interface/components/Button';
 import { ComboboxItemProps, comboboxVariants } from '@monetr/interface/components/Combobox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@monetr/interface/components/Command';
 import { Drawer, DrawerContent, DrawerTrigger } from '@monetr/interface/components/Drawer';
@@ -45,8 +45,64 @@ export default function SelectBankAccount(): JSX.Element {
 
   if (isMobile) {
     return (
-      <Drawer open={ open } onOpenChange={ setOpen }>
-        <DrawerTrigger asChild>
+      <div className='flex w-full gap-[1px]'>
+        <Drawer open={ open } onOpenChange={ setOpen }>
+          <DrawerTrigger asChild>
+            <Button
+              size='select'
+              variant='text'
+              role='combobox'
+              aria-expanded={ open }
+              disabled={ false }
+              className={ mergeTailwind(
+                comboboxVariants({ variant: 'text', size: 'select' }),
+                'h-[34px] group flex flex-auto'
+              ) }
+            >
+              <div className='text-inherit flex-shrink truncate min-w-0'>
+                { current?.value
+                  ? accounts.find(option => option.value === current?.value)?.label
+                  : 'Select a bank account...' }
+              </div>
+              <ChevronsUpDown
+                className={ mergeTailwind('h-3 w-3 flex-none opacity-50 transition-opacity duration-100', {
+                  'opacity-100': open,
+                }) }
+              />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <SelectBankAccountPicker
+              value={ current?.value }
+              setOpen={ setOpen }
+              options={ accounts }
+              onSelect={ value => navigate(`/bank/${value}/transactions`) }
+            />
+          </DrawerContent>
+        </Drawer>
+        <Link
+          role='combobox'
+          aria-expanded={ open }
+          className={ mergeTailwind(
+            buttonVariants({ variant: 'text', size: 'select' }),
+            comboboxVariants({ variant: 'text', size: 'select' }),
+            'h-[34px] w-[34px] p-0 justify-center group rounded-tl-none rounded-bl-none shrink-0',
+            'enabled:hover:ring-1',
+            'enabled:hover:ring-dark-monetr-border-string',
+            'focus:ring-dark-monetr-brand focus:ring-2',
+          ) }
+          to={ `/bank/${selectedBankAccount.bankAccountId}/settings` }
+        >
+          <Settings className='h-3 w-3 opacity-50 group-hover:opacity-100' />
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className='flex w-full gap-[1px]'>
+      <Popover open={ open } onOpenChange={ setOpen }>
+        <PopoverTrigger asChild>
           <Button
             size='select'
             variant='text'
@@ -55,60 +111,45 @@ export default function SelectBankAccount(): JSX.Element {
             disabled={ false }
             className={ mergeTailwind(
               comboboxVariants({ variant: 'text', size: 'select' }),
-              'w-full h-[34px] test'
+              'h-[34px] group flex flex-auto'
             ) }
           >
-            <div className='text-ellipsis text-nowrap min-w-0 overflow-hidden text-inherit'>
+            <div className='text-inherit flex-shrink truncate min-w-0'>
               { current?.value
                 ? accounts.find(option => option.value === current?.value)?.label
                 : 'Select a bank account...' }
             </div>
-            <ChevronsUpDown className='h-3 w-3 shrink-0 opacity-50' />
+            <ChevronsUpDown
+              className={ mergeTailwind('h-3 w-3 flex-none opacity-50 transition-opacity duration-100', {
+                'opacity-100': open,
+              }) }
+            />
           </Button>
-        </DrawerTrigger>
-        <DrawerContent>
+        </PopoverTrigger>
+        <PopoverContent className='w-80'>
           <SelectBankAccountPicker
             value={ current?.value }
             setOpen={ setOpen }
             options={ accounts }
             onSelect={ value => navigate(`/bank/${value}/transactions`) }
           />
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <Popover open={ open } onOpenChange={ setOpen }>
-      <PopoverTrigger asChild>
-        <Button
-          size='select'
-          variant='text'
+        </PopoverContent>
+        <Link
           role='combobox'
-          aria-expanded={ open }
-          disabled={ false }
           className={ mergeTailwind(
-            comboboxVariants({ variant: 'text', size: 'select' }), 
-            'w-full h-[34px] test'
+            buttonVariants({ variant: 'text', size: 'select' }),
+            comboboxVariants({ variant: 'text', size: 'select' }),
+            'h-[34px] w-[34px] p-0 justify-center group rounded-tl-none rounded-bl-none shrink-0',
+            'enabled:hover:ring-1',
+            'enabled:hover:ring-dark-monetr-border-string',
+            'focus:ring-0', // DIFFERENT FROM MOBILE
           ) }
+          to={ `/bank/${selectedBankAccount.bankAccountId}/settings` }
         >
-          <div className='text-ellipsis text-nowrap min-w-0 overflow-hidden text-inherit'>
-            { current?.value
-              ? accounts.find(option => option.value === current?.value)?.label
-              : 'Select a bank account...' }
-          </div>
-          <ChevronsUpDown className='h-3 w-3 shrink-0 opacity-50' />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className='w-80'>
-        <SelectBankAccountPicker
-          value={ current?.value }
-          setOpen={ setOpen }
-          options={ accounts }
-          onSelect={ value => navigate(`/bank/${value}/transactions`) }
-        />
-      </PopoverContent>
-    </Popover>
+          <Settings className='h-4 w-4 opacity-50 group-hover:opacity-100' />
+        </Link>
+      </Popover>
+    </div>
   );
 }
 

@@ -82,7 +82,6 @@ function NewBankAccountModal(): JSX.Element {
             name='name'
             label={ 'What is the account\'s name ?' }
             required
-            autoFocus
             autoComplete='off'
             placeholder='Personal Checking...'
           />

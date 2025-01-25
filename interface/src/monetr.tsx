@@ -124,6 +124,7 @@ export default function Monetr(): JSX.Element {
       <div className='w-full h-full flex min-w-0 overflow-y-auto'>
         <RoutesImpl>
           <Route path='/bank/:bankAccountId' element={ <BudgetingLayout /> }>
+            <Route path='settings' element={ <div /> } />
             <Route path='transactions' element={ <Transactions /> } />
             <Route path='transactions/:transactionId/details' element={ <TransactionDetails /> } />
             <Route path='expenses' element={ <Expenses /> } />

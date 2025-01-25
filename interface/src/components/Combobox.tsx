@@ -13,7 +13,7 @@ import { cva, VariantProps } from 'class-variance-authority';
  
 export const comboboxVariants = cva(
   [
-    'justify-between text-ellipsis overflow-hidden text-nowrap flex-shrink-0',
+    'justify-between truncate',
   ],
   {
     variants: {
