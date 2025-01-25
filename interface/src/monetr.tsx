@@ -13,6 +13,7 @@ import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication
 import Loading from '@monetr/interface/loading';
 import SubscribePage from '@monetr/interface/pages/account/subscribe';
 import AfterCheckoutPage from '@monetr/interface/pages/account/subscribe/after';
+import BankAccountSettingsPage from '@monetr/interface/pages/bank/settings';
 import ConfigError from '@monetr/interface/pages/error/config';
 import ExpenseDetails from '@monetr/interface/pages/expense/details';
 import Expenses from '@monetr/interface/pages/expenses';
@@ -124,7 +125,7 @@ export default function Monetr(): JSX.Element {
       <div className='w-full h-full flex min-w-0 overflow-y-auto'>
         <RoutesImpl>
           <Route path='/bank/:bankAccountId' element={ <BudgetingLayout /> }>
-            <Route path='settings' element={ <div /> } />
+            <Route path='settings' element={ <BankAccountSettingsPage /> } />
             <Route path='transactions' element={ <Transactions /> } />
             <Route path='transactions/:transactionId/details' element={ <TransactionDetails /> } />
             <Route path='expenses' element={ <Expenses /> } />
