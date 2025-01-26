@@ -7,7 +7,7 @@ import type { DocsThemeConfig } from 'nextra-theme-docs';
 import Logo from '@monetr/docs/assets/logo.svg';
 import GithubStars from '@monetr/docs/components/GithubStars';
 import Head from '@monetr/docs/components/Head';
-import SignUp from '@monetr/docs/components/SignUp';
+import SignIn from '@monetr/docs/components/SignIn';
 
 const branch = process.env.GIT_BRANCH ?? 'main';
 
@@ -46,7 +46,7 @@ const config: DocsThemeConfig = {
     link: 'https://github.com/monetr/monetr',
   },
   navbar: {
-    extraContent: <SignUp />,
+    extraContent: <SignIn />,
   },
   sidebar: {
     defaultMenuCollapseLevel: 1,
