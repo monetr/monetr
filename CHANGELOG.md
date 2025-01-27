@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.8](https://github.com/monetr/monetr/compare/v1.1.7...v1.1.8) (2025-01-27)
+
+
+### Dependencies
+
+* **ui:** update radix-ui-primitives monorepo ([#2359](https://github.com/monetr/monetr/issues/2359)) ([ca59a56](https://github.com/monetr/monetr/commit/ca59a569438546454db0ddb9c418ef8755967dac))
+* **ui:** update rsbuild ([#2365](https://github.com/monetr/monetr/issues/2365)) ([480ba37](https://github.com/monetr/monetr/commit/480ba370e28df4dd74dfabbba0c4bb7c3217fe43))
+
+
+### Bug Fixes
+
+* **api:** Fix not handling long passwords ([#2368](https://github.com/monetr/monetr/issues/2368)) ([0bf15d4](https://github.com/monetr/monetr/commit/0bf15d46f9e2a1be94d103462af9005bb449a525)), closes [#2367](https://github.com/monetr/monetr/issues/2367)
+
 ## [1.1.7](https://github.com/monetr/monetr/compare/v1.1.6...v1.1.7) (2025-01-27)
 
 
