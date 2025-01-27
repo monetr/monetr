@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.1.7](https://github.com/monetr/monetr/compare/v1.1.6...v1.1.7) (2025-01-27)
+
+
+### Dependencies
+
+* **api:** update dependency go to v1.23.5 ([#2338](https://github.com/monetr/monetr/issues/2338)) ([e5b5471](https://github.com/monetr/monetr/commit/e5b547152016af8bd70a35ad8bc0435d993133c8))
+* **api:** update module github.com/aws/aws-sdk-go to v1.55.6 ([#2339](https://github.com/monetr/monetr/issues/2339)) ([5b0272a](https://github.com/monetr/monetr/commit/5b0272a3c79be2bd7addccccb9f3e68f6ae5e3e0))
+* **ui:** update dependency @react-email/components to v0.0.32 ([#2345](https://github.com/monetr/monetr/issues/2345)) ([8ce78aa](https://github.com/monetr/monetr/commit/8ce78aab3408162e9b41232c745a8c5f812a8525))
+* **ui:** update dependency @swc/core to v1.10.9 ([#2346](https://github.com/monetr/monetr/issues/2346)) ([7c0f0e7](https://github.com/monetr/monetr/commit/7c0f0e7a8839b20bb8a564d2e0feec425f13185a))
+* **ui:** update dependency next to v15.1.5 ([#2347](https://github.com/monetr/monetr/issues/2347)) ([899f086](https://github.com/monetr/monetr/commit/899f08692ef34b965193cb3cc9a63c48eb2d0105))
+* **ui:** update dependency next to v15.1.6 ([#2355](https://github.com/monetr/monetr/issues/2355)) ([22ef0a7](https://github.com/monetr/monetr/commit/22ef0a7f2b2db57b1040d3b2b84db748b47929e4))
+* **ui:** update dependency notistack to v3.0.2 ([#2348](https://github.com/monetr/monetr/issues/2348)) ([fb1a21b](https://github.com/monetr/monetr/commit/fb1a21b49495037c4c201def6f394786b2f81f03))
+* **ui:** update dependency react-router-dom to v6.28.2 ([#2356](https://github.com/monetr/monetr/issues/2356)) ([2688fc8](https://github.com/monetr/monetr/commit/2688fc8a721574b8fe0765c2f638dcfc9fd4695c))
+* **ui:** update dependency typescript to v5.7.3 ([#2340](https://github.com/monetr/monetr/issues/2340)) ([31e6761](https://github.com/monetr/monetr/commit/31e67612ff989cc5d870d3257b1bebf385f6beb0))
+* **ui:** update dependency zustand to v5.0.3 ([#2349](https://github.com/monetr/monetr/issues/2349)) ([e94e895](https://github.com/monetr/monetr/commit/e94e8950baf6af9a6caa194967212697b9ce85a2))
+* **ui:** update rsbuild ([#2350](https://github.com/monetr/monetr/issues/2350)) ([48bd9f7](https://github.com/monetr/monetr/commit/48bd9f74a094e1aaa4d942fdf20e2988eae495f2))
+
+
+### Bug Fixes
+
+* **api:** Allow currency to be changed on manual accounts ([#2331](https://github.com/monetr/monetr/issues/2331)) ([7b67063](https://github.com/monetr/monetr/commit/7b670634ec29c9480f3b00eac72b747cc963e5ea))
+* **api:** Detect AVX and AVX512F instruction sets using runtime ([#2363](https://github.com/monetr/monetr/issues/2363)) ([0f5e60d](https://github.com/monetr/monetr/commit/0f5e60d8c0b0aee708c4a09afa54a5f5744e9947))
+* **docs:** Change Sign-Up button to be sign in instead. ([1c469aa](https://github.com/monetr/monetr/commit/1c469aaeb880137d7cb00e18505c203c9a3b3750))
+* **ofx:** Allow an alternative OFX date format to be parsed ([#2364](https://github.com/monetr/monetr/issues/2364)) ([1cb3023](https://github.com/monetr/monetr/commit/1cb302353bbb1781490d35714fb314c33f668b16)), closes [#2362](https://github.com/monetr/monetr/issues/2362)
+* **test:** Fix documentation tests in CI ([#2361](https://github.com/monetr/monetr/issues/2361)) ([5d308b9](https://github.com/monetr/monetr/commit/5d308b9c91640fefd4d11c713a146b11d4c51821))
+* **ui:** Fixing undefined currency ([#2342](https://github.com/monetr/monetr/issues/2342)) ([f3c8027](https://github.com/monetr/monetr/commit/f3c802746c5562f2f89d94ce377c64153ea365ed)), closes [#2336](https://github.com/monetr/monetr/issues/2336)
+
+
+### Miscellaneous
+
+* **compose:** Updating compose files valkey version ([16001ee](https://github.com/monetr/monetr/commit/16001eebed1dc5449cf3ead334e083416827794a))
+* **container:** Bump go version in Dockerfile ([ffaa89d](https://github.com/monetr/monetr/commit/ffaa89d221fbf9ad4c28c2a44d3f93adfd8f4bd7))
+* **emails:** Removing the launch notification template ([e676ebf](https://github.com/monetr/monetr/commit/e676ebf0e6f99f388bba35151eb15b337bc7ab0a))
+
 ## [1.1.6](https://github.com/monetr/monetr/compare/v1.1.5...v1.1.6) (2025-01-20)
 
 
