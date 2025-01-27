@@ -734,6 +734,34 @@ func TestRegister(t *testing.T) {
 		}
 	})
 
+	t.Run("password too long", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		var registerRequest struct {
+			Email     string `json:"email"`
+			Password  string `json:"password"`
+			FirstName string `json:"firstName"`
+			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
+		}
+		registerRequest.Email = testutils.GetUniqueEmail(t)
+		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 100)
+		registerRequest.FirstName = gofakeit.FirstName()
+		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
+
+		{ // Register a new user.
+			response := e.POST(`/api/authentication/register`).
+				WithJSON(registerRequest).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Password must be less than 72 characters")
+		}
+	})
+
 	t.Run("beta code not provided", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Beta.EnableBetaCodes = true

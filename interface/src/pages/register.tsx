@@ -66,6 +66,10 @@ function validator(values: RegisterValues): FormikErrors<RegisterValues> {
     errors['confirmPassword'] = 'Password confirmation must match.';
   }
 
+  if (values?.password.length > 71) {
+    errors['password'] = 'Password is too long, must be less than 72 characters.';
+  }
+
   return errors;
 }
 

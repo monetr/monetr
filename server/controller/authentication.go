@@ -344,9 +344,12 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	log := c.getLog(ctx)
 
 	registerRequest.Email = strings.TrimSpace(registerRequest.Email)
-	registerRequest.Password = strings.TrimSpace(registerRequest.Password)
 	registerRequest.FirstName = strings.TrimSpace(registerRequest.FirstName)
 	registerRequest.Locale = strings.TrimSpace(registerRequest.Locale)
+	registerRequest.Password = strings.TrimSpace(registerRequest.Password)
+	if len(registerRequest.Password) > 71 {
+		return c.badRequest(ctx, "Password must be less than 72 characters")
+	}
 	if registerRequest.BetaCode != nil {
 		*registerRequest.BetaCode = strings.TrimSpace(*registerRequest.BetaCode)
 	}
