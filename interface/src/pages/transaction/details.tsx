@@ -1,10 +1,10 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { HeartBroken, ShoppingCartOutlined } from '@mui/icons-material';
+import { ShoppingCartOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { startOfDay } from 'date-fns';
 import { FormikHelpers } from 'formik';
-import { Save } from 'lucide-react';
+import { HeartCrack, Save } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -56,7 +56,7 @@ export default function TransactionDetails(): JSX.Element {
   if (!transactionId && !isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <HeartCrack className='dark:text-dark-monetr-content h-24 w-24' />
         <MSpan className='text-5xl'>
           Something isn't right...
         </MSpan>
@@ -69,7 +69,7 @@ export default function TransactionDetails(): JSX.Element {
   if ((isError || !transaction) && !isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <HeartCrack className='dark:text-dark-monetr-content h-24 w-24' />
         <MSpan className='text-5xl'>
           Something isn't right...
         </MSpan>
