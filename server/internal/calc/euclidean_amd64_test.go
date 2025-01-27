@@ -7,12 +7,12 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/klauspost/cpuid/v2"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/sys/cpu"
 )
 
 func BenchmarkEuclideanDistance64_AVX(bench *testing.B) {
-	if !cpuid.CPU.Has(cpuid.AVX) {
+	if !cpu.X86.HasAVX {
 		bench.Skip("host does not support AVX")
 	}
 
@@ -47,7 +47,7 @@ func BenchmarkEuclideanDistance64_AVX(bench *testing.B) {
 }
 
 func BenchmarkEuclideanDistance32_AVX(bench *testing.B) {
-	if !cpuid.CPU.Has(cpuid.AVX) {
+	if !cpu.X86.HasAVX {
 		bench.Skip("host does not support AVX")
 	}
 
@@ -82,7 +82,7 @@ func BenchmarkEuclideanDistance32_AVX(bench *testing.B) {
 }
 
 func BenchmarkEuclideanDistance64_AVX512(bench *testing.B) {
-	if !cpuid.CPU.Has(cpuid.AVX512F) {
+	if !cpu.X86.HasAVX512F {
 		bench.Skip("host does not support AVX512")
 	}
 
@@ -117,7 +117,7 @@ func BenchmarkEuclideanDistance64_AVX512(bench *testing.B) {
 }
 
 func BenchmarkEuclideanDistance32_AVX512(bench *testing.B) {
-	if !cpuid.CPU.Has(cpuid.AVX512F) {
+	if !cpu.X86.HasAVX512F {
 		bench.Skip("host does not support AVX512")
 	}
 
@@ -152,7 +152,7 @@ func BenchmarkEuclideanDistance32_AVX512(bench *testing.B) {
 }
 
 func TestEuclideanDistance64_AVX(t *testing.T) {
-	if !cpuid.CPU.Has(cpuid.AVX) {
+	if !cpu.X86.HasAVX {
 		t.Skip("host does not support AVX")
 	}
 
@@ -170,7 +170,7 @@ func TestEuclideanDistance64_AVX(t *testing.T) {
 }
 
 func TestEuclideanDistance32_AVX(t *testing.T) {
-	if !cpuid.CPU.Has(cpuid.AVX) {
+	if !cpu.X86.HasAVX {
 		t.Skip("host does not support AVX")
 	}
 
@@ -235,7 +235,7 @@ func TestEuclideanDistance32_AVX(t *testing.T) {
 }
 
 func TestEuclideanDistance64_AVX512(t *testing.T) {
-	if !cpuid.CPU.Has(cpuid.AVX512F) {
+	if !cpu.X86.HasAVX512F {
 		t.Skip("host does not support AVX512")
 	}
 
@@ -253,7 +253,7 @@ func TestEuclideanDistance64_AVX512(t *testing.T) {
 }
 
 func TestEuclideanDistance32_AVX512(t *testing.T) {
-	if !cpuid.CPU.Has(cpuid.AVX512F) {
+	if !cpu.X86.HasAVX512F {
 		t.Skip("host does not support AVX")
 	}
 

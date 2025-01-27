@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	locale "github.com/elliotcourant/go-lclocale"
-	"github.com/klauspost/cpuid/v2"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/icons"
 	"github.com/monetr/monetr/server/ui"
 	"github.com/spf13/cobra"
+	"golang.org/x/sys/cpu"
 )
 
 type versionCommand struct {
@@ -58,9 +58,9 @@ func newVersionCommand(parent *cobra.Command) {
 			}
 
 			simd := "N/A"
-			if cpuid.CPU.Supports(cpuid.AVX512F) {
+			if cpu.X86.HasAVX512F {
 				simd = "AVX512"
-			} else if cpuid.CPU.Supports(cpuid.AVX) {
+			} else if cpu.X86.HasAVX {
 				simd = "AVX"
 			}
 

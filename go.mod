@@ -26,7 +26,6 @@ require (
 	github.com/gomodule/redigo v1.9.2
 	github.com/google/uuid v1.6.0
 	github.com/jarcoal/httpmock v1.3.1
-	github.com/klauspost/cpuid/v2 v2.2.9
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/mileusna/useragent v1.3.5
 	github.com/monetr/validation v1.0.2
@@ -163,7 +162,7 @@ require (
 	golang.org/x/net v0.34.0
 	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/sys v0.29.0
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241118233622-e639e219e697 // indirect
