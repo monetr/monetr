@@ -114,7 +114,7 @@ if(BUILD_TESTING)
 
   set(HYPERLINK_GITHUB_ARGS "--check-anchors" "--sources" "${CMAKE_SOURCE_DIR}/docs/src/pages")
   if(DEFINED ENV{CI})
-    set(HYPERLINK_GITHUB_ARGS "--github-actions")
+    list(APPEND HYPERLINK_GITHUB_ARGS "--github-actions")
   endif()
   add_test(
     NAME docs/check-links
