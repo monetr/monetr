@@ -7,12 +7,12 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/klauspost/cpuid/v2"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/sys/cpu"
 )
 
 func TestNormalizeVector64_AVX(t *testing.T) {
-	if !cpuid.CPU.Has(cpuid.AVX) {
+	if !cpu.X86.HasAVX {
 		t.Skip("host does not support AVX")
 	}
 
@@ -84,7 +84,7 @@ func TestNormalizeVector64_AVX(t *testing.T) {
 }
 
 func TestNormalizeVector64_AVX512(t *testing.T) {
-	if !cpuid.CPU.Has(cpuid.AVX512F) {
+	if !cpu.X86.HasAVX512F {
 		t.Skip("host does not support AVX512")
 	}
 
@@ -156,7 +156,7 @@ func TestNormalizeVector64_AVX512(t *testing.T) {
 }
 
 func TestNormalizeVector32_AVX(t *testing.T) {
-	if !cpuid.CPU.Has(cpuid.AVX) {
+	if !cpu.X86.HasAVX {
 		t.Skip("host does not support AVX")
 	}
 
@@ -228,7 +228,7 @@ func TestNormalizeVector32_AVX(t *testing.T) {
 }
 
 func TestNormalizeVector32_AVX512(t *testing.T) {
-	if !cpuid.CPU.Has(cpuid.AVX512F) {
+	if !cpu.X86.HasAVX512F {
 		t.Skip("host does not support AVX512")
 	}
 
@@ -308,7 +308,7 @@ func TestNormalizeVector32_AVX512(t *testing.T) {
 }
 
 func BenchmarkNormalizeVector64_AVX(bench *testing.B) {
-	if !cpuid.CPU.Has(cpuid.AVX) {
+	if !cpu.X86.HasAVX {
 		bench.Skip("host does not support AVX")
 	}
 
@@ -341,7 +341,7 @@ func BenchmarkNormalizeVector64_AVX(bench *testing.B) {
 }
 
 func BenchmarkNormalizeVector64_AVX512(bench *testing.B) {
-	if !cpuid.CPU.Has(cpuid.AVX512F) {
+	if !cpu.X86.HasAVX512F {
 		bench.Skip("host does not support AVX512")
 	}
 
@@ -374,7 +374,7 @@ func BenchmarkNormalizeVector64_AVX512(bench *testing.B) {
 }
 
 func BenchmarkNormalizeVector32_AVX(bench *testing.B) {
-	if !cpuid.CPU.Has(cpuid.AVX) {
+	if !cpu.X86.HasAVX {
 		bench.Skip("host does not support AVX")
 	}
 
@@ -407,7 +407,7 @@ func BenchmarkNormalizeVector32_AVX(bench *testing.B) {
 }
 
 func BenchmarkNormalizeVector32_AVX512(bench *testing.B) {
-	if !cpuid.CPU.Has(cpuid.AVX512F) {
+	if !cpu.X86.HasAVX512F {
 		bench.Skip("host does not support AVX512")
 	}
 

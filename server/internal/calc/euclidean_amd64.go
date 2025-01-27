@@ -2,7 +2,9 @@
 
 package calc
 
-import "github.com/klauspost/cpuid/v2"
+import (
+	"golang.org/x/sys/cpu"
+)
 
 //go:noescape
 func __euclideanDistance64_AVX(a, b []float64) float64
@@ -17,10 +19,10 @@ func __euclideanDistance64_AVX512(a, b []float64) float64
 func __euclideanDistance32_AVX512(a, b []float32) float32
 
 func init() {
-	if cpuid.CPU.Supports(cpuid.AVX512F) {
+	if cpu.X86.HasAVX512F {
 		euclideanImplementation64 = __euclideanDistance64_AVX512
 		euclideanImplementation32 = __euclideanDistance32_AVX512
-	} else if cpuid.CPU.Supports(cpuid.AVX) {
+	} else if cpu.X86.HasAVX {
 		euclideanImplementation64 = __euclideanDistance64_AVX
 		euclideanImplementation32 = __euclideanDistance32_AVX
 	}
