@@ -4,7 +4,7 @@
   "private": true,
   "devDependencies": {
     "@react-email/components": "0.0.32",
-    "@storybook/react": "8.4.7",
+    "@storybook/react": "8.5.2",
     "react-email": "2.1.6"
   }
 }
