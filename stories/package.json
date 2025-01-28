@@ -25,14 +25,14 @@
   "devDependencies": {
     "@rsbuild/core": "1.2.3",
     "@rsbuild/plugin-react": "1.1.0",
-    "@rsbuild/plugin-sass": "1.1.2",
+    "@rsbuild/plugin-sass": "1.2.0",
     "@rspack/binding-linux-arm64-gnu": "1.2.2",
     "@rspack/binding-linux-x64-gnu": "1.2.2",
     "autoprefixer": "10.4.20",
     "postcss": "8.4.49",
-    "sass": "1.83.1",
-    "sass-embedded-linux-arm64": "1.83.1",
-    "sass-embedded-linux-x64": "1.83.1",
+    "sass": "1.83.4",
+    "sass-embedded-linux-arm64": "1.83.4",
+    "sass-embedded-linux-x64": "1.83.4",
     "storybook-react-rsbuild": "0.1.8"
   }
 }
