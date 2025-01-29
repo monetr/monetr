@@ -18,7 +18,7 @@ making it absolutely clear how much you have left over to budget or use for othe
 the now defunct [Simple](https://web.archive.org/web/20201128231953/https://www.simple.com/). It is also completely free
 to [self-host](https://monetr.app/documentation/install/).
 
-![image](https://github.com/user-attachments/assets/010648f1-829f-47a2-a408-c1d8759221ab)
+![monetr Screenshot](https://github.com/user-attachments/assets/d80847f7-8a99-4813-b15a-29094f5646ad)
 
 ## Contributing
 
