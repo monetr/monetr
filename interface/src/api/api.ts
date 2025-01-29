@@ -33,7 +33,15 @@ export function NewClient(config: AxiosRequestConfig): AxiosInstance {
   client.interceptors.response.use(result => {
     return result;
   }, error => {
-    if (error.response.status === 500) {
+    // If we did get an error, and its a 500 status code then report this to sentry so we can figure out what went
+    // wrong.
+    if (error?.response?.status === 500) {
+      Sentry.captureException(error);
+    }
+
+    // If we get an error but there is no status or response for some reason, then something else is goofy and also
+    // report that to sentry so we can diagnose it.
+    if (!error?.response?.status) {
       Sentry.captureException(error);
     }
 
