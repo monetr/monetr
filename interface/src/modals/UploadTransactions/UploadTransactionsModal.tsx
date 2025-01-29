@@ -102,6 +102,9 @@ function UploadFileStage(props: StageProps) {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
+    // If the file has not been presented then do nothing!
+    if (!file) return;
+
     const formData = new FormData();
     formData.append('data', file, file.name);
 
