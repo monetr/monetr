@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.1.9](https://github.com/monetr/monetr/compare/v1.1.8...v1.1.9) (2025-01-29)
+
+
+### Dependencies
+
+* **ui:** update dependency @swc/core to v1.10.11 ([#2369](https://github.com/monetr/monetr/issues/2369)) ([44815d0](https://github.com/monetr/monetr/commit/44815d0fc4bfb28cc67fe232e4566e9f5bcc7b10))
+* **ui:** update dependency react-select to v5.10.0 ([#2373](https://github.com/monetr/monetr/issues/2373)) ([5db9bb9](https://github.com/monetr/monetr/commit/5db9bb9e7c05f776ab9b5d687ca5f150c7452079))
+* **ui:** update sass ([#2374](https://github.com/monetr/monetr/issues/2374)) ([d072a50](https://github.com/monetr/monetr/commit/d072a506b093c8e61aa65e09b04b48facbe2ae03))
+* **ui:** update sentry-javascript monorepo to v8.52.0 ([#2375](https://github.com/monetr/monetr/issues/2375)) ([cac6c52](https://github.com/monetr/monetr/commit/cac6c522eae9a9b9c6c16f28d945a3773bf557d1))
+* **ui:** update storybook monorepo to v8.5.2 ([#2376](https://github.com/monetr/monetr/issues/2376)) ([b846fd0](https://github.com/monetr/monetr/commit/b846fd00a715ee5a1e73ec90da35c02d17ff4f18))
+
+
+### Bug Fixes
+
+* **ofx:** Handle even more OFX date formats ([0af3626](https://github.com/monetr/monetr/commit/0af362660c983f37c57361d89bbd7cbf0a0412fb)), closes [#2380](https://github.com/monetr/monetr/issues/2380)
+* **ui:** Fix API failures not being sent to Sentry properly ([28afc1e](https://github.com/monetr/monetr/commit/28afc1e38bdfa16ea49cc52755ce0f0d7ac9d08f)), closes [#2381](https://github.com/monetr/monetr/issues/2381)
+* **ui:** Fix transaction upload submit crash ([1d97670](https://github.com/monetr/monetr/commit/1d976705f90542aa2e64bb44c86233601b28a9a8)), closes [#2377](https://github.com/monetr/monetr/issues/2377)
+* **ui:** Fixed page crash from expense timeline rendering ([ad857cb](https://github.com/monetr/monetr/commit/ad857cbd8f8dcc8a06a9ce70ae8431ef568ce321)), closes [#2379](https://github.com/monetr/monetr/issues/2379)
+
 ## [1.1.8](https://github.com/monetr/monetr/compare/v1.1.7...v1.1.8) (2025-01-27)
 
 
