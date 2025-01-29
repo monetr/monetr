@@ -90,7 +90,7 @@
     "cssnano": "7.0.6",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
-    "postcss": "8.4.49",
+    "postcss": "8.5.1",
     "prettier": "2.8.8",
     "react-test-renderer": "18.3.1",
     "sass": "1.83.4",
