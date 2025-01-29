@@ -26,11 +26,11 @@ interface TimelineItemData {
 
 export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Element {
   const { data: locale } = useLocaleCurrency();
-  const { data: spending } = useSpending(props.spendingId);
-  const { data: fundingSchedule } = useFundingSchedule(spending?.fundingScheduleId);
+  const { data: spending, isLoading: spendingLoading } = useSpending(props.spendingId);
+  const { data: fundingSchedule, isLoading: fundingLoading } = useFundingSchedule(spending?.fundingScheduleId);
   const { result: forecast, isLoading, isError } = useForecast();
 
-  if (isLoading) {
+  if (isLoading || spendingLoading || fundingLoading) {
     return (
       <MSpan>Loading...</MSpan>
     );
