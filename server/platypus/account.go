@@ -115,7 +115,6 @@ func NewPlaidBankAccount(bankAccount plaid.AccountBase) (PlaidBankAccount, error
 		// currency code we get from Plaid, or fall back to USD as a default.
 		Currency: myownsanity.CoalesceStrings(
 			balances.GetIsoCurrencyCode(),
-			balances.GetUnofficialCurrencyCode(),
 			consts.DefaultCurrencyCode,
 		),
 	}, nil
