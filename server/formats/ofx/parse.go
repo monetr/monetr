@@ -3,11 +3,16 @@ package ofx
 import (
 	"encoding/xml"
 	"io"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/elliotcourant/gofx"
 	"github.com/pkg/errors"
+)
+
+var (
+	ofxDateRegex = regexp.MustCompile(`^(?<timestamp>\d{14})(?<extra>.\d{3})?`)
 )
 
 func Parse(reader io.Reader) (*gofx.OFX, error) {
@@ -34,6 +39,15 @@ func Parse(reader io.Reader) (*gofx.OFX, error) {
 }
 
 func ParseDate(input string, timezone *time.Location) (time.Time, error) {
+	matches := ofxDateRegex.FindAllString(input, -1)
+	if len(matches) != 1 {
+		return time.Time{}, errors.Errorf("failed to parse OFX timestamp [%s], found %d matching patterns", input, len(matches))
+	}
+
+	// We know that matches has exactly one item. Overwrite our input variable
+	// with our "cleaned" version.
+	input = matches[0]
+
 	// Typically we would see the `.000` suffix for the timestamp, but some files
 	// might not have this from some institutions.
 	if strings.Contains(input, ".") {

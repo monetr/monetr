@@ -149,7 +149,7 @@ func (h *ProcessOFXUploadHandler) QueueName() string {
 
 func (h *ProcessOFXUploadHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	inLog *logrus.Entry,
 	data []byte,
 ) error {
 	var args ProcessOFXUploadArguments
@@ -161,6 +161,12 @@ func (h *ProcessOFXUploadHandler) HandleConsumeJob(
 	}
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
+
+	log := inLog.WithFields(logrus.Fields{
+		"accountId":           args.AccountId,
+		"transactionUploadId": args.TransactionUploadId,
+		"bankAccountId":       args.BankAccountId,
+	})
 
 	if err := h.updateStatus(ctx, args, TransactionUploadStatusProcessing, nil); err != nil {
 		return err
