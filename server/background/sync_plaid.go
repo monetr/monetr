@@ -417,7 +417,14 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		plaidTransactionsToInsert := make([]*PlaidTransaction, 0)
 		for i := range plaidTransactions {
 			plaidTransaction := plaidTransactions[i]
-			bankAccount := s.bankAccounts[plaidTransaction.GetBankAccountId()]
+			bankAccount, ok := s.bankAccounts[plaidTransaction.GetBankAccountId()]
+			if !ok {
+				log.WithFields(logrus.Fields{
+					"plaidTransactionId": plaidTransaction.GetTransactionId(),
+					"plaidBankAccountId": plaidTransaction.GetBankAccountId(),
+					"bug":                true,
+				}).Error("bank account for plaid transaction was not in the bank accounts map! there is a bug!")
+			}
 
 			created, updated, plaidCreated, err := s.syncPlaidTransaction(
 				span.Context(),
