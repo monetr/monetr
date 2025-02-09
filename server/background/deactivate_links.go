@@ -209,6 +209,16 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 
 	crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.PlaidId)
 
+	log = log.WithFields(logrus.Fields{
+		"accountId":       d.args.AccountId,
+		"linkId":          d.args.LinkId,
+		"plaidLinkId":     link.PlaidLinkId,
+		"itemId":          link.PlaidLink.PlaidId,
+		"institutionId":   link.PlaidLink.InstitutionId,
+		"institutionName": link.PlaidLink.InstitutionName,
+		"plaidLinkStatus": link.PlaidLink.Status.String(),
+	})
+
 	log.Warn("DRY RUN, would have removed plaid link")
 
 	// secret, err := d.secrets.Read(span.Context(), link.PlaidLink.SecretId)
