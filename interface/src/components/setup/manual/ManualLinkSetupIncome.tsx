@@ -15,8 +15,11 @@ import { useCreateBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import { useCreateLink } from '@monetr/interface/hooks/links';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
+
+import { tz } from '@date-fns/tz';
 
 interface Values {
   nextPayday: Date;
@@ -25,6 +28,7 @@ interface Values {
 }
 
 export default function ManualLinkSetupIncome(): JSX.Element {
+  const { data: timezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const createLink = useCreateLink();
   const createBankAccount = useCreateBankAccount();
@@ -32,7 +36,9 @@ export default function ManualLinkSetupIncome(): JSX.Element {
   const navigate = useNavigate();
   const viewContext = useViewContext<ManualLinkSetupSteps, {}>();
   const initialValues: Values = {
-    nextPayday: startOfTomorrow(),
+    nextPayday: startOfTomorrow({
+      in: tz(timezone),
+    }),
     ruleset: '',
     paydayAmount: 0.00,
     ...viewContext.formData,
@@ -60,7 +66,9 @@ export default function ManualLinkSetupIncome(): JSX.Element {
       .then(bankAccount => createFundingSchedule(new FundingSchedule({
         bankAccountId: bankAccount.bankAccountId,
         name: 'Payday',
-        nextRecurrence: startOfDay(values.nextPayday),
+        nextRecurrence: startOfDay(values.nextPayday, {
+          in: tz(timezone),
+        }),
         ruleset: values.ruleset,
         estimatedDeposit: locale.friendlyToAmount(values.paydayAmount),
         excludeWeekends: false,
@@ -88,7 +96,9 @@ export default function ManualLinkSetupIncome(): JSX.Element {
             label='When do you get paid next?'
             className='w-full'
             required
-            min={ startOfTomorrow() }
+            min={ startOfTomorrow({
+              in: tz(timezone),
+            }) }
             autoFocus
           />
           <MSelectFrequency

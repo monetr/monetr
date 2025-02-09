@@ -11,7 +11,10 @@ import { ReactElement } from './types';
 import { Button } from '@monetr/interface/components/Button';
 import { Calendar } from '@monetr/interface/components/Calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import { tz } from '@date-fns/tz';
 
 export interface MDatePickerProps extends
   Omit<React.HTMLAttributes<HTMLButtonElement>, 'value' | 'defaultValue'>
@@ -32,7 +35,10 @@ export interface MDatePickerProps extends
 }
 
 export default function MDatePicker(props: MDatePickerProps): JSX.Element {
-  const today = startOfToday();
+  const { data: timezone } = useTimezone();
+  const today = startOfToday({
+    in: tz(timezone),
+  });
   const formikContext = useFormikContext();
 
   const getFormikError = () => {
@@ -78,7 +84,9 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     ? formatSelectedDates(selectedValue, undefined, enUS)
     : placeholder;
 
-  const defaultMonth = startOfMonth(selectedValue ?? maxDate ?? today);
+  const defaultMonth = startOfMonth(selectedValue ?? maxDate ?? today, {
+    in: tz(timezone),
+  });
   const isClearEnabled = enableClear && !disabled;
 
   const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
