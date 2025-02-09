@@ -69,9 +69,6 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 		// would always be unique. If possible it would also be good to take into
 		// account the order of the terms for the final name. But I'm not sure how
 		// important that will be yet.
-		// =========================================================================
-		// In the mean time I'm going to use the most common merchant name or the
-		// name of the transaction with the highest ID.
 
 		indicies := s.tfidf.indexToWord
 		mostValuableIndicies := make([]struct {
@@ -114,30 +111,43 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 			})
 		}
 
-		sort.SliceStable(mostValuableIndicies, func(i, j int) bool {
-			return mostValuableIndicies[i].Value > mostValuableIndicies[j].Value
-		})
+		// Post processing steps for the similar transaction cluster...
 
-		consistentId := sha512.New()
-		slug := make([]string, 0, 2)
-		for _, valuableWord := range mostValuableIndicies[0:cap(slug)] {
-			if valuableWord.Value == 0 {
-				continue
+		{ // Sort the members of the cluster by their transaction date.
+			sort.SliceStable(items, func(i, j int) bool {
+				return items[i].Date.After(items[j].Date)
+			})
+			for i := range items {
+				group.Members[i] = items[i].ID
 			}
-			slug = append(slug, valuableWord.OriginalWord)
-			consistentId.Write([]byte(valuableWord.Word))
 		}
 
-		sort.SliceStable(items, func(i, j int) bool {
-			return items[i].Date.After(items[j].Date)
-		})
+		{ // Calculate a consistent ID and a "name" for the cluster
+			sort.SliceStable(mostValuableIndicies, func(i, j int) bool {
+				return mostValuableIndicies[i].Value > mostValuableIndicies[j].Value
+			})
 
-		for i := range items {
-			group.Members[i] = items[i].ID
+			consistentId := sha512.New()
+			slug := make([]string, 0, 2)
+			hashSlug := make([]string, 0, 2)
+			for _, valuableWord := range mostValuableIndicies[0:cap(slug)] {
+				if valuableWord.Value == 0 {
+					break
+				}
+				slug = append(slug, valuableWord.OriginalWord)
+				hashSlug = append(hashSlug, valuableWord.Word)
+			}
+
+			group.Name = strings.Join(slug, " ")
+
+			// We already have the 2 most valuable words in the cluster. Sort them
+			// alphabetically so we can be consistent in hashing if they swap places.
+			// For example; rocket mortgage and mortgage rocket should be the same
+			// meaningfully.
+			sort.Strings(hashSlug)
+			consistentId.Write([]byte(strings.Join(hashSlug, ";")))
+			group.Signature = hex.EncodeToString(consistentId.Sum(nil))
 		}
-
-		group.Name = strings.Join(slug, " ")
-		group.Signature = hex.EncodeToString(consistentId.Sum(nil))
 
 		similar[i] = group
 	}
