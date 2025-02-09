@@ -119,7 +119,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 		})
 
 		consistentId := sha512.New()
-		slug := make([]string, 0, 3)
+		slug := make([]string, 0, 2)
 		for _, valuableWord := range mostValuableIndicies[0:cap(slug)] {
 			if valuableWord.Value == 0 {
 				continue

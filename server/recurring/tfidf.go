@@ -33,6 +33,8 @@ var (
 		"check":           0,
 		"transfer":        0,
 		"deposit":         0,
+		"withdrawal":      0,
+		"withdraw":        0,
 		"purchase":        0,
 		"adjustment":      0,
 		"payment":         0,
@@ -102,7 +104,10 @@ var (
 	}
 
 	synonyms = map[string]string{
+		"amz":         "amazon",
 		"amzn":        "amazon",
+		"amzncom":     "amazon",
+		"amazoncom":   "amazon",
 		"youtubepre":  "youtube premium",
 		"youtubeprem": "youtube premium",
 		"coffe":       "coffee",
@@ -140,7 +145,7 @@ func (p *TFIDF) indexWords() (mapping map[string]int, vectorSize int) {
 	// to get information back out of the transform after we are done.
 	if len(p.wordToIndex) == 0 {
 		index := 0
-		wordCount := len(p.wc)
+		wordCount := len(p.wc) * 2
 		// Define the length of the vector and adjust it to be divisible by 16. This
 		// will enable us to leverage SIMD in the future. By using 16 we are
 		// compatible with both AVX and AVX512.
@@ -153,6 +158,7 @@ func (p *TFIDF) indexWords() (mapping map[string]int, vectorSize int) {
 			}
 			p.wordToIndex[word] = index
 			p.indexToWord[index] = word
+			index++
 			index++
 		}
 	}

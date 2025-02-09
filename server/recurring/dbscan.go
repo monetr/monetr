@@ -18,7 +18,6 @@ var (
 )
 
 type Cluster struct {
-	ID    models.ID[models.Transaction]
 	Items map[int]uint8
 }
 
@@ -79,21 +78,6 @@ func (d *DBSCAN) Calculate(ctx context.Context) []Cluster {
 
 		// Then start constructing a cluster around this point.
 		d.expandCluster(index, neighbors, &newCluster)
-		// Set the cluster's unique ID to the lowest numeric ID in that cluster.
-		// HACK: I need a way to uniquely identify each cluster. Generally by using the contents of that cluster. This
-		// relies on the contents of that cluster remaining consistent over time. While the order of the clusters might
-		// change in the future or they might expand as new transactions show up, I need to know which cluster they get
-		// added to in order to tune things over time. This has the potential to cause issues on its own, what if the
-		// cluster algorithm changes enough that the "lowest ID" gets kicked out of the cluster? What if we push a bad
-		// change and the clusters change entirely? Or what if that "lowest ID" gets moved to a different cluster. This
-		// needs improvement, but I think this should be fine for the initial implementation of the clustering algorithm.
-		for i := range newCluster.Items {
-			item := d.dataset[i]
-			if item.ID < newCluster.ID || newCluster.ID.IsZero() {
-				newCluster.ID = item.ID
-			}
-		}
-
 		d.clusters = append(d.clusters, newCluster)
 	}
 

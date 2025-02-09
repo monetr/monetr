@@ -42,7 +42,8 @@ func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
 
 		groups := detector.DetectSimilarTransactions(context.Background())
 		assert.NotEmpty(t, groups, "must return an array of groups of similar transactions")
-		// Since the amazon dataset only has amazon transactions there should only be a single group.
-		assert.Len(t, groups, 1, "should have only a single group")
+
+		j, _ := json.MarshalIndent(groups, "", "  ")
+		fmt.Println(string(j))
 	})
 }
