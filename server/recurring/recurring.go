@@ -6,6 +6,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/calc"
 	"github.com/monetr/monetr/server/models"
@@ -23,6 +24,7 @@ var (
 
 type Frequency struct {
 	StartDate time.Time
+	EndDate   *time.Time
 	Frequency int
 	Rule      models.RuleSet
 }
@@ -43,6 +45,7 @@ type RecurringTransactionResult struct {
 
 func DetectRecurringTransactions(
 	ctx context.Context,
+	now clock.Clock,
 	transactions []models.Transaction,
 ) (*RecurringTransactionResult, error) {
 	span := crumbs.StartFnTrace(ctx)
@@ -112,13 +115,12 @@ func DetectRecurringTransactions(
 	// specific frequency then that will be the end result. Some frequencies are
 	// allowed to overlap or tie for "first". Like 14,15,16.
 	frequencies := []int{
-		7,
-		14,
-		15,
-		16,
-		30,
-		60,
-		90,
+		7,      // Weekly
+		14,     // Every 2 weeks
+		15, 16, // Twice a month
+		30, 31, // Monthly
+		60, // Every 2 months
+		90, // Quarterly
 	}
 
 	result := calc.FastFourierTransform(series)
@@ -284,6 +286,18 @@ func DetectRecurringTransactions(
 	// TODO Determine if the top score is actually the best, or if it is tied with
 	// other scores. If its tied but its a compatible score (such as 14, 15 and
 	// 16) then use the top score. Otherwise return no recurrence detected.
+
+	// TODO Generate a rrule based on the data we calculated above and determine
+	// an end date. There is no end date if the recurring result could still be
+	// ongoing.
+	// var startDate time.Time = members[0].Date
+	// var endDate *time.Time
+	// startDateString := startDate.UTC().Format("20060102T150405Z")
+	// var rule *models.RuleSet
+	// switch frequency.Frequency {
+	// case 15, 16:
+	// 	rule = models.NewRuleSet(fmt.Sprintf("DTSTART:%s\nRRULE:FREQ=FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", startDateString))
+	// }
 
 	return &RecurringTransactionResult{
 		Best: &Frequency{

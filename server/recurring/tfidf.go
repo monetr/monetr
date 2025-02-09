@@ -115,14 +115,17 @@ type Document struct {
 	TFIDF       map[string]float32
 	Vector      []float32
 	Transaction *models.Transaction
-	Parts       []string
+	LowerParts  []string
+	UpperParts  []string
 	Valid       bool
 }
 
 type TFIDF struct {
-	documents []Document
-	wc        map[string]float32
-	idf       map[string]float32
+	documents   []Document
+	wc          map[string]float32
+	idf         map[string]float32
+	wordToIndex map[string]int
+	indexToWord []string
 }
 
 func NewTransactionTFIDF() *TFIDF {
@@ -132,18 +135,29 @@ func NewTransactionTFIDF() *TFIDF {
 	}
 }
 
-func (p *TFIDF) indexWords() map[string]int {
-	index := 0
-	result := make(map[string]int)
-	for word, count := range p.wc {
-		if count == 1 {
-			continue
+func (p *TFIDF) indexWords() (mapping map[string]int, vectorSize int) {
+	// Only calculate the index once. This way we can use it elsewhere if we need
+	// to get information back out of the transform after we are done.
+	if len(p.wordToIndex) == 0 {
+		index := 0
+		wordCount := len(p.wc)
+		// Define the length of the vector and adjust it to be divisible by 16. This
+		// will enable us to leverage SIMD in the future. By using 16 we are
+		// compatible with both AVX and AVX512.
+		vectorLength := wordCount + (16 - (wordCount % 16))
+		p.wordToIndex = make(map[string]int)
+		p.indexToWord = make([]string, vectorLength)
+		for word, count := range p.wc {
+			if count == 1 {
+				continue
+			}
+			p.wordToIndex[word] = index
+			p.indexToWord[index] = word
+			index++
 		}
-		result[word] = index
-		index++
 	}
 
-	return result
+	return p.wordToIndex, len(p.indexToWord)
 }
 
 func TokenizeName(txn *models.Transaction) (lower, normal []string) {
@@ -184,7 +198,8 @@ func (p *TFIDF) AddTransaction(txn *models.Transaction) {
 
 	p.documents = append(p.documents, Document{
 		ID:          txn.TransactionId,
-		Parts:       upper,
+		LowerParts:  lower,
+		UpperParts:  upper,
 		Transaction: txn,
 		TF:          tf,
 		TFIDF:       map[string]float32{},
@@ -206,23 +221,22 @@ func (p *TFIDF) GetDocuments(ctx context.Context) []Document {
 		p.idf[word] = float32(math.Log(float64(docCount / (count + 1))))
 	}
 	// Get a map of all the meaningful words and their index to use in the vector
-	minified := p.indexWords()
-	// Define the length of the vector and adjust it to be divisible by 16. This will enable us to leverage SIMD in the
-	// future. By using 16 we are compatible with both AVX and AVX512.
-	vectorLength := len(minified) + (16 - (len(minified) % 16))
+	minified, vectorSize := p.indexWords()
 	for i := range p.documents {
 		// Get the current document we are working with
 		document := p.documents[i]
 		// Calculate the TFIDF for that document
 		for word, tfValue := range document.TF {
 			document.TFIDF[word] = tfValue * p.idf[word]
-			// If this specific word is meant to be more meaningful than tfidf might treat it then adjust it accordingly
+			// If this specific word is meant to be more meaningful than tfidf might
+			// treat it then adjust it accordingly
 			if multiplier, ok := specialWeights[word]; ok {
 				document.TFIDF[word] *= multiplier
 			}
 		}
-		// Then create a vector of the words in the document name to use for the DBSCAN clustering
-		document.Vector = make([]float32, vectorLength)
+		// Then create a vector of the words in the document name to use for the
+		// DBSCAN clustering
+		document.Vector = make([]float32, vectorSize)
 		words := 0
 		for word, tfidfValue := range document.TFIDF {
 			index, exists := minified[word]

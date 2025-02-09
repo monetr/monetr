@@ -82,7 +82,7 @@ func TestPreProcessor(t *testing.T) {
 			item := dbscan.dataset[index]
 			output[i] = append(output[i], Presentation{
 				ID:        item.ID,
-				Sanitized: strings.Join(item.Parts, " "),
+				Sanitized: strings.Join(item.UpperParts, " "),
 				Original:  strings.TrimSpace(item.Transaction.OriginalName + " " + item.Transaction.OriginalMerchantName),
 			})
 		}

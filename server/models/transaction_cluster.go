@@ -15,6 +15,7 @@ type TransactionCluster struct {
 	Account              *Account               `json:"-" pg:"rel:has-one"`
 	BankAccountId        ID[BankAccount]        `json:"bankAccountId" pg:"bank_account_id,notnull"`
 	BankAccount          *BankAccount           `json:"-" pg:"rel:has-one"`
+	Signature            string                 `json:"signature" pg:"signature"`
 	Name                 string                 `json:"name" pg:"name,notnull"`
 	Members              []ID[Transaction]      `json:"members" pg:"members,notnull,type:'varchar(32)[]'"`
 	CreatedAt            time.Time              `json:"createdAt" pg:"created_at,notnull,default:now()"`
