@@ -2,7 +2,10 @@ package recurring
 
 import (
 	"context"
+	"crypto/sha512"
+	"encoding/hex"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/monetr/monetr/server/crumbs"
@@ -70,9 +73,12 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 		// In the mean time I'm going to use the most common merchant name or the
 		// name of the transaction with the highest ID.
 
-		merchants := map[string]int{}
-		var highestName string
-		var highestId models.ID[models.Transaction]
+		indicies := s.tfidf.indexToWord
+		mostValuableIndicies := make([]struct {
+			Word         string
+			OriginalWord string
+			Value        float32
+		}, len(indicies))
 
 		items := make([]memberItem, 0, len(cluster.Items))
 		for index := range cluster.Items {
@@ -84,19 +90,42 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 				panic("could not find a datum with an index in a resulting cluster")
 			}
 
+			for wordIndex, wordValue := range datum.Vector {
+				tracker := mostValuableIndicies[wordIndex]
+				tracker.Word = indicies[wordIndex]
+				tracker.Value += wordValue
+
+				if tracker.OriginalWord == "" {
+					for _, originalWord := range datum.UpperParts {
+						if strings.EqualFold(indicies[wordIndex], originalWord) {
+							tracker.OriginalWord = originalWord
+							break
+						}
+					}
+				}
+
+				mostValuableIndicies[wordIndex] = tracker
+			}
+
 			// Add the transaction ID to the matches.
 			items = append(items, memberItem{
 				ID:   datum.ID,
 				Date: datum.Transaction.Date,
 			})
+		}
 
-			if datum.Transaction.OriginalMerchantName != "" {
-				merchants[datum.Transaction.OriginalMerchantName] += 1
+		sort.SliceStable(mostValuableIndicies, func(i, j int) bool {
+			return mostValuableIndicies[i].Value > mostValuableIndicies[j].Value
+		})
+
+		consistentId := sha512.New()
+		slug := make([]string, 0, 5)
+		for _, valuableWord := range mostValuableIndicies[0:5] {
+			if valuableWord.Value == 0 {
+				continue
 			}
-			if datum.ID > highestId {
-				highestName = datum.Transaction.OriginalName
-				highestId = datum.ID
-			}
+			slug = append(slug, valuableWord.OriginalWord)
+			consistentId.Write([]byte(valuableWord.Word))
 		}
 
 		sort.SliceStable(items, func(i, j int) bool {
@@ -107,22 +136,8 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 			group.Members[i] = items[i].ID
 		}
 
-		if len(merchants) == 0 {
-			group.Name = highestName
-		} else {
-			highestId = ""
-			highestName = ""
-			// TODO What was I even doing here?
-			highestCount := 0
-			for merchant, count := range merchants {
-				if count > highestCount {
-					highestName = merchant
-					highestCount = count
-				}
-			}
-
-			group.Name = highestName
-		}
+		group.Name = strings.Join(slug, " ")
+		group.Signature = hex.EncodeToString(consistentId.Sum(nil))
 
 		similar[i] = group
 	}

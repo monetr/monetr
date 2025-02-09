@@ -2,6 +2,8 @@ package recurring
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,8 +24,11 @@ func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
 		for _, group := range groups {
 			assert.NotEmpty(t, group.Members, "a groups matches should not be empty!")
 			assert.NotEmpty(t, group.Name, "a groups name should not be empty!")
+			assert.NotEmpty(t, group.Signature, "a groups signature should not be empty!")
 		}
 		// TODO, add specific assertions here about what the groups are.
+		j, _ := json.MarshalIndent(groups, "", "  ")
+		fmt.Println(string(j))
 	})
 
 	t.Run("amazon dataset", func(t *testing.T) {
