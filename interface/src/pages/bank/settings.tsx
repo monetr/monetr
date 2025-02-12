@@ -1,24 +1,27 @@
 import React from 'react';
-import { HeartCrack, Save, Settings } from 'lucide-react';
+import { AxiosError } from 'axios';
+import { FormikHelpers } from 'formik';
+import { FlaskConical, HeartCrack, Save, Settings } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
+import Card from '@monetr/interface/components/Card';
 import MForm from '@monetr/interface/components/MForm';
-import MSelect from '@monetr/interface/components/MSelect';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import { useInstalledCurrencies } from '@monetr/interface/hooks/useInstalledCurrencies';
+import SelectCurrency from '@monetr/interface/components/SelectCurrency';
+import { useSelectedBankAccount, useUpdateBankAccount } from '@monetr/interface/hooks/bankAccounts';
+import { APIError } from '@monetr/interface/util/request';
 
 interface BankAccountValues {
   name: string;
+  currency: string;
 }
-
 
 export default function BankAccountSettingsPage(): JSX.Element {
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
-  const { data: currencies, isLoading: currenciesLoading } = useInstalledCurrencies();
+  const updateBankAccount = useUpdateBankAccount();
   const { enqueueSnackbar } = useSnackbar();
 
   if (isLoading) {
@@ -45,14 +48,40 @@ export default function BankAccountSettingsPage(): JSX.Element {
     );
   }
 
+  async function submit(values: BankAccountValues, helpers: FormikHelpers<BankAccountValues>) {
+    helpers.setSubmitting(true);
+
+    return await updateBankAccount({
+      bankAccountId: bankAccount.bankAccountId,
+      name: values.name,
+      currency: values.currency,
+    })
+      .then(() => enqueueSnackbar(
+        'Updated bank account successfully',
+        {
+          variant: 'success',
+          disableWindowBlurListener: true,
+        },
+      ))
+      .catch((error: AxiosError<APIError>) => enqueueSnackbar(
+        error?.response?.data?.error || 'Failed to update bank account',
+        {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        },
+      ))
+      .finally(() => helpers.setSubmitting(false));
+  }
+
   const initialValues: BankAccountValues = {
     name: bankAccount.name,
+    currency: bankAccount.currency,
   };
 
   return (
     <MForm
       initialValues={ initialValues }
-      onSubmit={ () => {} }
+      onSubmit={ submit }
       className='w-full h-full flex flex-col'
     >
       <MTopNavigation
@@ -69,6 +98,15 @@ export default function BankAccountSettingsPage(): JSX.Element {
       <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
+            <Card className='w-full mb-4'>
+              <MSpan>
+                <FlaskConical className='w-16 h-16' />
+                This page is still a work in progress, however it has been made available to make it possible to more
+                currencies sooner. This page will be changed over the next several releases to improve the UX and
+                functionality.
+              </MSpan>
+            </Card>
+
             <MTextField
               id='bank-account-name-search'
               label='Name'
@@ -77,15 +115,8 @@ export default function BankAccountSettingsPage(): JSX.Element {
               className='w-full'
             />
 
-            <MSelect
-              label='Currency'
+            <SelectCurrency
               name='currency'
-              onChange={ () => {} }
-              options={ (currencies ?? []).map(currency => ({ label: currency, value: currency })) }
-              isLoading={ currenciesLoading }
-              placeholder='Select a funding schedule...'
-              required
-              value={ { label: 'USD', value: 'USD' } }
               className='w-full'
             />
           </div>
