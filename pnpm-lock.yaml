@@ -124,8 +124,8 @@ importers:
         specifier: 18.3.5
         version: 18.3.5(@types/react@18.3.18)
       '@untitaker/hyperlink':
-        specifier: 0.1.43
-        version: 0.1.43
+        specifier: 0.1.44
+        version: 0.1.44
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.5.1)
@@ -4034,8 +4034,8 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@untitaker/hyperlink@0.1.43':
-    resolution: {integrity: sha512-oTUHExa2M2JimlOQNGXBBHH3Ys6acx4vdQXXoaoYC2FPWTGuOEO+iBPRBjfxliqh0OyfaZyA6+x7qVfx5mhuHw==}
+  '@untitaker/hyperlink@0.1.44':
+    resolution: {integrity: sha512-st7MlpW7P8UsosGY7EY8eqx5P7oKzAJZp8ngSkD7vUwFuvHY23YDCom06IWmAW0UbNnTC5Cuj4S72VJHAQGHcA==}
     engines: {node: '>=14', npm: '>=6'}
     hasBin: true
 
@@ -13625,7 +13625,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@untitaker/hyperlink@0.1.43':
+  '@untitaker/hyperlink@0.1.44':
     dependencies:
       axios: 1.7.9
       axios-proxy-builder: 0.1.2
