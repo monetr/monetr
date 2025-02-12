@@ -45,9 +45,9 @@ require (
 	github.com/wneessen/go-mail v0.4.4
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/mock v0.5.0
-	golang.org/x/crypto v0.32.0
+	golang.org/x/crypto v0.33.0
 	golang.org/x/net v0.34.0
-	golang.org/x/sys v0.29.0
+	golang.org/x/sys v0.30.0
 	google.golang.org/api v0.211.0
 	google.golang.org/genproto v0.0.0-20241118233622-e639e219e697
 	google.golang.org/protobuf v1.35.2
@@ -158,8 +158,8 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/text v0.21.0
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/text v0.22.0
 	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241118233622-e639e219e697 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241206012308-a4fef0638583 // indirect
