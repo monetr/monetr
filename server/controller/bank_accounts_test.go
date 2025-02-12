@@ -351,26 +351,20 @@ func TestPutBankAccount(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"availableBalance": 1000,
-					"currentBalance":   1000,
-					"mask":             "1234",
-					"name":             "My New Name",
-					"currency":         "USD",
-					"status":           "active",
-					"accountType":      "depository",
-					"accountSubType":   "checking",
+					"name":     "My New Name",
+					"currency": "USD",
 				}).
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.availableBalance").Number().IsEqual(1000)
-			response.JSON().Path("$.currentBalance").Number().IsEqual(1000)
-			response.JSON().Path("$.mask").String().IsEqual("1234")
 			response.JSON().Path("$.name").String().IsEqual("My New Name")
 			response.JSON().Path("$.currency").String().IsEqual("USD")
-			response.JSON().Path("$.status").String().IsEqual("active")
-			response.JSON().Path("$.accountType").String().IsEqual("depository")
-			response.JSON().Path("$.accountSubType").String().IsEqual("checking")
+			response.JSON().Path("$.mask").String().IsEqual(bank.Mask)
+			response.JSON().Path("$.availableBalance").Number().IsEqual(bank.AvailableBalance)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
+			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.Type))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.SubType))
 		}
 	})
 
@@ -401,26 +395,20 @@ func TestPutBankAccount(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"availableBalance": 1000,
-					"currentBalance":   1000,
-					"mask":             "1234",
-					"name":             "My New Name",
-					"currency":         "EUR",
-					"status":           "active",
-					"accountType":      "depository",
-					"accountSubType":   "checking",
+					"name":     "My New Name",
+					"currency": "EUR",
 				}).
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.availableBalance").Number().IsEqual(1000)
-			response.JSON().Path("$.currentBalance").Number().IsEqual(1000)
-			response.JSON().Path("$.mask").String().IsEqual("1234")
 			response.JSON().Path("$.name").String().IsEqual("My New Name")
 			response.JSON().Path("$.currency").String().IsEqual("EUR")
-			response.JSON().Path("$.status").String().IsEqual("active")
-			response.JSON().Path("$.accountType").String().IsEqual("depository")
-			response.JSON().Path("$.accountSubType").String().IsEqual("checking")
+			response.JSON().Path("$.mask").String().IsEqual(bank.Mask)
+			response.JSON().Path("$.availableBalance").Number().IsEqual(bank.AvailableBalance)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
+			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.Type))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.SubType))
 		}
 	})
 

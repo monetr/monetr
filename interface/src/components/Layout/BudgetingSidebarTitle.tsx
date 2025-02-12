@@ -6,13 +6,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import MDivider from '@monetr/interface/components/MDivider';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import { useLink, useTriggerManualPlaidSync } from '@monetr/interface/hooks/links';
+import { useCurrentLink, useTriggerManualPlaidSync } from '@monetr/interface/hooks/links';
 import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePlaidAccountOverlay';
 
 export default function BudgetingSidebarTitle(): JSX.Element {
   const { data: bankAccount } = useSelectedBankAccount();
-  const { data: link } = useLink(bankAccount?.linkId);
+  const { data: link } = useCurrentLink();
   const triggerSync = useTriggerManualPlaidSync();
 
   const handleReauthenticateLink = useCallback(() => {
