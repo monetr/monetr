@@ -264,6 +264,8 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed := authed.Group("", c.requireActiveSubscriptionMiddleware)
 	// Icons
 	billed.POST("/icons/search", c.searchIcon)
+	// Locale and currency data
+	billed.GET("/locale/currency", c.listCurrencies)
 	// Account
 	billed.DELETE("/account", c.deleteAccount)
 	// Links

@@ -34,10 +34,10 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
     'hidden md:inline': Boolean(props.breadcrumb),
   }, 'w-auto text-center order-1');
 
-  const iconClassName = mergeTailwind({
+  const iconClassName = mergeTailwind('mb-1 inline', {
     'mr-0 md:mr-2': Boolean(props.breadcrumb),
     'mr-2': !Boolean(props.breadcrumb),
-  }, 'mb-1');
+  });
 
   function InitialCrumb(): JSX.Element {
     return (

@@ -1,19 +1,18 @@
 /* eslint-disable max-len */
 import React, { Fragment, useCallback } from 'react';
-import { CopyPlus, EllipsisVertical, LogIn, Plug, RefreshCw, Trash2 } from 'lucide-react';
+import { EllipsisVertical, LogIn, Plug, RefreshCw, Trash2 } from 'lucide-react';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@monetr/interface/components/DropdownMenu';
 import MDivider from '@monetr/interface/components/MDivider';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import { useLink, useTriggerManualPlaidSync } from '@monetr/interface/hooks/links';
-import { showNewBankAccountModal } from '@monetr/interface/modals/NewBankAccountModal';
+import { useCurrentLink, useTriggerManualPlaidSync } from '@monetr/interface/hooks/links';
 import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePlaidAccountOverlay';
 
 export default function BudgetingSidebarTitle(): JSX.Element {
   const { data: bankAccount } = useSelectedBankAccount();
-  const { data: link } = useLink(bankAccount?.linkId);
+  const { data: link } = useCurrentLink();
   const triggerSync = useTriggerManualPlaidSync();
 
   const handleReauthenticateLink = useCallback(() => {
@@ -67,10 +66,6 @@ export default function BudgetingSidebarTitle(): JSX.Element {
           <MenuItem visible={ link.getIsPlaid() } onClick={ handleTriggerResync }>
             <RefreshCw />
             Manually Resync
-          </MenuItem>
-          <MenuItem visible={ link.getIsManual() } onClick={ showNewBankAccountModal }>
-            <CopyPlus />
-            Add Account
           </MenuItem>
           <MDivider />
           <MenuItem visible onClick={ handleRemoveLink }>

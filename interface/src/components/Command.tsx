@@ -6,6 +6,7 @@ import { Search } from 'lucide-react';
 
 import { Dialog, DialogContent } from '@monetr/interface/components/Dialog';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 import { Command as CommandPrimitive } from 'cmdk';
  
@@ -37,12 +38,16 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
     </Dialog>
   );
 };
+
+interface CommandInputProps extends ExtractProps<typeof CommandPrimitive.Input> {
+  wrapperClassName?: string;
+}
  
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
->(({ className, ...props }, ref) => (
-  <div className='flex items-center border-b-[thin] border-dark-monetr-border px-3' cmdk-input-wrapper=''>
+  CommandInputProps
+>(({ className, wrapperClassName, ...props }, ref) => (
+  <div className={ mergeTailwind('flex items-center border-dark-monetr-border border-b-[thin] px-3', wrapperClassName) } cmdk-input-wrapper=''>
     <Search className='mr-2 h-4 w-4 shrink-0 opacity-50' />
     <CommandPrimitive.Input
       ref={ ref }
@@ -94,7 +99,7 @@ const CommandGroup = React.forwardRef<
       '[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5',
       '[&_[cmdk-group-heading]]:text-xs',
       '[&_[cmdk-group-heading]]:font-semibold',
-      '[&_[cmdk-group-heading]]:text-dark-monetr-content-muted',
+      '[&_[cmdk-group-heading]]:text-dark-monetr-content-subtle',
       className
     ) }
     { ...props }

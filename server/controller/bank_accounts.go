@@ -3,7 +3,6 @@ package controller
 import (
 	"bytes"
 	"net/http"
-	"regexp"
 	"strings"
 
 	locale "github.com/elliotcourant/go-lclocale"
@@ -178,25 +177,25 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 	// safe to assume that it is a Plaid managed bank account.
 	if existingBankAccount.PlaidBankAccountId == nil {
 		var request struct {
-			AvailableBalance int64              `json:"availableBalance"`
-			CurrentBalance   int64              `json:"currentBalance"`
-			LimitBalance     int64              `json:"limitBalance"`
-			Mask             string             `json:"mask"`
-			Name             string             `json:"name"`
-			Currency         *string            `json:"currency"`
-			Status           BankAccountStatus  `json:"status"`
-			Type             BankAccountType    `json:"accountType"`
-			SubType          BankAccountSubType `json:"accountSubType"`
+			// AvailableBalance int64   `json:"availableBalance"`
+			// CurrentBalance   int64   `json:"currentBalance"`
+			// LimitBalance     int64   `json:"limitBalance"`
+			// Mask     string  `json:"mask"`
+			Name     string  `json:"name"`
+			Currency *string `json:"currency"`
+			// Status           BankAccountStatus  `json:"status"`
+			// Type             BankAccountType    `json:"accountType"`
+			// SubType          BankAccountSubType `json:"accountSubType"`
 		}
 		if err = ctx.Bind(&request); err != nil {
 			return c.invalidJson(ctx)
 		}
 
 		err = validation.ValidateStructWithContext(c.getContext(ctx), &request,
-			validation.Field(
-				&request.Mask,
-				validation.Match(regexp.MustCompile(`\d{4}`)).Error("Mask must be a 4 digit string"),
-			),
+			// validation.Field(
+			// 	&request.Mask,
+			// 	validation.Match(regexp.MustCompile(`\d{4}`)).Error("Mask must be a 4 digit string"),
+			// ),
 			validation.Field(
 				&request.Name,
 				validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
@@ -207,45 +206,45 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 					locale.GetInstalledCurrencies()...,
 				).Error("Currency must be one supported by the server"),
 			),
-			validation.Field(
-				&request.LimitBalance,
-				validation.Min(0).Error("Limit balance cannot be negative"),
-			),
-			validation.Field(
-				&request.Status,
-				validation.In(
-					ActiveBankAccountStatus,
-					InactiveBankAccountStatus,
-					UnknownBankAccountStatus,
-				).Error("Invalid bank account status"),
-			),
-			validation.Field(
-				&request.Type,
-				validation.In(
-					DepositoryBankAccountType,
-					CreditBankAccountType,
-					LoanBankAccountType,
-					InvestmentBankAccountType,
-					OtherBankAccountType,
-				).Error("Invalid bank account type"),
-			),
-			validation.Field(
-				&request.SubType,
-				validation.In(
-					CheckingBankAccountSubType,
-					SavingsBankAccountSubType,
-					HSABankAccountSubType,
-					CDBankAccountSubType,
-					MoneyMarketBankAccountSubType,
-					PayPalBankAccountSubType,
-					PrepaidBankAccountSubType,
-					CashManagementBankAccountSubType,
-					EBTBankAccountSubType,
-					CreditCardBankAccountSubType,
-					AutoBankAccountSubType,
-					OtherBankAccountSubType,
-				).Error("Invalid bank account sub type"),
-			),
+			// validation.Field(
+			// 	&request.LimitBalance,
+			// 	validation.Min(0).Error("Limit balance cannot be negative"),
+			// ),
+			// validation.Field(
+			// 	&request.Status,
+			// 	validation.In(
+			// 		ActiveBankAccountStatus,
+			// 		InactiveBankAccountStatus,
+			// 		UnknownBankAccountStatus,
+			// 	).Error("Invalid bank account status"),
+			// ),
+			// validation.Field(
+			// 	&request.Type,
+			// 	validation.In(
+			// 		DepositoryBankAccountType,
+			// 		CreditBankAccountType,
+			// 		LoanBankAccountType,
+			// 		InvestmentBankAccountType,
+			// 		OtherBankAccountType,
+			// 	).Error("Invalid bank account type"),
+			// ),
+			// validation.Field(
+			// 	&request.SubType,
+			// 	validation.In(
+			// 		CheckingBankAccountSubType,
+			// 		SavingsBankAccountSubType,
+			// 		HSABankAccountSubType,
+			// 		CDBankAccountSubType,
+			// 		MoneyMarketBankAccountSubType,
+			// 		PayPalBankAccountSubType,
+			// 		PrepaidBankAccountSubType,
+			// 		CashManagementBankAccountSubType,
+			// 		EBTBankAccountSubType,
+			// 		CreditCardBankAccountSubType,
+			// 		AutoBankAccountSubType,
+			// 		OtherBankAccountSubType,
+			// 	).Error("Invalid bank account sub type"),
+			// ),
 		)
 		if err != nil {
 			return ctx.JSON(http.StatusBadRequest, map[string]any{
@@ -254,14 +253,14 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 			})
 		}
 
-		existingBankAccount.AvailableBalance = request.AvailableBalance
-		existingBankAccount.CurrentBalance = request.CurrentBalance
-		existingBankAccount.LimitBalance = request.LimitBalance
+		// existingBankAccount.AvailableBalance = request.AvailableBalance
+		// existingBankAccount.CurrentBalance = request.CurrentBalance
+		// existingBankAccount.LimitBalance = request.LimitBalance
 		existingBankAccount.Name = request.Name
-		existingBankAccount.Mask = request.Mask
-		existingBankAccount.Status = request.Status
-		existingBankAccount.Type = request.Type
-		existingBankAccount.SubType = request.SubType
+		// existingBankAccount.Mask = request.Mask
+		// existingBankAccount.Status = request.Status
+		// existingBankAccount.Type = request.Type
+		// existingBankAccount.SubType = request.SubType
 		if request.Currency != nil {
 			existingBankAccount.Currency = *request.Currency
 		}

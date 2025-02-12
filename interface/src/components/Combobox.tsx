@@ -11,9 +11,9 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import { cva, VariantProps } from 'class-variance-authority';
  
-const comboboxVariants = cva(
+export const comboboxVariants = cva(
   [
-    'justify-between text-ellipsis overflow-hidden text-nowrap flex-shrink-0',
+    'justify-between truncate',
   ],
   {
     variants: {
