@@ -31,7 +31,7 @@
     "@types/node": "^20",
     "@types/react": "18.3.16",
     "@types/react-dom": "18.3.5",
-    "@untitaker/hyperlink": "0.1.43",
+    "@untitaker/hyperlink": "0.1.44",
     "autoprefixer": "10.4.20",
     "cheerio": "1.0.0",
     "cssnano": "7.0.6",
