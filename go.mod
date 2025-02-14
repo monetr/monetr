@@ -7,7 +7,7 @@ toolchain go1.24.0
 require (
 	aidanwoods.dev/go-paseto v1.5.3
 	cloud.google.com/go/kms v1.20.2
-	cloud.google.com/go/storage v1.48.0
+	cloud.google.com/go/storage v1.50.0
 	github.com/MicahParks/keyfunc v1.9.0
 	github.com/adrg/strutil v0.3.1
 	github.com/ahmetb/go-linq/v3 v3.2.0
