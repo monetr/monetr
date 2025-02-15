@@ -1,8 +1,10 @@
 package platypus
 
 import (
+	"math"
 	"time"
 
+	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/v30/plaid"
@@ -52,8 +54,17 @@ func NewTransactionFromPlaid(input plaid.Transaction) (Transaction, error) {
 	}
 	pendingTransactionId, _ := input.GetPendingTransactionIdOk()
 
+	// Get the number of fractional digits for the currency of this transaction.
+	fractions, err := locale.GetCurrencyInternationalFractionalDigits(
+		input.GetIsoCurrencyCode(),
+	)
+	if err != nil {
+		fractions = 2
+	}
+
+	multiplier := math.Pow(10, float64(fractions))
 	transaction := PlaidTransaction{
-		Amount:                 int64(input.GetAmount() * 100),
+		Amount:                 int64(input.GetAmount() * multiplier),
 		BankAccountId:          input.GetAccountId(),
 		Category:               input.GetCategory(),
 		CategoryDetail:         input.GetPersonalFinanceCategory().Detailed,
