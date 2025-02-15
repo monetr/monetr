@@ -101,9 +101,9 @@ export default function BankAccountSettingsPage(): JSX.Element {
             <Card className='w-full mb-4'>
               <MSpan>
                 <FlaskConical className='w-16 h-16' />
-                This page is still a work in progress, however it has been made available to make it possible to more
-                currencies sooner. This page will be changed over the next several releases to improve the UX and
-                functionality.
+                This page is still a work in progress, however it has been made available to make it possible to switch
+                the currencies for your bank account sooner. This page will be changed over the next several releases to
+                improve the UX and functionality.
               </MSpan>
             </Card>
 

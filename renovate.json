@@ -15,7 +15,8 @@
     {
       "matchPackageNames": [
         "github.com/aws/aws-sdk-go",
-        "google.golang.org/genproto"
+        "google.golang.org/genproto",
+        "@types/.+"
       ],
       "extends": [
         "schedule:monthly"
