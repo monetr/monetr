@@ -104,6 +104,14 @@ if(DOCKER_EXECUTABLE)
         --build-arg RELEASE=$(RELEASE_VERSION)
         --build-arg REVISION=$(RELEASE_REVISION)
         --build-arg BUILD_HOST=${HOSTNAME}
+        --annotation "index:org.opencontainers.image.url=https://monetr.app"
+        --annotation "index:org.opencontainers.image.source=https://github.com/monetr/monetr"
+        --annotation "index:org.opencontainers.image.authors=elliot.courant@monetr.app"
+        --annotation "index:org.opencontainers.image.vendor=monetr"
+        --annotation "index:org.opencontainers.image.licenses=FSL-1.1-MIT"
+        --annotation "index:org.opencontainers.image.description=monetr's budgeting application"
+        --annotation "index:org.opencontainers.image.version=$(RELEASE_VERSION)"
+        --annotation "index:org.opencontainers.image.revision=$(RELEASE_REVISION)"
         ${CONTAINER_ARGS}
         ${CMAKE_SOURCE_DIR}
   )
