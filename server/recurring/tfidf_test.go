@@ -27,7 +27,7 @@ func TestTokenizeName(t *testing.T) {
 
 		lower, _ := TokenizeName(&txn)
 		assert.EqualValues(t, []string{
-			"google", "youtube premium", "gco",
+			"pos", "debit", "google", "youtube premium", "gco", "helppay",
 		}, lower, "should match the cleaned string")
 	})
 
@@ -39,7 +39,7 @@ func TestTokenizeName(t *testing.T) {
 
 		lower, _ := TokenizeName(&txn)
 		assert.EqualValues(t, []string{
-			"cloud", "gco",
+			"pos", "debit", "cloud", "gco", "helppay",
 		}, lower, "should match the cleaned string")
 	})
 
@@ -50,7 +50,7 @@ func TestTokenizeName(t *testing.T) {
 
 		lower, _ := TokenizeName(&txn)
 		assert.EqualValues(t, []string{
-			"croix", "valle",
+			"ach", "debit", "croix", "valle", "privacycom",
 		}, lower, "should match the cleaned string")
 	})
 
@@ -61,7 +61,7 @@ func TestTokenizeName(t *testing.T) {
 
 		lower, _ := TokenizeName(&txn)
 		assert.EqualValues(t, []string{
-			"obsidianmd",
+			"ach", "debit", "obsidianmd", "privacycom",
 		}, lower, "should match the cleaned string")
 	})
 
@@ -72,7 +72,7 @@ func TestTokenizeName(t *testing.T) {
 
 		lower, _ := TokenizeName(&txn)
 		assert.EqualValues(t, []string{
-			"obsidianmd",
+			"pos", "debit", "obsidianmd",
 		}, lower, "should match the cleaned string")
 	})
 
@@ -83,7 +83,7 @@ func TestTokenizeName(t *testing.T) {
 
 		lower, _ := TokenizeName(&txn)
 		assert.EqualValues(t, []string{
-			"dominos",
+			"ach", "debit", "dominos", "privacycom",
 		}, lower, "should match the cleaned string")
 	})
 
@@ -94,7 +94,7 @@ func TestTokenizeName(t *testing.T) {
 
 		lower, _ := TokenizeName(&txn)
 		assert.EqualValues(t, []string{
-			"chuck", "dons", "forest", "lake", "forest", "lake",
+			"pos", "debit", "chuck", "dons", "forest", "lake", "forest", "lake",
 		}, lower, "should match the cleaned string")
 	})
 
@@ -105,7 +105,7 @@ func TestTokenizeName(t *testing.T) {
 
 		lower, _ := TokenizeName(&txn)
 		assert.EqualValues(t, []string{
-			"brinks", "market", "chisago", "city",
+			"pos", "debit", "brinks", "market", "chisago", "city",
 		}, lower, "should match the cleaned string")
 	})
 
@@ -116,7 +116,7 @@ func TestTokenizeName(t *testing.T) {
 
 		lower, _ := TokenizeName(&txn)
 		assert.EqualValues(t, []string{
-			"caribou", "coffee", "north", "branch",
+			"pos", "debit", "caribou", "coffee", "north", "branch",
 		}, lower, "should match the cleaned string")
 	})
 }
