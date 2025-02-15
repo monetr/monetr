@@ -38,6 +38,7 @@ func newVersionCommand(parent *cobra.Command) {
 				"Embedded Icons:  %t\n" +
 				"  Icon Packs:    %s\n" +
 				"Locales:         %d\n" +
+				"Currencies:      %d\n" +
 				"Architecture:    %s\n" +
 				"OS:              %s\n" +
 				"SIMD:            %s\n" +
@@ -45,6 +46,7 @@ func newVersionCommand(parent *cobra.Command) {
 				"Go Version:      %s\n"
 
 			locales := locale.GetInstalledLocales()
+			currencies := locale.GetInstalledCurrencies()
 
 			iconsEnabled := icons.GetIconsEnabled()
 			iconPacks := "<not enabled>"
@@ -75,6 +77,7 @@ func newVersionCommand(parent *cobra.Command) {
 				iconsEnabled,
 				iconPacks,
 				len(locales),
+				len(currencies),
 				runtime.GOARCH,
 				runtime.GOOS,
 				simd,
