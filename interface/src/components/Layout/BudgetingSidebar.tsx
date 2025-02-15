@@ -30,7 +30,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
 
 
   const className = mergeTailwind(
-    'w-72 h-full flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center pb-6 lg:pb-4 overflow-auto',
+    'budget-sidebar fixed left-16 h-screen flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center pb-6 lg:pb-4 overflow-auto',
     props.className,
   );
 
