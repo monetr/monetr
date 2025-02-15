@@ -3,6 +3,7 @@ import { ActionMeta, OnChangeValue } from 'react-select';
 import { useFormikContext } from 'formik';
 
 import MSelect, { MSelectProps } from './MSelect';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 
 import getRecurrencesForDate from './Recurrence/getRecurrencesForDate';
 import Recurrence from './Recurrence/Recurrence';
@@ -14,12 +15,13 @@ export interface MSelectFrequencyProps extends MSelectProps<Recurrence> {
 }
 
 export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Element {
+  const { data: timezone } = useTimezone();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const formikContext = useFormikContext();
 
   const date = formikContext.values[props.dateFrom];
 
-  const rules = getRecurrencesForDate(date);
+  const rules = getRecurrencesForDate(date, timezone);
 
   // Every time the date input changes we need to rebuild the list of recurrences. When this happens we should also try
   // to find a recurrence that matches our current rule. This happens when we have a rule like the 15,-1 and the current
