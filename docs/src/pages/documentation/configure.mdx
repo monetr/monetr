@@ -91,6 +91,10 @@ plaid:
   # # Uncomment with the domain you want Plaid to send webhooks to, only provide the domain name.
   # # The path cannot be customized and plaid requires HTTPS to be available for webhooks.
   # webhooksDomain: ""
+  # List of country codes that monetr will use for the Plaid link, please read Plaid's configuration
+  # documentation before modifying this.
+  countryCodes:
+    - US
 postgres:
   # # Uncomment this if you are not using the included PostgreSQL server in the docker compose and
   # # Specify your own address for PostgreSQL.

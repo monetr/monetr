@@ -7,10 +7,7 @@ import (
 var (
 	PlaidClientName = "monetr"
 	PlaidLanguage   = "en"
-	PlaidCountries  = []plaid.CountryCode{
-		plaid.COUNTRYCODE_US,
-	}
-	PlaidProducts = []plaid.Products{
+	PlaidProducts   = []plaid.Products{
 		plaid.PRODUCTS_TRANSACTIONS,
 	}
 )

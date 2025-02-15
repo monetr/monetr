@@ -242,7 +242,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 		LinkTokenCreateRequest(plaid.LinkTokenCreateRequest{
 			ClientName:   consts.PlaidClientName,
 			Language:     consts.PlaidLanguage,
-			CountryCodes: consts.PlaidCountries,
+			CountryCodes: p.config.CountryCodes,
 			User: plaid.LinkTokenCreateRequestUser{
 				ClientUserId:             options.ClientUserID,
 				LegalName:                &options.LegalName,
@@ -363,7 +363,7 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 		InstitutionsGetById(span.Context()).
 		InstitutionsGetByIdRequest(plaid.InstitutionsGetByIdRequest{
 			InstitutionId: institutionId,
-			CountryCodes:  consts.PlaidCountries,
+			CountryCodes:  p.config.CountryCodes,
 			Options: &plaid.InstitutionsGetByIdRequestOptions{
 				IncludeOptionalMetadata:          myownsanity.BoolP(true),
 				IncludeStatus:                    myownsanity.BoolP(true),
