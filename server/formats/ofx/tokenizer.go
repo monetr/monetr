@@ -11,7 +11,7 @@ import (
 var (
 	headerRegex  = regexp.MustCompile(`^(?:^\w+:\w+$)+$`)
 	payloadRegex = regexp.MustCompile(`^<OFX>([\W|\w|\s]+)</OFX>$`)
-	dataRegex    = regexp.MustCompile(`(?P<tag><[\w|\S]+>)(?P<value>.+)?`)
+	dataRegex    = regexp.MustCompile(`(?P<tag><[/a-zA-Z0-9.]+>)(?P<value>[^<]+)?`)
 )
 
 type ItemType uint8
@@ -79,8 +79,8 @@ func tokenizeItem(index int, items [][]string) (i int, result Token) {
 }
 
 func getItemType(item []string) ItemType {
-	value := item[2]
-	name := item[1]
+	value := strings.TrimSpace(item[2])
+	name := strings.TrimSpace(item[1])
 	if value == "" {
 		isClosing := strings.HasPrefix(name, "</")
 		if isClosing {
@@ -125,5 +125,5 @@ func tokenizeField(index int, items [][]string) (i int, result Token) {
 }
 
 func cleanName(name string) string {
-	return strings.Trim(name, "<>")
+	return strings.Trim(strings.TrimSpace(name), "<>")
 }
