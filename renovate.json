@@ -68,7 +68,36 @@
   "docker-compose": {
     "fileMatch": [
       "compose/.+\\.yaml.in$",
-      "docker-compose.yaml",
+      "docker-compose.yaml"
     ]
-  }
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update Golang min version in CMake",
+      "fileMatch": ["CMakeLists.txt"],
+      "matchStrings": ["set\\(GO_MIN_VERSION \"(?<currentValue>.*?)\"\\)"],
+      "depNameTemplate": "go",
+      "datasourceTemplate": "golang-version"
+    },
+    {
+      "customType": "regex",
+      "description": "Update Golang min version in docs",
+      "fileMatch": [".+\\.mdx"],
+      "matchStrings": [
+        "[Gg]o.+(?<currentValue>\\d+\\.\\d+\\.\\d+).+"
+      ],
+      "depNameTemplate": "go",
+      "datasourceTemplate": "golang-version"
+    },
+    {
+      "customType": "regex",
+      "description": "Update simple-icons version in CMake",
+      "fileMatch": ["CMakeLists.txt"],
+      "matchStrings": ["GIT_REPOSITORY .+simple-icons.+\n.+GIT_TAG (?<currentValue>.*?)\n"],
+      "depNameTemplate": "simple-icons",
+      "packageNameTemplate": "https://github.com/simple-icons/simple-icons.git",
+      "datasourceTemplate": "git-refs"
+    }
+  ]
 }
