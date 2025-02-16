@@ -60,11 +60,15 @@
       ]
     }
   ],
-  "docker": {
+  "dockerfile": {
     "fileMatch": [
-      "compose/.+\\.yaml.in$",
-      "docker-compose.yaml",
       "Dockerfile"
     ]
   },
+  "docker-compose": {
+    "fileMatch": [
+      "compose/.+\\.yaml.in$",
+      "docker-compose.yaml",
+    ]
+  }
 }
