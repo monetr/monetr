@@ -1,5 +1,4 @@
-FROM --platform=$BUILDPLATFORM debian:12-slim AS base_builder
-ARG GO_VERSION=1.24.0
+FROM --platform=$BUILDPLATFORM golang:1.24.0 AS base_builder
 WORKDIR /monetr
 RUN apt-get update && apt-get install -y --no-install-recommends \
   build-essential \
@@ -14,10 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   npm \
   wget
 
-RUN wget -c https://golang.org/dl/go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz && tar -C /usr/local -xzf go${GO_VERSION}.linux-$(dpkg --print-architecture).tar.gz
-ENV GOPATH=/home/go
-RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
-ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH:
 RUN git config --global --add safe.directory /monetr
 
 FROM base_builder AS monetr_builder

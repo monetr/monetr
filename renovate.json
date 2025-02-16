@@ -59,5 +59,12 @@
         "/sass/"
       ]
     }
-  ]
+  ],
+  "docker": {
+    "fileMatch": [
+      "compose/.+\\.yaml.in$",
+      "docker-compose.yaml",
+      "Dockerfile"
+    ]
+  },
 }
