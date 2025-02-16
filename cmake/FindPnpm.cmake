@@ -13,7 +13,7 @@ file(MAKE_DIRECTORY "${NPM_PREFIX}")
 add_custom_command(
   OUTPUT ${PNPM_EXECUTABLE}
   BYPRODUCTS ${LOCAL_PNPM_EXECUTABLE}
-  COMMAND ${NPM_EXECUTABLE} install --no-fund --no-audit --global --prefix ${NPM_PREFIX} pnpm
+  COMMAND ${NPM_EXECUTABLE} install --silent --no-fund --no-audit --global --prefix ${NPM_PREFIX} pnpm
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMENT "Setting up a local version of pnpm, this will not affect the host system"
 )
