@@ -35,7 +35,7 @@ postgresql:
 | `caCertificatePath`  | String   |             | Path to the certificate authority certificate file. If you are verifying your TLS connection then this is required or the server certificate must be among the hosts certificate authorities already. |
 | `keyPath`            | String   |             | Path to the client TLS key that monetr should use to connect to the PostgreSQL server.                                                                                                                |
 | `certificatePath`    | String   |             | Path to the client TLS certificate that monetr should use to connect to the PostgreSQL server.                                                                                                        |
-| `migrate`            | Bool     | `true`      | Automatically apply database migrations on startup.                                                                                                                                                   |
+| `migrate`            | Boolean  | `true`      | Automatically apply database migrations on startup.                                                                                                                                                   |
 
 <Callout type="info">
   monetr does watch for certificate changes on the filesystem to facilitate certificate rotation without needing to
