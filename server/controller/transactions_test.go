@@ -488,8 +488,8 @@ func TestPostTransactions(t *testing.T) {
 					Mask:             "1234",
 					Name:             "Checking Account",
 					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
+					AccountType:      DepositoryBankAccountType,
+					AccountSubType:   CheckingBankAccountSubType,
 					Status:           ActiveBankAccountStatus,
 				}).
 				Expect()

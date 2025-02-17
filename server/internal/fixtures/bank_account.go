@@ -74,8 +74,8 @@ func GivenIHaveABankAccount(
 			Currency:         "USD",
 			Mask:             gofakeit.Generate("####"),
 			Name:             "E-ACCOUNT",
-			Type:             accountType,
-			SubType:          subType,
+			AccountType:      accountType,
+			AccountSubType:   subType,
 			LastUpdated:      clock.Now(),
 		},
 	}
@@ -139,8 +139,8 @@ func GivenIHaveAPlaidBankAccount(
 		CurrentBalance:     current,
 		Mask:               gofakeit.Generate("####"),
 		Name:               "E-ACCOUNT",
-		Type:               accountType,
-		SubType:            subType,
+		AccountType:        accountType,
+		AccountSubType:     subType,
 		LastUpdated:        clock.Now(),
 		CreatedAt:          clock.Now(),
 	}

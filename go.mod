@@ -50,6 +50,8 @@ require (
 
 require google.golang.org/protobuf v1.36.6 // indirect
 
+require dario.cat/mergo v1.0.1
+
 require (
 	aidanwoods.dev/go-result v0.3.1 // indirect
 	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 // indirect
