@@ -281,6 +281,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// Bank Accounts
 	billed.GET("/bank_accounts", c.getBankAccounts)
 	billed.GET("/bank_accounts/:bankAccountId", c.getBankAccount)
+	billed.PATCH("/bank_accounts/:bankAccountId", c.patchBankAccount)
 	billed.PUT("/bank_accounts/:bankAccountId", c.putBankAccounts)
 	billed.GET("/bank_accounts/:bankAccountId/balances", c.getBalances)
 	billed.POST("/bank_accounts", c.postBankAccounts)
