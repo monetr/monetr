@@ -48,8 +48,8 @@ func TestPostBankAccount(t *testing.T) {
 					Mask:             "1234",
 					Name:             "Checking Account",
 					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
+					AccountType:      DepositoryBankAccountType,
+					AccountSubType:   CheckingBankAccountSubType,
 					Status:           ActiveBankAccountStatus,
 				}).
 				Expect()
@@ -123,8 +123,8 @@ func TestPostBankAccount(t *testing.T) {
 					Mask:             "1234",
 					Name:             "Checking Account",
 					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
+					AccountType:      DepositoryBankAccountType,
+					AccountSubType:   CheckingBankAccountSubType,
 					Status:           ActiveBankAccountStatus,
 				}).
 				Expect()
@@ -201,8 +201,8 @@ func TestPostBankAccount(t *testing.T) {
 					Mask:             "1234",
 					Name:             "Checking Account",
 					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
+					AccountType:      DepositoryBankAccountType,
+					AccountSubType:   CheckingBankAccountSubType,
 					Status:           ActiveBankAccountStatus,
 					Currency:         "EUR",
 				}).
@@ -262,8 +262,8 @@ func TestPostBankAccount(t *testing.T) {
 					Mask:             "1234",
 					Name:             "Checking Account",
 					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
+					AccountType:      DepositoryBankAccountType,
+					AccountSubType:   CheckingBankAccountSubType,
 					Status:           ActiveBankAccountStatus,
 					Currency:         "???",
 				}).
@@ -289,8 +289,8 @@ func TestPostBankAccount(t *testing.T) {
 					Mask:             "1234",
 					Name:             "Checking Account",
 					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
+					AccountType:      DepositoryBankAccountType,
+					AccountSubType:   CheckingBankAccountSubType,
 					Status:           ActiveBankAccountStatus,
 				}).
 				Expect()
@@ -321,14 +321,49 @@ func TestPostBankAccount(t *testing.T) {
 					Mask:             "1234",
 					Name:             "Checking Account",
 					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
+					AccountType:      DepositoryBankAccountType,
+					AccountSubType:   CheckingBankAccountSubType,
 					Status:           ActiveBankAccountStatus,
 				}).
 				Expect()
 
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").IsEqual("Cannot create a bank account for a non-manual link")
+		}
+	})
+}
+
+func TestPatchBankAccount(t *testing.T) {
+	t.Run("happy path patch a manual link bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"availableBalance": -100,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.name").String().IsEqual(bank.Name)
+			response.JSON().Path("$.currency").String().IsEqual(bank.Currency)
+			response.JSON().Path("$.mask").String().IsEqual(bank.Mask)
+			response.JSON().Path("$.availableBalance").Number().IsEqual(-100)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
+			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.AccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.AccountSubType))
 		}
 	})
 }
@@ -363,8 +398,8 @@ func TestPutBankAccount(t *testing.T) {
 			response.JSON().Path("$.availableBalance").Number().IsEqual(bank.AvailableBalance)
 			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
 			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
-			response.JSON().Path("$.accountType").String().IsEqual(string(bank.Type))
-			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.SubType))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.AccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.AccountSubType))
 		}
 	})
 
@@ -407,8 +442,8 @@ func TestPutBankAccount(t *testing.T) {
 			response.JSON().Path("$.availableBalance").Number().IsEqual(bank.AvailableBalance)
 			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
 			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
-			response.JSON().Path("$.accountType").String().IsEqual(string(bank.Type))
-			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.SubType))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.AccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.AccountSubType))
 		}
 	})
 
@@ -516,8 +551,8 @@ func TestPutBankAccount(t *testing.T) {
 			response.JSON().Path("$.mask").String().IsEqual(bank.Mask)
 			response.JSON().Path("$.currency").String().IsEqual(bank.Currency)
 			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
-			response.JSON().Path("$.accountType").String().IsEqual(string(bank.Type))
-			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.SubType))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.AccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.AccountSubType))
 
 			response.JSON().Path("$.name").String().IsEqual("My New Name")
 		}

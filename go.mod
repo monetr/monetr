@@ -53,6 +53,8 @@ require (
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
 
+require dario.cat/mergo v1.0.1
+
 require (
 	aidanwoods.dev/go-result v0.3.1 // indirect
 	cel.dev/expr v0.16.1 // indirect
