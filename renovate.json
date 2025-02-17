@@ -91,7 +91,7 @@
       "customType": "regex",
       "description": "Update Golang min version in docs",
       "fileMatch": [".+\\.mdx"],
-      "matchStrings": ["[Gg]o[^\d]+(?<currentValue>\\d+\\.\\d+\\.\\d+).+$"],
+      "matchStrings": ["[Gg]o.*?(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "go",
       "datasourceTemplate": "golang-version"
     },
