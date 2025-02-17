@@ -186,7 +186,7 @@ export default function Transactions(): JSX.Element {
         <AddTransactionButton />
       </MTopNavigation>
       <div className='flex flex-grow min-w-0 min-h-0'>
-        <ul className='w-full overflow-y-auto pb-16' ref={ ref }>
+        <ul className='w-full' ref={ ref }>
           <TransactionItems />
           {loading && (
             <li ref={ sentryRef }>
