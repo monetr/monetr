@@ -116,8 +116,8 @@ type BankAccount struct {
 	Mask               string                `json:"mask" pg:"mask"`
 	Name               string                `json:"name,omitempty" pg:"name,notnull"`
 	OriginalName       string                `json:"originalName" pg:"original_name,notnull"`
-	Type               BankAccountType       `json:"accountType" pg:"account_type"`
-	SubType            BankAccountSubType    `json:"accountSubType" pg:"account_sub_type"`
+	AccountType        BankAccountType       `json:"accountType" pg:"account_type"`
+	AccountSubType     BankAccountSubType    `json:"accountSubType" pg:"account_sub_type"`
 	Status             BankAccountStatus     `json:"status" pg:"status,notnull"`
 	LastUpdated        time.Time             `json:"lastUpdated" pg:"last_updated,notnull"`
 	CreatedAt          time.Time             `json:"createdAt" pg:"created_at,notnull"`
