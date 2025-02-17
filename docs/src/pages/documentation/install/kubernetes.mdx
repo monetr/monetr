@@ -25,6 +25,9 @@ We will not provide a guide on how to configure each of these, however there are
 
 ## Manifests
 
+Below are some example manifests in the order they'll need to be setup. Again, this assumes that you already have the
+requirements mentioned above setup in some way.
+
 ### Configuration
 
 In order to configure monetr in Kubernetes, it is recommended to create a
@@ -73,7 +76,7 @@ data:
       level: "debug"
       format: "text" # Can also be set to JSON depending on your preferences
     plaid:
-      enabled: true
+      enabled: false
       # # Uncomment this section if you do not want to provide credentials via environment variables.
       # clientId: ""
       # clientSecret: ""
@@ -87,15 +90,15 @@ data:
       countryCodes:
         - US
     postgres:
-      # # Uncomment this if you are not using the included PostgreSQL server in the docker compose and
-      # # Specify your own address for PostgreSQL.
-      # address: ""
+      # Uncomment this if you are not using the included PostgreSQL server in the docker compose and
+      # Specify your own address for PostgreSQL.
+      address: ""
       port: 5432
-      # # Similar to address, uncomment this if you are want to customize the credentials used for
-      # # connecting to PostgreSQL.
-      # username: ""
-      # password: ""
-      # database: ""
+      # Similar to address, uncomment this if you are want to customize the credentials used for
+      # connecting to PostgreSQL.
+      username: ""
+      password: ""
+      database: ""
       insecureSkipVerify: false
     security:
       # This path is based on the volume mount and secret described in the following examples.
