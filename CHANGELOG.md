@@ -1,5 +1,45 @@
 # Changelog
 
+## [1.3.0](https://github.com/monetr/monetr/compare/v1.2.0...v1.3.0) (2025-02-17)
+
+
+### Features
+
+* **api:** Lift balances query out of SQL view. ([d6adccd](https://github.com/monetr/monetr/commit/d6adccd7626e5e725afabb69a65b86d616de1cb5))
+* **build:** Annotate container builds better ([58f9a0b](https://github.com/monetr/monetr/commit/58f9a0b2be09e97dbcf8466d2487b7165457fdb0))
+* **build:** Improved building of email templates ([#2436](https://github.com/monetr/monetr/issues/2436)) ([702ae0d](https://github.com/monetr/monetr/commit/702ae0df59523f1cd081b4bb77e9c561b5cd9406))
+* **cmd:** Show number of installed currencies in version details ([51dd99f](https://github.com/monetr/monetr/commit/51dd99f9c4a52a675172b759e8335c2aded4b8e4))
+* **renovate:** Adding renovate to test suite ([e266f7b](https://github.com/monetr/monetr/commit/e266f7b03993f4a58de591f815484213b444d199))
+
+
+### Dependencies
+
+* **api:** update module github.com/spf13/cobra to v1.9.0 ([#2434](https://github.com/monetr/monetr/issues/2434)) ([d2f0d99](https://github.com/monetr/monetr/commit/d2f0d99bb45410fdcb36af15f81e1b81d6c07f12))
+* **api:** update module github.com/spf13/cobra to v1.9.1 ([#2444](https://github.com/monetr/monetr/issues/2444)) ([89b6c32](https://github.com/monetr/monetr/commit/89b6c326efcc62d868ed4ddc512fb82cb6527d21))
+* **containers:** update ghcr.io/flipt-io/flipt docker tag to v1.55.0 ([#2443](https://github.com/monetr/monetr/issues/2443)) ([8e47676](https://github.com/monetr/monetr/commit/8e47676ea0f497097a626ae3111ed1b0a5568d41))
+* **containers:** update hashicorp/vault docker tag to v1.18.4 ([#2441](https://github.com/monetr/monetr/issues/2441)) ([c8ce687](https://github.com/monetr/monetr/commit/c8ce687a90391c6d8aacd74d40992ff3d14a6adc))
+* **containers:** update node.js to v18.20.6 ([#2440](https://github.com/monetr/monetr/issues/2440)) ([c95f875](https://github.com/monetr/monetr/commit/c95f875f70a2782694be755609e39576e1c18d81))
+* **renovate:** update dependency go to v1.24.0 ([#2437](https://github.com/monetr/monetr/issues/2437)) ([b0cee7f](https://github.com/monetr/monetr/commit/b0cee7f0dc4b7c9ae4a9c36b15cfaa1445f1ebd4))
+* **renovate:** update dependency simple-icons to v14.7.0 ([#2438](https://github.com/monetr/monetr/issues/2438)) ([67afce9](https://github.com/monetr/monetr/commit/67afce9f798ee7b342996be07cec3a1b0c3c7150))
+* **ui:** update dependency input-otp to v1.4.2 ([#2100](https://github.com/monetr/monetr/issues/2100)) ([729e084](https://github.com/monetr/monetr/commit/729e0847739f088a96824054d0b84d2837bbf897))
+* **ui:** update dependency react-email to v3 ([#2421](https://github.com/monetr/monetr/issues/2421)) ([cb4cef9](https://github.com/monetr/monetr/commit/cb4cef926f9f00a08739ee2119b1038572baf014))
+* **ui:** update rsbuild ([#2431](https://github.com/monetr/monetr/issues/2431)) ([27a88a2](https://github.com/monetr/monetr/commit/27a88a2b0583b5db29ded8404d5d4a7b4e817ecb))
+* **ui:** update sass to v1.85.0 ([#2442](https://github.com/monetr/monetr/issues/2442)) ([41e2543](https://github.com/monetr/monetr/commit/41e2543beb54e0845a102befd8c56474f97b10fe))
+
+
+### Bug Fixes
+
+* **container:** Improving container build process ([490035e](https://github.com/monetr/monetr/commit/490035ec6fcdc96fde12896166a7ee484e66f2e9))
+* **database:** Refactoring some of the database entrypoint code ([#2307](https://github.com/monetr/monetr/issues/2307)) ([cd966a5](https://github.com/monetr/monetr/commit/cd966a565483253a83fdf2176967dc2b5cdaa13b))
+* **renovate:** Fixing regex in renovate config ([1fb5b55](https://github.com/monetr/monetr/commit/1fb5b55325cb6ee1f12de9a1a49976185cddb737))
+* **renovate:** Improving renovate config ([fbf5d3c](https://github.com/monetr/monetr/commit/fbf5d3c280585e24899866352f887d4332dd5500))
+* **renovate:** More renovate config improvements ([0b05628](https://github.com/monetr/monetr/commit/0b05628e0080159638d7382e2170282a581cf5ea))
+
+
+### Miscellaneous
+
+* **deps:** Group golang toolchain updates ([f6adecb](https://github.com/monetr/monetr/commit/f6adecb0bc674663c1015876dcb28a097eaac25d))
+
 ## [1.2.0](https://github.com/monetr/monetr/compare/v1.1.9...v1.2.0) (2025-02-15)
 
 
