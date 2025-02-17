@@ -52,7 +52,7 @@ services:
     # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
     # do `pnpm install` before doing docker compose up.
     tty: true # Color output.
-    image: node:18.20.6-bookworm
+    image: node:22.14.0-bookworm
     user: "${UID:-0}:${GID:-0}"
     working_dir: /build
     restart: always
