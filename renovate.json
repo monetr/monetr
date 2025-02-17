@@ -53,6 +53,13 @@
       ]
     },
     {
+      "groupName": "golang",
+      "groupSlug": "golang",
+      "matchPackageNames": [
+        "^go$",
+      ]
+    },
+    {
       "groupName": "sass",
       "groupSlug": "sass",
       "matchPackageNames": [
