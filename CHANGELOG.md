@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/monetr/monetr/compare/v1.3.0...v1.3.1) (2025-02-17)
+
+
+### Bug Fixes
+
+* **api:** Removed unused balances view ([#2450](https://github.com/monetr/monetr/issues/2450)) ([e05d7ac](https://github.com/monetr/monetr/commit/e05d7acd5e37f4a68b6b16c46a8634900d632c16))
+
 ## [1.3.0](https://github.com/monetr/monetr/compare/v1.2.0...v1.3.0) (2025-02-17)
 
 
