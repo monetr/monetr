@@ -108,16 +108,10 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 			return errors.Wrap(err, errorMessage)
 		}
 
-		// Only include the plaid error message if it is provided.
-		plaidMessage := ""
-		if plaidError.ErrorMessage != "" {
-			plaidMessage += " " + plaidError.ErrorMessage
-		}
-
-		return errors.Wrap(errors.Errorf(
-			"plaid API call failed with [%s - %s]%s",
-			plaidError.ErrorType, plaidError.ErrorCode, plaidMessage,
-		), errorMessage)
+		return errors.Wrapf(
+			&PlatypusError{plaidError},
+			errorMessage,
+		)
 	default:
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, errorMessage)

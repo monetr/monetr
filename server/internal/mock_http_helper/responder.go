@@ -3,7 +3,7 @@ package mock_http_helper
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -31,7 +31,7 @@ func NewHttpMockJsonResponder(
 			Proto:         "HTTP/1.0",
 			ProtoMajor:    1,
 			ProtoMinor:    0,
-			Body:          ioutil.NopCloser(body),
+			Body:          io.NopCloser(body),
 			ContentLength: int64(body.Len()),
 			Request:       request,
 			Header: map[string][]string{
