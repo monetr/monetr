@@ -16,7 +16,8 @@
       "matchPackageNames": [
         "github.com/aws/aws-sdk-go",
         "google.golang.org/genproto",
-        "@types/.+"
+        "@types/.+",
+        "renovate"
       ],
       "extends": [
         "schedule:monthly"
@@ -82,7 +83,7 @@
     {
       "customType": "regex",
       "description": "Update Golang min version in CMake",
-      "fileMatch": ["CMakeLists.txt"],
+      "fileMatch": ["CMakeLists.txt", ".+\\.cmake"],
       "matchStrings": ["set\\(GO_MIN_VERSION \"(?<currentValue>.*?)\"\\)"],
       "depNameTemplate": "go",
       "datasourceTemplate": "golang-version"
@@ -98,8 +99,8 @@
     {
       "customType": "regex",
       "description": "Update Node min version in CMake",
-      "fileMatch": ["CMakeLists.txt"],
-      "matchStrings": ["set\\(NODE_MIN_VERSION \"(?<currentValue>.*?)\"\\)"],
+      "fileMatch": ["CMakeLists.txt", ".+\\.cmake"],
+      "matchStrings": ["set\\(NODE_MIN_VERSION \"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"\\)"],
       "depNameTemplate": "node",
       "datasourceTemplate": "node-version"
     },
