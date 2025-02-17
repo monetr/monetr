@@ -395,8 +395,8 @@ github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTS
 github.com/mitchellh/mapstructure v1.4.1/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
-github.com/monetr/validation v1.0.2 h1:rGUh4PimL61PBJ0AQMdj22PkUvRt9/t7k4oRpaLdyUg=
-github.com/monetr/validation v1.0.2/go.mod h1:Wavagj20BdgLYqGA4y5F7QlSme4m8CnjuKJgSwBGBVY=
+github.com/monetr/validation v1.0.3 h1:8cE0XUtTsG9secLGTtGiWOaFfYKJCBXXfv40Q0vvthA=
+github.com/monetr/validation v1.0.3/go.mod h1:Wavagj20BdgLYqGA4y5F7QlSme4m8CnjuKJgSwBGBVY=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
