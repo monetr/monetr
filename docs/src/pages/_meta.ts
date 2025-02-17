@@ -21,17 +21,6 @@ export default {
       'layout': 'raw',
     },
   },
-  'roadmap': {
-    'type': 'page',
-    'title': 'Roadmap',
-    theme: {
-      toc: false,
-      sidebar: false,
-      pagination: true,
-      typesetting: 'article',
-      layout: 'default',
-    },
-  },
   'documentation': {
     'type': 'page',
     'title': 'Documentation',
