@@ -98,14 +98,19 @@ func init() {
 }
 
 func GetPgOptions(t *testing.T) *pg.Options {
-	portString := myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_PORG"), os.Getenv("POSTGRES_PORT"))
-	if portString == "" {
-		portString = "5432"
-	}
+	portString := myownsanity.CoalesceStrings(
+		os.Getenv("MONETR_PG_PORT"),
+		os.Getenv("POSTGRES_PORT"),
+		"5432",
+	)
 	port, err := strconv.ParseInt(portString, 10, 64)
 	require.NoError(t, err, "must be able to parse the Postgres port as a number")
 
-	host := myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_ADDRESS"), os.Getenv("POSTGRES_HOST"))
+	host := myownsanity.CoalesceStrings(
+		os.Getenv("MONETR_PG_ADDRESS"),
+		os.Getenv("POSTGRES_HOST"),
+		"localhost",
+	)
 
 	address := fmt.Sprintf("%s:%d", host, port)
 
