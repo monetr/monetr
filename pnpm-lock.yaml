@@ -108,8 +108,8 @@ importers:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
       tailwind-merge:
-        specifier: 1.14.0
-        version: 1.14.0
+        specifier: 3.0.1
+        version: 3.0.1
       zod:
         specifier: 3.24.2
         version: 3.24.2
@@ -286,8 +286,8 @@ importers:
         specifier: 2.8.1
         version: 2.8.1
       tailwind-merge:
-        specifier: 1.14.0
-        version: 1.14.0
+        specifier: 3.0.1
+        version: 3.0.1
       tailwindcss:
         specifier: 3.4.17
         version: 3.4.17(ts-node@10.9.1(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.2)(typescript@5.7.3))
@@ -10648,8 +10648,8 @@ packages:
     resolution: {integrity: sha512-zTvf0mcggrGeTe/2jJ6ECkJHAQPIYEwDoqsiqBjI24mvRmQbInK5jq33fyypaCBxX08hMkfmdOqj6haT33EqWw==}
     engines: {node: '>=4.0.0'}
 
-  tailwind-merge@1.14.0:
-    resolution: {integrity: sha512-3mFKyCo/MBcgyOTlrY8T7odzZFx+w+qKSMAmdFzRvqBfLlSigU6TZnlFHK0lkMwj9Bj8OYU+9yW9lmGuS0QEnQ==}
+  tailwind-merge@3.0.1:
+    resolution: {integrity: sha512-AvzE8FmSoXC7nC+oU5GlQJbip2UO7tmOhOfQyOmPhrStOGXHU08j8mZEHZ4BmCqY5dWTCo4ClWkNyRNx1wpT0g==}
 
   tailwindcss-animate@1.0.7:
     resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
@@ -24863,7 +24863,7 @@ snapshots:
       typical: 2.6.1
       wordwrapjs: 3.0.0
 
-  tailwind-merge@1.14.0: {}
+  tailwind-merge@3.0.1: {}
 
   tailwindcss-animate@1.0.7(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.2)(typescript@5.7.3))):
     dependencies:
