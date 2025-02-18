@@ -36,8 +36,8 @@ importers:
         specifier: 6.10.2
         version: 6.10.2(eslint@8.57.1)
       eslint-plugin-no-relative-import-paths:
-        specifier: 1.5.3
-        version: 1.5.3
+        specifier: 1.6.1
+        version: 1.6.1
       eslint-plugin-react:
         specifier: 7.37.4
         version: 7.37.4(eslint@8.57.1)
@@ -6407,8 +6407,8 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9
 
-  eslint-plugin-no-relative-import-paths@1.5.3:
-    resolution: {integrity: sha512-z7c7Km1U0zdLyPziWeRKSsN2mPaGaBHDjfXn98B8XjRIhFi2bPqduRYcxWih1kI5al5tQtiChXVmspLkB0wNsQ==}
+  eslint-plugin-no-relative-import-paths@1.6.1:
+    resolution: {integrity: sha512-YZNeOnsOrJcwhFw0X29MXjIzu2P/f5X2BZDPWw1R3VUYBRFxNIh77lyoL/XrMU9ewZNQPcEvAgL/cBOT1P330A==}
 
   eslint-plugin-react-hooks@4.6.2:
     resolution: {integrity: sha512-QzliNJq4GinDBcD8gPB5v0wh6g8q3SUi6EFF0x8N/BL9PoVs0atuGc47ozMRyOWAKdwaZ5OnbOEa3WR+dSGKuQ==}
@@ -19053,7 +19053,7 @@ snapshots:
       safe-regex-test: 1.0.3
       string.prototype.includes: 2.0.1
 
-  eslint-plugin-no-relative-import-paths@1.5.3: {}
+  eslint-plugin-no-relative-import-paths@1.6.1: {}
 
   eslint-plugin-react-hooks@4.6.2(eslint@8.57.1):
     dependencies:
