@@ -118,17 +118,11 @@ func (e *emailCommunicationBase) sendMessage(ctx context.Context, payload *mail.
 	c, err := mail.NewClient(
 		e.config.Email.SMTP.Host,
 		mail.WithPort(e.config.Email.SMTP.Port),
-		mail.WithSMTPAuthCustom(PlainAuth(
-			e.config.Email.SMTP.Identity,
-			e.config.Email.SMTP.Username,
-			e.config.Email.SMTP.Password,
-			e.config.Email.SMTP.Host,
-		)),
-		mail.WithTimeout(5*time.Second),
+		mail.WithUsername(e.config.Email.SMTP.Username),
+		mail.WithPassword(e.config.Email.SMTP.Password),
+		mail.WithSMTPAuth(SMTPAuth),
 		mail.WithTLSPolicy(TLSPolicy),
-		// Move to this once we are no longer using mailhog? It overwrites the port
-		// in a weird way.
-		// mail.WithTLSPortPolicy(TLSPolicy),
+		mail.WithTimeout(5*time.Second),
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to create mail client")
