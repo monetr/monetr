@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.24.0
 
 require (
-	aidanwoods.dev/go-paseto v1.5.3
+	aidanwoods.dev/go-paseto v1.5.4
 	cloud.google.com/go/kms v1.20.2
 	cloud.google.com/go/storage v1.48.0
 	github.com/MicahParks/keyfunc v1.9.0
@@ -55,7 +55,7 @@ require (
 )
 
 require (
-	aidanwoods.dev/go-result v0.1.0 // indirect
+	aidanwoods.dev/go-result v0.3.1 // indirect
 	cel.dev/expr v0.16.1 // indirect
 	cloud.google.com/go v0.116.0 // indirect
 	cloud.google.com/go/auth v0.12.1 // indirect
