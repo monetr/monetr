@@ -29,7 +29,7 @@
     "@rspack/binding-linux-arm64-gnu": "1.2.5",
     "@rspack/binding-linux-x64-gnu": "1.2.5",
     "autoprefixer": "10.4.20",
-    "postcss": "8.5.2",
+    "postcss": "8.5.3",
     "sass": "1.85.0",
     "sass-embedded-linux-arm64": "1.85.0",
     "sass-embedded-linux-x64": "1.85.0",
