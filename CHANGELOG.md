@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.3.2](https://github.com/monetr/monetr/compare/v1.3.1...v1.3.2) (2025-02-20)
+
+
+### Dependencies
+
+* **api:** update module aidanwoods.dev/go-paseto to v1.5.4 ([#2462](https://github.com/monetr/monetr/issues/2462)) ([69d56f3](https://github.com/monetr/monetr/commit/69d56f3de0c7b2e0a4701dc70c914b0ec2dbe48a))
+* **api:** update module github.com/monetr/validation to v1.0.3 ([#2455](https://github.com/monetr/monetr/issues/2455)) ([5b471c6](https://github.com/monetr/monetr/commit/5b471c624eb91f247b231322254d15db6db402b0))
+* **api:** update module github.com/wneessen/go-mail to v0.6.2 ([#2044](https://github.com/monetr/monetr/issues/2044)) ([c3fb792](https://github.com/monetr/monetr/commit/c3fb7924e4ba810de54a17c293dcd97d928bb691))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.7.3 ([#2467](https://github.com/monetr/monetr/issues/2467)) ([720beec](https://github.com/monetr/monetr/commit/720beec4fdd686b10c3d6011857f306a6eb5e14f))
+* **ui:** update dependency eslint-plugin-no-relative-import-paths to v1.6.1 ([#2457](https://github.com/monetr/monetr/issues/2457)) ([4581244](https://github.com/monetr/monetr/commit/4581244f6fbb4b3dd25ebe6e187e1947ac74b4d8))
+* **ui:** update rsbuild ([#2464](https://github.com/monetr/monetr/issues/2464)) ([883c48c](https://github.com/monetr/monetr/commit/883c48c05ba47807ec841c784b363c540047a3da))
+* **ui:** update rsbuild ([#2468](https://github.com/monetr/monetr/issues/2468)) ([d3ade33](https://github.com/monetr/monetr/commit/d3ade33100438b8f68e7df6808719ee09f05e131))
+
+
+### Bug Fixes
+
+* **jobs:** Only run the deactivate links cron when billing is enabled ([e83d45d](https://github.com/monetr/monetr/commit/e83d45d1aff077236f5b2316ae03f7ff8f989835))
+* **plaid:** Remove plaid links after 90 days ([cb8dae2](https://github.com/monetr/monetr/commit/cb8dae27b9c8839e8b781f44c5c9d41f3698d230))
+
+
+### Miscellaneous
+
+* **ui:** Tweak sample rate for interface ([85e1263](https://github.com/monetr/monetr/commit/85e1263b2a19b32c1fe7fc7436958e9936456d8d))
+
 ## [1.3.1](https://github.com/monetr/monetr/compare/v1.3.0...v1.3.1) (2025-02-17)
 
 
