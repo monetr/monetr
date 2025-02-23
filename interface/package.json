@@ -71,7 +71,7 @@
     "@imagemagick/magick-wasm": "0.0.32",
     "@rsbuild/core": "1.2.11",
     "@rsbuild/plugin-react": "1.1.1",
-    "@rsbuild/plugin-sass": "1.2.1",
+    "@rsbuild/plugin-sass": "1.2.2",
     "@rspack/binding-linux-arm64-gnu": "1.2.5",
     "@rspack/binding-linux-x64-gnu": "1.2.5",
     "@swc/core": "1.10.16",
