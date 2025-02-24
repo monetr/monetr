@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.24.0
 
 require (
-	aidanwoods.dev/go-paseto v1.5.3
+	aidanwoods.dev/go-paseto v1.5.4
 	cloud.google.com/go/kms v1.20.2
 	cloud.google.com/go/storage v1.48.0
 	github.com/MicahParks/keyfunc v1.9.0
@@ -29,20 +29,20 @@ require (
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/mileusna/useragent v1.3.5
-	github.com/monetr/validation v1.0.2
+	github.com/monetr/validation v1.0.3
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v30 v30.0.0
 	github.com/prometheus/client_golang v1.20.5
 	github.com/robfig/cron v1.2.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.8.1
+	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
 	github.com/stripe/stripe-go/v81 v81.1.1
 	github.com/teambition/rrule-go v1.8.2
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	github.com/wneessen/go-mail v0.4.4
+	github.com/wneessen/go-mail v0.6.2
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/mock v0.5.0
 	golang.org/x/crypto v0.33.0
@@ -55,7 +55,7 @@ require (
 )
 
 require (
-	aidanwoods.dev/go-result v0.1.0 // indirect
+	aidanwoods.dev/go-result v0.3.1 // indirect
 	cel.dev/expr v0.16.1 // indirect
 	cloud.google.com/go v0.116.0 // indirect
 	cloud.google.com/go/auth v0.12.1 // indirect
@@ -129,7 +129,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect

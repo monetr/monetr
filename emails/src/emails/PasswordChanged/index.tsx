@@ -6,8 +6,8 @@ import {
   Text,
 } from '@react-email/components';
 
-import EmailLayout from '../components/EmailLayout';
-import EmailLogo from '../components/EmailLogo';
+import EmailLayout from '../../components/EmailLayout';
+import EmailLogo from '../../components/EmailLogo';
 
 interface PasswordChangedProps {
   baseUrl?: string;

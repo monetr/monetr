@@ -8,6 +8,9 @@ allowsignup: true
 environment: development
 plaid:
   environment: https://sandbox.plaid.com
+  countryCodes:
+    - US
+    - CA
 backgroundjobs:
   engine: postgresql
   scheduler: internal

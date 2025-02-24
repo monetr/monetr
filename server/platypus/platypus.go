@@ -108,16 +108,10 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 			return errors.Wrap(err, errorMessage)
 		}
 
-		// Only include the plaid error message if it is provided.
-		plaidMessage := ""
-		if plaidError.ErrorMessage != "" {
-			plaidMessage += " " + plaidError.ErrorMessage
-		}
-
-		return errors.Wrap(errors.Errorf(
-			"plaid API call failed with [%s - %s]%s",
-			plaidError.ErrorType, plaidError.ErrorCode, plaidMessage,
-		), errorMessage)
+		return errors.Wrapf(
+			&PlatypusError{plaidError},
+			errorMessage,
+		)
 	default:
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, errorMessage)
@@ -242,7 +236,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 		LinkTokenCreateRequest(plaid.LinkTokenCreateRequest{
 			ClientName:   consts.PlaidClientName,
 			Language:     consts.PlaidLanguage,
-			CountryCodes: consts.PlaidCountries,
+			CountryCodes: p.config.CountryCodes,
 			User: plaid.LinkTokenCreateRequestUser{
 				ClientUserId:             options.ClientUserID,
 				LegalName:                &options.LegalName,
@@ -363,7 +357,7 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 		InstitutionsGetById(span.Context()).
 		InstitutionsGetByIdRequest(plaid.InstitutionsGetByIdRequest{
 			InstitutionId: institutionId,
-			CountryCodes:  consts.PlaidCountries,
+			CountryCodes:  p.config.CountryCodes,
 			Options: &plaid.InstitutionsGetByIdRequestOptions{
 				IncludeOptionalMetadata:          myownsanity.BoolP(true),
 				IncludeStatus:                    myownsanity.BoolP(true),

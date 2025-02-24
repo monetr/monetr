@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	Epsilon      = 0.98
+	Epsilon      = 0.8
 	MinNeighbors = 1
 )
 

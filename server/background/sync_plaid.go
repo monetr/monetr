@@ -131,7 +131,15 @@ func (s *SyncPlaidHandler) HandleConsumeJob(
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
 
-	return s.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
+	attempts := 0
+	maxAttempts := 3
+RetrySync:
+
+	if attempts > 0 {
+		log = log.WithField("attempt", attempts)
+	}
+
+	err := s.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
@@ -160,6 +168,20 @@ func (s *SyncPlaidHandler) HandleConsumeJob(
 		}
 		return job.Run(span.Context())
 	})
+	{ // Allow the plaid sync job to be retried under some circumstances
+		attempts++
+		if attempts < maxAttempts {
+			switch plaidError := errors.Cause(err).(type) {
+			case *platypus.PlatypusError:
+				if plaidError.ErrorCode == "TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION" {
+					log.WithError(err).Warn("plaid sync failed with mutation error, job will be retried")
+					goto RetrySync
+				}
+			}
+		}
+	}
+
+	return err
 }
 
 func (s SyncPlaidHandler) DefaultSchedule() string {

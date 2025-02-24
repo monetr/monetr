@@ -5,6 +5,7 @@ import (
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/database"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +22,7 @@ func newCleanupJobsCommand(parent *cobra.Command) {
 			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 
-			db, err := getDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
 				return err
 			}

@@ -18,8 +18,8 @@ func TestConvertOFXToXML(t *testing.T) {
 		assert.NotEmpty(t, xmlString, "must produce an xml string")
 	})
 
-	t.Run("nfcu 2", func(t *testing.T) {
-		data := GetFixtures(t, "sample-nfcu-2.qfx")
+	t.Run("nfcu wrapped", func(t *testing.T) {
+		data := GetFixtures(t, "sample-nfcu-wrapped.qfx")
 		token, err := Tokenize(string(data))
 		assert.NoError(t, err)
 
@@ -52,8 +52,8 @@ func TestValidXMLOutput(t *testing.T) {
 		assert.NotNil(t, ofx.BANKMSGSRSV1, "bank message response must not be nil")
 	})
 
-	t.Run("nfcu 2", func(t *testing.T) {
-		data := GetFixtures(t, "sample-nfcu-2.qfx")
+	t.Run("nfcu wrapped", func(t *testing.T) {
+		data := GetFixtures(t, "sample-nfcu-wrapped.qfx")
 		token, err := Tokenize(string(data))
 		assert.NoError(t, err)
 

@@ -23,16 +23,16 @@
     "typescript": "5.7.3"
   },
   "devDependencies": {
-    "@rsbuild/core": "1.2.7",
-    "@rsbuild/plugin-react": "1.1.0",
-    "@rsbuild/plugin-sass": "1.2.1",
-    "@rspack/binding-linux-arm64-gnu": "1.2.3",
-    "@rspack/binding-linux-x64-gnu": "1.2.3",
+    "@rsbuild/core": "1.2.11",
+    "@rsbuild/plugin-react": "1.1.1",
+    "@rsbuild/plugin-sass": "1.2.2",
+    "@rspack/binding-linux-arm64-gnu": "1.2.5",
+    "@rspack/binding-linux-x64-gnu": "1.2.5",
     "autoprefixer": "10.4.20",
-    "postcss": "8.5.2",
-    "sass": "1.84.0",
-    "sass-embedded-linux-arm64": "1.83.4",
-    "sass-embedded-linux-x64": "1.83.4",
-    "storybook-react-rsbuild": "0.1.9"
+    "postcss": "8.5.3",
+    "sass": "1.85.0",
+    "sass-embedded-linux-arm64": "1.85.0",
+    "sass-embedded-linux-x64": "1.85.0",
+    "storybook-react-rsbuild": "0.1.10"
   }
 }

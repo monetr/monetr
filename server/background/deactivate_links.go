@@ -219,37 +219,37 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 		"plaidLinkStatus": link.PlaidLink.Status.String(),
 	})
 
-	log.Warn("DRY RUN, would have removed plaid link")
+	log.Info("removing plaid link")
 
-	// secret, err := d.secrets.Read(span.Context(), link.PlaidLink.SecretId)
-	// if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
-	// 	log.WithError(err).Error("could not retrieve API credentials for Plaid for link, this job will be retried")
-	// 	return err
-	// }
-	//
-	// client, err := d.plaidPlatypus.NewClient(span.Context(), link, secret.Value, link.PlaidLink.PlaidId)
-	// if err != nil {
-	// 	log.WithError(err).Error("failed to create client for link deactivation")
-	// 	return err
-	// }
-	//
-	// if err = d.repo.DeletePlaidLink(span.Context(), *link.PlaidLinkId); err != nil {
-	// 	log.WithError(err).Warn("failed to remove Plaid details, link cannot be removed at this time")
-	// 	return err
-	// }
-	//
-	// log.Info("deactivating Plaid link now")
-	// if err = client.RemoveItem(span.Context()); err != nil {
-	// 	log.WithError(err).Error("failed to deactivate Plaid link, the job will not be retried")
-	// 	return nil
-	// }
-	//
-	// log.Info("Plaid link was successfully deactivated, removing Plaid details now")
-	//
-	// if err = d.secrets.Delete(span.Context(), secret.SecretId); err != nil {
-	// 	log.WithError(err).Error("failed to remove Plaid credentials for link")
-	// 	return nil // Don't retry.
-	// }
+	secret, err := d.secrets.Read(span.Context(), link.PlaidLink.SecretId)
+	if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
+		log.WithError(err).Error("could not retrieve API credentials for Plaid for link, this job will be retried")
+		return err
+	}
+
+	client, err := d.plaidPlatypus.NewClient(span.Context(), link, secret.Value, link.PlaidLink.PlaidId)
+	if err != nil {
+		log.WithError(err).Error("failed to create client for link deactivation")
+		return err
+	}
+
+	if err = d.repo.DeletePlaidLink(span.Context(), *link.PlaidLinkId); err != nil {
+		log.WithError(err).Warn("failed to remove Plaid details, link cannot be removed at this time")
+		return err
+	}
+
+	log.Info("deactivating Plaid link now")
+	if err = client.RemoveItem(span.Context()); err != nil {
+		log.WithError(err).Error("failed to deactivate Plaid link, the job will not be retried")
+		return nil
+	}
+
+	log.Info("Plaid link was successfully deactivated, removing Plaid details now")
+
+	if err = d.secrets.Delete(span.Context(), secret.SecretId); err != nil {
+		log.WithError(err).Error("failed to remove Plaid credentials for link")
+		return nil // Don't retry.
+	}
 
 	return nil
 }

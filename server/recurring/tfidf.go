@@ -17,31 +17,7 @@ var (
 	numberOnly              = regexp.MustCompile(`^\d+$`)
 
 	specialWeights = map[string]float32{
-		"amazon":          10,
-		"youtube premium": 5,
-		"google":          2,
-		"stripe":          2,
-		"pwp":             0, // Paid with privacy
-		"privacycom":      0, // Same as pwp
-		"sq":              0, // Square
-		"debit":           0,
-		"pos":             0,
-		"visa":            0,
-		"ach":             0,
-		"transaction":     0,
-		"card":            0,
-		"check":           0,
-		"transfer":        0,
-		"deposit":         0,
-		"withdrawal":      0,
-		"withdraw":        0,
-		"purchase":        0,
-		"adjustment":      0,
-		"payment":         0,
-		"to":              0,
-		"of":              0,
-		"helppay":         0, // Shows up on some google transactions, not helpful.
-		"null":            0, // Shows up in manual imports somtimes
+		"null": 0, // Shows up in manual imports somtimes
 
 		"merchant": 0, // Shows up in almost all mercury transactions.
 		"name":     0, // Shows up in almost all mercury transactions.

@@ -78,7 +78,6 @@ func NewBackgroundJobs(
 		NewCalculateTransactionClustersHandler(log, db, clock),
 		NewCleanupFilesHandler(log, db, clock, fileStorage, enqueuer),
 		NewCleanupJobsHandler(log, db),
-		NewDeactivateLinksHandler(log, db, clock, configuration, kms, plaidPlatypus),
 		NewProcessFundingScheduleHandler(log, db, clock),
 		NewProcessOFXUploadHandler(log, db, clock, fileStorage, publisher, enqueuer),
 		NewProcessSpendingHandler(log, db, clock),
@@ -91,6 +90,7 @@ func NewBackgroundJobs(
 	// When billing is enabled, periodically perform billing upkeep tasks.
 	if configuration.Stripe.IsBillingEnabled() {
 		jobs = append(jobs,
+			NewDeactivateLinksHandler(log, db, clock, configuration, kms, plaidPlatypus),
 			NewNotificationTrialExpiryHandler(log, db, clock, configuration, email),
 			NewReconcileSubscriptionHandler(log, db, clock, publisher, billing),
 		)

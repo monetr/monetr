@@ -253,7 +253,7 @@ func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection boo
 		LinkTokenCreateRequest(plaid.LinkTokenCreateRequest{
 			ClientName:   consts.PlaidClientName,
 			Language:     consts.PlaidLanguage,
-			CountryCodes: consts.PlaidCountries,
+			CountryCodes: p.config.CountryCodes,
 			User: plaid.LinkTokenCreateRequestUser{
 				ClientUserId: p.accountId.String(),
 				EmailAddress: nil,

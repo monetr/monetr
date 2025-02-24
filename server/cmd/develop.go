@@ -8,6 +8,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/database"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -44,7 +45,7 @@ func newDevelopCommand(parent *cobra.Command) {
 				log.WithField("config", configFileName).Info("config file loaded")
 			}
 
-			db, err := getDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
 				log.WithError(err).Fatal("failed to setup database")
 				return err
@@ -143,7 +144,7 @@ func newDevelopCommand(parent *cobra.Command) {
 				log.WithField("config", configFileName).Info("config file loaded")
 			}
 
-			db, err := getDatabase(log, configuration, nil)
+			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
 				log.WithError(err).Fatal("failed to setup database")
 				return err

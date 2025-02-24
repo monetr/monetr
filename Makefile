@@ -31,7 +31,7 @@ ifndef CI
 	CONCURRENCY ?= 8
 else
 	CMAKE_PRESET ?= release
-	CONCURRENCY := 4
+	CONCURRENCY ?= 4
 endif
 
 ifdef DEBUG
@@ -60,30 +60,30 @@ clean:
 	-cmake -E remove_directory $(CMAKE_CONFIGURATION_DIRECTORY) $(BUILD_ARGS)
 
 dependencies: | $(CMAKE_CONFIGURATION_DIRECTORY)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t dependencies $(BUILD_ARGS)
+	+cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t dependencies $(BUILD_ARGS)
 
 deps: dependencies
 
 monetr: | $(CMAKE_CONFIGURATION_DIRECTORY)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.monetr $(BUILD_ARGS)
+	+cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.monetr $(BUILD_ARGS)
 
 monetr-release:
-	$(MAKE) monetr -B CMAKE_PRESET=release
+	+$(MAKE) monetr -B CMAKE_PRESET=release
 
 release: monetr-release
 
 interface: $(CMAKE_CONFIGURATION_DIRECTORY)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.interface $(BUILD_ARGS)
+	+cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.interface $(BUILD_ARGS)
 
 .PHONY: docs
 docs: | $(CMAKE_CONFIGURATION_DIRECTORY)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.docs $(BUILD_ARGS)
+	+cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.docs $(BUILD_ARGS)
 
 email: | $(CMAKE_CONFIGURATION_DIRECTORY)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.email $(BUILD_ARGS)
+	+cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.email $(BUILD_ARGS)
 
 storybook: | $(CMAKE_CONFIGURATION_DIRECTORY)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.stories $(BUILD_ARGS)
+	+cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.stories $(BUILD_ARGS)
 
 migrate: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.migrate $(BUILD_ARGS)

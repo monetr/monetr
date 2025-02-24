@@ -52,7 +52,7 @@ services:
     # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
     # do `pnpm install` before doing docker compose up.
     tty: true # Color output.
-    image: node:18.20.4-bookworm
+    image: node:18.20.6-bookworm
     user: "${UID:-0}:${GID:-0}"
     working_dir: /build
     restart: always
@@ -78,7 +78,7 @@ services:
       - /build/compose/ui-entrypoint.sh
   monetr:
     tty: true # Makes color output work nicely.
-    image: golang:1.23.2
+    image: golang:1.24.0
     user: "${UID:-0}:${GID:-0}"
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build

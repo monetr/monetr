@@ -10,7 +10,7 @@ import (
 
 func TestPlaidTransaction_GetDates(t *testing.T) {
 	transaction := PlaidTransaction{
-		Amount:        128,
+		Amount:        128.00,
 		BankAccountId: gofakeit.Generate("?????"),
 		Category: []string{
 			"Bank Fee",

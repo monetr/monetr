@@ -1,6 +1,9 @@
 package platypus
 
 import (
+	"math"
+
+	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/plaid/plaid-go/v30/plaid"
@@ -54,12 +57,21 @@ var (
 )
 
 func NewPlaidBankAccountBalances(balances plaid.AccountBalance) (PlaidBankAccountBalances, error) {
+	// Get the number of fractional digits for the currency of this transaction.
+	fractions, err := locale.GetCurrencyInternationalFractionalDigits(
+		balances.GetIsoCurrencyCode(),
+	)
+	if err != nil {
+		fractions = 2
+	}
+
+	multiplier := math.Pow(10, float64(fractions))
 	return PlaidBankAccountBalances{
 		// We work with all amounts in cents. So we need to convert all balances to cents in order to make them whole
 		// integers rather than floats.
-		Available:              int64(balances.GetAvailable() * 100),
-		Current:                int64(balances.GetCurrent() * 100),
-		Limit:                  int64(balances.GetLimit() * 100),
+		Available:              int64(balances.GetAvailable() * multiplier),
+		Current:                int64(balances.GetCurrent() * multiplier),
+		Limit:                  int64(balances.GetLimit() * multiplier),
 		IsoCurrencyCode:        balances.GetIsoCurrencyCode(),
 		UnofficialCurrencyCode: balances.GetUnofficialCurrencyCode(),
 	}, nil

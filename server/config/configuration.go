@@ -113,6 +113,7 @@ type PostgreSQL struct {
 	CACertificatePath  string `yaml:"caCertificatePath"`
 	KeyPath            string `yaml:"keyPath"`
 	CertificatePath    string `yaml:"certificatePath"`
+	Migrate            bool   `yaml:"migrate"`
 }
 
 func (c Configuration) GetEmail() Email {
@@ -192,20 +193,24 @@ type Plaid struct {
 	ClientID     string            `yaml:"clientId"`
 	ClientSecret string            `yaml:"clientSecret"`
 	Environment  plaid.Environment `yaml:"environment"`
-
 	// EnableReturningUserExperience changes the required data for sign up. If
 	// this is enabled then the user must provide their full legal name as well
 	// as their phone number.
 	// If enabled; email address and phone number verification is REQUIRED.
-	EnableReturningUserExperience bool `yaml:"enableReturningUserExperience"`
-
-	WebhooksEnabled bool   `yaml:"webhooksEnabled"`
-	WebhooksDomain  string `yaml:"webhooksDomain"`
-	// OAuthDomain is used to specify the domain name that the user will be brought to upon returning to monetr after
-	// authenticating to a bank that requires OAuth. This will typically be a UI domain name and should not include a
-	// protocol or a path. The protocol is auto inserted as `https` as it is the only protocol supported. The path is
-	// currently hard coded until a need for different paths arises?
+	EnableReturningUserExperience bool   `yaml:"enableReturningUserExperience"`
+	WebhooksEnabled               bool   `yaml:"webhooksEnabled"`
+	WebhooksDomain                string `yaml:"webhooksDomain"`
+	// OAuthDomain is used to specify the domain name that the user will be
+	// brought to upon returning to monetr after authenticating to a bank that
+	// requires OAuth. This will typically be a UI domain name and should not
+	// include a protocol or a path. The protocol is auto inserted as `https` as
+	// it is the only protocol supported. The path is currently hard coded until a
+	// need for different paths arises?
 	OAuthDomain string `yaml:"oauthDomain"`
+	// Specify the country codes that monetr can connect to using Plaid. Some
+	// countries require special access from Plaid and cannot simply be added to
+	// enable the functionality.
+	CountryCodes []plaid.CountryCode `yaml:"countryCodes"`
 }
 
 func (p Plaid) GetEnabled() bool {
@@ -351,6 +356,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("KeyManagement.Google", nil)
 	v.SetDefault("KeyManagement.Vault", nil)
 	v.SetDefault("Plaid.Enabled", true)
+	v.SetDefault("Plaid.CountryCodes", []plaid.CountryCode{plaid.COUNTRYCODE_US})
 	v.SetDefault("PostgreSQL.Address", "localhost")
 	v.SetDefault("PostgreSQL.Database", "postgres")
 	v.SetDefault("PostgreSQL.Port", 5432)

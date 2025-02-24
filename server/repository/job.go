@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
@@ -92,7 +91,7 @@ func (r *repositoryBase) GetJob(jobId string) (Job, error) {
 }
 
 func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]Link, error) {
-	span := sentry.StartSpan(ctx, "GetLinksForExpiredAccounts")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	// Links should be seen as expired if the account subscription is not active for 90 days.
