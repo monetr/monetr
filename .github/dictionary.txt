@@ -3,15 +3,19 @@ API.*
 AboutFeatures
 BackgroundGradientAnimation
 Biometric
+Bitnami
 BlogHeader
 BlogIndex
 CLI
 CMake
 CORS
+CSI
 CSP
 CSV
 Chatwoot
 Chisago
+CloudNativePG
+ConfigMap
 DNS
 DNT
 DSN
@@ -26,10 +30,10 @@ Gramm-Leach-Bliley
 HTTPS
 HandCoins
 Hashicorp
+Ingress-Nginx
 IntellJ
 JSON
 KMS.*
-Kubernetes
 LLC
 Leyna
 Lindstrom
@@ -51,6 +55,7 @@ SDK
 SMS
 SMTP
 SSL
+ShipWheel
 ShoppingCart
 StackDriver.*
 Sube
@@ -74,6 +79,7 @@ YAML
 [iI]nclusivity
 [jJ][sS]
 [kK]eyring
+[kK]ubernetes
 [mM]ailpit
 [mM]akefile.*
 [nN]extra
@@ -96,6 +102,7 @@ dev
 dropdown
 enforceability
 env
+filesystem[s]?
 financials
 forecasted
 formatter
@@ -121,6 +128,7 @@ non-HTTPS
 npm
 pnpm
 pre-screen
+radosgw
 recaptcha
 self-hostable
 severable
@@ -128,5 +136,7 @@ sexualized
 submodule.*
 templating
 unbudgeted
+uncomment
 valkey
 voiceprints
+yaml
