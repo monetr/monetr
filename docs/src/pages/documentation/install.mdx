@@ -4,7 +4,7 @@ description: Learn how to self-host monetr for free using Docker or Podman. Expl
 ---
 
 import { Cards } from 'nextra/components';
-import { Container } from 'lucide-react';
+import { Container, ShipWheel } from 'lucide-react';
 
 # Install monetr
 
@@ -45,8 +45,21 @@ monetr application and PostgreSQL.
 <Cards.Card
   icon={<Container />}
   title="Follow the Docker Compose Installation Guide"
-  description="Set up your monetr account, link bank accounts, or create a manual budget."
+  description="Install monetr on your own system using Docker Compose"
   href="/documentation/install/docker/"
+/>
+
+### **Install on Kubernetes**
+
+If you are looking to deploy monetr on a Kubernetes cluster, there is a _very_ basic guide on how to do so. This is not
+the recommended way to run monetr at this time. A helm chart will be available in the future, but this guide has been
+made available until then.
+
+<Cards.Card
+  icon={<ShipWheel />}
+  title="Follow the Kubernetes Installation Guide"
+  description="Install monetr on your own Kubernetes cluster"
+  href="/documentation/install/kubernetes/"
 />
 
 ## What’s Next?

@@ -1,0 +1,423 @@
+---
+title: Kubernetes
+description: Deploy monetr to your own Kubernetes cluster. A guide with some starting points for how to deploy monetr on Kubernetes.
+---
+
+# Kubernetes
+
+These are some example manifests for deploying monetr to Kubernetes. These manifests are less maintained than the
+[Docker Compose](./docker) files provided in the repository. As such, you should be familiar with Kubernetes before
+trying to deploy monetr on it.
+
+**Note**: At some point there will be a Helm chart for monetr. However, until then these manifests can be used as a
+starting point for deploying monetr into Kubernetes yourself.
+
+## Requirements
+
+You will need to provide the following in your cluster:
+
+- An ingress controller with a registered ingress class name.
+- A CSI storage provider (or use host paths).
+- A PostgreSQL database.
+
+We will not provide a guide on how to configure each of these, however there are some
+[recommendations](#recommendations) at the end of the examples.
+
+## Manifests
+
+Below are some example manifests in the order they'll need to be setup. Again, this assumes that you already have the
+requirements mentioned above setup in some way.
+
+### Configuration
+
+In order to configure monetr in Kubernetes, it is recommended to create a
+[ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) with monetr's `config.yaml` file. You can find
+documentation on building that file **[here](/documentation/configure/)**.
+
+Here is an example of the ConfigMap for monetr with the yaml file. Customize as needed:
+
+```yaml filename="configmap.yaml" copy
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: monetr-config
+  labels:
+    app.kubernetes.io/name: monetr
+    app.kubernetes.io/instance: monetr
+    app.kubernetes.io/component: config
+data:
+  config.yaml: |
+    environment: "self-hosted"
+    allowSignUp: true
+
+    email:
+      enabled: false
+      domain: "" # Does not need to match your `externalUrl` domain.
+      verification:
+        enabled: false
+        tokenLifetime: 10m
+      forgotPassword:
+        enabled: false
+        tokenLifetime: 10m
+      smtp:
+        identity: "..." # SMTP Identity
+        username: "..." # SMTP Username
+        password: "..." # SMTP Password or app password depending on provider
+        host: "..."     # Domain name of the SMTP server, no protocol or port specified
+        port: 587       # Use the port specified by your provider, could be 587, 465 or 25
+    keyManagement:
+      # Default to plaintext, if you want to encrypt secrets you need to look at the key
+      # management configuration docs.
+      provider: "plaintext"
+    links:
+      # Max number of Plaid links an account can have, `0` means unlimited Plaid links.
+      maxNumberOfLinks: 0
+    logging:
+      level: "debug"
+      format: "text" # Can also be set to JSON depending on your preferences
+    plaid:
+      enabled: false
+      # # Uncomment this section if you do not want to provide credentials via environment variables.
+      # clientId: ""
+      # clientSecret: ""
+      # environment: "https://sandbox.plaid.com" # Set to the production URL if you have prod API keys.
+      webhooksEnabled: false
+      # # Uncomment with the domain you want Plaid to send webhooks to, only provide the domain name.
+      # # The path cannot be customized and plaid requires HTTPS to be available for webhooks.
+      # webhooksDomain: ""
+      # List of country codes that monetr will use for the Plaid link, please read Plaid's configuration
+      # documentation before modifying this.
+      countryCodes:
+        - US
+    postgres:
+      # Uncomment this if you are not using the included PostgreSQL server in the docker compose and
+      # Specify your own address for PostgreSQL.
+      address: ""
+      port: 5432
+      # Similar to address, uncomment this if you are want to customize the credentials used for
+      # connecting to PostgreSQL.
+      username: ""
+      password: ""
+      database: ""
+      insecureSkipVerify: false
+    security:
+      # This path is based on the volume mount and secret described in the following examples.
+      privateKey: "/etc/monetr/certificate/ed25519.key"
+    server:
+      # YOU NEED TO CONFIGURE THIS IF YOU ARE USING SOMETHING OTHER THAN LOCALHOST TO ACCESS MONETR
+      # This config determines what URL monetr sets cookies on as well as what URL is used for links
+      # sent via email. Misconfiguring this URL may result in not being able to login to monetr.
+      externalUrl: "https://YOUR DOMAIN NAME"
+    storage:
+      # Required for file uploads to work, if you want do not need file uploads then this can be
+      # disabled.
+      enabled: true
+      provider: "filesystem"
+      filesystem:
+        basePath: "/etc/monetr/storage"
+```
+
+### Authentication Certificate
+
+monetr requires an Ed25519 certificate to sign authentication tokens and temporary email tokens. You can generate the
+Kubernetes secret for this certificate with the following command:
+
+```shell filename="Shell" copy
+openssl genpkey -algorithm ED25519 -out /dev/stdout | kubectl create secret generic monetr-certificate \
+    --type=string --from-file=ed25519.key=/dev/stdin
+```
+
+This will generate a certificate and store it in your Kubernetes cluster. The name of the certificate
+(`monetr-certificate`) will be important later as it is referenced directly in the other sample manifests.
+
+### Storage
+
+monetr requires persistent storage if you are going to use the file upload functionality. You will need to create a
+persistent volume claim for monetr to use. What storage class you decide is up to you; the following example will use
+the default storage class configured for your cluster.
+
+```yaml filename="storage.yaml" copy
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: monetr-storage
+  labels:
+    app.kubernetes.io/name: monetr
+    app.kubernetes.io/instance: monetr
+    app.kubernetes.io/component: storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: "1Gi"
+  # # Uncomment to specify a non-default storage class.
+  # storageClassName: "your-storage-class"
+```
+
+Some things to note about the storage claim:
+
+1. `ReadWriteOnce` is recommended when using a volume mount. monetr has not been tested with any `ReadWriteMany`
+   filesystems and while they _may_ work. They may also cause problems that we will not support or fix. If you want to
+   run more than one instance of the monetr server you should instead use an [Object
+   Store](/documentation/configure/storage/).
+2. `1Gi` is more than enough storage for now. More features in the future will take advantage of storage, such as
+   transaction attachments. But at the moment storage is only used for transaction file imports.
+3. If you have a storage class setup in your cluster that you want to use, and it is not the default storage class. Then
+   you will need to uncomment and update the storage class field.
+
+### Deployment
+
+Below is a simple deployment for monetr, it will contain a single replica. Restarting the deployment will pull new
+images if you remain on the `latest` image tag. Database migrations are performed as part of the `initContainers`
+process.
+
+```yaml filename="deployment.yaml" copy
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monetr
+  labels:
+    app.kubernetes.io/name: monetr
+    app.kubernetes.io/instance: monetr
+    app.kubernetes.io/component: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: monetr
+      app.kubernetes.io/instance: monetr
+      app.kubernetes.io/component: server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: monetr
+        app.kubernetes.io/instance: monetr
+        app.kubernetes.io/component: server
+    spec:
+      securityContext: {}
+      initContainers:
+        - name: migrations
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+          image: "ghcr.io/monetr/monetr:latest"
+          imagePullPolicy: Always
+          command:
+            - "/usr/bin/monetr"
+          args:
+            - "-c"
+            - "/etc/monetr/config.yaml"
+            - "database"
+            - "migrate"
+          env:
+          - name: MONETR_ENVIRONMENT
+            value: self-hosted
+          volumeMounts:
+            - mountPath: /etc/monetr
+              name: config
+              readOnly: true
+              subPath: config.yaml
+            - mountPath: /etc/monetr/certificate
+              name: certificate
+              readOnly: true
+              subPath: ed25519.key
+          resources:
+            limits:
+              cpu: 200m
+              memory: 512Mi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+      containers:
+        - name: monetr
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+          image: "ghcr.io/monetr/monetr:latest"
+          imagePullPolicy: Always
+          command:
+            - "/usr/bin/monetr"
+          args:
+            - "-c"
+            - "/etc/monetr/config.yaml"
+            - "serve"
+          env:
+          - name: MONETR_ENVIRONMENT
+            value: self-hosted
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+          volumeMounts:
+            - mountPath: /etc/monetr
+              name: config
+              readOnly: true
+              subPath: config.yaml
+            - mountPath: /etc/monetr/storage
+              name: storage
+              readOnly: false
+            - mountPath: /etc/monetr/certificate
+              name: certificate
+              readOnly: true
+              subPath: ed25519.key
+          resources:
+            limits:
+              cpu: 200m
+              memory: 512Mi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+      nodeSelector:
+        kubernetes.io/os: linux
+      volumes:
+        - name: config
+          configMap:
+            name: monetr-config
+        - name: storage
+          configMap:
+            name: monetr-storage
+        - name: certificate
+          secret:
+            secretName: monetr-certificate
+```
+
+### Service
+
+This service spec will allow traffic to be routed to the monetr server pod only.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: monetr
+  labels:
+    app.kubernetes.io/name: monetr
+    app.kubernetes.io/instance: monetr
+    app.kubernetes.io/component: networking
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: monetr
+    app.kubernetes.io/instance: monetr
+    app.kubernetes.io/component: server
+```
+
+### Ingress
+
+To surface monetr through a Kubernetes ingress, you'll need to modify the following manifest with the domain name you
+used for the `server.externalUrl` value in the config map above.
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monetr
+  labels:
+    app.kubernetes.io/name: monetr
+    app.kubernetes.io/instance: monetr
+    app.kubernetes.io/component: networking
+spec:
+  ingressClassName: "FILL ME IN"
+  rules:
+    - host: "YOUR DOMAIN NAME"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: monetr
+                port:
+                  number: 4000
+  tls:
+    - hosts:
+        - "YOUR DOMAIN NAME"
+      secretName: monetr-tls
+```
+
+## Recommendations
+
+The following are recommendations for running monetr in Kubernetes. Some of which are based on our own experience
+running monetr's production environment in Kubernetes.
+
+### Storage
+
+Instead of using Persistent Volumes, you can run an Object Storage system inside Kubernetes.
+
+- [Rook](https://rook.io/) and specifically [radosgw](https://docs.ceph.com/en/squid/radosgw/) is what monetr is using
+  in production and is the recommended object storage provider for running multiple instances of monetr.
+- [minio](https://min.io/) is probably the easiest to get up and running.
+
+### Ingress
+
+Ingress-Nginx Controller is what is used in monetr's production environment.
+
+- [Ingress-Nginx Controller](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/)
+
+### Certificates
+
+For TLS (or for authentication) monetr is using [cert-manager](https://cert-manager.io/) in production. If you also want
+to issue authentication certificates with cert-manager you can use the following manifests:
+
+```yaml filename="issuer.yaml" copy
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: monetr-authentication
+spec:
+  selfSigned: {}
+```
+
+Then you can create a Certificate resource for authentication:
+
+```yaml filename="authentication.yaml" copy
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: monetr-authentication-certificate
+  labels:
+    app.kubernetes.io/name: monetr
+    app.kubernetes.io/instance: monetr
+    app.kubernetes.io/component: certificate
+spec:
+  # You can replace with whatever common name you want, it is a self-signed certificate so it doesn't really matter.
+  commonName: my.monetr.local
+  # This will make the certificate rotate every 90 days
+  duration: 2160h0m0s
+  issuerRef:
+    kind: Issuer
+    name: monetr-authentication
+  privateKey:
+    algorithm: Ed25519
+    encoding: PKCS8
+    rotationPolicy: Always
+  # Replace the volume mount with this secret instead.
+  secretName: monetr-authentication-certificate
+  usages:
+  - any
+```
+
+**Note**: You will need to modify the volume mounts in the example Deployment yaml if you are going to use certificates
+generated from cert-manager.
+
+### Database
+
+There are a ton of different ways to deploy PostgreSQL to Kubernetes, however the only one we will recommend at this
+point is [CloudNativePG](https://cloudnative-pg.io/).
+
+If you want a very easy way to deploy PostgreSQL though, you can look into the Bitnami helm charts.
