@@ -42,6 +42,14 @@ func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File
 		case ".qfx", ".ofx":
 			log.Debug("detected OFX file format")
 			contentType = string(storage.IntuitQFXContentType)
+		case ".pdf":
+			contentType = "application/pdf"
+		case ".png":
+			contentType = "image/png"
+		case ".jpeg", ".jpg":
+			contentType = "image/jpeg"
+		case ".heic", ".heif": // Apple's image format.
+			contentType = "image/heif"
 		default:
 			log.Warn("could not determine file format by file extension")
 		}
@@ -79,7 +87,8 @@ func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File
 		ContentType: contentType,
 		Size:        uint64(header.Size),
 		BlobUri:     fileUri,
-		ExpiresAt:   kind.FileExpiration(c.Clock),
+		// May be nil, if it is nil then it never expires.
+		ExpiresAt: kind.FileExpiration(c.Clock),
 	}
 
 	if err := repo.CreateFile(c.getContext(ctx), &file); err != nil {
