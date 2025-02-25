@@ -1,0 +1,38 @@
+.monetr {
+  .bank-sidebar {
+    @apply w-16;
+    position: fixed !important;
+  }
+
+  .budget-sidebar {
+    @apply w-72;
+  }
+
+  .view-content {
+    @apply pl-0 lg:pl-16;
+
+    .with-budget {
+      @apply pl-0 lg:pl-72;
+
+      @media (width >= 64rem) { 
+        nav {
+          width: calc(100vw - (4rem + 18rem) ) !important;
+          // padding-left: 4rem + 18rem !important;
+        }
+      }
+    }
+  }
+
+  nav {
+    width: 100vw;
+    position: fixed;
+    right: 0px;
+    top: 0px;
+
+  }
+
+  nav + div {
+    padding-top: 3rem !important;
+  }
+
+}
