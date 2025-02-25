@@ -5,8 +5,8 @@ description: Deploy monetr to your own Kubernetes cluster. A guide with some sta
 
 # Kubernetes
 
-These are some example deployment manifests for deploying monetr to Kubernetes. These manifests are less maintained than
-the [Docker Compose](./docker) files provided in the repository. As such, you should be familiar with Kubernetes before
+These are some example manifests for deploying monetr to Kubernetes. These manifests are less maintained than the
+[Docker Compose](./docker) files provided in the repository. As such, you should be familiar with Kubernetes before
 trying to deploy monetr on it.
 
 **Note**: At some point there will be a Helm chart for monetr. However, until then these manifests can be used as a
@@ -32,7 +32,7 @@ requirements mentioned above setup in some way.
 
 In order to configure monetr in Kubernetes, it is recommended to create a
 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) with monetr's `config.yaml` file. You can find
-documentation on building that file **[here](/documentation/configure/)**
+documentation on building that file **[here](/documentation/configure/)**.
 
 Here is an example of the ConfigMap for monetr with the yaml file. Customize as needed:
 
@@ -233,7 +233,6 @@ spec:
       containers:
         - name: monetr
           securityContext:
-            readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: 1000
           image: "ghcr.io/monetr/monetr:latest"
@@ -292,9 +291,7 @@ spec:
             secretName: monetr-certificate
 ```
 
-### Networking
-
-#### Service
+### Service
 
 This service spec will allow traffic to be routed to the monetr server pod only.
 
@@ -320,7 +317,7 @@ spec:
     app.kubernetes.io/component: server
 ```
 
-#### Ingress
+### Ingress
 
 To surface monetr through a Kubernetes ingress, you'll need to modify the following manifest with the domain name you
 used for the `server.externalUrl` value in the config map above.
@@ -414,6 +411,9 @@ spec:
   usages:
   - any
 ```
+
+**Note**: You will need to modify the volume mounts in the example Deployment yaml if you are going to use certificates
+generated from cert-manager.
 
 ### Database
 
