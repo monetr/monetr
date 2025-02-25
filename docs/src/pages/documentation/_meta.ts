@@ -12,7 +12,6 @@ export default {
   },
   'install': '',
   'configure': '',
-  'guides': 'Guides',
 
   '-- Contributing': {
     'type': 'separator',
