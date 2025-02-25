@@ -65,9 +65,14 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
     );
   }
 
+  const actionClass = mergeTailwind(
+    'flex gap-x-2 flex-shrink-0',
+    // 'block fixed bottom-0'
+  );
+
   return (
-    <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-x-4 justify-between'>
-      <div className='flex gap-2 min-w-0 h-12 items-center flex-grow'>
+    <nav className='h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-x-4 justify-between z-20 backdrop-blur-sm bg-gradient-to-t from-transparent dark:to-dark-monetr-background via-90%'>
+      <div className='flex gap-2 min-w-0 h-12 items-center flex-auto'>
         <MSidebarToggle className='mr-2' backButton={ props.base } />
         <span className='flex gap-2 flex-grow min-w-0'>
           <InitialCrumb />
@@ -75,10 +80,10 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
         </span>
       </div>
       { props.children && (
-        <div className='flex gap-x-2 md:p-0'>
+        <div className={ actionClass }>
           { props.children }
         </div>
       )}
-    </div>
+    </nav>
   );
 }

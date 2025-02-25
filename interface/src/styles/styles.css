@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 html, body {
-    height: 100%;
+    height: 100vh;
     @apply bg-background;
 }
 
