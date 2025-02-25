@@ -32,7 +32,7 @@ export default function PricingCards(): JSX.Element {
           </li>
         </ul>
         <Link
-          href='/documentation/install'
+          href='/documentation/install/'
           className='block px-8 py-3 text-md font-semibold text-center text-gray-100 transition duration-100 bg-white rounded-lg outline-none bg-opacity-10 hover:bg-opacity-20 md:text-base'
         >
           Get Started Now
