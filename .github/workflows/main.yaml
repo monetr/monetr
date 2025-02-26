@@ -290,17 +290,6 @@ jobs:
         with:
           name: '${{ github.sha }}-maps'
           path: '${{ github.workspace }}/server/ui/static'
-      # - name: Create Sentry Release
-      #   uses: getsentry/action-release@v1
-      #   env:
-      #     SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-      #     SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-      #     SENTRY_PROJECT: monetr
-      #   with:
-      #     environment: 'my.monetr.dev'
-      #     version: 'v${{ needs.docker.outputs.post-tag }}'
-      #     sourcemaps: 'server/ui/static/assets/scripts'
-      #     url_prefix: 'https://my.monetr.dev'
       - name: Trigger Deployment
         run: |
           curl -X POST \
@@ -309,5 +298,5 @@ jobs:
             -F "ref=main" \
             -F "variables[ENVIRONMENT]=my.monetr.dev" \
             -F "variables[GH_DEPLOYMENT_ID]=${{ steps.deployment.outputs.deployment_id }}" \
-            -F "variables[DEPLOY_VERSION]=${{ needs.docker.outputs.post-tag }}" \
+            -F "variables[DEPLOY_VERSION]=${{ needs.docker-push.outputs.post-tag }}" \
             https://gitlab.com/api/v4/projects/61422476/trigger/pipeline
