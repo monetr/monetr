@@ -256,6 +256,8 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	authed.PUT("/users/security/password", c.changePassword)
 	authed.POST("/users/security/totp/setup", c.postSetupTOTP)
 	authed.POST("/users/security/totp/confirm", c.postConfirmTOTP)
+	// API Keys
+	c.RegisterAPIKeyRoutes(authed)
 	// Billing
 	authed.POST("/billing/create_checkout", c.handlePostCreateCheckout)
 	authed.GET("/billing/checkout/:checkoutSessionId", c.handleGetAfterCheckout)

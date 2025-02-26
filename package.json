@@ -40,5 +40,10 @@
       "react-app",
       "react-app/jest"
     ]
+  },
+  "dependencies": {
+    "@radix-ui/react-select": "^2.1.6",
+    "lucide-react": "^0.476.0",
+    "notistack": "^3.0.2"
   }
 }

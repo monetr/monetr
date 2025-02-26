@@ -136,9 +136,15 @@ type BaseRepository interface {
 type Repository interface {
 	BaseRepository
 	UserId() ID[User]
-
 	GetMe(ctx context.Context) (*User, error)
 	UpdateUser(ctx context.Context, user *User) error
+	
+	// API Key methods
+	CreateAPIKey(ctx context.Context, userId string, name string, expiresAt *time.Time) (string, *APIKey, error)
+	GetAPIKeyByHash(ctx context.Context, keyHash string) (*APIKey, error)
+	ListAPIKeys(ctx context.Context, userId string) ([]APIKey, error)
+	RevokeAPIKey(ctx context.Context, userId string, apiKeyId int64) error
+	UpdateAPIKeyLastUsed(ctx context.Context, apiKeyId int64) error
 }
 
 type UnauthenticatedRepository interface {

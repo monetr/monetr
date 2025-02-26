@@ -29,6 +29,9 @@ export default function SettingsLayout(): JSX.Element {
           Billing
           </SettingTab>
         ) }
+        <SettingTab to='/settings/api-keys'>
+          API Keys
+        </SettingTab>
         <SettingTab to='/settings/about'>
           About
         </SettingTab>

@@ -325,6 +325,10 @@ func RunServer() error {
 	// Create the actual application for echo to run.
 	app := application.NewApp(configuration, applicationControllers...)
 
+	// Register the API key middleware
+	apiKeyRepo := repository.NewAPIKeyRepository(db)
+	RegisterAPIKeyMiddleware(app, apiKeyRepo, db)
+
 	protocol := "http"
 	if configuration.Server.TLSCertificate != "" && configuration.Server.TLSKey != "" {
 		protocol = "https"

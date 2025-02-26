@@ -31,6 +31,7 @@ import PasswordResetNew from '@monetr/interface/pages/password/reset';
 import OauthReturn from '@monetr/interface/pages/plaid/oauth-return';
 import Register from '@monetr/interface/pages/register';
 import SettingsAbout from '@monetr/interface/pages/settings/about';
+import SettingsAPIKeys from '@monetr/interface/pages/settings/api_keys';
 import SettingsBilling from '@monetr/interface/pages/settings/billing';
 import SettingsOverview from '@monetr/interface/pages/settings/overview';
 import SettingsSecurity from '@monetr/interface/pages/settings/security';
@@ -142,6 +143,7 @@ export default function Monetr(): JSX.Element {
             { config?.billingEnabled && (
               <Route path='billing' element={ <SettingsBilling /> } />
             ) }
+            <Route path='api-keys' element={ <SettingsAPIKeys /> } />
             <Route path='about' element={ <SettingsAbout /> } />
           </Route>
           <Route path='/link/create' element={ <LinkCreatePage /> } />
@@ -168,7 +170,7 @@ function BudgetingLayout(): JSX.Element {
   return (
     <Fragment>
       <BudgetingSidebar className='hidden lg:flex' />
-      <div className='w-full h-full min-w-0 flex flex-col'>
+      <div className='w-full h-full flex flex-col'>
         <Outlet />
       </div>
     </Fragment>
