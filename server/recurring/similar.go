@@ -10,6 +10,7 @@ import (
 
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
+	"github.com/sirupsen/logrus"
 )
 
 type SimilarTransactionDetection interface {
@@ -18,12 +19,14 @@ type SimilarTransactionDetection interface {
 }
 
 type SimilarTransactions_TFIDF_DBSCAN struct {
+	log    *logrus.Entry
 	tfidf  *TFIDF
 	dbscan *DBSCAN
 }
 
-func NewSimilarTransactions_TFIDF_DBSCAN() SimilarTransactionDetection {
+func NewSimilarTransactions_TFIDF_DBSCAN(log *logrus.Entry) SimilarTransactionDetection {
 	return &SimilarTransactions_TFIDF_DBSCAN{
+		log:   log,
 		tfidf: NewTransactionTFIDF(),
 	}
 }
@@ -46,9 +49,9 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 	datums := s.tfidf.GetDocuments(span.Context())
 	s.dbscan = NewDBSCAN(datums, Epsilon, MinNeighbors)
 	result := s.dbscan.Calculate(span.Context())
-	similar := make([]models.TransactionCluster, len(result))
+	similar := make([]models.TransactionCluster, 0, len(result))
 
-	for i, cluster := range result {
+	for _, cluster := range result {
 		group := models.TransactionCluster{
 			Members: make([]models.ID[models.Transaction], len(cluster.Items)),
 		}
@@ -138,7 +141,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 				hashSlug = append(hashSlug, valuableWord.Word)
 			}
 
-			group.Name = strings.Join(slug, " ")
+			group.Name = strings.TrimSpace(strings.Join(slug, " "))
 
 			// We already have the 2 most valuable words in the cluster. Sort them
 			// alphabetically so we can be consistent in hashing if they swap places.
@@ -149,7 +152,19 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 			group.Signature = hex.EncodeToString(consistentId.Sum(nil))
 		}
 
-		similar[i] = group
+		// Don't return a transaction cluster with no name, this can happen somehow
+		// but I'm still debugging exactly how.
+		if group.Name == "" {
+			s.log.
+				WithFields(logrus.Fields{
+					"bug":     true,
+					"members": group.Members,
+				}).
+				Warn("transaction cluster was calculated to not have a name, investigate!")
+			continue
+		}
+
+		similar = append(similar, group)
 	}
 
 	return similar
