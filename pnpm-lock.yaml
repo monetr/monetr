@@ -314,11 +314,11 @@ importers:
         specifier: 1.2.2
         version: 1.2.2(@rsbuild/core@1.2.11)
       '@rspack/binding-linux-arm64-gnu':
-        specifier: 1.2.5
-        version: 1.2.5
+        specifier: 1.2.6
+        version: 1.2.6
       '@rspack/binding-linux-x64-gnu':
-        specifier: 1.2.5
-        version: 1.2.5
+        specifier: 1.2.6
+        version: 1.2.6
       '@swc/core':
         specifier: 1.11.1
         version: 1.11.1(@swc/helpers@0.5.15)
@@ -441,11 +441,11 @@ importers:
         specifier: 1.2.2
         version: 1.2.2(@rsbuild/core@1.2.11)
       '@rspack/binding-linux-arm64-gnu':
-        specifier: 1.2.5
-        version: 1.2.5
+        specifier: 1.2.6
+        version: 1.2.6
       '@rspack/binding-linux-x64-gnu':
-        specifier: 1.2.5
-        version: 1.2.5
+        specifier: 1.2.6
+        version: 1.2.6
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.5.3)
@@ -3528,6 +3528,11 @@ packages:
     cpu: [arm64]
     os: [linux]
 
+  '@rspack/binding-linux-arm64-gnu@1.2.6':
+    resolution: {integrity: sha512-Ld26wvy9NSTqhUb/ll5ZpIW08ZzUkTl5daW3xHJgcaoRDrnJkRV1pMx8cdV8S+xsavJIPf4c+BuKpU6Ml2kx9A==}
+    cpu: [arm64]
+    os: [linux]
+
   '@rspack/binding-linux-arm64-musl@1.2.3':
     resolution: {integrity: sha512-mgovdzGb6cH9hQsjTyzDbfZWCPhTcoHcLro1P7UbiqcLPMDJp/k3Io9xV2/EJhaDA1aynIdq7XfY0fuk4+6Irw==}
     cpu: [arm64]
@@ -3545,6 +3550,11 @@ packages:
 
   '@rspack/binding-linux-x64-gnu@1.2.5':
     resolution: {integrity: sha512-dzEKs8oi86Vi+TFRCPpgmfF5ANL0VmlZN45e1An7HipeI2C5B1xrz/H8V43vPy8XEvQuMmkXO6Sp82A0zlHvIA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@rspack/binding-linux-x64-gnu@1.2.6':
+    resolution: {integrity: sha512-aZ6mrZyuUg8hlBf7qEfXRAVPh2tM8E7kYZhI5eBOUoi6XhO5fTVcf/S2VUimFWLUmJdmSujG+nrYGQu1n74Xag==}
     cpu: [x64]
     os: [linux]
 
@@ -15522,7 +15532,10 @@ snapshots:
   '@rspack/binding-linux-arm64-gnu@1.2.3':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@1.2.5': {}
+  '@rspack/binding-linux-arm64-gnu@1.2.5':
+    optional: true
+
+  '@rspack/binding-linux-arm64-gnu@1.2.6': {}
 
   '@rspack/binding-linux-arm64-musl@1.2.3':
     optional: true
@@ -15533,7 +15546,10 @@ snapshots:
   '@rspack/binding-linux-x64-gnu@1.2.3':
     optional: true
 
-  '@rspack/binding-linux-x64-gnu@1.2.5': {}
+  '@rspack/binding-linux-x64-gnu@1.2.5':
+    optional: true
+
+  '@rspack/binding-linux-x64-gnu@1.2.6': {}
 
   '@rspack/binding-linux-x64-musl@1.2.3':
     optional: true
