@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.3.3](https://github.com/monetr/monetr/compare/v1.3.2...v1.3.3) (2025-02-26)
+
+
+### Dependencies
+
+* **api:** update module golang.org/x/crypto to v0.35.0 ([#2485](https://github.com/monetr/monetr/issues/2485)) ([46ec6e4](https://github.com/monetr/monetr/commit/46ec6e4c2c664aabca83f25364a45be35e61c8c1))
+* **ui:** update dependency @swc/core to v1.11.1 ([#2463](https://github.com/monetr/monetr/issues/2463)) ([c119a37](https://github.com/monetr/monetr/commit/c119a371b0b6b0cc9a96d215e5e3d1ce338107d5))
+* **ui:** update dependency react-dropzone to v14.3.8 ([#2480](https://github.com/monetr/monetr/issues/2480)) ([bac1cbb](https://github.com/monetr/monetr/commit/bac1cbbf9b63a64144183d262cbaa2ebbc3df73e))
+* **ui:** update rsbuild to v1.2.6 ([#2481](https://github.com/monetr/monetr/issues/2481)) ([cd4520d](https://github.com/monetr/monetr/commit/cd4520ddc3ee4b718029fa7182181135c410fe83))
+* **ui:** update storybook monorepo to v8.6.0 ([#2433](https://github.com/monetr/monetr/issues/2433)) ([75e61fb](https://github.com/monetr/monetr/commit/75e61fb64ecc52a2bfce18de7d6edf917ba99b5e))
+
+
+### Bug Fixes
+
+* **api:** Fixed transaction clusters not having a name ([#2479](https://github.com/monetr/monetr/issues/2479)) ([e146ede](https://github.com/monetr/monetr/commit/e146edea1da61f8c41d536ef49ea3fcffcf0e50a)), closes [#2475](https://github.com/monetr/monetr/issues/2475)
+* **ci:** Build multiarch containers on main, but only push amd64 ([6410f57](https://github.com/monetr/monetr/commit/6410f5704192141526a10ee772b8ae9155a5ab96))
+* **ci:** Don't do multiarch build and push on main ([83d5aad](https://github.com/monetr/monetr/commit/83d5aad6f90d74c34511b521ed45bc5815ab7738))
+* **ci:** Fix annotations on container push ([76fa24b](https://github.com/monetr/monetr/commit/76fa24b76f534d07a4f50600472ae2aff283c94a))
+* **ci:** Fixed staging deployments not passing version properly ([7dbe89f](https://github.com/monetr/monetr/commit/7dbe89f8e64c8c3137e7df673b2a5cd622c78064))
+
+
+### Documentation
+
+* Document getting monetr running on Kubernetes ([#2439](https://github.com/monetr/monetr/issues/2439)) ([daefda2](https://github.com/monetr/monetr/commit/daefda2a9ff004824b6b4f0a44a7f3cd42be0fef))
+
 ## [1.3.2](https://github.com/monetr/monetr/compare/v1.3.1...v1.3.2) (2025-02-25)
 
 
