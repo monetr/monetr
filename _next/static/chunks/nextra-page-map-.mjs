@@ -199,6 +199,13 @@ export const pageMap = [{
         "title": "Self-Host with Docker Compose",
         "description": "Learn how to self-host monetr using Docker Compose. Follow step-by-step instructions to set up monetr, manage updates, and troubleshoot common issues for a seamless self-hosting experience."
       }
+    }, {
+      name: "kubernetes",
+      route: "/documentation/install/kubernetes",
+      frontMatter: {
+        "title": "Kubernetes",
+        "description": "Deploy monetr to your own Kubernetes cluster. A guide with some starting points for how to deploy monetr on Kubernetes."
+      }
     }]
   }, {
     name: "install",
