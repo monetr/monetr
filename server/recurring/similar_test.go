@@ -6,14 +6,15 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
 	t.Run("monetr mercury dataset", func(t *testing.T) {
 		data := GetFixtures(t, "monetr_sample_data_1.json")
-
-		detector := NewSimilarTransactions_TFIDF_DBSCAN()
+		log := testutils.GetLog(t)
+		detector := NewSimilarTransactions_TFIDF_DBSCAN(log)
 
 		for i := range data {
 			detector.AddTransaction(&data[i])
@@ -33,8 +34,8 @@ func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
 
 	t.Run("amazon dataset", func(t *testing.T) {
 		data := GetFixtures(t, "amazon_sample_data_1.json")
-
-		detector := NewSimilarTransactions_TFIDF_DBSCAN()
+		log := testutils.GetLog(t)
+		detector := NewSimilarTransactions_TFIDF_DBSCAN(log)
 
 		for i := range data {
 			detector.AddTransaction(&data[i])

@@ -128,7 +128,7 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 		"bankAccountId": bankAccountId,
 	})
 
-	clustering := recurring.NewSimilarTransactions_TFIDF_DBSCAN()
+	clustering := recurring.NewSimilarTransactions_TFIDF_DBSCAN(log)
 
 	limit := 500
 	offset := 0
