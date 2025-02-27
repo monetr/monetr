@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { AccountBalanceWalletOutlined, LocalAtmOutlined, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
+import { PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
 import { Infinity } from 'lucide-react';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
@@ -12,12 +12,15 @@ import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
 import { ReactElement } from '@monetr/interface/components/types';
-import { useCurrentBalance } from '@monetr/interface/hooks/balances';
+import { useCurrentBalanceOld } from '@monetr/interface/hooks/balances';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useNextFundingDate } from '@monetr/interface/hooks/fundingSchedules';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
+import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceAvailableAmount';
+import BalanceCurrentAmount from '@monetr/interface/components/Layout/BalanceCurrentAmount';
 
 export interface BudgetingSidebarProps {
   className?: string;
@@ -26,7 +29,7 @@ export interface BudgetingSidebarProps {
 export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const { data: bankAccount, isError } = useSelectedBankAccount();
-  const balance = useCurrentBalance();
+  const balance = useCurrentBalanceOld();
 
 
   const className = mergeTailwind(
@@ -34,55 +37,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
     props.className,
   );
 
-  // if (isLoading) {
-  //   return null;
-  // }
-
   if (isError) {
-    return null;
-  }
-
-  function FreeToUse(): JSX.Element {
-    switch (bankAccount?.accountSubType) {
-      case 'checking':
-      case 'savings':
-        const valueClassName = mergeTailwind({
-          'dark:text-dark-monetr-content-emphasis': balance?.free >= 0,
-          'dark:text-dark-monetr-red': balance?.free < 0,
-        });
-        return (
-          <div className='flex w-full justify-between'>
-            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              <AccountBalanceWalletOutlined />
-              Free-To-Use:
-            </MSpan>
-            <MSpan size='lg' weight='semibold' className={ valueClassName }>
-              { locale.formatAmount(balance?.free, AmountType.Stored) }
-            </MSpan>
-          </div>
-        );
-    }
-
-    return null;
-  }
-
-  function Available(): JSX.Element {
-    switch (bankAccount?.accountSubType) {
-      case 'checking':
-      case 'savings':
-        return (
-          <div className='flex w-full justify-between'>
-            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              <LocalAtmOutlined />
-              Available:
-            </MSpan>
-            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              { locale.formatAmount(balance?.available, AmountType.Stored) }
-            </MSpan>
-          </div>
-        );
-    }
-
     return null;
   }
 
@@ -113,17 +68,9 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
         <MDivider className='w-1/2' />
 
         <div className='flex w-full flex-col items-center gap-2 px-2'>
-          <FreeToUse />
-          <Available />
-          <div className='flex w-full justify-between'>
-            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              <TollOutlined />
-              Current:
-            </MSpan>
-            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              { locale.formatAmount(balance?.current, AmountType.Stored) }
-            </MSpan>
-          </div>
+          <BalanceFreeToUseAmount />
+          <BalanceAvailableAmount />
+          <BalanceCurrentAmount />
           <Limit />
         </div>
         <MDivider className='w-1/2' />

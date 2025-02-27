@@ -165,6 +165,10 @@ export function formatAmount(
   currency: string,
   signDisplay: boolean = false,
 ): string {
+  if (amount === undefined) {
+    return '';
+  }
+
   const localeAdjusted = locale.replace('_', '-');
   const intl = new Intl.NumberFormat(
     localeAdjusted,
