@@ -244,12 +244,7 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 		return nil
 	}
 
-	log.Info("Plaid link was successfully deactivated, removing Plaid details now")
-
-	if err = d.secrets.Delete(span.Context(), secret.SecretId); err != nil {
-		log.WithError(err).Error("failed to remove Plaid credentials for link")
-		return nil // Don't retry.
-	}
+	log.Info("Plaid link was successfully deactivated")
 
 	return nil
 }

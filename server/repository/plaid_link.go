@@ -54,7 +54,6 @@ func (r *repositoryBase) DeletePlaidLink(
 
 	// Then delete the Plaid link itself.
 	_, err = r.txn.ModelContext(span.Context(), &PlaidLink{}).
-		Set(`"secret_id" = NULL`).
 		Set(`"status" = ?`, PlaidLinkStatusDeactivated).
 		Set(`"deleted_at" = ?`, r.clock.Now().UTC()).
 		Where(`"plaid_link"."account_id" = ?`, r.AccountId()).
