@@ -1,5 +1,5 @@
 set(NODE_BIN ${CMAKE_BINARY_DIR}/node/bin)
-set(NODE_MIN_VERSION "18.18.0")
+set(NODE_MIN_VERSION "18.20.7")
 set(NPM_MIN_VERSION "8.0.0")
 
 find_package(Node REQUIRED)
