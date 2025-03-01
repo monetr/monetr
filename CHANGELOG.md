@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.3.4](https://github.com/monetr/monetr/compare/v1.3.3...v1.3.4) (2025-03-01)
+
+
+### Dependencies
+
+* **containers:** update hashicorp/vault docker tag to v1.18.5 ([#2477](https://github.com/monetr/monetr/issues/2477)) ([3275518](https://github.com/monetr/monetr/commit/3275518b12997302fec60a49e4b8da72dce1e5f0))
+* **renovate:** update dependency simple-icons to v14.8.0 ([#2491](https://github.com/monetr/monetr/issues/2491)) ([694e1fb](https://github.com/monetr/monetr/commit/694e1fb1eb6c353a18f764374eefbfcaddefafac))
+* **ui:** update dependency @rsbuild/core to v1.2.13 ([#2497](https://github.com/monetr/monetr/issues/2497)) ([3652187](https://github.com/monetr/monetr/commit/3652187a0e1bb09e2c37aefc710c3b7eb218f7fc))
+* **ui:** update dependency @swc/core to v1.11.5 ([#2498](https://github.com/monetr/monetr/issues/2498)) ([2a2014d](https://github.com/monetr/monetr/commit/2a2014de0e95aca009b53aa7441e6c2508dba9b7))
+* **ui:** update dependency axios to v1.8.1 ([#2494](https://github.com/monetr/monetr/issues/2494)) ([82a4db0](https://github.com/monetr/monetr/commit/82a4db03fac9dafdedbe5de59914be1c0eb5796c))
+* **ui:** update dependency react-router-dom to v6.30.0 ([#2496](https://github.com/monetr/monetr/issues/2496)) ([5f391c2](https://github.com/monetr/monetr/commit/5f391c21cf2ab3a4f861361402f0a808a242adda))
+* **ui:** update dependency typescript to v5.8.2 ([#2499](https://github.com/monetr/monetr/issues/2499)) ([5fbfa14](https://github.com/monetr/monetr/commit/5fbfa14459ca31d78ee57d03ba0c61dea7bd89d8))
+* **ui:** update storybook monorepo to v8.6.2 ([#2490](https://github.com/monetr/monetr/issues/2490)) ([d4bdaa9](https://github.com/monetr/monetr/commit/d4bdaa9663a9821e42372fd0f559666eb3a94587))
+
+
+### Bug Fixes
+
+* **api:** Cleaning up unused code ([#2501](https://github.com/monetr/monetr/issues/2501)) ([5b56a00](https://github.com/monetr/monetr/commit/5b56a0091cf8dc63ca98e205204e801e5616cf9d))
+
+
+### Documentation
+
+* Fix particles being slow on mobile ([bed3483](https://github.com/monetr/monetr/commit/bed3483a01a6ffff8ffc71ab598b44d6aaaa37a6))
+
 ## [1.3.3](https://github.com/monetr/monetr/compare/v1.3.2...v1.3.3) (2025-02-28)
 
 
