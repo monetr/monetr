@@ -23,7 +23,7 @@
     "typescript": "5.8.2"
   },
   "devDependencies": {
-    "@rsbuild/core": "1.2.13",
+    "@rsbuild/core": "1.2.14",
     "@rsbuild/plugin-react": "1.1.1",
     "@rsbuild/plugin-sass": "1.2.2",
     "@rspack/binding-linux-arm64-gnu": "1.2.6",
