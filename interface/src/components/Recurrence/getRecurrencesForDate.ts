@@ -4,17 +4,24 @@ import { endOfMonth, format, getDate, getMonth, isEqual, startOfDay, startOfMont
 import Recurrence from '@monetr/interface/components/Recurrence/Recurrence';
 import parseDate from '@monetr/interface/util/parseDate';
 
+import { tz } from '@date-fns/tz';
 import { RRule, Weekday } from 'rrule';
 
-export default function getRecurrencesForDate(inputDate: Date | string | null): Array<Recurrence> {
+export default function getRecurrencesForDate(inputDate: Date | string | null, timezone: string): Array<Recurrence> {
   const date = parseDate(inputDate);
   if (!date) {
     return [];
   }
 
-  const input = startOfDay(date);
-  const endOfMonthDate = startOfDay(endOfMonth(input));
-  const startOfMonthDate = startOfDay(startOfMonth(input));
+  const input = startOfDay(date, {
+    in: tz(timezone),
+  });
+  const endOfMonthDate = startOfDay(endOfMonth(input), {
+    in: tz(timezone),
+  });
+  const startOfMonthDate = startOfDay(startOfMonth(input), {
+    in: tz(timezone),
+  });
   const isStartOfMonth = isEqual(input, startOfMonthDate);
   const isEndOfMonth = isEqual(input, endOfMonthDate);
 
