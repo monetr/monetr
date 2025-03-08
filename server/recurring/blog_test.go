@@ -2,6 +2,8 @@ package recurring_test
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"testing"
@@ -17,10 +19,31 @@ import (
 	"github.com/monetr/monetr/server/storage"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
 const SampleDataPath = "/home/elliotcourant/Downloads/transactions sample.ofx"
+
+func GetTxnByUploadIdentifier(t *testing.T, bankAccount BankAccount, uploadId string) *Transaction {
+	db := testutils.GetPgDatabase(t)
+	var txn Transaction
+	err := db.ModelContext(t.Context(), &txn).
+		Where(`"account_id" = ?`, bankAccount.AccountId).
+		Where(`"bank_account_id" = ?`, bankAccount.BankAccountId).
+		Where(`"upload_identifier" = ?`, uploadId).
+		Limit(1).
+		Select(&txn)
+	require.NoError(t, err, "must be able to find transaction by upload identifier: %s", uploadId)
+	require.NotEmpty(t, txn.TransactionId, "must be able to find transaction by upload identifier: %s", uploadId)
+	return &txn
+}
+
+func PPrint(t *testing.T, thing any) {
+	j, err := json.MarshalIndent(thing, "", "  ")
+	require.NoError(t, err, "must be able to marshal json of %T", thing)
+	fmt.Println(string(j))
+}
 
 func TestSimilarTransactionsBlogPost(t *testing.T) {
 	clock := clock.NewMock()
@@ -118,8 +141,8 @@ func TestSimilarTransactionsBlogPost(t *testing.T) {
 	// We should now have a bunch of transactions, but now we need to actually run
 	// the transaction cluster code.
 
-	// Make test louder again
-	log.Logger.SetLevel(logrus.TraceLevel)
+	// Change log level for detailed stuff after this
+	log.Logger.SetLevel(logrus.ErrorLevel)
 
 	{ // Calculate our similar transactions
 		job, err := background.NewCalculateTransactionClustersJob(log, db, clock, background.CalculateTransactionClustersArguments{
@@ -132,4 +155,7 @@ func TestSimilarTransactionsBlogPost(t *testing.T) {
 		assert.NoError(t, err, "must be able to calculate similar transactions")
 	}
 
+	// Example Transaction from the file
+	txn := GetTxnByUploadIdentifier(t, bankAccount, "8a34a85e9506be8d019563cb185e4496")
+	PPrint(t, txn)
 }
