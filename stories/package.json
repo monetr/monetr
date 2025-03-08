@@ -16,8 +16,8 @@
     "@storybook/blocks": "8.6.2",
     "@storybook/react": "8.6.2",
     "axios-mock-adapter": "2.1.0",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "storybook": "8.6.2",
     "storybook-addon-react-router-v6": "1.0.2",
     "typescript": "5.8.2"
