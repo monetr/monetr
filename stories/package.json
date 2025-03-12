@@ -23,11 +23,11 @@
     "typescript": "5.8.2"
   },
   "devDependencies": {
-    "@rsbuild/core": "1.2.14",
+    "@rsbuild/core": "1.2.18",
     "@rsbuild/plugin-react": "1.1.1",
     "@rsbuild/plugin-sass": "1.2.2",
-    "@rspack/binding-linux-arm64-gnu": "1.2.6",
-    "@rspack/binding-linux-x64-gnu": "1.2.6",
+    "@rspack/binding-linux-arm64-gnu": "1.2.8",
+    "@rspack/binding-linux-x64-gnu": "1.2.8",
     "autoprefixer": "10.4.20",
     "postcss": "8.5.3",
     "sass": "1.85.1",
