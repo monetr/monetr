@@ -20,10 +20,17 @@ email:
   smtp: { ... }           # SMTP configuration
 ```
 
-| **Name**  | **Type** | **Default** | **Description**                                                                        |
-| ---       | ---      | ---         | ---                                                                                    |
-| `enabled` | Boolean  | `false`     | Are email notifications enabled on this server?                                        |
-| `domain`  | String   |             | Email domain used to send emails, emails will always be sent from `no-reply@{DOMAIN}`. |
+| **Name**  | **Type** | **Default** | **Description**                                                                                                                   |
+| ---       | ---      | ---         | ---                                                                                                                               |
+| `enabled` | Boolean  | `false`     | Are email notifications enabled on this server?                                                                                   |
+| `domain`  | String   |             | Email domain used to send emails, emails will always be sent from `no-reply@{DOMAIN}`. Do not provide a full URL with a protocol. |
+
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable               | Config File Field |
+| ---                    | ---               |
+| `MONETR_EMAIL_ENABLED` | `email.enabled`   |
+| `MONETR_EMAIL_DOMAIN`  | `email.domain`    |
 
 ## Email Verification Configuration
 
@@ -48,6 +55,13 @@ can be parsed using that function is a valid configuration value.
 | `enabled`       | Boolean  | `false`     | Is email verification enabled/required on this server?       |
 | `tokenLifetime` | Duration | `10m`       | How long should the link in the verification email be valid? |
 
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable                                   | Config File Field                  |
+| ---                                        | ---                                |
+| `MONETR_EMAIL_VERIFICATION_ENABLED`        | `email.verification.enabled`       |
+| `MONETR_EMAIL_VERIFICATION_TOKEN_LIFETIME` | `email.verification.tokenLifetime` |
+
 ## Forgot Password Configuration
 
 If you ever lose your password and need to reset it, the easiest way is by using the forgot password form. This will
@@ -69,10 +83,18 @@ email:
 | `enabled`       | Boolean  | `false`     | Are users allowed to reset their password via forgot password? |
 | `tokenLifetime` | Duration | `10m`       | How long should the password reset link be valid?              |
 
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable                                      | Config File Field                    |
+| ---                                           | ---                                  |
+| `MONETR_EMAIL_FORGOT_PASSWORD_ENABLED`        | `email.forgotPassword.enabled`       |
+| `MONETR_EMAIL_FORGOT_PASSWORD_TOKEN_LIFETIME` | `email.forgotPassword.tokenLifetime` |
+
 ## SMTP Configuration
 
-monetr only supports [PLAIN SMTP authentication](https://datatracker.ietf.org/doc/html/rfc4616) at this time. You can
-obtain all of the necessary details from your preferred email provider.
+Make sure to read the documentation for your email provider. monetr **requires** TLS support from the SMTP server that
+it is connecting to. This can be via `STARTTLS` or via a dedicated TLS port on the server. Consult your providers
+documentation for specifics.
 
 <Callout type="info">
   monetr's SMTP implementation _requires_ TLS. Your email provider must support TLS on whatever port specified below.
@@ -81,9 +103,24 @@ obtain all of the necessary details from your preferred email provider.
 ```yaml filename="config.yaml"
 email:
   smtp:
-    identity: "..." # SMTP Identity
     username: "..." # SMTP Username
     password: "..." # SMTP Password or app password depending on provider
     host: "..."     # Domain name of the SMTP server, no protocol or port specified
     port: 587       # Use the port specified by your provider, could be 587, 465 or 25
 ```
+
+| **Name**   | **Type** | **Default** | **Description**                                                                                                                           |
+| ---        | ---      | ---         | ---                                                                                                                                       |
+| `username` | String   |             | The username provided by your SMTP provider or relay.                                                                                     |
+| `password` | String   |             | The password provided by your SMTP provider or relay, this may also be an API credential or an "app password" depending on your provider. |
+| `host`     | String   |             | The hostname or IP address of the SMTP server you are sending email with.                                                                 |
+| `port`     | String   |             | The port specified by your provider to use, typical ports are `587`, `465` or `25`.                                                       |
+
+The following environment variables map to the following configuration file fields. Each field is documented below.
+
+| Variable                     | Config File Field     |
+| ---                          | ---                   |
+| `MONETR_EMAIL_SMTP_USERNAME` | `email.smtp.username` |
+| `MONETR_EMAIL_SMTP_PASSWORD` | `email.smtp.password` |
+| `MONETR_EMAIL_SMTP_HOST`     | `email.smtp.host`     |
+| `MONETR_EMAIL_SMTP_PORT`     | `email.smtp.port`     |

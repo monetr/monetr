@@ -149,7 +149,6 @@ type ForgotPassword struct {
 }
 
 type SMTPClient struct {
-	Identity string `yaml:"identity"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
 	Host     string `yaml:"host"`
@@ -392,11 +391,8 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Email.Domain", "MONETR_EMAIL_DOMAIN")
 	_ = v.BindEnv("Email.Verification.Enabled", "MONETR_EMAIL_VERIFICATION_ENABLED")
 	_ = v.BindEnv("Email.Verification.TokenLifetime", "MONETR_EMAIL_VERIFICATION_TOKEN_LIFETIME")
-	_ = v.BindEnv("Email.Verification.TokenSecret", "MONETR_EMAIL_VERIFICATION_TOKEN_SECRET")
 	_ = v.BindEnv("Email.ForgotPassword.Enabled", "MONETR_EMAIL_FORGOT_PASSWORD_ENABLED")
 	_ = v.BindEnv("Email.ForgotPassword.TokenLifetime", "MONETR_EMAIL_FORGOT_PASSWORD_TOKEN_LIFETIME")
-	_ = v.BindEnv("Email.ForgotPassword.TokenSecret", "MONETR_EMAIL_FORGOT_PASSWORD_TOKEN_SECRET")
-	_ = v.BindEnv("Email.SMTP.Identity", "MONETR_EMAIL_SMTP_IDENTITY")
 	_ = v.BindEnv("Email.SMTP.Username", "MONETR_EMAIL_SMTP_USERNAME")
 	_ = v.BindEnv("Email.SMTP.Password", "MONETR_EMAIL_SMTP_PASSWORD")
 	_ = v.BindEnv("Email.SMTP.Host", "MONETR_EMAIL_SMTP_HOST")
