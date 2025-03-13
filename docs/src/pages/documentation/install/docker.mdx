@@ -182,13 +182,47 @@ If the containers fail to start or exit immediately:
   docker compose logs -f
   ```
 
+#### Permission Error
+
+If you are getting a permission denied error in your logs similar to:
+
+```
+failed to write private key: open /etc/monetr/ed25519.key: permission denied
+```
+
+Then it is possible the permissions for your volume is not setup properly for the docker compose. This can happen if you
+are using host path volume mounts.
+
+On Linux or macOS run the `id` command in your terminal, you should get something like this:
+
+```shell
+id
+# uid=1000(elliotcourant) gid=1000(elliotcourant) ...
+```
+
+Those two numbers could be anything on your system, take those two numbers and add the following line to the `monetr`
+service in your docker compose file:
+
+```yaml {5} filename="docker-compose.yaml"
+services:
+  # ...
+  monetr:
+    # ...
+    user: 1000:1000
+```
+
+Replacing the pairs of `1000` with the values of `uid` and `gid` respectively.
+
+Then try to start the compose file again. This should alleviate any permission issues with host path mounts as it will
+make the container match your own user's permissions.
+
 ### Cannot Access monetr in the Browser
 
 If `http://localhost:4000` doesn’t load:
 
 Verify the containers are running using:
 
-``` shell
+```shell
 docker compose ps
 ```
 
