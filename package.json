@@ -40,5 +40,10 @@
       "react-app",
       "react-app/jest"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "axios": "1.8.3"
+    }
   }
 }
