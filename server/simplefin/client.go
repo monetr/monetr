@@ -30,12 +30,15 @@ type Client interface {
 }
 
 type Transaction struct {
-	ID          string         `json:"id"`
-	Posted      int64          `json:"posted"`
-	Amount      json.Number    `json:"amount"`
-	Description string         `json:"description"`
-	Pending     bool           `json:"pending"`
-	Extra       map[string]any `json:"extra"`
+	ID           string         `json:"id"`
+	Posted       int64          `json:"posted"`
+	Amount       json.Number    `json:"amount"`
+	Description  string         `json:"description"`
+	Payee        string         `json:"payee"`
+	Memo         string         `json:"memo"`
+	Pending      bool           `json:"pending"`
+	TransactedAt int64          `json:"transacted_at"`
+	Extra        map[string]any `json:"extra"`
 }
 
 type Organization struct {
