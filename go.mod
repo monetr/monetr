@@ -17,7 +17,7 @@ require (
 	github.com/elliotcourant/go-lclocale v0.1.2
 	github.com/elliotcourant/gofx v0.0.1
 	github.com/fsnotify/fsnotify v1.8.0
-	github.com/gavv/httpexpect/v2 v2.16.0
+	github.com/gavv/httpexpect/v2 v2.17.0
 	github.com/getsentry/sentry-go v0.31.1
 	github.com/go-pg/migrations/v8 v8.1.0
 	github.com/go-pg/pg/v10 v10.14.0
