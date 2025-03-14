@@ -28,7 +28,7 @@
     "@rsbuild/plugin-sass": "1.2.2",
     "@rspack/binding-linux-arm64-gnu": "1.2.8",
     "@rspack/binding-linux-x64-gnu": "1.2.8",
-    "autoprefixer": "10.4.20",
+    "autoprefixer": "10.4.21",
     "postcss": "8.5.3",
     "sass": "1.85.1",
     "sass-embedded-linux-arm64": "1.85.1",
