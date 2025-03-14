@@ -627,4 +627,54 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		assert.EqualValues(t, 3333, spending.NextContributionAmount)
 		assert.EqualValues(t, expectedNextDate.UTC(), spending.NextRecurrence.UTC(), "next recurrence should handle DST transition")
 	})
+
+	t.Run("fund every wednesday", func(t *testing.T) {
+		timezone, err := time.LoadLocation("America/New_York")
+		require.NoError(t, err, "must be able to load timezone")
+
+		now := time.Date(2025, 3, 4, 0, 0, 0, 0, timezone)
+		assert.NoError(t, err, "must be able to get now")
+
+		spendingString := "DTSTART:20250122T050000\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=22"
+		spendingRule, err := NewRuleSet(spendingString)
+		assert.NoError(t, err, "must be able to parse the rule")
+
+		contributionString := "DTSTART:20250122T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=WE"
+		contributionRule, err := NewRuleSet(contributionString)
+		assert.NoError(t, err, "must be able to parse the rule")
+
+		spending := Spending{
+			SpendingType:           SpendingTypeExpense,
+			TargetAmount:           20000,
+			CurrentAmount:          0,
+			NextContributionAmount: 0,
+			NextRecurrence:         spendingRule.After(now, false).UTC(),
+			RuleSet:                spendingRule,
+		}
+		funding := FundingSchedule{
+			FundingScheduleId: "fund_bogus",
+			Name:              "Bogus Funding Schedule",
+			Description:       "Bogus",
+			RuleSet:           contributionRule,
+			NextRecurrence:    contributionRule.After(now, false).UTC(),
+		}
+		err = spending.CalculateNextContribution(
+			context.Background(),
+			timezone.String(),
+			&funding,
+			now,
+		)
+		assert.NoError(t, err)
+
+		fmt.Printf("now: %s -> next funding %s -> next spending %s\n",
+			now,
+			funding.NextRecurrence,
+			spending.NextRecurrence,
+		)
+		fmt.Printf("current: %d -> next %d -> sum %d\n",
+			spending.CurrentAmount,
+			spending.NextContributionAmount,
+			spending.CurrentAmount+spending.NextContributionAmount,
+		)
+	})
 }
