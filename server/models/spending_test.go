@@ -632,15 +632,17 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		timezone, err := time.LoadLocation("America/New_York")
 		require.NoError(t, err, "must be able to load timezone")
 
-		now := time.Date(2025, 2, 15, 0, 0, 0, 0, timezone).UTC()
+		now := time.Date(2025, 2, 23, 0, 0, 0, 0, timezone).UTC()
 		assert.NoError(t, err, "must be able to get now")
 
 		spendingString := "DTSTART:20250122T050000\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=22"
 		spendingRule, err := NewRuleSet(spendingString)
+		spendingRule.DTStart(spendingRule.GetDTStart().In(timezone))
 		assert.NoError(t, err, "must be able to parse the rule")
 
 		contributionString := "DTSTART:20250122T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=WE"
 		contributionRule, err := NewRuleSet(contributionString)
+		contributionRule.DTStart(contributionRule.GetDTStart().In(timezone))
 		assert.NoError(t, err, "must be able to parse the rule")
 
 		spending := Spending{
