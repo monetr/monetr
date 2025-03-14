@@ -308,14 +308,14 @@ importers:
         specifier: 0.0.34
         version: 0.0.34
       '@rsbuild/core':
-        specifier: 1.2.18
-        version: 1.2.18
+        specifier: 1.2.19
+        version: 1.2.19
       '@rsbuild/plugin-react':
         specifier: 1.1.1
-        version: 1.1.1(@rsbuild/core@1.2.18)
+        version: 1.1.1(@rsbuild/core@1.2.19)
       '@rsbuild/plugin-sass':
         specifier: 1.2.2
-        version: 1.2.2(@rsbuild/core@1.2.18)
+        version: 1.2.2(@rsbuild/core@1.2.19)
       '@rspack/binding-linux-arm64-gnu':
         specifier: 1.2.8
         version: 1.2.8
@@ -435,14 +435,14 @@ importers:
         version: 5.8.2
     devDependencies:
       '@rsbuild/core':
-        specifier: 1.2.18
-        version: 1.2.18
+        specifier: 1.2.19
+        version: 1.2.19
       '@rsbuild/plugin-react':
         specifier: 1.1.1
-        version: 1.1.1(@rsbuild/core@1.2.18)
+        version: 1.1.1(@rsbuild/core@1.2.19)
       '@rsbuild/plugin-sass':
         specifier: 1.2.2
-        version: 1.2.2(@rsbuild/core@1.2.18)
+        version: 1.2.2(@rsbuild/core@1.2.19)
       '@rspack/binding-linux-arm64-gnu':
         specifier: 1.2.8
         version: 1.2.8
@@ -466,7 +466,7 @@ importers:
         version: 1.85.1
       storybook-react-rsbuild:
         specifier: 0.1.10
-        version: 0.1.10(@rsbuild/core@1.2.18)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(@storybook/test@8.6.2(storybook@8.6.2(prettier@3.5.1)))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.2(prettier@3.5.1))(typescript@5.8.2)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.23.0))
+        version: 0.1.10(@rsbuild/core@1.2.19)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(@storybook/test@8.6.2(storybook@8.6.2(prettier@3.5.1)))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.2(prettier@3.5.1))(typescript@5.8.2)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.23.0))
 
 packages:
 
@@ -3330,8 +3330,8 @@ packages:
       rollup:
         optional: true
 
-  '@rsbuild/core@1.2.18':
-    resolution: {integrity: sha512-hnqYu75ewn4X4f+/FqLZ5DUv1CaqLuzJl1HGgkOMWg1gj8b5kmidGHcGFCgRMQqJacdMGJGAy0yJHGLVuDPYNg==}
+  '@rsbuild/core@1.2.19':
+    resolution: {integrity: sha512-k76is4HygmbYYMLG2V1d1yQeurHHC+ZEtGs/nwE11y6HmwSndoFhmjOeQbQ2Ul0b2B8HErksqSMtlCxd37YPPQ==}
     engines: {node: '>=16.7.0'}
     hasBin: true
 
@@ -5173,9 +5173,6 @@ packages:
 
   caniuse-lite@1.0.30001669:
     resolution: {integrity: sha512-DlWzFDJqstqtIVx1zeSpIMLjunf5SmwOw0N2Ck/QSQdS8PLS4+9HrLaYei4w8BIAL7IB/UEDu889d8vhCTPA0w==}
-
-  caniuse-lite@1.0.30001703:
-    resolution: {integrity: sha512-kRlAGTRWgPsOj7oARC9m1okJEXdL/8fekFVcxA8Hl7GH4r/sN4OJn/i6Flde373T50KS7Y37oFbMwlE8+F42kQ==}
 
   caniuse-lite@1.0.30001704:
     resolution: {integrity: sha512-+L2IgBbV6gXB4ETf0keSvLr7JUrRVbIaB/lrQ1+z8mRcQiisG5k+lG6O4n6Y5q6f5EuNfaYXKgymucphlEXQew==}
@@ -15261,7 +15258,7 @@ snapshots:
       estree-walker: 2.0.2
       picomatch: 4.0.2
 
-  '@rsbuild/core@1.2.18':
+  '@rsbuild/core@1.2.19':
     dependencies:
       '@rspack/core': 1.2.8(@swc/helpers@0.5.15)
       '@rspack/lite-tapable': 1.0.1
@@ -15271,29 +15268,29 @@ snapshots:
     transitivePeerDependencies:
       - '@rspack/tracing'
 
-  '@rsbuild/plugin-react@1.1.1(@rsbuild/core@1.2.18)':
+  '@rsbuild/plugin-react@1.1.1(@rsbuild/core@1.2.19)':
     dependencies:
-      '@rsbuild/core': 1.2.18
+      '@rsbuild/core': 1.2.19
       '@rspack/plugin-react-refresh': 1.0.1(react-refresh@0.16.0)
       react-refresh: 0.16.0
 
-  '@rsbuild/plugin-sass@1.2.2(@rsbuild/core@1.2.18)':
+  '@rsbuild/plugin-sass@1.2.2(@rsbuild/core@1.2.19)':
     dependencies:
-      '@rsbuild/core': 1.2.18
+      '@rsbuild/core': 1.2.19
       deepmerge: 4.3.1
       loader-utils: 2.0.4
       postcss: 8.5.3
       reduce-configs: 1.1.0
       sass-embedded: 1.85.0
 
-  '@rsbuild/plugin-type-check@1.2.1(@rsbuild/core@1.2.18)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(typescript@5.8.2)':
+  '@rsbuild/plugin-type-check@1.2.1(@rsbuild/core@1.2.19)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(typescript@5.8.2)':
     dependencies:
       deepmerge: 4.3.1
       json5: 2.2.3
       reduce-configs: 1.1.0
       ts-checker-rspack-plugin: 1.1.1(@rspack/core@1.2.8(@swc/helpers@0.5.15))(typescript@5.8.2)
     optionalDependencies:
-      '@rsbuild/core': 1.2.18
+      '@rsbuild/core': 1.2.19
     transitivePeerDependencies:
       - '@rspack/core'
       - typescript
@@ -15340,7 +15337,7 @@ snapshots:
       '@module-federation/runtime-tools': 0.8.4
       '@rspack/binding': 1.2.8
       '@rspack/lite-tapable': 1.0.1
-      caniuse-lite: 1.0.30001703
+      caniuse-lite: 1.0.30001704
     optionalDependencies:
       '@swc/helpers': 0.5.15
 
@@ -17600,8 +17597,6 @@ snapshots:
       lodash.uniq: 4.5.0
 
   caniuse-lite@1.0.30001669: {}
-
-  caniuse-lite@1.0.30001703: {}
 
   caniuse-lite@1.0.30001704: {}
 
@@ -23941,12 +23936,12 @@ snapshots:
     dependencies:
       tslib: 2.7.0
 
-  rsbuild-plugin-html-minifier-terser@1.1.1(@rsbuild/core@1.2.18):
+  rsbuild-plugin-html-minifier-terser@1.1.1(@rsbuild/core@1.2.19):
     dependencies:
       '@types/html-minifier-terser': 7.0.2
       html-minifier-terser: 7.2.0
     optionalDependencies:
-      '@rsbuild/core': 1.2.18
+      '@rsbuild/core': 1.2.19
 
   run-parallel@1.2.0:
     dependencies:
@@ -24481,10 +24476,10 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  storybook-builder-rsbuild@0.1.10(@rsbuild/core@1.2.18)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(@types/react@18.3.18)(storybook@8.6.2(prettier@3.5.1))(typescript@5.8.2)(webpack-sources@3.2.3):
+  storybook-builder-rsbuild@0.1.10(@rsbuild/core@1.2.19)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(@types/react@18.3.18)(storybook@8.6.2(prettier@3.5.1))(typescript@5.8.2)(webpack-sources@3.2.3):
     dependencies:
-      '@rsbuild/core': 1.2.18
-      '@rsbuild/plugin-type-check': 1.2.1(@rsbuild/core@1.2.18)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(typescript@5.8.2)
+      '@rsbuild/core': 1.2.19
+      '@rsbuild/plugin-type-check': 1.2.1(@rsbuild/core@1.2.19)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(typescript@5.8.2)
       '@storybook/addon-docs': 8.5.5(@types/react@18.3.18)(storybook@8.6.2(prettier@3.5.1))(webpack-sources@3.2.3)
       '@storybook/core-webpack': 8.3.6(storybook@8.6.2(prettier@3.5.1))
       browser-assert: 1.2.1
@@ -24497,7 +24492,7 @@ snapshots:
       magic-string: 0.30.17
       path-browserify: 1.0.1
       process: 0.11.10
-      rsbuild-plugin-html-minifier-terser: 1.1.1(@rsbuild/core@1.2.18)
+      rsbuild-plugin-html-minifier-terser: 1.1.1(@rsbuild/core@1.2.19)
       sirv: 2.0.4
       storybook: 8.6.2(prettier@3.5.1)
       ts-dedent: 2.2.0
@@ -24511,10 +24506,10 @@ snapshots:
       - '@types/react'
       - webpack-sources
 
-  storybook-react-rsbuild@0.1.10(@rsbuild/core@1.2.18)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(@storybook/test@8.6.2(storybook@8.6.2(prettier@3.5.1)))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.2(prettier@3.5.1))(typescript@5.8.2)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.23.0)):
+  storybook-react-rsbuild@0.1.10(@rsbuild/core@1.2.19)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(@storybook/test@8.6.2(storybook@8.6.2(prettier@3.5.1)))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.2(prettier@3.5.1))(typescript@5.8.2)(webpack-sources@3.2.3)(webpack@5.94.0(esbuild@0.23.0)):
     dependencies:
       '@rollup/pluginutils': 5.1.4
-      '@rsbuild/core': 1.2.18
+      '@rsbuild/core': 1.2.19
       '@storybook/react': 8.6.2(@storybook/test@8.6.2(storybook@8.6.2(prettier@3.5.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.2(prettier@3.5.1))(typescript@5.8.2)
       '@storybook/react-docgen-typescript-plugin': 1.0.1(typescript@5.8.2)(webpack@5.94.0(esbuild@0.23.0))
       '@types/node': 18.19.75
@@ -24526,7 +24521,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       resolve: 1.22.10
       storybook: 8.6.2(prettier@3.5.1)
-      storybook-builder-rsbuild: 0.1.10(@rsbuild/core@1.2.18)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(@types/react@18.3.18)(storybook@8.6.2(prettier@3.5.1))(typescript@5.8.2)(webpack-sources@3.2.3)
+      storybook-builder-rsbuild: 0.1.10(@rsbuild/core@1.2.19)(@rspack/core@1.2.8(@swc/helpers@0.5.15))(@types/react@18.3.18)(storybook@8.6.2(prettier@3.5.1))(typescript@5.8.2)(webpack-sources@3.2.3)
       tsconfig-paths: 4.2.0
     optionalDependencies:
       typescript: 5.8.2
