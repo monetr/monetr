@@ -629,20 +629,23 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 	})
 
 	t.Run("fund every wednesday", func(t *testing.T) {
-		timezone, err := time.LoadLocation("America/New_York")
+		userTimezone, err := time.LoadLocation("America/New_York")
 		require.NoError(t, err, "must be able to load timezone")
 
-		now := time.Date(2025, 2, 23, 0, 0, 0, 0, timezone).UTC()
+		serverTimezone, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must be able to load timezone")
+
+		now := time.Date(2025, 2, 23, 0, 0, 0, 0, userTimezone).In(serverTimezone)
 		assert.NoError(t, err, "must be able to get now")
 
 		spendingString := "DTSTART:20250122T050000\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=22"
 		spendingRule, err := NewRuleSet(spendingString)
-		spendingRule.DTStart(spendingRule.GetDTStart().In(timezone))
+		spendingRule.DTStart(spendingRule.GetDTStart().In(userTimezone))
 		assert.NoError(t, err, "must be able to parse the rule")
 
 		contributionString := "DTSTART:20250122T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=WE"
 		contributionRule, err := NewRuleSet(contributionString)
-		contributionRule.DTStart(contributionRule.GetDTStart().In(timezone))
+		contributionRule.DTStart(contributionRule.GetDTStart().In(userTimezone))
 		assert.NoError(t, err, "must be able to parse the rule")
 
 		spending := Spending{
@@ -662,23 +665,11 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		}
 		err = spending.CalculateNextContribution(
 			context.Background(),
-			timezone.String(),
+			userTimezone.String(),
 			&funding,
 			now,
 		)
 		assert.NoError(t, err)
-
-		fmt.Printf("now: %s -> next funding %s -> next spending %s\n",
-			now,
-			funding.NextRecurrence,
-			spending.NextRecurrence,
-		)
-		fmt.Printf("current: %d -> next %d -> sum %d\n",
-			spending.CurrentAmount,
-			spending.NextContributionAmount,
-			spending.CurrentAmount+spending.NextContributionAmount,
-		)
-
-		fmt.Println(contributionRule.Between(now, now.AddDate(0, 2, 0), false))
+		assert.EqualValues(t, 10000, spending.NextContributionAmount, "should contribute half next time")
 	})
 }
