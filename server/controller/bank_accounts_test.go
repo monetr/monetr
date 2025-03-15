@@ -523,3 +523,133 @@ func TestPutBankAccount(t *testing.T) {
 		}
 	})
 }
+
+func TestDeleteBankAccount(t *testing.T) {
+	t.Run("delete manual account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // See the bank account in an API response
+			response := e.GET("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$[0].bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Array().Length().IsEqual(1)
+		}
+
+		{ // Delete the bank account
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().IsEmpty()
+		}
+
+		{ // See the bank account in an API response
+			response := e.GET("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().IsEmpty()
+		}
+
+		{ // Can still request by a single ID
+			response := e.GET("/api/bank_accounts/{bankAccoundId}").
+				WithPath("bankAccoundId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.deletedAt").String().NotEmpty()
+		}
+	})
+
+	t.Run("cant delete Plaid account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveAPlaidBankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // See the bank account in an API response
+			response := e.GET("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$[0].bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Array().Length().IsEqual(1)
+		}
+
+		{ // Delete the bank account
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").IsEqual("Plaid bank account cannot be removed this way")
+		}
+
+		{ // See the bank account in an API response
+			response := e.GET("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$[0].bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Array().Length().IsEqual(1)
+		}
+	})
+
+	t.Run("cant delete someone elses bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Create a bank account under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // See the bank account in an API response
+			response := e.GET("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().IsEmpty()
+		}
+
+		{ // Delete the bank account
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").IsEqual("Failed to retrieve bank account: record does not exist")
+		}
+	})
+}

@@ -58,6 +58,7 @@ func (j *jobRepository) GetFundingSchedulesToProcess(ctx context.Context) ([]Pro
 	defer span.Finish()
 
 	var items []ProcessFundingSchedulesItem
+	// TODO Exclude deleted bank accounts from processing
 	_, err := j.txn.QueryContext(
 		span.Context(),
 		&items,

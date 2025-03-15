@@ -8,6 +8,7 @@ import (
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/consts"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/validation"
 	"github.com/sirupsen/logrus"
@@ -160,7 +161,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, bankAccount)
 }
 
-func (c *Controller) putBankAccounts(ctx echo.Context) error {
+func (c *Controller) putBankAccount(ctx echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
@@ -296,4 +297,34 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, *existingBankAccount)
+}
+
+func (c *Controller) deleteBankAccount(ctx echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "Must specify a valid bank account Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	existingBankAccount, err := repo.GetBankAccount(
+		c.getContext(ctx),
+		bankAccountId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve bank account")
+	}
+
+	if existingBankAccount.PlaidBankAccount != nil {
+		return c.badRequest(ctx, "Plaid bank account cannot be removed this way")
+	}
+
+	existingBankAccount.DeletedAt = myownsanity.TimeP(c.Clock.Now())
+	if err = repo.UpdateBankAccount(
+		c.getContext(ctx),
+		existingBankAccount,
+	); err != nil {
+		return c.wrapPgError(ctx, err, "failed to update bank account")
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }

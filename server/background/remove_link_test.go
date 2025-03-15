@@ -23,7 +23,6 @@ func TestRemoveLinkJob_Run(t *testing.T) {
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
-
 		bankAccount := fixtures.GivenIHaveAPlaidBankAccount(
 			t,
 			clock,

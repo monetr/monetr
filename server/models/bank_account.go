@@ -122,6 +122,7 @@ type BankAccount struct {
 	LastUpdated        time.Time             `json:"lastUpdated" pg:"last_updated,notnull"`
 	CreatedAt          time.Time             `json:"createdAt" pg:"created_at,notnull"`
 	UpdatedAt          time.Time             `json:"updatedAt" pg:"updated_at,notnull"`
+	DeletedAt          *time.Time            `json:"deletedAt,omitempty" pg:"deleted_at"`
 }
 
 func (BankAccount) IdentityPrefix() string {

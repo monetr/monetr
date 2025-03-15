@@ -21,6 +21,7 @@ func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]BankAccount, er
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation("PlaidBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
+		Where(`"bank_account"."deleted_at" IS NULL`).
 		Select(&result)
 	return result, errors.Wrap(err, "failed to retrieve bank accounts")
 }
