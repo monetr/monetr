@@ -1,7 +1,7 @@
 # vim: set ft=yaml
 services:
   vault:
-    image: hashicorp/vault:1.18.5
+    image: hashicorp/vault:1.19.0
     restart: always # If something goes wrong just restart the container, this is for development only.
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80/v1/sys/health || exit 1
@@ -22,7 +22,7 @@ services:
     volumes:
       - "@CMAKE_BINARY_DIR@/development/vault:/data"
   vault-bootstrap:
-    image: hashicorp/vault:1.18.5
+    image: hashicorp/vault:1.19.0
     restart: no
     entrypoint: >
       /bin/sh -c "
