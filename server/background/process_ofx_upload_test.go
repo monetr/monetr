@@ -14,7 +14,6 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/storage"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -40,8 +39,6 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		log := testutils.GetLog(t)
-		// Make test quieter
-		log.Logger.SetLevel(logrus.ErrorLevel)
 		db := testutils.GetPgDatabase(t)
 		ps := pubsub.NewPostgresPubSub(log, db)
 
@@ -49,7 +46,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 		// Force the timezone to be central time
 		user.Account.Timezone = "America/Central"
 		testutils.MustDBUpdate(t, user.Account)
-		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
 		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 
 		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db, log)
