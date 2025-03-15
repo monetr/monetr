@@ -1,5 +1,63 @@
 # Changelog
 
+## [1.3.4](https://github.com/monetr/monetr/compare/v1.3.3...v1.3.4) (2025-03-15)
+
+
+### Dependencies
+
+* **api:** update module github.com/gavv/httpexpect/v2 to v2.17.0 ([#2530](https://github.com/monetr/monetr/issues/2530)) ([c1332df](https://github.com/monetr/monetr/commit/c1332df94398cd2b49f9ce54b2292ec8b6db76a4))
+* **api:** update module golang.org/x/crypto to v0.36.0 ([#2517](https://github.com/monetr/monetr/issues/2517)) ([3c8b61a](https://github.com/monetr/monetr/commit/3c8b61a43c6c8fd8ce52cb5677763e1525135a19))
+* **api:** update module golang.org/x/net to v0.36.0 [security] ([#2512](https://github.com/monetr/monetr/issues/2512)) ([b7135a6](https://github.com/monetr/monetr/commit/b7135a620593e6cc7a4254cce0ef2afdd18a86e9))
+* **api:** update module golang.org/x/net to v0.37.0 ([#2518](https://github.com/monetr/monetr/issues/2518)) ([7bdae9e](https://github.com/monetr/monetr/commit/7bdae9e94b0bb82bc3cc84b74ceed470ae666727))
+* **containers:** update ghcr.io/flipt-io/flipt docker tag to v1.55.1 ([#2515](https://github.com/monetr/monetr/issues/2515)) ([f782fd8](https://github.com/monetr/monetr/commit/f782fd8cfc34ef9470a6ec293bca561877a525c8))
+* **containers:** update golang docker tag to v1.24.1 ([#2506](https://github.com/monetr/monetr/issues/2506)) ([10774ca](https://github.com/monetr/monetr/commit/10774ca68217338aaef4b7682d13042c51a9276d))
+* **containers:** update hashicorp/vault docker tag to v1.18.5 ([#2477](https://github.com/monetr/monetr/issues/2477)) ([3275518](https://github.com/monetr/monetr/commit/3275518b12997302fec60a49e4b8da72dce1e5f0))
+* **containers:** update hashicorp/vault docker tag to v1.19.0 ([#2533](https://github.com/monetr/monetr/issues/2533)) ([24daf94](https://github.com/monetr/monetr/commit/24daf94b482025cef7dddae5d70d55cbef492938))
+* **renovate:** update dependency go to v1.24.1 ([#2507](https://github.com/monetr/monetr/issues/2507)) ([eb16179](https://github.com/monetr/monetr/commit/eb16179c0d5c045030dc02b82068de9b8f0aa3ef))
+* **renovate:** update dependency simple-icons to v14.8.0 ([#2491](https://github.com/monetr/monetr/issues/2491)) ([694e1fb](https://github.com/monetr/monetr/commit/694e1fb1eb6c353a18f764374eefbfcaddefafac))
+* **ui:** update dependency @rsbuild/core to v1.2.13 ([#2497](https://github.com/monetr/monetr/issues/2497)) ([3652187](https://github.com/monetr/monetr/commit/3652187a0e1bb09e2c37aefc710c3b7eb218f7fc))
+* **ui:** update dependency @rsbuild/core to v1.2.14 ([#2502](https://github.com/monetr/monetr/issues/2502)) ([f9ba565](https://github.com/monetr/monetr/commit/f9ba565bc63cea4a243d913435be8b6b53642723))
+* **ui:** update dependency @rsbuild/core to v1.2.19 ([#2524](https://github.com/monetr/monetr/issues/2524)) ([6ba4b04](https://github.com/monetr/monetr/commit/6ba4b04271e5ec01fd1f498541528aa2cda68e26))
+* **ui:** update dependency @swc/core to v1.11.5 ([#2498](https://github.com/monetr/monetr/issues/2498)) ([2a2014d](https://github.com/monetr/monetr/commit/2a2014de0e95aca009b53aa7441e6c2508dba9b7))
+* **ui:** update dependency @swc/core to v1.11.9 ([#2505](https://github.com/monetr/monetr/issues/2505)) ([f2c89cd](https://github.com/monetr/monetr/commit/f2c89cd980165b3356aee7072ce7f6311851cc3c))
+* **ui:** update dependency autoprefixer to v10.4.21 ([#2516](https://github.com/monetr/monetr/issues/2516)) ([7f5e2bb](https://github.com/monetr/monetr/commit/7f5e2bbc26f6cf56ec6e6c561f4fe0aca11a507d))
+* **ui:** update dependency axios to v1.8.1 ([#2494](https://github.com/monetr/monetr/issues/2494)) ([82a4db0](https://github.com/monetr/monetr/commit/82a4db03fac9dafdedbe5de59914be1c0eb5796c))
+* **ui:** update dependency axios to v1.8.2 [security] ([#2513](https://github.com/monetr/monetr/issues/2513)) ([7b79ddc](https://github.com/monetr/monetr/commit/7b79ddcd573ea274a9fb5ced94d9b5c1d057137f))
+* **ui:** update dependency lucide-react to v0.482.0 ([#2414](https://github.com/monetr/monetr/issues/2414)) ([30bf436](https://github.com/monetr/monetr/commit/30bf436a4c96affe358b9c05f10a0c54f3c3862c))
+* **ui:** update dependency react-router-dom to v6.30.0 ([#2496](https://github.com/monetr/monetr/issues/2496)) ([5f391c2](https://github.com/monetr/monetr/commit/5f391c21cf2ab3a4f861361402f0a808a242adda))
+* **ui:** update dependency react-select to v5.10.1 ([#2521](https://github.com/monetr/monetr/issues/2521)) ([8aa5c9f](https://github.com/monetr/monetr/commit/8aa5c9f1bb5765e3a76ac3986067e2b23ec01966))
+* **ui:** update dependency typescript to v5.8.2 ([#2499](https://github.com/monetr/monetr/issues/2499)) ([5fbfa14](https://github.com/monetr/monetr/commit/5fbfa14459ca31d78ee57d03ba0c61dea7bd89d8))
+* **ui:** update rsbuild ([#2503](https://github.com/monetr/monetr/issues/2503)) ([acbebcb](https://github.com/monetr/monetr/commit/acbebcb54889d2936e4f7ee5386653f0c01a5e6f))
+* **ui:** update storybook monorepo to v8.6.2 ([#2490](https://github.com/monetr/monetr/issues/2490)) ([d4bdaa9](https://github.com/monetr/monetr/commit/d4bdaa9663a9821e42372fd0f559666eb3a94587))
+* **ui:** update storybook monorepo to v8.6.4 ([#2504](https://github.com/monetr/monetr/issues/2504)) ([ecb6be8](https://github.com/monetr/monetr/commit/ecb6be8a40a58e910610f0081bbaf0d38c601059))
+
+
+### Bug Fixes
+
+* **api:** Allow manual bank accounts to be soft deleted ([1ebb466](https://github.com/monetr/monetr/commit/1ebb4667da780269e2a3a2a9f31f9f59ea98632b))
+* **api:** Cleaning up unused code ([#2501](https://github.com/monetr/monetr/issues/2501)) ([5b56a00](https://github.com/monetr/monetr/commit/5b56a0091cf8dc63ca98e205204e801e5616cf9d))
+* **api:** Rename old migrations embed data ([1dbe13f](https://github.com/monetr/monetr/commit/1dbe13f667ac5bf83b82aec796376218582b7536))
+* **api:** Significantly improve logging ([#2536](https://github.com/monetr/monetr/issues/2536)) ([19bd78b](https://github.com/monetr/monetr/commit/19bd78b839fb9f3a6748b316a7420e5847ee072a))
+* **deps:** Fixed axios dependency security alert ([e9b5cb4](https://github.com/monetr/monetr/commit/e9b5cb4d0ed076eba78d47ef6548f3bc0ea5d28c))
+* **ui:** Don't allow refreshing a disconnected Plaid link ([a51a8fd](https://github.com/monetr/monetr/commit/a51a8fde5f3f75472cf63457fe7c69785d28dfdf))
+* **ui:** Make expense amounts more evident ([9b1454c](https://github.com/monetr/monetr/commit/9b1454c4a7e2520c55c2cb278c61eec33ee872c4)), closes [#2526](https://github.com/monetr/monetr/issues/2526)
+* **ui:** Show revoked Plaid connection on sidebar ([1b36a2d](https://github.com/monetr/monetr/commit/1b36a2d1eb4ab44ff36a3b2f986aa7f7f0d4089c)), closes [#2385](https://github.com/monetr/monetr/issues/2385)
+
+
+### Miscellaneous
+
+* **api:** Adding test for odd spending/funding ([#2523](https://github.com/monetr/monetr/issues/2523)) ([3d89c8b](https://github.com/monetr/monetr/commit/3d89c8b12417fe59ecede9995d98f9587283f8d8))
+* **deps:** Bump axios from 1.8.1 to 1.8.2 ([#2514](https://github.com/monetr/monetr/issues/2514)) ([af54056](https://github.com/monetr/monetr/commit/af540562ae83cee6247c9b516d6034045f4d777c))
+* **deps:** Bump golang.org/x/net from 0.35.0 to 0.36.0 ([#2511](https://github.com/monetr/monetr/issues/2511)) ([703a42b](https://github.com/monetr/monetr/commit/703a42b51c87bec4c821489945edec2370cb5f49))
+* **test:** Improved test coverage for processing OFX files ([#2537](https://github.com/monetr/monetr/issues/2537)) ([52b5400](https://github.com/monetr/monetr/commit/52b54000561bde84aa4c11e82401fd041ef6bd18))
+
+
+### Documentation
+
+* **docker:** Add notes on resolving permission issues ([d60df33](https://github.com/monetr/monetr/commit/d60df33dbb688026f9f47272ea03fabd561c94a9))
+* **email:** Improve documentation around emails ([777f6a8](https://github.com/monetr/monetr/commit/777f6a8bf7c77791b8651c5e1ca78de1d6bb49d0)), closes [#2461](https://github.com/monetr/monetr/issues/2461)
+* Fix particles being slow on mobile ([bed3483](https://github.com/monetr/monetr/commit/bed3483a01a6ffff8ffc71ab598b44d6aaaa37a6))
+
 ## [1.3.3](https://github.com/monetr/monetr/compare/v1.3.2...v1.3.3) (2025-02-28)
 
 
