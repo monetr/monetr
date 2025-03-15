@@ -17,7 +17,7 @@ type MonetrMigrationsManager struct {
 
 func NewMigrationsManager(log *logrus.Entry, db migrations.DB) (*MonetrMigrationsManager, error) {
 	collection := migrations.NewCollection(functional.FunctionalMigrations...)
-	if err := collection.DiscoverSQLMigrationsFromFilesystem(http.FS(things), "schema"); err != nil {
+	if err := collection.DiscoverSQLMigrationsFromFilesystem(http.FS(embededMigrations), "schema"); err != nil {
 		return nil, errors.Wrap(err, "failed to discover embedded sql migrations")
 	}
 
@@ -57,7 +57,7 @@ func (m *MonetrMigrationsManager) Up() (oldVersion, newVersion int64, err error)
 
 func RunMigrations(log *logrus.Entry, db migrations.DB) {
 	collection := migrations.NewCollection()
-	collection.DiscoverSQLMigrationsFromFilesystem(http.FS(things), "schema")
+	collection.DiscoverSQLMigrationsFromFilesystem(http.FS(embededMigrations), "schema")
 
 	if _, _, err := collection.Run(db, "init"); err != nil {
 		log.Fatalf("failed to init schema migrations: %+v", err)

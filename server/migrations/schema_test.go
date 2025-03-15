@@ -7,7 +7,7 @@ import (
 )
 
 func TestGeneral(t *testing.T) {
-	files, err := things.ReadDir(".")
+	files, err := embededMigrations.ReadDir(".")
 	assert.NoError(t, err)
 	assert.NotEmpty(t, files)
 }
