@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?OFX OFXHEADER="200" VERSION="220" SECURITY="NONE" OLDFILEUID="NONE" NEWFILEUID="NONE"?>
+<OFX >
+  <SIGNONMSGSRSV1>
+    <SONRS>
+      <STATUS>
+        <CODE>0</CODE>
+        <SEVERITY>INFO</SEVERITY>
+      </STATUS>
+      <DTSERVER>20250307102338.600</DTSERVER>
+      <LANGUAGE>ENG</LANGUAGE>
+      <FI>
+        <ORG>NFCU</ORG>
+        <FID>1001</FID>
+      </FI>
+      <INTU.BID>14545</INTU.BID>
+    </SONRS>
+  </SIGNONMSGSRSV1>
+  <BANKMSGSRSV1>
+    <STMTTRNRS>
+      <TRNUID>0</TRNUID>
+      <STATUS>
+        <CODE>0</CODE>
+        <SEVERITY>INFO</SEVERITY>
+      </STATUS>
+      <STMTRS>
+        <CURDEF>USD</CURDEF>
+        <BANKACCTFROM>
+          <BANKID>123456789</BANKID>
+          <BANKID>1234567890</BANKID>
+          <ACCTTYPE>CHECKING</ACCTTYPE>
+        </BANKACCTFROM>
+        <BANKTRANLIST>
+          <DTSTART>20230519120000.000</DTSTART>
+          <DTEND>20250306120000.000</DTEND>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20250306120000.000</DTPOSTED>
+            <TRNAMT>-10.73</TRNAMT>
+            <FITID>8a34b9c89506be8c0195711720250751</FITID>
+            <NAME>- Pwp Discord* Ni Privacycom XX1</NAME>
+            <MEMO>ACH Debit - Pwp  Discord* Ni  Privacycom 2111508</MEMO>
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT</TRNTYPE>
+            <DTPOSTED>20250306120000.000</DTPOSTED>
+            <TRNAMT>-32.16</TRNAMT>
+            <FITID>8a34b9c89506be8c0195711720250753</FITID>
+            <NAME>Caribou Coffee</NAME>
+            <MEMO>
+              POS DEBIT-DC 5988 TST* CARIBOU COFFE NORTH BRANCH MN
+            </MEMO>
+          </STMTTRN>
+        </BANKTRANLIST>
+        <LEDGERBAL>
+          <BALAMT>4247.15</BALAMT>
+          <DTASOF>20250307102338.600</DTASOF>
+        </LEDGERBAL>
+        <AVAILBAL>
+          <BALAMT>4149.58</BALAMT>
+          <DTASOF>20250307102338.600</DTASOF>
+        </AVAILBAL>
+      </STMTRS>
+    </STMTTRNRS>
+  </BANKMSGSRSV1>
+</OFX>

@@ -19,7 +19,6 @@ import (
 	"github.com/gavv/httpexpect/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/application"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/captcha"
@@ -33,7 +32,6 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
-	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -93,19 +91,20 @@ func NewTestApplication(t *testing.T) (*TestApp, *httpexpect.Expect) {
 type TestApp struct {
 	Configuration config.Configuration
 	Email         *mockgen.MockEmailCommunication
+	Storage       *mockgen.MockStorage
+	Jobs          *mockgen.MockJobController
 	Clock         *clock.Mock
 	Tokens        security.ClientTokens
 }
 
 type TestAppInterfaces struct {
-	JobController *background.JobController
 }
 
 func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) (*TestApp, *httpexpect.Expect) {
-	return NewTestApplicationPatched(t, configuration, TestAppInterfaces{})
-}
-
-func NewTestApplicationPatched(t *testing.T, configuration config.Configuration, patched TestAppInterfaces) (*TestApp, *httpexpect.Expect) {
+	mockController := gomock.NewController(t)
+	t.Cleanup(func() {
+		defer mockController.Finish()
+	})
 	clock := clock.NewMock()
 	clock.Set(time.Date(2023, 10, 9, 13, 32, 0, 0, time.UTC))
 	log := testutils.GetLog(t)
@@ -148,19 +147,9 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	require.NoError(t, err, "must be able to create a temp directory for uploads")
 	log.Debugf("[TEST] created temporary directory for uploads: %s", tempDirectory)
 
-	fileStorage, err := storage.NewFilesystemStorage(log, tempDirectory)
-	require.NoError(t, err, "must not have an error when creating the filesystem storage")
-
-	var jobRunner background.JobController
-	if patched.JobController != nil {
-		jobRunner = *patched.JobController
-	}
-
-	emailMockController := gomock.NewController(t)
-	t.Cleanup(func() {
-		defer emailMockController.Finish()
-	})
-	email := mockgen.NewMockEmailCommunication(emailMockController)
+	fileStorage := mockgen.NewMockStorage(mockController)
+	jobRunner := mockgen.NewMockJobController(mockController)
+	email := mockgen.NewMockEmailCommunication(mockController)
 
 	var recaptcha captcha.Verification
 	if configuration.ReCAPTCHA.Enabled {
@@ -251,6 +240,8 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	return &TestApp{
 		Configuration: configuration,
 		Email:         email,
+		Storage:       fileStorage,
+		Jobs:          jobRunner,
 		Clock:         clock,
 		Tokens:        clientTokens,
 	}, expect

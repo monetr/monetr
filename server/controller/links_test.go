@@ -9,7 +9,6 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
-	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -476,16 +475,8 @@ func TestPutLink(t *testing.T) {
 
 func TestDeleteLink(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
 		clock := clock.New()
-
-		jobController := mockgen.NewMockJobController(ctrl)
-		var controller background.JobController = jobController
-		config := NewTestApplicationConfig(t)
-		_, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
-			JobController: &controller,
-		})
+		app, e := NewTestApplication(t)
 
 		user, password := fixtures.GivenIHaveABasicAccount(t, clock)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -510,7 +501,7 @@ func TestDeleteLink(t *testing.T) {
 			link.LinkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 		}
 
-		jobController.EXPECT().
+		app.Jobs.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
 				gomock.Eq(background.RemoveLink),

@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+//go:generate go run go.uber.org/mock/mockgen@v0.5.0 -source=storage.go -package=mockgen -destination=../internal/mockgen/storage.go Storage
 var (
 	ErrInvalidContentType = errors.New("invalid content type")
 )

@@ -10,7 +10,6 @@ import (
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
-	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/plaid/plaid-go/v30/plaid"
 	"github.com/stretchr/testify/assert"
@@ -156,22 +155,13 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 
 func TestPostSyncPlaidManually(t *testing.T) {
 	t.Run("successful with account select enabled", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		jobController := mockgen.NewMockJobController(ctrl)
-		var controller background.JobController = jobController
-
-		config := NewTestApplicationConfig(t)
-		app, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
-			JobController: &controller,
-		})
+		app, e := NewTestApplication(t)
 
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		jobController.EXPECT().
+		app.Jobs.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
 				gomock.Eq(background.SyncPlaid),
@@ -195,22 +185,13 @@ func TestPostSyncPlaidManually(t *testing.T) {
 	})
 
 	t.Run("fails on subsequent attempt", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		jobController := mockgen.NewMockJobController(ctrl)
-		var controller background.JobController = jobController
-
-		config := NewTestApplicationConfig(t)
-		app, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
-			JobController: &controller,
-		})
+		app, e := NewTestApplication(t)
 
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		jobController.EXPECT().
+		app.Jobs.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
 				gomock.Eq(background.SyncPlaid),
@@ -248,22 +229,13 @@ func TestPostSyncPlaidManually(t *testing.T) {
 	})
 
 	t.Run("failed to enque job", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		jobController := mockgen.NewMockJobController(ctrl)
-		var controller background.JobController = jobController
-
-		config := NewTestApplicationConfig(t)
-		app, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
-			JobController: &controller,
-		})
+		app, e := NewTestApplication(t)
 
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		jobController.EXPECT().
+		app.Jobs.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
 				gomock.Eq(background.SyncPlaid),
