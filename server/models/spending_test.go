@@ -627,4 +627,49 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		assert.EqualValues(t, 3333, spending.NextContributionAmount)
 		assert.EqualValues(t, expectedNextDate.UTC(), spending.NextRecurrence.UTC(), "next recurrence should handle DST transition")
 	})
+
+	t.Run("fund every wednesday", func(t *testing.T) {
+		userTimezone, err := time.LoadLocation("America/New_York")
+		require.NoError(t, err, "must be able to load timezone")
+
+		serverTimezone, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must be able to load timezone")
+
+		now := time.Date(2025, 2, 23, 0, 0, 0, 0, userTimezone).In(serverTimezone)
+		assert.NoError(t, err, "must be able to get now")
+
+		spendingString := "DTSTART:20250122T050000\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=22"
+		spendingRule, err := NewRuleSet(spendingString)
+		spendingRule.DTStart(spendingRule.GetDTStart().In(userTimezone))
+		assert.NoError(t, err, "must be able to parse the rule")
+
+		contributionString := "DTSTART:20250122T050000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=WE"
+		contributionRule, err := NewRuleSet(contributionString)
+		contributionRule.DTStart(contributionRule.GetDTStart().In(userTimezone))
+		assert.NoError(t, err, "must be able to parse the rule")
+
+		spending := Spending{
+			SpendingType:           SpendingTypeExpense,
+			TargetAmount:           20000,
+			CurrentAmount:          0,
+			NextContributionAmount: 0,
+			NextRecurrence:         spendingRule.After(now, false).UTC(),
+			RuleSet:                spendingRule,
+		}
+		funding := FundingSchedule{
+			FundingScheduleId: "fund_bogus",
+			Name:              "Bogus Funding Schedule",
+			Description:       "Bogus",
+			RuleSet:           contributionRule,
+			NextRecurrence:    contributionRule.After(now, false).UTC(),
+		}
+		err = spending.CalculateNextContribution(
+			context.Background(),
+			userTimezone.String(),
+			&funding,
+			now,
+		)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 10000, spending.NextContributionAmount, "should contribute half next time")
+	})
 }
