@@ -43,6 +43,7 @@
   },
   "pnpm": {
     "overrides": {
+      "@rsbuild/core": "1.2.19",
       "axios": "1.8.3"
     }
   }

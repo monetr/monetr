@@ -13,6 +13,7 @@ node_modules
 generated
 values.mayview.yaml
 redoc-static.html
+doc_build
 server/communication/email_templates/*
 !server/communication/email_templates/README.md
 server/ui/static/*
