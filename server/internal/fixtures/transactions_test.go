@@ -1,7 +1,6 @@
 package fixtures
 
 import (
-	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -92,8 +91,15 @@ func TestCountPendingTransactions(t *testing.T) {
 		// Create a non-pending transaction
 		GivenIHaveATransaction(t, clock, bankAccount)
 
+		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
-		repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedBy, bankAccount.AccountId, db)
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			bankAccount.Link.CreatedBy,
+			bankAccount.AccountId,
+			db,
+			log,
+		)
 
 		timezone, err := bankAccount.Account.GetTimezone()
 		require.NoError(t, err, "must be able to get the timezone from the account")
@@ -110,11 +116,10 @@ func TestCountPendingTransactions(t *testing.T) {
 		name := fmt.Sprintf("%s%s", prefix, strings.ToUpper(company))
 
 		transaction := models.Transaction{
-			AccountId:     bankAccount.AccountId,
-			Account:       bankAccount.Account,
-			BankAccountId: bankAccount.BankAccountId,
-			BankAccount:   &bankAccount,
-			// PlaidTransactionId:   gofakeit.UUID(),
+			AccountId:            bankAccount.AccountId,
+			Account:              bankAccount.Account,
+			BankAccountId:        bankAccount.BankAccountId,
+			BankAccount:          &bankAccount,
 			Amount:               int64(gofakeit.Number(100, 10000)),
 			Date:                 util.Midnight(clock.Now(), timezone),
 			Name:                 name,
@@ -126,7 +131,7 @@ func TestCountPendingTransactions(t *testing.T) {
 			CreatedAt:            clock.Now(),
 		}
 
-		err = repo.CreateTransaction(context.Background(), bankAccount.BankAccountId, &transaction)
+		err = repo.CreateTransaction(t.Context(), bankAccount.BankAccountId, &transaction)
 		require.NoError(t, err, "must be able to seed transaction")
 
 		assert.EqualValues(t, 2, CountNonDeletedTransactions(t, user.AccountId))

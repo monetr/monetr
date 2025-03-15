@@ -89,11 +89,16 @@ func (h *ReconcileSubscriptionHandler) HandleConsumeJob(
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
 
+	log = log.WithContext(ctx).WithFields(logrus.Fields{
+		"accountId": args.AccountId,
+	})
+
 	repo := repository.NewRepositoryFromSession(
 		h.clock,
 		"user_system",
 		args.AccountId,
 		h.db,
+		log,
 	)
 	job, err := NewReconcileSubscriptionJob(
 		log,

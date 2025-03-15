@@ -194,7 +194,9 @@ func (c *Controller) mustGetUnauthenticatedRepository(ctx echo.Context) reposito
 	return repo
 }
 
-func (c *Controller) getAuthenticatedRepository(ctx echo.Context) (repository.Repository, error) {
+func (c *Controller) getAuthenticatedRepository(
+	ctx echo.Context,
+) (repository.Repository, error) {
 	userId, err := c.getUserId(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "you are not authenticated to an account")
@@ -210,7 +212,13 @@ func (c *Controller) getAuthenticatedRepository(ctx echo.Context) (repository.Re
 		return nil, errors.Errorf("no transaction for request")
 	}
 
-	return repository.NewRepositoryFromSession(c.Clock, userId, accountId, txn), nil
+	return repository.NewRepositoryFromSession(
+		c.Clock,
+		userId,
+		accountId,
+		txn,
+		c.getLog(ctx),
+	), nil
 }
 
 func (c *Controller) mustGetAuthenticatedRepository(ctx echo.Context) repository.Repository {

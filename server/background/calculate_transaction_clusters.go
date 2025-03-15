@@ -120,13 +120,18 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 
 	accountId := c.args.AccountId
 	bankAccountId := c.args.BankAccountId
-
-	repo := repository.NewRepositoryFromSession(c.clock, "user_system", accountId, c.db)
-
 	log := c.log.WithContext(span.Context()).WithFields(logrus.Fields{
 		"accountId":     accountId,
 		"bankAccountId": bankAccountId,
 	})
+
+	repo := repository.NewRepositoryFromSession(
+		c.clock,
+		"user_system",
+		accountId,
+		c.db,
+		log,
+	)
 
 	clustering := recurring.NewSimilarTransactions_TFIDF_DBSCAN(log)
 
@@ -138,7 +143,12 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 			"offset": offset,
 		})
 		txnLog.Trace("requesting next batch of transactions")
-		transactions, err := repo.GetTransactions(span.Context(), bankAccountId, limit, offset)
+		transactions, err := repo.GetTransactions(
+			span.Context(),
+			bankAccountId,
+			limit,
+			offset,
+		)
 		if err != nil {
 			return errors.Wrap(err, "failed to read transactions for clustering")
 		}

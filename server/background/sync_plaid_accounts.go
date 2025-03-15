@@ -96,9 +96,18 @@ func (s *SyncPlaidAccountsHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := log.WithContext(span.Context())
+		log := log.WithContext(span.Context()).WithFields(logrus.Fields{
+			"accountId": args.AccountId,
+			"linkId":    args.LinkId,
+		})
 
-		repo := repository.NewRepositoryFromSession(s.clock, "user_plaid", args.AccountId, txn)
+		repo := repository.NewRepositoryFromSession(
+			s.clock,
+			"user_plaid",
+			args.AccountId,
+			txn,
+			log,
+		)
 		secretsRepo := repository.NewSecretsRepository(
 			log,
 			s.clock,

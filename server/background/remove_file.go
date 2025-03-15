@@ -83,8 +83,17 @@ func (h *RemoveFileHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := log.WithContext(span.Context())
-		repo := repository.NewRepositoryFromSession(h.clock, "user_system", args.AccountId, txn)
+		log := log.WithContext(span.Context()).WithFields(logrus.Fields{
+			"accountId": args.AccountId,
+			"fileId":    args.FileId,
+		})
+		repo := repository.NewRepositoryFromSession(
+			h.clock,
+			"user_system",
+			args.AccountId,
+			txn,
+			log,
+		)
 
 		job, err := NewRemoveFileJob(
 			log,

@@ -8,7 +8,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/util"
-	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 type SpendingType uint8
@@ -104,25 +104,53 @@ func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Lo
 
 func (e *Spending) CalculateNextContribution(
 	ctx context.Context,
-	accountTimezone string,
+	timezone *time.Location,
 	fundingSchedule *FundingSchedule,
 	now time.Time,
-) error {
+	log *logrus.Entry,
+) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	timezone, err := time.LoadLocation(accountTimezone)
-	if err != nil {
-		return errors.Wrap(err, "failed to parse account's timezone")
-	}
+	spndLog := log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"spendingId": e.SpendingId,
+		"timezone":   timezone.String(),
+		"spending": logrus.Fields{
+			"ruleset":       e.RuleSet,
+			"targetAmount":  e.TargetAmount,
+			"currentAmount": e.CurrentAmount,
+		},
+		"funding": logrus.Fields{
+			"ruleset": fundingSchedule.RuleSet,
+		},
+		"before": logrus.Fields{
+			"isBehind":               e.IsBehind,
+			"nextContributionAmount": e.NextContributionAmount,
+			"lastRecurrence":         e.LastRecurrence,
+			"nextRecurrence":         e.NextRecurrence,
+		},
+	})
 
-	result := CalculateNextContribution(span.Context(), *e, *fundingSchedule, timezone, now)
+	result := CalculateNextContribution(
+		span.Context(),
+		*e,
+		*fundingSchedule,
+		timezone,
+		now,
+	)
 	e.IsBehind = result.IsBehind
 	e.NextContributionAmount = result.NextContributionAmount
 	e.LastRecurrence = result.LastRecurrence
 	e.NextRecurrence = result.NextRecurrence
 
-	return nil
+	spndLog.WithFields(logrus.Fields{
+		"after": logrus.Fields{
+			"isBehind":               e.IsBehind,
+			"nextContributionAmount": e.NextContributionAmount,
+			"lastRecurrence":         e.LastRecurrence,
+			"nextRecurrence":         e.NextRecurrence,
+		},
+	}).Debug("calculated next spending contribution")
 }
 
 // CalculateNextContribution takes a spending object and its funding schedule, a timezone and a point in time. It then

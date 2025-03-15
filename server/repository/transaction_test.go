@@ -17,6 +17,7 @@ import (
 func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 	t.Run("non-pending", func(t *testing.T) {
 		clock := clock.NewMock()
+		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
@@ -28,7 +29,13 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			models.CheckingBankAccountSubType,
 		)
 
-		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
 
 		plaidTransaction := models.PlaidTransaction{
 			AccountId:          repo.AccountId(),
@@ -83,6 +90,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 
 	t.Run("with pending", func(t *testing.T) {
 		clock := clock.NewMock()
+		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
@@ -94,7 +102,13 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			models.CheckingBankAccountSubType,
 		)
 
-		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
 
 		pendingPlaidTransaction := models.PlaidTransaction{
 			AccountId:          repo.AccountId(),

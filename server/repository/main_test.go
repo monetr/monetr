@@ -12,6 +12,7 @@ import (
 )
 
 func GetTestAuthenticatedRepository(t *testing.T, clock clock.Clock) repository.Repository {
+	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 
 	user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -23,5 +24,11 @@ func GetTestAuthenticatedRepository(t *testing.T, clock clock.Clock) repository.
 		assert.NoError(t, txn.Commit(), "should commit")
 	})
 
-	return repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, txn)
+	return repository.NewRepositoryFromSession(
+		clock,
+		user.UserId,
+		user.AccountId,
+		txn,
+		log,
+	)
 }

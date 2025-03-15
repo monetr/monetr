@@ -1,4 +1,4 @@
-package models
+package models_test
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/monetr/monetr/server/internal/testutils"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -104,13 +106,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			NextRecurrence: dayAfterDayAfterTomorrow,
 		}
 
-		err := spending.CalculateNextContribution(
+		spending.CalculateNextContribution(
 			context.Background(),
-			time.UTC.String(),
+			time.UTC,
 			GiveMeAFundingSchedule(dayAfterTomorrow, ruleset),
 			time.Now(),
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind because it will be funded before it is spent")
 		assert.EqualValues(t, spending.TargetAmount, spending.NextContributionAmount, "next contribution should be the entire amount")
 	})
@@ -130,13 +132,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			NextRecurrence: dayAfterTomorrow,
 		}
 
-		err := spending.CalculateNextContribution(
+		spending.CalculateNextContribution(
 			context.Background(),
-			time.UTC.String(),
+			time.UTC,
 			GiveMeAFundingSchedule(dayAfterTomorrow.Add(25*time.Hour), ruleset),
 			time.Now(),
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.EqualValues(t, spending.TargetAmount, spending.NextContributionAmount, "next contribution should be the entire amount")
 		assert.True(t, spending.IsBehind, "spending should be behind since it will not be funded until after it is needed")
 	})
@@ -164,13 +166,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			NextRecurrence: nextRecurrence.UTC(),
 		}
 
-		err = spending.CalculateNextContribution(
+		spending.CalculateNextContribution(
 			context.Background(),
-			central.String(),
+			central,
 			GiveMeAFundingSchedule(nextFunding.UTC(), fundingRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.EqualValues(t, 9020, spending.NextContributionAmount, "next contribution amount should be half of the total needed to reach the target")
 	})
 
@@ -200,13 +202,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			RuleSet:        spendingRule,
 		}
 
-		err := spending.CalculateNextContribution(
+		spending.CalculateNextContribution(
 			context.Background(),
-			time.UTC.String(),
+			time.UTC,
 			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.True(t, spending.IsBehind, "should be behind")
 		assert.EqualValues(t, 1500, spending.NextContributionAmount, "should try to contribute the entire amount")
 	})
@@ -233,13 +235,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			RuleSet:        spendingRule,
 		}
 
-		err := spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind")
 		assert.Equal(t, subsequentDueDate, spending.NextRecurrence, "subsequent due date should be a month in the future")
 		assert.EqualValues(t, 750, spending.NextContributionAmount, "next contribution should be half")
@@ -263,13 +265,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			RuleSet:        spendingRule,
 		}
 
-		err := spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind")
 		assert.EqualValues(t, 3000, spending.NextContributionAmount, "next contribution amount should be more than the target to account for frequency")
 	})
@@ -291,13 +293,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			NextRecurrence: nextDueDate,
 			RuleSet:        spendingRule,
 		}
-		err := spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind")
 		assert.EqualValues(t, 10000, spending.NextContributionAmount, "we should allocate the target * 2 to cover the next spending period for the expense")
 
@@ -305,13 +307,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		now = time.Date(2022, 4, 12, 12, 0, 0, 0, time.UTC)
 		// This will make it evaluate how much it needs to allocate for the next two instances of the expense.
 		spending.CurrentAmount = 0
-		err = spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind")
 		assert.EqualValues(t, 10000, spending.NextContributionAmount, "we will need to contribute twice the target on the 15th in order to fulfill the expense")
 		expectedNextRecurrence := time.Date(2022, 4, 18, 0, 0, 0, 0, time.UTC)
@@ -335,13 +337,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			NextRecurrence: nextDueDate,
 			RuleSet:        spendingRule,
 		}
-		err := spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind")
 		assert.EqualValues(t, 0, spending.NextContributionAmount, "because we are over-allocated we should not need to fund this spending at all this next period")
 	})
@@ -359,13 +361,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			CurrentAmount:  16000, // Allocate enough for this funding period and the next one.
 			NextRecurrence: nextDueDate,
 		}
-		err := spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind")
 		assert.EqualValues(t, 0, spending.NextContributionAmount, "because we are beyond our target amount for the goal there is nothing more to contribute")
 	})
@@ -387,26 +389,26 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			RuleSet:        spendingRule,
 		}
 
-		err := spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind")
 		assert.EqualValues(t, 10000, spending.NextContributionAmount, "we will need to allocate the target * 2 for the 2 spending events in the second funding period")
 
 		// Now if the 15th (payday) comes and we still have not spent this expense. We need to calculate how much more
 		// we need.
 		now = time.Date(2022, 4, 15, 0, 0, 0, 0, time.UTC)
-		err = spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		// Because we are calculating the next contribution, on the day of that contribution it thinks that a
 		// contribution cannot be made before the next X recurrences. Because of this the expense has fallen behind.
 		assert.True(t, spending.IsBehind, "should be behind because this funding period needs $100 but only $50 is allocated to the spending object")
@@ -433,13 +435,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			RuleSet:        spendingRule,
 		}
 
-		err = spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind")
 		assert.EqualValues(t, 2500, spending.NextContributionAmount, "give that there will be 2 contributions, half of the target amount should be allocated on the next contribution")
 	})
@@ -462,13 +464,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			RuleSet:        spendingRule,
 		}
 
-		err = spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind")
 		assert.EqualValues(t, 2450, spending.NextContributionAmount, "little bit less than half per contribution")
 	})
@@ -491,13 +493,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			RuleSet:        spendingRule,
 		}
 
-		err = spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind")
 		assert.EqualValues(t, 1030, spending.NextContributionAmount, "little bit less than half per contribution")
 	})
@@ -521,26 +523,26 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			RuleSet:        spendingRule,
 		}
 
-		err = spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			time.UTC,
 			GiveMeAFundingSchedule(fundingDate, contributionRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
 		assert.False(t, spending.IsBehind, "should not be behind")
 		assert.EqualValues(t, 1030, spending.NextContributionAmount, "little bit less than half per contribution")
 	})
 
 	t.Run("expense recurs on funding date", func(t *testing.T) {
-		location, err := time.LoadLocation("America/Chicago")
+		timezone, err := time.LoadLocation("America/Chicago")
 		require.NoError(t, err, "must be able to load timezone")
-		now := time.Date(2022, 9, 27, 14, 32, 0, 0, location)
-		nextFundingDate := time.Date(2022, 9, 30, 0, 0, 0, 0, location)
-		nextDueDate := time.Date(2022, 10, 15, 0, 0, 0, 0, location)
+		now := time.Date(2022, 9, 27, 14, 32, 0, 0, timezone)
+		nextFundingDate := time.Date(2022, 9, 30, 0, 0, 0, 0, timezone)
+		nextDueDate := time.Date(2022, 10, 15, 0, 0, 0, 0, timezone)
 
-		spendingRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", now)
-		contributionRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
+		spendingRule := RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", now)
+		contributionRule := RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
@@ -550,25 +552,25 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			RuleSet:        spendingRule,
 		}
 
-		err = spending.CalculateNextContribution(
-			context.Background(),
-			location.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			timezone,
 			GiveMeAFundingSchedule(nextFundingDate, contributionRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err)
 		assert.EqualValues(t, 12500, spending.NextContributionAmount, "should be half of the target amount")
 	})
 
 	t.Run("goal is due on a funding date", func(t *testing.T) {
-		location, err := time.LoadLocation("America/Chicago")
+		timezone, err := time.LoadLocation("America/Chicago")
 		require.NoError(t, err, "must be able to load timezone")
-		now := time.Date(2022, 1, 1, 14, 0, 0, 0, location)
-		nextFundingDate := time.Date(2022, 1, 15, 0, 0, 0, 0, location)
-		nextDueDate := time.Date(2022, 12, 31, 0, 0, 0, 0, location)
+		now := time.Date(2022, 1, 1, 14, 0, 0, 0, timezone)
+		nextFundingDate := time.Date(2022, 1, 15, 0, 0, 0, 0, timezone)
+		nextDueDate := time.Date(2022, 12, 31, 0, 0, 0, 0, timezone)
 
 		// But we can only contribute to the goal twice a month.
-		contributionRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
+		contributionRule := RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeGoal,
@@ -577,13 +579,13 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			NextRecurrence: nextDueDate,
 		}
 
-		err = spending.CalculateNextContribution(
-			context.Background(),
-			location.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			timezone,
 			GiveMeAFundingSchedule(nextFundingDate, contributionRule),
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err)
 		assert.EqualValues(t, 500, spending.NextContributionAmount, "should be 12000/24")
 	})
 
@@ -611,9 +613,9 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			NextRecurrence:         time.Date(2024, 10, 1, 0, 0, 0, 0, timezone).UTC(),
 			RuleSet:                spendingRule,
 		}
-		err = spending.CalculateNextContribution(
-			context.Background(),
-			timezone.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			timezone,
 			&FundingSchedule{
 				FundingScheduleId: "fund_bogus",
 				Name:              "Bogus Funding Schedule",
@@ -622,8 +624,8 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 				NextRecurrence:    time.Date(2024, 10, 15, 0, 0, 0, 0, timezone).UTC(),
 			},
 			now,
+			testutils.GetLog(t),
 		)
-		assert.NoError(t, err)
 		assert.EqualValues(t, 3333, spending.NextContributionAmount)
 		assert.EqualValues(t, expectedNextDate.UTC(), spending.NextRecurrence.UTC(), "next recurrence should handle DST transition")
 	})
@@ -663,11 +665,12 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			RuleSet:           contributionRule,
 			NextRecurrence:    contributionRule.After(now, false).UTC(),
 		}
-		err = spending.CalculateNextContribution(
-			context.Background(),
-			userTimezone.String(),
+		spending.CalculateNextContribution(
+			t.Context(),
+			userTimezone,
 			&funding,
 			now,
+			testutils.GetLog(t),
 		)
 		assert.NoError(t, err)
 		assert.EqualValues(t, 10000, spending.NextContributionAmount, "should contribute half next time")

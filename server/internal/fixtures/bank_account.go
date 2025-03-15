@@ -1,7 +1,6 @@
 package fixtures
 
 import (
-	"context"
 	"testing"
 
 	"github.com/benbjohnson/clock"
@@ -12,26 +11,53 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func ReadBankAccounts(t *testing.T, clock clock.Clock, link models.Link) []models.BankAccount {
+func ReadBankAccounts(
+	t *testing.T,
+	clock clock.Clock,
+	link models.Link,
+) []models.BankAccount {
 	require.NotZero(t, link.LinkId, "link id must be included")
 	require.NotZero(t, link.AccountId, "link id must be included")
 
+	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(clock, link.CreatedBy, link.AccountId, db)
+	repo := repository.NewRepositoryFromSession(
+		clock,
+		link.CreatedBy,
+		link.AccountId,
+		db,
+		log,
+	)
 
-	bankAccounts, err := repo.GetBankAccountsByLinkId(context.Background(), link.LinkId)
+	bankAccounts, err := repo.GetBankAccountsByLinkId(
+		t.Context(),
+		link.LinkId,
+	)
 	require.NoError(t, err, "must be able to read bank accounts")
 
 	return bankAccounts
 }
 
-func GivenIHaveABankAccount(t *testing.T, clock clock.Clock, link *models.Link, accountType models.BankAccountType, subType models.BankAccountSubType) models.BankAccount {
+func GivenIHaveABankAccount(
+	t *testing.T,
+	clock clock.Clock,
+	link *models.Link,
+	accountType models.BankAccountType,
+	subType models.BankAccountSubType,
+) models.BankAccount {
 	require.NotNil(t, link, "link must actually be provided")
 	require.NotZero(t, link.LinkId, "link id must be included")
 	require.NotZero(t, link.AccountId, "link id must be included")
 
+	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(clock, link.CreatedBy, link.AccountId, db)
+	repo := repository.NewRepositoryFromSession(
+		clock,
+		link.CreatedBy,
+		link.AccountId,
+		db,
+		log,
+	)
 
 	current := int64(gofakeit.Number(2000, 100000))
 	available := current - int64(gofakeit.Number(100, 2000))
@@ -54,7 +80,7 @@ func GivenIHaveABankAccount(t *testing.T, clock clock.Clock, link *models.Link, 
 		},
 	}
 
-	err := repo.CreateBankAccounts(context.Background(), banks...)
+	err := repo.CreateBankAccounts(t.Context(), banks...)
 	require.NoError(t, err, "must seed bank account")
 	require.NotZero(t, banks[0].BankAccountId, "bank account Id must have been set")
 
@@ -73,8 +99,15 @@ func GivenIHaveAPlaidBankAccount(
 	require.NotZero(t, link.AccountId, "link id must be included")
 	require.NotZero(t, link.PlaidLinkId, "link plaid link id must be included")
 
+	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(clock, link.CreatedBy, link.AccountId, db)
+	repo := repository.NewRepositoryFromSession(
+		clock,
+		link.CreatedBy,
+		link.AccountId,
+		db,
+		log,
+	)
 
 	current := int64(gofakeit.Number(2000, 100000))
 	available := current - int64(gofakeit.Number(100, 2000))
@@ -91,7 +124,7 @@ func GivenIHaveAPlaidBankAccount(
 	}
 	require.NoError(
 		t,
-		repo.CreatePlaidBankAccount(context.Background(), &plaidBankAccount),
+		repo.CreatePlaidBankAccount(t.Context(), &plaidBankAccount),
 		"must be able to create the plaid bank account record",
 	)
 
@@ -114,7 +147,7 @@ func GivenIHaveAPlaidBankAccount(
 
 	require.NoError(
 		t,
-		repo.CreateBankAccounts(context.Background(), &bankAccount),
+		repo.CreateBankAccounts(t.Context(), &bankAccount),
 		"must seed bank account",
 	)
 	require.NotZero(t, bankAccount.BankAccountId, "bank account Id must have been set")

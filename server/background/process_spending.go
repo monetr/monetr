@@ -76,9 +76,20 @@ func (p *ProcessSpendingHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		repo := repository.NewRepositoryFromSession(p.clock, "user_system", args.AccountId, txn)
+		log = log.WithContext(span.Context()).WithFields(logrus.Fields{
+			"accountId":     args.AccountId,
+			"bankAccountId": args.BankAccountId,
+		})
+
+		repo := repository.NewRepositoryFromSession(
+			p.clock,
+			"user_system",
+			args.AccountId,
+			txn,
+			log,
+		)
 		job, err := NewProcessSpendingJob(
-			log.WithContext(span.Context()),
+			log,
 			repo,
 			args,
 			p.clock,
@@ -168,6 +179,12 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 		return err
 	}
 
+	timezone, err := account.GetTimezone()
+	if err != nil {
+		log.WithError(err).Error("failed to parse account timezone")
+		return err
+	}
+
 	now := p.clock.Now()
 	allSpending, err := p.repo.GetSpending(span.Context(), p.args.BankAccountId)
 	if err != nil {
@@ -189,7 +206,11 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 
 		fundingSchedule, ok := fundingSchedules[spending.FundingScheduleId]
 		if !ok {
-			fundingSchedule, err = p.repo.GetFundingSchedule(span.Context(), spending.BankAccountId, spending.FundingScheduleId)
+			fundingSchedule, err = p.repo.GetFundingSchedule(
+				span.Context(),
+				spending.BankAccountId,
+				spending.FundingScheduleId,
+			)
 			if err != nil {
 				log.WithError(err).Warn("failed to retrieve funding schedule for spending object, it will not be processed")
 				continue
@@ -198,15 +219,13 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 			fundingSchedules[spending.FundingScheduleId] = fundingSchedule
 		}
 
-		if err = spending.CalculateNextContribution(
+		spending.CalculateNextContribution(
 			span.Context(),
-			account.Timezone,
+			timezone,
 			fundingSchedule,
 			now,
-		); err != nil {
-			log.WithError(err).Warn("failed to calculate next contribution for spending object")
-			continue
-		}
+			log,
+		)
 
 		spendingToUpdate = append(spendingToUpdate, spending)
 	}
@@ -218,5 +237,9 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 
 	log.WithField("count", len(spendingToUpdate)).Info("updating stale spending objects")
 
-	return errors.Wrap(p.repo.UpdateSpending(span.Context(), p.args.BankAccountId, spendingToUpdate), "failed to update stale spending")
+	return errors.Wrap(p.repo.UpdateSpending(
+		span.Context(),
+		p.args.BankAccountId,
+		spendingToUpdate,
+	), "failed to update stale spending")
 }

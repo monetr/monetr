@@ -141,11 +141,16 @@ func (h *NotificationTrialExpiryHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
+		log = log.WithContext(span.Context()).WithFields(logrus.Fields{
+			"accountId": args.AccountId,
+		})
+
 		repo := repository.NewRepositoryFromSession(
 			h.clock,
 			"user_system",
 			args.AccountId,
 			txn,
+			log,
 		)
 		job, err := NewNotificationTrialExpiryJob(
 			log,

@@ -146,7 +146,13 @@ var (
 						return err
 					}
 
-					repo := repository.NewRepositoryFromSession(clock, "user_admin", jobArgs.AccountId, txn)
+					repo := repository.NewRepositoryFromSession(
+						clock,
+						"user_admin",
+						jobArgs.AccountId,
+						txn,
+						log,
+					)
 
 					kms, err := getKMS(log, configuration)
 					if err != nil {

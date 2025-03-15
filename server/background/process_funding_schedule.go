@@ -56,32 +56,36 @@ func (p *ProcessFundingScheduleHandler) HandleConsumeJob(
 	log *logrus.Entry,
 	data []byte,
 ) error {
-	// TODO Move this into a constructor to make it consistent with the other job code.
-	job := &ProcessFundingScheduleJob{
-		args:  ProcessFundingScheduleArguments{},
-		log:   log.WithContext(ctx),
-		repo:  nil,
-		clock: p.clock,
-	}
-
-	if err := errors.Wrap(p.unmarshaller(data, &job.args), "failed to unmarshal arguments"); err != nil {
+	var args ProcessFundingScheduleArguments
+	if err := errors.Wrap(p.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
 		crumbs.Error(ctx, "Failed to unmarshal arguments for Process Funding Schedule job.", "job", map[string]interface{}{
 			"data": data,
 		})
 		return err
 	}
 
-	crumbs.IncludeUserInScope(ctx, job.args.AccountId)
+	crumbs.IncludeUserInScope(ctx, args.AccountId)
 
 	return p.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
+		log = log.WithContext(span.Context()).WithFields(logrus.Fields{
+			"accountId":     args.AccountId,
+			"bankAccountId": args.BankAccountId,
+		})
+		job := &ProcessFundingScheduleJob{
+			args:  args,
+			log:   log,
+			repo:  nil,
+			clock: p.clock,
+		}
 
 		job.repo = repository.NewRepositoryFromSession(
 			p.clock,
 			"user_system",
 			job.args.AccountId,
 			txn,
+			log,
 		)
 		return job.Run(span.Context())
 	})
@@ -268,24 +272,20 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 				}
 
 				// TODO Take free-to-use into account when allocating to expenses.
-				//  As of writing this I am not going to consider that balance. I'm going to assume that the user has
-				//  enough money in their account at the time of this running that this will accurately reflect a real
-				//  allocated balance. This can be impacted though by a delay in a deposit showing in Plaid and thus us
-				//  over-allocating temporarily until the deposit shows properly in Plaid.
+				//  As of writing this I am not going to consider that balance. I'm
+				//  going to assume that the user has enough money in their account at
+				//  the time of this running that this will accurately reflect a real
+				//  allocated balance. This can be impacted though by a delay in a
+				//  deposit showing in Plaid and thus us over-allocating temporarily
+				//  until the deposit shows properly in Plaid.
 				spending.CurrentAmount += spending.NextContributionAmount
-				if err = (&spending).CalculateNextContribution(
+				(&spending).CalculateNextContribution(
 					span.Context(),
-					account.Timezone,
+					timezone,
 					fundingSchedule,
 					p.clock.Now(),
-				); err != nil {
-					crumbs.Error(span.Context(), "Failed to calculate next contribution for spending", "spending", map[string]interface{}{
-						"fundingScheduleId": fundingScheduleId,
-						"spendingId":        spending.SpendingId,
-					})
-					spendingLog.WithError(err).Error("failed to calculate next contribution for spending")
-					return err
-				}
+					log,
+				)
 
 				expensesToUpdate = append(expensesToUpdate, spending)
 			}

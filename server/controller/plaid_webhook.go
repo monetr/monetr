@@ -204,6 +204,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 		link.CreatedBy,
 		link.AccountId,
 		c.mustGetDatabase(ctx),
+		log,
 	)
 
 	if hook.Error != nil {

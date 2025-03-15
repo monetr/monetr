@@ -194,7 +194,13 @@ func (h *ProcessOFXUploadHandler) HandleConsumeJob(
 		defer span.Finish()
 
 		log := log.WithContext(span.Context())
-		repo := repository.NewRepositoryFromSession(h.clock, "user_system", args.AccountId, txn)
+		repo := repository.NewRepositoryFromSession(
+			h.clock,
+			"user_system",
+			args.AccountId,
+			txn,
+			log,
+		)
 
 		job, err := NewProcessOFXUploadJob(
 			log, repo, h.clock, h.files, h.publisher, h.enqueuer, args,

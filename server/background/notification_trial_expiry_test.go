@@ -225,9 +225,17 @@ func TestNotificationTrialExpiryJob_Run(t *testing.T) {
 		assert.NotNil(t, user.Account.TrialEndsAt, "trial ends at date must be present")
 		assert.Nil(t, user.Account.TrialExpiryNotificationSentAt, "trial notification email should be unsent")
 
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+
 		job, err := background.NewNotificationTrialExpiryJob(
 			log,
-			repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db),
+			repo,
 			db,
 			clock,
 			config,
@@ -281,9 +289,17 @@ func TestNotificationTrialExpiryJob_Run(t *testing.T) {
 		user.Account.TrialExpiryNotificationSentAt = myownsanity.TimeP(clock.Now())
 		testutils.MustDBUpdate(t, user.Account)
 
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+
 		job, err := background.NewNotificationTrialExpiryJob(
 			log,
-			repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db),
+			repo,
 			db,
 			clock,
 			config,
