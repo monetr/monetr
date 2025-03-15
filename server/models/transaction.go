@@ -179,13 +179,7 @@ func AddSpendingToTransaction(
 		log,
 	)
 
-	return allocationAmount, CalculateNextContribution(
-		span.Context(),
-		spending,
-		*spending.FundingSchedule,
-		timezone,
-		now,
-	)
+	return allocationAmount, spending
 }
 
 func ProcessSpentFrom(
