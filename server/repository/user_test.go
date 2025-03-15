@@ -16,11 +16,18 @@ import (
 
 func TestRepositoryBase_GetMe(t *testing.T) {
 	clock := clock.NewMock()
+	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 
 	user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+	repo := repository.NewRepositoryFromSession(
+		clock,
+		user.UserId,
+		user.AccountId,
+		db,
+		log,
+	)
 
 	me, err := repo.GetMe(context.Background())
 	assert.NoError(t, err, "should not return an error for retrieving me")
@@ -32,6 +39,7 @@ func TestRepositoryBase_GetMe(t *testing.T) {
 func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 		clock := clock.NewMock()
+		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		unauthenticatedRepo := GetTestUnauthenticatedRepository(t, clock)
 
@@ -79,7 +87,13 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 		}
 
 		{ // When we are authenticated as the owner
-			ownerRepo := repository.NewRepositoryFromSession(clock, ownerUser.UserId, ownerUser.AccountId, db)
+			ownerRepo := repository.NewRepositoryFromSession(
+				clock,
+				ownerUser.UserId,
+				ownerUser.AccountId,
+				db,
+				log,
+			)
 			owner, err := ownerRepo.GetAccountOwner(context.Background())
 			assert.NoError(t, err, "must be able to retrieve the owner")
 			assert.NotNil(t, owner.Account, "account sub object should be included")
@@ -88,7 +102,13 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 		}
 
 		{ // When we are authenticated as a member
-			memberRepo := repository.NewRepositoryFromSession(clock, memberUser.UserId, memberUser.AccountId, db)
+			memberRepo := repository.NewRepositoryFromSession(
+				clock,
+				memberUser.UserId,
+				memberUser.AccountId,
+				db,
+				log,
+			)
 			// Even if we are the member, we should still retrieve the owner who is
 			// not us. Makes sure the current user ID doesn't change the query.
 			owner, err := memberRepo.GetAccountOwner(context.Background())
@@ -101,6 +121,7 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 
 	t.Run("missing owner", func(t *testing.T) {
 		clock := clock.NewMock()
+		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		unauthenticatedRepo := GetTestUnauthenticatedRepository(t, clock)
 
@@ -134,7 +155,13 @@ func TestRepositoryBase_GetAccountOwner(t *testing.T) {
 		}
 
 		{ // When there is no owner, we should get an error
-			memberRepo := repository.NewRepositoryFromSession(clock, memberUser.UserId, memberUser.AccountId, db)
+			memberRepo := repository.NewRepositoryFromSession(
+				clock,
+				memberUser.UserId,
+				memberUser.AccountId,
+				db,
+				log,
+			)
 			owner, err := memberRepo.GetAccountOwner(context.Background())
 			assert.Error(t, err, "must return an error when there is no owner")
 			assert.Nil(t, owner, "owner object should be nil when there is no owner")

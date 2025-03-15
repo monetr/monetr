@@ -4,11 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 type TransactionSource string
@@ -81,8 +80,13 @@ func (t Transaction) IsAddition() bool {
 // AddSpendingToTransaction will take the provided spending object and deduct as
 // much as possible from this transaction from that spending object. It does not
 // change the spendingId on the transaction, it simply performs the deductions.
-func (t *Transaction) AddSpendingToTransaction(ctx context.Context, spending *Spending, account *Account) error {
-	span := sentry.StartSpan(ctx, "AddSpendingToTransaction")
+func (t *Transaction) AddSpendingToTransaction(
+	ctx context.Context,
+	spending *Spending,
+	timezone *time.Location,
+	log *logrus.Entry,
+) error {
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	var allocationAmount int64
@@ -117,14 +121,13 @@ func (t *Transaction) AddSpendingToTransaction(ctx context.Context, spending *Sp
 
 	// Now that we have deducted the amount we need from the spending we need to
 	// recalculate it's next contribution.
-	if err := spending.CalculateNextContribution(
+	spending.CalculateNextContribution(
 		span.Context(),
-		account.Timezone,
+		timezone,
 		spending.FundingSchedule,
 		time.Now(),
-	); err != nil {
-		return errors.Wrap(err, "failed to calculate next contribution for new transaction expense")
-	}
+		log,
+	)
 
 	return nil
 }
@@ -135,6 +138,7 @@ func AddSpendingToTransaction(
 	spending Spending,
 	timezone *time.Location,
 	now time.Time,
+	log *logrus.Entry,
 ) (amount int64, result Spending) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -166,13 +170,16 @@ func AddSpendingToTransaction(
 	}
 
 	// Keep track of how much we took from the spending in case things change later.
-	return allocationAmount, CalculateNextContribution(
+
+	spending.CalculateNextContribution(
 		span.Context(),
-		spending,
-		*spending.FundingSchedule,
 		timezone,
+		spending.FundingSchedule,
 		now,
+		log,
 	)
+
+	return allocationAmount, spending
 }
 
 func ProcessSpentFrom(
@@ -181,6 +188,7 @@ func ProcessSpentFrom(
 	inputSpend, currentSpend *Spending,
 	now time.Time,
 	timezone *time.Location,
+	log *logrus.Entry,
 ) (updatedTransaction Transaction, updatedSpending []Spending) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -252,15 +260,19 @@ func ProcessSpentFrom(
 			"current spend is missing the embedded funding schedule data",
 		)
 
-		// Now that we have added that money back to the expense we need to
-		// calculate the expense's next contribution.
-		updatedSpending = append(updatedSpending, CalculateNextContribution(
-			span.Context(),
-			*currentSpend,
-			*currentSpend.FundingSchedule,
-			timezone,
-			now,
-		))
+		{ // Clone the expense object so we don't modify things upstream
+			current := *currentSpend
+			// Calculate the next contribution
+			current.CalculateNextContribution(
+				span.Context(),
+				timezone,
+				current.FundingSchedule,
+				now,
+				log,
+			)
+			// Then add it to our list
+			updatedSpending = append(updatedSpending, current)
+		}
 
 		// If we are only removing the expense then we are done with this part.
 		if expensePlan == RemoveExpense {
@@ -271,13 +283,13 @@ func ProcessSpentFrom(
 		// handle the processing of the new expense.
 		fallthrough
 	case AddExpense:
-
 		amountSpent, updatedNewSpend := AddSpendingToTransaction(
 			span.Context(),
 			input,
 			*inputSpend,
 			timezone,
 			now,
+			log,
 		)
 
 		// Then take all the fields that have changed and throw them in our list of

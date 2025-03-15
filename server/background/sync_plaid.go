@@ -130,6 +130,10 @@ func (s *SyncPlaidHandler) HandleConsumeJob(
 	}
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
+	log = log.WithFields(logrus.Fields{
+		"accountId": args.AccountId,
+		"linkId":    args.LinkId,
+	})
 
 	attempts := 0
 	maxAttempts := 3
@@ -144,8 +148,13 @@ RetrySync:
 		defer span.Finish()
 
 		log := log.WithContext(span.Context())
-
-		repo := repository.NewRepositoryFromSession(s.clock, "user_plaid", args.AccountId, txn)
+		repo := repository.NewRepositoryFromSession(
+			s.clock,
+			"user_plaid",
+			args.AccountId,
+			txn,
+			log,
+		)
 		secretsRepo := repository.NewSecretsRepository(
 			log,
 			s.clock,

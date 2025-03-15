@@ -15,12 +15,19 @@ import (
 func TestRepositoryBase_GetBalances(t *testing.T) {
 	t.Run("will read balances", func(t *testing.T) {
 		clock := clock.NewMock()
+		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAManualLink(t, clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
-		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
 
 		balances, err := repo.GetBalances(t.Context(), bank.BankAccountId)
 		assert.NoError(t, err, "must not return an error when reading balances")
@@ -33,12 +40,19 @@ func TestRepositoryBase_GetBalances(t *testing.T) {
 
 	t.Run("with spending objects", func(t *testing.T) {
 		clock := clock.NewMock()
+		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAManualLink(t, clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
-		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
 
 		{ // Before we create an expense, double check balances
 			balances, err := repo.GetBalances(t.Context(), bank.BankAccountId)

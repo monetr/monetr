@@ -1,7 +1,6 @@
 package fixtures
 
 import (
-	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -48,8 +47,15 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount BankAc
 	require.NotZero(t, bankAccount.AccountId, "bank account Id must be included")
 	require.NotNil(t, bankAccount.Account, "bank account must include account object")
 
+	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedBy, bankAccount.AccountId, db)
+	repo := repository.NewRepositoryFromSession(
+		clock,
+		bankAccount.Link.CreatedBy,
+		bankAccount.AccountId,
+		db,
+		log,
+	)
 
 	timezone, err := bankAccount.Account.GetTimezone()
 	require.NoError(t, err, "must be able to get the timezone from the account")
@@ -84,7 +90,7 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount BankAc
 
 			require.NoError(
 				t,
-				repo.CreatePlaidTransaction(context.Background(), plaidTransaction),
+				repo.CreatePlaidTransaction(t.Context(), plaidTransaction),
 				"must be able to seed transaction",
 			)
 		}
@@ -114,7 +120,7 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount BankAc
 			transaction.PlaidTransaction = plaidTransaction
 		}
 
-		err = repo.CreateTransaction(context.Background(), bankAccount.BankAccountId, &transaction)
+		err = repo.CreateTransaction(t.Context(), bankAccount.BankAccountId, &transaction)
 		require.NoError(t, err, "must be able to seed transaction")
 
 		transactions[i] = transaction

@@ -5,6 +5,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/sirupsen/logrus"
 )
 
 type repositoryBase struct {
@@ -14,4 +15,5 @@ type repositoryBase struct {
 	account   *Account
 	kms       secrets.KeyManagement
 	clock     clock.Clock
+	log       *logrus.Entry
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/sirupsen/logrus"
 )
 
 type BaseRepository interface {
@@ -153,16 +154,26 @@ type UnauthenticatedRepository interface {
 	ValidateBetaCode(ctx context.Context, betaCode string) (*Beta, error)
 }
 
-func NewRepositoryFromSession(clock clock.Clock, userId ID[User], accountId ID[Account], database pg.DBI) Repository {
+func NewRepositoryFromSession(
+	clock clock.Clock,
+	userId ID[User],
+	accountId ID[Account],
+	database pg.DBI,
+	log *logrus.Entry,
+) Repository {
 	return &repositoryBase{
 		userId:    userId,
 		accountId: accountId,
 		txn:       database,
 		clock:     clock,
+		log:       log,
 	}
 }
 
-func NewUnauthenticatedRepository(clock clock.Clock, txn pg.DBI) UnauthenticatedRepository {
+func NewUnauthenticatedRepository(
+	clock clock.Clock,
+	txn pg.DBI,
+) UnauthenticatedRepository {
 	return &unauthenticatedRepo{
 		txn:   txn,
 		clock: clock,

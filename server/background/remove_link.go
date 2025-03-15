@@ -92,8 +92,13 @@ func (r *RemoveLinkHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
+		log := log.WithContext(span.Context()).WithFields(logrus.Fields{
+			"accountId": args.AccountId,
+			"linkId":    args.LinkId,
+		})
+
 		job, err := NewRemoveLinkJob(
-			log.WithContext(span.Context()),
+			log,
 			txn,
 			r.clock,
 			r.publisher,
@@ -127,12 +132,18 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
+	log := r.log.WithContext(span.Context())
+
 	accountId := r.args.AccountId
 	linkId := r.args.LinkId
 
-	repo := repository.NewRepositoryFromSession(r.clock, "user_system", accountId, r.db)
-
-	log := r.log.WithContext(span.Context())
+	repo := repository.NewRepositoryFromSession(
+		r.clock,
+		"user_system",
+		accountId,
+		r.db,
+		log,
+	)
 
 	link, err := repo.GetLink(span.Context(), linkId)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/sirupsen/logrus"
 )
 
 func (c *Controller) getSpending(ctx echo.Context) error {
@@ -61,6 +62,8 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		return c.invalidJson(ctx)
 	}
 
+	log := c.getLog(ctx)
+
 	spending.SpendingId = "" // Make sure we create a new spending.
 	spending.BankAccountId = bankAccountId
 	spending.Name, err = c.cleanString(ctx, "Name", spending.Name)
@@ -93,13 +96,6 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "could not find funding schedule specified")
 	}
 
-	// We also need to know the current account's timezone, as contributions are
-	// made at midnight in that user's timezone.
-	account, err := repo.GetAccount(c.getContext(ctx))
-	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to retrieve account details")
-	}
-
 	spending.LastRecurrence = nil
 
 	// Once we know that the next recurrence is not in the past we can just store
@@ -129,14 +125,13 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	spending.NextRecurrence = nextRecurrence
 
 	// Once we have all that data we can calculate the new expenses next contribution amount.
-	if err = spending.CalculateNextContribution(
+	spending.CalculateNextContribution(
 		c.getContext(ctx),
-		account.Timezone,
+		c.mustGetTimezone(ctx),
 		fundingSchedule,
 		c.Clock.Now(),
-	); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate the next contribution for the new spending")
-	}
+		log,
+	)
 
 	if err = repo.CreateSpending(c.getContext(ctx), spending); err != nil {
 		return c.wrapPgError(ctx, err, "failed to create spending")
@@ -148,7 +143,7 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid bank account Id")
+		return c.badRequest(ctx, "Must specify a valid bank account Id")
 	}
 
 	var transfer struct {
@@ -160,8 +155,18 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 		return c.invalidJson(ctx)
 	}
 
+	log := c.getLog(ctx).WithFields(logrus.Fields{
+		"from": logrus.Fields{
+			"spendingId": transfer.FromSpendingId,
+		},
+		"to": logrus.Fields{
+			"spendingId": transfer.FromSpendingId,
+		},
+		"amount": transfer.Amount,
+	})
+
 	if transfer.Amount <= 0 {
-		return c.badRequest(ctx, "transfer amount must be greater than 0")
+		return c.badRequest(ctx, "Transfer amount must be greater than 0")
 	}
 
 	if (transfer.FromSpendingId == nil || (*transfer.FromSpendingId).IsZero()) &&
@@ -169,19 +174,19 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 		return c.badRequest(ctx, "Both a from and a to must be specified to transfer allocated funds")
 	}
 
+	timezone := c.mustGetTimezone(ctx)
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	spendingToUpdate := make([]Spending, 0, 2)
 
-	account, err := c.Accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
-	if err != nil {
-		return c.wrapPgError(ctx, err, "Failed to retrieve account for transfer")
-	}
-
 	var fundingSchedule *FundingSchedule
 
 	if transfer.FromSpendingId != nil {
-		fromExpense, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transfer.FromSpendingId)
+		fromExpense, err := repo.GetSpendingById(
+			c.getContext(ctx),
+			bankAccountId,
+			*transfer.FromSpendingId,
+		)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "Failed to retrieve source expense for transfer")
 		}
@@ -190,21 +195,27 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 			return c.badRequest(ctx, "Cannot transfer more than is available in source goal/expense")
 		}
 
-		fundingSchedule, err = repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, fromExpense.FundingScheduleId)
+		fundingSchedule, err = repo.GetFundingSchedule(
+			c.getContext(ctx),
+			bankAccountId,
+			fromExpense.FundingScheduleId,
+		)
 		if err != nil {
-			return c.wrapPgError(ctx, err, "Failed to retrieve funding schedule for source goal/expense")
+			return c.wrapPgError(
+				ctx,
+				err,
+				"Failed to retrieve funding schedule for source goal/expense",
+			)
 		}
 
 		fromExpense.CurrentAmount -= transfer.Amount
-
-		if err = fromExpense.CalculateNextContribution(
+		fromExpense.CalculateNextContribution(
 			c.getContext(ctx),
-			account.Timezone,
+			timezone,
 			fundingSchedule,
 			c.Clock.Now(),
-		); err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
-		}
+			log,
+		)
 
 		spendingToUpdate = append(spendingToUpdate, *fromExpense)
 	}
@@ -232,20 +243,22 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 				toExpense.FundingScheduleId,
 			)
 			if err != nil {
-				return c.wrapPgError(ctx, err, "Failed to retrieve funding schedule for destination goal/expense")
+				return c.wrapPgError(
+					ctx,
+					err,
+					"Failed to retrieve funding schedule for destination goal/expense",
+				)
 			}
 		}
 
 		toExpense.CurrentAmount += transfer.Amount
-
-		if err = toExpense.CalculateNextContribution(
+		toExpense.CalculateNextContribution(
 			c.getContext(ctx),
-			account.Timezone,
+			timezone,
 			fundingSchedule,
 			c.Clock.Now(),
-		); err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
-		}
+			log,
+		)
 
 		spendingToUpdate = append(spendingToUpdate, *toExpense)
 	}
@@ -258,6 +271,8 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 	if err != nil {
 		return c.wrapPgError(ctx, err, "could not get updated balances")
 	}
+
+	log.Debug("transfered allocated funds between budgets")
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"balance":  balance,
@@ -280,6 +295,9 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 	if err := ctx.Bind(updatedSpending); err != nil {
 		return c.invalidJson(ctx)
 	}
+
+	log := c.getLog(ctx)
+
 	updatedSpending.SpendingId = spendingId
 	updatedSpending.BankAccountId = bankAccountId
 	updatedSpending.Name, err = c.cleanString(ctx, "Name", updatedSpending.Name)
@@ -352,11 +370,7 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 	}
 
 	if recalculateSpending {
-		account, err := repo.GetAccount(c.getContext(ctx))
-		if err != nil {
-			return c.wrapPgError(ctx, err, "failed to retrieve account details")
-		}
-
+		timezone := c.mustGetTimezone(ctx)
 		fundingSchedule, err := repo.GetFundingSchedule(
 			c.getContext(ctx),
 			bankAccountId,
@@ -366,14 +380,13 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 			return c.wrapPgError(ctx, err, "failed to retrieve funding schedule")
 		}
 
-		if err = updatedSpending.CalculateNextContribution(
+		updatedSpending.CalculateNextContribution(
 			c.getContext(ctx),
-			account.Timezone,
+			timezone,
 			fundingSchedule,
 			c.Clock.Now(),
-		); err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution")
-		}
+			log,
+		)
 	}
 
 	if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []Spending{

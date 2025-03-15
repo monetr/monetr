@@ -1,7 +1,6 @@
 package fixtures
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -26,7 +25,13 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user User) Link {
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 
-	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+	repo := repository.NewRepositoryFromSession(
+		clock,
+		user.UserId,
+		user.AccountId,
+		db,
+		log,
+	)
 	secretsRepo := repository.NewSecretsRepository(
 		log,
 		clock,
@@ -39,7 +44,7 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user User) Link {
 		Kind:  PlaidSecretKind,
 		Value: gofakeit.UUID(),
 	}
-	err := secretsRepo.Store(context.Background(), &secret)
+	err := secretsRepo.Store(t.Context(), &secret)
 	require.NoError(t, err, "must be able to see plaid token secret")
 
 	plaidLink := PlaidLink{
@@ -61,7 +66,7 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user User) Link {
 		CreatedAt:            clock.Now().UTC(),
 		CreatedBy:            user.UserId,
 	}
-	err = repo.CreatePlaidLink(context.Background(), &plaidLink)
+	err = repo.CreatePlaidLink(t.Context(), &plaidLink)
 	require.NoError(t, err, "must be able to seed plaid link")
 
 	link := Link{
@@ -77,16 +82,22 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user User) Link {
 		UpdatedAt:       clock.Now(),
 	}
 
-	err = repo.CreateLink(context.Background(), &link)
+	err = repo.CreateLink(t.Context(), &link)
 	require.NoError(t, err, "must be able to seed link")
 
 	return link
 }
 
 func GivenIHaveAManualLink(t *testing.T, clock clock.Clock, user User) Link {
+	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
-
-	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+	repo := repository.NewRepositoryFromSession(
+		clock,
+		user.UserId,
+		user.AccountId,
+		db,
+		log,
+	)
 
 	link := Link{
 		AccountId:       user.AccountId,
@@ -99,7 +110,7 @@ func GivenIHaveAManualLink(t *testing.T, clock clock.Clock, user User) Link {
 		UpdatedAt:       clock.Now(),
 	}
 
-	err := repo.CreateLink(context.Background(), &link)
+	err := repo.CreateLink(t.Context(), &link)
 	require.NoError(t, err, "must be able to seed link")
 
 	return link

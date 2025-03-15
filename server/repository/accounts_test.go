@@ -15,9 +15,16 @@ import (
 func TestRepositoryBase_GetAccount(t *testing.T) {
 	t.Run("account does not exist", func(t *testing.T) {
 		clock := clock.NewMock()
+		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
-		repo := repository.NewRepositoryFromSession(clock, "user_bogus", "acct_bogus", db)
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			"user_bogus",
+			"acct_bogus",
+			db,
+			log,
+		)
 		account, err := repo.GetAccount(context.Background())
 		assert.EqualError(t, err, "failed to retrieve account: pg: no rows in result set")
 		assert.Nil(t, account, "should not return an account")
@@ -25,11 +32,18 @@ func TestRepositoryBase_GetAccount(t *testing.T) {
 
 	t.Run("account exists", func(t *testing.T) {
 		clock := clock.NewMock()
+		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
 		account, err := repo.GetAccount(context.Background())
 		assert.NoError(t, err, "must not return an error if the account exists")
 		assert.NotNil(t, account, "should return a valid account")
@@ -38,11 +52,18 @@ func TestRepositoryBase_GetAccount(t *testing.T) {
 
 	t.Run("will cache the account", func(t *testing.T) {
 		clock := clock.NewMock()
+		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
 		account, err := repo.GetAccount(context.Background())
 		assert.NoError(t, err, "must not return an error if the account exists")
 		assert.NotNil(t, account, "should return a valid account")

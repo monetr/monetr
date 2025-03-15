@@ -3,13 +3,13 @@ package controller
 import (
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 func (c *Controller) getFundingSchedules(ctx echo.Context) error {
@@ -128,6 +128,8 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		return c.invalidJson(ctx)
 	}
 
+	log := c.getLog(ctx)
+
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	// Retrieve the existing funding schedule to make sure some fields cannot be overridden
 	existingFundingSchedule, err := repo.GetFundingSchedule(
@@ -149,15 +151,15 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 	request.LastRecurrence = existingFundingSchedule.LastRecurrence
 
 	if request.Name == "" {
-		return c.badRequest(ctx, "funding schedule must have a name")
+		return c.badRequest(ctx, "Funding schedule must have a name")
 	}
 
 	if request.RuleSet == nil {
-		return c.badRequest(ctx, "funding schedule must include a rule set")
+		return c.badRequest(ctx, "Funding schedule must include a rule set")
 	}
 
 	if request.EstimatedDeposit != nil && *request.EstimatedDeposit < 0 {
-		return c.badRequest(ctx, "estimated deposit must be greater than or equal to zero")
+		return c.badRequest(ctx, "Estimated deposit must be greater than or equal to zero")
 	}
 
 	recalculateSpending := false
@@ -180,8 +182,14 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		recalculateSpending = true
 	}
 
+	log = log.WithFields(logrus.Fields{
+		"bankAccountId":     bankAccountId,
+		"fundingScheduleId": fundingScheduleId,
+	})
+
 	updatedSpending := make([]Spending, 0)
 	if recalculateSpending {
+		log.Debug("spending will be recalculated as part of this funding schedule update")
 		crumbs.Debug(c.getContext(ctx), "Spending will be recalculated as part of this funding schedule update", map[string]interface{}{
 			"bankAccountId":     bankAccountId,
 			"fundingScheduleId": fundingScheduleId,
@@ -192,19 +200,26 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		}
 
 		if len(spending) > 0 {
-			account, err := repo.GetAccount(c.getContext(ctx))
-			if err != nil {
-				return c.wrapPgError(ctx, err, "failed to retrieve account data to update funding schedule")
-			}
-
-			now := time.Now()
+			now := c.Clock.Now()
+			timezone := c.mustGetTimezone(ctx)
 			for _, spend := range spending {
-				if err := spend.CalculateNextContribution(c.getContext(ctx), account.Timezone, &request, now); err != nil {
-					return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to recalculate spending object")
-				}
+				log.
+					WithField("spendingId", spend.SpendingId).
+					Debug("recalculating next contribution for spending due to updated funding schedule")
+				spend.CalculateNextContribution(
+					c.getContext(ctx),
+					timezone,
+					&request,
+					now,
+					log,
+				)
 			}
 
-			if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, spending); err != nil {
+			if err = repo.UpdateSpending(
+				c.getContext(ctx),
+				bankAccountId,
+				spending,
+			); err != nil {
 				return c.wrapPgError(ctx, err, "failed to update spending objects for updated funding schedule")
 			}
 			updatedSpending = spending

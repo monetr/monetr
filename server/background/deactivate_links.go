@@ -90,8 +90,17 @@ func (d *DeactivateLinksHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := log.WithContext(span.Context())
-		repo := repository.NewRepositoryFromSession(d.clock, "user_system", args.AccountId, txn)
+		log = log.WithContext(span.Context()).WithFields(logrus.Fields{
+			"accountId": args.AccountId,
+			"linkId":    args.LinkId,
+		})
+		repo := repository.NewRepositoryFromSession(
+			d.clock,
+			"user_system",
+			args.AccountId,
+			txn,
+			log,
+		)
 		secretsRepo := repository.NewSecretsRepository(
 			log,
 			d.clock,

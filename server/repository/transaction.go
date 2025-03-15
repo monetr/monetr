@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 type TransactionUpdateId struct {
@@ -318,9 +319,13 @@ func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId ID
 	return nil
 }
 
-// UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is doing a
-// bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
-func (r *repositoryBase) UpdateTransactions(ctx context.Context, transactions []*Transaction) error {
+// UpdateTransactions is unique in that it REQUIRES that all data on each
+// transaction object be populated. It is doing a bulk update, so if data is
+// missing it has the potential to overwrite a transaction incorrectly.
+func (r *repositoryBase) UpdateTransactions(
+	ctx context.Context,
+	transactions []*Transaction,
+) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -346,7 +351,11 @@ func (r *repositoryBase) UpdateTransactions(ctx context.Context, transactions []
 	return nil
 }
 
-func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) error {
+func (r *repositoryBase) DeleteTransaction(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	transactionId ID[Transaction],
+) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -360,7 +369,11 @@ func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId ID
 	return errors.Wrap(err, "failed to soft-delete transaction")
 }
 
-func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context, linkId ID[Link], plaidTransactionIds []string) ([]Transaction, error) {
+func (r *repositoryBase) GetTransactionsByPlaidTransactionId(
+	ctx context.Context,
+	linkId ID[Link],
+	plaidTransactionIds []string,
+) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -382,7 +395,10 @@ func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context
 	return result, nil
 }
 
-func (r *repositoryBase) GetRecentDepositTransactions(ctx context.Context, bankAccountId ID[BankAccount]) ([]Transaction, error) {
+func (r *repositoryBase) GetRecentDepositTransactions(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -401,11 +417,24 @@ func (r *repositoryBase) GetRecentDepositTransactions(ctx context.Context, bankA
 	return result, nil
 }
 
-func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAccountId ID[BankAccount], input, existing *Transaction) (updatedExpenses []Spending, _ error) {
+func (r *repositoryBase) ProcessTransactionSpentFrom(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	input, existing *Transaction,
+) (updatedExpenses []Spending, _ error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
+	log := r.log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"bankAccountId": bankAccountId,
+		"transactionId": existing.TransactionId,
+	})
+
 	account, err := r.GetAccount(span.Context())
+	if err != nil {
+		return nil, err
+	}
+	timezone, err := account.GetTimezone()
 	if err != nil {
 		return nil, err
 	}
@@ -432,12 +461,15 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 	case existingSpendingId.IsZero() && !newSpendingId.IsZero():
 		// Spending is being added to the transaction.
 		expensePlan = AddExpense
+		log = log.WithField("transactionAction", "AddExpense")
 	case !existingSpendingId.IsZero() && newSpendingId != existingSpendingId && !newSpendingId.IsZero():
 		// Spending is being changed from one expense to another.
 		expensePlan = ChangeExpense
+		log = log.WithField("transactionAction", "ChangeExpense")
 	case !existingSpendingId.IsZero() && newSpendingId.IsZero():
 		// Spending is being removed from the transaction.
 		expensePlan = RemoveExpense
+		log = log.WithField("transactionAction", "RemoveExpense")
 	default:
 		// TODO Handle transaction amount changes with expenses.
 		return nil, nil
@@ -448,15 +480,32 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 	var currentErr, newErr error
 	switch expensePlan {
 	case AddExpense:
-		newExpense, newErr = r.GetSpendingById(span.Context(), bankAccountId, newSpendingId)
+		newExpense, newErr = r.GetSpendingById(
+			span.Context(),
+			bankAccountId,
+			newSpendingId,
+		)
 	case ChangeExpense:
-		currentExpense, currentErr = r.GetSpendingById(span.Context(), bankAccountId, existingSpendingId)
-		newExpense, newErr = r.GetSpendingById(span.Context(), bankAccountId, newSpendingId)
+		currentExpense, currentErr = r.GetSpendingById(
+			span.Context(),
+			bankAccountId,
+			existingSpendingId,
+		)
+		newExpense, newErr = r.GetSpendingById(
+			span.Context(),
+			bankAccountId,
+			newSpendingId,
+		)
 	case RemoveExpense:
-		currentExpense, currentErr = r.GetSpendingById(span.Context(), bankAccountId, existingSpendingId)
+		currentExpense, currentErr = r.GetSpendingById(
+			span.Context(),
+			bankAccountId,
+			existingSpendingId,
+		)
 	}
 
-	// If we failed to retrieve either of the expenses then something is wrong and we need to stop.
+	// If we failed to retrieve either of the expenses then something is wrong and
+	// we need to stop.
 	switch {
 	case currentErr != nil:
 		return nil, errors.Wrap(currentErr, "failed to retrieve the current expense for the transaction")
@@ -468,10 +517,11 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 
 	switch expensePlan {
 	case ChangeExpense, RemoveExpense:
-		// If the transaction already has an expense then it should have an expense amount. If this is missing then
-		// something is wrong.
+		// If the transaction already has an expense then it should have an expense
+		// amount. If this is missing then something is wrong.
 		if existing.SpendingAmount == nil {
-			// TODO Handle missing expense amount when changing or removing a transaction's expense.
+			// TODO Handle missing expense amount when changing or removing a
+			// transaction's expense.
 			panic("somethings wrong, expense amount missing")
 		}
 
@@ -488,17 +538,18 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 
 		input.SpendingAmount = nil
 
-		// Now that we have added that money back to the expense we need to calculate the expense's next contribution.
-		if err = currentExpense.CalculateNextContribution(
+		// Now that we have added that money back to the expense we need to
+		// calculate the expense's next contribution.
+		currentExpense.CalculateNextContribution(
 			span.Context(),
-			account.Timezone,
+			timezone,
 			currentExpense.FundingSchedule,
-			time.Now(),
-		); err != nil {
-			return nil, errors.Wrap(err, "failed to calculate next contribution for current transaction expense")
-		}
+			r.clock.Now(),
+			log,
+		)
 
-		// Then take all the fields that have changed and throw them in our list of things to update.
+		// Then take all the fields that have changed and throw them in our list of
+		// things to update.
 		expenseUpdates = append(expenseUpdates, *currentExpense)
 
 		// If we are only removing the expense then we are done with this part.
@@ -506,11 +557,16 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 			break
 		}
 
-		// If we are changing the expense though then we want to fallthrough to handle the processing of the new
-		// expense.
+		// If we are changing the expense though then we want to fallthrough to
+		// handle the processing of the new expense.
 		fallthrough
 	case AddExpense:
-		if err = input.AddSpendingToTransaction(span.Context(), newExpense, account); err != nil {
+		if err = input.AddSpendingToTransaction(
+			span.Context(),
+			newExpense,
+			timezone,
+			log,
+		); err != nil {
 			return nil, err
 		}
 
@@ -518,10 +574,18 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 		expenseUpdates = append(expenseUpdates, *newExpense)
 	}
 
-	return expenseUpdates, r.UpdateSpending(span.Context(), bankAccountId, expenseUpdates)
+	return expenseUpdates, r.UpdateSpending(
+		span.Context(),
+		bankAccountId,
+		expenseUpdates,
+	)
 }
 
-func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transaction *Transaction, spending *Spending) error {
+func (r *repositoryBase) AddExpenseToTransaction(
+	ctx context.Context,
+	transaction *Transaction,
+	spending *Spending,
+) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -529,6 +593,16 @@ func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transactio
 	if err != nil {
 		return err
 	}
+	timezone, err := account.GetTimezone()
+	if err != nil {
+		return err
+	}
+
+	log := r.log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"bankAccountId": transaction.BankAccountId,
+		"transactionId": transaction.TransactionId,
+		"spendingId":    spending.SpendingId,
+	})
 
 	var allocationAmount int64
 	// If the amount allocated to the spending we are adding to the transaction is less than the amount of the
@@ -555,14 +629,13 @@ func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transactio
 	transaction.SpendingAmount = &allocationAmount
 
 	// Now that we have deducted the amount we need from the spending we need to recalculate it's next contribution.
-	if err = spending.CalculateNextContribution(
+	spending.CalculateNextContribution(
 		span.Context(),
-		account.Timezone,
+		timezone,
 		spending.FundingSchedule,
-		time.Now(),
-	); err != nil {
-		return errors.Wrap(err, "failed to calculate next contribution for new transaction expense")
-	}
+		r.clock.Now(),
+		log,
+	)
 
 	return nil
 }

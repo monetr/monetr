@@ -195,7 +195,13 @@ func TestSyncPlaidAccountsJob_Run(t *testing.T) {
 
 		job, err := background.NewSyncPlaidAccountsJob(
 			log,
-			repository.NewRepositoryFromSession(clock, "user_system", user.AccountId, db),
+			repository.NewRepositoryFromSession(
+				clock,
+				"user_system",
+				user.AccountId,
+				db,
+				log,
+			),
 			clock,
 			repository.NewSecretsRepository(log, clock, db, kms, user.AccountId),
 			plaidPlatypus,
@@ -291,7 +297,13 @@ func TestSyncPlaidAccountsJob_Run(t *testing.T) {
 
 		job, err := background.NewSyncPlaidAccountsJob(
 			log,
-			repository.NewRepositoryFromSession(clock, "user_system", user.AccountId, db),
+			repository.NewRepositoryFromSession(
+				clock,
+				"user_system",
+				user.AccountId,
+				db,
+				log,
+			),
 			clock,
 			repository.NewSecretsRepository(log, clock, db, kms, user.AccountId),
 			plaidPlatypus,

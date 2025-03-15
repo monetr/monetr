@@ -1,7 +1,6 @@
 package fixtures
 
 import (
-	"context"
 	"testing"
 
 	"github.com/benbjohnson/clock"
@@ -13,7 +12,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func GivenIHaveAFundingSchedule(t *testing.T, clock clock.Clock, bankAccount *models.BankAccount, ruleString string, excludeWeekends bool) *models.FundingSchedule {
+func GivenIHaveAFundingSchedule(
+	t *testing.T,
+	clock clock.Clock,
+	bankAccount *models.BankAccount,
+	ruleString string,
+	excludeWeekends bool,
+) *models.FundingSchedule {
 	require.NotNil(t, bankAccount, "must provide a valid bank account")
 	require.NotZero(t, bankAccount.BankAccountId, "bank account must have a valid Id")
 	require.NotZero(t, bankAccount.AccountId, "bank account must have a valid account Id")
@@ -23,8 +28,15 @@ func GivenIHaveAFundingSchedule(t *testing.T, clock clock.Clock, bankAccount *mo
 		panic("sorry I haven't implemented this yet")
 	}
 
+	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedBy, bankAccount.AccountId, db)
+	repo := repository.NewRepositoryFromSession(
+		clock,
+		bankAccount.Link.CreatedBy,
+		bankAccount.AccountId,
+		db,
+		log,
+	)
 
 	timezone := testutils.MustEz(t, bankAccount.Account.GetTimezone)
 	rule := testutils.RuleToSet(t, timezone, ruleString, clock.Now())
@@ -44,7 +56,10 @@ func GivenIHaveAFundingSchedule(t *testing.T, clock clock.Clock, bankAccount *mo
 		NextRecurrenceOriginal: nextOccurrence,
 	}
 
-	require.NoError(t, repo.CreateFundingSchedule(context.Background(), &fundingSchedule), "must be able to create funding schedule")
+	require.NoError(t, repo.CreateFundingSchedule(
+		t.Context(),
+		&fundingSchedule,
+	), "must be able to create funding schedule")
 
 	return &fundingSchedule
 }
