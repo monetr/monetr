@@ -27,8 +27,14 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
 
   const amountClass = mergeTailwind(
     {
-      'text-green-500': spending.targetAmount <= spending.currentAmount,
-      'text-blue-500': spending.targetAmount !== spending.currentAmount,
+      // Green if the expense is funded fully
+      'text-green-500': spending.targetAmount === spending.currentAmount,
+      // Blue if the expense is not funded fully but is not behind
+      'text-blue-500': !spending.isBehind && spending.targetAmount > spending.currentAmount,
+      // Red if the expense is not fully funded and is behind
+      'text-red-500': spending.isBehind && spending.targetAmount > spending.currentAmount,
+      // Yellow if the expense is over funded
+      'text-yellow-400': spending.targetAmount < spending.currentAmount,
     },
     'text-end',
     'font-semibold',
