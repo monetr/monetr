@@ -63,7 +63,7 @@ export default function BudgetingSidebarTitle(): JSX.Element {
             <Plug />
             Update Account Selection
           </MenuItem>
-          <MenuItem visible={ link.getIsPlaid() } onClick={ handleTriggerResync }>
+          <MenuItem visible={ link.getIsPlaid() && !link.getIsRevoked() } onClick={ handleTriggerResync }>
             <RefreshCw />
             Manually Resync
           </MenuItem>
