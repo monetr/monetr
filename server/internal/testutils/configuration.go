@@ -47,5 +47,9 @@ func GetConfig(t *testing.T) config.Configuration {
 		Logging: config.Logging{
 			Level: "trace",
 		},
+		Storage: config.Storage{
+			Enabled:  true,
+			Provider: "mock",
+		},
 	}
 }
