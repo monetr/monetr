@@ -35,6 +35,18 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
     );
   };
 
+  const LinkRevokedIndicator = () => {
+    const isBad = link.getIsPlaid() && link.getIsRevoked();
+    if (!isBad) return null;
+
+    return (
+      <span className='absolute flex h-3 w-3 right-0 bottom-0'>
+        <span className='animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-red-400' />
+        <span className='relative inline-flex rounded-full h-3 w-3 bg-red-500' />
+      </span>
+    );
+  };
+
   const classes = mergeTailwind(
     'absolute',
     'dark:bg-dark-monetr-border',
@@ -56,10 +68,14 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
   );
 
   let tooltip: string = link.getName();
-  if (link.getIsError()) {
-    tooltip = `${tooltip} (Error)`;
-  } else if (link.getIsPendingExpiration()) {
-    tooltip = `${tooltip} (Pending Expiration)`;
+  if (link.getIsPlaid()) {
+    if (link.getIsError()) {
+      tooltip = `${tooltip} (Error)`;
+    } else if (link.getIsPendingExpiration()) {
+      tooltip = `${tooltip} (Pending Expiration)`;
+    } else if (link.getIsRevoked()) {
+      tooltip = `${tooltip} (Disconnected)`;
+    }
   }
 
   return (
@@ -75,6 +91,7 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
         >
           <PlaidInstitutionLogo link={ link } />
           <LinkWarningIndicator />
+          <LinkRevokedIndicator />
         </Link>
       </TooltipTrigger>
       <TooltipContent side='right'>

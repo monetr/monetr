@@ -64,6 +64,10 @@ export default class Link {
     return this.plaidLink?.status === PlaidLinkStatus.PendingExpiration;
   }
 
+  getIsRevoked(): boolean {
+    return this.plaidLink?.status === PlaidLinkStatus.Revoked;
+  }
+
   getErrorMessage(): string | null {
     const code = this.plaidLink?.status;
     return errorMessages[code] || null;
