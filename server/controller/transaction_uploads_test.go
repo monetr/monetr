@@ -70,6 +70,50 @@ func TestPostTransaactionUpload(t *testing.T) {
 		response.JSON().Path("$.status").String().IsEqual("pending")
 	})
 
+	t.Run("upload camt.053 to the wrong endpoint", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Seed data
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		app.Storage.EXPECT().
+			Store(
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(0).
+			Return(
+				"",
+				nil,
+			)
+
+		app.Jobs.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				background.ProcessOFXUpload,
+				gomock.Any(),
+			).
+			Times(0).
+			Return(nil)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions/upload").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithMultipart().
+			WithFileBytes("data", "statement.xml", fixtures.LoadFile(t, "goldman-us-camt053-v2.xml")).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("Unsupported file type!")
+	})
+
 	t.Run("storage disabled", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Storage.Enabled = false
