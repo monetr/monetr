@@ -5,7 +5,7 @@ provision_golang_tests(${CMAKE_CURRENT_SOURCE_DIR})
 include(ExternalProject)
 ExternalProject_Add(simple-icons
   GIT_REPOSITORY https://github.com/simple-icons/simple-icons.git
-  GIT_TAG 14.8.0
+  GIT_TAG 14.11.0
   SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/sources/simple-icons"
   BINARY_DIR ""
   CONFIGURE_COMMAND ""
