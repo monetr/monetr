@@ -6,7 +6,6 @@ import { KeyboardArrowRight } from '@mui/icons-material';
 import MBadge from '@monetr/interface/components/MBadge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
-import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
@@ -86,7 +85,6 @@ interface GoalProps {
 
 function GoalAmount({ spending }: GoalProps): JSX.Element {
   const { data: locale } = useLocaleCurrency();
-  const user = useAuthentication();
   const amountClass = mergeTailwind(
     {
       'text-green-500': spending.targetAmount <= spending.currentAmount,
