@@ -74,13 +74,15 @@ const (
 	TextCSVContentType      ContentType = "text/csv"
 	OpenXMLExcelContentType ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 	IntuitQFXContentType    ContentType = "application/vnd.intu.QFX"
+	CAMT053ContentType      ContentType = "application/vnd.camt-053" // Not a real content type, but what monetr will use.
 )
 
 var (
 	contentTypeExtensions = map[ContentType]string{
-		TextCSVContentType:      "csv",
-		OpenXMLExcelContentType: "xlsx",
+		CAMT053ContentType:      "xml",
 		IntuitQFXContentType:    "qfx",
+		OpenXMLExcelContentType: "xlsx",
+		TextCSVContentType:      "csv",
 	}
 )
 
