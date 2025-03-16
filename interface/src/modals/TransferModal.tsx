@@ -30,6 +30,12 @@ interface TransferValues {
 }
 
 function TransferModal(props: TransferModalProps): JSX.Element {
+  const initialValues: TransferValues = {
+    fromSpendingId: props.initialFromSpendingId,
+    toSpendingId: props.initialToSpendingId,
+    amount: 0.00,
+  };
+
   const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
@@ -37,13 +43,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { result: spending } = useSpendingSink();
 
-  const initialValues: TransferValues = {
-    fromSpendingId: props.initialFromSpendingId,
-    toSpendingId: props.initialToSpendingId,
-    amount: 0.00,
-  };
-
-  function validate(values: TransferValues): FormikErrors<TransferValues> {
+  const validate = useCallback((values: TransferValues): FormikErrors<TransferValues> => {
     const errors: FormikErrors<TransferValues> = {};
     const amount = locale.friendlyToAmount(values.amount);
 
@@ -63,9 +63,9 @@ function TransferModal(props: TransferModalProps): JSX.Element {
     }
 
     return errors;
-  }
+  }, [locale, spending]);
 
-  async function submit(values: TransferValues, helper: FormikHelpers<TransferValues>): Promise<void> {
+  const submit = useCallback(async (values: TransferValues, helper: FormikHelpers<TransferValues>): Promise<void> => {
     if (values.toSpendingId === null && values.fromSpendingId === null) {
       helper.setFieldError('toSpendingId', 'Must select a destination and a source');
       return Promise.resolve();
@@ -78,7 +78,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
     }
 
     helper.setSubmitting(true);
-    return transfer({
+    return await transfer({
       fromSpendingId: values.fromSpendingId,
       toSpendingId: values.toSpendingId,
       amount: locale.friendlyToAmount(values.amount),
@@ -97,7 +97,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
           disableWindowBlurListener: true,
         }))
       .finally(() => helper.setSubmitting(false));
-  }
+  }, [enqueueSnackbar, locale, modal, transfer, validate]);
 
   return (
     <MModal open={ modal.visible } ref={ ref } className='md:max-w-sm'>
@@ -170,8 +170,7 @@ export function showTransferModal(props: TransferModalProps): Promise<void> {
 
 function ReverseTargetsButton(): JSX.Element {
   const formik = useFormikContext<TransferValues>();
-
-  function onClick() {
+  const swap = useCallback(() => {
     // Do nothing if we are currently submitting.
     if (formik.isSubmitting) return;
 
@@ -181,12 +180,12 @@ function ReverseTargetsButton(): JSX.Element {
       toSpendingId: fromSpendingId,
       amount: amount,
     });
-  }
+  }, [formik]);
 
   return (
     <a className='w-full flex justify-center mb-1'>
       <SwapVertOutlined
-        onClick={ onClick }
+        onClick={ swap }
         className='cursor-pointer text-4xl dark:text-dark-monetr-content-subtle hover:dark:text-dark-monetr-content'
       />
     </a>

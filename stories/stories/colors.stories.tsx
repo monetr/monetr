@@ -22,9 +22,9 @@ export const Pallete: StoryObj<typeof Component> = {
 
     const colors = Object.entries(theme.colors).map(([name, variations]) => {
       const items = Object.entries(variations).filter(([_, color]) => !!color).map(([weight, color]) => (
-        <div>
+        <div key={ `${name}-${weight}` }>
           <span>{ name }-{ weight }</span>
-          <div key={ `${name}-${weight}` } className='p-4 col-span-1' style={ { backgroundColor: color as any } } />
+          <div className='p-4 col-span-1' style={ { backgroundColor: color as any } } />
         </div>
       ));
 

@@ -1,4 +1,4 @@
-import React, { Fragment, useRef } from 'react';
+import React, { Fragment, useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
 import { startOfDay, startOfTomorrow } from 'date-fns';
@@ -43,8 +43,10 @@ function NewFundingModal(): JSX.Element {
   const selectedBankAccountId = useSelectedBankAccountId();
   const createFundingSchedule = useCreateFundingSchedule();
   const { data: { friendlyToAmount } } = useLocaleCurrency();
-
-  async function submit(values: NewFundingValues, helpers: FormikHelpers<NewFundingValues>): Promise<void> {
+  const submit = useCallback(async (
+    values: NewFundingValues,
+    helpers: FormikHelpers<NewFundingValues>,
+  ): Promise<void> => {
     helpers.setSubmitting(true);
     const newFundingSchedule = new FundingSchedule({
       bankAccountId: selectedBankAccountId,
@@ -55,7 +57,7 @@ function NewFundingModal(): JSX.Element {
       excludeWeekends: values.excludeWeekends,
     });
 
-    return createFundingSchedule(newFundingSchedule)
+    return await createFundingSchedule(newFundingSchedule)
       .then(created => modal.resolve(created))
       .then(() => modal.remove())
       .catch((error: AxiosError) => void enqueueSnackbar(error.response.data['error'], {
@@ -63,7 +65,8 @@ function NewFundingModal(): JSX.Element {
         disableWindowBlurListener: true,
       }))
       .finally(() => helpers.setSubmitting(false));
-  }
+  }, [createFundingSchedule, enqueueSnackbar, friendlyToAmount, modal, selectedBankAccountId]);
+
 
   return (
     <MModal open={ modal.visible } ref={ ref } className='md:max-w-md'>

@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import Select, { ActionMeta, components, FormatOptionLabelMeta, OnChangeValue, OptionProps, Theme } from 'react-select';
 import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 
@@ -29,7 +29,11 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
   const [isLoading, setIsLoading] = useState(false);
   const id = `txn-${transaction.transactionId}-spending-input`;
 
-  async function updateSpentFrom(selection: Spending | null) {
+  const onChangeSpentFrom = useCallback(async (
+    newValue: OnChangeValue<SpendingOption, false>,
+    _: ActionMeta<SpendingOption>,
+  ) => {
+    const selection = newValue.spending;
     const spendingId = selection ? selection.spendingId : null;
 
     // Not strict equal because undefined vs null stuff.
@@ -44,7 +48,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
       spendingId: spendingId,
     });
 
-    return updateTransaction(updatedTransaction)
+    return await updateTransaction(updatedTransaction)
       .finally(() => {
         setIsLoading(false);
         // Needs to be in a timeout for some reason. But basically re-focus the select after we have updated the
@@ -53,11 +57,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
           document.getElementById(id).focus();
         }, 0);
       });
-  }
-
-  function handleSpentFromChange(newValue: OnChangeValue<SpendingOption, false>, _: ActionMeta<SpendingOption>) {
-    return updateSpentFrom(newValue.spending);
-  }
+  }, [id, transaction, updateTransaction]);
 
   const freeToUse = {
     label: 'Free-To-Use',
@@ -154,7 +154,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
         } }
         classNamePrefix='m-select-spending-transaction'
         isLoading={ isLoading || (spendingIsLoading && Boolean(transaction.spendingId)) }
-        onChange={ handleSpentFromChange }
+        onChange={ onChangeSpentFrom }
         formatOptionLabel={ formatOptionsLabel }
         options={ options }
         value={ selectedItem }

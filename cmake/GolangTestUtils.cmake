@@ -1,3 +1,15 @@
+# Apple has some weird DNS shit that doesn't always work for some reason with
+# golang. In order to work around this if we are on an Apple machine then we
+# need to change the DNS resolver to be the pure go one instead of the cgo one.
+# This will make it so that when we run tests or database migrations we can
+# actually find the server. This was added because without it monetr literally
+# couldn't even resolve localhost.
+# https://pkg.go.dev/net#hdr-Name_Resolution
+set(DNS_FUCKERY)
+if(APPLE)
+  set(DNS_FUCKERY ${CMAKE_COMMAND} -E env GODEBUG=netdns=go --)
+endif()
+
 macro(provision_golang_tests CURRENT_SOURCE_DIR)
   if (BUILD_TESTING)
     if(CMAKE_Go_COMPILER)
@@ -119,7 +131,7 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
 
           add_test(
             NAME ${PACKAGE}/${FRIENDLY_TEST_NAME}
-            COMMAND ${GOTESTSUM_MAYBE} ${PACKAGE_TEST_BINARY} ${TEST_ARGS} -test.run ${REGEX_TEST_NAME}
+            COMMAND ${DNS_FUCKERY} ${GOTESTSUM_MAYBE} ${PACKAGE_TEST_BINARY} ${TEST_ARGS} -test.run ${REGEX_TEST_NAME}
             WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
           )
           set_tests_properties(${PACKAGE}/${FRIENDLY_TEST_NAME} PROPERTIES

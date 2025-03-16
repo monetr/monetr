@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { ShoppingCartOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
@@ -40,8 +40,35 @@ export default function TransactionDetails(): JSX.Element {
   const { transactionId: id } = useParams();
   const updateTransaction = useUpdateTransaction();
   const transactionId = id || null;
-
   const { data: transaction, isLoading, isError } = useTransaction(transactionId);
+  const submit = useCallback(async (values: TransactionValues, helpers: FormikHelpers<TransactionValues>) => {
+    const updatedTransaction = new Transaction({
+      ...transaction,
+      name: values.name,
+      spendingId: values.spendingId,
+      amount: locale.friendlyToAmount(values.amount),
+      date: startOfDay(values.date),
+      isPending: values.isPending,
+    });
+
+    helpers.setSubmitting(true);
+    return await updateTransaction(updatedTransaction)
+      .then(() => enqueueSnackbar(
+        'Updated transaction successfully',
+        {
+          variant: 'success',
+          disableWindowBlurListener: true,
+        },
+      ))
+      .catch((error: AxiosError<APIError>) => enqueueSnackbar(
+        error?.response?.data?.error || 'Failed to update transaction',
+        {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        },
+      ))
+      .finally(() => helpers.setSubmitting(false));
+  }, [enqueueSnackbar, locale, transaction, updateTransaction]);
 
   if (isLoading) {
     return (
@@ -78,35 +105,6 @@ export default function TransactionDetails(): JSX.Element {
         </MSpan>
       </div>
     );
-  }
-
-  async function submit(values: TransactionValues, helpers: FormikHelpers<TransactionValues>) {
-    const updatedTransaction = new Transaction({
-      ...transaction,
-      name: values.name,
-      spendingId: values.spendingId,
-      amount: locale.friendlyToAmount(values.amount),
-      date: startOfDay(values.date),
-      isPending: values.isPending,
-    });
-
-    helpers.setSubmitting(true);
-    return updateTransaction(updatedTransaction)
-      .then(() => enqueueSnackbar(
-        'Updated transaction successfully',
-        {
-          variant: 'success',
-          disableWindowBlurListener: true,
-        },
-      ))
-      .catch((error: AxiosError<APIError>) => enqueueSnackbar(
-        error?.response?.data?.error || 'Failed to update transaction',
-        {
-          variant: 'error',
-          disableWindowBlurListener: true,
-        },
-      ))
-      .finally(() => helpers.setSubmitting(false));
   }
 
   const initialValues: TransactionValues = {

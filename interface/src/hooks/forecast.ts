@@ -21,7 +21,7 @@ interface SpendingForecast {
 export function useSpendingForecast(): (spending: SpendingBareMinimum) => Promise<SpendingForecast> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return async function (spending: SpendingBareMinimum): Promise<SpendingForecast> {
-    return request()
+    return await request()
       .post<SpendingForecast>(`/bank_accounts/${ selectedBankAccountId }/forecast/spending`, spending)
       .then(result => result.data);
   };

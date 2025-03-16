@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
@@ -23,15 +23,10 @@ export default function ResendVerificationPage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const config = useAppConfiguration();
   const { state: routeState } = useLocation();
-  const initialValues: ResendValues = {
-    email: (routeState && routeState['emailAddress']) || undefined,
-    captcha: null,
-  };
-
   const [done, setDone] = useState(false);
 
-  async function resendVerification(values: ResendValues): Promise<void> {
-    return request().post('/authentication/verify/resend', {
+  const resendVerification = useCallback(async (values: ResendValues): Promise<void> => {
+    return await request().post('/authentication/verify/resend', {
       email: values.email,
       captcha: values.captcha,
     })
@@ -40,9 +35,9 @@ export default function ResendVerificationPage(): JSX.Element {
         variant: 'error',
         disableWindowBlurListener: true,
       }));
-  }
+  }, [enqueueSnackbar]);
 
-  function validateInput(values: ResendValues): Partial<ResendValues> | null {
+  const validateInput = useCallback((values: ResendValues): Partial<ResendValues> | null => {
     const errors: Partial<ResendValues> = {};
 
     if (values.email) {
@@ -52,13 +47,18 @@ export default function ResendVerificationPage(): JSX.Element {
     }
 
     return errors;
-  }
+  }, []);
 
-  async function submit(values: ResendValues, helpers: FormikHelpers<ResendValues>): Promise<void> {
+  const submit = useCallback(async (values: ResendValues, helpers: FormikHelpers<ResendValues>): Promise<void> => {
     helpers.setSubmitting(true);
-    return resendVerification(values)
+    return await resendVerification(values)
       .finally(() => helpers.setSubmitting(false));
-  }
+  }, [resendVerification]);
+
+  const initialValues: ResendValues = {
+    email: (routeState && routeState['emailAddress']) || undefined,
+    captcha: null,
+  };
 
   if (done) {
     return <AfterEmailVerificationSent />;

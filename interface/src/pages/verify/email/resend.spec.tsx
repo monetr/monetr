@@ -61,9 +61,11 @@ describe('resend verification email', () => {
       },
     );
 
-    expect(world.queryByTestId('resend-email')).toBeVisible();
-    expect(world.queryByTestId('resend-captcha')).not.toBeInTheDocument();
-    expect(world.queryByTestId('resend-email-included')).toBeVisible();
-    expect(world.queryByTestId('resend-email-excluded')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(world.queryByTestId('resend-email')).toBeVisible();
+      expect(world.queryByTestId('resend-captcha')).not.toBeInTheDocument();
+      expect(world.queryByTestId('resend-email-included')).toBeVisible();
+      expect(world.queryByTestId('resend-email-excluded')).not.toBeInTheDocument();
+    });
   });
 });
