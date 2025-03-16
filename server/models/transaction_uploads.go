@@ -20,6 +20,7 @@ const (
 var (
 	_ pg.BeforeInsertHook = (*TransactionUpload)(nil)
 	_ Identifiable        = TransactionUpload{}
+	_ Uploadable          = TransactionUpload{}
 )
 
 type TransactionUpload struct {
