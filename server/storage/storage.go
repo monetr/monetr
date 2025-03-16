@@ -74,21 +74,31 @@ const (
 	TextCSVContentType      ContentType = "text/csv"
 	OpenXMLExcelContentType ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 	IntuitQFXContentType    ContentType = "application/vnd.intu.QFX"
+	PDFContentType          ContentType = "application/pdf"
+	PNGImageContentType     ContentType = "image/png"
+	JPEGImageContentType    ContentType = "image/jpeg"
+	AppleImageContentType   ContentType = "image/heic"
 )
 
 var (
-	contentTypeExtensions = map[ContentType]string{
-		TextCSVContentType:      "csv",
-		OpenXMLExcelContentType: "xlsx",
-		IntuitQFXContentType:    "qfx",
+	contentTypeExtensions = map[ContentType][]string{
+		TextCSVContentType:      {"csv"},
+		OpenXMLExcelContentType: {"xlsx"},
+		IntuitQFXContentType:    {"qfx", "ofx"},
+		PDFContentType:          {"pdf"},
+		PNGImageContentType:     {"png"},
+		JPEGImageContentType:    {"jpeg", "jpg"},
+		AppleImageContentType:   {"heic", "heif"},
 	}
 )
 
 func getContentTypeByPath(filePath string) (ContentType, error) {
 	extension := strings.TrimPrefix(path.Ext(filePath), ".")
-	for contentType, ext := range contentTypeExtensions {
-		if ext == extension {
-			return contentType, nil
+	for contentType, extensions := range contentTypeExtensions {
+		for _, ext := range extensions {
+			if ext == extension {
+				return contentType, nil
+			}
 		}
 	}
 
