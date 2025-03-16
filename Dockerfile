@@ -1,17 +1,20 @@
 FROM --platform=$BUILDPLATFORM golang:1.24.1 AS base_builder
 WORKDIR /monetr
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  build-essential \
-  ca-certificates \
-  cmake \
-  # gcc-x86-64-linux-gnu \ # Add these back to support arm64 hosts compiling amd64
-  # libc6-dev-amd64-cross \
-  gcc-aarch64-linux-gnu \
-  libc6-dev-arm64-cross \
-  git \
-  nodejs=18.* \
-  npm \
-  wget
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      build-essential \
+      ca-certificates \
+      cmake \
+      # gcc-x86-64-linux-gnu \ # Add these back to support arm64 hosts compiling amd64
+      # libc6-dev-amd64-cross \
+      gcc-aarch64-linux-gnu \
+      libc6-dev-arm64-cross \
+      git \
+      nodejs=18.* \
+      npm \
+      wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN git config --global --add safe.directory /monetr
 
