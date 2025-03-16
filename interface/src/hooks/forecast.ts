@@ -127,6 +127,6 @@ export function useForecast(): ForecastResult {
 
   return {
     ...result,
-    result: !!result?.data ? new Forecast(result.data) : null,
+    result: result?.data ? new Forecast(result.data) : null,
   };
 }

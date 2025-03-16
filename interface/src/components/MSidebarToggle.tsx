@@ -15,7 +15,7 @@ export default function MSidebarToggle(props: MSidebarToggleProps): JSX.Element 
   const { setMobileSidebarOpen, mobileSidebarOpen } = useStore();
 
   function onClick() {
-    if (!!props.backButton) {
+    if (props.backButton) {
       navigate(props.backButton);
     } else {
       setMobileSidebarOpen(!mobileSidebarOpen);

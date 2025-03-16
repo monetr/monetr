@@ -44,7 +44,7 @@ export default function useLocaleCurrency(): UseQueryResult<LocaleCurrency | nul
     ...bankAccount as any,
     ...me as any,
     data: {
-      source: Boolean(bankAccount?.data) ? CurrencySource.BankAccount : CurrencySource.UserDefault,
+      source: bankAccount?.data ? CurrencySource.BankAccount : CurrencySource.UserDefault,
       locale: locale,
       currency: currency,
       friendlyToAmount: friendlyToAmountCallback,

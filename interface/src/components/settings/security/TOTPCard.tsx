@@ -21,7 +21,7 @@ export default function TOTPCard(): JSX.Element {
           disabled={ Boolean(login.totpEnabledAt) }
           onClick={ showEnableTOTPModal }
         >
-          { Boolean(login.totpEnabledAt) ? 'Already Enabled' : 'Enable TOTP' }
+          { login.totpEnabledAt ? 'Already Enabled' : 'Enable TOTP' }
         </Button>
       </div>
       <MSpan size='md' weight='medium' color='emphasis'>

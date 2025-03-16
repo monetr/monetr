@@ -58,11 +58,13 @@ function NewBankAccountModal(): JSX.Element {
       .finally(() => helper.setSubmitting(false));
   }, [createBankAccount, selectedBankAccount, locale, navigate, modal, enqueueSnackbar]);
 
-  if (isLoading) (
-    <MModal open={ modal.visible } ref={ ref }>
-      One moment...
-    </MModal>
-  );
+  if (isLoading) {
+    return (
+      <MModal open={ modal.visible } ref={ ref }>
+        One moment...
+      </MModal>
+    );
+  }
 
   return (
     <MModal open={ modal.visible } ref={ ref }>

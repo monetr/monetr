@@ -71,7 +71,7 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
               </span>
               &nbsp;
               <span className='text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>
-                { !!contributionForecast?.data ? locale.formatAmount(contributionForecast.data, AmountType.Stored) : '...' }
+                { contributionForecast?.data ? locale.formatAmount(contributionForecast.data, AmountType.Stored) : '...' }
               </span>
             </div>
           </div>

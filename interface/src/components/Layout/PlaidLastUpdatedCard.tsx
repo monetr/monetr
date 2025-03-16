@@ -16,11 +16,11 @@ export default function PlaidLastUpdatedCard(props: PlaidLastUpdatedCardProps): 
     return null;
   }
 
-  const lastUpdateString = !!link?.data?.plaidLink?.lastSuccessfulUpdate ?
+  const lastUpdateString = link?.data?.plaidLink?.lastSuccessfulUpdate ?
     formatDistanceToNow(link.data.plaidLink.lastSuccessfulUpdate) :
     'Never';
 
-  const lastAttemptString = !!link?.data?.plaidLink?.lastAttemptedUpdate ?
+  const lastAttemptString = link?.data?.plaidLink?.lastAttemptedUpdate ?
     formatDistanceToNow(link.data.plaidLink.lastAttemptedUpdate) :
     'Never';
 
