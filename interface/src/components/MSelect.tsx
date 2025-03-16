@@ -124,7 +124,7 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
           value: props.value,
           onChange: props.onChange,
         }) }
-        role='none'
+        role='select'
       >
         <ValueContainer />
       </button>
