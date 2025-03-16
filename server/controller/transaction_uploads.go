@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -183,21 +182,6 @@ func (c *Controller) getTransactionUploadProgress(ctx echo.Context) error {
 			return
 		}
 	}).ServeHTTP(ctx.Response(), ctx.Request())
-
-	return nil
-}
-
-func (c *Controller) sendWebsocketMessage(ctx echo.Context, ws *websocket.Conn, message any) error {
-	log := c.getLog(ctx)
-	msg, err := json.Marshal(message)
-	if err != nil {
-		log.WithField("mesasge", message).WithError(err).Error("failed to encode websocket message")
-		return err
-	}
-	if err := websocket.Message.Send(ws, string(msg)); err != nil {
-		log.WithField("mesasge", message).WithError(err).Error("failed to send websocket message")
-		return err
-	}
 
 	return nil
 }
