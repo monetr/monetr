@@ -1,0 +1,905 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+    <BkToCstmrStmt>
+        <GrpHdr>
+            <MsgId>235549650</MsgId>
+            <CreDtTm>2023-10-05T14:43:51.979</CreDtTm>
+            <MsgRcpt>
+                <Nm>Test Client Ltd.</Nm>
+                <Id>
+                    <OrgId>
+                        <Othr>
+                            <Id>test001</Id>
+                        </Othr>
+                    </OrgId>
+                </Id>
+            </MsgRcpt>
+        </GrpHdr>
+        <Stmt>
+            <Id>258158850</Id>
+            <ElctrncSeqNb>1</ElctrncSeqNb>
+            <LglSeqNb>1</LglSeqNb>
+            <CreDtTm>2023-10-05T14:43:52.098</CreDtTm>
+            <FrToDt>
+                <FrDtTm>2023-09-30T20:00:00.000</FrDtTm>
+                <ToDtTm>2023-10-01T19:59:59.000</ToDtTm>
+            </FrToDt>
+            <Acct>
+                <Id>
+                    <Othr>
+                        <Id>DD01100056869</Id>
+                    </Othr>
+                </Id>
+                <Tp>
+                    <Prtry>IBDA_DDA</Prtry>
+                </Tp>
+                <Ccy>USD</Ccy>
+                <Nm>Sample Name 123</Nm>
+                <Svcr>
+                    <FinInstnId>
+                        <BIC>GSCRUS30</BIC>
+                        <Nm>Goldman Sachs Bank</Nm>
+                    </FinInstnId>
+                </Svcr>
+            </Acct>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">843686.20</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-09-30T20:00:00.000</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">846665.15</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-09-30T20:00:00.000</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">334432492.92</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-09-30T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">334432401.27</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-10-01T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <TxsSummry>
+                <TtlNtries>
+                    <NbOfNtries>14</NbOfNtries>
+                    <Sum>140.00</Sum>
+                    <TtlNetNtryAmt>40.00</TtlNetNtryAmt>
+                    <CdtDbtInd>CRDT</CdtDbtInd>
+                </TtlNtries>
+                <TtlCdtNtries>
+                    <NbOfNtries>9</NbOfNtries>
+                    <Sum>90.00</Sum>
+                </TtlCdtNtries>
+                <TtlDbtNtries>
+                    <NbOfNtries>5</NbOfNtries>
+                    <Sum>50.00</Sum>
+                </TtlDbtNtries>
+            </TxsSummry>
+            <Ntry>
+                <NtryRef>52198201</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>true</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T13:37:14.000</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Prtry>
+                        <Cd>ACH Credit Reject</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>GSNULXSKMMJ479NMKS</MsgId>
+                            <AcctSvcrRef>B20092800002225</AcctSvcrRef>
+                            <PmtInfId>RP/GS/CTFILERP0002/CTBA0003</PmtInfId>
+                            <EndToEndId>GSGWGDNCTAHQM8</EndToEndId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RmtInf>
+                            <Ustrd>Sample Unstructured Remittance 123</Ustrd>
+                        </RmtInf>
+                        <RtrInf>
+                            <AddtlInf>Status changed to REJECTED : REJECT REVERSAL</AddtlInf>
+                        </RtrInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>52198251</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T13:37:11.000</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Prtry>
+                        <Cd>ACH Credit Payment</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>GSNULXSKMMJ479NMKS</MsgId>
+                            <AcctSvcrRef>SPB20092845886394</AcctSvcrRef>
+                            <PmtInfId>RP/GS/CTFILERP0002/CTBA0003</PmtInfId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>GS Bank USA</Nm>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <Othr>
+                                        <Id>ACHCONTROLOUTUSD01</Id>
+                                    </Othr>
+                                </Id>
+                            </CdtrAcct>
+                        </RltdPties>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>52198301</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T13:36:04.000</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Prtry>
+                        <Cd>Incoming Wire</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>20230928LTERMID100000312221631FT01</MsgId>
+                            <AcctSvcrRef>I20092800008308</AcctSvcrRef>
+                            <EndToEndId>20230928LTERMID2000003</EndToEndId>
+                            <ClrSysRef>20230928LTERMID2000003</ClrSysRef>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties />
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>111214350</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T21:05:02.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>IDDT</Cd>
+                            <SubFmlyCd>PADD</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>ACH Debit Collection</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>cs3SJXv1RN_20230918_A</MsgId>
+                            <AcctSvcrRef>SPB2326182390753</AcctSvcrRef>
+                            <PmtInfId>cs3SJXv1RN230918A0000022</PmtInfId>
+                            <TxId>SPB2326182390753</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <Purp>
+                            <Prtry>gsbt_Of8X0</Prtry>
+                        </Purp>
+                        <AddtlTxInf>SEC Code: CCD,Desc: Entry Description: gsbt_Of8X0; -, SEC: CCD, Client Ref ID: cs3SJXv1RN230918A0000022, GS ID: SPB2326182390753</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>107770750</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T15:14:51.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>RCDT</Cd>
+                            <SubFmlyCd>BOOK</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Transfer</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>GTOS4BN19D124XV</MsgId>
+                            <AcctSvcrRef>GI2325100009148</AcctSvcrRef>
+                            <EndToEndId>GTOS4BN19D124XV</EndToEndId>
+                            <TxId>GI2325100009148</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Dbtr>
+                                <Nm>TEST CLIENT</Nm>
+                            </Dbtr>
+                            <DbtrAcct>
+                                <Id>
+                                    <Othr>
+                                        <Id>06883105620</Id>
+                                    </Othr>
+                                </Id>
+                                <Nm>TEST CLIENT</Nm>
+                            </DbtrAcct>
+                        </RltdPties>
+                        <RltdAgts>
+                            <DbtrAgt>
+                                <FinInstnId>
+                                    <BIC>GOLDUS33XXX</BIC>
+                                </FinInstnId>
+                            </DbtrAgt>
+                        </RltdAgts>
+                        <RmtInf>
+                            <Ustrd>TEST 2023</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: From: TEST CLIENT, Account: XXXXXXX-5620, Remittance Info:"ABC 1818 L.P. 2023", Client Ref ID: GTOS4BN19D124XV, GS ID: GI2325100009148</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>103825900</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T00:03:19.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>ACMT</Cd>
+                        <Fmly>
+                            <Cd>MCOP</Cd>
+                            <SubFmlyCd>INTR</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Interest</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <AcctSvcrRef>SBD91894_20230831_0011</AcctSvcrRef>
+                            <EndToEndId>SBD91894_20230831_0011</EndToEndId>
+                            <TxId>SBD91894_20230831_0011</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <AddtlTxInf>Desc: Interest For Account: XXXXXXXX-7497, Period: Sept 1, 2023
+                            to Sept 31, 2023</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>111217750</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T19:00:47.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>DMCT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Outgoing Wire</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>ntsub_Of6teoIeoK9HKo</MsgId>
+                            <AcctSvcrRef>GI2326100013419</AcctSvcrRef>
+                            <PmtInfId>gswire_11112AAGW0QyETo</PmtInfId>
+                            <EndToEndId>D2M0Y6P0D3Q0M3Z2S5T3F0X0S7G3S7V8L0S</EndToEndId>
+                            <TxId>GI2326100013419</TxId>
+                            <ClrSysRef>20230918MMQFMPU7006755</ClrSysRef>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>ABC INC</Nm>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <Othr>
+                                        <Id>4356695007</Id>
+                                    </Othr>
+                                </Id>
+                            </CdtrAcct>
+                        </RltdPties>
+                        <RltdAgts>
+                            <CdtrAgt>
+                                <FinInstnId>
+                                    <BIC>WFBIUS6S</BIC>
+                                </FinInstnId>
+                            </CdtrAgt>
+                        </RltdAgts>
+                        <RmtInf>
+                            <Ustrd>TBT OF6LBKDOHYVGZL</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: To: TEST INC, Remittance Info: "TBT OF6LBKDOHYVGZL",
+                            Client Ref ID: D2M0Y6P0D3Q0M3Z2S5T3F0X0S7G3S7V8L0S, GS ID:
+                            GI2326100013419, Clearing Ref: 20230918MMQFMPU7006755</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>172404700</NtryRef>
+                <Amt Ccy="EUR">29.06</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-08-02T14:52:06.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-08-02</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>DMCT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Outgoing Wire</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>5741312</MsgId>
+                            <AcctSvcrRef>GI2321400001068</AcctSvcrRef>
+                            <PmtInfId>1</PmtInfId>
+                            <EndToEndId>5741412</EndToEndId>
+                            <TxId>GI2321400001068</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">25.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="EUR">29.06</Amt>
+                                <CcyXchg>
+                                    <SrcCcy>EUR</SrcCcy>
+                                    <TrgtCcy>USD</TrgtCcy>
+                                    <XchgRate>1.1622</XchgRate>
+                                    <QtnDt>2023-09-30T14:52:06.939Z</QtnDt>
+                                </CcyXchg>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>Test creditor name</Nm>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <Othr>
+                                        <Id>GB14BARC20325340846481</Id>
+                                    </Othr>
+                                </Id>
+                            </CdtrAcct>
+                        </RltdPties>
+                        <RltdAgts>
+                            <CdtrAgt>
+                                <FinInstnId>
+                                    <BIC>BARCGB22XXX</BIC>
+                                </FinInstnId>
+                            </CdtrAgt>
+                        </RltdAgts>
+                        <RmtInf>
+                            <Ustrd>FFC</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: To: Test creditor name, Remittance Info: "FFC", Client Ref
+                            ID: 5741412, GS ID: GI2321400001068, Clearing Ref:
+                            0565b685-c32b-448d-9b92-2249b94c203d, Settled Amt: USD 25.00, FX Rate:
+                            1.162224</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>177684750</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T08:36:45.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>IRCT</Cd>
+                            <SubFmlyCd>DMCT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>RTP Outgoing</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>GS20QAPQIKN9ZY</MsgId>
+                            <AcctSvcrRef>CHFPS1000097489</AcctSvcrRef>
+                            <PmtInfId>RTR0808001</PmtInfId>
+                            <EndToEndId>GSIISSUKTI8QBQER05IK</EndToEndId>
+                            <TxId>CHFPS1000097489</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>RTR-CdtrName</Nm>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <Othr>
+                                        <Id>102133906</Id>
+                                    </Othr>
+                                </Id>
+                            </CdtrAcct>
+                        </RltdPties>
+                        <RltdAgts>
+                            <CdtrAgt>
+                                <FinInstnId>
+                                    <Othr>
+                                        <Id>000000010</Id>
+                                    </Othr>
+                                </FinInstnId>
+                            </CdtrAgt>
+                        </RltdAgts>
+                        <AddtlTxInf>Desc: To: RTR-CdtrName, Client Ref ID: GSIISSUKTI8QBQER05IK, GS
+                            ID: CHFPS1000097489, Clearing Ref: 20230830026014601T1BHB1693384447221</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>268885951</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>true</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T16:03:53.023Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>RRTN</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Outgoing Wire Return</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>20210706MMQFMPU700000106301050FT03</MsgId>
+                            <AcctSvcrRef>GI2118700002010</AcctSvcrRef>
+                            <EndToEndId>GSWDEZOJDF</EndToEndId>
+                            <TxId>GI2118700001832</TxId>
+                            <ClrSysRef>20210706MMQFMPU8000001</ClrSysRef>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Dbtr>
+                                <Nm>OPY USA INC.</Nm>
+                            </Dbtr>
+                            <DbtrAcct>
+                                <Id>
+                                    <Othr>
+                                        <Id>107049932</Id>
+                                    </Othr>
+                                </Id>
+                                <Ccy>USD</Ccy>
+                            </DbtrAcct>
+                        </RltdPties>
+                        <RltdAgts>
+                            <DbtrAgt>
+                                <FinInstnId>
+                                    <BIC>GSCRUS33</BIC>
+                                    <Othr>
+                                        <Id>021000089</Id>
+                                    </Othr>
+                                </FinInstnId>
+                            </DbtrAgt>
+                        </RltdAgts>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>274748251</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T14:21:59.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>RCHQ</Cd>
+                            <SubFmlyCd>CCHQ</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Check Deposit</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>D-DEP-TEST-FILE-G</MsgId>
+                            <AcctSvcrRef>SX21271060439231</AcctSvcrRef>
+                            <PmtInfId>d-uniqueid-test123-G</PmtInfId>
+                            <TxId>SX21271060439231</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties />
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>52198401</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T18:39:54.000</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Prtry>
+                        <Cd>ACH Credit Receipt</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>FEDACHIN092820P</MsgId>
+                            <AcctSvcrRef>B20092800009509</AcctSvcrRef>
+                            <PmtInfId>0000001</PmtInfId>
+                            <EndToEndId>021000020000017</EndToEndId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Dbtr>
+                                <Nm>JPMCHASEClient</Nm>
+                            </Dbtr>
+                        </RltdPties>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>52198451</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>true</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T16:27:53.000</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Prtry>
+                        <Cd>ACH Credit Payment Return</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>FEDACHIN092820G</MsgId>
+                            <AcctSvcrRef>B20092800008542</AcctSvcrRef>
+                            <PmtInfId>0000001</PmtInfId>
+                            <EndToEndId>GSKWTHM25VCGE5</EndToEndId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Dbtr>
+                                <Nm>Primrose</Nm>
+                            </Dbtr>
+                            <DbtrAcct>
+                                <Id>
+                                    <Othr>
+                                        <Id>456000000</Id>
+                                    </Othr>
+                                </Id>
+                                <Nm>Primrose</Nm>
+                            </DbtrAcct>
+                        </RltdPties>
+                        <RltdAgts>
+                            <DbtrAgt>
+                                <FinInstnId>
+                                    <Othr>
+                                        <Id>082000549</Id>
+                                    </Othr>
+                                </FinInstnId>
+                            </DbtrAgt>
+                        </RltdAgts>
+                        <RtrInf>
+                            <Rsn>
+                                <Prtry>R02</Prtry>
+                            </Rsn>
+                        </RtrInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>52198501</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T13:35:06.000</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Prtry>
+                        <Cd>Incoming Wire</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>20230928LTERMID100000212221631FT01</MsgId>
+                            <AcctSvcrRef>I20092800008305</AcctSvcrRef>
+                            <EndToEndId>20230928LTERMID2000002</EndToEndId>
+                            <ClrSysRef>20230928LTERMID2000002</ClrSysRef>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties />
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+
+            <Ntry>
+                <NtryRef>52198551</NtryRef>
+                <Amt Ccy="USD">10.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-01T10:17:07.000</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-01</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Prtry>
+                        <Cd>ACH Credit Payment</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>1058863</MsgId>
+                            <AcctSvcrRef>PB20092845805853</AcctSvcrRef>
+                            <PmtInfId> CLIENTID200928A0000001</PmtInfId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">10.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>GS Bank USA</Nm>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <Othr>
+                                        <Id>ACHCONTROLOUTUSD01</Id>
+                                    </Othr>
+                                </Id>
+                            </CdtrAcct>
+                        </RltdPties>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+        </Stmt>
+    </BkToCstmrStmt>
+</Document>

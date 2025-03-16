@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml-model href="camt.053.001.02.xsd"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+    <BkToCstmrStmt>
+        <GrpHdr>
+            <MsgId>13541036800</MsgId>
+            <CreDtTm>2024-07-05T03:24:26.807Z</CreDtTm>
+            <MsgRcpt>
+                <Nm>TEST ENTITY 1</Nm>
+                <Id>
+                    <OrgId>
+                        <Othr>
+                            <Id>abtest1</Id>
+                        </Othr>
+                    </OrgId>
+                </Id>
+            </MsgRcpt>
+        </GrpHdr>
+        <Stmt>
+            <Id>10660815150</Id>
+            <ElctrncSeqNb>6486</ElctrncSeqNb>
+            <LglSeqNb>6486</LglSeqNb>
+            <CreDtTm>2024-07-05T03:24:26.826Z</CreDtTm>
+            <FrToDt>
+                <FrDtTm>2024-07-04T00:00:00.000Z</FrDtTm>
+                <ToDtTm>2024-07-04T23:59:59.000Z</ToDtTm>
+            </FrToDt>
+            <Acct>
+                <Id>
+                    <IBAN>AB19514304108000001081</IBAN>
+                </Id>
+                <Tp>
+                    <Prtry>IBDA_DDA</Prtry>
+                </Tp>
+                <Ccy>USD</Ccy>
+                <Nm>Test DDA - USD</Nm>
+                <Svcr>
+                    <FinInstnId>
+                        <BIC>TESTBIC0</BIC>
+                        <Nm>Goldman Sachs Bank</Nm>
+                    </FinInstnId>
+                </Svcr>
+            </Acct>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">10410696.66</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-03T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">10410411.51</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-04T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">10375329.29</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-03T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">10375044.14</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-04T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <TxsSummry>
+                <TtlNtries>
+                    <NbOfNtries>5</NbOfNtries>
+                    <Sum>285.1500</Sum>
+                    <TtlNetNtryAmt>285.1500</TtlNetNtryAmt>
+                    <CdtDbtInd>DBIT</CdtDbtInd>
+                </TtlNtries>
+                <TtlCdtNtries>
+                    <NbOfNtries>0</NbOfNtries>
+                    <Sum>0.0000</Sum>
+                </TtlCdtNtries>
+                <TtlDbtNtries>
+                    <NbOfNtries>5</NbOfNtries>
+                    <Sum>285.1500</Sum>
+                </TtlDbtNtries>
+            </TxsSummry>
+            <Ntry>
+                <NtryRef>219587150</NtryRef>
+                <Amt Ccy="USD">11.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2024-07-04T17:45:51.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2024-07-04</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>DMCT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Outgoing Wire</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>GSNMFFIC1KGW</MsgId>
+                            <AcctSvcrRef>GI2418600002000</AcctSvcrRef>
+                            <PmtInfId>SAMPLE_PMT_INF_ID_K4</PmtInfId>
+                            <EndToEndId>GSQDO9E33IDPQLI</EndToEndId>
+                            <TxId>GI2418600002000</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="USD">11.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">11.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>GOLDMAN SACHS BANK</Nm>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <Othr>
+                                        <Id>40670834</Id>
+                                    </Othr>
+                                </Id>
+                            </CdtrAcct>
+                        </RltdPties>
+                        <RltdAgts>
+                            <CdtrAgt>
+                                <FinInstnId>
+                                    <BIC>CITIUS30</BIC>
+                                </FinInstnId>
+                            </CdtrAgt>
+                        </RltdAgts>
+                        <Purp>
+                            <Prtry>test</Prtry>
+                        </Purp>
+                        <RmtInf>
+                            <Ustrd>test</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: To: GOLDMAN SACHS BANK, Remittance Info: "test", Client Ref ID: GSQDO9E33IDPQLI, GS ID: GI2418600002000, Clearing Ref: ce4c7bea-cff3-4f9e-bace-a616a63c7123</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>219587200</NtryRef>
+                <Amt Ccy="USD">100.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2024-07-04T17:33:05.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2024-07-04</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>DMCT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Outgoing Wire</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>GSNMFFIC1KGW</MsgId>
+                            <AcctSvcrRef>GI2418600002208</AcctSvcrRef>
+                            <PmtInfId>SAMPLE_PMT_INF_ID_K2</PmtInfId>
+                            <EndToEndId>GSC3PS3RGN</EndToEndId>
+                            <TxId>GI2418600002208</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="GBP">78.27</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">100.00</Amt>
+                                <CcyXchg>
+                                    <SrcCcy>USD</SrcCcy>
+                                    <TrgtCcy>GBP</TrgtCcy>
+                                    <XchgRate>1.2775</XchgRate>
+                                    <QtnDt>2024-07-04T17:33:02.826Z</QtnDt>
+                                </CcyXchg>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>John Smith</Nm>
+                            </Cdtr>
+                        </RltdPties>
+                        <RltdAgts>
+                            <CdtrAgt>
+                                <FinInstnId>
+                                    <BIC>MIDLGB22XXX</BIC>
+                                </FinInstnId>
+                            </CdtrAgt>
+                        </RltdAgts>
+                        <Purp>
+                            <Prtry>GBP payment favouring USD account</Prtry>
+                        </Purp>
+                        <RmtInf>
+                            <Ustrd>GBP payment favouring USD account</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: To: John Smith, Remittance Info: "GBP payment favouring USD account", Client Ref ID: GSC3PS3RGN, GS ID: GI2418600002208, Settled Amt: GBP 78.27, FX Rate: 1.277558</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>219587250</NtryRef>
+                <Amt Ccy="USD">100.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2024-07-04T17:33:05.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2024-07-04</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>DMCT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Outgoing Wire</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>GSNMFFIC1KGW</MsgId>
+                            <AcctSvcrRef>GI2418600002209</AcctSvcrRef>
+                            <PmtInfId>SAMPLE_PMT_INF_ID_K3</PmtInfId>
+                            <EndToEndId>GS5HLGVJJU</EndToEndId>
+                            <TxId>GI2418600002209</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="BRL">521.58</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">100.00</Amt>
+                                <CcyXchg>
+                                    <SrcCcy>USD</SrcCcy>
+                                    <TrgtCcy>BRL</TrgtCcy>
+                                    <XchgRate>0.1917</XchgRate>
+                                    <QtnDt>2024-07-04T17:33:03.445Z</QtnDt>
+                                </CcyXchg>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>Test Creditor Adam</Nm>
+                            </Cdtr>
+                        </RltdPties>
+                        <RltdAgts>
+                            <CdtrAgt>
+                                <FinInstnId>
+                                    <BIC>BNPABRSP</BIC>
+                                </FinInstnId>
+                            </CdtrAgt>
+                        </RltdAgts>
+                        <Purp>
+                            <Prtry>Goods service</Prtry>
+                        </Purp>
+                        <RmtInf>
+                            <Ustrd>KES payment favouring USD account</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: To: Test Creditor Adam, Remittance Info: "KES payment favouring USD account", Client Ref ID: GS5HLGVJJU, GS ID: GI2418600002209, Clearing Ref: 0da83b5d-a30a-4123-a30c-a80782f92311, Settled Amt: BRL 521.58, FX Rate: 0.191727</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>219587300</NtryRef>
+                <Amt Ccy="USD">9.67</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2024-07-04T17:33:04.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2024-07-04</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>DMCT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Outgoing Wire</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>GSNMFFIC1KGW</MsgId>
+                            <AcctSvcrRef>GI2418600002206</AcctSvcrRef>
+                            <PmtInfId>SAMPLE_PMT_INF_ID_K0</PmtInfId>
+                            <EndToEndId>GSJNQT2KUR</EndToEndId>
+                            <TxId>GI2418600002206</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="BRL">50.47</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">9.67</Amt>
+                                <CcyXchg>
+                                    <SrcCcy>USD</SrcCcy>
+                                    <TrgtCcy>BRL</TrgtCcy>
+                                    <XchgRate>0.1915</XchgRate>
+                                    <QtnDt>2024-07-04T17:33:02.487Z</QtnDt>
+                                </CcyXchg>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>Test Creditor William</Nm>
+                            </Cdtr>
+                        </RltdPties>
+                        <RltdAgts>
+                            <CdtrAgt>
+                                <FinInstnId>
+                                    <BIC>BNPABRSP</BIC>
+                                </FinInstnId>
+                            </CdtrAgt>
+                        </RltdAgts>
+                        <Purp>
+                            <Prtry>Goods service</Prtry>
+                        </Purp>
+                        <RmtInf>
+                            <Ustrd>KES payment favouring USD account</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: To: Test Creditor William, Remittance Info: "KES payment favouring USD account", Client Ref ID: GSJNQT2KUR, GS ID: GI2418600002206, Clearing Ref: 7f7a723b-94f0-47ed-8cf9-bc267b2899e4, Settled Amt: BRL 50.47, FX Rate: 0.191544</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>219587350</NtryRef>
+                <Amt Ccy="USD">64.48</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2024-07-04T17:33:02.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2024-07-04</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>DMCT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Outgoing Wire</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>GSNMFFIC1KGW</MsgId>
+                            <AcctSvcrRef>GI2418600002205</AcctSvcrRef>
+                            <PmtInfId>SAMPLE_PMT_INF_ID_K0</PmtInfId>
+                            <EndToEndId>GSETGFQ4LM</EndToEndId>
+                            <TxId>GI2418600002205</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="GBP">50.47</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="USD">64.48</Amt>
+                                <CcyXchg>
+                                    <SrcCcy>USD</SrcCcy>
+                                    <TrgtCcy>GBP</TrgtCcy>
+                                    <XchgRate>1.2775</XchgRate>
+                                    <QtnDt>2024-07-04T17:33:01.907Z</QtnDt>
+                                </CcyXchg>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>John Smith</Nm>
+                            </Cdtr>
+                        </RltdPties>
+                        <RltdAgts>
+                            <CdtrAgt>
+                                <FinInstnId>
+                                    <BIC>MIDLGB22XXX</BIC>
+                                </FinInstnId>
+                            </CdtrAgt>
+                        </RltdAgts>
+                        <Purp>
+                            <Prtry>GBP payment favouring USD account</Prtry>
+                        </Purp>
+                        <RmtInf>
+                            <Ustrd>GBP payment favouring USD account</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: To: John Smith, Remittance Info: "GBP payment favouring USD account", Client Ref ID: GSETGFQ4LM, GS ID: GI2418600002205, Settled Amt: GBP 50.47, FX Rate: 1.277557</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+        </Stmt>
+        <Stmt>
+            <Id>10660815200</Id>
+            <ElctrncSeqNb>6487</ElctrncSeqNb>
+            <LglSeqNb>6487</LglSeqNb>
+            <CreDtTm>2024-07-05T03:24:26.832Z</CreDtTm>
+            <FrToDt>
+                <FrDtTm>2024-07-04T00:00:00.000Z</FrDtTm>
+                <ToDtTm>2024-07-04T23:59:59.000Z</ToDtTm>
+            </FrToDt>
+            <Acct>
+                <Id>
+                    <IBAN>DE02514304103000002430</IBAN>
+                </Id>
+                <Tp>
+                    <Prtry>IBDA_DDA</Prtry>
+                </Tp>
+                <Ccy>USD</Ccy>
+                <Nm>DE Test DDA - USD - Firmwide</Nm>
+                <Svcr>
+                    <FinInstnId>
+                        <BIC>ZYTADEF0</BIC>
+                        <Nm>Goldman Sachs Bank</Nm>
+                    </FinInstnId>
+                </Svcr>
+            </Acct>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">1557137.22</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-03T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">1557137.22</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-04T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">0.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-03T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="USD">0.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-04T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+        </Stmt>
+        <Stmt>
+            <Id>10660815250</Id>
+            <ElctrncSeqNb>6488</ElctrncSeqNb>
+            <LglSeqNb>6488</LglSeqNb>
+            <CreDtTm>2024-07-05T03:24:26.833Z</CreDtTm>
+            <FrToDt>
+                <FrDtTm>2024-07-04T00:00:00.000Z</FrDtTm>
+                <ToDtTm>2024-07-04T23:59:59.000Z</ToDtTm>
+            </FrToDt>
+            <Acct>
+                <Id>
+                    <IBAN>DE06514304109000000796</IBAN>
+                </Id>
+                <Tp>
+                    <Prtry>IBDA_DDA</Prtry>
+                </Tp>
+                <Ccy>HUF</Ccy>
+                <Nm>DE Test DDA - HUF</Nm>
+                <Svcr>
+                    <FinInstnId>
+                        <BIC>ZYTADEF0</BIC>
+                        <Nm>Goldman Sachs Bank</Nm>
+                    </FinInstnId>
+                </Svcr>
+            </Acct>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="HUF">11034874.96</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-03T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="HUF">11034874.96</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-04T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="HUF">0.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-03T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="HUF">0.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2024-07-04T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+        </Stmt>
+    </BkToCstmrStmt>
+</Document>

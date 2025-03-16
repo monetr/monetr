@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+    <BkToCstmrStmt>
+        <GrpHdr>
+            <MsgId>9184021900</MsgId>
+            <CreDtTm>2023-10-10T09:42:50.622Z</CreDtTm>
+            <MsgRcpt>
+                <Nm>UK SAMPLE ENTITY</Nm>
+                <Id>
+                    <OrgId>
+                        <Othr>
+                            <Id>uksample</Id>
+                        </Othr>
+                    </OrgId>
+                </Id>
+            </MsgRcpt>
+        </GrpHdr>
+        <Stmt>
+            <Id>9740092600</Id>
+            <ElctrncSeqNb>496373</ElctrncSeqNb>
+            <LglSeqNb>496373</LglSeqNb>
+            <CreDtTm>2023-10-10T09:42:50.623Z</CreDtTm>
+            <FrToDt>
+                <FrDtTm>2023-10-09T00:00:00.000Z</FrDtTm>
+                <ToDtTm>2023-10-09T23:59:59.000Z</ToDtTm>
+            </FrToDt>
+            <Acct>
+                <Id>
+                    <Othr>
+                        <Id>60000635</Id>
+                    </Othr>
+                </Id>
+                <Tp>
+                    <Prtry>BAN</Prtry>
+                </Tp>
+                <Ccy>GBP</Ccy>
+                <Nm>GBP TEST ACCOUNT</Nm>
+                <Svcr>
+                    <FinInstnId>
+                        <BIC>GSCRUS30</BIC>
+                        <Nm>Goldman Sachs Bank</Nm>
+                    </FinInstnId>
+                </Svcr>
+            </Acct>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="GBP">68206.51</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-10-08T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="GBP">68206.51</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-10-09T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="GBP">0.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-10-08T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="GBP">0.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-10-09T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+        </Stmt>
+        <Stmt>
+            <Id>9740092650</Id>
+            <ElctrncSeqNb>496374</ElctrncSeqNb>
+            <LglSeqNb>496374</LglSeqNb>
+            <CreDtTm>2023-10-10T09:42:50.624Z</CreDtTm>
+            <FrToDt>
+                <FrDtTm>2023-10-09T00:00:00.000Z</FrDtTm>
+                <ToDtTm>2023-10-09T23:59:59.000Z</ToDtTm>
+            </FrToDt>
+            <Acct>
+                <Id>
+                    <IBAN>GB36GSLD04296250000970</IBAN>
+                </Id>
+                <Tp>
+                    <Prtry>IBDA_DDA</Prtry>
+                </Tp>
+                <Ccy>GBP</Ccy>
+                <Nm>TEST GBP ACCOUNT</Nm>
+                <Svcr>
+                    <FinInstnId>
+                        <BIC>GSLDGB20</BIC>
+                        <ClrSysMmbId>
+                            <ClrSysId>
+                                <Cd>GBDSC</Cd>
+                            </ClrSysId>
+                            <MmbId>042962</MmbId>
+                        </ClrSysMmbId>
+                        <Nm>Goldman Sachs Bank</Nm>
+                    </FinInstnId>
+                </Svcr>
+            </Acct>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="GBP">334425218.07</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-10-08T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="GBP">334425126.42</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-10-09T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>OPAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="GBP">334432492.92</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-10-08T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLAV</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="GBP">334432401.27</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <DtTm>2023-10-09T23:59:00.000Z</DtTm>
+                </Dt>
+            </Bal>
+            <TxsSummry>
+                <TtlNtries>
+                    <NbOfNtries>6</NbOfNtries>
+                    <Sum>600</Sum>
+                    <TtlNetNtryAmt>200.0000</TtlNetNtryAmt>
+                    <CdtDbtInd>DBIT</CdtDbtInd>
+                </TtlNtries>
+                <TtlCdtNtries>
+                    <NbOfNtries>2</NbOfNtries>
+                    <Sum>200.0000</Sum>
+                </TtlCdtNtries>
+                <TtlDbtNtries>
+                    <NbOfNtries>4</NbOfNtries>
+                    <Sum>400.0000</Sum>
+                </TtlDbtNtries>
+            </TxsSummry>
+            <Ntry>
+                <NtryRef>181694450</NtryRef>
+                <Amt Ccy="GBP">100.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-09T02:00:04.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-09</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>ACDT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>BACS Credit Payment</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>2937999</MsgId>
+                            <AcctSvcrRef>SPB2327886082710</AcctSvcrRef>
+                            <PmtInfId>c67733f177ea422db587087e7f47567f</PmtInfId>
+                            <TxId>SPB2327886082710</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="GBP">100.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="GBP">100.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <AddtlTxInf>Desc: -</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>181694500</NtryRef>
+                <Amt Ccy="GBP">100.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-09T02:00:04.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-09</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>ACDT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>BACS Credit Payment</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>2938467</MsgId>
+                            <AcctSvcrRef>SPB2327886082774</AcctSvcrRef>
+                            <PmtInfId>c67733f177ea422db587087e7f47567f</PmtInfId>
+                            <TxId>SPB2327886082774</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="GBP">100.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="GBP">100.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <AddtlTxInf>Desc: -</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>181694550</NtryRef>
+                <Amt Ccy="GBP">100.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>true</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-09T02:00:01.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2022-10-12</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>ARET</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>BACS Credit Payment Return</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>BACSIN2023100614330204P</MsgId>
+                            <AcctSvcrRef>SB2327900001420</AcctSvcrRef>
+                            <EndToEndId>00384068</EndToEndId>
+                            <TxId>SB2327900001420</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="GBP">100.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="GBP">100.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Dbtr>
+                                <Nm>TEST NAME</Nm>
+                            </Dbtr>
+                            <DbtrAcct>
+                                <Id>
+                                    <Othr>
+                                        <Id>12345678</Id>
+                                    </Othr>
+                                </Id>
+                                <Nm>TEST NAME </Nm>
+                            </DbtrAcct>
+                        </RltdPties>
+                        <RltdAgts>
+                            <DbtrAgt>
+                                <FinInstnId>
+                                    <Othr>
+                                        <Id>622294</Id>
+                                    </Othr>
+                                </FinInstnId>
+                            </DbtrAgt>
+                        </RltdAgts>
+                        <RmtInf>
+                            <Ustrd>GSGA8BGHVA</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: Return From: FILES UAT SI, Remittance Info: "GSGA8BGHVA", Reason: "0", Client Ref ID: 00384068, GS ID: SB2327900001420, Value Date: Oct 12, 2022</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>181719050</NtryRef>
+                <Amt Ccy="GBP">100.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-10T10:40:35.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-10</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>DMCT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>Outgoing Wire</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>5853728</MsgId>
+                            <AcctSvcrRef>GI2328200000244</AcctSvcrRef>
+                            <PmtInfId>1</PmtInfId>
+                            <EndToEndId>CHCSVP1139982</EndToEndId>
+                            <TxId>GI2328200000244</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="EUR">303.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="GBP">262.55</Amt>
+                                <CcyXchg>
+                                    <SrcCcy>GBP</SrcCcy>
+                                    <TrgtCcy>EUR</TrgtCcy>
+                                    <XchgRate>0.8664</XchgRate>
+                                    <QtnDt>2023-10-10T10:40:27.588Z</QtnDt>
+                                </CcyXchg>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>FX Withdraw</Nm>
+                            </Cdtr>
+                        </RltdPties>
+                        <RltdAgts>
+                            <CdtrAgt>
+                                <FinInstnId>
+                                    <BIC>TESTTESTXXX</BIC>
+                                </FinInstnId>
+                            </CdtrAgt>
+                        </RltdAgts>
+                        <RmtInf>
+                            <Ustrd>Test3</Ustrd>
+                            <Ustrd>FX USD - GBP</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: To: FX Withdraw, Remittance Info: "Test3,FX USD - GBP", Client Ref ID: CHCSVP1139982, GS ID: GI2328200000244, Clearing Ref: 9a54b8bc-465b-4241-9347-3ac405eac9c9, Settled Amt: EUR 303.00, FX Rate: 0.866486</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>181553900</NtryRef>
+                <Amt Ccy="GBP">100.00</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-06T15:56:00.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-06</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>RRCT</Cd>
+                            <SubFmlyCd>DMCT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>FPS Incoming</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>106603178357357837</MsgId>
+                            <AcctSvcrRef>GI2327900000753</AcctSvcrRef>
+                            <PmtInfId>a140dc8302ad4fc5b01b2143cfbca65a</PmtInfId>
+                            <EndToEndId>GSUPGKUAUQ6EJDK</EndToEndId>
+                            <TxId>GI2327900000753</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="EUR">10.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="GBP">64.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Dbtr>
+                                <Nm>Test Investments</Nm>
+                            </Dbtr>
+                            <DbtrAcct>
+                                <Id>
+                                    <IBAN>CH6908235000012345678</IBAN>
+                                </Id>
+                                <Nm>Test Investments</Nm>
+                            </DbtrAcct>
+                        </RltdPties>
+                        <RltdAgts>
+                            <DbtrAgt>
+                                <FinInstnId>
+                                    <BIC>BSCHCHGGXXX</BIC>
+                                </FinInstnId>
+                            </DbtrAgt>
+                        </RltdAgts>
+                        <RmtInf>
+                            <Ustrd>Test Remit Info</Ustrd>
+                            <Ustrd>Test Remit Info</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: From: Test Investments, Remittance Info: "Test Remit Info,Test Remit Info", Client Ref ID: GSUPGKUAUQ6EJDK, GS ID: GI2327900000753, Clearing Ref: 1066031783573578371020231006826040004</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <NtryRef>181553950</NtryRef>
+                <Amt Ccy="GBP">100.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <RvslInd>false</RvslInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <DtTm>2023-10-06T15:55:58.000Z</DtTm>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2023-10-06</Dt>
+                </ValDt>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>IRCT</Cd>
+                            <SubFmlyCd>DMCT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                    <Prtry>
+                        <Cd>FPS Outgoing</Cd>
+                    </Prtry>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>GSWV94T5AF</MsgId>
+                            <AcctSvcrRef>GI2327900000751</AcctSvcrRef>
+                            <PmtInfId>GS0D2QQ1KUAY7MT_1</PmtInfId>
+                            <EndToEndId>GSEOOM9QJYXKHLO</EndToEndId>
+                            <TxId>GI2327900000751</TxId>
+                        </Refs>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="GBP">15.00</Amt>
+                            </InstdAmt>
+                            <TxAmt>
+                                <Amt Ccy="GBP">15.00</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>Test Investments</Nm>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <Othr>
+                                        <Id>38290008</Id>
+                                    </Othr>
+                                </Id>
+                            </CdtrAcct>
+                        </RltdPties>
+                        <RltdAgts>
+                            <CdtrAgt>
+                                <FinInstnId>
+                                    <BIC>BUKBGB22XXX</BIC>
+                                </FinInstnId>
+                            </CdtrAgt>
+                        </RltdAgts>
+                        <Purp>
+                            <Prtry>Reimbursement of Medical Expenses</Prtry>
+                        </Purp>
+                        <RmtInf>
+                            <Ustrd>Test Remit Info</Ustrd>
+                        </RmtInf>
+                        <AddtlTxInf>Desc: To: Test Investments, Remittance Info: "Test Remit Info", Client Ref ID: GSEOOM9QJYXKHLO, GS ID: GI2327900000751, Clearing Ref: G23279F146630051  1020231006826042962</AddtlTxInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+        </Stmt>
+    </BkToCstmrStmt>
+</Document>
