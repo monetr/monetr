@@ -116,6 +116,7 @@ type BankAccount struct {
 	Mask               string                `json:"mask" pg:"mask"`
 	Name               string                `json:"name,omitempty" pg:"name,notnull"`
 	OriginalName       string                `json:"originalName" pg:"original_name,notnull"`
+	UploadIdentifier   *string               `json:"uploadIdentifier" pg:"upload_identifier"`
 	Type               BankAccountType       `json:"accountType" pg:"account_type"`
 	SubType            BankAccountSubType    `json:"accountSubType" pg:"account_sub_type"`
 	Status             BankAccountStatus     `json:"status" pg:"status,notnull"`
