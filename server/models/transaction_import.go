@@ -53,6 +53,7 @@ type TransactionImport struct {
 	Link                *Link                   `json:"-,omitempty" pg:"rel:has-one"`
 	FileId              ID[File]                `json:"fileId" pg:"file_id,notnull"`
 	File                *File                   `json:"file,omitempty" pg:"rel:has-one"`
+	Status              TransactionImportStatus `json:"status" pg:"status,notnull"`
 	Items               []TransactionImportItem `json:"items" pg:"rel:has-many"`
 	ExpiresAt           time.Time               `json:"expiresAt" pg:"expires_at,notnull"`
 	CreatedAt           time.Time               `json:"createdAt" pg:"created_at,notnull"`
