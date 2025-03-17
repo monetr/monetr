@@ -83,6 +83,7 @@ func (c *Controller) getTransactionImportProgress(ctx echo.Context) error {
 		"transactionImportId": transactionImportId,
 	})
 	repo := c.mustGetAuthenticatedRepository(ctx)
+	fmt.Sprint(repo)
 
 	// TODO Read the import from the DB
 
