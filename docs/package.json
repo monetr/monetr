@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@fontsource-variable/inter": "5.1.1",
+    "@fontsource-variable/inter": "5.2.5",
     "@radix-ui/react-slot": "1.1.2",
     "@tanstack/react-query": "4.36.1",
     "date-fns": "4.1.0",
