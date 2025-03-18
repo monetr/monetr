@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
 	. "github.com/monetr/monetr/server/models"
@@ -259,4 +260,14 @@ func (c *Controller) mustGetSecretsRepository(ctx echo.Context) repository.Secre
 	}
 
 	return repo
+}
+
+func (c *Controller) scrubSentryBody(ctx echo.Context) {
+	// If sentry is setup, make sure we never send the body for this request to
+	// sentry.
+	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
+		if scope := hub.Scope(); scope != nil {
+			scope.SetRequestBody(nil)
+		}
+	}
 }

@@ -64,6 +64,7 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 }
 
 func (c *Controller) postLogin(ctx echo.Context) error {
+	c.scrubSentryBody(ctx)
 	var loginRequest struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -245,6 +246,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 }
 
 func (c *Controller) postMultifactor(ctx echo.Context) error {
+	c.scrubSentryBody(ctx)
 	var request struct {
 		TOTP string `json:"totp"`
 	}
@@ -316,6 +318,7 @@ func (c *Controller) logoutEndpoint(ctx echo.Context) error {
 }
 
 func (c *Controller) postRegister(ctx echo.Context) error {
+	c.scrubSentryBody(ctx)
 	if !c.Configuration.AllowSignUp {
 		return c.notFound(ctx, "sign up is not enabled on this server")
 	}
@@ -541,6 +544,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 }
 
 func (c *Controller) verifyEndpoint(ctx echo.Context) error {
+	c.scrubSentryBody(ctx)
 	if !c.Configuration.Email.ShouldVerifyEmails() {
 		return c.notFound(ctx, "email verification is not enabled")
 	}
@@ -577,6 +581,7 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 }
 
 func (c *Controller) resendVerification(ctx echo.Context) error {
+	c.scrubSentryBody(ctx)
 	log := c.getLog(ctx)
 	if !c.Configuration.Email.ShouldVerifyEmails() {
 		return c.notFound(ctx, "email verification is not enabled")
@@ -639,6 +644,7 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 }
 
 func (c *Controller) postForgotPassword(ctx echo.Context) error {
+	c.scrubSentryBody(ctx)
 	if !c.Configuration.Email.AllowPasswordReset() {
 		return c.notFound(ctx, "password reset not enabled")
 	}
@@ -729,21 +735,8 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-// Reset Password
-// @Summary Reset Password
-// @id reset-password
-// @tags Authentication
-// @description This endpoint handles resetting passwords for users who have forgotten theirs. It requires a `token` be
-// @description provided that comes from the email the `/authentication/forgot` endpoint sends to the login's email
-// @description address.
-// @Produce json
-// @Accept json
-// @Param Token body swag.ResetPasswordRequest true "Reset Password Request"
-// @Router /authentication/reset [post]
-// @Success 200
-// @Failure 400 {object} swag.ResetPasswordBadRequest
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) resetPassword(ctx echo.Context) error {
+	c.scrubSentryBody(ctx)
 	if !c.Configuration.Email.AllowPasswordReset() {
 		return c.notFound(ctx, "password reset not enabled")
 	}

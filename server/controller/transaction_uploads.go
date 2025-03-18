@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/background"
 	. "github.com/monetr/monetr/server/models"
@@ -16,17 +15,11 @@ import (
 )
 
 func (c *Controller) postTransactionUpload(ctx echo.Context) error {
+	c.scrubSentryBody(ctx)
+
 	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
-	}
-
-	// If sentry is setup, make sure we never send the body for this request to
-	// sentry.
-	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
-		if scope := hub.Scope(); scope != nil {
-			scope.SetRequestBody(nil)
-		}
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
