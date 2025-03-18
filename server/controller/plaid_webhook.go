@@ -197,7 +197,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 		"linkId":    link.LinkId,
 	})
 
-	log.Trace("processing webhook")
+	log.Info("processing Plaid webhook")
 
 	authenticatedRepo := repository.NewRepositoryFromSession(
 		c.Clock,
