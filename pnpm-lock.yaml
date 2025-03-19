@@ -69,8 +69,8 @@ importers:
   docs:
     dependencies:
       '@fontsource-variable/inter':
-        specifier: 5.1.1
-        version: 5.1.1
+        specifier: 5.2.5
+        version: 5.2.5
       '@radix-ui/react-slot':
         specifier: 1.1.2
         version: 1.1.2(@types/react@18.3.18)(react@18.3.1)
@@ -166,8 +166,8 @@ importers:
         specifier: 1.2.13
         version: 1.2.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@fontsource-variable/inter':
-        specifier: 5.1.1
-        version: 5.1.1
+        specifier: 5.2.5
+        version: 5.2.5
       '@mui/icons-material':
         specifier: 5.11.0
         version: 5.11.0(@mui/material@5.11.3(@emotion/react@11.10.6(@types/react@18.3.18)(react@18.3.1))(@emotion/styled@11.10.6(@emotion/react@11.10.6(@types/react@18.3.18)(react@18.3.1))(@types/react@18.3.18)(react@18.3.1))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.18)(react@18.3.1)
@@ -383,8 +383,8 @@ importers:
   stories:
     dependencies:
       '@fontsource-variable/inter':
-        specifier: 5.1.1
-        version: 5.1.1
+        specifier: 5.2.5
+        version: 5.2.5
       '@monetr/interface':
         specifier: workspace:*
         version: link:../interface
@@ -1736,8 +1736,8 @@ packages:
   '@floating-ui/utils@0.2.8':
     resolution: {integrity: sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==}
 
-  '@fontsource-variable/inter@5.1.1':
-    resolution: {integrity: sha512-OpXFTmiH6tHkYijMvQTycFKBLK4X+SRV6tet1m4YOUH7SzIIlMqDja+ocDtiCA72UthBH/vF+3ZtlMr2rN/wIw==}
+  '@fontsource-variable/inter@5.2.5':
+    resolution: {integrity: sha512-TrWffUAFOnT8zroE9YmGybagoOgM/HjRqMQ8k9R0vVgXlnUh/vnpbGPAS/Caz1KIlOPnPGh6fvJbb7DHbFCncA==}
 
   '@formatjs/intl-localematcher@0.5.8':
     resolution: {integrity: sha512-I+WDNWWJFZie+jkfkiK5Mp4hEDyRSEvmyfYadflOno/mmKJKcB17fEpEH0oJu/OWhhCJ8kJBDz2YMd/6cDl7Mg==}
@@ -13543,7 +13543,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.8': {}
 
-  '@fontsource-variable/inter@5.1.1': {}
+  '@fontsource-variable/inter@5.2.5': {}
 
   '@formatjs/intl-localematcher@0.5.8':
     dependencies:
