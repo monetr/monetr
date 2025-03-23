@@ -25,7 +25,7 @@ set(SITEMAP_EXECUTABLE ${NODE_MODULES_BIN}/next-sitemap${JS_EXECUTABLE_SUFFIX})
 set(SPELLCHECKER_EXECUTABLE ${NODE_MODULES_BIN}/spellchecker${JS_EXECUTABLE_SUFFIX})
 set(STORYBOOK_EXECUTABLE ${NODE_MODULES_BIN}/storybook${JS_EXECUTABLE_SUFFIX})
 
-set(PNPM_ARGUMENTS "--frozen-lockfile")
+set(PNPM_ARGUMENTS "--frozen-lockfile" "--ignore-scripts")
 
 add_custom_command(
   OUTPUT ${NODE_MODULES}
