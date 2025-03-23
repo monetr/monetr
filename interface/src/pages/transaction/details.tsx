@@ -4,10 +4,11 @@ import { ShoppingCartOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { startOfDay } from 'date-fns';
 import { FormikHelpers } from 'formik';
-import { HeartCrack, Save } from 'lucide-react';
+import { HeartCrack, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
+import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MCheckbox from '@monetr/interface/components/MCheckbox';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
@@ -129,12 +130,16 @@ export default function TransactionDetails(): JSX.Element {
         base={ `/bank/${transaction.bankAccountId}/transactions` }
         breadcrumb={ transaction?.name }
       >
-        <Button variant='primary' className='gap-1 py-1 px-2' type='submit'>
+        <Button variant='destructive' className='gap-1 py-1 px-2' onClick={ () => {} } >
+          <Trash />
+          Remove
+        </Button>
+        <FormButton variant='primary' className='gap-1 py-1 px-2' type='submit' role='form'>
           <Save />
           Save Changes
-        </Button>
+        </FormButton>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
+      <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
             <div className='w-full flex justify-center mb-2'>

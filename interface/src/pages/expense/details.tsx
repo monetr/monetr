@@ -1,15 +1,16 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { DeleteOutlined, HeartBroken, PriceCheckOutlined, SaveOutlined, SwapVertOutlined } from '@mui/icons-material';
+import { HeartBroken, PriceCheckOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { startOfDay, startOfToday } from 'date-fns';
 import { FormikHelpers } from 'formik';
+import { ArrowUpDown, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import ExpenseTimeline from './ExpenseTimeline';
+import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import { MBaseButton } from '@monetr/interface/components/MButton';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MDivider from '@monetr/interface/components/MDivider';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
@@ -169,24 +170,23 @@ export default function ExpenseDetails(): JSX.Element {
         base={ `/bank/${spending.bankAccountId}/expenses` }
         breadcrumb={ spending?.name }
       >
-        <MBaseButton
-          color='secondary'
-          className='gap-1 py-1 px-2'
+        <Button
+          variant='secondary'
           onClick={ () => showTransferModal({ initialToSpendingId: spending?.spendingId }) }
         >
-          <SwapVertOutlined />
-            Transfer
-        </MBaseButton>
-        <MBaseButton color='cancel' className='gap-1 py-1 px-2' onClick={ deleteExpense } >
-          <DeleteOutlined />
+          <ArrowUpDown />
+          Transfer
+        </Button>
+        <Button variant='destructive' onClick={ deleteExpense } >
+          <Trash />
           Remove
-        </MBaseButton>
+        </Button>
         <FormButton variant='primary' type='submit' role='form'>
-          <SaveOutlined />
+          <Save />
           Save
         </FormButton>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
+      <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
 

@@ -74,11 +74,31 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
           <BreadcrumbMaybe />
         </span>
       </div>
-      { props.children && (
-        <div className='flex gap-x-2 md:p-0'>
-          { props.children }
-        </div>
-      )}
+      <ActionArea children={ props.children } />
+    </div>
+  );
+}
+
+interface ActionAreaProps {
+  children?: React.ReactNode;
+}
+
+function ActionArea(props: ActionAreaProps): JSX.Element {
+  if (!props.children) return null;
+
+  const styles = mergeTailwind([
+    'flex justify-end gap-x-4 md:gap-x-2',
+    'md:relative fixed -bottom-1 md:bottom-auto left-0 md:left-auto',
+    // Hacky width and padding to make sure scrollbar renders properly
+    'p-4 pr-[calc(1rem-16px)] md:p-0',
+    'w-[calc(100vw-16px)] md:w-auto',
+    'z-20',
+    'backdrop-blur-sm bg-dark-monetr-background/90',
+  ]);
+
+  return (
+    <div className={ styles }>
+      { props.children }
     </div>
   );
 }
