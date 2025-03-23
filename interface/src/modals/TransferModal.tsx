@@ -1,12 +1,12 @@
 import React, { useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { SwapVertOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { FormikErrors, FormikHelpers, useFormikContext } from 'formik';
+import { ArrowUpDown } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
+import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MFormButton from '@monetr/interface/components/MButton';
 import MForm from '@monetr/interface/components/MForm';
 import { MLabelDecoratorProps } from '@monetr/interface/components/MLabel';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
@@ -141,19 +141,19 @@ function TransferModal(props: TransferModalProps): JSX.Element {
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <MFormButton
-            color='secondary'
+          <FormButton
+            variant='secondary'
             onClick={ modal.remove }
             data-testid='close-new-expense-modal'
           >
             Cancel
-          </MFormButton>
-          <MFormButton
-            color='primary'
+          </FormButton>
+          <FormButton
+            variant='primary'
             type='submit'
           >
             Transfer
-          </MFormButton>
+          </FormButton>
         </div>
       </MForm>
     </MModal>
@@ -184,9 +184,9 @@ function ReverseTargetsButton(): JSX.Element {
 
   return (
     <a className='w-full flex justify-center mb-1'>
-      <SwapVertOutlined
+      <ArrowUpDown
         onClick={ swap }
-        className='cursor-pointer text-4xl dark:text-dark-monetr-content-subtle hover:dark:text-dark-monetr-content'
+        className='h-10 w-10 cursor-pointer text-4xl dark:text-dark-monetr-content-subtle hover:dark:text-dark-monetr-content'
       />
     </a>
   );

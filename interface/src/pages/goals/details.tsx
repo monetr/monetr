@@ -2,12 +2,11 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   HeartBroken,
-  SavingsOutlined,
 } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { startOfDay, startOfToday } from 'date-fns';
 import { FormikHelpers } from 'formik';
-import { ArrowUpDown, Save, Trash } from 'lucide-react';
+import { ArrowUpDown, PiggyBank, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -172,7 +171,7 @@ export default function GoalDetails(): JSX.Element {
   return (
     <MForm initialValues={ initialValues } onSubmit={ submit } className='flex w-full h-full flex-col'>
       <MTopNavigation
-        icon={ SavingsOutlined }
+        icon={ PiggyBank }
         title='Goals'
         base={ `/bank/${spending.bankAccountId}/goals` }
         breadcrumb={ spending?.name }
