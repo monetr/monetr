@@ -211,7 +211,7 @@ function SelectBankAccountPicker(props: SelectBankAccountPickerProps): JSX.Eleme
       { !isMobile && <CommandInput placeholder={ props.searchPlaceholder } /> }
       <CommandList>
         <CommandEmpty>{ props.emptyString }</CommandEmpty>
-        { link.getIsManual() && (
+        { link?.getIsManual() && (
           <CommandGroup className='' heading='Controls'>
             <CommandItem
               value='null'
