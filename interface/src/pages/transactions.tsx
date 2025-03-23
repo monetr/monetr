@@ -7,6 +7,7 @@ import { Plus, Upload } from 'lucide-react';
 import * as R from 'ramda';
 
 import { Button } from '@monetr/interface/components/Button';
+import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import TransactionDateItem from '@monetr/interface/components/transactions/TransactionDateItem';
@@ -156,8 +157,8 @@ export default function Transactions(): JSX.Element {
           title='Transactions'
         >
           <UploadButtonMaybe />
-          <AddTransactionButton />
         </MTopNavigation>
+        <AddTransactionButton />
         <div className='w-full h-full flex justify-center items-center'>
           <div className='flex flex-col gap-2 items-center max-w-md'>
             <div className='w-full flex justify-center space-x-4'>
@@ -182,9 +183,14 @@ export default function Transactions(): JSX.Element {
         icon={ ShoppingCartOutlined }
         title='Transactions'
       >
+        <div className='w-screen md:hidden flex justify-evenly'>
+          <div className='flex flex-grow w-full' /> { /* These force the free to use to be more centered */ }
+          <BalanceFreeToUseAmount />
+          <div className='flex flex-grow w-full' />
+        </div>
         <UploadButtonMaybe />
-        <AddTransactionButton />
       </MTopNavigation>
+      <AddTransactionButton />
       <div className='flex flex-grow min-w-0 min-h-0'>
         <ul className='w-full overflow-y-auto pb-16' ref={ ref }>
           <TransactionItems />
@@ -224,7 +230,7 @@ function AddTransactionButton(): JSX.Element {
 
   return (
     <button 
-      className='fixed bottom-4 right-4 w-14 h-14 rounded-full bg-dark-monetr-brand-subtle backdrop-blur-sm bg-opacity-75 backdrop-brightness-200 z-20 flex items-center justify-center active:backdrop-brightness-50'
+      className='fixed md:bottom-4 bottom-8 right-4 w-14 h-14 rounded-full bg-dark-monetr-brand-subtle backdrop-blur-sm bg-opacity-75 backdrop-brightness-200 z-20 flex items-center justify-center active:backdrop-brightness-50'
       onClick={ showNewTransactionModal }
     >
       <Plus className='h-12 w-12 text-dark-monetr-content' />

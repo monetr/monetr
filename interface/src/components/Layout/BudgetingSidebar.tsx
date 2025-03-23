@@ -5,6 +5,9 @@ import { PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutline
 import { Infinity } from 'lucide-react';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
+import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceAvailableAmount';
+import BalanceCurrentAmount from '@monetr/interface/components/Layout/BalanceCurrentAmount';
+import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
@@ -18,9 +21,6 @@ import { useNextFundingDate } from '@monetr/interface/hooks/fundingSchedules';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
-import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceAvailableAmount';
-import BalanceCurrentAmount from '@monetr/interface/components/Layout/BalanceCurrentAmount';
 
 export interface BudgetingSidebarProps {
   className?: string;

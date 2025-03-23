@@ -22,11 +22,12 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
       });
 
       return (
-        <div className='flex w-full justify-between'>
+        <div className='flex w-full justify-between flex-shrink min-w-fit'>
           <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
             <AccountBalanceWalletOutlined />
             Free-To-Use:
           </MSpan>
+          &nbsp;
           <MSpan size='lg' weight='semibold' className={ valueClassName }>
             { locale.formatAmount(balance?.free, AmountType.Stored) }
           </MSpan>
