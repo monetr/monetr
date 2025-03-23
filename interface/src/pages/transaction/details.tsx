@@ -1,10 +1,9 @@
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { ShoppingCartOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { startOfDay } from 'date-fns';
 import { FormikHelpers } from 'formik';
-import { HeartCrack, Save, Trash } from 'lucide-react';
+import { HeartCrack, Save, ShoppingCart, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -125,7 +124,7 @@ export default function TransactionDetails(): JSX.Element {
       className='flex w-full h-full flex-col'
     >
       <MTopNavigation
-        icon={ ShoppingCartOutlined }
+        icon={ ShoppingCart }
         title='Transactions'
         base={ `/bank/${transaction.bankAccountId}/transactions` }
         breadcrumb={ transaction?.name }

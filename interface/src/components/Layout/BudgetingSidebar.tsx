@@ -1,8 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
-import { Infinity } from 'lucide-react';
+import { CalendarSync, Infinity, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
 import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceAvailableAmount';
@@ -77,13 +76,13 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
 
         <div className='flex h-full w-full flex-col gap-2 pb-4'>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/transactions` }>
-            <ShoppingCartOutlined />
+            <ShoppingCart />
             <MSpan ellipsis color='inherit'>
               Transactions
             </MSpan>
           </NavigationItem>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/expenses` }>
-            <PriceCheckOutlined />
+            <Receipt />
             <MSpan ellipsis color='inherit'>
               Expenses
             </MSpan>
@@ -92,7 +91,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
             </MBadge>
           </NavigationItem>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/goals` }>
-            <SavingsOutlined />
+            <PiggyBank />
             <MSpan ellipsis color='inherit'>
               Goals
             </MSpan>
@@ -101,7 +100,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
             </MBadge>
           </NavigationItem>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/funding` }>
-            <TodayOutlined />
+            <CalendarSync />
             <MSpan ellipsis color='inherit'>
               Funding Schedules
             </MSpan>

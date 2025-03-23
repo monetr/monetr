@@ -1,13 +1,15 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ErrorOutline, Logout, PlusOne, Settings } from '@mui/icons-material';
+import { ErrorOutline } from '@mui/icons-material';
+import { LogOut, Settings } from 'lucide-react';
 
 import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
 import Logo from '@monetr/interface/assets/Logo';
 import BankSidebarItem from '@monetr/interface/components/Layout/BankSidebarItem';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
+import MSpan from '@monetr/interface/components/MSpan';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useLinks } from '@monetr/interface/hooks/links';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
@@ -64,7 +66,9 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
           to='/link/create'
           className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'
         >
-          <PlusOne className='text-3xl' />
+          <MSpan weight='bold' size='xl' color='emphasis'>
+            +1
+          </MSpan>
         </Link>
       </div>
     </SidebarWrapper>
@@ -125,7 +129,7 @@ function LogoutButton(): JSX.Element {
   // easier to prevent the current user's data from leaking into another session.
   return (
     <Link to='/logout' data-testid='bank-sidebar-logout'>
-      <Logout className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+      <LogOut className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
     </Link>
   );
 }

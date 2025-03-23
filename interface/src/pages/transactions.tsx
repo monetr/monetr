@@ -1,9 +1,9 @@
 import React, { Fragment, useCallback, useEffect, useRef } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { useNavigationType } from 'react-router-dom';
-import { HeartBroken, ShoppingCartOutlined } from '@mui/icons-material';
+import { HeartBroken } from '@mui/icons-material';
 import { format, getUnixTime, parse } from 'date-fns';
-import { Plus, Upload } from 'lucide-react';
+import { Plus, ShoppingCart, Upload } from 'lucide-react';
 import * as R from 'ramda';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -153,7 +153,7 @@ export default function Transactions(): JSX.Element {
     return (
       <Fragment>
         <MTopNavigation
-          icon={ ShoppingCartOutlined }
+          icon={ ShoppingCart }
           title='Transactions'
         >
           <UploadButtonMaybe />
@@ -162,7 +162,7 @@ export default function Transactions(): JSX.Element {
         <div className='w-full h-full flex justify-center items-center'>
           <div className='flex flex-col gap-2 items-center max-w-md'>
             <div className='w-full flex justify-center space-x-4'>
-              <ShoppingCartOutlined className='h-full text-5xl dark:text-dark-monetr-content-muted' />
+              <ShoppingCart className='h-16 w-16 text-5xl dark:text-dark-monetr-content-muted' />
             </div>
             <MSpan size='xl' color='subtle' className='text-center'>
               You don't have any transactions yet...
@@ -180,7 +180,7 @@ export default function Transactions(): JSX.Element {
   return (
     <Fragment>
       <MTopNavigation
-        icon={ ShoppingCartOutlined }
+        icon={ ShoppingCart }
         title='Transactions'
       >
         <div className='w-screen md:hidden flex justify-evenly'>
