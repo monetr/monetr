@@ -797,6 +797,8 @@ func TestDeleteTransactions(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance - 200)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance - 200)
 		}
 
 		{ // Check that the transaction is now missing.
@@ -882,13 +884,13 @@ func TestDeleteTransactions(t *testing.T) {
 			response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("transactionId", transactionId).
-				WithJSON(map[string]any{
-					"adjustsBalance": true,
-				}).
+				WithQuery("adjusts_balance", "true").
 				WithCookie(TestCookieName, token).
 				Expect()
 
 			response.Status(http.StatusOK)
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance)
 		}
 
 		{ // Check that the transaction is now missing.
@@ -911,6 +913,372 @@ func TestDeleteTransactions(t *testing.T) {
 			// Balances should not have the $2 deduction anymore
 			response.JSON().Path("$.available").Number().IsEqual(startingAvailableBalance)
 			response.JSON().Path("$.current").Number().IsEqual(startingCurrentBalance)
+		}
+	})
+
+	t.Run("happy path with spending", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		{ // Seed the data for the test.
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		var startingAvailableBalance, startingCurrentBalance int64
+		{
+			response := e.GET("/api/bank_accounts/{bankAccountId}/balances").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			startingAvailableBalance = int64(response.JSON().Path("$.available").Number().Gt(0).Raw())
+			startingCurrentBalance = int64(response.JSON().Path("$.current").Number().Gt(0).Raw())
+		}
+
+		var fundingScheduleId ID[FundingSchedule]
+		{
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					"name":        "Payday",
+					"description": "15th and the Last day of every month",
+					"ruleset":     FifthteenthAndLastDayOfEveryMonth,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+		}
+
+		var spendingId ID[Spending]
+		{ // Create an expense
+			now := app.Clock.Now()
+			timezone := testutils.MustEz(t, user.Account.GetTimezone)
+			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
+			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
+			nextRecurrence = util.Midnight(nextRecurrence, timezone)
+
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					"name":              "Some Monthly Expense",
+					"ruleset":           FirstDayOfEveryMonth,
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      1000,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
+			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
+			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+		}
+
+		{ // Transfer funds to the spending object
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending/transfer").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"fromSpendingId": nil,
+					"toSpendingId":   spendingId,
+					"amount":         1000, // $10.00
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.spending").Array().Length().IsEqual(1)
+			response.JSON().Path("$.spending[0].currentAmount").Number().IsEqual(1000)
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance)
+			response.JSON().Path("$.balance.free").Number().IsEqual(startingAvailableBalance - 1000)
+		}
+
+		var transactionId ID[Transaction]
+		{
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"bankAccountId":  bank.BankAccountId,
+					"amount":         200, // Spent $2
+					"isPending":      false,
+					"name":           "I spent money",
+					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"adjustsBalance": true,
+					"spendingId":     spendingId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance - 200)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance - 200)
+			response.JSON().Path("$.balance.free").Number().IsEqual(startingAvailableBalance - 1000)
+			response.JSON().Path("$.spending.spendingId").IsEqual(spendingId)
+			response.JSON().Path("$.spending.currentAmount").IsEqual(800)
+			transactionId = ID[Transaction](response.JSON().Path("$.transaction.transactionId").String().Raw())
+		}
+
+		{ // Check that we can see the transaction in the API response.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$[0].transactionId").String().IsEqual(transactionId.String())
+			response.JSON().Array().Length().IsEqual(1)
+		}
+
+		{ // Delete the transaction we just created
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transactionId).
+				WithQuery("adjusts_balance", "true").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// When we delete a transaction that was spent from an expense, and we are
+			// adjusting balances. We should remove the transactions impact on the
+			// available and current balances (so they should return to the balances
+			// seen before the txn was created). We should still see a deduction of
+			// $10 though from free because the funds from the transaction would have
+			// been returned to the spending object's allocation.
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance)
+			response.JSON().Path("$.balance.free").Number().IsEqual(startingAvailableBalance - 1000)
+			response.JSON().Path("$.spending[0].spendingId").IsEqual(spendingId)
+			response.JSON().Path("$.spending[0].currentAmount").IsEqual(1000)
+		}
+
+		{ // Check that the transaction is now missing.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().IsEmpty()
+		}
+
+		{ // Make sure the balance has not been changed
+			response := e.GET("/api/bank_accounts/{bankAccountId}/balances").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Balances should not have the $2 deduction anymore
+			response.JSON().Path("$.available").Number().IsEqual(startingAvailableBalance)
+			response.JSON().Path("$.current").Number().IsEqual(startingCurrentBalance)
+		}
+
+		{ // Because this was soft deleted, it can still be read by ID.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transactionId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transactionId").IsEqual(transactionId)
+		}
+	})
+
+	t.Run("hard delete with spending", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		{ // Seed the data for the test.
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		var startingAvailableBalance, startingCurrentBalance int64
+		{
+			response := e.GET("/api/bank_accounts/{bankAccountId}/balances").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			startingAvailableBalance = int64(response.JSON().Path("$.available").Number().Gt(0).Raw())
+			startingCurrentBalance = int64(response.JSON().Path("$.current").Number().Gt(0).Raw())
+		}
+
+		var fundingScheduleId ID[FundingSchedule]
+		{
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					"name":        "Payday",
+					"description": "15th and the Last day of every month",
+					"ruleset":     FifthteenthAndLastDayOfEveryMonth,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+		}
+
+		var spendingId ID[Spending]
+		{ // Create an expense
+			now := app.Clock.Now()
+			timezone := testutils.MustEz(t, user.Account.GetTimezone)
+			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
+			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
+			nextRecurrence = util.Midnight(nextRecurrence, timezone)
+
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					"name":              "Some Monthly Expense",
+					"ruleset":           FirstDayOfEveryMonth,
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      1000,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
+			response.JSON().Path("$.nextContributionAmount").Number().Gt(0)
+			response.JSON().Path("$.ruleset").IsEqual(FirstDayOfEveryMonth)
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+		}
+
+		{ // Transfer funds to the spending object
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending/transfer").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"fromSpendingId": nil,
+					"toSpendingId":   spendingId,
+					"amount":         1000, // $10.00
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.spending").Array().Length().IsEqual(1)
+			response.JSON().Path("$.spending[0].currentAmount").Number().IsEqual(1000)
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance)
+			response.JSON().Path("$.balance.free").Number().IsEqual(startingAvailableBalance - 1000)
+		}
+
+		var transactionId ID[Transaction]
+		{
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"bankAccountId":  bank.BankAccountId,
+					"amount":         200, // Spent $2
+					"isPending":      false,
+					"name":           "I spent money",
+					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"adjustsBalance": true,
+					"spendingId":     spendingId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance - 200)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance - 200)
+			response.JSON().Path("$.balance.free").Number().IsEqual(startingAvailableBalance - 1000)
+			response.JSON().Path("$.spending.spendingId").IsEqual(spendingId)
+			response.JSON().Path("$.spending.currentAmount").IsEqual(800)
+			transactionId = ID[Transaction](response.JSON().Path("$.transaction.transactionId").String().Raw())
+		}
+
+		{ // Check that we can see the transaction in the API response.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$[0].transactionId").String().IsEqual(transactionId.String())
+			response.JSON().Array().Length().IsEqual(1)
+		}
+
+		{ // Delete the transaction we just created
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transactionId).
+				WithQuery("adjusts_balance", "true").
+				WithQuery("soft", "false").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// When we delete a transaction that was spent from an expense, and we are
+			// adjusting balances. We should remove the transactions impact on the
+			// available and current balances (so they should return to the balances
+			// seen before the txn was created). We should still see a deduction of
+			// $10 though from free because the funds from the transaction would have
+			// been returned to the spending object's allocation.
+			response.JSON().Path("$.balance.available").Number().IsEqual(startingAvailableBalance)
+			response.JSON().Path("$.balance.current").Number().IsEqual(startingCurrentBalance)
+			response.JSON().Path("$.balance.free").Number().IsEqual(startingAvailableBalance - 1000)
+			response.JSON().Path("$.spending[0].spendingId").IsEqual(spendingId)
+			response.JSON().Path("$.spending[0].currentAmount").IsEqual(1000)
+		}
+
+		{ // Check that the transaction is now missing.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().IsEmpty()
+		}
+
+		{ // Make sure the balance has not been changed
+			response := e.GET("/api/bank_accounts/{bankAccountId}/balances").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Balances should not have the $2 deduction anymore
+			response.JSON().Path("$.available").Number().IsEqual(startingAvailableBalance)
+			response.JSON().Path("$.current").Number().IsEqual(startingCurrentBalance)
+		}
+
+		{ // Because this was soft deleted, it can still be read by ID.
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transactionId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNotFound)
 		}
 	})
 
@@ -939,19 +1307,6 @@ func TestDeleteTransactions(t *testing.T) {
 
 		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").String().IsEqual("unauthorized")
-	})
-
-	t.Run("malformed json", func(t *testing.T) {
-		_, e := NewTestApplication(t)
-		token := GivenIHaveToken(t, e)
-
-		response := e.DELETE(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
-			WithCookie(TestCookieName, token).
-			WithBytes([]byte("I am not really json")).
-			Expect()
-
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("invalid JSON body")
 	})
 
 	t.Run("transaction does not exist", func(t *testing.T) {

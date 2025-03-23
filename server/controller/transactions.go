@@ -315,7 +315,12 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 		}
 	}
 
-	updatedExpenses, err := repo.ProcessTransactionSpentFrom(c.getContext(ctx), bankAccountId, &transaction, existingTransaction)
+	updatedExpenses, err := repo.ProcessTransactionSpentFrom(
+		c.getContext(ctx),
+		bankAccountId,
+		&transaction,
+		existingTransaction,
+	)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to process expense changes")
 	}
@@ -325,7 +330,13 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 	//  where if a field is missing during a PUT, like the name field; we might
 	//  update the name to be blank?
 
-	if err = repo.UpdateTransaction(c.getContext(ctx), bankAccountId, &transaction); err != nil {
+	// TODO Handle balance changes on a transaction with an amount change.
+	// TODO Handle un-soft-deleting a transaction.
+	if err = repo.UpdateTransaction(
+		c.getContext(ctx),
+		bankAccountId,
+		&transaction,
+	); err != nil {
 		return c.wrapPgError(ctx, err, "could not update transaction")
 	}
 
@@ -361,22 +372,16 @@ func (c *Controller) deleteTransactions(ctx echo.Context) error {
 
 	log := c.getLog(ctx)
 
-	var request struct {
-		AdjustsBalance bool `json:"adjustsBalance"`
-	}
-	// If a body was provided then we should assume it is a JSON body and try to
-	// derive the AdjustsBalance field from it.
-	if ctx.Request().ContentLength > 0 {
-		log.Debug("delete transaction request has a body, reading json information it")
-		if err = ctx.Bind(&request); err != nil {
-			return c.invalidJson(ctx)
-		}
-	}
+	adjustsBalance := urlParamBoolDefault(ctx, "adjusts_balance", false)
+	softDelete := urlParamBoolDefault(ctx, "soft", true)
 
 	log = log.WithFields(logrus.Fields{
-		"adjustsBalance": request.AdjustsBalance,
-		"transactionId":  transactionId,
-		"bankAccountId":  bankAccountId,
+		"params": logrus.Fields{
+			"adjustsBalance": adjustsBalance,
+			"softDelete":     softDelete,
+		},
+		"transactionId": transactionId,
+		"bankAccountId": bankAccountId,
 	})
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -407,15 +412,28 @@ func (c *Controller) deleteTransactions(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "Failed to find transaction to be removed")
 	}
 
-	if err := repo.DeleteTransaction(
-		c.getContext(ctx),
-		bankAccountId,
-		transactionId,
-	); err != nil {
-		return c.wrapPgError(ctx, err, "Failed to remove transaction")
+	// If we are soft deleting the transaction then don't actually remove it. This
+	// basically just sets the deleted_at to be the current timestamp.
+	if softDelete {
+		if err := repo.SoftDeleteTransaction(
+			c.getContext(ctx),
+			bankAccountId,
+			transactionId,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to remove transaction")
+		}
+	} else {
+		if err := repo.DeleteTransaction(
+			c.getContext(ctx),
+			bankAccountId,
+			transactionId,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to remove transaction")
+		}
 	}
 
-	if request.AdjustsBalance {
+	updatedExpenses := make([]Spending, 0)
+	if adjustsBalance {
 		bankAccount, err := repo.GetBankAccount(c.getContext(ctx), bankAccountId)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "Failed to read bank account information")
@@ -427,10 +445,35 @@ func (c *Controller) deleteTransactions(ctx echo.Context) error {
 		bankAccount.AvailableBalance += transaction.Amount
 		bankAccount.CurrentBalance += transaction.Amount
 
-		if err := repo.UpdateBankAccount(c.getContext(ctx), bankAccount); err != nil {
+		if err := repo.UpdateBankAccount(
+			c.getContext(ctx),
+			bankAccount,
+		); err != nil {
 			return c.wrapPgError(ctx, err, "Failed to update account balances")
+		}
+
+		if transaction.SpendingId != nil {
+			updatedTransaction := *transaction
+			updatedTransaction.SpendingId = nil
+			updatedExpenses, err = repo.ProcessTransactionSpentFrom(
+				c.getContext(ctx),
+				bankAccountId,
+				&updatedTransaction,
+				transaction,
+			)
+			if err != nil {
+				return c.wrapPgError(ctx, err, "failed to process expense changes")
+			}
 		}
 	}
 
-	return ctx.NoContent(http.StatusOK)
+	balance, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "could not get updated balances")
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]any{
+		"balance":  balance,
+		"spending": updatedExpenses,
+	})
 }

@@ -37,6 +37,7 @@ type BaseRepository interface {
 	DeletePlaidLink(ctx context.Context, plaidLinkId ID[PlaidLink]) error
 	DeleteSpending(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending]) error
 	DeleteTransaction(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) error
+	SoftDeleteTransaction(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) error
 	GetAccount(ctx context.Context) (*Account, error)
 	// GetAccountOwner will return a User object for the currently authenticated
 	// account, as well as the Login and Account sub object for that user. If one

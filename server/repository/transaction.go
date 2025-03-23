@@ -351,7 +351,7 @@ func (r *repositoryBase) UpdateTransactions(
 	return nil
 }
 
-func (r *repositoryBase) DeleteTransaction(
+func (r *repositoryBase) SoftDeleteTransaction(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],
 	transactionId ID[Transaction],
@@ -367,6 +367,23 @@ func (r *repositoryBase) DeleteTransaction(
 		Update()
 
 	return errors.Wrap(err, "failed to soft-delete transaction")
+}
+
+func (r *repositoryBase) DeleteTransaction(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	transactionId ID[Transaction],
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	_, err := r.txn.ModelContext(span.Context(), &Transaction{}).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."transaction_id" = ?`, transactionId).
+		ForceDelete()
+
+	return errors.Wrap(err, "failed to delete transaction")
 }
 
 func (r *repositoryBase) GetTransactionsByPlaidTransactionId(

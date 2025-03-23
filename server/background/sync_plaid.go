@@ -959,7 +959,7 @@ func (s *SyncPlaidJob) syncRemovedTransaction(
 		}
 
 		// Safe to remove this transaction
-		if err := s.repo.DeleteTransaction(
+		if err := s.repo.SoftDeleteTransaction(
 			ctx,
 			existingTransaction.BankAccountId,
 			existingTransaction.TransactionId,
