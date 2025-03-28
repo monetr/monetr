@@ -1,7 +1,7 @@
 import React, { Fragment, useCallback, useEffect, useRef } from 'react';
 import { useNavigationType } from 'react-router-dom';
-import { HeartBroken, SavingsOutlined } from '@mui/icons-material';
-import { Plus } from 'lucide-react';
+import { HeartBroken } from '@mui/icons-material';
+import { PiggyBank, Plus } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import GoalItem from '@monetr/interface/components/goals/GoalItem';
@@ -83,7 +83,7 @@ export default function Goals(): JSX.Element {
 
   return (
     <Fragment>
-      <MTopNavigation icon={ SavingsOutlined } title='Goals' >
+      <MTopNavigation icon={ PiggyBank } title='Goals' >
         <Button variant='primary' onClick={ showNewGoalModal }>
           <Plus />
           New Goal
@@ -101,7 +101,7 @@ function EmptyState(): JSX.Element {
     <div className='w-full h-full flex justify-center items-center'>
       <div className='flex flex-col gap-2 items-center max-w-md'>
         <div className='w-full flex justify-center space-x-4'>
-          <SavingsOutlined className='h-full text-5xl dark:text-dark-monetr-content-muted' />
+          <PiggyBank className='w-16 h-16 dark:text-dark-monetr-content-muted' />
         </div>
         <MSpan size='xl' color='subtle' className='text-center'>
           You don't have any goals yet...

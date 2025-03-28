@@ -1,20 +1,18 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  DeleteOutlined,
   HeartBroken,
-  SaveOutlined,
-  SavingsOutlined,
-  SwapVertOutlined,
 } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { startOfDay, startOfToday } from 'date-fns';
 import { FormikHelpers } from 'formik';
+import { ArrowUpDown, PiggyBank, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
+import { Button } from '@monetr/interface/components/Button';
+import FormButton from '@monetr/interface/components/FormButton';
 import GoalTimeline from '@monetr/interface/components/goals/GoalTimeline';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MFormButton, { MBaseButton } from '@monetr/interface/components/MButton';
 import MCheckbox from '@monetr/interface/components/MCheckbox';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MDivider from '@monetr/interface/components/MDivider';
@@ -173,29 +171,28 @@ export default function GoalDetails(): JSX.Element {
   return (
     <MForm initialValues={ initialValues } onSubmit={ submit } className='flex w-full h-full flex-col'>
       <MTopNavigation
-        icon={ SavingsOutlined }
+        icon={ PiggyBank }
         title='Goals'
         base={ `/bank/${spending.bankAccountId}/goals` }
         breadcrumb={ spending?.name }
       >
-        <MBaseButton
-          color='secondary'
-          className='gap-1 py-1 px-2'
+        <Button
+          variant='secondary'
           onClick={ () => showTransferModal({ initialToSpendingId: spending?.spendingId }) }
         >
-          <SwapVertOutlined />
+          <ArrowUpDown />
           Transfer
-        </MBaseButton>
-        <MBaseButton color='cancel' className='gap-1 py-1 px-2' onClick={ deleteGoal } >
-          <DeleteOutlined />
+        </Button>
+        <Button variant='destructive' onClick={ deleteGoal } >
+          <Trash />
           Remove
-        </MBaseButton>
-        <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit' role='form'>
-          <SaveOutlined />
+        </Button>
+        <FormButton variant='primary' type='submit' role='form'>
+          <Save />
           Save
-        </MFormButton>
+        </FormButton>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
+      <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col'>
 

@@ -1,17 +1,17 @@
 import React from 'react';
 import { useMatch, useNavigate } from 'react-router-dom';
-import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
 import HeartBroken from '@mui/icons-material/HeartBroken';
-import SaveOutlined from '@mui/icons-material/SaveOutlined';
 import TodayOutlined from '@mui/icons-material/TodayOutlined';
 import { AxiosError } from 'axios';
 import { format, isEqual, startOfDay } from 'date-fns';
 import { FormikErrors, FormikHelpers } from 'formik';
+import { Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
+import { Button } from '@monetr/interface/components/Button';
+import FormButton from '@monetr/interface/components/FormButton';
 import FundingTimeline from '@monetr/interface/components/funding/FundingTimeline';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MFormButton, { MBaseButton } from '@monetr/interface/components/MButton';
 import MCheckbox from '@monetr/interface/components/MCheckbox';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MDivider from '@monetr/interface/components/MDivider';
@@ -155,16 +155,16 @@ export default function FundingDetails(): JSX.Element {
         breadcrumb={ funding.name }
         base={ `/bank/${funding.bankAccountId}/funding` }
       >
-        <MBaseButton color='cancel' className='gap-1 py-1 px-2' onClick={ removeFunding } >
-          <DeleteOutlined />
+        <Button variant='destructive' onClick={ removeFunding } >
+          <Trash />
           Remove
-        </MBaseButton>
-        <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit' role='form'>
-          <SaveOutlined />
+        </Button>
+        <FormButton variant='primary' className='gap-1 py-1 px-2' type='submit' role='form'>
+          <Save />
           Save
-        </MFormButton>
+        </FormButton>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
+      <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col'>
             <MTextField className='w-full' label='Name' name='name' id='funding-name-search' required />
