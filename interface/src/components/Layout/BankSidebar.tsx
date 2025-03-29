@@ -91,7 +91,7 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
     'pt-2',
     'pb-8',
     'lg:pb-4',
-    'w-16',
+    'bank-sidebar',
     props.className,
   );
 
