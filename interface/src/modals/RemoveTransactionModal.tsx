@@ -50,13 +50,10 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
       softDelete: values.softDelete,
       adjustsBalance: values.adjustsBalance,
     })
-      .then(() => enqueueSnackbar(
-        'Transaction removed successfully',
-        {
-          variant: 'success',
-          disableWindowBlurListener: true,
-        },
-      ))
+      .then(() => void enqueueSnackbar('Transaction removed successfully', {
+        variant: 'success',
+        disableWindowBlurListener: true,
+      }))
       .then(() => modal.resolve())
       .then(() => modal.remove())
       .catch((error: AxiosError<APIError>) => void enqueueSnackbar(error.response.data['error'], {

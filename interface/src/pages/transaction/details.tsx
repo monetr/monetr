@@ -1,12 +1,11 @@
 import React, { useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { startOfDay } from 'date-fns';
 import { FormikHelpers } from 'formik';
-import { HeartCrack, Save, ShoppingCart, Trash } from 'lucide-react';
+import { HeartCrack, Save, ShoppingCart } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
-import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MCheckbox from '@monetr/interface/components/MCheckbox';
@@ -17,11 +16,11 @@ import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import RemoveTransactionButton from '@monetr/interface/components/transactions/RemoveTransactionButton';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
 import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
-import { showRemoveTransactionModal } from '@monetr/interface/modals/RemoveTransactionModal';
 import Transaction from '@monetr/interface/models/Transaction';
 import { APIError } from '@monetr/interface/util/request';
 
@@ -37,7 +36,6 @@ interface TransactionValues {
 export default function TransactionDetails(): JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const { data: link } = useCurrentLink();
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { transactionId: id } = useParams();
   const updateTransaction = useUpdateTransaction();
@@ -109,13 +107,6 @@ export default function TransactionDetails(): JSX.Element {
     );
   }
 
-  async function promptRemoveTransaction() {
-    return await showRemoveTransactionModal({
-      transaction,
-    })
-      .then(() => navigate(`/bank/${ transaction.bankAccountId }/transactions`));
-  }
-
   const initialValues: TransactionValues = {
     name: transaction.name,
     originalName: transaction.originalName,
@@ -138,15 +129,8 @@ export default function TransactionDetails(): JSX.Element {
         base={ `/bank/${transaction.bankAccountId}/transactions` }
         breadcrumb={ transaction?.name }
       >
-        <Button
-          variant='destructive'
-          className='flex-shrink-0'
-          onClick={ promptRemoveTransaction }
-        >
-          <Trash />
-          Remove
-        </Button>
-        <FormButton variant='primary' className='flex-shrink-0' type='submit' role='form'>
+        <RemoveTransactionButton transaction={ transaction } />
+        <FormButton variant='primary' type='submit' role='form'>
           <Save />
           Save Changes
         </FormButton>
