@@ -230,7 +230,7 @@ function AddTransactionButton(): JSX.Element {
 
   return (
     <button 
-      className='fixed md:bottom-4 bottom-8 right-4 w-14 h-14 rounded-full bg-dark-monetr-brand-subtle backdrop-blur-sm bg-opacity-75 backdrop-brightness-200 z-20 flex items-center justify-center active:backdrop-brightness-50'
+      className='fixed md:bottom-4 bottom-14 right-4 w-14 h-14 rounded-full bg-dark-monetr-brand-subtle backdrop-blur-sm bg-opacity-75 backdrop-brightness-200 z-20 flex items-center justify-center active:backdrop-brightness-50'
       onClick={ showNewTransactionModal }
     >
       <Plus className='h-12 w-12 text-dark-monetr-content' />

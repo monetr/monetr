@@ -86,16 +86,16 @@ interface ActionAreaProps {
 function ActionArea(props: ActionAreaProps): JSX.Element {
   if (!props.children) return null;
 
-  const styles = mergeTailwind([
+  const styles = mergeTailwind(
     'flex justify-end gap-x-4 md:gap-x-2',
     'flex-shrink-0',
     'md:relative fixed -bottom-1 md:bottom-auto left-0 md:left-auto',
     // Hacky width and padding to make sure scrollbar renders properly
-    'p-4 pr-[calc(1rem-16px)] md:p-0',
+    'p-6 pr-[calc(1.5rem-16px)] md:p-0 pb-8 md:pb-0',
     'w-[calc(100vw-16px)] md:w-auto',
     'z-20',
     'backdrop-blur-sm bg-dark-monetr-background/50',
-  ]);
+  );
 
   return (
     <div className={ styles }>
