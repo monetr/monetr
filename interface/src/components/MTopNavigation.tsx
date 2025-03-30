@@ -66,19 +66,40 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
   }
 
   return (
-    <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-x-4 justify-between'>
-      <div className='flex gap-2 min-w-0 h-12 items-center flex-grow'>
+    <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-x-2 justify-between'>
+      <div className='flex gap-2 min-w-0 h-12 items-center flex-shrink'>
         <MSidebarToggle className='mr-2' backButton={ props.base } />
         <span className='flex gap-2 flex-grow min-w-0'>
           <InitialCrumb />
           <BreadcrumbMaybe />
         </span>
       </div>
-      { props.children && (
-        <div className='flex gap-x-2 md:p-0'>
-          { props.children }
-        </div>
-      )}
+      <ActionArea children={ props.children } />
+    </div>
+  );
+}
+
+interface ActionAreaProps {
+  children?: React.ReactNode;
+}
+
+function ActionArea(props: ActionAreaProps): JSX.Element {
+  if (!props.children) return null;
+
+  const styles = mergeTailwind([
+    'flex justify-end gap-x-4 md:gap-x-2',
+    'flex-shrink-0',
+    'md:relative fixed -bottom-1 md:bottom-auto left-0 md:left-auto',
+    // Hacky width and padding to make sure scrollbar renders properly
+    'p-4 pr-[calc(1rem-16px)] md:p-0',
+    'w-[calc(100vw-16px)] md:w-auto',
+    'z-20',
+    'backdrop-blur-sm bg-dark-monetr-background/50',
+  ]);
+
+  return (
+    <div className={ styles }>
+      { props.children }
     </div>
   );
 }

@@ -1,13 +1,12 @@
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { ShoppingCartOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { startOfDay } from 'date-fns';
 import { FormikHelpers } from 'formik';
-import { HeartCrack, Save } from 'lucide-react';
+import { HeartCrack, Save, ShoppingCart } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
-import { Button } from '@monetr/interface/components/Button';
+import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MCheckbox from '@monetr/interface/components/MCheckbox';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
@@ -17,6 +16,7 @@ import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import RemoveTransactionButton from '@monetr/interface/components/transactions/RemoveTransactionButton';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
 import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
@@ -124,17 +124,18 @@ export default function TransactionDetails(): JSX.Element {
       className='flex w-full h-full flex-col'
     >
       <MTopNavigation
-        icon={ ShoppingCartOutlined }
+        icon={ ShoppingCart }
         title='Transactions'
         base={ `/bank/${transaction.bankAccountId}/transactions` }
         breadcrumb={ transaction?.name }
       >
-        <Button variant='primary' className='gap-1 py-1 px-2' type='submit'>
+        <RemoveTransactionButton transaction={ transaction } />
+        <FormButton variant='primary' type='submit' role='form'>
           <Save />
           Save Changes
-        </Button>
+        </FormButton>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
+      <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
             <div className='w-full flex justify-center mb-2'>
