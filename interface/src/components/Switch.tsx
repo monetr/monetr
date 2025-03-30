@@ -18,7 +18,7 @@ const Switch = React.forwardRef<
       'focus-visible:ring-offset-2 focus-visible:ring-offset-background',
       // Disabled
       'disabled:cursor-not-allowed disabled:opacity-50',
-      // Checed
+      // Checked
       'data-[state=checked]:bg-dark-monetr-green data-[state=unchecked]:bg-dark-monetr-background-subtle',
       className
     ) }

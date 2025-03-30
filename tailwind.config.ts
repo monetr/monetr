@@ -99,6 +99,10 @@ const config: Partial<Config> = {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
+      gap: {
+        'component': '0.125rem', // gap-0.5
+        'stack': '0.5rem', // gap-2
+      },
       colors: {
         inherit: 'inherit',
         current: 'currentColor',

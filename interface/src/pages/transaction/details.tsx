@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { startOfDay } from 'date-fns';
 import { FormikHelpers } from 'formik';
@@ -21,6 +21,7 @@ import SimilarTransactions from '@monetr/interface/components/transactions/Simil
 import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { showRemoveTransactionModal } from '@monetr/interface/modals/RemoveTransactionModal';
 import Transaction from '@monetr/interface/models/Transaction';
 import { APIError } from '@monetr/interface/util/request';
 
@@ -36,6 +37,7 @@ interface TransactionValues {
 export default function TransactionDetails(): JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const { data: link } = useCurrentLink();
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { transactionId: id } = useParams();
   const updateTransaction = useUpdateTransaction();
@@ -107,6 +109,13 @@ export default function TransactionDetails(): JSX.Element {
     );
   }
 
+  async function promptRemoveTransaction() {
+    return await showRemoveTransactionModal({
+      transaction,
+    })
+      .then(() => navigate(`/bank/${ transaction.bankAccountId }/transactions`));
+  }
+
   const initialValues: TransactionValues = {
     name: transaction.name,
     originalName: transaction.originalName,
@@ -129,11 +138,15 @@ export default function TransactionDetails(): JSX.Element {
         base={ `/bank/${transaction.bankAccountId}/transactions` }
         breadcrumb={ transaction?.name }
       >
-        <Button variant='destructive' className='gap-1 py-1 px-2' onClick={ () => {} } >
+        <Button
+          variant='destructive'
+          className='flex-shrink-0'
+          onClick={ promptRemoveTransaction }
+        >
           <Trash />
           Remove
         </Button>
-        <FormButton variant='primary' className='gap-1 py-1 px-2' type='submit' role='form'>
+        <FormButton variant='primary' className='flex-shrink-0' type='submit' role='form'>
           <Save />
           Save Changes
         </FormButton>

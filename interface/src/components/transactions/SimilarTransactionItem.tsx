@@ -10,6 +10,10 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface SimilarTransactionItemProps {
   transactionId: string;
+  /**
+   * disableNavigate will remove the arrow link or the click-ability of the similar transaction item.
+   */
+  disableNavigate?: boolean;
 }
 
 export default function SimilarTransactionItem(props: SimilarTransactionItemProps): JSX.Element {
@@ -84,7 +88,9 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
           <span className={ amountClassnames }>
             { locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0) }
           </span>
-          <ArrowLink redirect={ redirectUrl } />
+          { !props.disableNavigate && (
+            <ArrowLink redirect={ redirectUrl } />
+          ) }
         </div>
       </div>
     </li>
