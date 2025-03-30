@@ -1,0 +1,15 @@
+input[type="date"]::-webkit-calendar-picker-indicator {
+  color-scheme: dark !important;
+  font-size: 1.125rem /* 18px */ !important;
+  line-height: 1.75rem /* 28px */ !important;
+  opacity: 80% !important;
+  position: absolute !important;
+}
+
+input[type="date"] {
+  font-size: 0.875rem /* 14px */ !important;
+  line-height: 1.25rem /* 20px */ !important;
+  text-indent: 0.75rem !important; // indent-3
+  font-weight: 400 !important;
+  color: rgb(228 228 231 / 1) !important; // zinc-200
+}

@@ -1,17 +1,19 @@
 /* eslint-disable max-len */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { isEqual, Locale, startOfMonth, startOfToday } from 'date-fns';
+import { format, isEqual, Locale, parse, startOfMonth, startOfToday } from 'date-fns';
 import { enUS } from 'date-fns/locale/en-US';
 import { useFormikContext } from 'formik';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
 
 import MLabel, { MLabelDecorator } from './MLabel';
 import { ReactElement } from './types';
-import { Button } from '@monetr/interface/components/Button';
+import { Button, buttonVariants } from '@monetr/interface/components/Button';
 import { Calendar } from '@monetr/interface/components/Calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import './MDatePicker.scss';
 
 export interface MDatePickerProps extends
   Omit<React.HTMLAttributes<HTMLButtonElement>, 'value' | 'defaultValue'>
@@ -185,13 +187,35 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
       >
         <LabelDecorator name={ props.name } disabled={ props.disabled } />
       </MLabel>
+      { /*
+      This is a trick to make the date picker a native picker when we are on mobile, but to use the react custom date
+      picker when we are on desktop.
+      */ }
+      <input
+        className={ mergeTailwind(
+          buttonVariants({ variant: 'outlined', size: 'select' }),
+          className,
+          'bg-transparent',
+          'block md:hidden',
+        ) }
+        type='date'
+        name={ props.name }
+        value={ format(selectedValue, 'yyyy-MM-dd') }
+        min={ props.min ? format(props.min, 'yyyy-MM-dd') : undefined }
+        max={ props.max ? format(props.max, 'yyyy-MM-dd') : undefined }
+        required={ props.required }
+        onChange={ event => handleSelect(parse(event.currentTarget.value, 'yyyy-MM-dd', startOfToday())) }
+      />
       <Popover open={ open }>
         <PopoverTrigger asChild>
           <Button
             variant='outlined'
             size='select'
             disabled={ formikContext?.isSubmitting || disabled }
-            className={ classNames }
+            className={ mergeTailwind(
+              classNames,
+              'hidden md:inline-flex',
+            ) }
             onClick={ handleClick }
           >
             <CalendarIcon />
