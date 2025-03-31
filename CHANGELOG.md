@@ -1,5 +1,62 @@
 # Changelog
 
+## [1.4.0](https://github.com/monetr/monetr/compare/v1.3.4...v1.4.0) (2025-03-30)
+
+
+### Features
+
+* **api:** Improving deleting transactions ([47f9d8c](https://github.com/monetr/monetr/commit/47f9d8c991ab74c1d64719cf343c3ff7acaa7e3c))
+* **api:** Laying groundwork for camt.053 support ([a0fa5cf](https://github.com/monetr/monetr/commit/a0fa5cf2b91642a0a2455369249a9efba1cd360e))
+* **ui:** Adding UX to remove transactions for manual links ([#2564](https://github.com/monetr/monetr/issues/2564)) ([f378265](https://github.com/monetr/monetr/commit/f37826561fecbfcba3c795bf1bd4d5be553cecf3))
+* **ui:** Use native datepicker elements on mobile. ([83ecd6d](https://github.com/monetr/monetr/commit/83ecd6d260f35b48ee9c4b214b8a62275979afde))
+
+
+### Dependencies
+
+* **api:** update module github.com/golang-jwt/jwt/v4 to v4.5.2 [security] ([#2559](https://github.com/monetr/monetr/issues/2559)) ([62fff8d](https://github.com/monetr/monetr/commit/62fff8db7c212507065524d8822cdee20166fe32))
+* **api:** update module google.golang.org/protobuf to v1.36.6 ([#2568](https://github.com/monetr/monetr/issues/2568)) ([8ce34b9](https://github.com/monetr/monetr/commit/8ce34b9d43449e18f60bd79a927747d0790c15a1))
+* **containers:** update ghcr.io/flipt-io/flipt docker tag to v1.56.0 ([#2550](https://github.com/monetr/monetr/issues/2550)) ([24132ce](https://github.com/monetr/monetr/commit/24132ce3d14d280deaf06384c7ee66bd6fe885bb))
+* **renovate:** update dependency simple-icons to v14.11.0 ([#2535](https://github.com/monetr/monetr/issues/2535)) ([a376706](https://github.com/monetr/monetr/commit/a37670678e4e9dca66a6ca52497966633ab98556))
+* **ui:** update dependency @fontsource-variable/inter to v5.2.5 ([#2551](https://github.com/monetr/monetr/issues/2551)) ([101123d](https://github.com/monetr/monetr/commit/101123d3b2725b4a3d4cb67cd0effd056b746efa))
+* **ui:** update dependency @react-email/components to v0.0.34 ([#2543](https://github.com/monetr/monetr/issues/2543)) ([ca6cbc4](https://github.com/monetr/monetr/commit/ca6cbc4b0afe1e57d5630dc6c3e1723f88674edc))
+* **ui:** update dependency @swc/core to v1.11.10 ([#2544](https://github.com/monetr/monetr/issues/2544)) ([d12327e](https://github.com/monetr/monetr/commit/d12327eef8e772be221dd82ee8b603e39b35c8c4))
+* **ui:** update dependency @swc/core to v1.11.11 ([#2549](https://github.com/monetr/monetr/issues/2549)) ([03f5b58](https://github.com/monetr/monetr/commit/03f5b585a481d70789fc9925b5980fb8068fe491))
+* **ui:** update dependency @swc/core to v1.11.13 ([#2569](https://github.com/monetr/monetr/issues/2569)) ([4968c20](https://github.com/monetr/monetr/commit/4968c20e76486fa940cbcbbf5ede6c5304384574))
+* **ui:** update dependency @types/react to v18.3.19 ([#2553](https://github.com/monetr/monetr/issues/2553)) ([c0fe2da](https://github.com/monetr/monetr/commit/c0fe2da9de054e0ae5ce1b456ef18cb6f7e9c9d2))
+* **ui:** update dependency axios to v1.8.4 ([#2557](https://github.com/monetr/monetr/issues/2557)) ([21cfdad](https://github.com/monetr/monetr/commit/21cfdadb9c933b31b3529850be3c69c2a952ac49))
+* **ui:** update dependency lucide-react to v0.484.0 ([#2560](https://github.com/monetr/monetr/issues/2560)) ([3d57e9f](https://github.com/monetr/monetr/commit/3d57e9f97b63d9784e0234877b378982a760a0b7))
+* **ui:** update dependency next to v15.2.3 [security] ([#2556](https://github.com/monetr/monetr/issues/2556)) ([e928b99](https://github.com/monetr/monetr/commit/e928b99c7188aef8e40a2507f7c699c495724b7a))
+* **ui:** update dependency renovate to v39.207.2 ([#2546](https://github.com/monetr/monetr/issues/2546)) ([393719a](https://github.com/monetr/monetr/commit/393719ac337408ee564f3216e87fec7f3cbda7b0))
+* **ui:** update sass to v1.86.0 ([#2562](https://github.com/monetr/monetr/issues/2562)) ([c18ba4c](https://github.com/monetr/monetr/commit/c18ba4c5cb0e914dbc1619e5edadb9810be5dca5))
+* **ui:** update storybook monorepo to v8.6.6 ([#2531](https://github.com/monetr/monetr/issues/2531)) ([f20a19b](https://github.com/monetr/monetr/commit/f20a19b06a45dca257c3028603fcd97d73e5ebab))
+* **ui:** update storybook monorepo to v8.6.7 ([#2547](https://github.com/monetr/monetr/issues/2547)) ([51ff8f7](https://github.com/monetr/monetr/commit/51ff8f7ac384f5c4a188a99d8bc6d65c253fc860))
+
+
+### Bug Fixes
+
+* **api:** Better scrub sentry data ([421d438](https://github.com/monetr/monetr/commit/421d43829988409dca87607c026fb5bee3f4a05d))
+* **build:** Fixing DNS issues with macOS and test suite locally ([4333fe4](https://github.com/monetr/monetr/commit/4333fe4c42b5ff1c494c3b23e519a972e662e3f2))
+* **container:** Dockerfile cleanup ([52c9f30](https://github.com/monetr/monetr/commit/52c9f30c30eebe5736a284b77ecb66072e3e5887))
+* **test:** Make sure camt.053 files aren't accepted on the old endpoint ([c7c2c81](https://github.com/monetr/monetr/commit/c7c2c81cd5d849aae70a3fa75936dc95066a7b26))
+* **test:** Move CAMT fixture files to internal fixture package ([42bb5f4](https://github.com/monetr/monetr/commit/42bb5f4408053da6273032c8b1279b4b9b1c6b66))
+* **ui:** Cleaning up unused code snippets in UI ([c5440ef](https://github.com/monetr/monetr/commit/c5440ef7a2c3860ef9efcb5472e28413b93faa27))
+* **ui:** Fix padding due to corners on mobile devices ([a38b3b9](https://github.com/monetr/monetr/commit/a38b3b911fb6d702ca7e89147bce509a0474cf7a))
+* **ui:** Fixed invalid interactive role on select button ([df52642](https://github.com/monetr/monetr/commit/df526426f399db01b5577125da33c391a21ddee6))
+* **ui:** Fixed page crash when links load slowly ([4732f13](https://github.com/monetr/monetr/commit/4732f1341f437d3e07e68aad8b6fa2e96f507ca5)), closes [#2563](https://github.com/monetr/monetr/issues/2563)
+* **ui:** More UI code cleanup ([1d92aef](https://github.com/monetr/monetr/commit/1d92aefeef5a566d9ef0073291ec3dfece302e5e))
+* **ui:** More UI improvements from code quality ([4333fe4](https://github.com/monetr/monetr/commit/4333fe4c42b5ff1c494c3b23e519a972e662e3f2))
+* **ui:** Removing unreachable code in UI ([b92137f](https://github.com/monetr/monetr/commit/b92137f8f9423b97ba759342e5bf3146c5c53684))
+
+
+### Miscellaneous
+
+* **api:** Tweak Plaid webhook logging ([5b74786](https://github.com/monetr/monetr/commit/5b74786a84fcfe2dec1aac4eb71709792a73932d))
+
+
+### Documentation
+
+* Remove unused waitlist code ([1d92aef](https://github.com/monetr/monetr/commit/1d92aefeef5a566d9ef0073291ec3dfece302e5e))
+
 ## [1.3.4](https://github.com/monetr/monetr/compare/v1.3.3...v1.3.4) (2025-03-15)
 
 
