@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +17,7 @@ func TestParseDate(t *testing.T) {
 		assert.EqualValues(t, time.Date(2024, 1, 4, 16, 44, 54, 232000000, time.UTC), result)
 	})
 
-	t.Run("alternative format", func(t *testing.T) {
+	t.Run("normal alternative format", func(t *testing.T) {
 		// See: https://github.com/monetr/monetr/issues/2362
 		ofxDate := "20250124120000"
 		result, err := ParseDate(ofxDate, time.UTC)
@@ -32,10 +33,18 @@ func TestParseDate(t *testing.T) {
 		assert.EqualValues(t, time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), result)
 	})
 
-	t.Run("invalid input", func(t *testing.T) {
-		ofxDate := "20240101"
+	t.Run("date format without timestamp", func(t *testing.T) {
+		// See: https://github.com/monetr/monetr/issues/2575
+		ofxDate := "20250101"
 		result, err := ParseDate(ofxDate, time.UTC)
-		assert.EqualError(t, err, "failed to parse OFX timestamp [20240101], found 0 matching patterns")
+		assert.NoError(t, err, "must be able to parse the alternative OFX timestamp")
+		assert.EqualValues(t, time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), result)
+	})
+
+	t.Run("invalid input", func(t *testing.T) {
+		ofxDate := "January 01, 2025"
+		result, err := ParseDate(ofxDate, time.UTC)
+		assert.EqualError(t, err, "failed to parse OFX timestamp [January 01, 2025], found 0 matching patterns")
 		assert.True(t, result.IsZero(), "date returned must be zero")
 	})
 }
@@ -79,5 +88,15 @@ func TestParse(t *testing.T) {
 		assert.NotNil(t, result, "resulting OFX object should not be nil")
 		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
 		assert.NotNil(t, result.CREDITCARDMSGSRSV1, "credit card message response must not be nil")
+	})
+
+	t.Run("no curdef MXN", func(t *testing.T) {
+		reader := bytes.NewReader(fixtures.LoadFile(t, "no-curdef-mxn.ofx"))
+
+		result, err := Parse(reader)
+		assert.NoError(t, err, "must not return an error parsing known valid file")
+		assert.NotNil(t, result, "resulting OFX object should not be nil")
+		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
+		assert.NotNil(t, result.BANKMSGSRSV1, "bank message response must not be nil")
 	})
 }

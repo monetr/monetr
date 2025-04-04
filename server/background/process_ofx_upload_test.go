@@ -44,7 +44,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		// Force the timezone to be central time
-		user.Account.Timezone = "America/Central"
+		user.Account.Timezone = "America/Chicago"
 		testutils.MustDBUpdate(t, user.Account)
 		link := fixtures.GivenIHaveAManualLink(t, clock, user)
 		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
@@ -197,6 +197,102 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			assert.NotNil(t, GetTxnByUploadIdentifier(t, bankAccount, "8a34b9c89506be8c0195711720250751"))
 			// Find the new transaction from the second file
 			assert.NotNil(t, GetTxnByUploadIdentifier(t, bankAccount, "8a348ece9588213401958a84627458ab"))
+		}
+	})
+
+	t.Run("handle missing curdef in ofx file", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		ps := pubsub.NewPostgresPubSub(log, db)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		// Force the timezone to be central time
+		user.Account.Timezone = "America/Chicago"
+		testutils.MustDBUpdate(t, user.Account)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		{ // Update the bank account to be MXN currency
+			bankAccount.Currency = "MXN"
+			testutils.MustDBUpdate(t, &bankAccount)
+		}
+
+		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db, log)
+		store := mockgen.NewMockStorage(ctrl)
+		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+
+		{ // Import our sample data into monetr
+			// Read the transaction OFX file
+			sampleFileData := fixtures.LoadFile(t, "no-curdef-mxn.ofx")
+
+			// Create a bogus file record
+			file := testutils.MustInsert(t, File{
+				AccountId:   bankAccount.AccountId,
+				Name:        "no-curdef-mxn.ofx",
+				ContentType: string(storage.IntuitQFXContentType),
+				Size:        uint64(len(sampleFileData)),
+				BlobUri:     "bogus:///bogus-part-one",
+				CreatedBy:   user.UserId,
+			})
+
+			// Create the file upload record for the job.
+			upload := testutils.MustInsert(t, TransactionUpload{
+				AccountId:     bankAccount.AccountId,
+				BankAccountId: bankAccount.BankAccountId,
+				FileId:        file.FileId,
+				Status:        TransactionUploadStatusPending,
+				Error:         nil,
+				CreatedBy:     user.UserId,
+				ProcessedAt:   nil,
+				CompletedAt:   nil,
+			})
+
+			// Create the job executor
+			job, err := background.NewProcessOFXUploadJob(log, repo, clock, store, ps, enqueuer, background.ProcessOFXUploadArguments{
+				AccountId:           upload.AccountId,
+				BankAccountId:       upload.BankAccountId,
+				TransactionUploadId: upload.TransactionUploadId,
+			})
+			assert.NoError(t, err, "must be able to create an OFX upload job")
+
+			{ // Mock out our expected calls from within the job
+				store.EXPECT().
+					Read(
+						gomock.Any(),
+						gomock.Eq(file.BlobUri),
+					).
+					Return(
+						io.NopCloser(bytes.NewReader(sampleFileData)),
+						storage.IntuitQFXContentType,
+						nil,
+					)
+
+				enqueuer.EXPECT().
+					EnqueueJob(
+						gomock.Any(),
+						background.CalculateTransactionClusters,
+						gomock.Eq(background.CalculateTransactionClustersArguments{
+							AccountId:     bankAccount.AccountId,
+							BankAccountId: bankAccount.BankAccountId,
+						}),
+					)
+				enqueuer.EXPECT().
+					EnqueueJob(
+						gomock.Any(),
+						background.RemoveFile,
+						gomock.Eq(background.RemoveFileArguments{
+							AccountId: file.AccountId,
+							FileId:    file.FileId,
+						}),
+					)
+			}
+
+			// Run our import job
+			err = job.Run(t.Context())
+			assert.NoError(t, err, "must be able to import ofx transactions for sample")
+			assert.NotNil(t, GetTxnByUploadIdentifier(t, bankAccount, "db0676765969665a5a920576638051aee50fd0ca"))
 		}
 	})
 }

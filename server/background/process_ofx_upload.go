@@ -11,7 +11,6 @@ import (
 	"github.com/elliotcourant/gofx"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/formats/ofx"
@@ -60,6 +59,7 @@ type (
 		clock     clock.Clock
 		timezone  *time.Location
 
+		bankAccount           *BankAccount
 		upload                *TransactionUpload
 		file                  *File
 		data                  *gofx.OFX
@@ -275,6 +275,13 @@ func (j *ProcessOFXUploadJob) Run(ctx context.Context) error {
 		j.timezone = time.UTC
 	}
 
+	// Load the bank account ahead of processing the file, we need this for
+	// currency data and will use it for balance updates later.
+	j.bankAccount, err = j.repo.GetBankAccount(span.Context(), j.args.BankAccountId)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve bank account for file import sync")
+	}
+
 	// Load the file and its data into memory.
 	if err := j.loadFile(span.Context()); err != nil {
 		return err
@@ -296,10 +303,14 @@ func (j *ProcessOFXUploadJob) Run(ctx context.Context) error {
 	}
 
 	// Also kick off the transaction similarity job.
-	j.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, CalculateTransactionClustersArguments{
-		AccountId:     j.args.AccountId,
-		BankAccountId: j.args.BankAccountId,
-	})
+	j.enqueuer.EnqueueJob(
+		span.Context(),
+		CalculateTransactionClusters,
+		CalculateTransactionClustersArguments{
+			AccountId:     j.args.AccountId,
+			BankAccountId: j.args.BankAccountId,
+		},
+	)
 
 	return nil
 }
@@ -381,9 +392,18 @@ func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
 	}
 
 	// If we are unable to derive the currency code from the file itself then we
-	// should fallback to monetr's default.
+	// should fallback to the bank account's default. This way if we are able to
+	// verify the currency from the file but it doesn't match the currency of the
+	// account we still throw an error later.
 	if j.currency == "" {
-		j.currency = consts.DefaultCurrencyCode
+		j.log.
+			WithField("currency", j.bankAccount.Currency).
+			Debug("could not detect currency from OFX file, defaulting to bank account's currency instead")
+		j.currency = j.bankAccount.Currency
+	} else {
+		j.log.
+			WithField("currency", j.currency).
+			Debug("detected currency from OFX file")
 	}
 
 	// Reverse the order of the arrray we store such that the order we insert the
@@ -575,21 +595,20 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 		}
 	}
 
-	bankAccount, err := j.repo.GetBankAccount(span.Context(), j.args.BankAccountId)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve bank account for file import sync")
-	}
-
-	if j.currency != bankAccount.Currency {
-		return errors.Errorf("Currency of OFX file does not match currency of bank account, file: [%s], account: [%s]", j.currency, bankAccount.Currency)
+	if j.currency != j.bankAccount.Currency {
+		return errors.Errorf(
+			"Currency of OFX file does not match currency of bank account, file: [%s], account: [%s]",
+			j.currency,
+			j.bankAccount.Currency,
+		)
 	}
 
 	// TODO Log the previous value and the new one?
-	bankAccount.CurrentBalance = currentBalance
-	bankAccount.AvailableBalance = availableBalance
-	bankAccount.LimitBalance = limitBalance
+	j.bankAccount.CurrentBalance = currentBalance
+	j.bankAccount.AvailableBalance = availableBalance
+	j.bankAccount.LimitBalance = limitBalance
 
-	if err := j.repo.UpdateBankAccount(span.Context(), bankAccount); err != nil {
+	if err := j.repo.UpdateBankAccount(span.Context(), j.bankAccount); err != nil {
 		return errors.Wrap(err, "failed to update bank account balances")
 	}
 

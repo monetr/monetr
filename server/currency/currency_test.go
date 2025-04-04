@@ -44,7 +44,7 @@ func TestParseFriendlyToAmount(t *testing.T) {
 
 	t.Run("invalid currency", func(t *testing.T) {
 		result, err := currency.ParseFriendlyToAmount("1239.99", "???")
-		assert.EqualError(t, err, "failed to parse currency amount: currency not supported")
+		assert.EqualError(t, err, "failed to get currency information [???]: currency not supported")
 		assert.Zero(t, result, "should return an exact int64")
 	})
 

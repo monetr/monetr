@@ -2,9 +2,9 @@ package ofx
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/elliotcourant/gofx"
@@ -12,7 +12,12 @@ import (
 )
 
 var (
-	ofxDateRegex = regexp.MustCompile(`^(?<timestamp>\d{14})(?<extra>.\d{3})?`)
+	ofxDateRegex   = regexp.MustCompile(`^(?<timestamp>(?:\d{14}|\d{8})(?:\.\d{3})?)`)
+	ofxDateFormats = []string{
+		"20060102150405.000",
+		"20060102150405",
+		"20060102",
+	}
 )
 
 func Parse(reader io.Reader) (*gofx.OFX, error) {
@@ -48,17 +53,20 @@ func ParseDate(input string, timezone *time.Location) (time.Time, error) {
 	// with our "cleaned" version.
 	input = matches[0]
 
-	// Typically we would see the `.000` suffix for the timestamp, but some files
-	// might not have this from some institutions.
-	if strings.Contains(input, ".") {
-		result, err := time.ParseInLocation("20060102150405.000", input, timezone)
-		return result, errors.Wrapf(err, "failed to parse OFX timestamp [%s]", input)
+	// Attempt to parse the input in all of the known formats that monetr can
+	// handle.
+	for _, format := range ofxDateFormats {
+		result, err := time.ParseInLocation(format, input, timezone)
+		fmt.Println(input, format, err)
+		if err != nil {
+			continue
+		}
+
+		return result, nil
 	}
 
-	// If they don't have that suffix then try to parse the timestamp without it.
-	// If it is still bad then that means the file isn't OFX somehow, or there is
-	// a new timestamp format that we haven't seen yet.
-	// See: https://github.com/monetr/monetr/issues/2362
-	result, err := time.ParseInLocation("20060102150405", input, timezone)
-	return result, errors.Wrapf(err, "failed to parse OFX timestamp [%s]", input)
+	// If none of the formats are valid then return an error, if you are a user
+	// reading this code and you see this error please open a bug issue on github
+	// so we can add support for more date formats.
+	return time.Time{}, errors.Errorf("failed to parse OFX timestamp [%s], unknown format", input)
 }
