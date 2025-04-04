@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.4.1](https://github.com/monetr/monetr/compare/v1.4.0...v1.4.1) (2025-04-04)
+
+
+### Bug Fixes
+
+* **api:** Fix importing an OFX file missing curdef ([#2576](https://github.com/monetr/monetr/issues/2576)) ([5b7e966](https://github.com/monetr/monetr/commit/5b7e966af3520a17e5ddee335c029147ab4b0690)), closes [#2575](https://github.com/monetr/monetr/issues/2575)
+* **log:** Added trace and span IDs to log messages ([b87214f](https://github.com/monetr/monetr/commit/b87214fea3ac9ee99ca637e1080e7ea3ec308900))
+* **ui:** Fix native date picker bugs ([0405d62](https://github.com/monetr/monetr/commit/0405d62bac2020bf3a130faa0139802698c55cd8))
+* **ui:** Fix native date picker style issue ([c0234b8](https://github.com/monetr/monetr/commit/c0234b85f07f7d6cec9faa143ef7443298718603))
+
+
+### Miscellaneous
+
+* **deps:** Bump next from 15.2.3 to 15.2.4 ([#2571](https://github.com/monetr/monetr/issues/2571)) ([465fdd8](https://github.com/monetr/monetr/commit/465fdd85296a681ba3d7ec0a04eb6f92a420d7ee))
+
 ## [1.4.0](https://github.com/monetr/monetr/compare/v1.3.4...v1.4.0) (2025-03-30)
 
 
