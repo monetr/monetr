@@ -32,7 +32,7 @@ func ParseFriendlyToAmount(
 	// Retrieve the fractional digits for the currency we are parsing.
 	fractionalDigits, err := locale.GetCurrencyInternationalFractionalDigits(currency)
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to parse currency amount")
+		return 0, errors.Wrapf(err, "failed to get currency information [%s]", currency)
 	}
 
 	// Determine the modifier by how many deciml pplaces the currency has. For
