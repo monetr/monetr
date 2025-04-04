@@ -194,7 +194,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
       <input
         className={ mergeTailwind(
           buttonVariants({ variant: 'outlined', size: 'select' }),
-          className,
+          classNames,
           'bg-transparent',
           'block md:hidden',
         ) }
