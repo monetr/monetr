@@ -200,10 +200,11 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
         ) }
         type='date'
         name={ props.name }
-        value={ format(selectedValue, 'yyyy-MM-dd') }
+        value={ selectedValue ? format(selectedValue, 'yyyy-MM-dd') : undefined }
         min={ props.min ? format(props.min, 'yyyy-MM-dd') : undefined }
         max={ props.max ? format(props.max, 'yyyy-MM-dd') : undefined }
         required={ props.required }
+        disabled={ formikContext?.isSubmitting || disabled }
         onChange={ event => handleSelect(parse(event.currentTarget.value, 'yyyy-MM-dd', startOfToday())) }
       />
       <Popover open={ open }>
