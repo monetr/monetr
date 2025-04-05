@@ -57,12 +57,12 @@ func TestSimilarTransactionsBlogPost(t *testing.T) {
 
 	user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 	// Force the timezone to be central time
-	user.Account.Timezone = "America/Central"
+	user.Account.Timezone = "America/Chicago"
 	testutils.MustDBUpdate(t, user.Account)
 	link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 	bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 
-	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db, log)
 	store := mockgen.NewMockStorage(ctrl)
 	enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
 
