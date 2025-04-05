@@ -315,6 +315,7 @@ add_custom_target(
   USES_TERMINAL
   DEPENDS
     download.simple-icons
+    download.cldr-json
     dependencies.node_modules
     build.email
     ${NGINX_CONFIG_FILE}
