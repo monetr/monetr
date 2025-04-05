@@ -60,11 +60,13 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 			// Log after the request completes, this way we have information about the
 			// authenticated user (if there is one).
 			defer func(ctx echo.Context) {
-				log := c.Log.WithFields(logrus.Fields{
-					"method":    ctx.Request().Method,
-					"path":      ctx.Path(),
-					"requestId": util.GetRequestID(ctx),
-				})
+				log := c.Log.
+					WithContext(c.getContext(ctx)).
+					WithFields(logrus.Fields{
+						"method":    ctx.Request().Method,
+						"path":      ctx.Path(),
+						"requestId": util.GetRequestID(ctx),
+					})
 
 				claims, err := c.getClaims(ctx)
 				if err == nil {

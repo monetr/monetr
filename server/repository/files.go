@@ -24,7 +24,7 @@ func (r *repositoryBase) GetFiles(ctx context.Context) ([]File, error) {
 		"accountId": r.AccountId(),
 	}
 
-	var items []File
+	items := make([]File, 0)
 	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"deleted_at" IS NULL`).
