@@ -455,6 +455,16 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 					"plaidBankAccountId": plaidTransaction.GetBankAccountId(),
 					"bug":                true,
 				}).Error("bank account for plaid transaction was not in the bank accounts map! there is a bug!")
+				crumbs.IndicateBug(
+					span.Context(),
+					"bank account for plaid transaction was not in the bank accounts map! there is a bug!",
+					map[string]any{
+						"plaidTransactionId": plaidTransaction.GetTransactionId(),
+						"plaidBankAccountId": plaidTransaction.GetBankAccountId(),
+						"bug":                true,
+					},
+				)
+				continue
 			}
 
 			created, updated, plaidCreated, err := s.syncPlaidTransaction(
