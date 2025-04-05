@@ -108,7 +108,7 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 			return errors.Wrap(err, errorMessage)
 		}
 
-		return errors.Wrapf(
+		return errors.Wrap(
 			&PlatypusError{plaidError},
 			errorMessage,
 		)

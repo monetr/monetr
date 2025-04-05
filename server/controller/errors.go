@@ -41,7 +41,7 @@ func (c *Controller) wrapPgError(ctx echo.Context, err error, msg string, args .
 				return c.wrapAndReturnError(ctx, cleanedErr, status, msg, args...)
 			default:
 				formattedMessage := fmt.Sprint(fmt.Sprintf(msg, args...), ": ", cleanedErr.Error())
-				return c.wrapAndReturnError(ctx, cleanedErr, status, formattedMessage)
+				return c.wrapAndReturnError(ctx, cleanedErr, status, formattedMessage, []any{}...)
 			}
 		default:
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, msg, args...)
