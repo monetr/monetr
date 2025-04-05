@@ -59,8 +59,6 @@ RUN apt-get update && \
       tzdata=2026c-0+deb13u1 \
       # renovate: datasource=deb depName=ca-certificates versioning=deb
       ca-certificates=20250419 \
-      # renovate: datasource=deb depName=locales-all versioning=deb
-      locales-all=2.41-12+deb13u4 \
     && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
