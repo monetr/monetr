@@ -65,3 +65,9 @@ func ParseFriendlyToAmount(
 	amount, _ := strconv.ParseInt(str, 10, 64)
 	return amount, nil
 }
+
+type Currency struct {
+	Code             string `json:"code"`
+	Name             string `json:"name"`
+	FractionalDigits int    `json:"fractionalDigits"`
+}
