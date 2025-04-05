@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.2](https://github.com/monetr/monetr/compare/v1.4.1...v1.4.2) (2025-04-05)
+
+
+### Bug Fixes
+
+* **api:** Upgrading to go1.24 proper ([8ae4add](https://github.com/monetr/monetr/commit/8ae4add3b331798dda9bfb7b9eac75b97a0b2a1b))
+* **ui:** Making UI elements more consistent, more MUI removals ([eb702c5](https://github.com/monetr/monetr/commit/eb702c54b6f5b5f15fb755620931609f42a7150d))
+* **ui:** Revert native date picker and fix bottom padding on mobile ([6e0f824](https://github.com/monetr/monetr/commit/6e0f82461dc8d2a5b45b00259a09065e340b8b93))
+
 ## [1.4.1](https://github.com/monetr/monetr/compare/v1.4.0...v1.4.1) (2025-04-04)
 
 
