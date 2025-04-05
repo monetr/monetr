@@ -1,8 +1,8 @@
 import React from 'react';
 import { Mail, RectangleEllipsis } from 'lucide-react';
 
+import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
-import { MBaseButton } from '@monetr/interface/components/MButton';
 import MSpan from '@monetr/interface/components/MSpan';
 import { showChangePasswordModal } from '@monetr/interface/components/settings/security/ChangePasswordModal';
 import TOTPCard from '@monetr/interface/components/settings/security/TOTPCard';
@@ -25,13 +25,9 @@ export default function SettingsSecurity(): JSX.Element {
             <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
               <RectangleEllipsis />
             </div>
-            <MBaseButton 
-              variant='solid' 
-              color='primary'
-              onClick={ showChangePasswordModal }
-            >
+            <Button variant='primary' onClick={ showChangePasswordModal }>
               Change Password
-            </MBaseButton>
+            </Button>
           </div>
           <MSpan size='md' weight='medium' color='emphasis'>
             Account Password
@@ -46,9 +42,9 @@ export default function SettingsSecurity(): JSX.Element {
             <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
               <Mail />
             </div>
-            <MBaseButton variant='solid' color='primary' disabled>
+            <Button variant='primary' disabled>
               Update Email
-            </MBaseButton>
+            </Button>
           </div>
           <MSpan size='md' weight='medium' color='emphasis'>
             Email Address

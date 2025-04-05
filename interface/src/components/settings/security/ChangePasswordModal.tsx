@@ -1,16 +1,16 @@
 import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { FormikErrors, FormikHelpers } from 'formik';
+import { RectangleEllipsis } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
-import MFormButton from '@monetr/interface/components/MButton';
+import { Button } from '@monetr/interface/components/Button';
+import FormButton from '@monetr/interface/components/FormButton';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import request from '@monetr/interface/util/request';
-
-import { RectangleEllipsis } from 'lucide-react';
 
 interface ChangePasswordValues {
   currentPassword: string;
@@ -112,13 +112,13 @@ function ChangePasswordModal(): JSX.Element {
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-change-password-modal'>
+          <Button variant='secondary' onClick={ modal.remove } data-testid='close-change-password-modal'>
             Cancel
-          </MFormButton>
-          <MFormButton color='primary' type='submit'>
+          </Button>
+          <FormButton color='primary' type='submit'>
             <RectangleEllipsis className='mr-1' />
             Update Password
-          </MFormButton>
+          </FormButton>
         </div>
       </MForm>
     </MModal>

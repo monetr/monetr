@@ -1,6 +1,5 @@
 import React, { Fragment } from 'react';
-import { AccountBalance, ArrowForward, Today, TodayOutlined } from '@mui/icons-material';
-import { Plus } from 'lucide-react';
+import { CalendarSync, Plus } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import FundingItem from '@monetr/interface/components/funding/FundingItem';
@@ -13,7 +12,13 @@ export default function Funding(): JSX.Element {
   const { isError: fundingIsError, isLoading: fundingIsLoading, data: funding } = useFundingSchedulesSink();
 
   if (fundingIsLoading) {
-    return <MSpan>Loading...</MSpan>;
+    return (
+      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+        <MSpan className='text-5xl'>
+          One moment...
+        </MSpan>
+      </div>
+    );
   }
 
   if (fundingIsError) {
@@ -37,7 +42,7 @@ export default function Funding(): JSX.Element {
   return (
     <Fragment>
       <MTopNavigation
-        icon={ TodayOutlined }
+        icon={ CalendarSync }
         title='Funding Schedules'
       >
         <Button variant='primary' onClick={ showNewFundingModal }>
@@ -57,9 +62,7 @@ function EmptyState(): JSX.Element {
     <div className='w-full h-full flex justify-center items-center'>
       <div className='flex flex-col gap-2 items-center max-w-md'>
         <div className='w-full flex justify-center space-x-4'>
-          <Today className='h-full text-5xl dark:text-dark-monetr-content-muted' />
-          <ArrowForward className='h-full text-5xl dark:text-dark-monetr-content-muted' />
-          <AccountBalance className='h-full text-5xl dark:text-dark-monetr-content-muted' />
+          <CalendarSync className='dark:text-dark-monetr-content-muted h-12 w-12' />
         </div>
         <MSpan size='xl' color='subtle' className='text-center'>
           You don't have any funding schedules yet...

@@ -1,6 +1,7 @@
 import React, { Fragment, useCallback, useEffect, useRef } from 'react';
 import { useNavigationType } from 'react-router-dom';
-import { AccountBalance, AutoModeOutlined, HeartBroken, PriceCheckOutlined } from '@mui/icons-material';
+import { HeartBroken } from '@mui/icons-material';
+import { Plus, Receipt } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import ExpenseItem from '@monetr/interface/components/expenses/ExpenseItem';
@@ -9,8 +10,6 @@ import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useSpendingFiltered } from '@monetr/interface/hooks/spending';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import { SpendingType } from '@monetr/interface/models/Spending';
-
-import { Plus } from 'lucide-react';
 
 let evilScrollPosition: number = 0;
 
@@ -85,7 +84,7 @@ export default function Expenses(): JSX.Element {
   return (
     <Fragment>
       <MTopNavigation
-        icon={ PriceCheckOutlined }
+        icon={ Receipt }
         title='Expenses'
       >
         <Button variant='primary' className='gap-1 py-1 px-2' onClick={ showNewExpenseModal }>
@@ -105,9 +104,7 @@ function EmptyState(): JSX.Element {
     <div className='w-full h-full flex justify-center items-center'>
       <div className='flex flex-col gap-2 items-center max-w-md'>
         <div className='w-full flex justify-center space-x-4'>
-          <AccountBalance className='h-full text-5xl dark:text-dark-monetr-content-muted' />
-          <AutoModeOutlined className='h-full text-5xl dark:text-dark-monetr-content-muted' />
-          <PriceCheckOutlined className='h-full text-5xl dark:text-dark-monetr-content-muted' />
+          <Receipt className='dark:text-dark-monetr-content-muted h-12 w-12' />
         </div>
         <MSpan size='xl' color='subtle' className='text-center'>
           You don't have any expenses yet...
