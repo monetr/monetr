@@ -262,8 +262,8 @@ importers:
         specifier: 4.1.1
         version: 4.1.1(react@18.3.1)
       react-number-format:
-        specifier: 5.4.3
-        version: 5.4.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 5.4.4
+        version: 5.4.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-plaid-link:
         specifier: 3.6.1
         version: 3.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -9383,8 +9383,8 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  react-number-format@5.4.3:
-    resolution: {integrity: sha512-VCY5hFg/soBighAoGcdE+GagkJq0230qN6jcS5sp8wQX1qy1fYN/RX7/BXkrs0oyzzwqR8/+eSUrqXbGeywdUQ==}
+  react-number-format@5.4.4:
+    resolution: {integrity: sha512-wOmoNZoOpvMminhifQYiYSTCLUDOiUbBunrMrMjA+dV52sY+vck1S4UhR6PkgnoCquvvMSeJjErXZ4qSaWCliA==}
     peerDependencies:
       react: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -22981,7 +22981,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  react-number-format@5.4.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-number-format@5.4.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
