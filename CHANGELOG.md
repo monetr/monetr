@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.4.3](https://github.com/monetr/monetr/compare/v1.4.2...v1.4.3) (2025-04-18)
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.32.0 ([#2591](https://github.com/monetr/monetr/issues/2591)) ([5de67b8](https://github.com/monetr/monetr/commit/5de67b8ea0239448bc302eb44060628abb31aa6b))
+* **api:** update module golang.org/x/net to v0.38.0 [security] ([#2596](https://github.com/monetr/monetr/issues/2596)) ([1671665](https://github.com/monetr/monetr/commit/1671665fdba053e063ecc9237ffbaf331a379d79))
+* **containers:** update golang docker tag to v1.24.2 ([#2574](https://github.com/monetr/monetr/issues/2574)) ([ac0d418](https://github.com/monetr/monetr/commit/ac0d418033e201cc031a151ca8f6b9beccbc4cbb))
+* **renovate:** update dependency go to v1.24.2 ([#2577](https://github.com/monetr/monetr/issues/2577)) ([2c9b503](https://github.com/monetr/monetr/commit/2c9b503078d630e81714f93971cdff6a570267da))
+* **ui:** update dependency @react-email/components to v0.0.36 ([#2584](https://github.com/monetr/monetr/issues/2584)) ([591cf84](https://github.com/monetr/monetr/commit/591cf84553e0a19120cc76b582e5e2920c98b13e))
+* **ui:** update dependency @swc/core to v1.11.18 ([#2585](https://github.com/monetr/monetr/issues/2585)) ([f5043ad](https://github.com/monetr/monetr/commit/f5043ad0ec30ba5d59fa3273203f31e46625fa3b))
+* **ui:** update dependency react-number-format to v5.4.4 ([#2589](https://github.com/monetr/monetr/issues/2589)) ([5d6d7ae](https://github.com/monetr/monetr/commit/5d6d7ae0d29cc7c2eb7e7dfba0af30d6d49b7b5b))
+* **ui:** update dependency renovate to v39.251.0 ([#2592](https://github.com/monetr/monetr/issues/2592)) ([43587d4](https://github.com/monetr/monetr/commit/43587d4c21888e66118dc9a668376b2064b29f83))
+* **ui:** update radix-ui-primitives monorepo ([#2590](https://github.com/monetr/monetr/issues/2590)) ([9c2be14](https://github.com/monetr/monetr/commit/9c2be149f314f387ea3206742bb51170ccb883fc))
+* **ui:** update rsbuild ([#2593](https://github.com/monetr/monetr/issues/2593)) ([562c0e5](https://github.com/monetr/monetr/commit/562c0e502032ed159a58c8c40d809f8915085ec9))
+
+
+### Bug Fixes
+
+* **api:** Fail gracefully if a Plaid bank account is missing ([bbffb4b](https://github.com/monetr/monetr/commit/bbffb4b2f7cd750068af97de4864424900c72e97)), closes [#2384](https://github.com/monetr/monetr/issues/2384)
+
+
+### Miscellaneous
+
+* **api:** Small API improvements ([9f185ba](https://github.com/monetr/monetr/commit/9f185babeae8959d536b1fc74a749ad99657896f))
+
 ## [1.4.2](https://github.com/monetr/monetr/compare/v1.4.1...v1.4.2) (2025-04-05)
 
 
