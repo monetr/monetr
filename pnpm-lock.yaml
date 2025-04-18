@@ -259,8 +259,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0(react@18.3.1)
       react-infinite-scroll-hook:
-        specifier: 4.1.1
-        version: 4.1.1(react@18.3.1)
+        specifier: 5.0.2
+        version: 5.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-number-format:
         specifier: 5.4.4
         version: 5.4.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -9383,21 +9383,22 @@ packages:
     peerDependencies:
       react: '>=16.4.1'
 
-  react-infinite-scroll-hook@4.1.1:
-    resolution: {integrity: sha512-1bu2572rF3DtjFMhIOzoasLMdYW0vMWxROtl99M5FYGSxm84Ro4aNBZW6ivgE45ofus4Ymo7jIS0Be3zcuLk8g==}
-    engines: {node: '>=10'}
+  react-infinite-scroll-hook@5.0.2:
+    resolution: {integrity: sha512-CappfAyRrShFF5McYWTB8sRjiiLc9Jbs6SNhIGFH+QQgQRcRuaovKwQnGGEb14fRWg2czlRxISoAO7Rtf0nbPA==}
     peerDependencies:
       react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   react-inspector@6.0.2:
     resolution: {integrity: sha512-x+b7LxhmHXjHoU/VrFAzw5iutsILRoYyDq97EDYdFpPLcvqtEzk4ZSZSQjnFPbr5T57tLXnHcqFYoN1pI6u8uQ==}
     peerDependencies:
       react: ^16.8.4 || ^17.0.0 || ^18.0.0
 
-  react-intersection-observer-hook@2.1.1:
-    resolution: {integrity: sha512-MeFGpYtcfHB9v6oGqQuHAbSwaWBpd7yZ4wMIeVtboWRdGusAF4V+/8QQ0OKZ36Ez19grYnoDVhRUCjtwI2ZVaw==}
+  react-intersection-observer-hook@3.0.1:
+    resolution: {integrity: sha512-nehzFUV+jVY49tc9FOm4yJHrmFFtCmsBZKiN1rUUB2675CMBf6kKu1ekuTqvCnmh4XG7RFP3bMyAevfqfV94xw==}
     peerDependencies:
       react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -23070,18 +23071,20 @@ snapshots:
       react: 18.3.1
       react-async-script: 1.2.0(react@18.3.1)
 
-  react-infinite-scroll-hook@4.1.1(react@18.3.1):
+  react-infinite-scroll-hook@5.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
-      react-intersection-observer-hook: 2.1.1(react@18.3.1)
+      react-dom: 18.3.1(react@18.3.1)
+      react-intersection-observer-hook: 3.0.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   react-inspector@6.0.2(react@18.3.1):
     dependencies:
       react: 18.3.1
 
-  react-intersection-observer-hook@2.1.1(react@18.3.1):
+  react-intersection-observer-hook@3.0.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
 
   react-is@16.13.1: {}
 
