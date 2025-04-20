@@ -613,7 +613,7 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 			// a sentry span/hub. This way we can attach a ton of useful data to the
 			// event when we send it to sentry if it succeeds or fails.
 			// TODO Clean it up at some point?
-			func(log *logrus.Entry, nextJob cronJobTracker) {
+			func(inLog *logrus.Entry, nextJob cronJobTracker) {
 				ctx, cancel := context.WithTimeout(
 					context.Background(),
 					jobTimeoutSeconds*time.Second,
@@ -630,6 +630,10 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 				span.SetData("messaging.system", "postgresql")
 				// For now, sample all cron jobs
 				span.Sampled = sentry.SampledTrue
+
+				// Make sure we are logging with the correct context here
+				log := inLog.WithContext(span.Context())
+
 				slug := strings.ToLower(nextJob.queueName)
 				slug = strings.ReplaceAll(slug, "::", "-")
 
