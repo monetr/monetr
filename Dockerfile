@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.24.2 AS base_builder
+FROM --platform=$BUILDPLATFORM golang:1.24.3 AS base_builder
 WORKDIR /monetr
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
