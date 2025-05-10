@@ -108,7 +108,7 @@
       "customType": "regex",
       "description": "Update go.uber.org/mock",
       "fileMatch": [".+\\.go"],
-      "matchStrings": ["//go:generate go run go.uber.org/mock/mockgen@v(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "matchStrings": ["//go:generate go run go.uber.org/mock/mockgen@(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "go.uber.org/mock",
       "datasourceTemplate": "go"
     },
@@ -116,7 +116,7 @@
       "customType": "regex",
       "description": "Update golang.org/x/tools/cmd/stringer",
       "fileMatch": [".+\\.go"],
-      "matchStrings": ["//go:generate go run golang.org/x/tools/cmd/stringer@v(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "matchStrings": ["//go:generate go run golang.org/x/tools/cmd/stringer@(?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "golang.org/x/tools/cmd/stringer",
       "datasourceTemplate": "go"
     },
