@@ -1,6 +1,7 @@
 package currency
 
 import (
+	"fmt"
 	"math"
 	"math/big"
 	"strconv"
@@ -64,4 +65,15 @@ func ParseFriendlyToAmount(
 	// point numbers are the dumbest thing in the entire world.
 	amount, _ := strconv.ParseInt(str, 10, 64)
 	return amount, nil
+}
+
+// ParseFloatToAmount takes a float32 or float64 and converts it into the amount
+// that monetr uses and stores for the currency the amount is in. This is done
+// in a hacky way where we just convert the float to a string and then parse it
+// manually. But it prevents weird rounding errors.
+func ParseFloatToAmount[T float32 | float64](
+	input T,
+	currency string,
+) (int64, error) {
+	return ParseFriendlyToAmount(fmt.Sprint(input), currency)
 }

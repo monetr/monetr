@@ -61,3 +61,14 @@ func TestParseFriendlyToAmount(t *testing.T) {
 		assert.EqualValues(t, 0, result, "should return an exact int64")
 	})
 }
+
+func TestParseFloatToAmount(t *testing.T) {
+	t.Run("simple float to amount", func(t *testing.T) {
+		// From https://github.com/monetr/monetr/issues/2594 to make sure there is
+		// no regression going forward.
+		input := 575.67
+		result, err := currency.ParseFloatToAmount(input, "USD")
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, 57567, result, "should")
+	})
+}
