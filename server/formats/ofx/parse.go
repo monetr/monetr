@@ -2,7 +2,6 @@ package ofx
 
 import (
 	"encoding/xml"
-	"fmt"
 	"io"
 	"regexp"
 	"time"
@@ -57,7 +56,6 @@ func ParseDate(input string, timezone *time.Location) (time.Time, error) {
 	// handle.
 	for _, format := range ofxDateFormats {
 		result, err := time.ParseInLocation(format, input, timezone)
-		fmt.Println(input, format, err)
 		if err != nil {
 			continue
 		}
