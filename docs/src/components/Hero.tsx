@@ -9,8 +9,6 @@ import MobileFriendly from '@monetr/docs/components/Features/MobileFriendly';
 import Plaid from '@monetr/docs/components/Features/Plaid';
 import SelfHost from '@monetr/docs/components/Features/SelfHost';
 import SourceVisible from '@monetr/docs/components/Features/SourceVisible';
-import GithubStars from '@monetr/docs/components/GithubStars';
-import ProductHunt from '@monetr/docs/components/ProductHunt';
 import ScreenshotCarousel from '@monetr/docs/components/ScreenshotCarousel';
 
 export default function Hero(): JSX.Element {
@@ -56,11 +54,6 @@ export default function Hero(): JSX.Element {
           >
             Learn More
           </Link>
-        </div>
-
-        <div className='flex flex-col sm:flex-row gap-4 items-center'>
-          <GithubStars variant='large' />
-          <ProductHunt />
         </div>
 
         <ScreenshotCarousel />
