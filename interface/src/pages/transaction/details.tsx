@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
+import { tz } from '@date-fns/tz';
 import { startOfDay } from 'date-fns';
 import { FormikHelpers } from 'formik';
 import { HeartCrack, Save, ShoppingCart } from 'lucide-react';
@@ -21,6 +22,7 @@ import SimilarTransactions from '@monetr/interface/components/transactions/Simil
 import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 import Transaction from '@monetr/interface/models/Transaction';
 import { APIError } from '@monetr/interface/util/request';
 
@@ -34,6 +36,7 @@ interface TransactionValues {
 }
 
 export default function TransactionDetails(): JSX.Element {
+  const { data: timezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const { data: link } = useCurrentLink();
   const { enqueueSnackbar } = useSnackbar();
@@ -47,7 +50,9 @@ export default function TransactionDetails(): JSX.Element {
       name: values.name,
       spendingId: values.spendingId,
       amount: locale.friendlyToAmount(values.amount),
-      date: startOfDay(values.date),
+      date: startOfDay(values.date, {
+        in: tz(timezone),
+      }),
       isPending: values.isPending,
     });
 
