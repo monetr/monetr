@@ -367,26 +367,35 @@ func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
 	externalTransactionIds := make([]string, 0)
 
 	// Gather the bank transactions
+	// TODO Clean this up, this is a nested nightmare.
 	if bankResponse := j.data.BANKMSGSRSV1; bankResponse != nil {
 		for _, statementTransactions := range bankResponse.STMTTRNRS {
-			for _, transaction := range statementTransactions.STMTRS.BANKTRANLIST.STMTTRN {
-				// Someday we might need to also consider CORRECTFITID.
-				externalTransactionIds = append(externalTransactionIds, transaction.FITID)
-				j.statementTransactions = append(j.statementTransactions, *transaction)
-			}
-			if j.currency == "" {
-				j.currency = strings.ToUpper(statementTransactions.STMTRS.CURDEF)
+			if stmtrs := statementTransactions.STMTRS; stmtrs != nil {
+				if stmtrs.BANKTRANLIST != nil {
+					for _, transaction := range stmtrs.BANKTRANLIST.STMTTRN {
+						// Someday we might need to also consider CORRECTFITID.
+						externalTransactionIds = append(externalTransactionIds, transaction.FITID)
+						j.statementTransactions = append(j.statementTransactions, *transaction)
+					}
+				}
+				if j.currency == "" {
+					j.currency = strings.ToUpper(stmtrs.CURDEF)
+				}
 			}
 		}
 	} else if bankResponse := j.data.CREDITCARDMSGSRSV1; bankResponse != nil {
 		for _, statementTransactions := range bankResponse.CCSTMTTRNRS {
-			for _, transaction := range statementTransactions.CCSTMTRS.BANKTRANLIST.STMTTRN {
-				// Someday we might need to also consider CORRECTFITID.
-				externalTransactionIds = append(externalTransactionIds, transaction.FITID)
-				j.statementTransactions = append(j.statementTransactions, *transaction)
-			}
-			if j.currency == "" {
-				j.currency = strings.ToUpper(statementTransactions.CCSTMTRS.CURDEF)
+			if ccstmtrs := statementTransactions.CCSTMTRS; ccstmtrs != nil {
+				if ccstmtrs.BANKTRANLIST != nil {
+					for _, transaction := range ccstmtrs.BANKTRANLIST.STMTTRN {
+						// Someday we might need to also consider CORRECTFITID.
+						externalTransactionIds = append(externalTransactionIds, transaction.FITID)
+						j.statementTransactions = append(j.statementTransactions, *transaction)
+					}
+				}
+				if j.currency == "" {
+					j.currency = strings.ToUpper(ccstmtrs.CURDEF)
+				}
 			}
 		}
 	}
@@ -415,7 +424,8 @@ func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
 	// over time.
 
 	if len(externalTransactionIds) == 0 {
-		return errors.Errorf("no external transaction IDs were found in the file, account type may not be supported")
+		j.log.WithContext(span.Context()).Warn("no external transaction IDs were found in the file, account type may not be supported")
+		return nil
 	}
 
 	var err error
