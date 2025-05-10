@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { tz } from '@date-fns/tz';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikHelpers } from 'formik';
 
@@ -18,8 +19,6 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
-
-import { tz } from '@date-fns/tz';
 
 interface Values {
   nextPayday: Date;

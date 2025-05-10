@@ -1,10 +1,10 @@
 /* eslint-disable id-length */
+import { tz } from '@date-fns/tz';
 import { endOfMonth, format, getDate, getMonth, isEqual, startOfDay, startOfMonth } from 'date-fns';
 
 import Recurrence from '@monetr/interface/components/Recurrence/Recurrence';
 import parseDate from '@monetr/interface/util/parseDate';
 
-import { tz } from '@date-fns/tz';
 import { RRule, Weekday } from 'rrule';
 
 export default function getRecurrencesForDate(inputDate: Date | string | null, timezone: string): Array<Recurrence> {

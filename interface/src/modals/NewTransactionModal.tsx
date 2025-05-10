@@ -1,7 +1,8 @@
 import React, { Fragment, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
-import { startOfToday } from 'date-fns';
+import { tz } from '@date-fns/tz';
+import { startOfDay, startOfToday } from 'date-fns';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
@@ -18,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monetr/interface/comp
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { CreateTransactionRequest, useCreateTransaction } from '@monetr/interface/hooks/transactions';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewTransactionValues {
@@ -31,23 +33,26 @@ interface NewTransactionValues {
   adjustsBalance: boolean;
 }
 
-const initialValues: NewTransactionValues = {
-  name: '',
-  date: startOfToday(),
-  amount: 0,
-  spendingId: null,
-  kind: 'debit',
-  isPending: false,
-  adjustsBalance: false,
-};
-
 function NewTransactionModal(): JSX.Element {
+  const { data: timezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
   const { enqueueSnackbar } = useSnackbar();
   const { data: selectedBankAccount } = useSelectedBankAccount();
   const createTransaction = useCreateTransaction();
+
+  const initialValues: NewTransactionValues = {
+    name: '',
+    date: startOfToday({
+      in: tz(timezone),
+    }),
+    amount: 0,
+    spendingId: null,
+    kind: 'debit',
+    isPending: false,
+    adjustsBalance: false,
+  };
 
   async function submit(
     values: NewTransactionValues,
@@ -60,7 +65,9 @@ function NewTransactionModal(): JSX.Element {
       ),
       name: values.name,
       merchantName: null,
-      date: values.date,
+      date: startOfDay(new Date(values.date), {
+        in: tz(timezone),
+      }),
       isPending: values.isPending,
       spendingId: values.spendingId,
       adjustsBalance: values.adjustsBalance,
