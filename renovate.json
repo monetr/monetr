@@ -106,10 +106,10 @@
     },
     {
       "customType": "regex",
-      "description": "Update go.uber.org/mock/mockgen",
+      "description": "Update go.uber.org/mock",
       "fileMatch": [".+\\.go"],
       "matchStrings": ["//go:generate go run go.uber.org/mock/mockgen@v(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
-      "depNameTemplate": "go.uber.org/mock/mockgen",
+      "depNameTemplate": "go.uber.org/mock",
       "datasourceTemplate": "go"
     },
     {
