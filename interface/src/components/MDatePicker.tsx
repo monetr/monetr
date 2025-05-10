@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { tz } from '@date-fns/tz';
 import { isEqual, Locale, startOfMonth, startOfToday } from 'date-fns';
 import { enUS } from 'date-fns/locale/en-US';
 import { useFormikContext } from 'formik';
@@ -13,8 +14,6 @@ import { Calendar } from '@monetr/interface/components/Calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
-import { tz } from '@date-fns/tz';
 
 export interface MDatePickerProps extends
   Omit<React.HTMLAttributes<HTMLButtonElement>, 'value' | 'defaultValue'>

@@ -259,6 +259,7 @@
                 "^@tanstack",
                 "^@testing-library",
                 "^axios",
+                "^@date-fns",
                 "^date-fns",
                 "^formik",
                 "^history",

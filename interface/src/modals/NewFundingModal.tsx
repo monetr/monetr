@@ -1,6 +1,7 @@
 import React, { Fragment, useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
+import { tz } from '@date-fns/tz';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
@@ -17,6 +18,7 @@ import { Switch } from '@monetr/interface/components/Switch';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
@@ -28,21 +30,25 @@ interface NewFundingValues {
   estimatedDeposit?: number | null;
 }
 
-const initialValues: NewFundingValues = {
-  name: '',
-  nextOccurrence: startOfTomorrow(),
-  ruleset: '',
-  excludeWeekends: false,
-  estimatedDeposit: undefined,
-};
-
 function NewFundingModal(): JSX.Element {
+  const { data: timezone } = useTimezone();
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
   const { enqueueSnackbar } = useSnackbar();
   const selectedBankAccountId = useSelectedBankAccountId();
   const createFundingSchedule = useCreateFundingSchedule();
   const { data: { friendlyToAmount } } = useLocaleCurrency();
+
+  const initialValues: NewFundingValues = {
+    name: '',
+    nextOccurrence: startOfTomorrow({
+      in: tz(timezone),
+    }),
+    ruleset: '',
+    excludeWeekends: false,
+    estimatedDeposit: undefined,
+  };
+
   const submit = useCallback(async (
     values: NewFundingValues,
     helpers: FormikHelpers<NewFundingValues>,
@@ -51,7 +57,9 @@ function NewFundingModal(): JSX.Element {
     const newFundingSchedule = new FundingSchedule({
       bankAccountId: selectedBankAccountId,
       name: values.name,
-      nextRecurrence: startOfDay(new Date(values.nextOccurrence)),
+      nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
+        in: tz(timezone),
+      }),
       ruleset: values.ruleset,
       estimatedDeposit: values.estimatedDeposit > 0 ? friendlyToAmount(values.estimatedDeposit) : null,
       excludeWeekends: values.excludeWeekends,
@@ -94,7 +102,9 @@ function NewFundingModal(): JSX.Element {
                 name='nextOccurrence'
                 label='When do you get paid next?'
                 required
-                min={ startOfTomorrow() }
+                min={ startOfTomorrow({
+                  in: tz(timezone),
+                }) }
               />
               <MSelectFrequency
                 dateFrom='nextOccurrence'
