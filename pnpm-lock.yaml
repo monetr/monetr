@@ -151,8 +151,8 @@ importers:
   emails:
     devDependencies:
       '@react-email/components':
-        specifier: 0.0.38
-        version: 0.0.38(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.0.40
+        version: 0.0.40(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/react':
         specifier: 8.6.7
         version: 8.6.7(@storybook/test@8.6.7(storybook@8.6.7(prettier@3.5.3)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.7(prettier@3.5.3))(typescript@5.8.3)
@@ -3158,8 +3158,8 @@ packages:
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
-  '@react-email/components@0.0.38':
-    resolution: {integrity: sha512-2cjMBZsSPjD1Iyur/MzGrgW/n5A6ONOJQ97pNaVOClxz/EaqNZTo1lFmKdH7p54P7LG9ZxRXxoTe2075VCCGQA==}
+  '@react-email/components@0.0.40':
+    resolution: {integrity: sha512-MXBjXyjCAczWIxq12Im5ysAIp8mXeSVm9YMF7t4rMjqH6+uxrCxWWqQbaLMUtjHkhD4OmXb3ay2aMG2oGKWk+g==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
@@ -3217,14 +3217,14 @@ packages:
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
-  '@react-email/preview@0.0.12':
-    resolution: {integrity: sha512-g/H5fa9PQPDK6WUEG7iTlC19sAktI23qyoiJtMLqQiXFCfWeQMhqjLGKeLSKkfzszqmfJCjZtpSiKtBoOdxp3Q==}
+  '@react-email/preview@0.0.13':
+    resolution: {integrity: sha512-F7j9FJ0JN/A4d7yr+aw28p4uX7VLWs7hTHtLo7WRyw4G+Lit6Zucq4UWKRxJC8lpsUdzVmG7aBJnKOT+urqs/w==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
-  '@react-email/render@1.1.0':
-    resolution: {integrity: sha512-X4CsHvXi5X7kTn5NgXNGg8Y5U1VtVJmlpNLlTc2E8RVHKFS3bpr+o/ZXhEPN4yRkdY+ZYN5eqVTV922Hujqsxw==}
+  '@react-email/render@1.1.1':
+    resolution: {integrity: sha512-YB7GtmfNbCqq/Jm+wYg+LD85OvPtoBFW5qOI55ap3BWw1UUggGLTqUgU0hy0qP5NrfRM//L2owBU/4DENfgnvg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
@@ -3248,8 +3248,8 @@ packages:
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
-  '@react-email/text@0.1.3':
-    resolution: {integrity: sha512-H22KR54MXUg29a+1/lTfg9oCQA65V8+TL4v19OzV7RsOxnEnzGOc287XKh8vc+v7ENewrMV97BzUPOnKz3bqkA==}
+  '@react-email/text@0.1.4':
+    resolution: {integrity: sha512-cMNE02y8172DocpNGh97uV5HSTawaS4CKG/zOku8Pu+m6ehBKbAjgtQZDIxhgstw8+TWraFB8ltS1DPjfG8nLA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
@@ -15078,7 +15078,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@react-email/components@0.0.38(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@react-email/components@0.0.40(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@react-email/body': 0.0.11(react@18.3.1)
       '@react-email/button': 0.0.19(react@18.3.1)
@@ -15094,12 +15094,12 @@ snapshots:
       '@react-email/img': 0.0.11(react@18.3.1)
       '@react-email/link': 0.0.12(react@18.3.1)
       '@react-email/markdown': 0.0.15(react@18.3.1)
-      '@react-email/preview': 0.0.12(react@18.3.1)
-      '@react-email/render': 1.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@react-email/preview': 0.0.13(react@18.3.1)
+      '@react-email/render': 1.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-email/row': 0.0.12(react@18.3.1)
       '@react-email/section': 0.0.16(react@18.3.1)
       '@react-email/tailwind': 1.0.5(react@18.3.1)
-      '@react-email/text': 0.1.3(react@18.3.1)
+      '@react-email/text': 0.1.4(react@18.3.1)
       react: 18.3.1
     transitivePeerDependencies:
       - react-dom
@@ -15141,11 +15141,11 @@ snapshots:
       md-to-react-email: 5.0.5(react@18.3.1)
       react: 18.3.1
 
-  '@react-email/preview@0.0.12(react@18.3.1)':
+  '@react-email/preview@0.0.13(react@18.3.1)':
     dependencies:
       react: 18.3.1
 
-  '@react-email/render@1.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@react-email/render@1.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       html-to-text: 9.0.5
       prettier: 3.5.3
@@ -15165,7 +15165,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@react-email/text@0.1.3(react@18.3.1)':
+  '@react-email/text@0.1.4(react@18.3.1)':
     dependencies:
       react: 18.3.1
 
