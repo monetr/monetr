@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikHelpers } from 'formik';
@@ -55,6 +55,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
         currentBalance: locale.friendlyToAmount(data['startingBalance']),
         accountType: BankAccountType.Depository,
         accountSubType: BankAccountSubType.Checking,
+        currency: data['currency'],
       }))
       .then(bankAccount => createFundingSchedule(new FundingSchedule({
         bankAccountId: bankAccount.bankAccountId,
@@ -76,39 +77,44 @@ export default function ManualLinkSetupIncome(): JSX.Element {
       onSubmit={ submit }
       className='w-full flex flex-col justify-center items-center gap-2'
     >
-      <MSpan size='lg' color='subtle' className='text-center'>
-        How often do you get paid and how much do you get paid typically? monetr uses this to forecast balances based on
-        the budgets you create.
-      </MSpan>
-      <MDatePicker
-        name='nextPayday'
-        label='When do you get paid next?'
-        className='w-full'
-        required
-        min={ startOfTomorrow() }
-        autoFocus
-      />
-      <MSelectFrequency
-        dateFrom='nextPayday'
-        menuPosition='fixed'
-        menuShouldScrollIntoView={ false }
-        menuShouldBlockScroll={ true }
-        menuPortalTarget={ document.body }
-        menuPlacement='bottom'
-        label='How often do you get paid?'
-        placeholder='Select a funding frequency...'
-        required
-        className='w-full text-start'
-        name='ruleset'
-      />
-      <MAmountField
-        name='paydayAmount'
-        label='How much do you usually get paid?'
-        className='w-full'
-        required
-        allowNegative={ false }
-      />
-      <ManualLinkSetupButtons />
+      { ({ values: { currency } }) => (
+        <Fragment>
+          <MSpan size='lg' color='subtle' className='text-center'>
+            How often do you get paid and how much do you get paid typically? monetr uses this to forecast balances
+            based on the budgets you create.
+          </MSpan>
+          <MDatePicker
+            name='nextPayday'
+            label='When do you get paid next?'
+            className='w-full'
+            required
+            min={ startOfTomorrow() }
+            autoFocus
+          />
+          <MSelectFrequency
+            dateFrom='nextPayday'
+            menuPosition='fixed'
+            menuShouldScrollIntoView={ false }
+            menuShouldBlockScroll={ true }
+            menuPortalTarget={ document.body }
+            menuPlacement='bottom'
+            label='How often do you get paid?'
+            placeholder='Select a funding frequency...'
+            required
+            className='w-full text-start'
+            name='ruleset'
+          />
+          <MAmountField
+            name='paydayAmount'
+            label='How much do you usually get paid?'
+            className='w-full'
+            required
+            allowNegative={ false }
+            currency={ currency }
+          />
+          <ManualLinkSetupButtons />
+        </Fragment>
+      ) }
     </MForm>
   );
 }

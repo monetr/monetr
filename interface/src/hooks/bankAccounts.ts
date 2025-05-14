@@ -21,6 +21,7 @@ export interface CreateBankAccountRequest {
   currentBalance: number;
   accountType: BankAccountType;
   accountSubType: BankAccountSubType;
+  currency: string;
 }
 
 export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest) => Promise<BankAccount> {
