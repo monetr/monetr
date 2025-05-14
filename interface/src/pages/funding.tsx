@@ -31,7 +31,7 @@ export default function Funding(): JSX.Element {
     }
 
     return (
-      <ul className='w-full flex flex-col gap-2 py-2'>
+      <ul className='w-full flex flex-col gap-2 py-2 pb-16'>
         { funding
           ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
           .map(item => (<FundingItem funding={ item } key={ item.fundingScheduleId } />)) }

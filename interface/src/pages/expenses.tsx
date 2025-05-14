@@ -73,7 +73,7 @@ export default function Expenses(): JSX.Element {
     }
 
     return (
-      <ul className='w-full flex flex-col gap-2 py-2'>
+      <ul className='w-full flex flex-col gap-2 py-2 pb-16'>
         { expenses
           ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
           .map(item => (<ExpenseItem spending={ item } key={ item.spendingId } />)) }
