@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.4.4](https://github.com/monetr/monetr/compare/v1.4.3...v1.4.4) (2025-05-22)
+
+
+### Dependencies
+
+* **api:** update module golang.org/x/net to v0.40.0 ([#2625](https://github.com/monetr/monetr/issues/2625)) ([7372188](https://github.com/monetr/monetr/commit/737218809f638ec7144046d8023c13a76f0853f0))
+* **api:** update module golang.org/x/text to v0.25.0 ([#2627](https://github.com/monetr/monetr/issues/2627)) ([acda4f6](https://github.com/monetr/monetr/commit/acda4f6f1102f8c482b14ece44356ef0fc0d8b48))
+* **ui:** update dependency @react-email/components to v0.0.41 ([#2620](https://github.com/monetr/monetr/issues/2620)) ([a3b2bb5](https://github.com/monetr/monetr/commit/a3b2bb556e30839aaf0849531c0e080a648f9ca0))
+* **ui:** update dependency cssnano to v7.0.7 ([#2618](https://github.com/monetr/monetr/issues/2618)) ([b5e60cc](https://github.com/monetr/monetr/commit/b5e60ccd17b44e9b65708c01d6809bb084a8cdc1))
+* **ui:** update dependency next to v15.3.2 ([#2628](https://github.com/monetr/monetr/issues/2628)) ([e9458ae](https://github.com/monetr/monetr/commit/e9458aee2ad7fc67a6029921a50e9762786012ed))
+* **ui:** update dependency renovate to v39.264.0 ([#2629](https://github.com/monetr/monetr/issues/2629)) ([7685945](https://github.com/monetr/monetr/commit/7685945d6cee00a2cdb4bfcf4faa455c73229a15))
+* **ui:** update rsbuild ([#2622](https://github.com/monetr/monetr/issues/2622)) ([279c8f2](https://github.com/monetr/monetr/commit/279c8f2ddf80a34087a6dea92f9a134fbccd669d))
+
 ## [1.4.3](https://github.com/monetr/monetr/compare/v1.4.2...v1.4.3) (2025-05-14)
 
 
