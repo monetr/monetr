@@ -4,13 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"math"
-	"regexp"
 	"time"
 
-	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/mergo"
+	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 )
@@ -168,32 +166,12 @@ func (o *BankAccount) UnmarshalRequest(ctx context.Context, reader io.Reader) er
 			ctx,
 			&rawData,
 			validation.Map(
-				validation.Key(
-					"mask",
-					validation.Match(regexp.MustCompile(`\d{4}`)).Error("Mask must be a 4 digit string"),
-				).Optional(),
-				validation.Key(
-					"name",
-					validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
-				).Optional(),
-				validation.Key(
-					"currency",
-					validation.In(
-						locale.GetInstalledCurrencies()...,
-					).Error("Currency must be one supported by the server"),
-				).Optional(),
-				validation.Key(
-					"limitBalance",
-					validation.Min(float64(0)).Error("Limit balance cannot be negative"),
-				).Optional(),
-				validation.Key(
-					"currentBalance",
-					validation.Max(math.MaxFloat64),
-				).Optional(),
-				validation.Key(
-					"availableBalance",
-					validation.Max(math.MaxFloat64),
-				).Optional(),
+				validators.Mask(),
+				validators.Name(),
+				validators.CurrencyCode(),
+				validators.LimitBalance("limitBalance"),
+				validators.Balance("currentBalance"),
+				validators.Balance("availableBalance"),
 				validation.Key(
 					"status",
 					validation.In(
@@ -236,10 +214,7 @@ func (o *BankAccount) UnmarshalRequest(ctx context.Context, reader io.Reader) er
 			ctx,
 			&rawData,
 			validation.Map(
-				validation.Key(
-					"name",
-					validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
-				).Optional(),
+				validators.Name(),
 			),
 		)
 	}
