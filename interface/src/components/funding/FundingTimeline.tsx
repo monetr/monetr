@@ -1,12 +1,14 @@
 /* eslint-disable max-len */
-import React from 'react';
+import React, { useMemo } from 'react';
 import NorthEast from '@mui/icons-material/NorthEast';
+import { tz } from '@date-fns/tz';
 import { format, getUnixTime } from 'date-fns';
 
 import MSpan from '@monetr/interface/components/MSpan';
 import { Event, useForecast } from '@monetr/interface/hooks/forecast';
 import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -24,9 +26,11 @@ interface TimelineItemData {
 }
 
 export default function FundingTimeline(props: FundingTimelineProps): JSX.Element {
+  const { data: timezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const { data: funding } = useFundingSchedule(props.fundingScheduleId);
   const { result: forecast, isLoading, isError } = useForecast();
+  const inTimezone = useMemo(() => tz(timezone), [timezone]);
 
   if (isLoading) {
     return (
@@ -86,7 +90,7 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
       body += `An estimated ${locale.formatAmount(funding.estimatedDeposit - props.contributedAmount, AmountType.Stored)} will be left over for Free-to-Use after this contribution.`;
     }
     if (props.date.getDate() != props.originalDate.getDate()) {
-      dateExtra = `(Avoided weekend or holiday on ${format(props.originalDate, 'MMMM do')})`;
+      dateExtra = `(Avoided weekend or holiday on ${format(inTimezone(props.originalDate), 'MMMM do')})`;
     }
 
     const rowClassNames = mergeTailwind(
@@ -99,7 +103,7 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
       <li className={ rowClassNames }>
         <div className='absolute w-3 h-3 bg-zinc-200 rounded-full mt-1.5 -left-1.5 border border-white dark:border-zinc-900 dark:bg-zinc-700' />
         <time className='mb-1 text-sm font-normal leading-none text-zinc-400 dark:text-zinc-500'>
-          {format(props.date, 'MMMM do')} <br /> { dateExtra }
+          {format(inTimezone(props.date), 'MMMM do')} <br /> { dateExtra }
         </time>
         <h3 className='text-lg font-semibold text-zinc-900 dark:text-white'>
           {header} {icon}

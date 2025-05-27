@@ -3,7 +3,8 @@ import { useMatch, useNavigate } from 'react-router-dom';
 import HeartBroken from '@mui/icons-material/HeartBroken';
 import TodayOutlined from '@mui/icons-material/TodayOutlined';
 import { AxiosError } from 'axios';
-import { format, isEqual, startOfDay } from 'date-fns';
+import { tz } from '@date-fns/tz';
+import { format, isEqual, startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikErrors, FormikHelpers } from 'formik';
 import { Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
@@ -22,6 +23,7 @@ import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useFundingSchedule, useRemoveFundingSchedule, useUpdateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { APIError } from '@monetr/interface/util/request';
 
@@ -34,6 +36,7 @@ interface FundingValues {
 }
 
 export default function FundingDetails(): JSX.Element {
+  const { data: timezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   // I don't want to do it this way, but it seems like it's the only way to do it for tests without having the entire
   // router also present in the test?
@@ -78,7 +81,9 @@ export default function FundingDetails(): JSX.Element {
     const updatedFunding = new FundingSchedule({
       ...funding,
       name: values.name,
-      nextRecurrence: startOfDay(values.nextRecurrence),
+      nextRecurrence: startOfDay(values.nextRecurrence, {
+        in: tz(timezone),
+      }),
       ruleset: values.rule,
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: locale.friendlyToAmount(values.estimatedDeposit),
@@ -175,6 +180,9 @@ export default function FundingDetails(): JSX.Element {
               labelDecorator={ NextOccurrenceDecorator }
               required
               data-testid='funding-details-date-picker'
+              min={ startOfTomorrow({
+                in: tz(timezone),
+              }) }
             />
             <MSelectFrequency
               className='w-full'
