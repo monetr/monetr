@@ -8,9 +8,9 @@ import (
 	"regexp"
 	"strings"
 
-	"dario.cat/mergo"
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/mergo"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"

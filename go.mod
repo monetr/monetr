@@ -28,6 +28,7 @@ require (
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/mileusna/useragent v1.3.5
+	github.com/monetr/mergo v1.0.3
 	github.com/monetr/validation v1.0.3
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/pkg/errors v0.9.1
@@ -52,8 +53,6 @@ require (
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
-
-require dario.cat/mergo v1.0.1
 
 require (
 	aidanwoods.dev/go-result v0.3.1 // indirect
