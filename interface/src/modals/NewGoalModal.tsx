@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
+import { tz } from '@date-fns/tz';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
@@ -16,6 +17,7 @@ import MTextField from '@monetr/interface/components/MTextField';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import { useCreateSpending } from '@monetr/interface/hooks/spending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
@@ -26,20 +28,23 @@ interface NewGoalValues {
   fundingScheduleId: string;
 }
 
-const initialValues: NewGoalValues = {
-  name: '',
-  amount: 0.00,
-  nextOccurrence: startOfTomorrow(),
-  fundingScheduleId: '',
-};
-
 function NewGoalModal(): JSX.Element {
+  const { data: timezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
   const selectedBankAccountId = useSelectedBankAccountId();
   const createSpending = useCreateSpending();
   const ref = useRef<MModalRef>(null);
+
+  const initialValues: NewGoalValues = {
+    name: '',
+    amount: 0.00,
+    nextOccurrence: startOfTomorrow({
+      in: tz(timezone),
+    }),
+    fundingScheduleId: '',
+  };
 
   async function submit(
     values: NewGoalValues,
@@ -48,7 +53,9 @@ function NewGoalModal(): JSX.Element {
     const newSpending = new Spending({
       bankAccountId: selectedBankAccountId,
       name: values.name.trim(),
-      nextRecurrence: startOfDay(new Date(values.nextOccurrence)),
+      nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
+        in: tz(timezone),
+      }),
       spendingType: SpendingType.Goal,
       fundingScheduleId: values.fundingScheduleId,
       targetAmount: locale.friendlyToAmount(values.amount),
@@ -98,7 +105,9 @@ function NewGoalModal(): JSX.Element {
             <MDatePicker
               className='w-full md:w-1/2'
               label='How soon will you need it?'
-              min={ startOfTomorrow() }
+              min={ startOfTomorrow({
+                in: tz(timezone),
+              }) }
               name='nextOccurrence'
               required
             />
