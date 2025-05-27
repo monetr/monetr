@@ -2,7 +2,8 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { HeartBroken, PriceCheckOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
-import { startOfDay, startOfToday } from 'date-fns';
+import { tz } from '@date-fns/tz';
+import { startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikHelpers } from 'formik';
 import { ArrowUpDown, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
@@ -22,6 +23,7 @@ import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useRemoveSpending, useSpending, useUpdateSpending } from '@monetr/interface/hooks/spending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
@@ -36,6 +38,7 @@ interface ExpenseValues {
 }
 
 export default function ExpenseDetails(): JSX.Element {
+  const { data: timezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();
@@ -125,7 +128,9 @@ export default function ExpenseDetails(): JSX.Element {
       ...spending,
       name: values.name,
       description: null,
-      nextRecurrence: startOfDay(values.nextRecurrence),
+      nextRecurrence: startOfDay(values.nextRecurrence, {
+        in: tz(timezone),
+      }),
       fundingScheduleId: values.fundingScheduleId,
       ruleset: values.recurrenceRule,
       targetAmount: locale.friendlyToAmount(values.amount),
@@ -221,7 +226,9 @@ export default function ExpenseDetails(): JSX.Element {
               name='nextRecurrence'
               className='w-full'
               required
-              min={ startOfToday() }
+              min={ startOfTomorrow({
+                in: tz(timezone),
+              }) }
             />
             <MSelectFunding
               className='w-full'

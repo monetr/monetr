@@ -35,8 +35,9 @@ export interface MDatePickerProps extends
 
 export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   const { data: timezone } = useTimezone();
+  const inTimezone = useMemo(() => tz(timezone), [timezone]);
   const today = startOfToday({
-    in: tz(timezone),
+    in: inTimezone,
   });
   const formikContext = useFormikContext();
 
@@ -66,8 +67,8 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
   React.useEffect(() => {
-    setSelectedValue(value);
-  }, [value]);
+    setSelectedValue(value ? inTimezone(value) : undefined);
+  }, [value, inTimezone]);
 
   const open = Boolean(anchorEl);
 
@@ -84,7 +85,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     : placeholder;
 
   const defaultMonth = startOfMonth(selectedValue ?? maxDate ?? today, {
-    in: tz(timezone),
+    in: inTimezone,
   });
   const isClearEnabled = enableClear && !disabled;
 
@@ -105,15 +106,22 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   }, [setSelectedValue, formikContext, props.name]);
 
   const handleSelect = useCallback((value: Date | null) => {
+    // If the value is a selected date then cast the date to the account's timezone.
+    if (value) {
+      value = inTimezone(value);
+    }
+
+    // If we are in a formik form boi then propagate the values upwards.
     if (formikContext) {
       formikContext.setFieldValue(props.name, value);
       formikContext.setFieldTouched(props.name, true);
       formikContext.validateField(props.name);
     }
 
+    // Store the selected value (or lack thereof).
     setSelectedValue(value);
     handleClose();
-  }, [setSelectedValue, formikContext, props.name, handleClose]);
+  }, [formikContext, handleClose, inTimezone, props.name]);
 
   const classNames = mergeTailwind(
     {
