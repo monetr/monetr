@@ -11,12 +11,14 @@ import (
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/captcha"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/security"
+	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -69,17 +71,43 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 		Captcha  string `json:"captcha"`
-		IsMobile bool   `json:"isMobile"`
 	}
 	if err := ctx.Bind(&loginRequest); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
 	}
 
-	// This will take the captcha from the request and validate it if the API is
-	// configured to do so. If it is enabled and the captcha fails then an error
-	// is returned to the client.
-	if err := c.validateLoginCaptcha(c.getContext(ctx), loginRequest.Captcha); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Valid ReCAPTCHA is required")
+	validators := []*validation.FieldRules{
+		validation.Field(
+			&loginRequest.Email,
+			validation.Required,
+			validation.Length(3, 300).Error("Email must be at least 3 characters long"),
+		),
+		validation.Field(
+			&loginRequest.Password,
+			validation.Required,
+			validation.Length(8, 100).Error("Password must be between 8 and 100 characters"),
+		),
+	}
+
+	// If we are requiring a captcha for login then also include the captcha
+	// verification function.
+	if !c.Configuration.ReCAPTCHA.ShouldVerifyLogin() {
+		validators = append(validators, validation.Field(
+			&loginRequest.Captcha,
+			validation.Required,
+			captcha.Validate(c.Captcha),
+		))
+	}
+
+	if err := validation.ValidateStructWithContext(
+		c.getContext(ctx),
+		&loginRequest,
+		validators...,
+	); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":    "Invalid request",
+			"problems": err,
+		})
 	}
 
 	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
@@ -214,11 +242,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			"isActive": true,
 		}
 
-		if !loginRequest.IsMobile {
-			c.updateAuthenticationCookie(ctx, token)
-		} else {
-			result["token"] = token
-		}
+		c.updateAuthenticationCookie(ctx, token)
 
 		if !c.Configuration.Stripe.IsBillingEnabled() {
 			// Return their account token.
