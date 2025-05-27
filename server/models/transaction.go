@@ -84,6 +84,7 @@ func (t *Transaction) AddSpendingToTransaction(
 	ctx context.Context,
 	spending *Spending,
 	timezone *time.Location,
+	now time.Time,
 	log *logrus.Entry,
 ) error {
 	span := crumbs.StartFnTrace(ctx)
@@ -125,7 +126,7 @@ func (t *Transaction) AddSpendingToTransaction(
 		span.Context(),
 		timezone,
 		spending.FundingSchedule,
-		time.Now(),
+		now,
 		log,
 	)
 

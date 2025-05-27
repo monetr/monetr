@@ -582,6 +582,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(
 			span.Context(),
 			newExpense,
 			timezone,
+			r.clock.Now(),
 			log,
 		); err != nil {
 			return nil, err

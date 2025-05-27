@@ -675,4 +675,55 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		assert.NoError(t, err)
 		assert.EqualValues(t, 10000, spending.NextContributionAmount, "should contribute half next time")
 	})
+
+	t.Run("another miscalculation bug", func(t *testing.T) {
+		// Trying to reproduce the issue observed in
+		// https://github.com/monetr/monetr/issues/2623 but I'm not able to
+		// reproduce the issue. Ultimately the call stack ends at calculate next
+		// contribution with the data setup below. But in this test the result is
+		// correct and isn't wrong. But in the logged behavior it is wrong. Not sure
+		// whats going on here.
+		timezone, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must be able to load timezone")
+		now := time.Date(2025, 5, 15, 15, 28, 9, 0, time.UTC)
+
+		spendingString := "DTSTART:20241115T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15"
+		spendingRule, err := NewRuleSet(spendingString)
+		spendingRule.DTStart(spendingRule.GetDTStart().In(timezone))
+		assert.NoError(t, err, "must be able to parse the rule")
+
+		contributionString := "DTSTART:20241115T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1"
+		contributionRule, err := NewRuleSet(contributionString)
+		contributionRule.DTStart(contributionRule.GetDTStart().In(timezone))
+		assert.NoError(t, err, "must be able to parse the rule")
+
+		lastRecurrence := time.Date(2025, 5, 15, 5, 0, 0, 0, time.UTC)
+		spending := Spending{
+			SpendingType:           SpendingTypeExpense,
+			TargetAmount:           50000,
+			CurrentAmount:          17890,
+			NextContributionAmount: 0,
+			NextRecurrence:         time.Date(2025, 6, 15, 5, 0, 0, 0, time.UTC),
+			LastRecurrence:         &lastRecurrence,
+			RuleSet:                spendingRule,
+			IsBehind:               false,
+		}
+		funding := FundingSchedule{
+			FundingScheduleId:      "fund_bogus",
+			Name:                   "Bogus Funding Schedule",
+			Description:            "Bogus",
+			RuleSet:                contributionRule,
+			NextRecurrence:         contributionRule.After(now, false).UTC(),
+			NextRecurrenceOriginal: contributionRule.After(now, false).UTC(),
+		}
+		spending.CalculateNextContribution(
+			t.Context(),
+			timezone,
+			&funding,
+			now,
+			testutils.GetLog(t),
+		)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 16055, spending.NextContributionAmount, "should contribute half of the remaining amount")
+	})
 }

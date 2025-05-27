@@ -121,7 +121,9 @@ func (e *Spending) CalculateNextContribution(
 			"currentAmount": e.CurrentAmount,
 		},
 		"funding": logrus.Fields{
-			"ruleset": fundingSchedule.RuleSet,
+			"ruleset":         fundingSchedule.RuleSet,
+			"nextRecurrence":  fundingSchedule.NextRecurrence,
+			"excludeWeekends": fundingSchedule.ExcludeWeekends,
 		},
 		"before": logrus.Fields{
 			"isBehind":               e.IsBehind,
