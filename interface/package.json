@@ -58,7 +58,7 @@
     "react-number-format": "5.4.4",
     "react-plaid-link": "3.6.1",
     "react-qr-code": "2.0.15",
-    "react-router-dom": "6.30.0",
+    "react-router-dom": "6.30.1",
     "react-select": "5.10.1",
     "rrule": "2.8.1",
     "tailwind-merge": "1.14.0",
