@@ -31,8 +31,8 @@
 <url><loc>https://monetr.app/documentation/development/credentials/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/development/documentation/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/development/local_development/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://monetr.app/documentation/install/kubernetes/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/install/docker/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://monetr.app/documentation/install/kubernetes/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/use/billing/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/use/expense/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/use/forecasting/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
