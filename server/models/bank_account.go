@@ -2,9 +2,17 @@ package models
 
 import (
 	"context"
+	"encoding/json"
+	"io"
+	"math"
+	"regexp"
 	"time"
 
+	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/mergo"
+	"github.com/monetr/validation"
+	"github.com/pkg/errors"
 )
 
 type BankAccountType string
@@ -144,4 +152,108 @@ func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error)
 	}
 
 	return ctx, nil
+}
+
+func (o *BankAccount) UnmarshalRequest(ctx context.Context, reader io.Reader) error {
+	rawData := map[string]any{}
+	decoder := json.NewDecoder(reader)
+	decoder.UseNumber()
+	if err := decoder.Decode(&rawData); err != nil {
+		return errors.WithStack(err)
+	}
+
+	var err error
+	if o.PlaidBankAccountId == nil {
+		err = validation.ValidateWithContext(
+			ctx,
+			&rawData,
+			validation.Map(
+				validation.Key(
+					"mask",
+					validation.Match(regexp.MustCompile(`\d{4}`)).Error("Mask must be a 4 digit string"),
+				).Optional(),
+				validation.Key(
+					"name",
+					validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
+				).Optional(),
+				validation.Key(
+					"currency",
+					validation.In(
+						locale.GetInstalledCurrencies()...,
+					).Error("Currency must be one supported by the server"),
+				).Optional(),
+				validation.Key(
+					"limitBalance",
+					validation.Min(float64(0)).Error("Limit balance cannot be negative"),
+				).Optional(),
+				validation.Key(
+					"currentBalance",
+					validation.Max(math.MaxFloat64),
+				).Optional(),
+				validation.Key(
+					"availableBalance",
+					validation.Max(math.MaxFloat64),
+				).Optional(),
+				validation.Key(
+					"status",
+					validation.In(
+						ActiveBankAccountStatus,
+						InactiveBankAccountStatus,
+						UnknownBankAccountStatus,
+					).Error("Invalid bank account status"),
+				).Optional(),
+				validation.Key(
+					"accountType",
+					validation.In(
+						DepositoryBankAccountType,
+						CreditBankAccountType,
+						LoanBankAccountType,
+						InvestmentBankAccountType,
+						OtherBankAccountType,
+					).Error("Invalid bank account type"),
+				).Optional(),
+				validation.Key(
+					"accountSubType",
+					validation.In(
+						CheckingBankAccountSubType,
+						SavingsBankAccountSubType,
+						HSABankAccountSubType,
+						CDBankAccountSubType,
+						MoneyMarketBankAccountSubType,
+						PayPalBankAccountSubType,
+						PrepaidBankAccountSubType,
+						CashManagementBankAccountSubType,
+						EBTBankAccountSubType,
+						CreditCardBankAccountSubType,
+						AutoBankAccountSubType,
+						OtherBankAccountSubType,
+					).Error("Invalid bank account sub type"),
+				).Optional(),
+			),
+		)
+	} else {
+		err = validation.ValidateWithContext(
+			ctx,
+			&rawData,
+			validation.Map(
+				validation.Key(
+					"name",
+					validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
+				).Optional(),
+			),
+		)
+	}
+	if err != nil {
+		return err
+	}
+
+	if err = mergo.Map(
+		o, rawData,
+		mergo.WithOverride,
+		mergo.WithTransformers(NewIDTransformer[BankAccount]()),
+	); err != nil {
+		return errors.Wrap(err, "failed to merge patched data")
+	}
+
+	return nil
 }

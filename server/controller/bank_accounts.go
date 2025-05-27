@@ -2,15 +2,11 @@ package controller
 
 import (
 	"bytes"
-	"encoding/json"
-	"math"
 	"net/http"
-	"regexp"
 	"strings"
 
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/mergo"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
@@ -177,94 +173,19 @@ func (c *Controller) patchBankAccount(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve bank account")
 	}
 
-	var request map[string]any
-	decoder := json.NewDecoder(ctx.Request().Body)
-	decoder.UseNumber()
-	if err := decoder.Decode(&request); err != nil {
-		return c.invalidJson(ctx)
-	}
-	if existingBankAccount.PlaidBankAccountId == nil {
-		err = validation.ValidateWithContext(
-			c.getContext(ctx),
-			&request,
-			validation.Map(
-				validation.Key(
-					"mask",
-					validation.Match(regexp.MustCompile(`\d{4}`)).Error("Mask must be a 4 digit string"),
-				).Optional(),
-				validation.Key(
-					"name",
-					validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
-				).Optional(),
-				validation.Key(
-					"currency",
-					validation.In(
-						locale.GetInstalledCurrencies()...,
-					).Error("Currency must be one supported by the server"),
-				).Optional(),
-				validation.Key(
-					"limitBalance",
-					validation.Min(float64(0)).Error("Limit balance cannot be negative"),
-				).Optional(),
-				validation.Key(
-					"currentBalance",
-					validation.Max(math.MaxFloat64),
-				).Optional(),
-				validation.Key(
-					"availableBalance",
-					validation.Max(math.MaxFloat64),
-				).Optional(),
-				validation.Key(
-					"status",
-					validation.In(
-						ActiveBankAccountStatus,
-						InactiveBankAccountStatus,
-						UnknownBankAccountStatus,
-					).Error("Invalid bank account status"),
-				).Optional(),
-				validation.Key(
-					"accountType",
-					validation.In(
-						DepositoryBankAccountType,
-						CreditBankAccountType,
-						LoanBankAccountType,
-						InvestmentBankAccountType,
-						OtherBankAccountType,
-					).Error("Invalid bank account type"),
-				).Optional(),
-				validation.Key(
-					"accountSubType",
-					validation.In(
-						CheckingBankAccountSubType,
-						SavingsBankAccountSubType,
-						HSABankAccountSubType,
-						CDBankAccountSubType,
-						MoneyMarketBankAccountSubType,
-						PayPalBankAccountSubType,
-						PrepaidBankAccountSubType,
-						CashManagementBankAccountSubType,
-						EBTBankAccountSubType,
-						CreditCardBankAccountSubType,
-						AutoBankAccountSubType,
-						OtherBankAccountSubType,
-					).Error("Invalid bank account sub type"),
-				).Optional(),
-			),
-		)
-		if err != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]any{
-				"error":    "Invalid request",
-				"problems": err,
-			})
-		}
-
-		if err := mergo.Map(
-			existingBankAccount, request,
-			mergo.WithOverride,
-			mergo.WithTransformers(NewIDTransformer[BankAccount]()),
-		); err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to patch request data")
-		}
+	switch err := existingBankAccount.UnmarshalRequest(
+		c.getContext(ctx),
+		ctx.Request().Body,
+	).(type) {
+	case validation.Error:
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":    "Invalid request",
+			"problems": err,
+		})
+	case nil:
+		break
+	default:
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
 	}
 
 	if err = repo.UpdateBankAccount(
