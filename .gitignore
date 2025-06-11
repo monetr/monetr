@@ -44,3 +44,5 @@ docs/developing/api/swagger.*
 .pnpm-store
 
 CMakeUserPresets.json
+
+doc_build
