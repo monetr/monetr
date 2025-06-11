@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.4.4](https://github.com/monetr/monetr/compare/v1.4.3...v1.4.4) (2025-06-11)
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.33.0 ([#2639](https://github.com/monetr/monetr/issues/2639)) ([92b4d7d](https://github.com/monetr/monetr/commit/92b4d7d65ad90fd8dd1f4ecbbc636e82459db81d))
+* **api:** update module github.com/jarcoal/httpmock to v1.4.0 ([#2640](https://github.com/monetr/monetr/issues/2640)) ([2e2106f](https://github.com/monetr/monetr/commit/2e2106f280ed538a19010fa60cd3d40393d7b3ba))
+* **api:** update module github.com/labstack/echo/v4 to v4.13.4 ([#2630](https://github.com/monetr/monetr/issues/2630)) ([fcff5a5](https://github.com/monetr/monetr/commit/fcff5a50b0d9cf0bb3af95f34bc4167583a2b3c9))
+* **api:** update module github.com/oklog/ulid/v2 to v2.1.1 ([#2631](https://github.com/monetr/monetr/issues/2631)) ([22cc5cd](https://github.com/monetr/monetr/commit/22cc5cd129ec4bdd3b5b7dc31e45c98bc26828b4))
+* **api:** update module golang.org/x/net to v0.40.0 ([#2625](https://github.com/monetr/monetr/issues/2625)) ([7372188](https://github.com/monetr/monetr/commit/737218809f638ec7144046d8023c13a76f0853f0))
+* **api:** update module golang.org/x/text to v0.25.0 ([#2627](https://github.com/monetr/monetr/issues/2627)) ([acda4f6](https://github.com/monetr/monetr/commit/acda4f6f1102f8c482b14ece44356ef0fc0d8b48))
+* **containers:** update hashicorp/vault docker tag to v1.19.4 ([#2583](https://github.com/monetr/monetr/issues/2583)) ([321b587](https://github.com/monetr/monetr/commit/321b587eb7104baf093093411f93d973d4a39337))
+* **ui:** update dependency @react-email/components to v0.0.41 ([#2620](https://github.com/monetr/monetr/issues/2620)) ([a3b2bb5](https://github.com/monetr/monetr/commit/a3b2bb556e30839aaf0849531c0e080a648f9ca0))
+* **ui:** update dependency @swc/core to v1.12.0 ([#2603](https://github.com/monetr/monetr/issues/2603)) ([5c3bc4d](https://github.com/monetr/monetr/commit/5c3bc4df365d75f6b28aa1f75c745070c670e872))
+* **ui:** update dependency cssnano to v7.0.7 ([#2618](https://github.com/monetr/monetr/issues/2618)) ([b5e60cc](https://github.com/monetr/monetr/commit/b5e60ccd17b44e9b65708c01d6809bb084a8cdc1))
+* **ui:** update dependency next to v15.3.2 ([#2628](https://github.com/monetr/monetr/issues/2628)) ([e9458ae](https://github.com/monetr/monetr/commit/e9458aee2ad7fc67a6029921a50e9762786012ed))
+* **ui:** update dependency next to v15.3.3 ([#2644](https://github.com/monetr/monetr/issues/2644)) ([c8b3070](https://github.com/monetr/monetr/commit/c8b3070538b7a7556d591df0509f69e27d526d78))
+* **ui:** update dependency react-router-dom to v6.30.1 ([#2632](https://github.com/monetr/monetr/issues/2632)) ([11d2530](https://github.com/monetr/monetr/commit/11d25300b1d634b175905986d382473b72edbd21))
+* **ui:** update dependency renovate to v39.264.0 ([#2629](https://github.com/monetr/monetr/issues/2629)) ([7685945](https://github.com/monetr/monetr/commit/7685945d6cee00a2cdb4bfcf4faa455c73229a15))
+* **ui:** update dependency renovate to v39.264.1 ([#2637](https://github.com/monetr/monetr/issues/2637)) ([0717537](https://github.com/monetr/monetr/commit/0717537de0c019caddce6e5a27ce46684b06fbb3))
+* **ui:** update dependency zustand to v5.0.5 ([#2633](https://github.com/monetr/monetr/issues/2633)) ([11e0e34](https://github.com/monetr/monetr/commit/11e0e34bdee14944f026e51bdf8fa5439dca967f))
+* **ui:** update rsbuild ([#2622](https://github.com/monetr/monetr/issues/2622)) ([279c8f2](https://github.com/monetr/monetr/commit/279c8f2ddf80a34087a6dea92f9a134fbccd669d))
+* **ui:** update rsbuild ([#2634](https://github.com/monetr/monetr/issues/2634)) ([a8254dc](https://github.com/monetr/monetr/commit/a8254dc91db7b5729f3114a9854f0f3c5a7ca247))
+
+
+### Bug Fixes
+
+* **api:** Adding test for miscalculation in spending code ([0a5faf4](https://github.com/monetr/monetr/commit/0a5faf40baf1f23545793d7156fc19e596ba5e57)), closes [#2623](https://github.com/monetr/monetr/issues/2623)
+* **ui:** More timezone bug fixes ([#2635](https://github.com/monetr/monetr/issues/2635)) ([7a192f3](https://github.com/monetr/monetr/commit/7a192f34ce1f7b65b10b49d31940c8987e260fa1))
+* **ui:** Use account timezone if available instead of browser timezone ([#2390](https://github.com/monetr/monetr/issues/2390)) ([0af5042](https://github.com/monetr/monetr/commit/0af5042731e1e09a723149eeb9be9a92e42d0bcc))
+
 ## [1.4.3](https://github.com/monetr/monetr/compare/v1.4.2...v1.4.3) (2025-05-14)
 
 
