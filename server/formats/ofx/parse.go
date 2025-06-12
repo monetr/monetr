@@ -8,6 +8,7 @@ import (
 
 	"github.com/elliotcourant/gofx"
 	"github.com/pkg/errors"
+	"golang.org/x/text/encoding/ianaindex"
 )
 
 var (
@@ -20,13 +21,18 @@ var (
 )
 
 func Parse(reader io.Reader) (*gofx.OFX, error) {
-	data, err := io.ReadAll(reader)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to read OFX buffer")
-	}
-
 	var ofx gofx.OFX
-	if originalErr := xml.Unmarshal(data, &ofx); originalErr != nil {
+	decoder := xml.NewDecoder(reader)
+	decoder.CharsetReader = func(charset string, input io.Reader) (io.Reader, error) {
+		enc, err := ianaindex.IANA.Encoding(charset)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to decode charset %s", charset)
+		}
+
+		return enc.NewDecoder().Reader(input), nil
+	}
+	if originalErr := decoder.Decode(&ofx); originalErr != nil {
+		// TODO Fix the retokenization!
 		tokens, err := Tokenize(string(data))
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse")
