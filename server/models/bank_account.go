@@ -2,9 +2,15 @@ package models
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"time"
 
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/mergo"
+	"github.com/monetr/monetr/server/validators"
+	"github.com/monetr/validation"
+	"github.com/pkg/errors"
 )
 
 type BankAccountType string
@@ -116,8 +122,8 @@ type BankAccount struct {
 	Mask               string                `json:"mask" pg:"mask"`
 	Name               string                `json:"name,omitempty" pg:"name,notnull"`
 	OriginalName       string                `json:"originalName" pg:"original_name,notnull"`
-	Type               BankAccountType       `json:"accountType" pg:"account_type"`
-	SubType            BankAccountSubType    `json:"accountSubType" pg:"account_sub_type"`
+	AccountType        BankAccountType       `json:"accountType" pg:"account_type"`
+	AccountSubType     BankAccountSubType    `json:"accountSubType" pg:"account_sub_type"`
 	Status             BankAccountStatus     `json:"status" pg:"status,notnull"`
 	LastUpdated        time.Time             `json:"lastUpdated" pg:"last_updated,notnull"`
 	CreatedAt          time.Time             `json:"createdAt" pg:"created_at,notnull"`
@@ -144,4 +150,85 @@ func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error)
 	}
 
 	return ctx, nil
+}
+
+func (o *BankAccount) UnmarshalRequest(ctx context.Context, reader io.Reader) error {
+	rawData := map[string]any{}
+	decoder := json.NewDecoder(reader)
+	decoder.UseNumber()
+	if err := decoder.Decode(&rawData); err != nil {
+		return errors.WithStack(err)
+	}
+
+	var err error
+	if o.PlaidBankAccountId == nil {
+		err = validation.ValidateWithContext(
+			ctx,
+			&rawData,
+			validation.Map(
+				validators.Mask(),
+				validators.Name(),
+				validators.CurrencyCode(),
+				validators.LimitBalance("limitBalance"),
+				validators.Balance("currentBalance"),
+				validators.Balance("availableBalance"),
+				validation.Key(
+					"status",
+					validation.In(
+						ActiveBankAccountStatus,
+						InactiveBankAccountStatus,
+						UnknownBankAccountStatus,
+					).Error("Invalid bank account status"),
+				).Optional(),
+				validation.Key(
+					"accountType",
+					validation.In(
+						DepositoryBankAccountType,
+						CreditBankAccountType,
+						LoanBankAccountType,
+						InvestmentBankAccountType,
+						OtherBankAccountType,
+					).Error("Invalid bank account type"),
+				).Optional(),
+				validation.Key(
+					"accountSubType",
+					validation.In(
+						CheckingBankAccountSubType,
+						SavingsBankAccountSubType,
+						HSABankAccountSubType,
+						CDBankAccountSubType,
+						MoneyMarketBankAccountSubType,
+						PayPalBankAccountSubType,
+						PrepaidBankAccountSubType,
+						CashManagementBankAccountSubType,
+						EBTBankAccountSubType,
+						CreditCardBankAccountSubType,
+						AutoBankAccountSubType,
+						OtherBankAccountSubType,
+					).Error("Invalid bank account sub type"),
+				).Optional(),
+			),
+		)
+	} else {
+		err = validation.ValidateWithContext(
+			ctx,
+			&rawData,
+			validation.Map(
+				validators.Name(),
+			),
+		)
+	}
+	if err != nil {
+		return err
+	}
+
+	if err = mergo.Map(
+		o, rawData,
+		mergo.WithOverride,
+		mergo.WithTransformers(NewIDTransformer[BankAccount]()),
+	); err != nil {
+		return errors.Wrap(err, "failed to merge patched data")
+	}
+
+	return nil
 }

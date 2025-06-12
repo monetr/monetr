@@ -83,8 +83,8 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	}
 
 	bankAccount.Status = ParseBankAccountStatus(bankAccount.Status)
-	bankAccount.Type = ParseBankAccountType(bankAccount.Type)
-	bankAccount.SubType = ParseBankAccountSubType(bankAccount.SubType)
+	bankAccount.AccountType = ParseBankAccountType(bankAccount.AccountType)
+	bankAccount.AccountSubType = ParseBankAccountSubType(bankAccount.AccountSubType)
 	bankAccount.LastUpdated = c.Clock.Now().UTC()
 
 	if bankAccount.Name == "" {
@@ -159,6 +159,43 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, bankAccount)
+}
+
+func (c *Controller) patchBankAccount(ctx echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	existingBankAccount, err := repo.GetBankAccount(c.getContext(ctx), bankAccountId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve bank account")
+	}
+
+	switch err := existingBankAccount.UnmarshalRequest(
+		c.getContext(ctx),
+		ctx.Request().Body,
+	).(type) {
+	case validation.Error:
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":    "Invalid request",
+			"problems": err,
+		})
+	case nil:
+		break
+	default:
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
+	}
+
+	if err = repo.UpdateBankAccount(
+		c.getContext(ctx),
+		existingBankAccount,
+	); err != nil {
+		return c.wrapPgError(ctx, err, "failed to update bank account")
+	}
+
+	return ctx.JSON(http.StatusOK, *existingBankAccount)
 }
 
 func (c *Controller) putBankAccount(ctx echo.Context) error {
