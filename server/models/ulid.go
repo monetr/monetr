@@ -4,9 +4,11 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
+	"reflect"
 	"strings"
 	"sync"
 
+	"github.com/monetr/validation"
 	"github.com/oklog/ulid/v2"
 	"github.com/pkg/errors"
 )
@@ -90,4 +92,66 @@ func ParseID[T Identifiable](input string) (ID[T], error) {
 	}
 
 	return ID[T](input), nil
+}
+
+var (
+	_            validation.Rule = IDRule[Login]{}
+	ErrInvalidID                 = validation.NewError("id_invalid", "ID is invalid")
+)
+
+type IDRule[T Identifiable] struct {
+	error validation.Error
+}
+
+func ValidID[T Identifiable]() IDRule[T] {
+	return IDRule[T]{
+		error: ErrInvalidID,
+	}
+}
+
+// Validate implements validation.Rule.
+func (i IDRule[T]) Validate(value any) error {
+	str, ok := value.(string)
+	if !ok {
+		return i.error
+	}
+	_, err := ParseID[T](str)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (i IDRule[T]) Error(message string) IDRule[T] {
+	i.error = i.error.SetMessage(message)
+	return i
+}
+
+func (i IDRule[T]) ErrorObject(err validation.Error) IDRule[T] {
+	i.error = err
+	return i
+}
+
+type IDTransformer[T Identifiable] struct {
+	id ID[T]
+}
+
+func NewIDTransformer[T Identifiable]() IDTransformer[T] {
+	return IDTransformer[T]{
+		id: ID[T](""),
+	}
+}
+
+func (i IDTransformer[T]) Transformer(typ reflect.Type) func(dst, src reflect.Value) error {
+	if typ == reflect.TypeOf(i.id) {
+		return func(dst, src reflect.Value) error {
+			if dst.CanSet() {
+				srcValue := src.Interface().(string)
+				dst.SetString(srcValue)
+			}
+			return nil
+		}
+	}
+	return nil
 }
