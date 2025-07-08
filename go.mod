@@ -2,7 +2,7 @@ module github.com/monetr/monetr
 
 go 1.24.0
 
-toolchain go1.24.3
+toolchain go1.24.5
 
 require (
 	aidanwoods.dev/go-paseto v1.5.4
