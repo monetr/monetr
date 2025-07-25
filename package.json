@@ -43,7 +43,8 @@
   },
   "pnpm": {
     "overrides": {
-      "axios": "1.8.4"
+      "axios": "1.8.4",
+      "form-data": "4.0.4"
     }
   }
 }
