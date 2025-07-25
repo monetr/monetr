@@ -52,7 +52,7 @@ directory.
 
 To get the compose file, first clone the monetr repository:
 
-```shell filename="Clone monetr"
+```shell filename="Clone monetr" copy
 git clone https://github.com/monetr/monetr.git
 cd monetr
 ```
@@ -95,7 +95,7 @@ multiple configuration file if you need to by passing `-c ${file}` multiple time
 
 To run monetr, execute the following command in your terminal from the root directory of monetr's repository.
 
-```shell filename="Start monetr"
+```shell filename="Start monetr" copy
 docker compose up --wait
 ```
 
@@ -134,7 +134,7 @@ should be aware of.
 
 In your cloned monetr directory, run the following command to retrieve the latest changes.
 
-```shell filename="Retrieve changes"
+```shell filename="Retrieve changes" copy
 git pull --rebase
 ```
 
@@ -145,7 +145,7 @@ cause problems with the latest version of monetr. Make sure to resolve these con
 
 You'll need to stop the containers running before upgrading to make sure there are not conflicts.
 
-```shell filename="Stop monetr"
+```shell filename="Stop monetr" copy
 docker compose stop
 ```
 
@@ -153,7 +153,7 @@ docker compose stop
 
 Once the containers have stopped you can run the following command to update the monetr image:
 
-```shell filename="Docker pull"
+```shell filename="Docker pull" copy
 docker compose pull
 ```
 
@@ -161,7 +161,7 @@ docker compose pull
 
 Once the new images have been pulled onto your local machine you can restart the server via docker compose:
 
-```shell filename="Docker start"
+```shell filename="Docker start" copy
 docker compose up --wait
 ```
 
@@ -178,7 +178,7 @@ If you encounter issues while setting up or running monetr, here are some common
 If the containers fail to start or exit immediately:
 
 - Check the logs using:
-  ```shell
+  ```shell copy
   docker compose logs -f
   ```
 
@@ -222,7 +222,7 @@ If `http://localhost:4000` doesn’t load:
 
 Verify the containers are running using:
 
-```shell
+```shell copy
 docker compose ps
 ```
 
@@ -235,7 +235,7 @@ If monetr doesn't work correctly after an update:
 
 - Check for breaking changes in the [Release Notes](https://github.com/monetr/monetr/releases)
 - Run
-  ```shell
+  ```shell copy
   docker compose stop
   docker compose up -d
   ```
@@ -258,7 +258,7 @@ If these solutions don't resolve your issue:
 
 To uninstall monetr via Docker Compose you can run the following command:
 
-```shell
+```shell copy
 docker compose down --remove-orphans -v
 ```
 
