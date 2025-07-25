@@ -1,6 +1,7 @@
 package ofx
 
 import (
+	"bytes"
 	"fmt"
 	"regexp"
 	"strings"
@@ -23,29 +24,29 @@ const (
 )
 
 type Token interface {
-	Token() string
+	Token() []byte
 	XML() string
 }
 
 type Field struct {
-	Name  string
-	Value string
+	Name  []byte
+	Value []byte
 }
 
-func (f Field) Token() string {
+func (f Field) Token() []byte {
 	return f.Name
 }
 
 func (f Field) XML() string {
-	return fmt.Sprintf("<%s>%s</%s>", f.Name, strings.TrimSpace(f.Value), f.Name)
+	return fmt.Sprintf("<%s>%s</%s>", f.Name, string(bytes.TrimSpace(f.Value)), f.Name)
 }
 
 type Array struct {
-	Name  string
+	Name  []byte
 	Items []Token
 }
 
-func (a Array) Token() string {
+func (a Array) Token() []byte {
 	return a.Name
 }
 
@@ -57,8 +58,8 @@ func (a Array) XML() string {
 	return fmt.Sprintf("<%s>%s</%s>", a.Name, strings.Join(pieces, ""), a.Name)
 }
 
-func Tokenize(ofxData string) (Token, error) {
-	items := dataRegex.FindAllStringSubmatch(ofxData, -1)
+func Tokenize(ofxData []byte) (Token, error) {
+	items := dataRegex.FindAllSubmatch(ofxData, -1)
 	if len(items) == 0 {
 		return nil, errors.New("OFX file provided is not valid")
 	}
@@ -66,7 +67,7 @@ func Tokenize(ofxData string) (Token, error) {
 	return token, nil
 }
 
-func tokenizeItem(index int, items [][]string) (i int, result Token) {
+func tokenizeItem(index int, items [][][]byte) (i int, result Token) {
 	item := items[index]
 	switch getItemType(item) {
 	case ArrayStartItemType:
@@ -78,11 +79,11 @@ func tokenizeItem(index int, items [][]string) (i int, result Token) {
 	}
 }
 
-func getItemType(item []string) ItemType {
-	value := strings.TrimSpace(item[2])
-	name := strings.TrimSpace(item[1])
-	if value == "" {
-		isClosing := strings.HasPrefix(name, "</")
+func getItemType(item [][]byte) ItemType {
+	value := bytes.TrimSpace(item[2])
+	name := bytes.TrimSpace(item[1])
+	if len(value) == 0 {
+		isClosing := bytes.HasPrefix(name, []byte("</"))
 		if isClosing {
 			return ArrayEndItemType
 		}
@@ -92,7 +93,7 @@ func getItemType(item []string) ItemType {
 	return FieldItemType
 }
 
-func tokenizeArray(index int, items [][]string) (i int, result Token) {
+func tokenizeArray(index int, items [][][]byte) (i int, result Token) {
 	var token *Array
 	for i = index; i < len(items); i++ {
 		item := items[i]
@@ -117,13 +118,13 @@ func tokenizeArray(index int, items [][]string) (i int, result Token) {
 	return i, token
 }
 
-func tokenizeField(index int, items [][]string) (i int, result Token) {
+func tokenizeField(index int, items [][][]byte) (i int, result Token) {
 	return index, &Field{
 		Name:  cleanName(items[index][1]),
 		Value: items[index][2],
 	}
 }
 
-func cleanName(name string) string {
-	return strings.Trim(strings.TrimSpace(name), "<>")
+func cleanName(name []byte) []byte {
+	return bytes.Trim(bytes.TrimSpace(name), "<>")
 }

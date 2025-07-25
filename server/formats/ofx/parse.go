@@ -1,6 +1,7 @@
 package ofx
 
 import (
+	"bytes"
 	"encoding/xml"
 	"io"
 	"regexp"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/elliotcourant/gofx"
 	"github.com/pkg/errors"
+	"golang.org/x/text/encoding/ianaindex"
 )
 
 var (
@@ -20,23 +22,40 @@ var (
 )
 
 func Parse(reader io.Reader) (*gofx.OFX, error) {
-	data, err := io.ReadAll(reader)
+	xmlBytes, err := io.ReadAll(reader)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read OFX buffer")
+		return nil, errors.Wrap(err, "failed to read all of the OFX data from the reader")
 	}
 
-	var ofx gofx.OFX
-	if originalErr := xml.Unmarshal(data, &ofx); originalErr != nil {
-		tokens, err := Tokenize(string(data))
+	ofx, err := parseInner(bytes.NewReader(xmlBytes))
+	if err != nil {
+		tokens, err := Tokenize(xmlBytes)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse")
 		}
-		xmlData := ConvertOFXToXML(tokens)
-		data = xmlData
-
-		if err := xml.Unmarshal(data, &ofx); err != nil {
+		xmlBytes = ConvertOFXToXML(tokens)
+		ofx, err = parseInner(bytes.NewReader(xmlBytes))
+		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse OFX")
 		}
+	}
+
+	return ofx, nil
+}
+
+func parseInner(reader io.Reader) (*gofx.OFX, error) {
+	var ofx gofx.OFX
+	decoder := xml.NewDecoder(reader)
+	decoder.CharsetReader = func(charset string, input io.Reader) (io.Reader, error) {
+		enc, err := ianaindex.IANA.Encoding(charset)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to decode charset %s", charset)
+		}
+
+		return enc.NewDecoder().Reader(input), nil
+	}
+	if err := decoder.Decode(&ofx); err != nil {
+		return nil, errors.Wrap(err, "failed to decode OFX file as XML")
 	}
 
 	return &ofx, nil
