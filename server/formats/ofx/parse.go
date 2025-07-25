@@ -1,6 +1,7 @@
 package ofx
 
 import (
+	"bytes"
 	"encoding/xml"
 	"io"
 	"regexp"
@@ -21,6 +22,28 @@ var (
 )
 
 func Parse(reader io.Reader) (*gofx.OFX, error) {
+	xmlBytes, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to read all of the OFX data from the reader")
+	}
+
+	ofx, err := parseInner(bytes.NewReader(xmlBytes))
+	if err != nil {
+		tokens, err := Tokenize(xmlBytes)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to parse")
+		}
+		xmlBytes = ConvertOFXToXML(tokens)
+		ofx, err = parseInner(bytes.NewReader(xmlBytes))
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to parse OFX")
+		}
+	}
+
+	return ofx, nil
+}
+
+func parseInner(reader io.Reader) (*gofx.OFX, error) {
 	var ofx gofx.OFX
 	decoder := xml.NewDecoder(reader)
 	decoder.CharsetReader = func(charset string, input io.Reader) (io.Reader, error) {
@@ -31,18 +54,8 @@ func Parse(reader io.Reader) (*gofx.OFX, error) {
 
 		return enc.NewDecoder().Reader(input), nil
 	}
-	if originalErr := decoder.Decode(&ofx); originalErr != nil {
-		// TODO Fix the retokenization!
-		tokens, err := Tokenize(string(data))
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to parse")
-		}
-		xmlData := ConvertOFXToXML(tokens)
-		data = xmlData
-
-		if err := xml.Unmarshal(data, &ofx); err != nil {
-			return nil, errors.Wrap(err, "failed to parse OFX")
-		}
+	if err := decoder.Decode(&ofx); err != nil {
+		return nil, errors.Wrap(err, "failed to decode OFX file as XML")
 	}
 
 	return &ofx, nil

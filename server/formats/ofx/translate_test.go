@@ -11,7 +11,7 @@ import (
 func TestConvertOFXToXML(t *testing.T) {
 	t.Run("nfcu", func(t *testing.T) {
 		data := GetFixtures(t, "sample-nfcu.qfx")
-		token, err := Tokenize(string(data))
+		token, err := Tokenize(data)
 		assert.NoError(t, err)
 
 		xmlString := ConvertOFXToXML(token)
@@ -20,7 +20,7 @@ func TestConvertOFXToXML(t *testing.T) {
 
 	t.Run("nfcu wrapped", func(t *testing.T) {
 		data := GetFixtures(t, "sample-nfcu-wrapped.qfx")
-		token, err := Tokenize(string(data))
+		token, err := Tokenize(data)
 		assert.NoError(t, err)
 
 		xmlString := ConvertOFXToXML(token)
@@ -29,7 +29,7 @@ func TestConvertOFXToXML(t *testing.T) {
 
 	t.Run("us bank", func(t *testing.T) {
 		data := GetFixtures(t, "sample-usbank.qfx")
-		token, err := Tokenize(string(data))
+		token, err := Tokenize(data)
 		assert.NoError(t, err)
 
 		xmlString := ConvertOFXToXML(token)
@@ -40,7 +40,7 @@ func TestConvertOFXToXML(t *testing.T) {
 func TestValidXMLOutput(t *testing.T) {
 	t.Run("nfcu", func(t *testing.T) {
 		data := GetFixtures(t, "sample-nfcu.qfx")
-		token, err := Tokenize(string(data))
+		token, err := Tokenize(data)
 		assert.NoError(t, err)
 
 		convertedToXml := ConvertOFXToXML(token)
@@ -54,7 +54,7 @@ func TestValidXMLOutput(t *testing.T) {
 
 	t.Run("nfcu wrapped", func(t *testing.T) {
 		data := GetFixtures(t, "sample-nfcu-wrapped.qfx")
-		token, err := Tokenize(string(data))
+		token, err := Tokenize(data)
 		assert.NoError(t, err)
 
 		convertedToXml := ConvertOFXToXML(token)
@@ -68,7 +68,7 @@ func TestValidXMLOutput(t *testing.T) {
 
 	t.Run("us bank", func(t *testing.T) {
 		data := GetFixtures(t, "sample-usbank.qfx")
-		token, err := Tokenize(string(data))
+		token, err := Tokenize(data)
 		assert.NoError(t, err)
 
 		convertedToXml := ConvertOFXToXML(token)
