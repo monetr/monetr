@@ -99,4 +99,24 @@ func TestParse(t *testing.T) {
 		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
 		assert.NotNil(t, result.BANKMSGSRSV1, "bank message response must not be nil")
 	})
+
+	t.Run("non-utf8 OFX", func(t *testing.T) {
+		reader := bytes.NewReader(GetFixtures(t, "sample-non-utf8.qfx"))
+
+		result, err := Parse(reader)
+		assert.NoError(t, err, "must not return an error parsing known valid file")
+		assert.NotNil(t, result, "resulting OFX object should not be nil")
+		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
+		assert.NotNil(t, result.BANKMSGSRSV1, "bank message response must not be nil")
+	})
+
+	t.Run("non-utf8 XML", func(t *testing.T) {
+		reader := bytes.NewReader(GetFixtures(t, "sample-non-utf8-xml.qfx"))
+
+		result, err := Parse(reader)
+		assert.NoError(t, err, "must not return an error parsing known valid file")
+		assert.NotNil(t, result, "resulting OFX object should not be nil")
+		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
+		assert.NotNil(t, result.BANKMSGSRSV1, "bank message response must not be nil")
+	})
 }
