@@ -61,7 +61,7 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 		"Syncing with Plaid",
 		"failed to sync data with Plaid",
 	); err != nil {
-		log.WithError(err).Error("failed to sync data with Plaid")
+		log.WithError(err).Warn("failed to sync data with Plaid")
 		return nil, err
 	}
 	span.SetTag("plaid.requestId", result.GetRequestId())
