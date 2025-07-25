@@ -29,14 +29,16 @@ const filename = isDevelopment ? '[name]' : '[contenthash:8]';
 export default defineConfig({
   mode: isDevelopment ? 'development' : 'production',
   source: {
-    alias: {
-      '@monetr/interface': interfaceSource,
-    },
     define: {
       CONFIG: JSON.stringify({}),
       REVISION: JSON.stringify(process.env.RELEASE_REVISION),
       RELEASE: JSON.stringify(version),
       NODE_VERSION: process.version,
+    },
+  },
+  resolve: {
+    alias: {
+      '@monetr/interface': interfaceSource,
     },
   },
   dev: {
