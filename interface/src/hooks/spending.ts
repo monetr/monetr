@@ -37,7 +37,7 @@ export function useSpending(spendingId: string | null): UseQueryResult<Spending>
  */
 export function useSpendingOld(spendingId?: string): Spending | null {
   const { data } = useSpendings();
-  if (!spendingId) {
+  if (!spendingId || !data) {
     return null;
   }
 
@@ -48,7 +48,7 @@ export function useSpendingFiltered(kind: SpendingType): SpendingResult {
   const base = useSpendings();
   return {
     ...base,
-    result: base.data.filter(item => item.spendingType === kind),
+    result: base.data?.filter(item => item.spendingType === kind),
   };
 }
 
