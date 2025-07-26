@@ -11,7 +11,7 @@ interface PlaidInstitutionLogoProps {
 }
 
 export default function PlaidInstitutionLogo(props: PlaidInstitutionLogoProps): JSX.Element {
-  const { result: institution } = useInstitution(props.link?.plaidLink?.institutionId);
+  const { data: institution } = useInstitution(props.link?.plaidLink?.institutionId);
 
   if (!institution?.logo) {
     return (

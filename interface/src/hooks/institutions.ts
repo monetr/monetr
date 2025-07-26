@@ -2,17 +2,13 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import Institution from '@monetr/interface/models/Institution';
 
-export type InstitutionResult =
-  { result: Institution }
-  & UseQueryResult<Partial<Institution>>;
-
-export function useInstitution(institutionId: string | null): InstitutionResult {
-  const result = useQuery<{ logo: string }>([`/institutions/${ institutionId }`], {
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    enabled: Boolean(institutionId),
-  });
-  return {
-    ...result,
-    result: new Institution(result.data),
-  };
+export function useInstitution(institutionId: string | null): UseQueryResult<Institution> {
+  return useQuery<Partial<Institution>, unknown, Institution>(
+    [`/institutions/${ institutionId }`],
+    {
+      staleTime: 30 * 60 * 1000, // 30 minutes
+      enabled: Boolean(institutionId),
+      select: data => new Institution(data),
+    },
+  );
 }

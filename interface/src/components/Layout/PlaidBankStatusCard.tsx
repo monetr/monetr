@@ -12,7 +12,7 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
  */
 export default function PlaidBankStatusCard(): JSX.Element {
   const { data: link } = useCurrentLink();
-  const { result: institution } = useInstitution(link?.plaidLink?.institutionId);
+  const { data: institution } = useInstitution(link?.plaidLink?.institutionId);
 
   if (!link?.plaidLink) {
     return null;
