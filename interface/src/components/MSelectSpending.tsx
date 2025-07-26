@@ -6,7 +6,7 @@ import { useFormikContext } from 'formik';
 import MBadge from './MBadge';
 import MSelect, { MSelectProps } from './MSelect';
 import MSpan from './MSpan';
-import { useCurrentBalanceOld } from '@monetr/interface/hooks/balances';
+import { useCurrentBalance } from '@monetr/interface/hooks/balances';
 import { useSpendings } from '@monetr/interface/hooks/spending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
@@ -30,7 +30,7 @@ const FREE_TO_USE = 'spnd_freeToUse';
 export default function MSelectSpending(props: MSelectSpendingProps): JSX.Element {
   const formikContext = useFormikContext();
   const { data: spending, isLoading, isError } = useSpendings();
-  const balances = useCurrentBalanceOld();
+  const { data: balances } = useCurrentBalance();
 
   props = {
     label: 'Spent From',

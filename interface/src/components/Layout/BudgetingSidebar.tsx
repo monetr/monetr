@@ -14,7 +14,7 @@ import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
 import { ReactElement } from '@monetr/interface/components/types';
-import { useCurrentBalanceOld } from '@monetr/interface/hooks/balances';
+import { useCurrentBalance } from '@monetr/interface/hooks/balances';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useNextFundingDate } from '@monetr/interface/hooks/fundingSchedules';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -28,7 +28,7 @@ export interface BudgetingSidebarProps {
 export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const { data: bankAccount, isError } = useSelectedBankAccount();
-  const balance = useCurrentBalanceOld();
+  const { data: balance } = useCurrentBalance();
 
 
   const className = mergeTailwind(

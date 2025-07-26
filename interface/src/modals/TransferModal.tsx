@@ -12,7 +12,7 @@ import { MLabelDecoratorProps } from '@monetr/interface/components/MLabel';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
-import { useCurrentBalanceOld } from '@monetr/interface/hooks/balances';
+import { useCurrentBalance } from '@monetr/interface/hooks/balances';
 import { useSpendings, useTransfer } from '@monetr/interface/hooks/spending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { AmountType } from '@monetr/interface/util/amounts';
@@ -196,7 +196,7 @@ function TransferSelectDecorator(props: MLabelDecoratorProps): JSX.Element {
   const formik = useFormikContext<TransferValues>();
   const value = formik.values[props.name];
   const { data: spending } = useSpendings();
-  const balances = useCurrentBalanceOld();
+  const { data: balances } = useCurrentBalance();
 
   // If we are working with the free to use amount.
   if (!value || value === -1) {
