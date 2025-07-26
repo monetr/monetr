@@ -259,6 +259,17 @@ Tests can be run using the `go test` CLI, or all tests can be run using:
 make test
 ```
 
+If needed, you can also specify a concurrency or a pattern of tests that should be run using a combination of the
+following Make arguments.
+
+```shell filename="Shell"
+make test CONCURRENCY=16 PATTERN=interface
+```
+
+`PATTERN` will restrict tests to the pattern specified based on the name of the test. Where as `CONCURRENCY` will limit
+the maximum number of tests to run at the same time. **Note**: Interface/UI tests do not necessarily run at the max
+concurrency as those tests will consume more than a single CPU core.
+
 ### Storybook
 
 monetr now provides a storybook setup for working on UI components outside of running the entire application locally. To
