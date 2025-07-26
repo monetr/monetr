@@ -54,7 +54,9 @@ var (
 	_ BankAccountBalances = PlaidBankAccountBalances{}
 )
 
-func NewPlaidBankAccountBalances(balances plaid.AccountBalance) (PlaidBankAccountBalances, error) {
+func NewPlaidBankAccountBalances(
+	balances plaid.AccountBalance,
+) (PlaidBankAccountBalances, error) {
 	available, _ := currency.ParseFloatToAmount(
 		balances.GetAvailable(),
 		balances.GetIsoCurrencyCode(),
@@ -69,8 +71,8 @@ func NewPlaidBankAccountBalances(balances plaid.AccountBalance) (PlaidBankAccoun
 	)
 
 	return PlaidBankAccountBalances{
-		// We work with all amounts in cents. So we need to convert all balances to cents in order to make them whole
-		// integers rather than floats.
+		// We work with all amounts in cents. So we need to convert all balances to
+		// cents in order to make them whole integers rather than floats.
 		Available:              available,
 		Current:                current,
 		Limit:                  limit,
@@ -111,7 +113,9 @@ var (
 	_ BankAccount = PlaidBankAccount{}
 )
 
-func NewPlaidBankAccount(bankAccount plaid.AccountBase) (PlaidBankAccount, error) {
+func NewPlaidBankAccount(
+	bankAccount plaid.AccountBase,
+) (PlaidBankAccount, error) {
 	balances, err := NewPlaidBankAccountBalances(bankAccount.GetBalances())
 	if err != nil {
 		return PlaidBankAccount{}, err

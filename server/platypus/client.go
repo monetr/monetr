@@ -136,7 +136,11 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 	return accounts, nil
 }
 
-func (p *PlaidClient) GetAllTransactions(ctx context.Context, start, end time.Time, accountIds []string) ([]Transaction, error) {
+func (p *PlaidClient) GetAllTransactions(
+	ctx context.Context,
+	start, end time.Time,
+	accountIds []string,
+) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -144,16 +148,21 @@ func (p *PlaidClient) GetAllTransactions(ctx context.Context, start, end time.Ti
 
 	transactions := make([]Transaction, 0)
 
-	var perPage int32 = 500
+	var limit int32 = 500
 	var offset int32 = 0
 	for {
-		someTransactions, err := p.GetTransactions(span.Context(), start, end, perPage, offset, accountIds)
+		someTransactions, err := p.GetTransactions(
+			span.Context(),
+			start, end,
+			limit, offset,
+			accountIds,
+		)
 		if err != nil {
 			return nil, err
 		}
 
 		transactions = append(transactions, someTransactions...)
-		if retrieved := int32(len(someTransactions)); retrieved == perPage {
+		if retrieved := int32(len(someTransactions)); retrieved == limit {
 			offset += retrieved
 			continue
 		}
@@ -164,7 +173,12 @@ func (p *PlaidClient) GetAllTransactions(ctx context.Context, start, end time.Ti
 	return transactions, nil
 }
 
-func (p *PlaidClient) GetTransactions(ctx context.Context, start, end time.Time, count, offset int32, bankAccountIds []string) ([]Transaction, error) {
+func (p *PlaidClient) GetTransactions(
+	ctx context.Context,
+	start, end time.Time,
+	count, offset int32,
+	bankAccountIds []string,
+) ([]Transaction, error) {
 	span := sentry.StartSpan(ctx, "http.client")
 	defer span.Finish()
 	span.Description = "Plaid - GetTransactions"
@@ -220,7 +234,10 @@ func (p *PlaidClient) GetTransactions(ctx context.Context, start, end time.Time,
 	return transactions, nil
 }
 
-func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection bool) (LinkToken, error) {
+func (p *PlaidClient) UpdateItem(
+	ctx context.Context,
+	updateAccountSelection bool,
+) (LinkToken, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -232,7 +249,9 @@ func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection boo
 	if p.config.OAuthDomain != "" {
 		// Normally we would substitute the configured protocol, but Plaid _requires_ that we use HTTPS for oauth callbacks.
 		// So if the monetr server is not configured for TLS that sucks because this won't work.
-		redirectUri = myownsanity.StringP(fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain))
+		redirectUri = myownsanity.StringP(fmt.Sprintf(
+			"https://%s/plaid/oauth-return", p.config.OAuthDomain,
+		))
 		log = log.WithField("redirectUri", *redirectUri)
 	}
 

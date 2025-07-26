@@ -11,7 +11,9 @@ type ItemToken struct {
 	ItemId      string
 }
 
-func NewItemTokenFromPlaid(input plaid.ItemPublicTokenExchangeResponse) (ItemToken, error) {
+func NewItemTokenFromPlaid(
+	input plaid.ItemPublicTokenExchangeResponse,
+) (ItemToken, error) {
 	return ItemToken{
 		AccessToken: input.GetAccessToken(),
 		ItemId:      input.GetItemId(),

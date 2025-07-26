@@ -14,14 +14,21 @@ var (
 	_ http.RoundTripper = &ObservabilityRoundTripper{}
 )
 
-type Handler func(ctx context.Context, request *http.Request, response *http.Response, err error)
+type Handler func(
+	ctx context.Context,
+	request *http.Request,
+	response *http.Response,
+	err error,
+)
 
 type ObservabilityRoundTripper struct {
 	handler Handler
 	inner   http.RoundTripper
 }
 
-func (o *ObservabilityRoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
+func (o *ObservabilityRoundTripper) RoundTrip(
+	request *http.Request,
+) (*http.Response, error) {
 	span := sentry.StartSpan(request.Context(), "http.client")
 	defer span.Finish()
 	span.Description = fmt.Sprintf("%s %s", strings.ToUpper(request.Method), request.URL.String())
@@ -65,7 +72,10 @@ func (o *ObservabilityRoundTripper) RoundTrip(request *http.Request) (*http.Resp
 	return response, err
 }
 
-func NewObservabilityRoundTripper(inner http.RoundTripper, handler Handler) http.RoundTripper {
+func NewObservabilityRoundTripper(
+	inner http.RoundTripper,
+	handler Handler,
+) http.RoundTripper {
 	return &ObservabilityRoundTripper{
 		handler: handler,
 		inner:   inner,
