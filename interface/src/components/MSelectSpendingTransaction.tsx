@@ -5,7 +5,7 @@ import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 import MBadge from './MBadge';
 import MSpan from './MSpan';
 import { useCurrentBalanceOld } from '@monetr/interface/hooks/balances';
-import { useSpendingSink } from '@monetr/interface/hooks/spending';
+import { useSpendings } from '@monetr/interface/hooks/spending';
 import { useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTheme from '@monetr/interface/hooks/useTheme';
@@ -22,7 +22,7 @@ export interface MSelectSpendingTransactionProps {
 
 export default function MSelectSpendingTransaction(props: MSelectSpendingTransactionProps): JSX.Element {
   const { transaction } = props;
-  const { result: allSpending, isLoading: spendingIsLoading } = useSpendingSink();
+  const { data: allSpending, isLoading: spendingIsLoading } = useSpendings();
   const balances = useCurrentBalanceOld();
   const updateTransaction = useUpdateTransaction();
   const theme = useTheme();

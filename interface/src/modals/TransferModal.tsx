@@ -13,7 +13,7 @@ import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useCurrentBalanceOld } from '@monetr/interface/hooks/balances';
-import { useSpendingSink, useTransfer } from '@monetr/interface/hooks/spending';
+import { useSpendings, useTransfer } from '@monetr/interface/hooks/spending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { AmountType } from '@monetr/interface/util/amounts';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
@@ -41,7 +41,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
   const ref = useRef<MModalRef>(null);
   const transfer = useTransfer();
   const { enqueueSnackbar } = useSnackbar();
-  const { result: spending } = useSpendingSink();
+  const { data: spending } = useSpendings();
 
   const validate = useCallback((values: TransferValues): FormikErrors<TransferValues> => {
     const errors: FormikErrors<TransferValues> = {};
@@ -195,7 +195,7 @@ function ReverseTargetsButton(): JSX.Element {
 function TransferSelectDecorator(props: MLabelDecoratorProps): JSX.Element {
   const formik = useFormikContext<TransferValues>();
   const value = formik.values[props.name];
-  const { result: spending } = useSpendingSink();
+  const { data: spending } = useSpendings();
   const balances = useCurrentBalanceOld();
 
   // If we are working with the free to use amount.

@@ -9,18 +9,15 @@ export type SpendingResult =
   { result: Array<Spending> }
   & UseQueryResult<Array<Partial<Spending>>>;
 
-export function useSpendingSink(): SpendingResult {
+export function useSpendings(): UseQueryResult<Array<Spending>> {
   const selectedBankAccountId = useSelectedBankAccountId();
-  const result = useQuery<Array<Partial<Spending>>>(
+  return useQuery<Array<Partial<Spending>>, unknown, Array<Spending>>(
     [`/bank_accounts/${ selectedBankAccountId }/spending`],
     {
       enabled: !!selectedBankAccountId,
+      select: data => data?.map(item => new Spending(item)) ?? [],
     },
   );
-  return {
-    ...result,
-    result: (result?.data || []).map(item => new Spending(item)),
-  };
 }
 
 export function useSpending(spendingId: string | null): UseQueryResult<Spending> {
@@ -39,19 +36,19 @@ export function useSpending(spendingId: string | null): UseQueryResult<Spending>
  * selected bank account.
  */
 export function useSpendingOld(spendingId?: string): Spending | null {
-  const { result } = useSpendingSink();
+  const { data } = useSpendings();
   if (!spendingId) {
     return null;
   }
 
-  return result.find(item => item.spendingId === spendingId) || null;
+  return data.find(item => item.spendingId === spendingId) || null;
 }
 
 export function useSpendingFiltered(kind: SpendingType): SpendingResult {
-  const base = useSpendingSink();
+  const base = useSpendings();
   return {
     ...base,
-    result: base.result.filter(item => item.spendingType === kind),
+    result: base.data.filter(item => item.spendingType === kind),
   };
 }
 
