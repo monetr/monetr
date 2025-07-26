@@ -5,7 +5,7 @@
   "scripts": {
     "build": "rsbuild build --mode=production",
     "start": "MONETR_ENV=${MONETR_ENV:=local} rsbuild dev",
-    "lite": "MONETR_ENV=${MONETR_ENV:=local} MONETR_DEVELOPMENT_LITE=true rsbuild dev",
+    "lite": "MONETR_ENV=${MONETR_ENV:=local} MONETR_DEVELOPMENT_LITE=true rsbuild dev"
   },
   "browserslist": {
     "production": [
