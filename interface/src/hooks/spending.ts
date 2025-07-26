@@ -15,7 +15,9 @@ export function useSpendings(): UseQueryResult<Array<Spending>> {
     [`/bank_accounts/${ selectedBankAccountId }/spending`],
     {
       enabled: !!selectedBankAccountId,
-      select: data => data?.map(item => new Spending(item)) ?? [],
+      initialData: [],
+      initialDataUpdatedAt: undefined,
+      select: data => (data || []).map(item => new Spending(item)),
     },
   );
 }
@@ -41,14 +43,14 @@ export function useSpendingOld(spendingId?: string): Spending | null {
     return null;
   }
 
-  return data.find(item => item.spendingId === spendingId) || null;
+  return data?.find(item => item.spendingId === spendingId) || null;
 }
 
 export function useSpendingFiltered(kind: SpendingType): SpendingResult {
   const base = useSpendings();
   return {
     ...base,
-    result: base.data?.filter(item => item.spendingType === kind),
+    result: base.data?.filter(item => item.spendingType === kind) || [],
   };
 }
 
