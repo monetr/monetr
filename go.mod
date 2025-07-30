@@ -45,7 +45,7 @@ require (
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/mock v0.5.2
 	golang.org/x/crypto v0.40.0
-	golang.org/x/net v0.41.0
+	golang.org/x/net v0.42.0
 	golang.org/x/sys v0.34.0
 	google.golang.org/api v0.211.0
 	google.golang.org/genproto v0.0.0-20241118233622-e639e219e697
