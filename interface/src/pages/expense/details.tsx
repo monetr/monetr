@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { HeartBroken, PriceCheckOutlined } from '@mui/icons-material';
+import { HeartBroken } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { tz } from '@date-fns/tz';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikHelpers } from 'formik';
-import { ArrowUpDown, Save, Trash } from 'lucide-react';
+import { ArrowUpDown, Receipt, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import ExpenseTimeline from './ExpenseTimeline';
@@ -170,7 +170,7 @@ export default function ExpenseDetails(): JSX.Element {
   return (
     <MForm initialValues={ initialValues } onSubmit={ submit } className='flex w-full h-full flex-col'>
       <MTopNavigation
-        icon={ PriceCheckOutlined }
+        icon={ Receipt }
         title='Expenses'
         base={ `/bank/${spending.bankAccountId}/expenses` }
         breadcrumb={ spending?.name }
