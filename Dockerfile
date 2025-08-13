@@ -52,18 +52,4 @@ VOLUME ["/etc/monetr"]
 ENTRYPOINT ["/usr/bin/monetr"]
 CMD ["serve"]
 
-# Build args need to be present in each "FROM"
-ARG REVISION
-ARG RELEASE
-
-LABEL org.opencontainers.image.url=https://monetr.app
-LABEL org.opencontainers.image.source=https://github.com/monetr/monetr
-LABEL org.opencontainers.image.authors=elliot.courant@monetr.app
-LABEL org.opencontainers.image.vendor="monetr"
-LABEL org.opencontainers.image.licenses="FSL-1.1-MIT"
-LABEL org.opencontainers.image.title="monetr"
-LABEL org.opencontainers.image.description="monetr's budgeting application"
-LABEL org.opencontainers.image.version=${RELEASE}
-LABEL org.opencontainers.image.revision=${REVISION}
-
 COPY --from=monetr_builder /monetr/build/monetr /usr/bin/monetr

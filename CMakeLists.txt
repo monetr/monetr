@@ -80,7 +80,7 @@ if(DOCKER_EXECUTABLE)
     endforeach()
   endforeach()
 
-  set(DOCKER_CONTAINER ${CMAKE_BINARY_DIR}/docker-container-marker.txt)
+  set(DOCKER_CONTAINER ${CMAKE_BINARY_DIR}/docker-build-manifest.json)
   add_custom_command(
     OUTPUT ${DOCKER_CONTAINER}
     BYPRODUCTS ${DOCKER_CONTAINER}
@@ -104,6 +104,15 @@ if(DOCKER_EXECUTABLE)
         --build-arg RELEASE=$(RELEASE_VERSION)
         --build-arg REVISION=$(RELEASE_REVISION)
         --build-arg BUILD_HOST=${HOSTNAME}
+        --metadata-file ${DOCKER_CONTAINER}
+        --label "index:org.opencontainers.image.url=https://monetr.app"
+        --label "index:org.opencontainers.image.source=https://github.com/monetr/monetr"
+        --label "index:org.opencontainers.image.authors=elliot.courant@monetr.app"
+        --label "index:org.opencontainers.image.vendor=monetr"
+        --label "index:org.opencontainers.image.licenses=FSL-1.1-MIT"
+        --label "index:org.opencontainers.image.description=monetr's budgeting application"
+        --label "index:org.opencontainers.image.version=$(RELEASE_VERSION)"
+        --label "index:org.opencontainers.image.revision=$(RELEASE_REVISION)"
         --annotation "index:org.opencontainers.image.url=https://monetr.app"
         --annotation "index:org.opencontainers.image.source=https://github.com/monetr/monetr"
         --annotation "index:org.opencontainers.image.authors=elliot.courant@monetr.app"
@@ -120,7 +129,7 @@ if(DOCKER_EXECUTABLE)
     DEPENDS ${DOCKER_CONTAINER}
   )
 
-  set(DOCKER_CONTAINER_PUSH ${CMAKE_BINARY_DIR}/docker-container-push-marker.txt)
+  set(DOCKER_CONTAINER_PUSH ${CMAKE_BINARY_DIR}/docker-container-push-manifest.json)
   add_custom_command(
     OUTPUT ${DOCKER_CONTAINER_PUSH}
     BYPRODUCTS ${DOCKER_CONTAINER_PUSH}
@@ -145,6 +154,15 @@ if(DOCKER_EXECUTABLE)
         --build-arg RELEASE=$(RELEASE_VERSION)
         --build-arg REVISION=$(RELEASE_REVISION)
         --build-arg BUILD_HOST=${HOSTNAME}
+        --metadata-file ${DOCKER_CONTAINER_PUSH}
+        --label "index:org.opencontainers.image.url=https://monetr.app"
+        --label "index:org.opencontainers.image.source=https://github.com/monetr/monetr"
+        --label "index:org.opencontainers.image.authors=elliot.courant@monetr.app"
+        --label "index:org.opencontainers.image.vendor=monetr"
+        --label "index:org.opencontainers.image.licenses=FSL-1.1-MIT"
+        --label "index:org.opencontainers.image.description=monetr's budgeting application"
+        --label "index:org.opencontainers.image.version=$(RELEASE_VERSION)"
+        --label "index:org.opencontainers.image.revision=$(RELEASE_REVISION)"
         --annotation "index:org.opencontainers.image.url=https://monetr.app"
         --annotation "index:org.opencontainers.image.source=https://github.com/monetr/monetr"
         --annotation "index:org.opencontainers.image.authors=elliot.courant@monetr.app"
