@@ -17,7 +17,7 @@ export default function useTimezone(): UseQueryResult<string, never> {
         },
       },
     }) as Partial<AuthenticationWrapper>,
-    initialDataUpdatedAt: undefined,
+    initialDataUpdatedAt: 0,
     select: data => data?.user?.account?.timezone ?? getTimezone(),
   });
 }

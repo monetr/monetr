@@ -16,7 +16,7 @@ export function useSpendings(): UseQueryResult<Array<Spending>> {
     {
       enabled: !!selectedBankAccountId,
       initialData: [],
-      initialDataUpdatedAt: undefined,
+      initialDataUpdatedAt: 0,
       select: data => (data || []).map(item => new Spending(item)),
     },
   );
