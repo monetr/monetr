@@ -27,8 +27,8 @@ const (
 )
 
 type Configuration struct {
-	// configFile is not an actual configuration variable, but is used to let usages know what file was loaded for the
-	// configuration.
+	// configFile is not an actual configuration variable, but is used to let
+	// usages know what file was loaded for the configuration.
 	configFile string `yaml:"-"`
 
 	Environment   string        `yaml:"environment"`
@@ -55,21 +55,22 @@ func (c Configuration) GetConfigFileName() string {
 }
 
 type Storage struct {
-	// Enabled controls whether or not monetr can actually store files. If this is disabled then some monetr features will
-	// not be available. These features include things like file imports for transactions.
+	// Enabled controls whether or not monetr can actually store files. If this is
+	// disabled then some monetr features will not be available. These features
+	// include things like file imports for transactions.
 	Enabled bool `yaml:"enabled"`
-	// Provider specifies which storage backend monetr should use. Allowed values are:
+	// Provider specifies which storage backend monetr should use. Allowed values
+	// are:
 	// - `s3`
-	// - `gcs`
 	// - `filesystem`
-	// Note: If you use the filesystem backend you cannot run multiple monetr servers. Even if the filesystem is shared
-	// between the instances via something like NFS; it can cause unpredictable behavior. It is recommended to use GCS or
-	// S3 backed storage when you are running multiple instances of monetr.
-	// If you are self-hosting monetr though as a single instance, then filesystem is the recommended storage backend for
-	// ease of use.
+	// Note: If you use the filesystem backend you cannot run multiple monetr
+	// servers. Even if the filesystem is shared between the instances via
+	// something like NFS; it can cause unpredictable behavior. It is recommended
+	// to use the S3 backed storage when you are running multiple instances of
+	// monetr. If you are self-hosting monetr though as a single instance, then
+	// filesystem is the recommended storage backend for ease of use.
 	Provider   string             `yaml:"provider"`
 	S3         *S3Storage         `yaml:"s3"`
-	GCS        *GCSStorage        `yaml:"gcs"`
 	Filesystem *FilesystemStorage `yaml:"filesystem"`
 }
 
@@ -82,11 +83,6 @@ type S3Storage struct {
 
 	Bucket         string `yaml:"bucket"`
 	ForcePathStyle bool   `yaml:"forcePathStyle"`
-}
-
-type GCSStorage struct {
-	Bucket          string  `yaml:"bucket"`
-	CredentialsJSON *string `yaml:"credentialsJSON"`
 }
 
 type FilesystemStorage struct {

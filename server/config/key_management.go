@@ -7,9 +7,6 @@ type KeyManagement struct {
 	// AWS provides configuration for using AWS's KMS for encrypting and
 	// decrypting secrets.
 	AWS AWSKMS `yaml:"aws"`
-	// Google provides configuration for using Google's KMS for encrypting and
-	// decrypting secrets.
-	Google GoogleKMS `yaml:"google"`
 	// Vault provides configuration for using Vault's Transit API for encrypting
 	// and decrypting secrets.
 	Vault VaultTransit `yaml:"vault"`
@@ -22,11 +19,6 @@ type AWSKMS struct {
 	SecretKey string  `yaml:"secretKey"`
 
 	KeyID string `yaml:"keyID"`
-}
-
-type GoogleKMS struct {
-	ResourceName    string  `yaml:"resourceName"`
-	CredentialsJSON *string `yaml:"credentialsJSON"`
 }
 
 type VaultTransit struct {

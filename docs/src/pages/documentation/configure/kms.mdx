@@ -1,5 +1,6 @@
 ---
 title: "Key Management"
+description: Configure your self hosted monetr instance to encrypt secrets using an encryption service such as Vault or AWS KMS.
 ---
 
 import { Callout } from 'nextra/components'
@@ -13,9 +14,8 @@ To that end, monetr supports a few different providers. An outline of the config
 
 ```yaml filename="config.yaml"
 keyManagement:
-  provider: "<plaintext|aws|google|vault>" # KMS provider, must be one of these values
+  provider: "<plaintext|aws|vault>" # KMS provider, must be one of these values
   aws: { ... }    # AWS KMS specific configuration, only used when `provider: aws`
-  google: { ... } # Google Cloud KMS specific configuration, only used when `provider: google`
   vault: { ... }  # Hashicorp Vault configuration, only used when `provider: vault`
 ```
 
@@ -54,28 +54,6 @@ keyManagement:
 | `secretKey` | String   |             | The Secret Key that monetr should use to access the AWS KMS API.                                                                                                                                                                          |
 | `keyID`     | String   |             | The actual Key ID in AWS, this must be the ID of the key to use for encryption and decryption and should not be changed. If this ID is changed then values encrypted with another key will not be able to be decrypted with this new key. |
 | `endpoint`  | String   | `null`      | The AWS KMS API endpoint, this is intended to be used only for local development environments.                                                                                                                                            |
-
-## Google Cloud KMS Configuration
-
-Google Cloud KMS is also supported for encryption/decryption of secrets in monetr. It will require service account
-credentials in the form of a JSON file. However if you are running monetr within Google Cloud, you can typically inject
-the service account credentials directly into the VM or the GKE container. Documentation on obtaining credentials
-magically via Google Cloud will not be provided here.
-
-```yaml filename="config.yaml"
-keyManagement:
-  google:
-    resourceName: "projects/project-12345/locations/us/keyRings/your-keyring-12345/cryptoKeys/your-crypto-key-12345"
-    credentialsJSON: "/home/monetr/.config/gcloud/application_default_credentials.json" # Example path
-```
-
-| **Name**          | **Type** | **Default** | **Description**                                                                                                                                                                                                |
-| ----------------- | -------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `resourceName`    | String   |             | The name of the actual keyring to use for encryption and decryption. This cannot be changed later as previously encrypted secrets cannot be decrypted with a different keyring.                                |
-| `credentialsJSON` | String   | `null`      | If you want to load credentials for your service account via a JSON file, specify the path to that file here. If left blank the Google Cloud SDK will look in default locations on the system for credentials. |
-
-More information on how credentials in Google Cloud can be found here: [How Application Default Credentials
-works](https://cloud.google.com/docs/authentication/application-default-credentials)
 
 ## Vault Transit Configuration
 
