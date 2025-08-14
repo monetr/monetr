@@ -64,7 +64,8 @@ export const pageMap = [{
       name: "kms",
       route: "/documentation/configure/kms",
       frontMatter: {
-        "title": "Key Management"
+        "title": "Key Management",
+        "description": "Configure your self hosted monetr instance to encrypt secrets using an encryption service such as Vault or AWS KMS."
       }
     }, {
       name: "links",
