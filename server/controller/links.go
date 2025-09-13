@@ -218,10 +218,14 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		}
 	}
 
-	if err = background.TriggerRemoveLink(c.getContext(ctx), c.JobRunner, background.RemoveLinkArguments{
-		AccountId: link.AccountId,
-		LinkId:    link.LinkId,
-	}); err != nil {
+	if err = background.TriggerRemoveLink(
+		c.getContext(ctx),
+		c.JobRunner,
+		background.RemoveLinkArguments{
+			AccountId: link.AccountId,
+			LinkId:    link.LinkId,
+		},
+	); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to enqueue link removal job")
 	}
 

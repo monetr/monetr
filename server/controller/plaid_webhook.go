@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-pg/pg/v10"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/background"
@@ -165,10 +166,17 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 		crumbs.Error(c.getContext(ctx),
 			"Failed to retrieve a link for the item Id provided by the Plaid webhook.",
 			"plaid",
-			map[string]interface{}{
+			map[string]any{
 				"itemId": hook.ItemId,
 			},
 		)
+
+		// If the link is not even in the database then there is nothing to be done.
+		if errors.Is(err, pg.ErrNoRows) {
+			log.WithError(err).Warn("link is not in database, webhook cannot be handled")
+			return nil
+		}
+
 		log.WithError(err).Errorf("failed to retrieve link for item Id in webhook")
 		return err
 	}
@@ -184,7 +192,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 		crumbs.AddTag(c.getContext(ctx), "plaid.institution_id", link.PlaidLink.InstitutionId)
 	} else {
 		// If we don't have it for some reason, indicate that there is a bug.
-		crumbs.IndicateBug(c.getContext(ctx), "Plaid link should be in scope when retrieved by Plaid item ID", map[string]interface{}{
+		crumbs.IndicateBug(c.getContext(ctx), "Plaid link should be in scope when retrieved by Plaid item ID", map[string]any{
 			"itemId": hook.ItemId,
 			"link":   link,
 		})

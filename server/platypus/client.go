@@ -310,9 +310,11 @@ func (p *PlaidClient) RemoveItem(ctx context.Context) error {
 
 	span.SetTag("itemId", p.itemId)
 
-	log := p.getLog(span)
+	log := p.getLog(span).WithFields(logrus.Fields{
+		"itemId": p.itemId,
+	})
 
-	log.Trace("removing item")
+	log.Debug("removing item from Plaid")
 
 	// Build the get accounts request.
 	request := p.client.PlaidApi.
