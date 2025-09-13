@@ -5,9 +5,12 @@ import (
 	"encoding/xml"
 	"io"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/elliotcourant/gofx"
+	"github.com/monetr/monetr/server/currency"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
 	"golang.org/x/text/encoding/ianaindex"
 )
@@ -86,4 +89,27 @@ func ParseDate(input string, timezone *time.Location) (time.Time, error) {
 	// reading this code and you see this error please open a bug issue on github
 	// so we can add support for more date formats.
 	return time.Time{}, errors.Errorf("failed to parse OFX timestamp [%s], unknown format", input)
+}
+
+func ParseAmount(
+	transaction gofx.StatementTransaction,
+	txnCurrency string,
+) (int64, error) {
+
+	amount, err := currency.ParseFriendlyToAmount(
+		transaction.TRNAMT,
+		txnCurrency,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	switch {
+	case strings.EqualFold(transaction.TRNTYPE, "DEBIT"):
+		return myownsanity.Abs(amount), nil
+	case strings.EqualFold(transaction.TRNTYPE, "CREDIT"):
+		return myownsanity.Abs(amount) * -1, nil
+	default:
+		return amount, nil
+	}
 }

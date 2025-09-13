@@ -31,3 +31,8 @@ func Min[T Number](a, b T) T {
 
 	return b
 }
+
+func Abs(input int64) int64 {
+	mask := input >> 63
+	return (input ^ mask) - mask
+}
