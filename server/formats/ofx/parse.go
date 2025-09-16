@@ -91,11 +91,13 @@ func ParseDate(input string, timezone *time.Location) (time.Time, error) {
 	return time.Time{}, errors.Errorf("failed to parse OFX timestamp [%s], unknown format", input)
 }
 
-func ParseAmount(
+// ParseTransactionAmount takes an OFX transaction object and a currency code
+// and returns an int64 representing the amount as a whole number, or an error
+// if the value cannot be parsed.
+func ParseTransactionAmount(
 	transaction gofx.StatementTransaction,
 	txnCurrency string,
 ) (int64, error) {
-
 	amount, err := currency.ParseFriendlyToAmount(
 		transaction.TRNAMT,
 		txnCurrency,
@@ -108,6 +110,7 @@ func ParseAmount(
 	case strings.EqualFold(transaction.TRNTYPE, "DEBIT"):
 		return myownsanity.Abs(amount), nil
 	case strings.EqualFold(transaction.TRNTYPE, "CREDIT"):
+		// Credits are represented as negative in monetr.
 		return myownsanity.Abs(amount) * -1, nil
 	default:
 		return amount, nil
