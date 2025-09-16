@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elliotcourant/gofx"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/stretchr/testify/assert"
 )
@@ -118,5 +119,41 @@ func TestParse(t *testing.T) {
 		assert.NotNil(t, result, "resulting OFX object should not be nil")
 		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
 		assert.NotNil(t, result.BANKMSGSRSV1, "bank message response must not be nil")
+	})
+}
+
+func TestParseTransactionAmount(t *testing.T) {
+	t.Run("debit", func(t *testing.T) {
+		txn := gofx.StatementTransaction{
+			TRNTYPE: "DEBIT",
+			TRNAMT:  "-123.45",
+		}
+
+		result, err := ParseTransactionAmount(txn, "USD")
+		assert.NoError(t, err, "must be able to parse amount")
+		assert.EqualValues(t, 12345, result, "must be the expected amount")
+	})
+
+	t.Run("credit", func(t *testing.T) {
+		txn := gofx.StatementTransaction{
+			TRNTYPE: "CREDIT",
+			TRNAMT:  "123.45",
+		}
+
+		result, err := ParseTransactionAmount(txn, "USD")
+		assert.NoError(t, err, "must be able to parse amount")
+		assert.EqualValues(t, -12345, result, "must be the expected amount")
+	})
+
+	t.Run("other", func(t *testing.T) {
+		txn := gofx.StatementTransaction{
+			// Default to debit behavior if it cannot be handled normally.
+			TRNTYPE: "ATM",
+			TRNAMT:  "123.45",
+		}
+
+		result, err := ParseTransactionAmount(txn, "USD")
+		assert.NoError(t, err, "must be able to parse amount")
+		assert.EqualValues(t, 12345, result, "must be the expected amount")
 	})
 }
