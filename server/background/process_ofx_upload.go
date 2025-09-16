@@ -463,20 +463,19 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 		})
 
 		// Parse the amount in the specified currency.
-		amount, err := currency.ParseFriendlyToAmount(
-			externalTransaction.TRNAMT,
+		amount, err := ofx.ParseTransactionAmount(
+			externalTransaction,
 			j.currency,
 		)
 		if err != nil {
 			tlog.WithError(err).
-				WithField("trnamt", externalTransaction.TRNAMT).
+				WithFields(logrus.Fields{
+					"trntype": externalTransaction.TRNTYPE,
+					"trnamt":  externalTransaction.TRNAMT,
+				}).
 				Error("failed to parse transaction amount")
 			continue
 		}
-		// monetr uses negative amounts to represent deposits and positive to
-		// represent debits. This is the opposite of the file format, so we need
-		// to invert the amount.
-		amount = amount * -1
 
 		// Still need to figure out something to do with memo, but for now we can
 		// take the name and trim it. Memo seems to behave a bit differently from
