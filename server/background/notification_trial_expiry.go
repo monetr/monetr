@@ -12,6 +12,7 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
@@ -83,10 +84,18 @@ func (h *NotificationTrialExpiryHandler) EnqueueTriggeredJob(
 	cutoff := h.clock.Now().AddDate(0, 0, 5)
 
 	err := h.db.ModelContext(ctx, &accounts).
+		Join(`INNER JOIN "users" AS "user"`).
+		JoinOn(`"user"."account_id" = "account"."account_id"`).
+		Join(`INNER JOIN "logins" AS "login"`).
+		JoinOn(`"login"."login_id" = "user"."login_id"`).
 		Where(`"account"."trial_expiry_notification_sent_at" IS NULL`).
 		Where(`"account"."trial_ends_at" < ?`, cutoff).
 		// Make sure to exclude users who have subscribed before their trial ends.
 		Where(`"account"."subscription_active_until" IS NULL`).
+		// Only if there is an owner on the account.
+		Where(`"user"."role" = ?`, models.UserRoleOwner).
+		// Only if the owner has verified.
+		Where(`"login"."email_verified_at" IS NOT NULL`).
 		Select(&accounts)
 	if err != nil {
 		return errors.Wrap(err, "failed to query accounts who need a trial expiry notification")
