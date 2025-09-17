@@ -41,6 +41,11 @@ func TestNotificationTrialExpiryHandler_EnqueueTriggeredJob(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		login, _ := fixtures.GivenIHaveLogin(t, clock)
+		{ // Mark the login's email as verified
+			login.IsEmailVerified = true
+			login.EmailVerifiedAt = myownsanity.TimeP(clock.Now())
+			testutils.MustDBUpdate(t, &login)
+		}
 		user := fixtures.GivenIHaveATrialingAccount(t, clock, login)
 		config := config.Configuration{}
 		email := mockgen.NewMockEmailCommunication(ctrl)
