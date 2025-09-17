@@ -99,6 +99,63 @@ func TestNotificationTrialExpiryHandler_EnqueueTriggeredJob(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	t.Run("dont notify users who have not verified their email", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		login, _ := fixtures.GivenIHaveLogin(t, clock)
+		{ // Mark the login's email as verified
+			login.IsEmailVerified = false
+			login.EmailVerifiedAt = nil
+			testutils.MustDBUpdate(t, &login)
+		}
+		user := fixtures.GivenIHaveATrialingAccount(t, clock, login)
+		config := config.Configuration{}
+		email := mockgen.NewMockEmailCommunication(ctrl)
+		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+
+		assert.NotNil(t, user.Account, "need account to force trial scenario")
+		assert.NotNil(t, user.Account.TrialEndsAt, "trial ends at date must be present")
+		assert.Nil(t, user.Account.TrialExpiryNotificationSentAt, "trial notification email should be unsent")
+
+		handler := background.NewNotificationTrialExpiryHandler(
+			log,
+			db,
+			clock,
+			config,
+			email,
+		)
+
+		// First time, no notifications should be enqueued and we should not have an
+		// error.
+		err := handler.EnqueueTriggeredJob(context.Background(), enqueuer)
+		assert.NoError(t, err)
+
+		// Move time forward 26 days, the trial in the fixture is for 30 days; so we
+		// should now be within the notification window.
+		clock.Add(26 * 24 * time.Hour)
+
+		// But now we should see one call to enqueue the notification.
+		enqueuer.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				gomock.Eq(background.NotificationTrialExpiry),
+				testutils.NewGenericMatcher(func(args background.NotificationTrialExpiryArguments) bool {
+					return assert.EqualValues(t, user.AccountId, args.AccountId)
+				}),
+			).
+			Return(nil).
+			Times(0)
+
+		// Run the cron again, this time we should see the notification get
+		// enqueued.
+		err = handler.EnqueueTriggeredJob(context.Background(), enqueuer)
+		assert.NoError(t, err)
+	})
+
 	t.Run("user subscribed before trial ended", func(t *testing.T) {
 		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
