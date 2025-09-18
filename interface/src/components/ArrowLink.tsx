@@ -1,23 +1,18 @@
 import React from 'react';
-import { NavigateFunction, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 
 export interface ArrowRedirectProps {
-  redirect: string;
+  to: string;
 }
 
-export default function ArrowLink({
-  redirect,
-}: ArrowRedirectProps): JSX.Element {
-  const navigate: NavigateFunction = useNavigate();
-
-  function go(): void {
-    navigate(redirect);
-  }
-
+export default function ArrowLink(props: ArrowRedirectProps): JSX.Element {
   return (
-    <button className="flex-none dark:text-dark-monetr-content-subtle dark:group-hover:text-dark-monetr-content-emphasis md:cursor-pointer" onClick={ go }>
+    <Link
+      to={ props.to }
+      className='flex-none dark:text-dark-monetr-content-subtle dark:group-hover:text-dark-monetr-content-emphasis md:cursor-pointer'
+    >
       <KeyboardArrowRight />
-    </button>
+    </Link>
   );
 }

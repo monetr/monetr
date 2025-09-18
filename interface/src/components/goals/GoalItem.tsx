@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import React, { Fragment } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { KeyboardArrowRight } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 
+import ArrowLink from '@monetr/interface/components/ArrowLink';
 import MBadge from '@monetr/interface/components/MBadge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
@@ -18,12 +18,8 @@ export interface GoalItemProps {
 export default function GoalItem({ spending }: GoalItemProps): JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
-  const navigate = useNavigate();
 
-
-  function openDetails() {
-    navigate(`/bank/${spending.bankAccountId}/goals/${spending.spendingId}/details`);
-  }
+  const detailsPath = `/bank/${spending.bankAccountId}/goals/${spending.spendingId}/details`;
 
   // By default the contribution string should simply be the amount that will be added to this goal per funding schedule
   // it is associated with.
@@ -37,9 +33,9 @@ export default function GoalItem({ spending }: GoalItemProps): JSX.Element {
 
   return (
     <li className='group relative w-full px-1 md:px-2'>
-      <div
+      <Link
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
-        onClick={ openDetails }
+        to={ detailsPath }
       />
       <div className='w-full flex rounded-lg group-hover:bg-zinc-600 gap-2 md:gap-4 items-center px-2 py-1 cursor-pointer md:cursor-auto'>
         <MerchantIcon name={ spending.name } />
@@ -70,10 +66,7 @@ export default function GoalItem({ spending }: GoalItemProps): JSX.Element {
           </div>
           <GoalProgressBar spending={ spending } />
         </div>
-        <KeyboardArrowRight
-          className='dark:text-dark-monetr-content-subtle dark:group-hover:text-dark-monetr-content-emphasis md:cursor-pointer'
-          onClick={ openDetails }
-        />
+        <ArrowLink to={ detailsPath } />
       </div>
     </li>
   );

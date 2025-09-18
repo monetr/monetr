@@ -267,6 +267,7 @@
                 "^next",
                 "^notistack",
                 "^ramda",
+                "^rrule",
                 "^tailwindcss",
                 "^zustand"
               ],
