@@ -45,7 +45,7 @@ func loadCertificates(configuration config.Configuration, generateCertificates b
 			if err != nil {
 				return nil, nil, errors.Wrap(err, "public key directory is not valid")
 			}
-			if err := os.MkdirAll(directory, 0755); err != nil {
+			if err := os.MkdirAll(directory, 0600); err != nil {
 				return nil, nil, errors.Wrap(err, "failed to create directory for certificates")
 			}
 
