@@ -2,12 +2,11 @@ package testutils
 
 import (
 	"context"
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"net"
 	"os"
-	"strconv"
 	"sync"
 	"testing"
 
@@ -98,13 +97,11 @@ func init() {
 }
 
 func GetPgOptions(t *testing.T) *pg.Options {
-	portString := myownsanity.CoalesceStrings(
+	port := myownsanity.CoalesceStrings(
 		os.Getenv("MONETR_PG_PORT"),
 		os.Getenv("POSTGRES_PORT"),
 		"5432",
 	)
-	port, err := strconv.ParseInt(portString, 10, 64)
-	require.NoError(t, err, "must be able to parse the Postgres port as a number")
 
 	host := myownsanity.CoalesceStrings(
 		os.Getenv("MONETR_PG_ADDRESS"),
@@ -112,11 +109,9 @@ func GetPgOptions(t *testing.T) *pg.Options {
 		"localhost",
 	)
 
-	address := fmt.Sprintf("%s:%d", host, port)
-
 	options := &pg.Options{
 		Network:         "tcp",
-		Addr:            address,
+		Addr:            net.JoinHostPort(host, port),
 		User:            myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_USERNAME"), os.Getenv("POSTGRES_USER")),
 		Password:        myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_PASSWORD"), os.Getenv("POSTGRES_PASSWORD")),
 		Database:        myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_DATABASE"), os.Getenv("POSTGRES_DB")),
@@ -171,7 +166,7 @@ func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 			switch option {
 			case IsolatedDatabase:
 				log.Debug("creating isolated database for test")
-				databaseName := fmt.Sprintf("%x", md5.Sum([]byte(t.Name())))
+				databaseName := fmt.Sprintf("%x", sha256.Sum256([]byte(t.Name())))
 
 				_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS "%s";`, databaseName))
 				require.NoError(t, err, "must be able to drop an isolated database if it exists")
