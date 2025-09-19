@@ -13,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const filesystemPermissions = 0600
+const filesystemPermissions = 0700
 
 type filesystemStorage struct {
 	log           *logrus.Entry
@@ -71,7 +71,7 @@ func (f *filesystemStorage) Store(
 	filePath := path.Join(f.baseDirectory, key)
 	directory := path.Dir(filePath)
 
-	if err := os.MkdirAll(directory, 0600); err != nil {
+	if err := os.MkdirAll(directory, filesystemPermissions); err != nil {
 		return "", errors.Wrap(err, "failed to create destination directory")
 	}
 
