@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/monetr/monetr/compare/v1.5.0...v1.5.1) (2025-09-20)
+
+
+### Bug Fixes
+
+* **api:** Fixing similarity calculations ([dd91683](https://github.com/monetr/monetr/commit/dd916835c0dc76ca4db79a73a3aab3daf71c129f))
+
 ## [1.5.0](https://github.com/monetr/monetr/compare/v1.4.3...v1.5.0) (2025-09-20)
 
 
