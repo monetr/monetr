@@ -89,7 +89,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
             { locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0) }
           </span>
           { !props.disableNavigate && (
-            <ArrowLink redirect={ redirectUrl } />
+            <ArrowLink to={ redirectUrl } />
           ) }
         </div>
       </div>

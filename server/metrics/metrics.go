@@ -100,8 +100,10 @@ func NewStats() *Stats {
 func (s *Stats) Listen(address string) {
 	s.listenAndServerSync.Do(func() {
 		s.server = &http.Server{
-			Addr:    address,
-			Handler: s.mux,
+			Addr:              address,
+			Handler:           s.mux,
+			ReadTimeout:       30 * time.Second,
+			ReadHeaderTimeout: 30 * time.Second,
 		}
 		go s.server.ListenAndServe()
 	})
@@ -117,16 +119,6 @@ func (s *Stats) Close() error {
 
 func (s *Stats) JobEnqueued(name string) {
 	s.JobsEnqueued.With(prometheus.Labels{
-		"job_name": name,
-	}).Inc()
-}
-
-func (s *Stats) JobFinished(name string, accountId uint64, start time.Time) {
-	s.JobRunTime.With(prometheus.Labels{
-		"job_name":   name,
-		"account_id": strconv.FormatUint(accountId, 10),
-	}).Observe(float64(time.Since(start).Milliseconds()))
-	s.JobsProcessed.With(prometheus.Labels{
 		"job_name": name,
 	}).Inc()
 }

@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
@@ -18,7 +18,6 @@ export interface TransactionItemProps {
 export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const spending = useSpendingOld(transaction.spendingId);
-  const navigate = useNavigate();
   const detailsUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
 
   const amountClassnames = mergeTailwind(
@@ -46,8 +45,8 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
     const spentFromClasses = mergeTailwind(
       {
         // Transaction does have spending
-        'font-bold': !!transaction.spendingId,
-        'dark:text-dark-monetr-content-emphasis': !!transaction.spendingId,
+        'font-bold': Boolean(transaction.spendingId),
+        'dark:text-dark-monetr-content-emphasis': Boolean(transaction.spendingId),
         // No spending for the transaction
         'font-medium': !transaction.spendingId,
         'dark:text-dark-monetr-content': !transaction.spendingId,
@@ -84,10 +83,14 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
   }
 
   return (
-    <li className='group relative w-full px-1 md:px-2' id={ transaction.transactionId } data-testid={ transaction.transactionId }>
-      <div
+    <li
+      className='group relative w-full px-1 md:px-2'
+      id={ transaction.transactionId }
+      data-testid={ transaction.transactionId }
+    >
+      <Link
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
-        onClick={ () => navigate(detailsUrl) }
+        to={ detailsUrl }
       />
       <div className='group flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4'>
         <div className='flex w-full min-w-0 flex-1 flex-row items-center gap-4 md:w-1/2'>
@@ -112,7 +115,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
           <span className={ amountClassnames }>
             { locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0) }
           </span>
-          <ArrowLink redirect={ detailsUrl } />
+          <ArrowLink to={ detailsUrl } />
         </div>
       </div>
     </li>

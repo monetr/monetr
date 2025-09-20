@@ -1,7 +1,8 @@
 package cache
 
 import (
-	"fmt"
+	"net"
+	"strconv"
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
@@ -16,12 +17,15 @@ type RedisController struct {
 	pool *redis.Pool
 }
 
-func NewRedisCache(log *logrus.Entry, conf config.Redis) (*RedisController, error) {
+func NewRedisCache(
+	log *logrus.Entry,
+	conf config.Redis,
+) (*RedisController, error) {
 	controller := &RedisController{}
 	var redisAddress string
 	var err error
 	if conf.Enabled {
-		redisAddress = fmt.Sprintf("%s:%d", conf.Address, conf.Port)
+		redisAddress = net.JoinHostPort(conf.Address, strconv.Itoa(conf.Port))
 		log.Debugf("connecting to redis at: %s", redisAddress)
 	} else {
 		controller.mini, err = miniredis.Run()
@@ -57,7 +61,7 @@ func NewRedisCache(log *logrus.Entry, conf config.Redis) (*RedisController, erro
 }
 
 func waitForRedis(log *logrus.Entry, maxAttempts int, pool *redis.Pool) error {
-	for i := 0; i < maxAttempts; i++ {
+	for i := range maxAttempts {
 		log.Trace("pinging redis")
 		result, err := pool.Get().Do("PING")
 		if err != nil {

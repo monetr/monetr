@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -329,7 +331,10 @@ func RunServer() error {
 	if configuration.Server.TLSCertificate != "" && configuration.Server.TLSKey != "" {
 		protocol = "https"
 	}
-	listenAddress := fmt.Sprintf("%s:%d", configuration.Server.ListenAddress, configuration.Server.ListenPort)
+	listenAddress := net.JoinHostPort(
+		configuration.Server.ListenAddress,
+		strconv.Itoa(configuration.Server.ListenPort),
+	)
 	go func() {
 		var err error
 		if configuration.Server.TLSCertificate != "" && configuration.Server.TLSKey != "" {

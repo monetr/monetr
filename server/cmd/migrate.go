@@ -3,10 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/database"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/migrations"
 	"github.com/spf13/cobra"
@@ -87,10 +85,12 @@ var (
 		Short: "Prints version information about your database.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log := logging.NewLoggerWithLevel(config.LogLevel)
-
-			options := getDatabaseCommandConfiguration()
-
-			db := pg.Connect(options)
+			configuration := config.LoadConfiguration()
+			configuration.PostgreSQL.Migrate = false
+			db, err := database.GetDatabase(log, configuration, nil)
+			if err != nil {
+				log.WithError(err).Fatal("failed to setup database")
+			}
 
 			migrator, err := migrations.NewMigrationsManager(log, db)
 			if err != nil {
@@ -127,23 +127,3 @@ var (
 		},
 	}
 )
-
-func getDatabaseCommandConfiguration() *pg.Options {
-	configuration := config.LoadConfiguration()
-
-	address := myownsanity.CoalesceStrings(postgresAddress, configuration.PostgreSQL.Address, "localhost")
-	port := myownsanity.CoalesceInts(postgresPort, configuration.PostgreSQL.Port, 5432)
-	username := myownsanity.CoalesceStrings(postgresUsername, configuration.PostgreSQL.Username, "postgres")
-	password := myownsanity.CoalesceStrings(postgresPassword, configuration.PostgreSQL.Password)
-	database := myownsanity.CoalesceStrings(postgresDatabase, configuration.PostgreSQL.Database, "postgres")
-
-	options := &pg.Options{
-		Addr:            fmt.Sprintf("%s:%d", address, port),
-		User:            username,
-		Password:        password,
-		Database:        database,
-		ApplicationName: "monetr",
-	}
-
-	return options
-}

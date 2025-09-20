@@ -1,9 +1,11 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import { format, isThisYear } from 'date-fns';
+import { rrulestr } from 'rrule';
 
+import ArrowLink from '@monetr/interface/components/ArrowLink';
 import MBadge from '@monetr/interface/components/MBadge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
@@ -13,8 +15,6 @@ import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import { rrulestr } from 'rrule';
-
 export interface ExpenseItemProps {
   spending: Spending;
 }
@@ -22,7 +22,6 @@ export interface ExpenseItemProps {
 export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
-  const navigate = useNavigate();
   const rule = rrulestr(spending.ruleset!);
 
   const amountClass = mergeTailwind(
@@ -40,9 +39,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
     'font-semibold',
   );
 
-  function openDetails() {
-    navigate(`/bank/${spending.bankAccountId}/expenses/${spending.spendingId}/details`);
-  }
+  const detailsPath = `/bank/${spending.bankAccountId}/expenses/${spending.spendingId}/details`;
 
   const dateString = isThisYear(spending.nextRecurrence!) ?
     format(spending.nextRecurrence!, 'MMM do') :
@@ -50,9 +47,9 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
 
   return (
     <li className='group relative w-full px-1 md:px-2'>
-      <div
+      <Link
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
-        onClick={ openDetails }
+        to={ detailsPath }
       />
       <div className='w-full flex rounded-lg group-hover:bg-zinc-600 gap-2 items-center px-2 py-1 cursor-pointer md:cursor-auto'>
         <div className='flex items-center flex-1 w-full md:w-1/2 gap-4 min-w-0 pr-1'>
@@ -114,10 +111,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
               </span>
             </div>
           </div>
-          <KeyboardArrowRight
-            className='flex-none dark:text-dark-monetr-content-subtle dark:group-hover:text-dark-monetr-content-emphasis md:cursor-pointer'
-            onClick={ openDetails }
-          />
+          <ArrowLink to={ detailsPath } />
         </div>
       </div>
     </li>
