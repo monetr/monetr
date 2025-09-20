@@ -2,17 +2,18 @@
 
 // func __euclideanDistance64_AVX(a, b []float64) float64
 TEXT ·__euclideanDistance64_AVX(SB), NOSPLIT, $48-56
-  MOVQ a_len+8(FP),   DX // Load the length of A into the DX register.
+  MOVQ a_len+8(FP),   DX // Load the length of a into the DX register.
   MOVQ a_base+0(FP),  AX // Load the pointer of the first array.
   MOVQ b_base+24(FP), BX // Load the pointer of the second array.
 
   VXORPD Y0, Y0, Y0 // Clear the accumulator register.
 
   LOOP:
-    VMOVUPD     (AX), Y1   // Load the current 4 float64s from AX into the 256-bit register Y1.
-    VMOVUPD     (BX), Y2   // Load the current 4 float64s from BX into the 256-bit register Y2.
-    VSUBPD      Y1, Y2, Y1 // Subtract the 4 from AX from the 4 from BX and store the result in Y1.
-    VFMADD231PD Y1, Y1, Y0 // Square the Y1 register and add the result to the Y0 accumulator register.
+    VMOVUPD (AX), Y1  // Load the current 4 float64s from a into the 256-bit register Y1.
+    VMOVUPD (BX), Y2  // Load the current 4 float64s from b into the 256-bit register Y2.
+    VSUBPD Y1, Y2, Y1 // Subtract the 4 from a from the 4 from b and store the result in Y1.
+    VMULPD Y1, Y1, Y2 // Then square Y1 (the result of the subtraction) and store it in Y2.
+    VADDPD Y2, Y0, Y0 // Then add the result of Y2 into the accumulator register.
 
     ADDQ $32, AX      // Add 32 (4 * 8) to the AX and BX registers. This moves the pointer forward
     ADDQ $32, BX      // in the array by 4 items for the next simd operation to take place.
@@ -39,7 +40,8 @@ TEXT ·__euclideanDistance32_AVX(SB), NOSPLIT, $48-52
     VMOVUPS (AX), Y1  // Load the current 8 float32s from a into the 256-bit register Y1.
     VMOVUPS (BX), Y2  // Load the current 8 float32s from b into the 256-bit register Y2.
     VSUBPS Y1, Y2, Y1 // Subtract the 8 from a from the 8 from b and store the result in Y1.
-    VFMADD231PS Y1, Y1, Y0 // Square the Y1 register and add the result to the Y0 accumulator register.
+    VMULPS Y1, Y1, Y2 // Then square Y1 (the result of the subtraction) and store it in Y2.
+    VADDPS Y2, Y0, Y0 // Then add the result of Y2 into the accumulator register.
 
     ADDQ $32, AX      // Add 32 (4 * 8) to the AX and BX registers. This moves the pointer forward
     ADDQ $32, BX      // in the array by 4 items for the next simd operation to take place.
@@ -68,7 +70,8 @@ TEXT ·__euclideanDistance64_AVX512(SB), NOSPLIT, $48-56
     VMOVUPD (AX), Z1  // Load the current 8 float64s from a into the 512-bit register ZMM1.
     VMOVUPD (BX), Z2  // Load the current 8 float64s from b into the 512-bit register ZMM2.
     VSUBPD Z1, Z2, Z1 // Subtract the 8 from a from the 8 from b and store the result in ZMM1.
-    VFMADD231PD Z1, Z1, Z0 // Square the ZMM1 register and add it to the ZMM0 accumulator register.
+    VMULPD Z1, Z1, Z2 // Then square ZMM1 (the result of the subtraction) and store it in ZMM2.
+    VADDPD Z2, Z0, Z0 // Then add the result of ZMM2 into the accumulator register.
 
     ADDQ $64, AX      // Add 64 (8 * 8) to the AX and BX registers. This moves the pointer forward
     ADDQ $64, BX      // in the array by 8 items for the next simd operation to take place.
@@ -99,7 +102,8 @@ TEXT ·__euclideanDistance32_AVX512(SB), NOSPLIT, $48-52
     VMOVUPS (AX), Z1  // Load the current 16 float64s from a into the 512-bit register ZMM1.
     VMOVUPS (BX), Z2  // Load the current 16 float64s from b into the 512-bit register ZMM2.
     VSUBPS Z1, Z2, Z1 // Subtract the 16 from a from the 16 from b and store the result in ZMM1.
-    VFMADD231PS Z1, Z1, Z0 // Square the ZMM1 register and add it to the ZMM0 accumulator register.
+    VMULPS Z1, Z1, Z2 // Then square ZMM1 (the result of the subtraction) and store it in ZMM2.
+    VADDPS Z2, Z0, Z0 // Then add the result of ZMM2 into the accumulator register.
 
     ADDQ $64, AX      // Add 64 (16 * 4) to the AX and BX registers. This moves the pointer forward
     ADDQ $64, BX      // in the array by 16 items for the next simd operation to take place.
