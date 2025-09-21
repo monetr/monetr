@@ -32,6 +32,7 @@ func init() {
 	commands.AdminCommand(rootCommand)
 	commands.DatabaseCommand(rootCommand)
 	commands.DevelopmentCommand(rootCommand)
+	commands.JobCommand(rootCommand)
 	commands.ServeCommand(rootCommand)
 	commands.VersionCommand(rootCommand)
 }

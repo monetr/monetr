@@ -118,20 +118,24 @@ func (c Configuration) GetEmail() Email {
 }
 
 type Email struct {
-	// Enabled controls whether the API can send emails at all. In order to support things like forgot password links or
-	// email verification this must be enabled.
+	// Enabled controls whether the API can send emails at all. In order to
+	// support things like forgot password links or email verification this must
+	// be enabled.
 	Enabled        bool              `yaml:"enabled"`
 	Verification   EmailVerification `yaml:"verification"`
 	ForgotPassword ForgotPassword    `yaml:"forgotPassword"`
-	// Domain specifies the actual domain name used to send emails. Emails will always be sent from `no-reply@{domain}`.
+	// Domain specifies the actual domain name used to send emails. Emails will
+	// always be sent from `no-reply@{domain}`.
 	Domain string `yaml:"domain"`
-	// Email is sent via SMTP. If you want to send emails it is required to include an SMTP configuration.
+	// Email is sent via SMTP. If you want to send emails it is required to
+	// include an SMTP configuration.
 	SMTP SMTPClient `yaml:"smtp"`
 }
 
 type EmailVerification struct {
-	// If you want to verify email addresses when a new user signs up then this should be enabled. This will require a
-	// user to verify that they own (or at least have proper access to) the email address that they used when they
+	// If you want to verify email addresses when a new user signs up then this
+	// should be enabled. This will require a user to verify that they own (or at
+	// least have proper access to) the email address that they used when they
 	// signed up.
 	Enabled bool `yaml:"enabled"`
 	// Specify the amount of time that an email verification link is valid.
@@ -139,7 +143,8 @@ type EmailVerification struct {
 }
 
 type ForgotPassword struct {
-	// If you want to allow people to reset their passwords then we need to be able to send them a password reset link.
+	// If you want to allow people to reset their passwords then we need to be
+	// able to send them a password reset link.
 	Enabled bool `yaml:"enabled"`
 	// Specify the amount of time that a password reset link will be valid.
 	TokenLifetime time.Duration `yaml:"tokenLifetime"`
@@ -167,8 +172,8 @@ type ReCAPTCHA struct {
 	Version        int    `yaml:"version"` // Currently only version 2 is supported by the UI.
 	VerifyLogin    bool   `yaml:"verifyLogin"`
 	VerifyRegister bool   `yaml:"loginRegister"`
-	// VerifyForgotPassword determines whether or not the user will be required to verify that they are not a robot
-	// overlord.
+	// VerifyForgotPassword determines whether or not the user will be required to
+	// verify that they are not a robot overlord.
 	VerifyForgotPassword bool `yaml:"verifyPasswordReset"`
 }
 
