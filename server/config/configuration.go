@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"time"
 
 	"github.com/monetr/monetr/server/util"
@@ -284,10 +285,10 @@ func getViper(configFilePath []string) *viper.Viper {
 
 	switch len(FilePath) {
 	case 0:
-		{ // If we can determine the user's home directory, then look there + /.sentry for the config
+		{ // If we can determine the user's home directory, then look there.
 			homeDir, err := os.UserHomeDir()
 			if err == nil {
-				v.AddConfigPath(homeDir + "/.monetr/config.yaml")
+				v.AddConfigPath(path.Join(homeDir, "/.monetr/config.yaml"))
 			}
 		}
 
