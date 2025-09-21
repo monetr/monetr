@@ -5,6 +5,8 @@ import (
 	"runtime/debug"
 
 	"github.com/monetr/monetr/server/build"
+	"github.com/monetr/monetr/server/commands"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -14,6 +16,26 @@ var (
 	buildType     = "binary"
 	release       = ""
 )
+
+var (
+	rootCommand = &cobra.Command{
+		Use:   "monetr",
+		Short: "monetr's budgeting application",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmd.Help()
+		},
+	}
+)
+
+func init() {
+	commands.RegisterGlobalFlags(rootCommand)
+	commands.AdminCommand(rootCommand)
+	commands.DatabaseCommand(rootCommand)
+	commands.DevelopmentCommand(rootCommand)
+	commands.JobCommand(rootCommand)
+	commands.ServeCommand(rootCommand)
+	commands.VersionCommand(rootCommand)
+}
 
 func main() {
 	info, ok := debug.ReadBuildInfo()

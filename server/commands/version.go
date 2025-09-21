@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"fmt"
@@ -13,12 +13,11 @@ import (
 	"golang.org/x/sys/cpu"
 )
 
-type versionCommand struct {
-	detailed bool
-}
+func VersionCommand(parent *cobra.Command) {
+	var arguments struct {
+		detailed bool
+	}
 
-func newVersionCommand(parent *cobra.Command) {
-	var arguments versionCommand
 	command := &cobra.Command{
 		Use:   "version",
 		Short: "Print the version of monetr.",
@@ -88,6 +87,7 @@ func newVersionCommand(parent *cobra.Command) {
 			return nil
 		},
 	}
+
 	command.PersistentFlags().BoolVarP(&arguments.detailed, "detailed", "d", false, "Print detailed version information.")
 
 	parent.AddCommand(command)

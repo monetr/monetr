@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"crypto/ed25519"
@@ -11,29 +11,12 @@ import (
 
 	"github.com/monetr/monetr/server/config"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-var (
-	rootCommand = &cobra.Command{
-		Use:   "monetr",
-		Short: "monetr's budgeting application",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmd.Help()
-		},
-	}
-)
-
-func init() {
-	rootCommand.PersistentFlags().StringVarP(&config.LogLevel, "log-level", "L", "info", "Specify the log level to use, allowed values: trace, debug, info, warn, error, fatal")
-	rootCommand.PersistentFlags().StringArrayVarP(&config.FilePath, "config", "c", []string{}, "Specify the config file to use.")
-	viper.BindPFlag("Logging.Level", rootCommand.PersistentFlags().Lookup("log-level"))
-	viper.BindPFlag("configFile", rootCommand.PersistentFlags().Lookup("config"))
-	newVersionCommand(rootCommand)
-}
-
-func loadCertificates(configuration config.Configuration, generateCertificates bool) (ed25519.PublicKey, ed25519.PrivateKey, error) {
+func loadCertificates(
+	configuration config.Configuration,
+	generateCertificates bool,
+) (ed25519.PublicKey, ed25519.PrivateKey, error) {
 	var publicKey ed25519.PublicKey
 	var privateKey ed25519.PrivateKey
 	var ok bool

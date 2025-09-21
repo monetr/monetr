@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"github.com/benbjohnson/clock"
@@ -10,9 +10,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newCleanupJobsCommand(parent *cobra.Command) {
-	var dryRun bool
-	var local bool
+func jobCleanupJobs(parent *cobra.Command) {
+	var arguments struct {
+		Local  bool
+		DryRun bool
+	}
 
 	command := &cobra.Command{
 		Use:   "cleanup-jobs",
@@ -27,7 +29,7 @@ func newCleanupJobsCommand(parent *cobra.Command) {
 				return err
 			}
 
-			if local || dryRun {
+			if arguments.Local || arguments.DryRun {
 				log.Info("running locally")
 
 				txn, err := db.BeginContext(cmd.Context())
@@ -43,7 +45,7 @@ func newCleanupJobsCommand(parent *cobra.Command) {
 					return err
 				}
 
-				if dryRun {
+				if arguments.DryRun {
 					log.Info("dry run... rolling changes back")
 					return txn.RollbackContext(cmd.Context())
 				} else {
@@ -79,7 +81,7 @@ func newCleanupJobsCommand(parent *cobra.Command) {
 		},
 	}
 
-	command.PersistentFlags().BoolVarP(&dryRun, "dry-run", "d", false, "Dry run the job cleanup, this will log some basic information about what records would be removed but will not persist any changes. [local]")
-	command.PersistentFlags().BoolVar(&local, "local", false, "Run the job locally, this means the job is not dispatched to the external scheduler like RabbitMQ or Redis. This defaults to true when dry running or when the job engine is in-memory.")
+	command.PersistentFlags().BoolVarP(&arguments.DryRun, "dry-run", "d", false, "Dry run the job cleanup, this will log some basic information about what records would be removed but will not persist any changes. [local]")
+	command.PersistentFlags().BoolVar(&arguments.Local, "local", false, "Run the job locally, this means the job is not dispatched to the external scheduler like RabbitMQ or Redis. This defaults to true when dry running or when the job engine is in-memory.")
 	parent.AddCommand(command)
 }
