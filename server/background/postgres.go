@@ -474,6 +474,11 @@ func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 		// Before we even tick, try to consume a job.
 		job, err := p.consumeJobMaybe()
 		if err != nil {
+			// If we experienced an error trying to pull a job from the queue then we
+			// need to return an available thread to the channel. This way if the
+			// database server is failing for just a moment we don't exhaust our
+			// available threads.
+			p.availableThreads <- consumerSignal
 			p.log.WithError(err).Error("failed to consume job")
 		} else if job != nil {
 			p.log.WithFields(logrus.Fields{
