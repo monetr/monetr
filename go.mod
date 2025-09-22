@@ -43,7 +43,7 @@ require (
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/mock v0.5.2
 	golang.org/x/crypto v0.42.0
-	golang.org/x/net v0.43.0
+	golang.org/x/net v0.44.0
 	golang.org/x/sys v0.36.0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
