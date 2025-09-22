@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  axios: 1.12.0
+  axios: 1.12.2
   form-data: 4.0.4
   next: 15.4.7
 
@@ -219,8 +219,8 @@ importers:
         specifier: 4.36.1
         version: 4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       axios:
-        specifier: 1.12.0
-        version: 1.12.0
+        specifier: 1.12.2
+        version: 1.12.2
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -356,7 +356,7 @@ importers:
         version: 10.4.21(postcss@8.5.6)
       axios-mock-adapter:
         specifier: 2.1.0
-        version: 2.1.0(axios@1.12.0)
+        version: 2.1.0(axios@1.12.2)
       cssnano:
         specifier: 7.0.7
         version: 7.0.7(postcss@8.5.6)
@@ -413,7 +413,7 @@ importers:
         version: 8.6.14(@storybook/test@8.6.14(storybook@8.6.14(prettier@3.5.3)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.14(prettier@3.5.3))(typescript@5.8.3)
       axios-mock-adapter:
         specifier: 2.1.0
-        version: 2.1.0(axios@1.12.0)
+        version: 2.1.0(axios@1.12.2)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -4951,13 +4951,13 @@ packages:
   axios-mock-adapter@2.1.0:
     resolution: {integrity: sha512-AZUe4OjECGCNNssH8SOdtneiQELsqTsat3SQQCWLPjN436/H+L9AjWfV7bF+Zg/YL9cgbhrz5671hoh+Tbn98w==}
     peerDependencies:
-      axios: 1.12.0
+      axios: 1.12.2
 
   axios-proxy-builder@0.1.2:
     resolution: {integrity: sha512-6uBVsBZzkB3tCC8iyx59mCjQckhB8+GQrI9Cop8eC7ybIsvs/KtnNgEBfRMSEa7GqK2VBGUzgjNYMdPIfotyPA==}
 
-  axios@1.12.0:
-    resolution: {integrity: sha512-oXTDccv8PcfjZmPGlWsPSwtOJCZ/b6W5jAMCNcfwJbCzDckwG0jrYJFaWH1yvivfCXjVzV/SPDEhMB3Q+DSurg==}
+  axios@1.12.2:
+    resolution: {integrity: sha512-vMJzPewAlRyOgxV2dU0Cuz2O8zzzx9VYtbJOaBgXFeLc4IV/Eg50n4LowmehOOR61S8ZMpc2K5Sa7g6A4jfkUw==}
 
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
@@ -16860,7 +16860,7 @@ snapshots:
 
   '@untitaker/hyperlink@0.1.44':
     dependencies:
-      axios: 1.12.0
+      axios: 1.12.2
       axios-proxy-builder: 0.1.2
       console.table: 0.10.0
       detect-libc: 2.0.3
@@ -17320,9 +17320,9 @@ snapshots:
 
   axe-core@4.10.0: {}
 
-  axios-mock-adapter@2.1.0(axios@1.12.0):
+  axios-mock-adapter@2.1.0(axios@1.12.2):
     dependencies:
-      axios: 1.12.0
+      axios: 1.12.2
       fast-deep-equal: 3.1.3
       is-buffer: 2.0.5
 
@@ -17330,7 +17330,7 @@ snapshots:
     dependencies:
       tunnel: 0.0.6
 
-  axios@1.12.0:
+  axios@1.12.2:
     dependencies:
       follow-redirects: 1.15.9
       form-data: 4.0.4
