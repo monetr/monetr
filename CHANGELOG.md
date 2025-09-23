@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.5.2](https://github.com/monetr/monetr/compare/v1.5.1...v1.5.2) (2025-09-23)
+
+
+### Features
+
+* New CLI structure ([#2699](https://github.com/monetr/monetr/issues/2699)) ([66f635a](https://github.com/monetr/monetr/commit/66f635a97a1f240a0cc0e764785c8d4265585800))
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.35.3 ([#2697](https://github.com/monetr/monetr/issues/2697)) ([4a82b2f](https://github.com/monetr/monetr/commit/4a82b2fe7b94a5e0056b6b5f3c3b68b649440376))
+* **api:** update module github.com/spf13/cobra to v1.10.1 ([#2705](https://github.com/monetr/monetr/issues/2705)) ([e1d30b0](https://github.com/monetr/monetr/commit/e1d30b09e9477bd9699f1239f91be050668befef))
+* **api:** update module github.com/stretchr/testify to v1.11.1 ([#2706](https://github.com/monetr/monetr/issues/2706)) ([03f14da](https://github.com/monetr/monetr/commit/03f14da32422446f3887ebce09e2e020b01b7c5f))
+* **api:** update module golang.org/x/crypto to v0.42.0 ([#2707](https://github.com/monetr/monetr/issues/2707)) ([f46984d](https://github.com/monetr/monetr/commit/f46984d48bc4a65b1d36a34fbeb3d3760807e56f))
+* **api:** update module golang.org/x/net to v0.44.0 ([#2708](https://github.com/monetr/monetr/issues/2708)) ([4d8f8a8](https://github.com/monetr/monetr/commit/4d8f8a8dc0159ebd1579e3b8458d3688a83dc099))
+* **api:** update module golang.org/x/sys to v0.36.0 ([#2709](https://github.com/monetr/monetr/issues/2709)) ([d77dedf](https://github.com/monetr/monetr/commit/d77dedffb495c79065af8733286b966550d41f73))
+* **api:** update module golang.org/x/text to v0.29.0 ([#2710](https://github.com/monetr/monetr/issues/2710)) ([2951de1](https://github.com/monetr/monetr/commit/2951de14476be997eb68879cd1f50303ec6903a7))
+* **ui:** update dependency @imagemagick/magick-wasm to v0.0.36 ([#2701](https://github.com/monetr/monetr/issues/2701)) ([332441b](https://github.com/monetr/monetr/commit/332441b2bd3423ab807afcaefe96816275a15131))
+* **ui:** update dependency @tanstack/react-query to v4.41.0 ([#2711](https://github.com/monetr/monetr/issues/2711)) ([5b69062](https://github.com/monetr/monetr/commit/5b69062a511038ea1eedae52b0ad543bae966312))
+* **ui:** update dependency axios to v1.12.2 ([#2702](https://github.com/monetr/monetr/issues/2702)) ([8469c6c](https://github.com/monetr/monetr/commit/8469c6cdf8246cf0faf6711c1da92928df4fe3f0))
+* **ui:** update dependency react-qr-code to v2.0.18 ([#2657](https://github.com/monetr/monetr/issues/2657)) ([613abff](https://github.com/monetr/monetr/commit/613abff38549af261daf5cc83d9ffc93db132e5a))
+* **ui:** update dependency zustand to v5.0.8 ([#2703](https://github.com/monetr/monetr/issues/2703)) ([09c33f0](https://github.com/monetr/monetr/commit/09c33f0c83cd75e3a5fd271cbb57aa5a5d86b60e))
+
+
+### Bug Fixes
+
+* **background:** Fix job consumer dying if PostgreSQL fails over ([960ab70](https://github.com/monetr/monetr/commit/960ab70dc5ac0164d3fcb7acf65494e4cc4d8091)), closes [#2700](https://github.com/monetr/monetr/issues/2700)
+
+
+### Miscellaneous
+
+* release 1.5.2 ([3438dd5](https://github.com/monetr/monetr/commit/3438dd5243cd33667856afa6f7e986073a4de587))
+
 ## [1.5.1](https://github.com/monetr/monetr/compare/v1.5.0...v1.5.1) (2025-09-20)
 
 
