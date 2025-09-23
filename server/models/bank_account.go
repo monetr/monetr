@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/mergo"
+	"github.com/monetr/monetr/server/util"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
@@ -152,7 +153,130 @@ func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error)
 	return ctx, nil
 }
 
-func (o *BankAccount) UnmarshalRequest(ctx context.Context, reader io.Reader) error {
+// CreateValidators returns an array of validators that can be passed to the
+// BankAccount UnmarshalRequest function. Specifically for requests to create a
+// bank account object.
+func (BankAccount) CreateValidators() []*validation.KeyRules {
+	return []*validation.KeyRules{
+		validators.Mask(),
+		validators.Name(true),
+		validation.Key(
+			"originalName",
+			validation.Length(1, 300).Error("Original name must be between 1 and 300 characters"),
+		).Optional(),
+		validation.Key(
+			"linkId",
+			validation.Required.Error("Link ID must be provided"),
+			ValidID[Link](),
+		),
+		validators.CurrencyCode(true),
+		validators.LimitBalance("limitBalance"),
+		validators.Balance("currentBalance"),
+		validators.Balance("availableBalance"),
+		validation.Key(
+			"status",
+			validation.In(
+				string(ActiveBankAccountStatus),
+				string(InactiveBankAccountStatus),
+				string(UnknownBankAccountStatus),
+			).Error("Invalid bank account status"),
+		).Optional(),
+		validation.Key(
+			"accountType",
+			validation.In(
+				string(DepositoryBankAccountType),
+				string(CreditBankAccountType),
+				string(LoanBankAccountType),
+				string(InvestmentBankAccountType),
+				string(OtherBankAccountType),
+			).Error("Invalid bank account type"),
+		).Optional(),
+		validation.Key(
+			"accountSubType",
+			validation.In(
+				string(CheckingBankAccountSubType),
+				string(SavingsBankAccountSubType),
+				string(HSABankAccountSubType),
+				string(CDBankAccountSubType),
+				string(MoneyMarketBankAccountSubType),
+				string(PayPalBankAccountSubType),
+				string(PrepaidBankAccountSubType),
+				string(CashManagementBankAccountSubType),
+				string(EBTBankAccountSubType),
+				string(CreditCardBankAccountSubType),
+				string(AutoBankAccountSubType),
+				string(OtherBankAccountSubType),
+			).Error("Invalid bank account sub type"),
+		).Optional(),
+	}
+}
+
+// UpdateValidator returns an array of validation rules that can be used to
+// validate requests to PATCH endpoints.
+func (o *BankAccount) UpdateValidator() []*validation.KeyRules {
+	if o.PlaidBankAccountId != nil {
+		return []*validation.KeyRules{
+			validators.Name(false),
+		}
+	}
+
+	return []*validation.KeyRules{
+		validators.Mask(),
+		validators.Name(false),
+		validators.CurrencyCode(false),
+		validators.LimitBalance("limitBalance"),
+		validators.Balance("currentBalance"),
+		validators.Balance("availableBalance"),
+		validation.Key(
+			"status",
+			validation.In(
+				string(ActiveBankAccountStatus),
+				string(InactiveBankAccountStatus),
+				string(UnknownBankAccountStatus),
+			).Error("Invalid bank account status"),
+		).Optional(),
+		validation.Key(
+			"accountType",
+			validation.In(
+				string(DepositoryBankAccountType),
+				string(CreditBankAccountType),
+				string(LoanBankAccountType),
+				string(InvestmentBankAccountType),
+				string(OtherBankAccountType),
+			).Error("Invalid bank account type"),
+		).Optional(),
+		validation.Key(
+			"accountSubType",
+			validation.In(
+				string(CheckingBankAccountSubType),
+				string(SavingsBankAccountSubType),
+				string(HSABankAccountSubType),
+				string(CDBankAccountSubType),
+				string(MoneyMarketBankAccountSubType),
+				string(PayPalBankAccountSubType),
+				string(PrepaidBankAccountSubType),
+				string(CashManagementBankAccountSubType),
+				string(EBTBankAccountSubType),
+				string(CreditCardBankAccountSubType),
+				string(AutoBankAccountSubType),
+				string(OtherBankAccountSubType),
+			).Error("Invalid bank account sub type"),
+		).Optional(),
+	}
+}
+
+// UnmarshalRequest consumes a request body and an array of validation rules in
+// order to create an object that can be persisted to the database. For updates,
+// this function should be called on the existing object that is already stored
+// in the database. The provided validators should prevent key or sensitive
+// fields from being overwritten by the client's request body. For creates, the
+// initial object can be left blank; or default values can be specified ahead of
+// calling this function in case some fields are omitted in the intial request.
+func (o *BankAccount) UnmarshalRequest(
+	ctx context.Context,
+	reader io.Reader,
+	validators ...*validation.KeyRules,
+) error {
 	rawData := map[string]any{}
 	decoder := json.NewDecoder(reader)
 	decoder.UseNumber()
@@ -160,72 +284,20 @@ func (o *BankAccount) UnmarshalRequest(ctx context.Context, reader io.Reader) er
 		return errors.WithStack(err)
 	}
 
-	var err error
-	if o.PlaidBankAccountId == nil {
-		err = validation.ValidateWithContext(
-			ctx,
-			&rawData,
-			validation.Map(
-				validators.Mask(),
-				validators.Name(),
-				validators.CurrencyCode(),
-				validators.LimitBalance("limitBalance"),
-				validators.Balance("currentBalance"),
-				validators.Balance("availableBalance"),
-				validation.Key(
-					"status",
-					validation.In(
-						ActiveBankAccountStatus,
-						InactiveBankAccountStatus,
-						UnknownBankAccountStatus,
-					).Error("Invalid bank account status"),
-				).Optional(),
-				validation.Key(
-					"accountType",
-					validation.In(
-						DepositoryBankAccountType,
-						CreditBankAccountType,
-						LoanBankAccountType,
-						InvestmentBankAccountType,
-						OtherBankAccountType,
-					).Error("Invalid bank account type"),
-				).Optional(),
-				validation.Key(
-					"accountSubType",
-					validation.In(
-						CheckingBankAccountSubType,
-						SavingsBankAccountSubType,
-						HSABankAccountSubType,
-						CDBankAccountSubType,
-						MoneyMarketBankAccountSubType,
-						PayPalBankAccountSubType,
-						PrepaidBankAccountSubType,
-						CashManagementBankAccountSubType,
-						EBTBankAccountSubType,
-						CreditCardBankAccountSubType,
-						AutoBankAccountSubType,
-						OtherBankAccountSubType,
-					).Error("Invalid bank account sub type"),
-				).Optional(),
-			),
-		)
-	} else {
-		err = validation.ValidateWithContext(
-			ctx,
-			&rawData,
-			validation.Map(
-				validators.Name(),
-			),
-		)
-	}
-	if err != nil {
+	if err := validation.ValidateWithContext(
+		ctx,
+		&rawData,
+		validation.Map(
+			validators...,
+		),
+	); err != nil {
 		return err
 	}
 
-	if err = mergo.Map(
+	if err := mergo.Map(
 		o, rawData,
 		mergo.WithOverride,
-		mergo.WithTransformers(NewIDTransformer[BankAccount]()),
+		mergo.WithTransformers(util.MergeTransformer{}),
 	); err != nil {
 		return errors.Wrap(err, "failed to merge patched data")
 	}

@@ -8,9 +8,10 @@ import (
 	"github.com/monetr/validation"
 )
 
-func Name() *validation.KeyRules {
+func Name(required bool) *validation.KeyRules {
 	return validation.Key(
 		"name",
+		validation.Required.When(required).Error("Name is required"),
 		validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
 	).Optional()
 }
@@ -22,9 +23,10 @@ func Mask() *validation.KeyRules {
 	).Optional()
 }
 
-func CurrencyCode() *validation.KeyRules {
+func CurrencyCode(required bool) *validation.KeyRules {
 	return validation.Key(
 		"currency",
+		validation.Required.When(required).Error("Currency is required"),
 		validation.In(
 			locale.GetInstalledCurrencies()...,
 		).Error("Currency must be one supported by the server"),
