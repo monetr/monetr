@@ -3,7 +3,6 @@ package controller
 import (
 	"bytes"
 	"net/http"
-	"strings"
 
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/labstack/echo/v4"
@@ -56,102 +55,77 @@ func (c *Controller) getBalances(ctx echo.Context) error {
 }
 
 func (c *Controller) postBankAccounts(ctx echo.Context) error {
-	var bankAccount BankAccount
-	if err := ctx.Bind(&bankAccount); err != nil {
-		return c.invalidJson(ctx)
-	}
-
-	if bankAccount.LinkId.IsZero() {
-		return c.badRequest(ctx, "Link ID must be provided")
-	}
-
-	var err error
-	bankAccount.BankAccountId = ""
-	bankAccount.Name, err = c.cleanString(ctx, "Name", bankAccount.Name)
-	if err != nil {
-		return err
-	}
-
-	bankAccount.Mask, err = c.cleanString(ctx, "Mask", bankAccount.Mask)
-	if err != nil {
-		return err
-	}
-
-	// TODO Should mask be enforced to be numeric only?
-	if len(bankAccount.Mask) > 4 {
-		return c.badRequest(ctx, "Mask cannot be more than 4 characters")
-	}
-
-	bankAccount.Status = ParseBankAccountStatus(bankAccount.Status)
-	bankAccount.AccountType = ParseBankAccountType(bankAccount.AccountType)
-	bankAccount.AccountSubType = ParseBankAccountSubType(bankAccount.AccountSubType)
-	bankAccount.LastUpdated = c.Clock.Now().UTC()
-
-	if bankAccount.Name == "" {
-		return c.badRequest(ctx, "Bank account must have a name")
-	}
-
 	log := c.getLog(ctx)
-
-	// If the client has not specified a currency code then we should determine
-	// the currency code based on the user's locale.
-	if bankAccount.Currency == "" {
-		account, err := c.Accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
-		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to read account details")
-		}
-
-		// If we cannot determine what currencyCode we should default to based on the
-		// locale, then fallback to monetr's global default.
-		currencyCode := consts.DefaultCurrencyCode
-		// Try to retrieve currency information for the user's locale from the
-		// operating system.
-		lconv, err := locale.GetLConv(account.Locale)
-		if err != nil || lconv == nil {
-			log.
-				WithFields(logrus.Fields{
-					"locale": account.Locale,
-				}).
-				WithError(err).
-				Warn("failed to get currency information for account's locale, application default currency will be used")
-		} else {
-			// If it worked then clean up the code from the OS and use it.
-			currencyCode = string(bytes.TrimSpace(lconv.IntCurrSymbol))
-		}
-
-		// Set the bank account's currency based on the user's locale.
-		bankAccount.Currency = currencyCode
-	} else {
-		// Clean up the currency code the user provided.
-		currencyCode := strings.ToUpper(strings.TrimSpace(bankAccount.Currency))
-		// Check to see if the system we are on supports that currency code by
-		// checking if there is fractional digit information about it.
-		if _, err := locale.GetCurrencyInternationalFractionalDigits(currencyCode); err != nil {
-			log.
-				WithFields(logrus.Fields{
-					"input":    bankAccount.Currency,
-					"currency": currencyCode,
-				}).
-				WithError(err).
-				Warn("could not find currency information for the specified currency code")
-			return c.badRequest(ctx, "Provided currency code is not valid")
-		}
-		// If the currency code specified by the client is valid then use that code
-		// for the account.
-		bankAccount.Currency = currencyCode
-	}
-
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	// Bank accounts can only be created this way when they are associated with a link that allows manual
-	// management. If the link they specified does not, then a bank account cannot be created for this link.
+	account, err := c.Accounts.GetAccount(
+		c.getContext(ctx),
+		c.mustGetAccountId(ctx),
+	)
+	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to read account details")
+	}
+
+	// If we cannot determine what currencyCode we should default to based on the
+	// locale, then fallback to monetr's global default.
+	currencyCode := consts.DefaultCurrencyCode
+	// Try to retrieve currency information for the user's locale from the
+	// operating system.
+	lconv, err := locale.GetLConv(account.Locale)
+	if err != nil || lconv == nil {
+		log.
+			WithFields(logrus.Fields{
+				"locale": account.Locale,
+			}).
+			WithError(err).
+			Warn("failed to get currency information for account's locale, application default currency will be used")
+	} else {
+		// If it worked then clean up the code from the OS and use it.
+		currencyCode = string(bytes.TrimSpace(lconv.IntCurrSymbol))
+	}
+
+	var bankAccount BankAccount
+	// Pre-set the default values for these fields.
+	bankAccount.Status = ActiveBankAccountStatus
+	bankAccount.AccountType = DepositoryBankAccountType
+	bankAccount.AccountSubType = CheckingBankAccountSubType
+	bankAccount.Currency = currencyCode
+
+	switch err := bankAccount.UnmarshalRequest(
+		c.getContext(ctx),
+		ctx.Request().Body,
+		bankAccount.CreateValidators()...,
+	).(type) {
+	case validation.Errors:
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":    "Invalid request",
+			"problems": err,
+		})
+	case nil:
+		break
+	default:
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse request")
+	}
+
+	// Some fields cannot be overwritten, so we set those after we unmarshal.
+	bankAccount.LastUpdated = c.Clock.Now().UTC()
+
+	// Bank accounts can only be created this way when they are associated with a
+	// link that allows manual management. If the link they specified does not,
+	// then a bank account cannot be created for this link.
 	isManual, err := repo.GetLinkIsManual(c.getContext(ctx), bankAccount.LinkId)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "Could not validate link is manual")
 	}
 
+	// TODO Create a custom validator
 	if !isManual {
-		return c.badRequest(ctx, "Cannot create a bank account for a non-manual link")
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error": "Invalid request",
+			"problems": map[string]any{
+				"linkId": "Cannot create a bank account for a non-manual link, specify a manual Link ID",
+			},
+		})
 	}
 
 	if err := repo.CreateBankAccounts(c.getContext(ctx), &bankAccount); err != nil {
@@ -176,8 +150,9 @@ func (c *Controller) patchBankAccount(ctx echo.Context) error {
 	switch err := existingBankAccount.UnmarshalRequest(
 		c.getContext(ctx),
 		ctx.Request().Body,
+		existingBankAccount.UpdateValidator()...,
 	).(type) {
-	case validation.Error:
+	case validation.Errors:
 		return ctx.JSON(http.StatusBadRequest, map[string]any{
 			"error":    "Invalid request",
 			"problems": err,
