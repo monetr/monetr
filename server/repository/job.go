@@ -14,6 +14,7 @@ import (
 type JobRepository interface {
 	GetFundingSchedulesToProcess(ctx context.Context) ([]ProcessFundingSchedulesItem, error)
 	GetLinksForExpiredAccounts(ctx context.Context) ([]Link, error)
+	GetInactiveLinksForExpiredAccounts(ctx context.Context) ([]Link, error)
 	GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error)
 	GetAccountsWithTooManyFiles(ctx context.Context) ([]AccountWithTooManyFiles, error)
 }
@@ -107,6 +108,33 @@ func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]Link,
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve Plaid links for expired accounts")
+	}
+
+	return result, nil
+}
+
+func (j *jobRepository) GetInactiveLinksForExpiredAccounts(ctx context.Context) ([]Link, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	// Links should be seen as expired if the account subscription is not active
+	// for 90 days.
+	expirationCutoff := j.clock.Now().Add(-97 * 24 * time.Hour).UTC()
+
+	var result []Link
+	err := j.txn.ModelContext(span.Context(), &result).
+		Join(`INNER JOIN "accounts" AS "account"`).
+		JoinOn(`"account"."account_id" = "link"."account_id"`).
+		Join(`LEFT JOIN "plaid_links" AS "plaid_link"`).
+		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
+		JoinOn(`"plaid_link"."account_id" = "link"."account_id"`).
+		// We only want to get links that are manual or are Plaid links that have
+		// been moved away from being setup.
+		Where(`("plaid_link"."status" != ? OR "link"."plaid_link_id" IS NULL)`, PlaidLinkStatusSetup).
+		Where(`GREATEST("account"."subscription_active_until", "account"."trial_ends_at") < ?`, expirationCutoff).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve inactive links for expired accounts")
 	}
 
 	return result, nil
