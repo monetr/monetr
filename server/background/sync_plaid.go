@@ -123,7 +123,7 @@ func (s *SyncPlaidHandler) HandleConsumeJob(
 ) error {
 	var args SyncPlaidArguments
 	if err := errors.Wrap(s.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Sync Plaid job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Sync Plaid job.", "job", map[string]any{
 			"data": data,
 		})
 		return err
@@ -184,6 +184,8 @@ RetrySync:
 			case *platypus.PlatypusError:
 				if plaidError.ErrorCode == "TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION" {
 					log.WithError(err).Warn("plaid sync failed with mutation error, job will be retried")
+					// So we don't report this error to sentry when its not necessary.
+					err = nil
 					goto RetrySync
 				}
 			}
@@ -240,7 +242,7 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 		})
 		if err != nil {
 			itemLog.WithError(err).Warn("failed to enqueue job to sync with plaid")
-			crumbs.Warn(ctx, "Failed to enqueue job to sync with plaid", "job", map[string]interface{}{
+			crumbs.Warn(ctx, "Failed to enqueue job to sync with plaid", "job", map[string]any{
 				"error": err,
 			})
 			continue
@@ -301,7 +303,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		crumbs.IndicateBug(
 			span.Context(),
 			"BUG: Link was queued to sync with plaid, but has no plaid details",
-			map[string]interface{}{
+			map[string]any{
 				"link": link,
 			},
 		)
@@ -433,7 +435,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		plaidTransactions := append(syncData.New, syncData.Updated...)
 
 		log.WithField("count", len(plaidTransactions)).Debugf("retrieved transactions from plaid")
-		crumbs.Debug(span.Context(), "Retrieved transactions from plaid.", map[string]interface{}{
+		crumbs.Debug(span.Context(), "Retrieved transactions from plaid.", map[string]any{
 			"count": len(plaidTransactions),
 		})
 
