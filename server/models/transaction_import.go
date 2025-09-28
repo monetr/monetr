@@ -59,6 +59,7 @@ type TransactionImport struct {
 	CreatedAt           time.Time               `json:"createdAt" pg:"created_at,notnull"`
 	CreatedBy           ID[User]                `json:"createdBy" pg:"created_by,notnull"`
 	CreatedByUser       *User                   `json:"-" pg:"rel:has-one,fk:created_by"`
+	UpdateAt            time.Time               `json:"updatedAt" pg:"updated_at,notnull"`
 }
 
 func (TransactionImport) IdentityPrefix() string {
@@ -69,8 +70,8 @@ func (TransactionImport) FileKind() string {
 	return "transactions/imports"
 }
 
-// TransactionImport files expire after 1 hour be default.
 func (TransactionImport) FileExpiration(clock clock.Clock) *time.Time {
+	// TransactionImport files expire after 1 hour be default.
 	expiration := clock.Now().Add(1 * time.Hour)
 	return &expiration
 }

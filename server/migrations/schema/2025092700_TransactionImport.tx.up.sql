@@ -7,6 +7,7 @@ CREATE TABLE "transaction_imports" (
   "expires_at"            TIMESTAMP WITH TIME ZONE NOT NULL,
   "created_at"            TIMESTAMP WITH TIME ZONE NOT NULL,
   "created_by"            VARCHAR(32) NOT NULL,
+  "updated_at"            TIMESTAMP WITH TIME ZONE NOT NULL,
   CONSTRAINT "pk_transaction_imports" PRIMARY KEY ("transaction_import_id", "account_id"),
   CONSTRAINT "fk_transaction_imports_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
   CONSTRAINT "fk_transaction_imports_link" FOREIGN KEY ("link_id", "account_id") REFERENCES "links" ("link_id", "account_id"),
