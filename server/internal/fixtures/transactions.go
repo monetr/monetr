@@ -90,7 +90,7 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount BankAc
 
 			require.NoError(
 				t,
-				repo.CreatePlaidTransaction(t.Context(), plaidTransaction),
+				repo.CreatePlaidTransactions(t.Context(), plaidTransaction),
 				"must be able to seed transaction",
 			)
 		}

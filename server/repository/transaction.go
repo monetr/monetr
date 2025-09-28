@@ -22,8 +22,10 @@ func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
+	now := r.clock.Now()
 	for i := range transactions {
 		transactions[i].AccountId = r.AccountId()
+		transactions[i].CreatedAt = now
 	}
 	_, err := r.txn.ModelContext(span.Context(), &transactions).Insert(&transactions)
 	return errors.Wrap(err, "failed to insert transactions")

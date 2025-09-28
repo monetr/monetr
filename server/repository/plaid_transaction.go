@@ -8,21 +8,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (r *repositoryBase) CreatePlaidTransaction(
-	ctx context.Context,
-	transaction *PlaidTransaction,
-) error {
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-
-	transaction.AccountId = r.AccountId()
-	transaction.CreatedAt = r.clock.Now().UTC()
-
-	r.txn.ModelContext(span.Context(), transaction).Insert(transaction)
-
-	return nil
-}
-
 func (r *repositoryBase) CreatePlaidTransactions(
 	ctx context.Context,
 	transactions ...*PlaidTransaction,

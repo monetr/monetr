@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
@@ -12,14 +13,14 @@ var (
 	ErrFundingScheduleNotFound = errors.New("funding schedule does not exist")
 )
 
-func (r *repositoryBase) GetFundingSchedules(ctx context.Context, bankAccountId ID[BankAccount]) ([]FundingSchedule, error) {
-	span := sentry.StartSpan(ctx, "GetFundingSchedules")
+func (r *repositoryBase) GetFundingSchedules(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+) ([]FundingSchedule, error) {
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId":     r.AccountId(),
-		"bankAccountId": bankAccountId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
 
 	result := make([]FundingSchedule, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
@@ -36,15 +37,16 @@ func (r *repositoryBase) GetFundingSchedules(ctx context.Context, bankAccountId 
 	return result, nil
 }
 
-func (r *repositoryBase) GetFundingSchedule(ctx context.Context, bankAccountId ID[BankAccount], fundingScheduleId ID[FundingSchedule]) (*FundingSchedule, error) {
-	span := sentry.StartSpan(ctx, "GetFundingSchedule")
+func (r *repositoryBase) GetFundingSchedule(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	fundingScheduleId ID[FundingSchedule],
+) (*FundingSchedule, error) {
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId":         r.AccountId(),
-		"bankAccountId":     bankAccountId,
-		"fundingScheduleId": fundingScheduleId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
+	span.SetData("fundingScheduleId", fundingScheduleId)
 
 	var result FundingSchedule
 	err := r.txn.ModelContext(span.Context(), &result).
@@ -63,18 +65,21 @@ func (r *repositoryBase) GetFundingSchedule(ctx context.Context, bankAccountId I
 	return &result, nil
 }
 
-func (r *repositoryBase) CreateFundingSchedule(ctx context.Context, fundingSchedule *FundingSchedule) error {
-	span := sentry.StartSpan(ctx, "CreateFundingSchedule")
+func (r *repositoryBase) CreateFundingSchedule(
+	ctx context.Context,
+	fundingSchedule *FundingSchedule,
+) error {
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId":     r.AccountId(),
-		"bankAccountId": fundingSchedule.BankAccountId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", fundingSchedule.BankAccountId)
 
 	fundingSchedule.AccountId = r.AccountId()
 
-	if _, err := r.txn.ModelContext(span.Context(), fundingSchedule).Insert(fundingSchedule); err != nil {
+	if _, err := r.txn.ModelContext(
+		span.Context(),
+		fundingSchedule,
+	).Insert(fundingSchedule); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create funding schedule")
 	}
@@ -85,15 +90,13 @@ func (r *repositoryBase) CreateFundingSchedule(ctx context.Context, fundingSched
 }
 
 func (r *repositoryBase) UpdateFundingSchedule(ctx context.Context, fundingSchedule *FundingSchedule) error {
-	span := sentry.StartSpan(ctx, "UpdateFundingSchedule")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", fundingSchedule.BankAccountId)
+	span.SetData("fundingScheduleId", fundingSchedule.FundingScheduleId)
 
 	fundingSchedule.AccountId = r.AccountId()
-
-	span.Data = map[string]interface{}{
-		"accountId":         r.AccountId(),
-		"fundingScheduleId": fundingSchedule.FundingScheduleId,
-	}
 
 	result, err := r.txn.ModelContext(span.Context(), fundingSchedule).
 		WherePK().
@@ -111,8 +114,12 @@ func (r *repositoryBase) UpdateFundingSchedule(ctx context.Context, fundingSched
 	return nil
 }
 
-func (r *repositoryBase) DeleteFundingSchedule(ctx context.Context, bankAccountId ID[BankAccount], fundingScheduleId ID[FundingSchedule]) error {
-	span := sentry.StartSpan(ctx, "DeleteFundingSchedule")
+func (r *repositoryBase) DeleteFundingSchedule(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	fundingScheduleId ID[FundingSchedule],
+) error {
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	result, err := r.txn.ModelContext(span.Context(), &FundingSchedule{}).

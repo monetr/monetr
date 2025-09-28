@@ -27,10 +27,9 @@ type BaseRepository interface {
 	CreateSpending(ctx context.Context, expense *Spending) error
 	CreateTransaction(ctx context.Context, bankAccountId ID[BankAccount], transaction *Transaction) error
 
-	// CreatePlaidTransaction takes a Plaid transaction model and ensures the
+	// CreatePlaidTransactions takes a Plaid transaction model and ensures the
 	// account ID and the created at timestamp are properly set then stores the
 	// transaction in the database.
-	CreatePlaidTransaction(ctx context.Context, transaction *PlaidTransaction) error
 	CreatePlaidTransactions(ctx context.Context, transactions ...*PlaidTransaction) error
 
 	DeleteFundingSchedule(ctx context.Context, bankAccountId ID[BankAccount], fundingScheduleId ID[FundingSchedule]) error

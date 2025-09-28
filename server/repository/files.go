@@ -19,10 +19,7 @@ type fileRepositoryInterface interface {
 func (r *repositoryBase) GetFiles(ctx context.Context) ([]File, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId": r.AccountId(),
-	}
+	span.SetData("accountId", r.AccountId())
 
 	items := make([]File, 0)
 	err := r.txn.ModelContext(span.Context(), &items).
@@ -44,10 +41,7 @@ func (r *repositoryBase) GetFiles(ctx context.Context) ([]File, error) {
 func (r *repositoryBase) CreateFile(ctx context.Context, file *File) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId": r.AccountId(),
-	}
+	span.SetData("accountId", r.AccountId())
 
 	file.AccountId = r.AccountId()
 	file.CreatedAt = r.clock.Now().UTC()
@@ -63,7 +57,6 @@ func (r *repositoryBase) CreateFile(ctx context.Context, file *File) error {
 	span.Status = sentry.SpanStatusOK
 
 	return nil
-
 }
 
 func (r *repositoryBase) GetFile(
@@ -72,6 +65,7 @@ func (r *repositoryBase) GetFile(
 ) (*File, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
+	span.SetData("accountId", r.AccountId())
 
 	var file File
 	err := r.txn.ModelContext(span.Context(), &file).
@@ -92,6 +86,7 @@ func (r *repositoryBase) UpdateFile(
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
+	span.SetData("accountId", r.AccountId())
 
 	file.AccountId = r.AccountId()
 

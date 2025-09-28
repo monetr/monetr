@@ -84,7 +84,12 @@ func (p *accountsRepositoryBase) GetAccount(
 		return nil, errors.Wrap(err, "failed to retrieve account by Id")
 	}
 
-	if err := p.cache.SetEzTTL(span.Context(), buildAccountCacheKey(accountId), account, 30*time.Minute); err != nil {
+	if err := p.cache.SetEzTTL(
+		span.Context(),
+		buildAccountCacheKey(accountId),
+		account,
+		30*time.Minute,
+	); err != nil {
 		log.WithError(err).Warn("failed to store account in cache")
 	}
 
@@ -105,11 +110,7 @@ func (p *accountsRepositoryBase) GetAccountByCustomerId(
 		Select(&account); err != nil {
 
 		span.Status = sentry.SpanStatusInternalError
-		if span.Data == nil {
-			span.Data = map[string]interface{}{}
-		}
-
-		span.Data["stripeCustomerId"] = stripeCustomerId
+		span.SetData("stripeCustomerId", stripeCustomerId)
 
 		return nil, errors.Wrap(err, "failed to retrieve account by customer Id")
 	}
@@ -121,7 +122,9 @@ func (p *accountsRepositoryBase) UpdateAccount(ctx context.Context, account *Acc
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := p.log.WithContext(span.Context()).WithField("accountId", account.AccountId)
+	log := p.log.
+		WithContext(span.Context()).
+		WithField("accountId", account.AccountId)
 
 	log.Debug("updating account")
 

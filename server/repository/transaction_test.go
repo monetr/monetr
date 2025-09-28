@@ -55,7 +55,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			CreatedAt:      clock.Now(),
 			DeletedAt:      nil,
 		}
-		assert.NoError(t, repo.CreatePlaidTransaction(context.Background(), &plaidTransaction))
+		assert.NoError(t, repo.CreatePlaidTransactions(context.Background(), &plaidTransaction))
 
 		transaction := models.Transaction{
 			AccountId:          repo.AccountId(),
@@ -128,7 +128,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			CreatedAt:      clock.Now(),
 			DeletedAt:      nil,
 		}
-		assert.NoError(t, repo.CreatePlaidTransaction(context.Background(), &pendingPlaidTransaction))
+		assert.NoError(t, repo.CreatePlaidTransactions(context.Background(), &pendingPlaidTransaction))
 
 		plaidTransaction := models.PlaidTransaction{
 			AccountId:          repo.AccountId(),
@@ -148,7 +148,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			CreatedAt:      clock.Now(),
 			DeletedAt:      nil,
 		}
-		assert.NoError(t, repo.CreatePlaidTransaction(context.Background(), &plaidTransaction))
+		assert.NoError(t, repo.CreatePlaidTransactions(context.Background(), &plaidTransaction))
 
 		transaction := models.Transaction{
 			AccountId:                 repo.AccountId(),

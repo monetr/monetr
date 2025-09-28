@@ -9,13 +9,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]BankAccount, error) {
+func (r *repositoryBase) GetBankAccounts(
+	ctx context.Context,
+) ([]BankAccount, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId": r.AccountId(),
-	}
+	span.SetData("accountId", r.AccountId())
 
 	result := make([]BankAccount, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
@@ -26,13 +25,13 @@ func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]BankAccount, er
 	return result, errors.Wrap(err, "failed to retrieve bank accounts")
 }
 
-func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ...*BankAccount) error {
+func (r *repositoryBase) CreateBankAccounts(
+	ctx context.Context,
+	bankAccounts ...*BankAccount,
+) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId": r.AccountId(),
-	}
+	span.SetData("accountId", r.AccountId())
 
 	for i := range bankAccounts {
 		bankAccounts[i].AccountId = r.AccountId()
@@ -40,7 +39,10 @@ func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ..
 			bankAccounts[i].Status = ActiveBankAccountStatus
 		}
 	}
-	if _, err := r.txn.ModelContext(span.Context(), &bankAccounts).Insert(&bankAccounts); err != nil {
+	if _, err := r.txn.ModelContext(
+		span.Context(),
+		&bankAccounts,
+	).Insert(&bankAccounts); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to insert bank accounts")
 	}
@@ -50,14 +52,14 @@ func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ..
 	return nil
 }
 
-func (r *repositoryBase) GetBankAccountsByLinkId(ctx context.Context, linkId ID[Link]) ([]BankAccount, error) {
+func (r *repositoryBase) GetBankAccountsByLinkId(
+	ctx context.Context,
+	linkId ID[Link],
+) ([]BankAccount, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId": r.AccountId(),
-		"linkId":    linkId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("linkId", linkId)
 
 	var result []BankAccount
 	err := r.txn.ModelContext(span.Context(), &result).
@@ -81,11 +83,8 @@ func (r *repositoryBase) GetBankAccountsWithPlaidByLinkId(
 ) ([]BankAccount, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId": r.AccountId(),
-		"linkId":    linkId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("linkId", linkId)
 
 	var result []BankAccount
 	err := r.txn.ModelContext(span.Context(), &result).
@@ -104,14 +103,14 @@ func (r *repositoryBase) GetBankAccountsWithPlaidByLinkId(
 	return result, nil
 }
 
-func (r *repositoryBase) GetPlaidBankAccountsByLinkId(ctx context.Context, linkId ID[Link]) ([]PlaidBankAccount, error) {
+func (r *repositoryBase) GetPlaidBankAccountsByLinkId(
+	ctx context.Context,
+	linkId ID[Link],
+) ([]PlaidBankAccount, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId": r.AccountId(),
-		"linkId":    linkId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("linkId", linkId)
 
 	var result []PlaidBankAccount
 	err := r.txn.ModelContext(span.Context(), &result).
@@ -130,14 +129,14 @@ func (r *repositoryBase) GetPlaidBankAccountsByLinkId(ctx context.Context, linkI
 	return result, nil
 }
 
-func (r *repositoryBase) GetBankAccount(ctx context.Context, bankAccountId ID[BankAccount]) (*BankAccount, error) {
+func (r *repositoryBase) GetBankAccount(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+) (*BankAccount, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId":     r.AccountId(),
-		"bankAccountId": bankAccountId,
-	}
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccountId)
 
 	var result BankAccount
 	err := r.txn.ModelContext(span.Context(), &result).
@@ -155,17 +154,17 @@ func (r *repositoryBase) GetBankAccount(ctx context.Context, bankAccountId ID[Ba
 	return &result, nil
 }
 
-func (r *repositoryBase) UpdateBankAccount(ctx context.Context, bankAccount *BankAccount) error {
+func (r *repositoryBase) UpdateBankAccount(
+	ctx context.Context,
+	bankAccount *BankAccount,
+) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
+	span.SetData("accountId", r.AccountId())
+	span.SetData("bankAccountId", bankAccount.BankAccountId)
 
 	bankAccount.AccountId = r.AccountId()
 	bankAccount.UpdatedAt = r.clock.Now()
-
-	span.Data = map[string]interface{}{
-		"accountId":     r.AccountId(),
-		"bankAccountId": bankAccount.BankAccountId,
-	}
 
 	_, err := r.txn.ModelContext(span.Context(), bankAccount).
 		WherePK().

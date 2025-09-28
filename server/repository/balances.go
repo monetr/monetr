@@ -21,7 +21,10 @@ type Balances struct {
 	Goals         int64           `json:"goals" pg:"goals"`
 }
 
-func (r *repositoryBase) GetBalances(ctx context.Context, bankAccountId ID[BankAccount]) (*Balances, error) {
+func (r *repositoryBase) GetBalances(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+) (*Balances, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

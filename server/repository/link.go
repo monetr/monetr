@@ -9,12 +9,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (r *repositoryBase) GetLink(ctx context.Context, linkId ID[Link]) (*Link, error) {
+func (r *repositoryBase) GetLink(
+	ctx context.Context,
+	linkId ID[Link],
+) (*Link, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Data = map[string]interface{}{
-		"linkId": linkId,
-	}
+	span.SetData("linkId", linkId)
 
 	var link Link
 	err := r.txn.ModelContext(span.Context(), &link).
@@ -63,12 +64,13 @@ func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error)
 	return count, nil
 }
 
-func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId ID[Link]) (bool, error) {
+func (r *repositoryBase) GetLinkIsManual(
+	ctx context.Context,
+	linkId ID[Link],
+) (bool, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Data = map[string]interface{}{
-		"linkId": linkId,
-	}
+	span.SetData("linkId", linkId)
 
 	ok, err := r.txn.ModelContext(span.Context(), &Link{}).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
@@ -86,12 +88,13 @@ func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId ID[Link]) (
 	return ok, nil
 }
 
-func (r *repositoryBase) GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId ID[BankAccount]) (bool, error) {
+func (r *repositoryBase) GetLinkIsManualByBankAccountId(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+) (bool, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Data = map[string]interface{}{
-		"bankAccountId": bankAccountId,
-	}
+	span.SetData("bankAccountId", bankAccountId)
 
 	ok, err := r.txn.ModelContext(span.Context(), &Link{}).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
@@ -129,10 +132,6 @@ func (r *repositoryBase) CreateLink(ctx context.Context, link *Link) error {
 func (r *repositoryBase) UpdateLink(ctx context.Context, link *Link) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"link": *link,
-	}
 
 	link.AccountId = r.AccountId()
 	link.UpdatedAt = r.clock.Now().UTC()
