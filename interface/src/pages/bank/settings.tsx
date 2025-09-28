@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { FormikHelpers } from 'formik';
-import { FlaskConical, HeartCrack, Save, Settings } from 'lucide-react';
+import { Archive, FlaskConical, HeartCrack, Save, Settings } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -11,7 +12,7 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
-import { useSelectedBankAccount, useUpdateBankAccount } from '@monetr/interface/hooks/bankAccounts';
+import { useArchiveBankAccount, useSelectedBankAccount, useUpdateBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { APIError } from '@monetr/interface/util/request';
 
 interface BankAccountValues {
@@ -22,7 +23,22 @@ interface BankAccountValues {
 export default function BankAccountSettingsPage(): JSX.Element {
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
   const updateBankAccount = useUpdateBankAccount();
+  const archiveBankAccount = useArchiveBankAccount();
   const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
+
+  const archive = useCallback(async () => {
+    if (!bankAccount) {
+      return Promise.resolve();
+    }
+
+    if (window.confirm(`Are you sure you want to archive bank account: ${ bankAccount.name }`)) {
+      return archiveBankAccount(bankAccount.bankAccountId)
+        .then(() => navigate('/'));
+    }
+
+    return Promise.resolve();
+  }, [bankAccount, archiveBankAccount, navigate]);
 
   if (isLoading) {
     return (
@@ -90,6 +106,10 @@ export default function BankAccountSettingsPage(): JSX.Element {
         base={ `/bank/${bankAccount.bankAccountId}/transactions` }
         breadcrumb='Settings'
       >
+        <Button variant='destructive' onClick={ archive } >
+          <Archive />
+          Archive
+        </Button>
         <Button variant='primary' type='submit'>
           <Save />
           Save Changes

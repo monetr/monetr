@@ -4,6 +4,7 @@ import { EllipsisVertical, LogIn, Plug, RefreshCw, Trash2 } from 'lucide-react';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@monetr/interface/components/DropdownMenu';
 import MDivider from '@monetr/interface/components/MDivider';
+import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useCurrentLink, useTriggerManualPlaidSync } from '@monetr/interface/hooks/links';
@@ -37,7 +38,14 @@ export default function BudgetingSidebarTitle(): JSX.Element {
   }, [link]);
 
   if (!link) {
-    return null;
+    return (
+      <Fragment>
+        <div className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis' >
+          <Skeleton className='h-7 w-full' />
+        </div>
+        <MDivider className='w-1/2' />
+      </Fragment>
+    );
   }
 
   return (

@@ -87,6 +87,31 @@ export function useUpdateBankAccount(): (_bankAccount: UpdateBankAccountRequest)
   return mutate.mutateAsync;
 }
 
+export function useArchiveBankAccount(): (_bankAccountId: string) => Promise<string> {
+  const queryClient = useQueryClient();
+
+  async function archiveBankAccount(bankAccountId: string): Promise<string> {
+    return request()
+      .delete<Partial<BankAccount>>(`/bank_accounts/${bankAccountId}`)
+      .then(() => bankAccountId);
+  }
+
+  const mutate = useMutation(
+    archiveBankAccount,
+    {
+      onSuccess: (bankAccountId: string) => Promise.all([
+        queryClient.setQueryData(
+          ['/bank_accounts'],
+          (previous: Array<Partial<BankAccount>>) => previous.filter(item => item.bankAccountId !== bankAccountId),
+        ),
+        queryClient.removeQueries([`/bank_accounts/${bankAccountId}`]),
+      ]),
+    }
+  );
+
+  return mutate.mutateAsync;
+}
+
 export function useSelectedBankAccount(): UseQueryResult<BankAccount | undefined> {
   const queryClient = useQueryClient();
   const match = useMatch('/bank/:bankId/*');
