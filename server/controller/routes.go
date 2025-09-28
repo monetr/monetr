@@ -277,7 +277,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.PUT("/links/:linkId", c.putLink)
 	billed.PUT("/links/convert/:linkId", c.convertLink)
 	billed.DELETE("/links/:linkId", c.deleteLink)
-	billed.GET("/links/wait/:linkId", c.waitForDeleteLink)
 	// Institutions
 	billed.GET("/institutions/:institutionId", c.getInstitutionDetails)
 	// Bank Accounts

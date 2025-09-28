@@ -1,19 +1,13 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 
-	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func (c *Controller) getLinks(ctx echo.Context) error {
@@ -21,7 +15,7 @@ func (c *Controller) getLinks(ctx echo.Context) error {
 
 	links, err := repo.GetLinks(c.getContext(ctx))
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve links")
+		return c.wrapPgError(ctx, err, "Failed to retrieve links")
 	}
 
 	return ctx.JSON(http.StatusOK, links)
@@ -78,7 +72,7 @@ func (c *Controller) postLinks(ctx echo.Context) error {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	if err := repo.CreateLink(c.getContext(ctx), &link); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not create manual link")
+		return c.wrapPgError(ctx, err, "Could not create a manual link")
 	}
 
 	return ctx.JSON(http.StatusOK, link)
@@ -94,7 +88,7 @@ func (c *Controller) putLink(ctx echo.Context) error {
 		Description *string `json:"description"`
 	}
 	if err := ctx.Bind(&request); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		return c.invalidJson(ctx)
 	}
 
 	// If a description is provided. Trim the space on the description.
@@ -140,10 +134,6 @@ func (c *Controller) convertLink(ctx echo.Context) error {
 
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
-		if errors.Is(errors.Cause(err), pg.ErrNoRows) {
-			return c.notFound(ctx, "the specified link ID does not exist")
-		}
-
 		return c.wrapPgError(ctx, err, "could not retrieve link to convert")
 	}
 
@@ -169,10 +159,6 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
-		if errors.Is(errors.Cause(err), pg.ErrNoRows) {
-			return c.notFound(ctx, "the specified link ID does not exist")
-		}
-
 		return c.wrapPgError(ctx, err, "failed to retrieve the specified link")
 	}
 
@@ -188,7 +174,7 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		if err != nil {
 			crumbs.Error(
 				c.getContext(ctx),
-				"Failed to retrieve access token for plaid link.", "secrets", map[string]interface{}{
+				"Failed to retrieve access token for plaid link.", "secrets", map[string]any{
 					"linkId":   link.LinkId,
 					"itemId":   link.PlaidLink.PlaidId,
 					"secretId": secret.SecretId,
@@ -230,66 +216,4 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusOK)
-}
-
-func (c *Controller) waitForDeleteLink(ctx echo.Context) error {
-	// TODO Just deprecate this endpoint entirely and instead use soft delete?
-	linkId, err := ParseID[Link](ctx.Param("linkId"))
-	if err != nil || linkId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid link Id to wait for")
-	}
-
-	log := c.getLog(ctx).WithFields(logrus.Fields{
-		"linkId": linkId,
-	})
-	repo := c.mustGetAuthenticatedRepository(ctx)
-	// link, err := repo.GetLink(c.getContext(ctx), linkId)
-	// if err != nil {
-	// 	return c.wrapPgError(ctx, err, "failed to retrieve link")
-	// }
-
-	// If the link is done just return.
-	// TODO This is all wrong, why are we checking for link status setup for deleting?
-	//      Just going to have it return nothing for now.
-	// if link.LinkStatus == LinkStatusSetup {
-	// 	crumbs.Debug(c.getContext(ctx), "Link is setup, no need to poll.", nil)
-	// 	return ctx.NoContent(http.StatusNoContent)
-	// }
-
-	channelName := fmt.Sprintf("link:remove:%s:%s", repo.AccountId(), linkId)
-
-	listener, err := c.PubSub.Subscribe(c.getContext(ctx), channelName)
-	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to listen on channel")
-	}
-	defer func() {
-		if err = listener.Close(); err != nil {
-			log.WithFields(logrus.Fields{
-				"accountId": c.mustGetAccountId(ctx),
-				"linkId":    linkId,
-			}).WithError(err).Error("failed to gracefully close listener")
-		}
-	}()
-
-	crumbs.Debug(c.getContext(ctx), "Waiting for notification on channel", map[string]interface{}{
-		"channel": channelName,
-	})
-
-	log.Debugf("waiting for link to be removed on channel: %s", channelName)
-
-	span := sentry.StartSpan(c.getContext(ctx), "Wait For Notification")
-	defer span.Finish()
-
-	deadLine := time.NewTimer(30 * time.Second)
-	defer deadLine.Stop()
-
-	select {
-	case <-deadLine.C:
-		log.Trace("timed out waiting for link to be removed")
-		return ctx.NoContent(http.StatusRequestTimeout)
-	case <-listener.Channel():
-		// Just exit successfully, any message on this channel is considered a success.
-		log.Trace("link removed successfully")
-		return ctx.NoContent(http.StatusOK)
-	}
 }
