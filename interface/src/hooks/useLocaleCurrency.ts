@@ -19,13 +19,19 @@ interface LocaleCurrency {
   formatAmount: (value: number, kind: AmountType, signDisplay?: boolean) => string;
 }
 
-export default function useLocaleCurrency(): UseQueryResult<LocaleCurrency | null> {
+export const DefaultCurrency = 'USD';
+
+export default function useLocaleCurrency(): UseQueryResult<LocaleCurrency> {
   const { result: _, ...me } = useAuthenticationSink();
   const bankAccount = useSelectedBankAccount();
   const locale = useMemo(() => me.data?.user?.account?.locale ?? 'en_US', [me]);
   const currency = useMemo(() => {
     // Return the first _defined_ currency.
-    return [bankAccount?.data?.currency, me?.data?.defaultCurrency, 'USD'].find(value => !!value);
+    return [
+      bankAccount?.data?.currency,
+      me?.data?.defaultCurrency,
+      DefaultCurrency,
+    ].find(value => !!value);
   }, [me, bankAccount]);
 
   const friendlyToAmountCallback = useCallback((value: number) => {

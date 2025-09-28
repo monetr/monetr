@@ -11,20 +11,17 @@ import MForm from '@monetr/interface/components/MForm';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
+import SelectCurrency from '@monetr/interface/components/SelectCurrency';
 import { useCreateBankAccount, useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useLocaleCurrency, { DefaultCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewBankAccountValues {
   name: string;
   balance: number;
+  currency: string;
 }
-
-const initialValues: NewBankAccountValues = {
-  name: '',
-  balance: 0,
-};
 
 function NewBankAccountModal(): JSX.Element {
   const { data: locale } = useLocaleCurrency();
@@ -34,6 +31,12 @@ function NewBankAccountModal(): JSX.Element {
   const createBankAccount = useCreateBankAccount();
   const navigate = useNavigate();
   const ref = useRef<MModalRef>(null);
+
+  const initialValues: NewBankAccountValues = {
+    name: '',
+    balance: 0,
+    currency: locale?.currency ?? DefaultCurrency,
+  };
 
   const submit = useCallback(async (
     values: NewBankAccountValues,
@@ -48,6 +51,7 @@ function NewBankAccountModal(): JSX.Element {
       // TODO Make it so these can be customized
       accountType: BankAccountType.Depository,
       accountSubType: BankAccountSubType.Checking,
+      currency: values.currency,
     })
       .then(result => navigate(`/bank/${ result.bankAccountId }/transactions`))
       .then(() => modal.remove())
@@ -86,6 +90,12 @@ function NewBankAccountModal(): JSX.Element {
             required
             autoComplete='off'
             placeholder='Personal Checking...'
+          />
+          <SelectCurrency
+            name='currency'
+            className='w-full'
+            menuPortalTarget={ document.body }
+            required
           />
           <MAmountField
             id='bank-account-balance-search' // Keep's 1Pass from hijacking normal name fields.

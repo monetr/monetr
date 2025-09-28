@@ -28,6 +28,7 @@ export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element 
         placeholder='Select a currency...'
         required={ props.required }
         className={ props.className }
+        menuPortalTarget={ props.menuPortalTarget }
       />
     );
   }
@@ -46,6 +47,7 @@ export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element 
       placeholder='Select a currency...'
       required={ props.required }
       className={ props.className }
+      menuPortalTarget={ props.menuPortalTarget }
       value={ value }
     />
   );
