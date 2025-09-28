@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"strings"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
+	"golang.org/x/net/websocket"
 )
 
 // cleanString takes the current request context, the name of a field and the
@@ -270,4 +272,31 @@ func (c *Controller) scrubSentryBody(ctx echo.Context) {
 			scope.SetRequestBody(nil)
 		}
 	}
+}
+
+func (c *Controller) sendWebsocketMessage(ctx echo.Context, ws *websocket.Conn, message any) error {
+	log := c.getLog(ctx)
+	msg, err := json.Marshal(message)
+	if err != nil {
+		log.WithField("mesasge", message).WithError(err).Error("failed to encode websocket message")
+		return err
+	}
+	if err := websocket.Message.Send(ws, string(msg)); err != nil {
+		log.WithField("mesasge", message).WithError(err).Error("failed to send websocket message")
+		return err
+	}
+
+	return nil
+}
+
+func (c *Controller) readWebsocketMessage(ctx echo.Context, ws *websocket.Conn, result any) error {
+	log := c.getLog(ctx)
+
+	var message string
+	if err := websocket.Message.Receive(ws, &message); err != nil {
+		log.WithField("message", message).WithError(err).Error("failed to read websocket message")
+		return errors.Wrap(err, "failed to read websocket message")
+	}
+
+	return errors.Wrap(json.Unmarshal([]byte(message), result), "failed to decode websocket message")
 }

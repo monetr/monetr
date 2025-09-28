@@ -37,3 +37,31 @@ func TestParse(t *testing.T) {
 		assert.NotEmpty(t, result)
 	})
 }
+
+func TestParseTransactionAmount(t *testing.T) {
+	t.Run("us example debit", func(t *testing.T) {
+		input := camt.ReportEntry15{
+			Amt: &camt.ActiveOrHistoricCurrencyAndAmount{
+				CcyAttr: "USD",
+				Value:   100.00,
+			},
+			CdtDbtInd: "DBIT",
+		}
+		result, err := camt.ParseTransactionAmount(input)
+		assert.NoError(t, err, "should not return an error parsing known good values")
+		assert.EqualValues(t, 10000, result, "should match the expected amount")
+	})
+
+	t.Run("us example credit", func(t *testing.T) {
+		input := camt.ReportEntry15{
+			Amt: &camt.ActiveOrHistoricCurrencyAndAmount{
+				CcyAttr: "USD",
+				Value:   100.00,
+			},
+			CdtDbtInd: "CRDT",
+		}
+		result, err := camt.ParseTransactionAmount(input)
+		assert.NoError(t, err, "should not return an error parsing known good values")
+		assert.EqualValues(t, -10000, result, "should match the expected amount")
+	})
+}

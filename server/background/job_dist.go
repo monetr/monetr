@@ -7,8 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type JobMarshaller func(v interface{}) ([]byte, error)
-type JobUnmarshaller func(src []byte, dst interface{}) error
+type JobMarshaller func(v any) ([]byte, error)
+type JobUnmarshaller func(src []byte, dst any) error
 
 var (
 	DefaultJobMarshaller   JobMarshaller   = json.Marshal

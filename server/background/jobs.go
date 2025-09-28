@@ -78,6 +78,7 @@ func NewBackgroundJobs(
 		NewCalculateTransactionClustersHandler(log, db, clock),
 		NewCleanupFilesHandler(log, db, clock, fileStorage, enqueuer),
 		NewCleanupJobsHandler(log, db),
+		NewProcessCAMTUploadHandler(log, db, clock, fileStorage, publisher, enqueuer),
 		NewProcessFundingScheduleHandler(log, db, clock),
 		NewProcessOFXUploadHandler(log, db, clock, fileStorage, publisher, enqueuer),
 		NewProcessSpendingHandler(log, db, clock),
@@ -141,10 +142,19 @@ func (b *BackgroundJobs) Close() error {
 	return b.processor.Close()
 }
 
-func (b *BackgroundJobs) EnqueueJob(ctx context.Context, queue string, data interface{}) error {
+func (b *BackgroundJobs) EnqueueJob(
+	ctx context.Context,
+	queue string,
+	data any,
+) error {
 	return b.enqueuer.EnqueueJob(ctx, queue, data)
 }
 
-func (b *BackgroundJobs) EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, data interface{}) error {
+func (b *BackgroundJobs) EnqueueJobTxn(
+	ctx context.Context,
+	txn pg.DBI,
+	queue string,
+	data any,
+) error {
 	return b.enqueuer.EnqueueJobTxn(ctx, txn, queue, data)
 }
