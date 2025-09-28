@@ -1,6 +1,7 @@
 import { useMatch } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
+import { QueryMethod } from '@monetr/interface/components/MQueryClient';
 import { useLinks } from '@monetr/interface/hooks/links';
 import BankAccount, { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import request from '@monetr/interface/util/request';
@@ -11,6 +12,20 @@ export function useBankAccounts(): UseQueryResult<Array<BankAccount>> {
     enabled: !!links && links.length > 0,
     select: data => data.map(item => new BankAccount(item)),
   });
+}
+
+export function useBankAccountsForLink(linkId: string): UseQueryResult<Array<BankAccount>> {
+  return useQuery<Array<Partial<BankAccount>>, unknown, Array<BankAccount>>(
+    ['/bank_accounts', 'link_id', linkId], 
+    {
+      meta: {
+        // Force the code to generate a query param request
+        method: QueryMethod.UseQuery,
+      },
+      enabled: Boolean(linkId),
+      select: data => data.map(item => new BankAccount(item)),
+    },
+  );
 }
 
 export interface CreateBankAccountRequest {

@@ -23,6 +23,7 @@ import Goals from '@monetr/interface/pages/goals';
 import GoalDetails from '@monetr/interface/pages/goals/details';
 import LinkCreatePage from '@monetr/interface/pages/link/create';
 import CreateManualLinkPage from '@monetr/interface/pages/link/create/manual';
+import LinkDetails from '@monetr/interface/pages/link/details';
 import Login from '@monetr/interface/pages/login';
 import MultifactorAuthenticationPage from '@monetr/interface/pages/login/multifactor';
 import LogoutPage from '@monetr/interface/pages/logout';
@@ -144,6 +145,7 @@ export default function Monetr(): JSX.Element {
             ) }
             <Route path='about' element={ <SettingsAbout /> } />
           </Route>
+          <Route path='/link/:linkId/details' element={ <LinkDetails /> } />
           <Route path='/link/create' element={ <LinkCreatePage /> } />
           <Route path='/link/create/plaid' element={ <PlaidSetup alreadyOnboarded /> } />
           <Route path='/link/create/manual' element={ <CreateManualLinkPage /> } />
