@@ -41,6 +41,22 @@ export function getCurrencySymbol(locale: string, currency: string) {
 }
 
 /**
+ * getCurrencySymbolPrefixed does the same thing as `getCurrencySymbol` but if the string that would be returned is not
+ * a single symbol, then it adds a space suffix to make it easier to read.
+ *
+ * @param {string} locale The local code for the current user's perspective.
+ * @param {string} currency The ISO currency code of the current the amount is in.
+ */
+export function getCurrencySymbolPrefixed(locale: string, currency: string): string {
+  const result = getCurrencySymbol(locale, currency);
+  if (result.match(/\w{3}/)) {
+    return `${result} `;
+  }
+
+  return result;
+}
+
+/**
  * getDecimalSeparator will return the character for the specified locale that is used as the decimal separator. For
  * example `,` or `.`.
  *

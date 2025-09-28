@@ -21,18 +21,25 @@ interface LocaleCurrency {
 
 export const DefaultCurrency = 'USD';
 
-export default function useLocaleCurrency(): UseQueryResult<LocaleCurrency> {
+/**
+ * useLocaleCurrency takes an optional currency code, if the code is provided then it will return the locale currency
+ * for that specific code. Otherwise it will use a default chain for the currency + locale to be returned.
+ * It will use the current bank accounts currency (if there is one), then the user's default currency then the global
+ * default currency.
+ */
+export default function useLocaleCurrency(forceCurrency?: string): UseQueryResult<LocaleCurrency> {
   const { result: _, ...me } = useAuthenticationSink();
   const bankAccount = useSelectedBankAccount();
   const locale = useMemo(() => me.data?.user?.account?.locale ?? 'en_US', [me]);
   const currency = useMemo(() => {
     // Return the first _defined_ currency.
     return [
+      forceCurrency,
       bankAccount?.data?.currency,
       me?.data?.defaultCurrency,
       DefaultCurrency,
     ].find(value => !!value);
-  }, [me, bankAccount]);
+  }, [forceCurrency, me, bankAccount]);
 
   const friendlyToAmountCallback = useCallback((value: number) => {
     return friendlyToAmount(value, locale, currency);

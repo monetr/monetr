@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { Fragment, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
@@ -78,42 +78,47 @@ function NewBankAccountModal(): JSX.Element {
         className='h-full flex flex-col gap-2 p-2 justify-between'
         data-testid='new-bank-account-modal'
       >
-        <div className='flex flex-col'>
-          <MSpan weight='bold' size='xl' className='mb-2'>
-            Create A New Bank Account
-          </MSpan>
-          <MTextField
-            id='bank-account-name-search' // Keep's 1Pass from hijacking normal name fields.
-            data-testid='bank-account-name'
-            name='name'
-            label={ 'What is the account\'s name ?' }
-            required
-            autoComplete='off'
-            placeholder='Personal Checking...'
-          />
-          <SelectCurrency
-            name='currency'
-            className='w-full'
-            menuPortalTarget={ document.body }
-            required
-          />
-          <MAmountField
-            id='bank-account-balance-search' // Keep's 1Pass from hijacking normal name fields.
-            data-testid='bank-account-balance'
-            name='balance'
-            label='Initial Balance'
-            required
-            allowNegative
-          />
-        </div>
-        <div className='flex justify-end gap-2'>
-          <FormButton variant='secondary' onClick={ modal.remove } data-testid='close-new-bank-account-modal'>
-            Cancel
-          </FormButton>
-          <FormButton variant='primary' type='submit' data-testid='bank-account-submit'>
-            Create
-          </FormButton>
-        </div>
+        { ({ values }) => (
+          <Fragment>
+            <div className='flex flex-col'>
+              <MSpan weight='bold' size='xl' className='mb-2'>
+                Create A New Bank Account
+              </MSpan>
+              <MTextField
+                id='bank-account-name-search' // Keep's 1Pass from hijacking normal name fields.
+                data-testid='bank-account-name'
+                name='name'
+                label={ 'What is the account\'s name ?' }
+                required
+                autoComplete='off'
+                placeholder='Personal Checking...'
+              />
+              <SelectCurrency
+                name='currency'
+                className='w-full'
+                menuPortalTarget={ document.body }
+                required
+              />
+              <MAmountField
+                id='bank-account-balance-search' // Keep's 1Pass from hijacking normal name fields.
+                data-testid='bank-account-balance'
+                name='balance'
+                label='Initial Balance'
+                required
+                allowNegative
+                currency={ values['currency'] }
+              />
+            </div>
+            <div className='flex justify-end gap-2'>
+              <FormButton variant='secondary' onClick={ modal.remove } data-testid='close-new-bank-account-modal'>
+                Cancel
+              </FormButton>
+              <FormButton variant='primary' type='submit' data-testid='bank-account-submit'>
+                Create
+              </FormButton>
+            </div>
+          </Fragment>
+        ) }
       </MForm>
     </MModal>
   );

@@ -4,7 +4,7 @@ import { useFormikContext } from 'formik';
 
 import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
-import { getCurrencySymbol, getDecimalSeparator, getNumberGroupSeparator, intlNumberFormat, intlNumberFormatter } from '@monetr/interface/util/amounts';
+import { getCurrencySymbolPrefixed, getDecimalSeparator, getNumberGroupSeparator, intlNumberFormat, intlNumberFormatter } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 type NumericField =  Omit<
@@ -26,7 +26,7 @@ const MAmountFieldPropsDefaults: MAmountFieldProps = {
 };
 
 export default function MAmountField(props: MAmountFieldProps = MAmountFieldPropsDefaults): JSX.Element {
-  const { data: localeInfo } = useLocaleCurrency();
+  const { data: localeInfo } = useLocaleCurrency(props.currency);
   const formikContext = useFormikContext();
   const getFormikError = () => {
     if (!formikContext?.touched[props?.name]) return null;
@@ -80,6 +80,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
       'ring-gray-200': props.disabled,
       'text-gray-500': props.disabled,
     },
+    'proportional-nums',
     'block',
     'border-0',
     'focus:ring-2',
@@ -139,8 +140,8 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           thousandSeparator={ getNumberGroupSeparator(localeInfo.locale) }
           onValueChange={ onChange }
           renderText={ intlNumberFormatter(localeInfo.locale, props.currency)  }
-          placeholder={ `${intlNumberFormatter(localeInfo.locale, props.currency)('0') }` }
-          prefix={ `${getCurrencySymbol(localeInfo.locale, props.currency)}` }
+          placeholder={ intlNumberFormatter(localeInfo.locale, props.currency)('0') }
+          prefix={ getCurrencySymbolPrefixed(localeInfo.locale, props.currency) }
         />
       </div>
       <Error />
