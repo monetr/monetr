@@ -68,6 +68,12 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
     },
   );
 
+  let linkPath = `/bank/${destinationBankAccount?.bankAccountId}/transactions`;
+  // If the link has no non-archived bank accounts then instead redirect to the link details page.
+  if (bankAccounts?.filter(b => b.linkId === link.linkId).length === 0) {
+    linkPath = `/link/${link.linkId}/details`;
+  }
+
   let tooltip: string = link.getName();
   if (link.getIsPlaid()) {
     if (link.getIsError()) {
@@ -88,7 +94,7 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
         <div className={ classes } />
         <Link
           className='absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle drop-shadow-md flex justify-center items-center'
-          to={ `/bank/${destinationBankAccount?.bankAccountId}/transactions` }
+          to={ linkPath }
         >
           <PlaidInstitutionLogo link={ link } />
           <LinkWarningIndicator />
