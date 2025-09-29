@@ -26,17 +26,14 @@ export default function MQueryClient(props: MQueryClientProps): JSX.Element {
   const queryFn = useCallback(async (context: QueryFunctionContext<QueryKey>) => {
     let method = 'GET';
     let body = undefined;
-    const params = {};
-    if (context.queryKey.length > 1 && context.meta['method'] !== QueryMethod.UseQuery) {
+    let params = {};
+    if (context.queryKey.length > 1 && context?.meta?.['method'] !== QueryMethod.UseQuery) {
       method = 'POST';
       body = context.queryKey[1];
     }
 
-    if (context.meta['method'] === QueryMethod.UseQuery && (context.queryKey.length - 1) % 2 === 0) {
-      for (let i = 1; i < context.queryKey.length; i += 2) {
-        console.log(i, context.queryKey[i], context.queryKey);
-        params[String(context.queryKey[i])] = context.queryKey[i + 1];
-      }
+    if (context?.meta?.['method'] === QueryMethod.UseQuery && context.queryKey.length > 1) {
+      params = context.queryKey[1];
     }
 
     if (context.pageParam) {
