@@ -84,7 +84,7 @@ describe('bank account hooks', () => {
     afterAll(() => mockAxios.restore());
   
     it('will handle url params', async () => {
-      mockAxios.onGet('/api/bank_accounts?link_id=foo').reply(200, [
+      mockAxios.onGet('/api/bank_accounts', { params: { link_id: 'foo' } }).reply(200, [
         {
           'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
           'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
@@ -104,11 +104,15 @@ describe('bank account hooks', () => {
       { // Make sure use selected bank account works.
         const world = testRenderHook(useBankAccountsForLink, {
           initialRoute: '/',
+          initialProps: 'foo',
         });
-        world.rerender('foo');
         expect(world.result.current.data).not.toBeDefined();
         expect(world.result.current.isLoading).toBeTruthy();
+        // Wait for the hook to load the data
         await world.waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
+        // Make sure we returned the data from our mock request above!
+        expect(world.result.current.data).toHaveLength(1);
+        expect(world.result.current.data[0].bankAccountId).toBe('bac_01hy4rcmadc01d2kzv7vynbxxx');
       }
     });
   });

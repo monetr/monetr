@@ -16,7 +16,7 @@ export function useBankAccounts(): UseQueryResult<Array<BankAccount>> {
 
 export function useBankAccountsForLink(linkId: string): UseQueryResult<Array<BankAccount>> {
   return useQuery<Array<Partial<BankAccount>>, unknown, Array<BankAccount>>(
-    ['/bank_accounts', 'link_id', linkId], 
+    ['/bank_accounts', { link_id: linkId }],
     {
       meta: {
         // Force the code to generate a query param request
