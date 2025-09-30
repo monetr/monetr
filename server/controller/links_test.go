@@ -473,6 +473,89 @@ func TestPutLink(t *testing.T) {
 	})
 }
 
+func TestPatchLink(t *testing.T) {
+	t.Run("simple manual link", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId models.ID[models.Link]
+		{ // Create the manual link via the API
+			institutionName := "U.S. Bank"
+
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": institutionName,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII()
+			response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		{ // Then update the link with a patch request
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "My Own Name",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").IsEqual(linkId)
+			response.JSON().Path("$.institutionName").String().IsEqual("My Own Name")
+		}
+
+	})
+
+	t.Run("simple plaid link", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Then update the link with a patch request
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "My Own Name",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").IsEqual(link.LinkId)
+			response.JSON().Path("$.institutionName").String().IsEqual("My Own Name")
+		}
+	})
+
+	t.Run("cant update any other fields", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Then update the link with a patch request
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkType": models.ManualLinkType,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").IsEqual("Invalid request")
+			response.JSON().Path("$.problems.linkType").String().IsEqual("key not expected")
+		}
+	})
+}
+
 func TestDeleteLink(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		clock := clock.New()

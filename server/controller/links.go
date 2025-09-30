@@ -8,6 +8,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/validation"
 )
 
 func (c *Controller) getLinks(ctx echo.Context) error {
@@ -38,36 +39,26 @@ func (c *Controller) getLink(ctx echo.Context) error {
 }
 
 func (c *Controller) postLinks(ctx echo.Context) error {
-	var err error
-	var request struct {
-		InstitutionName string  `json:"institutionName"`
-		Description     *string `json:"description"`
-	}
-	if err = ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
-	}
-
-	request.InstitutionName, err = c.cleanString(ctx, "Institution Name", request.InstitutionName)
-	if err != nil {
-		return err
-	}
-	if request.InstitutionName == "" {
-		return c.badRequest(ctx, "link must have an institution name")
-	}
-
-	// If a description is provided. Trim the space on the description.
-	if request.Description != nil {
-		desc, err := c.cleanString(ctx, "Description", *request.Description)
-		if err != nil {
-			return err
-		}
-		request.Description = &desc
-	}
-
 	link := Link{
-		InstitutionName: request.InstitutionName,
-		Description:     request.Description,
-		LinkType:        ManualLinkType,
+		// Since we can only create manual links via the API directly like this,
+		// then set this field initially. It cannot be overwritten by the unmarshall
+		// anyway.
+		LinkType: ManualLinkType,
+	}
+	switch err := link.UnmarshalRequest(
+		c.getContext(ctx),
+		ctx.Request().Body,
+		link.CreateValidators()...,
+	).(type) {
+	case validation.Errors:
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":    "Invalid request",
+			"problems": err,
+		})
+	case nil:
+		break
+	default:
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse post request")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -122,6 +113,41 @@ func (c *Controller) putLink(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, existingLink)
+}
+
+func (c *Controller) patchLink(ctx echo.Context) error {
+	linkId, err := ParseID[Link](ctx.Param("linkId"))
+	if err != nil || linkId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid link Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	existingLink, err := repo.GetLink(c.getContext(ctx), linkId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve link")
+	}
+
+	switch err := existingLink.UnmarshalRequest(
+		c.getContext(ctx),
+		ctx.Request().Body,
+		existingLink.UpdateValidator()...,
+	).(type) {
+	case validation.Errors:
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":    "Invalid request",
+			"problems": err,
+		})
+	case nil:
+		break
+	default:
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
+	}
+
+	if err = repo.UpdateLink(c.getContext(ctx), existingLink); err != nil {
+		return c.wrapPgError(ctx, err, "failed to update link")
+	}
+
+	return ctx.JSON(http.StatusOK, *existingLink)
 }
 
 func (c *Controller) convertLink(ctx echo.Context) error {

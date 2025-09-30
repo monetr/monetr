@@ -283,6 +283,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/links/:linkId", c.getLink)
 	billed.POST("/links", c.postLinks)
 	billed.PUT("/links/:linkId", c.putLink)
+	billed.PATCH("/links/:linkId", c.patchLink)
 	billed.PUT("/links/convert/:linkId", c.convertLink)
 	billed.DELETE("/links/:linkId", c.deleteLink)
 	// Institutions
