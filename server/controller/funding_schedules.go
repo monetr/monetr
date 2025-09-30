@@ -8,6 +8,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -64,23 +65,21 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 	}
 
 	var fundingSchedule FundingSchedule
-	if err := ctx.Bind(&fundingSchedule); err != nil {
-		return c.invalidJson(ctx)
-	}
-
-	fundingSchedule.FundingScheduleId = "" // Make sure we create a new funding schedule.
-	fundingSchedule.Name, err = c.cleanString(ctx, "Name", fundingSchedule.Name)
-	if err != nil {
-		return err
-	}
-	fundingSchedule.Description, err = c.cleanString(ctx, "Description", fundingSchedule.Description)
-	if err != nil {
-		return err
-	}
 	fundingSchedule.BankAccountId = bankAccountId
-
-	if fundingSchedule.Name == "" {
-		return c.badRequest(ctx, "funding schedule must have a name")
+	switch err := fundingSchedule.UnmarshalRequest(
+		c.getContext(ctx),
+		ctx.Request().Body,
+		fundingSchedule.CreateValidators()...,
+	).(type) {
+	case validation.Errors:
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":    "Invalid request",
+			"problems": err,
+		})
+	case nil:
+		break
+	default:
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse post request")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)

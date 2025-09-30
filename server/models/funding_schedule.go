@@ -2,14 +2,18 @@ package models
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/mergo"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/util"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
+	"github.com/pkg/errors"
 )
 
 type FundingSchedule struct {
@@ -175,16 +179,15 @@ func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, now time.
 
 func (FundingSchedule) CreateValidators() []*validation.KeyRules {
 	return []*validation.KeyRules{
-		validation.Key(
-			"bankAccountId",
-			validation.Required.Error("Must specify a bank account ID"),
-			ValidID[BankAccount]().Error("Bank account ID specified is not valid"),
-		).Required(validators.Require),
+		// validation.Key(
+		// 	"bankAccountId",
+		// 	validation.Required.Error("Must specify a bank account ID"),
+		// 	ValidID[BankAccount]().Error("Bank account ID specified is not valid"),
+		// ).Required(validators.Optional),
 		validators.Name(validators.Require),
-		validation.Key(
-			"description",
-			validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
-		).Required(validators.Optional),
+		validators.Description(),
+		// TODO This is broken because we cannot take a string ruleset and MERGE it
+		// into a ruleset struct. We need to implement a transformer here.
 		validation.Key(
 			"ruleset",
 			validation.Required.Error("Ruleset must be specified for funding schedules"),
@@ -201,6 +204,75 @@ func (FundingSchedule) CreateValidators() []*validation.KeyRules {
 			"estimatedDeposit",
 			validation.Min(float64(0)).Error("Estimated deposit cannot be less than 0"),
 		).Required(validators.Optional),
-		// TODO Validate next recurrence based on the current timestamp
+		validation.Key(
+			"nextRecurrence",
+			validation.Date(time.RFC3339).Min(time.Now()).Error("Next recurrence must be in the future"),
+		).Required(validators.Optional),
 	}
+}
+
+func (FundingSchedule) UpdateValidators() []*validation.KeyRules {
+	return []*validation.KeyRules{
+		validators.Name(validators.Optional),
+		validators.Description(),
+		validation.Key(
+			"ruleset",
+			validation.NewStringRule(func(input string) bool {
+				_, err := NewRuleSet(input)
+				return err == nil
+			}, "Ruleset must be valid"),
+		).Required(validators.Optional),
+		validation.Key(
+			"excludeWeekends",
+			validation.In(true, false).Error("Exclude weekends must be a valid boolean"),
+		).Required(validators.Optional),
+		validation.Key(
+			"estimatedDeposit",
+			validation.Min(float64(0)).Error("Estimated deposit cannot be less than 0"),
+		).Required(validators.Optional),
+		validation.Key(
+			"nextRecurrence",
+			validation.Date(time.RFC3339).Min(time.Now()).Error("Next recurrence must be in the future"),
+		).Required(validators.Optional),
+	}
+}
+
+// UnmarshalRequest consumes a request body and an array of validation rules in
+// order to create an object that can be persisted to the database. For updates,
+// this function should be called on the existing object that is already stored
+// in the database. The provided validators should prevent key or sensitive
+// fields from being overwritten by the client's request body. For creates, the
+// initial object can be left blank; or default values can be specified ahead of
+// calling this function in case some fields are omitted in the intial request.
+func (o *FundingSchedule) UnmarshalRequest(
+	ctx context.Context,
+	reader io.Reader,
+	validators ...*validation.KeyRules,
+) error {
+	rawData := map[string]any{}
+	decoder := json.NewDecoder(reader)
+	decoder.UseNumber()
+	if err := decoder.Decode(&rawData); err != nil {
+		return errors.WithStack(err)
+	}
+
+	if err := validation.ValidateWithContext(
+		ctx,
+		&rawData,
+		validation.Map(
+			validators...,
+		),
+	); err != nil {
+		return err
+	}
+
+	if err := mergo.Map(
+		o, rawData,
+		mergo.WithOverride,
+		mergo.WithTransformers(util.MergeTransformer{}),
+	); err != nil {
+		return errors.Wrap(err, "failed to merge patched data")
+	}
+
+	return nil
 }

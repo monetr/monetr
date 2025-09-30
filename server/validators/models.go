@@ -23,6 +23,13 @@ func Name(required OptionalOrRequire) *validation.KeyRules {
 	).Required(required)
 }
 
+func Description() *validation.KeyRules {
+	return validation.Key(
+		"description",
+		validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
+	).Required(Optional)
+}
+
 func Mask() *validation.KeyRules {
 	return validation.Key(
 		"mask",

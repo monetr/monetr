@@ -9,6 +9,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/mergo"
 	"github.com/monetr/monetr/server/util"
+	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 )
@@ -65,7 +66,7 @@ func (Link) CreateValidators() []*validation.KeyRules {
 		validation.Key(
 			"description",
 			validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
-		).Optional(),
+		).Required(validators.Optional),
 	}
 }
 
@@ -77,11 +78,11 @@ func (Link) UpdateValidator() []*validation.KeyRules {
 		validation.Key(
 			"institutionName",
 			validation.Length(1, 300).Error("Institution name must be between 1 and 300 characters"),
-		).Optional(),
+		).Required(validators.Optional),
 		validation.Key(
 			"description",
 			validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
-		).Optional(),
+		).Required(validators.Optional),
 	}
 }
 

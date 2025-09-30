@@ -25,7 +25,7 @@ func TestPostFundingSchedules(t *testing.T) {
 		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 			WithPath("bankAccountId", bank.BankAccountId).
 			WithCookie(TestCookieName, token).
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"name":        "Payday",
 				"description": "15th and the Last day of every month",
 				"ruleset":     FifthteenthAndLastDayOfEveryMonth,
@@ -49,7 +49,7 @@ func TestPostFundingSchedules(t *testing.T) {
 		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 			WithPath("bankAccountId", bank.BankAccountId).
 			WithCookie(TestCookieName, token).
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"name":        gofakeit.Sentence(250),
 				"description": "15th and the Last day of every month",
 				"ruleset":     FifthteenthAndLastDayOfEveryMonth,
