@@ -332,8 +332,8 @@ github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTS
 github.com/mitchellh/mapstructure v1.4.1/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
-github.com/monetr/mergo v1.0.3 h1:A6I7OEMsQ7Ngua5GI6luqj7QNMt+o1q2BsyzOwQiS04=
-github.com/monetr/mergo v1.0.3/go.mod h1:jzbe6/PwkRvpT0GGzyM9IjDzmWjoqfaH5AVnIJcsDUo=
+github.com/monetr/mergo v1.0.4 h1:PJRYpsOxEYqNAm3IXFycGlxOrH9xaF3d9CSZY3ngzwQ=
+github.com/monetr/mergo v1.0.4/go.mod h1:jzbe6/PwkRvpT0GGzyM9IjDzmWjoqfaH5AVnIJcsDUo=
 github.com/monetr/validation v1.0.3 h1:8cE0XUtTsG9secLGTtGiWOaFfYKJCBXXfv40Q0vvthA=
 github.com/monetr/validation v1.0.3/go.mod h1:Wavagj20BdgLYqGA4y5F7QlSme4m8CnjuKJgSwBGBVY=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=

@@ -1,6 +1,8 @@
 package util
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type MergeTransformer struct {
 }

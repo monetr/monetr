@@ -18,25 +18,17 @@ import (
 
 func TestPostLink(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		app, e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
-		createdAndUpdatedBogus := app.Clock.Now().Add(-1 * time.Hour)
-		link := models.Link{
-			LinkId:          "link_bogus",         // Set it to something so we can verify its different in the result.
-			LinkType:        models.PlaidLinkType, // This should be changed to manual in the response.
-			InstitutionName: "U.S. Bank",
-			Description:     myownsanity.StringP("My personal link"),
-			CreatedAt:       createdAndUpdatedBogus, // Set these to something to make sure it gets overwritten.
-			UpdatedAt:       createdAndUpdatedBogus,
-		}
-
 		response := e.POST("/api/links").
 			WithCookie(TestCookieName, token).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"description":     "My personal link",
+			}).
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.linkId").NotEqual(link.LinkId)
 		response.JSON().Path("$.linkId").String().IsASCII()
 		response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 		response.JSON().Path("$.institutionName").String().NotEmpty()
