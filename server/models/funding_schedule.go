@@ -8,6 +8,8 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/util"
+	"github.com/monetr/monetr/server/validators"
+	"github.com/monetr/validation"
 )
 
 type FundingSchedule struct {
@@ -45,7 +47,8 @@ func (o *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, er
 	return ctx, nil
 }
 
-// Deprecated: Use the forecasting package funding instructions interface instead.
+// Deprecated: Use the forecasting package funding instructions interface
+// instead.
 func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, timezone *time.Location) int64 {
 	rule := f.RuleSet.Set
 	// Make sure that the rule is using the timezone of the dates provided. This
@@ -67,7 +70,8 @@ func (f *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezo
 	return nextOne, subsequent
 }
 
-// Deprecated: Use the forecasting package funding instructions interface instead.
+// Deprecated: Use the forecasting package funding instructions interface
+// instead.
 func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) (actual, original time.Time) {
 	// Make debugging easier.
 	now = now.In(timezone)
@@ -84,13 +88,15 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 		nextContributionDate = util.Midnight(nextContributionRule.Before(now, false), timezone)
 	}
 	if now.Before(nextContributionDate) {
-		// If now is before the already established next occurrence, then just return that.
-		// This might be goofy if we want to test stuff in the distant past?
+		// If now is before the already established next occurrence, then just
+		// return that. This might be goofy if we want to test stuff in the distant
+		// past?
 		return nextContributionDate, nextContributionDate
 	}
 
-	// Keep track of an un-adjusted next contribution date. Because we might subtract days to account for early
-	// funding, we need to make sure we are still incrementing relative to the _real_ contribution dates. Not the
+	// Keep track of an un-adjusted next contribution date. Because we might
+	// subtract days to account for early funding, we need to make sure we are
+	// still incrementing relative to the _real_ contribution dates. Not the
 	// adjusted ones.
 	actualNextContributionDate := nextContributionDate
 	for !nextContributionDate.After(now) {
@@ -99,15 +105,17 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 		// Store the real contribution date for later use.
 		actualNextContributionDate = nextContributionDate
 
-		// If we are excluding weekends, and the next contribution date falls on a weekend; then we need to adjust the
-		// date to the previous business day.
+		// If we are excluding weekends, and the next contribution date falls on a
+		// weekend; then we need to adjust the date to the previous business day.
 		if f.ExcludeWeekends {
 			switch nextContributionDate.Weekday() {
 			case time.Sunday:
-				// If it lands on a sunday then subtract 2 days to put the contribution date on a Friday.
+				// If it lands on a sunday then subtract 2 days to put the contribution
+				// date on a Friday.
 				nextContributionDate = nextContributionDate.AddDate(0, 0, -2)
 			case time.Saturday:
-				// If it lands on a sunday then subtract 1 day to put the contribution date on a Friday.
+				// If it lands on a sunday then subtract 1 day to put the contribution
+				// date on a Friday.
 				nextContributionDate = nextContributionDate.AddDate(0, 0, -1)
 			}
 		}
@@ -118,7 +126,8 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 	return nextContributionDate, actualNextContributionDate
 }
 
-// Deprecated: This function should no longer be used, use the forecasting code instead.
+// Deprecated: This function should no longer be used, use the forecasting code
+// instead.
 func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, now time.Time, timezone *time.Location) bool {
 	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
@@ -162,4 +171,36 @@ func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, now time.
 	f.NextRecurrenceOriginal = originalNextFundingOccurrence
 
 	return true
+}
+
+func (FundingSchedule) CreateValidators() []*validation.KeyRules {
+	return []*validation.KeyRules{
+		validation.Key(
+			"bankAccountId",
+			validation.Required.Error("Must specify a bank account ID"),
+			ValidID[BankAccount]().Error("Bank account ID specified is not valid"),
+		).Required(validators.Require),
+		validators.Name(validators.Require),
+		validation.Key(
+			"description",
+			validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
+		).Required(validators.Optional),
+		validation.Key(
+			"ruleset",
+			validation.Required.Error("Ruleset must be specified for funding schedules"),
+			validation.NewStringRule(func(input string) bool {
+				_, err := NewRuleSet(input)
+				return err == nil
+			}, "Ruleset must be valid"),
+		).Required(validators.Require),
+		validation.Key(
+			"excludeWeekends",
+			validation.In(true, false).Error("Exclude weekends must be a valid boolean"),
+		).Required(validators.Optional),
+		validation.Key(
+			"estimatedDeposit",
+			validation.Min(float64(0)).Error("Estimated deposit cannot be less than 0"),
+		).Required(validators.Optional),
+		// TODO Validate next recurrence based on the current timestamp
+	}
 }
