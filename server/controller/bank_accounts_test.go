@@ -6,7 +6,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
@@ -21,10 +20,9 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual link
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(Link{
-					LinkType:        ManualLinkType,
-					InstitutionName: "Manual Link",
-					Description:     myownsanity.StringP("My personal link"),
+				WithJSON(map[string]any{
+					"institutionName": "Manual Link",
+					"description":     "My personal link",
 				}).
 				Expect()
 
@@ -77,10 +75,9 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual link
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(Link{
-					LinkType:        ManualLinkType,
-					InstitutionName: "Manual Link",
-					Description:     myownsanity.StringP("My personal link"),
+				WithJSON(map[string]any{
+					"institutionName": "Manual Link",
+					"description":     "My personal link",
 				}).
 				Expect()
 
@@ -144,10 +141,9 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual link
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(Link{
-					LinkType:        ManualLinkType,
-					InstitutionName: "Manual Link",
-					Description:     myownsanity.StringP("My personal link"),
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
 				}).
 				Expect()
 
@@ -222,10 +218,9 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual link
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(Link{
-					LinkType:        ManualLinkType,
-					InstitutionName: "Manual Link",
-					Description:     myownsanity.StringP("My personal link"),
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
 				}).
 				Expect()
 
@@ -283,10 +278,9 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual link
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(Link{
-					LinkType:        ManualLinkType,
-					InstitutionName: "Manual Link",
-					Description:     myownsanity.StringP("My personal link"),
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
 				}).
 				Expect()
 
