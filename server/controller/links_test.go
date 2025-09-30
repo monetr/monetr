@@ -38,51 +38,50 @@ func TestPostLink(t *testing.T) {
 	t.Run("institution name is too long", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
-		link := models.Link{
-			InstitutionName: gofakeit.Sentence(250),
-			Description:     myownsanity.StringP("My personal link"),
-		}
-
 		response := e.POST("/api/links").
 			WithCookie(TestCookieName, token).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": gofakeit.Sentence(301),
+				"description":     "My personal link",
+			}).
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Institution Name must not be longer than 250 characters")
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.institutionName").String().IsEqual("Institution name must be between 1 and 300 characters")
+	})
+
+	t.Run("name not provided", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "",
+				"description":     "My personal link",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.institutionName").String().IsEqual("Institution name is required")
 	})
 
 	t.Run("description is too long", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
-		link := models.Link{
-			InstitutionName: "Link name",
-			Description:     myownsanity.StringP(gofakeit.Sentence(250)),
-		}
 
 		response := e.POST("/api/links").
 			WithCookie(TestCookieName, token).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"description":     gofakeit.Sentence(301),
+			}).
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Description must not be longer than 250 characters")
-	})
-
-	t.Run("missing name", func(t *testing.T) {
-		_, e := NewTestApplication(t)
-		token := GivenIHaveToken(t, e)
-		link := models.Link{
-			InstitutionName: "",
-		}
-
-		response := e.POST("/api/links").
-			WithCookie(TestCookieName, token).
-			WithJSON(link).
-			Expect()
-
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("link must have an institution name")
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.description").String().IsEqual("Description must be between 1 and 300 characters")
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
@@ -95,7 +94,7 @@ func TestPostLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("invalid JSON body")
+		response.JSON().Path("$.error").IsEqual("failed to parse post request")
 	})
 
 	t.Run("unauthenticated", func(t *testing.T) {
