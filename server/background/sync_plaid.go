@@ -183,9 +183,12 @@ RetrySync:
 			switch plaidError := errors.Cause(err).(type) {
 			case *platypus.PlatypusError:
 				if plaidError.ErrorCode == "TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION" {
-					log.WithError(err).Warn("plaid sync failed with mutation error, job will be retried")
+					log.WithError(err).Warn("plaid sync failed with mutation error, job will be retried in a few seconds")
 					// So we don't report this error to sentry when its not necessary.
 					err = nil
+					// TODO Very evil, would be better to just build in an actual backoff
+					// with the job system. But this will do something at least.
+					time.Sleep(time.Duration(attempts) * 2 * time.Second)
 					goto RetrySync
 				}
 			}

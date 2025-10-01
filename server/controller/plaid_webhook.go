@@ -84,7 +84,7 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 	result, err := jwt.ParseWithClaims(
 		verification,
 		&claims,
-		func(token *jwt.Token) (interface{}, error) {
+		func(token *jwt.Token) (any, error) {
 			// Make sure the signing method for the JWT token is ES256 per Plaid's
 			// documentation. Anything else should be rejected.
 			method, ok := token.Method.(*jwt.SigningMethodECDSA)

@@ -16,6 +16,7 @@ import (
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -181,6 +182,13 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 						level = logrus.WarnLevel
 					}
 				}
+
+				// Don't log an error level if we are logging for a context canceled
+				// error.
+				if errors.Is(err, context.Canceled) {
+					level = logrus.WarnLevel
+				}
+
 				log.WithError(err).Logf(level, "%s", err.Error())
 			}
 
@@ -194,14 +202,14 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 						return ctx.JSON(actualError.Code, internalError)
 					}
 				default:
-					return ctx.JSON(actualError.Code, map[string]interface{}{
+					return ctx.JSON(actualError.Code, map[string]any{
 						"error": actualError.Message,
 					})
 				}
 			case nil:
 				return err
 			default:
-				return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				return ctx.JSON(http.StatusInternalServerError, map[string]any{
 					"error": err.Error(),
 				})
 			}

@@ -122,8 +122,9 @@ func (m *memoryWebhookVerification) GetVerificationKey(ctx context.Context, keyI
 	if result.ExpiredAt != nil {
 		expiration = time.Unix(int64(*result.ExpiredAt), 0)
 	} else {
-		// Making a huge assumption here, and this might end up causing problems later on. Maybe we should also add a
-		// check here to make sure that items that are close to expiration even here should not be cached?
+		// Making a huge assumption here, and this might end up causing problems
+		// later on. Maybe we should also add a check here to make sure that items
+		// that are close to expiration even here should not be cached?
 		expiration = time.Unix(int64(result.CreatedAt), 0).Add(30 * time.Minute)
 	}
 

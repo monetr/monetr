@@ -22,7 +22,7 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *echo
 	app.Use(sentryecho.New(sentryecho.Options{
 		Repanic:         false,
 		WaitForDelivery: false,
-		Timeout:         10 * time.Second,
+		Timeout:         30 * time.Second,
 	}))
 
 	app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
