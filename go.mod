@@ -39,7 +39,7 @@ require (
 	github.com/stripe/stripe-go/v81 v81.1.1
 	github.com/teambition/rrule-go v1.8.2
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	github.com/wneessen/go-mail v0.7.1
+	github.com/wneessen/go-mail v0.7.2
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/mock v0.5.2
 	golang.org/x/crypto v0.42.0
