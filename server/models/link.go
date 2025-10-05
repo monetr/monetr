@@ -7,8 +7,7 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/monetr/mergo"
-	"github.com/monetr/monetr/server/util"
+	"github.com/monetr/monetr/server/merge"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
@@ -115,10 +114,8 @@ func (o *Link) UnmarshalRequest(
 		return err
 	}
 
-	if err := mergo.Map(
-		o, rawData,
-		mergo.WithOverride,
-		mergo.WithTransformers(util.MergeTransformer{}),
+	if err := merge.Merge(
+		o, rawData, merge.ErrorOnUnknownField,
 	); err != nil {
 		return errors.Wrap(err, "failed to merge patched data")
 	}

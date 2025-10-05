@@ -7,8 +7,7 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/monetr/mergo"
-	"github.com/monetr/monetr/server/util"
+	"github.com/monetr/monetr/server/merge"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
@@ -163,13 +162,13 @@ func (BankAccount) CreateValidators() []*validation.KeyRules {
 		validation.Key(
 			"originalName",
 			validation.Length(1, 300).Error("Original name must be between 1 and 300 characters"),
-		).Optional(),
+		).Required(validators.Optional),
 		validation.Key(
 			"linkId",
 			validation.Required.Error("Link ID must be provided"),
 			ValidID[Link](),
 		),
-		validators.CurrencyCode(true),
+		validators.CurrencyCode(validators.Optional),
 		validators.LimitBalance("limitBalance"),
 		validators.Balance("currentBalance"),
 		validators.Balance("availableBalance"),
@@ -180,7 +179,7 @@ func (BankAccount) CreateValidators() []*validation.KeyRules {
 				string(InactiveBankAccountStatus),
 				string(UnknownBankAccountStatus),
 			).Error("Invalid bank account status"),
-		).Optional(),
+		).Required(validators.Optional),
 		validation.Key(
 			"accountType",
 			validation.In(
@@ -190,7 +189,7 @@ func (BankAccount) CreateValidators() []*validation.KeyRules {
 				string(InvestmentBankAccountType),
 				string(OtherBankAccountType),
 			).Error("Invalid bank account type"),
-		).Optional(),
+		).Required(validators.Optional),
 		validation.Key(
 			"accountSubType",
 			validation.In(
@@ -207,7 +206,7 @@ func (BankAccount) CreateValidators() []*validation.KeyRules {
 				string(AutoBankAccountSubType),
 				string(OtherBankAccountSubType),
 			).Error("Invalid bank account sub type"),
-		).Optional(),
+		).Required(validators.Optional),
 	}
 }
 
@@ -294,10 +293,8 @@ func (o *BankAccount) UnmarshalRequest(
 		return err
 	}
 
-	if err := mergo.Map(
-		o, rawData,
-		mergo.WithOverride,
-		mergo.WithTransformers(util.MergeTransformer{}),
+	if err := merge.Merge(
+		o, rawData, merge.ErrorOnUnknownField,
 	); err != nil {
 		return errors.Wrap(err, "failed to merge patched data")
 	}

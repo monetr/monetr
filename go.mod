@@ -26,7 +26,6 @@ require (
 	github.com/jarcoal/httpmock v1.4.1
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/mileusna/useragent v1.3.5
-	github.com/monetr/mergo v1.0.4
 	github.com/monetr/validation v1.0.5
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/pkg/errors v0.9.1

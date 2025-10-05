@@ -8,8 +8,8 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/monetr/mergo"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/merge"
 	"github.com/monetr/monetr/server/util"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
@@ -53,8 +53,8 @@ func (o *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, er
 
 // Deprecated: Use the forecasting package funding instructions interface
 // instead.
-func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, timezone *time.Location) int64 {
-	rule := f.RuleSet.Set
+func (o *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, timezone *time.Location) int64 {
+	rule := o.RuleSet.Set
 	// Make sure that the rule is using the timezone of the dates provided. This
 	// is an easy way to force that. We also need to truncate the hours on the
 	// start time. To make sure that we are operating relative to midnight.
@@ -67,27 +67,27 @@ func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, 
 // contributions to funds that recur more frequently than they can be funded.
 // Deprecated: Use the forecasting package funding instructions interface
 // instead.
-func (f *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezone *time.Location) (time.Time, time.Time) {
-	nextOne, _ := f.GetNextContributionDateAfter(now, timezone)
-	subsequent, _ := f.GetNextContributionDateAfter(nextOne, timezone)
+func (o *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezone *time.Location) (time.Time, time.Time) {
+	nextOne, _ := o.GetNextContributionDateAfter(now, timezone)
+	subsequent, _ := o.GetNextContributionDateAfter(nextOne, timezone)
 
 	return nextOne, subsequent
 }
 
 // Deprecated: Use the forecasting package funding instructions interface
 // instead.
-func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) (actual, original time.Time) {
+func (o *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) (actual, original time.Time) {
 	// Make debugging easier.
 	now = now.In(timezone)
-	nextContributionRule := f.RuleSet.Clone()
+	nextContributionRule := o.RuleSet.Clone()
 	// Force the start of the rule to be the next contribution date. This fixes a
 	// bug where the rule would increment properly, but would include the current
 	// timestamp in that increment causing incorrect comparisons below. This makes
 	// sure that the rule will increment in the user's timezone as intended.
 	nextContributionRule.DTStart(nextContributionRule.GetDTStart().In(timezone))
 	var nextContributionDate time.Time
-	if !f.NextRecurrence.IsZero() {
-		nextContributionDate = util.Midnight(f.NextRecurrence, timezone)
+	if !o.NextRecurrence.IsZero() {
+		nextContributionDate = util.Midnight(o.NextRecurrence, timezone)
 	} else {
 		nextContributionDate = util.Midnight(nextContributionRule.Before(now, false), timezone)
 	}
@@ -111,7 +111,7 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 
 		// If we are excluding weekends, and the next contribution date falls on a
 		// weekend; then we need to adjust the date to the previous business day.
-		if f.ExcludeWeekends {
+		if o.ExcludeWeekends {
 			switch nextContributionDate.Weekday() {
 			case time.Sunday:
 				// If it lands on a sunday then subtract 2 days to put the contribution
@@ -132,47 +132,47 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 
 // Deprecated: This function should no longer be used, use the forecasting code
 // instead.
-func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, now time.Time, timezone *time.Location) bool {
+func (o *FundingSchedule) CalculateNextOccurrence(ctx context.Context, now time.Time, timezone *time.Location) bool {
 	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
 	span.Description = "CalculateNextOccurrence"
 
-	span.Data = map[string]interface{}{
-		"fundingScheduleId": f.FundingScheduleId,
+	span.Data = map[string]any{
+		"fundingScheduleId": o.FundingScheduleId,
 		"timezone":          timezone.String(),
 	}
 
-	if now.Before(f.NextRecurrence) {
-		crumbs.Debug(span.Context(), "Skipping processing funding schedule, it does not occur yet", map[string]interface{}{
-			"fundingScheduleId": f.FundingScheduleId,
+	if now.Before(o.NextRecurrence) {
+		crumbs.Debug(span.Context(), "Skipping processing funding schedule, it does not occur yet", map[string]any{
+			"fundingScheduleId": o.FundingScheduleId,
 			"now":               now,
-			"nextOccurrence":    f.NextRecurrence,
+			"nextOccurrence":    o.NextRecurrence,
 		})
 		return false
 	}
 
-	nextFundingOccurrence, originalNextFundingOccurrence := f.GetNextContributionDateAfter(now, timezone)
+	nextFundingOccurrence, originalNextFundingOccurrence := o.GetNextContributionDateAfter(now, timezone)
 
-	crumbs.Debug(span.Context(), "Calculated next recurrence for funding schedule", map[string]interface{}{
-		"fundingScheduleId": f.FundingScheduleId,
-		"excludeWeekends":   f.ExcludeWeekends,
-		"ruleset":           f.RuleSet,
-		"before": map[string]interface{}{
-			"lastRecurrence":         f.LastRecurrence,
-			"nextRecurrence":         f.NextRecurrence,
-			"nextRecurrenceOriginal": f.NextRecurrenceOriginal,
+	crumbs.Debug(span.Context(), "Calculated next recurrence for funding schedule", map[string]any{
+		"fundingScheduleId": o.FundingScheduleId,
+		"excludeWeekends":   o.ExcludeWeekends,
+		"ruleset":           o.RuleSet,
+		"before": map[string]any{
+			"lastRecurrence":         o.LastRecurrence,
+			"nextRecurrence":         o.NextRecurrence,
+			"nextRecurrenceOriginal": o.NextRecurrenceOriginal,
 		},
-		"after": map[string]interface{}{
-			"lastRecurrence":         f.NextRecurrence,
+		"after": map[string]any{
+			"lastRecurrence":         o.NextRecurrence,
 			"nextRecurrence":         nextFundingOccurrence,
 			"nextRecurrenceOriginal": originalNextFundingOccurrence,
 		},
 	})
 
-	current := f.NextRecurrence
-	f.LastRecurrence = &current
-	f.NextRecurrence = nextFundingOccurrence
-	f.NextRecurrenceOriginal = originalNextFundingOccurrence
+	current := o.NextRecurrence
+	o.LastRecurrence = &current
+	o.NextRecurrence = nextFundingOccurrence
+	o.NextRecurrenceOriginal = originalNextFundingOccurrence
 
 	return true
 }
@@ -266,10 +266,8 @@ func (o *FundingSchedule) UnmarshalRequest(
 		return err
 	}
 
-	if err := mergo.Map(
-		o, rawData,
-		mergo.WithOverride,
-		mergo.WithTransformers(util.MergeTransformer{}),
+	if err := merge.Merge(
+		o, rawData, merge.ErrorOnUnknownField,
 	); err != nil {
 		return errors.Wrap(err, "failed to merge patched data")
 	}
