@@ -53,7 +53,10 @@ func (o *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, er
 
 // Deprecated: Use the forecasting package funding instructions interface
 // instead.
-func (o *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, timezone *time.Location) int64 {
+func (o *FundingSchedule) GetNumberOfContributionsBetween(
+	start, end time.Time,
+	timezone *time.Location,
+) int64 {
 	rule := o.RuleSet.Set
 	// Make sure that the rule is using the timezone of the dates provided. This
 	// is an easy way to force that. We also need to truncate the hours on the
@@ -67,7 +70,10 @@ func (o *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, 
 // contributions to funds that recur more frequently than they can be funded.
 // Deprecated: Use the forecasting package funding instructions interface
 // instead.
-func (o *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezone *time.Location) (time.Time, time.Time) {
+func (o *FundingSchedule) GetNextTwoContributionDatesAfter(
+	now time.Time,
+	timezone *time.Location,
+) (time.Time, time.Time) {
 	nextOne, _ := o.GetNextContributionDateAfter(now, timezone)
 	subsequent, _ := o.GetNextContributionDateAfter(nextOne, timezone)
 
@@ -76,7 +82,10 @@ func (o *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezo
 
 // Deprecated: Use the forecasting package funding instructions interface
 // instead.
-func (o *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) (actual, original time.Time) {
+func (o *FundingSchedule) GetNextContributionDateAfter(
+	now time.Time,
+	timezone *time.Location,
+) (actual, original time.Time) {
 	// Make debugging easier.
 	now = now.In(timezone)
 	nextContributionRule := o.RuleSet.Clone()
@@ -132,7 +141,11 @@ func (o *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 
 // Deprecated: This function should no longer be used, use the forecasting code
 // instead.
-func (o *FundingSchedule) CalculateNextOccurrence(ctx context.Context, now time.Time, timezone *time.Location) bool {
+func (o *FundingSchedule) CalculateNextOccurrence(
+	ctx context.Context,
+	now time.Time,
+	timezone *time.Location,
+) bool {
 	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
 	span.Description = "CalculateNextOccurrence"
