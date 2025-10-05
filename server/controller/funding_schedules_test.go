@@ -284,7 +284,7 @@ func TestPutFundingSchedules(t *testing.T) {
 					"description":     "15th and the Last day of every month",
 					"ruleset":         fundingRule,
 					"excludeWeekends": true,
-					"nextRecurrence":  fundingRule.After(now, false),
+					"nextRecurrence":  fundingRule.After(time.Now(), false),
 				}).
 				Expect()
 

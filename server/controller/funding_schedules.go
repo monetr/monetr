@@ -189,7 +189,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 	updatedSpending := make([]Spending, 0)
 	if recalculateSpending {
 		log.Debug("spending will be recalculated as part of this funding schedule update")
-		crumbs.Debug(c.getContext(ctx), "Spending will be recalculated as part of this funding schedule update", map[string]interface{}{
+		crumbs.Debug(c.getContext(ctx), "Spending will be recalculated as part of this funding schedule update", map[string]any{
 			"bankAccountId":     bankAccountId,
 			"fundingScheduleId": fundingScheduleId,
 		})
@@ -229,7 +229,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to update funding schedule")
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"fundingSchedule": request,
 		"spending":        updatedSpending,
 	})
