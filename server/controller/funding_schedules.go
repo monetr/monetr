@@ -164,9 +164,10 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 	recalculateSpending := false
 	// If the next occurrence changes then we need to recalulate spending.
 	if !request.NextRecurrence.Equal(existingFundingSchedule.NextRecurrence) {
-		// The user cannot override the next occurrence for a funding schedule and have it be in the past. If they set it to
-		// be in the future then that is okay. The next time the funding schedule is processed it will be relative to that
-		// next occurrence.
+		// The user cannot override the next occurrence for a funding schedule and
+		// have it be in the past. If they set it to be in the future then that is
+		// okay. The next time the funding schedule is processed it will be relative
+		// to that next occurrence.
 		if request.NextRecurrence.Before(c.Clock.Now()) {
 			request.NextRecurrence = existingFundingSchedule.NextRecurrence
 			request.NextRecurrenceOriginal = existingFundingSchedule.NextRecurrenceOriginal
@@ -231,6 +232,119 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, map[string]any{
 		"fundingSchedule": request,
+		"spending":        updatedSpending,
+	})
+}
+
+func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	fundingScheduleId, err := ParseID[FundingSchedule](ctx.Param("fundingScheduleId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid funding schedule Id")
+	}
+
+	log := c.getLog(ctx)
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	// Retrieve the existing funding schedule to make sure some fields cannot be overridden
+	fundingSchedule, err := repo.GetFundingSchedule(
+		c.getContext(ctx),
+		bankAccountId,
+		fundingScheduleId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to verify funding schedule exists")
+	}
+
+	// Make a copy of the original so we can compare some things.
+	originalFundingSchedule := *fundingSchedule
+
+	switch err := fundingSchedule.UnmarshalRequest(
+		c.getContext(ctx),
+		ctx.Request().Body,
+		fundingSchedule.UpdateValidators()...,
+	).(type) {
+	case validation.Errors:
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":    "Invalid request",
+			"problems": err,
+		})
+	case nil:
+		break
+	default:
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
+	}
+
+	// Check if the changes made to the funding schedule would require that we
+	// recalculate the contributions made to the spending objects that use the
+	// funding schedule.
+	var recalculateSpending bool
+	if !originalFundingSchedule.NextRecurrence.Equal(fundingSchedule.NextRecurrence) {
+		recalculateSpending = true
+	}
+
+	if originalFundingSchedule.RuleSet.String() != fundingSchedule.RuleSet.String() {
+		recalculateSpending = true
+	}
+
+	log = log.WithFields(logrus.Fields{
+		"bankAccountId":     bankAccountId,
+		"fundingScheduleId": fundingScheduleId,
+	})
+
+	updatedSpending := make([]Spending, 0)
+	if recalculateSpending {
+		log.Debug("spending will be recalculated as part of this funding schedule update")
+		crumbs.Debug(c.getContext(ctx), "Spending will be recalculated as part of this funding schedule update", map[string]any{
+			"bankAccountId":     bankAccountId,
+			"fundingScheduleId": fundingScheduleId,
+		})
+		spending, err := repo.GetSpendingByFundingSchedule(
+			c.getContext(ctx),
+			bankAccountId,
+			fundingScheduleId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to retrieve existing spending objects for funding schedule")
+		}
+
+		if len(spending) > 0 {
+			now := c.Clock.Now()
+			timezone := c.mustGetTimezone(ctx)
+			for _, spend := range spending {
+				log.
+					WithField("spendingId", spend.SpendingId).
+					Debug("recalculating next contribution for spending due to updated funding schedule")
+				spend.CalculateNextContribution(
+					c.getContext(ctx),
+					timezone,
+					fundingSchedule,
+					now,
+					log,
+				)
+			}
+
+			if err = repo.UpdateSpending(
+				c.getContext(ctx),
+				bankAccountId,
+				spending,
+			); err != nil {
+				return c.wrapPgError(ctx, err, "failed to update spending objects for updated funding schedule")
+			}
+			updatedSpending = spending
+		}
+	}
+
+	if err = repo.UpdateFundingSchedule(c.getContext(ctx), fundingSchedule); err != nil {
+		return c.wrapPgError(ctx, err, "failed to update funding schedule")
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]any{
+		"fundingSchedule": fundingSchedule,
 		"spending":        updatedSpending,
 	})
 }
