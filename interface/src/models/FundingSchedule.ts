@@ -8,7 +8,7 @@ export default class FundingSchedule {
   ruleset: string;
   lastRecurrence?: Date;
   nextRecurrence: Date;
-  nextRecurrenceOriginal: Date;
+  readonly nextRecurrenceOriginal: Date;
   excludeWeekends: boolean;
   estimatedDeposit: number | null;
 
