@@ -457,8 +457,6 @@ func TestPatchFundingSchedule(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("fundingScheduleId", fundingScheduleId).
 				WithJSON(map[string]any{
-					"name":            "Payday",
-					"description":     "Every friday",
 					"ruleset":         newFundingRule,
 					"excludeWeekends": false,
 					"nextRecurrence":  next,
@@ -469,6 +467,88 @@ func TestPatchFundingSchedule(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.fundingSchedule.name").String().IsEqual("Payday")
 			response.JSON().Path("$.fundingSchedule.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(next)
+			response.JSON().Path("$.spending").IsArray()
+			response.JSON().Path("$.spending").Array().Length().IsEqual(1)
+			response.JSON().Path("$.spending[0].spendingId").IsEqual(spendingId)
+		}
+	})
+
+	t.Run("update spending with exclude weekends", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		// Hack to fix the mock clock thing for now.
+		app.Clock.Add(time.Since(app.Clock.Now()))
+		now := app.Clock.Now()
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+
+		var fundingScheduleId models.ID[models.FundingSchedule]
+		{ // Create the funding schedule
+			fundingRule := testutils.Must(t, models.NewRuleSet, FifthteenthAndLastDayOfEveryMonth)
+			fundingRule.DTStart(util.Midnight(fundingRule.GetDTStart(), timezone)) // Force the Rule to be in the correct TZ.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         fundingRule,
+					"excludeWeekends": true,
+					"nextRecurrence":  fundingRule.After(time.Now(), false),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+			fundingScheduleId = models.ID[models.FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
+		}
+
+		var spendingId models.ID[models.Spending]
+		{ // Create an expense
+			timezone := testutils.MustEz(t, user.Account.GetTimezone)
+			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
+			nextRecurrence = util.Midnight(nextRecurrence, timezone)
+			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
+
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":              "Some Monthly Expense",
+					"ruleset":           ruleset,
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      1000,
+					"spendingType":      models.SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.spendingId").String().IsASCII()
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").IsEqual(fundingScheduleId)
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
+			spendingId = models.ID[models.Spending](response.JSON().Path("$.spendingId").String().Raw())
+			assert.NotZero(t, spendingId, "must be able to extract the spending ID")
+		}
+
+		{ // Updating only the exclude weekends should also update spending.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("fundingScheduleId", fundingScheduleId).
+				WithJSON(map[string]any{
+					"excludeWeekends": false,
+				}).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.fundingSchedule.excludeWeekends").Boolean().IsFalse()
 			response.JSON().Path("$.spending").IsArray()
 			response.JSON().Path("$.spending").Array().Length().IsEqual(1)
 			response.JSON().Path("$.spending[0].spendingId").IsEqual(spendingId)

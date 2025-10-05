@@ -291,6 +291,10 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		recalculateSpending = true
 	}
 
+	if originalFundingSchedule.ExcludeWeekends != fundingSchedule.ExcludeWeekends {
+		recalculateSpending = true
+	}
+
 	log = log.WithFields(logrus.Fields{
 		"bankAccountId":     bankAccountId,
 		"fundingScheduleId": fundingScheduleId,
