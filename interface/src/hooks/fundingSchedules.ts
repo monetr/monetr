@@ -47,12 +47,25 @@ export function useFundingSchedule(fundingScheduleId: string | null): UseQueryRe
   );
 }
 
-export function useCreateFundingSchedule(): (_funding: FundingSchedule) => Promise<FundingSchedule> {
+export type CreateFundingScheduleRequest = Pick<FundingSchedule,
+  'bankAccountId' |
+  'name' |
+  'description' |
+  'ruleset' |
+  'nextRecurrence' |
+  'excludeWeekends' |
+  'estimatedDeposit'
+>;
+
+export function useCreateFundingSchedule(): (_funding: CreateFundingScheduleRequest) => Promise<FundingSchedule> {
   const queryClient = useQueryClient();
 
-  async function createFundingSchedule(newItem: FundingSchedule): Promise<FundingSchedule> {
+  async function createFundingSchedule({
+    bankAccountId,
+    ...fundingSchedule
+  }: CreateFundingScheduleRequest): Promise<FundingSchedule> {
     return request()
-      .post<Partial<FundingSchedule>>(`/bank_accounts/${newItem.bankAccountId}/funding_schedules`, newItem)
+      .post<Partial<FundingSchedule>>(`/bank_accounts/${bankAccountId}/funding_schedules`, fundingSchedule)
       .then(result => new FundingSchedule(result?.data));
   }
 

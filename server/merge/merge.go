@@ -36,7 +36,7 @@ func Merge[T any](dst *T, src map[string]any, options ...MergeOption) error {
 		options: mergedOptions,
 	}
 
-	return m.deepMerge()
+	return m.merge()
 }
 
 type mergeContext struct {
@@ -70,7 +70,7 @@ func (m *mergeContext) buildFieldMap(dst reflect.Value) error {
 	return nil
 }
 
-func (m *mergeContext) deepMerge() error {
+func (m *mergeContext) merge() error {
 	if m.dst.IsNil() {
 		return errors.New("cannot merge into a nil destination")
 	}
@@ -95,6 +95,10 @@ func (m *mergeContext) deepMerge() error {
 			continue
 		}
 
+		if srcValue.Kind() == reflect.Invalid {
+			continue
+		}
+
 		switch {
 		case dstField.Type().Implements(jsonUnmarshallerType) && srcValue.Kind() == reflect.String:
 			// Create a new instance of the type of the pointer for the destination
@@ -108,7 +112,7 @@ func (m *mergeContext) deepMerge() error {
 			// If that all works out then we can assign the resulting value to the
 			// destination field even if it is nil.
 			dstField.Set(value)
-		case isInteger(dstField) && srcValue.Type() == jsonNumberType:
+		case isInteger(dstField.Type()) && srcValue.Type() == jsonNumberType:
 			// If the destination is an integer field and the source is a json number
 			// then we can work with the destination field directly like this. This
 			// way we can be better about how we parse and handle numbers.
@@ -117,7 +121,17 @@ func (m *mergeContext) deepMerge() error {
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			dstField.SetInt(value)
+
+			// If the destination is a pointer then we need to set the inner value
+			// instead of the value of the pointer.
+			if dstField.Kind() == reflect.Pointer {
+				newValue := reflect.New(reflect.TypeOf(value))
+				newValue.Elem().Set(reflect.ValueOf(value))
+				dstField.Set(newValue)
+			} else {
+				// Otherwise just set the value directly.
+				dstField.SetInt(value)
+			}
 		case dstField.Kind() == reflect.String && srcValue.Kind() == reflect.String:
 			// This is a weird very specific condition. But basically instead of using
 			// Set() we can use SetString instead which does not perform the same type
@@ -158,10 +172,12 @@ func (m *mergeContext) deepMerge() error {
 	return nil
 }
 
-func isInteger(val reflect.Value) bool {
+func isInteger(val reflect.Type) bool {
 	switch val.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return true
+	case reflect.Pointer:
+		return isInteger(val.Elem())
 	default:
 		return false
 	}

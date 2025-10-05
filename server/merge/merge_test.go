@@ -117,6 +117,21 @@ func TestMerge(t *testing.T) {
 		assert.EqualValues(t, 12345, dst.Amount, "amount should be merged properly!")
 	})
 
+	t.Run("handle json pointer numbers", func(t *testing.T) {
+		type Foo struct {
+			Amount *int64 `json:"amount"`
+		}
+
+		dst := Foo{}
+		src := map[string]any{
+			"amount": json.Number("12345"),
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.NoError(t, err, "Must be able to merge with json numbers in the source")
+		assert.EqualValues(t, 12345, *dst.Amount, "amount should be merged properly!")
+	})
+
 	t.Run("handle timestamps", func(t *testing.T) {
 		type Foo struct {
 			Timestamp time.Time `json:"timestamp"`

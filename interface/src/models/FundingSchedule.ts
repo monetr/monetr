@@ -6,7 +6,7 @@ export default class FundingSchedule {
   name: string;
   description?: string;
   ruleset: string;
-  lastRecurrence?: Date;
+  readonly lastRecurrence?: Date;
   nextRecurrence: Date;
   readonly nextRecurrenceOriginal: Date;
   excludeWeekends: boolean;

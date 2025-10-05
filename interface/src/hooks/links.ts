@@ -46,8 +46,7 @@ export function useCurrentLink(): UseQueryResult<Link | undefined> {
 
 export interface CreateLinkRequest {
   institutionName: string;
-  customInstitutionName: string;
-  description?: string | null;
+  description?: string;
 }
 
 export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {
