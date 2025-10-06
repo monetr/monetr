@@ -166,7 +166,7 @@ func (BankAccount) CreateValidators() []*validation.KeyRules {
 		validation.Key(
 			"linkId",
 			validation.Required.Error("Link ID must be provided"),
-			ValidID[Link](),
+			ValidID[Link]().Error("Link ID must be valid"),
 		),
 		validators.CurrencyCode(validators.Optional),
 		validators.LimitBalance("limitBalance"),

@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
 	"sync"
 
@@ -131,27 +130,4 @@ func (i IDRule[T]) Error(message string) IDRule[T] {
 func (i IDRule[T]) ErrorObject(err validation.Error) IDRule[T] {
 	i.error = err
 	return i
-}
-
-type IDTransformer[T Identifiable] struct {
-	id ID[T]
-}
-
-func NewIDTransformer[T Identifiable]() IDTransformer[T] {
-	return IDTransformer[T]{
-		id: ID[T](""),
-	}
-}
-
-func (i IDTransformer[T]) Transformer(typ reflect.Type) func(dst, src reflect.Value) error {
-	if typ == reflect.TypeOf(i.id) {
-		return func(dst, src reflect.Value) error {
-			if dst.CanSet() {
-				srcValue := src.Interface().(string)
-				dst.SetString(srcValue)
-			}
-			return nil
-		}
-	}
-	return nil
 }
