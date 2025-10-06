@@ -15,7 +15,21 @@ import (
 
 func (c *Controller) getBankAccounts(ctx echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	bankAccounts, err := repo.GetBankAccounts(c.getContext(ctx))
+	var err error
+	var bankAccounts []BankAccount
+
+	// If the client is filtering by Link ID then use this query instead. As it
+	// will not exclude deleted bank accounts which is important for the link
+	// details view.
+	if linkId := ctx.QueryParam("link_id"); linkId != "" {
+		bankAccounts, err = repo.GetBankAccountsByLinkId(
+			c.getContext(ctx),
+			ID[Link](linkId),
+		)
+	} else {
+		bankAccounts, err = repo.GetBankAccounts(c.getContext(ctx))
+	}
+
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve bank accounts")
 	}

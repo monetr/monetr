@@ -76,7 +76,8 @@ func (c *Controller) putLink(ctx echo.Context) error {
 	}
 
 	var request struct {
-		Description *string `json:"description"`
+		InstituionName string  `json:"instituionName"`
+		Description    *string `json:"description"`
 	}
 	if err := ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
