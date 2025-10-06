@@ -554,6 +554,54 @@ func TestPatchFundingSchedule(t *testing.T) {
 			response.JSON().Path("$.spending[0].spendingId").IsEqual(spendingId)
 		}
 	})
+
+	t.Run("cannot update bank account ID or other invalid field", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		// Hack to fix the mock clock thing for now.
+		app.Clock.Add(time.Since(app.Clock.Now()))
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", fundingSchedule.BankAccountId).
+			WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+			WithJSON(map[string]any{
+				"bankAccountId": "bank_invalid",
+			}).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.bankAccountId").String().IsEqual("key not expected")
+	})
+
+	t.Run("invalid ruleset", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		// Hack to fix the mock clock thing for now.
+		app.Clock.Add(time.Since(app.Clock.Now()))
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", fundingSchedule.BankAccountId).
+			WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+			WithJSON(map[string]any{
+				"ruleset": "invalid",
+			}).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.ruleset").String().IsEqual("Ruleset must be valid")
+	})
 }
 
 func TestDeleteFundingSchedules(t *testing.T) {
