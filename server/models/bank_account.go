@@ -221,8 +221,8 @@ func (o *BankAccount) UpdateValidator() []*validation.KeyRules {
 
 	return []*validation.KeyRules{
 		validators.Mask(),
-		validators.Name(false),
-		validators.CurrencyCode(false),
+		validators.Name(validators.Optional),
+		validators.CurrencyCode(validators.Optional),
 		validators.LimitBalance("limitBalance"),
 		validators.Balance("currentBalance"),
 		validators.Balance("availableBalance"),
@@ -233,7 +233,7 @@ func (o *BankAccount) UpdateValidator() []*validation.KeyRules {
 				string(InactiveBankAccountStatus),
 				string(UnknownBankAccountStatus),
 			).Error("Invalid bank account status"),
-		).Optional(),
+		).Required(validators.Optional),
 		validation.Key(
 			"accountType",
 			validation.In(
@@ -243,7 +243,7 @@ func (o *BankAccount) UpdateValidator() []*validation.KeyRules {
 				string(InvestmentBankAccountType),
 				string(OtherBankAccountType),
 			).Error("Invalid bank account type"),
-		).Optional(),
+		).Required(validators.Optional),
 		validation.Key(
 			"accountSubType",
 			validation.In(
@@ -260,7 +260,7 @@ func (o *BankAccount) UpdateValidator() []*validation.KeyRules {
 				string(AutoBankAccountSubType),
 				string(OtherBankAccountSubType),
 			).Error("Invalid bank account sub type"),
-		).Optional(),
+		).Required(validators.Optional),
 	}
 }
 

@@ -199,8 +199,6 @@ func (FundingSchedule) CreateValidators() []*validation.KeyRules {
 		// ).Required(validators.Optional),
 		validators.Name(validators.Require),
 		validators.Description(),
-		// TODO This is broken because we cannot take a string ruleset and MERGE it
-		// into a ruleset struct. We need to implement a transformer here.
 		validation.Key(
 			"ruleset",
 			validation.Required.Error("Ruleset must be specified for funding schedules"),
