@@ -7,7 +7,8 @@ import MDivider from '@monetr/interface/components/MDivider';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import { useCurrentLink, useTriggerManualPlaidSync } from '@monetr/interface/hooks/links';
+import { useTriggerManualPlaidSync } from '@monetr/interface/hooks/links';
+import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePlaidAccountOverlay';
 

@@ -1,48 +1,11 @@
 import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 
-import { useBankAccounts, useSelectedBankAccount } from './bankAccounts';
-import { useAuthenticationSink } from './useAuthentication';
+import { useBankAccounts } from './bankAccounts';
+import { useLinks } from '@monetr/interface/hooks/useLinks';
 import Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
-
-export function useLinks(): UseQueryResult<Array<Link>> {
-  const { result: { user, isActive, mfaPending } } = useAuthenticationSink();
-  return useQuery<Array<Partial<Link>>, unknown, Array<Link>>(
-    ['/links'], {
-    // Only request links if there is an authenticated user.
-      enabled: !!user && isActive && !mfaPending,
-      select: data => {
-        if (Array.isArray(data)) {
-          return data.map(item => new Link(item));
-        }
-
-        return [];
-      },
-    });
-}
-
-export function useLink(linkId: string | null): UseQueryResult<Link> {
-  const queryClient = useQueryClient();
-  return useQuery<Partial<Link>, unknown, Link>(
-    [`/links/${linkId}`],
-    {
-      enabled: !!linkId,
-      select: data => new Link(data),
-      initialData: () => queryClient
-        .getQueryData<Array<Link>>(['/links'])
-        ?.find(item => item.linkId === linkId),
-      initialDataUpdatedAt: () => queryClient
-        .getQueryState(['/links'])?.dataUpdatedAt,
-    }
-  );
-}
-
-export function useCurrentLink(): UseQueryResult<Link | undefined> {
-  const { data: bankAccount } = useSelectedBankAccount();
-  return useLink(bankAccount?.linkId);
-}
 
 export interface CreateLinkRequest {
   institutionName: string;

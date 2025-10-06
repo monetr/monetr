@@ -21,7 +21,7 @@ export interface PatchFundingScheduleResponse {
   spending: Array<Spending>;
 }
 
-export function usePatchFundingSchedule(): (_patch: PatchFundingScheduleRequest) => Promise<PatchFundingScheduleResponse> {
+export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => Promise<PatchFundingScheduleResponse> {
   const queryClient = useQueryClient();
 
   async function patchFundingSchedule(
@@ -38,35 +38,37 @@ export function usePatchFundingSchedule(): (_patch: PatchFundingScheduleRequest)
       }));
   }
 
-  const mutation = useMutation(
-    patchFundingSchedule,
-    {
-      onSuccess: (response: PatchFundingScheduleResponse) => Promise.all([
-        queryClient.setQueriesData(
-          [`/bank_accounts/${response.fundingSchedule.bankAccountId}/funding_schedules`],
-          (previous: Array<Partial<FundingSchedule>>) => previous.map(item =>
-            item.fundingScheduleId === response.fundingSchedule.fundingScheduleId ? response.fundingSchedule : item
-          ),
+  const mutation = useMutation({
+    mutationFn: patchFundingSchedule,
+    onSuccess: ({ fundingSchedule, spending }: PatchFundingScheduleResponse) => Promise.all([
+      queryClient.setQueryData(
+        [`/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules`],
+        (previous: Array<Partial<FundingSchedule>>) => previous.map(item =>
+          item.fundingScheduleId === fundingSchedule.fundingScheduleId ? fundingSchedule : item
         ),
-        queryClient.setQueriesData(
-          [`/bank_accounts/${response.fundingSchedule.bankAccountId}/funding_schedules/${response.fundingSchedule.fundingScheduleId}`],
-          response.fundingSchedule,
-        ),
-        queryClient.setQueriesData(
-          [`/bank_accounts/${response.fundingSchedule.bankAccountId}/spending`],
-          (previous: Array<Partial<Spending>>) => previous
-            .map(item => (response.spending || []).find(updated => updated.spendingId === item.spendingId) || item),
-        ),
-        (response.spending || []).map(spending =>
-          queryClient.setQueriesData(
-            [`/bank_accounts/${response.fundingSchedule.bankAccountId}/spending/${spending.spendingId}`],
-            spending,
-          )),
-        queryClient.invalidateQueries([`/bank_accounts/${ response.fundingSchedule.bankAccountId }/forecast`]),
-        queryClient.invalidateQueries([`/bank_accounts/${ response.fundingSchedule.bankAccountId }/forecast/next_funding`]),
-      ]),
-    },
-  );
+      ),
+      queryClient.setQueryData(
+        [`/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules/${fundingSchedule.fundingScheduleId}`],
+        fundingSchedule,
+      ),
+      queryClient.setQueryData(
+        [`/bank_accounts/${fundingSchedule.bankAccountId}/spending`],
+        (previous: Array<Partial<Spending>>) => previous
+          .map(item => (spending || []).find(updated => updated.spendingId === item.spendingId) || item),
+      ),
+      (spending || []).map(spending =>
+        queryClient.setQueryData(
+          [`/bank_accounts/${fundingSchedule.bankAccountId}/spending/${spending.spendingId}`],
+          spending,
+        )),
+      queryClient.invalidateQueries({
+        queryKey: [`/bank_accounts/${ fundingSchedule.bankAccountId }/forecast`],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: [`/bank_accounts/${ fundingSchedule.bankAccountId }/forecast/next_funding`],
+      }),
+    ]),
+  });
 
   return mutation.mutateAsync;
 }

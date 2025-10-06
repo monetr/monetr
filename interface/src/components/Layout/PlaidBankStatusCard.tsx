@@ -3,7 +3,7 @@ import React from 'react';
 import MSpan from '@monetr/interface/components/MSpan';
 import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/InstitutionLogo';
 import { useInstitution } from '@monetr/interface/hooks/institutions';
-import { useCurrentLink } from '@monetr/interface/hooks/links';
+import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 /**

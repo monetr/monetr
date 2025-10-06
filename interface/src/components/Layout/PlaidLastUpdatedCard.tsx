@@ -3,7 +3,7 @@ import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 
 import MSpan from '@monetr/interface/components/MSpan';
-import { useLink } from '@monetr/interface/hooks/links';
+import { useLink } from '@monetr/interface/hooks/useLink';
 
 interface PlaidLastUpdatedCardProps {
   linkId: string | null;

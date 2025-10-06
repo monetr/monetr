@@ -11,7 +11,7 @@ import MSpan from '@monetr/interface/components/MSpan';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { useBankAccounts, useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import { useCurrentLink } from '@monetr/interface/hooks/links';
+import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';
 import { showNewBankAccountModal } from '@monetr/interface/modals/NewBankAccountModal';
 import { BankAccountStatus } from '@monetr/interface/models/BankAccount';
