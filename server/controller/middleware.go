@@ -39,7 +39,7 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 				break
 			}
 			fallthrough
-		case "PUT", "DELETE":
+		case "PATCH", "PUT", "DELETE":
 			txn, err := c.DB.BeginContext(c.getContext(ctx))
 			if err != nil {
 				c.Log.WithError(err).Errorf("failed to begin transaction")

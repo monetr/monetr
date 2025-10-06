@@ -9,7 +9,6 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
@@ -18,25 +17,17 @@ import (
 
 func TestPostLink(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		app, e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
-		createdAndUpdatedBogus := app.Clock.Now().Add(-1 * time.Hour)
-		link := models.Link{
-			LinkId:          "link_bogus",         // Set it to something so we can verify its different in the result.
-			LinkType:        models.PlaidLinkType, // This should be changed to manual in the response.
-			InstitutionName: "U.S. Bank",
-			Description:     myownsanity.StringP("My personal link"),
-			CreatedAt:       createdAndUpdatedBogus, // Set these to something to make sure it gets overwritten.
-			UpdatedAt:       createdAndUpdatedBogus,
-		}
-
 		response := e.POST("/api/links").
 			WithCookie(TestCookieName, token).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"description":     "My personal link",
+			}).
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.linkId").NotEqual(link.LinkId)
 		response.JSON().Path("$.linkId").String().IsASCII()
 		response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 		response.JSON().Path("$.institutionName").String().NotEmpty()
@@ -46,51 +37,50 @@ func TestPostLink(t *testing.T) {
 	t.Run("institution name is too long", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
-		link := models.Link{
-			InstitutionName: gofakeit.Sentence(250),
-			Description:     myownsanity.StringP("My personal link"),
-		}
-
 		response := e.POST("/api/links").
 			WithCookie(TestCookieName, token).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": gofakeit.Sentence(301),
+				"description":     "My personal link",
+			}).
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Institution Name must not be longer than 250 characters")
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.institutionName").String().IsEqual("Institution name must be between 1 and 300 characters")
+	})
+
+	t.Run("name not provided", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "",
+				"description":     "My personal link",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.institutionName").String().IsEqual("Institution name is required")
 	})
 
 	t.Run("description is too long", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
-		link := models.Link{
-			InstitutionName: "Link name",
-			Description:     myownsanity.StringP(gofakeit.Sentence(250)),
-		}
 
 		response := e.POST("/api/links").
 			WithCookie(TestCookieName, token).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"description":     gofakeit.Sentence(301),
+			}).
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Description must not be longer than 250 characters")
-	})
-
-	t.Run("missing name", func(t *testing.T) {
-		_, e := NewTestApplication(t)
-		token := GivenIHaveToken(t, e)
-		link := models.Link{
-			InstitutionName: "",
-		}
-
-		response := e.POST("/api/links").
-			WithCookie(TestCookieName, token).
-			WithJSON(link).
-			Expect()
-
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("link must have an institution name")
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.description").String().IsEqual("Description must be between 1 and 300 characters")
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
@@ -103,7 +93,7 @@ func TestPostLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("invalid JSON body")
+		response.JSON().Path("$.error").IsEqual("failed to parse post request")
 	})
 
 	t.Run("unauthenticated", func(t *testing.T) {
@@ -127,17 +117,9 @@ func TestPostLink(t *testing.T) {
 
 func TestGetLink(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		app, e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		tokenA, tokenB := GivenIHaveToken(t, e), GivenIHaveToken(t, e)
-
-		link := models.Link{
-			LinkId:          "link_bogus",         // Set it to something so we can verify its different in the result.
-			LinkType:        models.PlaidLinkType, // This should be changed to manual in the response.
-			InstitutionName: "U.S. Bank",
-			CreatedAt:       app.Clock.Now().Add(-1 * time.Hour), // Set these to something to make sure it gets overwritten.
-			UpdatedAt:       app.Clock.Now().Add(1 * time.Hour),
-		}
 
 		// We want to create a link with tokenA. This link should not be visible later when we request the link for
 		// tokenB. This will help verify that we do not expose data from someone else's login.
@@ -145,11 +127,13 @@ func TestGetLink(t *testing.T) {
 		{
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, tokenA).
-				WithJSON(link).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
+				}).
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.linkId").NotEqual(link.LinkId)
 			response.JSON().Path("$.linkId").String().IsASCII()
 			response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
@@ -163,11 +147,13 @@ func TestGetLink(t *testing.T) {
 		{
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, tokenB).
-				WithJSON(link).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
+				}).
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.linkId").NotEqual(link.LinkId)
 			response.JSON().Path("$.linkId").String().IsASCII()
 			response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
@@ -212,32 +198,30 @@ func TestGetLink(t *testing.T) {
 
 		institutionName := "U.S. Bank"
 
-		link := models.Link{
-			LinkType:        models.ManualLinkType,
-			InstitutionName: institutionName,
-		}
-
+		var linkId models.ID[models.Link]
 		{ // Create the link.
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(link).
+				WithJSON(map[string]any{
+					"institutionName": institutionName,
+				}).
 				Expect()
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.linkId").String().IsASCII()
 			response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
 
-			link.LinkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 		}
 
 		{ // Retrieve the link and make sure the linkId matches.
 			response := e.GET("/api/links/{linkId}").
-				WithPath("linkId", link.LinkId).
+				WithPath("linkId", linkId).
 				WithCookie(TestCookieName, token).
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.linkId").IsEqual(link.LinkId)
+			response.JSON().Path("$.linkId").IsEqual(linkId)
 		}
 	})
 
@@ -300,14 +284,11 @@ func TestPutLink(t *testing.T) {
 
 		institutionName := "U.S. Bank"
 
-		link := models.Link{
-			LinkType:        models.ManualLinkType,
-			InstitutionName: institutionName,
-		}
-
 		response := e.POST("/api/links").
 			WithCookie(TestCookieName, token).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": institutionName,
+			}).
 			Expect()
 
 		response.Status(http.StatusOK)
@@ -316,14 +297,13 @@ func TestPutLink(t *testing.T) {
 
 		linkId := models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 
-		link.LinkId = linkId
-		link.InstitutionName = "New Name"
-		link.Description = myownsanity.StringP("Add description")
-
 		updated := e.PUT("/api/links/{linkId}").
 			WithPath("linkId", linkId).
 			WithCookie(TestCookieName, token).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": "New Name",
+				"description":     "Add description",
+			}).
 			Expect()
 
 		updated.Status(http.StatusOK)
@@ -338,14 +318,11 @@ func TestPutLink(t *testing.T) {
 
 		institutionName := "U.S. Bank"
 
-		link := models.Link{
-			LinkType:        models.ManualLinkType,
-			InstitutionName: institutionName,
-		}
-
 		response := e.POST("/api/links").
 			WithCookie(TestCookieName, token).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": institutionName,
+			}).
 			Expect()
 
 		response.Status(http.StatusOK)
@@ -354,13 +331,12 @@ func TestPutLink(t *testing.T) {
 
 		linkId := models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 
-		link.LinkId = linkId
-		link.InstitutionName = "New Name"
-
 		updated := e.PUT("/api/links/{linkId}").
 			WithPath("linkId", linkId).
 			WithCookie(TestCookieName, token).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": institutionName,
+			}).
 			Expect()
 
 		updated.Status(http.StatusNotModified)
@@ -373,14 +349,11 @@ func TestPutLink(t *testing.T) {
 
 		institutionName := "U.S. Bank"
 
-		link := models.Link{
-			LinkType:        models.ManualLinkType,
-			InstitutionName: institutionName,
-		}
-
 		response := e.POST("/api/links").
 			WithCookie(TestCookieName, token).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": institutionName,
+			}).
 			Expect()
 
 		response.Status(http.StatusOK)
@@ -389,13 +362,12 @@ func TestPutLink(t *testing.T) {
 
 		linkId := models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 
-		link.LinkId = linkId
-		link.InstitutionName = "New Name"
-
 		// Try to perform an update without a token.
 		updated := e.PUT("/api/links/{linkId}").
 			WithPath("linkId", linkId).
-			WithJSON(link).
+			WithJSON(map[string]any{
+				"institutionName": "New Name",
+			}).
 			Expect()
 
 		updated.Status(http.StatusUnauthorized)
@@ -407,21 +379,18 @@ func TestPutLink(t *testing.T) {
 
 		tokenA, tokenB := GivenIHaveToken(t, e), GivenIHaveToken(t, e)
 
-		link := models.Link{
-			InstitutionName: "U.S. Bank",
-		}
-
 		// We want to create a link with tokenA. This link should not be visible later when we request the link for
 		// tokenB. This will help verify that we do not expose data from someone else's login.
 		var linkAID, linkBID models.ID[models.Link]
 		{
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, tokenA).
-				WithJSON(link).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+				}).
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.linkId").NotEqual(link.LinkId)
 			response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
 			linkAID = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
@@ -431,11 +400,12 @@ func TestPutLink(t *testing.T) {
 		{
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, tokenB).
-				WithJSON(link).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+				}).
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.linkId").NotEqual(link.LinkId)
 			response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
 			linkBID = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
@@ -443,13 +413,12 @@ func TestPutLink(t *testing.T) {
 
 		// Now using token A, try to update token B's link.
 		{
-			link := models.Link{
-				LinkId: linkBID,
-			}
 			response := e.PUT("/api/links/{linkId}").
-				WithPath("linkId", link.LinkId).
+				WithPath("linkId", linkBID).
 				WithCookie(TestCookieName, tokenA).
-				WithJSON(link).
+				WithJSON(map[string]any{
+					"institutionName": "New Name",
+				}).
 				Expect()
 
 			response.Status(http.StatusNotFound)
@@ -458,17 +427,99 @@ func TestPutLink(t *testing.T) {
 
 		// Now do the same thing with token B for token A's link.
 		{
-			link := models.Link{
-				LinkId: linkAID,
-			}
 			response := e.PUT("/api/links/{linkId}").
-				WithPath("linkId", link.LinkId).
+				WithPath("linkId", linkAID).
 				WithCookie(TestCookieName, tokenB).
-				WithJSON(link).
+				WithJSON(map[string]any{
+					"institutionName": "New Name",
+				}).
 				Expect()
 
 			response.Status(http.StatusNotFound)
 			response.JSON().Path("$.error").String().IsEqual("failed to retrieve existing link for update: record does not exist")
+		}
+	})
+}
+
+func TestPatchLink(t *testing.T) {
+	t.Run("simple manual link", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId models.ID[models.Link]
+		{ // Create the manual link via the API
+			institutionName := "U.S. Bank"
+
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": institutionName,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII()
+			response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		{ // Then update the link with a patch request
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", linkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "My Own Name",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").IsEqual(linkId)
+			response.JSON().Path("$.institutionName").String().IsEqual("My Own Name")
+		}
+
+	})
+
+	t.Run("simple plaid link", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Then update the link with a patch request
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "My Own Name",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").IsEqual(link.LinkId)
+			response.JSON().Path("$.institutionName").String().IsEqual("My Own Name")
+		}
+	})
+
+	t.Run("cant update any other fields", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Then update the link with a patch request
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkType": models.ManualLinkType,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").IsEqual("Invalid request")
+			response.JSON().Path("$.problems.linkType").String().IsEqual("key not expected")
 		}
 	})
 }
@@ -483,22 +534,21 @@ func TestDeleteLink(t *testing.T) {
 
 		institutionName := "U.S. Bank"
 
-		link := models.Link{
-			LinkType:        models.ManualLinkType,
-			InstitutionName: institutionName,
-		}
-
+		var linkId models.ID[models.Link]
 		{ // Create the link.
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(link).
+				WithJSON(map[string]any{
+					"institutionName": institutionName,
+					"description":     "My personal link",
+				}).
 				Expect()
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.linkId").String().IsASCII()
 			response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
 
-			link.LinkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
+			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 		}
 
 		app.Jobs.EXPECT().
@@ -506,7 +556,7 @@ func TestDeleteLink(t *testing.T) {
 				gomock.Any(),
 				gomock.Eq(background.RemoveLink),
 				testutils.NewGenericMatcher(func(args background.RemoveLinkArguments) bool {
-					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
+					a := assert.EqualValues(t, linkId, args.LinkId, "Link ID should match")
 					b := assert.EqualValues(t, user.AccountId, args.AccountId, "Account ID should match")
 					return a && b
 				}),
@@ -516,7 +566,7 @@ func TestDeleteLink(t *testing.T) {
 
 		{ // Try to retrieve the link before it's been deleted.
 			response := e.GET("/api/links/{linkId}").
-				WithPath("linkId", link.LinkId).
+				WithPath("linkId", linkId).
 				WithCookie(TestCookieName, token).
 				Expect()
 
@@ -527,7 +577,7 @@ func TestDeleteLink(t *testing.T) {
 
 		{ // Try to delete it.
 			response := e.DELETE("/api/links/{linkId}").
-				WithPath("linkId", link.LinkId).
+				WithPath("linkId", linkId).
 				WithCookie(TestCookieName, token).
 				WithTimeout(5 * time.Second).
 				Expect()
@@ -538,7 +588,7 @@ func TestDeleteLink(t *testing.T) {
 
 		{ // Try to retrieve the link after it's been deleted.
 			response := e.GET("/api/links/{linkId}").
-				WithPath("linkId", link.LinkId).
+				WithPath("linkId", linkId).
 				WithCookie(TestCookieName, token).
 				Expect()
 

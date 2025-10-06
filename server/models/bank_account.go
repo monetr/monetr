@@ -2,9 +2,15 @@ package models
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"time"
 
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/server/merge"
+	"github.com/monetr/monetr/server/validators"
+	"github.com/monetr/validation"
+	"github.com/pkg/errors"
 )
 
 type BankAccountType string
@@ -116,8 +122,8 @@ type BankAccount struct {
 	Mask               string                `json:"mask" pg:"mask"`
 	Name               string                `json:"name,omitempty" pg:"name,notnull"`
 	OriginalName       string                `json:"originalName" pg:"original_name,notnull"`
-	Type               BankAccountType       `json:"accountType" pg:"account_type"`
-	SubType            BankAccountSubType    `json:"accountSubType" pg:"account_sub_type"`
+	AccountType        BankAccountType       `json:"accountType" pg:"account_type"`
+	AccountSubType     BankAccountSubType    `json:"accountSubType" pg:"account_sub_type"`
 	Status             BankAccountStatus     `json:"status" pg:"status,notnull"`
 	LastUpdated        time.Time             `json:"lastUpdated" pg:"last_updated,notnull"`
 	CreatedAt          time.Time             `json:"createdAt" pg:"created_at,notnull"`
@@ -144,4 +150,154 @@ func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error)
 	}
 
 	return ctx, nil
+}
+
+// CreateValidators returns an array of validators that can be passed to the
+// BankAccount UnmarshalRequest function. Specifically for requests to create a
+// bank account object.
+func (BankAccount) CreateValidators() []*validation.KeyRules {
+	return []*validation.KeyRules{
+		validators.Mask(),
+		validators.Name(true),
+		validation.Key(
+			"originalName",
+			validation.Length(1, 300).Error("Original name must be between 1 and 300 characters"),
+		).Required(validators.Optional),
+		validation.Key(
+			"linkId",
+			validation.Required.Error("Link ID must be provided"),
+			ValidID[Link]().Error("Link ID must be valid"),
+		),
+		validators.CurrencyCode(validators.Optional),
+		validators.LimitBalance("limitBalance"),
+		validators.Balance("currentBalance"),
+		validators.Balance("availableBalance"),
+		validation.Key(
+			"status",
+			validation.In(
+				string(ActiveBankAccountStatus),
+				string(InactiveBankAccountStatus),
+				string(UnknownBankAccountStatus),
+			).Error("Invalid bank account status"),
+		).Required(validators.Optional),
+		validation.Key(
+			"accountType",
+			validation.In(
+				string(DepositoryBankAccountType),
+				string(CreditBankAccountType),
+				string(LoanBankAccountType),
+				string(InvestmentBankAccountType),
+				string(OtherBankAccountType),
+			).Error("Invalid bank account type"),
+		).Required(validators.Optional),
+		validation.Key(
+			"accountSubType",
+			validation.In(
+				string(CheckingBankAccountSubType),
+				string(SavingsBankAccountSubType),
+				string(HSABankAccountSubType),
+				string(CDBankAccountSubType),
+				string(MoneyMarketBankAccountSubType),
+				string(PayPalBankAccountSubType),
+				string(PrepaidBankAccountSubType),
+				string(CashManagementBankAccountSubType),
+				string(EBTBankAccountSubType),
+				string(CreditCardBankAccountSubType),
+				string(AutoBankAccountSubType),
+				string(OtherBankAccountSubType),
+			).Error("Invalid bank account sub type"),
+		).Required(validators.Optional),
+	}
+}
+
+// UpdateValidator returns an array of validation rules that can be used to
+// validate requests to PATCH endpoints.
+func (o *BankAccount) UpdateValidator() []*validation.KeyRules {
+	if o.PlaidBankAccountId != nil {
+		return []*validation.KeyRules{
+			validators.Name(false),
+		}
+	}
+
+	return []*validation.KeyRules{
+		validators.Mask(),
+		validators.Name(validators.Optional),
+		validators.CurrencyCode(validators.Optional),
+		validators.LimitBalance("limitBalance"),
+		validators.Balance("currentBalance"),
+		validators.Balance("availableBalance"),
+		validation.Key(
+			"status",
+			validation.In(
+				string(ActiveBankAccountStatus),
+				string(InactiveBankAccountStatus),
+				string(UnknownBankAccountStatus),
+			).Error("Invalid bank account status"),
+		).Required(validators.Optional),
+		validation.Key(
+			"accountType",
+			validation.In(
+				string(DepositoryBankAccountType),
+				string(CreditBankAccountType),
+				string(LoanBankAccountType),
+				string(InvestmentBankAccountType),
+				string(OtherBankAccountType),
+			).Error("Invalid bank account type"),
+		).Required(validators.Optional),
+		validation.Key(
+			"accountSubType",
+			validation.In(
+				string(CheckingBankAccountSubType),
+				string(SavingsBankAccountSubType),
+				string(HSABankAccountSubType),
+				string(CDBankAccountSubType),
+				string(MoneyMarketBankAccountSubType),
+				string(PayPalBankAccountSubType),
+				string(PrepaidBankAccountSubType),
+				string(CashManagementBankAccountSubType),
+				string(EBTBankAccountSubType),
+				string(CreditCardBankAccountSubType),
+				string(AutoBankAccountSubType),
+				string(OtherBankAccountSubType),
+			).Error("Invalid bank account sub type"),
+		).Required(validators.Optional),
+	}
+}
+
+// UnmarshalRequest consumes a request body and an array of validation rules in
+// order to create an object that can be persisted to the database. For updates,
+// this function should be called on the existing object that is already stored
+// in the database. The provided validators should prevent key or sensitive
+// fields from being overwritten by the client's request body. For creates, the
+// initial object can be left blank; or default values can be specified ahead of
+// calling this function in case some fields are omitted in the intial request.
+func (o *BankAccount) UnmarshalRequest(
+	ctx context.Context,
+	reader io.Reader,
+	validators ...*validation.KeyRules,
+) error {
+	rawData := map[string]any{}
+	decoder := json.NewDecoder(reader)
+	decoder.UseNumber()
+	if err := decoder.Decode(&rawData); err != nil {
+		return errors.WithStack(err)
+	}
+
+	if err := validation.ValidateWithContext(
+		ctx,
+		&rawData,
+		validation.Map(
+			validators...,
+		),
+	); err != nil {
+		return err
+	}
+
+	if err := merge.Merge(
+		o, rawData, merge.ErrorOnUnknownField,
+	); err != nil {
+		return errors.Wrap(err, "failed to merge patched data")
+	}
+
+	return nil
 }

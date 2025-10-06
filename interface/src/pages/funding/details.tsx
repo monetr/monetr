@@ -21,10 +21,9 @@ import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { useFundingSchedule, useRemoveFundingSchedule, useUpdateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import { useFundingSchedule, usePatchFundingSchedule, useRemoveFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { APIError } from '@monetr/interface/util/request';
 
 interface FundingValues {
@@ -44,7 +43,7 @@ export default function FundingDetails(): JSX.Element {
   const fundingId = match?.params?.fundingId || null;
   const { data: funding } = useFundingSchedule(fundingId);
   const navigate = useNavigate();
-  const updateFundingSchedule = useUpdateFundingSchedule();
+  const patchFundingSchedule = usePatchFundingSchedule();
   const removeFundingSchedule = useRemoveFundingSchedule();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -78,8 +77,9 @@ export default function FundingDetails(): JSX.Element {
 
   async function submit(values: FundingValues, helpers: FormikHelpers<FundingValues>) {
     helpers.setSubmitting(true);
-    const updatedFunding = new FundingSchedule({
-      ...funding,
+    return patchFundingSchedule({
+      fundingScheduleId: funding.fundingScheduleId,
+      bankAccountId: funding.bankAccountId,
       name: values.name,
       nextRecurrence: startOfDay(values.nextRecurrence, {
         in: tz(timezone),
@@ -87,9 +87,7 @@ export default function FundingDetails(): JSX.Element {
       ruleset: values.rule,
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: locale.friendlyToAmount(values.estimatedDeposit),
-    });
-
-    return updateFundingSchedule(updatedFunding)
+    })
       .then(() => void enqueueSnackbar(
         'Updated funding schedule successfully',
         {

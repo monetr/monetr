@@ -283,6 +283,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/links/:linkId", c.getLink)
 	billed.POST("/links", c.postLinks)
 	billed.PUT("/links/:linkId", c.putLink)
+	billed.PATCH("/links/:linkId", c.patchLink)
 	billed.PUT("/links/convert/:linkId", c.convertLink)
 	billed.DELETE("/links/:linkId", c.deleteLink)
 	// Institutions
@@ -292,6 +293,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/bank_accounts/:bankAccountId", c.getBankAccount)
 	billed.PUT("/bank_accounts/:bankAccountId", c.putBankAccount)
 	billed.DELETE("/bank_accounts/:bankAccountId", c.deleteBankAccount)
+	billed.PATCH("/bank_accounts/:bankAccountId", c.patchBankAccount)
 	billed.GET("/bank_accounts/:bankAccountId/balances", c.getBalances)
 	billed.POST("/bank_accounts", c.postBankAccounts)
 	// Transactions
@@ -311,6 +313,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.getFundingScheduleById)
 	billed.POST("/bank_accounts/:bankAccountId/funding_schedules", c.postFundingSchedules)
 	billed.PUT("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.putFundingSchedules)
+	billed.PATCH("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.patchFundingSchedule)
 	billed.DELETE("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.deleteFundingSchedules)
 	// Spending
 	billed.GET("/bank_accounts/:bankAccountId/spending", c.getSpending)

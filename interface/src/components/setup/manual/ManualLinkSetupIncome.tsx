@@ -18,7 +18,6 @@ import { useCreateLink } from '@monetr/interface/hooks/links';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
-import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 
 interface Values {
   nextPayday: Date;
@@ -51,7 +50,6 @@ export default function ManualLinkSetupIncome(): JSX.Element {
     };
     return createLink({
       institutionName: data['budgetName'],
-      customInstitutionName: data['budgetName'],
     })
       .then(link => createBankAccount({
         linkId: link.linkId,
@@ -62,7 +60,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
         accountSubType: BankAccountSubType.Checking,
         currency: data['currency'],
       }))
-      .then(bankAccount => createFundingSchedule(new FundingSchedule({
+      .then(bankAccount => createFundingSchedule({
         bankAccountId: bankAccount.bankAccountId,
         name: 'Payday',
         nextRecurrence: startOfDay(values.nextPayday, {
@@ -71,7 +69,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
         ruleset: values.ruleset,
         estimatedDeposit: locale.friendlyToAmount(values.paydayAmount),
         excludeWeekends: false,
-      })))
+      }))
       .then(fundingSchedule => navigate(`/bank/${fundingSchedule.bankAccountId}/transactions`))
       .catch(error => {
         throw error;

@@ -54,7 +54,7 @@ function NewFundingModal(): JSX.Element {
     helpers: FormikHelpers<NewFundingValues>,
   ): Promise<void> => {
     helpers.setSubmitting(true);
-    const newFundingSchedule = new FundingSchedule({
+    return await createFundingSchedule({
       bankAccountId: selectedBankAccountId,
       name: values.name,
       nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
@@ -63,9 +63,7 @@ function NewFundingModal(): JSX.Element {
       ruleset: values.ruleset,
       estimatedDeposit: values.estimatedDeposit > 0 ? friendlyToAmount(values.estimatedDeposit) : null,
       excludeWeekends: values.excludeWeekends,
-    });
-
-    return await createFundingSchedule(newFundingSchedule)
+    })
       .then(created => modal.resolve(created))
       .then(() => modal.remove())
       .catch((error: AxiosError) => void enqueueSnackbar(error.response.data['error'], {

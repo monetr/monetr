@@ -7,7 +7,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
@@ -460,10 +459,9 @@ func TestPostTransactions(t *testing.T) {
 		{ // Create the manual link
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(Link{
-					LinkType:        ManualLinkType,
-					InstitutionName: "Manual Link",
-					Description:     myownsanity.StringP("My personal link"),
+				WithJSON(map[string]any{
+					"institutionName": "Manual Link",
+					"description":     "My personal link",
 				}).
 				Expect()
 
@@ -480,17 +478,17 @@ func TestPostTransactions(t *testing.T) {
 		{ // Create the manual bank account
 			response := e.POST("/api/bank_accounts").
 				WithCookie(TestCookieName, token).
-				WithJSON(BankAccount{
-					LinkId:           linkId,
-					AvailableBalance: 100,
-					CurrentBalance:   100,
-					LimitBalance:     0,
-					Mask:             "1234",
-					Name:             "Checking Account",
-					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
-					Status:           ActiveBankAccountStatus,
+				WithJSON(map[string]any{
+					"linkId":           linkId,
+					"availableBalance": 100,
+					"currentBalance":   100,
+					"limitBalance":     0,
+					"mask":             "1234",
+					"name":             "Checking Account",
+					"originalName":     "PERSONAL CHECKING",
+					"accountType":      DepositoryBankAccountType,
+					"accountSubType":   CheckingBankAccountSubType,
+					"status":           ActiveBankAccountStatus,
 				}).
 				Expect()
 

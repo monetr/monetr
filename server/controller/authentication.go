@@ -69,7 +69,6 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 		Captcha  string `json:"captcha"`
-		IsMobile bool   `json:"isMobile"`
 	}
 	if err := ctx.Bind(&loginRequest); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
@@ -214,11 +213,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			"isActive": true,
 		}
 
-		if !loginRequest.IsMobile {
-			c.updateAuthenticationCookie(ctx, token)
-		} else {
-			result["token"] = token
-		}
+		c.updateAuthenticationCookie(ctx, token)
 
 		if !c.Configuration.Stripe.IsBillingEnabled() {
 			// Return their account token.

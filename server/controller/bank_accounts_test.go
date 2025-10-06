@@ -6,7 +6,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
@@ -21,10 +20,9 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual link
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(Link{
-					LinkType:        ManualLinkType,
-					InstitutionName: "Manual Link",
-					Description:     myownsanity.StringP("My personal link"),
+				WithJSON(map[string]any{
+					"institutionName": "Manual Link",
+					"description":     "My personal link",
 				}).
 				Expect()
 
@@ -40,17 +38,17 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual bank account
 			response := e.POST("/api/bank_accounts").
 				WithCookie(TestCookieName, token).
-				WithJSON(BankAccount{
-					LinkId:           linkId,
-					AvailableBalance: 100,
-					CurrentBalance:   100,
-					LimitBalance:     0,
-					Mask:             "1234",
-					Name:             "Checking Account",
-					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
-					Status:           ActiveBankAccountStatus,
+				WithJSON(map[string]any{
+					"linkId":           linkId,
+					"availableBalance": 100,
+					"currentBalance":   100,
+					"limitBalance":     0,
+					"mask":             "1234",
+					"name":             "Checking Account",
+					"originalName":     "PERSONAL CHECKING",
+					"accountType":      DepositoryBankAccountType,
+					"accountSubType":   CheckingBankAccountSubType,
+					"status":           ActiveBankAccountStatus,
 				}).
 				Expect()
 
@@ -63,6 +61,53 @@ func TestPostBankAccount(t *testing.T) {
 			response.JSON().Path("$.mask").String().IsEqual("1234")
 			response.JSON().Path("$.name").String().IsEqual("Checking Account")
 			response.JSON().Path("$.originalName").String().IsEqual("PERSONAL CHECKING")
+			response.JSON().Path("$.accountType").String().IsEqual(string(DepositoryBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CheckingBankAccountSubType))
+			response.JSON().Path("$.status").String().IsEqual(string(ActiveBankAccountStatus))
+		}
+	})
+
+	t.Run("minimal creation", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId ID[Link]
+		{ // Create the manual link
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "Manual Link",
+					"description":     "My personal link",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.linkType").IsEqual(ManualLinkType)
+			response.JSON().Path("$.institutionName").String().NotEmpty()
+			response.JSON().Path("$.description").String().IsEqual("My personal link")
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+			assert.False(t, linkId.IsZero(), "must be able to extract the link ID")
+		}
+
+		{ // Create the manual bank account
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId": linkId,
+					"name":   "Checking Account",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.linkId").String().IsEqual(linkId.String())
+			response.JSON().Path("$.availableBalance").Number().IsEqual(0)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(0)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(0)
+			response.JSON().Path("$.mask").String().IsEmpty()
+			response.JSON().Path("$.name").String().IsEqual("Checking Account")
+			response.JSON().Path("$.originalName").String().IsEmpty()
 			response.JSON().Path("$.accountType").String().IsEqual(string(DepositoryBankAccountType))
 			response.JSON().Path("$.accountSubType").String().IsEqual(string(CheckingBankAccountSubType))
 			response.JSON().Path("$.status").String().IsEqual(string(ActiveBankAccountStatus))
@@ -96,10 +141,9 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual link
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(Link{
-					LinkType:        ManualLinkType,
-					InstitutionName: "Manual Link",
-					Description:     myownsanity.StringP("My personal link"),
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
 				}).
 				Expect()
 
@@ -115,17 +159,17 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual bank account
 			response := e.POST("/api/bank_accounts").
 				WithCookie(TestCookieName, token).
-				WithJSON(BankAccount{
-					LinkId:           linkId,
-					AvailableBalance: 100,
-					CurrentBalance:   100,
-					LimitBalance:     0,
-					Mask:             "1234",
-					Name:             "Checking Account",
-					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
-					Status:           ActiveBankAccountStatus,
+				WithJSON(map[string]any{
+					"linkId":           linkId,
+					"availableBalance": 100,
+					"currentBalance":   100,
+					"limitBalance":     0,
+					"mask":             "1234",
+					"name":             "Checking Account",
+					"originalName":     "PERSONAL CHECKING",
+					"accountType":      DepositoryBankAccountType,
+					"accountSubType":   CheckingBankAccountSubType,
+					"status":           ActiveBankAccountStatus,
 				}).
 				Expect()
 
@@ -174,10 +218,9 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual link
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(Link{
-					LinkType:        ManualLinkType,
-					InstitutionName: "Manual Link",
-					Description:     myownsanity.StringP("My personal link"),
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
 				}).
 				Expect()
 
@@ -193,18 +236,18 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual bank account
 			response := e.POST("/api/bank_accounts").
 				WithCookie(TestCookieName, token).
-				WithJSON(BankAccount{
-					LinkId:           linkId,
-					AvailableBalance: 100,
-					CurrentBalance:   100,
-					LimitBalance:     0,
-					Mask:             "1234",
-					Name:             "Checking Account",
-					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
-					Status:           ActiveBankAccountStatus,
-					Currency:         "EUR",
+				WithJSON(map[string]any{
+					"linkId":           linkId,
+					"availableBalance": 100,
+					"currentBalance":   100,
+					"limitBalance":     0,
+					"mask":             "1234",
+					"name":             "Checking Account",
+					"originalName":     "PERSONAL CHECKING",
+					"accountType":      DepositoryBankAccountType,
+					"accountSubType":   CheckingBankAccountSubType,
+					"status":           ActiveBankAccountStatus,
+					"currency":         "EUR",
 				}).
 				Expect()
 
@@ -235,10 +278,9 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual link
 			response := e.POST("/api/links").
 				WithCookie(TestCookieName, token).
-				WithJSON(Link{
-					LinkType:        ManualLinkType,
-					InstitutionName: "Manual Link",
-					Description:     myownsanity.StringP("My personal link"),
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
 				}).
 				Expect()
 
@@ -254,23 +296,24 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual bank account
 			response := e.POST("/api/bank_accounts").
 				WithCookie(TestCookieName, token).
-				WithJSON(BankAccount{
-					LinkId:           linkId,
-					AvailableBalance: 100,
-					CurrentBalance:   100,
-					LimitBalance:     0,
-					Mask:             "1234",
-					Name:             "Checking Account",
-					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
-					Status:           ActiveBankAccountStatus,
-					Currency:         "???",
+				WithJSON(map[string]any{
+					"linkId":           linkId,
+					"availableBalance": 100,
+					"currentBalance":   100,
+					"limitBalance":     0,
+					"mask":             "1234",
+					"name":             "Checking Account",
+					"originalName":     "PERSONAL CHECKING",
+					"accountType":      DepositoryBankAccountType,
+					"accountSubType":   CheckingBankAccountSubType,
+					"status":           ActiveBankAccountStatus,
+					"currency":         "???",
 				}).
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("Provided currency code is not valid")
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be one supported by the server")
 		}
 	})
 
@@ -281,17 +324,16 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual bank account
 			response := e.POST("/api/bank_accounts").
 				WithCookie(TestCookieName, token).
-				WithJSON(BankAccount{
-					LinkId:           "bogus",
-					AvailableBalance: 100,
-					CurrentBalance:   100,
-					LimitBalance:     0,
-					Mask:             "1234",
-					Name:             "Checking Account",
-					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
-					Status:           ActiveBankAccountStatus,
+				WithJSON(map[string]any{
+					"availableBalance": 100,
+					"currentBalance":   100,
+					"limitBalance":     0,
+					"mask":             "1234",
+					"name":             "Checking Account",
+					"originalName":     "PERSONAL CHECKING",
+					"accountType":      DepositoryBankAccountType,
+					"accountSubType":   CheckingBankAccountSubType,
+					"status":           ActiveBankAccountStatus,
 				}).
 				Expect()
 
@@ -299,7 +341,8 @@ func TestPostBankAccount(t *testing.T) {
 			// just sees that the link does not exist with a manual type. Not that the
 			// link doesn't exist at all.
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").IsEqual("Cannot create a bank account for a non-manual link")
+			response.JSON().Path("$.error").IsEqual("Invalid request")
+			response.JSON().Path("$.problems.linkId").String().IsEqual("required key is missing")
 		}
 	})
 
@@ -313,22 +356,58 @@ func TestPostBankAccount(t *testing.T) {
 		{ // Create the manual bank account
 			response := e.POST("/api/bank_accounts").
 				WithCookie(TestCookieName, token).
-				WithJSON(BankAccount{
-					LinkId:           plaidLink.LinkId,
-					AvailableBalance: 100,
-					CurrentBalance:   100,
-					LimitBalance:     0,
-					Mask:             "1234",
-					Name:             "Checking Account",
-					OriginalName:     "PERSONAL CHECKING",
-					Type:             DepositoryBankAccountType,
-					SubType:          CheckingBankAccountSubType,
-					Status:           ActiveBankAccountStatus,
+				WithJSON(map[string]any{
+					"linkId":           plaidLink.LinkId,
+					"availableBalance": 100,
+					"currentBalance":   100,
+					"limitBalance":     0,
+					"mask":             "1234",
+					"name":             "Checking Account",
+					"originalName":     "PERSONAL CHECKING",
+					"accountType":      DepositoryBankAccountType,
+					"accountSubType":   CheckingBankAccountSubType,
+					"status":           ActiveBankAccountStatus,
 				}).
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").IsEqual("Cannot create a bank account for a non-manual link")
+			response.JSON().Path("$.error").IsEqual("Invalid request")
+			response.JSON().Path("$.problems.linkId").String().IsEqual("Cannot create a bank account for a non-manual link, specify a manual Link ID")
+		}
+	})
+}
+
+func TestPatchBankAccount(t *testing.T) {
+	t.Run("happy path patch a manual link bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"availableBalance": -100,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.name").String().IsEqual(bank.Name)
+			response.JSON().Path("$.currency").String().IsEqual(bank.Currency)
+			response.JSON().Path("$.mask").String().IsEqual(bank.Mask)
+			response.JSON().Path("$.availableBalance").Number().IsEqual(-100)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
+			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.AccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.AccountSubType))
 		}
 	})
 }
@@ -363,8 +442,8 @@ func TestPutBankAccount(t *testing.T) {
 			response.JSON().Path("$.availableBalance").Number().IsEqual(bank.AvailableBalance)
 			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
 			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
-			response.JSON().Path("$.accountType").String().IsEqual(string(bank.Type))
-			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.SubType))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.AccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.AccountSubType))
 		}
 	})
 
@@ -407,8 +486,8 @@ func TestPutBankAccount(t *testing.T) {
 			response.JSON().Path("$.availableBalance").Number().IsEqual(bank.AvailableBalance)
 			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
 			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
-			response.JSON().Path("$.accountType").String().IsEqual(string(bank.Type))
-			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.SubType))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.AccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.AccountSubType))
 		}
 	})
 
@@ -516,8 +595,8 @@ func TestPutBankAccount(t *testing.T) {
 			response.JSON().Path("$.mask").String().IsEqual(bank.Mask)
 			response.JSON().Path("$.currency").String().IsEqual(bank.Currency)
 			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
-			response.JSON().Path("$.accountType").String().IsEqual(string(bank.Type))
-			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.SubType))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.AccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.AccountSubType))
 
 			response.JSON().Path("$.name").String().IsEqual("My New Name")
 		}
