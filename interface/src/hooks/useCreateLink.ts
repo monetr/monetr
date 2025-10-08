@@ -17,21 +17,19 @@ export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {
       .then(result => new Link(result?.data));
   }
 
-  const mutate = useMutation(
-    {
-      mutationFn: createLink,
-      onSuccess: (newLink: Link) => Promise.all([
-        queryClient.setQueryData(
-          ['/links'],
-          (previous: Array<Partial<Link>> | null) => (previous ?? []).concat(newLink),
-        ),
-        queryClient.setQueryData(
-          [`/links/${newLink.linkId}`],
-          newLink,
-        ),
-      ]),
-    }
-  );
+  const mutate = useMutation({
+    mutationFn: createLink,
+    onSuccess: (newLink: Link) => Promise.all([
+      queryClient.setQueryData(
+        ['/links'],
+        (previous: Array<Partial<Link>> | null) => (previous ?? []).concat(newLink),
+      ),
+      queryClient.setQueryData(
+        [`/links/${newLink.linkId}`],
+        newLink,
+      ),
+    ]),
+  });
 
   return mutate.mutateAsync;
 }
