@@ -14,7 +14,7 @@ import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 import { useCreateBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
-import { useCreateLink } from '@monetr/interface/hooks/links';
+import { useCreateLink } from '@monetr/interface/hooks/useCreateLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';

@@ -7,7 +7,7 @@ import { useSnackbar } from 'notistack';
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
-import { useRemoveLink } from '@monetr/interface/hooks/links';
+import { useRemoveLink } from '@monetr/interface/hooks/useRemoveLink';
 import Link from '@monetr/interface/models/Link';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
