@@ -8,8 +8,8 @@ export function useBankAccount(bankAccountId?: string): UseQueryResult<BankAccou
 
   return useQuery<Partial<BankAccount>, unknown, BankAccount | undefined>({
     queryKey: [`/bank_accounts/${bankAccountId}`],
-    enabled: !!bankAccountId, // Only request if we have a valid bank account ID to work with.
-    select: data => !!data && new BankAccount(data),
+    enabled: Boolean(bankAccountId), // Only request if we have a valid bank account ID to work with.
+    select: data => Boolean(data) && new BankAccount(data),
     // If the bank account is in our existing query state then use that.
     initialData: () => Array.isArray(existingData) ?
       existingData.find(item => item.bankAccountId === bankAccountId) :
