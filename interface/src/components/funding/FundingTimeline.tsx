@@ -5,8 +5,8 @@ import { tz } from '@date-fns/tz';
 import { format, getUnixTime } from 'date-fns';
 
 import MSpan from '@monetr/interface/components/MSpan';
-import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import { ForecastEvent, useForecast } from '@monetr/interface/hooks/useForecast';
+import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { AmountType } from '@monetr/interface/util/amounts';

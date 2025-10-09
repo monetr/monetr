@@ -8,7 +8,7 @@ import { rrulestr } from 'rrule';
 import ArrowLink from '@monetr/interface/components/ArrowLink';
 import MBadge from '@monetr/interface/components/MBadge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
-import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';

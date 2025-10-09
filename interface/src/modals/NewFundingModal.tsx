@@ -15,7 +15,7 @@ import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { Switch } from '@monetr/interface/components/Switch';
-import { useCreateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';

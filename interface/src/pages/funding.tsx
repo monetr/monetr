@@ -5,11 +5,11 @@ import { Button } from '@monetr/interface/components/Button';
 import FundingItem from '@monetr/interface/components/funding/FundingItem';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { useFundingSchedulesSink } from '@monetr/interface/hooks/fundingSchedules';
+import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 
 export default function Funding(): JSX.Element {
-  const { isError: fundingIsError, isLoading: fundingIsLoading, data: funding } = useFundingSchedulesSink();
+  const { isError: fundingIsError, isLoading: fundingIsLoading, data: funding } = useFundingSchedules();
 
   if (fundingIsLoading) {
     return (

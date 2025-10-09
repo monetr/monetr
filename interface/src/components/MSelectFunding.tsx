@@ -5,7 +5,7 @@ import { Calendar } from 'lucide-react';
 import MLabel from './MLabel';
 import MSelect from './MSelect';
 import { Button } from '@monetr/interface/components/Button';
-import { useFundingSchedulesSink } from '@monetr/interface/hooks/fundingSchedules';
+import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 
 export interface MSelectFundingProps {
@@ -22,7 +22,7 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
     data: funding,
     isLoading: fundingIsLoading,
     isError: fundingIsError,
-  } = useFundingSchedulesSink();
+  } = useFundingSchedules();
   const label = props.label ?? 'Select a funding schedule';
 
   if (fundingIsLoading) {
