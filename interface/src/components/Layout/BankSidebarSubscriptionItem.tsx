@@ -6,18 +6,18 @@ import { CreditCard } from 'lucide-react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
-import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 export default function BankSidebarSubscriptionItem(): JSX.Element {
   const config = useAppConfiguration();
-  const { result } = useAuthenticationSink();
+  const { data } = useAuthentication();
   const path = '/settings/billing';
 
   if (!config?.billingEnabled) {
     return null;
   }
 
-  if (result?.isTrialing) {
+  if (data?.isTrialing) {
     return (
       <Tooltip delayDuration={ 100 }>
         <TooltipTrigger>
@@ -30,7 +30,7 @@ export default function BankSidebarSubscriptionItem(): JSX.Element {
           </Link>
         </TooltipTrigger>
         <TooltipContent side='right'>
-          Your trial ends in { formatDistance(result.trialingUntil, new Date())}.
+          Your trial ends in { formatDistance(data.trialingUntil, new Date())}.
         </TooltipContent>
       </Tooltip>
     );

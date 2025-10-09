@@ -3,10 +3,10 @@ import React from 'react';
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MSelect from '@monetr/interface/components/MSelect';
 import MTextField from '@monetr/interface/components/MTextField';
-import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 export default function SettingsOverview(): JSX.Element {
-  const { result: me } = useAuthenticationSink();
+  const { data: me } = useAuthentication();
 
   const timezone = {
     label: me?.user?.account?.timezone,

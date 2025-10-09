@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import * as Sentry from '@sentry/react';
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
@@ -5,7 +6,7 @@ import User from '@monetr/interface/models/User';
 import parseDate from '@monetr/interface/util/parseDate';
 import request from '@monetr/interface/util/request';
 
-export interface AuthenticationWrapper {
+export interface Authentication {
   user: User;
   defaultCurrency: string;
   mfaPending: boolean;
@@ -18,11 +19,38 @@ export interface AuthenticationWrapper {
 }
 
 export type AuthenticationResult =
-  { result: AuthenticationWrapper }
-  & UseQueryResult<Partial<AuthenticationWrapper>, unknown>;
+  { result: Authentication }
+  & UseQueryResult<Partial<Authentication>, unknown>;
+
+export function useAuthentication(): UseQueryResult<Authentication | undefined, unknown> {
+  const result = useQuery<Partial<Authentication>, unknown, Authentication>({
+    queryKey: ['/users/me'],
+    select: data => ({
+      user: Boolean(data?.user) && new User(data?.user),
+      defaultCurrency: data?.defaultCurrency,
+      mfaPending: Boolean(data?.mfaPending),
+      isSetup: Boolean(data?.isSetup),
+      isActive: Boolean(data?.isActive),
+      isTrialing: Boolean(data?.isTrialing),
+      activeUntil: parseDate(data?.activeUntil),
+      trialingUntil: parseDate(data?.trialingUntil),
+      hasSubscription: Boolean(data?.hasSubscription),
+    }),
+    refetchOnWindowFocus: true, // Might want to change this to 'always' at some point?
+  });
+  useEffect(() => {
+    if (result?.data?.user?.accountId) {
+      Sentry.setUser({
+        id: result.data.user.accountId,
+        username: `account:${result.data.user.accountId}`,
+      });
+    }
+  }, [result]);
+  return result;
+}
 
 export function useAuthenticationSink(): AuthenticationResult {
-  const result = useQuery<Partial<AuthenticationWrapper>>(['/users/me'], {
+  const result = useQuery<Partial<Authentication>>(['/users/me'], {
     onSuccess: data => {
       if (data?.user?.accountId) {
         Sentry.setUser({
@@ -49,7 +77,7 @@ export function useAuthenticationSink(): AuthenticationResult {
   };
 }
 
-export function useAuthentication(): User | null {
+export function useAuthenticationOLD(): User | null {
   const { result: { user } } = useAuthenticationSink();
   return user;
 }

@@ -6,7 +6,7 @@ import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
-import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
 
 export default function SubscribePage(): JSX.Element {
@@ -14,7 +14,7 @@ export default function SubscribePage(): JSX.Element {
   const {
     initialPlan,
   } = useAppConfiguration();
-  const { result: { hasSubscription, activeUntil } } = useAuthenticationSink();
+  const { data: { hasSubscription, activeUntil } } = useAuthentication();
 
   const [loading, setLoading] = useState(false);
   const handleContinue = useCallback(() => {

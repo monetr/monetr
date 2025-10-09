@@ -7,7 +7,7 @@ import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
 import Sidebar from '@monetr/interface/components/Layout/Sidebar';
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
 import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
-import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 import Loading from '@monetr/interface/loading';
@@ -51,7 +51,7 @@ export default function Monetr(): JSX.Element {
     isLoading: configIsLoading,
     isError: configIsError,
   } = useAppConfigurationSink();
-  const { isLoading: authIsLoading, result: { user, isActive, mfaPending } } = useAuthenticationSink();
+  const { isLoading: authIsLoading, data: { user, isActive, mfaPending } } = useAuthentication();
   const { isLoading: linksIsLoading, data: links } = useLinks();
   const isAuthenticated = !!user;
   // If the config or authentication is loading just show a loading page.

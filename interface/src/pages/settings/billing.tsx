@@ -9,14 +9,14 @@ import { Button } from '@monetr/interface/components/Button';
 import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
-import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
 
 export default function SettingsBilling(): JSX.Element {
   const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
-  const { result: { hasSubscription } } = useAuthenticationSink();
+  const { data: { hasSubscription } } = useAuthentication();
   const handleManageSubscription = useCallback(async () => {
     setLoading(true);
     let promise: Promise<AxiosResponse<{ url: string }>>;

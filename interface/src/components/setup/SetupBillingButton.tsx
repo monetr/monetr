@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useSnackbar } from 'notistack';
 
 import { MBaseButton } from '@monetr/interface/components/MButton';
-import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 
 /**
@@ -12,7 +12,7 @@ import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication
  * settings if you do not have an active link for some reason.
  */
 export default function SetupBillingButton(): JSX.Element {
-  const { result: { hasSubscription } } = useAuthenticationSink();
+  const { data: { hasSubscription } } = useAuthentication();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
 
