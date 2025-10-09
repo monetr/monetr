@@ -9,7 +9,7 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 export default function BankSidebarSubscriptionItem(): JSX.Element {
-  const config = useAppConfiguration();
+  const { data: config } = useAppConfiguration();
   const { data } = useAuthentication();
   const path = '/settings/billing';
 

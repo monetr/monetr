@@ -87,7 +87,7 @@ export function RegisterSuccessful(): JSX.Element {
 
 export default function Register(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const config = useAppConfiguration();
+  const { data: config } = useAppConfiguration();
   const signUp = useSignUp();
   const navigate = useNavigate();
   const queryClient = useQueryClient();

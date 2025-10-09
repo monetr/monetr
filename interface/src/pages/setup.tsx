@@ -46,7 +46,7 @@ interface GreetingProps {
 }
 
 function Greeting(props: GreetingProps): JSX.Element {
-  const config = useAppConfiguration();
+  const { data: config } = useAppConfiguration();
   const [active, setActive] = useState<'plaid'|'teller'|'manual'|null>(null);
 
   function Banner(): JSX.Element {

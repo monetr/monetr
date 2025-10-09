@@ -8,7 +8,9 @@ export function useLinks(): UseQueryResult<Array<Link>, unknown> {
   return useQuery<Array<Partial<Link>>, unknown, Array<Link>>({
     queryKey: ['/links'],
     // Only request links if there is an authenticated user.
-    enabled: !!user && isActive && !mfaPending,
+    enabled: Boolean(user) && isActive && !mfaPending,
+    initialData: [],
+    initialDataUpdatedAt: 0,
     select: data => {
       if (Array.isArray(data)) {
         return data.map(item => new Link(item));

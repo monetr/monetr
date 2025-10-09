@@ -21,6 +21,18 @@ export interface Authentication {
 export function useAuthentication(): UseQueryResult<Authentication | undefined, unknown> {
   const result = useQuery<Partial<Authentication>, unknown, Authentication>({
     queryKey: ['/users/me'],
+    initialData: {
+      user: null,
+      defaultCurrency: DefaultCurrency,
+      mfaPending: false,
+      isSetup: false,
+      isActive: false,
+      isTrialing: false,
+      activeUntil: null,
+      trialingUntil: null,
+      hasSubscription: false,
+    },
+    initialDataUpdatedAt: 0,
     select: data => ({
       user: Boolean(data?.user) && new User(data?.user),
       defaultCurrency: data?.defaultCurrency || DefaultCurrency,

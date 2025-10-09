@@ -21,7 +21,8 @@ describe('use locale currency', () => {
     });
 
     const { result, waitFor } = testRenderHook(useLocaleCurrency, { initialRoute: '/login' });
-    expect(result.current.isLoading).toBeTruthy();
+    expect(result.current.isFetching).toBeTruthy();
+    await waitFor(() => expect(result.current.isFetching).toBeFalsy());
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     await waitFor(() => expect(result.current.data.locale).toBe('en_US'));
     await waitFor(() => expect(result.current.data.currency).toBe('USD'));
@@ -63,7 +64,8 @@ describe('use locale currency', () => {
     });
 
     const { result, waitFor } = testRenderHook(useLocaleCurrency, { initialRoute: '/setup' });
-    expect(result.current.isLoading).toBeTruthy();
+    expect(result.current.isFetching).toBeTruthy();
+    await waitFor(() => expect(result.current.isFetching).toBeFalsy());
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     await waitFor(() => expect(result.current.data.locale).toBe('ja_JP'));
     await waitFor(() => expect(result.current.data.currency).toBe('JPY'));
@@ -120,8 +122,11 @@ describe('use locale currency', () => {
       'updatedAt': '2024-03-19T06:17:32.335106Z',
     });
 
-    const { result, waitFor } = testRenderHook(useLocaleCurrency, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions' });
-    expect(result.current.isLoading).toBeTruthy();
+    const { result, waitFor } = testRenderHook(useLocaleCurrency, {
+      initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions',
+    });
+    expect(result.current.isFetching).toBeTruthy();
+    await waitFor(() => expect(result.current.isFetching).toBeFalsy());
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     // Locale should always come from the user.
     await waitFor(() => expect(result.current.data.locale).toBe('ja_JP'));
@@ -168,7 +173,8 @@ describe('use locale currency', () => {
     });
 
     const { result, waitFor } = testRenderHook(useLocaleCurrency, { initialRoute: '/bank/undefined/transactions' });
-    expect(result.current.isLoading).toBeTruthy();
+    expect(result.current.isFetching).toBeTruthy();
+    await waitFor(() => expect(result.current.isFetching).toBeFalsy());
     // Still use the user's locale
     await waitFor(() => expect(result.current.data.locale).toBe('en_US'));
     // But fall back to the default if we can't load the bank currency

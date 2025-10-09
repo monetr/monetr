@@ -6,7 +6,7 @@ import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSideb
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
 import Sidebar from '@monetr/interface/components/Layout/Sidebar';
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
-import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
+import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
@@ -47,10 +47,10 @@ const RoutesImpl = Sentry.withSentryReactRouterV6Routing(Routes);
 
 export default function Monetr(): JSX.Element {
   const {
-    result: config,
+    data: config,
     isLoading: configIsLoading,
     isError: configIsError,
-  } = useAppConfigurationSink();
+  } = useAppConfiguration();
   const { isLoading: authIsLoading, data: { user, isActive, mfaPending } } = useAuthentication();
   const { isLoading: linksIsLoading, data: links } = useLinks();
   const isAuthenticated = !!user;

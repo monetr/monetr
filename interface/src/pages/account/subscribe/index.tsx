@@ -11,9 +11,7 @@ import request from '@monetr/interface/util/request';
 
 export default function SubscribePage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const {
-    initialPlan,
-  } = useAppConfiguration();
+  const { data: { initialPlan } } = useAppConfiguration();
   const { data: { hasSubscription, activeUntil } } = useAuthentication();
 
   const [loading, setLoading] = useState(false);

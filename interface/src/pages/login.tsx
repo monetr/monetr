@@ -45,7 +45,7 @@ function validator(values: LoginValues): FormikErrors<LoginValues> {
 
 export default function Login(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const config = useAppConfiguration();
+  const { data: config } = useAppConfiguration();
   const login = useLogin();
 
   function ForgotPasswordButton(): JSX.Element {

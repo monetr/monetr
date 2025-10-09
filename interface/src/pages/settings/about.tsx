@@ -8,10 +8,12 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 
 export default function SettingsAbout(): JSX.Element {
   const {
-    release,
-    revision,
-    buildType,
-    buildTime,
+    data: {
+      release,
+      revision,
+      buildType,
+      buildTime,
+    },
   } = useAppConfiguration();
 
   return (

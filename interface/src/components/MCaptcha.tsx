@@ -15,7 +15,7 @@ export interface MCaptchaProps {
 
 export default function MCaptcha(props: MCaptchaProps): JSX.Element {
   const formikContext = useFormikContext();
-  const config = useAppConfiguration();
+  const { data: config } = useAppConfiguration();
 
   if (!props.show || !config?.ReCAPTCHAKey) {
     return null;
