@@ -2,7 +2,7 @@ import React from 'react';
 import { AccountBalanceWalletOutlined } from '@mui/icons-material';
 
 import MSpan from '@monetr/interface/components/MSpan';
-import { useCurrentBalance } from '@monetr/interface/hooks/balances';
+import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { AmountType } from '@monetr/interface/util/amounts';
