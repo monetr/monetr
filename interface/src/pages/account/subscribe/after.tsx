@@ -4,7 +4,7 @@ import { LoaderCircle } from 'lucide-react';
 
 import Logo from '@monetr/interface/assets/Logo';
 import MSpan from '@monetr/interface/components/MSpan';
-import { useAfterCheckout } from '@monetr/interface/hooks/useAuthentication';
+import { useAfterCheckout } from '@monetr/interface/hooks/useAfterCheckout';
 
 export default function AfterCheckoutPage(): JSX.Element {
   const { search } = useLocation();
