@@ -27,10 +27,10 @@ export const DefaultCurrency = 'USD';
  * It will use the current bank accounts currency (if there is one), then the user's default currency then the global
  * default currency.
  */
-export default function useLocaleCurrency(forceCurrency?: string): UseQueryResult<LocaleCurrency> {
+export default function useLocaleCurrency(forceCurrency?: string): UseQueryResult<LocaleCurrency, unknown> {
   const { data: me, ...authenticationState } = useAuthentication();
   const bankAccount = useSelectedBankAccount();
-  const locale = useMemo(() => me?.user?.account?.locale ?? 'en_US', [me]);
+  const locale = useMemo(() => me?.user?.account?.locale || 'en_US', [me]);
   const currency = useMemo(() => {
     // Return the first _defined_ currency.
     return [
