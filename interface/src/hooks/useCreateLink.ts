@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
 import Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
@@ -9,22 +9,18 @@ export interface CreateLinkRequest {
 }
 
 export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {
-  const queryClient = useQueryClient();
-
-  async function createLink(newLink: CreateLinkRequest): Promise<Link> {
-    return request()
-      .post<Partial<Link>>('/links', newLink)
-      .then(result => new Link(result?.data));
-  }
-
   const mutate = useMutation({
-    mutationFn: createLink,
-    onSuccess: (newLink: Link) => Promise.all([
-      queryClient.setQueryData(
+    mutationFn: async (newLink: CreateLinkRequest): Promise<Link> => {
+      return request()
+        .post<Partial<Link>>('/links', newLink)
+        .then(result => new Link(result?.data));
+    },
+    onSuccess: (newLink: Link, _a, _b, context) => Promise.all([
+      context.client.setQueryData(
         ['/links'],
         (previous: Array<Partial<Link>> | null) => (previous ?? []).concat(newLink),
       ),
-      queryClient.setQueryData(
+      context.client.setQueryData(
         [`/links/${newLink.linkId}`],
         newLink,
       ),
