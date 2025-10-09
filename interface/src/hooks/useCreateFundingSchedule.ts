@@ -30,7 +30,7 @@ export function useCreateFundingSchedule(): (_funding: CreateFundingScheduleRequ
     onSuccess: (newFunding: FundingSchedule) => Promise.all([
       queryClient.setQueryData(
         [`/bank_accounts/${newFunding.bankAccountId}/funding_schedules`],
-        (previous: Array<Partial<FundingSchedule>>) => previous.concat(newFunding),
+        (previous: Array<Partial<FundingSchedule>>) => (previous ?? []).concat(newFunding),
       ),
       queryClient.setQueryData(
         [`/bank_accounts/${newFunding.bankAccountId}/funding_schedules/${newFunding.fundingScheduleId}`],

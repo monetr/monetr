@@ -51,13 +51,13 @@ export default function Monetr(): JSX.Element {
     isLoading: configIsLoading,
     isError: configIsError,
   } = useAppConfiguration();
-  const { isLoading: authIsLoading, data: { user, isActive, mfaPending } } = useAuthentication();
+  const { isLoading: authIsLoading, data: auth } = useAuthentication();
   const { isLoading: linksIsLoading, data: links } = useLinks();
-  const isAuthenticated = !!user;
+  const isAuthenticated = Boolean(auth?.user);
   // If the config or authentication is loading just show a loading page.
   // Links is loading is weird becuase the loading state will be true until we actually request links. But links won't
   // be requested until we are authenticated with an active subscription.
-  if (configIsLoading || authIsLoading || (linksIsLoading && isActive && !mfaPending)) {
+  if (configIsLoading || authIsLoading || (linksIsLoading && auth?.isActive && !auth?.mfaPending)) {
     return <Loading />;
   }
 
@@ -83,7 +83,7 @@ export default function Monetr(): JSX.Element {
   }
 
   // If the currently authenticated user requires MFA then only allow them to access the MFA pages.
-  if (mfaPending) {
+  if (auth?.mfaPending) {
     return (
       <RoutesImpl>
         <Route path='/login/multifactor' element={ <MultifactorAuthenticationPage /> } />
@@ -93,7 +93,7 @@ export default function Monetr(): JSX.Element {
     );
   }
 
-  if (!isActive) {
+  if (!auth?.isActive) {
     return (
       <RoutesImpl>
         <Route path='/logout' element={ <LogoutPage /> } />

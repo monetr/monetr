@@ -16,11 +16,11 @@ export default function SettingsBilling(): JSX.Element {
   const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
-  const { data: { hasSubscription } } = useAuthentication();
+  const { data: auth } = useAuthentication();
   const handleManageSubscription = useCallback(async () => {
     setLoading(true);
     let promise: Promise<AxiosResponse<{ url: string }>>;
-    if (!hasSubscription) {
+    if (!auth?.hasSubscription) {
       promise = request().post('/billing/create_checkout', {
         // If the user backs out of the stripe checkout then return them to the current URL.
         cancelPath: location.pathname,
@@ -40,9 +40,9 @@ export default function SettingsBilling(): JSX.Element {
           disableWindowBlurListener: true,
         });
       });
-  }, [enqueueSnackbar, hasSubscription, location]);
+  }, [enqueueSnackbar, auth, location]);
 
-  const manageSubscriptionText = hasSubscription ? 'Manage Your Subscription' : 'Subscribe Early';
+  const manageSubscriptionText = auth?.hasSubscription ? 'Manage Your Subscription' : 'Subscribe Early';
 
   return (
     <div className='w-full flex flex-col p-4 max-w-xl'>

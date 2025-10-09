@@ -4,11 +4,11 @@ import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Link from '@monetr/interface/models/Link';
 
 export function useLinks(): UseQueryResult<Array<Link>, unknown> {
-  const { data: { user, isActive, mfaPending } } = useAuthentication();
+  const { data } = useAuthentication();
   return useQuery<Array<Partial<Link>>, unknown, Array<Link>>({
     queryKey: ['/links'],
     // Only request links if there is an authenticated user.
-    enabled: Boolean(user) && isActive && !mfaPending,
+    enabled: Boolean(data?.user) && data?.isActive && !data?.mfaPending,
     initialData: [],
     initialDataUpdatedAt: 0,
     select: data => {
