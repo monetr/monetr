@@ -19,10 +19,11 @@ import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import RemoveTransactionButton from '@monetr/interface/components/transactions/RemoveTransactionButton';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
-import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
+import { useTransaction } from '@monetr/interface/hooks/useTransaction';
+import { useUpdateTransaction } from '@monetr/interface/hooks/useUpdateTransaction';
 import Transaction from '@monetr/interface/models/Transaction';
 import { APIError } from '@monetr/interface/util/request';
 

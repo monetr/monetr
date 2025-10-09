@@ -12,7 +12,7 @@ import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import { Switch } from '@monetr/interface/components/Switch';
 import SimilarTransactionItem from '@monetr/interface/components/transactions/SimilarTransactionItem';
-import { useRemoveTransaction } from '@monetr/interface/hooks/transactions';
+import { useRemoveTransaction } from '@monetr/interface/hooks/useRemoveTransaction';
 import Transaction from '@monetr/interface/models/Transaction';
 import { APIError } from '@monetr/interface/util/request';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';

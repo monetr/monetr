@@ -12,9 +12,9 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import TransactionDateItem from '@monetr/interface/components/transactions/TransactionDateItem';
 import TransactionItem from '@monetr/interface/components/transactions/TransactionItem';
-import { useTransactions } from '@monetr/interface/hooks/transactions';
 import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
+import { useTransactions } from '@monetr/interface/hooks/useTransactions';
 import { showNewTransactionModal } from '@monetr/interface/modals/NewTransactionModal';
 import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import Transaction from '@monetr/interface/models/Transaction';
@@ -24,11 +24,12 @@ let evilScrollPosition: number = 0;
 export default function Transactions(): JSX.Element {
   const { result: config } = useAppConfigurationSink();
   const {
+    data: transactions,
+    hasNextPage,
     isLoading,
     isError,
     isFetching,
     fetchNextPage,
-    result: transactions, hasNextPage,
   } = useTransactions();
 
   const { data: link } = useCurrentLink();
