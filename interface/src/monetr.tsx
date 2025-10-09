@@ -6,9 +6,9 @@ import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSideb
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
 import Sidebar from '@monetr/interface/components/Layout/Sidebar';
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
-import { useBankAccounts } from '@monetr/interface/hooks/bankAccounts';
 import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 import Loading from '@monetr/interface/loading';
 import SubscribePage from '@monetr/interface/pages/account/subscribe';

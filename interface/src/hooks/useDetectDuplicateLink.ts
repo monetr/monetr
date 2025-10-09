@@ -1,6 +1,6 @@
 import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
 
-import { useBankAccounts } from '@monetr/interface/hooks/bankAccounts';
+import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 
 export function useDetectDuplicateLink(): (_metadata: PlaidLinkOnSuccessMetadata) => boolean {
