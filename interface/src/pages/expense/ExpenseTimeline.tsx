@@ -5,9 +5,9 @@ import { tz } from '@date-fns/tz';
 import { format, getUnixTime } from 'date-fns';
 
 import MSpan from '@monetr/interface/components/MSpan';
-import { Event, useForecast } from '@monetr/interface/hooks/forecast';
 import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import { useSpending } from '@monetr/interface/hooks/spending';
+import { ForecastEvent, useForecast } from '@monetr/interface/hooks/useForecast';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { AmountType } from '@monetr/interface/util/amounts';
@@ -31,7 +31,7 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
   const { data: locale } = useLocaleCurrency();
   const { data: spending, isLoading: spendingLoading } = useSpending(props.spendingId);
   const { data: fundingSchedule, isLoading: fundingLoading } = useFundingSchedule(spending?.fundingScheduleId);
-  const { result: forecast, isLoading, isError } = useForecast();
+  const { data: forecast, isLoading, isError } = useForecast();
   const inTimezone = useMemo(() => tz(timezone), [timezone]);
 
   if (isLoading || spendingLoading || fundingLoading) {
@@ -47,7 +47,7 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
   }
 
   // Keep only the events that have spending or contributions for this spending object.
-  const events: Array<Event> = forecast.events
+  const events: Array<ForecastEvent> = forecast.events
     .filter(event => event.spending.some(spending => spending.spendingId === props.spendingId))
     .map(event => ({
       ...event,

@@ -3,16 +3,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import { format, isThisYear } from 'date-fns';
+import { rrulestr } from 'rrule';
 
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import MSpan from '@monetr/interface/components/MSpan';
-import { useNextFundingForecast } from '@monetr/interface/hooks/forecast';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useNextFundingForecast } from '@monetr/interface/hooks/useNextFundingForecast';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
-
-import { rrulestr } from 'rrule';
 
 export interface FundingItemProps {
   funding: FundingSchedule;
@@ -31,7 +30,7 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
   const next = funding.nextRecurrence;
   const dateFormatString = isThisYear(next) ? 'EEEE LLLL do' : 'EEEE LLLL do, yyyy';
   // TODO look into format distance.
-  const nextOccurrenceString = `${format(next, dateFormatString)}`;
+  const nextOccurrenceString = format(next, dateFormatString);
 
   function openDetails() {
     navigate(`/bank/${funding.bankAccountId}/funding/${funding.fundingScheduleId}/details`);
