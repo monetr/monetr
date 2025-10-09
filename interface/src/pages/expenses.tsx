@@ -7,7 +7,7 @@ import { Button } from '@monetr/interface/components/Button';
 import ExpenseItem from '@monetr/interface/components/expenses/ExpenseItem';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { useSpendingFiltered } from '@monetr/interface/hooks/spending';
+import { useSpendingFiltered } from '@monetr/interface/hooks/useSpendingFiltered';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import { SpendingType } from '@monetr/interface/models/Spending';
 
@@ -15,7 +15,7 @@ let evilScrollPosition: number = 0;
 
 export default function Expenses(): JSX.Element {
   const {
-    result: expenses,
+    data: expenses,
     isError,
     isLoading,
   } = useSpendingFiltered(SpendingType.Expense);

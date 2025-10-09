@@ -4,10 +4,10 @@ import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 
 import MBadge from './MBadge';
 import MSpan from './MSpan';
-import { useSpendings } from '@monetr/interface/hooks/spending';
 import { useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import useTheme from '@monetr/interface/hooks/useTheme';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import Transaction from '@monetr/interface/models/Transaction';

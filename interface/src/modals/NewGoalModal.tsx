@@ -14,7 +14,7 @@ import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
-import { useCreateSpending } from '@monetr/interface/hooks/spending';
+import { useCreateSpending } from '@monetr/interface/hooks/useCreateSpending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
