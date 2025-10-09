@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
-import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import { SpendingType } from '@monetr/interface/models/Spending';
 import parseDate from '@monetr/interface/util/parseDate';
 import request from '@monetr/interface/util/request';

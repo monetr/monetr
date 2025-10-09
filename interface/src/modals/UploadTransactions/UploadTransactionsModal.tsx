@@ -8,7 +8,7 @@ import axios, { AxiosProgressEvent, AxiosResponse } from 'axios';
 import { Button } from '@monetr/interface/components/Button';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
-import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import ErrorFileStage from '@monetr/interface/modals/UploadTransactions/ErrorFileStage';
 import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/ProcessingFileStage';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
@@ -36,8 +36,8 @@ function UploadTransactionsModal(): JSX.Element {
   const [monetrUpload, setMonetrUpload] = useState<TransactionUpload|null>(null);
   const onClose = useCallback(() => {
     if (stage === UploadTransactionStage.Processing) {
-      queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/transactions`]);
-      queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/balances`]);
+      queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${ selectedBankAccountId }/transactions`] });
+      queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${ selectedBankAccountId }/balances`] });
     }
     return modal.remove();
   }, [stage, modal, queryClient, selectedBankAccountId]);
@@ -45,31 +45,31 @@ function UploadTransactionsModal(): JSX.Element {
   function CurrentStage(): JSX.Element {
     switch (stage) {
       case UploadTransactionStage.FileUpload:
-        return <UploadFileStage 
-          setResult={ setMonetrUpload } 
-          setStage={ setStage } 
+        return <UploadFileStage
+          setResult={ setMonetrUpload }
+          setStage={ setStage }
           setError={ setError }
-          close={ modal.remove } 
+          close={ modal.remove }
         />;
       case UploadTransactionStage.Processing:
-        return <ProcessingFileStage 
-          upload={ monetrUpload } 
-          setStage={ setStage } 
-          close={ onClose } 
+        return <ProcessingFileStage
+          upload={ monetrUpload }
+          setStage={ setStage }
+          close={ onClose }
         />;
       case UploadTransactionStage.Completed:
-        return null;       
+        return null;
       case UploadTransactionStage.Error:
-        return <ErrorFileStage 
+        return <ErrorFileStage
           error={ error }
-          close={ onClose } 
+          close={ onClose }
         />;
       default:
         return null;
     }
 
   }
-  
+
   return (
     <MModal open={ modal.visible } ref={ ref } className='sm:max-w-xl'>
       <CurrentStage />
@@ -92,7 +92,7 @@ function UploadFileStage(props: StageProps) {
     const selectedFile = acceptedFiles[0];
     setFile(selectedFile);
   }, []);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       'application/vnd.intu.QFX': ['.ofx', '.qfx'],

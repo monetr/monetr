@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack
 import { AxiosResponse } from 'axios';
 import { format, isBefore } from 'date-fns';
 
-import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import Spending from '@monetr/interface/models/Spending';
 import request from '@monetr/interface/util/request';

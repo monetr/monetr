@@ -12,7 +12,9 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
-import { useArchiveBankAccount, useSelectedBankAccount, useUpdateBankAccount } from '@monetr/interface/hooks/bankAccounts';
+import { useArchiveBankAccount } from '@monetr/interface/hooks/useArchiveBankAccount';
+import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
+import { useUpdateBankAccount } from '@monetr/interface/hooks/useUpdateBankAccount';
 import { APIError } from '@monetr/interface/util/request';
 
 interface BankAccountValues {

@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
 
-import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
 import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { amountToFriendly, AmountType, formatAmount, friendlyToAmount } from '@monetr/interface/util/amounts';
 
 enum CurrencySource {
