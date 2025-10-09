@@ -73,10 +73,10 @@ export default function SettingsBilling(): JSX.Element {
 }
 
 function SubscriptionStatusBadge(): JSX.Element {
-  const { result: { isActive, hasSubscription, trialingUntil } } = useAuthenticationSink();
+  const { data: auth } = useAuthentication();
 
   // If they have a subscription and it is active then show active.
-  if (hasSubscription && isActive) {
+  if (auth?.hasSubscription && auth?.isActive) {
     return (
       <MBadge className='bg-green-600' data-testid='billing-subscription-active'>
         Active
@@ -85,10 +85,10 @@ function SubscriptionStatusBadge(): JSX.Element {
   }
 
   // If they have a trial end date that is in the future then they are trialing.
-  if (trialingUntil && isFuture(trialingUntil)) {
-    const trialEndDate = isThisYear(trialingUntil) ?
-      format(trialingUntil, 'MMMM do') :
-      format(trialingUntil, 'MMMM do, yyyy');
+  if (auth?.trialingUntil && isFuture(auth?.trialingUntil)) {
+    const trialEndDate = isThisYear(auth?.trialingUntil) ?
+      format(auth?.trialingUntil, 'MMMM do') :
+      format(auth?.trialingUntil, 'MMMM do, yyyy');
 
     return (
       <MBadge className='bg-yellow-600' data-testid='billing-subscription-trialing'>

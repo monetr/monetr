@@ -43,7 +43,7 @@ export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => P
     onSuccess: ({ fundingSchedule, spending }: PatchFundingScheduleResponse) => Promise.all([
       queryClient.setQueryData(
         [`/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules`],
-        (previous: Array<Partial<FundingSchedule>>) => previous.map(item =>
+        (previous: Array<Partial<FundingSchedule>>) => (previous ?? []).map(item =>
           item.fundingScheduleId === fundingSchedule.fundingScheduleId ? fundingSchedule : item
         ),
       ),
@@ -53,7 +53,7 @@ export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => P
       ),
       queryClient.setQueryData(
         [`/bank_accounts/${fundingSchedule.bankAccountId}/spending`],
-        (previous: Array<Partial<Spending>>) => previous
+        (previous: Array<Partial<Spending>>) => (previous ?? [])
           .map(item => (spending || []).find(updated => updated.spendingId === item.spendingId) || item),
       ),
       (spending || []).map(spending =>
