@@ -21,7 +21,7 @@ import (
 //go:embed email_templates/*
 var templates embed.FS
 
-//go:generate go run go.uber.org/mock/mockgen@v0.5.2 -source=email.go -package=mockgen -destination=../internal/mockgen/email.go EmailCommunication
+//go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=email.go -package=mockgen -destination=../internal/mockgen/email.go EmailCommunication
 type EmailCommunication interface {
 	SendEmail(ctx context.Context, email Email) error
 }

@@ -25,7 +25,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//go:generate go run go.uber.org/mock/mockgen@v0.5.2 -source=platypus.go -package=mockgen -destination=../internal/mockgen/platypus.go Platypus
+//go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=platypus.go -package=mockgen -destination=../internal/mockgen/platypus.go Platypus
 type (
 	Platypus interface {
 		CreateLinkToken(ctx context.Context, options LinkTokenOptions) (LinkToken, error)
