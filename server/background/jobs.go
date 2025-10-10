@@ -24,7 +24,7 @@ var (
 	_ JobEnqueuer   = &BackgroundJobs{}
 )
 
-//go:generate go run go.uber.org/mock/mockgen@v0.5.2 -source=jobs.go -package=mockgen -destination=../internal/mockgen/jobs.go JobController
+//go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=jobs.go -package=mockgen -destination=../internal/mockgen/jobs.go JobController
 type (
 	// JobController is an interface that can be safely provided to packages outside this one that will allow jobs to be
 	// triggered manually by other events. For a job to be triggered it must have its own trigger function that accepts

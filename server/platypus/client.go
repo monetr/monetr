@@ -15,7 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//go:generate go run go.uber.org/mock/mockgen@v0.5.2 -source=client.go -package=mockgen -destination=../internal/mockgen/platypus_client.go Client
+//go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=client.go -package=mockgen -destination=../internal/mockgen/platypus_client.go Client
 type (
 	Client interface {
 		GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error)
