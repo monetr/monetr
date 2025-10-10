@@ -50,9 +50,9 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): JS
 }
 
 function useTransactionUploadProgress(
-  bankAccountId: string, 
+  bankAccountId: string,
   transactionUploadId: string,
-): UseQueryResult<TransactionUpload> {
+): UseQueryResult<TransactionUpload, unknown> {
   const queryClient = useQueryClient();
   // Bootstrap the socket to listen for the actual changes.
   useEffect(() => {
@@ -88,11 +88,9 @@ function useTransactionUploadProgress(
   }, [bankAccountId, queryClient, transactionUploadId]);
 
   // Subscribe to changes for the transaction upload
-  return useQuery<Partial<TransactionUpload>, unknown, TransactionUpload>(
-    [`/bank_accounts/${ bankAccountId }/transactions/upload/${ transactionUploadId }`],
-    {
-      initialData: () => null, // Don't do the initial fetch, rely on the websocket instead.
-      select: data => new TransactionUpload(data),
-    },
-  );
+  return useQuery<Partial<TransactionUpload>, unknown, TransactionUpload>({
+    queryKey: [`/bank_accounts/${bankAccountId}/transactions/upload/${transactionUploadId}`],
+    initialData: () => null, // Don't do the initial fetch, rely on the websocket instead.
+    select: data => new TransactionUpload(data),
+  });
 }

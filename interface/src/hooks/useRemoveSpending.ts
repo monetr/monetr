@@ -4,7 +4,7 @@ import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBan
 import Spending from '@monetr/interface/models/Spending';
 import request from '@monetr/interface/util/request';
 
-export function useRemoveSpending(): (_spendingId: string) => Promise<void> {
+export function useRemoveSpending(): (_spendingId: string) => Promise<unknown> {
   const queryClient = useQueryClient();
   const selectedBankAccountId = useSelectedBankAccountId();
 
@@ -27,8 +27,9 @@ export function useRemoveSpending(): (_spendingId: string) => Promise<void> {
       queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/balances`] }),
       queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/forecast`] }),
       queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/forecast/next_funding`] }),
+      queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/transactions`] }),
     ]),
   });
 
-  return void mutation.mutateAsync;
+  return mutation.mutateAsync;
 }

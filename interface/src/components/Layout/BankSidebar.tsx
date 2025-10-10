@@ -43,7 +43,7 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
     );
   }
 
-  const linksSorted = links.sort((a, b) => {
+  const linksSorted = (links ?? []).sort((a, b) => {
     const nameA = a.getName().toUpperCase();
     const nameB = b.getName().toUpperCase();
     if (nameA < nameB) {
