@@ -9,7 +9,7 @@ import (
 
 type PlaidLinkStatus uint8
 
-//go:generate go run golang.org/x/tools/cmd/stringer@v0.33.0 -type=PlaidLinkStatus -output=plaid_link.strings.go
+//go:generate go run golang.org/x/tools/cmd/stringer@v0.38.0 -type=PlaidLinkStatus -output=plaid_link.strings.go
 const (
 	PlaidLinkStatusUnknown           PlaidLinkStatus = 0
 	PlaidLinkStatusPending           PlaidLinkStatus = 1
