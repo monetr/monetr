@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { DeleteOutlined } from '@mui/icons-material';
+import { Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
-import { MBaseButton } from '@monetr/interface/components/MButton';
+import { Button } from '@monetr/interface/components/Button';
+import FormButton from '@monetr/interface/components/FormButton';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useRemoveLink } from '@monetr/interface/hooks/useRemoveLink';
@@ -44,7 +45,7 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
       <div className='h-full flex flex-col gap-4 p-2 justify-between'>
         <div className='flex flex-col'>
           <MSpan weight='bold' size='xl' className='mb-2'>
-            <DeleteOutlined />
+            <Trash />
             Remove { props.link.getName() }?
           </MSpan>
           <MSpan size='lg' weight='medium'>
@@ -55,12 +56,12 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
           </MSpan>
         </div>
         <div className='flex justify-end gap-2'>
-          <MBaseButton disabled={ submitting } color='secondary' onClick={ modal.remove }>
+          <Button disabled={ submitting } variant='secondary' onClick={ modal.remove }>
             Cancel
-          </MBaseButton>
-          <MBaseButton disabled={ submitting } color='cancel' type='submit' onClick={ submit }>
+          </Button>
+          <FormButton disabled={ submitting } variant='destructive' type='submit' onClick={ submit }>
             Remove
-          </MBaseButton>
+          </FormButton>
         </div>
       </div>
     </MModal>

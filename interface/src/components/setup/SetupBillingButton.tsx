@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from 'react';
-import { CreditCard } from '@mui/icons-material';
 import axios from 'axios';
+import { CreditCard } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
-import { MBaseButton } from '@monetr/interface/components/MButton';
+import { Button } from '@monetr/interface/components/Button';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 
@@ -36,14 +36,14 @@ export default function SetupBillingButton(): JSX.Element {
   }
 
   return (
-    <MBaseButton
+    <Button
       className='max-w-xs'
-      color='secondary'
+      variant='secondary'
       disabled={ loading }
       onClick={ handleManageSubscription }
     >
       <CreditCard className='mr-2' />
       Manage Your Subscription
-    </MBaseButton>
+    </Button>
   );
 }

@@ -7,6 +7,6 @@ export default function useLogout(): () => Promise<void> {
   return async () => {
     return request()
       .get('/authentication/logout')
-      .then(() => queryClient.invalidateQueries(['/users/me']));
+      .then(() => queryClient.invalidateQueries({ queryKey: ['/users/me'] }));
   };
 }

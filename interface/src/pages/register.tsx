@@ -128,7 +128,7 @@ export default function Register(): JSX.Element {
           return setSuccessful(true);
         }
 
-        return queryClient.invalidateQueries(['/users/me'])
+        return queryClient.invalidateQueries({ queryKey: ['/users/me'] })
           .then(() => {
             // If the register endpoint has told us to navigate to a specific url afterwards, then do that now.
             if (result.nextUrl) {

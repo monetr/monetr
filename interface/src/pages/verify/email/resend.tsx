@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MFormButton from '@monetr/interface/components/MButton';
+import FormButton from '@monetr/interface/components/FormButton';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
@@ -105,9 +105,9 @@ export default function ResendVerificationPage(): JSX.Element {
           show={ Boolean(config?.ReCAPTCHAKey) }
           data-testid='resend-captcha'
         />
-        <MFormButton type='submit' color='primary' className='w-full'>
+        <FormButton type='submit' color='primary' className='w-full'>
           Resend Verification
-        </MFormButton>
+        </FormButton>
         <div className='mt-1 flex justify-center gap-1'>
           <MSpan color='subtle' className='text-sm'>Don't need to resend?</MSpan>
           <MLink to='/login' size='sm' data-testid='login-signup'>Return to login</MLink>

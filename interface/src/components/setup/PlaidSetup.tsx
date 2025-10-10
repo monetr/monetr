@@ -109,8 +109,8 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
         await longPollSetup(0, linkId);
 
         setTimeout(() => {
-          queryClient.invalidateQueries(['/links']);
-          queryClient.invalidateQueries(['/bank_accounts']);
+          queryClient.invalidateQueries({ queryKey: ['/links'] });
+          queryClient.invalidateQueries({ queryKey: ['/bank_accounts'] });
           navigate('/');
         }, 8000);
       })

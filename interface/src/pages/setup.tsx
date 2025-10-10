@@ -4,8 +4,8 @@ import { Navigate } from 'react-router-dom';
 import CheckCircle from '@mui/icons-material/CheckCircle';
 import EditOutlined from '@mui/icons-material/EditOutlined';
 
+import { Button } from '@monetr/interface/components/Button';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
-import { MBaseButton } from '@monetr/interface/components/MButton';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
@@ -105,13 +105,13 @@ function Greeting(props: GreetingProps): JSX.Element {
           disabled={ !props.manualEnabled }
         />
       </div>
-      <MBaseButton
+      <Button
         color={ !active ? 'secondary' : 'primary' }
         disabled={ !active }
         onClick={ () => props.onContinue(active) }
       >
         Continue
-      </MBaseButton>
+      </Button>
       { !props.alreadyOnboarded && <SetupBillingButton /> }
       <Footer />
     </div>

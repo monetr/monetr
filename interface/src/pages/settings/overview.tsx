@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { MBaseButton } from '@monetr/interface/components/MButton';
+import { Button } from '@monetr/interface/components/Button';
 import MSelect from '@monetr/interface/components/MSelect';
 import MTextField from '@monetr/interface/components/MTextField';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
@@ -47,9 +47,9 @@ export default function SettingsOverview(): JSX.Element {
         />
       </div>
       <div className='w-full flex justify-end px-4'>
-        <MBaseButton color='primary' disabled>
+        <Button variant='primary' disabled>
           Save Settings
-        </MBaseButton>
+        </Button>
       </div>
     </div>
   );

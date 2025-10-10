@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useSnackbar } from 'notistack';
 
-import { MBaseButton } from '@monetr/interface/components/MButton';
+import { Button } from '@monetr/interface/components/Button';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -52,9 +52,9 @@ export default function SubscribePage(): JSX.Element {
               Thank you for having subscribed to monetr before! If you'd like to continue using monetr you will have to
               resubscribe below. Click continue to proceed to our billing portal.
             </MSpan>
-            <MBaseButton color='primary' disabled={ loading } onClick={ handleContinue }>
+            <Button variant='primary' disabled={ loading } onClick={ handleContinue }>
               Continue
-            </MBaseButton>
+            </Button>
           </div>
           { !loading &&
           <div className='flex justify-center gap-1'>
@@ -79,9 +79,9 @@ export default function SubscribePage(): JSX.Element {
             Thank you for trying out monetr! We hope that you found our budgeting tools useful during your trial. If
             you'd like to continue using monetr you can easily subscribe below.
           </MSpan>
-          <MBaseButton color='primary' disabled={ loading } onClick={ handleContinue }>
+          <Button variant='primary' disabled={ loading } onClick={ handleContinue }>
             Continue
-          </MBaseButton>
+          </Button>
         </div>
         { !loading &&
           <div className='flex justify-center gap-1'>

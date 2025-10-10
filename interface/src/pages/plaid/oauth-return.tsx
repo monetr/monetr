@@ -97,8 +97,8 @@ export default function OauthReturn(): JSX.Element {
 
         return longPollSetup()
           .then(() => Promise.all([
-            queryClient.invalidateQueries(['/links']),
-            queryClient.invalidateQueries(['/bank_accounts']),
+            queryClient.invalidateQueries({ queryKey: ['/links'] }),
+            queryClient.invalidateQueries({ queryKey: ['/bank_accounts'] }),
           ]));
       });
   }

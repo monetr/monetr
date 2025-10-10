@@ -63,9 +63,9 @@ function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaid
       accountIds: metadata.accounts.map(account => account.id),
     })
       .then(() => Promise.all([
-        queryClient.invalidateQueries(['/bank_accounts']),
-        queryClient.invalidateQueries(['/links']),
-        queryClient.invalidateQueries([`/links/${link.linkId}`]),
+        queryClient.invalidateQueries({ queryKey: ['/bank_accounts'] }),
+        queryClient.invalidateQueries({ queryKey: ['/links'] }),
+        queryClient.invalidateQueries({ queryKey: [`/links/${link.linkId}`] }),
       ]))
       .then(() => modal.remove());
   }, [link, modal, queryClient]);

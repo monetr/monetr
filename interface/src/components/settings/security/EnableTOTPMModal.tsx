@@ -3,17 +3,16 @@ import QRCode from 'react-qr-code';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { FormikHelpers } from 'formik';
+import { Shield } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
+import FormButton from '@monetr/interface/components/FormButton';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@monetr/interface/components/InputOTP';
-import MFormButton from '@monetr/interface/components/MButton';
 import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import request from '@monetr/interface/util/request';
-
-import { Shield } from 'lucide-react';
 
 interface EnableTOTPValues {
   totp: string;
@@ -54,7 +53,7 @@ function EnableTOTPModal(): JSX.Element {
     return request().post('/users/security/totp/confirm', {
       totp: values.totp,
     })
-      .then(() => queryClient.invalidateQueries(['/users/me']))
+      .then(() => queryClient.invalidateQueries({ queryKey: ['/users/me'] }))
       .then(() => enqueueSnackbar('Multifactor authentication enabled.', {
         variant: 'success',
         disableWindowBlurListener: true,
@@ -119,13 +118,13 @@ function EnableTOTPModal(): JSX.Element {
               </div>
             </div>
             <div className='flex justify-end gap-2'>
-              <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-change-password-modal'>
+              <FormButton variant='destructive' onClick={ modal.remove } data-testid='close-change-password-modal'>
                 Cancel
-              </MFormButton>
-              <MFormButton color='primary' type='submit'>
+              </FormButton>
+              <FormButton variant='primary' type='submit'>
                 <Shield className='mr-1' />
                 Enable TOTP
-              </MFormButton>
+              </FormButton>
             </div>
           </Fragment>
         ) }

@@ -3,8 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
+import FormButton from '@monetr/interface/components/FormButton';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@monetr/interface/components/InputOTP';
-import MFormButton from '@monetr/interface/components/MButton';
 import MForm from '@monetr/interface/components/MForm';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -29,7 +29,7 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
     return request().post('/authentication/multifactor', {
       totp: values.totp,
     })
-      .then(() => queryClient.invalidateQueries(['/users/me']))
+      .then(() => queryClient.invalidateQueries({ queryKey: ['/users/me'] }))
       .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to validate TOTP code.', {
         variant: 'error',
         disableWindowBlurListener: true,
@@ -41,7 +41,7 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
     if (values.totp.length != 6) {
       errors['totp'] = 'TOTP code must be 6 digits';
     }
-  
+
     return errors;
   }
 
@@ -71,8 +71,8 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
             Please provide the 6-digit code from your authenticator app
           </MSpan>
           <InputOTP
-            name='totp' 
-            maxLength={ 6 } 
+            name='totp'
+            maxLength={ 6 }
             required
             onChange={ value => formik.setFieldValue('totp', value) }
             disabled={ formik.isSubmitting }
@@ -91,18 +91,17 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
             </InputOTPGroup>
           </InputOTP>
           <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
-            <MFormButton
+            <FormButton
               disabled={ !formik.isValid }
               data-testid='multifactor-submit'
-              color='primary'
-              variant='solid'
+              variant='primary'
               role='form'
               type='submit'
               className='w-full'
               tabIndex={ 3 }
             >
               { formatContinueButton(formik.values as MultifactorValues) }
-            </MFormButton>
+            </FormButton>
           </div>
           <LogoutFooter />
         </Fragment>

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MFormButton from '@monetr/interface/components/MButton';
+import FormButton from '@monetr/interface/components/FormButton';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
@@ -105,15 +105,14 @@ export default function PasswordResetNew(): JSX.Element {
           required
           className='w-full'
         />
-        <MFormButton
-          color='primary'
-          variant='solid'
+        <FormButton
+          variant='primary'
           role='form'
           type='submit'
           className='w-full'
         >
           Reset Password
-        </MFormButton>
+        </FormButton>
       </div>
       <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
         <MSpan color='subtle' className='text-sm'>Remembered your password?</MSpan>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FormikErrors, FormikHelpers } from 'formik';
 
-import MFormButton from '@monetr/interface/components/MButton';
+import FormButton from '@monetr/interface/components/FormButton';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
@@ -109,15 +109,14 @@ export default function ForgotPasswordNew(): JSX.Element {
         show={ Boolean(config?.verifyForgotPassword) }
       />
       <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
-        <MFormButton
-          color='primary'
-          variant='solid'
+        <FormButton
+          variant='primary'
           role='form'
           type='submit'
           className='w-full'
         >
           Reset Password
-        </MFormButton>
+        </FormButton>
       </div>
       <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
         <MSpan color='subtle' className='text-sm'>Remembered your password?</MSpan>
