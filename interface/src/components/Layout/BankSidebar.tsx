@@ -11,7 +11,7 @@ import MDivider from '@monetr/interface/components/MDivider';
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
 import MSpan from '@monetr/interface/components/MSpan';
 import { ReactElement } from '@monetr/interface/components/types';
-import { useLinks } from '@monetr/interface/hooks/links';
+import { useLinks } from '@monetr/interface/hooks/useLinks';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface BankSidebarProps {
@@ -43,7 +43,7 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
     );
   }
 
-  const linksSorted = links.sort((a, b) => {
+  const linksSorted = (links ?? []).sort((a, b) => {
     const nameA = a.getName().toUpperCase();
     const nameB = b.getName().toUpperCase();
     if (nameA < nameB) {

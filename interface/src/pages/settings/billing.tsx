@@ -9,18 +9,18 @@ import { Button } from '@monetr/interface/components/Button';
 import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
-import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
 
 export default function SettingsBilling(): JSX.Element {
   const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
-  const { result: { hasSubscription } } = useAuthenticationSink();
+  const { data: auth } = useAuthentication();
   const handleManageSubscription = useCallback(async () => {
     setLoading(true);
     let promise: Promise<AxiosResponse<{ url: string }>>;
-    if (!hasSubscription) {
+    if (!auth?.hasSubscription) {
       promise = request().post('/billing/create_checkout', {
         // If the user backs out of the stripe checkout then return them to the current URL.
         cancelPath: location.pathname,
@@ -40,9 +40,9 @@ export default function SettingsBilling(): JSX.Element {
           disableWindowBlurListener: true,
         });
       });
-  }, [enqueueSnackbar, hasSubscription, location]);
+  }, [enqueueSnackbar, auth, location]);
 
-  const manageSubscriptionText = hasSubscription ? 'Manage Your Subscription' : 'Subscribe Early';
+  const manageSubscriptionText = auth?.hasSubscription ? 'Manage Your Subscription' : 'Subscribe Early';
 
   return (
     <div className='w-full flex flex-col p-4 max-w-xl'>
@@ -73,10 +73,10 @@ export default function SettingsBilling(): JSX.Element {
 }
 
 function SubscriptionStatusBadge(): JSX.Element {
-  const { result: { isActive, hasSubscription, trialingUntil } } = useAuthenticationSink();
+  const { data: auth } = useAuthentication();
 
   // If they have a subscription and it is active then show active.
-  if (hasSubscription && isActive) {
+  if (auth?.hasSubscription && auth?.isActive) {
     return (
       <MBadge className='bg-green-600' data-testid='billing-subscription-active'>
         Active
@@ -85,10 +85,10 @@ function SubscriptionStatusBadge(): JSX.Element {
   }
 
   // If they have a trial end date that is in the future then they are trialing.
-  if (trialingUntil && isFuture(trialingUntil)) {
-    const trialEndDate = isThisYear(trialingUntil) ?
-      format(trialingUntil, 'MMMM do') :
-      format(trialingUntil, 'MMMM do, yyyy');
+  if (auth?.trialingUntil && isFuture(auth?.trialingUntil)) {
+    const trialEndDate = isThisYear(auth?.trialingUntil) ?
+      format(auth?.trialingUntil, 'MMMM do') :
+      format(auth?.trialingUntil, 'MMMM do, yyyy');
 
     return (
       <MBadge className='bg-yellow-600' data-testid='billing-subscription-trialing'>

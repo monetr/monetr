@@ -12,9 +12,10 @@ import { MLabelDecoratorProps } from '@monetr/interface/components/MLabel';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
-import { useCurrentBalance } from '@monetr/interface/hooks/balances';
-import { useSpendings, useTransfer } from '@monetr/interface/hooks/spending';
+import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useSpendings } from '@monetr/interface/hooks/useSpendings';
+import { useTransfer } from '@monetr/interface/hooks/useTransfer';
 import { AmountType } from '@monetr/interface/util/amounts';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 

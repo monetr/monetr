@@ -6,10 +6,10 @@ import MDivider from '@monetr/interface/components/MDivider';
 import { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { ReactElement } from '@monetr/interface/components/types';
-import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
+import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 
 export default function SettingsLayout(): JSX.Element {
-  const config = useAppConfigurationSink();
+  const config = useAppConfiguration();
 
   return (
     <div className='w-full h-full min-w-0 flex flex-col'>

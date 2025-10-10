@@ -14,21 +14,19 @@ export function useRemoveFundingSchedule(): (_fundingSchedule: FundingSchedule) 
       .then(() => fundingSchedule);
   }
 
-  const mutation = useMutation(
-    removeFundingSchedule,
-    {
-      onSuccess: ({ bankAccountId, fundingScheduleId }: FundingSchedule) => Promise.all([
-        queryClient.setQueriesData(
-          [`/bank_accounts/${bankAccountId}/funding_schedules`],
-          (previous: Array<Partial<FundingSchedule>>) => previous
-            .filter(item => item.fundingScheduleId !== fundingScheduleId),
-        ),
-        queryClient.removeQueries(
-          [`/bank_accounts/${bankAccountId}/funding_schedules/${fundingScheduleId}`]
-        ),
-      ]),
-    },
-  );
+  const mutation = useMutation({
+    mutationFn: removeFundingSchedule,
+    onSuccess: ({ bankAccountId, fundingScheduleId }: FundingSchedule) => Promise.all([
+      queryClient.setQueryData(
+        [`/bank_accounts/${bankAccountId}/funding_schedules`],
+        (previous: Array<Partial<FundingSchedule>>) => previous
+          .filter(item => item.fundingScheduleId !== fundingScheduleId),
+      ),
+      queryClient.removeQueries({
+        queryKey: [`/bank_accounts/${bankAccountId}/funding_schedules/${fundingScheduleId}`],
+      }),
+    ]),
+  });
 
   return mutation.mutateAsync;
 }

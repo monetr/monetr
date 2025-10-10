@@ -12,8 +12,9 @@ import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
-import { useCreateBankAccount, useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
+import { useCreateBankAccount } from '@monetr/interface/hooks/useCreateBankAccount';
 import useLocaleCurrency, { DefaultCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
+import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 

@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
 
-import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
+import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { amountToFriendly, AmountType, formatAmount, friendlyToAmount } from '@monetr/interface/util/amounts';
 
 enum CurrencySource {
@@ -27,16 +27,16 @@ export const DefaultCurrency = 'USD';
  * It will use the current bank accounts currency (if there is one), then the user's default currency then the global
  * default currency.
  */
-export default function useLocaleCurrency(forceCurrency?: string): UseQueryResult<LocaleCurrency> {
-  const { result: _, ...me } = useAuthenticationSink();
+export default function useLocaleCurrency(forceCurrency?: string): UseQueryResult<LocaleCurrency, unknown> {
+  const { data: me, ...authenticationState } = useAuthentication();
   const bankAccount = useSelectedBankAccount();
-  const locale = useMemo(() => me.data?.user?.account?.locale ?? 'en_US', [me]);
+  const locale = useMemo(() => me?.user?.account?.locale || 'en_US', [me]);
   const currency = useMemo(() => {
     // Return the first _defined_ currency.
     return [
       forceCurrency,
       bankAccount?.data?.currency,
-      me?.data?.defaultCurrency,
+      me?.defaultCurrency,
       DefaultCurrency,
     ].find(value => !!value);
   }, [forceCurrency, me, bankAccount]);
@@ -55,7 +55,7 @@ export default function useLocaleCurrency(forceCurrency?: string): UseQueryResul
 
   return {
     ...bankAccount as any,
-    ...me as any,
+    ...authenticationState as any,
     data: {
       source: bankAccount?.data ? CurrencySource.BankAccount : CurrencySource.UserDefault,
       locale: locale,

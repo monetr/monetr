@@ -21,7 +21,7 @@ import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchFundingSchedule } from '@monetr/interface/hooks/usePatchFundingSchedule';
 import { useRemoveFundingSchedule } from '@monetr/interface/hooks/useRemoveFundingSchedule';

@@ -6,10 +6,10 @@ import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSideb
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
 import Sidebar from '@monetr/interface/components/Layout/Sidebar';
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
-import { useBankAccounts } from '@monetr/interface/hooks/bankAccounts';
-import { useLinks } from '@monetr/interface/hooks/links';
-import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
-import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
+import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
+import { useLinks } from '@monetr/interface/hooks/useLinks';
 import Loading from '@monetr/interface/loading';
 import SubscribePage from '@monetr/interface/pages/account/subscribe';
 import AfterCheckoutPage from '@monetr/interface/pages/account/subscribe/after';
@@ -47,17 +47,17 @@ const RoutesImpl = Sentry.withSentryReactRouterV6Routing(Routes);
 
 export default function Monetr(): JSX.Element {
   const {
-    result: config,
+    data: config,
     isLoading: configIsLoading,
     isError: configIsError,
-  } = useAppConfigurationSink();
-  const { isLoading: authIsLoading, result: { user, isActive, mfaPending } } = useAuthenticationSink();
+  } = useAppConfiguration();
+  const { isLoading: authIsLoading, data: auth } = useAuthentication();
   const { isLoading: linksIsLoading, data: links } = useLinks();
-  const isAuthenticated = !!user;
+  const isAuthenticated = Boolean(auth?.user);
   // If the config or authentication is loading just show a loading page.
   // Links is loading is weird becuase the loading state will be true until we actually request links. But links won't
   // be requested until we are authenticated with an active subscription.
-  if (configIsLoading || authIsLoading || (linksIsLoading && isActive && !mfaPending)) {
+  if (configIsLoading || authIsLoading || (linksIsLoading && auth?.isActive && !auth?.mfaPending)) {
     return <Loading />;
   }
 
@@ -83,7 +83,7 @@ export default function Monetr(): JSX.Element {
   }
 
   // If the currently authenticated user requires MFA then only allow them to access the MFA pages.
-  if (mfaPending) {
+  if (auth?.mfaPending) {
     return (
       <RoutesImpl>
         <Route path='/login/multifactor' element={ <MultifactorAuthenticationPage /> } />
@@ -93,7 +93,7 @@ export default function Monetr(): JSX.Element {
     );
   }
 
-  if (!isActive) {
+  if (!auth?.isActive) {
     return (
       <RoutesImpl>
         <Route path='/logout' element={ <LogoutPage /> } />

@@ -7,7 +7,7 @@ import { Button } from '@monetr/interface/components/Button';
 import GoalItem from '@monetr/interface/components/goals/GoalItem';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { useSpendingFiltered } from '@monetr/interface/hooks/spending';
+import { useSpendingFiltered } from '@monetr/interface/hooks/useSpendingFiltered';
 import { showNewGoalModal } from '@monetr/interface/modals/NewGoalModal';
 import { SpendingType } from '@monetr/interface/models/Spending';
 
@@ -15,7 +15,7 @@ let evilScrollPosition: number = 0;
 
 export default function Goals(): JSX.Element {
   const {
-    result: goals,
+    data: goals,
     isError,
     isLoading,
   } = useSpendingFiltered(SpendingType.Goal);

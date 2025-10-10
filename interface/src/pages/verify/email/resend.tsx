@@ -21,7 +21,7 @@ interface ResendValues {
 
 export default function ResendVerificationPage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const config = useAppConfiguration();
+  const { data: config } = useAppConfiguration();
   const { state: routeState } = useLocation();
   const [done, setDone] = useState(false);
 

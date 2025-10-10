@@ -8,7 +8,7 @@ import { showEnableTOTPModal } from '@monetr/interface/components/settings/secur
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 export default function TOTPCard(): JSX.Element {
-  const { login } = useAuthentication();
+  const { data: { user: { login } } } = useAuthentication();
 
   return (
     <Card className='md:w-1/3'>

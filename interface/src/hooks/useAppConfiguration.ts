@@ -36,24 +36,18 @@ export class AppConfiguration {
   }
 }
 
-export type AppConfigurationResult =
-  { result: AppConfiguration | null }
-  & UseQueryResult<Partial<AppConfiguration>, unknown>;
-
-export function useAppConfigurationSink(): AppConfigurationResult {
-  const result = useQuery<Partial<AppConfiguration>>(['/config'], {
+export function useAppConfiguration(): UseQueryResult<AppConfiguration, unknown> {
+  return useQuery<Partial<AppConfiguration>, unknown, AppConfiguration>({
+    queryKey: ['/config'],
     staleTime: 60 * 1000, // One minute in milliseconds.
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
+    select: data => new AppConfiguration(data),
   });
-  return {
-    result: (result?.data && new AppConfiguration(result.data)) || null,
-    ...result,
-  };
 }
 
-export function useAppConfiguration(): AppConfiguration | null {
-  const { result } = useAppConfigurationSink();
+export function useAppConfigurationBAD(): AppConfiguration | null {
+  const { result } = useAppConfiguration();
   return result;
 }

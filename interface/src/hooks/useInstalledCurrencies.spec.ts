@@ -59,8 +59,8 @@ describe('use installed currencies', () => {
       initialRoute: '/settings',
     });
     expect(world.result.current.data).not.toBeDefined();
-    expect(world.result.current.isLoading).toBeTruthy();
-    await world.waitFor(() => expect(world.result.current.isFetching).toBeTruthy());
+    await world.waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
+    await world.waitFor(() => expect(world.result.current.isLoading).toBeFalsy());
     await world.waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
     expect(world.result.current.data).toStrictEqual([
       'EUR',
@@ -76,8 +76,8 @@ describe('use installed currencies', () => {
       initialRoute: '/login',
     });
     expect(world.result.current.data).not.toBeDefined();
-    expect(world.result.current.isLoading).toBeTruthy();
-    // Stays falsy
     expect(world.result.current.isFetching).toBeFalsy();
+    // Since it cannot request anything because we are not logged in. Then it should stay in a pending state.
+    expect(world.result.current.status).toBe('pending');
   });
 });

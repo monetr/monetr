@@ -21,9 +21,11 @@ import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { useRemoveSpending, useSpending, useUpdateSpending } from '@monetr/interface/hooks/spending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useRemoveSpending } from '@monetr/interface/hooks/useRemoveSpending';
+import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
+import { useUpdateSpending } from '@monetr/interface/hooks/useUpdateSpending';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
@@ -45,7 +47,6 @@ export default function ExpenseDetails(): JSX.Element {
   const navigate = useNavigate();
   const { spendingId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
-
   const { data: spending, isLoading, isError } = useSpending(spendingId);
 
   if (!spendingId) {

@@ -9,13 +9,14 @@ import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
 
 import { newTheme } from 'theme';
 
-export interface HooksOptions {
+export interface HooksOptions<TProps> {
   initialRoute: string;
+  initialProps?: TProps;
 }
 
 function testRenderHook<TProps, TResult>(
   callback: (props: TProps) => TResult,
-  options?: HooksOptions,
+  options?: HooksOptions<TProps>,
 ): RenderHookResult<TProps, TResult> {
   const Wrapper: WrapperComponent<TProps> = (props: React.PropsWithChildren<any>) => {
     return (
@@ -39,6 +40,7 @@ function testRenderHook<TProps, TResult>(
 
   return renderHook<TProps, TResult>(callback, {
     wrapper: Wrapper,
+    initialProps: options?.initialProps,
   });
 }
 

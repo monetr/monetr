@@ -16,9 +16,9 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { Switch } from '@monetr/interface/components/Switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monetr/interface/components/Tabs';
-import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import { CreateTransactionRequest, useCreateTransaction } from '@monetr/interface/hooks/transactions';
+import { CreateTransactionRequest, useCreateTransaction } from '@monetr/interface/hooks/useCreateTransaction';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 

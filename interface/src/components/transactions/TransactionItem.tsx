@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom';
 import ArrowLink from '@monetr/interface/components/ArrowLink';
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
-import { useSpendingOld } from '@monetr/interface/hooks/spending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useSpending } from '@monetr/interface/hooks/useSpending';
 import Transaction from '@monetr/interface/models/Transaction';
 import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
@@ -17,7 +17,7 @@ export interface TransactionItemProps {
 
 export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
   const { data: locale } = useLocaleCurrency();
-  const spending = useSpendingOld(transaction.spendingId);
+  const { data: spending } = useSpending(transaction.spendingId);
   const detailsUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
 
   const amountClassnames = mergeTailwind(

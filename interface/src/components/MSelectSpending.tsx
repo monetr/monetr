@@ -6,9 +6,9 @@ import { useFormikContext } from 'formik';
 import MBadge from './MBadge';
 import MSelect, { MSelectProps } from './MSelect';
 import MSpan from './MSpan';
-import { useCurrentBalance } from '@monetr/interface/hooks/balances';
-import { useSpendings } from '@monetr/interface/hooks/spending';
+import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 
