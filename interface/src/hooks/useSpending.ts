@@ -18,8 +18,8 @@ export function useSpending(spendingId?: string): UseQueryResult<Spending, unkno
   return useQuery<Partial<Spending>, unknown, Spending>({
     queryKey: [`/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`],
     enabled: Boolean(selectedBankAccountId) && Boolean(spendingId),
-    // If the bank account is in our existing query state then use that.
     initialData: () => Array.isArray(existingData) ?
+      // If the spending is in our existing query state then use that.
       existingData.find(item => item.spendingId === spendingId) :
       // Otherwise fall back to undefined.
       undefined,
