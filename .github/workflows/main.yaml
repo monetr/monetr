@@ -18,7 +18,7 @@ jobs:
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Fix dumb git issue
@@ -96,7 +96,7 @@ jobs:
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Fix dumb git issue
         run: |
           git config --global --add safe.directory ${PWD}
@@ -161,7 +161,7 @@ jobs:
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Fix dumb git issue
@@ -203,7 +203,7 @@ jobs:
       - "test"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Fix dumb git issue
@@ -225,7 +225,7 @@ jobs:
     name: Container Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Set up QEMU
@@ -243,7 +243,7 @@ jobs:
     outputs:
       post-tag: ${{ steps.tag.outputs.POST_TAG }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Set up Docker Buildx
@@ -282,7 +282,7 @@ jobs:
           transient-environment: false
           production-environment: false
           ref: ${{ github.sha }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/download-artifact@v4
