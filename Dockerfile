@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.24.5 AS base_builder
+FROM --platform=$BUILDPLATFORM golang:1.24.8-trixie AS base_builder
 WORKDIR /monetr
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -10,7 +10,7 @@ RUN apt-get update && \
       gcc-aarch64-linux-gnu \
       libc6-dev-arm64-cross \
       git \
-      nodejs=18.* \
+      nodejs=20.* \
       npm \
       wget && \
     apt-get clean && \
