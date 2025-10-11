@@ -32,7 +32,7 @@ ENV GOFLAGS=$GOFLAGS
 COPY . /monetr
 RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} make release -B
 
-FROM debian:12-slim
+FROM debian:13-slim
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       tzdata \
