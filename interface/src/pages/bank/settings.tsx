@@ -108,10 +108,12 @@ export default function BankAccountSettingsPage(): JSX.Element {
         base={ `/bank/${bankAccount.bankAccountId}/transactions` }
         breadcrumb='Settings'
       >
-        <Button variant='destructive' onClick={ archive } >
-          <Archive />
-          Archive
-        </Button>
+        { !Boolean(bankAccount.deletedAt) && (
+          <Button variant='destructive' onClick={ archive } >
+            <Archive />
+            Archive
+          </Button>
+        ) }
         <Button variant='primary' type='submit'>
           <Save />
           Save Changes

@@ -54,11 +54,15 @@ export default function Monetr(): JSX.Element {
   } = useAppConfiguration();
   const { isLoading: authIsLoading, data: auth } = useAuthentication();
   const { isLoading: linksIsLoading, data: links } = useLinks();
+  const { isLoading: bankAccountsIsLoading, data: bankAccounts } = useBankAccounts();
   const isAuthenticated = Boolean(auth?.user);
   // If the config or authentication is loading just show a loading page.
   // Links is loading is weird becuase the loading state will be true until we actually request links. But links won't
   // be requested until we are authenticated with an active subscription.
-  if (configIsLoading || authIsLoading || (linksIsLoading && auth?.isActive && !auth?.mfaPending)) {
+  if (configIsLoading || 
+    authIsLoading || 
+    ((bankAccountsIsLoading || linksIsLoading) && auth?.isActive && !auth?.mfaPending)
+  ) {
     return <Loading />;
   }
 
@@ -205,7 +209,7 @@ function RedirectToBank(): JSX.Element {
   const accounts = sortAccounts(Array.from(bankAccounts.values()).filter(account => account.linkId === link.linkId));
 
   if (accounts.length === 0) {
-    return null;
+    return <Navigate replace to='/link/create' />;
   }
 
   const account = accounts[0];

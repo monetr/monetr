@@ -1,29 +1,64 @@
 import React, { useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { AxiosError } from 'axios';
 import { FormikHelpers } from 'formik';
-import { Landmark, Save, Trash } from 'lucide-react';
+import { ChevronRight, Landmark, Save, Trash } from 'lucide-react';
+import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
+import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { useBankAccountsForLink } from '@monetr/interface/hooks/bankAccounts';
-import { useLink } from '@monetr/interface/hooks/links';
+import { useBankAccountsForLink } from '@monetr/interface/hooks/useBankAccountsForLink';
+import { useLink } from '@monetr/interface/hooks/useLink';
+import { usePatchLink } from '@monetr/interface/hooks/usePatchLink';
+import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
+import BankAccount from '@monetr/interface/models/BankAccount';
+import capitalize from '@monetr/interface/util/capitalize';
+import { APIError } from '@monetr/interface/util/request';
 
 interface LinkValues {
   institutionName: string;
 }
 
 export default function LinkDetails(): React.JSX.Element {
+  const { enqueueSnackbar } = useSnackbar();
   const { linkId } = useParams();
   const { data: link, isLoading: linkIsLoading } = useLink(linkId);
   const { data: bankAccounts, isLoading: bankAccountsLoading } = useBankAccountsForLink(linkId);
+  const patchLink = usePatchLink();
+
   const submit = useCallback(async (values: LinkValues, helpers: FormikHelpers<LinkValues>) => {
-    console.log(values, helpers);
-  }, []);
+    helpers.setSubmitting(true);
+
+    return await patchLink({
+      linkId: linkId,
+      ...values,
+    })
+      .then(() => enqueueSnackbar(
+        'Updated link successfully',
+        {
+          variant: 'success',
+          disableWindowBlurListener: true,
+        },
+      ))
+      .catch((error: AxiosError<APIError>) => enqueueSnackbar(
+        error?.response?.data?.error || 'Failed to update link',
+        {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        },
+      ))
+      .finally(() => helpers.setSubmitting(false));
+  }, [enqueueSnackbar, linkId, patchLink]);
+
+  const handleRemoveLink = useCallback(() => {
+    showRemoveLinkModal({ link: link });
+  }, [link]);
 
 
   if (linkIsLoading || bankAccountsLoading) {
@@ -50,13 +85,13 @@ export default function LinkDetails(): React.JSX.Element {
         icon={ Landmark }
         title={ link.getName() }
       >
-        <Button variant='destructive' >
+        <Button variant='destructive' onClick={ handleRemoveLink } >
           <Trash />
           Remove
         </Button>
         <FormButton variant='primary' type='submit' role='form'>
           <Save />
-          Save
+          Save Changes
         </FormButton>
       </MTopNavigation>
       <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
@@ -79,12 +114,48 @@ export default function LinkDetails(): React.JSX.Element {
             <MSpan className='text-xl my-2'>
               Accounts
             </MSpan>
-            { bankAccounts.map(account => (
-              <div>{account.name}</div>
-            ))}
+            <ul className='flex flex-col gap-2'>
+              { bankAccounts.map(account => (
+                <BankAccountItem key={ account.bankAccountId } bankAccount={ account } />
+              ))}
+            </ul>
           </div>
         </div>
       </div>
     </MForm>
+  );
+}
+
+interface BankAccountItemProps {
+  bankAccount: BankAccount;
+}
+
+function BankAccountItem(props: BankAccountItemProps): React.JSX.Element {
+  const path = `/bank/${props.bankAccount.bankAccountId}/settings`;
+  return (
+    <li className='group relative w-full'>
+      <Link
+        to={ path }
+        className='group flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4 items-center'
+      >
+        <div className='flex min-w-0 flex-col overflow-hidden grow'>
+          <div className='flex gap-2'>
+            <MSpan size='md' weight='semibold' color='emphasis' ellipsis className='group-hover:underline'>
+              { props.bankAccount.name }
+            </MSpan>
+            { Boolean(props.bankAccount.deletedAt) && (
+              <MBadge size='sm'>
+                Archived
+              </MBadge>
+            ) }
+          </div>
+          <MSpan size='sm' weight='medium' color='default' ellipsis>
+            { capitalize(props.bankAccount.accountSubType)  }
+          </MSpan>
+
+        </div>
+        <ChevronRight className='text-dark-monetr-content-subtle group-hover:text-dark-monetr-content-emphasis' />
+      </Link>
+    </li>
   );
 }

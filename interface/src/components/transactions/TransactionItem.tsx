@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
+import MSpan from '@monetr/interface/components/MSpan';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
@@ -96,9 +97,9 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
         <div className='flex w-full min-w-0 flex-1 flex-row items-center gap-4 md:w-1/2'>
           <TransactionMerchantIcon name={ transaction.getName() } pending={ transaction.isPending } />
           <div className='flex min-w-0 flex-col overflow-hidden'>
-            <span className='w-full min-w-0 truncate text-base font-semibold dark:text-dark-monetr-content-emphasis'>
+            <MSpan size='md' weight='semibold' color='emphasis' ellipsis>
               { transaction.getName() }
-            </span>
+            </MSpan>
             <span className='hidden w-full min-w-0 truncate text-sm font-medium dark:text-dark-monetr-content md:block'>
               { transaction.getMainCategory() }
             </span>
