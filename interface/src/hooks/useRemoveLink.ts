@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
 
-export function useRemoveLink(): (_linkId: string) => Promise<void> {
+export function useRemoveLink(): (_linkId: string) => Promise<unknown> {
   const queryClient = useQueryClient();
 
   async function removeLink(linkId: string): Promise<string> {
@@ -23,5 +23,5 @@ export function useRemoveLink(): (_linkId: string) => Promise<void> {
     ]),
   });
 
-  return void mutate.mutateAsync;
+  return mutate.mutateAsync;
 }
