@@ -23,6 +23,7 @@ import Goals from '@monetr/interface/pages/goals';
 import GoalDetails from '@monetr/interface/pages/goals/details';
 import LinkCreatePage from '@monetr/interface/pages/link/create';
 import CreateManualLinkPage from '@monetr/interface/pages/link/create/manual';
+import LinkDetails from '@monetr/interface/pages/link/details';
 import Login from '@monetr/interface/pages/login';
 import MultifactorAuthenticationPage from '@monetr/interface/pages/login/multifactor';
 import LogoutPage from '@monetr/interface/pages/logout';
@@ -53,11 +54,15 @@ export default function Monetr(): JSX.Element {
   } = useAppConfiguration();
   const { isLoading: authIsLoading, data: auth } = useAuthentication();
   const { isLoading: linksIsLoading, data: links } = useLinks();
+  const { isLoading: bankAccountsIsLoading, data: bankAccounts } = useBankAccounts();
   const isAuthenticated = Boolean(auth?.user);
   // If the config or authentication is loading just show a loading page.
   // Links is loading is weird becuase the loading state will be true until we actually request links. But links won't
   // be requested until we are authenticated with an active subscription.
-  if (configIsLoading || authIsLoading || (linksIsLoading && auth?.isActive && !auth?.mfaPending)) {
+  if (configIsLoading || 
+    authIsLoading || 
+    ((bankAccountsIsLoading || linksIsLoading) && auth?.isActive && !auth?.mfaPending)
+  ) {
     return <Loading />;
   }
 
@@ -144,6 +149,7 @@ export default function Monetr(): JSX.Element {
             ) }
             <Route path='about' element={ <SettingsAbout /> } />
           </Route>
+          <Route path='/link/:linkId/details' element={ <LinkDetails /> } />
           <Route path='/link/create' element={ <LinkCreatePage /> } />
           <Route path='/link/create/plaid' element={ <PlaidSetup alreadyOnboarded /> } />
           <Route path='/link/create/manual' element={ <CreateManualLinkPage /> } />
@@ -203,7 +209,7 @@ function RedirectToBank(): JSX.Element {
   const accounts = sortAccounts(Array.from(bankAccounts.values()).filter(account => account.linkId === link.linkId));
 
   if (accounts.length === 0) {
-    return null;
+    return <Navigate replace to='/link/create' />;
   }
 
   const account = accounts[0];

@@ -10,6 +10,7 @@ interface SelectCurrencyProps {
   required?: boolean;
   className?: string;
   menuPortalTarget?: HTMLElement;
+  disabled?: boolean;
 }
 
 export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element {
@@ -38,7 +39,7 @@ export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element 
 
   return (
     <MSelect
-      disabled={ formikContext.isSubmitting }
+      disabled={ props.disabled || formikContext.isSubmitting }
       label='Currency'
       name={ props.name }
       onChange={ onChange }

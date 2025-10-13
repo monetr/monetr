@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import React, { Fragment, useCallback } from 'react';
-import { EllipsisVertical, LogIn, Plug, RefreshCw, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { EllipsisVertical, LogIn, Plug, RefreshCw, Settings, Trash2 } from 'lucide-react';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@monetr/interface/components/DropdownMenu';
 import MDivider from '@monetr/interface/components/MDivider';
@@ -15,6 +16,7 @@ import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePl
 export default function BudgetingSidebarTitle(): JSX.Element {
   const { data: bankAccount } = useSelectedBankAccount();
   const { data: link } = useCurrentLink();
+  const navigate = useNavigate();
   const triggerSync = useTriggerManualPlaidSync();
 
   const handleReauthenticateLink = useCallback(() => {
@@ -37,6 +39,10 @@ export default function BudgetingSidebarTitle(): JSX.Element {
   const handleRemoveLink = useCallback(() => {
     showRemoveLinkModal({ link: link });
   }, [link]);
+
+  const handleLinkSettings = useCallback(() => {
+    navigate(`/link/${link?.linkId}/details`);
+  }, [link, navigate]);
 
   if (!link) {
     return (
@@ -75,6 +81,10 @@ export default function BudgetingSidebarTitle(): JSX.Element {
           <MenuItem visible={ link.getIsPlaid() && !link.getIsRevoked() } onClick={ handleTriggerResync }>
             <RefreshCw />
             Manually Resync
+          </MenuItem>
+          <MenuItem visible onClick={ handleLinkSettings }>
+            <Settings />
+            Settings
           </MenuItem>
           <MDivider />
           <MenuItem visible onClick={ handleRemoveLink }>

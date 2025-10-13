@@ -25,6 +25,7 @@ export default class Link {
   linkId: string;
   linkType: LinkType;
   institutionName: string;
+  description: string | null;
   updatedAt: Date;
   createdAt: Date;
   createdBy: string;
