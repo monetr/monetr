@@ -13,6 +13,7 @@ import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
 import { useArchiveBankAccount } from '@monetr/interface/hooks/useArchiveBankAccount';
+import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { useUpdateBankAccount } from '@monetr/interface/hooks/useUpdateBankAccount';
 import { APIError } from '@monetr/interface/util/request';
@@ -23,6 +24,7 @@ interface BankAccountValues {
 }
 
 export default function BankAccountSettingsPage(): JSX.Element {
+  const { data: link } = useCurrentLink();
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
   const updateBankAccount = useUpdateBankAccount();
   const archiveBankAccount = useArchiveBankAccount();
@@ -108,7 +110,7 @@ export default function BankAccountSettingsPage(): JSX.Element {
         base={ `/bank/${bankAccount.bankAccountId}/transactions` }
         breadcrumb='Settings'
       >
-        { !Boolean(bankAccount.deletedAt) && (
+        { !Boolean(bankAccount.deletedAt) && Boolean(link?.getIsManual()) && (
           <Button variant='destructive' onClick={ archive } >
             <Archive />
             Archive
@@ -142,6 +144,7 @@ export default function BankAccountSettingsPage(): JSX.Element {
             <SelectCurrency
               name='currency'
               className='w-full'
+              disabled={ link?.getIsPlaid() }
             />
           </div>
         </div>

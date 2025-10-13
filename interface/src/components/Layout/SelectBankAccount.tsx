@@ -82,23 +82,21 @@ export default function SelectBankAccount(): JSX.Element {
             />
           </DrawerContent>
         </Drawer>
-        { link?.getIsManual() && (
-          <Link
-            role='combobox'
-            aria-expanded={ open }
-            className={ mergeTailwind(
-              buttonVariants({ variant: 'text', size: 'select' }),
-              comboboxVariants({ variant: 'text', size: 'select' }),
-              'h-[34px] w-[34px] p-0 justify-center group rounded-tl-none rounded-bl-none shrink-0',
-              'enabled:hover:ring-1',
-              'enabled:hover:ring-dark-monetr-border-string',
-              'focus:ring-dark-monetr-brand focus:ring-2',
-            ) }
-            to={ `/bank/${selectedBankAccount.bankAccountId}/settings` }
-          >
-            <Settings className='h-3 w-3 opacity-50 group-hover:opacity-100' />
-          </Link>
-        ) }
+        <Link
+          role='combobox'
+          aria-expanded={ open }
+          className={ mergeTailwind(
+            buttonVariants({ variant: 'text', size: 'select' }),
+            comboboxVariants({ variant: 'text', size: 'select' }),
+            'h-[34px] w-[34px] p-0 justify-center group rounded-tl-none rounded-bl-none shrink-0',
+            'enabled:hover:ring-1',
+            'enabled:hover:ring-dark-monetr-border-string',
+            'focus:ring-dark-monetr-brand focus:ring-2',
+          ) }
+          to={ `/bank/${selectedBankAccount.bankAccountId}/settings` }
+        >
+          <Settings className='h-3 w-3 opacity-50 group-hover:opacity-100' />
+        </Link>
       </div>
     );
   }
@@ -138,22 +136,20 @@ export default function SelectBankAccount(): JSX.Element {
             onSelect={ value => navigate(`/bank/${value}/transactions`) }
           />
         </PopoverContent>
-        { link?.getIsManual() && (
-          <Link
-            role='combobox'
-            className={ mergeTailwind(
-              buttonVariants({ variant: 'text', size: 'select' }),
-              comboboxVariants({ variant: 'text', size: 'select' }),
-              'h-[34px] w-[34px] p-0 justify-center group rounded-tl-none rounded-bl-none shrink-0',
-              'enabled:hover:ring-1',
-              'enabled:hover:ring-dark-monetr-border-string',
-              'focus:ring-0', // DIFFERENT FROM MOBILE
-            ) }
-            to={ `/bank/${selectedBankAccount.bankAccountId}/settings` }
-          >
-            <Settings className='h-4 w-4 opacity-50 group-hover:opacity-100' />
-          </Link>
-        ) }
+        <Link
+          role='combobox'
+          className={ mergeTailwind(
+            buttonVariants({ variant: 'text', size: 'select' }),
+            comboboxVariants({ variant: 'text', size: 'select' }),
+            'h-[34px] w-[34px] p-0 justify-center group rounded-tl-none rounded-bl-none shrink-0',
+            'enabled:hover:ring-1',
+            'enabled:hover:ring-dark-monetr-border-string',
+            'focus:ring-0', // DIFFERENT FROM MOBILE
+          ) }
+          to={ `/bank/${selectedBankAccount.bankAccountId}/settings` }
+        >
+          <Settings className='h-4 w-4 opacity-50 group-hover:opacity-100' />
+        </Link>
       </Popover>
     </div>
   );
