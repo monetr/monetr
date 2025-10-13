@@ -40,13 +40,6 @@ export default function MQueryClient(props: MQueryClientProps): JSX.Element {
       params['offset'] = context.pageParam;
     }
 
-    console.warn({
-      url: `${context.queryKey[0]}`,
-      method: method,
-      params: params,
-      data: body,
-    });
-
     const { data } = await client.request({
       url: `${context.queryKey[0]}`,
       method: method,
