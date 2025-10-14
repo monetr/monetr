@@ -67,7 +67,7 @@
   },
   "devDependencies": {
     "@imagemagick/magick-wasm": "0.0.36",
-    "@rsbuild/core": "1.5.16",
+    "@rsbuild/core": "1.5.17",
     "@rsbuild/plugin-react": "1.4.1",
     "@rsbuild/plugin-sass": "1.4.0",
     "@rspack/binding-linux-arm64-gnu": "1.5.8",
