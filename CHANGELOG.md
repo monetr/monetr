@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.3](https://github.com/monetr/monetr/compare/v1.5.2...v1.5.3) (2025-10-16)
+
+
+### Bug Fixes
+
+* **api:** Fix handling of old timezone names ([#2754](https://github.com/monetr/monetr/issues/2754)) ([b0176d0](https://github.com/monetr/monetr/commit/b0176d0fe422c39fa6522e943549524e3b4650f0)), closes [#2741](https://github.com/monetr/monetr/issues/2741)
+* **build:** Adding tzdata to local development environment ([a24c12f](https://github.com/monetr/monetr/commit/a24c12f70f78fa34426a91c3815c019626f05cc7))
+
 ## [1.5.2](https://github.com/monetr/monetr/compare/v1.5.1...v1.5.2) (2025-10-13)
 
 
