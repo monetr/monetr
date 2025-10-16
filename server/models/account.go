@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/zoneinfo"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v81"
 )
@@ -49,7 +50,7 @@ func (o *Account) BeforeInsert(ctx context.Context) (context.Context, error) {
 }
 
 func (a *Account) GetTimezone() (*time.Location, error) {
-	location, err := time.LoadLocation(a.Timezone)
+	location, err := zoneinfo.Timezone(a.Timezone)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse account timezone as location")
 	}
