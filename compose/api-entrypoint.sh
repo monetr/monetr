@@ -3,7 +3,7 @@
 if [ ! -f "/tmp/locales-marker" ]
 then
   echo "[executor] locales have not been installed yet, installing them now"
-  apt-get update && apt-get install -y locales-all
+  apt-get update && apt-get install -y locales-all tzdata
 fi
 
 if ! command -v air &> /dev/null
