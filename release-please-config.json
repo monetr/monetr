@@ -1,6 +1,6 @@
 {
   "packages": {
-    ".": {
+    "": {
       "package-name": "monetr",
       "changelog-path": "CHANGELOG.md",
       "release-type": "simple",
