@@ -35,6 +35,7 @@ import (
 	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/ui"
+	"github.com/monetr/monetr/server/zoneinfo"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -58,6 +59,9 @@ func ServeCommand(parent *cobra.Command) {
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
 				log.WithField("config", configFileName).Info("config file loaded")
 			}
+
+			// Load any timezone aliases from the host operating system.
+			zoneinfo.LoadAliasesFromHost(cmd.Context(), log)
 
 			log.WithFields(logrus.Fields{
 				"privateKeyPath":       configuration.Security.PrivateKey,

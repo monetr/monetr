@@ -17,6 +17,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/security"
+	"github.com/monetr/monetr/server/zoneinfo"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -372,7 +373,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		return err // validateRegistration also returns a valid http error that can just be passed through.
 	}
 
-	timezone, err := time.LoadLocation(registerRequest.Timezone)
+	timezone, err := zoneinfo.Timezone(registerRequest.Timezone)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse timezone")
 	}
