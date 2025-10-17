@@ -4,7 +4,6 @@ import { Button } from '@monetr/interface/components/Button';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 
-
 export default function ManualLinkSetupButtons(): JSX.Element {
   const viewContext = useViewContext<ManualLinkSetupSteps, {}>();
   const steps = Object.values(ManualLinkSetupSteps);
@@ -25,7 +24,7 @@ export default function ManualLinkSetupButtons(): JSX.Element {
     case lastStep:
       return (
         <div className='flex gap-4'>
-          <Button variant='secondary' onClick={ previousStep }>
+          <Button variant='secondary' onClick={previousStep}>
             Back
           </Button>
           <Button variant='primary' type='submit'>
@@ -36,7 +35,7 @@ export default function ManualLinkSetupButtons(): JSX.Element {
     default:
       return (
         <div className='flex gap-4'>
-          <Button variant='secondary' onClick={ previousStep }>
+          <Button variant='secondary' onClick={previousStep}>
             Back
           </Button>
           <Button variant='primary' type='submit'>

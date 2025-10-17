@@ -14,15 +14,14 @@ export function useArchiveBankAccount(): (_bankAccountId: string) => Promise<str
 
   const mutate = useMutation({
     mutationFn: archiveBankAccount,
-    onSuccess: (bankAccountId: string) => Promise.all([
-      queryClient.setQueryData(
-        ['/bank_accounts'],
-        (previous: Array<Partial<BankAccount>>) => previous.filter(item => item.bankAccountId !== bankAccountId),
-      ),
-      queryClient.removeQueries({ queryKey: [`/bank_accounts/${bankAccountId}`] }),
-    ]),
+    onSuccess: (bankAccountId: string) =>
+      Promise.all([
+        queryClient.setQueryData(['/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
+          previous.filter(item => item.bankAccountId !== bankAccountId),
+        ),
+        queryClient.removeQueries({ queryKey: [`/bank_accounts/${bankAccountId}`] }),
+      ]),
   });
 
   return mutate.mutateAsync;
 }
-

@@ -19,8 +19,7 @@ export default function RemoveTransactionButton(props: RemoveTransactionButtonPr
   const promptRemoveTransaction = useCallback(async () => {
     return await showRemoveTransactionModal({
       transaction,
-    })
-      .then(() => navigate(`/bank/${ transaction.bankAccountId }/transactions`));
+    }).then(() => navigate(`/bank/${transaction.bankAccountId}/transactions`));
   }, [navigate, transaction]);
 
   // We only allow removing transactions on manual links.
@@ -29,10 +28,7 @@ export default function RemoveTransactionButton(props: RemoveTransactionButtonPr
   }
 
   return (
-    <Button
-      variant='destructive'
-      onClick={ promptRemoveTransaction }
-    >
+    <Button variant='destructive' onClick={promptRemoveTransaction}>
       <Trash />
       Remove
     </Button>

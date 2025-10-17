@@ -39,47 +39,50 @@ function NewBankAccountModal(): JSX.Element {
     currency: locale?.currency ?? DefaultCurrency,
   };
 
-  const submit = useCallback(async (
-    values: NewBankAccountValues,
-    helper: FormikHelpers<NewBankAccountValues>,
-  ): Promise<void> => {
-    helper.setSubmitting(true);
-    return await createBankAccount({
-      linkId: selectedBankAccount.linkId,
-      name: values.name,
-      availableBalance: locale.friendlyToAmount(values.balance),
-      currentBalance: locale.friendlyToAmount(values.balance),
-      // TODO Make it so these can be customized
-      accountType: BankAccountType.Depository,
-      accountSubType: BankAccountSubType.Checking,
-      currency: values.currency,
-    })
-      .then(result => navigate(`/bank/${ result.bankAccountId }/transactions`))
-      .then(() => modal.remove())
-      .catch((error: AxiosError) => void enqueueSnackbar(error.response.data['error'], {
-        variant: 'error',
-        disableWindowBlurListener: true,
-      }))
-      .finally(() => helper.setSubmitting(false));
-  }, [createBankAccount, selectedBankAccount, locale, navigate, modal, enqueueSnackbar]);
+  const submit = useCallback(
+    async (values: NewBankAccountValues, helper: FormikHelpers<NewBankAccountValues>): Promise<void> => {
+      helper.setSubmitting(true);
+      return await createBankAccount({
+        linkId: selectedBankAccount.linkId,
+        name: values.name,
+        availableBalance: locale.friendlyToAmount(values.balance),
+        currentBalance: locale.friendlyToAmount(values.balance),
+        // TODO Make it so these can be customized
+        accountType: BankAccountType.Depository,
+        accountSubType: BankAccountSubType.Checking,
+        currency: values.currency,
+      })
+        .then(result => navigate(`/bank/${result.bankAccountId}/transactions`))
+        .then(() => modal.remove())
+        .catch(
+          (error: AxiosError) =>
+            void enqueueSnackbar(error.response.data['error'], {
+              variant: 'error',
+              disableWindowBlurListener: true,
+            }),
+        )
+        .finally(() => helper.setSubmitting(false));
+    },
+    [createBankAccount, selectedBankAccount, locale, navigate, modal, enqueueSnackbar],
+  );
 
   if (isLoading) {
     return (
-      <MModal open={ modal.visible } ref={ ref }>
+      <MModal open={modal.visible} ref={ref}>
         One moment...
       </MModal>
     );
   }
 
   return (
-    <MModal open={ modal.visible } ref={ ref }>
+    <MModal open={modal.visible} ref={ref}>
       <MForm
-        onSubmit={ submit }
-        initialValues={ initialValues }
+        onSubmit={submit}
+        initialValues={initialValues}
         className='h-full flex flex-col gap-2 p-2 justify-between'
         data-testid='new-bank-account-modal'
       >
-        { ({ values }) => (
+        {({ values }) => (
           <Fragment>
             <div className='flex flex-col'>
               <MSpan weight='bold' size='xl' className='mb-2'>
@@ -89,17 +92,12 @@ function NewBankAccountModal(): JSX.Element {
                 id='bank-account-name-search' // Keep's 1Pass from hijacking normal name fields.
                 data-testid='bank-account-name'
                 name='name'
-                label={ 'What is the account\'s name ?' }
+                label={"What is the account's name ?"}
                 required
                 autoComplete='off'
                 placeholder='Personal Checking...'
               />
-              <SelectCurrency
-                name='currency'
-                className='w-full'
-                menuPortalTarget={ document.body }
-                required
-              />
+              <SelectCurrency name='currency' className='w-full' menuPortalTarget={document.body} required />
               <MAmountField
                 id='bank-account-balance-search' // Keep's 1Pass from hijacking normal name fields.
                 data-testid='bank-account-balance'
@@ -107,11 +105,11 @@ function NewBankAccountModal(): JSX.Element {
                 label='Initial Balance'
                 required
                 allowNegative
-                currency={ values['currency'] }
+                currency={values['currency']}
               />
             </div>
             <div className='flex justify-end gap-2'>
-              <FormButton variant='secondary' onClick={ modal.remove } data-testid='close-new-bank-account-modal'>
+              <FormButton variant='secondary' onClick={modal.remove} data-testid='close-new-bank-account-modal'>
                 Cancel
               </FormButton>
               <FormButton variant='primary' type='submit' data-testid='bank-account-submit'>
@@ -119,7 +117,7 @@ function NewBankAccountModal(): JSX.Element {
               </FormButton>
             </div>
           </Fragment>
-        ) }
+        )}
       </MForm>
     </MModal>
   );

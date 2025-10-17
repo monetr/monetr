@@ -1,4 +1,3 @@
-
-export function queryText(query: string): string|null {
+export function queryText(query: string): string | null {
   return document.querySelector(query).textContent;
 }

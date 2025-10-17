@@ -23,9 +23,7 @@ export const Default: StoryFn<typeof Button> = () => (
       <span className='w-full text-center'>With Icon Disabled</span>
       <span className='w-full text-center'>Icon Only</span>
       <span className='w-full text-center'>Icon Only Disabled</span>
-      <Button variant='primary'>
-        Primary
-      </Button>
+      <Button variant='primary'>Primary</Button>
       <Button variant='primary' disabled>
         Primary
       </Button>
@@ -44,9 +42,7 @@ export const Default: StoryFn<typeof Button> = () => (
         <Plus />
       </Button>
 
-      <Button variant='secondary'>
-        Secondary
-      </Button>
+      <Button variant='secondary'>Secondary</Button>
       <Button variant='secondary' disabled>
         Secondary
       </Button>
@@ -65,9 +61,7 @@ export const Default: StoryFn<typeof Button> = () => (
         <Plus />
       </Button>
 
-      <Button variant='outlined'>
-        Outlined
-      </Button>
+      <Button variant='outlined'>Outlined</Button>
       <Button variant='outlined' disabled>
         Outlined
       </Button>
@@ -86,9 +80,7 @@ export const Default: StoryFn<typeof Button> = () => (
         <Plus />
       </Button>
 
-      <Button variant='text'>
-        Text
-      </Button>
+      <Button variant='text'>Text</Button>
       <Button variant='text' disabled>
         Text
       </Button>
@@ -107,30 +99,27 @@ export const Default: StoryFn<typeof Button> = () => (
         <Plus />
       </Button>
 
+      <Button variant='destructive'>Destructive</Button>
+      <Button variant='destructive' disabled>
+        Destructive
+      </Button>
       <Button variant='destructive'>
-        Destructive
-      </Button>
-      <Button  variant='destructive' disabled>
-        Destructive
-      </Button>
-      <Button  variant='destructive'>
         <Plus />
         Destructive
       </Button>
-      <Button  variant='destructive' disabled>
+      <Button variant='destructive' disabled>
         <Plus />
         Destructive
       </Button>
-      <Button  variant='destructive'>
+      <Button variant='destructive'>
         <Plus />
       </Button>
-      <Button  variant='destructive' disabled>
+      <Button variant='destructive' disabled>
         <Plus />
       </Button>
     </div>
   </div>
 );
-
 
 interface FormValues {
   name: string;
@@ -158,24 +147,18 @@ export const Form: StoryFn<typeof Button> = () => {
   }
 
   return (
-    <MForm
-      initialValues={ initialValues }
-      onSubmit={ submit  }
-      className='flex max-w-lg flex-col p-4'
-    >
-      <MSpan size='lg'>
-        Hit enter should show submitted, not canceled
-      </MSpan>
+    <MForm initialValues={initialValues} onSubmit={submit} className='flex max-w-lg flex-col p-4'>
+      <MSpan size='lg'>Hit enter should show submitted, not canceled</MSpan>
       <MTextField
         name='name'
         label='Name / Description'
         required
         autoComplete='off'
         placeholder='Amazon, Netflix...'
-        data-1p-ignore 
+        data-1p-ignore
       />
       <div className='flex justify-end gap-2'>
-        <Button variant='destructive' onClick={ cancel }>
+        <Button variant='destructive' onClick={cancel}>
           Cancel
         </Button>
         <FormButton variant='primary' type='submit'>

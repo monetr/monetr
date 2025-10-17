@@ -90,8 +90,7 @@ export default function PullToRefresh(): JSX.Element {
 
       const screenY = e.targetTouches[0].screenY;
 
-      const pullLength =
-        pullStartPoint < screenY ? Math.abs(screenY - pullStartPoint) : 0;
+      const pullLength = pullStartPoint < screenY ? Math.abs(screenY - pullStartPoint) : 0;
 
       setPullChange(pullLength);
     };
@@ -131,27 +130,27 @@ export default function PullToRefresh(): JSX.Element {
 
   return (
     <div
-      ref={ refreshDiv }
+      ref={refreshDiv}
       className='absolute left-0 right-0 z-50 m-auto w-fit transition-all ease-out'
       id='refreshIcon'
-      style={ {
+      style={{
         top:
           pullDownIconLocation < pullDownStopThreshold && pullDownInitThreshold
             ? pullDownIconLocation
             : pullDownInitThreshold
               ? pullDownStopThreshold
               : '',
-      } }
+      }}
     >
       <div
         className='relative -top-16 h-9 w-9 rounded-full border-1 border-dark-monetr-border bg-dark-monetr-background shadow-md shadow-black ring-1 ring-dark-monetr-background flex items-center justify-center'
-        style={ { animationDirection: 'reverse' } }
+        style={{ animationDirection: 'reverse' }}
       >
-        <div className={ refreshDiv.current?.classList.contains('loading') ? 'animate-spin' : undefined }>
+        <div className={refreshDiv.current?.classList.contains('loading') ? 'animate-spin' : undefined}>
           <RefreshCcw
-            className={ `rounded-full ${
+            className={`rounded-full ${
               pullDownReloadThreshold && 'rotate-180'
-            } text-indigo-500 transition-all duration-300` }
+            } text-indigo-500 transition-all duration-300`}
           />
         </div>
       </div>

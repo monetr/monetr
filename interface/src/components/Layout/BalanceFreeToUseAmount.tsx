@@ -28,8 +28,8 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
             Free-To-Use:
           </MSpan>
           &nbsp;
-          <MSpan size='lg' weight='semibold' className={ valueClassName }>
-            { locale.formatAmount(balance?.free, AmountType.Stored) }
+          <MSpan size='lg' weight='semibold' className={valueClassName}>
+            {locale.formatAmount(balance?.free, AmountType.Stored)}
           </MSpan>
         </div>
       );

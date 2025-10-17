@@ -11,9 +11,10 @@ export function useSpendingFiltered(kind: SpendingType): UseQueryResult<Array<Sp
     enabled: Boolean(selectedBankAccountId),
     initialData: [],
     initialDataUpdatedAt: 0,
-    select: data => (data || [])
-      .map(item => new Spending(item))
-      // Filter the data by the kind specified!
-      .filter(item => item.spendingType === kind),
+    select: data =>
+      (data || [])
+        .map(item => new Spending(item))
+        // Filter the data by the kind specified!
+        .filter(item => item.spendingType === kind),
   });
 }

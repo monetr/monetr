@@ -33,22 +33,12 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
 
   const loading = Boolean(formikContext?.isSubmitting);
 
-  const classes = mergeTailwind([
-    'flex',
-    'items-center',
-    'justify-center',
-    'w-full',
-  ], props.className);
+  const classes = mergeTailwind(['flex', 'items-center', 'justify-center', 'w-full'], props.className);
 
   return (
-    <div className={ classes }>
-      { !loading && <ReCAPTCHA
-        data-testid={ props['data-testid'] }
-        sitekey={ config.ReCAPTCHAKey }
-        onChange={ onVerify }
-      /> }
-      { loading && <LoaderCircle className='spin' /> }
+    <div className={classes}>
+      {!loading && <ReCAPTCHA data-testid={props['data-testid']} sitekey={config.ReCAPTCHAKey} onChange={onVerify} />}
+      {loading && <LoaderCircle className='spin' />}
     </div>
   );
-
 }

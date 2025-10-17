@@ -19,8 +19,7 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
   const { data: bankAccounts } = useBankAccounts();
   const active = selectBankAccount.data?.linkId === link.linkId;
 
-  const destinationBankAccounts = sortAccounts(bankAccounts
-    ?.filter(bankAccount => bankAccount.linkId === link.linkId));
+  const destinationBankAccounts = sortAccounts(bankAccounts?.filter(bankAccount => bankAccount.linkId === link.linkId));
 
   const destinationBankAccount = destinationBankAccounts.length > 0 ? destinationBankAccounts[0] : null;
 
@@ -86,24 +85,22 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
   }
 
   return (
-    <Tooltip delayDuration={ 100 }>
+    <Tooltip delayDuration={100}>
       <TooltipTrigger
         className='w-full h-12 flex items-center justify-center relative group'
-        data-testid={ `bank-sidebar-item-${link.linkId}` }
+        data-testid={`bank-sidebar-item-${link.linkId}`}
       >
-        <div className={ classes } />
+        <div className={classes} />
         <Link
           className='absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle drop-shadow-md flex justify-center items-center'
-          to={ linkPath }
+          to={linkPath}
         >
-          <PlaidInstitutionLogo link={ link } />
+          <PlaidInstitutionLogo link={link} />
           <LinkWarningIndicator />
           <LinkRevokedIndicator />
         </Link>
       </TooltipTrigger>
-      <TooltipContent side='right'>
-        { tooltip }
-      </TooltipContent>
+      <TooltipContent side='right'>{tooltip}</TooltipContent>
     </Tooltip>
   );
 }

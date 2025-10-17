@@ -10,11 +10,8 @@ export default function LinkCreatePage(): JSX.Element {
 
   return (
     <div className='flex flex-col w-full'>
-      <MTopNavigation
-        icon={ PowerOutlined }
-        title='Add another connection'
-      />
-      <SetupPage alreadyOnboarded manualEnabled={ config?.manualEnabled } />
+      <MTopNavigation icon={PowerOutlined} title='Add another connection' />
+      <SetupPage alreadyOnboarded manualEnabled={config?.manualEnabled} />
     </div>
   );
 }

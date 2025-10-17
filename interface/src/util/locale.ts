@@ -6,7 +6,7 @@ export function getLocale(): string {
   if (!locale) {
     locale = navigator.language;
   }
-    
+
   // Transform en-US to en_US
   return locale.replace('-', '_');
 }

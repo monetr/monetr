@@ -30,7 +30,9 @@ describe('login', () => {
       nextUrl: '/account/subscribe',
     });
 
-    const { result: { current: login } } = testRenderHook(useLogin, { initialRoute: '/login' });
+    const {
+      result: { current: login },
+    } = testRenderHook(useLogin, { initialRoute: '/login' });
 
     await act(() => {
       return login({
@@ -48,7 +50,9 @@ describe('login', () => {
       isActive: true,
     });
 
-    const { result: { current: login } } = testRenderHook(useLogin, { initialRoute: '/login' });
+    const {
+      result: { current: login },
+    } = testRenderHook(useLogin, { initialRoute: '/login' });
 
     await act(() => {
       return login({
@@ -67,7 +71,9 @@ describe('login', () => {
       resetToken: 'abc123',
     });
 
-    const { result: { current: login } } = testRenderHook(useLogin, { initialRoute: '/login' });
+    const {
+      result: { current: login },
+    } = testRenderHook(useLogin, { initialRoute: '/login' });
 
     await act(() => {
       return login({
@@ -80,8 +86,8 @@ describe('login', () => {
     // reset page.
     expect(mockUseNavigate).toBeCalledWith('/password/reset', {
       state: {
-        'message': 'You are required to change your password before authenticating.',
-        'token': 'abc123',
+        message: 'You are required to change your password before authenticating.',
+        token: 'abc123',
       },
     });
   });
@@ -91,7 +97,9 @@ describe('login', () => {
       code: 'EMAIL_NOT_VERIFIED',
     });
 
-    const { result: { current: login } } = testRenderHook(useLogin, { initialRoute: '/login' });
+    const {
+      result: { current: login },
+    } = testRenderHook(useLogin, { initialRoute: '/login' });
 
     await act(() => {
       return login({
@@ -103,7 +111,7 @@ describe('login', () => {
     // When our email is not verified, make sure we navigate to the resend page.
     expect(mockUseNavigate).toBeCalledWith('/verify/email/resend', {
       state: {
-        'emailAddress': 'test@test.com',
+        emailAddress: 'test@test.com',
       },
     });
   });

@@ -51,11 +51,13 @@ export default function PasswordResetNew(): JSX.Element {
   async function submit(values: ResetPasswordValues, helpers: FormikHelpers<ResetPasswordValues>): Promise<void> {
     helpers.setSubmitting(true);
 
-    return resetPassword(values.password, token)
-      // If the reset password fails, then set submitting to false and do nothing. The error will already have been
-      // displayed by the reset password function. We only do this if there is an error because if this succeeds then
-      // the user is automatically redirected to the login page.
-      .catch(() => helpers.setSubmitting(false));
+    return (
+      resetPassword(values.password, token)
+        // If the reset password fails, then set submitting to false and do nothing. The error will already have been
+        // displayed by the reset password function. We only do this if there is an error because if this succeeds then
+        // the user is automatically redirected to the login page.
+        .catch(() => helpers.setSubmitting(false))
+    );
   }
 
   function validate(values: ResetPasswordValues): FormikErrors<ResetPasswordValues> {
@@ -76,18 +78,16 @@ export default function PasswordResetNew(): JSX.Element {
 
   return (
     <MForm
-      onSubmit={ submit }
-      initialValues={ initialValues }
-      validate={ validate }
+      onSubmit={submit}
+      initialValues={initialValues}
+      validate={validate}
       className='w-full h-full flex flex-col pt-10 md:pt-0 mb:pb-10 md:justify-center items-center px-5 gap-1'
     >
       <div className='flex items-center flex-col gap-1 w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'>
         <div className='max-w-[128px] w-full'>
           <MLogo />
         </div>
-        <MSpan className='flex items-center text-center'>
-          { message }
-        </MSpan>
+        <MSpan className='flex items-center text-center'>{message}</MSpan>
         <MTextField
           autoFocus
           autoComplete='current-password'
@@ -105,18 +105,17 @@ export default function PasswordResetNew(): JSX.Element {
           required
           className='w-full'
         />
-        <FormButton
-          variant='primary'
-          role='form'
-          type='submit'
-          className='w-full'
-        >
+        <FormButton variant='primary' role='form' type='submit' className='w-full'>
           Reset Password
         </FormButton>
       </div>
       <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
-        <MSpan color='subtle' className='text-sm'>Remembered your password?</MSpan>
-        <MLink to='/login' size='sm'>Sign in</MLink>
+        <MSpan color='subtle' className='text-sm'>
+          Remembered your password?
+        </MSpan>
+        <MLink to='/login' size='sm'>
+          Sign in
+        </MLink>
       </div>
     </MForm>
   );

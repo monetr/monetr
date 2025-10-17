@@ -10,5 +10,5 @@ export default function Sidebar(): JSX.Element {
     return <MobileSidebar />;
   }
 
-  return <BankSidebar  />;
+  return <BankSidebar />;
 }

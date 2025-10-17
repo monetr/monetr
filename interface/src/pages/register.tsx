@@ -96,16 +96,7 @@ export default function Register(): JSX.Element {
   function BetaCodeInput(): JSX.Element {
     if (!config?.requireBetaCode) return null;
 
-    return (
-      <MTextField
-        label='Beta Code'
-        name='betaCode'
-        type='text'
-        required
-        uppercasetext
-        className={ breakpoints }
-      />
-    );
+    return <MTextField label='Beta Code' name='betaCode' type='text' required uppercasetext className={breakpoints} />;
   }
 
   async function submit(values: RegisterValues, helpers: FormikHelpers<RegisterValues>): Promise<void> {
@@ -128,16 +119,15 @@ export default function Register(): JSX.Element {
           return setSuccessful(true);
         }
 
-        return queryClient.invalidateQueries({ queryKey: ['/users/me'] })
-          .then(() => {
-            // If the register endpoint has told us to navigate to a specific url afterwards, then do that now.
-            if (result.nextUrl) {
-              return navigate(result.nextUrl);
-            }
+        return queryClient.invalidateQueries({ queryKey: ['/users/me'] }).then(() => {
+          // If the register endpoint has told us to navigate to a specific url afterwards, then do that now.
+          if (result.nextUrl) {
+            return navigate(result.nextUrl);
+          }
 
-            // Otherwise just go to the index-ish route for the authenticated app.
-            return navigate('/');
-          });
+          // Otherwise just go to the index-ish route for the authenticated app.
+          return navigate('/');
+        });
       })
       .catch((error: AxiosError<APIError>) => {
         const message = error.response.data.error || 'Failed to sign up.';
@@ -150,27 +140,22 @@ export default function Register(): JSX.Element {
   }
 
   if (successful) {
-    return (
-      <RegisterSuccessful />
-    );
+    return <RegisterSuccessful />;
   }
-
 
   return (
     <div className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5 overflow-y-auto py-4'>
       <MForm
-        initialValues={ initialValues }
-        validate={ validator }
-        onSubmit={ submit }
+        initialValues={initialValues}
+        validate={validator}
+        onSubmit={submit}
         className='flex flex-col md:w-1/2 lg:w-1/3 xl:w-1/4 items-center'
       >
         <div className='max-w-[96px] w-full'>
           <MLogo />
         </div>
         <div className='flex flex-col items-center text-center'>
-          <MSpan className='text-5xl'>
-            Get Started
-          </MSpan>
+          <MSpan className='text-5xl'>Get Started</MSpan>
           <MSpan color='subtle' className='text-lg'>
             Create your monetr account now
           </MSpan>
@@ -221,18 +206,8 @@ export default function Register(): JSX.Element {
           type='password'
         />
         <BetaCodeInput />
-        <MCaptcha
-          className='mb-1'
-          name='captcha'
-          show={ Boolean(config?.verifyRegister) }
-        />
-        <FormButton
-          data-testid='register-submit'
-          className='w-full mt-1'
-          role='form'
-          type='submit'
-          variant='primary'
-        >
+        <MCaptcha className='mb-1' name='captcha' show={Boolean(config?.verifyRegister)} />
+        <FormButton data-testid='register-submit' className='w-full mt-1' role='form' type='submit' variant='primary'>
           Sign Up
         </FormButton>
         <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
@@ -241,9 +216,11 @@ export default function Register(): JSX.Element {
             <a
               target='_blank'
               className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
-              href='https://monetr.app/policy/terms'>
+              href='https://monetr.app/policy/terms'
+            >
               Terms & Conditions
-            </a> and&nbsp;
+            </a>{' '}
+            and&nbsp;
             <a
               target='_blank'
               className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
@@ -254,8 +231,12 @@ export default function Register(): JSX.Element {
           </MSpan>
         </div>
         <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
-          <MSpan color='subtle' className='text-sm'>Already have an account?</MSpan>
-          <MLink to='/login' size='sm'>Sign in instead</MLink>
+          <MSpan color='subtle' className='text-sm'>
+            Already have an account?
+          </MSpan>
+          <MLink to='/login' size='sm'>
+            Sign in instead
+          </MLink>
         </div>
       </MForm>
     </div>

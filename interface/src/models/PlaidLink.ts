@@ -30,7 +30,7 @@ export default class PlaidLink {
         ...data,
         expirationDate: parseDate(data?.expirationDate),
         lastManualSync: parseDate(data?.lastManualSync),
-        lastSuccessfulUpdate:  parseDate(data?.lastSuccessfulUpdate),
+        lastSuccessfulUpdate: parseDate(data?.lastSuccessfulUpdate),
         lastAttemptedUpdate: parseDate(data?.lastAttemptedUpdate),
         updatedAt: parseDate(data?.updatedAt),
         createdAt: parseDate(data?.createdAt),

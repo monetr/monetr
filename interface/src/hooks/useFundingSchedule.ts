@@ -8,6 +8,6 @@ export function useFundingSchedule(fundingScheduleId?: string): UseQueryResult<F
   return useQuery<Partial<FundingSchedule>, unknown, FundingSchedule | null>({
     queryKey: [`/bank_accounts/${selectedBankAccountId}/funding_schedules/${fundingScheduleId}`],
     enabled: Boolean(selectedBankAccountId) && Boolean(fundingScheduleId),
-    select: data => data?.fundingScheduleId ? new FundingSchedule(data) : null,
+    select: data => (data?.fundingScheduleId ? new FundingSchedule(data) : null),
   });
 }

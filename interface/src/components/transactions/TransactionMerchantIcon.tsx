@@ -12,7 +12,7 @@ export default function TransactionMerchantIcon(props: TransactionMerchantIconPr
   if (pending) {
     return (
       <div className='relative'>
-        <MerchantIcon { ...merchantIconProps } />
+        <MerchantIcon {...merchantIconProps} />
         <span className='absolute flex h-3 w-3 right-0 bottom-0'>
           <span className='animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-blue-400' />
           <span className='relative inline-flex rounded-full h-3 w-3 bg-blue-500' />
@@ -21,8 +21,5 @@ export default function TransactionMerchantIcon(props: TransactionMerchantIconPr
     );
   }
 
-  return (
-    <MerchantIcon { ...merchantIconProps } />
-  );
-
+  return <MerchantIcon {...merchantIconProps} />;
 }

@@ -55,7 +55,7 @@ export default function Login(): JSX.Element {
     }
 
     return (
-      <MLink to='/password/forgot' size='sm' data-testid='login-forgot' tabIndex={ 5 }>
+      <MLink to='/password/forgot' size='sm' data-testid='login-forgot' tabIndex={5}>
         Forgot password?
       </MLink>
     );
@@ -66,8 +66,12 @@ export default function Login(): JSX.Element {
 
     return (
       <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
-        <MSpan color='subtle' className='text-sm'>Not a user?</MSpan>
-        <MLink to='/register' size='sm' data-testid='login-signup' tabIndex={ 4 }>Sign up now</MLink>
+        <MSpan color='subtle' className='text-sm'>
+          Not a user?
+        </MSpan>
+        <MLink to='/register' size='sm' data-testid='login-signup' tabIndex={4}>
+          Sign up now
+        </MLink>
       </div>
     );
   }
@@ -80,18 +84,20 @@ export default function Login(): JSX.Element {
       email: values.email,
       password: values.password,
     })
-      .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to authenticate.', {
-        variant: 'error',
-        disableWindowBlurListener: true,
-      }))
+      .catch(error =>
+        enqueueSnackbar(error?.response?.data?.error || 'Failed to authenticate.', {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        }),
+      )
       .finally(() => helpers.setSubmitting(false));
   }
 
   return (
     <MForm
-      initialValues={ initialValues }
-      validate={ validator }
-      onSubmit={ submit }
+      initialValues={initialValues}
+      validate={validator}
+      onSubmit={submit}
       className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5'
     >
       <div className='max-w-[128px] w-full'>
@@ -106,23 +112,20 @@ export default function Login(): JSX.Element {
         type='email'
         required
         className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'
-        tabIndex={ 1 }
+        tabIndex={1}
       />
       <MTextField
         autoComplete='current-password'
         className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'
         data-testid='login-password'
         label='Password'
-        labelDecorator={ ForgotPasswordButton }
+        labelDecorator={ForgotPasswordButton}
         name='password'
         required
         type='password'
-        tabIndex={ 2 }
+        tabIndex={2}
       />
-      <MCaptcha
-        name='captcha'
-        show={ Boolean(config?.verifyLogin) }
-      />
+      <MCaptcha name='captcha' show={Boolean(config?.verifyLogin)} />
       <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
         <FormButton
           data-testid='login-submit'
@@ -130,7 +133,7 @@ export default function Login(): JSX.Element {
           role='form'
           type='submit'
           className='w-full'
-          tabIndex={ 3 }
+          tabIndex={3}
         >
           Sign In
         </FormButton>
@@ -139,4 +142,3 @@ export default function Login(): JSX.Element {
     </MForm>
   );
 }
-

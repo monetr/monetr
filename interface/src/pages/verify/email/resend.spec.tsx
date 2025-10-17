@@ -8,14 +8,14 @@ import testRenderer from '@monetr/interface/testutils/renderer';
 
 describe('resend verification email', () => {
   let mockAxios: MockAdapter;
-  
+
   beforeEach(() => {
     mockAxios = new MockAdapter(monetrClient);
   });
   afterEach(() => {
     mockAxios.reset();
   });
-  
+
   afterAll(() => mockAxios.restore());
 
   it('will render without ReCAPTCHA', () => {
@@ -49,17 +49,14 @@ describe('resend verification email', () => {
       ReCAPTCHAKey: null,
     });
 
-    const world = testRenderer(
-      <ResendVerificationPage />,
-      {
-        initialRoute: {
-          pathname: '/verify/email/resend',
-          state: {
-            emailAddress: 'email@test.com',
-          },
+    const world = testRenderer(<ResendVerificationPage />, {
+      initialRoute: {
+        pathname: '/verify/email/resend',
+        state: {
+          emailAddress: 'email@test.com',
         },
       },
-    );
+    });
 
     await waitFor(() => {
       expect(world.queryByTestId('resend-email')).toBeVisible();

@@ -24,15 +24,21 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
     }
   }, [props.base, navigate]);
 
-  const className = mergeTailwind({
-    'dark:text-dark-monetr-content-emphasis': !Boolean(props.breadcrumb),
-    'dark:text-dark-monetr-content-subtle dark:hover:text-dark-monetr-content-emphasis': Boolean(props.breadcrumb),
-    'cursor-pointer': Boolean(props.base),
-  }, 'w-auto order-1 flex-shrink-0 md:flex-shrink');
+  const className = mergeTailwind(
+    {
+      'dark:text-dark-monetr-content-emphasis': !Boolean(props.breadcrumb),
+      'dark:text-dark-monetr-content-subtle dark:hover:text-dark-monetr-content-emphasis': Boolean(props.breadcrumb),
+      'cursor-pointer': Boolean(props.base),
+    },
+    'w-auto order-1 flex-shrink-0 md:flex-shrink',
+  );
 
-  const titleClassName = mergeTailwind({
-    'hidden md:inline': Boolean(props.breadcrumb),
-  }, 'w-auto text-center order-1');
+  const titleClassName = mergeTailwind(
+    {
+      'hidden md:inline': Boolean(props.breadcrumb),
+    },
+    'w-auto text-center order-1',
+  );
 
   const iconClassName = mergeTailwind('mb-1 inline', {
     'mr-0 md:mr-2': Boolean(props.breadcrumb),
@@ -41,11 +47,9 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
 
   function InitialCrumb(): JSX.Element {
     return (
-      <MSpan weight='bold' size='2xl' className={ className } onClick={ onInitialClick } ellipsis>
-        <Icon className={ iconClassName } />
-        <span className={ titleClassName }>
-          { props.title }
-        </span>
+      <MSpan weight='bold' size='2xl' className={className} onClick={onInitialClick} ellipsis>
+        <Icon className={iconClassName} />
+        <span className={titleClassName}>{props.title}</span>
       </MSpan>
     );
   }
@@ -59,7 +63,7 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
           /
         </MSpan>
         <MSpan weight='bold' size='2xl' color='emphasis' ellipsis className='order-3'>
-          { props.breadcrumb }
+          {props.breadcrumb}
         </MSpan>
       </Fragment>
     );
@@ -68,13 +72,13 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
   return (
     <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-x-2 justify-between'>
       <div className='flex gap-2 min-w-0 h-12 items-center flex-shrink'>
-        <MSidebarToggle className='mr-2' backButton={ props.base } />
+        <MSidebarToggle className='mr-2' backButton={props.base} />
         <span className='flex gap-2 flex-grow min-w-0'>
           <InitialCrumb />
           <BreadcrumbMaybe />
         </span>
       </div>
-      <ActionArea children={ props.children } />
+      <ActionArea children={props.children} />
     </div>
   );
 }
@@ -97,9 +101,5 @@ function ActionArea(props: ActionAreaProps): JSX.Element {
     'backdrop-blur-sm bg-dark-monetr-background/50',
   );
 
-  return (
-    <div className={ styles }>
-      { props.children }
-    </div>
-  );
+  return <div className={styles}>{props.children}</div>;
 }

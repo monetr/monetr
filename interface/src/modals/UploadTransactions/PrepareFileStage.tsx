@@ -22,9 +22,10 @@ export default function PrepareFileStage(props: PrepareFileStageProps): JSX.Elem
   useEffect(() => {
     if (!selectedBankAccountId) return;
 
-    axios.post(`/api/bank_accounts/${selectedBankAccountId}/transactions/upload`, {
-      fileId: props.file.fileId,
-    })
+    axios
+      .post(`/api/bank_accounts/${selectedBankAccountId}/transactions/upload`, {
+        fileId: props.file.fileId,
+      })
       .then((result: AxiosResponse<TransactionUpload>) => {
         props.setResult(new TransactionUpload(result.data));
         props.setStage(UploadTransactionStage.Processing);
@@ -43,15 +44,13 @@ export default function PrepareFileStage(props: PrepareFileStageProps): JSX.Elem
           <MSpan weight='bold' size='xl'>
             Upload Transactions
           </MSpan>
-          <div>
-            { /* TODO Close button */ }
-          </div>
+          <div>{/* TODO Close button */}</div>
         </div>
 
         <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
           <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
           <div className='flex flex-col py-1 w-full'>
-            <MSpan size='lg'>{ props.file.name }</MSpan>
+            <MSpan size='lg'>{props.file.name}</MSpan>
             <MSpan>Preparing...</MSpan>
           </div>
         </div>

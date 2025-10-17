@@ -11,21 +11,19 @@ import Spending from '@monetr/interface/models/Spending';
 export function useSpending(spendingId?: string): UseQueryResult<Spending, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   const queryClient = useQueryClient();
-  const existingData = queryClient.getQueryData<Array<Spending>>(
-    [`/bank_accounts/${selectedBankAccountId}/spending`],
-  );
+  const existingData = queryClient.getQueryData<Array<Spending>>([`/bank_accounts/${selectedBankAccountId}/spending`]);
 
   return useQuery<Partial<Spending>, unknown, Spending>({
     queryKey: [`/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`],
     enabled: Boolean(selectedBankAccountId) && Boolean(spendingId),
-    initialData: () => Array.isArray(existingData) ?
-      // If the spending is in our existing query state then use that.
-      existingData.find(item => item.spendingId === spendingId) :
-      // Otherwise fall back to undefined.
-      undefined,
-    initialDataUpdatedAt: () => queryClient.getQueryState(
-      [`/bank_accounts/${selectedBankAccountId}/spending`],
-    )?.dataUpdatedAt,
+    initialData: () =>
+      Array.isArray(existingData)
+        ? // If the spending is in our existing query state then use that.
+          existingData.find(item => item.spendingId === spendingId)
+        : // Otherwise fall back to undefined.
+          undefined,
+    initialDataUpdatedAt: () =>
+      queryClient.getQueryState([`/bank_accounts/${selectedBankAccountId}/spending`])?.dataUpdatedAt,
     select: data => new Spending(data),
   });
 }

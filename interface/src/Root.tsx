@@ -16,7 +16,7 @@ export default function Root(): JSX.Element {
     <BrowserRouter>
       <Sentry.ErrorBoundary>
         <MQueryClient>
-          <ThemeProvider theme={ newTheme }>
+          <ThemeProvider theme={newTheme}>
             <MSnackbarProvider>
               <TooltipProvider>
                 <NiceModal.Provider>

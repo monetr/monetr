@@ -20,29 +20,29 @@ export default function SettingsOverview(): JSX.Element {
           label='First Name'
           name='firstName'
           className='max-w-[24rem] w-full'
-          value={ me?.user?.login?.firstName }
+          value={me?.user?.login?.firstName}
           disabled
         />
         <MTextField
           label='Last Name'
           name='lastName'
           className='max-w-[24rem] w-full'
-          value={ me?.user?.login?.lastName }
+          value={me?.user?.login?.lastName}
           disabled
         />
         <MTextField
           label='Email Address'
           name='email'
           className='max-w-[24rem] w-full'
-          value={ me?.user?.login.email }
+          value={me?.user?.login.email}
           disabled
         />
         <MSelect
           label='Timezone'
           name='timezone'
           className='max-w-[24rem] w-full'
-          options={ [timezone] }
-          value={ timezone }
+          options={[timezone]}
+          value={timezone}
           disabled
         />
       </div>

@@ -12,4 +12,3 @@ export default meta;
 export const Config: StoryObj<typeof Loading> = {
   name: 'Loading',
 };
-

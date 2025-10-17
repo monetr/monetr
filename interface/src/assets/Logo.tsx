@@ -8,11 +8,5 @@ interface LogoProps {
 }
 
 export default function Logo(props: LogoProps): JSX.Element {
-  return (
-    <img
-      className={ props.className }
-      src={ logoData }
-      alt='monetr'
-    />
-  );
+  return <img className={props.className} src={logoData} alt='monetr' />;
 }

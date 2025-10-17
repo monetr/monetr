@@ -12,7 +12,7 @@ export default function LogoutPage(): JSX.Element {
   });
 
   return (
-    <Backdrop open={ true }>
+    <Backdrop open={true}>
       <LoaderCircle className='spin' />
     </Backdrop>
   );

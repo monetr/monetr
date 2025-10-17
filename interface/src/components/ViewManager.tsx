@@ -34,7 +34,7 @@ interface ViewManagerProps<T extends string, M extends Record<string, any>> {
   initialMetadata?: M;
   // Layout is an optional wrapper component that can accept the view context as a property.
   layout?: React.FC<{
-    children: ReactNode | undefined,
+    children: ReactNode | undefined;
   }>;
 }
 
@@ -57,7 +57,7 @@ function ViewManager<T extends string, M extends Record<string, any>>({
       setCurrentView(previousView);
       return;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentView, previousView]);
 
   const goToView = useCallback(
@@ -104,7 +104,7 @@ function ViewManager<T extends string, M extends Record<string, any>>({
   if (layout) {
     const Layout = layout;
     return (
-      <ViewContext.Provider value={ value }>
+      <ViewContext.Provider value={value}>
         <Layout>
           <CurrentViewComponent />
         </Layout>
@@ -113,7 +113,7 @@ function ViewManager<T extends string, M extends Record<string, any>>({
   }
 
   return (
-    <ViewContext.Provider value={ value }>
+    <ViewContext.Provider value={value}>
       <CurrentViewComponent />
     </ViewContext.Provider>
   );

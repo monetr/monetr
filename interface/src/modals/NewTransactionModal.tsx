@@ -54,15 +54,10 @@ function NewTransactionModal(): JSX.Element {
     adjustsBalance: false,
   };
 
-  async function submit(
-    values: NewTransactionValues,
-    helper: FormikHelpers<NewTransactionValues>,
-  ): Promise<void> {
+  async function submit(values: NewTransactionValues, helper: FormikHelpers<NewTransactionValues>): Promise<void> {
     const newTransactionRequest: CreateTransactionRequest = {
       bankAccountId: selectedBankAccount.bankAccountId,
-      amount: locale.friendlyToAmount(
-        values.kind === 'credit' ? values.amount * -1 : values.amount,
-      ),
+      amount: locale.friendlyToAmount(values.kind === 'credit' ? values.amount * -1 : values.amount),
       name: values.name,
       merchantName: null,
       date: startOfDay(new Date(values.date), {
@@ -75,49 +70,54 @@ function NewTransactionModal(): JSX.Element {
 
     helper.setSubmitting(true);
 
-    return createTransaction(newTransactionRequest)
-      // TODO Show toast that the transaction was created, include button to "view transaction".
-      .then(() => modal.remove())
-      .catch((error: AxiosError) => void enqueueSnackbar(error.response.data['error'], {
-        variant: 'error',
-        disableWindowBlurListener: true,
-      }))
-      .finally(() => helper.setSubmitting(false));
+    return (
+      createTransaction(newTransactionRequest)
+        // TODO Show toast that the transaction was created, include button to "view transaction".
+        .then(() => modal.remove())
+        .catch(
+          (error: AxiosError) =>
+            void enqueueSnackbar(error.response.data['error'], {
+              variant: 'error',
+              disableWindowBlurListener: true,
+            }),
+        )
+        .finally(() => helper.setSubmitting(false))
+    );
   }
 
   return (
-    <MModal open={ modal.visible } ref={ ref } className='sm:max-w-xl'>
-      <MForm
-        onSubmit={ submit }
-        className='h-full flex flex-col gap-2 p-2 justify-between'
-        initialValues={ initialValues }
-      >
-        { ({ setFieldValue, values }) => (
+    <MModal open={modal.visible} ref={ref} className='sm:max-w-xl'>
+      <MForm onSubmit={submit} className='h-full flex flex-col gap-2 p-2 justify-between' initialValues={initialValues}>
+        {({ setFieldValue, values }) => (
           <Fragment>
             <div className='flex flex-col'>
               <MSpan weight='bold' size='xl' className='mb-2'>
                 Create A New Transaction
               </MSpan>
 
-              { /* 
+              {/* 
               TODO I'm like 99% sure there is going to be a bug here where someone could do something like select a
               spending ID while on the debit tab, then switch to the credit tab and create a deposit with a spending ID?
-              */ }
+              */}
 
-              <Tabs 
-                defaultValue='debit' 
+              <Tabs
+                defaultValue='debit'
                 className='w-full mb-2'
-                onValueChange={ value => setFieldValue('kind', value as any) }
+                onValueChange={value => setFieldValue('kind', value as any)}
               >
                 <TabsList className='w-full'>
-                  <TabsTrigger className='w-full' value='debit'>Debit</TabsTrigger>
-                  <TabsTrigger className='w-full' value='credit'>Credit</TabsTrigger>
+                  <TabsTrigger className='w-full' value='debit'>
+                    Debit
+                  </TabsTrigger>
+                  <TabsTrigger className='w-full' value='credit'>
+                    Credit
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value='debit'>
                   <MTextField
                     autoComplete='off'
                     autoFocus
-                    data-1p-ignore 
+                    data-1p-ignore
                     label='Name / Description'
                     name='name'
                     placeholder='Amazon, Netflix...'
@@ -129,22 +129,17 @@ function NewTransactionModal(): JSX.Element {
                       label='Amount'
                       required
                       className='w-full md:w-1/2'
-                      allowNegative={ false }
+                      allowNegative={false}
                     />
-                    <MDatePicker
-                      className='w-full md:w-1/2'
-                      label='Date'
-                      name='date'
-                      required
-                    />
+                    <MDatePicker className='w-full md:w-1/2' label='Date' name='date' required />
                   </div>
                   <MSelectSpending
                     className='w-full'
                     name='spendingId'
                     menuPosition='fixed'
-                    menuShouldScrollIntoView={ false }
-                    menuShouldBlockScroll={ true }
-                    menuPortalTarget={ document.body }
+                    menuShouldScrollIntoView={false}
+                    menuShouldBlockScroll={true}
+                    menuPortalTarget={document.body}
                     menuPlacement='bottom'
                   />
                   <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'>
@@ -157,19 +152,19 @@ function NewTransactionModal(): JSX.Element {
                       </p>
                     </div>
                     <Switch
-                      checked={ values['adjustsBalance'] }
-                      onCheckedChange={ () => setFieldValue('adjustsBalance', !values['adjustsBalance']) }
+                      checked={values['adjustsBalance']}
+                      onCheckedChange={() => setFieldValue('adjustsBalance', !values['adjustsBalance'])}
                     />
                   </div>
                 </TabsContent>
-                <TabsContent value='credit'> 
+                <TabsContent value='credit'>
                   <MTextField
                     name='name'
                     label='Name / Description'
                     required
                     autoComplete='off'
                     placeholder='Paycheck, Deposit...'
-                    data-1p-ignore 
+                    data-1p-ignore
                   />
                   <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
                     <MAmountField
@@ -177,34 +172,27 @@ function NewTransactionModal(): JSX.Element {
                       label='Amount'
                       required
                       className='w-full md:w-1/2'
-                      allowNegative={ false }
+                      allowNegative={false}
                     />
-                    <MDatePicker
-                      className='w-full md:w-1/2'
-                      label='Date'
-                      name='date'
-                      required
-                    />
+                    <MDatePicker className='w-full md:w-1/2' label='Date' name='date' required />
                   </div>
                   <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'>
                     <div className='space-y-0.5'>
-                      <label className='text-sm font-medium text-dark-monetr-content-emphasis'>
-                        Adjust Balance
-                      </label>
+                      <label className='text-sm font-medium text-dark-monetr-content-emphasis'>Adjust Balance</label>
                       <p className='text-sm text-dark-monetr-content'>
                         Update your account balance for this transaction?
                       </p>
                     </div>
                     <Switch
-                      checked={ values['adjustsBalance'] }
-                      onCheckedChange={ () => setFieldValue('adjustsBalance', !values['adjustsBalance']) }
+                      checked={values['adjustsBalance']}
+                      onCheckedChange={() => setFieldValue('adjustsBalance', !values['adjustsBalance'])}
                     />
                   </div>
                 </TabsContent>
               </Tabs>
             </div>
             <div className='flex justify-end gap-2'>
-              <FormButton variant='destructive' onClick={ modal.remove } data-testid='close-new-transaction-modal'>
+              <FormButton variant='destructive' onClick={modal.remove} data-testid='close-new-transaction-modal'>
                 Cancel
               </FormButton>
               <FormButton variant='primary' type='submit'>
@@ -212,7 +200,7 @@ function NewTransactionModal(): JSX.Element {
               </FormButton>
             </div>
           </Fragment>
-        ) } 
+        )}
       </MForm>
     </MModal>
   );

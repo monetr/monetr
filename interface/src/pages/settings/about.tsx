@@ -8,12 +8,7 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 
 export default function SettingsAbout(): JSX.Element {
   const {
-    data: {
-      release,
-      revision,
-      buildType,
-      buildTime,
-    },
+    data: { release, revision, buildType, buildTime },
   } = useAppConfiguration();
 
   return (
@@ -28,7 +23,7 @@ export default function SettingsAbout(): JSX.Element {
             Version
           </MSpan>
           <MSpan component='code' size='lg' className='max-w-fit'>
-            { release || 'Unknown' }
+            {release || 'Unknown'}
           </MSpan>
         </div>
         <MDivider />
@@ -38,7 +33,7 @@ export default function SettingsAbout(): JSX.Element {
             Revision
           </MSpan>
           <MSpan component='code' size='lg' className='max-w-fit'>
-            { revision ? revision.slice(0, 7) : 'Unknown' }
+            {revision ? revision.slice(0, 7) : 'Unknown'}
           </MSpan>
         </div>
         <MDivider />
@@ -48,7 +43,7 @@ export default function SettingsAbout(): JSX.Element {
             Build Type
           </MSpan>
           <MSpan component='code' size='lg' className='max-w-fit'>
-            { buildType || 'Unknown' }
+            {buildType || 'Unknown'}
           </MSpan>
         </div>
         <MDivider />
@@ -58,7 +53,7 @@ export default function SettingsAbout(): JSX.Element {
             Build Time
           </MSpan>
           <MSpan component='code' size='lg' className='max-w-fit' ellipsis>
-            { format(buildTime, 'LLLL do yyyy, h:mmaaa OOOO') }
+            {format(buildTime, 'LLLL do yyyy, h:mmaaa OOOO')}
           </MSpan>
         </div>
         <MDivider />
@@ -74,9 +69,7 @@ export default function SettingsAbout(): JSX.Element {
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
             Source Code
           </MSpan>
-          <AboutHyperlink href='https://github.com/monetr/monetr'>
-            https://github.com/monetr/monetr
-          </AboutHyperlink>
+          <AboutHyperlink href='https://github.com/monetr/monetr'>https://github.com/monetr/monetr</AboutHyperlink>
         </div>
         <MDivider />
 
@@ -84,9 +77,7 @@ export default function SettingsAbout(): JSX.Element {
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
             Email
           </MSpan>
-          <AboutHyperlink href='mailto:support@monetr.app'>
-            support@monetr.app
-          </AboutHyperlink>
+          <AboutHyperlink href='mailto:support@monetr.app'>support@monetr.app</AboutHyperlink>
         </div>
         <MDivider />
 
@@ -104,9 +95,7 @@ export default function SettingsAbout(): JSX.Element {
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
             Discord
           </MSpan>
-          <AboutHyperlink href='https://discord.gg/68wTCXrhuq'>
-            Join Discord Server
-          </AboutHyperlink>
+          <AboutHyperlink href='https://discord.gg/68wTCXrhuq'>Join Discord Server</AboutHyperlink>
         </div>
         <MDivider />
 
@@ -114,9 +103,7 @@ export default function SettingsAbout(): JSX.Element {
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
             Terms & Conditions
           </MSpan>
-          <AboutHyperlink href='https://monetr.app/policy/terms'>
-            https://monetr.app/policy/terms
-          </AboutHyperlink>
+          <AboutHyperlink href='https://monetr.app/policy/terms'>https://monetr.app/policy/terms</AboutHyperlink>
         </div>
         <MDivider />
 
@@ -124,9 +111,7 @@ export default function SettingsAbout(): JSX.Element {
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
             Privacy Policy
           </MSpan>
-          <AboutHyperlink href='https://monetr.app/policy/privacy'>
-            https://monetr.app/policy/privacy
-          </AboutHyperlink>
+          <AboutHyperlink href='https://monetr.app/policy/privacy'>https://monetr.app/policy/privacy</AboutHyperlink>
         </div>
         <MDivider />
       </div>
@@ -142,12 +127,13 @@ interface AboutHyperlinkProps {
 function AboutHyperlink(props: AboutHyperlinkProps): JSX.Element {
   const className = MSpanDeriveClasses({
     size: 'lg',
-    className: 'block dark:text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline text-ellipsis min-w-0 truncate',
+    className:
+      'block dark:text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline text-ellipsis min-w-0 truncate',
   });
 
   return (
-    <a className={ className } target='_blank' href={ props.href }>
-      { props.children }
+    <a className={className} target='_blank' href={props.href}>
+      {props.children}
     </a>
   );
 }

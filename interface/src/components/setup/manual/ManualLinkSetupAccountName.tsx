@@ -27,8 +27,8 @@ export default function ManualLinkSetupAccountName(): JSX.Element {
 
   return (
     <MForm
-      initialValues={ initialValues }
-      onSubmit={ submit }
+      initialValues={initialValues}
+      onSubmit={submit}
       className='w-full flex flex-col justify-center items-center gap-2'
     >
       <MSpan size='lg' color='subtle' className='text-center'>

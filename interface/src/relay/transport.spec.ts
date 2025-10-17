@@ -8,7 +8,7 @@ describe('sentry relay transport', () => {
         url: 'http://my.monetr.dev',
         recordDroppedEvent: jest.fn(),
         headers: {
-          'Key': 'value',
+          Key: 'value',
         },
       },
       jest.fn(),

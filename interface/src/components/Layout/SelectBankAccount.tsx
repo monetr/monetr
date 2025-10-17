@@ -4,7 +4,14 @@ import { Check, ChevronsUpDown, CirclePlus, Settings } from 'lucide-react';
 
 import { Button, buttonVariants } from '@monetr/interface/components/Button';
 import { ComboboxItemProps, comboboxVariants } from '@monetr/interface/components/Combobox';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@monetr/interface/components/Command';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@monetr/interface/components/Command';
 import { Drawer, DrawerContent, DrawerTrigger } from '@monetr/interface/components/Drawer';
 import MBadge from '@monetr/interface/components/MBadge';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -27,73 +34,71 @@ export default function SelectBankAccount(): JSX.Element {
   const [open, setOpen] = React.useState(false);
   const isMobile = useIsMobile();
 
-  const accounts: Array<SelectBankAccountPickerOption> = sortAccounts(allBankAccounts
-    ?.filter(account => account.linkId === selectedBankAccount?.linkId))
-    .map(account => ({
-      label: account.name,
-      value: account.bankAccountId,
-      type: account.accountSubType,
-      mask: account.mask,
-      status: account.status,
-    }));
+  const accounts: Array<SelectBankAccountPickerOption> = sortAccounts(
+    allBankAccounts?.filter(account => account.linkId === selectedBankAccount?.linkId),
+  ).map(account => ({
+    label: account.name,
+    value: account.bankAccountId,
+    type: account.accountSubType,
+    mask: account.mask,
+    status: account.status,
+  }));
 
   const current = accounts?.find(account => account.value === selectedBankAccount?.bankAccountId);
 
   if (allIsLoading || selectedIsLoading) {
-    return (
-      <Skeleton className='w-full h-10' />
-    );
+    return <Skeleton className='w-full h-10' />;
   }
 
   if (isMobile) {
     return (
       <div className='flex w-full gap-[1px]'>
-        <Drawer open={ open } onOpenChange={ setOpen }>
+        <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>
             <Button
               size='select'
               variant='text'
               role='combobox'
-              aria-expanded={ open }
-              disabled={ false }
-              className={ mergeTailwind(
+              aria-expanded={open}
+              disabled={false}
+              className={mergeTailwind(
                 comboboxVariants({ variant: 'text', size: 'select' }),
-                'h-[34px] group flex flex-auto'
-              ) }
+                'h-[34px] group flex flex-auto',
+              )}
             >
               <div className='text-inherit flex-shrink truncate min-w-0'>
-                { current?.value
+                {current?.value
                   ? accounts.find(option => option.value === current?.value)?.label
-                  : 'Select a bank account...' }
+                  : 'Select a bank account...'}
               </div>
               <ChevronsUpDown
-                className={ mergeTailwind('h-3 w-3 flex-none opacity-50 transition-opacity duration-100', {
+                className={mergeTailwind('h-3 w-3 flex-none opacity-50 transition-opacity duration-100', {
                   'opacity-100': open,
-                }) }
+                })}
               />
             </Button>
           </DrawerTrigger>
           <DrawerContent>
             <SelectBankAccountPicker
-              value={ current?.value }
-              setOpen={ setOpen }
-              options={ accounts }
-              onSelect={ value => navigate(`/bank/${value}/transactions`) }
+              value={current?.value}
+              setOpen={setOpen}
+              options={accounts}
+              onSelect={value => navigate(`/bank/${value}/transactions`)}
             />
           </DrawerContent>
         </Drawer>
         <Link
           role='combobox'
-          aria-expanded={ open }
-          className={ mergeTailwind(
+          aria-expanded={open}
+          className={mergeTailwind(
             buttonVariants({ variant: 'text', size: 'select' }),
             comboboxVariants({ variant: 'text', size: 'select' }),
             'h-[34px] w-[34px] p-0 justify-center group rounded-tl-none rounded-bl-none shrink-0',
             'enabled:hover:ring-1',
             'enabled:hover:ring-dark-monetr-border-string',
             'focus:ring-dark-monetr-brand focus:ring-2',
-          ) }
-          to={ `/bank/${selectedBankAccount.bankAccountId}/settings` }
+          )}
+          to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
         >
           <Settings className='h-3 w-3 opacity-50 group-hover:opacity-100' />
         </Link>
@@ -103,50 +108,50 @@ export default function SelectBankAccount(): JSX.Element {
 
   return (
     <div className='flex w-full gap-[1px]'>
-      <Popover open={ open } onOpenChange={ setOpen }>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             size='select'
             variant='text'
             role='combobox'
-            aria-expanded={ open }
-            disabled={ false }
-            className={ mergeTailwind(
+            aria-expanded={open}
+            disabled={false}
+            className={mergeTailwind(
               comboboxVariants({ variant: 'text', size: 'select' }),
-              'h-[34px] group flex flex-auto'
-            ) }
+              'h-[34px] group flex flex-auto',
+            )}
           >
             <div className='text-inherit flex-shrink truncate min-w-0'>
-              { current?.value
+              {current?.value
                 ? accounts.find(option => option.value === current?.value)?.label
-                : 'Select a bank account...' }
+                : 'Select a bank account...'}
             </div>
             <ChevronsUpDown
-              className={ mergeTailwind('h-3 w-3 flex-none opacity-50 transition-opacity duration-100', {
+              className={mergeTailwind('h-3 w-3 flex-none opacity-50 transition-opacity duration-100', {
                 'opacity-100': open,
-              }) }
+              })}
             />
           </Button>
         </PopoverTrigger>
         <PopoverContent className='w-80'>
           <SelectBankAccountPicker
-            value={ current?.value }
-            setOpen={ setOpen }
-            options={ accounts }
-            onSelect={ value => navigate(`/bank/${value}/transactions`) }
+            value={current?.value}
+            setOpen={setOpen}
+            options={accounts}
+            onSelect={value => navigate(`/bank/${value}/transactions`)}
           />
         </PopoverContent>
         <Link
           role='combobox'
-          className={ mergeTailwind(
+          className={mergeTailwind(
             buttonVariants({ variant: 'text', size: 'select' }),
             comboboxVariants({ variant: 'text', size: 'select' }),
             'h-[34px] w-[34px] p-0 justify-center group rounded-tl-none rounded-bl-none shrink-0',
             'enabled:hover:ring-1',
             'enabled:hover:ring-dark-monetr-border-string',
             'focus:ring-0', // DIFFERENT FROM MOBILE
-          ) }
-          to={ `/bank/${selectedBankAccount.bankAccountId}/settings` }
+          )}
+          to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
         >
           <Settings className='h-4 w-4 opacity-50 group-hover:opacity-100' />
         </Link>
@@ -169,24 +174,24 @@ function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccoun
   return (
     <div className='flex items-center w-full gap-1'>
       <Check
-        className={ mergeTailwind(
+        className={mergeTailwind(
           'mr-1 h-5 w-5 flex-none',
-          props.currentValue == props.option.value ? 'opacity-100' : 'opacity-0'
-        ) }
+          props.currentValue == props.option.value ? 'opacity-100' : 'opacity-0',
+        )}
       />
       <MSpan className='w-full' color='emphasis' ellipsis>
-        { props.option.label }
+        {props.option.label}
       </MSpan>
-      { props.option.status === 'inactive' && (
+      {props.option.status === 'inactive' && (
         <MBadge size='xs' className='bg-dark-monetr-border-subtle'>
           Inactive
         </MBadge>
-      ) }
-      { props.option.mask != '' && (
+      )}
+      {props.option.mask != '' && (
         <MBadge size='xs' className='font-mono'>
-          { props.option.mask }
+          {props.option.mask}
         </MBadge>
-      ) }
+      )}
     </div>
   );
 }
@@ -205,18 +210,18 @@ function SelectBankAccountPicker(props: SelectBankAccountPickerProps): JSX.Eleme
   const { data: link } = useCurrentLink();
   return (
     <Command>
-      { !isMobile && <CommandInput placeholder={ props.searchPlaceholder } /> }
+      {!isMobile && <CommandInput placeholder={props.searchPlaceholder} />}
       <CommandList>
-        <CommandEmpty>{ props.emptyString }</CommandEmpty>
-        { link?.getIsManual() && (
+        <CommandEmpty>{props.emptyString}</CommandEmpty>
+        {link?.getIsManual() && (
           <CommandGroup className='' heading='Controls'>
             <CommandItem
               value='null'
               title='Create an account'
-              onSelect={ () => {
+              onSelect={() => {
                 props.setOpen(false);
                 showNewBankAccountModal();
-              } }
+              }}
             >
               <div className='flex items-center w-full gap-1'>
                 <CirclePlus className='mr-1 h-5 w-5 flex-none' />
@@ -226,21 +231,21 @@ function SelectBankAccountPicker(props: SelectBankAccountPickerProps): JSX.Eleme
               </div>
             </CommandItem>
           </CommandGroup>
-        ) }
+        )}
         <CommandGroup className='pb-6 md:pb-1' heading='Accounts'>
-          { props.options.map(option => (
+          {props.options.map(option => (
             <CommandItem
-              key={ option.value }
-              value={ `${option.label} ${option.value}` /* makes search work properly :( */ }
-              title={ option.label }
-              onSelect={ () => {
+              key={option.value}
+              value={`${option.label} ${option.value}` /* makes search work properly :( */}
+              title={option.label}
+              onSelect={() => {
                 props.onSelect && props.onSelect(option.value);
                 props.setOpen(false);
-              } }
+              }}
             >
-              <BankAccountSelectItem currentValue={ props.value } option={ option } />
+              <BankAccountSelectItem currentValue={props.value} option={option} />
             </CommandItem>
-          )) }
+          ))}
         </CommandGroup>
       </CommandList>
     </Command>

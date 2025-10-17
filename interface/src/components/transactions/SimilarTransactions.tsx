@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 import MSpan from '@monetr/interface/components/MSpan';
@@ -29,16 +28,14 @@ export default function SimilarTransactions(props: SimilarTransactionsProps): JS
   const items = similarData.members
     .filter(item => item !== props.transaction.transactionId)
     .slice(0, Math.min(maxNumberOfSimilarTransactions, similarData.members.length) - 1)
-    .map(item => <SimilarTransactionItem key={ item } transactionId={ item } />);
+    .map(item => <SimilarTransactionItem key={item} transactionId={item} />);
 
   return (
     <div className='w-full flex flex-col gap-2'>
       <MSpan size='xl' weight='semibold' className='pl-4'>
         Similar Transactions
       </MSpan>
-      <ul className='w-full flex gap-2 flex-col'>
-        { items }
-      </ul>
+      <ul className='w-full flex gap-2 flex-col'>{items}</ul>
     </div>
   );
 }

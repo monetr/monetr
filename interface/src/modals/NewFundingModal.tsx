@@ -37,7 +37,9 @@ function NewFundingModal(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const selectedBankAccountId = useSelectedBankAccountId();
   const createFundingSchedule = useCreateFundingSchedule();
-  const { data: { friendlyToAmount } } = useLocaleCurrency();
+  const {
+    data: { friendlyToAmount },
+  } = useLocaleCurrency();
 
   const initialValues: NewFundingValues = {
     name: '',
@@ -49,44 +51,45 @@ function NewFundingModal(): JSX.Element {
     estimatedDeposit: undefined,
   };
 
-  const submit = useCallback(async (
-    values: NewFundingValues,
-    helpers: FormikHelpers<NewFundingValues>,
-  ): Promise<void> => {
-    helpers.setSubmitting(true);
-    return await createFundingSchedule({
-      bankAccountId: selectedBankAccountId,
-      name: values.name,
-      nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
-        in: tz(timezone),
-      }),
-      ruleset: values.ruleset,
-      estimatedDeposit: values.estimatedDeposit > 0 ? friendlyToAmount(values.estimatedDeposit) : null,
-      excludeWeekends: values.excludeWeekends,
-    })
-      .then(created => modal.resolve(created))
-      .then(() => modal.remove())
-      .catch((error: AxiosError) => void enqueueSnackbar(error.response.data['error'], {
-        variant: 'error',
-        disableWindowBlurListener: true,
-      }))
-      .finally(() => helpers.setSubmitting(false));
-  }, [createFundingSchedule, enqueueSnackbar, friendlyToAmount, modal, selectedBankAccountId]);
-
+  const submit = useCallback(
+    async (values: NewFundingValues, helpers: FormikHelpers<NewFundingValues>): Promise<void> => {
+      helpers.setSubmitting(true);
+      return await createFundingSchedule({
+        bankAccountId: selectedBankAccountId,
+        name: values.name,
+        nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
+          in: tz(timezone),
+        }),
+        ruleset: values.ruleset,
+        estimatedDeposit: values.estimatedDeposit > 0 ? friendlyToAmount(values.estimatedDeposit) : null,
+        excludeWeekends: values.excludeWeekends,
+      })
+        .then(created => modal.resolve(created))
+        .then(() => modal.remove())
+        .catch(
+          (error: AxiosError) =>
+            void enqueueSnackbar(error.response.data['error'], {
+              variant: 'error',
+              disableWindowBlurListener: true,
+            }),
+        )
+        .finally(() => helpers.setSubmitting(false));
+    },
+    [createFundingSchedule, enqueueSnackbar, friendlyToAmount, modal, selectedBankAccountId],
+  );
 
   return (
-    <MModal open={ modal.visible } ref={ ref } className='md:max-w-md'>
+    <MModal open={modal.visible} ref={ref} className='md:max-w-md'>
       <MForm
-        initialValues={ initialValues }
-        onSubmit={ submit }
-        className='h-full flex flex-col gap-2 p-2 justify-between' data-testid='new-funding-modal'
+        initialValues={initialValues}
+        onSubmit={submit}
+        className='h-full flex flex-col gap-2 p-2 justify-between'
+        data-testid='new-funding-modal'
       >
-        { ({ setFieldValue, values }) => (
+        {({ setFieldValue, values }) => (
           <Fragment>
             <div className='flex flex-col'>
-              <MSpan className='font-bold text-xl mb-2'>
-                Create A New Funding Schedule
-              </MSpan>
+              <MSpan className='font-bold text-xl mb-2'>Create A New Funding Schedule</MSpan>
               <MTextField
                 autoFocus
                 id='funding-name-search' // Keep's 1Pass from hijacking normal name fields.
@@ -100,16 +103,16 @@ function NewFundingModal(): JSX.Element {
                 name='nextOccurrence'
                 label='When do you get paid next?'
                 required
-                min={ startOfTomorrow({
+                min={startOfTomorrow({
                   in: tz(timezone),
-                }) }
+                })}
               />
               <MSelectFrequency
                 dateFrom='nextOccurrence'
                 menuPosition='fixed'
-                menuShouldScrollIntoView={ false }
-                menuShouldBlockScroll={ true }
-                menuPortalTarget={ document.body }
+                menuShouldScrollIntoView={false}
+                menuShouldBlockScroll={true}
+                menuPortalTarget={document.body}
                 menuPlacement='bottom'
                 label='How often do you get paid?'
                 placeholder='Select a funding frequency...'
@@ -117,7 +120,7 @@ function NewFundingModal(): JSX.Element {
                 name='ruleset'
               />
               <MAmountField
-                allowNegative={ false }
+                allowNegative={false}
                 label='Estimated Deposit'
                 name='estimatedDeposit'
                 placeholder='Example: $ 1,000.00'
@@ -132,13 +135,13 @@ function NewFundingModal(): JSX.Element {
                   </p>
                 </div>
                 <Switch
-                  checked={ values['excludeWeekends'] }
-                  onCheckedChange={ () => setFieldValue('excludeWeekends', !values['excludeWeekends']) }
+                  checked={values['excludeWeekends']}
+                  onCheckedChange={() => setFieldValue('excludeWeekends', !values['excludeWeekends'])}
                 />
               </div>
             </div>
             <div className='flex justify-end gap-2'>
-              <FormButton variant='destructive' onClick={ modal.remove } data-testid='close-new-funding-modal'>
+              <FormButton variant='destructive' onClick={modal.remove} data-testid='close-new-funding-modal'>
                 Cancel
               </FormButton>
               <FormButton variant='primary' type='submit'>
@@ -146,7 +149,7 @@ function NewFundingModal(): JSX.Element {
               </FormButton>
             </div>
           </Fragment>
-        ) }
+        )}
       </MForm>
     </MModal>
   );

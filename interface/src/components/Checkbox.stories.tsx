@@ -20,11 +20,9 @@ export const Default: StoryFn<typeof Checkbox> = () => (
             htmlFor='terms1'
             className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
           >
-          Accept terms and conditions
+            Accept terms and conditions
           </label>
-          <p className='text-sm text-muted-foreground'>
-          You agree to our Terms of Service and Privacy Policy.
-          </p>
+          <p className='text-sm text-muted-foreground'>You agree to our Terms of Service and Privacy Policy.</p>
         </div>
       </div>
       <div className='items-top flex space-x-2'>
@@ -34,14 +32,11 @@ export const Default: StoryFn<typeof Checkbox> = () => (
             htmlFor='terms1'
             className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
           >
-          Accept terms and conditions
+            Accept terms and conditions
           </label>
-          <p className='text-sm text-muted-foreground'>
-          You agree to our Terms of Service and Privacy Policy.
-          </p>
+          <p className='text-sm text-muted-foreground'>You agree to our Terms of Service and Privacy Policy.</p>
         </div>
       </div>
     </div>
   </div>
 );
-

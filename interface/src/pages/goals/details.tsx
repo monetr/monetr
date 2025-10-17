@@ -1,8 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  HeartBroken,
-} from '@mui/icons-material';
+import { HeartBroken } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { tz } from '@date-fns/tz';
 import { startOfDay, startOfTomorrow } from 'date-fns';
@@ -55,12 +53,8 @@ export default function GoalDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>
-          Something isn't right...
-        </MSpan>
-        <MSpan className='text-2xl'>
-          There wasn't a goal specified...
-        </MSpan>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>There wasn't a goal specified...</MSpan>
       </div>
     );
   }
@@ -68,9 +62,7 @@ export default function GoalDetails(): JSX.Element {
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>
-          One moment...
-        </MSpan>
+        <MSpan className='text-5xl'>One moment...</MSpan>
       </div>
     );
   }
@@ -79,12 +71,8 @@ export default function GoalDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>
-          Something isn't right...
-        </MSpan>
-        <MSpan className='text-2xl'>
-          Couldn't find the goal you specified...
-        </MSpan>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>Couldn't find the goal you specified...</MSpan>
       </div>
     );
   }
@@ -97,12 +85,8 @@ export default function GoalDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>
-          Something isn't right...
-        </MSpan>
-        <MSpan className='text-2xl'>
-          This spending object is not a goal...
-        </MSpan>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>This spending object is not a goal...</MSpan>
       </div>
     );
   }
@@ -116,9 +100,8 @@ export default function GoalDetails(): JSX.Element {
       return Promise.resolve();
     }
 
-    if (window.confirm(`Are you sure you want to delete goal: ${ spending.name }`)) {
-      return removeSpending(spending.spendingId)
-        .then(() => backToGoals());
+    if (window.confirm(`Are you sure you want to delete goal: ${spending.name}`)) {
+      return removeSpending(spending.spendingId).then(() => backToGoals());
     }
 
     return Promise.resolve();
@@ -141,20 +124,20 @@ export default function GoalDetails(): JSX.Element {
     });
 
     return updateSpending(updatedSpending)
-      .then(() => void enqueueSnackbar(
-        'Updated goal successfully',
-        {
-          variant: 'success',
-          disableWindowBlurListener: true,
-        },
-      ))
-      .catch((error: AxiosError<APIError>) => void enqueueSnackbar(
-        error.response.data.error || 'Failed to update goal',
-        {
-          variant: 'error',
-          disableWindowBlurListener: true,
-        },
-      ))
+      .then(
+        () =>
+          void enqueueSnackbar('Updated goal successfully', {
+            variant: 'success',
+            disableWindowBlurListener: true,
+          }),
+      )
+      .catch(
+        (error: AxiosError<APIError>) =>
+          void enqueueSnackbar(error.response.data.error || 'Failed to update goal', {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          }),
+      )
       .finally(() => helpers.setSubmitting(false));
   }
 
@@ -166,31 +149,28 @@ export default function GoalDetails(): JSX.Element {
     isPaused: spending.isPaused,
   };
 
-  const usedProgress = ((Math.min(
-    spending?.usedAmount,
-    spending?.targetAmount,
-  ) / spending?.targetAmount) * 100).toFixed(0);
-  const allocatedProgress = ((Math.min(
-    spending?.currentAmount + spending?.usedAmount,
-    spending?.targetAmount,
-  ) / spending?.targetAmount) * 100).toFixed(0);
+  const usedProgress = (
+    (Math.min(spending?.usedAmount, spending?.targetAmount) / spending?.targetAmount) *
+    100
+  ).toFixed(0);
+  const allocatedProgress = (
+    (Math.min(spending?.currentAmount + spending?.usedAmount, spending?.targetAmount) / spending?.targetAmount) *
+    100
+  ).toFixed(0);
 
   return (
-    <MForm initialValues={ initialValues } onSubmit={ submit } className='flex w-full h-full flex-col'>
+    <MForm initialValues={initialValues} onSubmit={submit} className='flex w-full h-full flex-col'>
       <MTopNavigation
-        icon={ PiggyBank }
+        icon={PiggyBank}
         title='Goals'
-        base={ `/bank/${spending.bankAccountId}/goals` }
-        breadcrumb={ spending?.name }
+        base={`/bank/${spending.bankAccountId}/goals`}
+        breadcrumb={spending?.name}
       >
-        <Button
-          variant='secondary'
-          onClick={ () => showTransferModal({ initialToSpendingId: spending?.spendingId }) }
-        >
+        <Button variant='secondary' onClick={() => showTransferModal({ initialToSpendingId: spending?.spendingId })}>
           <ArrowUpDown />
           Transfer
         </Button>
-        <Button variant='destructive' onClick={ deleteGoal } >
+        <Button variant='destructive' onClick={deleteGoal}>
           <Trash />
           Remove
         </Button>
@@ -202,29 +182,26 @@ export default function GoalDetails(): JSX.Element {
       <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col'>
-
             <div className='flex flex-col w-full'>
               <div className='flex gap-4 items-center w-full overflow-hidden'>
-                <MerchantIcon name={ spending?.name } className='flex-none' />
+                <MerchantIcon name={spending?.name} className='flex-none' />
                 <div className='flex flex-col flex-1 overflow-hidden'>
-                  <p className='text-ellipsis truncate min-w-0'>
-                    { spending?.name }
-                  </p>
+                  <p className='text-ellipsis truncate min-w-0'>{spending?.name}</p>
                   <MSpan weight='semibold'>
-                    { locale.formatAmount(spending?.currentAmount, AmountType.Stored) }
+                    {locale.formatAmount(spending?.currentAmount, AmountType.Stored)}
                     <span className='font-normal'>of</span>
-                    { locale.formatAmount(spending?.targetAmount, AmountType.Stored) }
+                    {locale.formatAmount(spending?.targetAmount, AmountType.Stored)}
                   </MSpan>
                 </div>
               </div>
               <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
                 <div
                   className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600'
-                  style={ { width: `${allocatedProgress}%` } }
+                  style={{ width: `${allocatedProgress}%` }}
                 />
                 <div
                   className='absolute top-0 bg-blue-600 h-1.5 rounded-full dark:bg-blue-600'
-                  style={ { width: `${usedProgress}%` } }
+                  style={{ width: `${usedProgress}%` }}
                 />
               </div>
             </div>
@@ -232,20 +209,20 @@ export default function GoalDetails(): JSX.Element {
             <MDivider className='w-1/2 my-4' />
 
             <MTextField className='w-full' label='Expense' name='name' required />
-            <MAmountField allowNegative={ false } className='w-full' label='Amount' name='amount' required />
+            <MAmountField allowNegative={false} className='w-full' label='Amount' name='amount' required />
             <MDatePicker
               label='Target Date'
               name='nextRecurrence'
               className='w-full'
               required
-              min={ startOfTomorrow({
+              min={startOfTomorrow({
                 in: tz(timezone),
-              }) }
+              })}
             />
             <MSelectFunding
               className='w-full'
               label='When do you want to fund the expense?'
-              menuPortalTarget={ document.body }
+              menuPortalTarget={document.body}
               name='fundingScheduleId'
               required
             />
@@ -259,10 +236,8 @@ export default function GoalDetails(): JSX.Element {
           </div>
           <MDivider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>
-            <MSpan className='text-xl my-2'>
-              Goal Timeline
-            </MSpan>
-            <GoalTimeline spendingId={ spending.spendingId } />
+            <MSpan className='text-xl my-2'>Goal Timeline</MSpan>
+            <GoalTimeline spendingId={spending.spendingId} />
           </div>
         </div>
       </div>

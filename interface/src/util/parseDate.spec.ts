@@ -20,7 +20,6 @@ describe('parse dates', () => {
     expect(result).toBeNull();
   });
 
-
   it('will handle an undefined value', () => {
     const input = undefined;
     const result = parseDate(input);

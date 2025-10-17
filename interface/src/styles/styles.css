@@ -4,37 +4,38 @@
 
 @tailwind utilities;
 
-html, body {
-    height: 100%;
-    @apply bg-background;
+html,
+body {
+  height: 100%;
+  @apply bg-background;
 }
 
 /* custom scrollbar */
 ::-webkit-scrollbar {
-    width: 16px;
+  width: 16px;
 }
 
 ::-webkit-scrollbar-track {
-    background-color: inherit;
+  background-color: inherit;
 }
 
 ::-webkit-scrollbar-thumb {
-    @apply bg-zinc-700;
-    border-radius: 20px;
-    border: 6px solid transparent;
-    background-clip: content-box;
+  @apply bg-zinc-700;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    @apply bg-zinc-500;
+  @apply bg-zinc-500;
 }
 
 *:focus {
-    outline: none;
+  outline: none;
 }
 
 button:focus {
-    outline: none;
+  outline: none;
 }
 
 /* Make it so that number inputs don't have the stepper arrows */
@@ -44,29 +45,28 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-input[type=number] {
+input[type="number"] {
   -moz-appearance: textfield;
 }
 /* end of stepper arrow go away */
 
-
 .smooth-animation {
-    backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .m-content {
-  height: -webkit-calc(100vh - theme(spacing.16));
-  height: -moz-calc(100vh - theme(spacing.16));
-  height: calc(100vh - theme(spacing.16));
-  margin-top: theme(spacing.16);
+  height: -webkit-calc(100vh - theme(spacing 0.16));
+  height: -moz-calc(100vh - theme(spacing 0.16));
+  height: calc(100vh - theme(spacing 0.16));
+  margin-top: theme(spacing 0.16);
   width: 100%;
   display: flex;
 }
 
 .m-view-area {
   width: 100%;
-  height: calc(100vh - theme(spacing.16));
-  max-height: calc(100vh - theme(spacing.16));
+  height: calc(100vh - theme(spacing 0.16));
+  max-height: calc(100vh - theme(spacing 0.16));
   overflow-y: auto !important;
   overflow-x: unset !important;
 }
@@ -90,17 +90,17 @@ input[type=number] {
   color: green;
 }
 
-
 .animate-pulse {
   animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
-    opacity: .5;
+    opacity: 0.5;
   }
 }
 

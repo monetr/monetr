@@ -22,18 +22,15 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
   function Label(): JSX.Element {
     if (!props.label) return null;
 
-    const labelClasses = mergeTailwind(
-      'font-medium',
-      {
-        'dark:text-dark-monetr-content-emphasis': !props.disabled,
-        'text-gray-900': !props.disabled,
-        'text-gray-500': props.disabled,
-        'cursor-pointer': !props.disabled,
-      }
-    );
+    const labelClasses = mergeTailwind('font-medium', {
+      'dark:text-dark-monetr-content-emphasis': !props.disabled,
+      'text-gray-900': !props.disabled,
+      'text-gray-500': props.disabled,
+      'cursor-pointer': !props.disabled,
+    });
 
     return (
-      <label htmlFor={ props.id } className={ labelClasses }>
+      <label htmlFor={props.id} className={labelClasses}>
         {props.label}
       </label>
     );
@@ -42,11 +39,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
   function Description(): JSX.Element {
     if (!props.description) return null;
 
-    return (
-      <p className='text-gray-500 dark:text-dark-monetr-content'>
-        { props.description }
-      </p>
-    );
+    return <p className='text-gray-500 dark:text-dark-monetr-content'>{props.description}</p>;
   }
 
   props = {
@@ -55,23 +48,18 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
     checked: props?.checked || formikContext.values[props.name],
   };
 
-  const className = mergeTailwind(
-    'flex',
-    'gap-x-3',
-    'pb-3',
-    props.className,
-  );
+  const className = mergeTailwind('flex', 'gap-x-3', 'pb-3', props.className);
 
   return (
-    <div className={ className }>
+    <div className={className}>
       <div className='flex h-6 items-center'>
         <Checkbox
-          id={ props.id }
-          name={ props.name }
-          disabled={ props.disabled }
-          checked={ props.checked }
-          onCheckedChange={ state => formikContext?.setFieldValue(props.name, Boolean(state)) }
-          onBlur={ formikContext?.handleBlur }
+          id={props.id}
+          name={props.name}
+          disabled={props.disabled}
+          checked={props.checked}
+          onCheckedChange={state => formikContext?.setFieldValue(props.name, Boolean(state))}
+          onBlur={formikContext?.handleBlur}
         />
       </div>
       <div className='text-sm leading-6'>

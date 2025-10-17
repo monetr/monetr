@@ -15,13 +15,13 @@ const snackbarIcons: Partial<Record<VariantType, React.ReactNode>> = {
 };
 
 export interface MSnackbarProviderProps {
-  children: ReactElement
+  children: ReactElement;
 }
 
 export default function MSnackbarProvider(props: MSnackbarProviderProps): JSX.Element {
   return (
-    <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-      { props.children }
+    <SnackbarProvider maxSnack={5} iconVariant={snackbarIcons}>
+      {props.children}
     </SnackbarProvider>
   );
 }

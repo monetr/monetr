@@ -38,7 +38,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
       in: tz(timezone),
     }),
     ruleset: '',
-    paydayAmount: 0.00,
+    paydayAmount: 0.0,
     ...viewContext.formData,
   };
 
@@ -51,25 +51,29 @@ export default function ManualLinkSetupIncome(): JSX.Element {
     return createLink({
       institutionName: data['budgetName'],
     })
-      .then(link => createBankAccount({
-        linkId: link.linkId,
-        name: data['accountName'],
-        availableBalance: locale.friendlyToAmount(data['startingBalance']),
-        currentBalance: locale.friendlyToAmount(data['startingBalance']),
-        accountType: BankAccountType.Depository,
-        accountSubType: BankAccountSubType.Checking,
-        currency: data['currency'],
-      }))
-      .then(bankAccount => createFundingSchedule({
-        bankAccountId: bankAccount.bankAccountId,
-        name: 'Payday',
-        nextRecurrence: startOfDay(values.nextPayday, {
-          in: tz(timezone),
+      .then(link =>
+        createBankAccount({
+          linkId: link.linkId,
+          name: data['accountName'],
+          availableBalance: locale.friendlyToAmount(data['startingBalance']),
+          currentBalance: locale.friendlyToAmount(data['startingBalance']),
+          accountType: BankAccountType.Depository,
+          accountSubType: BankAccountSubType.Checking,
+          currency: data['currency'],
         }),
-        ruleset: values.ruleset,
-        estimatedDeposit: locale.friendlyToAmount(values.paydayAmount),
-        excludeWeekends: false,
-      }))
+      )
+      .then(bankAccount =>
+        createFundingSchedule({
+          bankAccountId: bankAccount.bankAccountId,
+          name: 'Payday',
+          nextRecurrence: startOfDay(values.nextPayday, {
+            in: tz(timezone),
+          }),
+          ruleset: values.ruleset,
+          estimatedDeposit: locale.friendlyToAmount(values.paydayAmount),
+          excludeWeekends: false,
+        }),
+      )
       .then(fundingSchedule => navigate(`/bank/${fundingSchedule.bankAccountId}/transactions`))
       .catch(error => {
         throw error;
@@ -78,11 +82,11 @@ export default function ManualLinkSetupIncome(): JSX.Element {
 
   return (
     <MForm
-      initialValues={ initialValues }
-      onSubmit={ submit }
+      initialValues={initialValues}
+      onSubmit={submit}
       className='w-full flex flex-col justify-center items-center gap-2'
     >
-      { ({ values: { currency } }) => (
+      {({ values: { currency } }) => (
         <Fragment>
           <MSpan size='lg' color='subtle' className='text-center'>
             How often do you get paid and how much do you get paid typically? monetr uses this to forecast balances
@@ -93,17 +97,17 @@ export default function ManualLinkSetupIncome(): JSX.Element {
             label='When do you get paid next?'
             className='w-full'
             required
-            min={ startOfTomorrow({
+            min={startOfTomorrow({
               in: tz(timezone),
-            }) }
+            })}
             autoFocus
           />
           <MSelectFrequency
             dateFrom='nextPayday'
             menuPosition='fixed'
-            menuShouldScrollIntoView={ false }
-            menuShouldBlockScroll={ true }
-            menuPortalTarget={ document.body }
+            menuShouldScrollIntoView={false}
+            menuShouldBlockScroll={true}
+            menuPortalTarget={document.body}
             menuPlacement='bottom'
             label='How often do you get paid?'
             placeholder='Select a funding frequency...'
@@ -116,12 +120,12 @@ export default function ManualLinkSetupIncome(): JSX.Element {
             label='How much do you usually get paid?'
             className='w-full'
             required
-            allowNegative={ false }
-            currency={ currency }
+            allowNegative={false}
+            currency={currency}
           />
           <ManualLinkSetupButtons />
         </Fragment>
-      ) }
+      )}
     </MForm>
   );
 }

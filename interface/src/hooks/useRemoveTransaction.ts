@@ -1,6 +1,4 @@
-import {
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import Balance from '@monetr/interface/models/Balance';
 import Spending from '@monetr/interface/models/Spending';
@@ -28,7 +26,8 @@ export function useRemoveTransaction(): (_: RemoveTransactionRequest) => Promise
     const { transaction, softDelete, adjustsBalance } = removal;
     const path = `/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`;
     const params = new URLSearchParams();
-    { // Build the query parameters for the request.
+    {
+      // Build the query parameters for the request.
       params.set('adjusts_balance', String(adjustsBalance));
       params.set('soft', String(softDelete));
     }
@@ -36,19 +35,22 @@ export function useRemoveTransaction(): (_: RemoveTransactionRequest) => Promise
     return await request()
       .delete(`${path}?${params.toString()}`)
       .then(result => result.data)
-      .then(async (_: RemoveTransactionResponse) => await Promise.all([
-        // TODO Instead of just invalidating all of these, it would be more efficient to move them into a mutator so we
-        // can update their data in place.
-        queryClient.invalidateQueries({
-          queryKey: [`/bank_accounts/${ removal.transaction.bankAccountId }/transactions`],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: [`/bank_accounts/${ removal.transaction.bankAccountId }/spending`],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: [`/bank_accounts/${ removal.transaction.bankAccountId }/balances`],
-        }),
-      ]));
+      .then(
+        async (_: RemoveTransactionResponse) =>
+          await Promise.all([
+            // TODO Instead of just invalidating all of these, it would be more efficient to move them into a mutator so we
+            // can update their data in place.
+            queryClient.invalidateQueries({
+              queryKey: [`/bank_accounts/${removal.transaction.bankAccountId}/transactions`],
+            }),
+            queryClient.invalidateQueries({
+              queryKey: [`/bank_accounts/${removal.transaction.bankAccountId}/spending`],
+            }),
+            queryClient.invalidateQueries({
+              queryKey: [`/bank_accounts/${removal.transaction.bankAccountId}/balances`],
+            }),
+          ]),
+      );
   }
 
   return removeTransaction;

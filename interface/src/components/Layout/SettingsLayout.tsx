@@ -13,25 +13,12 @@ export default function SettingsLayout(): JSX.Element {
 
   return (
     <div className='w-full h-full min-w-0 flex flex-col'>
-      <MTopNavigation
-        icon={ SettingsOutlined }
-        title='Settings'
-      />
+      <MTopNavigation icon={SettingsOutlined} title='Settings' />
       <div className='w-full flex px-4 mt-4 gap-6'>
-        <SettingTab to='/settings/overview'>
-          Overview
-        </SettingTab>
-        <SettingTab to='/settings/security'>
-          Security
-        </SettingTab>
-        { config?.data?.billingEnabled && (
-          <SettingTab to='/settings/billing'>
-          Billing
-          </SettingTab>
-        ) }
-        <SettingTab to='/settings/about'>
-          About
-        </SettingTab>
+        <SettingTab to='/settings/overview'>Overview</SettingTab>
+        <SettingTab to='/settings/security'>Security</SettingTab>
+        {config?.data?.billingEnabled && <SettingTab to='/settings/billing'>Billing</SettingTab>}
+        <SettingTab to='/settings/about'>About</SettingTab>
       </div>
       <MDivider />
       <Outlet />
@@ -53,8 +40,8 @@ function SettingTab(props: SettingTabProps): JSX.Element {
   });
 
   return (
-    <Link to={ props.to } className={ className }>
-      { props.children }
+    <Link to={props.to} className={className}>
+      {props.children}
     </Link>
   );
 }

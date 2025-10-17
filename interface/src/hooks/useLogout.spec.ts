@@ -19,7 +19,9 @@ describe('logout', () => {
   it('will logout successfully', async () => {
     mockAxios.onGet('/api/authentication/logout').reply(200);
 
-    const { result: { current: logout } } = testRenderHook(useLogout, { initialRoute: '/' });
+    const {
+      result: { current: logout },
+    } = testRenderHook(useLogout, { initialRoute: '/' });
 
     expect(mockAxios.history['get']).toHaveLength(0);
 

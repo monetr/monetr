@@ -26,9 +26,8 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
     );
 
     // It is possible for colors to be missing for a given icon. When this happens just fall back to a black color.
-    const colorStyles = icon?.colors?.length > 0 ?
-      { backgroundColor: `#${icon.colors[0]}` } :
-      { backgroundColor: '#000000' };
+    const colorStyles =
+      icon?.colors?.length > 0 ? { backgroundColor: `#${icon.colors[0]}` } : { backgroundColor: '#000000' };
 
     const styles = {
       // TODO Add mask image things for other browsers.
@@ -40,8 +39,8 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
     };
 
     return (
-      <div className={ classNames }>
-        <div style={ styles } />
+      <div className={classNames}>
+        <div style={styles} />
       </div>
     );
   }
@@ -51,9 +50,9 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
   // If we have no icon to work with then create an avatar with the first character of the transaction name.
   const letter = props?.name?.toUpperCase().charAt(0) || '?';
   return (
-    <Avatar className={ classNames }>
+    <Avatar className={classNames}>
       <AvatarFallback className='dark:bg-dark-monetr-background-subtle dark:text-dark-monetr-content'>
-        { letter }
+        {letter}
       </AvatarFallback>
     </Avatar>
   );
