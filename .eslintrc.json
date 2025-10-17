@@ -266,7 +266,6 @@
                 "^lucide-react",
                 "^next",
                 "^notistack",
-                "^ramda",
                 "^rrule",
                 "^tailwindcss",
                 "^zustand"

@@ -2,9 +2,8 @@ import React, { Fragment, useCallback, useEffect, useRef } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { useNavigationType } from 'react-router-dom';
 import { HeartBroken } from '@mui/icons-material';
-import { format, getUnixTime, parse } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { Plus, ShoppingCart, Upload } from 'lucide-react';
-import * as R from 'ramda';
 
 import { Button } from '@monetr/interface/components/Button';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
@@ -119,28 +118,22 @@ export default function Transactions(): JSX.Element {
   }
 
   function TransactionItems() {
-    interface TransactionGroup {
-      transactions: Array<Transaction>;
-      group: Date;
-    }
-    return R.pipe(
-      R.groupBy((item: Transaction) => format(item.date, 'yyyy-MM-dd')),
-      R.mapObjIndexed((transactions, date) => ({
-        transactions: transactions,
-        group: parse(date, 'yyyy-MM-dd', new Date()),
-      })),
-      R.values,
-      R.map(({ transactions, group }: TransactionGroup): JSX.Element => (
-        <li key={ getUnixTime(group) }>
+    const groups: { [date: string]: Array<Transaction> } = transactions.reduce((accumulator, item) => {
+      (accumulator[format(item.date, 'yyyy-MM-dd')] ??= []).push(item);
+      return accumulator;
+    }, {});
+
+    return Object.entries(groups)
+      .map(([date, transactions]) => (
+        <li key={ date }>
           <ul className='flex gap-2 flex-col'>
-            <TransactionDateItem date={ group } />
-            { transactions .map(transaction => (
+            <TransactionDateItem date={ parse(date, 'yyyy-MM-dd', new Date()) } />
+            { transactions.map(transaction => (
               <TransactionItem key={ transaction.transactionId } transaction={ transaction } />
             )) }
           </ul>
         </li>
-      )),
-    )(transactions);
+      ));
   }
 
   let message = 'No more transactions...';

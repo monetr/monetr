@@ -23,7 +23,6 @@
     "eslint-plugin-storybook": "0.12.0",
     "eslint-plugin-testing-library": "5.11.1",
     "eslint-plugin-unused-imports": "4.1.4",
-    "renovate": "39.264.1",
     "typescript": "5.9.3"
   },
   "scripts": {

@@ -235,21 +235,20 @@ if(BUILD_TESTING)
     TEST ui.dependencies
     PROPERTY LABELS "bootstrap"
   )
-
-  add_test(
-    NAME renovate.validate
-    COMMAND ${RENOVATE_CONFIG_VALIDATOR_EXECUTABLE} --strict
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  )
-  set_tests_properties(renovate.validate PROPERTIES
-    FIXTURES_REQUIRED node_modules
-    FIXTURES_SETUP ui.dependencies
-    TIMEOUT 60
-  )
-  set_property(
-    TEST renovate.validate
-    PROPERTY LABELS "renovate"
-  )
+  # add_test(
+  #   NAME renovate.validate
+  #   COMMAND ${RENOVATE_CONFIG_VALIDATOR_EXECUTABLE} --strict
+  #   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  # )
+  # set_tests_properties(renovate.validate PROPERTIES
+  #   FIXTURES_REQUIRED node_modules
+  #   FIXTURES_SETUP ui.dependencies
+  #   TIMEOUT 60
+  # )
+  # set_property(
+  #   TEST renovate.validate
+  #   PROPERTY LABELS "renovate"
+  # )
 endif()
 
 file(GLOB_RECURSE SUB_PACKAGES RELATIVE ${CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/server/*CMakeLists.txt")
