@@ -1,5 +1,6 @@
 // eslint-disable-next-line max-len
-import React, { type ComponentType, createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+import type React from 'react';
+import { type ComponentType, createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 
 import { usePrevious } from '@monetr/interface/hooks/usePrevious';
 

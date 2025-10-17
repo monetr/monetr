@@ -15,7 +15,7 @@
     "lineEnding": "lf",
     "lineWidth": 120,
     "attributePosition": "auto",
-    "includes": ["interface/**", "docs/src/**", "emails/src/**", "!**/*.html", "!**/*.svg", "!**/*.mdx"]
+    "includes": ["interface/**", "docs/src/**", "emails/src/**", "!**/*.html", "!**/*.svg", "!**/*.mdx", "!**/*.css"]
   },
   "assist": {
     "actions": {
@@ -24,7 +24,7 @@
           "level": "on",
           "options": {
             "groups": [
-              ["react", "react-dom"],
+              ["react", "react-router-dom"],
               ":PACKAGE:",
               ":BLANK_LINE:",
               ["@monetr/**"],
@@ -86,13 +86,16 @@
         "noRestrictedImports": {
           "level": "warn",
           "options": {
-            "paths": {}
+            "paths": {
+              "@mui/icons-material": "use lucide-react instead",
+              "@mui/material": "use literally anything else instead"
+            }
           }
         }
       },
       "nursery": {}
     },
-    "includes": ["**", "!**/app/shared/vendor/**/*.js", "!**/scripts/**/*.js", "!**/package.json"]
+    "includes": ["interface/**", "docs/src/**", "emails/src/**", "!**/*.html", "!**/*.svg", "!**/*.mdx", "!**/*.css"]
   },
   "javascript": {
     "formatter": {
@@ -104,6 +107,11 @@
       "bracketSameLine": false,
       "quoteStyle": "single",
       "attributePosition": "auto"
+    }
+  },
+  "css": {
+    "formatter": {
+      "enabled": false
     }
   },
   "json": {

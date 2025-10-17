@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import BankAccount from '@monetr/interface/models/BankAccount';
+import type BankAccount from '@monetr/interface/models/BankAccount';
 import request from '@monetr/interface/util/request';
 
 export function useArchiveBankAccount(): (_bankAccountId: string) => Promise<string> {

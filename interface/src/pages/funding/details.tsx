@@ -2,10 +2,10 @@ import React from 'react';
 import { useMatch, useNavigate } from 'react-router-dom';
 import HeartBroken from '@mui/icons-material/HeartBroken';
 import TodayOutlined from '@mui/icons-material/TodayOutlined';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import { tz } from '@date-fns/tz';
 import { format, isEqual, startOfDay, startOfTomorrow } from 'date-fns';
-import { FormikErrors, FormikHelpers } from 'formik';
+import type { FormikErrors, FormikHelpers } from 'formik';
 import { Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
@@ -26,7 +26,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchFundingSchedule } from '@monetr/interface/hooks/usePatchFundingSchedule';
 import { useRemoveFundingSchedule } from '@monetr/interface/hooks/useRemoveFundingSchedule';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import { APIError } from '@monetr/interface/util/request';
+import type { APIError } from '@monetr/interface/util/request';
 
 interface FundingValues {
   name: string;

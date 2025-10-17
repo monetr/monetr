@@ -1,7 +1,7 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
-import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import Spending, { type SpendingType } from '@monetr/interface/models/Spending';
 
 export function useSpendingFiltered(kind: SpendingType): UseQueryResult<Array<Spending>, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Check, ChevronsUpDown, CirclePlus, Settings } from 'lucide-react';
 
 import { Button, buttonVariants } from '@monetr/interface/components/Button';
-import { ComboboxItemProps, comboboxVariants } from '@monetr/interface/components/Combobox';
+import { type ComboboxItemProps, comboboxVariants } from '@monetr/interface/components/Combobox';
 import {
   Command,
   CommandEmpty,
@@ -22,7 +22,7 @@ import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { showNewBankAccountModal } from '@monetr/interface/modals/NewBankAccountModal';
-import { BankAccountStatus } from '@monetr/interface/models/BankAccount';
+import type { BankAccountStatus } from '@monetr/interface/models/BankAccount';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 

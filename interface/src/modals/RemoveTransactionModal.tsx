@@ -1,21 +1,21 @@
 import React, { Fragment, useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { AxiosError } from 'axios';
-import { FormikHelpers } from 'formik';
+import type { AxiosError } from 'axios';
+import type { FormikHelpers } from 'formik';
 import { Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import MForm from '@monetr/interface/components/MForm';
-import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import { Switch } from '@monetr/interface/components/Switch';
 import SimilarTransactionItem from '@monetr/interface/components/transactions/SimilarTransactionItem';
 import { useRemoveTransaction } from '@monetr/interface/hooks/useRemoveTransaction';
-import Transaction from '@monetr/interface/models/Transaction';
-import { APIError } from '@monetr/interface/util/request';
-import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import type Transaction from '@monetr/interface/models/Transaction';
+import type { APIError } from '@monetr/interface/util/request';
+import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface RemoveTransactionModalProps {
   transaction: Transaction;

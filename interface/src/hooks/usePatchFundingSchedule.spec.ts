@@ -2,7 +2,7 @@ import { act } from 'react';
 import MockAdapter from 'axios-mock-adapter';
 
 import monetrClient from '@monetr/interface/api/api';
-import { PatchFundingScheduleResponse, usePatchFundingSchedule } from '@monetr/interface/hooks/usePatchFundingSchedule';
+import { type PatchFundingScheduleResponse, usePatchFundingSchedule } from '@monetr/interface/hooks/usePatchFundingSchedule';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 import parseDate from '@monetr/interface/util/parseDate';
 

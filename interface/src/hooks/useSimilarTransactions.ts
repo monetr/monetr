@@ -1,6 +1,6 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
-import Transaction from '@monetr/interface/models/Transaction';
+import type Transaction from '@monetr/interface/models/Transaction';
 import TransactionCluster from '@monetr/interface/models/TransactionCluster';
 
 export function useSimilarTransactions(transaction?: Transaction): UseQueryResult<TransactionCluster, unknown> {

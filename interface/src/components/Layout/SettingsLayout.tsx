@@ -5,7 +5,7 @@ import { SettingsOutlined } from '@mui/icons-material';
 import MDivider from '@monetr/interface/components/MDivider';
 import { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { ReactElement } from '@monetr/interface/components/types';
+import type { ReactElement } from '@monetr/interface/components/types';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 
 export default function SettingsLayout(): JSX.Element {

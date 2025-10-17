@@ -3,7 +3,7 @@ import React from 'react';
 import MSpan from '@monetr/interface/components/MSpan';
 import SimilarTransactionItem from '@monetr/interface/components/transactions/SimilarTransactionItem';
 import { useSimilarTransactions } from '@monetr/interface/hooks/useSimilarTransactions';
-import Transaction from '@monetr/interface/models/Transaction';
+import type Transaction from '@monetr/interface/models/Transaction';
 
 export interface SimilarTransactionsProps {
   transaction: Transaction;

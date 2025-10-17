@@ -1,11 +1,11 @@
-import React from 'react';
+import type React from 'react';
 import DoneIcon from '@mui/icons-material/Done';
 import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
 import WarningIcon from '@mui/icons-material/Warning';
-import { SnackbarProvider, VariantType } from 'notistack';
+import { SnackbarProvider, type VariantType } from 'notistack';
 
-import { ReactElement } from './types';
+import type { ReactElement } from './types';
 
 const snackbarIcons: Partial<Record<VariantType, React.ReactNode>> = {
   error: <ErrorIcon className='mr-2.5' />,

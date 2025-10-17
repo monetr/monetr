@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import {
-  PlaidLinkError,
-  PlaidLinkOnExitMetadata,
-  PlaidLinkOnSuccessMetadata,
-  PlaidLinkOptionsWithLinkToken,
+  type PlaidLinkError,
+  type PlaidLinkOnExitMetadata,
+  type PlaidLinkOnSuccessMetadata,
+  type PlaidLinkOptionsWithLinkToken,
   usePlaidLink,
 } from 'react-plaid-link';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import MSpinner from '@monetr/interface/components/MSpinner';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
-import { ReactElement } from '@monetr/interface/components/types';
+import type { ReactElement } from '@monetr/interface/components/types';
 import request from '@monetr/interface/util/request';
 
 interface PlaidProps {

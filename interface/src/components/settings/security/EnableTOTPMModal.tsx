@@ -1,8 +1,9 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import type React from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import QRCode from 'react-qr-code';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
 import { Shield } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
@@ -10,7 +11,7 @@ import FormButton from '@monetr/interface/components/FormButton';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@monetr/interface/components/InputOTP';
 import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
-import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import request from '@monetr/interface/util/request';
 

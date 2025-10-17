@@ -109,7 +109,7 @@ export function amountToFriendly(amount: number, locale: string, currency: strin
   // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2 decimal
   // places so this would be 10^2 or 100. Where as JPY would have 0 because it is already in the smallest increment.
   // This results in 10^0 which is 1. And the amount/1 remains the same.
-  const modifier = Math.pow(10, specs.maximumFractionDigits);
+  const modifier = 10 ** specs.maximumFractionDigits;
 
   // Shift the amount over the correct number of decimal places.
   const adjusted = Math.fround(amount / modifier);
@@ -133,7 +133,7 @@ export function friendlyToAmount(friendly: number, locale: string, currency: str
   // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2 decimal
   // places so this would be 10^2 or 100. Where as JPY would have 0 because it is already in the smallest increment.
   // This results in 10^0 which is 1. And the amount/1 remains the same.
-  const modifier = Math.pow(10, specs.maximumFractionDigits);
+  const modifier = 10 ** specs.maximumFractionDigits;
 
   // Instead of fractional rounding we want to do whole rounding for storage. Take the friendly amount and multiply it
   // by the modifier based on the number of decimal places the unit has in order to reduce it to it's smallest unit.
@@ -193,7 +193,7 @@ export function formatAmount(
     // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2
     // decimal places so this would be 10^2 or 100. Where as JPY would have 0 because it is already in the smallest
     // increment. This results in 10^0 which is 1. And the amount/1 remains the same.
-    const modifier = Math.pow(10, specs.maximumFractionDigits);
+    const modifier = 10 ** specs.maximumFractionDigits;
 
     // Shift the amount over the correct number of decimal places.
     const adjusted = Math.fround(amount / modifier);

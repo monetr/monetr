@@ -5,7 +5,7 @@ import { endOfMonth, format, getDate, getMonth, isEqual, startOfDay, startOfMont
 import Recurrence from '@monetr/interface/components/Recurrence/Recurrence';
 import parseDate from '@monetr/interface/util/parseDate';
 
-import { RRule, Weekday } from 'rrule';
+import { RRule, type Weekday } from 'rrule';
 
 export default function getRecurrencesForDate(inputDate: Date | string | null, timezone: string): Array<Recurrence> {
   const date = parseDate(inputDate);

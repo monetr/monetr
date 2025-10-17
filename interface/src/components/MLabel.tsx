@@ -1,6 +1,6 @@
-import React from 'react';
+import type React from 'react';
 
-import { ReactElement } from './types';
+import type { ReactElement } from './types';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MLabelDecoratorProps {

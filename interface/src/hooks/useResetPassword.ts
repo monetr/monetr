@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import { useSnackbar } from 'notistack';
 
-import request, { APIError } from '@monetr/interface/util/request';
+import request, { type APIError } from '@monetr/interface/util/request';
 
 export default function useResetPassword(): (newPassword: string, token: string) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();

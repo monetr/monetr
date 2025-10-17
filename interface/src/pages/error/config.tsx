@@ -16,7 +16,7 @@ export default function ConfigError(): JSX.Element {
           <a
             target='_blank'
             className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
-            href='mailto:support@monetr.app'
+            href='mailto:support@monetr.app' rel="noopener"
           >
             support@monetr.app
           </a>

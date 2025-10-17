@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tz } from '@date-fns/tz';
 import { startOfDay, startOfTomorrow } from 'date-fns';
-import { FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
 
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
@@ -10,7 +10,7 @@ import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSpan from '@monetr/interface/components/MSpan';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
-import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
+import type { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 import { useCreateBankAccount } from '@monetr/interface/hooks/useCreateBankAccount';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';

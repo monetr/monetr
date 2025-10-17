@@ -6,7 +6,7 @@ import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/Institution
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
-import MonetrLink from '@monetr/interface/models/Link';
+import type MonetrLink from '@monetr/interface/models/Link';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 

@@ -1,4 +1,4 @@
-import { RRule, rrulestr } from 'rrule';
+import { type RRule, rrulestr } from 'rrule';
 
 export default class Recurrence {
   name: string;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import MerchantIcon, { MerchantIconProps } from '@monetr/interface/components/MerchantIcon';
+import MerchantIcon, { type MerchantIconProps } from '@monetr/interface/components/MerchantIcon';
 
 export interface TransactionMerchantIconProps extends MerchantIconProps {
   pending?: boolean;

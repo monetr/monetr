@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import request from '@monetr/interface/util/request';
 
 export function useRemoveFundingSchedule(): (_fundingSchedule: FundingSchedule) => Promise<FundingSchedule> {

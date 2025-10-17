@@ -1,4 +1,4 @@
-import MonetrFile from './File';
+import type MonetrFile from './File';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum TransactionUploadStatus {

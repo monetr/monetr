@@ -2,13 +2,13 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { tz } from '@date-fns/tz';
-import { isEqual, Locale, startOfMonth, startOfToday } from 'date-fns';
+import { isEqual, type Locale, startOfMonth, startOfToday } from 'date-fns';
 import { enUS } from 'date-fns/locale/en-US';
 import { useFormikContext } from 'formik';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
 
-import MLabel, { MLabelDecorator } from './MLabel';
-import { ReactElement } from './types';
+import MLabel, { type MLabelDecorator } from './MLabel';
+import type { ReactElement } from './types';
 import { Button } from '@monetr/interface/components/Button';
 import { Calendar } from '@monetr/interface/components/Calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';

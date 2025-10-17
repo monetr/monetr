@@ -2,7 +2,7 @@
 import React from 'react';
 import { useFormikContext } from 'formik';
 
-import { ReactElement } from './types';
+import type { ReactElement } from './types';
 import { Checkbox } from '@monetr/interface/components/Checkbox';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 

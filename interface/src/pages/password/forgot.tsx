@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FormikErrors, FormikHelpers } from 'formik';
+import type { FormikErrors, FormikHelpers } from 'formik';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MCaptcha from '@monetr/interface/components/MCaptcha';

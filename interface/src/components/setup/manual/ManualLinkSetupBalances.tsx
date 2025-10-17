@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
 
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MForm from '@monetr/interface/components/MForm';

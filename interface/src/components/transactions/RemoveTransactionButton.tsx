@@ -5,7 +5,7 @@ import { Trash } from 'lucide-react';
 import { Button } from '@monetr/interface/components/Button';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { showRemoveTransactionModal } from '@monetr/interface/modals/RemoveTransactionModal';
-import Transaction from '@monetr/interface/models/Transaction';
+import type Transaction from '@monetr/interface/models/Transaction';
 
 interface RemoveTransactionButtonProps {
   transaction: Transaction;

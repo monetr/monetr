@@ -16,7 +16,7 @@ describe('billing settings page', () => {
 
   beforeAll(() => {
     delete window.location;
-    // @ts-ignore
+    // @ts-expect-error
     window.location = Object.defineProperties(
       {},
       {

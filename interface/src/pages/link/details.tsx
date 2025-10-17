@@ -1,7 +1,8 @@
-import React, { useCallback } from 'react';
+import type React from 'react';
+import { useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { AxiosError } from 'axios';
-import { FormikHelpers } from 'formik';
+import type { AxiosError } from 'axios';
+import type { FormikHelpers } from 'formik';
 import { ChevronRight, Landmark, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
@@ -17,9 +18,9 @@ import { useBankAccountsForLink } from '@monetr/interface/hooks/useBankAccountsF
 import { useLink } from '@monetr/interface/hooks/useLink';
 import { usePatchLink } from '@monetr/interface/hooks/usePatchLink';
 import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
-import BankAccount from '@monetr/interface/models/BankAccount';
+import type BankAccount from '@monetr/interface/models/BankAccount';
 import capitalize from '@monetr/interface/util/capitalize';
-import { APIError } from '@monetr/interface/util/request';
+import type { APIError } from '@monetr/interface/util/request';
 
 interface LinkValues {
   institutionName: string;

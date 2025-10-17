@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import MockAdapter from 'axios-mock-adapter';
+import type MockAdapter from 'axios-mock-adapter';
 
 // apiSampleResponses will fill the mock adapter with most of the API calls that the application needs to render most
 // pages. Some pages may not be able to render with this data and additional mocks may be needed. This should only be

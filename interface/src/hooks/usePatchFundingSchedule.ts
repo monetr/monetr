@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import Spending from '@monetr/interface/models/Spending';

@@ -13,7 +13,7 @@ import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAcc
 import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
-import { ReactElement } from '@monetr/interface/components/types';
+import type { ReactElement } from '@monetr/interface/components/types';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useNextFundingDate } from '@monetr/interface/hooks/useNextFundingDate';

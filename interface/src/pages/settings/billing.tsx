@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AccessTimeOutlined } from '@mui/icons-material';
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 import { format, isFuture, isThisYear } from 'date-fns';
 import { useSnackbar } from 'notistack';
 

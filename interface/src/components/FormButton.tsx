@@ -1,4 +1,4 @@
-import React, { ComponentProps } from 'react';
+import React, { type ComponentProps } from 'react';
 import { useFormikContext } from 'formik';
 
 import { Button } from '@monetr/interface/components/Button';

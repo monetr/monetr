@@ -6,11 +6,11 @@ import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
-import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useRemoveLink } from '@monetr/interface/hooks/useRemoveLink';
-import Link from '@monetr/interface/models/Link';
-import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import type Link from '@monetr/interface/models/Link';
+import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface RemoveLinkModalProps {
   link: Link;

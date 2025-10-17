@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
 
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';

@@ -1,14 +1,14 @@
 import React, { Fragment, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { AxiosError } from 'axios';
-import { FormikHelpers } from 'formik';
+import type { AxiosError } from 'axios';
+import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MForm from '@monetr/interface/components/MForm';
-import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
@@ -16,7 +16,7 @@ import { useCreateBankAccount } from '@monetr/interface/hooks/useCreateBankAccou
 import useLocaleCurrency, { DefaultCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
-import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewBankAccountValues {
   name: string;

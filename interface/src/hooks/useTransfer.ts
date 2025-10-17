@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import Balance from '@monetr/interface/models/Balance';
-import Spending from '@monetr/interface/models/Spending';
+import type Spending from '@monetr/interface/models/Spending';
 import request from '@monetr/interface/util/request';
 
 export type TransferParameters = {

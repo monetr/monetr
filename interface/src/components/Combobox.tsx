@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/compo
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import { cva, VariantProps } from 'class-variance-authority';
+import { cva, type VariantProps } from 'class-variance-authority';
 
 export const comboboxVariants = cva(['justify-between truncate'], {
   variants: {

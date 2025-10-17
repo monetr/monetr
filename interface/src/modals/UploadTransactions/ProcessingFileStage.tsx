@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { FilePresentOutlined } from '@mui/icons-material';
-import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
 import { Button } from '@monetr/interface/components/Button';
 import MSpan from '@monetr/interface/components/MSpan';
-import { UploadTransactionStage } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
+import type { UploadTransactionStage } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 
 interface ProcessingFileStageProps {

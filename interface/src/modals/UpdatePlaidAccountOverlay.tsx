@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  PlaidLinkError,
-  PlaidLinkOnEventMetadata,
-  PlaidLinkOnExitMetadata,
-  PlaidLinkOnSuccessMetadata,
-  PlaidLinkStableEvent,
+  type PlaidLinkError,
+  type PlaidLinkOnEventMetadata,
+  type PlaidLinkOnExitMetadata,
+  type PlaidLinkOnSuccessMetadata,
+  type PlaidLinkStableEvent,
   usePlaidLink,
 } from 'react-plaid-link';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
@@ -12,9 +12,9 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import MModal from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
-import Link from '@monetr/interface/models/Link';
+import type Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
-import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface UpdatePlaidAccountOverlayProps {
   link: Link;

@@ -1,12 +1,12 @@
-import React, { FormEvent, useCallback, useRef, useState } from 'react';
+import React, { type FormEvent, useCallback, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Close, FilePresentOutlined, UploadFileOutlined } from '@mui/icons-material';
 import { useQueryClient } from '@tanstack/react-query';
-import axios, { AxiosProgressEvent, AxiosResponse } from 'axios';
+import axios, { type AxiosProgressEvent, type AxiosResponse } from 'axios';
 
 import { Button } from '@monetr/interface/components/Button';
-import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import ErrorFileStage from '@monetr/interface/modals/UploadTransactions/ErrorFileStage';
@@ -14,7 +14,7 @@ import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/Pro
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 import fileSize from '@monetr/interface/util/fileSize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export enum UploadTransactionStage {
   FileUpload = 1,
@@ -101,7 +101,7 @@ function UploadFileStage(props: StageProps) {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      onUploadProgress: function (progressEvent: AxiosProgressEvent) {
+      onUploadProgress: (progressEvent: AxiosProgressEvent) => {
         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
         setUploadProgress(percentCompleted);
       },

@@ -15,7 +15,7 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
 
   switch (bankAccount?.accountSubType) {
     case 'checking':
-    case 'savings':
+    case 'savings': {
       const valueClassName = mergeTailwind({
         'dark:text-dark-monetr-content-emphasis': balance?.free >= 0,
         'dark:text-dark-monetr-red': balance?.free < 0,
@@ -33,6 +33,7 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
           </MSpan>
         </div>
       );
+    }
   }
 
   return null;
