@@ -1,5 +1,4 @@
-/* eslint-disable max-len */
-import React from 'react';
+
 import type { Meta, StoryObj } from '@storybook/react';
 import MockAdapter from 'axios-mock-adapter';
 

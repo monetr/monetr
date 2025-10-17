@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
 import { type FormikErrors, type FormikHelpers, useFormikContext } from 'formik';
@@ -50,7 +50,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
       const amount = locale.friendlyToAmount(values.amount);
 
       if (amount <= 0) {
-        errors['amount'] = 'Amount must be greater than zero';
+        errors.amount = 'Amount must be greater than zero';
       }
 
       // If we are moving an allocation out of an existing budget, do not let us overdraw that budget. We can only really
@@ -60,7 +60,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
         const from = spending?.find(item => item.spendingId === values.fromSpendingId);
         // And make sure that we are not moving more than that budget has.
         if (amount > from?.currentAmount) {
-          errors['amount'] = `Cannot move more than is available from ${from?.name}`;
+          errors.amount = `Cannot move more than is available from ${from?.name}`;
         }
       }
 
@@ -97,7 +97,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
         )
         .catch(
           (error: AxiosError) =>
-            void enqueueSnackbar(error.response.data['error'], {
+            void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,
             }),
@@ -173,7 +173,7 @@ function ReverseTargetsButton(): JSX.Element {
   const formik = useFormikContext<TransferValues>();
   const swap = useCallback(() => {
     // Do nothing if we are currently submitting.
-    if (formik.isSubmitting) return;
+    if (formik.isSubmitting) { return; }
 
     const { fromSpendingId, toSpendingId, amount } = formik.values;
     formik.setValues({
@@ -217,7 +217,7 @@ function TransferSelectDecorator(props: MLabelDecoratorProps): JSX.Element {
   const target = spendingSubject.targetAmount;
   const remaining = Math.max(spendingSubject.targetAmount - spendingSubject.currentAmount, 0);
 
-  if (remaining > 0 && remaining != target) {
+  if (remaining > 0 && remaining !== target) {
     return (
       <MSpan className='gap-1'>
         <AmountButton amount={current} />

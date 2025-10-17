@@ -1,4 +1,4 @@
-import * as React from 'react';
+
 import { Heading, Hr, Link, Text } from '@react-email/components';
 
 import EmailLayout from '../../components/EmailLayout';

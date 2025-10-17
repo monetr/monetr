@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tz } from '@date-fns/tz';
 import { startOfDay, startOfTomorrow } from 'date-fns';
@@ -32,7 +32,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
   const createFundingSchedule = useCreateFundingSchedule();
   const navigate = useNavigate();
   const viewContext = useViewContext<ManualLinkSetupSteps, {}>();
-  const { data: locale } = useLocaleCurrency(viewContext.formData['currency']);
+  const { data: locale } = useLocaleCurrency(viewContext.formData.currency);
   const initialValues: Values = {
     nextPayday: startOfTomorrow({
       in: tz(timezone),
@@ -49,17 +49,17 @@ export default function ManualLinkSetupIncome(): JSX.Element {
       ...values,
     };
     return createLink({
-      institutionName: data['budgetName'],
+      institutionName: data.budgetName,
     })
       .then(link =>
         createBankAccount({
           linkId: link.linkId,
-          name: data['accountName'],
-          availableBalance: locale.friendlyToAmount(data['startingBalance']),
-          currentBalance: locale.friendlyToAmount(data['startingBalance']),
+          name: data.accountName,
+          availableBalance: locale.friendlyToAmount(data.startingBalance),
+          currentBalance: locale.friendlyToAmount(data.startingBalance),
           accountType: BankAccountType.Depository,
           accountSubType: BankAccountSubType.Checking,
-          currency: data['currency'],
+          currency: data.currency,
         }),
       )
       .then(bankAccount =>

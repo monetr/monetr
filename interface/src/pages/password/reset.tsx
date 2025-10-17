@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
@@ -27,12 +27,12 @@ export default function PasswordResetNew(): JSX.Element {
   const navigate = useNavigate();
   const resetPassword = useResetPassword();
   const { state: routeState } = useLocation();
-  const message = (routeState && routeState['message']) || 'Enter the new password you would like to use.';
+  const message = (routeState?.message) || 'Enter the new password you would like to use.';
   const search = location.search;
   const query = new URLSearchParams(search);
   // The token is loaded from the route state (which is provided when a password reset is being forced) or from the
   // URL query parameter (which is provided when the user is brought here from a link in their email).
-  const token = query.get('token') || (routeState && routeState['token']);
+  const token = query.get('token') || (routeState?.token);
 
   useEffect(() => {
     if (!token) {
@@ -65,12 +65,12 @@ export default function PasswordResetNew(): JSX.Element {
 
     if (values.password) {
       if (values.password.trim().length < 8) {
-        errors['password'] = 'Password must be at least 8 characters long.';
+        errors.password = 'Password must be at least 8 characters long.';
       }
     }
 
     if (values.verifyPassword && values.password !== values.verifyPassword) {
-      errors['verifyPassword'] = 'Passwords must match.';
+      errors.verifyPassword = 'Passwords must match.';
     }
 
     return errors;

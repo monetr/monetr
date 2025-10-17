@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 
-import React from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
 
 import { Button } from '@monetr/interface/components/Button';

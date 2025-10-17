@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { AirlineStopsOutlined, NorthEast, SouthEast } from '@mui/icons-material';
 import { tz } from '@date-fns/tz';
 import { format, getUnixTime } from 'date-fns';

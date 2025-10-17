@@ -22,7 +22,7 @@ const MTextFieldPropsDefaults: Omit<MTextFieldProps, 'InputProps'> = {
 export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefaults): JSX.Element {
   const formikContext = useFormikContext();
   const getFormikError = () => {
-    if (!formikContext?.touched[props?.name]) return null;
+    if (!formikContext?.touched[props?.name]) { return null; }
 
     return formikContext?.errors[props?.name];
   };
@@ -38,7 +38,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
   const LabelDecorator = labelDecorator || MTextFieldPropsDefaults.labelDecorator;
 
   function Error() {
-    if (!props.error) return null;
+    if (!props.error) { return null; }
 
     return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
   }

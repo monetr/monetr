@@ -1,4 +1,4 @@
-import React from 'react';
+
 import type { Meta, StoryFn } from '@storybook/react';
 import { Plus } from 'lucide-react';
 import { useSnackbar } from 'notistack';

@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 import MSpan from '@monetr/interface/components/MSpan';
 import SimilarTransactionItem from '@monetr/interface/components/transactions/SimilarTransactionItem';

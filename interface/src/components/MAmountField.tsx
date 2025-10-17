@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import {
   type InputAttributes,
   type NumberFormatValues,
@@ -40,7 +40,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
   const { data: localeInfo } = useLocaleCurrency(props.currency);
   const formikContext = useFormikContext();
   const getFormikError = () => {
-    if (!formikContext?.touched[props?.name]) return null;
+    if (!formikContext?.touched[props?.name]) { return null; }
 
     return formikContext?.errors[props?.name];
   };
@@ -58,7 +58,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
   const LabelDecorator = labelDecorator || MAmountFieldPropsDefaults.labelDecorator;
 
   function Error() {
-    if (!props.error) return null;
+    if (!props.error) { return null; }
 
     return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
   }

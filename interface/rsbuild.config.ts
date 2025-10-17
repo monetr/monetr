@@ -4,7 +4,7 @@ import { pluginPWA } from './pluginPWA';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
-import path from 'path';
+import path from 'node:path';
 
 const envName = process.env.NODE_ENV ?? 'development';
 console.log(`Building for environment: ${envName}`);

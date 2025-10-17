@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import NorthEast from '@mui/icons-material/NorthEast';
 import { tz } from '@date-fns/tz';
 import { format, getUnixTime } from 'date-fns';
@@ -85,7 +85,7 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
       body += ' ';
       body += `An estimated ${locale.formatAmount(funding.estimatedDeposit - props.contributedAmount, AmountType.Stored)} will be left over for Free-to-Use after this contribution.`;
     }
-    if (props.date.getDate() != props.originalDate.getDate()) {
+    if (props.date.getDate() !== props.originalDate.getDate()) {
       dateExtra = `(Avoided weekend or holiday on ${format(inTimezone(props.originalDate), 'MMMM do')})`;
     }
 

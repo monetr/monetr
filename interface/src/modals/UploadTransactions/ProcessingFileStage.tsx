@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { FilePresentOutlined } from '@mui/icons-material';
 import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 
@@ -69,7 +69,7 @@ function useTransactionUploadProgress(
 
     // Whenever we receive a progress message, update our state to represent the new status.
     socket.onmessage = event => {
-      if (!event.data) return;
+      if (!event.data) { return; }
       const data: Partial<TransactionUpload> = JSON.parse(event.data);
       const queryKey = [`/bank_accounts/${bankAccountId}/transactions/upload/${transactionUploadId}`];
       // Take the current upload data stored in state (if its there) and merge it with the message we received. The

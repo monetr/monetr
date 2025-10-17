@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useMatch, useNavigate } from 'react-router-dom';
 import HeartBroken from '@mui/icons-material/HeartBroken';
 import TodayOutlined from '@mui/icons-material/TodayOutlined';
@@ -67,7 +67,7 @@ export default function FundingDetails(): JSX.Element {
     const errors: FormikErrors<FundingValues> = {};
 
     if (values.rule === '' || !values.rule) {
-      errors['rule'] = 'Frequency is required for funding schedules.';
+      errors.rule = 'Frequency is required for funding schedules.';
     }
 
     return errors;
@@ -117,7 +117,7 @@ export default function FundingDetails(): JSX.Element {
         .then(() => backToFunding())
         .catch(
           (error: AxiosError<APIError>) =>
-            void enqueueSnackbar(error.response.data['error'], {
+            void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,
             }),
@@ -137,7 +137,7 @@ export default function FundingDetails(): JSX.Element {
   };
 
   const NextOccurrenceDecorator = () => {
-    if (isEqual(funding.nextRecurrence, funding.nextRecurrenceOriginal)) return null;
+    if (isEqual(funding.nextRecurrence, funding.nextRecurrenceOriginal)) { return null; }
 
     return (
       <MSpan data-testid='funding-schedule-weekend-notice' size='sm' weight='medium'>

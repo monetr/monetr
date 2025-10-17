@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 import ManualLinkSetup from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 

@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 import MSpan from '@monetr/interface/components/MSpan';
 import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/InstitutionLogo';

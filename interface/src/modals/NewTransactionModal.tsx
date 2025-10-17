@@ -1,4 +1,4 @@
-import React, { Fragment, useRef } from 'react';
+import { Fragment, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
 import { tz } from '@date-fns/tz';
@@ -76,7 +76,7 @@ function NewTransactionModal(): JSX.Element {
         .then(() => modal.remove())
         .catch(
           (error: AxiosError) =>
-            void enqueueSnackbar(error.response.data['error'], {
+            void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,
             }),
@@ -152,8 +152,8 @@ function NewTransactionModal(): JSX.Element {
                       </p>
                     </div>
                     <Switch
-                      checked={values['adjustsBalance']}
-                      onCheckedChange={() => setFieldValue('adjustsBalance', !values['adjustsBalance'])}
+                      checked={values.adjustsBalance}
+                      onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
                     />
                   </div>
                 </TabsContent>
@@ -184,8 +184,8 @@ function NewTransactionModal(): JSX.Element {
                       </p>
                     </div>
                     <Switch
-                      checked={values['adjustsBalance']}
-                      onCheckedChange={() => setFieldValue('adjustsBalance', !values['adjustsBalance'])}
+                      checked={values.adjustsBalance}
+                      onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
                     />
                   </div>
                 </TabsContent>

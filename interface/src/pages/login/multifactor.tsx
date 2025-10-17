@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
@@ -41,15 +41,15 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
 
   function validate(values: MultifactorValues): FormikErrors<MultifactorValues> {
     const errors: FormikErrors<MultifactorValues> = {};
-    if (values.totp.length != 6) {
-      errors['totp'] = 'TOTP code must be 6 digits';
+    if (values.totp.length !== 6) {
+      errors.totp = 'TOTP code must be 6 digits';
     }
 
     return errors;
   }
 
   function formatContinueButton(values: MultifactorValues): string {
-    const length = values['totp'].length;
+    const length = values.totp.length;
     if (length < 6) {
       return `${6 - length} digits left`;
     }
@@ -101,7 +101,7 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
               role='form'
               type='submit'
               className='w-full'
-              tabIndex={3}
+              tabIndex="0"
             >
               {formatContinueButton(formik.values as MultifactorValues)}
             </FormButton>

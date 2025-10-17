@@ -1,5 +1,4 @@
-/* eslint-disable max-len */
-import React from 'react';
+
 import { Link } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import { format, isThisYear } from 'date-fns';

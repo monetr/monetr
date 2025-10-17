@@ -35,7 +35,6 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
       return <Navigate to={plaidPath} />;
     case 'manual':
       return <Navigate to={manualPath} />;
-    case 'loading':
     default:
       return <h1>Something went wrong...</h1>;
   }
@@ -76,7 +75,7 @@ function Greeting(props: GreetingProps): JSX.Element {
   }
 
   function Footer(): JSX.Element {
-    if (props.alreadyOnboarded) return null;
+    if (props.alreadyOnboarded) { return null; }
 
     return <LogoutFooter />;
   }
@@ -172,8 +171,8 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   );
 
   function handleClick() {
-    if (props.comingSoon) return;
-    if (props.disabled) return;
+    if (props.comingSoon) { return; }
+    if (props.disabled) { return; }
 
     props.onClick();
   }

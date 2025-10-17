@@ -11,13 +11,14 @@ export class Forecast {
   events: Array<ForecastEvent>;
 
   constructor(data?: Partial<Forecast>) {
-    if (data)
+    if (data) {
       Object.assign(this, {
         ...data,
         startingTime: parseDate(data.startingTime),
         endingTime: parseDate(data.endingTime),
         events: (data?.events || []).map(item => new ForecastEvent(item)),
       });
+    }
   }
 }
 
@@ -31,13 +32,14 @@ export class ForecastEvent {
   transaction: number;
 
   constructor(data?: Partial<ForecastEvent>) {
-    if (data)
+    if (data) {
       Object.assign(this, {
         ...data,
         date: parseDate(data.date),
         funding: (data?.funding || []).map(item => new FundingEvent(item)),
         spending: (data?.spending || []).map(item => new SpendingEvent(item)),
       });
+    }
   }
 }
 
@@ -50,12 +52,13 @@ export class SpendingEvent {
   transactionAmount: number;
 
   constructor(data?: Partial<SpendingEvent>) {
-    if (data)
+    if (data) {
       Object.assign(this, {
         ...data,
         date: parseDate(data.date),
         funding: (data?.funding || []).map(item => new FundingEvent(item)),
       });
+    }
   }
 }
 
@@ -66,12 +69,13 @@ export class FundingEvent {
   weekendAvoided: boolean;
 
   constructor(data?: Partial<FundingEvent>) {
-    if (data)
+    if (data) {
       Object.assign(this, {
         ...data,
         date: parseDate(data.date),
         originalDate: parseDate(data.originalDate),
       });
+    }
   }
 }
 

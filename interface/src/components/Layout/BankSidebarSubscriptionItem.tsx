@@ -1,5 +1,4 @@
-/* eslint-disable max-len */
-import React from 'react';
+
 import { Link } from 'react-router-dom';
 import { formatDistance } from 'date-fns';
 import { CreditCard } from 'lucide-react';

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AccessTimeOutlined } from '@mui/icons-material';
 import type { AxiosResponse } from 'axios';

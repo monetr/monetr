@@ -21,12 +21,13 @@ export default class TransactionUpload {
   completedAt: Date | null;
 
   constructor(data?: Partial<TransactionUpload>) {
-    if (data)
+    if (data) {
       Object.assign(this, {
         ...data,
         createdAt: parseDate(data?.createdAt),
         processedAt: parseDate(data?.processedAt),
         completedAt: parseDate(data?.completedAt),
       });
+    }
   }
 }

@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useRef } from 'react';
+import { Fragment, useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
 import type { FormikHelpers } from 'formik';
@@ -62,7 +62,7 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
         .then(() => modal.remove())
         .catch(
           (error: AxiosError<APIError>) =>
-            void enqueueSnackbar(error.response.data['error'], {
+            void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,
             }),
@@ -102,8 +102,8 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
                     </p>
                   </div>
                   <Switch
-                    checked={values['softDelete']}
-                    onCheckedChange={() => setFieldValue('softDelete', !values['softDelete'])}
+                    checked={values.softDelete}
+                    onCheckedChange={() => setFieldValue('softDelete', !values.softDelete)}
                   />
                 </div>
                 <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string gap-component'>
@@ -116,8 +116,8 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
                     </p>
                   </div>
                   <Switch
-                    checked={values['adjustsBalance']}
-                    onCheckedChange={() => setFieldValue('adjustsBalance', !values['adjustsBalance'])}
+                    checked={values.adjustsBalance}
+                    onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
                   />
                 </div>
               </div>

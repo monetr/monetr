@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { CalendarSync, Plus } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';

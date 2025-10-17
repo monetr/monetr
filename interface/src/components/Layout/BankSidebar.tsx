@@ -1,5 +1,4 @@
-/* eslint-disable max-len */
-import React from 'react';
+
 import { Link } from 'react-router-dom';
 import { ErrorOutline } from '@mui/icons-material';
 import { LogOut, Settings } from 'lucide-react';

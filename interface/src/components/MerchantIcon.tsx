@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import { useIconSearch } from '@monetr/interface/hooks/useIconSearch';
