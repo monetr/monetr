@@ -1,5 +1,11 @@
 import React, { type ReactNode } from 'react';
-import Select, { type ActionMeta, type GroupBase, type OnChangeValue, type OptionsOrGroups, type Theme } from 'react-select';
+import Select, {
+  type ActionMeta,
+  type GroupBase,
+  type OnChangeValue,
+  type OptionsOrGroups,
+  type Theme,
+} from 'react-select';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { CheckCircleOutline } from '@mui/icons-material';
 import { SwipeableDrawer } from '@mui/material';

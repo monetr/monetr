@@ -27,7 +27,7 @@ export default function MQueryClient(props: MQueryClientProps): JSX.Element {
   const queryFn = useCallback(
     async (context: QueryFunctionContext<QueryKey>) => {
       let method = 'GET';
-      let body ;
+      let body;
       let params = {};
       if (context.queryKey.length > 1 && context?.meta?.['method'] !== QueryMethod.UseQuery) {
         method = 'POST';

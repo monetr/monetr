@@ -216,7 +216,8 @@ export default function Register(): JSX.Element {
             <a
               target='_blank'
               className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
-              href='https://monetr.app/policy/terms' rel="noopener"
+              href='https://monetr.app/policy/terms'
+              rel='noopener'
             >
               Terms & Conditions
             </a>{' '}
@@ -224,7 +225,8 @@ export default function Register(): JSX.Element {
             <a
               target='_blank'
               className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
-              href='https://monetr.app/policy/privacy' rel="noopener"
+              href='https://monetr.app/policy/privacy'
+              rel='noopener'
             >
               Privacy Policy
             </a>

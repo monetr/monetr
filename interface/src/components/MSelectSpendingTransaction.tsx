@@ -1,6 +1,13 @@
 import type React from 'react';
 import { Fragment, useCallback, useState } from 'react';
-import Select, { type ActionMeta, components, type FormatOptionLabelMeta, type OnChangeValue, type OptionProps, type Theme } from 'react-select';
+import Select, {
+  type ActionMeta,
+  components,
+  type FormatOptionLabelMeta,
+  type OnChangeValue,
+  type OptionProps,
+  type Theme,
+} from 'react-select';
 import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 
 import MBadge from './MBadge';
