@@ -1,5 +1,0 @@
-# Ignore any html files in the pkg dir. These are basically email templates.
-pkg/**/*.html
-*.config.js
-!.storybook
-emails/src/emails/**

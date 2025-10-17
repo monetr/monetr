@@ -15,7 +15,7 @@
     "lineEnding": "lf",
     "lineWidth": 120,
     "attributePosition": "auto",
-    "includes": ["interface/**", "docs/src/**", "!**/*.html", "!**/*.svg"]
+    "includes": ["interface/**", "docs/src/**", "emails/src/**", "!**/*.html", "!**/*.svg", "!**/*.mdx"]
   },
   "assist": {
     "actions": {
@@ -86,8 +86,7 @@
         "noRestrictedImports": {
           "level": "warn",
           "options": {
-            "paths": {
-            }
+            "paths": {}
           }
         }
       },

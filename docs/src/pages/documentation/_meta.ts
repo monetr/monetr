@@ -1,21 +1,21 @@
 export default {
-  'index': 'Introduction',
+  index: 'Introduction',
   '-- Help': {
-    'type': 'separator',
-    'title': 'Help',
+    type: 'separator',
+    title: 'Help',
   },
-  'use': 'Using monetr',
+  use: 'Using monetr',
 
   '-- Installation': {
-    'type': 'separator',
-    'title': 'Installation',
+    type: 'separator',
+    title: 'Installation',
   },
-  'install': '',
-  'configure': '',
+  install: '',
+  configure: '',
 
   '-- Contributing': {
-    'type': 'separator',
-    'title': 'Contributing',
+    type: 'separator',
+    title: 'Contributing',
   },
-  'development': '',
+  development: '',
 };

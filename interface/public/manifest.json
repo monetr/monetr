@@ -31,10 +31,7 @@
     }
   ],
   "background_color": "#19161f",
-  "categories": [
-    "finance",
-    "utilities"
-  ],
+  "categories": ["finance", "utilities"],
   "description": "monetr budgeting app",
   "dir": "ltr",
   "display": "standalone",

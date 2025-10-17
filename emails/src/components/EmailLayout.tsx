@@ -13,11 +13,11 @@ export default function EmailLayout(props: EmailLayoutProps): JSX.Element {
   return (
     <Html>
       <Head />
-      <Preview>{ props.previewText }</Preview>
-      <Tailwind config={ tailwindConfig as any }>
+      <Preview>{props.previewText}</Preview>
+      <Tailwind config={tailwindConfig as any}>
         <Body className='bg-white my-auto mx-auto font-sans'>
           <Container className='border border-solid border-gray-200 rounded my-10 mx-auto p-5 max-w-xl'>
-            { props.children }
+            {props.children}
           </Container>
         </Body>
       </Tailwind>

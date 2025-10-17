@@ -17,8 +17,5 @@
       "@monetr/interface/*": ["./*"]
     }
   },
-  "include": [
-    "src/setupTests.ts",
-    "src/**/*"
-  ]
+  "include": ["src/setupTests.ts", "src/**/*"]
 }

@@ -46,49 +46,49 @@ export default function BlogIndex(): JSX.Element {
         </div>
       </div>
       <div className='flex m-view-width mx-auto justify-center flex-wrap'>
-        { (getPagesUnderRoute('/blog') as Array<Page & { frontMatter: FrontMatter }>)
+        {(getPagesUnderRoute('/blog') as Array<Page & { frontMatter: FrontMatter }>)
           .sort((a, b) => new Date(b.frontMatter.date).getTime() - new Date(a.frontMatter.date).getTime())
           .map(page => (
-            <Link key={ page.route } href={ page.route } className='block mb-8 group flex-shrink-0 w-full lg:w-1/2'>
-              { page.frontMatter?.ogImage ? (
+            <Link key={page.route} href={page.route} className='block mb-8 group flex-shrink-0 w-full lg:w-1/2'>
+              {page.frontMatter?.ogImage ? (
                 <div className='mt-4 rounded relative aspect-video overflow-hidden'>
                   <Image
-                    src={ page.frontMatter.ogImage }
+                    src={page.frontMatter.ogImage}
                     className='object-cover transform group-hover:scale-105 transition-transform'
-                    alt={ page.frontMatter?.title ?? 'Blog post image' }
-                    fill={ true }
+                    alt={page.frontMatter?.title ?? 'Blog post image'}
+                    fill={true}
                     sizes='(min-width: 1024px) 33vw, 100vw'
                     priority
                   />
                 </div>
-              ) : null }
+              ) : null}
               <h2 className='flex mt-8 text-3xl opacity-90 group-hover:opacity-100 items-center gap-2'>
-                { page.meta?.title || page.frontMatter?.title || page.name }
-                { page.frontMatter?.tag ? (
+                {page.meta?.title || page.frontMatter?.title || page.name}
+                {page.frontMatter?.tag ? (
                   <span className='opacity-80 text-xs py-1 px-2 ring-1 ring-gray-300 rounded group-hover:opacity-100 mt-1'>
-                    { page.frontMatter.tag }
+                    {page.frontMatter.tag}
                   </span>
-                ) : null }
+                ) : null}
               </h2>
               <div className='opacity-80 mt-2 group-hover:opacity-100'>
-                { page.frontMatter?.description }
+                {page.frontMatter?.description}
                 &nbsp;
-                <span className='flex items-center'>Read more <ArrowRight className='h-4' /></span>
+                <span className='flex items-center'>
+                  Read more <ArrowRight className='h-4' />
+                </span>
               </div>
               <div className='flex gap-2 flex-wrap mt-3 items-baseline'>
-                { page.frontMatter?.date ? (
+                {page.frontMatter?.date ? (
                   <span className='opacity-60 text-sm group-hover:opacity-100'>
-                    { format(parse(page.frontMatter.date, 'yyyy/MM/dd', new Date()), 'MMMM dd, yyyy') }
+                    {format(parse(page.frontMatter.date, 'yyyy/MM/dd', new Date()), 'MMMM dd, yyyy')}
                   </span>
-                ) : null }
-                { page.frontMatter?.author ? (
-                  <span className='opacity-60 text-sm group-hover:opacity-100'>
-                    by { page.frontMatter.author }
-                  </span>
-                ) : null }
+                ) : null}
+                {page.frontMatter?.author ? (
+                  <span className='opacity-60 text-sm group-hover:opacity-100'>by {page.frontMatter.author}</span>
+                ) : null}
               </div>
             </Link>
-          )) }
+          ))}
       </div>
     </div>
   );

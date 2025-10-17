@@ -10,7 +10,7 @@ import '@monetr/docs/styles/globals.scss';
 export default function App({ Component, pageProps }: AppProps): ReactElement {
   return (
     <QueryClientWrapper>
-      <Component { ...pageProps } />
+      <Component {...pageProps} />
     </QueryClientWrapper>
   );
 }
