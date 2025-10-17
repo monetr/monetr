@@ -83,7 +83,7 @@
     "@types/react-google-recaptcha": "2.1.9",
     "autoprefixer": "10.4.21",
     "axios-mock-adapter": "2.1.0",
-    "cssnano": "7.0.7",
+    "cssnano": "7.1.1",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "postcss": "8.5.6",
