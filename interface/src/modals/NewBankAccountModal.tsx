@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useRef } from 'react';
+import { Fragment, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
@@ -56,7 +56,7 @@ function NewBankAccountModal(): JSX.Element {
         .then(() => modal.remove())
         .catch(
           (error: AxiosError) =>
-            void enqueueSnackbar(error.response.data['error'], {
+            void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,
             }),
@@ -92,7 +92,7 @@ function NewBankAccountModal(): JSX.Element {
                 id='bank-account-name-search' // Keep's 1Pass from hijacking normal name fields.
                 data-testid='bank-account-name'
                 name='name'
-                label={"What is the account's name ?"}
+                label="What is the account's name ?"
                 required
                 autoComplete='off'
                 placeholder='Personal Checking...'
@@ -105,7 +105,7 @@ function NewBankAccountModal(): JSX.Element {
                 label='Initial Balance'
                 required
                 allowNegative
-                currency={values['currency']}
+                currency={values.currency}
               />
             </div>
             <div className='flex justify-end gap-2'>

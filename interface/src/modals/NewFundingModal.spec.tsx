@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { act, waitFor } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
 

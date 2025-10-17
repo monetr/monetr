@@ -45,7 +45,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
 
       // Not strict equal because undefined vs null stuff.
       // If the selected spending is the same as what we have now, do nothing.
-      if (spendingId == transaction.spendingId) {
+      if (spendingId === transaction.spendingId) {
         return Promise.resolve();
       }
       setIsLoading(true);
@@ -124,18 +124,18 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
           },
           colors: {
             ...baseTheme.colors,
-            neutral0: theme.tailwind.colors['dark-monetr']['background']['DEFAULT'],
-            neutral5: theme.tailwind.colors['dark-monetr']['background']['subtle'],
-            neutral10: theme.tailwind.colors['dark-monetr']['background']['emphasis'],
-            neutral20: theme.tailwind.colors['dark-monetr']['border']['string'],
-            neutral30: theme.tailwind.colors['dark-monetr']['content']['DEFAULT'],
-            neutral60: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            neutral70: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            neutral80: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            neutral90: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            primary25: theme.tailwind.colors['dark-monetr']['background']['emphasis'],
-            primary50: theme.tailwind.colors['dark-monetr']['brand']['faint'],
-            primary: theme.tailwind.colors['dark-monetr']['brand']['DEFAULT'],
+            neutral0: theme.tailwind.colors['dark-monetr'].background.DEFAULT,
+            neutral5: theme.tailwind.colors['dark-monetr'].background.subtle,
+            neutral10: theme.tailwind.colors['dark-monetr'].background.emphasis,
+            neutral20: theme.tailwind.colors['dark-monetr'].border.string,
+            neutral30: theme.tailwind.colors['dark-monetr'].content.DEFAULT,
+            neutral60: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            neutral70: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            neutral80: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            neutral90: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            primary25: theme.tailwind.colors['dark-monetr'].background.emphasis,
+            primary50: theme.tailwind.colors['dark-monetr'].brand.faint,
+            primary: theme.tailwind.colors['dark-monetr'].brand.DEFAULT,
           },
         })}
         menuPortalTarget={document.body}
@@ -156,7 +156,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
           }),
           option: (base: object) => ({
             ...base,
-            color: theme.tailwind.colors['dark-monetr']['content']['emphasized'],
+            color: theme.tailwind.colors['dark-monetr'].content.emphasized,
           }),
           menuPortal: (base: object) => ({
             ...base,

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import type { AxiosError } from 'axios';
 import { tz } from '@date-fns/tz';

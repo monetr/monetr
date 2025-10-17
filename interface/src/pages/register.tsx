@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
@@ -43,31 +43,31 @@ function validator(values: RegisterValues): FormikErrors<RegisterValues> {
   const errors = {};
 
   if (values?.firstName.length < 2) {
-    errors['firstName'] = 'First name must have at least 2 characters.';
+    errors.firstName = 'First name must have at least 2 characters.';
   }
 
   if (values?.lastName.length < 2) {
-    errors['lastName'] = 'Last name must have at least 2 characters.';
+    errors.lastName = 'Last name must have at least 2 characters.';
   }
 
   if (values?.email.length === 0) {
-    errors['email'] = 'Email must be provided.';
+    errors.email = 'Email must be provided.';
   }
 
   if (values?.email && !verifyEmailAddress(values?.email)) {
-    errors['email'] = 'Email must be valid.';
+    errors.email = 'Email must be valid.';
   }
 
   if (values?.password.length < 8) {
-    errors['password'] = 'Password must be at least 8 characters long.';
+    errors.password = 'Password must be at least 8 characters long.';
   }
 
   if (values?.confirmPassword !== values?.password) {
-    errors['confirmPassword'] = 'Password confirmation must match.';
+    errors.confirmPassword = 'Password confirmation must match.';
   }
 
   if (values?.password.length > 71) {
-    errors['password'] = 'Password is too long, must be less than 72 characters.';
+    errors.password = 'Password is too long, must be less than 72 characters.';
   }
 
   return errors;
@@ -94,7 +94,7 @@ export default function Register(): JSX.Element {
   const [successful, setSuccessful] = useState(false);
 
   function BetaCodeInput(): JSX.Element {
-    if (!config?.requireBetaCode) return null;
+    if (!config?.requireBetaCode) { return null; }
 
     return <MTextField label='Beta Code' name='betaCode' type='text' required uppercasetext className={breakpoints} />;
   }

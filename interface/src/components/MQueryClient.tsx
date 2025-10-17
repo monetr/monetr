@@ -29,17 +29,17 @@ export default function MQueryClient(props: MQueryClientProps): JSX.Element {
       let method = 'GET';
       let body;
       let params = {};
-      if (context.queryKey.length > 1 && context?.meta?.['method'] !== QueryMethod.UseQuery) {
+      if (context.queryKey.length > 1 && context?.meta?.method !== QueryMethod.UseQuery) {
         method = 'POST';
         body = context.queryKey[1];
       }
 
-      if (context?.meta?.['method'] === QueryMethod.UseQuery && context.queryKey.length > 1) {
+      if (context?.meta?.method === QueryMethod.UseQuery && context.queryKey.length > 1) {
         params = context.queryKey[1];
       }
 
       if (context.pageParam) {
-        params['offset'] = context.pageParam;
+        params.offset = context.pageParam;
       }
 
       const { data } = await client

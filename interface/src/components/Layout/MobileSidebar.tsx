@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useMatch } from 'react-router-dom';
 
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';

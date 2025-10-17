@@ -176,7 +176,7 @@ function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccoun
       <Check
         className={mergeTailwind(
           'mr-1 h-5 w-5 flex-none',
-          props.currentValue == props.option.value ? 'opacity-100' : 'opacity-0',
+          props.currentValue === props.option.value ? 'opacity-100' : 'opacity-0',
         )}
       />
       <MSpan className='w-full' color='emphasis' ellipsis>
@@ -187,7 +187,7 @@ function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccoun
           Inactive
         </MBadge>
       )}
-      {props.option.mask != '' && (
+      {props.option.mask !== '' && (
         <MBadge size='xs' className='font-mono'>
           {props.option.mask}
         </MBadge>
@@ -239,7 +239,7 @@ function SelectBankAccountPicker(props: SelectBankAccountPickerProps): JSX.Eleme
               value={`${option.label} ${option.value}` /* makes search work properly :( */}
               title={option.label}
               onSelect={() => {
-                props.onSelect && props.onSelect(option.value);
+                props.onSelect?.(option.value);
                 props.setOpen(false);
               }}
             >

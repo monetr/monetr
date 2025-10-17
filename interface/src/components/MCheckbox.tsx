@@ -1,5 +1,4 @@
-/* eslint-disable max-len */
-import React from 'react';
+
 import { useFormikContext } from 'formik';
 
 import type { ReactElement } from './types';
@@ -20,7 +19,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
   const formikContext = useFormikContext();
 
   function Label(): JSX.Element {
-    if (!props.label) return null;
+    if (!props.label) { return null; }
 
     const labelClasses = mergeTailwind('font-medium', {
       'dark:text-dark-monetr-content-emphasis': !props.disabled,
@@ -37,7 +36,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
   }
 
   function Description(): JSX.Element {
-    if (!props.description) return null;
+    if (!props.description) { return null; }
 
     return <p className='text-gray-500 dark:text-dark-monetr-content'>{props.description}</p>;
   }

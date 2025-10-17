@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { format } from 'date-fns';
 
 import MDivider from '@monetr/interface/components/MDivider';

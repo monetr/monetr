@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 
-import React from 'react';
 import { format, isThisYear } from 'date-fns';
 
 interface TransactionDateItemProps {

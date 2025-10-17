@@ -1,5 +1,4 @@
-/* eslint-disable max-len */
-import React from 'react';
+
 import { Link, useLocation } from 'react-router-dom';
 import { CalendarSync, Infinity, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
 
@@ -155,7 +154,7 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
 
 function NextFundingBadge(): JSX.Element {
   const next = useNextFundingDate();
-  if (!next) return null;
+  if (!next) { return null; }
 
   return (
     <MBadge className='ml-auto' size='sm'>

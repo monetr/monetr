@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Mail, RectangleEllipsis } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';

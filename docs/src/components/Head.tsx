@@ -71,7 +71,7 @@ export default function Head(): JSX.Element {
           <meta name='twitter:image' content={realUrl(frontMatter.ogImage)} />
         </Fragment>
       )}
-      {process.env.NODE_ENV != 'development' && (
+      {process.env.NODE_ENV !== 'development' && (
         <script defer src='https://a.monetr.app/script.js' data-website-id='ccbdfaf9-683f-4487-b97f-5516e1353715' />
       )}
       <ChatwootIntegration />

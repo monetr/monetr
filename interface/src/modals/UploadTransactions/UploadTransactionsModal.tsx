@@ -1,4 +1,4 @@
-import React, { type FormEvent, useCallback, useRef, useState } from 'react';
+import { type FormEvent, useCallback, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Close, FilePresentOutlined, UploadFileOutlined } from '@mui/icons-material';
@@ -92,7 +92,7 @@ function UploadFileStage(props: StageProps) {
     event.preventDefault();
 
     // If the file has not been presented then do nothing!
-    if (!file) return;
+    if (!file) { return; }
 
     const formData = new FormData();
     formData.append('data', file, file.name);

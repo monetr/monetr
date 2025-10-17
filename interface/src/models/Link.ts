@@ -32,13 +32,14 @@ export default class Link {
   plaidLink: PlaidLink | null;
 
   constructor(data?: Partial<Link>) {
-    if (data)
+    if (data) {
       Object.assign(this, {
         ...data,
         plaidLink: data?.plaidLink && new PlaidLink(data.plaidLink),
         updatedAt: parseDate(data?.updatedAt),
         createdAt: parseDate(data?.createdAt),
       });
+    }
   }
 
   getName(): string {

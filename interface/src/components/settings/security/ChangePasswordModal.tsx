@@ -57,20 +57,20 @@ function ChangePasswordModal(): JSX.Element {
     const errors: FormikErrors<ChangePasswordValues> = {};
 
     if (!values.currentPassword) {
-      errors['currentPassword'] = 'Your current password must be provided in order to change your password.';
+      errors.currentPassword = 'Your current password must be provided in order to change your password.';
       return errors;
     }
 
     if (values.newPassword.length < 8) {
-      errors['newPassword'] = 'New Password must be at least 8 characters long.';
+      errors.newPassword = 'New Password must be at least 8 characters long.';
     }
 
     if (values.repeatPassword.length === 0) {
-      errors['repeatPassword'] = 'You must repeat your password.';
+      errors.repeatPassword = 'You must repeat your password.';
     }
 
     if (values.repeatPassword !== values.newPassword) {
-      errors['repeatPassword'] = 'New Passwords must match.';
+      errors.repeatPassword = 'New Passwords must match.';
     }
 
     return errors;

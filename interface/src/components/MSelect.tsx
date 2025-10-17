@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import Select, {
   type ActionMeta,
   type GroupBase,
@@ -35,7 +35,7 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
   const theme = useTheme();
 
   function Error() {
-    if (!props.error) return null;
+    if (!props.error) { return null; }
 
     return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
   }
@@ -124,7 +124,6 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
             onChange: props.onChange,
           })
         }
-        role='select'
       >
         <ValueContainer />
       </button>
@@ -134,18 +133,18 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
           borderRadius: 8,
           colors: {
             ...baseTheme.colors,
-            neutral0: theme.tailwind.colors['dark-monetr']['background']['DEFAULT'],
-            neutral5: theme.tailwind.colors['dark-monetr']['background']['subtle'],
-            neutral10: theme.tailwind.colors['dark-monetr']['background']['emphasis'],
-            neutral20: theme.tailwind.colors['dark-monetr']['border']['string'],
-            neutral30: theme.tailwind.colors['dark-monetr']['content']['DEFAULT'],
-            neutral60: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            neutral70: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            neutral80: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            neutral90: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            primary25: theme.tailwind.colors['dark-monetr']['background']['emphasis'],
-            primary50: theme.tailwind.colors['dark-monetr']['brand']['faint'],
-            primary: theme.tailwind.colors['dark-monetr']['brand']['DEFAULT'],
+            neutral0: theme.tailwind.colors['dark-monetr'].background.DEFAULT,
+            neutral5: theme.tailwind.colors['dark-monetr'].background.subtle,
+            neutral10: theme.tailwind.colors['dark-monetr'].background.emphasis,
+            neutral20: theme.tailwind.colors['dark-monetr'].border.string,
+            neutral30: theme.tailwind.colors['dark-monetr'].content.DEFAULT,
+            neutral60: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            neutral70: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            neutral80: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            neutral90: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            primary25: theme.tailwind.colors['dark-monetr'].background.emphasis,
+            primary50: theme.tailwind.colors['dark-monetr'].brand.faint,
+            primary: theme.tailwind.colors['dark-monetr'].brand.DEFAULT,
           },
         })}
         {...otherProps}
@@ -164,7 +163,7 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
           }),
           option: (base: object) => ({
             ...base,
-            color: theme.tailwind.colors['dark-monetr']['content']['emphasized'],
+            color: theme.tailwind.colors['dark-monetr'].content.emphasized,
           }),
           menuPortal: (base: object) => ({
             ...base,
@@ -212,15 +211,15 @@ function SelectModal(props: SelectModalProps): JSX.Element {
         <ul className='w-full flex flex-col gap-2'>
           {options.map(item => (
             <li
-              key={item['value']}
+              key={item.value}
               className='w-full flex items-center active:bg-dark-monetr-background-subtle py-2'
               onClick={() => {
                 props.onChange(item, undefined);
                 modal.hide();
               }}
             >
-              {props.value?.['value'] === item['value'] && <CheckCircleOutline className='mx-2 w-6' />}
-              {props.value?.['value'] !== item['value'] && <div className='mx-2 w-6' />}
+              {props.value?.value === item.value && <CheckCircleOutline className='mx-2 w-6' />}
+              {props.value?.value !== item.value && <div className='mx-2 w-6' />}
               <MSpan size='lg' weight='medium'>
                 {item.label}
               </MSpan>

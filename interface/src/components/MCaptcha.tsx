@@ -1,4 +1,4 @@
-import React from 'react';
+
 import ReCAPTCHA from 'react-google-recaptcha';
 import { useFormikContext } from 'formik';
 import { LoaderCircle } from 'lucide-react';
@@ -10,7 +10,7 @@ export interface MCaptchaProps {
   name?: string;
   show?: boolean;
   className?: string;
-  ['data-testid']?: string;
+  'data-testid'?: string;
 }
 
 export default function MCaptcha(props: MCaptchaProps): JSX.Element {
@@ -22,7 +22,7 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
   }
 
   function onVerify(verification: string): void {
-    if (!formikContext?.setFieldValue || !props.name) return;
+    if (!formikContext?.setFieldValue || !props.name) { return; }
 
     formikContext.setFieldValue(
       props.name, // Name

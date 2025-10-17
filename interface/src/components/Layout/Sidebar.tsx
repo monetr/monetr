@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import MobileSidebar from '@monetr/interface/components/Layout/MobileSidebar';

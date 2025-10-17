@@ -38,7 +38,7 @@ export function useCreateTransaction(): (_: CreateTransactionRequest) => Promise
         queryClient.setQueryData(
           [`/bank_accounts/${transaction.bankAccountId}/spending`],
           (previous: Array<Partial<Spending>>) =>
-            previous.map(item => (spending?.spendingId == item.spendingId ? spending : item)),
+            previous.map(item => (spending?.spendingId === item.spendingId ? spending : item)),
         ),
         spending != null &&
           queryClient.setQueryData(

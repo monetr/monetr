@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 import ManualLinkSetupAccountName from '@monetr/interface/components/setup/manual/ManualLinkSetupAccountName';
 import ManualLinkSetupBalances from '@monetr/interface/components/setup/manual/ManualLinkSetupBalances';

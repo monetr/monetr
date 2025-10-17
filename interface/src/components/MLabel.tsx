@@ -20,7 +20,7 @@ export interface MLabelProps {
 
 export default function MLabel(props: MLabelProps): JSX.Element {
   function MaybeLabel(): JSX.Element {
-    if (!props.label) return null;
+    if (!props.label) { return null; }
 
     const labelClassNames = mergeTailwind('mb-1', 'block', 'text-sm', 'font-medium', 'leading-6', {
       'text-gray-900': !props.disabled,
@@ -36,7 +36,7 @@ export default function MLabel(props: MLabelProps): JSX.Element {
   }
 
   function MaybeRequired(): JSX.Element {
-    if (!props.required) return null;
+    if (!props.required) { return null; }
     return <span className='text-red-500'>*</span>;
   }
 

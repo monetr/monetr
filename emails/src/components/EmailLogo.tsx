@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Img, Section } from '@react-email/components';
 
 export interface EmailLogoProps {

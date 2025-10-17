@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { format, isThisYear } from 'date-fns';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';

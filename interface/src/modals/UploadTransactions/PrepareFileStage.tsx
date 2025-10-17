@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { FilePresentOutlined } from '@mui/icons-material';
 import axios, { type AxiosError, type AxiosResponse } from 'axios';
 
@@ -20,7 +20,7 @@ export default function PrepareFileStage(props: PrepareFileStageProps): JSX.Elem
   const selectedBankAccountId = useSelectedBankAccountId();
 
   useEffect(() => {
-    if (!selectedBankAccountId) return;
+    if (!selectedBankAccountId) { return; }
 
     axios
       .post(`/api/bank_accounts/${selectedBankAccountId}/transactions/upload`, {

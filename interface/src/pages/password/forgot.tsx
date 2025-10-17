@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { FormikErrors, FormikHelpers } from 'formik';
 
 import FormButton from '@monetr/interface/components/FormButton';
@@ -56,7 +56,7 @@ export default function ForgotPasswordNew(): JSX.Element {
     const errors: FormikErrors<Values> = {};
 
     if (values.email && !verifyEmailAddress(values.email)) {
-      errors['email'] = 'Please provide a valid email address.';
+      errors.email = 'Please provide a valid email address.';
     }
 
     return errors;

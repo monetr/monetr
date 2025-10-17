@@ -87,7 +87,7 @@ export function intlNumberFormatter(locale: string = 'en_US', currency: string =
     currency: currency,
   });
   return (value: string) => {
-    if (value === '') return '';
+    if (value === '') { return ''; }
     return formatter.format(+value);
   };
 }

@@ -1,5 +1,4 @@
-/* eslint-disable max-len */
-import React from 'react';
+
 import { ArrowRight, CircleCheck } from 'lucide-react';
 import Link from 'next/link';
 

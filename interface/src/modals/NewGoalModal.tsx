@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
 import { tz } from '@date-fns/tz';
@@ -65,7 +65,7 @@ function NewGoalModal(): JSX.Element {
       .then(() => modal.remove())
       .catch(
         (error: AxiosError) =>
-          void enqueueSnackbar(error.response.data['error'], {
+          void enqueueSnackbar(error.response.data.error, {
             variant: 'error',
             disableWindowBlurListener: true,
           }),

@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import MLogo from '@monetr/interface/components/MLogo';
 import MStepper from '@monetr/interface/components/MStepper';

@@ -40,7 +40,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   const formikContext = useFormikContext();
 
   const getFormikError = () => {
-    if (!formikContext?.touched[props?.name]) return null;
+    if (!formikContext?.touched[props?.name]) { return null; }
 
     return formikContext?.errors[props?.name];
   };
@@ -72,8 +72,8 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
 
   const disabledDays = useMemo(() => {
     const disabledDays = [];
-    if (minDate) disabledDays.push({ before: minDate });
-    if (maxDate) disabledDays.push({ after: maxDate });
+    if (minDate) { disabledDays.push({ before: minDate }); }
+    if (maxDate) { disabledDays.push({ after: maxDate }); }
     return disabledDays;
   }, [minDate, maxDate]);
 
@@ -179,7 +179,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
 
   const LabelDecorator = props.labelDecorator || (() => null);
   function Error() {
-    if (!props.error) return null;
+    if (!props.error) { return null; }
 
     return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
   }

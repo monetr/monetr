@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 import MerchantIcon, { type MerchantIconProps } from '@monetr/interface/components/MerchantIcon';
 

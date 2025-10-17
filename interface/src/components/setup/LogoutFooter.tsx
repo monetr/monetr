@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 import MLink from '@monetr/interface/components/MLink';
 import MSpan from '@monetr/interface/components/MSpan';

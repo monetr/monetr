@@ -89,7 +89,7 @@ export function ComboboxItem<V extends string, O extends ComboboxOption<V>>(
       <Check
         className={mergeTailwind(
           'mr-2 h-5 w-5',
-          props.currentValue == props.option.value ? 'opacity-100' : 'opacity-0',
+          props.currentValue === props.option.value ? 'opacity-100' : 'opacity-0',
         )}
       />
       {props.option.label}
@@ -120,7 +120,7 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
                 value={`${option.label} ${option.value}` /* makes search work properly :( */}
                 title={option.label}
                 onSelect={() => {
-                  props.onSelect && props.onSelect(option.value);
+                  props.onSelect?.(option.value);
                   setOpen(false);
                 }}
               >

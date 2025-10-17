@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
@@ -49,7 +49,7 @@ export default function ResendVerificationPage(): JSX.Element {
 
     if (values.email) {
       if (!verifyEmailAddress(values.email)) {
-        errors['email'] = 'Please provide a valid email address.';
+        errors.email = 'Please provide a valid email address.';
       }
     }
 
@@ -65,7 +65,7 @@ export default function ResendVerificationPage(): JSX.Element {
   );
 
   const initialValues: ResendValues = {
-    email: (routeState && routeState['emailAddress']) || undefined,
+    email: (routeState?.emailAddress) || undefined,
     captcha: null,
   };
 

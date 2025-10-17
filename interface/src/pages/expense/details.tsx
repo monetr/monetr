@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useNavigate, useParams } from 'react-router-dom';
 import { HeartBroken } from '@mui/icons-material';
 import type { AxiosError } from 'axios';

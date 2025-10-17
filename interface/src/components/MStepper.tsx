@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 
 import MDivider from './MDivider';
 import MSpan from './MSpan';
@@ -28,7 +28,7 @@ export default function MStepper(props: MStepperProps): JSX.Element {
       ];
 
     // We will show the divider when we are not the last item.
-    const divider = index != steps.length - 1;
+    const divider = index !== steps.length - 1;
 
     return <MStep key={index} state={state} name={name} currentIndex={activeIndex} index={index} divider={divider} />;
   });

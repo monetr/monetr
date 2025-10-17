@@ -1,4 +1,4 @@
-import React from 'react';
+
 import type { Meta, StoryObj } from '@storybook/react';
 
 import ForgotPasswordPage, { ForgotPasswordComplete } from '@monetr/interface/pages/password/forgot';

@@ -1,5 +1,4 @@
-/* eslint-disable max-len */
-import React from 'react';
+
 import { formatDistanceToNow } from 'date-fns';
 
 import MSpan from '@monetr/interface/components/MSpan';

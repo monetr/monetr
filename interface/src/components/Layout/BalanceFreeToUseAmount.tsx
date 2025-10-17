@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { AccountBalanceWalletOutlined } from '@mui/icons-material';
 
 import MSpan from '@monetr/interface/components/MSpan';
