@@ -3,7 +3,12 @@ import React, { Fragment, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EllipsisVertical, LogIn, Plug, RefreshCw, Settings, Trash2 } from 'lucide-react';
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@monetr/interface/components/DropdownMenu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@monetr/interface/components/DropdownMenu';
 import MDivider from '@monetr/interface/components/MDivider';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { ReactElement } from '@monetr/interface/components/types';
@@ -47,7 +52,7 @@ export default function BudgetingSidebarTitle(): JSX.Element {
   if (!link) {
     return (
       <Fragment>
-        <div className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis' >
+        <div className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis'>
           <Skeleton className='h-7 w-full' />
         </div>
         <MDivider className='w-1/2' />
@@ -58,38 +63,34 @@ export default function BudgetingSidebarTitle(): JSX.Element {
   return (
     <Fragment>
       <DropdownMenu>
-        <DropdownMenuTrigger
-          className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis dark:hover:bg-dark-monetr-background-emphasis'
-        >
-          <span className='truncate text-xl font-semibold'>
-            { link?.getName() }
-          </span>
+        <DropdownMenuTrigger className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis dark:hover:bg-dark-monetr-background-emphasis'>
+          <span className='truncate text-xl font-semibold'>{link?.getName()}</span>
           <EllipsisVertical className='ml-auto shrink-0' />
         </DropdownMenuTrigger>
         <DropdownMenuContent className='w-72'>
-          <MenuItem 
-            visible={ link.getIsPlaid() && (link.getIsError() || link.getIsPendingExpiration()) } 
-            onClick={ handleReauthenticateLink }
+          <MenuItem
+            visible={link.getIsPlaid() && (link.getIsError() || link.getIsPendingExpiration())}
+            onClick={handleReauthenticateLink}
           >
             <LogIn />
             Reauthenticate
           </MenuItem>
-          <MenuItem visible={ link.getIsPlaid() } onClick={ handleUpdateAccountSelection }>
+          <MenuItem visible={link.getIsPlaid()} onClick={handleUpdateAccountSelection}>
             <Plug />
             Update Account Selection
           </MenuItem>
-          <MenuItem visible={ link.getIsPlaid() && !link.getIsRevoked() } onClick={ handleTriggerResync }>
+          <MenuItem visible={link.getIsPlaid() && !link.getIsRevoked()} onClick={handleTriggerResync}>
             <RefreshCw />
             Manually Resync
           </MenuItem>
-          <MenuItem visible onClick={ handleLinkSettings }>
+          <MenuItem visible onClick={handleLinkSettings}>
             <Settings />
             Settings
           </MenuItem>
           <MDivider />
-          <MenuItem visible onClick={ handleRemoveLink }>
+          <MenuItem visible onClick={handleRemoveLink}>
             <Trash2 className='text-dark-monetr-red' />
-            Remove { link?.getName() }
+            Remove {link?.getName()}
           </MenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -109,11 +110,5 @@ function MenuItem({ visible, onClick, children }: MenuItemProps): JSX.Element {
     return null;
   }
 
-  return (
-    <DropdownMenuItem
-      onClick={ onClick }
-    >
-      { children }
-    </DropdownMenuItem>
-  );
+  return <DropdownMenuItem onClick={onClick}>{children}</DropdownMenuItem>;
 }

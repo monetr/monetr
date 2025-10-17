@@ -52,8 +52,8 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
     value: index,
   }));
 
-  const value = selectedIndex !== null && selectedIndex >= 0 && selectedIndex < options.length ?
-    options[selectedIndex] : null;
+  const value =
+    selectedIndex !== null && selectedIndex >= 0 && selectedIndex < options.length ? options[selectedIndex] : null;
 
   function onChange(newValue: OnChangeValue<SelectOption, false>, _: ActionMeta<SelectOption>) {
     setSelectedIndex(newValue.value);
@@ -64,20 +64,19 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
 
   return (
     <MSelect
-      { ...props }
+      {...props}
       placeholder='Select a frequency...'
-      disabled={ formikContext?.isSubmitting }
-      error={ formikContext?.errors[props.name] }
-      isClearable={ false }
-      label={ props.label }
-      name={ props.name }
-      onChange={ onChange }
-      options={ options }
-      value={ value }
+      disabled={formikContext?.isSubmitting}
+      error={formikContext?.errors[props.name]}
+      isClearable={false}
+      label={props.label}
+      name={props.name}
+      onChange={onChange}
+      options={options}
+      value={value}
     />
   );
 }
-
 
 interface SelectOption {
   readonly label: string;

@@ -66,31 +66,29 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
 
   const redirectUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
 
-  const dateString =  isThisYear(transaction.date) ?
-    format(transaction.date, 'MMMM do') :
-    format(transaction.date, 'MMMM do, yyyy');
+  const dateString = isThisYear(transaction.date)
+    ? format(transaction.date, 'MMMM do')
+    : format(transaction.date, 'MMMM do, yyyy');
 
   return (
     <li className='group relative w-full px-1 md:px-2'>
       <div className='group flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4'>
         <div className='flex w-full min-w-0 flex-1 flex-row items-center gap-4 md:w-1/2'>
-          <TransactionMerchantIcon name={ transaction.getName() } pending={ transaction.isPending } />
+          <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
           <div className='flex min-w-0 flex-col overflow-hidden'>
             <span className='w-full min-w-0 truncate text-base font-semibold dark:text-dark-monetr-content-emphasis'>
               {transaction.getName()}
             </span>
             <span className='w-full min-w-0 truncate text-sm font-medium dark:text-dark-monetr-content'>
-              { dateString }
+              {dateString}
             </span>
           </div>
         </div>
         <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
-          <span className={ amountClassnames }>
-            { locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0) }
+          <span className={amountClassnames}>
+            {locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0)}
           </span>
-          { !props.disableNavigate && (
-            <ArrowLink to={ redirectUrl } />
-          ) }
+          {!props.disableNavigate && <ArrowLink to={redirectUrl} />}
         </div>
       </div>
     </li>

@@ -33,15 +33,11 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
   const inTimezone = useMemo(() => tz(timezone), [timezone]);
 
   if (isLoading) {
-    return (
-      <MSpan>Loading...</MSpan>
-    );
+    return <MSpan>Loading...</MSpan>;
   }
 
   if (isError || !funding) {
-    return (
-      <MSpan>Failed to load funding forecast!</MSpan>
-    );
+    return <MSpan>Failed to load funding forecast!</MSpan>;
   }
 
   // Keep only the events that have spending or contributions for this spending object.
@@ -62,12 +58,12 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
       endingAllocation: event.balance,
       spendingCount: 0,
     };
-  
+
     event.spending.forEach(spending => {
       if (!spending.funding.find(funding => funding.fundingScheduleId === props.fundingScheduleId)) {
         return;
       }
-  
+
       item.contributedAmount += spending.contributionAmount;
       item.spendingCount++;
     });
@@ -100,17 +96,15 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
       'ml-4',
     );
     return (
-      <li className={ rowClassNames }>
+      <li className={rowClassNames}>
         <div className='absolute w-3 h-3 bg-zinc-200 rounded-full mt-1.5 -left-1.5 border border-white dark:border-zinc-900 dark:bg-zinc-700' />
         <time className='mb-1 text-sm font-normal leading-none text-zinc-400 dark:text-zinc-500'>
-          {format(inTimezone(props.date), 'MMMM do')} <br /> { dateExtra }
+          {format(inTimezone(props.date), 'MMMM do')} <br /> {dateExtra}
         </time>
         <h3 className='text-lg font-semibold text-zinc-900 dark:text-white'>
           {header} {icon}
         </h3>
-        <p className='text-base font-normal text-zinc-500 dark:text-zinc-400'>
-          {body}
-        </p>
+        <p className='text-base font-normal text-zinc-500 dark:text-zinc-400'>{body}</p>
         {secondaryBody && <p className='text-base font-normal text-zinc-500 dark:text-zinc-400'>{secondaryBody}</p>}
       </li>
     );
@@ -118,7 +112,9 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
 
   return (
     <ol className='relative border-l border-zinc-200 dark:border-zinc-700'>
-      {timelineItems.map((item, index) => (<TimelineItem key={ getUnixTime(item.date) } { ...item } last={ timelineItems.length - 1 === index } />))}
+      {timelineItems.map((item, index) => (
+        <TimelineItem key={getUnixTime(item.date)} {...item} last={timelineItems.length - 1 === index} />
+      ))}
     </ol>
   );
 }

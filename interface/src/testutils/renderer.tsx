@@ -10,25 +10,21 @@ import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
 import { TooltipProvider } from '@monetr/interface/components/Tooltip';
 import { newTheme } from '@monetr/interface/theme';
 
-export interface Options<
-  Q extends Queries = typeof queries,
-  Container extends Element | DocumentFragment = HTMLElement,
-> extends RenderOptions<Q, Container> {
+export interface Options<Q extends Queries = typeof queries, Container extends Element | DocumentFragment = HTMLElement>
+  extends RenderOptions<Q, Container> {
   initialRoute: string | Partial<Location>;
   client?: AxiosInstance;
 }
 
-function testRenderer<Q extends Queries = typeof queries,
-  Container extends Element | DocumentFragment = HTMLElement,
->(
+function testRenderer<Q extends Queries = typeof queries, Container extends Element | DocumentFragment = HTMLElement>(
   ui: React.ReactElement,
-  options?: Options<Q, Container>
+  options?: Options<Q, Container>,
 ): RenderResult<Q, Container> {
   const Wrapper = (props: React.PropsWithChildren<any>) => {
     return (
-      <MemoryRouter initialEntries={ [options.initialRoute] }>
-        <MQueryClient client={ options.client }>
-          <ThemeProvider theme={ newTheme }>
+      <MemoryRouter initialEntries={[options.initialRoute]}>
+        <MQueryClient client={options.client}>
+          <ThemeProvider theme={newTheme}>
             <MSnackbarProvider>
               <TooltipProvider>
                 <NiceModal.Provider>

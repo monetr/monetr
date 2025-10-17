@@ -14,13 +14,13 @@ export function useRemoveLink(): (_linkId: string) => Promise<unknown> {
 
   const mutate = useMutation({
     mutationFn: removeLink,
-    onSuccess: (linkId: string) => Promise.all([
-      queryClient.setQueryData(
-        ['/links'],
-        (previous: Array<Partial<Link>>) => previous.filter(item => item.linkId !== linkId),
-      ),
-      queryClient.removeQueries({ queryKey: [`/links/${linkId}`] }),
-    ]),
+    onSuccess: (linkId: string) =>
+      Promise.all([
+        queryClient.setQueryData(['/links'], (previous: Array<Partial<Link>>) =>
+          previous.filter(item => item.linkId !== linkId),
+        ),
+        queryClient.removeQueries({ queryKey: [`/links/${linkId}`] }),
+      ]),
   });
 
   return mutate.mutateAsync;

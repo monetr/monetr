@@ -45,43 +45,42 @@ export default function TransactionDetails(): JSX.Element {
   const updateTransaction = useUpdateTransaction();
   const transactionId = id || null;
   const { data: transaction, isLoading, isError } = useTransaction(transactionId);
-  const submit = useCallback(async (values: TransactionValues, helpers: FormikHelpers<TransactionValues>) => {
-    const updatedTransaction = new Transaction({
-      ...transaction,
-      name: values.name,
-      spendingId: values.spendingId,
-      amount: locale.friendlyToAmount(values.amount),
-      date: startOfDay(values.date, {
-        in: tz(timezone),
-      }),
-      isPending: values.isPending,
-    });
+  const submit = useCallback(
+    async (values: TransactionValues, helpers: FormikHelpers<TransactionValues>) => {
+      const updatedTransaction = new Transaction({
+        ...transaction,
+        name: values.name,
+        spendingId: values.spendingId,
+        amount: locale.friendlyToAmount(values.amount),
+        date: startOfDay(values.date, {
+          in: tz(timezone),
+        }),
+        isPending: values.isPending,
+      });
 
-    helpers.setSubmitting(true);
-    return await updateTransaction(updatedTransaction)
-      .then(() => enqueueSnackbar(
-        'Updated transaction successfully',
-        {
-          variant: 'success',
-          disableWindowBlurListener: true,
-        },
-      ))
-      .catch((error: AxiosError<APIError>) => enqueueSnackbar(
-        error?.response?.data?.error || 'Failed to update transaction',
-        {
-          variant: 'error',
-          disableWindowBlurListener: true,
-        },
-      ))
-      .finally(() => helpers.setSubmitting(false));
-  }, [enqueueSnackbar, locale, transaction, updateTransaction]);
+      helpers.setSubmitting(true);
+      return await updateTransaction(updatedTransaction)
+        .then(() =>
+          enqueueSnackbar('Updated transaction successfully', {
+            variant: 'success',
+            disableWindowBlurListener: true,
+          }),
+        )
+        .catch((error: AxiosError<APIError>) =>
+          enqueueSnackbar(error?.response?.data?.error || 'Failed to update transaction', {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          }),
+        )
+        .finally(() => helpers.setSubmitting(false));
+    },
+    [enqueueSnackbar, locale, transaction, updateTransaction],
+  );
 
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>
-          One moment...
-        </MSpan>
+        <MSpan className='text-5xl'>One moment...</MSpan>
       </div>
     );
   }
@@ -90,12 +89,8 @@ export default function TransactionDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>
-          Something isn't right...
-        </MSpan>
-        <MSpan className='text-2xl'>
-          There wasn't an expense specified...
-        </MSpan>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>There wasn't an expense specified...</MSpan>
       </div>
     );
   }
@@ -103,12 +98,8 @@ export default function TransactionDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>
-          Something isn't right...
-        </MSpan>
-        <MSpan className='text-2xl'>
-          We weren't able to load details for the transaction specified...
-        </MSpan>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>We weren't able to load details for the transaction specified...</MSpan>
       </div>
     );
   }
@@ -124,18 +115,18 @@ export default function TransactionDetails(): JSX.Element {
 
   return (
     <MForm
-      initialValues={ initialValues }
-      enableReinitialize={ true }
-      onSubmit={ submit }
+      initialValues={initialValues}
+      enableReinitialize={true}
+      onSubmit={submit}
       className='flex w-full h-full flex-col'
     >
       <MTopNavigation
-        icon={ ShoppingCart }
+        icon={ShoppingCart}
         title='Transactions'
-        base={ `/bank/${transaction.bankAccountId}/transactions` }
-        breadcrumb={ transaction?.name }
+        base={`/bank/${transaction.bankAccountId}/transactions`}
+        breadcrumb={transaction?.name}
       >
-        <RemoveTransactionButton transaction={ transaction } />
+        <RemoveTransactionButton transaction={transaction} />
         <FormButton variant='primary' type='submit' role='form'>
           <Save />
           Save Changes
@@ -145,7 +136,7 @@ export default function TransactionDetails(): JSX.Element {
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
             <div className='w-full flex justify-center mb-2'>
-              <MerchantIcon name={ transaction?.name } />
+              <MerchantIcon name={transaction?.name} />
             </div>
             <MTextField
               id='transaction-name-search'
@@ -161,18 +152,8 @@ export default function TransactionDetails(): JSX.Element {
               className='w-full'
               disabled
             />
-            <MAmountField
-              className='w-full'
-              disabled
-              label='Amount'
-              name='amount'
-            />
-            <MDatePicker
-              label='Date'
-              name='date'
-              className='w-full'
-              disabled={ !link.getIsManual() }
-            />
+            <MAmountField className='w-full' disabled label='Amount' name='amount' />
+            <MDatePicker label='Date' name='date' className='w-full' disabled={!link.getIsManual()} />
             <MCheckbox
               id='transaction-details-pending'
               data-testid='transaction-details-pending'
@@ -180,17 +161,12 @@ export default function TransactionDetails(): JSX.Element {
               label='Is Pending'
               description='Transaction has not yet cleared, the name or amount may change.'
               className='w-full'
-              disabled={ !link.getIsManual() }
+              disabled={!link.getIsManual()}
             />
-            { !transaction.getIsAddition() && (
-              <MSelectSpending
-                className='w-full'
-                name='spendingId'
-              />
-            ) }
+            {!transaction.getIsAddition() && <MSelectSpending className='w-full' name='spendingId' />}
           </div>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
-            <SimilarTransactions transaction={ transaction } />
+            <SimilarTransactions transaction={transaction} />
           </div>
         </div>
       </div>

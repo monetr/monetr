@@ -6,14 +6,18 @@ import request, { APIError } from '@monetr/interface/util/request';
 export default function useSendForgotPassword(): (email: string, ReCAPTCHA: string | null) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
   return async (email: string, ReCAPTCHA: string | null) => {
-    return request().post('/authentication/forgot', {
-      email,
-      captcha: ReCAPTCHA,
-    })
-      .then(() => void enqueueSnackbar('Successfully sent password reset link.', {
-        variant: 'success',
-        disableWindowBlurListener: true,
-      }))
+    return request()
+      .post('/authentication/forgot', {
+        email,
+        captcha: ReCAPTCHA,
+      })
+      .then(
+        () =>
+          void enqueueSnackbar('Successfully sent password reset link.', {
+            variant: 'success',
+            disableWindowBlurListener: true,
+          }),
+      )
       .catch((error: AxiosError<APIError>) => {
         const message = error.response.data.error || 'Failed to send password reset email.';
         let variant: VariantType = 'error';
@@ -32,4 +36,4 @@ export default function useSendForgotPassword(): (email: string, ReCAPTCHA: stri
         });
       });
   };
-};
+}

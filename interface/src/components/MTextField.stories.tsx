@@ -4,7 +4,6 @@ import { Meta, StoryFn } from '@storybook/react';
 import MTextField from './MTextField';
 import MDivider from '@monetr/interface/components/MDivider';
 
-
 export default {
   title: '@monetr/interface/components/Text Field',
   component: MTextField,

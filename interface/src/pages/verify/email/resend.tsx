@@ -25,17 +25,24 @@ export default function ResendVerificationPage(): JSX.Element {
   const { state: routeState } = useLocation();
   const [done, setDone] = useState(false);
 
-  const resendVerification = useCallback(async (values: ResendValues): Promise<void> => {
-    return await request().post('/authentication/verify/resend', {
-      email: values.email,
-      captcha: values.captcha,
-    })
-      .then(() => setDone(true))
-      .catch(error => void enqueueSnackbar(error?.response?.data?.error || 'Failed to resend verification link', {
-        variant: 'error',
-        disableWindowBlurListener: true,
-      }));
-  }, [enqueueSnackbar]);
+  const resendVerification = useCallback(
+    async (values: ResendValues): Promise<void> => {
+      return await request()
+        .post('/authentication/verify/resend', {
+          email: values.email,
+          captcha: values.captcha,
+        })
+        .then(() => setDone(true))
+        .catch(
+          error =>
+            void enqueueSnackbar(error?.response?.data?.error || 'Failed to resend verification link', {
+              variant: 'error',
+              disableWindowBlurListener: true,
+            }),
+        );
+    },
+    [enqueueSnackbar],
+  );
 
   const validateInput = useCallback((values: ResendValues): Partial<ResendValues> | null => {
     const errors: Partial<ResendValues> = {};
@@ -49,11 +56,13 @@ export default function ResendVerificationPage(): JSX.Element {
     return errors;
   }, []);
 
-  const submit = useCallback(async (values: ResendValues, helpers: FormikHelpers<ResendValues>): Promise<void> => {
-    helpers.setSubmitting(true);
-    return await resendVerification(values)
-      .finally(() => helpers.setSubmitting(false));
-  }, [resendVerification]);
+  const submit = useCallback(
+    async (values: ResendValues, helpers: FormikHelpers<ResendValues>): Promise<void> => {
+      helpers.setSubmitting(true);
+      return await resendVerification(values).finally(() => helpers.setSubmitting(false));
+    },
+    [resendVerification],
+  );
 
   const initialValues: ResendValues = {
     email: (routeState && routeState['emailAddress']) || undefined,
@@ -83,9 +92,9 @@ export default function ResendVerificationPage(): JSX.Element {
 
   return (
     <MForm
-      initialValues={ initialValues }
-      onSubmit={ submit }
-      validate={ validateInput }
+      initialValues={initialValues}
+      onSubmit={submit}
+      validate={validateInput}
       className='w-full h-full flex flex-col justify-center items-center gap-2 p-4'
     >
       <div className='max-w-xs flex flex-col items-center gap-2'>
@@ -102,20 +111,24 @@ export default function ResendVerificationPage(): JSX.Element {
         <MCaptcha
           name='captcha'
           // Show the captcha if there is a captcha key specified in the config.
-          show={ Boolean(config?.ReCAPTCHAKey) }
+          show={Boolean(config?.ReCAPTCHAKey)}
           data-testid='resend-captcha'
         />
         <FormButton type='submit' color='primary' className='w-full'>
           Resend Verification
         </FormButton>
         <div className='mt-1 flex justify-center gap-1'>
-          <MSpan color='subtle' className='text-sm'>Don't need to resend?</MSpan>
-          <MLink to='/login' size='sm' data-testid='login-signup'>Return to login</MLink>
+          <MSpan color='subtle' className='text-sm'>
+            Don't need to resend?
+          </MSpan>
+          <MLink to='/login' size='sm' data-testid='login-signup'>
+            Return to login
+          </MLink>
         </div>
       </div>
     </MForm>
   );
-};
+}
 
 export function AfterEmailVerificationSent(): JSX.Element {
   return (
@@ -126,7 +139,9 @@ export function AfterEmailVerificationSent(): JSX.Element {
           A new verification link was sent to your email address...
         </MSpan>
         <div className='mt-1 flex justify-center gap-1'>
-          <MLink to='/login' size='sm' data-testid='login-signup'>Return to login</MLink>
+          <MLink to='/login' size='sm' data-testid='login-signup'>
+            Return to login
+          </MLink>
         </div>
       </div>
     </div>

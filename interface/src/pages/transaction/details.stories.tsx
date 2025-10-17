@@ -21,7 +21,6 @@ const meta: Meta<typeof TransactionDetails> = {
 
 export default meta;
 
-
 export const NoTransaction: StoryObj<typeof TransactionDetails> = {
   name: 'No Transaction',
   render: () => (

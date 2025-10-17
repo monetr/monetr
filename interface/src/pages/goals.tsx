@@ -14,11 +14,7 @@ import { SpendingType } from '@monetr/interface/models/Spending';
 let evilScrollPosition: number = 0;
 
 export default function Goals(): JSX.Element {
-  const {
-    data: goals,
-    isError,
-    isLoading,
-  } = useSpendingFiltered(SpendingType.Goal);
+  const { data: goals, isError, isLoading } = useSpendingFiltered(SpendingType.Goal);
 
   // Scroll restoration code.
   const ref = useRef<HTMLDivElement>(null);
@@ -39,16 +35,14 @@ export default function Goals(): JSX.Element {
     return () => {
       current.removeEventListener('scroll', onScroll);
     };
-  // Fix bug with current impl.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Fix bug with current impl.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref.current, navigationType, onScroll]);
 
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>
-          One moment...
-        </MSpan>
+        <MSpan className='text-5xl'>One moment...</MSpan>
       </div>
     );
   }
@@ -57,12 +51,8 @@ export default function Goals(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>
-          Something isn't right...
-        </MSpan>
-        <MSpan className='text-2xl'>
-          We weren't able to retrieve goals at this time...
-        </MSpan>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>We weren't able to retrieve goals at this time...</MSpan>
       </div>
     );
   }
@@ -74,22 +64,24 @@ export default function Goals(): JSX.Element {
 
     return (
       <ul className='w-full flex flex-col gap-2 py-2 pb-16'>
-        { goals
-          ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
-          .map(item => (<GoalItem spending={ item } key={ item.spendingId } />)) }
+        {goals
+          ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
+          .map(item => (
+            <GoalItem spending={item} key={item.spendingId} />
+          ))}
       </ul>
     );
   }
 
   return (
     <Fragment>
-      <MTopNavigation icon={ PiggyBank } title='Goals' >
-        <Button variant='primary' onClick={ showNewGoalModal }>
+      <MTopNavigation icon={PiggyBank} title='Goals'>
+        <Button variant='primary' onClick={showNewGoalModal}>
           <Plus />
           New Goal
         </Button>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0' ref={ ref }>
+      <div className='w-full h-full overflow-y-auto min-w-0' ref={ref}>
         <ListContent />
       </div>
     </Fragment>

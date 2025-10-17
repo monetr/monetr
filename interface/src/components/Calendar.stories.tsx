@@ -18,14 +18,14 @@ export const Default: StoryFn<typeof Calendar> = () => {
         <span className='w-full text-center'>Disabled</span>
         <Calendar
           mode='single'
-          selected={ date }
-          onSelect={ setDate }
+          selected={date}
+          onSelect={setDate}
           className='rounded-md border border-dark-monetr-border'
         />
         <Calendar
           mode='single'
-          selected={ date }
-          onSelect={ setDate }
+          selected={date}
+          onSelect={setDate}
           disabled
           className='rounded-md border border-dark-monetr-border'
         />
@@ -33,5 +33,3 @@ export const Default: StoryFn<typeof Calendar> = () => {
     </div>
   );
 };
-
-

@@ -11,7 +11,7 @@ enum CurrencySource {
 }
 
 interface LocaleCurrency {
-  source: CurrencySource,
+  source: CurrencySource;
   locale: string;
   currency: string;
   friendlyToAmount: (value: number) => number;
@@ -33,29 +33,33 @@ export default function useLocaleCurrency(forceCurrency?: string): UseQueryResul
   const locale = useMemo(() => me?.user?.account?.locale || 'en_US', [me]);
   const currency = useMemo(() => {
     // Return the first _defined_ currency.
-    return [
-      forceCurrency,
-      bankAccount?.data?.currency,
-      me?.defaultCurrency,
-      DefaultCurrency,
-    ].find(value => !!value);
+    return [forceCurrency, bankAccount?.data?.currency, me?.defaultCurrency, DefaultCurrency].find(value => !!value);
   }, [forceCurrency, me, bankAccount]);
 
-  const friendlyToAmountCallback = useCallback((value: number) => {
-    return friendlyToAmount(value, locale, currency);
-  }, [locale, currency]);
+  const friendlyToAmountCallback = useCallback(
+    (value: number) => {
+      return friendlyToAmount(value, locale, currency);
+    },
+    [locale, currency],
+  );
 
-  const amountToFriendlyCallback = useCallback((value: number) => {
-    return amountToFriendly(value, locale, currency);
-  }, [locale, currency]);
+  const amountToFriendlyCallback = useCallback(
+    (value: number) => {
+      return amountToFriendly(value, locale, currency);
+    },
+    [locale, currency],
+  );
 
-  const formatAmountCallback = useCallback((value: number, kind: AmountType, signDisplay?: boolean): string => {
-    return formatAmount(value, kind, locale, currency, signDisplay);
-  }, [locale, currency]);
+  const formatAmountCallback = useCallback(
+    (value: number, kind: AmountType, signDisplay?: boolean): string => {
+      return formatAmount(value, kind, locale, currency, signDisplay);
+    },
+    [locale, currency],
+  );
 
   return {
-    ...bankAccount as any,
-    ...authenticationState as any,
+    ...(bankAccount as any),
+    ...(authenticationState as any),
     data: {
       source: bankAccount?.data ? CurrencySource.BankAccount : CurrencySource.UserDefault,
       locale: locale,

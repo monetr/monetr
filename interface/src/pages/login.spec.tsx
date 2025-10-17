@@ -97,7 +97,6 @@ describe('login page', () => {
     await waitFor(() => expect(world.queryByTestId('login-forgot')).not.toBeInTheDocument());
     await waitFor(() => expect(world.queryByTestId('login-signup')).not.toBeInTheDocument());
 
-
     await user.type(world.getByTestId('login-email'), 'test@test.com');
     await user.type(world.getByTestId('login-password'), 'password');
     await user.click(world.getByTestId('login-submit'));

@@ -9,8 +9,8 @@ const Checkbox = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
 >(({ className, ...props }, ref) => (
   <CheckboxPrimitive.Root
-    ref={ ref }
-    className={ mergeTailwind(
+    ref={ref}
+    className={mergeTailwind(
       'peer h-4 w-4 shrink-0',
       'rounded',
       'border border-dark-monetr-border',
@@ -18,13 +18,11 @@ const Checkbox = React.forwardRef<
       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
       'disabled:cursor-not-allowed disabled:opacity-50',
       'data-[state=checked]:bg-dark-monetr-brand-subtle data-[state=checked]:text-dark-monetr-content-emphasis',
-      className
-    ) }
-    { ...props }
+      className,
+    )}
+    {...props}
   >
-    <CheckboxPrimitive.Indicator
-      className={ mergeTailwind('flex items-center justify-center text-current') }
-    >
+    <CheckboxPrimitive.Indicator className={mergeTailwind('flex items-center justify-center text-current')}>
       <Check className='h-4 w-4' />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>

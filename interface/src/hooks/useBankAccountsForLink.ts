@@ -8,7 +8,7 @@ export function useBankAccountsForLink(linkId?: string): UseQueryResult<Array<Ba
     queryKey: ['/bank_accounts', { link_id: linkId }],
     enabled: Boolean(linkId),
     meta: {
-      'method': QueryMethod.UseQuery,
+      method: QueryMethod.UseQuery,
     },
     select: data => (data || []).map(item => new BankAccount(item)),
   });

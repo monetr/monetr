@@ -62,7 +62,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
 
     if (transaction.getIsAddition()) {
       return (
-        <span className={ className }>
+        <span className={className}>
           <span className='min-w-0 flex-none truncate font-medium dark:text-dark-monetr-content-subtle'>
             Contribution
           </span>
@@ -71,14 +71,10 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
     }
 
     return (
-      <span className={ className }>
-        <span className='min-w-0 flex-none truncate font-medium dark:text-dark-monetr-content'>
-          Spent from
-        </span>
+      <span className={className}>
+        <span className='min-w-0 flex-none truncate font-medium dark:text-dark-monetr-content'>Spent from</span>
         &nbsp;
-        <span className={ spentFromClasses }>
-          {spending?.name || 'Free-To-Use'}
-        </span>
+        <span className={spentFromClasses}>{spending?.name || 'Free-To-Use'}</span>
       </span>
     );
   }
@@ -86,37 +82,33 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
   return (
     <li
       className='group relative w-full px-1 md:px-2'
-      id={ transaction.transactionId }
-      data-testid={ transaction.transactionId }
+      id={transaction.transactionId}
+      data-testid={transaction.transactionId}
     >
       <Link
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
-        to={ detailsUrl }
+        to={detailsUrl}
       />
       <div className='group flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4'>
         <div className='flex w-full min-w-0 flex-1 flex-row items-center gap-4 md:w-1/2'>
-          <TransactionMerchantIcon name={ transaction.getName() } pending={ transaction.isPending } />
+          <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
           <div className='flex min-w-0 flex-col overflow-hidden'>
             <MSpan size='md' weight='semibold' color='emphasis' ellipsis>
-              { transaction.getName() }
+              {transaction.getName()}
             </MSpan>
             <span className='hidden w-full min-w-0 truncate text-sm font-medium dark:text-dark-monetr-content md:block'>
-              { transaction.getMainCategory() }
+              {transaction.getMainCategory()}
             </span>
             <BudgetingInfo className='flex w-full text-sm md:hidden' />
           </div>
         </div>
-        {!transaction.getIsAddition() && (
-          <MSelectSpendingTransaction transaction={ transaction } />
-        )}
-        {transaction.getIsAddition() && (
-          <BudgetingInfo className='hidden md:flex w-1/2 flex-1 items-center pl-6' />
-        )}
+        {!transaction.getIsAddition() && <MSelectSpendingTransaction transaction={transaction} />}
+        {transaction.getIsAddition() && <BudgetingInfo className='hidden md:flex w-1/2 flex-1 items-center pl-6' />}
         <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
-          <span className={ amountClassnames }>
-            { locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0) }
+          <span className={amountClassnames}>
+            {locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0)}
           </span>
-          <ArrowLink to={ detailsUrl } />
+          <ArrowLink to={detailsUrl} />
         </div>
       </div>
     </li>

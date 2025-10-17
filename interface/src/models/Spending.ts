@@ -1,4 +1,3 @@
-
 import { format, isThisYear } from 'date-fns';
 
 import parseDate from '@monetr/interface/util/parseDate';
@@ -41,9 +40,9 @@ export default class Spending {
   // If the next time the spending object is due is a different year than the current one; then the year will be
   // appended to the end of the date string.
   getNextOccurrenceString(): string {
-    return isThisYear(this.nextRecurrence) ?
-      format(this.nextRecurrence, 'MMM do') :
-      format(this.nextRecurrence, 'MMM do, yyyy');
+    return isThisYear(this.nextRecurrence)
+      ? format(this.nextRecurrence, 'MMM do')
+      : format(this.nextRecurrence, 'MMM do, yyyy');
   }
 
   getIsExpense(): boolean {
@@ -58,7 +57,7 @@ export default class Spending {
   // at what is currently allocated to the goal plus what has already been used on the goal. If the sum of these two
   // values is less than the target amount for the goal then we are still contributing to the goal.
   getGoalIsInProgress(): boolean {
-    return (this.currentAmount + this.usedAmount) < this.targetAmount;
+    return this.currentAmount + this.usedAmount < this.targetAmount;
   }
 
   getGoalSavedAmount(): number {

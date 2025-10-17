@@ -1,4 +1,3 @@
-
 export default class Balance {
   bankAccountId: string;
   available: number;

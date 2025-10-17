@@ -23,7 +23,8 @@ export interface SignUpError {
 
 export default function useSignUp(): (args: SignUpArguments) => Promise<SignUpResponse | SignUpError> {
   return async (args: SignUpArguments) => {
-    return request().post('/authentication/register', args)
+    return request()
+      .post('/authentication/register', args)
       .then(result => result.data as SignUpResponse);
   };
 }

@@ -5,8 +5,8 @@ export default function fileSize(bytes: number, si: boolean = false, dp: number 
     return `${bytes} B`;
   }
 
-  const units = si 
-    ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] 
+  const units = si
+    ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
     : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
   let x = -1;
   const y = 10 ** dp;
@@ -15,7 +15,6 @@ export default function fileSize(bytes: number, si: boolean = false, dp: number 
     bytes /= thresh;
     ++x;
   } while (Math.round(Math.abs(bytes) * y) / y >= thresh && x < units.length - 1);
-
 
   return `${bytes.toFixed(dp)} ${units[x]}`;
 }

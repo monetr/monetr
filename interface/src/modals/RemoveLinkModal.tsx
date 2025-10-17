@@ -33,7 +33,7 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
       })
       .catch(error => {
         setSubmitting(false);
-        enqueueSnackbar(error?.response?.data?.error || `Failed to remove ${ props.link.getName() }`, {
+        enqueueSnackbar(error?.response?.data?.error || `Failed to remove ${props.link.getName()}`, {
           variant: 'error',
           disableWindowBlurListener: true,
         });
@@ -41,12 +41,12 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
   }
 
   return (
-    <MModal open={ modal.visible } ref={ ref } className='py-4 md:max-w-md'>
+    <MModal open={modal.visible} ref={ref} className='py-4 md:max-w-md'>
       <div className='h-full flex flex-col gap-4 p-2 justify-between'>
         <div className='flex flex-col'>
           <MSpan weight='bold' size='xl' className='mb-2'>
             <Trash />
-            Remove { props.link.getName() }?
+            Remove {props.link.getName()}?
           </MSpan>
           <MSpan size='lg' weight='medium'>
             Are you sure you want to remove your {props.link.getName()} data?
@@ -56,10 +56,10 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
           </MSpan>
         </div>
         <div className='flex justify-end gap-2'>
-          <Button disabled={ submitting } variant='secondary' onClick={ modal.remove }>
+          <Button disabled={submitting} variant='secondary' onClick={modal.remove}>
             Cancel
           </Button>
-          <FormButton disabled={ submitting } variant='destructive' type='submit' onClick={ submit }>
+          <FormButton disabled={submitting} variant='destructive' type='submit' onClick={submit}>
             Remove
           </FormButton>
         </div>

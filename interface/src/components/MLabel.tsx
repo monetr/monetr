@@ -19,29 +19,17 @@ export interface MLabelProps {
 }
 
 export default function MLabel(props: MLabelProps): JSX.Element {
-
-
   function MaybeLabel(): JSX.Element {
     if (!props.label) return null;
 
-    const labelClassNames = mergeTailwind(
-      'mb-1',
-      'block',
-      'text-sm',
-      'font-medium',
-      'leading-6',
-      {
-        'text-gray-900': !props.disabled,
-        'text-gray-500': props.disabled,
-        'dark:text-dark-monetr-content-emphasis': !props.disabled,
-      },
-    );
+    const labelClassNames = mergeTailwind('mb-1', 'block', 'text-sm', 'font-medium', 'leading-6', {
+      'text-gray-900': !props.disabled,
+      'text-gray-500': props.disabled,
+      'dark:text-dark-monetr-content-emphasis': !props.disabled,
+    });
 
     return (
-      <label
-        htmlFor={ props.htmlFor }
-        className={ labelClassNames }
-      >
+      <label htmlFor={props.htmlFor} className={labelClassNames}>
         {props.label}
       </label>
     );
@@ -49,11 +37,7 @@ export default function MLabel(props: MLabelProps): JSX.Element {
 
   function MaybeRequired(): JSX.Element {
     if (!props.required) return null;
-    return (
-      <span className='text-red-500'>
-        *
-      </span>
-    );
+    return <span className='text-red-500'>*</span>;
   }
 
   return (
@@ -62,7 +46,7 @@ export default function MLabel(props: MLabelProps): JSX.Element {
         <MaybeLabel />
         <MaybeRequired />
       </div>
-      { props.children }
+      {props.children}
     </div>
   );
 }

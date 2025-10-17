@@ -12,12 +12,7 @@ const defaultSecondary = '#FF5798';
 
 export const newTheme = createTheme({
   typography: {
-    fontFamily: [
-      'Inter Variable',
-      'Helvetica',
-      'Arial',
-      'sans-serif',
-    ].join(','),
+    fontFamily: ['Inter Variable', 'Helvetica', 'Arial', 'sans-serif'].join(','),
   },
   shape: {
     borderRadius: 10,
@@ -36,11 +31,7 @@ export const newTheme = createTheme({
 
 const theme = createTheme({
   typography: {
-    fontFamily: [
-      'Helvetica',
-      'Arial',
-      'sans-serif',
-    ].join(','),
+    fontFamily: ['Helvetica', 'Arial', 'sans-serif'].join(','),
   },
   shape: {
     borderRadius: 10,

@@ -8,4 +8,4 @@ export default class Login {
   constructor(data?: Partial<Login>) {
     if (data) Object.assign(this, data);
   }
-};
+}

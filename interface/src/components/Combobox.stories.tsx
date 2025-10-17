@@ -36,62 +36,17 @@ export const Default: StoryFn<typeof Combobox> = () => (
     <div className='max-w-5xl grid grid-cols-2 gap-6'>
       <span className='w-full text-center'>Enabled</span>
       <span className='w-full text-center'>Disabled</span>
-      <Combobox
-        size='default'
-        variant='outlined'
-        placeholder='Outlined Placeholder...'
-        options={ frameworks }
-      />
-      <Combobox
-        disabled
-        size='default'
-        variant='outlined'
-        placeholder='Outlined Placeholder...'
-        options={ frameworks }
-      />
+      <Combobox size='default' variant='outlined' placeholder='Outlined Placeholder...' options={frameworks} />
+      <Combobox disabled size='default' variant='outlined' placeholder='Outlined Placeholder...' options={frameworks} />
 
-      <Combobox
-        size='md'
-        variant='outlined'
-        placeholder='Outlined Placeholder...'
-        options={ frameworks }
-      />
-      <Combobox
-        disabled
-        size='md'
-        variant='outlined'
-        placeholder='Outlined Placeholder...'
-        options={ frameworks }
-      />
+      <Combobox size='md' variant='outlined' placeholder='Outlined Placeholder...' options={frameworks} />
+      <Combobox disabled size='md' variant='outlined' placeholder='Outlined Placeholder...' options={frameworks} />
 
+      <Combobox size='default' variant='text' placeholder='Placeholder...' options={frameworks} />
+      <Combobox disabled size='default' variant='text' placeholder='Placeholder...' options={frameworks} />
 
-      <Combobox
-        size='default'
-        variant='text'
-        placeholder='Placeholder...'
-        options={ frameworks }
-      />
-      <Combobox
-        disabled
-        size='default'
-        variant='text'
-        placeholder='Placeholder...'
-        options={ frameworks }
-      />
-
-      <Combobox
-        size='md'
-        variant='text'
-        placeholder='Text Placeholder...'
-        options={ frameworks }
-      />
-      <Combobox
-        disabled
-        size='md'
-        variant='text'
-        placeholder='Text Placeholder...'
-        options={ frameworks }
-      />
+      <Combobox size='md' variant='text' placeholder='Text Placeholder...' options={frameworks} />
+      <Combobox disabled size='md' variant='text' placeholder='Text Placeholder...' options={frameworks} />
     </div>
   </div>
 );

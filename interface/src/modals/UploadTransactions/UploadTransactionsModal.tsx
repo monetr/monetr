@@ -32,12 +32,12 @@ function UploadTransactionsModal(): JSX.Element {
   const selectedBankAccountId = useSelectedBankAccountId();
 
   const [stage, setStage] = useState<UploadTransactionStage>(UploadTransactionStage.FileUpload);
-  const [error, setError] = useState<{message: string; filename: string}|null>(null);
-  const [monetrUpload, setMonetrUpload] = useState<TransactionUpload|null>(null);
+  const [error, setError] = useState<{ message: string; filename: string } | null>(null);
+  const [monetrUpload, setMonetrUpload] = useState<TransactionUpload | null>(null);
   const onClose = useCallback(() => {
     if (stage === UploadTransactionStage.Processing) {
-      queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${ selectedBankAccountId }/transactions`] });
-      queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${ selectedBankAccountId }/balances`] });
+      queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/transactions`] });
+      queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/balances`] });
     }
     return modal.remove();
   }, [stage, modal, queryClient, selectedBankAccountId]);
@@ -45,33 +45,22 @@ function UploadTransactionsModal(): JSX.Element {
   function CurrentStage(): JSX.Element {
     switch (stage) {
       case UploadTransactionStage.FileUpload:
-        return <UploadFileStage
-          setResult={ setMonetrUpload }
-          setStage={ setStage }
-          setError={ setError }
-          close={ modal.remove }
-        />;
+        return (
+          <UploadFileStage setResult={setMonetrUpload} setStage={setStage} setError={setError} close={modal.remove} />
+        );
       case UploadTransactionStage.Processing:
-        return <ProcessingFileStage
-          upload={ monetrUpload }
-          setStage={ setStage }
-          close={ onClose }
-        />;
+        return <ProcessingFileStage upload={monetrUpload} setStage={setStage} close={onClose} />;
       case UploadTransactionStage.Completed:
         return null;
       case UploadTransactionStage.Error:
-        return <ErrorFileStage
-          error={ error }
-          close={ onClose }
-        />;
+        return <ErrorFileStage error={error} close={onClose} />;
       default:
         return null;
     }
-
   }
 
   return (
-    <MModal open={ modal.visible } ref={ ref } className='sm:max-w-xl'>
+    <MModal open={modal.visible} ref={ref} className='sm:max-w-xl'>
       <CurrentStage />
     </MModal>
   );
@@ -81,12 +70,12 @@ interface StageProps {
   close: () => void;
   setResult: (result: TransactionUpload) => void;
   setStage: (stage: UploadTransactionStage) => void;
-  setError: (error: {message: string; filename: string}) => void;
+  setError: (error: { message: string; filename: string }) => void;
 }
 
 function UploadFileStage(props: StageProps) {
   const selectedBankAccountId = useSelectedBankAccountId();
-  const [file, setFile] = useState<File|null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(-1);
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
     const selectedFile = acceptedFiles[0];
@@ -150,19 +139,17 @@ function UploadFileStage(props: StageProps) {
             <MSpan weight='bold' size='xl'>
               Upload Transactions
             </MSpan>
-            <div>
-              { /* TODO Close button */ }
-            </div>
+            <div>{/* TODO Close button */}</div>
           </div>
 
           <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
             <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
             <div className='flex flex-col py-1 w-full'>
-              <MSpan size='lg'>{ file.name }</MSpan>
+              <MSpan size='lg'>{file.name}</MSpan>
               <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
                 <div
                   className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600'
-                  style={ { width: `${uploadProgress}%` } }
+                  style={{ width: `${uploadProgress}%` }}
                 />
               </div>
             </div>
@@ -174,31 +161,27 @@ function UploadFileStage(props: StageProps) {
 
   if (file) {
     return (
-      <form onSubmit={ handleSubmit } className='h-full flex flex-col gap-2 p-2 justify-between'>
+      <form onSubmit={handleSubmit} className='h-full flex flex-col gap-2 p-2 justify-between'>
         <div className='flex flex-col gap-2 h-full'>
           <div className='flex justify-between'>
             <MSpan weight='bold' size='xl'>
-            Upload Transactions
+              Upload Transactions
             </MSpan>
-            <div>
-              { /* TODO Close button */ }
-            </div>
+            <div>{/* TODO Close button */}</div>
           </div>
-          <MSpan>
-            Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.
-          </MSpan>
+          <MSpan>Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.</MSpan>
 
           <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
             <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
             <div className='flex flex-col py-1 w-full'>
-              <MSpan size='lg'>{ file.name }</MSpan>
-              <MSpan>{ fileSize(file.size) }</MSpan>
+              <MSpan size='lg'>{file.name}</MSpan>
+              <MSpan>{fileSize(file.size)}</MSpan>
             </div>
             <Close className='mr-2 text-dark-monetr-content-subtle hover:text-dark-monetr-content cursor-pointer' />
           </div>
         </div>
         <div className='flex justify-end gap-2 mt-2'>
-          <Button variant='secondary' onClick={ props.close }>
+          <Button variant='secondary' onClick={props.close}>
             Cancel
           </Button>
           <Button variant='primary' type='submit'>
@@ -210,29 +193,27 @@ function UploadFileStage(props: StageProps) {
   }
 
   return (
-    <form onSubmit={ handleSubmit } className='h-full flex flex-col gap-2 p-2 justify-between'>
+    <form onSubmit={handleSubmit} className='h-full flex flex-col gap-2 p-2 justify-between'>
       <div className='flex flex-col gap-2 h-full'>
         <div className='flex justify-between'>
           <MSpan weight='bold' size='xl'>
             Upload Transactions
           </MSpan>
-          <div>
-            { /* TODO Close button */ }
-          </div>
+          <div>{/* TODO Close button */}</div>
         </div>
-        <MSpan>
-          Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.
-        </MSpan>
+        <MSpan>Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.</MSpan>
 
-        <div { ...getRootProps() } className={ uploadClassNames }>
-          <input { ...getInputProps() } />
+        <div {...getRootProps()} className={uploadClassNames}>
+          <input {...getInputProps()} />
           <UploadFileOutlined className='text-6xl text-dark-monetr-content' />
-          <MSpan size='lg' weight='semibold'>Drag OFX file here</MSpan>
+          <MSpan size='lg' weight='semibold'>
+            Drag OFX file here
+          </MSpan>
           <MSpan>Or click to browse</MSpan>
         </div>
       </div>
       <div className='flex justify-end gap-2 mt-2'>
-        <Button variant='secondary' onClick={ props.close }>
+        <Button variant='secondary' onClick={props.close}>
           Cancel
         </Button>
         <Button variant='primary' type='submit'>

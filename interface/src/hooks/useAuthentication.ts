@@ -47,4 +47,3 @@ export function useAuthentication(): UseQueryResult<Authentication | undefined, 
 
   return result;
 }
-

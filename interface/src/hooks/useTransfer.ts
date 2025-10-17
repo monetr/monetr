@@ -6,10 +6,10 @@ import Spending from '@monetr/interface/models/Spending';
 import request from '@monetr/interface/util/request';
 
 export type TransferParameters = {
-  fromSpendingId: string | null,
-  toSpendingId: string | null,
-  amount: number,
-}
+  fromSpendingId: string | null;
+  toSpendingId: string | null;
+  amount: number;
+};
 
 export function useTransfer(): (transferParameters: TransferParameters) => Promise<unknown> {
   const queryClient = useQueryClient();
@@ -29,32 +29,36 @@ export function useTransfer(): (transferParameters: TransferParameters) => Promi
 
   async function transfer(transferRequest: BalanceTransferRequest): Promise<BalanceTransferResponse> {
     return request()
-      .post<BalanceTransferResponse>(`/bank_accounts/${ selectedBankAccountId }/spending/transfer`, transferRequest)
+      .post<BalanceTransferResponse>(`/bank_accounts/${selectedBankAccountId}/spending/transfer`, transferRequest)
       .then(result => result.data);
   }
 
   const { mutateAsync } = useMutation({
     mutationFn: transfer,
-    onSuccess: (result: BalanceTransferResponse) => Promise.all([
-      queryClient.setQueryData(
-        [`/bank_accounts/${selectedBankAccountId}/spending`],
-        (previous: Array<Partial<Spending>>) => previous
-          .map(item => result.spending.find(updated => updated.spendingId === item.spendingId) || item),
-      ),
-      result.spending.map(updatedSpending => queryClient.setQueryData(
-        [`/bank_accounts/${selectedBankAccountId}/spending/${updatedSpending.spendingId}`],
-        () => updatedSpending,
-      )),
-      queryClient.setQueryData(
-        [`/bank_accounts/${selectedBankAccountId}/balances`],
-        (previous: Partial<Balance>) => new Balance({
-          ...previous,
-          ...result.balance,
-        }),
-      ),
-      queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/forecast`] }),
-      queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/forecast/next_funding`] }),
-    ]),
+    onSuccess: (result: BalanceTransferResponse) =>
+      Promise.all([
+        queryClient.setQueryData(
+          [`/bank_accounts/${selectedBankAccountId}/spending`],
+          (previous: Array<Partial<Spending>>) =>
+            previous.map(item => result.spending.find(updated => updated.spendingId === item.spendingId) || item),
+        ),
+        result.spending.map(updatedSpending =>
+          queryClient.setQueryData(
+            [`/bank_accounts/${selectedBankAccountId}/spending/${updatedSpending.spendingId}`],
+            () => updatedSpending,
+          ),
+        ),
+        queryClient.setQueryData(
+          [`/bank_accounts/${selectedBankAccountId}/balances`],
+          (previous: Partial<Balance>) =>
+            new Balance({
+              ...previous,
+              ...result.balance,
+            }),
+        ),
+        queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/forecast`] }),
+        queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/forecast/next_funding`] }),
+      ]),
   });
 
   return mutateAsync;

@@ -1,4 +1,3 @@
-
 /**
  * intlNumberFormat takes a locale and a currency code and returns a ResolvedNumberFormatOptions object containing
  * information about the currency and how it should be formatted for the current locale.
@@ -11,13 +10,10 @@
  */
 export function intlNumberFormat(locale: string, currency: string): Intl.ResolvedNumberFormatOptions {
   const localeAdjusted = locale.replace('_', '-');
-  return new Intl.NumberFormat(
-    localeAdjusted,
-    {
-      style: 'currency',
-      currency: currency,
-    },
-  ).resolvedOptions();
+  return new Intl.NumberFormat(localeAdjusted, {
+    style: 'currency',
+    currency: currency,
+  }).resolvedOptions();
 }
 
 /**
@@ -29,15 +25,15 @@ export function intlNumberFormat(locale: string, currency: string): Intl.Resolve
  */
 export function getCurrencySymbol(locale: string, currency: string) {
   const localeAdjusted = locale.replace('_', '-');
-  return (0).toLocaleString(
-    localeAdjusted,
-    {
+  return (0)
+    .toLocaleString(localeAdjusted, {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }
-  ).replace(/\d/g, '').trim();
+    })
+    .replace(/\d/g, '')
+    .trim();
 }
 
 /**
@@ -67,8 +63,7 @@ export function getDecimalSeparator(locale: string): string {
   const numberWithDecimalSeparator = 1.1;
   return Intl.NumberFormat(localeAdjusted)
     .formatToParts(numberWithDecimalSeparator)
-    .find(part => part.type === 'decimal')
-    .value;
+    .find(part => part.type === 'decimal').value;
 }
 
 /**
@@ -82,19 +77,15 @@ export function getNumberGroupSeparator(locale: string): string {
   const numberWithDecimalSeparator = 100000.1;
   return Intl.NumberFormat(localeAdjusted)
     .formatToParts(numberWithDecimalSeparator)
-    .find(part => part.type === 'group')
-    .value;
+    .find(part => part.type === 'group').value;
 }
 
 export function intlNumberFormatter(locale: string = 'en_US', currency: string = 'USD'): (value: string) => string {
   const localeAdjusted = locale.replace('_', '-');
-  const formatter = new Intl.NumberFormat(
-    localeAdjusted,
-    {
-      style: 'currency',
-      currency: currency,
-    },
-  );
+  const formatter = new Intl.NumberFormat(localeAdjusted, {
+    style: 'currency',
+    currency: currency,
+  });
   return (value: string) => {
     if (value === '') return '';
     return formatter.format(+value);
@@ -124,7 +115,7 @@ export function amountToFriendly(amount: number, locale: string, currency: strin
   const adjusted = Math.fround(amount / modifier);
 
   // Truncate any additional decimal places that may exist.
-  return +(adjusted.toFixed(specs.maximumFractionDigits));
+  return +adjusted.toFixed(specs.maximumFractionDigits);
 }
 
 /**
@@ -149,7 +140,7 @@ export function friendlyToAmount(friendly: number, locale: string, currency: str
   const adjusted = Math.round(friendly * modifier);
 
   // Truncate any possible decimal places.
-  return +(adjusted.toFixed(0));
+  return +adjusted.toFixed(0);
 }
 
 export enum AmountType {
@@ -186,14 +177,11 @@ export function formatAmount(
   }
 
   const localeAdjusted = locale.replace('_', '-');
-  const intl = new Intl.NumberFormat(
-    localeAdjusted,
-    {
-      style: 'currency',
-      currency: currency,
-      signDisplay: signDisplay ? 'exceptZero' : 'auto',
-    },
-  );
+  const intl = new Intl.NumberFormat(localeAdjusted, {
+    style: 'currency',
+    currency: currency,
+    signDisplay: signDisplay ? 'exceptZero' : 'auto',
+  });
 
   let value: number = amount;
 
@@ -211,7 +199,7 @@ export function formatAmount(
     const adjusted = Math.fround(amount / modifier);
 
     // Truncate any additional decimal places that may exist.
-    value = +(adjusted.toFixed(specs.maximumFractionDigits));
+    value = +adjusted.toFixed(specs.maximumFractionDigits);
   }
 
   // Convert the resulting friendly amount value into a properly formatted string.

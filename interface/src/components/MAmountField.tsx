@@ -4,13 +4,19 @@ import { useFormikContext } from 'formik';
 
 import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
-import { getCurrencySymbolPrefixed, getDecimalSeparator, getNumberGroupSeparator, intlNumberFormat, intlNumberFormatter } from '@monetr/interface/util/amounts';
+import {
+  getCurrencySymbolPrefixed,
+  getDecimalSeparator,
+  getNumberGroupSeparator,
+  intlNumberFormat,
+  intlNumberFormatter,
+} from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-type NumericField =  Omit<
+type NumericField = Omit<
   NumericFormatProps<InputAttributes>,
   'decimalScale' | 'fixedDecimalScale' | 'prefix' | 'type' | 'onChange' | 'onValueChange'
->
+>;
 
 export interface MAmountFieldProps extends NumericField {
   label?: string;
@@ -21,7 +27,7 @@ export interface MAmountFieldProps extends NumericField {
 
 const MAmountFieldPropsDefaults: MAmountFieldProps = {
   label: null,
-  labelDecorator: ((_: MLabelDecoratorProps) => null),
+  labelDecorator: (_: MLabelDecoratorProps) => null,
   disabled: false,
 };
 
@@ -49,11 +55,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
   function Error() {
     if (!props.error) return null;
 
-    return (
-      <p className='text-xs font-medium text-red-500 mt-0.5'>
-        {props.error}
-      </p>
-    );
+    return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
   }
 
   const classNames = mergeTailwind(
@@ -99,49 +101,50 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
     'min-h-[38px]',
   );
 
-  const wrapperClassNames = mergeTailwind({
-    // This will make it so the space below the input is the same when there is and isn't an error.
-    'pb-[18px]': !props.error,
-  }, props.className);
+  const wrapperClassNames = mergeTailwind(
+    {
+      // This will make it so the space below the input is the same when there is and isn't an error.
+      'pb-[18px]': !props.error,
+    },
+    props.className,
+  );
 
   // If we are working with a date picker, then take the current value and transform it for the actual input.
   const value = formikContext?.values[props.name];
 
   // NumericFormat has a weird callback so we aren't using the typical onChange. Instead we are using onValueChange to
   // receive updates from the component and yeet them back up to formik.
-  const onChange = useCallback((values: NumberFormatValues) => {
-    if (formikContext) {
-      formikContext.setFieldValue(props.name, values.floatValue);
-    }
-  }, [props.name, formikContext]);;
+  const onChange = useCallback(
+    (values: NumberFormatValues) => {
+      if (formikContext) {
+        formikContext.setFieldValue(props.name, values.floatValue);
+      }
+    },
+    [props.name, formikContext],
+  );
 
   return (
-    <div className={ wrapperClassNames }>
-      <MLabel
-        label={ props.label }
-        disabled={ props.disabled }
-        htmlFor={ props.id }
-        required={ props.required }
-      >
-        <LabelDecorator name={ props.name } disabled={ props.disabled } />
+    <div className={wrapperClassNames}>
+      <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+        <LabelDecorator name={props.name} disabled={props.disabled} />
       </MLabel>
       <div>
         <NumericFormat
           /* These top properties might be overwritten by the ...otherProps below, this is intended. */
-          disabled={ formikContext?.isSubmitting }
-          onBlur={ formikContext?.handleBlur }
-          value={ value }
-          { ...otherProps }
+          disabled={formikContext?.isSubmitting}
+          onBlur={formikContext?.handleBlur}
+          value={value}
+          {...otherProps}
           /* Properties below this point cannot be overwritten by the caller! */
-          className={ classNames }
+          className={classNames}
           fixedDecimalScale
-          decimalScale={ currencyInfo.maximumFractionDigits }
-          decimalSeparator={ getDecimalSeparator(localeInfo.locale) }
-          thousandSeparator={ getNumberGroupSeparator(localeInfo.locale) }
-          onValueChange={ onChange }
-          renderText={ intlNumberFormatter(localeInfo.locale, props.currency)  }
-          placeholder={ intlNumberFormatter(localeInfo.locale, props.currency)('0') }
-          prefix={ getCurrencySymbolPrefixed(localeInfo.locale, props.currency) }
+          decimalScale={currencyInfo.maximumFractionDigits}
+          decimalSeparator={getDecimalSeparator(localeInfo.locale)}
+          thousandSeparator={getNumberGroupSeparator(localeInfo.locale)}
+          onValueChange={onChange}
+          renderText={intlNumberFormatter(localeInfo.locale, props.currency)}
+          placeholder={intlNumberFormatter(localeInfo.locale, props.currency)('0')}
+          prefix={getCurrencySymbolPrefixed(localeInfo.locale, props.currency)}
         />
       </div>
       <Error />

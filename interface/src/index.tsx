@@ -48,6 +48,4 @@ if (window?.__MONETR__?.SENTRY_DSN) {
   });
 }
 
-root.render(
-  <Root />,
-);
+root.render(<Root />);

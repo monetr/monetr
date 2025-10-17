@@ -17,7 +17,7 @@ export default function BalanceCurrentAmount(): JSX.Element {
         Current:
       </MSpan>
       <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-        { locale.formatAmount(balance?.current, AmountType.Stored) }
+        {locale.formatAmount(balance?.current, AmountType.Stored)}
       </MSpan>
     </div>
   );

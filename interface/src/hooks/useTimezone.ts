@@ -11,13 +11,14 @@ import { getTimezone } from '@monetr/interface/util/locale';
 export default function useTimezone(): UseQueryResult<string, never> {
   return useQuery<Partial<Authentication>, never, string>({
     queryKey: ['/users/me'],
-    initialData: () => ({
-      user: {
-        account: {
-          timezone: getTimezone(),
+    initialData: () =>
+      ({
+        user: {
+          account: {
+            timezone: getTimezone(),
+          },
         },
-      },
-    }) as Partial<Authentication>,
+      }) as Partial<Authentication>,
     initialDataUpdatedAt: 0,
     select: data => data?.user?.account?.timezone ?? getTimezone(),
   });

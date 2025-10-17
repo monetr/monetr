@@ -11,4 +11,3 @@ export function useSimilarTransactions(transaction?: Transaction): UseQueryResul
     retry: false,
   });
 }
-

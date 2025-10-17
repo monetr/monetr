@@ -29,10 +29,11 @@ export class AppConfiguration {
   buildTime: Date | null;
 
   constructor(data?: Partial<AppConfiguration>) {
-    if (data) Object.assign(this, {
-      ...data,
-      buildTime: parseDate(data?.buildTime),
-    });
+    if (data)
+      Object.assign(this, {
+        ...data,
+        buildTime: parseDate(data?.buildTime),
+      });
   }
 }
 

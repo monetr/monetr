@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 
@@ -15,9 +14,9 @@ const TooltipContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
 >(({ className, sideOffset = 4, ...props }, ref) => (
   <TooltipPrimitive.Content
-    ref={ ref }
-    sideOffset={ sideOffset }
-    className={ mergeTailwind(
+    ref={ref}
+    sideOffset={sideOffset}
+    className={mergeTailwind(
       'z-50 overflow-hidden',
       'rounded-md border border-dark-monetr-border',
       'bg-dark-monetr-background',
@@ -29,9 +28,9 @@ const TooltipContent = React.forwardRef<
       'data-[side=left]:slide-in-from-right-2',
       'data-[side=right]:slide-in-from-left-2',
       'data-[side=top]:slide-in-from-bottom-2',
-      className
-    ) }
-    { ...props }
+      className,
+    )}
+    {...props}
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;

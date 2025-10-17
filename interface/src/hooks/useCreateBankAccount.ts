@@ -25,16 +25,13 @@ export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest)
 
   const mutate = useMutation({
     mutationFn: createBankAccount,
-    onSuccess: (newBankAccount: BankAccount) => Promise.all([
-      queryClient.setQueryData(
-        ['/bank_accounts'],
-        (previous: Array<Partial<BankAccount>>) => (previous ?? []).concat(newBankAccount),
-      ),
-      queryClient.setQueryData(
-        [`/bank_accounts/${newBankAccount.bankAccountId}`],
-        newBankAccount,
-      ),
-    ]),
+    onSuccess: (newBankAccount: BankAccount) =>
+      Promise.all([
+        queryClient.setQueryData(['/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
+          (previous ?? []).concat(newBankAccount),
+        ),
+        queryClient.setQueryData([`/bank_accounts/${newBankAccount.bankAccountId}`], newBankAccount),
+      ]),
   });
 
   return mutate.mutateAsync;

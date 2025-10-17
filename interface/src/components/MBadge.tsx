@@ -3,12 +3,9 @@ import React from 'react';
 import MSpan, { MSpanProps } from './MSpan';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-
-export interface MBadgeProps extends Omit<MSpanProps, 'color'>{
-}
+export interface MBadgeProps extends Omit<MSpanProps, 'color'> {}
 
 export default function MBadge(props: MBadgeProps): JSX.Element {
-
   const classes = mergeTailwind(
     'bg-monetr-brand',
     'dark:text-dark-monetr-content-emphasis',
@@ -18,7 +15,5 @@ export default function MBadge(props: MBadgeProps): JSX.Element {
     props.className,
   );
 
-  return (
-    <MSpan { ...props } className={ classes } />
-  );
+  return <MSpan {...props} className={classes} />;
 }

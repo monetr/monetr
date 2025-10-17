@@ -29,24 +29,26 @@ function ChangePasswordModal(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const ref = useRef<MModalRef>(null);
 
-  async function updatePassword(
-    values: ChangePasswordValues, 
-    helpers: FormikHelpers<ChangePasswordValues>,
-  ) {
+  async function updatePassword(values: ChangePasswordValues, helpers: FormikHelpers<ChangePasswordValues>) {
     helpers.setSubmitting(true);
-    return request().put('/users/security/password', {
-      currentPassword: values.currentPassword,
-      newPassword: values.newPassword,
-    })
-      .then(() => enqueueSnackbar('Successfully updated password.', {
-        variant: 'success',
-        disableWindowBlurListener: true,
-      }))
+    return request()
+      .put('/users/security/password', {
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      })
+      .then(() =>
+        enqueueSnackbar('Successfully updated password.', {
+          variant: 'success',
+          disableWindowBlurListener: true,
+        }),
+      )
       .then(() => modal.remove())
-      .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to change password.', {
-        variant: 'error',
-        disableWindowBlurListener: true,
-      }))
+      .catch(error =>
+        enqueueSnackbar(error?.response?.data?.error || 'Failed to change password.', {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        }),
+      )
       .finally(() => helpers.setSubmitting(false));
   }
 
@@ -74,11 +76,11 @@ function ChangePasswordModal(): JSX.Element {
   }
 
   return (
-    <MModal open={ modal.visible } ref={ ref } className='sm:max-w-sm'>
+    <MModal open={modal.visible} ref={ref} className='sm:max-w-sm'>
       <MForm
-        onSubmit={ updatePassword }
-        initialValues={ initialValues }
-        validate={ validate }
+        onSubmit={updatePassword}
+        initialValues={initialValues}
+        validate={validate}
         className='h-full flex flex-col gap-2 p-2 justify-between'
       >
         <div className='flex flex-col'>
@@ -112,7 +114,7 @@ function ChangePasswordModal(): JSX.Element {
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <Button variant='secondary' onClick={ modal.remove } data-testid='close-change-password-modal'>
+          <Button variant='secondary' onClick={modal.remove} data-testid='close-change-password-modal'>
             Cancel
           </Button>
           <FormButton color='primary' type='submit'>
