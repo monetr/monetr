@@ -1,5 +1,6 @@
-import React, { Fragment, useCallback, useState } from 'react';
-import Select, { ActionMeta, components, FormatOptionLabelMeta, OnChangeValue, OptionProps, Theme } from 'react-select';
+import type React from 'react';
+import { Fragment, useCallback, useState } from 'react';
+import Select, { type ActionMeta, components, type FormatOptionLabelMeta, type OnChangeValue, type OptionProps, type Theme } from 'react-select';
 import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 
 import MBadge from './MBadge';
@@ -9,7 +10,8 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import useTheme from '@monetr/interface/hooks/useTheme';
 import { useUpdateTransaction } from '@monetr/interface/hooks/useUpdateTransaction';
-import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import type Spending from '@monetr/interface/models/Spending';
+import { SpendingType } from '@monetr/interface/models/Spending';
 import Transaction from '@monetr/interface/models/Transaction';
 import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';

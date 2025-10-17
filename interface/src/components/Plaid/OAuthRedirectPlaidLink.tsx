@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { PlaidLinkOnEvent, PlaidLinkOnExit, PlaidLinkOnLoad, PlaidLinkOnSuccess, usePlaidLink } from 'react-plaid-link';
+import type React from 'react';
+import { useEffect } from 'react';
+import { type PlaidLinkOnEvent, type PlaidLinkOnExit, type PlaidLinkOnLoad, type PlaidLinkOnSuccess, usePlaidLink } from 'react-plaid-link';
 
 export interface PropTypes {
   linkToken: string;

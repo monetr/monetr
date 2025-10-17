@@ -1,9 +1,10 @@
-import React, { Fragment, useCallback } from 'react';
+import type React from 'react';
+import { Fragment, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import MSidebarToggle from './MSidebarToggle';
 import MSpan from './MSpan';
-import { ReactElement } from './types';
+import type { ReactElement } from './types';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MTopNavigationProps {
@@ -26,7 +27,7 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
 
   const className = mergeTailwind(
     {
-      'dark:text-dark-monetr-content-emphasis': !Boolean(props.breadcrumb),
+      'dark:text-dark-monetr-content-emphasis': !props.breadcrumb,
       'dark:text-dark-monetr-content-subtle dark:hover:text-dark-monetr-content-emphasis': Boolean(props.breadcrumb),
       'cursor-pointer': Boolean(props.base),
     },
@@ -42,7 +43,7 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
 
   const iconClassName = mergeTailwind('mb-1 inline', {
     'mr-0 md:mr-2': Boolean(props.breadcrumb),
-    'mr-2': !Boolean(props.breadcrumb),
+    'mr-2': !props.breadcrumb,
   });
 
   function InitialCrumb(): JSX.Element {

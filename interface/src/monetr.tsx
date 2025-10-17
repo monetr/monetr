@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 
@@ -50,7 +50,8 @@ export default function Monetr(): JSX.Element {
   const { data: config, isLoading: configIsLoading, isError: configIsError } = useAppConfiguration();
   const { isLoading: authIsLoading, data: auth } = useAuthentication();
   const { isLoading: linksIsLoading, data: links } = useLinks();
-  const { isLoading: bankAccountsIsLoading, data: bankAccounts } = useBankAccounts();
+  const { isLoading: bankAccountsIsLoading } = useBankAccounts();
+
   const isAuthenticated = Boolean(auth?.user);
   // If the config or authentication is loading just show a loading page.
   // Links is loading is weird becuase the loading state will be true until we actually request links. But links won't

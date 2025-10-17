@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FormikErrors, FormikHelpers } from 'formik';
+import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';

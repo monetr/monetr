@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 
 declare global {
   interface Window {

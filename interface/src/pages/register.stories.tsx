@@ -1,5 +1,5 @@
 import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 
 // import { rest } from 'msw';
 import RegisterPage, { RegisterSuccessful } from '@monetr/interface/pages/register';

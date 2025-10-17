@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import BankAccount, { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
+import BankAccount, { type BankAccountSubType, type BankAccountType } from '@monetr/interface/models/BankAccount';
 import request from '@monetr/interface/util/request';
 
 export interface CreateBankAccountRequest {

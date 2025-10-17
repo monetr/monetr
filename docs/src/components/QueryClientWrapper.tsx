@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { QueryClient, QueryClientProvider, QueryFunctionContext, QueryKey } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, type QueryFunctionContext, type QueryKey } from '@tanstack/react-query';
 
 interface QueryClientWrapperProps {
   children: React.ReactNode;

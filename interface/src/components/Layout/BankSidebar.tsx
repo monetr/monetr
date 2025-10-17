@@ -10,7 +10,7 @@ import BankSidebarItem from '@monetr/interface/components/Layout/BankSidebarItem
 import MDivider from '@monetr/interface/components/MDivider';
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
 import MSpan from '@monetr/interface/components/MSpan';
-import { ReactElement } from '@monetr/interface/components/types';
+import type { ReactElement } from '@monetr/interface/components/types';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 

@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import MSpan from '@monetr/interface/components/MSpan';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useNextFundingForecast } from '@monetr/interface/hooks/useNextFundingForecast';
-import FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 

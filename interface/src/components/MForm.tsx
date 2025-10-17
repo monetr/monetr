@@ -1,5 +1,5 @@
-import React, { ForwardedRef } from 'react';
-import { Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
+import React, { type ForwardedRef } from 'react';
+import { Formik, type FormikConfig, type FormikProps, type FormikValues } from 'formik';
 
 interface MFormProps<Values extends FormikValues = FormikValues> extends FormikConfig<Values> {
   className?: string;

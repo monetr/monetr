@@ -1,6 +1,7 @@
-import React, { useCallback, useMemo } from 'react';
-import { QueryClient, QueryClientProvider, QueryFunctionContext, QueryKey } from '@tanstack/react-query';
-import { AxiosError, AxiosInstance } from 'axios';
+import type React from 'react';
+import { useCallback, useMemo } from 'react';
+import { QueryClient, QueryClientProvider, type QueryFunctionContext, type QueryKey } from '@tanstack/react-query';
+import type { AxiosError, AxiosInstance } from 'axios';
 
 import monetrClient from '@monetr/interface/api/api';
 
@@ -26,7 +27,7 @@ export default function MQueryClient(props: MQueryClientProps): JSX.Element {
   const queryFn = useCallback(
     async (context: QueryFunctionContext<QueryKey>) => {
       let method = 'GET';
-      let body = undefined;
+      let body ;
       let params = {};
       if (context.queryKey.length > 1 && context?.meta?.['method'] !== QueryMethod.UseQuery) {
         method = 'POST';

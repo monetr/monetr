@@ -1,6 +1,6 @@
 import { makeFetchTransport } from '@sentry/browser';
-import { type BrowserTransportOptions } from '@sentry/browser/build/npm/types/transports/types';
-import { type Transport } from '@sentry/core/build/types/types-hoist/transport';
+import type { BrowserTransportOptions } from '@sentry/browser/build/npm/types/transports/types';
+import type { Transport } from '@sentry/core/build/types/types-hoist/transport';
 
 // Get the type of the second argument parameter. This way we are typesafe but we don't really need to worry about this
 // parameter.

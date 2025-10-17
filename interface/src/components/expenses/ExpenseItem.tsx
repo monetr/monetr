@@ -10,7 +10,7 @@ import MBadge from '@monetr/interface/components/MBadge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
-import Spending from '@monetr/interface/models/Spending';
+import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';

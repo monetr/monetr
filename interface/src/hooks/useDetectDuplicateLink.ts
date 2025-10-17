@@ -1,4 +1,4 @@
-import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
+import type { PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
 
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
@@ -7,7 +7,7 @@ export function useDetectDuplicateLink(): (_metadata: PlaidLinkOnSuccessMetadata
   const { data: links } = useLinks();
   const { data: bankAccounts } = useBankAccounts();
 
-  return function (metadata: PlaidLinkOnSuccessMetadata): boolean {
+  return (metadata: PlaidLinkOnSuccessMetadata): boolean => {
     const linksForInstitution = new Map(
       links
         .filter(item => item.getIsPlaid())

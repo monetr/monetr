@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, { ComponentPropsWithoutRef, ElementRef, forwardRef } from 'react';
+import React, { type ComponentPropsWithoutRef, type ElementRef, forwardRef } from 'react';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Check, ChevronRight, Circle } from 'lucide-react';
 

@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AxiosError } from 'axios';
-import { FormikHelpers } from 'formik';
+import type { AxiosError } from 'axios';
+import type { FormikHelpers } from 'formik';
 import { Archive, FlaskConical, HeartCrack, Save, Settings } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
@@ -16,7 +16,7 @@ import { useArchiveBankAccount } from '@monetr/interface/hooks/useArchiveBankAcc
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { useUpdateBankAccount } from '@monetr/interface/hooks/useUpdateBankAccount';
-import { APIError } from '@monetr/interface/util/request';
+import type { APIError } from '@monetr/interface/util/request';
 
 interface BankAccountValues {
   name: string;
@@ -97,7 +97,7 @@ export default function BankAccountSettingsPage(): JSX.Element {
         base={`/bank/${bankAccount.bankAccountId}/transactions`}
         breadcrumb='Settings'
       >
-        {!Boolean(bankAccount.deletedAt) && Boolean(link?.getIsManual()) && (
+        {!bankAccount.deletedAt && Boolean(link?.getIsManual()) && (
           <Button variant='destructive' onClick={archive}>
             <Archive />
             Archive

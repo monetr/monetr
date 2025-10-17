@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import Link from '@monetr/interface/models/Link';
+import type Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
 
 export function useRemoveLink(): (_linkId: string) => Promise<unknown> {

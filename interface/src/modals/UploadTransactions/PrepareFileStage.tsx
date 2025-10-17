@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { FilePresentOutlined } from '@mui/icons-material';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { type AxiosError, type AxiosResponse } from 'axios';
 
 import MSpan from '@monetr/interface/components/MSpan';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import { UploadTransactionStage } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
-import MonetrFile from '@monetr/interface/models/File';
+import type MonetrFile from '@monetr/interface/models/File';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 
 interface PrepareFileStageProps {

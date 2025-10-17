@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 

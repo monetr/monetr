@@ -1,6 +1,6 @@
-import { Theme } from '@mui/material';
+import type { Theme } from '@mui/material';
 import resolveConfig from 'tailwindcss/resolveConfig';
-import { ThemeConfig } from 'tailwindcss/types/config.js';
+import type { ThemeConfig } from 'tailwindcss/types/config.js';
 
 import theme from '@monetr/interface/theme';
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { Landmark } from 'lucide-react';
 
 import { useInstitution } from '@monetr/interface/hooks/useInstitution';
-import Link from '@monetr/interface/models/Link';
+import type Link from '@monetr/interface/models/Link';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 interface PlaidInstitutionLogoProps {

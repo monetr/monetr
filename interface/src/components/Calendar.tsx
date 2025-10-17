@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DayPicker, DayPickerSingleProps, useNavigation } from 'react-day-picker';
+import { DayPicker, type DayPickerSingleProps, useNavigation } from 'react-day-picker';
 import { addYears, format } from 'date-fns';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 

@@ -11,7 +11,7 @@ import {
 } from '@monetr/interface/components/DropdownMenu';
 import MDivider from '@monetr/interface/components/MDivider';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
-import { ReactElement } from '@monetr/interface/components/types';
+import type { ReactElement } from '@monetr/interface/components/types';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { useTriggerManualPlaidSync } from '@monetr/interface/hooks/useTriggerManualPlaidSync';

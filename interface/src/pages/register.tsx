@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
-import { FormikErrors, FormikHelpers } from 'formik';
+import type { AxiosError } from 'axios';
+import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
@@ -14,9 +14,9 @@ import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
-import useSignUp, { SignUpResponse } from '@monetr/interface/hooks/useSignUp';
+import useSignUp, { type SignUpResponse } from '@monetr/interface/hooks/useSignUp';
 import { getLocale, getTimezone } from '@monetr/interface/util/locale';
-import { APIError } from '@monetr/interface/util/request';
+import type { APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
 interface RegisterValues {
@@ -216,7 +216,7 @@ export default function Register(): JSX.Element {
             <a
               target='_blank'
               className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
-              href='https://monetr.app/policy/terms'
+              href='https://monetr.app/policy/terms' rel="noopener"
             >
               Terms & Conditions
             </a>{' '}
@@ -224,7 +224,7 @@ export default function Register(): JSX.Element {
             <a
               target='_blank'
               className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
-              href='https://monetr.app/policy/privacy'
+              href='https://monetr.app/policy/privacy' rel="noopener"
             >
               Privacy Policy
             </a>

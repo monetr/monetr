@@ -1,16 +1,16 @@
 import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import { tz } from '@date-fns/tz';
 import { startOfDay, startOfTomorrow } from 'date-fns';
-import { FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MForm from '@monetr/interface/components/MForm';
-import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
@@ -19,7 +19,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
-import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewGoalValues {
   name: string;

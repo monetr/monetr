@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
-import { InputAttributes, NumberFormatValues, NumericFormat, NumericFormatProps } from 'react-number-format';
+import { type InputAttributes, type NumberFormatValues, NumericFormat, type NumericFormatProps } from 'react-number-format';
 import { useFormikContext } from 'formik';
 
-import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
+import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import {
   getCurrencySymbolPrefixed,

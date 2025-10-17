@@ -1,8 +1,8 @@
-import React from 'react';
+import type React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { renderHook, RenderHookResult, WrapperComponent } from '@testing-library/react-hooks';
+import { renderHook, type RenderHookResult, type WrapperComponent } from '@testing-library/react-hooks';
 
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';

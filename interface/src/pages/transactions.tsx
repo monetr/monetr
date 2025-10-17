@@ -16,7 +16,7 @@ import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useTransactions } from '@monetr/interface/hooks/useTransactions';
 import { showNewTransactionModal } from '@monetr/interface/modals/NewTransactionModal';
 import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
-import Transaction from '@monetr/interface/models/Transaction';
+import type Transaction from '@monetr/interface/models/Transaction';
 
 let evilScrollPosition: number = 0;
 

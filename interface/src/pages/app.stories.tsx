@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import MockAdapter from 'axios-mock-adapter';
 
 import MonetrWrapper from './app';

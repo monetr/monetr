@@ -10,7 +10,7 @@ import {
   MagickImage,
   MagickImageCollection,
 } from '@imagemagick/magick-wasm';
-import { RsbuildPlugin } from '@rsbuild/core';
+import type { RsbuildPlugin } from '@rsbuild/core';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
@@ -332,8 +332,6 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
             },
           }),
         );
-
-        {
           // Apple touch icons
           html.headTags.push({
             tag: 'link',
@@ -349,7 +347,6 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
               href: path.join('/', appleTouchIconPrecomposedName),
             },
           });
-        }
 
         html.headTags.push({
           tag: 'link',

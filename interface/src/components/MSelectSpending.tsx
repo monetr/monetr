@@ -1,10 +1,10 @@
 import React from 'react';
-import { components, OptionProps } from 'react-select';
+import { components, type OptionProps } from 'react-select';
 import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 import { useFormikContext } from 'formik';
 
 import MBadge from './MBadge';
-import MSelect, { MSelectProps } from './MSelect';
+import MSelect, { type MSelectProps } from './MSelect';
 import MSpan from './MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';

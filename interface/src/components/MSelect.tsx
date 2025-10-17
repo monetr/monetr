@@ -1,14 +1,14 @@
-import React, { ReactNode } from 'react';
-import Select, { ActionMeta, GroupBase, OnChangeValue, OptionsOrGroups, Theme } from 'react-select';
+import React, { type ReactNode } from 'react';
+import Select, { type ActionMeta, type GroupBase, type OnChangeValue, type OptionsOrGroups, type Theme } from 'react-select';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { CheckCircleOutline } from '@mui/icons-material';
 import { SwipeableDrawer } from '@mui/material';
 
-import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
+import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
 import MSpan from './MSpan';
 import useTheme from '@monetr/interface/hooks/useTheme';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface Value<T> {
   label: string;
@@ -65,7 +65,7 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
     },
     {
       // If there is not a value, the change the text of the button to be 400 for the placeholder.
-      'dark:text-gray-400': !Boolean(props.value),
+      'dark:text-gray-400': !props.value,
     },
     {
       'dark:bg-dark-monetr-background-subtle': props.disabled,

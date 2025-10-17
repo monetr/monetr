@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ActionMeta, OnChangeValue } from 'react-select';
+import type { ActionMeta, OnChangeValue } from 'react-select';
 import { useFormikContext } from 'formik';
 
-import MSelect, { MSelectProps } from './MSelect';
+import MSelect, { type MSelectProps } from './MSelect';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 
 import getRecurrencesForDate from './Recurrence/getRecurrencesForDate';
-import Recurrence from './Recurrence/Recurrence';
+import type Recurrence from './Recurrence/Recurrence';
 
 export interface MSelectFrequencyProps extends MSelectProps<Recurrence> {
   name: string;

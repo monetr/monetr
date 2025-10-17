@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';

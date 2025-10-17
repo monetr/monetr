@@ -1,15 +1,15 @@
 import React, { useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { AxiosError } from 'axios';
-import { FormikErrors, FormikHelpers, useFormikContext } from 'formik';
+import type { AxiosError } from 'axios';
+import { type FormikErrors, type FormikHelpers, useFormikContext } from 'formik';
 import { ArrowUpDown } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MForm from '@monetr/interface/components/MForm';
-import { MLabelDecoratorProps } from '@monetr/interface/components/MLabel';
-import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import type { MLabelDecoratorProps } from '@monetr/interface/components/MLabel';
+import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
@@ -17,7 +17,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import { useTransfer } from '@monetr/interface/hooks/useTransfer';
 import { AmountType } from '@monetr/interface/util/amounts';
-import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface TransferModalProps {
   initialFromSpendingId?: string;

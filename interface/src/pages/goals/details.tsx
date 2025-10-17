@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { HeartBroken } from '@mui/icons-material';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import { tz } from '@date-fns/tz';
 import { startOfDay, startOfTomorrow } from 'date-fns';
-import { FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
 import { ArrowUpDown, PiggyBank, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
@@ -29,7 +29,7 @@ import { useUpdateSpending } from '@monetr/interface/hooks/useUpdateSpending';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
-import { APIError } from '@monetr/interface/util/request';
+import type { APIError } from '@monetr/interface/util/request';
 
 interface GoalValues {
   name: string;
