@@ -53,15 +53,18 @@ export default defineConfig({
     port: 3000,
     historyApiFallback: true,
     host: developmentLite ? 'localhost' : '0.0.0.0',
-    proxy: developmentLite ? [
-      { // When we are in development-lite mode, proxy API calls to the upstream API server that they have specified.
-        context: ['/api'],
-        target: `https://${developmentLiteTarget}`,
-        changeOrigin: true,
-        cookieDomainRewrite: 'localhost',
-        ws: true, // For file uploads
-      },
-    ] : undefined,
+    proxy: developmentLite
+      ? [
+          {
+            // When we are in development-lite mode, proxy API calls to the upstream API server that they have specified.
+            context: ['/api'],
+            target: `https://${developmentLiteTarget}`,
+            changeOrigin: true,
+            cookieDomainRewrite: 'localhost',
+            ws: true, // For file uploads
+          },
+        ]
+      : undefined,
   },
   html: {
     template: path.resolve(__dirname, 'public/index.html'),
@@ -82,12 +85,14 @@ export default defineConfig({
       image: 'assets/images',
       font: 'assets/fonts',
     },
-    filename: isDevelopment ? undefined : {
-      js: `${filename}.js`,
-      css: `${filename}.css`,
-      image: `[name].${filename}[ext]`,
-      font: `${filename}[ext]`,
-    },
+    filename: isDevelopment
+      ? undefined
+      : {
+          js: `${filename}.js`,
+          css: `${filename}.css`,
+          image: `[name].${filename}[ext]`,
+          font: `${filename}[ext]`,
+        },
     cleanDistPath: false, // Handled by cmake
     charset: 'utf8',
     filenameHash: true,
@@ -120,10 +125,11 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginSass(),
-    !isDevelopment && pluginPWA({
-      logo: path.resolve(__dirname, '../images/logo.png'),
-      background: '#19161f',
-      quality: 90,
-    }),
+    !isDevelopment &&
+      pluginPWA({
+        logo: path.resolve(__dirname, '../images/logo.png'),
+        background: '#19161f',
+        quality: 90,
+      }),
   ].filter(item => Boolean(item)),
 });

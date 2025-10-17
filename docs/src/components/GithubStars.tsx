@@ -17,10 +17,13 @@ export default function GithubStars(props: GithubStarsProps): JSX.Element {
     queryKey: ['https://api.github.com/repos/monetr/monetr'],
   });
 
-  const stars = typeof data?.stargazers_count === 'number' ? data.stargazers_count.toLocaleString('en-US', {
-    compactDisplay: 'short',
-    notation: 'compact',
-  }) : undefined;
+  const stars =
+    typeof data?.stargazers_count === 'number'
+      ? data.stargazers_count.toLocaleString('en-US', {
+          compactDisplay: 'short',
+          notation: 'compact',
+        })
+      : undefined;
 
   if (!props.variant || props.variant === 'default') {
     return (
@@ -38,12 +41,11 @@ export default function GithubStars(props: GithubStarsProps): JSX.Element {
           </svg>
         </div>
         <div className='py-1 text-center font-medium text-sm group-hover:opacity-80 opacity-100 w-10'>
-          { isLoading || !stars ?
-            <span className='rounded bg-dark-monetr-background-emphasis text-dark-monetr-background-emphasis'>???</span> :
-            <span>
-              { stars }
-            </span>
-          }
+          {isLoading || !stars ? (
+            <span className='rounded bg-dark-monetr-background-emphasis text-dark-monetr-background-emphasis'>???</span>
+          ) : (
+            <span>{stars}</span>
+          )}
         </div>
       </div>
     );
@@ -71,14 +73,12 @@ export default function GithubStars(props: GithubStarsProps): JSX.Element {
         </span>
       </div>
       <div className='py-1 px-3 text-center font-medium text-xl group-hover:opacity-80 opacity-100 bg-black bg-opacity-20 backdrop-blur-sm h-full items-center flex justify-center'>
-        { isLoading || !stars ?
-          <span className='rounded bg-dark-monetr-background-emphasis text-dark-monetr-background-emphasis'>???</span> :
-          <span>
-            { stars }
-          </span>
-        }
+        {isLoading || !stars ? (
+          <span className='rounded bg-dark-monetr-background-emphasis text-dark-monetr-background-emphasis'>???</span>
+        ) : (
+          <span>{stars}</span>
+        )}
       </div>
     </Link>
   );
-
 }
