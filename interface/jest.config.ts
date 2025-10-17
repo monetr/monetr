@@ -19,8 +19,18 @@ const config: Config = {
   testEnvironment: 'jest-environment-jsdom', // '@happy-dom/jest-environment',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   transform: {
-    // '^.+\\.(t|j)sx?$': ['ts-jest', { isolatedModules: true }],
-    '^.+\\.(t|j)sx?$': '@swc/jest',
+    '^.+\\.(t|j)sx?$': [
+      '@swc/jest',
+      {
+        jsc: {
+          transform: {
+            react: {
+              runtime: 'automatic',
+            },
+          },
+        },
+      },
+    ],
   },
   coverageReporters: ['lcov'],
 };
