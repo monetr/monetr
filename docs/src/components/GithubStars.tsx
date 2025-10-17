@@ -13,7 +13,9 @@ interface GithubRepoResponse {
 }
 
 export default function GithubStars(props: GithubStarsProps): JSX.Element {
-  const { data, isLoading } = useQuery<GithubRepoResponse>(['https://api.github.com/repos/monetr/monetr']);
+  const { data, isLoading } = useQuery<GithubRepoResponse>({
+    queryKey: ['https://api.github.com/repos/monetr/monetr'],
+  });
 
   const stars = typeof data?.stargazers_count === 'number' ? data.stargazers_count.toLocaleString('en-US', {
     compactDisplay: 'short',
