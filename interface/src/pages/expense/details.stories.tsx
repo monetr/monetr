@@ -1,5 +1,5 @@
-import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+
+import type { Meta, StoryObj } from '@storybook/react';
 
 import ExpenseDetails from './details';
 import Monetr from '@monetr/interface/monetr';
@@ -7,17 +7,14 @@ import Monetr from '@monetr/interface/monetr';
 const meta: Meta<typeof ExpenseDetails> = {
   title: 'New UI/Expense',
   component: ExpenseDetails,
-  parameters: {
-  },
+  parameters: {},
 };
 
 export default meta;
 
 export const NotFound: StoryObj<typeof ExpenseDetails> = {
   name: 'Not Found',
-  render: () => (
-    <Monetr />
-  ),
+  render: () => <Monetr />,
   parameters: {
     reactRouter: {
       routePath: '/*',
@@ -32,9 +29,7 @@ export const NotFound: StoryObj<typeof ExpenseDetails> = {
 
 export const ExpenseDetailCloudProduction: StoryObj<typeof ExpenseDetails> = {
   name: 'Expense Detail (Cloud Production)',
-  render: () => (
-    <Monetr />
-  ),
+  render: () => <Monetr />,
   parameters: {
     reactRouter: {
       routePath: '/*',
@@ -49,9 +44,7 @@ export const ExpenseDetailCloudProduction: StoryObj<typeof ExpenseDetails> = {
 
 export const ExpenseDetailGitLab: StoryObj<typeof ExpenseDetails> = {
   name: 'Expense Detail (GitLab)',
-  render: () => (
-    <Monetr />
-  ),
+  render: () => <Monetr />,
   parameters: {
     reactRouter: {
       routePath: '/*',

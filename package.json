@@ -7,22 +7,7 @@
     "pnpm": ">=9"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "5.62.0",
-    "@typescript-eslint/parser": "5.62.0",
-    "eslint": "8.57.1",
-    "eslint-config-react-app": "7.0.1",
-    "eslint-plugin-flowtype": "8.0.3",
-    "eslint-plugin-hooks": "0.4.3",
-    "eslint-plugin-import": "2.31.0",
-    "eslint-plugin-jest": "27.2.1",
-    "eslint-plugin-jsx-a11y": "6.10.2",
-    "eslint-plugin-no-relative-import-paths": "1.6.1",
-    "eslint-plugin-react": "7.37.5",
-    "eslint-plugin-react-hooks": "4.6.2",
-    "eslint-plugin-simple-import-sort": "12.1.1",
-    "eslint-plugin-storybook": "0.12.0",
-    "eslint-plugin-testing-library": "5.11.1",
-    "eslint-plugin-unused-imports": "4.1.4",
+    "@biomejs/biome": "2.2.6",
     "typescript": "5.9.3"
   },
   "scripts": {
@@ -33,12 +18,6 @@
     "develop-docs": "cmake --preset default && cmake --build build -t development.documentation.up",
     "shutdown": "cmake --preset default && cmake --build build -t development.down",
     "clean": "pnpm shutdown && cmake --build build -t clean && cmake -E remove_directory build"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "pnpm": {
     "overrides": {

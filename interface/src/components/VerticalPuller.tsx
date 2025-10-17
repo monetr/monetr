@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Box, styled } from '@mui/material';
 
 export default function VerticalPuller(): JSX.Element {
@@ -14,4 +14,3 @@ export default function VerticalPuller(): JSX.Element {
 
   return <Thing />;
 }
-

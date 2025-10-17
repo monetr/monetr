@@ -1,5 +1,5 @@
-import React, { Fragment } from 'react';
-import { Meta, StoryFn } from '@storybook/react';
+import { Fragment } from 'react';
+import type { Meta, StoryFn } from '@storybook/react';
 
 import MCheckbox from './MCheckbox';
 
@@ -14,31 +14,11 @@ export const Default: StoryFn<typeof MCheckbox> = () => (
       <div className='max-w-5xl grid grid-cols-2 grid-flow-row gap-6'>
         <span className='w-full text-center'>Enabled</span>
         <span className='w-full text-center'>Disabled</span>
-        <MCheckbox
-          id='test'
-          label='Remember me for 30 days'
-        />
-        <MCheckbox
-          id='test2'
-          label='Remember me for 30 days'
-          disabled
-        />
-        <MCheckbox
-          id='test0'
-          label='Remember me for 30 days'
-          checked
-        />
-        <MCheckbox
-          id='test-1'
-          label='Remember me for 30 days'
-          disabled
-          checked
-        />
-        <MCheckbox
-          id='test3'
-          label='Remember me for 30 days'
-          description='Keep yourself logged in for a while.'
-        />
+        <MCheckbox id='test' label='Remember me for 30 days' />
+        <MCheckbox id='test2' label='Remember me for 30 days' disabled />
+        <MCheckbox id='test0' label='Remember me for 30 days' checked />
+        <MCheckbox id='test-1' label='Remember me for 30 days' disabled checked />
+        <MCheckbox id='test3' label='Remember me for 30 days' description='Keep yourself logged in for a while.' />
         <MCheckbox
           id='test4'
           label='Remember me for 30 days'
@@ -64,13 +44,17 @@ export const Default: StoryFn<typeof MCheckbox> = () => (
               <a
                 target='_blank'
                 className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
-                href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
+                href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'
+                rel='noopener'
+              >
                 Terms of Use
-              </a> and&nbsp;
+              </a>{' '}
+              and&nbsp;
               <a
                 target='_blank'
                 className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
                 href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
+                rel='noopener'
               >
                 Privacy Policy
               </a>
@@ -85,13 +69,17 @@ export const Default: StoryFn<typeof MCheckbox> = () => (
               <a
                 target='_blank'
                 className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
-                href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
+                href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'
+                rel='noopener'
+              >
                 Terms of Use
-              </a> and&nbsp;
+              </a>{' '}
+              and&nbsp;
               <a
                 target='_blank'
                 className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
                 href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
+                rel='noopener'
               >
                 Privacy Policy
               </a>

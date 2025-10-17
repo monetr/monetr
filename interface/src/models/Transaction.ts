@@ -1,4 +1,3 @@
-
 import parseDate from '@monetr/interface/util/parseDate';
 
 export default class Transaction {
@@ -61,7 +60,7 @@ export default class Transaction {
   // getMerchantName will return the custom merchant name specified by the user (if there is one) or it will return the
   // original merchant name from when the transaction was initially created. Transaction's do not require a merchant
   // name at all though so this may still return null.
-  getMerchantName(): string|null {
+  getMerchantName(): string | null {
     if (this.merchantName) {
       return this.merchantName;
     }

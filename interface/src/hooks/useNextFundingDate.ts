@@ -8,9 +8,7 @@ import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules
  */
 export function useNextFundingDate(): string | null {
   const { data: funding } = useFundingSchedules();
-  const date = funding
-    ?.sort((a, b) => isBefore(a.nextRecurrence, b.nextRecurrence) ? 1 : -1)
-    .pop();
+  const date = funding?.sort((a, b) => (isBefore(a.nextRecurrence, b.nextRecurrence) ? 1 : -1)).pop();
 
   if (date) {
     return format(date.nextRecurrence, 'M/dd');

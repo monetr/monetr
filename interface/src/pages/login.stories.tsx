@@ -1,5 +1,5 @@
-import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+
+import type { Meta, StoryObj } from '@storybook/react';
 import MockAdapter from 'axios-mock-adapter';
 
 import monetrClient from '@monetr/interface/api/api';
@@ -26,7 +26,7 @@ export const Default: StoryObj<typeof LoginPage> = {
         error: 'Invalid credentials provided!',
       });
 
-      return (<Story />);
+      return <Story />;
     },
   ],
 };
@@ -46,7 +46,7 @@ export const WithReCAPTCHA: StoryObj<typeof LoginPage> = {
         error: 'Invalid credentials provided!',
       });
 
-      return (<Story />);
+      return <Story />;
     },
   ],
 };
@@ -64,7 +64,7 @@ export const NoSignup: StoryObj<typeof LoginPage> = {
         error: 'Invalid credentials provided!',
       });
 
-      return (<Story />);
+      return <Story />;
     },
   ],
 };
@@ -82,7 +82,7 @@ export const NoForgotPassword: StoryObj<typeof LoginPage> = {
         error: 'Invalid credentials provided!',
       });
 
-      return (<Story />);
+      return <Story />;
     },
   ],
 };

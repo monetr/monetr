@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { ArrowBackOutlined, MenuOpenOutlined, MenuOutlined } from '@mui/icons-material';
 
@@ -30,16 +30,16 @@ export default function MSidebarToggle(props: MSidebarToggleProps): JSX.Element 
 
   if (props.backButton) {
     return (
-      <div className={ className } onClick={ onClick }>
+      <div className={className} onClick={onClick}>
         <ArrowBackOutlined />
       </div>
     );
   }
 
   return (
-    <div className={ className } onClick={ onClick }>
-      { !mobileSidebarOpen && <MenuOutlined /> }
-      { mobileSidebarOpen && <MenuOpenOutlined /> }
+    <div className={className} onClick={onClick}>
+      {!mobileSidebarOpen && <MenuOutlined />}
+      {mobileSidebarOpen && <MenuOpenOutlined />}
     </div>
   );
 }

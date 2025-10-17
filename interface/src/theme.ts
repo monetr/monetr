@@ -7,17 +7,12 @@ import tailwindConfig from '../tailwind.config.ts';
 const fullConfig = resolveConfig(tailwindConfig);
 const darkMode = false; // window.localStorage.getItem('darkMode') === 'true';
 const inputHeight = 56; // Default is 56
-const defaultPrimary = fullConfig.theme.colors['purple']['500']; // '#4E1AA0';
+const defaultPrimary = fullConfig.theme.colors.purple['500']; // '#4E1AA0';
 const defaultSecondary = '#FF5798';
 
 export const newTheme = createTheme({
   typography: {
-    fontFamily: [
-      'Inter Variable',
-      'Helvetica',
-      'Arial',
-      'sans-serif',
-    ].join(','),
+    fontFamily: ['Inter Variable', 'Helvetica', 'Arial', 'sans-serif'].join(','),
   },
   shape: {
     borderRadius: 10,
@@ -25,22 +20,18 @@ export const newTheme = createTheme({
   palette: {
     mode: 'dark',
     text: {
-      secondary: fullConfig.theme.colors['zinc']['50'],
+      secondary: fullConfig.theme.colors.zinc['50'],
     },
     background: {
-      default: fullConfig.theme.colors['zinc']['900'],
-      paper: fullConfig.theme.colors['zinc']['900'],
+      default: fullConfig.theme.colors.zinc['900'],
+      paper: fullConfig.theme.colors.zinc['900'],
     },
   },
 });
 
 const theme = createTheme({
   typography: {
-    fontFamily: [
-      'Helvetica',
-      'Arial',
-      'sans-serif',
-    ].join(','),
+    fontFamily: ['Helvetica', 'Arial', 'sans-serif'].join(','),
   },
   shape: {
     borderRadius: 10,

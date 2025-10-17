@@ -1,4 +1,3 @@
-
 export enum Feature {
   ManualBudgeting = 'ManualBudgeting',
   LinkedBudgeting = 'LinkedBudgeting',

@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import MobileSidebar from '@monetr/interface/components/Layout/MobileSidebar';
@@ -10,5 +10,5 @@ export default function Sidebar(): JSX.Element {
     return <MobileSidebar />;
   }
 
-  return <BankSidebar  />;
+  return <BankSidebar />;
 }

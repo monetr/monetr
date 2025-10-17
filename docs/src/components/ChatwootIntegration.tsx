@@ -3,7 +3,9 @@ import { Fragment } from 'react';
 export default function ChatwootIntegration(): JSX.Element {
   if (process.env.CHATWOOT_URL && process.env.CHATWOOT_TOKEN) {
     return (
-      <script dangerouslySetInnerHTML={ { __html: `
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
         (function(d,t) {
           var BASE_URL="${process.env.CHATWOOT_URL}";
           var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
@@ -18,8 +20,9 @@ export default function ChatwootIntegration(): JSX.Element {
             })
           }
         })(document,"script");
-        ` } 
-      } /> 
+        `,
+        }}
+      />
     );
   }
 

@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 
 import ConfigError from './config';
 
@@ -12,4 +12,3 @@ export default meta;
 export const Config: StoryObj<typeof ConfigError> = {
   name: 'Config',
 };
-

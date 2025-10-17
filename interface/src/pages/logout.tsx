@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Backdrop } from '@mui/material';
 import { LoaderCircle } from 'lucide-react';
 
@@ -12,7 +12,7 @@ export default function LogoutPage(): JSX.Element {
   });
 
   return (
-    <Backdrop open={ true }>
+    <Backdrop open={true}>
       <LoaderCircle className='spin' />
     </Backdrop>
   );

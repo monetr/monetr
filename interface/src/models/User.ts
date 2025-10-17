@@ -14,9 +14,11 @@ export default class User {
   login: Login;
 
   constructor(data?: Partial<User>) {
-    if (data) Object.assign(this, {
-      ...data,
-      login: new Login(data?.login),
-    });
+    if (data) {
+      Object.assign(this, {
+        ...data,
+        login: new Login(data?.login),
+      });
+    }
   }
 }

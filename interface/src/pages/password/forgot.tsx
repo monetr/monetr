@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FormikErrors, FormikHelpers } from 'formik';
+import { useState } from 'react';
+import type { FormikErrors, FormikHelpers } from 'formik';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
@@ -29,17 +29,19 @@ export function ForgotPasswordComplete(): JSX.Element {
         <MLogo />
       </div>
       <div className='flex flex-col items-center'>
-        <MSpan>
-          Check your email
-        </MSpan>
+        <MSpan>Check your email</MSpan>
         <MSpan color='subtle' className='max-w-[248px] text-center text-sm'>
           If a user was found with the email provided, then you should receive an email with instructions on how to
           reset your password.
         </MSpan>
       </div>
       <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
-        <MSpan color='subtle' className='text-sm'>Return to</MSpan>
-        <MLink to='/login' size='sm'>Sign in</MLink>
+        <MSpan color='subtle' className='text-sm'>
+          Return to
+        </MSpan>
+        <MLink to='/login' size='sm'>
+          Sign in
+        </MLink>
       </div>
     </div>
   );
@@ -54,7 +56,7 @@ export default function ForgotPasswordNew(): JSX.Element {
     const errors: FormikErrors<Values> = {};
 
     if (values.email && !verifyEmailAddress(values.email)) {
-      errors['email'] = 'Please provide a valid email address.';
+      errors.email = 'Please provide a valid email address.';
     }
 
     return errors;
@@ -71,25 +73,21 @@ export default function ForgotPasswordNew(): JSX.Element {
   }
 
   if (isComplete) {
-    return (
-      <ForgotPasswordComplete />
-    );
+    return <ForgotPasswordComplete />;
   }
 
   return (
     <MForm
-      initialValues={ initialValues }
-      validate={ validate }
-      onSubmit={ submit }
+      initialValues={initialValues}
+      validate={validate}
+      onSubmit={submit}
       className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5'
     >
       <div className='max-w-[128px] w-full'>
         <MLogo />
       </div>
       <div className='flex flex-col items-center'>
-        <MSpan>
-          Forgot your password?
-        </MSpan>
+        <MSpan>Forgot your password?</MSpan>
         <MSpan color='subtle' className='text-sm'>
           We can email you a link to reset it.
         </MSpan>
@@ -103,24 +101,19 @@ export default function ForgotPasswordNew(): JSX.Element {
         required
         className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'
       />
-      <MCaptcha
-        className='mb-1'
-        name='captcha'
-        show={ Boolean(config?.verifyForgotPassword) }
-      />
+      <MCaptcha className='mb-1' name='captcha' show={Boolean(config?.verifyForgotPassword)} />
       <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
-        <FormButton
-          variant='primary'
-          role='form'
-          type='submit'
-          className='w-full'
-        >
+        <FormButton variant='primary' role='form' type='submit' className='w-full'>
           Reset Password
         </FormButton>
       </div>
       <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
-        <MSpan color='subtle' className='text-sm'>Remembered your password?</MSpan>
-        <MLink to='/login' size='sm'>Sign in</MLink>
+        <MSpan color='subtle' className='text-sm'>
+          Remembered your password?
+        </MSpan>
+        <MLink to='/login' size='sm'>
+          Sign in
+        </MLink>
       </div>
     </MForm>
   );

@@ -1,0 +1,154 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true,
+    "defaultBranch": "origin/main"
+  },
+  "formatter": {
+    "enabled": true,
+    "bracketSpacing": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 120,
+    "attributePosition": "auto",
+    "includes": ["interface/**", "docs/src/**", "emails/src/**", "!**/*.html", "!**/*.svg", "!**/*.mdx", "!**/*.css"]
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              [
+                "@date-fns/tz",
+                "@ebay/nice-modal-react",
+                "@fontsource-variable/inter",
+                "@mui/**",
+                "@radix-ui/**",
+                "@sentry/**",
+                "@tanstack/react-query",
+                "axios",
+                "class-variance-authority",
+                "cmdk",
+                "date-fns",
+                "formik",
+                "input-otp",
+                "lucide-react",
+                "notistack",
+                "react",
+                "react-day-picker",
+                "react-dom",
+                "react-dropzone",
+                "react-google-recaptcha",
+                "react-infinite-scroll-hook",
+                "react-number-format",
+                "react-plaid-link",
+                "react-qr-code",
+                "react-router-dom",
+                "react-select",
+                "rrule",
+                "tailwind-merge",
+                "tailwindcss",
+                "tailwindcss-animate",
+                "vaul",
+                "zustand"
+              ],
+              ":BLANK_LINE:",
+              ["@monetr/**"],
+              ":ALIAS:",
+              ":BLANK_LINE:",
+              ["./**"],
+              ":PATH:",
+              ":BLANK_LINE:",
+              [
+                "@/**/*.scss",
+                "@/**/*.css",
+                "@/**/*.svg",
+                "@/**/*.png",
+                "@/**/*.jpg",
+                "@/**/*.gif",
+                "@/**/*.jpeg",
+                "@/**/*.webp"
+              ],
+              ":BLANK_LINE:"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "useKeyWithClickEvents": "off",
+        "useKeyWithMouseEvents": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off",
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
+      },
+      "complexity": {
+        "noForEach": "off",
+        "noThisInStatic": "off",
+        "noStaticOnlyClass": "off",
+        "noUselessFragments": "off"
+      },
+      "suspicious": {
+        "noShadowRestrictedNames": "off",
+        "noExplicitAny": "off",
+        "noExtraNonNullAssertion": "off"
+      },
+      "performance": {
+        "noDelete": "off"
+      },
+      "style": {
+        "useDefaultParameterLast": "off",
+        "noParameterAssign": "off",
+        "noNonNullAssertion": "off",
+        "useBlockStatements": "error",
+        "useConsistentCurlyBraces": "error",
+        "noRestrictedImports": {
+          "level": "warn",
+          "options": {
+            "paths": {
+              "@mui/icons-material": "use lucide-react instead",
+              "@mui/material": "use literally anything else instead"
+            }
+          }
+        }
+      },
+      "nursery": {}
+    },
+    "includes": ["interface/**", "docs/src/**", "emails/src/**", "!**/*.html", "!**/*.svg", "!**/*.mdx", "!**/*.css"]
+  },
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "single",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "all",
+      "arrowParentheses": "asNeeded",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "quoteStyle": "single",
+      "attributePosition": "auto"
+    }
+  },
+  "css": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  }
+}

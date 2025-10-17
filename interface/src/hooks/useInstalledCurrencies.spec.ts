@@ -17,35 +17,35 @@ describe('use installed currencies', () => {
 
   it('will fetch currencies if we are authenticated', async () => {
     mockAxios.onGet('/api/users/me').reply(200, {
-      'activeUntil': '2024-09-26T00:31:38Z',
-      'hasSubscription': true,
-      'isActive': true,
-      'isSetup': true,
-      'isTrialing': false,
-      'trialingUntil': null,
-      'defaultCurrency': 'USD',
-      'user': {
-        'userId': 'user_01hym36e8ewaq0hxssb1m3k4ha',
-        'loginId': 'lgn_01hym36d96ze86vz5g7883vcwg',
-        'login': {
-          'loginId': 'lgn_01hym36d96ze86vz5g7883vcwg',
-          'email': 'example@example.com',
-          'firstName': 'Elliot',
-          'lastName': 'Courant',
-          'passwordResetAt': null,
-          'isEmailVerified': true,
-          'emailVerifiedAt': '2022-09-25T00:24:25.976514Z',
-          'totpEnabledAt': null,
+      activeUntil: '2024-09-26T00:31:38Z',
+      hasSubscription: true,
+      isActive: true,
+      isSetup: true,
+      isTrialing: false,
+      trialingUntil: null,
+      defaultCurrency: 'USD',
+      user: {
+        userId: 'user_01hym36e8ewaq0hxssb1m3k4ha',
+        loginId: 'lgn_01hym36d96ze86vz5g7883vcwg',
+        login: {
+          loginId: 'lgn_01hym36d96ze86vz5g7883vcwg',
+          email: 'example@example.com',
+          firstName: 'Elliot',
+          lastName: 'Courant',
+          passwordResetAt: null,
+          isEmailVerified: true,
+          emailVerifiedAt: '2022-09-25T00:24:25.976514Z',
+          totpEnabledAt: null,
         },
-        'accountId': 'acct_01hk84dchvxvjgp7cgap818c82',
-        'account': {
-          'accountId': 'acct_01hk84dchvxvjgp7cgap818c82',
-          'timezone': 'America/Chicago',
-          'locale': 'en_US',
-          'subscriptionActiveUntil': '2024-09-26T00:31:38Z',
-          'subscriptionStatus': 'active',
-          'trialEndsAt': null,
-          'createdAt': '2024-01-03T17:02:23.290914Z',
+        accountId: 'acct_01hk84dchvxvjgp7cgap818c82',
+        account: {
+          accountId: 'acct_01hk84dchvxvjgp7cgap818c82',
+          timezone: 'America/Chicago',
+          locale: 'en_US',
+          subscriptionActiveUntil: '2024-09-26T00:31:38Z',
+          subscriptionStatus: 'active',
+          trialEndsAt: null,
+          createdAt: '2024-01-03T17:02:23.290914Z',
         },
       },
     });
@@ -62,10 +62,7 @@ describe('use installed currencies', () => {
     await world.waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
     await world.waitFor(() => expect(world.result.current.isLoading).toBeFalsy());
     await world.waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
-    expect(world.result.current.data).toStrictEqual([
-      'EUR',
-      'USD',
-    ]);
+    expect(world.result.current.data).toStrictEqual(['EUR', 'USD']);
   });
 
   it('will not fetch currencies if we are not authenticated', async () => {

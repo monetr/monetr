@@ -1,5 +1,4 @@
-/* eslint-disable max-len */
-import React from 'react';
+
 
 import logoData from './logo.svg';
 
@@ -8,11 +7,5 @@ interface LogoProps {
 }
 
 export default function Logo(props: LogoProps): JSX.Element {
-  return (
-    <img
-      className={ props.className }
-      src={ logoData }
-      alt='monetr'
-    />
-  );
+  return <img className={props.className} src={logoData} alt='monetr' />;
 }

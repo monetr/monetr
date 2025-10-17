@@ -17,21 +17,22 @@ describe('useSelectedBankAccount', () => {
 
   it('valid URL', async () => {
     mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
-      'bankAccountId': 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
-      'linkId': 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
-      'availableBalance': 48635,
-      'currentBalance': 48635,
-      'mask': '2982',
-      'name': 'Mercury Checking',
-      'originalName': 'Mercury Checking',
-      'officialName': 'Mercury Checking',
-      'accountType': 'depository',
-      'accountSubType': 'checking',
-      'status': 'active',
-      'lastUpdated': '2023-07-02T04:22:52.48118Z',
+      bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
+      linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
+      availableBalance: 48635,
+      currentBalance: 48635,
+      mask: '2982',
+      name: 'Mercury Checking',
+      originalName: 'Mercury Checking',
+      officialName: 'Mercury Checking',
+      accountType: 'depository',
+      accountSubType: 'checking',
+      status: 'active',
+      lastUpdated: '2023-07-02T04:22:52.48118Z',
     });
 
-    { // Make sure use selected bank account works.
+    {
+      // Make sure use selected bank account works.
       const world = testRenderHook(useSelectedBankAccount, {
         initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/expenses',
       });

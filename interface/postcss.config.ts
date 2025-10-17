@@ -6,11 +6,14 @@ const config: Config = {
     require('tailwindcss'),
     require('autoprefixer'),
     require('cssnano')({
-      preset: ['default', {
-        discardComments: {
-          removeAll: true,
+      preset: [
+        'default',
+        {
+          discardComments: {
+            removeAll: true,
+          },
         },
-      }],
+      ],
     }),
   ],
 };

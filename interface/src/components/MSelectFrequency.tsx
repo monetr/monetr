@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { ActionMeta, OnChangeValue } from 'react-select';
+import { useEffect, useState } from 'react';
+import type { ActionMeta, OnChangeValue } from 'react-select';
 import { useFormikContext } from 'formik';
 
-import MSelect, { MSelectProps } from './MSelect';
+import MSelect, { type MSelectProps } from './MSelect';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 
 import getRecurrencesForDate from './Recurrence/getRecurrencesForDate';
-import Recurrence from './Recurrence/Recurrence';
+import type Recurrence from './Recurrence/Recurrence';
 
 export interface MSelectFrequencyProps extends MSelectProps<Recurrence> {
   name: string;
@@ -52,8 +52,8 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
     value: index,
   }));
 
-  const value = selectedIndex !== null && selectedIndex >= 0 && selectedIndex < options.length ?
-    options[selectedIndex] : null;
+  const value =
+    selectedIndex !== null && selectedIndex >= 0 && selectedIndex < options.length ? options[selectedIndex] : null;
 
   function onChange(newValue: OnChangeValue<SelectOption, false>, _: ActionMeta<SelectOption>) {
     setSelectedIndex(newValue.value);
@@ -64,20 +64,19 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
 
   return (
     <MSelect
-      { ...props }
+      {...props}
       placeholder='Select a frequency...'
-      disabled={ formikContext?.isSubmitting }
-      error={ formikContext?.errors[props.name] }
-      isClearable={ false }
-      label={ props.label }
-      name={ props.name }
-      onChange={ onChange }
-      options={ options }
-      value={ value }
+      disabled={formikContext?.isSubmitting}
+      error={formikContext?.errors[props.name]}
+      isClearable={false}
+      label={props.label}
+      name={props.name}
+      onChange={onChange}
+      options={options}
+      value={value}
     />
   );
 }
-
 
 interface SelectOption {
   readonly label: string;

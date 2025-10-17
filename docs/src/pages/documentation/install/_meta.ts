@@ -1,3 +1,3 @@
 export default {
-  'docker': 'Docker Compose',
+  docker: 'Docker Compose',
 };

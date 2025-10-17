@@ -1,30 +1,29 @@
-
 import PlaidBankAccount from '@monetr/interface/models/PlaidBankAccount';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export type BankAccountStatus = 'unknown' | 'active' | 'inactive';
 
 export enum BankAccountType {
-	Depository = 'depository',
-	Credit     = 'credit',
-	Loan       = 'loan',
-	Investment = 'investment',
-	Other      = 'other',
+  Depository = 'depository',
+  Credit = 'credit',
+  Loan = 'loan',
+  Investment = 'investment',
+  Other = 'other',
 }
 
 export enum BankAccountSubType {
-  Checking       = 'checking',
-  Savings        = 'savings',
-  HSA            = 'hsa',
-  CD             = 'cd',
-  MoneyMarket    = 'money market',
-  PayPal         = 'paypal',
-  Prepaid        = 'prepaid',
+  Checking = 'checking',
+  Savings = 'savings',
+  HSA = 'hsa',
+  CD = 'cd',
+  MoneyMarket = 'money market',
+  PayPal = 'paypal',
+  Prepaid = 'prepaid',
   CashManagement = 'cash management',
-  EBT            = 'ebt',
-  CreditCard     = 'credit card',
-  Auto           = 'auto',
-  Other          = 'other',
+  EBT = 'ebt',
+  CreditCard = 'credit card',
+  Auto = 'auto',
+  Other = 'other',
 }
 
 export default class BankAccount {

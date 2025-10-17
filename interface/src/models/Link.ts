@@ -1,4 +1,3 @@
-
 import PlaidLink, { PlaidLinkStatus } from '@monetr/interface/models/PlaidLink';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -9,14 +8,14 @@ export enum LinkType {
 }
 
 export const errorMessages = {
-  'ITEM_LOGIN_REQUIRED': 'This link\'s authentication has expired and needs to be re-authenticated.',
+  ITEM_LOGIN_REQUIRED: "This link's authentication has expired and needs to be re-authenticated.",
 };
 
 /**
-  * A Link is used to represent an institution and it's bank accounts. An account can have multiple links and can have
-  * multiple links for the same institution. But typically links will represent a unique group of bank accounts for a
-  * an institution. A group of bank accounts within a single "login" for that institution.
-  */
+ * A Link is used to represent an institution and it's bank accounts. An account can have multiple links and can have
+ * multiple links for the same institution. But typically links will represent a unique group of bank accounts for a
+ * an institution. A group of bank accounts within a single "login" for that institution.
+ */
 export default class Link {
   /**
    * Represents the global unique identifier for a group of bank accounts in monetr.
@@ -33,12 +32,14 @@ export default class Link {
   plaidLink: PlaidLink | null;
 
   constructor(data?: Partial<Link>) {
-    if (data) Object.assign(this, {
-      ...data,
-      plaidLink: data?.plaidLink && new PlaidLink(data.plaidLink),
-      updatedAt: parseDate(data?.updatedAt),
-      createdAt: parseDate(data?.createdAt),
-    });
+    if (data) {
+      Object.assign(this, {
+        ...data,
+        plaidLink: data?.plaidLink && new PlaidLink(data.plaidLink),
+        updatedAt: parseDate(data?.updatedAt),
+        createdAt: parseDate(data?.createdAt),
+      });
+    }
   }
 
   getName(): string {

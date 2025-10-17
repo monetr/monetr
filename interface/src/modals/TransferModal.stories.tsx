@@ -1,12 +1,11 @@
-import { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 
 import TransferModal, { showTransferModal } from './TransferModal';
 
 const meta: Meta<typeof TransferModal> = {
   title: 'New UI/Modals/Transfer',
   component: TransferModal,
-  parameters: {
-  },
+  parameters: {},
 };
 
 export default meta;
