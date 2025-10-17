@@ -332,21 +332,21 @@ export const pluginPWA = (options: PluginPWAOptions): RsbuildPlugin => ({
             },
           }),
         );
-          // Apple touch icons
-          html.headTags.push({
-            tag: 'link',
-            attrs: {
-              rel: 'apple-touch-icon',
-              href: path.join('/', appleTouchIconName),
-            },
-          });
-          html.headTags.push({
-            tag: 'link',
-            attrs: {
-              rel: 'apple-touch-icon-precomposed',
-              href: path.join('/', appleTouchIconPrecomposedName),
-            },
-          });
+        // Apple touch icons
+        html.headTags.push({
+          tag: 'link',
+          attrs: {
+            rel: 'apple-touch-icon',
+            href: path.join('/', appleTouchIconName),
+          },
+        });
+        html.headTags.push({
+          tag: 'link',
+          attrs: {
+            rel: 'apple-touch-icon-precomposed',
+            href: path.join('/', appleTouchIconPrecomposedName),
+          },
+        });
 
         html.headTags.push({
           tag: 'link',

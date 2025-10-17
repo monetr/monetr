@@ -26,9 +26,9 @@ export function useRemoveTransaction(): (_: RemoveTransactionRequest) => Promise
     const { transaction, softDelete, adjustsBalance } = removal;
     const path = `/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`;
     const params = new URLSearchParams();
-      // Build the query parameters for the request.
-      params.set('adjusts_balance', String(adjustsBalance));
-      params.set('soft', String(softDelete));
+    // Build the query parameters for the request.
+    params.set('adjusts_balance', String(adjustsBalance));
+    params.set('soft', String(softDelete));
     // Send the delete request to the server and handle any changes returned.
     return await request()
       .delete(`${path}?${params.toString()}`)

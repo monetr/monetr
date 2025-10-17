@@ -44,7 +44,8 @@ export const Default: StoryFn<typeof MCheckbox> = () => (
               <a
                 target='_blank'
                 className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
-                href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md' rel="noopener"
+                href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'
+                rel='noopener'
               >
                 Terms of Use
               </a>{' '}
@@ -52,7 +53,8 @@ export const Default: StoryFn<typeof MCheckbox> = () => (
               <a
                 target='_blank'
                 className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
-                href='https://github.com/monetr/legal/blob/main/PRIVACY.md' rel="noopener"
+                href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
+                rel='noopener'
               >
                 Privacy Policy
               </a>
@@ -67,7 +69,8 @@ export const Default: StoryFn<typeof MCheckbox> = () => (
               <a
                 target='_blank'
                 className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
-                href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md' rel="noopener"
+                href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'
+                rel='noopener'
               >
                 Terms of Use
               </a>{' '}
@@ -75,7 +78,8 @@ export const Default: StoryFn<typeof MCheckbox> = () => (
               <a
                 target='_blank'
                 className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
-                href='https://github.com/monetr/legal/blob/main/PRIVACY.md' rel="noopener"
+                href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
+                rel='noopener'
               >
                 Privacy Policy
               </a>

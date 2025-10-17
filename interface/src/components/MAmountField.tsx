@@ -1,5 +1,10 @@
 import React, { useCallback } from 'react';
-import { type InputAttributes, type NumberFormatValues, NumericFormat, type NumericFormatProps } from 'react-number-format';
+import {
+  type InputAttributes,
+  type NumberFormatValues,
+  NumericFormat,
+  type NumericFormatProps,
+} from 'react-number-format';
 import { useFormikContext } from 'formik';
 
 import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
