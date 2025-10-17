@@ -1,7 +1,7 @@
 # vim: set ft=yaml
 services:
   flipt:
-    image: ghcr.io/flipt-io/flipt:v1.61.0
+    image: ghcr.io/flipt-io/flipt:v2.2.0
     restart: always # If something goes wrong just restart the container, this is for development only.
     # healthcheck:
     #   test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80/v1/sys/health || exit 1
