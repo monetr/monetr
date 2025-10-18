@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.5.4](https://github.com/monetr/monetr/compare/v1.5.3...v1.5.4) (2025-10-18)
+
+
+### Dependencies
+
+* **api:** update module github.com/spf13/viper to v1.21.0 ([#2545](https://github.com/monetr/monetr/issues/2545)) ([c6336d1](https://github.com/monetr/monetr/commit/c6336d174db1c392507bd5369ef48cd4e6e03ade))
+* **containers:** update ghcr.io/flipt-io/flipt docker tag to v2 ([#2748](https://github.com/monetr/monetr/issues/2748)) ([1746045](https://github.com/monetr/monetr/commit/1746045a8d4bbd54fb98de7d06b7f8bab219b573))
+* **docs:** Upgrading react-query for the documentation site ([3aad459](https://github.com/monetr/monetr/commit/3aad4593dc1855b2e1089d6ae62bbfb9e98b7755))
+* **ui:** Removing some extra dependencies ([5e18291](https://github.com/monetr/monetr/commit/5e18291dd9204189204ca158e6914bfe815bcdc4))
+* **ui:** update dependency @react-email/components to v0.5.7 ([#2760](https://github.com/monetr/monetr/issues/2760)) ([e241118](https://github.com/monetr/monetr/commit/e241118a920eb2561db92b604807526ea029043c))
+* **ui:** update dependency @tanstack/react-query to v5.90.5 ([#2756](https://github.com/monetr/monetr/issues/2756)) ([428ccc7](https://github.com/monetr/monetr/commit/428ccc78ad64f94f94a3f8b1b3b00699cf6a84d7))
+* **ui:** update dependency @types/node to v20.19.22 ([#2761](https://github.com/monetr/monetr/issues/2761)) ([93e70c2](https://github.com/monetr/monetr/commit/93e70c2eb7caac252a679664288c1d214c42f218))
+* **ui:** update dependency cssnano to v7.1.1 ([#2735](https://github.com/monetr/monetr/issues/2735)) ([5336a71](https://github.com/monetr/monetr/commit/5336a710fff5a27d642f4c4989ab5c9b4f7939a0))
+* **ui:** update dependency react-email to v4 ([#2751](https://github.com/monetr/monetr/issues/2751)) ([15b99ff](https://github.com/monetr/monetr/commit/15b99ff016e3e3c0e424dc53fe2225985db53bfd))
+* **ui:** update embla-carousel monorepo to v8.6.0 ([#2762](https://github.com/monetr/monetr/issues/2762)) ([7d0a525](https://github.com/monetr/monetr/commit/7d0a525d8fb18cbb8bb53ebdf782156304ac6c1d))
+
 ## [1.5.3](https://github.com/monetr/monetr/compare/v1.5.2...v1.5.3) (2025-10-16)
 
 
