@@ -13,8 +13,8 @@
 <url><loc>https://monetr.app/documentation/use/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/policy/privacy/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/policy/terms/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://monetr.app/documentation/configure/cors/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/configure/email/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://monetr.app/documentation/configure/cors/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/configure/kms/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/configure/links/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/configure/logging/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
