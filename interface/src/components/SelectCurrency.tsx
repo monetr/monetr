@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { useFormikContext } from 'formik';
-import type { OnChangeValue } from 'react-select';
 
 import MSelect from '@monetr/interface/components/MSelect';
+import Select, { type SelectOption } from '@monetr/interface/components/Select';
 import { useInstalledCurrencies } from '@monetr/interface/hooks/useInstalledCurrencies';
 
 interface SelectCurrencyProps {
@@ -17,7 +17,8 @@ export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element 
   const formikContext = useFormikContext();
   const { data: currencies, isLoading: currenciesLoading } = useInstalledCurrencies();
   const onChange = useCallback(
-    (option: OnChangeValue<{ label: string; value: string }, false>) => {
+    (option: SelectOption<string>) => {
+      console.log('CHANGED', option);
       formikContext.setFieldValue(props.name, option.value);
     },
     [formikContext, props.name],
@@ -41,7 +42,7 @@ export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element 
   const value = options.find(option => option.value === formikContext.values[props.name]);
 
   return (
-    <MSelect
+    <Select
       disabled={props.disabled || formikContext.isSubmitting}
       label='Currency'
       name={props.name}
@@ -51,7 +52,6 @@ export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element 
       placeholder='Select a currency...'
       required={props.required}
       className={props.className}
-      menuPortalTarget={props.menuPortalTarget}
       value={value}
     />
   );
