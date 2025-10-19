@@ -26,14 +26,14 @@ export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element 
 
   if (currenciesLoading) {
     return (
-      <MSelect
-        label='Currency'
+      <Select
         disabled
+        label='Currency'
+        options={[]}
         isLoading
         placeholder='Select a currency...'
-        required={props.required}
         className={props.className}
-        menuPortalTarget={props.menuPortalTarget}
+        onChange={onChange}
       />
     );
   }

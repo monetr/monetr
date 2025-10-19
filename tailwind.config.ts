@@ -112,6 +112,11 @@ const config: Partial<Config> = {
         border: 'hsl(var(--border))',
         input: 'var(--input)',
         ring: 'hsl(var(--ring))',
+        content: {
+          DEFAULT: '#d4d4d8', // zinc-200
+          placeholder: '#9ca3af', // gray-400
+          disabled: '#6b7280' // gray-500
+        },
         background: {
           subtle: '#27272a', // zinc-800
           DEFAULT: '#19161f',

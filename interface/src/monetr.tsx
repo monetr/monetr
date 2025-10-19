@@ -123,7 +123,7 @@ export default function Monetr(): JSX.Element {
   }
 
   return (
-    <div className='monetr max-w-screen max-h-screen h-full w-full bg-background flex'>
+    <div className='monetr h-screen w-screen bg-background flex'>
       <Sidebar />
       <div className='w-full h-full flex min-w-0 overflow-y-auto'>
         <RoutesImpl>

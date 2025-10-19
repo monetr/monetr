@@ -1,9 +1,11 @@
-import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cva } from 'class-variance-authority';
-import { ArrowDown, ArrowUp, LoaderCircle } from 'lucide-react';
+import { ArrowDown, ArrowUp, LoaderCircle, PanelBottomClose, PanelBottomOpen } from 'lucide-react';
 
+import { Drawer, DrawerContent, DrawerTrigger, DrawerWrapper } from '@monetr/interface/components/Drawer';
 import MLabel, { type MLabelDecorator } from '@monetr/interface/components/MLabel';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
+import useIsMobile from '@monetr/interface/hooks/useIsMobile';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import { type UseComboboxSelectedItemChange, useCombobox } from 'downshift';
@@ -39,6 +41,10 @@ export interface SelectProps<V = unknown> {
   filterImpl?: (filterText: string) => (option: SelectOption<V>) => boolean;
 }
 
+export interface SelectPropsLoading<V> extends SelectProps<V> {
+  isLoading: true;
+}
+
 export function defaultFilterImplementation<V = unknown>(filterText: string): (option: SelectOption<V>) => boolean {
   return (option: SelectOption<V>) => {
     return option.label.toLocaleLowerCase().includes(filterText.toLocaleLowerCase());
@@ -55,7 +61,7 @@ const SelectClasses = cva(
     'block',
     'border-0',
     'focus-within:ring-2 focus-within:ring-inset',
-    'placeholder:text-gray-400',
+    'placeholder:text-content-placeholder',
     'px-3 py-1.5',
     'ring-1 ring-inset',
     'rounded-lg',
@@ -66,17 +72,17 @@ const SelectClasses = cva(
     'dark:caret-zinc-50',
     'min-h-[38px]',
     // Disabled styles
-    'disabled:dark:bg-dark-monetr-background-subtle',
-    'disabled:dark:ring-dark-monetr-background-emphasis',
+    'disabled:dark:bg-background-subtle',
+    'disabled:dark:ring-background-emphasis',
     'disabled:ring-gray-200',
-    'disabled:text-gray-500',
-    'aria-disabled:dark:bg-dark-monetr-background-subtle',
-    'aria-disabled:dark:ring-dark-monetr-background-emphasis',
+    'disabled:content-disabled',
+    'aria-disabled:dark:bg-background-subtle',
+    'aria-disabled:dark:ring-background-emphasis',
     'aria-disabled:ring-gray-200',
     'aria-disabled:text-gray-500',
     // Enabled styles
     'dark:bg-transparent',
-    'dark:text-zinc-200',
+    'dark:text-content',
     'text-gray-900',
     // Default ring when we are not disabled or focused
     'dark:ring-dark-monetr-border-string',
@@ -106,6 +112,47 @@ const SelectClasses = cva(
 );
 
 export default function Select<V>(props: SelectProps<V>): React.JSX.Element {
+  const isMobile = useIsMobile();
+  if (props.isLoading) {
+    return <SelectLoading<V> {...props} isLoading />;
+  }
+
+  if (isMobile) {
+    return <SelectDrawer<V> {...props} />;
+  }
+
+  return <SelectCombobox<V> {...props} />;
+}
+
+export function SelectLoading<V>(props: SelectPropsLoading<V>): React.JSX.Element {
+  const classNames = SelectClasses({
+    error: Boolean(props.error),
+  });
+
+  const wrapperClassNames = mergeTailwind(
+    {
+      // This will make it so the space below the input is the same when there is and isn't an error.
+      'pb-[18px]': !props.error,
+    },
+    props.className,
+  );
+  const LabelDecorator = props.labelDecorator || (() => null);
+
+  return (
+    <div className={wrapperClassNames}>
+      <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+        <LabelDecorator name={props.name} disabled={props.disabled} />
+      </MLabel>
+      <div className={mergeTailwind(classNames, 'flex cursor-progress gap-1 items-center')}>
+        <Skeleton className='w-full h-5 mr-2' />
+        <SelectIndicator disabled={props.disabled} isLoading={props.isLoading} open={false} />
+      </div>
+      {Boolean(props.error) && <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>}
+    </div>
+  );
+}
+
+export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
   const inputWrapperRef = useRef<HTMLDivElement>(null);
   const [items, setItems] = useState<Array<SelectOption<V>>>(props.options);
   const filterImplementation = useMemo(() => {
@@ -260,6 +307,93 @@ export default function Select<V>(props: SelectProps<V>): React.JSX.Element {
   );
 }
 
+export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
+  const [open, setOpen] = useState<boolean>(false);
+  const onChange = useCallback(
+    (option: SelectOption<V>) => {
+      if (props.onChange) {
+        props.onChange(option);
+        setOpen(false);
+      }
+    },
+    [props],
+  );
+  const classNames = SelectClasses({
+    error: Boolean(props.error),
+  });
+
+  const wrapperClassNames = mergeTailwind(
+    {
+      // This will make it so the space below the input is the same when there is and isn't an error.
+      'pb-[18px]': !props.error,
+    },
+    props.className,
+  );
+  const LabelDecorator = props.labelDecorator || (() => null);
+
+  return (
+    <div className={wrapperClassNames}>
+      <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+        <LabelDecorator name={props.name} disabled={props.disabled} />
+      </MLabel>
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerTrigger asChild>
+          <button
+            type='button'
+            className={mergeTailwind(classNames, 'flex cursor-text gap-1 items-center text-start')}
+            aria-disabled={props.disabled}
+          >
+            <span
+              aria-disabled={props.disabled}
+              className={mergeTailwind('flex-1 bg-transparent disabled:text-gray-500', {
+                // If we don't have a value then use the placeholder text style.
+                'text-placeholder': !props.value?.label,
+              })}
+            >
+              {props.value?.label ?? props.placeholder}
+            </span>
+            <SelectIndicator disabled={props.disabled} isLoading={props.isLoading} open={open} />
+          </button>
+        </DrawerTrigger>
+        <DrawerContent>
+          <DrawerWrapper>
+            <ul className={mergeTailwind('space-y-0.5 pl-2')}>
+              {open &&
+                props.options.map(item => (
+                  <li
+                    key={item.label}
+                    className={mergeTailwind(
+                      [
+                        'group w-full rounded-lg px-2 py-1.5',
+                        'hover:bg-zinc-600 aria-selected:bg-zinc-600',
+                        'active:bg-zinc-600 aria-selected:bg-zinc-600',
+                        'cursor-pointer disabled:cursor-not-allowed',
+                      ],
+                      {
+                        // The _ACTUAL_ selected state will be slightly darker than the hover state.
+                        'bg-zinc-700': props.value === item,
+                      },
+                    )}
+                    onClick={() => onChange(item)}
+                  >
+                    {React.createElement<SelectOptionComponentProps<V>>(
+                      props.optionComponent ?? DefaultSelectOptionComponent,
+                      {
+                        ...item,
+                        selected: props.value === item,
+                      },
+                    )}
+                  </li>
+                ))}
+            </ul>
+          </DrawerWrapper>
+        </DrawerContent>
+      </Drawer>
+      {Boolean(props.error) && <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>}
+    </div>
+  );
+}
+
 interface SelectIndicator {
   isLoading?: boolean;
   disabled?: boolean;
@@ -297,9 +431,14 @@ const SelectIndicatorClasses = cva(
 );
 
 function SelectIndicator({ isLoading, disabled, open }: SelectIndicator): React.JSX.Element {
+  const isMobile = useIsMobile();
   const className = SelectIndicatorClasses({ isLoading, disabled });
   if (isLoading) {
     return <LoaderCircle className={className} />;
+  }
+
+  if (isMobile) {
+    return open ? <PanelBottomClose className={className} /> : <PanelBottomOpen className={className} />;
   }
 
   return open ? <ArrowDown className={className} /> : <ArrowUp className={className} />;
