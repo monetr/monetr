@@ -1,10 +1,9 @@
 /* eslint-disable max-len */
 import React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { X } from 'lucide-react';
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
-import { X } from 'lucide-react';
 
 const Dialog = DialogPrimitive.Root;
 

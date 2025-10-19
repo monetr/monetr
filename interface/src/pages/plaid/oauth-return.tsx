@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import type { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import * as Sentry from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 import { OAuthRedirectPlaidLink } from '@monetr/interface/components/Plaid/OAuthRedirectPlaidLink';
 import request from '@monetr/interface/util/request';
+
+import type { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
 
 interface State {
   loading: boolean;

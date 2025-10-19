@@ -1,7 +1,7 @@
-import { BrowserRouter } from 'react-router-dom';
 import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import * as Sentry from '@sentry/react';
+import { BrowserRouter } from 'react-router-dom';
 
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';

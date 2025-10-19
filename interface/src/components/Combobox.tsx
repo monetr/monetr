@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Fragment } from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { Check, ChevronsUpDown } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -15,8 +16,6 @@ import { Drawer, DrawerContent, DrawerTrigger, DrawerWrapper } from '@monetr/int
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
-import { cva, type VariantProps } from 'class-variance-authority';
 
 export const comboboxVariants = cva(['justify-between truncate'], {
   variants: {

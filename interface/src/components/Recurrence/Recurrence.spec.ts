@@ -1,8 +1,7 @@
 import { startOfMonth } from 'date-fns';
+import { RRule } from 'rrule';
 
 import Recurrence from './Recurrence';
-
-import { RRule } from 'rrule';
 
 describe('recurrence rules', () => {
   it('will compare equality regardless of dtstart', () => {

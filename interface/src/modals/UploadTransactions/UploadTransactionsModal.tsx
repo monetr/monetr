@@ -1,9 +1,9 @@
 import { type FormEvent, useCallback, useRef, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Close, FilePresentOutlined, UploadFileOutlined } from '@mui/icons-material';
 import { useQueryClient } from '@tanstack/react-query';
 import axios, { type AxiosProgressEvent, type AxiosResponse } from 'axios';
+import { useDropzone } from 'react-dropzone';
 
 import { Button } from '@monetr/interface/components/Button';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';

@@ -1,11 +1,11 @@
 import type React from 'react';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import QRCode from 'react-qr-code';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { FormikHelpers } from 'formik';
 import { Shield } from 'lucide-react';
 import { useSnackbar } from 'notistack';
+import QRCode from 'react-qr-code';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@monetr/interface/components/InputOTP';

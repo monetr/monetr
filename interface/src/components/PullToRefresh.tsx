@@ -26,9 +26,8 @@
 */
 
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
 import { RefreshCcw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function PullToRefresh(): JSX.Element {
   const navigate = useNavigate();

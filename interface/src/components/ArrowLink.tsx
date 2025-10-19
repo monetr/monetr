@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 
 export interface ArrowRedirectProps {
   to: string;

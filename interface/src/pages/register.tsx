@@ -1,10 +1,10 @@
 /* eslint-disable max-len */
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MCaptcha from '@monetr/interface/components/MCaptcha';

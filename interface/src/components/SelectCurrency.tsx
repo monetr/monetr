@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import type { OnChangeValue } from 'react-select';
 import { useFormikContext } from 'formik';
+import type { OnChangeValue } from 'react-select';
 
 import MSelect from '@monetr/interface/components/MSelect';
 import { useInstalledCurrencies } from '@monetr/interface/hooks/useInstalledCurrencies';

@@ -2,11 +2,11 @@
 
 import * as React from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 
 import { Button } from '@monetr/docs/components/Button';
 
 import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react';
-import { twMerge } from 'tailwind-merge';
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;

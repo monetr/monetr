@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
+import { type UseQueryResult, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import Link from '@monetr/interface/models/Link';
 

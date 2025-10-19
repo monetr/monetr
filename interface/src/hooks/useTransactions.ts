@@ -1,4 +1,4 @@
-import { useInfiniteQuery, type UseInfiniteQueryResult } from '@tanstack/react-query';
+import { type UseInfiniteQueryResult, useInfiniteQuery } from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import Transaction from '@monetr/interface/models/Transaction';

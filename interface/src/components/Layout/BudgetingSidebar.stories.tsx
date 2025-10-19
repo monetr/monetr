@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import MockAdapter from 'axios-mock-adapter';
 
 import monetrClient from '@monetr/interface/api/api';

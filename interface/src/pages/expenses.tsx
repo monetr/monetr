@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useRef } from 'react';
-import { useNavigationType } from 'react-router-dom';
 import { HeartBroken } from '@mui/icons-material';
 import { Plus, Receipt } from 'lucide-react';
+import { useNavigationType } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import ExpenseItem from '@monetr/interface/components/expenses/ExpenseItem';
@@ -21,7 +21,7 @@ export default function Expenses(): JSX.Element {
   const navigationType = useNavigationType();
   const onScroll = useCallback(() => {
     evilScrollPosition = ref.current.scrollTop;
-  }, [ref]);
+  }, []);
   useEffect(() => {
     if (!ref.current) {
       return undefined;
@@ -37,7 +37,7 @@ export default function Expenses(): JSX.Element {
     };
     // Fix bug with current impl.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref.current, navigationType, onScroll]);
+  }, [navigationType, onScroll]);
 
   if (isLoading) {
     return (
@@ -57,22 +57,6 @@ export default function Expenses(): JSX.Element {
     );
   }
 
-  function ListContent(): JSX.Element {
-    if (expenses.length === 0) {
-      return <EmptyState />;
-    }
-
-    return (
-      <ul className='w-full flex flex-col gap-2 py-2 pb-16'>
-        {expenses
-          ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
-          .map(item => (
-            <ExpenseItem spending={item} key={item.spendingId} />
-          ))}
-      </ul>
-    );
-  }
-
   return (
     <Fragment>
       <MTopNavigation icon={Receipt} title='Expenses'>
@@ -82,7 +66,16 @@ export default function Expenses(): JSX.Element {
         </Button>
       </MTopNavigation>
       <div className='w-full h-full overflow-y-auto min-w-0' ref={ref}>
-        <ListContent />
+        {(expenses ?? []).length === 0 && <EmptyState />}
+        {expenses?.length > 0 && (
+          <ul className='w-full flex flex-col gap-2 py-2 pb-16'>
+            {expenses
+              ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
+              .map(item => (
+                <ExpenseItem spending={item} key={item.spendingId} />
+              ))}
+          </ul>
+        )}
       </div>
     </Fragment>
   );

@@ -1,9 +1,10 @@
 import type React from 'react';
-import { type Location, MemoryRouter } from 'react-router-dom';
 import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { type Queries, type queries, render, type RenderOptions, type RenderResult } from '@testing-library/react';
 import type { AxiosInstance } from 'axios';
+import { type Location, MemoryRouter } from 'react-router-dom';
+
+import { type Queries, type queries, type RenderOptions, type RenderResult, render } from '@testing-library/react';
 
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';

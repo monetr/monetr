@@ -1,7 +1,7 @@
 import type React from 'react';
-import Link from 'next/link';
-
 import { twMerge } from 'tailwind-merge';
+
+import Link from 'next/link';
 
 interface FeatureProps {
   title: React.ReactNode;

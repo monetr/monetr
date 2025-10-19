@@ -1,13 +1,12 @@
 import { useCallback } from 'react';
+import { useFormikContext } from 'formik';
 import {
   type InputAttributes,
   type NumberFormatValues,
   NumericFormat,
   type NumericFormatProps,
 } from 'react-number-format';
-import { useFormikContext } from 'formik';
 
-import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import {
   getCurrencySymbolPrefixed,
@@ -17,6 +16,8 @@ import {
   intlNumberFormatter,
 } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
 
 type NumericField = Omit<
   NumericFormatProps<InputAttributes>,

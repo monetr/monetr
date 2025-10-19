@@ -1,8 +1,7 @@
-import { Link } from 'react-router-dom';
 import { ErrorOutline } from '@mui/icons-material';
 import { LogOut, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
 import Logo from '@monetr/interface/assets/Logo';
 import BankSidebarItem from '@monetr/interface/components/Layout/BankSidebarItem';
 import MDivider from '@monetr/interface/components/MDivider';
@@ -11,6 +10,8 @@ import MSpan from '@monetr/interface/components/MSpan';
 import type { ReactElement } from '@monetr/interface/components/types';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
 
 export interface BankSidebarProps {
   className?: string;

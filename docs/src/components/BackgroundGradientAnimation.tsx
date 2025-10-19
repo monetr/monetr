@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 import { useEffect, useState } from 'react';
-
 import { twMerge } from 'tailwind-merge';
 
 function hexToRgb(hex: string) {

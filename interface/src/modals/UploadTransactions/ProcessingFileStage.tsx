@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { FilePresentOutlined } from '@mui/icons-material';
-import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
+import { type UseQueryResult, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { Button } from '@monetr/interface/components/Button';
 import MSpan from '@monetr/interface/components/MSpan';

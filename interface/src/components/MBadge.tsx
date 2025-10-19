@@ -1,5 +1,6 @@
-import MSpan, { type MSpanProps } from './MSpan';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import MSpan, { type MSpanProps } from './MSpan';
 
 export interface MBadgeProps extends Omit<MSpanProps, 'color'> {}
 

@@ -1,11 +1,12 @@
 import { useFormikContext } from 'formik';
 import { Calendar } from 'lucide-react';
 
-import MLabel from './MLabel';
-import MSelect from './MSelect';
 import { Button } from '@monetr/interface/components/Button';
 import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
+
+import MLabel from './MLabel';
+import MSelect from './MSelect';
 
 export interface MSelectFundingProps {
   label?: string;

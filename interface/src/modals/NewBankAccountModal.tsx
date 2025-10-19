@@ -1,9 +1,9 @@
 import { Fragment, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
 import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';

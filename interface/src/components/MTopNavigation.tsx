@@ -2,10 +2,11 @@ import type React from 'react';
 import { Fragment, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
 import MSidebarToggle from './MSidebarToggle';
 import MSpan from './MSpan';
 import type { ReactElement } from './types';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MTopNavigationProps {
   icon: React.FC<{ className?: string }>;

@@ -1,5 +1,5 @@
-import type { Config } from 'jest';
 import path from 'node:path';
+import type { Config } from 'jest';
 
 const config: Config = {
   rootDir: path.resolve(__dirname),

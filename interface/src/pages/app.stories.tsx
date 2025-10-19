@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
+
 import MockAdapter from 'axios-mock-adapter';
 
-import MonetrWrapper from './app';
 import monetrClient from '@monetr/interface/api/api';
 import Monetr from '@monetr/interface/monetr';
+
+import MonetrWrapper from './app';
 
 const meta: Meta<typeof MonetrWrapper> = {
   title: 'New UI',

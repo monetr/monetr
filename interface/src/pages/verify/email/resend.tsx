@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
+import { useLocation } from 'react-router-dom';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MCaptcha from '@monetr/interface/components/MCaptcha';

@@ -1,8 +1,9 @@
 import { useFormikContext } from 'formik';
 
-import type { ReactElement } from './types';
 import { Checkbox } from '@monetr/interface/components/Checkbox';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import type { ReactElement } from './types';
 
 export interface MCheckboxProps {
   id?: string;

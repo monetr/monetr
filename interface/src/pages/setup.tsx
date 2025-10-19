@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
 import CheckCircle from '@mui/icons-material/CheckCircle';
 import EditOutlined from '@mui/icons-material/EditOutlined';
+import { Navigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';

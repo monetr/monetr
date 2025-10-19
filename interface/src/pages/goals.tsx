@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useRef } from 'react';
-import { useNavigationType } from 'react-router-dom';
 import { HeartBroken } from '@mui/icons-material';
 import { PiggyBank, Plus } from 'lucide-react';
+import { useNavigationType } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import GoalItem from '@monetr/interface/components/goals/GoalItem';

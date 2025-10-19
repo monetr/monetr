@@ -1,8 +1,9 @@
 /* eslint-disable max-len */
 import React from 'react';
 
-import type { ReactElement } from './types';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import type { ReactElement } from './types';
 
 export interface MModalProps {
   open: boolean;

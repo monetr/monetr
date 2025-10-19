@@ -1,4 +1,4 @@
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 import BankAccount from '@monetr/interface/models/BankAccount';

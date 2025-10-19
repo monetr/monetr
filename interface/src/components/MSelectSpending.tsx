@@ -1,15 +1,16 @@
-import { components, type OptionProps } from 'react-select';
 import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 import { useFormikContext } from 'formik';
+import { components, type OptionProps } from 'react-select';
 
-import MBadge from './MBadge';
-import MSelect, { type MSelectProps } from './MSelect';
-import MSpan from './MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
+
+import MBadge from './MBadge';
+import MSelect, { type MSelectProps } from './MSelect';
+import MSpan from './MSpan';
 
 // Remove the props that we do not want to allow the caller to pass in.
 type MSelecteSpendingBaseProps = Omit<

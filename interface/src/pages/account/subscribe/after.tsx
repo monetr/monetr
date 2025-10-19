@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { LoaderCircle } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import Logo from '@monetr/interface/assets/Logo';
 import MSpan from '@monetr/interface/components/MSpan';

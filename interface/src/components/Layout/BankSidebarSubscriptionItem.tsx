@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
 import { formatDistance } from 'date-fns';
 import { CreditCard } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';

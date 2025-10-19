@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
 import { pluginPWA } from './pluginPWA';
 
+import path from 'node:path';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
-import path from 'node:path';
 
 const envName = process.env.NODE_ENV ?? 'development';
 console.log(`Building for environment: ${envName}`);

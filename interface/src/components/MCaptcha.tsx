@@ -1,6 +1,6 @@
-import ReCAPTCHA from 'react-google-recaptcha';
 import { useFormikContext } from 'formik';
 import { LoaderCircle } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';

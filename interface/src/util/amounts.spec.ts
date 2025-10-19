@@ -1,4 +1,4 @@
-import { amountToFriendly, AmountType, formatAmount, friendlyToAmount } from './amounts';
+import { AmountType, amountToFriendly, formatAmount, friendlyToAmount } from './amounts';
 
 describe('amounts', () => {
   describe('amountToFriendly', () => {

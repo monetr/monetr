@@ -1,9 +1,10 @@
 import { waitFor } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
 
-import ResendVerificationPage from './resend';
 import monetrClient from '@monetr/interface/api/api';
 import testRenderer from '@monetr/interface/testutils/renderer';
+
+import ResendVerificationPage from './resend';
 
 describe('resend verification email', () => {
   let mockAxios: MockAdapter;

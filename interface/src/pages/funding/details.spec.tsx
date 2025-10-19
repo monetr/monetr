@@ -1,9 +1,10 @@
 import { waitFor } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
 
-import FundingDetails from './details';
 import monetrClient from '@monetr/interface/api/api';
 import testRenderer from '@monetr/interface/testutils/renderer';
+
+import FundingDetails from './details';
 
 describe('funding schedule details view', () => {
   let mockAxios: MockAdapter;

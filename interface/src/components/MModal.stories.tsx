@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
 
-import MModal from './MModal';
 import { Button } from '@monetr/interface/components/Button';
+
+import MModal from './MModal';
 
 export default {
   title: '@monetr/interface/components/Modal',

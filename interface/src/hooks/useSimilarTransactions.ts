@@ -1,4 +1,4 @@
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import type Transaction from '@monetr/interface/models/Transaction';
 import TransactionCluster from '@monetr/interface/models/TransactionCluster';

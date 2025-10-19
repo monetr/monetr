@@ -1,8 +1,9 @@
 import { act } from 'react';
+import { endOfMonth, endOfToday, startOfToday } from 'date-fns';
+
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MockAdapter from 'axios-mock-adapter';
-import { endOfMonth, endOfToday, startOfToday } from 'date-fns';
 
 import monetrClient from '@monetr/interface/api/api';
 import SettingsBilling from '@monetr/interface/pages/settings/billing';

@@ -1,4 +1,5 @@
 import { ArrowRight, CircleCheck } from 'lucide-react';
+
 import Link from 'next/link';
 
 export default function PricingCards(): JSX.Element {

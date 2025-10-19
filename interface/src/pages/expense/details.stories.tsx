@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import ExpenseDetails from './details';
 import Monetr from '@monetr/interface/monetr';
+
+import ExpenseDetails from './details';
 
 const meta: Meta<typeof ExpenseDetails> = {
   title: 'New UI/Expense',

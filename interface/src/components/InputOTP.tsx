@@ -1,10 +1,9 @@
 /* eslint-disable max-len */
 import React from 'react';
-
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
 import { OTPInput, OTPInputContext } from 'input-otp';
 import { Dot } from 'lucide-react';
+
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 const InputOTP = React.forwardRef<React.ElementRef<typeof OTPInput>, React.ComponentPropsWithoutRef<typeof OTPInput>>(
   ({ className, containerClassName, ...props }, ref) => (

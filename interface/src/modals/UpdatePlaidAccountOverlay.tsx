@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import NiceModal, { useModal } from '@ebay/nice-modal-react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   type PlaidLinkError,
   type PlaidLinkOnEventMetadata,
@@ -7,8 +9,6 @@ import {
   type PlaidLinkStableEvent,
   usePlaidLink,
 } from 'react-plaid-link';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { useQueryClient } from '@tanstack/react-query';
 
 import MModal from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';

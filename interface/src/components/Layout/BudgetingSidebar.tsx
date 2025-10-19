@@ -1,7 +1,6 @@
-import { Link, useLocation } from 'react-router-dom';
 import { CalendarSync, Infinity, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
-import BudgetingSidebarTitle from './BudgetingSidebarTitle';
 import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceAvailableAmount';
 import BalanceCurrentAmount from '@monetr/interface/components/Layout/BalanceCurrentAmount';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
@@ -18,6 +17,8 @@ import { useNextFundingDate } from '@monetr/interface/hooks/useNextFundingDate';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import BudgetingSidebarTitle from './BudgetingSidebarTitle';
 
 export interface BudgetingSidebarProps {
   className?: string;

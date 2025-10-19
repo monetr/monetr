@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/react';
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import { DefaultCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
 import User from '@monetr/interface/models/User';

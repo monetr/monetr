@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { Fragment, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { EllipsisVertical, LogIn, Plug, RefreshCw, Settings, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import {
   DropdownMenu,

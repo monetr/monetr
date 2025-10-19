@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import * as Sentry from '@sentry/react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   type PlaidLinkError,
   type PlaidLinkOnExitMetadata,
@@ -7,8 +9,6 @@ import {
   usePlaidLink,
 } from 'react-plaid-link';
 import { useNavigate } from 'react-router-dom';
-import * as Sentry from '@sentry/react';
-import { useQueryClient } from '@tanstack/react-query';
 
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';

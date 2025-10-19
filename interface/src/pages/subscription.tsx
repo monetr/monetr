@@ -1,6 +1,6 @@
-import { useNavigate } from 'react-router-dom';
 import { LoaderCircle } from 'lucide-react';
 import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 import CenteredLogo from '@monetr/interface/components/Logo/CenteredLogo';
 import MSpan from '@monetr/interface/components/MSpan';

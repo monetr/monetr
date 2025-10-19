@@ -1,6 +1,6 @@
-import { useNavigate } from 'react-router-dom';
 import type { AxiosError } from 'axios';
 import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 import request, { type APIError } from '@monetr/interface/util/request';
 

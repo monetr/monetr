@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom';
 import { ArrowBackOutlined, MenuOpenOutlined, MenuOutlined } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 import useStore from '@monetr/interface/hooks/store';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';

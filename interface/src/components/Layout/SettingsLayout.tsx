@@ -1,5 +1,5 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
 import { SettingsOutlined } from '@mui/icons-material';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 
 import MDivider from '@monetr/interface/components/MDivider';
 import { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';

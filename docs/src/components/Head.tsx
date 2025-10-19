@@ -1,10 +1,11 @@
 import React, { Fragment } from 'react';
 import { parse } from 'date-fns';
-import { useRouter } from 'next/router';
-import { useConfig } from 'nextra-theme-docs';
 
 import ChatwootIntegration from '@monetr/docs/components/ChatwootIntegration';
 import realUrl from '@monetr/docs/components/utils/realUrl';
+
+import { useRouter } from 'next/router';
+import { useConfig } from 'nextra-theme-docs';
 
 export default function Head(): JSX.Element {
   const { frontMatter, timestamp } = useConfig();

@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { useMemo } from 'react';
-import { AirlineStopsOutlined, NorthEast, SouthEast } from '@mui/icons-material';
 import { tz } from '@date-fns/tz';
+import { AirlineStopsOutlined, NorthEast, SouthEast } from '@mui/icons-material';
 import { format, getUnixTime } from 'date-fns';
 
 import MSpan from '@monetr/interface/components/MSpan';

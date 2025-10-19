@@ -2,11 +2,12 @@ import type { Meta, StoryFn } from '@storybook/react';
 import { Plus } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
-import { Button } from './Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
+
+import { Button } from './Button';
 
 export default {
   title: '@monetr/interface/components/Button',

@@ -1,13 +1,14 @@
 /* eslint-disable max-len */
 import React, { Fragment } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import type { DocsThemeConfig } from 'nextra-theme-docs';
 
 import Logo from '@monetr/docs/assets/logo.svg';
 import GithubStars from '@monetr/docs/components/GithubStars';
 import Head from '@monetr/docs/components/Head';
 import SignIn from '@monetr/docs/components/SignIn';
+
+import Image from 'next/image';
+import Link from 'next/link';
+import type { DocsThemeConfig } from 'nextra-theme-docs';
 
 const branch = process.env.GIT_BRANCH ?? 'main';
 

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Trash } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';

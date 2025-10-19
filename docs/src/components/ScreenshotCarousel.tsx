@@ -1,5 +1,4 @@
 import * as React from 'react';
-import Image from 'next/image';
 
 import TransactionScreenshot from '@monetr/docs/assets/screenshot.png';
 import ExpensesScreenshot from '@monetr/docs/assets/screenshot_expenses.png';
@@ -16,6 +15,7 @@ import {
 } from '@monetr/docs/components/Carousel';
 
 import Autoplay from 'embla-carousel-autoplay';
+import Image from 'next/image';
 
 export default function ScreenshotCarousel() {
   const plugin = React.useRef(Autoplay({ delay: 10000, stopOnInteraction: true }));

@@ -1,5 +1,6 @@
-import { waitFor } from '@testing-library/react';
 import axios from 'axios';
+
+import { waitFor } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
 
 import Register from '@monetr/interface/pages/register';

@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';

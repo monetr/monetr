@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';

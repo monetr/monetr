@@ -1,8 +1,9 @@
 import type React from 'react';
 import { Link, type LinkProps } from 'react-router-dom';
 
-import type { ReactElement, TextSize } from './types';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import type { ReactElement, TextSize } from './types';
 
 type BaseLinkProps = LinkProps & React.RefAttributes<HTMLAnchorElement>;
 export interface MLinkProps extends BaseLinkProps {
