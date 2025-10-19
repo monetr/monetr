@@ -5,7 +5,7 @@ export interface MockRequest {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
   status: number;
-  response: Object | Array<unknown>;
+  response: unknown | Array<unknown>;
   once?: boolean;
 }
 

@@ -3,7 +3,7 @@
     "allowJs": true,
     "baseUrl": "src",
     "esModuleInterop": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "module": "ESNEXT",
     "moduleResolution": "node",
     "noImplicitAny": false,

@@ -33,6 +33,7 @@
           "level": "on",
           "options": {
             "groups": [
+              ["react", "react-dom"],
               [
                 "@date-fns/tz",
                 "@ebay/nice-modal-react",
@@ -51,9 +52,7 @@
                 "input-otp",
                 "lucide-react",
                 "notistack",
-                "react",
                 "react-day-picker",
-                "react-dom",
                 "react-dropzone",
                 "react-google-recaptcha",
                 "react-infinite-scroll-hook",
