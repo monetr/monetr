@@ -15,7 +15,16 @@
     "lineEnding": "lf",
     "lineWidth": 120,
     "attributePosition": "auto",
-    "includes": ["interface/**", "docs/src/**", "emails/src/**", "!**/*.html", "!**/*.svg", "!**/*.mdx", "!**/*.css"]
+    "includes": [
+      "interface/**",
+      "docs/src/**",
+      "emails/src/**",
+      "stories/**",
+      "!**/*.html",
+      "!**/*.svg",
+      "!**/*.mdx",
+      "!**/*.css"
+    ]
   },
   "assist": {
     "actions": {
@@ -131,7 +140,16 @@
       },
       "nursery": {}
     },
-    "includes": ["interface/**", "docs/src/**", "emails/src/**", "!**/*.html", "!**/*.svg", "!**/*.mdx", "!**/*.css"]
+    "includes": [
+      "interface/**",
+      "docs/src/**",
+      "emails/src/**",
+      "stories/**",
+      "!**/*.html",
+      "!**/*.svg",
+      "!**/*.mdx",
+      "!**/*.css"
+    ]
   },
   "javascript": {
     "formatter": {

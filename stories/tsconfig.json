@@ -16,7 +16,5 @@
       "@monetr/interface/*": ["../../interface/src/*"]
     }
   },
-  "include": [
-    "*"
-  ]
+  "include": ["*"]
 }

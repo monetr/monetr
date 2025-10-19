@@ -31,7 +31,7 @@ const config: StorybookConfig = {
     if (marketingStoryOnly) {
       // Marketing story only merges the storybook dist with the next.js dist from docs.
       // as a result, the subpath for storybook needs to be /_storybook in order to be served properly.
-      config.output ??= { };
+      config.output ??= {};
       config.output.assetPrefix = '/_storybook/';
     }
     return config;

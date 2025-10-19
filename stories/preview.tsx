@@ -1,6 +1,7 @@
 import '@fontsource-variable/inter';
 
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 import NiceModal from '@ebay/nice-modal-react';
 import DoneIcon from '@mui/icons-material/Done';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -9,7 +10,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport';
 import type { Preview } from '@storybook/react';
-import { SnackbarProvider, VariantType } from 'notistack';
+import { SnackbarProvider, type VariantType } from 'notistack';
 
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import { TooltipProvider } from '@monetr/interface/components/Tooltip';
@@ -42,8 +43,8 @@ const preview: Preview = {
 
       return (
         <MQueryClient>
-          <ThemeProvider theme={ newTheme }>
-            <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
+          <ThemeProvider theme={newTheme}>
+            <SnackbarProvider maxSnack={5} iconVariant={snackbarIcons}>
               <TooltipProvider>
                 <NiceModal.Provider>
                   <CssBaseline />
@@ -57,9 +58,7 @@ const preview: Preview = {
     },
     withRouter,
   ],
-  args: {
-
-  },
+  args: {},
   parameters: {
     // screenshot: {
     //   viewport: {

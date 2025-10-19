@@ -1,10 +1,8 @@
-import React from 'react';
-import {
-  QueryClient, QueryClientProvider, QueryFunctionContext, QueryKey,
-} from '@tanstack/react-query';
+import type React from 'react';
+import { QueryClient, QueryClientProvider, type QueryFunctionContext, type QueryKey } from '@tanstack/react-query';
 
 export interface MockRequest {
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
   status: number;
   response: Object | Array<unknown>;
@@ -25,7 +23,7 @@ export default function MockQueryClient(props: MockQueryClientProps): JSX.Elemen
       return Promise.resolve({} as T);
     }
     const request = {
-      url: `/api${ context.queryKey[0] }`,
+      url: `/api${context.queryKey[0]}`,
       method: context.queryKey.length === 1 ? 'GET' : 'POST',
       params: context.pageParam && {
         offset: context.pageParam,
@@ -38,7 +36,7 @@ export default function MockQueryClient(props: MockQueryClientProps): JSX.Elemen
     });
     const response = requests[index];
     if (!response) {
-      console.warn(`No response found for: ${ request.method } ${ request.url }`);
+      console.warn(`No response found for: ${request.method} ${request.url}`);
       return Promise.reject<T>({
         error: 'No response found!',
       });
@@ -67,7 +65,5 @@ export default function MockQueryClient(props: MockQueryClientProps): JSX.Elemen
     },
   });
 
-  return (
-    <QueryClientProvider client={ queryClient } children={ props.children } />
-  );
+  return <QueryClientProvider client={queryClient} children={props.children} />;
 }

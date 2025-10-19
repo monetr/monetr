@@ -1,7 +1,7 @@
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
-import path from 'path';
+import path from 'node:path';
 
 const interfaceSource = path.resolve(__dirname, '../interface/src');
 
@@ -17,8 +17,5 @@ export default defineConfig({
       NODE_VERSION: process.version,
     },
   },
-  plugins: [
-    pluginReact(),
-    pluginSass(),
-  ],
+  plugins: [pluginReact(), pluginSass()],
 });
