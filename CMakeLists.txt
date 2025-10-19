@@ -195,7 +195,7 @@ else()
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS tools.biome
     # Check all of the files that have changed since this commit, this is when the linting was introduced.
-    COMMAND ${BIOME_EXECUTABLE} ci --max-diagnostics=1000 --since=6173df2df49e0754f0a2b902a433c712e034e1e2 --changed
+    COMMAND ${BIOME_EXECUTABLE} ci --reporter=github --max-diagnostics=1000 --since=6173df2df49e0754f0a2b902a433c712e034e1e2 --changed
   )
 endif()
 
