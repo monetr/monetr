@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { tz } from '@date-fns/tz';
 import HeartBroken from '@mui/icons-material/HeartBroken';
 import TodayOutlined from '@mui/icons-material/TodayOutlined';
@@ -36,6 +37,7 @@ interface FundingValues {
 }
 
 export default function FundingDetails(): JSX.Element {
+  const nameId = useId();
   const { data: timezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   // I don't want to do it this way, but it seems like it's the only way to do it for tests without having the entire
@@ -136,6 +138,10 @@ export default function FundingDetails(): JSX.Element {
   };
 
   const NextOccurrenceDecorator = () => {
+    if (!funding.excludeWeekends) {
+      return null;
+    }
+
     if (isEqual(funding.nextRecurrence, funding.nextRecurrenceOriginal)) {
       return null;
     }
@@ -167,7 +173,7 @@ export default function FundingDetails(): JSX.Element {
       <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col'>
-            <MTextField className='w-full' label='Name' name='name' id='funding-name-search' required />
+            <MTextField className='w-full' label='Name' name='name' id={`${nameId}-funding-name-search`} required />
             <MDatePicker
               className='w-full'
               label='Next Recurrence'
@@ -188,7 +194,6 @@ export default function FundingDetails(): JSX.Element {
               required
             />
             <MCheckbox
-              id='funding-details-exclude-weekends'
               data-testid='funding-details-exclude-weekends'
               name='excludeWeekends'
               label='Exclude weekends'
