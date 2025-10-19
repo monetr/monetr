@@ -35,7 +35,6 @@
     "@rspack/binding-linux-x64-gnu": "1.5.8",
     "autoprefixer": "10.4.21",
     "postcss": "8.5.6",
-    "postcss-load-config": "4.0.2",
     "sass": "1.93.2",
     "sass-embedded-linux-arm64": "1.93.2",
     "sass-embedded-linux-x64": "1.93.2",
