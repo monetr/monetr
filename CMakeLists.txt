@@ -186,7 +186,7 @@ add_custom_target(lint
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   DEPENDS tools.biome
   COMMAND ${BIOME_EXECUTABLE} format --fix
-  COMMAND ${BIOME_EXECUTABLE} lint --fix
+  COMMAND ${BIOME_EXECUTABLE} lint --fix --max-diagnostics=1000
   COMMAND ${CMAKE_Go_COMPILER} fmt ./...
 )
 
