@@ -1,4 +1,5 @@
 import { format, isThisYear } from 'date-fns';
+import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { rrulestr } from 'rrule';
 
@@ -11,7 +12,6 @@ import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-import { ChevronRight } from 'lucide-react';
 
 export interface ExpenseItemProps {
   spending: Spending;

@@ -11,6 +11,7 @@ export default function PlaidLogo(props: PlaidLogoProps): JSX.Element {
   return (
     <div>
       <svg className={className} viewBox='0 0 126 48' xmlns='http://www.w3.org/2000/svg'>
+        <title>Plaid Logo</title>
         <g fillRule='evenodd'>
           <path
             className='fill-white text-white'

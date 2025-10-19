@@ -1,4 +1,5 @@
 import { format, isThisYear } from 'date-fns';
+import { ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { rrulestr } from 'rrule';
 
@@ -9,7 +10,6 @@ import { useNextFundingForecast } from '@monetr/interface/hooks/useNextFundingFo
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
-import { ChevronRight } from 'lucide-react';
 
 export interface FundingItemProps {
   funding: FundingSchedule;
