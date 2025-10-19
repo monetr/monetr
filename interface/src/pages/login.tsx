@@ -25,7 +25,7 @@ const initialValues: LoginValues = {
 };
 
 function validator(values: LoginValues): FormikErrors<LoginValues> {
-  const errors = {};
+  const errors: FormikErrors<LoginValues> = {};
 
   if (values?.email.length === 0) {
     errors.email = 'Email must be provided.';
@@ -46,36 +46,6 @@ export default function Login(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: config } = useAppConfiguration();
   const login = useLogin();
-
-  function ForgotPasswordButton(): JSX.Element {
-    // If the application is not configured to allow forgot password then don't show the button.
-    if (!config?.allowForgotPassword) {
-      return null;
-    }
-
-    return (
-      <MLink to='/password/forgot' size='sm' data-testid='login-forgot' tabIndex='0'>
-        Forgot password?
-      </MLink>
-    );
-  }
-
-  function SignUpButton(): JSX.Element {
-    if (!config?.allowSignUp) {
-      return null;
-    }
-
-    return (
-      <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
-        <MSpan color='subtle' className='text-sm'>
-          Not a user?
-        </MSpan>
-        <MLink to='/register' size='sm' data-testid='login-signup' tabIndex='0'>
-          Sign up now
-        </MLink>
-      </div>
-    );
-  }
 
   async function submit(values: LoginValues, helpers: FormikHelpers<LoginValues>) {
     helpers.setSubmitting(true);
@@ -141,5 +111,37 @@ export default function Login(): JSX.Element {
       </div>
       <SignUpButton />
     </MForm>
+  );
+}
+
+function SignUpButton(): JSX.Element {
+  const { data: config } = useAppConfiguration();
+  if (!config?.allowSignUp) {
+    return null;
+  }
+
+  return (
+    <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
+      <MSpan color='subtle' className='text-sm'>
+        Not a user?
+      </MSpan>
+      <MLink to='/register' size='sm' data-testid='login-signup' tabIndex={-1}>
+        Sign up now
+      </MLink>
+    </div>
+  );
+}
+
+function ForgotPasswordButton(): JSX.Element {
+  const { data: config } = useAppConfiguration();
+  // If the application is not configured to allow forgot password then don't show the button.
+  if (!config?.allowForgotPassword) {
+    return null;
+  }
+
+  return (
+    <MLink to='/password/forgot' size='sm' data-testid='login-forgot' tabIndex={-1}>
+      Forgot password?
+    </MLink>
   );
 }
