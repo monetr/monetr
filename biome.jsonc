@@ -100,7 +100,11 @@
       "recommended": true,
       "a11y": {
         "useKeyWithClickEvents": "off",
-        "useKeyWithMouseEvents": "off"
+        "useKeyWithMouseEvents": "off",
+        "noDistractingElements": "error",
+        "noInteractiveElementToNoninteractiveRole": "warn",
+        "noLabelWithoutControl": "warn",
+        "useValidAutocomplete": "on"
       },
       "correctness": {
         "useExhaustiveDependencies": "off",

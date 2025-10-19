@@ -1,8 +1,9 @@
 import type React from 'react';
 import { useFormikContext } from 'formik';
 
-import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
