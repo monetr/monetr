@@ -75,7 +75,7 @@ function NewFundingModal(): JSX.Element {
         )
         .finally(() => helpers.setSubmitting(false));
     },
-    [createFundingSchedule, enqueueSnackbar, friendlyToAmount, modal, selectedBankAccountId],
+    [createFundingSchedule, enqueueSnackbar, friendlyToAmount, modal, selectedBankAccountId, timezone],
   );
 
   return (

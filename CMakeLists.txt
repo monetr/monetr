@@ -185,9 +185,7 @@ add_custom_target(lint
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   DEPENDS tools.biome
   COMMAND ${CMAKE_Go_COMPILER} fmt ./...
-  COMMAND ${BIOME_EXECUTABLE} check --write --max-diagnostics=1000 || ${CMAKE_COMMAND} -E true
-  COMMAND ${BIOME_EXECUTABLE} format --write || ${CMAKE_COMMAND} -E true
-  COMMAND ${BIOME_EXECUTABLE} lint --write --max-diagnostics=1000
+  COMMAND ${BIOME_EXECUTABLE} check --write --max-diagnostics=1000
 )
 
 ################################################################################

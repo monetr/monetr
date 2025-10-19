@@ -93,14 +93,11 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   });
   const isClearEnabled = enableClear && !disabled;
 
-  const handleClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      setAnchorEl(event.currentTarget);
-    },
-    [setAnchorEl],
-  );
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  }, []);
 
-  const handleClose = useCallback(() => setAnchorEl(null), [setAnchorEl]);
+  const handleClose = useCallback(() => setAnchorEl(null), []);
 
   const handleReset = useCallback(() => {
     if (formikContext) {
@@ -110,7 +107,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     }
 
     setSelectedValue(undefined);
-  }, [setSelectedValue, formikContext, props.name]);
+  }, [formikContext, props.name]);
 
   const handleSelect = useCallback(
     (value: Date | null) => {

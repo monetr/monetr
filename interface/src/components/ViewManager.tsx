@@ -59,7 +59,7 @@ function ViewManager<T extends string, M extends Record<string, any>>({
       return;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentView, previousView]);
+  }, [previousView]);
 
   const goToView = useCallback(
     (view: T) => {

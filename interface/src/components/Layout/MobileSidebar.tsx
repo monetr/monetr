@@ -19,7 +19,7 @@ export default function MobileSidebar(): JSX.Element {
   // like that.
   useEffect(() => {
     setMobileSidebarOpen(false);
-  }, [pathname, setMobileSidebarOpen]);
+  }, [setMobileSidebarOpen]);
 
   // Keeps the entire sidebar from re-rendering when things change. This way stuff like the drawer animation works
   // properly.

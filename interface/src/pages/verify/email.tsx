@@ -40,7 +40,7 @@ export default function VerifyEmail(): JSX.Element {
           error?.response?.data?.nextUrl,
         ),
       );
-  }, [token]);
+  }, [token, errorRedirect]);
 
   return <VerifyEmailView />;
 }

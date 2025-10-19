@@ -141,7 +141,7 @@ export default function PullToRefresh(): JSX.Element {
       window.removeEventListener('touchmove', pullDown);
       window.removeEventListener('touchend', pullFinish);
     };
-  }, [pullDownInitThreshold, pullDownReloadThreshold, pullStartPoint, navigate]);
+  }, [pullDownReloadThreshold, pullStartPoint, navigate]);
 
   return (
     <div

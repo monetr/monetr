@@ -45,7 +45,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
     formikContext?.validateField(props.name);
     // I only want to run this hook when the date prop changes. Selected index should not cause this to re-evaluate.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date]);
+  }, [formikContext, props.name, rules]);
 
   const options = rules.map((item, index) => ({
     label: item.name,

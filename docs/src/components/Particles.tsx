@@ -50,7 +50,7 @@ export default function Particles({
     if (context.current) {
       context.current.clearRect(0, 0, canvasSize.current.w, canvasSize.current.h);
     }
-  }, [context]);
+  }, []);
 
   const resizeCanvas = useCallback(() => {
     if (canvasContainerRef.current && canvasRef.current && context.current) {
@@ -195,11 +195,11 @@ export default function Particles({
 
   useEffect(() => {
     onMouseMove();
-  }, [mousePosition.x, mousePosition.y, onMouseMove]);
+  }, [onMouseMove]);
 
   useEffect(() => {
     initCanvas();
-  }, [initCanvas, refresh]);
+  }, [initCanvas]);
 
   return (
     <div className={className} ref={canvasContainerRef} aria-hidden='true'>

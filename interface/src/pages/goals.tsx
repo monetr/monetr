@@ -21,7 +21,7 @@ export default function Goals(): JSX.Element {
   const navigationType = useNavigationType();
   const onScroll = useCallback(() => {
     evilScrollPosition = ref.current.scrollTop;
-  }, [ref]);
+  }, []);
   useEffect(() => {
     if (!ref.current) {
       return undefined;
@@ -37,7 +37,7 @@ export default function Goals(): JSX.Element {
     };
     // Fix bug with current impl.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref.current, navigationType, onScroll]);
+  }, [navigationType, onScroll]);
 
   if (isLoading) {
     return (

@@ -46,7 +46,7 @@ function EnableTOTPModal(): JSX.Element {
           console.error('failed to get totp state', error);
         });
     }
-  }, [totpState, setTotpState]);
+  }, [totpState]);
 
   async function submit(values: EnableTOTPValues, helpers: FormikHelpers<EnableTOTPValues>) {
     helpers.setSubmitting(true);

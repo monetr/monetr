@@ -74,7 +74,7 @@ export default function TransactionDetails(): JSX.Element {
         )
         .finally(() => helpers.setSubmitting(false));
     },
-    [enqueueSnackbar, locale, transaction, updateTransaction],
+    [enqueueSnackbar, locale, transaction, updateTransaction, timezone],
   );
 
   if (isLoading) {
