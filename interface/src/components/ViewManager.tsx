@@ -53,13 +53,14 @@ function ViewManager<T extends string, M extends Record<string, any>>({
 
   const previousView = usePrevious(currentView);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Needs current view to trigger properly
   const prevView = useCallback(() => {
     if (previousView) {
       setCurrentView(previousView);
       return;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [previousView]);
+  }, [currentView, previousView]);
 
   const goToView = useCallback(
     (view: T) => {

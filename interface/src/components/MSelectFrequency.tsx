@@ -28,6 +28,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
   // date is the 15th, and the user changes it to -1. The rule is still valid even though the date has changed. But in
   // any other scenario where the rule is no longer valid. We want to remove the selection and make sure they provide a
   // new frequency.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: I want to only re-run this hook when the date prop changes
   useEffect(() => {
     // eslint-disable-next-line no-console
     console.debug('[MSelectFrequency]', 'date selection has changed and is no longer present in the rules');
@@ -44,8 +45,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
     formikContext?.setFieldValue(props.name, null);
     formikContext?.validateField(props.name);
     // I only want to run this hook when the date prop changes. Selected index should not cause this to re-evaluate.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formikContext, props.name, rules]);
+  }, [date]);
 
   const options = rules.map((item, index) => ({
     label: item.name,
