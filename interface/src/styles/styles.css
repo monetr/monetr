@@ -71,6 +71,14 @@ input[type=number] {
   overflow-x: unset !important;
 }
 
+/*
+ Fix some weird 1password thing thats being inserted by the chrome extention?
+ Web development is great...
+*/
+#\31 p-live-region {
+  display: none;
+}
+
 .transactions-item .transaction-select__control {
   background-color: transparent;
 }
