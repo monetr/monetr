@@ -20,7 +20,9 @@ export default function PrepareFileStage(props: PrepareFileStageProps): JSX.Elem
   const selectedBankAccountId = useSelectedBankAccountId();
 
   useEffect(() => {
-    if (!selectedBankAccountId) { return; }
+    if (!selectedBankAccountId) {
+      return;
+    }
 
     axios
       .post(`/api/bank_accounts/${selectedBankAccountId}/transactions/upload`, {

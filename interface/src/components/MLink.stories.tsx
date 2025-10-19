@@ -1,4 +1,3 @@
-
 import type { Meta, StoryFn } from '@storybook/react';
 
 import MLink from './MLink';

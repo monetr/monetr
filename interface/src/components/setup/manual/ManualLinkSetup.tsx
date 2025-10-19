@@ -1,5 +1,3 @@
-
-
 import ManualLinkSetupAccountName from '@monetr/interface/components/setup/manual/ManualLinkSetupAccountName';
 import ManualLinkSetupBalances from '@monetr/interface/components/setup/manual/ManualLinkSetupBalances';
 import ManualLinkSetupIncome from '@monetr/interface/components/setup/manual/ManualLinkSetupIncome';

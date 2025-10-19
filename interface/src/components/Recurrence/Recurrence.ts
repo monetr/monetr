@@ -5,7 +5,9 @@ export default class Recurrence {
   rule: RRule;
 
   constructor(recurrence?: Partial<Recurrence>) {
-    if (recurrence) { Object.assign(this, recurrence); }
+    if (recurrence) {
+      Object.assign(this, recurrence);
+    }
   }
 
   ruleString(): string {

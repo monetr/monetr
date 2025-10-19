@@ -6,6 +6,8 @@ export default class Login {
   totpEnabledAt: Date | null;
 
   constructor(data?: Partial<Login>) {
-    if (data) { Object.assign(this, data); }
+    if (data) {
+      Object.assign(this, data);
+    }
   }
 }

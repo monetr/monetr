@@ -94,7 +94,9 @@ export default function Register(): JSX.Element {
   const [successful, setSuccessful] = useState(false);
 
   function BetaCodeInput(): JSX.Element {
-    if (!config?.requireBetaCode) { return null; }
+    if (!config?.requireBetaCode) {
+      return null;
+    }
 
     return <MTextField label='Beta Code' name='betaCode' type='text' required uppercasetext className={breakpoints} />;
   }

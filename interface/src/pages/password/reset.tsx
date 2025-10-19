@@ -27,12 +27,12 @@ export default function PasswordResetNew(): JSX.Element {
   const navigate = useNavigate();
   const resetPassword = useResetPassword();
   const { state: routeState } = useLocation();
-  const message = (routeState?.message) || 'Enter the new password you would like to use.';
+  const message = routeState?.message || 'Enter the new password you would like to use.';
   const search = location.search;
   const query = new URLSearchParams(search);
   // The token is loaded from the route state (which is provided when a password reset is being forced) or from the
   // URL query parameter (which is provided when the user is brought here from a link in their email).
-  const token = query.get('token') || (routeState?.token);
+  const token = query.get('token') || routeState?.token;
 
   useEffect(() => {
     if (!token) {

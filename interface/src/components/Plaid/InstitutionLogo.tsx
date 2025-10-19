@@ -1,4 +1,3 @@
-
 import { Landmark } from 'lucide-react';
 
 import { useInstitution } from '@monetr/interface/hooks/useInstitution';

@@ -59,9 +59,13 @@ export default function PullToRefresh(): JSX.Element {
     // Locks or unlocks page when pulling down to refresh
     const pullStart = (e: TouchEvent) => {
       // If there is a dialog open, then do nothing.
-      if (document.querySelectorAll('[role="dialog"]').length > 0) { return; }
+      if (document.querySelectorAll('[role="dialog"]').length > 0) {
+        return;
+      }
       // Prevent accidently pull to refresh on the wrong main view.
-      if (document.querySelector('ul')?.scrollTop > 0) { return; }
+      if (document.querySelector('ul')?.scrollTop > 0) {
+        return;
+      }
 
       setPullStartPoint(e.targetTouches[0].screenY);
 
@@ -82,11 +86,17 @@ export default function PullToRefresh(): JSX.Element {
     // Tracks how far we have pulled down the refresh icon
     const pullDown = async (e: TouchEvent) => {
       // If there is a dialog open, then do nothing.
-      if (document.querySelectorAll('[role="dialog"]').length > 0) { return; }
+      if (document.querySelectorAll('[role="dialog"]').length > 0) {
+        return;
+      }
       // Prevent accidently pull to refresh on the wrong main view.
-      if (document.querySelector('ul')?.scrollTop > 0) { return; }
+      if (document.querySelector('ul')?.scrollTop > 0) {
+        return;
+      }
       // On the details pages don't allow pull to refresh either
-      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) { return; }
+      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) {
+        return;
+      }
 
       const screenY = e.targetTouches[0].screenY;
 
@@ -98,9 +108,15 @@ export default function PullToRefresh(): JSX.Element {
     // Will reload the page if we are past the threshold
     // Otherwise, we reset the pull
     const pullFinish = () => {
-      if (document.querySelectorAll('[role="dialog"]').length > 0) { return; }
-      if (document.querySelector('ul')?.scrollTop > 0) { return; }
-      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) { return; }
+      if (document.querySelectorAll('[role="dialog"]').length > 0) {
+        return;
+      }
+      if (document.querySelector('ul')?.scrollTop > 0) {
+        return;
+      }
+      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) {
+        return;
+      }
 
       setPullStartPoint(0);
 

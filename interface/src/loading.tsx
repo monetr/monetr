@@ -1,5 +1,3 @@
-
-
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 

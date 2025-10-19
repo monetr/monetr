@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { ErrorOutline } from '@mui/icons-material';
 import { LogOut, Settings } from 'lucide-react';

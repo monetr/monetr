@@ -1,5 +1,3 @@
-
-
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import MobileSidebar from '@monetr/interface/components/Layout/MobileSidebar';
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';

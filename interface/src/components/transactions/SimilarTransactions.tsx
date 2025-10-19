@@ -1,5 +1,3 @@
-
-
 import MSpan from '@monetr/interface/components/MSpan';
 import SimilarTransactionItem from '@monetr/interface/components/transactions/SimilarTransactionItem';
 import { useSimilarTransactions } from '@monetr/interface/hooks/useSimilarTransactions';

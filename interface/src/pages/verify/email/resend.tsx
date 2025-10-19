@@ -65,7 +65,7 @@ export default function ResendVerificationPage(): JSX.Element {
   );
 
   const initialValues: ResendValues = {
-    email: (routeState?.emailAddress) || undefined,
+    email: routeState?.emailAddress || undefined,
     captcha: null,
   };
 

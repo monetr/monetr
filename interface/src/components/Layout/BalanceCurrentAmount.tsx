@@ -1,4 +1,3 @@
-
 import { TollOutlined } from '@mui/icons-material';
 
 import MSpan from '@monetr/interface/components/MSpan';

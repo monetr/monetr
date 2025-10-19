@@ -1,6 +1,5 @@
 /* Image belongs to Plaid */
 
-
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface PlaidLogoProps {

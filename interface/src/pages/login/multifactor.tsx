@@ -101,7 +101,7 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
               role='form'
               type='submit'
               className='w-full'
-              tabIndex="0"
+              tabIndex='0'
             >
               {formatContinueButton(formik.values as MultifactorValues)}
             </FormButton>

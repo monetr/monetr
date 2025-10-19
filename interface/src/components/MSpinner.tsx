@@ -1,5 +1,3 @@
-
-
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MSpinnerProps {

@@ -1,5 +1,3 @@
-
-
 import Feature from '@monetr/docs/components/Feature';
 
 export default function Expenses(): JSX.Element {

@@ -245,7 +245,9 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   }
 
   function Footer(): JSX.Element {
-    if (props.alreadyOnboarded) { return null; }
+    if (props.alreadyOnboarded) {
+      return null;
+    }
 
     return <LogoutFooter />;
   }

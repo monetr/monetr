@@ -35,7 +35,9 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
   const theme = useTheme();
 
   function Error() {
-    if (!props.error) { return null; }
+    if (!props.error) {
+      return null;
+    }
 
     return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
   }

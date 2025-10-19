@@ -1,4 +1,3 @@
-
 import { Box, styled } from '@mui/material';
 
 export default function VerticalPuller(): JSX.Element {

@@ -1,5 +1,3 @@
-
-
 import MSpan from '@monetr/interface/components/MSpan';
 import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/InstitutionLogo';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';

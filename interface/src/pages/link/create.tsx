@@ -1,4 +1,3 @@
-
 import { PowerOutlined } from '@mui/icons-material';
 
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';

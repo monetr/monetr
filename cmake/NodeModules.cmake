@@ -14,6 +14,7 @@ if(WIN32)
 else()
   set(JS_EXECUTABLE_SUFFIX "")
 endif()
+set(BIOME_EXECUTABLE ${NODE_MODULES_BIN}/biome${JS_EXECUTABLE_SUFFIX})
 set(HYPERLINK_EXECUTABLE ${NODE_MODULES_BIN}/hyperlink${JS_EXECUTABLE_SUFFIX})
 set(JEST_EXECUTABLE ${NODE_MODULES_BIN}/jest${JS_EXECUTABLE_SUFFIX})
 set(NEXT_EXECUTABLE ${NODE_MODULES_BIN}/next${JS_EXECUTABLE_SUFFIX})
@@ -29,6 +30,7 @@ set(PNPM_ARGUMENTS "--frozen-lockfile" "--ignore-scripts")
 add_custom_command(
   OUTPUT ${NODE_MODULES}
          ${NODE_MODULES_MARKER}
+         ${BIOME_EXECUTABLE}
          ${HYPERLINK_EXECUTABLE}
          ${JEST_EXECUTABLE}
          ${NEXT_EXECUTABLE}
@@ -44,6 +46,7 @@ add_custom_command(
          ${CMAKE_SOURCE_DIR}/stories/node_modules
   BYPRODUCTS ${NODE_MODULES}
              ${NODE_MODULES_MARKER}
+             ${BIOME_EXECUTABLE}
              ${HYPERLINK_EXECUTABLE}
              ${JEST_EXECUTABLE}
              ${NEXT_EXECUTABLE}
@@ -76,6 +79,11 @@ add_custom_command(
 add_custom_target(
   dependencies.node_modules
   DEPENDS ${NODE_MODULES}
+)
+
+add_custom_target(
+  tools.biome
+  DEPENDS dependencies.node_modules
 )
 
 add_custom_target(

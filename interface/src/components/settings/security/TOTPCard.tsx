@@ -1,4 +1,3 @@
-
 import { Shield } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';

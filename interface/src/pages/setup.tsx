@@ -75,7 +75,9 @@ function Greeting(props: GreetingProps): JSX.Element {
   }
 
   function Footer(): JSX.Element {
-    if (props.alreadyOnboarded) { return null; }
+    if (props.alreadyOnboarded) {
+      return null;
+    }
 
     return <LogoutFooter />;
   }
@@ -171,8 +173,12 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   );
 
   function handleClick() {
-    if (props.comingSoon) { return; }
-    if (props.disabled) { return; }
+    if (props.comingSoon) {
+      return;
+    }
+    if (props.disabled) {
+      return;
+    }
 
     props.onClick();
   }

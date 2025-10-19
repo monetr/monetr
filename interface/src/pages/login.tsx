@@ -1,4 +1,3 @@
-
 import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
@@ -55,21 +54,23 @@ export default function Login(): JSX.Element {
     }
 
     return (
-      <MLink to='/password/forgot' size='sm' data-testid='login-forgot' tabIndex="0">
+      <MLink to='/password/forgot' size='sm' data-testid='login-forgot' tabIndex='0'>
         Forgot password?
       </MLink>
     );
   }
 
   function SignUpButton(): JSX.Element {
-    if (!config?.allowSignUp) { return null; }
+    if (!config?.allowSignUp) {
+      return null;
+    }
 
     return (
       <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
         <MSpan color='subtle' className='text-sm'>
           Not a user?
         </MSpan>
-        <MLink to='/register' size='sm' data-testid='login-signup' tabIndex="0">
+        <MLink to='/register' size='sm' data-testid='login-signup' tabIndex='0'>
           Sign up now
         </MLink>
       </div>
@@ -112,7 +113,7 @@ export default function Login(): JSX.Element {
         type='email'
         required
         className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'
-        tabIndex="0"
+        tabIndex='0'
       />
       <MTextField
         autoComplete='current-password'
@@ -123,7 +124,7 @@ export default function Login(): JSX.Element {
         name='password'
         required
         type='password'
-        tabIndex="0"
+        tabIndex='0'
       />
       <MCaptcha name='captcha' show={Boolean(config?.verifyLogin)} />
       <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
@@ -133,7 +134,7 @@ export default function Login(): JSX.Element {
           role='form'
           type='submit'
           className='w-full'
-          tabIndex="0"
+          tabIndex='0'
         >
           Sign In
         </FormButton>

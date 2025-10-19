@@ -1,5 +1,3 @@
-
-
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import { useIconSearch } from '@monetr/interface/hooks/useIconSearch';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';

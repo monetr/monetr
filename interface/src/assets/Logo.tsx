@@ -1,5 +1,3 @@
-
-
 import logoData from './logo.svg';
 
 interface LogoProps {

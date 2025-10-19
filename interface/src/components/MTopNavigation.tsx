@@ -56,7 +56,9 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
   }
 
   function BreadcrumbMaybe(): JSX.Element {
-    if (!props.breadcrumb) { return null; }
+    if (!props.breadcrumb) {
+      return null;
+    }
 
     return (
       <Fragment>
@@ -89,7 +91,9 @@ interface ActionAreaProps {
 }
 
 function ActionArea(props: ActionAreaProps): JSX.Element {
-  if (!props.children) { return null; }
+  if (!props.children) {
+    return null;
+  }
 
   const styles = mergeTailwind(
     'flex justify-end gap-x-4 md:gap-x-2',

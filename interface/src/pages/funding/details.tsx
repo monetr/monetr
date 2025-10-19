@@ -1,4 +1,3 @@
-
 import { useMatch, useNavigate } from 'react-router-dom';
 import HeartBroken from '@mui/icons-material/HeartBroken';
 import TodayOutlined from '@mui/icons-material/TodayOutlined';
@@ -137,7 +136,9 @@ export default function FundingDetails(): JSX.Element {
   };
 
   const NextOccurrenceDecorator = () => {
-    if (isEqual(funding.nextRecurrence, funding.nextRecurrenceOriginal)) { return null; }
+    if (isEqual(funding.nextRecurrence, funding.nextRecurrenceOriginal)) {
+      return null;
+    }
 
     return (
       <MSpan data-testid='funding-schedule-weekend-notice' size='sm' weight='medium'>

@@ -1,4 +1,3 @@
-
 import { formatDistanceToNow } from 'date-fns';
 
 import MSpan from '@monetr/interface/components/MSpan';

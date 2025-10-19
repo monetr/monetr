@@ -173,7 +173,9 @@ function ReverseTargetsButton(): JSX.Element {
   const formik = useFormikContext<TransferValues>();
   const swap = useCallback(() => {
     // Do nothing if we are currently submitting.
-    if (formik.isSubmitting) { return; }
+    if (formik.isSubmitting) {
+      return;
+    }
 
     const { fromSpendingId, toSpendingId, amount } = formik.values;
     formik.setValues({

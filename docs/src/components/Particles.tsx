@@ -126,7 +126,9 @@ export default function Particles({
       const remapClosestEdge = parseFloat(remapValue(closestEdge, 0, 20, 0, 1).toFixed(2));
       if (remapClosestEdge > 1) {
         circle.alpha += 0.02;
-        if (circle.alpha > circle.targetAlpha) { circle.alpha = circle.targetAlpha; }
+        if (circle.alpha > circle.targetAlpha) {
+          circle.alpha = circle.targetAlpha;
+        }
       } else {
         circle.alpha = circle.targetAlpha * remapClosestEdge;
       }

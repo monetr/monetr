@@ -181,6 +181,15 @@ if(DOCKER_EXECUTABLE)
   )
 endif()
 
+add_custom_target(lint
+  COMMENT "Linting monetr code base..."
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  DEPENDS tools.biome
+  COMMAND ${BIOME_EXECUTABLE} format --fix
+  COMMAND ${BIOME_EXECUTABLE} lint --fix
+  COMMAND ${CMAKE_Go_COMPILER} fmt ./...
+)
+
 ################################################################################
 #                                     TESTING                                  #
 ################################################################################

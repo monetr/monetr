@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 
 import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/InstitutionLogo';
@@ -24,7 +23,9 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
 
   const LinkWarningIndicator = () => {
     const isWarning = link.getIsError() || link.getIsPendingExpiration();
-    if (!isWarning) { return null; }
+    if (!isWarning) {
+      return null;
+    }
 
     return (
       <span className='absolute flex h-3 w-3 right-0 bottom-0'>
@@ -36,7 +37,9 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
 
   const LinkRevokedIndicator = () => {
     const isBad = link.getIsPlaid() && link.getIsRevoked();
-    if (!isBad) { return null; }
+    if (!isBad) {
+      return null;
+    }
 
     return (
       <span className='absolute flex h-3 w-3 right-0 bottom-0'>
