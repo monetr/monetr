@@ -75,11 +75,11 @@ const SelectClasses = cva(
     'disabled:dark:bg-background-subtle',
     'disabled:dark:ring-background-emphasis',
     'disabled:ring-gray-200',
-    'disabled:content-disabled',
+    'disabled:text-content-disabled',
     'aria-disabled:dark:bg-background-subtle',
     'aria-disabled:dark:ring-background-emphasis',
     'aria-disabled:ring-gray-200',
-    'aria-disabled:text-gray-500',
+    'aria-disabled:text-content-disabled',
     // Enabled styles
     'dark:bg-transparent',
     'dark:text-content',
@@ -183,6 +183,14 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
     },
   });
 
+  const onOpenClickHandler = useCallback(() => {
+    if (props.disabled) {
+      return;
+    }
+
+    openMenu();
+  }, [props, openMenu]);
+
   useEffect(() => {
     if (!isOpen) {
       // Clear the filter when we are currently open and moving to a closed state, this makes it so that if we re-open
@@ -223,21 +231,6 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
   );
   const LabelDecorator = props.labelDecorator || (() => null);
 
-  if (props.isLoading) {
-    return (
-      <div className={wrapperClassNames}>
-        <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
-          <LabelDecorator name={props.name} disabled={props.disabled} />
-        </MLabel>
-        <div className={mergeTailwind(classNames, 'flex cursor-progress gap-1 items-center')}>
-          <Skeleton className='w-full h-5 mr-2' />
-          <SelectIndicator disabled={props.disabled} isLoading={props.isLoading} open={isOpen} />
-        </div>
-        {Boolean(props.error) && <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>}
-      </div>
-    );
-  }
-
   return (
     <div className={wrapperClassNames}>
       <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
@@ -245,7 +238,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
       </MLabel>
       {/** biome-ignore lint/a11y/noStaticElementInteractions: Need to account for weird padding here */}
       <div
-        onClick={!props.disabled && openMenu}
+        onClick={onOpenClickHandler}
         ref={inputWrapperRef}
         className={mergeTailwind(classNames, 'flex cursor-text gap-1 items-center')}
         aria-disabled={props.disabled}
@@ -347,7 +340,8 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
               aria-disabled={props.disabled}
               className={mergeTailwind('flex-1 bg-transparent disabled:text-gray-500', {
                 // If we don't have a value then use the placeholder text style.
-                'text-placeholder': !props.value?.label,
+                'text-content-placeholder': !props.value?.label,
+                'text-content-disabled': props.disabled,
               })}
             >
               {props.value?.label ?? props.placeholder}
@@ -357,7 +351,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
         </DrawerTrigger>
         <DrawerContent>
           <DrawerWrapper>
-            <ul className={mergeTailwind('space-y-0.5 pl-2')}>
+            <ul className={mergeTailwind('space-y-0.5 pl-2 pr-2')}>
               {open &&
                 props.options.map(item => (
                   <li
