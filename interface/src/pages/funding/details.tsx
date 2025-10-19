@@ -26,6 +26,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchFundingSchedule } from '@monetr/interface/hooks/usePatchFundingSchedule';
 import { useRemoveFundingSchedule } from '@monetr/interface/hooks/useRemoveFundingSchedule';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type { APIError } from '@monetr/interface/util/request';
 
 interface FundingValues {
@@ -137,22 +138,6 @@ export default function FundingDetails(): JSX.Element {
     estimatedDeposit: locale.amountToFriendly(funding.estimatedDeposit),
   };
 
-  const NextOccurrenceDecorator = () => {
-    if (!funding.excludeWeekends) {
-      return null;
-    }
-
-    if (isEqual(funding.nextRecurrence, funding.nextRecurrenceOriginal)) {
-      return null;
-    }
-
-    return (
-      <MSpan data-testid='funding-schedule-weekend-notice' size='sm' weight='medium'>
-        Actual occurrence avoids weekend ({format(funding.nextRecurrence, 'M/dd')})
-      </MSpan>
-    );
-  };
-
   return (
     <MForm className='flex w-full h-full flex-col' initialValues={initialValues} onSubmit={submit} validate={validate}>
       <MTopNavigation
@@ -178,7 +163,7 @@ export default function FundingDetails(): JSX.Element {
               className='w-full'
               label='Next Recurrence'
               name='nextRecurrence'
-              labelDecorator={NextOccurrenceDecorator}
+              labelDecorator={() => <NextOccurrenceDecorator fundingSchedule={funding} />}
               required
               data-testid='funding-details-date-picker'
               min={startOfTomorrow({
@@ -214,5 +199,25 @@ export default function FundingDetails(): JSX.Element {
         </div>
       </div>
     </MForm>
+  );
+}
+
+interface NextOccurrenceDecoratorProps {
+  fundingSchedule: FundingSchedule;
+}
+
+function NextOccurrenceDecorator({ fundingSchedule: funding }: NextOccurrenceDecoratorProps): React.JSX.Element {
+  if (!funding.excludeWeekends) {
+    return null;
+  }
+
+  if (isEqual(funding.nextRecurrence, funding.nextRecurrenceOriginal)) {
+    return null;
+  }
+
+  return (
+    <MSpan data-testid='funding-schedule-weekend-notice' size='sm' weight='medium'>
+      Actual occurrence avoids weekend ({format(funding.nextRecurrence, 'M/dd')})
+    </MSpan>
   );
 }
