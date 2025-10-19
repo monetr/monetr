@@ -270,31 +270,11 @@ make test CONCURRENCY=16 PATTERN=interface
 the maximum number of tests to run at the same time. **Note**: Interface/UI tests do not necessarily run at the max
 concurrency as those tests will consume more than a single CPU core.
 
-### Storybook
-
-monetr now provides a storybook setup for working on UI components outside of running the entire application locally. To
-start storybook you can run the following command.
-
-```shell filename="Shell"
-make develop-storybook
-```
-
-This will kick off the storybook development server. You can make modifications to the stories locally or components
-used in stories and see the changes reflected with hot-reloading.
-
-To build the storybook as a static set of assets, you can run the following command:
-
-```shell filename="Shell"
-make storybook
-```
-
-This will output the storybook assets in `$PWD/build/stories/dist`
-
 ### Frontend
 
-An alternative to running storybook to work on only the frontend components of monetr is to run a "lite" development
-environment. The lite environment only runs the frontend dev server and instead of requiring an active API server and
-additional services to be running locally, you can instead point the frontend at a desired API server.
+An alternative to work on only the frontend components of monetr is to run a "lite" development environment. The lite
+environment only runs the frontend dev server and instead of requiring an active API server and additional services to
+be running locally, you can instead point the frontend at a desired API server.
 
 To start the "lite" development environment run the following command:
 

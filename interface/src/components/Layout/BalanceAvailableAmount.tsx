@@ -1,4 +1,3 @@
-import React from 'react';
 import { LocalAtmOutlined } from '@mui/icons-material';
 
 import MSpan from '@monetr/interface/components/MSpan';
@@ -22,7 +21,7 @@ export default function BalanceAvailableAmount(): JSX.Element {
             Available:
           </MSpan>
           <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-            { locale.formatAmount(balance?.available, AmountType.Stored) }
+            {locale.formatAmount(balance?.available, AmountType.Stored)}
           </MSpan>
         </div>
       );

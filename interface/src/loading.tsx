@@ -1,13 +1,9 @@
-import React from 'react';
-
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 
 import '@monetr/interface/loading.css';
 
 export default function Loading(): JSX.Element {
-
-
   return (
     <div className='w-full h-full items-center justify-center flex flex-col gap-8'>
       <MLogo className='w-24 h-24' />
@@ -17,9 +13,7 @@ export default function Loading(): JSX.Element {
         <div className='dots blob dark:bg-dark-monetr-brand' />
         <div className='dots blob dark:bg-dark-monetr-brand' />
       </div>
-      <MSpan className='text-3xl'>
-        Loading...
-      </MSpan>
+      <MSpan className='text-3xl'>Loading...</MSpan>
       <svg className='hidden' xmlns='http://www.w3.org/2000/svg' version='1.1'>
         <defs>
           <filter id='magic'>

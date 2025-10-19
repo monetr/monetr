@@ -1,13 +1,20 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { PlaidLinkError, PlaidLinkOnEventMetadata, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata, PlaidLinkStableEvent, usePlaidLink } from 'react-plaid-link';
+import { useCallback, useEffect, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+  type PlaidLinkError,
+  type PlaidLinkOnEventMetadata,
+  type PlaidLinkOnExitMetadata,
+  type PlaidLinkOnSuccessMetadata,
+  type PlaidLinkStableEvent,
+  usePlaidLink,
+} from 'react-plaid-link';
 
 import MModal from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
-import Link from '@monetr/interface/models/Link';
+import type Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
-import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface UpdatePlaidAccountOverlayProps {
   link: Link;
@@ -31,11 +38,13 @@ function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaid
 
   useEffect(() => {
     request()
-      .put(`/plaid/link/update/${ link.linkId }?update_account_selection=${ !!updateAccountSelection }`)
-      .then(result => setState({
-        loading: false,
-        linkToken: result.data.linkToken,
-      }))
+      .put(`/plaid/link/update/${link.linkId}?update_account_selection=${!!updateAccountSelection}`)
+      .then(result =>
+        setState({
+          loading: false,
+          linkToken: result.data.linkToken,
+        }),
+      )
       .catch(error => {
         setState({
           loading: false,
@@ -47,37 +56,45 @@ function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaid
       });
   }, [link, updateAccountSelection]);
 
+  const plaidOnSuccess = useCallback(
+    async (token: string, metadata: PlaidLinkOnSuccessMetadata) => {
+      console.log('plaidOnSuccess', {
+        token,
+        metadata,
+      });
+      setState({
+        loading: true,
+      });
 
-  const plaidOnSuccess = useCallback(async (token: string, metadata: PlaidLinkOnSuccessMetadata) => {
-    console.log('plaidOnSuccess', {
-      token,
-      metadata,
-    });
-    setState({
-      loading: true,
-    });
+      return request()
+        .post('/plaid/link/update/callback', {
+          linkId: link.linkId,
+          publicToken: token,
+          accountIds: metadata.accounts.map(account => account.id),
+        })
+        .then(() =>
+          Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['/bank_accounts'] }),
+            queryClient.invalidateQueries({ queryKey: ['/links'] }),
+            queryClient.invalidateQueries({ queryKey: [`/links/${link.linkId}`] }),
+          ]),
+        )
+        .then(() => modal.remove());
+    },
+    [link, modal, queryClient],
+  );
 
-    return request().post('/plaid/link/update/callback', {
-      linkId: link.linkId,
-      publicToken: token,
-      accountIds: metadata.accounts.map(account => account.id),
-    })
-      .then(() => Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['/bank_accounts'] }),
-        queryClient.invalidateQueries({ queryKey: ['/links'] }),
-        queryClient.invalidateQueries({ queryKey: [`/links/${link.linkId}`] }),
-      ]))
-      .then(() => modal.remove());
-  }, [link, modal, queryClient]);
+  const plaidOnExit = useCallback(
+    (error: null | PlaidLinkError, metadata: PlaidLinkOnExitMetadata) => {
+      console.log('plaidOnExit', {
+        error,
+        metadata,
+      });
 
-  const plaidOnExit = useCallback((error: null | PlaidLinkError, metadata: PlaidLinkOnExitMetadata) => {
-    console.log('plaidOnExit', {
-      error,
-      metadata,
-    });
-
-    modal.remove();
-  }, [modal]);
+      modal.remove();
+    },
+    [modal],
+  );
 
   const plaidOnEvent = useCallback((eventName: PlaidLinkStableEvent | string, metadata: PlaidLinkOnEventMetadata) => {
     console.log('plaidOnEvent', {
@@ -107,21 +124,21 @@ function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaid
   let title: string, message: string;
   if (updateAccountSelection) {
     title = 'Updating Account Selection';
-    message = `One moment while we prepare Plaid to update your account selection for ${ link.getName() }.`;
+    message = `One moment while we prepare Plaid to update your account selection for ${link.getName()}.`;
   } else {
     title = 'Reauthenticating';
     message = `One moment while we prepare Plaid to reauthenticate your connection to ${link.getName()}.`;
   }
 
   return (
-    <MModal open={ modal.visible } className='py-4 md:max-w-md'>
+    <MModal open={modal.visible} className='py-4 md:max-w-md'>
       <div className='h-full flex flex-col gap-4 p-2 justify-between'>
         <div className='flex flex-col'>
           <MSpan weight='bold' size='xl' className='mb-2'>
-            { title }
+            {title}
           </MSpan>
           <MSpan size='lg' weight='medium'>
-            { message }
+            {message}
           </MSpan>
         </div>
       </div>

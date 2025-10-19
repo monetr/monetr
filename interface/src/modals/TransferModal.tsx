@@ -1,15 +1,15 @@
-import React, { useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { AxiosError } from 'axios';
-import { FormikErrors, FormikHelpers, useFormikContext } from 'formik';
+import type { AxiosError } from 'axios';
+import { type FormikErrors, type FormikHelpers, useFormikContext } from 'formik';
 import { ArrowUpDown } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MForm from '@monetr/interface/components/MForm';
-import { MLabelDecoratorProps } from '@monetr/interface/components/MLabel';
-import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import type { MLabelDecoratorProps } from '@monetr/interface/components/MLabel';
+import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
@@ -17,7 +17,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import { useTransfer } from '@monetr/interface/hooks/useTransfer';
 import { AmountType } from '@monetr/interface/util/amounts';
-import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface TransferModalProps {
   initialFromSpendingId?: string;
@@ -34,7 +34,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
   const initialValues: TransferValues = {
     fromSpendingId: props.initialFromSpendingId,
     toSpendingId: props.initialToSpendingId,
-    amount: 0.00,
+    amount: 0.0,
   };
 
   const { data: locale } = useLocaleCurrency();
@@ -44,68 +44,75 @@ function TransferModal(props: TransferModalProps): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: spending } = useSpendings();
 
-  const validate = useCallback((values: TransferValues): FormikErrors<TransferValues> => {
-    const errors: FormikErrors<TransferValues> = {};
-    const amount = locale.friendlyToAmount(values.amount);
+  const validate = useCallback(
+    (values: TransferValues): FormikErrors<TransferValues> => {
+      const errors: FormikErrors<TransferValues> = {};
+      const amount = locale.friendlyToAmount(values.amount);
 
-    if (amount <= 0) {
-      errors['amount'] = 'Amount must be greater than zero';
-    }
-
-    // If we are moving an allocation out of an existing budget, do not let us overdraw that budget. We can only really
-    // overdraw free to use.
-    if (values.fromSpendingId !== null) {
-      // Otherwise we are moving funds out of an actual budget. Find that budget.
-      const from = spending?.find(item => item.spendingId === values.fromSpendingId);
-      // And make sure that we are not moving more than that budget has.
-      if (amount > from?.currentAmount) {
-        errors['amount'] = `Cannot move more than is available from ${from?.name}`;
+      if (amount <= 0) {
+        errors.amount = 'Amount must be greater than zero';
       }
-    }
 
-    return errors;
-  }, [locale, spending]);
+      // If we are moving an allocation out of an existing budget, do not let us overdraw that budget. We can only really
+      // overdraw free to use.
+      if (values.fromSpendingId !== null) {
+        // Otherwise we are moving funds out of an actual budget. Find that budget.
+        const from = spending?.find(item => item.spendingId === values.fromSpendingId);
+        // And make sure that we are not moving more than that budget has.
+        if (amount > from?.currentAmount) {
+          errors.amount = `Cannot move more than is available from ${from?.name}`;
+        }
+      }
 
-  const submit = useCallback(async (values: TransferValues, helper: FormikHelpers<TransferValues>): Promise<void> => {
-    if (values.toSpendingId === null && values.fromSpendingId === null) {
-      helper.setFieldError('toSpendingId', 'Must select a destination and a source');
-      return Promise.resolve();
-    }
+      return errors;
+    },
+    [locale, spending],
+  );
 
-    const check = validate(values);
-    if (Object.keys(check).length > 0) {
-      helper.setErrors(check);
-      return Promise.resolve();
-    }
+  const submit = useCallback(
+    async (values: TransferValues, helper: FormikHelpers<TransferValues>): Promise<void> => {
+      if (values.toSpendingId === null && values.fromSpendingId === null) {
+        helper.setFieldError('toSpendingId', 'Must select a destination and a source');
+        return Promise.resolve();
+      }
 
-    helper.setSubmitting(true);
-    return await transfer({
-      fromSpendingId: values.fromSpendingId,
-      toSpendingId: values.toSpendingId,
-      amount: locale.friendlyToAmount(values.amount),
-    })
-      .then(() => modal.remove())
-      .then(() => enqueueSnackbar(
-        'Moved funds allocated successfully',
-        {
-          variant: 'success',
-          disableWindowBlurListener: true,
-        },
-      ))
-      .catch((error: AxiosError) => void enqueueSnackbar(
-        error.response.data['error'], {
-          variant: 'error',
-          disableWindowBlurListener: true,
-        }))
-      .finally(() => helper.setSubmitting(false));
-  }, [enqueueSnackbar, locale, modal, transfer, validate]);
+      const check = validate(values);
+      if (Object.keys(check).length > 0) {
+        helper.setErrors(check);
+        return Promise.resolve();
+      }
+
+      helper.setSubmitting(true);
+      return await transfer({
+        fromSpendingId: values.fromSpendingId,
+        toSpendingId: values.toSpendingId,
+        amount: locale.friendlyToAmount(values.amount),
+      })
+        .then(() => modal.remove())
+        .then(() =>
+          enqueueSnackbar('Moved funds allocated successfully', {
+            variant: 'success',
+            disableWindowBlurListener: true,
+          }),
+        )
+        .catch(
+          (error: AxiosError) =>
+            void enqueueSnackbar(error.response.data.error, {
+              variant: 'error',
+              disableWindowBlurListener: true,
+            }),
+        )
+        .finally(() => helper.setSubmitting(false));
+    },
+    [enqueueSnackbar, locale, modal, transfer, validate],
+  );
 
   return (
-    <MModal open={ modal.visible } ref={ ref } className='md:max-w-sm'>
+    <MModal open={modal.visible} ref={ref} className='md:max-w-sm'>
       <MForm
-        onSubmit={ submit }
-        initialValues={ initialValues }
-        validate={ validate }
+        onSubmit={submit}
+        initialValues={initialValues}
+        validate={validate}
         className='h-full flex flex-col gap-2 p-2 justify-between'
         data-testid='transfer-modal'
       >
@@ -121,16 +128,16 @@ function TransferModal(props: TransferModalProps): JSX.Element {
           <MSelectSpending
             excludeFrom='toSpendingId'
             label='From'
-            labelDecorator={ TransferSelectDecorator }
-            menuPortalTarget={ document.body }
+            labelDecorator={TransferSelectDecorator}
+            menuPortalTarget={document.body}
             name='fromSpendingId'
           />
           <ReverseTargetsButton />
           <MSelectSpending
             excludeFrom='fromSpendingId'
             label='To'
-            labelDecorator={ TransferSelectDecorator }
-            menuPortalTarget={ document.body }
+            labelDecorator={TransferSelectDecorator}
+            menuPortalTarget={document.body}
             name='toSpendingId'
           />
           <MAmountField
@@ -138,21 +145,14 @@ function TransferModal(props: TransferModalProps): JSX.Element {
             label='Amount'
             placeholder='Amount to move...'
             step='0.01'
-            allowNegative={ false }
+            allowNegative={false}
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <FormButton
-            variant='secondary'
-            onClick={ modal.remove }
-            data-testid='close-new-expense-modal'
-          >
+          <FormButton variant='secondary' onClick={modal.remove} data-testid='close-new-expense-modal'>
             Cancel
           </FormButton>
-          <FormButton
-            variant='primary'
-            type='submit'
-          >
+          <FormButton variant='primary' type='submit'>
             Transfer
           </FormButton>
         </div>
@@ -173,7 +173,9 @@ function ReverseTargetsButton(): JSX.Element {
   const formik = useFormikContext<TransferValues>();
   const swap = useCallback(() => {
     // Do nothing if we are currently submitting.
-    if (formik.isSubmitting) return;
+    if (formik.isSubmitting) {
+      return;
+    }
 
     const { fromSpendingId, toSpendingId, amount } = formik.values;
     formik.setValues({
@@ -186,7 +188,7 @@ function ReverseTargetsButton(): JSX.Element {
   return (
     <a className='w-full flex justify-center mb-1'>
       <ArrowUpDown
-        onClick={ swap }
+        onClick={swap}
         className='h-10 w-10 cursor-pointer text-4xl dark:text-dark-monetr-content-subtle hover:dark:text-dark-monetr-content'
       />
     </a>
@@ -203,9 +205,7 @@ function TransferSelectDecorator(props: MLabelDecoratorProps): JSX.Element {
   if (!value || value === -1) {
     const amount = balances?.free;
 
-    return (
-      <AmountButton amount={ amount } />
-    );
+    return <AmountButton amount={amount} />;
   }
 
   // If we aren't dealing with the free to use, then we are working with a spending item. Find it and find out what its
@@ -219,23 +219,22 @@ function TransferSelectDecorator(props: MLabelDecoratorProps): JSX.Element {
   const target = spendingSubject.targetAmount;
   const remaining = Math.max(spendingSubject.targetAmount - spendingSubject.currentAmount, 0);
 
-  if (remaining > 0 && remaining != target) {
+  if (remaining > 0 && remaining !== target) {
     return (
       <MSpan className='gap-1'>
-        <AmountButton amount={ current } />
+        <AmountButton amount={current} />
         of
-        <AmountButton amount={ target } />
-        &nbsp;
-        (<AmountButton amount={ remaining } />)
+        <AmountButton amount={target} />
+        &nbsp; (<AmountButton amount={remaining} />)
       </MSpan>
     );
   }
 
   return (
     <MSpan className='gap-1' color='subtle'>
-      <AmountButton amount={ current } />
+      <AmountButton amount={current} />
       of
-      <AmountButton amount={ target } />
+      <AmountButton amount={target} />
     </MSpan>
   );
 }
@@ -258,9 +257,9 @@ function AmountButton({ amount }: AmountButtonProps): JSX.Element {
       size='sm'
       weight='medium'
       className='cursor-pointer hover:dark:text-dark-monetr-content-emphasis'
-      onClick={ onClick }
+      onClick={onClick}
     >
-      { typeof amount === 'number' && locale.formatAmount(amount, AmountType.Stored) }
+      {typeof amount === 'number' && locale.formatAmount(amount, AmountType.Stored)}
     </MSpan>
   );
 }

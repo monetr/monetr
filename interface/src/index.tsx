@@ -1,12 +1,13 @@
 import '@fontsource-variable/inter';
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { createRoutesFromChildren, matchRoutes, useLocation, useNavigationType } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
+import { createRoutesFromChildren, matchRoutes, useLocation, useNavigationType } from 'react-router-dom';
 
-import { makeSneakyFetchTransport } from '@monetr/interface/relay/transport';
 import Root from '@monetr/interface/Root';
+import { makeSneakyFetchTransport } from '@monetr/interface/relay/transport';
+
+import { createRoot } from 'react-dom/client';
 
 import '@monetr/interface/styles/styles.css';
 import '@monetr/interface/styles/index.scss';
@@ -48,6 +49,4 @@ if (window?.__MONETR__?.SENTRY_DSN) {
   });
 }
 
-root.render(
-  <Root />,
-);
+root.render(<Root />);

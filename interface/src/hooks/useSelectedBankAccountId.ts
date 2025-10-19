@@ -7,4 +7,3 @@ export function useSelectedBankAccountId(): string | undefined {
     return match?.params?.bankId || undefined;
   }, [match]);
 }
-

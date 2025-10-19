@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 import request from '@monetr/interface/util/request';
 
@@ -21,7 +21,8 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
         // Then bootstrap the authentication, once it's bootstrapped we want to consider the `nextUrl` field from the
         // login response above. If the nextUrl is present, then we want to navigate the user to that path. If it is not
         // present then we can direct the user to the root path.
-        return queryClient.invalidateQueries({ queryKey: ['/users/me'] })
+        return queryClient
+          .invalidateQueries({ queryKey: ['/users/me'] })
           .then(() => navigate(result?.data?.nextUrl || '/'));
       })
       .catch(async error => {
@@ -34,19 +35,20 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
               case 'PASSWORD_CHANGE_REQUIRED':
                 return navigate('/password/reset', {
                   state: {
-                    'message': 'You are required to change your password before authenticating.',
-                    'token': error?.response?.data?.resetToken,
+                    message: 'You are required to change your password before authenticating.',
+                    token: error?.response?.data?.resetToken,
                   },
                 });
               case 'MFA_REQUIRED':
                 // If we are required to provide multifactor authentication then we should be able to retrieve our user
                 // details at least.
-                return queryClient.invalidateQueries({ queryKey: ['/users/me'] })
+                return queryClient
+                  .invalidateQueries({ queryKey: ['/users/me'] })
                   .then(() => navigate('/login/multifactor'));
               case 'EMAIL_NOT_VERIFIED':
                 return navigate('/verify/email/resend', {
                   state: {
-                    'emailAddress': loginArgs.email,
+                    emailAddress: loginArgs.email,
                   },
                 });
               default:

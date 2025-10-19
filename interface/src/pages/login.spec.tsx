@@ -1,4 +1,3 @@
-import React from 'react';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MockAdapter from 'axios-mock-adapter';
@@ -96,7 +95,6 @@ describe('login page', () => {
 
     await waitFor(() => expect(world.queryByTestId('login-forgot')).not.toBeInTheDocument());
     await waitFor(() => expect(world.queryByTestId('login-signup')).not.toBeInTheDocument());
-
 
     await user.type(world.getByTestId('login-email'), 'test@test.com');
     await user.type(world.getByTestId('login-password'), 'password');

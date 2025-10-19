@@ -1,13 +1,12 @@
-import React from 'react';
-import { useMatch, useNavigate } from 'react-router-dom';
+import { tz } from '@date-fns/tz';
 import HeartBroken from '@mui/icons-material/HeartBroken';
 import TodayOutlined from '@mui/icons-material/TodayOutlined';
-import { AxiosError } from 'axios';
-import { tz } from '@date-fns/tz';
+import type { AxiosError } from 'axios';
 import { format, isEqual, startOfDay, startOfTomorrow } from 'date-fns';
-import { FormikErrors, FormikHelpers } from 'formik';
+import type { FormikErrors, FormikHelpers } from 'formik';
 import { Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
+import { useMatch, useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
@@ -26,7 +25,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchFundingSchedule } from '@monetr/interface/hooks/usePatchFundingSchedule';
 import { useRemoveFundingSchedule } from '@monetr/interface/hooks/useRemoveFundingSchedule';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import { APIError } from '@monetr/interface/util/request';
+import type { APIError } from '@monetr/interface/util/request';
 
 interface FundingValues {
   name: string;
@@ -53,12 +52,8 @@ export default function FundingDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>
-          Something isn't right...
-        </MSpan>
-        <MSpan className='text-2xl'>
-          There wasn't a funding schedule specified...
-        </MSpan>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>There wasn't a funding schedule specified...</MSpan>
       </div>
     );
   }
@@ -71,7 +66,7 @@ export default function FundingDetails(): JSX.Element {
     const errors: FormikErrors<FundingValues> = {};
 
     if (values.rule === '' || !values.rule) {
-      errors['rule'] = 'Frequency is required for funding schedules.';
+      errors.rule = 'Frequency is required for funding schedules.';
     }
 
     return errors;
@@ -90,20 +85,20 @@ export default function FundingDetails(): JSX.Element {
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: locale.friendlyToAmount(values.estimatedDeposit),
     })
-      .then(() => void enqueueSnackbar(
-        'Updated funding schedule successfully',
-        {
-          variant: 'success',
-          disableWindowBlurListener: true,
-        },
-      ))
-      .catch((error: AxiosError<APIError>) => void enqueueSnackbar(
-        error.response.data.error || 'Failed to update funding schedule',
-        {
-          variant: 'error',
-          disableWindowBlurListener: true,
-        },
-      ))
+      .then(
+        () =>
+          void enqueueSnackbar('Updated funding schedule successfully', {
+            variant: 'success',
+            disableWindowBlurListener: true,
+          }),
+      )
+      .catch(
+        (error: AxiosError<APIError>) =>
+          void enqueueSnackbar(error.response.data.error || 'Failed to update funding schedule', {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          }),
+      )
       .finally(() => helpers.setSubmitting(false));
   }
 
@@ -116,13 +111,16 @@ export default function FundingDetails(): JSX.Element {
       return Promise.resolve();
     }
 
-    if (window.confirm(`Are you sure you want to delete funding schedule: ${ funding.name }`)) {
+    if (window.confirm(`Are you sure you want to delete funding schedule: ${funding.name}`)) {
       return removeFundingSchedule(funding)
         .then(() => backToFunding())
-        .catch((error: AxiosError<APIError>) => void enqueueSnackbar(error.response.data['error'], {
-          variant: 'error',
-          disableWindowBlurListener: true,
-        }));
+        .catch(
+          (error: AxiosError<APIError>) =>
+            void enqueueSnackbar(error.response.data.error, {
+              variant: 'error',
+              disableWindowBlurListener: true,
+            }),
+        );
     }
 
     return Promise.resolve();
@@ -138,29 +136,26 @@ export default function FundingDetails(): JSX.Element {
   };
 
   const NextOccurrenceDecorator = () => {
-    if (isEqual(funding.nextRecurrence, funding.nextRecurrenceOriginal)) return null;
+    if (isEqual(funding.nextRecurrence, funding.nextRecurrenceOriginal)) {
+      return null;
+    }
 
     return (
       <MSpan data-testid='funding-schedule-weekend-notice' size='sm' weight='medium'>
-        Actual occurrence avoids weekend ({ format(funding.nextRecurrence, 'M/dd') })
+        Actual occurrence avoids weekend ({format(funding.nextRecurrence, 'M/dd')})
       </MSpan>
     );
   };
 
   return (
-    <MForm
-      className='flex w-full h-full flex-col'
-      initialValues={ initialValues }
-      onSubmit={ submit }
-      validate={ validate }
-    >
+    <MForm className='flex w-full h-full flex-col' initialValues={initialValues} onSubmit={submit} validate={validate}>
       <MTopNavigation
         title='Funding Schedules'
-        icon={ TodayOutlined }
-        breadcrumb={ funding.name }
-        base={ `/bank/${funding.bankAccountId}/funding` }
+        icon={TodayOutlined}
+        breadcrumb={funding.name}
+        base={`/bank/${funding.bankAccountId}/funding`}
       >
-        <Button variant='destructive' onClick={ removeFunding } >
+        <Button variant='destructive' onClick={removeFunding}>
           <Trash />
           Remove
         </Button>
@@ -177,12 +172,12 @@ export default function FundingDetails(): JSX.Element {
               className='w-full'
               label='Next Recurrence'
               name='nextRecurrence'
-              labelDecorator={ NextOccurrenceDecorator }
+              labelDecorator={NextOccurrenceDecorator}
               required
               data-testid='funding-details-date-picker'
-              min={ startOfTomorrow({
+              min={startOfTomorrow({
                 in: tz(timezone),
-              }) }
+              })}
             />
             <MSelectFrequency
               className='w-full'
@@ -200,7 +195,7 @@ export default function FundingDetails(): JSX.Element {
               description='If it were to land on a weekend, it is adjusted to the previous weekday instead.'
             />
             <MAmountField
-              allowNegative={ false }
+              allowNegative={false}
               label='Estimated Deposit'
               name='estimatedDeposit'
               placeholder='Example: $ 1,000.00'
@@ -208,10 +203,8 @@ export default function FundingDetails(): JSX.Element {
           </div>
           <MDivider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>
-            <MSpan className='text-xl my-2'>
-              Funding Timeline
-            </MSpan>
-            <FundingTimeline fundingScheduleId={ funding.fundingScheduleId } />
+            <MSpan className='text-xl my-2'>Funding Timeline</MSpan>
+            <FundingTimeline fundingScheduleId={funding.fundingScheduleId} />
           </div>
         </div>
       </div>

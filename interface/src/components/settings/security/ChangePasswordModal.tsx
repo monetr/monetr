@@ -1,13 +1,14 @@
-import React, { useRef } from 'react';
+import type React from 'react';
+import { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { FormikErrors, FormikHelpers } from 'formik';
+import type { FormikErrors, FormikHelpers } from 'formik';
 import { RectangleEllipsis } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import MForm from '@monetr/interface/components/MForm';
-import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import request from '@monetr/interface/util/request';
@@ -29,24 +30,26 @@ function ChangePasswordModal(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const ref = useRef<MModalRef>(null);
 
-  async function updatePassword(
-    values: ChangePasswordValues, 
-    helpers: FormikHelpers<ChangePasswordValues>,
-  ) {
+  async function updatePassword(values: ChangePasswordValues, helpers: FormikHelpers<ChangePasswordValues>) {
     helpers.setSubmitting(true);
-    return request().put('/users/security/password', {
-      currentPassword: values.currentPassword,
-      newPassword: values.newPassword,
-    })
-      .then(() => enqueueSnackbar('Successfully updated password.', {
-        variant: 'success',
-        disableWindowBlurListener: true,
-      }))
+    return request()
+      .put('/users/security/password', {
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      })
+      .then(() =>
+        enqueueSnackbar('Successfully updated password.', {
+          variant: 'success',
+          disableWindowBlurListener: true,
+        }),
+      )
       .then(() => modal.remove())
-      .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to change password.', {
-        variant: 'error',
-        disableWindowBlurListener: true,
-      }))
+      .catch(error =>
+        enqueueSnackbar(error?.response?.data?.error || 'Failed to change password.', {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        }),
+      )
       .finally(() => helpers.setSubmitting(false));
   }
 
@@ -54,31 +57,31 @@ function ChangePasswordModal(): JSX.Element {
     const errors: FormikErrors<ChangePasswordValues> = {};
 
     if (!values.currentPassword) {
-      errors['currentPassword'] = 'Your current password must be provided in order to change your password.';
+      errors.currentPassword = 'Your current password must be provided in order to change your password.';
       return errors;
     }
 
     if (values.newPassword.length < 8) {
-      errors['newPassword'] = 'New Password must be at least 8 characters long.';
+      errors.newPassword = 'New Password must be at least 8 characters long.';
     }
 
     if (values.repeatPassword.length === 0) {
-      errors['repeatPassword'] = 'You must repeat your password.';
+      errors.repeatPassword = 'You must repeat your password.';
     }
 
     if (values.repeatPassword !== values.newPassword) {
-      errors['repeatPassword'] = 'New Passwords must match.';
+      errors.repeatPassword = 'New Passwords must match.';
     }
 
     return errors;
   }
 
   return (
-    <MModal open={ modal.visible } ref={ ref } className='sm:max-w-sm'>
+    <MModal open={modal.visible} ref={ref} className='sm:max-w-sm'>
       <MForm
-        onSubmit={ updatePassword }
-        initialValues={ initialValues }
-        validate={ validate }
+        onSubmit={updatePassword}
+        initialValues={initialValues}
+        validate={validate}
         className='h-full flex flex-col gap-2 p-2 justify-between'
       >
         <div className='flex flex-col'>
@@ -112,7 +115,7 @@ function ChangePasswordModal(): JSX.Element {
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <Button variant='secondary' onClick={ modal.remove } data-testid='close-change-password-modal'>
+          <Button variant='secondary' onClick={modal.remove} data-testid='close-change-password-modal'>
             Cancel
           </Button>
           <FormButton color='primary' type='submit'>

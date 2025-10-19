@@ -20,17 +20,13 @@ export function useUpdateBankAccount(): (_bankAccount: UpdateBankAccountRequest)
 
   const mutate = useMutation({
     mutationFn: updateBankAccount,
-    onSuccess: (updatedBankAccount: BankAccount) => Promise.all([
-      queryClient.setQueryData(
-        ['/bank_accounts'],
-        (previous: Array<Partial<BankAccount>>) =>
-          previous.map(item => item.bankAccountId === updatedBankAccount.bankAccountId ? updatedBankAccount : item),
-      ),
-      queryClient.setQueryData(
-        [`/bank_accounts/${updatedBankAccount.bankAccountId}`],
-        updatedBankAccount,
-      ),
-    ]),
+    onSuccess: (updatedBankAccount: BankAccount) =>
+      Promise.all([
+        queryClient.setQueryData(['/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
+          previous.map(item => (item.bankAccountId === updatedBankAccount.bankAccountId ? updatedBankAccount : item)),
+        ),
+        queryClient.setQueryData([`/bank_accounts/${updatedBankAccount.bankAccountId}`], updatedBankAccount),
+      ]),
   });
 
   return mutate.mutateAsync;

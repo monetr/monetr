@@ -1,3 +1,3 @@
 export default {
-  'uploads': 'File Uploads',
+  uploads: 'File Uploads',
 };

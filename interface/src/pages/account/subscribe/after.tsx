@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { LoaderCircle } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import Logo from '@monetr/interface/assets/Logo';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -36,10 +36,7 @@ export default function AfterCheckoutPage(): JSX.Element {
           <Logo className='w-1/3' />
         </div>
         <div className='w-full pt-2.5 pb-2.5'>
-          <MSpan
-            size='xl'
-            className='w-full text-center'
-          >
+          <MSpan size='xl' className='w-full text-center'>
             Getting your account setup...
           </MSpan>
         </div>
@@ -49,4 +46,4 @@ export default function AfterCheckoutPage(): JSX.Element {
       </div>
     </div>
   );
-};
+}

@@ -15,16 +15,13 @@ export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {
         .post<Partial<Link>>('/links', newLink)
         .then(result => new Link(result?.data));
     },
-    onSuccess: (newLink: Link, _a, _b, context) => Promise.all([
-      context.client.setQueryData(
-        ['/links'],
-        (previous: Array<Partial<Link>> | null) => (previous ?? []).concat(newLink),
-      ),
-      context.client.setQueryData(
-        [`/links/${newLink.linkId}`],
-        newLink,
-      ),
-    ]),
+    onSuccess: (newLink: Link, _a, _b, context) =>
+      Promise.all([
+        context.client.setQueryData(['/links'], (previous: Array<Partial<Link>> | null) =>
+          (previous ?? []).concat(newLink),
+        ),
+        context.client.setQueryData([`/links/${newLink.linkId}`], newLink),
+      ]),
   });
 
   return mutate.mutateAsync;

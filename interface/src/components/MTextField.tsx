@@ -1,8 +1,9 @@
-import React from 'react';
+import type React from 'react';
 import { useFormikContext } from 'formik';
 
-import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
@@ -14,7 +15,7 @@ export interface MTextFieldProps extends InputProps {
 
 const MTextFieldPropsDefaults: Omit<MTextFieldProps, 'InputProps'> = {
   label: null,
-  labelDecorator: ((_: MLabelDecoratorProps) => null),
+  labelDecorator: (_: MLabelDecoratorProps) => null,
   disabled: false,
   uppercasetext: undefined,
 };
@@ -22,7 +23,9 @@ const MTextFieldPropsDefaults: Omit<MTextFieldProps, 'InputProps'> = {
 export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefaults): JSX.Element {
   const formikContext = useFormikContext();
   const getFormikError = () => {
-    if (!formikContext?.touched[props?.name]) return null;
+    if (!formikContext?.touched[props?.name]) {
+      return null;
+    }
 
     return formikContext?.errors[props?.name];
   };
@@ -38,13 +41,11 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
   const LabelDecorator = labelDecorator || MTextFieldPropsDefaults.labelDecorator;
 
   function Error() {
-    if (!props.error) return null;
+    if (!props.error) {
+      return null;
+    }
 
-    return (
-      <p className='text-xs font-medium text-red-500 mt-0.5'>
-        {props.error}
-      </p>
-    );
+    return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
   }
 
   const classNames = mergeTailwind(
@@ -55,7 +56,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       'dark:ring-red-500': !props.disabled && !!props.error,
       'ring-gray-300': !props.disabled && !props.error,
       'ring-red-300': !props.disabled && !!props.error,
-      'uppercase': props.uppercasetext,
+      uppercase: props.uppercasetext,
     },
     {
       'focus:ring-purple-400': !props.error,
@@ -90,32 +91,30 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     'min-h-[38px]',
   );
 
-  const wrapperClassNames = mergeTailwind({
-    // This will make it so the space below the input is the same when there is and isn't an error.
-    'pb-[18px]': !props.error,
-  }, props.className);
+  const wrapperClassNames = mergeTailwind(
+    {
+      // This will make it so the space below the input is the same when there is and isn't an error.
+      'pb-[18px]': !props.error,
+    },
+    props.className,
+  );
 
   // If we are working with a date picker, then take the current value and transform it for the actual input.
   const value = formikContext?.values[props.name];
 
   return (
-    <div className={ wrapperClassNames }>
-      <MLabel
-        label={ props.label }
-        disabled={ props.disabled }
-        htmlFor={ props.id }
-        required={ props.required }
-      >
-        <LabelDecorator name={ props.name } disabled={ props.disabled } />
+    <div className={wrapperClassNames}>
+      <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+        <LabelDecorator name={props.name} disabled={props.disabled} />
       </MLabel>
       <div>
         <input
-          value={ value }
-          onChange={ formikContext?.handleChange }
-          onBlur={ formikContext?.handleBlur }
-          disabled={ formikContext?.isSubmitting || props.disabled }
-          { ...otherProps }
-          className={ classNames }
+          value={value}
+          onChange={formikContext?.handleChange}
+          onBlur={formikContext?.handleBlur}
+          disabled={formikContext?.isSubmitting || props.disabled}
+          {...otherProps}
+          className={classNames}
         />
       </div>
       <Error />

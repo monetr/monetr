@@ -1,4 +1,3 @@
-import React from 'react';
 import { Img, Section } from '@react-email/components';
 
 export interface EmailLogoProps {
@@ -9,7 +8,7 @@ export default function EmailLogo(props: EmailLogoProps): JSX.Element {
   return (
     <Section className='mt-8 border-0'>
       <Img
-        src={ `${props.baseUrl}/assets/resources/transparent-128.png ` }
+        src={`${props.baseUrl}/assets/resources/transparent-128.png `}
         width='64'
         height='64'
         alt='monetr'

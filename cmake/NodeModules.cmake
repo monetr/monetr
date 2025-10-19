@@ -14,6 +14,7 @@ if(WIN32)
 else()
   set(JS_EXECUTABLE_SUFFIX "")
 endif()
+set(BIOME_EXECUTABLE ${NODE_MODULES_BIN}/biome${JS_EXECUTABLE_SUFFIX})
 set(HYPERLINK_EXECUTABLE ${NODE_MODULES_BIN}/hyperlink${JS_EXECUTABLE_SUFFIX})
 set(JEST_EXECUTABLE ${NODE_MODULES_BIN}/jest${JS_EXECUTABLE_SUFFIX})
 set(NEXT_EXECUTABLE ${NODE_MODULES_BIN}/next${JS_EXECUTABLE_SUFFIX})
@@ -22,13 +23,13 @@ set(RSBUILD_EXECUTABLE ${NODE_MODULES_BIN}/rsbuild${JS_EXECUTABLE_SUFFIX})
 set(RSPACK_EXECUTABLE ${NODE_MODULES_BIN}/rspack${JS_EXECUTABLE_SUFFIX})
 set(SITEMAP_EXECUTABLE ${NODE_MODULES_BIN}/next-sitemap${JS_EXECUTABLE_SUFFIX})
 set(SPELLCHECKER_EXECUTABLE ${NODE_MODULES_BIN}/spellchecker${JS_EXECUTABLE_SUFFIX})
-set(STORYBOOK_EXECUTABLE ${NODE_MODULES_BIN}/storybook${JS_EXECUTABLE_SUFFIX})
 
 set(PNPM_ARGUMENTS "--frozen-lockfile" "--ignore-scripts")
 
 add_custom_command(
   OUTPUT ${NODE_MODULES}
          ${NODE_MODULES_MARKER}
+         ${BIOME_EXECUTABLE}
          ${HYPERLINK_EXECUTABLE}
          ${JEST_EXECUTABLE}
          ${NEXT_EXECUTABLE}
@@ -37,13 +38,13 @@ add_custom_command(
          ${RSPACK_EXECUTABLE}
          ${SITEMAP_EXECUTABLE}
          ${SPELLCHECKER_EXECUTABLE}
-         ${STORYBOOK_EXECUTABLE}
          ${CMAKE_SOURCE_DIR}/docs/node_modules
          ${CMAKE_SOURCE_DIR}/emails/node_modules
          ${CMAKE_SOURCE_DIR}/interface/node_modules
          ${CMAKE_SOURCE_DIR}/stories/node_modules
   BYPRODUCTS ${NODE_MODULES}
              ${NODE_MODULES_MARKER}
+             ${BIOME_EXECUTABLE}
              ${HYPERLINK_EXECUTABLE}
              ${JEST_EXECUTABLE}
              ${NEXT_EXECUTABLE}
@@ -52,7 +53,6 @@ add_custom_command(
              ${RSPACK_EXECUTABLE}
              ${SITEMAP_EXECUTABLE}
              ${SPELLCHECKER_EXECUTABLE}
-             ${STORYBOOK_EXECUTABLE}
              ${CMAKE_SOURCE_DIR}/docs/node_modules
              ${CMAKE_SOURCE_DIR}/emails/node_modules
              ${CMAKE_SOURCE_DIR}/interface/node_modules
@@ -76,6 +76,11 @@ add_custom_command(
 add_custom_target(
   dependencies.node_modules
   DEPENDS ${NODE_MODULES}
+)
+
+add_custom_target(
+  tools.biome
+  DEPENDS dependencies.node_modules
 )
 
 add_custom_target(
@@ -110,11 +115,6 @@ add_custom_target(
 
 add_custom_target(
   tools.hyperlink
-  DEPENDS dependencies.node_modules
-)
-
-add_custom_target(
-  tools.storybook
   DEPENDS dependencies.node_modules
 )
 

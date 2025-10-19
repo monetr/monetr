@@ -1,0 +1,195 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.2.6/schema.json",
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true,
+    "defaultBranch": "origin/main"
+  },
+  "formatter": {
+    "enabled": true,
+    "bracketSpacing": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 120,
+    "attributePosition": "auto",
+    "includes": [
+      "interface/**",
+      "docs/src/**",
+      "emails/src/**",
+      "stories/**",
+      "!**/*.html",
+      "!**/*.svg",
+      "!**/*.mdx",
+      "!**/*.css"
+    ]
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              ["react", "react-dom"],
+              [
+                "@date-fns/tz",
+                "@ebay/nice-modal-react",
+                "@fontsource-variable/inter",
+                "@mui/**",
+                "@radix-ui/**",
+                "@react-email/**",
+                "@sentry/**",
+                "@storybook/**",
+                "@tanstack/react-query",
+                "axios",
+                "class-variance-authority",
+                "cmdk",
+                "date-fns",
+                "formik",
+                "input-otp",
+                "lucide-react",
+                "notistack",
+                "react-day-picker",
+                "react-dropzone",
+                "react-google-recaptcha",
+                "react-infinite-scroll-hook",
+                "react-number-format",
+                "react-plaid-link",
+                "react-qr-code",
+                "react-router-dom",
+                "react-select",
+                "rrule",
+                "storybook/**",
+                "tailwind-merge",
+                "tailwindcss",
+                "tailwindcss-animate",
+                "tailwindcss/**",
+                "vaul",
+                "zustand"
+              ],
+              ":BLANK_LINE:",
+              [
+                // Testing libraries
+                "@testing-library/**",
+                "axios-mock-adapter",
+                "react-test-renderer"
+              ],
+              ":BLANK_LINE:",
+              ["@monetr/**"],
+              ":ALIAS:",
+              ":BLANK_LINE:",
+              ["./**"],
+              ":PATH:",
+              ":BLANK_LINE:",
+              [
+                "@/**/*.scss",
+                "@/**/*.css",
+                "@/**/*.svg",
+                "@/**/*.png",
+                "@/**/*.jpg",
+                "@/**/*.gif",
+                "@/**/*.jpeg",
+                "@/**/*.webp"
+              ],
+              ":BLANK_LINE:"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "useKeyWithClickEvents": "off",
+        "useKeyWithMouseEvents": "off",
+        "noDistractingElements": "error",
+        "noInteractiveElementToNoninteractiveRole": "warn",
+        "noLabelWithoutControl": "warn",
+        "useValidAutocomplete": "error"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "warn",
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        "noUnreachable": "error",
+        "noUndeclaredDependencies": "warn", // Mainly for storybook silliness
+        "noUndeclaredVariables": "off", // Doesn't work with jest :(
+        "useParseIntRadix": "error",
+        "useValidTypeof": "error"
+      },
+      "complexity": {
+        "noForEach": "off",
+        "noThisInStatic": "off",
+        "noStaticOnlyClass": "off",
+        "noUselessFragments": "error",
+        "noArguments": "error",
+        "noEmptyTypeParameters": "error",
+        "noUselessCatch": "error",
+        "noUselessConstructor": "error"
+      },
+      "suspicious": {
+        "noShadowRestrictedNames": "error",
+        "noExplicitAny": "warn",
+        "noExtraNonNullAssertion": "warn"
+      },
+      "performance": {
+        "noDelete": "off"
+      },
+      "style": {
+        "useDefaultParameterLast": "off",
+        "noParameterAssign": "off",
+        "noNonNullAssertion": "off",
+        "useBlockStatements": "error",
+        "useConsistentCurlyBraces": "error",
+        "noRestrictedImports": {
+          "level": "warn",
+          "options": {
+            "paths": {
+              "@mui/icons-material": "use lucide-react instead",
+              "@mui/material": "use literally anything else instead"
+            }
+          }
+        }
+      },
+      "nursery": {}
+    },
+    "includes": [
+      "interface/**",
+      "docs/src/**",
+      "emails/src/**",
+      "stories/**",
+      "!**/*.html",
+      "!**/*.svg",
+      "!**/*.mdx",
+      "!**/*.css"
+    ]
+  },
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "single",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "all",
+      "arrowParentheses": "asNeeded",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "quoteStyle": "single",
+      "attributePosition": "auto"
+    }
+  },
+  "css": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  }
+}

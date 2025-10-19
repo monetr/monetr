@@ -1,7 +1,8 @@
 import { twMerge } from 'tailwind-merge';
-import { ClassNameValue } from 'tailwind-merge/dist/lib/tw-join';
 
-type ClassNameMap = {[key: string]: boolean | undefined | null | 0 | string};
+import type { ClassNameValue } from 'tailwind-merge/dist/lib/tw-join';
+
+type ClassNameMap = { [key: string]: boolean | undefined | null | 0 | string };
 
 export default function mergeTailwind(...args: (ClassNameValue | ClassNameMap)[]): string {
   const flattened = args.map(arg => {

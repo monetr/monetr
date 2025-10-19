@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { FormikErrors, FormikHelpers } from 'formik';
+import { useEffect } from 'react';
+import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MForm from '@monetr/interface/components/MForm';
@@ -27,12 +27,12 @@ export default function PasswordResetNew(): JSX.Element {
   const navigate = useNavigate();
   const resetPassword = useResetPassword();
   const { state: routeState } = useLocation();
-  const message = (routeState && routeState['message']) || 'Enter the new password you would like to use.';
+  const message = routeState?.message || 'Enter the new password you would like to use.';
   const search = location.search;
   const query = new URLSearchParams(search);
   // The token is loaded from the route state (which is provided when a password reset is being forced) or from the
   // URL query parameter (which is provided when the user is brought here from a link in their email).
-  const token = query.get('token') || (routeState && routeState['token']);
+  const token = query.get('token') || routeState?.token;
 
   useEffect(() => {
     if (!token) {
@@ -51,11 +51,13 @@ export default function PasswordResetNew(): JSX.Element {
   async function submit(values: ResetPasswordValues, helpers: FormikHelpers<ResetPasswordValues>): Promise<void> {
     helpers.setSubmitting(true);
 
-    return resetPassword(values.password, token)
-      // If the reset password fails, then set submitting to false and do nothing. The error will already have been
-      // displayed by the reset password function. We only do this if there is an error because if this succeeds then
-      // the user is automatically redirected to the login page.
-      .catch(() => helpers.setSubmitting(false));
+    return (
+      resetPassword(values.password, token)
+        // If the reset password fails, then set submitting to false and do nothing. The error will already have been
+        // displayed by the reset password function. We only do this if there is an error because if this succeeds then
+        // the user is automatically redirected to the login page.
+        .catch(() => helpers.setSubmitting(false))
+    );
   }
 
   function validate(values: ResetPasswordValues): FormikErrors<ResetPasswordValues> {
@@ -63,12 +65,12 @@ export default function PasswordResetNew(): JSX.Element {
 
     if (values.password) {
       if (values.password.trim().length < 8) {
-        errors['password'] = 'Password must be at least 8 characters long.';
+        errors.password = 'Password must be at least 8 characters long.';
       }
     }
 
     if (values.verifyPassword && values.password !== values.verifyPassword) {
-      errors['verifyPassword'] = 'Passwords must match.';
+      errors.verifyPassword = 'Passwords must match.';
     }
 
     return errors;
@@ -76,18 +78,16 @@ export default function PasswordResetNew(): JSX.Element {
 
   return (
     <MForm
-      onSubmit={ submit }
-      initialValues={ initialValues }
-      validate={ validate }
+      onSubmit={submit}
+      initialValues={initialValues}
+      validate={validate}
       className='w-full h-full flex flex-col pt-10 md:pt-0 mb:pb-10 md:justify-center items-center px-5 gap-1'
     >
       <div className='flex items-center flex-col gap-1 w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'>
         <div className='max-w-[128px] w-full'>
           <MLogo />
         </div>
-        <MSpan className='flex items-center text-center'>
-          { message }
-        </MSpan>
+        <MSpan className='flex items-center text-center'>{message}</MSpan>
         <MTextField
           autoFocus
           autoComplete='current-password'
@@ -105,18 +105,17 @@ export default function PasswordResetNew(): JSX.Element {
           required
           className='w-full'
         />
-        <FormButton
-          variant='primary'
-          role='form'
-          type='submit'
-          className='w-full'
-        >
+        <FormButton variant='primary' role='form' type='submit' className='w-full'>
           Reset Password
         </FormButton>
       </div>
       <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
-        <MSpan color='subtle' className='text-sm'>Remembered your password?</MSpan>
-        <MLink to='/login' size='sm'>Sign in</MLink>
+        <MSpan color='subtle' className='text-sm'>
+          Remembered your password?
+        </MSpan>
+        <MLink to='/login' size='sm'>
+          Sign in
+        </MLink>
       </div>
     </MForm>
   );

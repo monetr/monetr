@@ -1,12 +1,11 @@
-
 export default {
-  'terms': {
+  terms: {
     title: 'Terms & Conditions',
     theme: {
       sidebar: false,
     },
   },
-  'privacy': {
+  privacy: {
     title: 'Privacy Policy',
     theme: {
       sidebar: false,

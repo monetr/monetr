@@ -1,4 +1,4 @@
-import monetrClient, { AxiosInterface } from '@monetr/interface/api/api';
+import monetrClient, { type AxiosInterface } from '@monetr/interface/api/api';
 
 export interface APIError {
   error: string;

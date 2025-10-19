@@ -1,15 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata, PlaidLinkOptionsWithLinkToken, usePlaidLink } from 'react-plaid-link';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+  type PlaidLinkError,
+  type PlaidLinkOnExitMetadata,
+  type PlaidLinkOnSuccessMetadata,
+  type PlaidLinkOptionsWithLinkToken,
+  usePlaidLink,
+} from 'react-plaid-link';
+import { useNavigate } from 'react-router-dom';
 
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import MSpinner from '@monetr/interface/components/MSpinner';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
-import { ReactElement } from '@monetr/interface/components/types';
+import type { ReactElement } from '@monetr/interface/components/types';
 import request from '@monetr/interface/util/request';
 
 interface PlaidProps {
@@ -49,7 +55,8 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
       return Promise.resolve();
     }
 
-    return void request().get(`/plaid/link/setup/wait/${ linkId }`)
+    return void request()
+      .get(`/plaid/link/setup/wait/${linkId}`)
       .catch(error => {
         if (error.response.status === 408) {
           return longPollSetup(recur + 1, linkId);
@@ -64,7 +71,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
       console.warn('Plaid link exited with error', {
         'plaid.request_id': metadata.request_id,
         'plaid.link_session_id': metadata.link_session_id,
-        'data': error,
+        data: error,
       });
       Sentry.captureEvent({
         message: 'Plaid link exited with error',
@@ -98,12 +105,13 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   }
 
   async function onPlaidSuccess(public_token: string, metadata: PlaidLinkOnSuccessMetadata) {
-    return request().post('/plaid/link/token/callback', {
-      publicToken: public_token,
-      institutionId: metadata.institution.institution_id,
-      institutionName: metadata.institution.name,
-      accountIds: metadata.accounts.map((account: { id: string }) => account.id),
-    })
+    return request()
+      .post('/plaid/link/token/callback', {
+        publicToken: public_token,
+        institutionId: metadata.institution.institution_id,
+        institutionName: metadata.institution.name,
+        accountIds: metadata.accounts.map((account: { id: string }) => account.id),
+      })
       .then(async result => {
         const linkId: number = result.data.linkId;
         await longPollSetup(0, linkId);
@@ -134,23 +142,28 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
 
   const { error: plaidError, open: plaidOpen } = usePlaidLink(config);
   useEffect(() => {
-    request().get('/plaid/link/token/new?use_cache=true')
-      .then(result => setTimeout(() => {
-        setState({
-          loading: false,
-          token: result.data.linkToken,
-          error: null,
-        });
-      }, 1000))
-      .catch(error => setTimeout(() => {
-        const message = error?.response?.data?.error || 'Could not connect to Plaid, an unknown error occurred.';
-        setState({
-          loading: false,
-          token: null,
-          error: message,
-        });
-      }, 3000));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    request()
+      .get('/plaid/link/token/new?use_cache=true')
+      .then(result =>
+        setTimeout(() => {
+          setState({
+            loading: false,
+            token: result.data.linkToken,
+            error: null,
+          });
+        }, 1000),
+      )
+      .catch(error =>
+        setTimeout(() => {
+          const message = error?.response?.data?.error || 'Could not connect to Plaid, an unknown error occurred.';
+          setState({
+            loading: false,
+            token: null,
+            error: message,
+          });
+        }, 3000),
+      );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -171,9 +184,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
 
   let inner: ReactElement = (
     <div className='flex flex-col justify-center items-center'>
-      <MSpan className='text-2xl font-medium'>
-        Getting Plaid Ready!
-      </MSpan>
+      <MSpan className='text-2xl font-medium'>Getting Plaid Ready!</MSpan>
       <MSpan className='text-lg' color='subtle'>
         One moment while we prepare your connection with Plaid.
       </MSpan>
@@ -183,9 +194,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   if (settingUp) {
     inner = (
       <div className='flex flex-col justify-center items-center'>
-        <MSpan className='text-2xl font-medium'>
-          Successfully connected with Plaid!
-        </MSpan>
+        <MSpan className='text-2xl font-medium'>Successfully connected with Plaid!</MSpan>
         <MSpan className='text-lg' color='subtle'>
           Hold on a moment while we pull the initial data from Plaid into monetr.
         </MSpan>
@@ -204,9 +213,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   if (error) {
     inner = (
       <div className='flex flex-col justify-center items-center'>
-        <MSpan className='text-2xl font-medium'>
-          Something isn't quite right
-        </MSpan>
+        <MSpan className='text-2xl font-medium'>Something isn't quite right</MSpan>
         <MSpan className='text-lg' color='subtle'>
           We were not able to get Plaid ready for you at this time, please try again shortly.
         </MSpan>
@@ -214,7 +221,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
           If the problem continues, please contact support@monetr.app
         </MSpan>
         <MSpan className='text-md' color='muted'>
-          Error Message: { error }
+          Error Message: {error}
         </MSpan>
       </div>
     );
@@ -231,24 +238,24 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
           Plaid exited, did you want to set it up later?
         </MSpan>
         <MSpan size='md' color='subtle'>
-          Or <MLink to={ backUrl }>go back</MLink> and pick another option?
+          Or <MLink to={backUrl}>go back</MLink> and pick another option?
         </MSpan>
       </div>
     );
   }
 
   function Footer(): JSX.Element {
-    if (props.alreadyOnboarded) return null;
+    if (props.alreadyOnboarded) {
+      return null;
+    }
 
-    return (
-      <LogoutFooter />
-    );
+    return <LogoutFooter />;
   }
 
   return (
     <div className='w-full h-full flex justify-center items-center gap-8 flex-col overflow-hidden text-center p-2'>
       <MLogo className='w-24 h-24' />
-      { inner }
+      {inner}
       <Footer />
     </div>
   );

@@ -1,7 +1,7 @@
-import React, { Fragment, useCallback, useEffect, useRef } from 'react';
-import { useNavigationType } from 'react-router-dom';
+import { Fragment, useCallback, useEffect, useRef } from 'react';
 import { HeartBroken } from '@mui/icons-material';
 import { Plus, Receipt } from 'lucide-react';
+import { useNavigationType } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import ExpenseItem from '@monetr/interface/components/expenses/ExpenseItem';
@@ -14,18 +14,14 @@ import { SpendingType } from '@monetr/interface/models/Spending';
 let evilScrollPosition: number = 0;
 
 export default function Expenses(): JSX.Element {
-  const {
-    data: expenses,
-    isError,
-    isLoading,
-  } = useSpendingFiltered(SpendingType.Expense);
+  const { data: expenses, isError, isLoading } = useSpendingFiltered(SpendingType.Expense);
 
   // Scroll restoration code.
   const ref = useRef<HTMLDivElement>(null);
   const navigationType = useNavigationType();
   const onScroll = useCallback(() => {
     evilScrollPosition = ref.current.scrollTop;
-  }, [ref]);
+  }, []);
   useEffect(() => {
     if (!ref.current) {
       return undefined;
@@ -39,16 +35,14 @@ export default function Expenses(): JSX.Element {
     return () => {
       current.removeEventListener('scroll', onScroll);
     };
-  // Fix bug with current impl.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref.current, navigationType, onScroll]);
+    // Fix bug with current impl.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigationType, onScroll]);
 
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>
-          One moment...
-        </MSpan>
+        <MSpan className='text-5xl'>One moment...</MSpan>
       </div>
     );
   }
@@ -57,43 +51,31 @@ export default function Expenses(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>
-          Something isn't right...
-        </MSpan>
-        <MSpan className='text-2xl'>
-          We weren't able to retrieve expenses at this time...
-        </MSpan>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>We weren't able to retrieve expenses at this time...</MSpan>
       </div>
-    );
-  }
-
-  function ListContent(): JSX.Element {
-    if (expenses.length === 0) {
-      return <EmptyState />;
-    }
-
-    return (
-      <ul className='w-full flex flex-col gap-2 py-2 pb-16'>
-        { expenses
-          ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
-          .map(item => (<ExpenseItem spending={ item } key={ item.spendingId } />)) }
-      </ul>
     );
   }
 
   return (
     <Fragment>
-      <MTopNavigation
-        icon={ Receipt }
-        title='Expenses'
-      >
-        <Button variant='primary' className='gap-1 py-1 px-2' onClick={ showNewExpenseModal }>
+      <MTopNavigation icon={Receipt} title='Expenses'>
+        <Button variant='primary' className='gap-1 py-1 px-2' onClick={showNewExpenseModal}>
           <Plus />
           New Expense
         </Button>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0' ref={ ref }>
-        <ListContent />
+      <div className='w-full h-full overflow-y-auto min-w-0' ref={ref}>
+        {(expenses ?? []).length === 0 && <EmptyState />}
+        {expenses?.length > 0 && (
+          <ul className='w-full flex flex-col gap-2 py-2 pb-16'>
+            {expenses
+              ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
+              .map(item => (
+                <ExpenseItem spending={item} key={item.spendingId} />
+              ))}
+          </ul>
+        )}
       </div>
     </Fragment>
   );

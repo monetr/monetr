@@ -1,4 +1,3 @@
-import React from 'react';
 import { AccountBalanceWalletOutlined } from '@mui/icons-material';
 
 import MSpan from '@monetr/interface/components/MSpan';
@@ -15,7 +14,7 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
 
   switch (bankAccount?.accountSubType) {
     case 'checking':
-    case 'savings':
+    case 'savings': {
       const valueClassName = mergeTailwind({
         'dark:text-dark-monetr-content-emphasis': balance?.free >= 0,
         'dark:text-dark-monetr-red': balance?.free < 0,
@@ -28,11 +27,12 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
             Free-To-Use:
           </MSpan>
           &nbsp;
-          <MSpan size='lg' weight='semibold' className={ valueClassName }>
-            { locale.formatAmount(balance?.free, AmountType.Stored) }
+          <MSpan size='lg' weight='semibold' className={valueClassName}>
+            {locale.formatAmount(balance?.free, AmountType.Stored)}
           </MSpan>
         </div>
       );
+    }
   }
 
   return null;

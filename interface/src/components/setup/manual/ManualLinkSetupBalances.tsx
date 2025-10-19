@@ -1,5 +1,5 @@
-import React, { Fragment }  from 'react';
-import { FormikHelpers } from 'formik';
+import { Fragment } from 'react';
+import type { FormikHelpers } from 'formik';
 
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MForm from '@monetr/interface/components/MForm';
@@ -17,7 +17,7 @@ interface Values {
 export default function ManualLinkSetupBalances(): JSX.Element {
   const viewContext = useViewContext<ManualLinkSetupSteps, {}>();
   const initialValues: Values = {
-    startingBalance: 0.00,
+    startingBalance: 0.0,
     currency: 'USD',
     ...viewContext.formData,
   };
@@ -30,31 +30,28 @@ export default function ManualLinkSetupBalances(): JSX.Element {
 
   return (
     <MForm
-      initialValues={ initialValues }
-      onSubmit={ submit }
+      initialValues={initialValues}
+      onSubmit={submit}
       className='w-full flex flex-col justify-center items-center gap-2'
     >
-      { ({ values: { currency } }) => (
+      {({ values: { currency } }) => (
         <Fragment>
           <MSpan size='lg' color='subtle' className='text-center'>
             What is your current available balance? monetr will use this as a starting point, you can modify this at any
             time later on.
           </MSpan>
-          <SelectCurrency
-            name='currency'
-            className='w-full'
-          />
+          <SelectCurrency name='currency' className='w-full' />
           <MAmountField
             name='startingBalance'
             label='Starting Balance'
             className='w-full'
-            currency={ currency }
+            currency={currency}
             required
             allowNegative
           />
           <ManualLinkSetupButtons />
         </Fragment>
-      ) }
+      )}
     </MForm>
   );
 }

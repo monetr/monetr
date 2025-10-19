@@ -1,18 +1,28 @@
-import React, { Fragment, useCallback, useState } from 'react';
-import Select, { ActionMeta, components, FormatOptionLabelMeta, OnChangeValue, OptionProps, Theme } from 'react-select';
+import type React from 'react';
+import { Fragment, useCallback, useState } from 'react';
 import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
+import Select, {
+  type ActionMeta,
+  components,
+  type FormatOptionLabelMeta,
+  type OnChangeValue,
+  type OptionProps,
+  type Theme,
+} from 'react-select';
 
-import MBadge from './MBadge';
-import MSpan from './MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import useTheme from '@monetr/interface/hooks/useTheme';
 import { useUpdateTransaction } from '@monetr/interface/hooks/useUpdateTransaction';
-import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import type Spending from '@monetr/interface/models/Spending';
+import { SpendingType } from '@monetr/interface/models/Spending';
 import Transaction from '@monetr/interface/models/Transaction';
 import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import MBadge from './MBadge';
+import MSpan from './MSpan';
 
 import './MSelectSpendingTransaction.scss';
 
@@ -29,27 +39,24 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
   const [isLoading, setIsLoading] = useState(false);
   const id = `txn-${transaction.transactionId}-spending-input`;
 
-  const onChangeSpentFrom = useCallback(async (
-    newValue: OnChangeValue<SpendingOption, false>,
-    _: ActionMeta<SpendingOption>,
-  ) => {
-    const selection = newValue.spending;
-    const spendingId = selection ? selection.spendingId : null;
+  const onChangeSpentFrom = useCallback(
+    async (newValue: OnChangeValue<SpendingOption, false>, _: ActionMeta<SpendingOption>) => {
+      const selection = newValue.spending;
+      const spendingId = selection ? selection.spendingId : null;
 
-    // Not strict equal because undefined vs null stuff.
-    // If the selected spending is the same as what we have now, do nothing.
-    if (spendingId == transaction.spendingId) {
-      return Promise.resolve();
-    }
-    setIsLoading(true);
+      // Not strict equal because undefined vs null stuff.
+      // If the selected spending is the same as what we have now, do nothing.
+      if (spendingId === transaction.spendingId) {
+        return Promise.resolve();
+      }
+      setIsLoading(true);
 
-    const updatedTransaction = new Transaction({
-      ...transaction,
-      spendingId: spendingId,
-    });
+      const updatedTransaction = new Transaction({
+        ...transaction,
+        spendingId: spendingId,
+      });
 
-    return await updateTransaction(updatedTransaction)
-      .finally(() => {
+      return await updateTransaction(updatedTransaction).finally(() => {
         setIsLoading(false);
         // Needs to be in a timeout for some reason. But basically re-focus the select after we have updated the
         // spending.
@@ -57,7 +64,9 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
           document.getElementById(id).focus();
         }, 0);
       });
-  }, [id, transaction, updateTransaction]);
+    },
+    [id, transaction, updateTransaction],
+  );
 
   const freeToUse = {
     label: 'Free-To-Use',
@@ -78,7 +87,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
   const options = [
     freeToUse,
     // Labels will be unique. So we only need 1 | -1
-    ...items.sort((a, b) => a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1),
+    ...items.sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1)),
   ];
 
   const selectedItem = !transaction.spendingId ? freeToUse : items.find(item => item.value === transaction.spendingId);
@@ -87,9 +96,12 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
     if (meta.context === 'value') {
       return (
         <Fragment>
-          Spent From <span className={ mergeTailwind({
-            'font-bold dark:text-dark-monetr-content-emphasis': !!option.value,
-          }) }>
+          Spent From{' '}
+          <span
+            className={mergeTailwind({
+              'font-bold dark:text-dark-monetr-content-emphasis': !!option.value,
+            })}
+          >
             {option.label}
           </span>
         </Fragment>
@@ -102,8 +114,8 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
   return (
     <div className='hidden md:flex w-1/2 flex-1 items-center'>
       <Select
-        inputId={ id }
-        theme={ (baseTheme: Theme): Theme => ({
+        inputId={id}
+        theme={(baseTheme: Theme): Theme => ({
           ...baseTheme,
           borderRadius: 8,
           spacing: {
@@ -113,25 +125,25 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
           },
           colors: {
             ...baseTheme.colors,
-            neutral0: theme.tailwind.colors['dark-monetr']['background']['DEFAULT'],
-            neutral5: theme.tailwind.colors['dark-monetr']['background']['subtle'],
-            neutral10: theme.tailwind.colors['dark-monetr']['background']['emphasis'],
-            neutral20: theme.tailwind.colors['dark-monetr']['border']['string'],
-            neutral30: theme.tailwind.colors['dark-monetr']['content']['DEFAULT'],
-            neutral60: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            neutral70: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            neutral80: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            neutral90: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
-            primary25: theme.tailwind.colors['dark-monetr']['background']['emphasis'],
-            primary50: theme.tailwind.colors['dark-monetr']['brand']['faint'],
-            primary: theme.tailwind.colors['dark-monetr']['brand']['DEFAULT'],
+            neutral0: theme.tailwind.colors['dark-monetr'].background.DEFAULT,
+            neutral5: theme.tailwind.colors['dark-monetr'].background.subtle,
+            neutral10: theme.tailwind.colors['dark-monetr'].background.emphasis,
+            neutral20: theme.tailwind.colors['dark-monetr'].border.string,
+            neutral30: theme.tailwind.colors['dark-monetr'].content.DEFAULT,
+            neutral60: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            neutral70: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            neutral80: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            neutral90: theme.tailwind.colors['dark-monetr'].content.emphasis,
+            primary25: theme.tailwind.colors['dark-monetr'].background.emphasis,
+            primary50: theme.tailwind.colors['dark-monetr'].brand.faint,
+            primary: theme.tailwind.colors['dark-monetr'].brand.DEFAULT,
           },
-        }) }
-        menuPortalTarget={ document.body }
-        components={ {
+        })}
+        menuPortalTarget={document.body}
+        components={{
           Option: SpendingSelectOption,
-        } }
-        styles={ {
+        }}
+        styles={{
           placeholder: (base: object) => ({
             ...base,
             fontSize: '0.875rem', // Equivalent to text-sm and leading-6
@@ -145,19 +157,19 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
           }),
           option: (base: object) => ({
             ...base,
-            color: theme.tailwind.colors['dark-monetr']['content']['emphasized'],
+            color: theme.tailwind.colors['dark-monetr'].content.emphasized,
           }),
           menuPortal: (base: object) => ({
             ...base,
             zIndex: 9999,
           }),
-        } }
+        }}
         classNamePrefix='m-select-spending-transaction'
-        isLoading={ isLoading || (spendingIsLoading && Boolean(transaction.spendingId)) }
-        onChange={ onChangeSpentFrom }
-        formatOptionLabel={ formatOptionsLabel }
-        options={ options }
-        value={ selectedItem }
+        isLoading={isLoading || (spendingIsLoading && Boolean(transaction.spendingId))}
+        onChange={onChangeSpentFrom}
+        formatOptionLabel={formatOptionsLabel}
+        options={options}
+        value={selectedItem}
         className='w-full'
       />
     </div>
@@ -175,30 +187,25 @@ export function SpendingSelectOption({ children, ...props }: OptionProps<Spendin
   const { data: locale } = useLocaleCurrency();
   // If the current amount is specified then format the amount, if it is not then use N/A.
   const notLoaded = props.data.spending?.currentAmount === undefined;
-  const amount = notLoaded ? 'N/A' : locale.formatAmount(
-    props.data.spending.currentAmount,
-    AmountType.Stored,
-  );
+  const amount = notLoaded ? 'N/A' : locale.formatAmount(props.data.spending.currentAmount, AmountType.Stored);
   return (
-    <components.Option { ...props }>
+    <components.Option {...props}>
       <div className='flex justify-between'>
         <MSpan size='md' color='emphasis'>
-          { props.label }
+          {props.label}
         </MSpan>
         <div className='flex gap-2'>
-          { props.data.spending?.spendingType === SpendingType.Goal &&
+          {props.data.spending?.spendingType === SpendingType.Goal && (
             <MBadge size='sm' className='dark:bg-dark-monetr-blue  max-h-[24px]'>
               <SavingsOutlined />
             </MBadge>
-          }
-          { props.data.spending?.spendingType === SpendingType.Expense &&
+          )}
+          {props.data.spending?.spendingType === SpendingType.Expense && (
             <MBadge size='sm' className='dark:bg-dark-monetr-green max-h-[24px]'>
               <PriceCheckOutlined />
             </MBadge>
-          }
-          <MBadge size='sm'>
-            {amount}
-          </MBadge>
+          )}
+          <MBadge size='sm'>{amount}</MBadge>
         </div>
       </div>
     </components.Option>

@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useMatch } from 'react-router-dom';
 
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
@@ -19,19 +19,22 @@ export default function MobileSidebar(): JSX.Element {
   // like that.
   useEffect(() => {
     setMobileSidebarOpen(false);
-  }, [pathname, setMobileSidebarOpen]);
+  }, [setMobileSidebarOpen]);
 
   // Keeps the entire sidebar from re-rendering when things change. This way stuff like the drawer animation works
   // properly.
-  const classNames = mergeTailwind('z-40 w-screen h-screen top-0 left-0 bg-background flex flex-row backdrop-blur-sm dark:bg-opacity-50 backdrop-brightness-50', {
-    'fixed': mobileSidebarOpen,
-    'hidden': !mobileSidebarOpen,
-  });
+  const classNames = mergeTailwind(
+    'z-40 w-screen h-screen top-0 left-0 bg-background flex flex-row backdrop-blur-sm dark:bg-opacity-50 backdrop-brightness-50',
+    {
+      fixed: mobileSidebarOpen,
+      hidden: !mobileSidebarOpen,
+    },
+  );
 
   return (
-    <div className={ classNames }>
+    <div className={classNames}>
       <BankSidebar />
-      { isBankRoute && <BudgetingSidebar className='w-auto flex-auto border-none overflow-y-auto' /> }
+      {isBankRoute && <BudgetingSidebar className='w-auto flex-auto border-none overflow-y-auto' />}
     </div>
   );
 }

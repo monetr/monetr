@@ -2,22 +2,22 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { tz } from '@date-fns/tz';
-import { isEqual, Locale, startOfMonth, startOfToday } from 'date-fns';
-import { enUS } from 'date-fns/locale/en-US';
+import { isEqual, type Locale, startOfMonth, startOfToday } from 'date-fns';
 import { useFormikContext } from 'formik';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
 
-import MLabel, { MLabelDecorator } from './MLabel';
-import { ReactElement } from './types';
 import { Button } from '@monetr/interface/components/Button';
 import { Calendar } from '@monetr/interface/components/Calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-export interface MDatePickerProps extends
-  Omit<React.HTMLAttributes<HTMLButtonElement>, 'value' | 'defaultValue'>
-{
+import MLabel, { type MLabelDecorator } from './MLabel';
+import type { ReactElement } from './types';
+
+import { enUS } from 'date-fns/locale/en-US';
+
+export interface MDatePickerProps extends Omit<React.HTMLAttributes<HTMLButtonElement>, 'value' | 'defaultValue'> {
   value?: Date;
   min?: Date;
   max?: Date;
@@ -42,7 +42,9 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   const formikContext = useFormikContext();
 
   const getFormikError = () => {
-    if (!formikContext?.touched[props?.name]) return null;
+    if (!formikContext?.touched[props?.name]) {
+      return null;
+    }
 
     return formikContext?.errors[props?.name];
   };
@@ -74,15 +76,17 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
 
   const disabledDays = useMemo(() => {
     const disabledDays = [];
-    if (minDate) disabledDays.push({ before: minDate });
-    if (maxDate) disabledDays.push({ after: maxDate });
+    if (minDate) {
+      disabledDays.push({ before: minDate });
+    }
+    if (maxDate) {
+      disabledDays.push({ after: maxDate });
+    }
     return disabledDays;
   }, [minDate, maxDate]);
 
   const hasValue = Boolean(selectedValue);
-  const formattedSelection = hasValue
-    ? formatSelectedDates(selectedValue, undefined, enUS)
-    : placeholder;
+  const formattedSelection = hasValue ? formatSelectedDates(selectedValue, undefined, enUS) : placeholder;
 
   const defaultMonth = startOfMonth(selectedValue ?? maxDate ?? today, {
     in: inTimezone,
@@ -91,9 +95,9 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
 
   const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
-  }, [setAnchorEl]);
+  }, []);
 
-  const handleClose = useCallback(() => setAnchorEl(null), [setAnchorEl]);
+  const handleClose = useCallback(() => setAnchorEl(null), []);
 
   const handleReset = useCallback(() => {
     if (formikContext) {
@@ -103,25 +107,28 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     }
 
     setSelectedValue(undefined);
-  }, [setSelectedValue, formikContext, props.name]);
+  }, [formikContext, props.name]);
 
-  const handleSelect = useCallback((value: Date | null) => {
-    // If the value is a selected date then cast the date to the account's timezone.
-    if (value) {
-      value = inTimezone(value);
-    }
+  const handleSelect = useCallback(
+    (value: Date | null) => {
+      // If the value is a selected date then cast the date to the account's timezone.
+      if (value) {
+        value = inTimezone(value);
+      }
 
-    // If we are in a formik form boi then propagate the values upwards.
-    if (formikContext) {
-      formikContext.setFieldValue(props.name, value);
-      formikContext.setFieldTouched(props.name, true);
-      formikContext.validateField(props.name);
-    }
+      // If we are in a formik form boi then propagate the values upwards.
+      if (formikContext) {
+        formikContext.setFieldValue(props.name, value);
+        formikContext.setFieldTouched(props.name, true);
+        formikContext.validateField(props.name);
+      }
 
-    // Store the selected value (or lack thereof).
-    setSelectedValue(value);
-    handleClose();
-  }, [formikContext, handleClose, inTimezone, props.name]);
+      // Store the selected value (or lack thereof).
+      setSelectedValue(value);
+      handleClose();
+    },
+    [formikContext, handleClose, inTimezone, props.name],
+  );
 
   const classNames = mergeTailwind(
     {
@@ -141,7 +148,8 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
       'dark:text-zinc-200': !props.disabled,
       'text-gray-900': !props.disabled,
     },
-    { // If there is not a value, the change the text of the button to be 400 for the placeholder.
+    {
+      // If there is not a value, the change the text of the button to be 400 for the placeholder.
       'dark:text-gray-400': !hasValue,
     },
     {
@@ -176,70 +184,67 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
 
   const LabelDecorator = props.labelDecorator || (() => null);
   function Error() {
-    if (!props.error) return null;
+    if (!props.error) {
+      return null;
+    }
 
-    return (
-      <p className='text-xs font-medium text-red-500 mt-0.5'>
-        {props.error}
-      </p>
-    );
+    return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
   }
 
-  const wrapperClassNames = mergeTailwind({
-    // This will make it so the space below the input is the same when there is and isn't an error.
-    'pb-[18px]': !props.error,
-  }, 'relative', className);
+  const wrapperClassNames = mergeTailwind(
+    {
+      // This will make it so the space below the input is the same when there is and isn't an error.
+      'pb-[18px]': !props.error,
+    },
+    'relative',
+    className,
+  );
 
   return (
-    <div className={ wrapperClassNames } data-testid={ props['data-testid'] }>
-      <MLabel
-        label={ props.label }
-        disabled={ props.disabled }
-        htmlFor={ props.id }
-        required={ props.required }
-      >
-        <LabelDecorator name={ props.name } disabled={ props.disabled } />
+    <div className={wrapperClassNames} data-testid={props['data-testid']}>
+      <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+        <LabelDecorator name={props.name} disabled={props.disabled} />
       </MLabel>
-      <Popover open={ open }>
+      <Popover open={open}>
         <PopoverTrigger asChild>
           <Button
             variant='outlined'
             size='select'
-            disabled={ formikContext?.isSubmitting || disabled }
-            className={ mergeTailwind(classNames) }
-            onClick={ handleClick }
+            disabled={formikContext?.isSubmitting || disabled}
+            className={mergeTailwind(classNames)}
+            onClick={handleClick}
           >
             <CalendarIcon />
             <span className='truncate'>{formattedSelection}</span>
-            { isClearEnabled && selectedValue ? (
+            {isClearEnabled && selectedValue ? (
               <button
                 type='button'
-                className={ mergeTailwind(
+                className={mergeTailwind(
                   'absolute outline-none inset-y-0 right-2 flex items-center transition duration-100 dark:text-dark-monetr-content-subtle',
-                ) }
-                onClick={ e => {
+                )}
+                onClick={e => {
                   e.preventDefault();
                   handleReset();
-                } }
+                }}
               >
                 <X />
               </button>
-            ) : null }
+            ) : null}
           </Button>
         </PopoverTrigger>
-        <PopoverContent onPointerDownOutside={ handleClose }>
+        <PopoverContent onPointerDownOutside={handleClose}>
           <Calendar
-            showOutsideDays={ true }
+            showOutsideDays={true}
             mode='single'
-            defaultMonth={ defaultMonth }
-            selected={ selectedValue }
-            onSelect={ (value: Date) => {
+            defaultMonth={defaultMonth}
+            selected={selectedValue}
+            onSelect={(value: Date) => {
               handleSelect(value);
               handleClose();
-            } }
-            locale={ enUS }
-            disabled={ disabledDays }
-            enableYearNavigation={ enableYearNavigation }
+            }}
+            locale={enUS}
+            disabled={disabledDays}
+            enableYearNavigation={enableYearNavigation}
             className='overflow-y-auto outline-none rounded-lg p-3 bg-dark-monetr-background'
           />
         </PopoverContent>
@@ -249,11 +254,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   );
 }
 
-export function formatSelectedDates(
-  startDate: Date | null,
-  endDate: Date | null,
-  locale: Locale,
-) {
+export function formatSelectedDates(startDate: Date | null, endDate: Date | null, locale: Locale) {
   const localeCode = locale.code;
   if (!startDate && !endDate) {
     return '';
@@ -278,10 +279,7 @@ export function formatSelectedDates(
       return startDate.toLocaleDateString(localeCode, options);
     }
 
-    if (
-      startDate.getMonth() === endDate.getMonth() &&
-      startDate.getFullYear() === endDate.getFullYear()
-    ) {
+    if (startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear()) {
       const optionsStartDate: Intl.DateTimeFormatOptions = {
         month: 'short',
         day: 'numeric',
@@ -297,4 +295,4 @@ export function formatSelectedDates(
     return `${startDate.toLocaleDateString(localeCode, options)} - ${endDate.toLocaleDateString(localeCode, options)}`;
   }
   return '';
-};
+}

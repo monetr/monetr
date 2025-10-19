@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
 import CheckCircle from '@mui/icons-material/CheckCircle';
 import EditOutlined from '@mui/icons-material/EditOutlined';
+import { Navigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
@@ -10,7 +10,7 @@ import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
 import SetupBillingButton from '@monetr/interface/components/setup/SetupBillingButton';
-import { ReactElement } from '@monetr/interface/components/types';
+import type { ReactElement } from '@monetr/interface/components/types';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -19,7 +19,7 @@ export interface SetupPageProps {
   manualEnabled?: boolean;
 }
 
-type Step = 'greeting'|'plaid'|'teller'|'manual'|'loading';
+type Step = 'greeting' | 'plaid' | 'teller' | 'manual' | 'loading';
 
 export default function SetupPage(props: SetupPageProps): JSX.Element {
   const [step, setStep] = useState<Step>('greeting');
@@ -28,12 +28,13 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
 
   switch (step) {
     case 'greeting':
-      return <Greeting onContinue={ setStep } manualEnabled={ props.manualEnabled } alreadyOnboarded={ props.alreadyOnboarded } />;
+      return (
+        <Greeting onContinue={setStep} manualEnabled={props.manualEnabled} alreadyOnboarded={props.alreadyOnboarded} />
+      );
     case 'plaid':
-      return <Navigate to={ plaidPath } />;
+      return <Navigate to={plaidPath} />;
     case 'manual':
-      return <Navigate to={ manualPath } />;
-    case 'loading':
+      return <Navigate to={manualPath} />;
     default:
       return <h1>Something went wrong...</h1>;
   }
@@ -47,7 +48,7 @@ interface GreetingProps {
 
 function Greeting(props: GreetingProps): JSX.Element {
   const { data: config } = useAppConfiguration();
-  const [active, setActive] = useState<'plaid'|'teller'|'manual'|null>(null);
+  const [active, setActive] = useState<'plaid' | 'teller' | 'manual' | null>(null);
 
   function Banner(): JSX.Element {
     if (!props.alreadyOnboarded) {
@@ -65,9 +66,7 @@ function Greeting(props: GreetingProps): JSX.Element {
 
     return (
       <div className='flex flex-col justify-center items-center text-center'>
-        <MSpan className='text-2xl font-medium'>
-          Adding another bank?
-        </MSpan>
+        <MSpan className='text-2xl font-medium'>Adding another bank?</MSpan>
         <MSpan className='text-lg' color='subtle'>
           Please select what type of bank you want to setup below.
         </MSpan>
@@ -76,11 +75,11 @@ function Greeting(props: GreetingProps): JSX.Element {
   }
 
   function Footer(): JSX.Element {
-    if (props.alreadyOnboarded) return null;
+    if (props.alreadyOnboarded) {
+      return null;
+    }
 
-    return (
-      <LogoutFooter />
-    );
+    return <LogoutFooter />;
   }
 
   return (
@@ -89,30 +88,26 @@ function Greeting(props: GreetingProps): JSX.Element {
       <Banner />
       <div className='flex gap-4 flex-col md:flex-row p-2'>
         <OnboardingTile
-          icon={ <PlaidLogo /> }
+          icon={<PlaidLogo />}
           name='Plaid'
           description='Plaid makes connecting your monetr account to your bank easy.'
-          active={ active === 'plaid' }
-          onClick={ () => setActive('plaid') }
-          disabled={ !config?.plaidEnabled }
+          active={active === 'plaid'}
+          onClick={() => setActive('plaid')}
+          disabled={!config?.plaidEnabled}
         />
         <OnboardingTile
-          icon={ <EditOutlined /> }
+          icon={<EditOutlined />}
           name='Manual'
           description='Manage your transactions and budget manually with monetr.'
-          active={ active === 'manual' }
-          onClick={ () => setActive('manual') }
-          disabled={ !props.manualEnabled }
+          active={active === 'manual'}
+          onClick={() => setActive('manual')}
+          disabled={!props.manualEnabled}
         />
       </div>
-      <Button
-        color={ !active ? 'secondary' : 'primary' }
-        disabled={ !active }
-        onClick={ () => props.onContinue(active) }
-      >
+      <Button color={!active ? 'secondary' : 'primary'} disabled={!active} onClick={() => props.onContinue(active)}>
         Continue
       </Button>
-      { !props.alreadyOnboarded && <SetupBillingButton /> }
+      {!props.alreadyOnboarded && <SetupBillingButton />}
       <Footer />
     </div>
   );
@@ -143,7 +138,7 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
       'hover:border-monetr-border-string': !props.active,
     },
     'cursor-pointer',
-    'border'
+    'border',
   );
   const disabled = mergeTailwind(
     'cursor-not-allowed',
@@ -178,8 +173,12 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   );
 
   function handleClick() {
-    if (props.comingSoon) return;
-    if (props.disabled) return;
+    if (props.comingSoon) {
+      return;
+    }
+    if (props.disabled) {
+      return;
+    }
 
     props.onClick();
   }
@@ -189,29 +188,16 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   }
 
   return (
-    <a className={ wrapperClasses } onClick={ handleClick }>
-      { props.active && <CheckCircle className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' /> }
-      { React.cloneElement(props.icon, { className: 'w-16 h-12 md:w-20 md:h-12 ml-4 md:ml-0 md:mt-6' }) }
+    <a className={wrapperClasses} onClick={handleClick}>
+      {props.active && <CheckCircle className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' />}
+      {React.cloneElement(props.icon, { className: 'w-16 h-12 md:w-20 md:h-12 ml-4 md:ml-0 md:mt-6' })}
       <div className='flex flex-col gap-2 items-center h-full md:mt-4 text-center w-full md:w-auto'>
-        <MSpan className='text-lg font-medium'>
-          { props.name }
-        </MSpan>
-        <MSpan color='subtle'>
-          { props.description }
-        </MSpan>
-        { !props.comingSoon && <MSpan className='md:block hidden'>&nbsp;</MSpan>}
-        { props.comingSoon &&
-          <MSpan className='md:mt-5 font-medium'>
-            Coming Soon
-          </MSpan>
-        }
-        { props.disabled &&
-          <MSpan className='md:mt-5 font-medium'>
-            Unavailable
-          </MSpan>
-        }
+        <MSpan className='text-lg font-medium'>{props.name}</MSpan>
+        <MSpan color='subtle'>{props.description}</MSpan>
+        {!props.comingSoon && <MSpan className='md:block hidden'>&nbsp;</MSpan>}
+        {props.comingSoon && <MSpan className='md:mt-5 font-medium'>Coming Soon</MSpan>}
+        {props.disabled && <MSpan className='md:mt-5 font-medium'>Unavailable</MSpan>}
       </div>
     </a>
   );
 }
-

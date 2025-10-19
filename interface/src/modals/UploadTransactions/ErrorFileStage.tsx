@@ -1,4 +1,3 @@
-import React from 'react';
 import { FilePresentOutlined } from '@mui/icons-material';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -17,21 +16,19 @@ export default function ErrorFileStage(props: ErrorFileStageProps): JSX.Element 
           <MSpan weight='bold' size='xl'>
             Upload Transactions
           </MSpan>
-          <div>
-            { /* TODO Close button */ }
-          </div>
+          <div>{/* TODO Close button */}</div>
         </div>
 
         <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
           <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
           <div className='flex flex-col py-1 w-full'>
-            <MSpan size='lg'>{ props.error.filename }</MSpan>
-            <MSpan>Failed to import data: { props.error.message }</MSpan>
+            <MSpan size='lg'>{props.error.filename}</MSpan>
+            <MSpan>Failed to import data: {props.error.message}</MSpan>
           </div>
         </div>
       </div>
       <div className='flex justify-end gap-2 mt-2'>
-        <Button variant='secondary' onClick={ props.close }>
+        <Button variant='secondary' onClick={props.close}>
           Close
         </Button>
       </div>

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import BankAccount, { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
+import BankAccount, { type BankAccountSubType, type BankAccountType } from '@monetr/interface/models/BankAccount';
 import request from '@monetr/interface/util/request';
 
 export interface CreateBankAccountRequest {
@@ -25,16 +25,13 @@ export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest)
 
   const mutate = useMutation({
     mutationFn: createBankAccount,
-    onSuccess: (newBankAccount: BankAccount) => Promise.all([
-      queryClient.setQueryData(
-        ['/bank_accounts'],
-        (previous: Array<Partial<BankAccount>>) => (previous ?? []).concat(newBankAccount),
-      ),
-      queryClient.setQueryData(
-        [`/bank_accounts/${newBankAccount.bankAccountId}`],
-        newBankAccount,
-      ),
-    ]),
+    onSuccess: (newBankAccount: BankAccount) =>
+      Promise.all([
+        queryClient.setQueryData(['/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
+          (previous ?? []).concat(newBankAccount),
+        ),
+        queryClient.setQueryData([`/bank_accounts/${newBankAccount.bankAccountId}`], newBankAccount),
+      ]),
   });
 
   return mutate.mutateAsync;

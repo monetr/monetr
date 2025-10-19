@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import * as Sentry from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 import { OAuthRedirectPlaidLink } from '@monetr/interface/components/Plaid/OAuthRedirectPlaidLink';
 import request from '@monetr/interface/util/request';
+
+import type { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
 
 interface State {
   loading: boolean;
@@ -25,14 +26,18 @@ export default function OauthReturn(): JSX.Element {
   useEffect(() => {
     request()
       .get('/plaid/link/token/new?use_cache=true')
-      .then(result => setState({
-        loading: false,
-        linkToken: result.data.linkToken,
-      }))
-      .catch(error => setState({
-        loading: false,
-        error: error,
-      }));
+      .then(result =>
+        setState({
+          loading: false,
+          linkToken: result.data.linkToken,
+        }),
+      )
+      .catch(error =>
+        setState({
+          loading: false,
+          error: error,
+        }),
+      );
   }, []);
 
   const navigate = useNavigate();
@@ -47,7 +52,8 @@ export default function OauthReturn(): JSX.Element {
       return Promise.resolve();
     }
 
-    return request().get(`/plaid/link/setup/wait/${ linkId }`)
+    return request()
+      .get(`/plaid/link/setup/wait/${linkId}`)
       .then(() => Promise.resolve())
       .catch(error => {
         if (error.response.status === 408) {
@@ -84,22 +90,24 @@ export default function OauthReturn(): JSX.Element {
   async function plaidLinkSuccess(public_token: string, metadata: PlaidLinkOnSuccessMetadata): Promise<void> {
     setState({ loading: true });
 
-    return void request().post('/plaid/link/token/callback', {
-      publicToken: public_token,
-      institutionId: metadata.institution.institution_id,
-      institutionName: metadata.institution.name,
-      accountIds: metadata.accounts.map((account: { id: string}) => account.id),
-    })
+    return void request()
+      .post('/plaid/link/token/callback', {
+        publicToken: public_token,
+        institutionId: metadata.institution.institution_id,
+        institutionName: metadata.institution.name,
+        accountIds: metadata.accounts.map((account: { id: string }) => account.id),
+      })
       .then(result => {
         setState({
           linkId: result.data.linkId,
         });
 
-        return longPollSetup()
-          .then(() => Promise.all([
+        return longPollSetup().then(() =>
+          Promise.all([
             queryClient.invalidateQueries({ queryKey: ['/links'] }),
             queryClient.invalidateQueries({ queryKey: ['/bank_accounts'] }),
-          ]));
+          ]),
+        );
       });
   }
 
@@ -107,9 +115,7 @@ export default function OauthReturn(): JSX.Element {
     if (state.loading || !state.linkToken) {
       return (
         <div>
-          <Typography variant='h5'>
-            One moment...
-          </Typography>
+          <Typography variant='h5'>One moment...</Typography>
           <div className='flex justify-center items-center p-5 m-5'>
             <CircularProgress />
           </div>
@@ -120,9 +126,9 @@ export default function OauthReturn(): JSX.Element {
     return (
       <div>
         <OAuthRedirectPlaidLink
-          linkToken={ state.linkToken }
-          plaidOnSuccess={ plaidLinkSuccess }
-          plaidOnExit={ plaidLinkExit }
+          linkToken={state.linkToken}
+          plaidOnSuccess={plaidLinkSuccess}
+          plaidOnExit={plaidLinkExit}
         />
       </div>
     );
@@ -132,12 +138,9 @@ export default function OauthReturn(): JSX.Element {
     <div className='w-full h-full flex justify-center items-center p-10'>
       <div>
         <Card>
-          <CardContent>
-            { renderContents() }
-          </CardContent>
+          <CardContent>{renderContents()}</CardContent>
         </Card>
       </div>
     </div>
   );
-};
-
+}

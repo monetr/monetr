@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Link from '@monetr/interface/models/Link';

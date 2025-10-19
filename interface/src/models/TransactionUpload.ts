@@ -1,11 +1,12 @@
-import MonetrFile from './File';
 import parseDate from '@monetr/interface/util/parseDate';
+
+import type MonetrFile from './File';
 
 export enum TransactionUploadStatus {
   Pending = 'pending',
   Processing = 'processing',
   Failed = 'failed',
-  Complete = 'complete'
+  Complete = 'complete',
 }
 
 export default class TransactionUpload {
@@ -21,11 +22,13 @@ export default class TransactionUpload {
   completedAt: Date | null;
 
   constructor(data?: Partial<TransactionUpload>) {
-    if (data) Object.assign(this, {
-      ...data,
-      createdAt: parseDate(data?.createdAt),
-      processedAt: parseDate(data?.processedAt),
-      completedAt: parseDate(data?.completedAt),
-    });
+    if (data) {
+      Object.assign(this, {
+        ...data,
+        createdAt: parseDate(data?.createdAt),
+        processedAt: parseDate(data?.processedAt),
+        completedAt: parseDate(data?.completedAt),
+      });
+    }
   }
 }

@@ -1,4 +1,3 @@
-import React from 'react';
 import { waitFor } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
 
@@ -21,7 +20,7 @@ describe('monetr app', () => {
   it('will render the demo app used in docs', async () => {
     apiSampleResponses(mockAxios);
 
-    const world = testRenderer(<Monetr />, { 
+    const world = testRenderer(<Monetr />, {
       initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions',
     });
 
@@ -30,4 +29,3 @@ describe('monetr app', () => {
     await waitFor(() => expect(world.getByTestId('txn_01j68vszqeq30t7jz7atk9yd9r')).toBeVisible());
   });
 });
-

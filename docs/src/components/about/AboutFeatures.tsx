@@ -1,7 +1,3 @@
-/* eslint-disable max-len */
-import React from 'react';
-
-
 export function AboutFeatures() {
   return (
     <div className='w-full h-full flex items-center justify-center'>
@@ -16,4 +12,3 @@ export function AboutFeatures() {
     </div>
   );
 }
-

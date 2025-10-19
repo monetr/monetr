@@ -1,7 +1,7 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
-import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import Spending, { type SpendingType } from '@monetr/interface/models/Spending';
 
 export function useSpendingFiltered(kind: SpendingType): UseQueryResult<Array<Spending>, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
@@ -11,9 +11,10 @@ export function useSpendingFiltered(kind: SpendingType): UseQueryResult<Array<Sp
     enabled: Boolean(selectedBankAccountId),
     initialData: [],
     initialDataUpdatedAt: 0,
-    select: data => (data || [])
-      .map(item => new Spending(item))
-      // Filter the data by the kind specified!
-      .filter(item => item.spendingType === kind),
+    select: data =>
+      (data || [])
+        .map(item => new Spending(item))
+        // Filter the data by the kind specified!
+        .filter(item => item.spendingType === kind),
   });
 }

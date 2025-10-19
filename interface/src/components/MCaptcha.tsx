@@ -1,7 +1,6 @@
-import React from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
 import { useFormikContext } from 'formik';
 import { LoaderCircle } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
@@ -10,7 +9,7 @@ export interface MCaptchaProps {
   name?: string;
   show?: boolean;
   className?: string;
-  ['data-testid']?: string;
+  'data-testid'?: string;
 }
 
 export default function MCaptcha(props: MCaptchaProps): JSX.Element {
@@ -22,7 +21,9 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
   }
 
   function onVerify(verification: string): void {
-    if (!formikContext?.setFieldValue || !props.name) return;
+    if (!formikContext?.setFieldValue || !props.name) {
+      return;
+    }
 
     formikContext.setFieldValue(
       props.name, // Name
@@ -33,22 +34,12 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
 
   const loading = Boolean(formikContext?.isSubmitting);
 
-  const classes = mergeTailwind([
-    'flex',
-    'items-center',
-    'justify-center',
-    'w-full',
-  ], props.className);
+  const classes = mergeTailwind(['flex', 'items-center', 'justify-center', 'w-full'], props.className);
 
   return (
-    <div className={ classes }>
-      { !loading && <ReCAPTCHA
-        data-testid={ props['data-testid'] }
-        sitekey={ config.ReCAPTCHAKey }
-        onChange={ onVerify }
-      /> }
-      { loading && <LoaderCircle className='spin' /> }
+    <div className={classes}>
+      {!loading && <ReCAPTCHA data-testid={props['data-testid']} sitekey={config.ReCAPTCHAKey} onChange={onVerify} />}
+      {loading && <LoaderCircle className='spin' />}
     </div>
   );
-
 }

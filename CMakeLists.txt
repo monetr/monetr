@@ -45,7 +45,6 @@ include(NodeModules)
 include(GolangUtils)
 add_subdirectory("${CMAKE_SOURCE_DIR}/images")
 add_subdirectory("${CMAKE_SOURCE_DIR}/interface")
-add_subdirectory("${CMAKE_SOURCE_DIR}/stories")
 add_subdirectory("${CMAKE_SOURCE_DIR}/emails")
 
 add_custom_target(
@@ -180,6 +179,14 @@ if(DOCKER_EXECUTABLE)
     DEPENDS ${DOCKER_CONTAINER_PUSH}
   )
 endif()
+
+add_custom_target(lint
+  COMMENT "Linting monetr code base..."
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  DEPENDS tools.biome
+  COMMAND ${CMAKE_Go_COMPILER} fmt ./...
+  COMMAND ${BIOME_EXECUTABLE} check --write --max-diagnostics=1000
+)
 
 ################################################################################
 #                                     TESTING                                  #

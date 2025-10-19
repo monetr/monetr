@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -29,10 +29,12 @@ export class AppConfiguration {
   buildTime: Date | null;
 
   constructor(data?: Partial<AppConfiguration>) {
-    if (data) Object.assign(this, {
-      ...data,
-      buildTime: parseDate(data?.buildTime),
-    });
+    if (data) {
+      Object.assign(this, {
+        ...data,
+        buildTime: parseDate(data?.buildTime),
+      });
+    }
   }
 }
 

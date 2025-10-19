@@ -1,18 +1,17 @@
-/* eslint-disable max-len */
-import React from 'react';
-import { Link } from 'react-router-dom';
 import { ErrorOutline } from '@mui/icons-material';
 import { LogOut, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
 import Logo from '@monetr/interface/assets/Logo';
 import BankSidebarItem from '@monetr/interface/components/Layout/BankSidebarItem';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
 import MSpan from '@monetr/interface/components/MSpan';
-import { ReactElement } from '@monetr/interface/components/types';
+import type { ReactElement } from '@monetr/interface/components/types';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
 
 export interface BankSidebarProps {
   className?: string;
@@ -26,14 +25,12 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
   // gap-2 makes sure they are evenly spaced.
   const { data: links, isLoading, isError } = useLinks();
   if (isLoading) {
-    return (
-      <SidebarWrapper className={ props.className } />
-    );
+    return <SidebarWrapper className={props.className} />;
   }
 
   if (isError) {
     return (
-      <SidebarWrapper className={ props.className }>
+      <SidebarWrapper className={props.className}>
         <div className='w-full h-12 flex items-center justify-center relative group'>
           <div className='absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'>
             <ErrorOutline className='text-3xl' />
@@ -59,8 +56,10 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
 
   // TODO Make it so that when we are in the "add link" page, we have the add link +1 button as active.
   return (
-    <SidebarWrapper className={ props.className }>
-      { linksSorted.map(link => (<BankSidebarItem key={ link.linkId } link={ link } />)) }
+    <SidebarWrapper className={props.className}>
+      {linksSorted.map(link => (
+        <BankSidebarItem key={link.linkId} link={link} />
+      ))}
       <div className='w-full h-12 flex items-center justify-center relative group'>
         <Link
           to='/link/create'
@@ -100,15 +99,13 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
   );
 
   return (
-    <div className={ className } data-testid='bank-sidebar'>
+    <div className={className} data-testid='bank-sidebar'>
       <MSidebarToggle className='flex lg:hidden' />
       <div className='h-10 w-10'>
         <Logo className='w-full' />
       </div>
       <MDivider className='w-1/2' />
-      <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
-        { props?.children }
-      </div>
+      <div className='h-full w-full flex items-center flex-col overflow-y-auto'>{props?.children}</div>
       <BankSidebarSubscriptionItem />
       <SettingsButton />
       <LogoutButton />

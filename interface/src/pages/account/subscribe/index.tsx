@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -11,8 +11,12 @@ import request from '@monetr/interface/util/request';
 
 export default function SubscribePage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const { data: { initialPlan } } = useAppConfiguration();
-  const { data: { hasSubscription, activeUntil } } = useAuthentication();
+  const {
+    data: { initialPlan },
+  } = useAppConfiguration();
+  const {
+    data: { hasSubscription, activeUntil },
+  } = useAuthentication();
 
   const [loading, setLoading] = useState(false);
   const handleContinue = useCallback(() => {
@@ -52,16 +56,20 @@ export default function SubscribePage(): JSX.Element {
               Thank you for having subscribed to monetr before! If you'd like to continue using monetr you will have to
               resubscribe below. Click continue to proceed to our billing portal.
             </MSpan>
-            <Button variant='primary' disabled={ loading } onClick={ handleContinue }>
+            <Button variant='primary' disabled={loading} onClick={handleContinue}>
               Continue
             </Button>
           </div>
-          { !loading &&
-          <div className='flex justify-center gap-1'>
-            <MSpan color='subtle' className='text-sm'>Not ready to continue?</MSpan>
-            <MLink to='/logout' size='sm'>Logout for now</MLink>
-          </div>
-          }
+          {!loading && (
+            <div className='flex justify-center gap-1'>
+              <MSpan color='subtle' className='text-sm'>
+                Not ready to continue?
+              </MSpan>
+              <MLink to='/logout' size='sm'>
+                Logout for now
+              </MLink>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -79,19 +87,21 @@ export default function SubscribePage(): JSX.Element {
             Thank you for trying out monetr! We hope that you found our budgeting tools useful during your trial. If
             you'd like to continue using monetr you can easily subscribe below.
           </MSpan>
-          <Button variant='primary' disabled={ loading } onClick={ handleContinue }>
+          <Button variant='primary' disabled={loading} onClick={handleContinue}>
             Continue
           </Button>
         </div>
-        { !loading &&
+        {!loading && (
           <div className='flex justify-center gap-1'>
-            <MSpan color='subtle' className='text-sm'>Not ready to continue?</MSpan>
-            <MLink to='/logout' size='sm'>Logout for now</MLink>
+            <MSpan color='subtle' className='text-sm'>
+              Not ready to continue?
+            </MSpan>
+            <MLink to='/logout' size='sm'>
+              Logout for now
+            </MLink>
           </div>
-        }
+        )}
       </div>
     </div>
   );
 }
-
-

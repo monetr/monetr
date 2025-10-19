@@ -1,4 +1,3 @@
-import React from 'react';
 import { Shield } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -8,7 +7,11 @@ import { showEnableTOTPModal } from '@monetr/interface/components/settings/secur
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 export default function TOTPCard(): JSX.Element {
-  const { data: { user: { login } } } = useAuthentication();
+  const {
+    data: {
+      user: { login },
+    },
+  } = useAuthentication();
 
   return (
     <Card className='md:w-1/3'>
@@ -16,12 +19,8 @@ export default function TOTPCard(): JSX.Element {
         <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
           <Shield />
         </div>
-        <Button
-          variant='primary'
-          disabled={ Boolean(login.totpEnabledAt) }
-          onClick={ showEnableTOTPModal }
-        >
-          { login.totpEnabledAt ? 'Already Enabled' : 'Enable TOTP' }
+        <Button variant='primary' disabled={Boolean(login.totpEnabledAt)} onClick={showEnableTOTPModal}>
+          {login.totpEnabledAt ? 'Already Enabled' : 'Enable TOTP'}
         </Button>
       </div>
       <MSpan size='md' weight='medium' color='emphasis'>

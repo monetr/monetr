@@ -1,9 +1,9 @@
-import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AxiosError } from 'axios';
-import { FormikHelpers } from 'formik';
+import { useCallback } from 'react';
+import type { AxiosError } from 'axios';
+import type { FormikHelpers } from 'formik';
 import { Archive, FlaskConical, HeartCrack, Save, Settings } from 'lucide-react';
 import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
@@ -16,7 +16,7 @@ import { useArchiveBankAccount } from '@monetr/interface/hooks/useArchiveBankAcc
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { useUpdateBankAccount } from '@monetr/interface/hooks/useUpdateBankAccount';
-import { APIError } from '@monetr/interface/util/request';
+import type { APIError } from '@monetr/interface/util/request';
 
 interface BankAccountValues {
   name: string;
@@ -36,9 +36,8 @@ export default function BankAccountSettingsPage(): JSX.Element {
       return Promise.resolve();
     }
 
-    if (window.confirm(`Are you sure you want to archive bank account: ${ bankAccount.name }`)) {
-      return archiveBankAccount(bankAccount.bankAccountId)
-        .then(() => navigate('/'));
+    if (window.confirm(`Are you sure you want to archive bank account: ${bankAccount.name}`)) {
+      return archiveBankAccount(bankAccount.bankAccountId).then(() => navigate('/'));
     }
 
     return Promise.resolve();
@@ -47,9 +46,7 @@ export default function BankAccountSettingsPage(): JSX.Element {
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>
-          One moment...
-        </MSpan>
+        <MSpan className='text-5xl'>One moment...</MSpan>
       </div>
     );
   }
@@ -58,12 +55,8 @@ export default function BankAccountSettingsPage(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>
-          Something isn't right...
-        </MSpan>
-        <MSpan className='text-2xl'>
-          We weren't able to load details for the bank account specified...
-        </MSpan>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>We weren't able to load details for the bank account specified...</MSpan>
       </div>
     );
   }
@@ -76,20 +69,18 @@ export default function BankAccountSettingsPage(): JSX.Element {
       name: values.name,
       currency: values.currency,
     })
-      .then(() => enqueueSnackbar(
-        'Updated bank account successfully',
-        {
+      .then(() =>
+        enqueueSnackbar('Updated bank account successfully', {
           variant: 'success',
           disableWindowBlurListener: true,
-        },
-      ))
-      .catch((error: AxiosError<APIError>) => enqueueSnackbar(
-        error?.response?.data?.error || 'Failed to update bank account',
-        {
+        }),
+      )
+      .catch((error: AxiosError<APIError>) =>
+        enqueueSnackbar(error?.response?.data?.error || 'Failed to update bank account', {
           variant: 'error',
           disableWindowBlurListener: true,
-        },
-      ))
+        }),
+      )
       .finally(() => helpers.setSubmitting(false));
   }
 
@@ -99,23 +90,19 @@ export default function BankAccountSettingsPage(): JSX.Element {
   };
 
   return (
-    <MForm
-      initialValues={ initialValues }
-      onSubmit={ submit }
-      className='w-full h-full flex flex-col'
-    >
+    <MForm initialValues={initialValues} onSubmit={submit} className='w-full h-full flex flex-col'>
       <MTopNavigation
-        icon={ Settings }
-        title={ bankAccount.name }
-        base={ `/bank/${bankAccount.bankAccountId}/transactions` }
+        icon={Settings}
+        title={bankAccount.name}
+        base={`/bank/${bankAccount.bankAccountId}/transactions`}
         breadcrumb='Settings'
       >
-        { !Boolean(bankAccount.deletedAt) && Boolean(link?.getIsManual()) && (
-          <Button variant='destructive' onClick={ archive } >
+        {!bankAccount.deletedAt && Boolean(link?.getIsManual()) && (
+          <Button variant='destructive' onClick={archive}>
             <Archive />
             Archive
           </Button>
-        ) }
+        )}
         <Button variant='primary' type='submit'>
           <Save />
           Save Changes
@@ -141,11 +128,7 @@ export default function BankAccountSettingsPage(): JSX.Element {
               className='w-full'
             />
 
-            <SelectCurrency
-              name='currency'
-              className='w-full'
-              disabled={ link?.getIsPlaid() }
-            />
+            <SelectCurrency name='currency' className='w-full' disabled={link?.getIsPlaid()} />
           </div>
         </div>
       </div>

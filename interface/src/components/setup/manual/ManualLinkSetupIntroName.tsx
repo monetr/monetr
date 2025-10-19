@@ -1,5 +1,4 @@
-import React from 'react';
-import { FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
 
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -27,8 +26,8 @@ export default function ManualLinkSetupIntroName(): JSX.Element {
 
   return (
     <MForm
-      initialValues={ initialValues }
-      onSubmit={ submit }
+      initialValues={initialValues}
+      onSubmit={submit}
       className='w-full flex flex-col justify-center items-center gap-2'
     >
       <MSpan size='2xl' weight='medium'>

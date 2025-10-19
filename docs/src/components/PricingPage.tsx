@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 import PricingCards from '@monetr/docs/components/Pricing/PricingCards';
 
-
 export default function PricingPage(): JSX.Element {
   return (
     <div className='w-full relative m-view-height py-8 flex flex-col gap-16'>
@@ -28,34 +27,25 @@ export default function PricingPage(): JSX.Element {
         <PricingCards />
       </div>
 
-
       <div className='flex justify-center items-center flex-col gap-6 px-8'>
-        <h2 className='font-bold text-4xl text-center'>
-          Frequently Asked Questions
-        </h2>
+        <h2 className='font-bold text-4xl text-center'>Frequently Asked Questions</h2>
         <ul className='max-w-2xl flex flex-col gap-4'>
           <li>
-            <h4 className='text-lg font-bold'>
-              Can I cancel anytime?
-            </h4>
+            <h4 className='text-lg font-bold'>Can I cancel anytime?</h4>
             <p>
               Yes. You can cancel at any time. You will have access to your account until the end of the current billing
               period.
             </p>
           </li>
           <li>
-            <h4 className='text-lg font-bold'>
-              Is a payment method required to try monetr?
-            </h4>
+            <h4 className='text-lg font-bold'>Is a payment method required to try monetr?</h4>
             <p>
               monetr does not require a payment method to try it out, however we do limit you to a single Plaid
               connection during the trial to try to prevent spam.
             </p>
           </li>
           <li>
-            <h4 className='text-lg font-bold'>
-              What if I sign up and find monetr doesn't meet my needs?
-            </h4>
+            <h4 className='text-lg font-bold'>What if I sign up and find monetr doesn't meet my needs?</h4>
             <p>
               If you have not subscribed yet then you don't need to do anything! Your account will become inactive
               automatically at the end of your trial. If you have already subscribed then you can cancel your

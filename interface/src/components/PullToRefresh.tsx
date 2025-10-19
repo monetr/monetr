@@ -25,10 +25,9 @@
   SOFTWARE.
 */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
+import { useEffect, useRef, useState } from 'react';
 import { RefreshCcw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function PullToRefresh(): JSX.Element {
   const navigate = useNavigate();
@@ -59,9 +58,13 @@ export default function PullToRefresh(): JSX.Element {
     // Locks or unlocks page when pulling down to refresh
     const pullStart = (e: TouchEvent) => {
       // If there is a dialog open, then do nothing.
-      if (document.querySelectorAll('[role="dialog"]').length > 0) return;
+      if (document.querySelectorAll('[role="dialog"]').length > 0) {
+        return;
+      }
       // Prevent accidently pull to refresh on the wrong main view.
-      if (document.querySelector('ul')?.scrollTop > 0) return;
+      if (document.querySelector('ul')?.scrollTop > 0) {
+        return;
+      }
 
       setPullStartPoint(e.targetTouches[0].screenY);
 
@@ -82,16 +85,21 @@ export default function PullToRefresh(): JSX.Element {
     // Tracks how far we have pulled down the refresh icon
     const pullDown = async (e: TouchEvent) => {
       // If there is a dialog open, then do nothing.
-      if (document.querySelectorAll('[role="dialog"]').length > 0) return;
+      if (document.querySelectorAll('[role="dialog"]').length > 0) {
+        return;
+      }
       // Prevent accidently pull to refresh on the wrong main view.
-      if (document.querySelector('ul')?.scrollTop > 0) return;
+      if (document.querySelector('ul')?.scrollTop > 0) {
+        return;
+      }
       // On the details pages don't allow pull to refresh either
-      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) return;
+      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) {
+        return;
+      }
 
       const screenY = e.targetTouches[0].screenY;
 
-      const pullLength =
-        pullStartPoint < screenY ? Math.abs(screenY - pullStartPoint) : 0;
+      const pullLength = pullStartPoint < screenY ? Math.abs(screenY - pullStartPoint) : 0;
 
       setPullChange(pullLength);
     };
@@ -99,9 +107,15 @@ export default function PullToRefresh(): JSX.Element {
     // Will reload the page if we are past the threshold
     // Otherwise, we reset the pull
     const pullFinish = () => {
-      if (document.querySelectorAll('[role="dialog"]').length > 0) return;
-      if (document.querySelector('ul')?.scrollTop > 0) return;
-      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) return;
+      if (document.querySelectorAll('[role="dialog"]').length > 0) {
+        return;
+      }
+      if (document.querySelector('ul')?.scrollTop > 0) {
+        return;
+      }
+      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) {
+        return;
+      }
 
       setPullStartPoint(0);
 
@@ -127,31 +141,31 @@ export default function PullToRefresh(): JSX.Element {
       window.removeEventListener('touchmove', pullDown);
       window.removeEventListener('touchend', pullFinish);
     };
-  }, [pullDownInitThreshold, pullDownReloadThreshold, pullStartPoint, navigate]);
+  }, [pullDownReloadThreshold, pullStartPoint, navigate]);
 
   return (
     <div
-      ref={ refreshDiv }
+      ref={refreshDiv}
       className='absolute left-0 right-0 z-50 m-auto w-fit transition-all ease-out'
       id='refreshIcon'
-      style={ {
+      style={{
         top:
           pullDownIconLocation < pullDownStopThreshold && pullDownInitThreshold
             ? pullDownIconLocation
             : pullDownInitThreshold
               ? pullDownStopThreshold
               : '',
-      } }
+      }}
     >
       <div
         className='relative -top-16 h-9 w-9 rounded-full border-1 border-dark-monetr-border bg-dark-monetr-background shadow-md shadow-black ring-1 ring-dark-monetr-background flex items-center justify-center'
-        style={ { animationDirection: 'reverse' } }
+        style={{ animationDirection: 'reverse' }}
       >
-        <div className={ refreshDiv.current?.classList.contains('loading') ? 'animate-spin' : undefined }>
+        <div className={refreshDiv.current?.classList.contains('loading') ? 'animate-spin' : undefined}>
           <RefreshCcw
-            className={ `rounded-full ${
+            className={`rounded-full ${
               pullDownReloadThreshold && 'rotate-180'
-            } text-indigo-500 transition-all duration-300` }
+            } text-indigo-500 transition-all duration-300`}
           />
         </div>
       </div>

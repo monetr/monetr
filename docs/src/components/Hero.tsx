@@ -1,5 +1,4 @@
 import { ArrowRight } from 'lucide-react';
-import Link from 'next/link';
 
 import Expenses from '@monetr/docs/components/Features/Expenses';
 import FileUpload from '@monetr/docs/components/Features/FileUpload';
@@ -10,6 +9,8 @@ import Plaid from '@monetr/docs/components/Features/Plaid';
 import SelfHost from '@monetr/docs/components/Features/SelfHost';
 import SourceVisible from '@monetr/docs/components/Features/SourceVisible';
 import ScreenshotCarousel from '@monetr/docs/components/ScreenshotCarousel';
+
+import Link from 'next/link';
 
 export default function Hero(): JSX.Element {
   return (
@@ -31,13 +32,9 @@ export default function Hero(): JSX.Element {
             </h1>
           </div>
 
-          <h1 className='text-4xl sm:text-5xl font-bold'>
-            Take control of your finances, paycheck by paycheck
-          </h1>
+          <h1 className='text-4xl sm:text-5xl font-bold'>Take control of your finances, paycheck by paycheck</h1>
 
-          <h2 className='text-xl sm:text-2xl font-medium'>
-            Put aside what you need, spend what you want.
-          </h2>
+          <h2 className='text-xl sm:text-2xl font-medium'>Put aside what you need, spend what you want.</h2>
         </div>
 
         <div className='flex flex-col sm:flex-row gap-4'>

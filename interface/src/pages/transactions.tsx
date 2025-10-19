@@ -1,9 +1,9 @@
-import React, { Fragment, useCallback, useEffect, useRef } from 'react';
-import useInfiniteScroll from 'react-infinite-scroll-hook';
-import { useNavigationType } from 'react-router-dom';
+import { Fragment, useCallback, useEffect, useRef } from 'react';
 import { HeartBroken } from '@mui/icons-material';
 import { format, parse } from 'date-fns';
 import { Plus, ShoppingCart, Upload } from 'lucide-react';
+import useInfiniteScroll from 'react-infinite-scroll-hook';
+import { useNavigationType } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
@@ -16,20 +16,13 @@ import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useTransactions } from '@monetr/interface/hooks/useTransactions';
 import { showNewTransactionModal } from '@monetr/interface/modals/NewTransactionModal';
 import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
-import Transaction from '@monetr/interface/models/Transaction';
+import type Transaction from '@monetr/interface/models/Transaction';
 
 let evilScrollPosition: number = 0;
 
 export default function Transactions(): JSX.Element {
   const { data: config } = useAppConfiguration();
-  const {
-    data: transactions,
-    hasNextPage,
-    isLoading,
-    isError,
-    isFetching,
-    fetchNextPage,
-  } = useTransactions();
+  const { data: transactions, hasNextPage, isLoading, isError, isFetching, fetchNextPage } = useTransactions();
 
   const { data: link } = useCurrentLink();
 
@@ -38,7 +31,7 @@ export default function Transactions(): JSX.Element {
   const navigationType = useNavigationType();
   const onScroll = useCallback(() => {
     evilScrollPosition = ref.current.scrollTop;
-  }, [ref]);
+  }, []);
   useEffect(() => {
     if (!ref.current) {
       return undefined;
@@ -52,9 +45,9 @@ export default function Transactions(): JSX.Element {
     return () => {
       current.removeEventListener('scroll', onScroll);
     };
-  // Fix bug with current impl.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref.current, navigationType, onScroll]);
+    // Fix bug with current impl.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigationType, onScroll]);
 
   const loading = isLoading || isFetching;
 
@@ -79,9 +72,7 @@ export default function Transactions(): JSX.Element {
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>
-          One moment...
-        </MSpan>
+        <MSpan className='text-5xl'>One moment...</MSpan>
       </div>
     );
   }
@@ -90,12 +81,8 @@ export default function Transactions(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>
-          Something isn't right...
-        </MSpan>
-        <MSpan className='text-2xl'>
-          We weren't able to retrieve transactions at this time...
-        </MSpan>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>We weren't able to retrieve transactions at this time...</MSpan>
       </div>
     );
   }
@@ -110,7 +97,7 @@ export default function Transactions(): JSX.Element {
     }
 
     return (
-      <Button variant='primary' onClick={ showUploadTransactionsModal } className='hidden md:flex'>
+      <Button variant='primary' onClick={showUploadTransactionsModal} className='hidden md:flex'>
         <Upload />
         Upload
       </Button>
@@ -123,17 +110,16 @@ export default function Transactions(): JSX.Element {
       return accumulator;
     }, {});
 
-    return Object.entries(groups)
-      .map(([date, transactions]) => (
-        <li key={ date }>
-          <ul className='flex gap-2 flex-col'>
-            <TransactionDateItem date={ parse(date, 'yyyy-MM-dd', new Date()) } />
-            { transactions.map(transaction => (
-              <TransactionItem key={ transaction.transactionId } transaction={ transaction } />
-            )) }
-          </ul>
-        </li>
-      ));
+    return Object.entries(groups).map(([date, transactions]) => (
+      <li key={date}>
+        <ul className='flex gap-2 flex-col'>
+          <TransactionDateItem date={parse(date, 'yyyy-MM-dd', new Date())} />
+          {transactions.map(transaction => (
+            <TransactionItem key={transaction.transactionId} transaction={transaction} />
+          ))}
+        </ul>
+      </li>
+    ));
   }
 
   let message = 'No more transactions...';
@@ -146,10 +132,7 @@ export default function Transactions(): JSX.Element {
   if (!isLoading && transactions.length === 0) {
     return (
       <Fragment>
-        <MTopNavigation
-          icon={ ShoppingCart }
-          title='Transactions'
-        >
+        <MTopNavigation icon={ShoppingCart} title='Transactions'>
           <UploadButtonMaybe />
         </MTopNavigation>
         <AddTransactionButton />
@@ -173,12 +156,9 @@ export default function Transactions(): JSX.Element {
 
   return (
     <Fragment>
-      <MTopNavigation
-        icon={ ShoppingCart }
-        title='Transactions'
-      >
+      <MTopNavigation icon={ShoppingCart} title='Transactions'>
         <div className='w-screen md:hidden flex justify-evenly'>
-          <div className='flex flex-grow w-full' /> { /* These force the free to use to be more centered */ }
+          <div className='flex flex-grow w-full' /> {/* These force the free to use to be more centered */}
           <BalanceFreeToUseAmount />
           <div className='flex flex-grow w-full' />
         </div>
@@ -186,23 +166,23 @@ export default function Transactions(): JSX.Element {
       </MTopNavigation>
       <AddTransactionButton />
       <div className='flex flex-grow min-w-0 min-h-0'>
-        <ul className='w-full overflow-y-auto pb-16' ref={ ref }>
+        <ul className='w-full overflow-y-auto pb-16' ref={ref}>
           <TransactionItems />
           {loading && (
-            <li ref={ sentryRef }>
+            <li ref={sentryRef}>
               <div className='w-full flex justify-center p-5 opacity-70'>
                 <h1>{message}</h1>
               </div>
             </li>
           )}
-          {(!loading && hasNextPage) && (
-            <li ref={ sentryRef }>
+          {!loading && hasNextPage && (
+            <li ref={sentryRef}>
               <div className='w-full flex justify-center p-5 opacity-70'>
                 <h1>{message}</h1>
               </div>
             </li>
           )}
-          {(!loading && !hasNextPage) && (
+          {!loading && !hasNextPage && (
             <li>
               <div className='w-full flex justify-center p-5 opacity-70'>
                 <h1>{message}</h1>
@@ -223,9 +203,9 @@ function AddTransactionButton(): JSX.Element {
   }
 
   return (
-    <button 
+    <button
       className='fixed md:bottom-4 bottom-14 right-4 w-14 h-14 rounded-full bg-dark-monetr-brand-subtle backdrop-blur-sm bg-opacity-75 backdrop-brightness-200 z-20 flex items-center justify-center active:backdrop-brightness-50'
-      onClick={ showNewTransactionModal }
+      onClick={showNewTransactionModal}
     >
       <Plus className='h-12 w-12 text-dark-monetr-content' />
     </button>

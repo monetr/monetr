@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { ActionMeta, OnChangeValue } from 'react-select';
+import { useEffect, useState } from 'react';
 import { useFormikContext } from 'formik';
+import type { ActionMeta, OnChangeValue } from 'react-select';
 
-import MSelect, { MSelectProps } from './MSelect';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 
+import MSelect, { type MSelectProps } from './MSelect';
 import getRecurrencesForDate from './Recurrence/getRecurrencesForDate';
-import Recurrence from './Recurrence/Recurrence';
+import type Recurrence from './Recurrence/Recurrence';
 
 export interface MSelectFrequencyProps extends MSelectProps<Recurrence> {
   name: string;
@@ -28,6 +28,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
   // date is the 15th, and the user changes it to -1. The rule is still valid even though the date has changed. But in
   // any other scenario where the rule is no longer valid. We want to remove the selection and make sure they provide a
   // new frequency.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: I want to only re-run this hook when the date prop changes
   useEffect(() => {
     // eslint-disable-next-line no-console
     console.debug('[MSelectFrequency]', 'date selection has changed and is no longer present in the rules');
@@ -44,7 +45,6 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
     formikContext?.setFieldValue(props.name, null);
     formikContext?.validateField(props.name);
     // I only want to run this hook when the date prop changes. Selected index should not cause this to re-evaluate.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
   const options = rules.map((item, index) => ({
@@ -52,8 +52,8 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
     value: index,
   }));
 
-  const value = selectedIndex !== null && selectedIndex >= 0 && selectedIndex < options.length ?
-    options[selectedIndex] : null;
+  const value =
+    selectedIndex !== null && selectedIndex >= 0 && selectedIndex < options.length ? options[selectedIndex] : null;
 
   function onChange(newValue: OnChangeValue<SelectOption, false>, _: ActionMeta<SelectOption>) {
     setSelectedIndex(newValue.value);
@@ -64,20 +64,19 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
 
   return (
     <MSelect
-      { ...props }
+      {...props}
       placeholder='Select a frequency...'
-      disabled={ formikContext?.isSubmitting }
-      error={ formikContext?.errors[props.name] }
-      isClearable={ false }
-      label={ props.label }
-      name={ props.name }
-      onChange={ onChange }
-      options={ options }
-      value={ value }
+      disabled={formikContext?.isSubmitting}
+      error={formikContext?.errors[props.name]}
+      isClearable={false}
+      label={props.label}
+      name={props.name}
+      onChange={onChange}
+      options={options}
+      value={value}
     />
   );
 }
-
 
 interface SelectOption {
   readonly label: string;

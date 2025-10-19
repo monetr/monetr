@@ -1,6 +1,5 @@
 import { NextConfig } from 'next';
 import nextra from 'nextra';
-
 import path from 'path';
 
 const nextConfig: NextConfig = {

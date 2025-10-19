@@ -1,4 +1,3 @@
-import React from 'react';
 import { HeartBrokenOutlined } from '@mui/icons-material';
 
 import MSpan from '@monetr/interface/components/MSpan';
@@ -17,6 +16,7 @@ export default function ConfigError(): JSX.Element {
             target='_blank'
             className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
             href='mailto:support@monetr.app'
+            rel='noopener'
           >
             support@monetr.app
           </a>

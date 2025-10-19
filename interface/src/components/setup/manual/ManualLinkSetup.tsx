@@ -1,5 +1,3 @@
-import React from 'react';
-
 import ManualLinkSetupAccountName from '@monetr/interface/components/setup/manual/ManualLinkSetupAccountName';
 import ManualLinkSetupBalances from '@monetr/interface/components/setup/manual/ManualLinkSetupBalances';
 import ManualLinkSetupIncome from '@monetr/interface/components/setup/manual/ManualLinkSetupIncome';
@@ -12,27 +10,24 @@ export interface ManualLinkSetupMetadata {
   showLogoutFooter?: boolean;
 }
 
-interface ManualLinkSetupProps extends ManualLinkSetupMetadata {
-
-}
-
+interface ManualLinkSetupProps extends ManualLinkSetupMetadata {}
 
 export default function ManualLinkSetup(props: ManualLinkSetupProps): JSX.Element {
   const initialView: ManualLinkSetupSteps = ManualLinkSetupSteps.IntroName;
 
   return (
     <ViewManager<ManualLinkSetupSteps, ManualLinkSetupMetadata>
-      initialView= { initialView }
-      initialMetadata={ {
+      initialView={initialView}
+      initialMetadata={{
         showLogoutFooter: props.showLogoutFooter,
-      } }
-      viewComponents={ {
+      }}
+      viewComponents={{
         [ManualLinkSetupSteps.IntroName]: ManualLinkSetupIntroName,
         [ManualLinkSetupSteps.AccountName]: ManualLinkSetupAccountName,
         [ManualLinkSetupSteps.Balances]: ManualLinkSetupBalances,
         [ManualLinkSetupSteps.Income]: ManualLinkSetupIncome,
-      } }
-      layout={ ManualLinkSetupLayout }
+      }}
+      layout={ManualLinkSetupLayout}
     />
   );
 }

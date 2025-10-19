@@ -1,10 +1,9 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import request from '@monetr/interface/util/request';
-
 
 export default function VerifyEmail(): JSX.Element {
   const location = useLocation();
@@ -25,18 +24,23 @@ export default function VerifyEmail(): JSX.Element {
       return;
     }
 
-    request().post('/authentication/verify', {
-      'token': token,
-    })
-      .then(result => errorRedirect(
-        result?.data?.message || 'Your email has been verified, please login.',
-        result?.data?.nextUrl || '/login',
-      ))
-      .catch(error => errorRedirect(
-        error?.response?.data?.error || 'Failed to verify email address.',
-        error?.response?.data?.nextUrl,
-      ));
-  }, [token]);
+    request()
+      .post('/authentication/verify', {
+        token: token,
+      })
+      .then(result =>
+        errorRedirect(
+          result?.data?.message || 'Your email has been verified, please login.',
+          result?.data?.nextUrl || '/login',
+        ),
+      )
+      .catch(error =>
+        errorRedirect(
+          error?.response?.data?.error || 'Failed to verify email address.',
+          error?.response?.data?.nextUrl,
+        ),
+      );
+  }, [token, errorRedirect]);
 
   return <VerifyEmailView />;
 }

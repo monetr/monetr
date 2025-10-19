@@ -1,16 +1,16 @@
-import React, { useRef } from 'react';
-import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { AxiosError } from 'axios';
+import { useRef } from 'react';
 import { tz } from '@date-fns/tz';
+import NiceModal, { useModal } from '@ebay/nice-modal-react';
+import type { AxiosError } from 'axios';
 import { startOfDay, startOfTomorrow } from 'date-fns';
-import { FormikHelpers } from 'formik';
+import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import MAmountField from '@monetr/interface/components/MAmountField';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MForm from '@monetr/interface/components/MForm';
-import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
@@ -19,7 +19,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
-import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewGoalValues {
   name: string;
@@ -39,17 +39,14 @@ function NewGoalModal(): JSX.Element {
 
   const initialValues: NewGoalValues = {
     name: '',
-    amount: 0.00,
+    amount: 0.0,
     nextOccurrence: startOfTomorrow({
       in: tz(timezone),
     }),
     fundingScheduleId: '',
   };
 
-  async function submit(
-    values: NewGoalValues,
-    helper: FormikHelpers<NewGoalValues>,
-  ): Promise<void> {
+  async function submit(values: NewGoalValues, helper: FormikHelpers<NewGoalValues>): Promise<void> {
     const newSpending = new Spending({
       bankAccountId: selectedBankAccountId,
       name: values.name.trim(),
@@ -66,25 +63,26 @@ function NewGoalModal(): JSX.Element {
     return createSpending(newSpending)
       .then(created => modal.resolve(created))
       .then(() => modal.remove())
-      .catch((error: AxiosError) => void enqueueSnackbar(error.response.data['error'], {
-        variant: 'error',
-        disableWindowBlurListener: true,
-      }))
+      .catch(
+        (error: AxiosError) =>
+          void enqueueSnackbar(error.response.data.error, {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          }),
+      )
       .finally(() => helper.setSubmitting(false));
   }
 
   return (
-    <MModal open={ modal.visible } ref={ ref } className='sm:max-w-xl'>
+    <MModal open={modal.visible} ref={ref} className='sm:max-w-xl'>
       <MForm
-        onSubmit={ submit }
-        initialValues={ initialValues }
+        onSubmit={submit}
+        initialValues={initialValues}
         className='h-full flex flex-col gap-2 p-2 justify-between'
         data-testid='new-goal-modal'
       >
         <div className='flex flex-col'>
-          <MSpan className='font-bold text-xl mb-2'>
-            Create A New Goal
-          </MSpan>
+          <MSpan className='font-bold text-xl mb-2'>Create A New Goal</MSpan>
           <MTextField
             id='goal-name-search' // Keep's 1Pass from hijacking normal name fields.
             name='name'
@@ -100,27 +98,27 @@ function NewGoalModal(): JSX.Element {
               label='How much do you need?'
               required
               className='w-full md:w-1/2'
-              allowNegative={ false }
+              allowNegative={false}
             />
             <MDatePicker
               className='w-full md:w-1/2'
               label='How soon will you need it?'
-              min={ startOfTomorrow({
+              min={startOfTomorrow({
                 in: tz(timezone),
-              }) }
+              })}
               name='nextOccurrence'
               required
             />
           </div>
           <MSelectFunding
-            menuPortalTarget={ document.body }
+            menuPortalTarget={document.body}
             label='When do you want to fund the goal?'
             required
             name='fundingScheduleId'
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <FormButton variant='destructive' onClick={ modal.remove } data-testid='close-new-goal-modal'>
+          <FormButton variant='destructive' onClick={modal.remove} data-testid='close-new-goal-modal'>
             Cancel
           </FormButton>
           <FormButton variant='primary' type='submit'>

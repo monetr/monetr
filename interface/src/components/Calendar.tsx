@@ -1,7 +1,6 @@
-import * as React from 'react';
-import { DayPicker, DayPickerSingleProps, useNavigation } from 'react-day-picker';
 import { addYears, format } from 'date-fns';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { DayPicker, type DayPickerSingleProps, useNavigation } from 'react-day-picker';
 
 import { Button, buttonVariants } from '@monetr/interface/components/Button';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -9,7 +8,7 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export type CalendarProps = DayPickerSingleProps & {
   enableYearNavigation?: boolean;
-}
+};
 
 function Calendar({
   className,
@@ -21,11 +20,11 @@ function Calendar({
 }: CalendarProps) {
   return (
     <DayPicker
-      showOutsideDays={ showOutsideDays }
-      locale={ locale }
-      className={ mergeTailwind('p-3', className) }
+      showOutsideDays={showOutsideDays}
+      locale={locale}
+      className={mergeTailwind('p-3', className)}
       mode='single'
-      classNames={ {
+      classNames={{
         months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
         month: 'space-y-4',
         caption: 'flex justify-center pt-1 relative items-center',
@@ -33,7 +32,7 @@ function Calendar({
         nav: 'space-x-1 flex items-center',
         nav_button: mergeTailwind(
           buttonVariants({ variant: 'outlined' }),
-          'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
+          'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100',
         ),
         nav_button_previous: 'absolute left-1',
         nav_button_next: 'absolute right-1',
@@ -50,10 +49,7 @@ function Calendar({
           'last:[&:has([aria-selected])]:rounded-r-md',
           'focus-within:relative focus-within:z-20',
         ),
-        day: mergeTailwind(
-          buttonVariants({ variant: 'text' }),
-          'h-9 w-9 p-0 font-normal aria-selected:opacity-100'
-        ),
+        day: mergeTailwind(buttonVariants({ variant: 'text' }), 'h-9 w-9 p-0 font-normal aria-selected:opacity-100'),
         day_range_end: 'day-range-end',
         day_selected: mergeTailwind(
           'bg-dark-monetr-brand text-dark-monetr-content-emphasis',
@@ -71,25 +67,25 @@ function Calendar({
         day_range_middle: 'aria-selected:bg-accent aria-selected:text-accent-foreground',
         day_hidden: 'invisible',
         ...classNames,
-      } }
-      components={ {
+      }}
+      components={{
         Caption: ({ ...props }) => {
           const { goToMonth, nextMonth, previousMonth, currentMonth } = useNavigation();
           return (
-            <div className='flex justify-between items-center' { ...props }>
+            <div className='flex justify-between items-center' {...props}>
               <div className='flex items-center space-x-1'>
-                { enableYearNavigation && (
+                {enableYearNavigation && (
                   <Button
                     variant='outlined'
-                    onClick={ () => goToMonth(addYears(currentMonth, -1)) }
+                    onClick={() => goToMonth(addYears(currentMonth, -1))}
                     className='h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
                   >
                     <ChevronsLeft className='h-4 w-4' />
                   </Button>
-                ) }
+                )}
                 <Button
                   variant='outlined'
-                  onClick={ () => goToMonth(previousMonth) }
+                  onClick={() => goToMonth(previousMonth)}
                   className='h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
                 >
                   <ChevronLeft className='text-lg' />
@@ -97,32 +93,32 @@ function Calendar({
               </div>
 
               <MSpan className='mx-1' size='sm' color='emphasis'>
-                { format(props.displayMonth, 'LLLL yyy', { locale }) }
+                {format(props.displayMonth, 'LLLL yyy', { locale })}
               </MSpan>
 
               <div className='flex items-center space-x-1'>
                 <Button
                   variant='outlined'
-                  onClick={ () => goToMonth(nextMonth) }
+                  onClick={() => goToMonth(nextMonth)}
                   className='h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
                 >
                   <ChevronRight className='h-4 w-4' />
                 </Button>
-                { enableYearNavigation && (
+                {enableYearNavigation && (
                   <Button
                     variant='outlined'
-                    onClick={ () => goToMonth(addYears(currentMonth, 1)) }
+                    onClick={() => goToMonth(addYears(currentMonth, 1))}
                     className='h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
                   >
                     <ChevronsRight className='h-4 w-4' />
                   </Button>
-                ) }
+                )}
               </div>
             </div>
           );
         },
-      } }
-      { ...props }
+      }}
+      {...props}
     />
   );
 }

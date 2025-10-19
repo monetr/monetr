@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -31,7 +31,7 @@ export default function MSpan(props: MSpanProps): JSX.Element {
   const Element = props.component ?? 'span';
 
   return (
-    <Element className={ classNames } data-testid={ props['data-testid'] } onClick={ props.onClick }>
+    <Element className={classNames} data-testid={props['data-testid']} onClick={props.onClick}>
       {props.children}
     </Element>
   );
@@ -50,47 +50,33 @@ export function MSpanDeriveClasses(props: MSpanStyleProps): string {
   return mergeTailwind(
     'flex gap-2 items-center',
     {
-      'default': [
-        'dark:text-dark-monetr-content',
-        'text-monetr-content',
-      ],
-      'muted': [
-        'dark:text-dark-monetr-content-muted',
-        'text-monetr-content-muted',
-      ],
-      'subtle': [
-        'dark:text-dark-monetr-content-subtle',
-        'text-monetr-content-subtle',
-      ],
-      'emphasis': [
-        'dark:text-dark-monetr-content-emphasis',
-        'text-monetr-content-emphasis',
-      ],
-      'inherit': [
-        'text-inherit',
-      ],
+      default: ['dark:text-dark-monetr-content', 'text-monetr-content'],
+      muted: ['dark:text-dark-monetr-content-muted', 'text-monetr-content-muted'],
+      subtle: ['dark:text-dark-monetr-content-subtle', 'text-monetr-content-subtle'],
+      emphasis: ['dark:text-dark-monetr-content-emphasis', 'text-monetr-content-emphasis'],
+      inherit: ['text-inherit'],
     }[props.color],
     {
       'block text-ellipsis min-w-0 truncate': props.ellipsis,
     },
     {
-      'inherit': 'text-size-inherit',
-      'xs': 'text-xs',
-      'sm': 'text-sm',
-      'md': 'text-base',
-      'lg': 'text-lg',
-      'xl': 'text-xl',
+      inherit: 'text-size-inherit',
+      xs: 'text-xs',
+      sm: 'text-sm',
+      md: 'text-base',
+      lg: 'text-lg',
+      xl: 'text-xl',
       '2xl': 'text-2xl',
       '3xl': 'text-3xl',
     }[props.size],
     {
-      'normal': 'font-normal',
-      'medium': 'font-medium',
-      'semibold': 'font-semibold',
-      'bold': 'font-bold',
+      normal: 'font-normal',
+      medium: 'font-medium',
+      semibold: 'font-semibold',
+      bold: 'font-bold',
     }[props.weight],
     {
-      'code': 'dark:bg-dark-monetr-background-subtle px-1.5 rounded-lg',
+      code: 'dark:bg-dark-monetr-background-subtle px-1.5 rounded-lg',
     }[props.component?.toString()],
     props.className,
   );

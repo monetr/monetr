@@ -1,4 +1,3 @@
-
 export enum ManualLinkSetupSteps {
   IntroName = 'ManualLinkSetupSteps.IntroName',
   AccountName = 'ManualLinkSetupSteps.AccountName',

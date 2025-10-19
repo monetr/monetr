@@ -5,10 +5,11 @@ export interface Store {
   setMobileSidebarOpen: (_isOpen: boolean) => void;
 }
 
-const useStore = create<Store>((set): Store => ({
-  mobileSidebarOpen: false,
-  setMobileSidebarOpen: (isOpen: boolean) => set(() => ({ mobileSidebarOpen: isOpen })),
-}));
-
+const useStore = create<Store>(
+  (set): Store => ({
+    mobileSidebarOpen: false,
+    setMobileSidebarOpen: (isOpen: boolean) => set(() => ({ mobileSidebarOpen: isOpen })),
+  }),
+);
 
 export default useStore;

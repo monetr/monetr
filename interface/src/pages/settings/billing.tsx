@@ -1,9 +1,9 @@
-import React, { useCallback, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useCallback, useState } from 'react';
 import { AccessTimeOutlined } from '@mui/icons-material';
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 import { format, isFuture, isThisYear } from 'date-fns';
 import { useSnackbar } from 'notistack';
+import { useLocation } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import MBadge from '@monetr/interface/components/MBadge';
@@ -52,9 +52,7 @@ export default function SettingsBilling(): JSX.Element {
       <MDivider />
 
       <div className='flex justify-between py-4'>
-        <MSpan>
-          Subscription Status
-        </MSpan>
+        <MSpan>Subscription Status</MSpan>
         <SubscriptionStatusBadge />
       </div>
       <MDivider />
@@ -62,11 +60,11 @@ export default function SettingsBilling(): JSX.Element {
       <Button
         className='ml-auto mt-4 max-w-xs'
         variant='primary'
-        disabled={ loading }
-        onClick={ handleManageSubscription }
+        disabled={loading}
+        onClick={handleManageSubscription}
         data-testid='billing-subscribe'
       >
-        { manageSubscriptionText }
+        {manageSubscriptionText}
       </Button>
     </div>
   );
@@ -86,14 +84,14 @@ function SubscriptionStatusBadge(): JSX.Element {
 
   // If they have a trial end date that is in the future then they are trialing.
   if (auth?.trialingUntil && isFuture(auth?.trialingUntil)) {
-    const trialEndDate = isThisYear(auth?.trialingUntil) ?
-      format(auth?.trialingUntil, 'MMMM do') :
-      format(auth?.trialingUntil, 'MMMM do, yyyy');
+    const trialEndDate = isThisYear(auth?.trialingUntil)
+      ? format(auth?.trialingUntil, 'MMMM do')
+      : format(auth?.trialingUntil, 'MMMM do, yyyy');
 
     return (
       <MBadge className='bg-yellow-600' data-testid='billing-subscription-trialing'>
         <AccessTimeOutlined />
-        Trialing Until { trialEndDate }
+        Trialing Until {trialEndDate}
       </MBadge>
     );
   }
@@ -105,4 +103,3 @@ function SubscriptionStatusBadge(): JSX.Element {
     </MBadge>
   );
 }
-

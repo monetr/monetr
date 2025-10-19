@@ -1,11 +1,11 @@
-import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 import { Trash } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { showRemoveTransactionModal } from '@monetr/interface/modals/RemoveTransactionModal';
-import Transaction from '@monetr/interface/models/Transaction';
+import type Transaction from '@monetr/interface/models/Transaction';
 
 interface RemoveTransactionButtonProps {
   transaction: Transaction;
@@ -19,8 +19,7 @@ export default function RemoveTransactionButton(props: RemoveTransactionButtonPr
   const promptRemoveTransaction = useCallback(async () => {
     return await showRemoveTransactionModal({
       transaction,
-    })
-      .then(() => navigate(`/bank/${ transaction.bankAccountId }/transactions`));
+    }).then(() => navigate(`/bank/${transaction.bankAccountId}/transactions`));
   }, [navigate, transaction]);
 
   // We only allow removing transactions on manual links.
@@ -29,10 +28,7 @@ export default function RemoveTransactionButton(props: RemoveTransactionButtonPr
   }
 
   return (
-    <Button
-      variant='destructive'
-      onClick={ promptRemoveTransaction }
-    >
+    <Button variant='destructive' onClick={promptRemoveTransaction}>
       <Trash />
       Remove
     </Button>

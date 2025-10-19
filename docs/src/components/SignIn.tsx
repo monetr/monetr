@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react';
+
 import Link from 'next/link';
 
 export default function SignIn(): JSX.Element {

@@ -1,10 +1,11 @@
-import React from 'react';
-import { Link, LinkProps } from 'react-router-dom';
+import type React from 'react';
+import { Link, type LinkProps } from 'react-router-dom';
 
-import { ReactElement, TextSize } from './types';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-type BaseLinkProps = LinkProps & React.RefAttributes<HTMLAnchorElement>
+import type { ReactElement, TextSize } from './types';
+
+type BaseLinkProps = LinkProps & React.RefAttributes<HTMLAnchorElement>;
 export interface MLinkProps extends BaseLinkProps {
   children: ReactElement;
   color?: 'primary' | 'secondary';
@@ -23,7 +24,7 @@ export default function MLink(props: MLinkProps): JSX.Element {
   };
 
   const colors = {
-    'primary': [
+    primary: [
       'dark:text-dark-monetr-brand-faint',
       'dark:hover:text-dark-monetr-brand-bright',
       'text-purple-500',
@@ -32,25 +33,14 @@ export default function MLink(props: MLinkProps): JSX.Element {
       'focus:ring-1',
       'focus:ring-purple-500',
     ],
-    'secondary': [
-      'text-gray-400',
-      'hover:text-gray-500',
-    ],
+    secondary: ['text-gray-400', 'hover:text-gray-500'],
   };
 
-  const classNames = mergeTailwind(
-    'font-semibold',
-    ...colors[props.color],
-    `text-${props.size}`,
-    props.className,
-  );
+  const classNames = mergeTailwind('font-semibold', ...colors[props.color], `text-${props.size}`, props.className);
 
   return (
-    <Link
-      { ...props }
-      className={ classNames }
-    >
-      { props.children }
+    <Link {...props} className={classNames}>
+      {props.children}
     </Link>
   );
 }

@@ -1,11 +1,10 @@
 /* eslint-disable id-length */
 import { tz } from '@date-fns/tz';
 import { endOfMonth, format, getDate, getMonth, isEqual, startOfDay, startOfMonth } from 'date-fns';
+import { RRule, type Weekday } from 'rrule';
 
 import Recurrence from '@monetr/interface/components/Recurrence/Recurrence';
 import parseDate from '@monetr/interface/util/parseDate';
-
-import { RRule, Weekday } from 'rrule';
 
 export default function getRecurrencesForDate(inputDate: Date | string | null, timezone: string): Array<Recurrence> {
   const date = parseDate(inputDate);
@@ -33,7 +32,7 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
 
   const rules = [
     new Recurrence({
-      name: `Every ${ weekdayString }`,
+      name: `Every ${weekdayString}`,
       rule: new RRule({
         dtstart: input,
         freq: RRule.WEEKLY,
@@ -42,7 +41,7 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
       }),
     }),
     new Recurrence({
-      name: `Every other ${ weekdayString }`,
+      name: `Every other ${weekdayString}`,
       rule: new RRule({
         dtstart: input,
         freq: RRule.WEEKLY,
@@ -51,7 +50,7 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
       }),
     }),
     new Recurrence({
-      name: `Every month on the ${ dayStr }`,
+      name: `Every month on the ${dayStr}`,
       rule: new RRule({
         dtstart: input,
         freq: RRule.MONTHLY,
@@ -60,7 +59,7 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
       }),
     }),
     new Recurrence({
-      name: `Every other month on the ${ dayStr }`,
+      name: `Every other month on the ${dayStr}`,
       rule: new RRule({
         dtstart: input,
         freq: RRule.MONTHLY,
@@ -69,7 +68,7 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
       }),
     }),
     new Recurrence({
-      name: `Every 3 months (quarter) on the ${ dayStr }`,
+      name: `Every 3 months (quarter) on the ${dayStr}`,
       rule: new RRule({
         dtstart: input,
         freq: RRule.MONTHLY,
@@ -78,7 +77,7 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
       }),
     }),
     new Recurrence({
-      name: `Every 6 months on the ${ dayStr }`,
+      name: `Every 6 months on the ${dayStr}`,
       rule: new RRule({
         dtstart: input,
         freq: RRule.MONTHLY,
@@ -87,7 +86,7 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
       }),
     }),
     new Recurrence({
-      name: `Every year on the ${ ordinalSuffixOf(getDate(input)) } of ${ format(input, 'MMMM') }`,
+      name: `Every year on the ${ordinalSuffixOf(getDate(input))} of ${format(input, 'MMMM')}`,
       rule: new RRule({
         dtstart: input,
         freq: RRule.YEARLY,
@@ -99,27 +98,31 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
   ];
 
   if (isStartOfMonth || getDate(input) === 15) {
-    rules.push(new Recurrence({
-      name: '1st and 15th of every month',
-      rule: new RRule({
-        dtstart: input,
-        freq: RRule.MONTHLY,
-        interval: 1,
-        bymonthday: [1, 15],
+    rules.push(
+      new Recurrence({
+        name: '1st and 15th of every month',
+        rule: new RRule({
+          dtstart: input,
+          freq: RRule.MONTHLY,
+          interval: 1,
+          bymonthday: [1, 15],
+        }),
       }),
-    }));
+    );
   }
 
   if (isEndOfMonth || getDate(input) === 15) {
-    rules.push(new Recurrence({
-      name: '15th and last day of every month',
-      rule: new RRule({
-        dtstart: input,
-        freq: RRule.MONTHLY,
-        interval: 1,
-        bymonthday: [15, -1],
+    rules.push(
+      new Recurrence({
+        name: '15th and last day of every month',
+        rule: new RRule({
+          dtstart: input,
+          freq: RRule.MONTHLY,
+          interval: 1,
+          bymonthday: [15, -1],
+        }),
       }),
-    }));
+    );
   }
 
   return rules;
@@ -147,7 +150,8 @@ function getRuleDayOfWeek(date: Date): Weekday {
 }
 
 function ordinalSuffixOf(i: number) {
-  const j = i % 10, k = i % 100;
+  const j = i % 10,
+    k = i % 100;
   if (j === 1 && k !== 11) {
     return `${i}st`;
   }

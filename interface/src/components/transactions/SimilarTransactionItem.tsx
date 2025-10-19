@@ -1,4 +1,3 @@
-import React from 'react';
 import { format, isThisYear } from 'date-fns';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
@@ -25,26 +24,14 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
       <li className='group relative w-full px-1 md:px-2'>
         <div className='group animate-pulse flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4'>
           <div className='flex w-full min-w-0 flex-1 flex-row items-center gap-4 md:w-1/2'>
-            <div
-              className='h-10 w-10 rounded-full dark:bg-dark-monetr-background-subtle'
-              aria-label='Transaction Avatar'
-            />
+            <div className='h-10 w-10 rounded-full dark:bg-dark-monetr-background-subtle' />
             <div className='flex min-w-0 grow flex-col overflow-hidden'>
-              <div
-                className='w-full rounded-xl h-4 my-1 dark:bg-dark-monetr-background-subtle'
-                aria-label='Transaction Name'
-              />
-              <div
-                className='w-1/2 rounded-xl h-3 my-1 dark:bg-dark-monetr-background-subtle opacity-70'
-                aria-label='Transaction Date'
-              />
+              <div className='w-full rounded-xl h-4 my-1 dark:bg-dark-monetr-background-subtle' />
+              <div className='w-1/2 rounded-xl h-3 my-1 dark:bg-dark-monetr-background-subtle opacity-70' />
             </div>
           </div>
           <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
-            <div
-              className='w-1/3 rounded-xl h-4 dark:bg-dark-monetr-background-subtle'
-              aria-label='Transaction Amount'
-            />
+            <div className='w-1/3 rounded-xl h-4 dark:bg-dark-monetr-background-subtle' />
           </div>
         </div>
       </li>
@@ -66,31 +53,29 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
 
   const redirectUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
 
-  const dateString =  isThisYear(transaction.date) ?
-    format(transaction.date, 'MMMM do') :
-    format(transaction.date, 'MMMM do, yyyy');
+  const dateString = isThisYear(transaction.date)
+    ? format(transaction.date, 'MMMM do')
+    : format(transaction.date, 'MMMM do, yyyy');
 
   return (
     <li className='group relative w-full px-1 md:px-2'>
       <div className='group flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4'>
         <div className='flex w-full min-w-0 flex-1 flex-row items-center gap-4 md:w-1/2'>
-          <TransactionMerchantIcon name={ transaction.getName() } pending={ transaction.isPending } />
+          <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
           <div className='flex min-w-0 flex-col overflow-hidden'>
             <span className='w-full min-w-0 truncate text-base font-semibold dark:text-dark-monetr-content-emphasis'>
               {transaction.getName()}
             </span>
             <span className='w-full min-w-0 truncate text-sm font-medium dark:text-dark-monetr-content'>
-              { dateString }
+              {dateString}
             </span>
           </div>
         </div>
         <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
-          <span className={ amountClassnames }>
-            { locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0) }
+          <span className={amountClassnames}>
+            {locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0)}
           </span>
-          { !props.disableNavigate && (
-            <ArrowLink to={ redirectUrl } />
-          ) }
+          {!props.disableNavigate && <ArrowLink to={redirectUrl} />}
         </div>
       </div>
     </li>

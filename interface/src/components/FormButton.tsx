@@ -1,4 +1,4 @@
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import { useFormikContext } from 'formik';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -12,7 +12,5 @@ export default function FormButton(props: FormButtonProps): JSX.Element {
     disabled: formikContext?.isSubmitting || props?.disabled,
     onSubmit: props?.onSubmit || (props.type === 'submit' ? formikContext?.submitForm : undefined),
   };
-  return (
-    <Button { ...props } />
-  );
+  return <Button {...props} />;
 }

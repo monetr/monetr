@@ -1,8 +1,9 @@
-import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import type React from 'react';
 import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { renderHook, RenderHookResult, WrapperComponent } from '@testing-library/react-hooks';
+import { MemoryRouter } from 'react-router-dom';
+
+import { type RenderHookResult, renderHook, type WrapperComponent } from '@testing-library/react-hooks';
 
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
@@ -21,15 +22,15 @@ function testRenderHook<TProps, TResult>(
   const Wrapper: WrapperComponent<TProps> = (props: React.PropsWithChildren<any>) => {
     return (
       <MemoryRouter
-        initialEntries={ [options.initialRoute] }
-        future={ { v7_startTransition: false, v7_relativeSplatPath: false } }
+        initialEntries={[options.initialRoute]}
+        future={{ v7_startTransition: false, v7_relativeSplatPath: false }}
       >
         <MQueryClient>
-          <ThemeProvider theme={ newTheme }>
+          <ThemeProvider theme={newTheme}>
             <MSnackbarProvider>
               <NiceModal.Provider>
                 <CssBaseline />
-                { props.children }
+                {props.children}
               </NiceModal.Provider>
             </MSnackbarProvider>
           </ThemeProvider>
