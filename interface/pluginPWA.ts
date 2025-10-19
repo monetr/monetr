@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { promisify } from 'node:util';
 import {
   Gravity,
   ImageMagick,
@@ -17,6 +16,10 @@ import type { RsbuildPlugin } from '@rsbuild/core';
 
 const wasmLocation = require.resolve('@imagemagick/magick-wasm/magick.wasm');
 const wasmBytes = readFileSync(wasmLocation);
+
+
+
+import { promisify } from 'node:util';
 
 type PluginPWAOptions = {
   logo: string;

@@ -142,6 +142,53 @@ jobs:
           files: ${{ github.workspace }}/build/junit.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - id: go-cache-paths
+        name: Install pnpm and configure cache
+        run: |
+          npm install -g pnpm
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
+          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Fix dumb git issue
+        run: |
+          git config --global --add safe.directory ${PWD}
+
+      - name: Go Build Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.GOCACHE }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+
+      - name: Go Mod Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.GOMODCACHE }}
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+            ${{ runner.os }}-go-mod
+
+      - name: pnpm Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+            ${{ runner.os }}-pnpm-store
+
+      - name: Lint
+        run: |
+          make lint
+
   container:
     name: Container
     runs-on: ubuntu-latest
