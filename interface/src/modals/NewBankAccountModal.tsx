@@ -16,6 +16,7 @@ import { useCreateBankAccount } from '@monetr/interface/hooks/useCreateBankAccou
 import useLocaleCurrency, { DefaultCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
+import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewBankAccountValues {
@@ -55,7 +56,7 @@ function NewBankAccountModal(): JSX.Element {
         .then(result => navigate(`/bank/${result.bankAccountId}/transactions`))
         .then(() => modal.remove())
         .catch(
-          (error: AxiosError) =>
+          (error: AxiosError<APIError>) =>
             void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,
@@ -89,23 +90,23 @@ function NewBankAccountModal(): JSX.Element {
                 Create A New Bank Account
               </MSpan>
               <MTextField
-                id='bank-account-name-search' // Keep's 1Pass from hijacking normal name fields.
                 data-testid='bank-account-name'
                 name='name'
                 label="What is the account's name ?"
                 required
                 autoComplete='off'
                 placeholder='Personal Checking...'
+                data-1p-ignore
               />
               <SelectCurrency name='currency' className='w-full' menuPortalTarget={document.body} required />
               <MAmountField
-                id='bank-account-balance-search' // Keep's 1Pass from hijacking normal name fields.
                 data-testid='bank-account-balance'
                 name='balance'
                 label='Initial Balance'
                 required
                 allowNegative
                 currency={values.currency}
+                data-1p-ignore
               />
             </div>
             <div className='flex justify-end gap-2'>
@@ -128,5 +129,5 @@ const newBankAccountModal = NiceModal.create(NewBankAccountModal);
 export default newBankAccountModal;
 
 export function showNewBankAccountModal(): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof newBankAccountModal>, Object>(newBankAccountModal);
+  return NiceModal.show<void, ExtractProps<typeof newBankAccountModal>, unknown>(newBankAccountModal);
 }

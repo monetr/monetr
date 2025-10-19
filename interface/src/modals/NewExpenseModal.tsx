@@ -20,6 +20,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewExpenseValues {
@@ -70,7 +71,7 @@ function NewExpenseModal(): JSX.Element {
       .then(created => modal.resolve(created))
       .then(() => modal.remove())
       .catch(
-        (error: AxiosError) =>
+        (error: AxiosError<APIError>) =>
           void enqueueSnackbar(error.response.data.error, {
             variant: 'error',
             disableWindowBlurListener: true,
@@ -90,13 +91,13 @@ function NewExpenseModal(): JSX.Element {
         <div className='flex flex-col'>
           <MSpan className='font-bold text-xl mb-2'>Create A New Expense</MSpan>
           <MTextField
-            id='expense-name-search' // Keep's 1Pass from hijacking normal name fields.
             name='name'
             label='What are you budgeting for?'
             required
             autoFocus
             autoComplete='off'
             placeholder='Amazon, Netflix...'
+            data-1p-ignore
           />
           <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
             <MAmountField
@@ -153,5 +154,5 @@ const newExpenseModal = NiceModal.create(NewExpenseModal);
 export default newExpenseModal;
 
 export function showNewExpenseModal(): Promise<Spending | null> {
-  return NiceModal.show<Spending | null, ExtractProps<typeof newExpenseModal>, {}>(newExpenseModal);
+  return NiceModal.show<Spending | null, ExtractProps<typeof newExpenseModal>, unknown>(newExpenseModal);
 }

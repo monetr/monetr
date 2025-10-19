@@ -147,7 +147,6 @@ export default function PullToRefresh(): JSX.Element {
     <div
       ref={refreshDiv}
       className='absolute left-0 right-0 z-50 m-auto w-fit transition-all ease-out'
-      id='refreshIcon'
       style={{
         top:
           pullDownIconLocation < pullDownStopThreshold && pullDownInitThreshold

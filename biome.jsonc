@@ -121,7 +121,8 @@
         "noUndeclaredDependencies": "warn", // Mainly for storybook silliness
         "noUndeclaredVariables": "off", // Doesn't work with jest :(
         "useParseIntRadix": "error",
-        "useValidTypeof": "error"
+        "useValidTypeof": "error",
+        "noNestedComponentDefinitions": "warn" // Need to fix this at some point
       },
       "complexity": {
         "noForEach": "off",

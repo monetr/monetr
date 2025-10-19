@@ -19,6 +19,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewGoalValues {
@@ -64,7 +65,7 @@ function NewGoalModal(): JSX.Element {
       .then(created => modal.resolve(created))
       .then(() => modal.remove())
       .catch(
-        (error: AxiosError) =>
+        (error: AxiosError<APIError>) =>
           void enqueueSnackbar(error.response.data.error, {
             variant: 'error',
             disableWindowBlurListener: true,
@@ -84,13 +85,13 @@ function NewGoalModal(): JSX.Element {
         <div className='flex flex-col'>
           <MSpan className='font-bold text-xl mb-2'>Create A New Goal</MSpan>
           <MTextField
-            id='goal-name-search' // Keep's 1Pass from hijacking normal name fields.
             name='name'
             label='What are you budgeting for?'
             required
             autoFocus
             autoComplete='off'
             placeholder='Vacation, Furniture, Car...'
+            data-1p-ignore
           />
           <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
             <MAmountField
@@ -135,5 +136,5 @@ const newGoalModal = NiceModal.create(NewGoalModal);
 export default newGoalModal;
 
 export function showNewGoalModal(): Promise<Spending | null> {
-  return NiceModal.show<Spending | null, ExtractProps<typeof newGoalModal>, {}>(newGoalModal);
+  return NiceModal.show<Spending | null, ExtractProps<typeof newGoalModal>, unknown>(newGoalModal);
 }

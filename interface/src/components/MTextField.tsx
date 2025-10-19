@@ -40,14 +40,6 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
   const { labelDecorator, ...otherProps } = props;
   const LabelDecorator = labelDecorator || MTextFieldPropsDefaults.labelDecorator;
 
-  function Error() {
-    if (!props.error) {
-      return null;
-    }
-
-    return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
-  }
-
   const classNames = mergeTailwind(
     {
       'dark:focus:ring-dark-monetr-brand': !props.disabled && !props.error,
@@ -117,7 +109,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
           className={classNames}
         />
       </div>
-      <Error />
+      {Boolean(props.error) && <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>}
     </div>
   );
 }

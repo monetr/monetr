@@ -30,7 +30,6 @@ export default function SelectBankAccount(): JSX.Element {
   const navigate = useNavigate();
   const { data: allBankAccounts, isLoading: allIsLoading } = useBankAccounts();
   const { data: selectedBankAccount, isLoading: selectedIsLoading } = useSelectedBankAccount();
-  const { data: link } = useCurrentLink();
   const [open, setOpen] = React.useState(false);
   const isMobile = useIsMobile();
 

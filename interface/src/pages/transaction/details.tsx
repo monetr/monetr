@@ -138,13 +138,7 @@ export default function TransactionDetails(): JSX.Element {
             <div className='w-full flex justify-center mb-2'>
               <MerchantIcon name={transaction?.name} />
             </div>
-            <MTextField
-              id='transaction-name-search'
-              label='Name'
-              placeholder='Transaction name...'
-              name='name'
-              className='w-full'
-            />
+            <MTextField label='Name' placeholder='Transaction name...' name='name' className='w-full' data-1p-ignore />
             <MTextField
               label='Original Name'
               placeholder='No original name...?'
@@ -155,7 +149,6 @@ export default function TransactionDetails(): JSX.Element {
             <MAmountField className='w-full' disabled label='Amount' name='amount' />
             <MDatePicker label='Date' name='date' className='w-full' disabled={!link.getIsManual()} />
             <MCheckbox
-              id='transaction-details-pending'
               data-testid='transaction-details-pending'
               name='isPending'
               label='Is Pending'

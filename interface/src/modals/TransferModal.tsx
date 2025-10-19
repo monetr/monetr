@@ -17,6 +17,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import { useTransfer } from '@monetr/interface/hooks/useTransfer';
 import { AmountType } from '@monetr/interface/util/amounts';
+import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface TransferModalProps {
@@ -96,7 +97,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
           }),
         )
         .catch(
-          (error: AxiosError) =>
+          (error: AxiosError<APIError>) =>
             void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,
@@ -166,7 +167,7 @@ const transferModal = NiceModal.create<TransferModalProps>(TransferModal);
 export default transferModal;
 
 export function showTransferModal(props: TransferModalProps): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof transferModal>, {}>(transferModal, props);
+  return NiceModal.show<void, ExtractProps<typeof transferModal>, unknown>(transferModal, props);
 }
 
 function ReverseTargetsButton(): JSX.Element {
@@ -186,12 +187,9 @@ function ReverseTargetsButton(): JSX.Element {
   }, [formik]);
 
   return (
-    <a className='w-full flex justify-center mb-1'>
-      <ArrowUpDown
-        onClick={swap}
-        className='h-10 w-10 cursor-pointer text-4xl dark:text-dark-monetr-content-subtle hover:dark:text-dark-monetr-content'
-      />
-    </a>
+    <button type='button' className='w-full flex justify-center mb-1 group' onClick={swap}>
+      <ArrowUpDown className='size-10 dark:text-dark-monetr-content-subtle group-hover:dark:text-dark-monetr-content' />
+    </button>
   );
 }
 

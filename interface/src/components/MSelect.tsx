@@ -34,15 +34,6 @@ export interface MSelectProps<V extends Value<any>>
 
 export default function MSelect<V extends Value<any> = Value<any>>(props: MSelectProps<V>): JSX.Element {
   const theme = useTheme();
-
-  function Error() {
-    if (!props.error) {
-      return null;
-    }
-
-    return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
-  }
-
   const { labelDecorator, className, ...otherProps } = props;
   const wrapperClassNames = mergeTailwind(
     {
@@ -102,14 +93,6 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
     'relative',
   );
 
-  function ValueContainer(): JSX.Element {
-    if (props.value?.label) {
-      return <span className='truncate'>{props?.value?.label}</span>;
-    }
-
-    return <span className='truncate'>{props?.placeholder}</span>;
-  }
-
   return (
     <div className={wrapperClassNames}>
       <MLabel label={props.label} htmlFor={props.id} required={props.required} disabled={props.disabled}>
@@ -128,7 +111,7 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
           })
         }
       >
-        <ValueContainer />
+        <span className='truncate'>{props?.value?.label ?? props?.placeholder}</span>
       </button>
       <Select
         theme={(baseTheme: Theme): Theme => ({
@@ -174,7 +157,7 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
           }),
         }}
       />
-      <Error />
+      {Boolean(props.error) && <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>}
     </div>
   );
 }

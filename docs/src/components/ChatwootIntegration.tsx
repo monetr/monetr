@@ -4,6 +4,7 @@ export default function ChatwootIntegration(): JSX.Element {
   if (process.env.CHATWOOT_URL && process.env.CHATWOOT_TOKEN) {
     return (
       <script
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: This is the easiest way to make this actually work
         dangerouslySetInnerHTML={{
           __html: `
         (function(d,t) {

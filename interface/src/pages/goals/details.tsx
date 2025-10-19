@@ -68,7 +68,7 @@ export default function GoalDetails(): JSX.Element {
   if (isError) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <HeartCrack className='dark:text-dark-monetr-content size-24' />
         <MSpan className='text-5xl'>Something isn't right...</MSpan>
         <MSpan className='text-2xl'>Couldn't find the goal you specified...</MSpan>
       </div>
@@ -82,7 +82,7 @@ export default function GoalDetails(): JSX.Element {
   if (spending.spendingType !== SpendingType.Goal) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <HeartCrack className='dark:text-dark-monetr-content size-24' />
         <MSpan className='text-5xl'>Something isn't right...</MSpan>
         <MSpan className='text-2xl'>This spending object is not a goal...</MSpan>
       </div>
@@ -206,7 +206,7 @@ export default function GoalDetails(): JSX.Element {
 
             <MDivider className='w-1/2 my-4' />
 
-            <MTextField className='w-full' label='Expense' name='name' required />
+            <MTextField className='w-full' label='Expense' name='name' required data-1p-ignore />
             <MAmountField allowNegative={false} className='w-full' label='Amount' name='amount' required />
             <MDatePicker
               label='Target Date'
@@ -225,7 +225,6 @@ export default function GoalDetails(): JSX.Element {
               required
             />
             <MCheckbox
-              id='goal-details-paused'
               data-testid='goal-details-paused'
               name='isPaused'
               label='Paused?'

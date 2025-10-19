@@ -119,15 +119,7 @@ export default function BankAccountSettingsPage(): JSX.Element {
                 improve the UX and functionality.
               </MSpan>
             </Card>
-
-            <MTextField
-              id='bank-account-name-search'
-              label='Name'
-              placeholder='Bank account name...'
-              name='name'
-              className='w-full'
-            />
-
+            <MTextField label='Name' placeholder='Bank account name...' name='name' className='w-full' data-1p-ignore />
             <SelectCurrency name='currency' className='w-full' disabled={link?.getIsPlaid()} />
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useRef } from 'react';
+import { Fragment, useCallback, useId, useRef } from 'react';
 import { tz } from '@date-fns/tz';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
@@ -20,6 +20,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewFundingValues {
@@ -31,6 +32,7 @@ interface NewFundingValues {
 }
 
 function NewFundingModal(): JSX.Element {
+  const switchId = useId();
   const { data: timezone } = useTimezone();
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
@@ -67,7 +69,7 @@ function NewFundingModal(): JSX.Element {
         .then(created => modal.resolve(created))
         .then(() => modal.remove())
         .catch(
-          (error: AxiosError) =>
+          (error: AxiosError<APIError>) =>
             void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,
@@ -92,12 +94,12 @@ function NewFundingModal(): JSX.Element {
               <MSpan className='font-bold text-xl mb-2'>Create A New Funding Schedule</MSpan>
               <MTextField
                 autoFocus
-                id='funding-name-search' // Keep's 1Pass from hijacking normal name fields.
                 name='name'
                 label='What do you want to call your funding schedule?'
                 required
                 autoComplete='off'
                 placeholder='Example: Payday...'
+                data-1p-ignore
               />
               <MDatePicker
                 name='nextOccurrence'
@@ -127,7 +129,10 @@ function NewFundingModal(): JSX.Element {
               />
               <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'>
                 <div className='space-y-0.5'>
-                  <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>
+                  <label
+                    htmlFor={switchId}
+                    className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'
+                  >
                     Exclude Weekends
                   </label>
                   <p className='text-sm text-dark-monetr-content'>
@@ -135,6 +140,7 @@ function NewFundingModal(): JSX.Element {
                   </p>
                 </div>
                 <Switch
+                  id={switchId}
                   checked={values.excludeWeekends}
                   onCheckedChange={() => setFieldValue('excludeWeekends', !values.excludeWeekends)}
                 />
@@ -160,5 +166,5 @@ const newFundingModal = NiceModal.create(NewFundingModal);
 export default newFundingModal;
 
 export function showNewFundingModal(): Promise<FundingSchedule | null> {
-  return NiceModal.show<FundingSchedule | null, ExtractProps<typeof newFundingModal>, {}>(newFundingModal);
+  return NiceModal.show<FundingSchedule | null, ExtractProps<typeof newFundingModal>, unknown>(newFundingModal);
 }

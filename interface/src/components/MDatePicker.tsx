@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-
 import React, { useCallback, useMemo, useState } from 'react';
 import { tz } from '@date-fns/tz';
 import { isEqual, type Locale, startOfMonth, startOfToday } from 'date-fns';
@@ -182,13 +180,6 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   );
 
   const LabelDecorator = props.labelDecorator || (() => null);
-  function Error() {
-    if (!props.error) {
-      return null;
-    }
-
-    return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
-  }
 
   const wrapperClassNames = mergeTailwind(
     {
@@ -248,7 +239,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
           />
         </PopoverContent>
       </Popover>
-      <Error />
+      {Boolean(props.error) && <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>}
     </div>
   );
 }

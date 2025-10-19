@@ -1,6 +1,5 @@
-/* eslint-disable max-len */
 import { useEffect } from 'react';
-import { useLocation, useMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
@@ -11,7 +10,6 @@ export default function MobileSidebar(): JSX.Element {
   const match = useMatch('/bank/:bankId/*');
   const isBankRoute = Boolean(match?.params?.bankId || null);
   const { setMobileSidebarOpen, mobileSidebarOpen } = useStore();
-  const { pathname } = useLocation();
 
   // When we navigate away from the current page, if the sidebar is open; close it.
   // This achieves the behavior of; if they click a navigation item in the sidebar we automatically

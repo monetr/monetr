@@ -60,14 +60,6 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
   const { labelDecorator, ...otherProps } = props;
   const LabelDecorator = labelDecorator || MAmountFieldPropsDefaults.labelDecorator;
 
-  function Error() {
-    if (!props.error) {
-      return null;
-    }
-
-    return <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>;
-  }
-
   const classNames = mergeTailwind(
     {
       'dark:focus:ring-dark-monetr-brand': !props.disabled && !props.error,
@@ -157,7 +149,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           prefix={getCurrencySymbolPrefixed(localeInfo.locale, props.currency)}
         />
       </div>
-      <Error />
+      {Boolean(props.error) && <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>}
     </div>
   );
 }

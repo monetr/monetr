@@ -23,6 +23,7 @@ export default function PlaidInstitutionLogo(props: PlaidInstitutionLogoProps): 
 
   return (
     <img
+      alt={institution.name}
       data-testid={`bank-sidebar-item-${props.link?.linkId}-logo`}
       src={`data:image/png;base64,${institution.logo}`}
       className={props.className}
