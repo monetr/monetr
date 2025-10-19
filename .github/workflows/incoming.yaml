@@ -226,22 +226,3 @@ jobs:
           name: '${{ github.sha }}-docs'
           path: '${{ github.workspace }}/docs/out'
           retention-days: 7
-
-  storybook:
-    name: Storybook
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - name: Fix dumb git issue
-        run: |
-          git config --global --add safe.directory ${PWD}
-      - name: Build
-        run: make storybook
-      - uses: actions/upload-artifact@v4
-        name: Upload Storybook As Artifact
-        with:
-          name: '${{ github.sha }}-storybook'
-          path: '${{ github.workspace }}/build/stories/dist'
-          retention-days: 7

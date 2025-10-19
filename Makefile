@@ -82,9 +82,6 @@ docs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 email: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	+cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.email $(BUILD_ARGS)
 
-storybook: | $(CMAKE_CONFIGURATION_DIRECTORY)
-	+cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.stories $(BUILD_ARGS)
-
 migrate: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.migrate $(BUILD_ARGS)
 
@@ -110,9 +107,6 @@ develop-docs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 
 develop-email: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.email $(BUILD_ARGS)
-
-develop-storybook: | $(CMAKE_CONFIGURATION_DIRECTORY)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.stories.up $(BUILD_ARGS)
 
 logs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.logs $(BUILD_ARGS)

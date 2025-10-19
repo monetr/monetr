@@ -45,7 +45,6 @@ include(NodeModules)
 include(GolangUtils)
 add_subdirectory("${CMAKE_SOURCE_DIR}/images")
 add_subdirectory("${CMAKE_SOURCE_DIR}/interface")
-add_subdirectory("${CMAKE_SOURCE_DIR}/stories")
 add_subdirectory("${CMAKE_SOURCE_DIR}/emails")
 
 add_custom_target(
