@@ -73,23 +73,6 @@ export default function ResendVerificationPage(): JSX.Element {
     return <AfterEmailVerificationSent />;
   }
 
-  function RouteStateMessage(): JSX.Element {
-    if (routeState) {
-      return (
-        <MSpan className='text-center' size='sm' data-testid='resend-email-included'>
-          It looks like your email address has not been verified. Do you want to resend the email verification link?
-        </MSpan>
-      );
-    }
-
-    return (
-      <MSpan className='text-center' size='sm' data-testid='resend-email-excluded'>
-        If your email verification link has expired, or you never got one. You can enter your email address below and
-        another verification link will be sent to you.
-      </MSpan>
-    );
-  }
-
   return (
     <MForm
       initialValues={initialValues}
@@ -145,5 +128,23 @@ export function AfterEmailVerificationSent(): JSX.Element {
         </div>
       </div>
     </div>
+  );
+}
+
+function RouteStateMessage(): JSX.Element {
+  const { state: routeState } = useLocation();
+  if (routeState) {
+    return (
+      <MSpan className='text-center' size='sm' data-testid='resend-email-included'>
+        It looks like your email address has not been verified. Do you want to resend the email verification link?
+      </MSpan>
+    );
+  }
+
+  return (
+    <MSpan className='text-center' size='sm' data-testid='resend-email-excluded'>
+      If your email verification link has expired, or you never got one. You can enter your email address below and
+      another verification link will be sent to you.
+    </MSpan>
   );
 }
