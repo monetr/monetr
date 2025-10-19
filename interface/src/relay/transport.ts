@@ -21,7 +21,7 @@ export function makeSneakyFetchTransport(options: BrowserTransportOptions, nativ
 
   // Take the authentication out of the query params.
   const authParts: Array<string> = [];
-  parsedUrl.searchParams.forEach((value, key) => authParts.push(`${key}=${value}`));
+  parsedUrl.searchParams.forEach((value, key) => void authParts.push(`${key}=${value}`));
 
   const newOptions = {
     ...options,

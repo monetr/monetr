@@ -71,6 +71,13 @@
                 "zustand"
               ],
               ":BLANK_LINE:",
+              [
+                // Testing libraries
+                "@testing-library/**",
+                "axios-mock-adapter",
+                "react-test-renderer"
+              ],
+              ":BLANK_LINE:",
               ["@monetr/**"],
               ":ALIAS:",
               ":BLANK_LINE:",
@@ -104,23 +111,32 @@
         "noDistractingElements": "error",
         "noInteractiveElementToNoninteractiveRole": "warn",
         "noLabelWithoutControl": "warn",
-        "useValidAutocomplete": "on"
+        "useValidAutocomplete": "error"
       },
       "correctness": {
-        "useExhaustiveDependencies": "off",
+        "useExhaustiveDependencies": "warn",
         "noUnusedVariables": "error",
-        "noUnusedImports": "error"
+        "noUnusedImports": "error",
+        "noUnreachable": "error",
+        "noUndeclaredDependencies": "warn", // Mainly for storybook silliness
+        "noUndeclaredVariables": "off", // Doesn't work with jest :(
+        "useParseIntRadix": "error",
+        "useValidTypeof": "error"
       },
       "complexity": {
         "noForEach": "off",
         "noThisInStatic": "off",
         "noStaticOnlyClass": "off",
-        "noUselessFragments": "off"
+        "noUselessFragments": "error",
+        "noArguments": "error",
+        "noEmptyTypeParameters": "error",
+        "noUselessCatch": "error",
+        "noUselessConstructor": "error"
       },
       "suspicious": {
-        "noShadowRestrictedNames": "off",
-        "noExplicitAny": "off",
-        "noExtraNonNullAssertion": "off"
+        "noShadowRestrictedNames": "error",
+        "noExplicitAny": "warn",
+        "noExtraNonNullAssertion": "warn"
       },
       "performance": {
         "noDelete": "off"
