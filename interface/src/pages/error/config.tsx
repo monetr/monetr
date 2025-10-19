@@ -1,4 +1,4 @@
-import { HeartBrokenOutlined } from '@mui/icons-material';
+import { HeartCrack } from 'lucide-react';
 
 import MSpan from '@monetr/interface/components/MSpan';
 
@@ -6,7 +6,7 @@ export default function ConfigError(): JSX.Element {
   return (
     <div className='w-full h-full flex items-center justify-center flex-col p-4'>
       <MSpan className='w-full h-full justify-center flex-col text-center gap-4'>
-        <HeartBrokenOutlined className='text-9xl' />
+        <HeartCrack className='size-24' />
         <MSpan size='xl' weight='medium'>
           There was a problem loading the monetr application config, the API may be unavailable at this time.
         </MSpan>

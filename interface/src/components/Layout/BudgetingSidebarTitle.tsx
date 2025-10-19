@@ -11,7 +11,6 @@ import {
 } from '@monetr/interface/components/DropdownMenu';
 import MDivider from '@monetr/interface/components/MDivider';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
-import type { ReactElement } from '@monetr/interface/components/types';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { useTriggerManualPlaidSync } from '@monetr/interface/hooks/useTriggerManualPlaidSync';
@@ -102,7 +101,7 @@ export default function BudgetingSidebarTitle(): JSX.Element {
 interface MenuItemProps {
   visible?: boolean;
   onClick: () => unknown;
-  children?: ReactElement;
+  children?: React.ReactNode;
 }
 
 function MenuItem({ visible, onClick, children }: MenuItemProps): JSX.Element {

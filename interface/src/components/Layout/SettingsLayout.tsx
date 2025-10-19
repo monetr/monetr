@@ -1,10 +1,9 @@
-import { SettingsOutlined } from '@mui/icons-material';
+import { Settings } from 'lucide-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
 import MDivider from '@monetr/interface/components/MDivider';
 import { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import type { ReactElement } from '@monetr/interface/components/types';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 
 export default function SettingsLayout(): JSX.Element {
@@ -12,7 +11,7 @@ export default function SettingsLayout(): JSX.Element {
 
   return (
     <div className='w-full h-full min-w-0 flex flex-col'>
-      <MTopNavigation icon={SettingsOutlined} title='Settings' />
+      <MTopNavigation icon={Settings} title='Settings' />
       <div className='w-full flex px-4 mt-4 gap-6'>
         <SettingTab to='/settings/overview'>Overview</SettingTab>
         <SettingTab to='/settings/security'>Security</SettingTab>
@@ -27,7 +26,7 @@ export default function SettingsLayout(): JSX.Element {
 
 interface SettingTabProps {
   to: string;
-  children: ReactElement;
+  children: React.ReactNode;
 }
 
 function SettingTab(props: SettingTabProps): JSX.Element {

@@ -6,12 +6,11 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import MSidebarToggle from './MSidebarToggle';
 import MSpan from './MSpan';
-import type { ReactElement } from './types';
 
 export interface MTopNavigationProps {
   icon: React.FC<{ className?: string }>;
   title: string;
-  children?: ReactElement;
+  children?: React.ReactNode;
   base?: string;
   breadcrumb?: string;
 }

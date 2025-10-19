@@ -1,4 +1,4 @@
-import { TollOutlined } from '@mui/icons-material';
+import { Coins } from 'lucide-react';
 
 import MSpan from '@monetr/interface/components/MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
@@ -12,7 +12,7 @@ export default function BalanceCurrentAmount(): JSX.Element {
   return (
     <div className='flex w-full justify-between'>
       <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-        <TollOutlined />
+        <Coins />
         Current:
       </MSpan>
       <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>

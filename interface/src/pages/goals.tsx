@@ -1,6 +1,5 @@
 import { Fragment, useCallback, useEffect, useRef } from 'react';
-import { HeartBroken } from '@mui/icons-material';
-import { PiggyBank, Plus } from 'lucide-react';
+import { HeartCrack, PiggyBank, Plus } from 'lucide-react';
 import { useNavigationType } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -50,7 +49,7 @@ export default function Goals(): JSX.Element {
   if (isError) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <HeartCrack className='dark:text-dark-monetr-content size-24' />
         <MSpan className='text-5xl'>Something isn't right...</MSpan>
         <MSpan className='text-2xl'>We weren't able to retrieve goals at this time...</MSpan>
       </div>

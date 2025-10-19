@@ -3,12 +3,11 @@ import { Fragment } from 'react';
 
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
-import type { ReactElement } from '@monetr/interface/components/types';
 import Expenses from '@monetr/interface/pages/expenses';
 import Transactions from '@monetr/interface/pages/transactions';
 
 interface MonetrWrapperProps {
-  children: ReactElement;
+  children: React.ReactNode;
 }
 
 export default function MonetrWrapper(props: MonetrWrapperProps): JSX.Element {
@@ -21,7 +20,7 @@ export default function MonetrWrapper(props: MonetrWrapperProps): JSX.Element {
 }
 
 interface BankViewProps {
-  children: ReactElement;
+  children: React.ReactNode;
 }
 
 export function BankView(props: BankViewProps): JSX.Element {

@@ -1,5 +1,5 @@
-import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 import { useFormikContext } from 'formik';
+import { PiggyBank, Receipt } from 'lucide-react';
 import { components, type OptionProps } from 'react-select';
 
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
@@ -134,12 +134,12 @@ function MSelectSpendingOption({ children: _, ...props }: OptionProps<SpendingOp
         <div className='flex gap-2'>
           {props.data.spending?.spendingType === SpendingType.Goal && (
             <MBadge size='sm' className='dark:bg-dark-monetr-blue  max-h-[24px]'>
-              <SavingsOutlined />
+              <PiggyBank />
             </MBadge>
           )}
           {props.data.spending?.spendingType === SpendingType.Expense && (
             <MBadge size='sm' className='dark:bg-dark-monetr-green max-h-[24px]'>
-              <PriceCheckOutlined />
+              <Receipt />
             </MBadge>
           )}
           <MBadge size='sm'>{amount}</MBadge>

@@ -3,12 +3,10 @@ import { useFormikContext } from 'formik';
 import { Checkbox } from '@monetr/interface/components/Checkbox';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import type { ReactElement } from './types';
-
 export interface MCheckboxProps {
   id?: string;
-  label?: ReactElement;
-  description?: ReactElement;
+  label?: React.ReactNode;
+  description?: React.ReactNode;
   name?: string;
   disabled?: boolean;
   checked?: boolean;

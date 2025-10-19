@@ -1,4 +1,3 @@
-import { KeyboardArrowRight } from '@mui/icons-material';
 import { format, isThisYear } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { rrulestr } from 'rrule';
@@ -12,6 +11,7 @@ import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import { ChevronRight } from 'lucide-react';
 
 export interface ExpenseItemProps {
   spending: Spending;
@@ -85,7 +85,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
               {locale.formatAmount(spending.targetAmount, AmountType.Stored)}
             </span>
           </div>
-          <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50 flex-none md:cursor-pointer' />
+          <ChevronRight className='text-zinc-600 group-hover:text-zinc-50 flex-none md:cursor-pointer' />
         </div>
 
         {/* This block only shows on desktops or larger screens */}

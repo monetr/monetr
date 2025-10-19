@@ -1,8 +1,8 @@
 import { type FormEvent, useCallback, useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { Close, FilePresentOutlined, UploadFileOutlined } from '@mui/icons-material';
 import { useQueryClient } from '@tanstack/react-query';
 import axios, { type AxiosProgressEvent, type AxiosResponse } from 'axios';
+import { FileUp } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -42,26 +42,29 @@ function UploadTransactionsModal(): JSX.Element {
     return modal.remove();
   }, [stage, modal, queryClient, selectedBankAccountId]);
 
-  function CurrentStage(): JSX.Element {
-    switch (stage) {
-      case UploadTransactionStage.FileUpload:
-        return (
-          <UploadFileStage setResult={setMonetrUpload} setStage={setStage} setError={setError} close={modal.remove} />
-        );
-      case UploadTransactionStage.Processing:
-        return <ProcessingFileStage upload={monetrUpload} setStage={setStage} close={onClose} />;
-      case UploadTransactionStage.Completed:
-        return null;
-      case UploadTransactionStage.Error:
-        return <ErrorFileStage error={error} close={onClose} />;
-      default:
-        return null;
-    }
-  }
-
   return (
     <MModal open={modal.visible} ref={ref} className='sm:max-w-xl'>
-      <CurrentStage />
+      {(() => {
+        switch (stage) {
+          case UploadTransactionStage.FileUpload:
+            return (
+              <UploadFileStage
+                setResult={setMonetrUpload}
+                setStage={setStage}
+                setError={setError}
+                close={modal.remove}
+              />
+            );
+          case UploadTransactionStage.Processing:
+            return <ProcessingFileStage upload={monetrUpload} setStage={setStage} close={onClose} />;
+          case UploadTransactionStage.Completed:
+            return null;
+          case UploadTransactionStage.Error:
+            return <ErrorFileStage error={error} close={onClose} />;
+          default:
+            return null;
+        }
+      })()}
     </MModal>
   );
 }
@@ -145,7 +148,7 @@ function UploadFileStage(props: StageProps) {
           </div>
 
           <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
-            <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
+            <FileUp className='size-12 text-dark-monetr-content' />
             <div className='flex flex-col py-1 w-full'>
               <MSpan size='lg'>{file.name}</MSpan>
               <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
@@ -174,12 +177,11 @@ function UploadFileStage(props: StageProps) {
           <MSpan>Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.</MSpan>
 
           <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
-            <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
+            <FileUp className='size-12 text-dark-monetr-content' />
             <div className='flex flex-col py-1 w-full'>
               <MSpan size='lg'>{file.name}</MSpan>
               <MSpan>{fileSize(file.size)}</MSpan>
             </div>
-            <Close className='mr-2 text-dark-monetr-content-subtle hover:text-dark-monetr-content cursor-pointer' />
           </div>
         </div>
         <div className='flex justify-end gap-2 mt-2'>
@@ -207,7 +209,7 @@ function UploadFileStage(props: StageProps) {
 
         <div {...getRootProps()} className={uploadClassNames}>
           <input {...getInputProps()} />
-          <UploadFileOutlined className='text-6xl text-dark-monetr-content' />
+          <FileUp className='size-12 text-dark-monetr-content' />
           <MSpan size='lg' weight='semibold'>
             Drag OFX file here
           </MSpan>
@@ -231,5 +233,5 @@ const uploadTransactionsModal = NiceModal.create(UploadTransactionsModal);
 export default uploadTransactionsModal;
 
 export function showUploadTransactionsModal(): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof uploadTransactionsModal>, {}>(uploadTransactionsModal);
+  return NiceModal.show<void, ExtractProps<typeof uploadTransactionsModal>, unknown>(uploadTransactionsModal);
 }

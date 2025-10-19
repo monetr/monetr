@@ -1,7 +1,6 @@
 import { Fragment, useCallback, useEffect, useRef } from 'react';
-import { HeartBroken } from '@mui/icons-material';
 import { format, parse } from 'date-fns';
-import { Plus, ShoppingCart, Upload } from 'lucide-react';
+import { HeartCrack, Plus, ShoppingCart, Upload } from 'lucide-react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { useNavigationType } from 'react-router-dom';
 
@@ -80,7 +79,7 @@ export default function Transactions(): JSX.Element {
   if (isError) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <HeartCrack className='dark:text-dark-monetr-content size-24' />
         <MSpan className='text-5xl'>Something isn't right...</MSpan>
         <MSpan className='text-2xl'>We weren't able to retrieve transactions at this time...</MSpan>
       </div>
@@ -106,6 +105,7 @@ export default function Transactions(): JSX.Element {
 
   function TransactionItems() {
     const groups: { [date: string]: Array<Transaction> } = transactions.reduce((accumulator, item) => {
+      // biome-ignore lint/suspicious/noAssignInExpressions: This is the cleanest way to do this group by...
       (accumulator[format(item.date, 'yyyy-MM-dd')] ??= []).push(item);
       return accumulator;
     }, {});
@@ -204,6 +204,7 @@ function AddTransactionButton(): JSX.Element {
 
   return (
     <button
+      type='button'
       className='fixed md:bottom-4 bottom-14 right-4 w-14 h-14 rounded-full bg-dark-monetr-brand-subtle backdrop-blur-sm bg-opacity-75 backdrop-brightness-200 z-20 flex items-center justify-center active:backdrop-brightness-50'
       onClick={showNewTransactionModal}
     >

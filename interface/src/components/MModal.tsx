@@ -3,12 +3,10 @@ import React from 'react';
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import type { ReactElement } from './types';
-
 export interface MModalProps {
   open: boolean;
   onClose?: () => void;
-  children: ReactElement;
+  children: React.ReactNode;
   className?: string;
 }
 

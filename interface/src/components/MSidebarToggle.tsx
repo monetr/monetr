@@ -1,4 +1,4 @@
-import { ArrowBackOutlined, MenuOpenOutlined, MenuOutlined } from '@mui/icons-material';
+import { ArrowLeft, PanelLeft, PanelLeftClose } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import useStore from '@monetr/interface/hooks/store';
@@ -23,22 +23,22 @@ export default function MSidebarToggle(props: MSidebarToggleProps): JSX.Element 
 
   const className = mergeTailwind(
     'visible lg:hidden',
-    'dark:text-dark-monetr-content-emphasis cursor-pointer h-12 flex items-center justify-center',
+    'dark:text-dark-monetr-content-emphasis h-12 flex items-center justify-center',
     props.className,
   );
 
   if (props.backButton) {
     return (
-      <div className={className} onClick={onClick}>
-        <ArrowBackOutlined />
-      </div>
+      <button type='button' className={className} onClick={onClick}>
+        <ArrowLeft />
+      </button>
     );
   }
 
   return (
-    <div className={className} onClick={onClick}>
-      {!mobileSidebarOpen && <MenuOutlined />}
-      {mobileSidebarOpen && <MenuOpenOutlined />}
-    </div>
+    <button type='button' className={className} onClick={onClick}>
+      {!mobileSidebarOpen && <PanelLeft />}
+      {mobileSidebarOpen && <PanelLeftClose />}
+    </button>
   );
 }

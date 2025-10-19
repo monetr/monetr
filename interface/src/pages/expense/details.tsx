@@ -1,9 +1,8 @@
 import { tz } from '@date-fns/tz';
-import { HeartBroken } from '@mui/icons-material';
 import type { AxiosError } from 'axios';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
-import { ArrowUpDown, Receipt, Save, Trash } from 'lucide-react';
+import { ArrowUpDown, HeartCrack, Receipt, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -52,7 +51,7 @@ export default function ExpenseDetails(): JSX.Element {
   if (!spendingId) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <HeartCrack className='dark:text-dark-monetr-content size-24' />
         <MSpan className='text-5xl'>Something isn't right...</MSpan>
         <MSpan className='text-2xl'>There wasn't an expense specified...</MSpan>
       </div>

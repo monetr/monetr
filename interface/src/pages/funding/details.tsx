@@ -1,11 +1,9 @@
 import { useId } from 'react';
 import { tz } from '@date-fns/tz';
-import HeartBroken from '@mui/icons-material/HeartBroken';
-import TodayOutlined from '@mui/icons-material/TodayOutlined';
 import type { AxiosError } from 'axios';
 import { format, isEqual, startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikErrors, FormikHelpers } from 'formik';
-import { Save, Trash } from 'lucide-react';
+import { CalendarSync, HeartCrack, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useMatch, useNavigate } from 'react-router-dom';
 
@@ -54,7 +52,7 @@ export default function FundingDetails(): JSX.Element {
   if (!fundingId) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <HeartCrack className='dark:text-dark-monetr-content size-24' />
         <MSpan className='text-5xl'>Something isn't right...</MSpan>
         <MSpan className='text-2xl'>There wasn't a funding schedule specified...</MSpan>
       </div>
@@ -142,7 +140,7 @@ export default function FundingDetails(): JSX.Element {
     <MForm className='flex w-full h-full flex-col' initialValues={initialValues} onSubmit={submit} validate={validate}>
       <MTopNavigation
         title='Funding Schedules'
-        icon={TodayOutlined}
+        icon={CalendarSync}
         breadcrumb={funding.name}
         base={`/bank/${funding.bankAccountId}/funding`}
       >

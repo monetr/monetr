@@ -1,5 +1,4 @@
-import { ErrorOutline } from '@mui/icons-material';
-import { LogOut, Settings } from 'lucide-react';
+import { CircleAlert, LogOut, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import Logo from '@monetr/interface/assets/Logo';
@@ -7,7 +6,6 @@ import BankSidebarItem from '@monetr/interface/components/Layout/BankSidebarItem
 import MDivider from '@monetr/interface/components/MDivider';
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
 import MSpan from '@monetr/interface/components/MSpan';
-import type { ReactElement } from '@monetr/interface/components/types';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -33,7 +31,7 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
       <SidebarWrapper className={props.className}>
         <div className='w-full h-12 flex items-center justify-center relative group'>
           <div className='absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'>
-            <ErrorOutline className='text-3xl' />
+            <CircleAlert className='size-9' />
           </div>
         </div>
       </SidebarWrapper>
@@ -76,7 +74,7 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
 
 interface SidebarWrapperProps {
   className?: string;
-  children?: ReactElement;
+  children?: React.ReactNode;
 }
 
 function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {

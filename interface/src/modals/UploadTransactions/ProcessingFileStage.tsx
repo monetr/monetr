@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { FilePresentOutlined } from '@mui/icons-material';
 import { type UseQueryResult, useQuery, useQueryClient } from '@tanstack/react-query';
+import { FileUp } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -31,7 +31,7 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): JS
         </MSpan>
 
         <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
-          <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
+          <FileUp className='size-12 text-dark-monetr-content' />
           <div className='flex flex-col py-1 w-full'>
             <MSpan size='lg'>{props.upload.file.name}</MSpan>
             <MSpan>Import {data?.status || 'processing'}!</MSpan>

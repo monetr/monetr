@@ -13,7 +13,6 @@ import useTimezone from '@monetr/interface/hooks/useTimezone';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import MLabel, { type MLabelDecorator } from './MLabel';
-import type { ReactElement } from './types';
 
 import { enUS } from 'date-fns/locale/en-US';
 
@@ -21,7 +20,7 @@ export interface MDatePickerProps extends Omit<React.HTMLAttributes<HTMLButtonEl
   value?: Date;
   min?: Date;
   max?: Date;
-  children?: ReactElement;
+  children?: React.ReactNode;
   disabled?: boolean;
   enableClear?: boolean;
   enableYearNavigation?: boolean;

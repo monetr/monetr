@@ -1,4 +1,4 @@
-import { AccountBalanceWalletOutlined } from '@mui/icons-material';
+import { Wallet } from 'lucide-react';
 
 import MSpan from '@monetr/interface/components/MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
@@ -23,7 +23,7 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
       return (
         <div className='flex w-full justify-between flex-shrink min-w-fit'>
           <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-            <AccountBalanceWalletOutlined />
+            <Wallet />
             Free-To-Use:
           </MSpan>
           &nbsp;

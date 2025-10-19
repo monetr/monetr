@@ -15,7 +15,6 @@ import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import MSpinner from '@monetr/interface/components/MSpinner';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
-import type { ReactElement } from '@monetr/interface/components/types';
 import request from '@monetr/interface/util/request';
 
 interface PlaidProps {
@@ -182,7 +181,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
     }
   }, [plaidError]);
 
-  let inner: ReactElement = (
+  let inner: React.ReactNode = (
     <div className='flex flex-col justify-center items-center'>
       <MSpan className='text-2xl font-medium'>Getting Plaid Ready!</MSpan>
       <MSpan className='text-lg' color='subtle'>

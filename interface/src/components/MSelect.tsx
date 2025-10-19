@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { CheckCircleOutline } from '@mui/icons-material';
 import { SwipeableDrawer } from '@mui/material';
+import { CircleCheck } from 'lucide-react';
 import Select, {
   type ActionMeta,
   type GroupBase,
@@ -221,7 +221,7 @@ function SelectModal(props: SelectModalProps): JSX.Element {
                 modal.hide();
               }}
             >
-              {props.value?.value === item.value && <CheckCircleOutline className='mx-2 w-6' />}
+              {props.value?.value === item.value && <CircleCheck className='mx-2 size-6' />}
               {props.value?.value !== item.value && <div className='mx-2 w-6' />}
               <MSpan size='lg' weight='medium'>
                 {item.label}

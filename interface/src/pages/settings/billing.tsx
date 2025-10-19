@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { AccessTimeOutlined } from '@mui/icons-material';
 import type { AxiosResponse } from 'axios';
 import { format, isFuture, isThisYear } from 'date-fns';
+import { Clock } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useLocation } from 'react-router-dom';
 
@@ -90,7 +90,7 @@ function SubscriptionStatusBadge(): JSX.Element {
 
     return (
       <MBadge className='bg-yellow-600' data-testid='billing-subscription-trialing'>
-        <AccessTimeOutlined />
+        <Clock />
         Trialing Until {trialEndDate}
       </MBadge>
     );

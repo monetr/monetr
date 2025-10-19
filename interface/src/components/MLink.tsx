@@ -3,11 +3,11 @@ import { Link, type LinkProps } from 'react-router-dom';
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import type { ReactElement, TextSize } from './types';
+import type { TextSize } from './types';
 
 type BaseLinkProps = LinkProps & React.RefAttributes<HTMLAnchorElement>;
 export interface MLinkProps extends BaseLinkProps {
-  children: ReactElement;
+  children: React.ReactNode;
   color?: 'primary' | 'secondary';
   size?: TextSize;
 }

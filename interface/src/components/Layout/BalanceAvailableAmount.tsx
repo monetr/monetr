@@ -1,4 +1,4 @@
-import { LocalAtmOutlined } from '@mui/icons-material';
+import { Banknote } from 'lucide-react';
 
 import MSpan from '@monetr/interface/components/MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
@@ -17,7 +17,7 @@ export default function BalanceAvailableAmount(): JSX.Element {
       return (
         <div className='flex w-full justify-between'>
           <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-            <LocalAtmOutlined />
+            <Banknote />
             Available:
           </MSpan>
           <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>

@@ -151,7 +151,6 @@
           "level": "warn",
           "options": {
             "paths": {
-              "@mui/icons-material": "use lucide-react instead",
               "@mui/material": "use literally anything else instead"
             }
           }

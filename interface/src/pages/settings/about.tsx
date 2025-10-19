@@ -2,7 +2,6 @@ import { format } from 'date-fns';
 
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan, { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';
-import type { ReactElement } from '@monetr/interface/components/types';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 
 export default function SettingsAbout(): JSX.Element {
@@ -120,7 +119,7 @@ export default function SettingsAbout(): JSX.Element {
 
 interface AboutHyperlinkProps {
   href: string;
-  children: ReactElement;
+  children: React.ReactNode;
 }
 
 function AboutHyperlink(props: AboutHyperlinkProps): JSX.Element {

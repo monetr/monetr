@@ -1,7 +1,5 @@
-/* eslint-disable max-len */
 import React, { useState } from 'react';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import EditOutlined from '@mui/icons-material/EditOutlined';
+import { CircleCheck, Pencil } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -10,7 +8,6 @@ import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
 import SetupBillingButton from '@monetr/interface/components/setup/SetupBillingButton';
-import type { ReactElement } from '@monetr/interface/components/types';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -88,7 +85,7 @@ function Greeting(props: GreetingProps): JSX.Element {
       <Banner />
       <div className='flex gap-4 flex-col md:flex-row p-2'>
         <OnboardingTile
-          icon={<PlaidLogo />}
+          icon={PlaidLogo}
           name='Plaid'
           description='Plaid makes connecting your monetr account to your bank easy.'
           active={active === 'plaid'}
@@ -96,7 +93,7 @@ function Greeting(props: GreetingProps): JSX.Element {
           disabled={!config?.plaidEnabled}
         />
         <OnboardingTile
-          icon={<EditOutlined />}
+          icon={Pencil}
           name='Manual'
           description='Manage your transactions and budget manually with monetr.'
           active={active === 'manual'}
@@ -116,9 +113,9 @@ function Greeting(props: GreetingProps): JSX.Element {
 interface OnboardingTileProps {
   onClick: () => void;
   active: boolean;
-  icon: React.ReactElement;
-  name: ReactElement;
-  description: ReactElement;
+  icon: React.FC<{ className?: string }>; // Anything that allows the class name to be customized
+  name: React.ReactNode;
+  description: React.ReactNode;
   comingSoon?: boolean;
   disabled?: boolean;
 }
@@ -188,9 +185,9 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   }
 
   return (
-    <a className={wrapperClasses} onClick={handleClick}>
-      {props.active && <CheckCircle className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' />}
-      {React.cloneElement(props.icon, { className: 'w-16 h-12 md:w-20 md:h-12 ml-4 md:ml-0 md:mt-6' })}
+    <button type='button' className={wrapperClasses} onClick={handleClick}>
+      {props.active && <CircleCheck className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' />}
+      {React.createElement(props.icon, { className: 'w-16 h-12 md:w-20 md:h-12 ml-4 md:ml-0 md:mt-6' })}
       <div className='flex flex-col gap-2 items-center h-full md:mt-4 text-center w-full md:w-auto'>
         <MSpan className='text-lg font-medium'>{props.name}</MSpan>
         <MSpan color='subtle'>{props.description}</MSpan>
@@ -198,6 +195,6 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
         {props.comingSoon && <MSpan className='md:mt-5 font-medium'>Coming Soon</MSpan>}
         {props.disabled && <MSpan className='md:mt-5 font-medium'>Unavailable</MSpan>}
       </div>
-    </a>
+    </button>
   );
 }

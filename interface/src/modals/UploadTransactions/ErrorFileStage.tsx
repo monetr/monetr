@@ -1,4 +1,4 @@
-import { FilePresentOutlined } from '@mui/icons-material';
+import { FileUp } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -20,7 +20,7 @@ export default function ErrorFileStage(props: ErrorFileStageProps): JSX.Element 
         </div>
 
         <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
-          <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
+          <FileUp className='size-12 text-dark-monetr-content' />
           <div className='flex flex-col py-1 w-full'>
             <MSpan size='lg'>{props.error.filename}</MSpan>
             <MSpan>Failed to import data: {props.error.message}</MSpan>

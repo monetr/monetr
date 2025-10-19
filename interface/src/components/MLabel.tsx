@@ -2,8 +2,6 @@ import type React from 'react';
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import type { ReactElement } from './types';
-
 export interface MLabelDecoratorProps {
   name?: string;
   disabled?: boolean;
@@ -16,7 +14,7 @@ export interface MLabelProps {
   label?: string;
   required?: boolean;
   disabled?: boolean;
-  children?: ReactElement;
+  children?: React.ReactNode;
 }
 
 export default function MLabel(props: MLabelProps): JSX.Element {

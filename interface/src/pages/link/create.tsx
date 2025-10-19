@@ -1,4 +1,4 @@
-import { PowerOutlined } from '@mui/icons-material';
+import { Plug } from 'lucide-react';
 
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
@@ -9,7 +9,7 @@ export default function LinkCreatePage(): JSX.Element {
 
   return (
     <div className='flex flex-col w-full'>
-      <MTopNavigation icon={PowerOutlined} title='Add another connection' />
+      <MTopNavigation icon={Plug} title='Add another connection' />
       <SetupPage alreadyOnboarded manualEnabled={config?.manualEnabled} />
     </div>
   );

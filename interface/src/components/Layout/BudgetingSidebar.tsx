@@ -1,4 +1,4 @@
-import { CalendarSync, Infinity, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
+import { CalendarSync, Infinity as InfinityIcon, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceAvailableAmount';
@@ -10,7 +10,6 @@ import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAcc
 import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
-import type { ReactElement } from '@monetr/interface/components/types';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useNextFundingDate } from '@monetr/interface/hooks/useNextFundingDate';
@@ -44,7 +43,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
         return (
           <div className='flex w-full justify-between'>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
-              <Infinity />
+              <InfinityIcon />
               Limit:
             </MSpan>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
@@ -113,7 +112,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
 }
 
 interface NavigationItemProps {
-  children: ReactElement;
+  children: React.ReactNode;
   to: string;
 }
 

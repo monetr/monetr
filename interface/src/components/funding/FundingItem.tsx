@@ -1,6 +1,5 @@
-import { KeyboardArrowRight } from '@mui/icons-material';
 import { format, isThisYear } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { rrulestr } from 'rrule';
 
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
@@ -10,6 +9,7 @@ import { useNextFundingForecast } from '@monetr/interface/hooks/useNextFundingFo
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
+import { ChevronRight } from 'lucide-react';
 
 export interface FundingItemProps {
   funding: FundingSchedule;
@@ -36,9 +36,9 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
 
   return (
     <li className='group relative w-full px-1 md:px-2'>
-      <div
+      <Link
+        to={`/bank/${funding.bankAccountId}/funding/${funding.fundingScheduleId}/details`}
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
-        onClick={openDetails}
       />
       <div className='flex items-center rounded-lg group-hover:bg-zinc-600 gap-2 md:gap-4 px-2 py-1 h-full cursor-pointer md:cursor-auto'>
         <Avatar className='h-10 w-10'>
@@ -70,7 +70,7 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
               </span>
             </div>
           </div>
-          <KeyboardArrowRight
+          <ChevronRight
             className='dark:text-dark-monetr-content-subtle dark:group-hover:text-dark-monetr-content-emphasis flex-none md:cursor-pointer'
             onClick={openDetails}
           />
