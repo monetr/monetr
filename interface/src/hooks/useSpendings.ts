@@ -8,8 +8,6 @@ export function useSpendings(): UseQueryResult<Array<Spending>, unknown> {
   return useQuery<Array<Partial<Spending>>, unknown, Array<Spending>>({
     queryKey: [`/bank_accounts/${selectedBankAccountId}/spending`],
     enabled: Boolean(selectedBankAccountId),
-    initialData: [],
-    initialDataUpdatedAt: 0,
     select: data => (data || []).map(item => new Spending(item)),
   });
 }

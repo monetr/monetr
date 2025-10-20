@@ -163,7 +163,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
     return defaultFilterImplementation<V>;
   }, [props.filterImpl]);
 
-  const { isOpen, getMenuProps, getInputProps, getItemProps, selectedItem, openMenu } = useCombobox({
+  const { isOpen, getMenuProps, getInputProps, getItemProps, openMenu, selectedItem } = useCombobox({
     selectedItem: props.value,
     // By default the highest item should be "highlighted" unless the user moves the highlight themselves.
     defaultHighlightedIndex: 0,
@@ -278,7 +278,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
                 ],
                 {
                   // The _ACTUAL_ selected state will be slightly darker than the hover state.
-                  'bg-zinc-700': selectedItem.value === item.value,
+                  'bg-zinc-700': selectedItem?.value === item.value,
                 },
               )}
               {...getItemProps({
@@ -290,7 +290,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
                 props.optionComponent ?? DefaultSelectOptionComponent,
                 {
                   ...item,
-                  selected: selectedItem.value === item.value,
+                  selected: selectedItem?.value === item.value,
                 },
               )}
             </li>
