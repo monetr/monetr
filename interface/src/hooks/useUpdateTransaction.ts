@@ -29,12 +29,14 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<T
       Promise.all([
         queryClient.setQueryData(
           [`/bank_accounts/${transaction.bankAccountId}/transactions`],
-          (previous: InfiniteData<Array<Transaction>>) => ({
-            ...previous,
-            pages: previous.pages.map(page =>
-              page.map(item => (item.transactionId === transaction.transactionId ? transaction : item)),
-            ),
-          }),
+          (previous: InfiniteData<Array<Transaction>>) =>
+            // If previous does not exist then do nothing, otherwise this will break the page.
+            previous && {
+              ...previous,
+              pages: previous?.pages?.map(page =>
+                page.map(item => (item.transactionId === transaction.transactionId ? transaction : item)),
+              ),
+            },
         ),
         queryClient.setQueryData(
           [`/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`],

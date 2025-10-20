@@ -2,11 +2,11 @@ import { useFormikContext } from 'formik';
 import { Calendar } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
+import Select, { type SelectOption } from '@monetr/interface/components/Select';
 import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 
 import MLabel from './MLabel';
-import MSelect from './MSelect';
 
 export interface MSelectFundingProps {
   label?: string;
@@ -23,28 +23,29 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
 
   if (fundingIsLoading) {
     return (
-      <MSelect
+      <Select
         className={props?.className}
         disabled
         isLoading
         label={label}
-        menuPortalTarget={props.menuPortalTarget}
         placeholder='Select a funding schedule...'
         required={props?.required}
+        options={[]}
+        onChange={() => {}}
       />
     );
   }
 
   if (fundingIsError) {
     return (
-      <MSelect
+      <Select
         className={props?.className}
         disabled
-        isLoading
         label={label}
-        menuPortalTarget={props.menuPortalTarget}
-        placeholder='Failed to load funding schedules...'
+        placeholder='Failed to loading funding schedules...'
         required={props?.required}
+        options={[]}
+        onChange={() => {}}
       />
     );
   }
@@ -77,16 +78,13 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
 
   const value = options.find(option => option.value === formikContext.values[props.name]);
 
-  function onSelect(newValue: { label: string; value: number }) {
+  function onSelect(newValue: SelectOption<string>) {
     formikContext.setFieldValue(props.name, newValue.value);
   }
 
   return (
-    <MSelect
+    <Select
       label={props.label ?? 'Funding'}
-      menuPlacement='auto'
-      menuPortalTarget={props.menuPortalTarget}
-      menuPosition='fixed'
       name='fundingScheduleId'
       onChange={onSelect}
       options={options}

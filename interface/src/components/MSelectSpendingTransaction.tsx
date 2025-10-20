@@ -78,7 +78,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
       currentAmount: balances?.free,
     },
   };
-  const items = allSpending.map(item => ({
+  const items = (allSpending ?? []).map(item => ({
     label: item.name,
     value: item.spendingId,
     spending: item,

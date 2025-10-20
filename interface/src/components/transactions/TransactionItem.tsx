@@ -70,7 +70,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
 
     return (
       <span className={className}>
-        <span className='min-w-0 flex-none truncate font-medium dark:text-dark-monetr-content'>Spent from</span>
+        <span className='min-w-0 flex-none truncate font-medium dark:text-content'>Spent from</span>
         &nbsp;
         <span className={spentFromClasses}>{spending?.name || 'Free-To-Use'}</span>
       </span>
@@ -94,7 +94,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
             <MSpan size='md' weight='semibold' color='emphasis' ellipsis>
               {transaction.getName()}
             </MSpan>
-            <span className='hidden w-full min-w-0 truncate text-sm font-medium dark:text-dark-monetr-content md:block'>
+            <span className='hidden w-full min-w-0 truncate text-sm font-medium dark:text-content md:block'>
               {transaction.getMainCategory()}
             </span>
             <BudgetingInfo className='flex w-full text-sm md:hidden' />

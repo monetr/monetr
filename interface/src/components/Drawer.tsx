@@ -36,17 +36,21 @@ const DrawerContent = React.forwardRef<
       ref={ref}
       className={mergeTailwind(
         'fixed',
-        'inset-x-0 bottom-0',
+        'inset-x-0',
         'z-50', // mt-24',
-        'flex h-auto flex-col',
+        'flex flex-col',
         'rounded-t-[10px]',
+        'bottom-0 left-0 right-0',
         'border border-b-0 border-dark-monetr-border bg-dark-monetr-background',
-        'max-h-screen',
+        'max-h-[60%]',
+        'gap-4',
+        'pb-4',
+        // 'max-h-screen',
         className,
       )}
       {...props}
     >
-      <div className='mx-auto mt-4 h-2 w-[100px] rounded-full bg-dark-monetr-content-muted' />
+      <div className='mx-auto mt-4 h-2 min-h-2 w-[100px] rounded-full bg-dark-monetr-content-muted' />
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
@@ -57,7 +61,7 @@ DrawerContent.displayName = 'DrawerContent';
 // properly.
 const DrawerWrapper = React.forwardRef<HTMLDivElement, React.ButtonHTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
-    <div ref={ref} className={mergeTailwind('h-full flex-shrink overflow-y-auto', className)} {...props}>
+    <div ref={ref} className={mergeTailwind('flex-shrink overflow-y-auto', className)} {...props}>
       {children}
     </div>
   ),
