@@ -73,7 +73,7 @@
     "@rspack/binding-linux-x64-gnu": "1.5.8",
     "@swc/core": "1.13.5",
     "@swc/jest": "0.2.39",
-    "@testing-library/jest-dom": "6.6.4",
+    "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.0",
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.6.1",
