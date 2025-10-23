@@ -16,8 +16,8 @@
 <url><loc>https://monetr.app/documentation/configure/cors/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/configure/email/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/configure/kms/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://monetr.app/documentation/configure/links/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/configure/logging/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://monetr.app/documentation/configure/links/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/configure/plaid/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/configure/postgres/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://monetr.app/documentation/configure/recaptcha/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
