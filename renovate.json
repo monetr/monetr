@@ -136,6 +136,15 @@
       "depNameTemplate": "simple-icons",
       "packageNameTemplate": "https://github.com/simple-icons/simple-icons.git",
       "datasourceTemplate": "git-refs"
+    },
+    {
+      "customType": "regex",
+      "description": "Update biome schema version",
+      "fileMatch": ["biome.jsonc"],
+      "matchStrings": ["https:\/\/biomejs.dev\/schemas\/(?<currentValue>.*?)\/schema.json"],
+      "depNameTemplate": "@biomejs/biome",
+      "packageNameTemplate": "@biomejs/biome",
+      "datasourceTemplate": "npm"
     }
   ]
 }
