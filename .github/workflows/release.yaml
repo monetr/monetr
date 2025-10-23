@@ -130,14 +130,14 @@ jobs:
           name: '${{ needs.release_please.outputs.version }}-maps'
           path: '${{ github.workspace }}/server/ui/static'
       - name: Create Sentry Release
-        uses: getsentry/action-release@v1
+        uses: getsentry/action-release@v3
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: monetr
         with:
           environment: 'my.monetr.app'
-          version: 'v${{ needs.release_please.outputs.version }}'
+          release: 'v${{ needs.release_please.outputs.version }}'
           sourcemaps: 'server/ui/static/assets/scripts'
           url_prefix: 'https://my.monetr.app'
       - name: Trigger Deployment
