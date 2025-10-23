@@ -220,5 +220,5 @@ function SelectModal(props: SelectModalProps): JSX.Element {
 const selectModal = NiceModal.create<SelectModalProps>(SelectModal);
 
 function showSelectModal(props: SelectModalProps): Promise<Value<unknown>> {
-  return NiceModal.show<Value<unknown>, ExtractProps<typeof selectModal>, {}>(selectModal, props);
+  return NiceModal.show<Value<unknown>, ExtractProps<typeof selectModal>, unknown>(selectModal, props);
 }

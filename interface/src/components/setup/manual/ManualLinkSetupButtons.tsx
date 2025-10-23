@@ -5,7 +5,7 @@ import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 
 export default function ManualLinkSetupButtons(): JSX.Element {
-  const viewContext = useViewContext<ManualLinkSetupSteps, {}>();
+  const viewContext = useViewContext<ManualLinkSetupSteps, unknown>();
   const steps = Object.values(ManualLinkSetupSteps);
   const step = steps.indexOf(viewContext.currentView);
   const lastStep = steps.length - 1;

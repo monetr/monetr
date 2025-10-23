@@ -142,5 +142,5 @@ const removeTransactionModal = NiceModal.create<RemoveTransactionModalProps>(Rem
 export default removeTransactionModal;
 
 export function showRemoveTransactionModal(props: RemoveTransactionModalProps): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof removeTransactionModal>, {}>(removeTransactionModal, props);
+  return NiceModal.show<void, ExtractProps<typeof removeTransactionModal>, unknown>(removeTransactionModal, props);
 }

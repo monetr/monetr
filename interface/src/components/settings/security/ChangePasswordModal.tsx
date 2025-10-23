@@ -133,5 +133,5 @@ const changePasswordModal = NiceModal.create(ChangePasswordModal);
 export default changePasswordModal;
 
 export function showChangePasswordModal(): Promise<void> {
-  return NiceModal.show<void, React.ComponentProps<typeof changePasswordModal>, {}>(changePasswordModal);
+  return NiceModal.show<void, React.ComponentProps<typeof changePasswordModal>, unknown>(changePasswordModal);
 }

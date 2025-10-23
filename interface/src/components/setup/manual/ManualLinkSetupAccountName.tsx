@@ -12,7 +12,7 @@ interface Values {
 }
 
 export default function ManualLinkSetupAccountName(): JSX.Element {
-  const viewContext = useViewContext<ManualLinkSetupSteps, {}>();
+  const viewContext = useViewContext<ManualLinkSetupSteps, unknown>();
   const initialValues: Values = {
     accountName: '',
     ...viewContext.formData,

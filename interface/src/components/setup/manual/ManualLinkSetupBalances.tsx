@@ -15,7 +15,7 @@ interface Values {
 }
 
 export default function ManualLinkSetupBalances(): JSX.Element {
-  const viewContext = useViewContext<ManualLinkSetupSteps, {}>();
+  const viewContext = useViewContext<ManualLinkSetupSteps, unknown>();
   const initialValues: Values = {
     startingBalance: 0.0,
     currency: 'USD',

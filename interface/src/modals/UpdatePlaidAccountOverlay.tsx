@@ -151,5 +151,8 @@ const updatePlaidAccountOverlay = NiceModal.create<UpdatePlaidAccountOverlayProp
 export default updatePlaidAccountOverlay;
 
 export function showUpdatePlaidAccountOverlay(props: UpdatePlaidAccountOverlayProps): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof updatePlaidAccountOverlay>, {}>(updatePlaidAccountOverlay, props);
+  return NiceModal.show<void, ExtractProps<typeof updatePlaidAccountOverlay>, unknown>(
+    updatePlaidAccountOverlay,
+    props,
+  );
 }

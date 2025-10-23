@@ -73,5 +73,5 @@ const removeLinkModal = NiceModal.create<RemoveLinkModalProps>(RemoveLinkModal);
 export default removeLinkModal;
 
 export function showRemoveLinkModal(props: RemoveLinkModalProps): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof removeLinkModal>, {}>(removeLinkModal, props);
+  return NiceModal.show<void, ExtractProps<typeof removeLinkModal>, unknown>(removeLinkModal, props);
 }

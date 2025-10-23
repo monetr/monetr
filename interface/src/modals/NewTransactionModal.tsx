@@ -211,5 +211,5 @@ const newTransactionModal = NiceModal.create(NewTransactionModal);
 export default newTransactionModal;
 
 export function showNewTransactionModal(): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof newTransactionModal>, {}>(newTransactionModal);
+  return NiceModal.show<void, ExtractProps<typeof newTransactionModal>, unknown>(newTransactionModal);
 }

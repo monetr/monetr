@@ -31,7 +31,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
   const createBankAccount = useCreateBankAccount();
   const createFundingSchedule = useCreateFundingSchedule();
   const navigate = useNavigate();
-  const viewContext = useViewContext<ManualLinkSetupSteps, {}>();
+  const viewContext = useViewContext<ManualLinkSetupSteps, unknown>();
   const { data: locale } = useLocaleCurrency(viewContext.formData.currency);
   const initialValues: Values = {
     nextPayday: startOfTomorrow({
