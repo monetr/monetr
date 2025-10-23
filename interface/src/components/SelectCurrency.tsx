@@ -17,7 +17,6 @@ export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element 
   const { data: currencies, isLoading: currenciesLoading } = useInstalledCurrencies();
   const onChange = useCallback(
     (option: SelectOption<string>) => {
-      console.log('CHANGED', option);
       formikContext.setFieldValue(props.name, option.value);
     },
     [formikContext, props.name],
