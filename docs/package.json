@@ -30,7 +30,7 @@
     "@types/react-dom": "18.3.7",
     "@untitaker/hyperlink": "0.1.44",
     "autoprefixer": "10.4.21",
-    "cheerio": "1.0.0",
+    "cheerio": "1.1.2",
     "cssnano": "7.1.1",
     "postcss": "8.5.6",
     "sass": "1.93.2",
