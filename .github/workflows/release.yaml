@@ -66,7 +66,7 @@ jobs:
         run: |
           make interface RELEASE=${{ needs.release_please.outputs.version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         name: Upload UI As Artifact
         with:
           name: '${{ needs.release_please.outputs.version }}-maps'
@@ -124,7 +124,7 @@ jobs:
           production-environment: false
           ref: "v${{ needs.release_please.outputs.version }}"
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         name: Download UI As Artifact
         with:
           name: '${{ needs.release_please.outputs.version }}-maps'
