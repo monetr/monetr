@@ -61,7 +61,7 @@ services:
     tty: true # Color output.
     image: monetr-ui:local
     pull_policy: never
-    user: "${UID:-1000}:${GID:-1000}"
+    user: "${UID:-0}:${GID:-0}"
     working_dir: "@CMAKE_SOURCE_DIR@/interface"
     restart: always
     healthcheck:
@@ -71,8 +71,8 @@ services:
       retries: 12
       start_period: 60s
     environment:
-      UID: "${UID:-1000}"
-      GID: "${GID:-1000}"
+      UID: "${UID:-0}"
+      GID: "${GID:-0}"
       WS_PROTO: 'wss' # TODO Make this based on the local protocol
       INSECURE_WS: "false" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
       NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
@@ -92,7 +92,7 @@ services:
     image: monetr-backend:local
     pull_policy: never
     restart: no
-    user: "${UID:-1000}:${GID:-1000}"
+    user: "${UID:-0}:${GID:-0}"
     build:
       context: .
       dockerfile: "@CMAKE_SOURCE_DIR@/compose/monetr-backend.Dockerfile"
@@ -100,7 +100,7 @@ services:
     tty: true # Makes color output work nicely.
     image: monetr-backend:local
     pull_policy: never
-    user: "${UID:-1000}:${GID:-1000}"
+    user: "${UID:-0}:${GID:-0}"
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
     healthcheck:
@@ -110,8 +110,8 @@ services:
       retries: 35
       start_period: 60s
     environment:
-      UID: "${UID:-1000}"
-      GID: "${GID:-1000}"
+      UID: "${UID:-0}"
+      GID: "${GID:-0}"
       air_wd: /build
       DISABLE_GO_RELOAD: "@DISABLE_GO_RELOAD@"
       CLOUD_MAGIC: "@CLOUD_MAGIC@"
