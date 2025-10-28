@@ -194,14 +194,6 @@ elseif("${MONETR_STORAGE_PROVIDER}" STREQUAL "")
   set(MONETR_STORAGE_ENABLED "false")
 endif()
 
-if("${MONETR_FEATURE_FLAG_PROVIDER}" STREQUAL "flipt")
-  # Flipt's data directory
-  file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/flipt)
-  list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.flipt.yaml.in)
-  list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/flipt.nginx.conf.in)
-  list(APPEND LOCAL_DOMAINS "flipt.${MONETR_LOCAL_DOMAIN}")
-endif()
-
 # Once the list of compose file templates has been built, actually generate the template files and build our arguments
 # for docker compose.
 
@@ -229,7 +221,6 @@ set(S3_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/s3.nginx.conf")
 set(VAULT_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/vault.nginx.conf")
 set(NGROK_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/ngrok.nginx.conf")
 set(MAIL_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/mail.nginx.conf")
-set(FLIPT_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/flipt.nginx.conf")
 
 if(EXISTS "${S3_NGINX_CONFIG_FILE}")
   file(READ "${S3_NGINX_CONFIG_FILE}" S3_NGINX_CONFIG)
@@ -247,9 +238,6 @@ if(EXISTS "${MAIL_NGINX_CONFIG_FILE}")
   file(READ "${MAIL_NGINX_CONFIG_FILE}" MAIL_NGINX_CONFIG)
 endif()
 
-if(EXISTS "${FLIPT_NGINX_CONFIG_FILE}")
-  file(READ "${FLIPT_NGINX_CONFIG_FILE}" FLIPT_NGINX_CONFIG)
-endif()
 # And template them into the final config.
 configure_file("${CMAKE_SOURCE_DIR}/compose/nginx.conf.in" "${NGINX_CONFIG_FILE}" @ONLY)
 
