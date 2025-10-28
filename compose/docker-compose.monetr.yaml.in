@@ -48,13 +48,23 @@ services:
       - monetr
       - ui
       - mail
+  ui_builder:
+    image: monetr-ui:local
+    pull_policy: never
+    restart: no
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM node:20.19.5-trixie
+        RUN npm install -g pnpm
   ui:
     # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
     # do `pnpm install` before doing docker compose up.
     tty: true # Color output.
-    image: node:20.19.5-trixie
-    user: "${UID:-0}:${GID:-0}"
-    working_dir: /build
+    image: monetr-ui:local
+    pull_policy: never
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: "@CMAKE_SOURCE_DIR@/interface"
     restart: always
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
@@ -63,6 +73,8 @@ services:
       retries: 12
       start_period: 60s
     environment:
+      UID: "${UID:-1000}"
+      GID: "${GID:-1000}"
       WS_PROTO: 'wss' # TODO Make this based on the local protocol
       INSECURE_WS: "false" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
       NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
@@ -71,15 +83,37 @@ services:
       CLOUD_MAGIC: "@CLOUD_MAGIC@"
       MONETR_SENTRY_DSN: "${MONETR_SENTRY_DSN:-@MONETR_SENTRY_DSN@}"
     volumes:
-      - ./:/build
+      - "@CMAKE_SOURCE_DIR@:@CMAKE_SOURCE_DIR@"
     command:
-      - bash
-      - -c
-      - /build/compose/ui-entrypoint.sh
+      - "pnpm"
+      - "start"
+    depends_on:
+      ui_builder:
+        condition: service_completed_successfully
+  monetr_builder:
+    image: monetr-backend:local
+    pull_policy: never
+    restart: no
+    user: "${UID:-1000}:${GID:-1000}"
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM golang:1.24.8-trixie
+        RUN apt-get update && apt-get install -y locales-all tzdata
+        RUN groupadd -g ${GID:-1000} monetr
+        RUN useradd -rm -d /home/monetr -s /bin/bash -g root -g monetr -G sudo -u ${PID:-1000} monetr
+        USER monetr
+        WORKDIR /home/monetr
+        RUN mkdir -p /home/monetr/go/bin && mkdir /home/monetr/bin
+        ENV GOPATH=/home/monetr/go
+        ENV PATH=$PATH:/home/monetr/go/bin:/home/monetr/bin
+        RUN go install github.com/cosmtrek/air@v1.29.0
+        RUN go install github.com/go-delve/delve/cmd/dlv@latest
   monetr:
     tty: true # Makes color output work nicely.
-    image: golang:1.24.8-trixie
-    user: "${UID:-0}:${GID:-0}"
+    image: monetr-backend:local
+    pull_policy: never
+    user: "${UID:-1000}:${GID:-1000}"
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
     healthcheck:
@@ -89,6 +123,8 @@ services:
       retries: 35
       start_period: 60s
     environment:
+      UID: "${UID:-1000}"
+      GID: "${GID:-1000}"
       air_wd: /build
       DISABLE_GO_RELOAD: "@DISABLE_GO_RELOAD@"
       CLOUD_MAGIC: "@CLOUD_MAGIC@"
@@ -136,6 +172,8 @@ services:
         condition: service_started
       postgres:
         condition: service_started
+      monetr_builder:
+        condition: service_completed_successfully
 
 volumes:
   kmsData:
