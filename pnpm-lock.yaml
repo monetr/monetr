@@ -213,8 +213,8 @@ importers:
         specifier: 5.4.4
         version: 5.4.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-plaid-link:
-        specifier: 3.6.1
-        version: 3.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.1.1
+        version: 4.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-qr-code:
         specifier: 2.0.18
         version: 2.0.18(react@18.3.1)
@@ -5634,11 +5634,11 @@ packages:
       react: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  react-plaid-link@3.6.1:
-    resolution: {integrity: sha512-nKxFPm9z8NiFCqOczNhhIp5R/xZY5BQ0lcQjkflIzpQ3Bx9Dsq2F1kORse0EU1aYkuGfVCfnySLwXhsu7rJSjQ==}
+  react-plaid-link@4.1.1:
+    resolution: {integrity: sha512-xzAYWQIT/gk+u6lwFAMEZ20f9+AUsCwVyfm64/iudMsyuWANta4wm3Jb7N+APSwuKIR9VUlTkYDhPjLamIGcPA==}
     peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react: ^16.8.0 || ^17 || ^18 || ^19
+      react-dom: ^16.8.0 || ^17 || ^18 || ^19
 
   react-promise-suspense@0.3.4:
     resolution: {integrity: sha512-I42jl7L3Ze6kZaq+7zXWSunBa3b1on5yfvUW6Eo/3fFOj6dZ5Bqmcd264nJbTK/gn1HjjILAjSwnZbV4RpSaNQ==}
@@ -5684,12 +5684,6 @@ packages:
     engines: {node: '>=14.0.0'}
     peerDependencies:
       react: '>=16.8'
-
-  react-script-hook@1.7.2:
-    resolution: {integrity: sha512-fhyCEfXb94fag34UPRF0zry1XGwmVY+79iibWwTqAoOiCzYJQOYTiWJ7CnqglA9tMSV8g45cQpHCMcBwr7dwhA==}
-    peerDependencies:
-      react: ^16.8.6 || 17 - 18
-      react-dom: ^16.8.6 || 17 - 18
 
   react-select@5.10.2:
     resolution: {integrity: sha512-Z33nHdEFWq9tfnfVXaiM12rbJmk+QjFEztWLtmXqQhz6Al4UZZ9xc0wiatmGtUOCCnHN0WizL3tCMYRENX4rVQ==}
@@ -13147,12 +13141,11 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  react-plaid-link@3.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-plaid-link@4.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-script-hook: 1.7.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   react-promise-suspense@0.3.4:
     dependencies:
@@ -13196,11 +13189,6 @@ snapshots:
     dependencies:
       '@remix-run/router': 1.23.0
       react: 18.3.1
-
-  react-script-hook@1.7.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
 
   react-select@5.10.2(@types/react@18.3.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
