@@ -48,13 +48,21 @@ services:
       - monetr
       - ui
       - mail
+  ui_builder:
+    image: monetr-ui:local
+    pull_policy: never
+    restart: no
+    build:
+      context: .
+      dockerfile: "@CMAKE_SOURCE_DIR@/compose/monetr-frontend.Dockerfile"
   ui:
     # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
     # do `pnpm install` before doing docker compose up.
     tty: true # Color output.
-    image: node:20.19.5-trixie
+    image: monetr-ui:local
+    pull_policy: never
     user: "${UID:-0}:${GID:-0}"
-    working_dir: /build
+    working_dir: "@CMAKE_SOURCE_DIR@/interface"
     restart: always
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
@@ -63,6 +71,8 @@ services:
       retries: 12
       start_period: 60s
     environment:
+      UID: "${UID:-0}"
+      GID: "${GID:-0}"
       WS_PROTO: 'wss' # TODO Make this based on the local protocol
       INSECURE_WS: "false" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
       NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
@@ -71,14 +81,25 @@ services:
       CLOUD_MAGIC: "@CLOUD_MAGIC@"
       MONETR_SENTRY_DSN: "${MONETR_SENTRY_DSN:-@MONETR_SENTRY_DSN@}"
     volumes:
-      - ./:/build
+      - "@CMAKE_SOURCE_DIR@:@CMAKE_SOURCE_DIR@"
     command:
-      - bash
-      - -c
-      - /build/compose/ui-entrypoint.sh
+      - "pnpm"
+      - "start"
+    depends_on:
+      ui_builder:
+        condition: service_completed_successfully
+  monetr_builder:
+    image: monetr-backend:local
+    pull_policy: never
+    restart: no
+    user: "${UID:-0}:${GID:-0}"
+    build:
+      context: .
+      dockerfile: "@CMAKE_SOURCE_DIR@/compose/monetr-backend.Dockerfile"
   monetr:
     tty: true # Makes color output work nicely.
-    image: golang:1.24.8-trixie
+    image: monetr-backend:local
+    pull_policy: never
     user: "${UID:-0}:${GID:-0}"
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
@@ -89,6 +110,8 @@ services:
       retries: 35
       start_period: 60s
     environment:
+      UID: "${UID:-0}"
+      GID: "${GID:-0}"
       air_wd: /build
       DISABLE_GO_RELOAD: "@DISABLE_GO_RELOAD@"
       CLOUD_MAGIC: "@CLOUD_MAGIC@"
@@ -136,6 +159,8 @@ services:
         condition: service_started
       postgres:
         condition: service_started
+      monetr_builder:
+        condition: service_completed_successfully
 
 volumes:
   kmsData:

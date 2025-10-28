@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-if ! command -v dlv &> /dev/null
-then
-    echo "[builder] delve could not be found, it will be installed"
-    go install github.com/go-delve/delve/cmd/dlv@latest
-else
-    echo "[builder] delve already installed, skipping..."
-fi
-
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 REVISION=$(git rev-parse HEAD)
 
@@ -21,4 +13,4 @@ TAGS="development,local,noui,icons"
 [ -d "server/icons/sources/simple-icons" ] && TAGS="${TAGS},simple_icons"
 
 echo "[builder] building monetr now with tags (${TAGS})..."
-go build -buildvcs=false -ldflags "${LDFLAGS}" -tags=${TAGS} -o /usr/bin/monetr github.com/monetr/monetr/server/cmd
+go build -buildvcs=false -ldflags "${LDFLAGS}" -tags=${TAGS} -o /home/monetr/bin/monetr github.com/monetr/monetr/server/cmd

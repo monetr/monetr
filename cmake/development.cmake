@@ -290,7 +290,7 @@ set(ALL_COMPOSE_ARGS ${COMPOSE_FILES} ${BASE_ARGS})
 add_custom_target(
   development.monetr.up
   COMMENT "Starting monetr using Docker compose locally..."
-  COMMAND ${CMAKE_COMMAND} -E env LOCAL_PROTOCOL=${LOCAL_PROTOCOL} MONETR_LOCAL_DOMAIN=${MONETR_LOCAL_DOMAIN} ${DOCKER_EXECUTABLE} compose ${DEVELOPMENT_COMPOSE_ARGS} up --wait --remove-orphans
+  COMMAND ${CMAKE_COMMAND} -E env LOCAL_PROTOCOL=${LOCAL_PROTOCOL} MONETR_LOCAL_DOMAIN=${MONETR_LOCAL_DOMAIN} ${DOCKER_EXECUTABLE} compose ${DEVELOPMENT_COMPOSE_ARGS} up --wait --remove-orphans --build
   COMMAND ${CMAKE_COMMAND} -E echo "-- ========================================================================="
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- monetr is now running locally."

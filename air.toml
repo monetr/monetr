@@ -7,7 +7,7 @@ tmp_dir = "/build/development"
 # Build monetr with the mini tag, this will allow insecure SMTP communication for working with emails locally.
 cmd = '/build/compose/api-builder.sh'
 # The resulting binary that we are working with.
-bin = "/usr/bin/monetr"
+bin = "/tmp/monetr"
 # Run monetr inside of dlv, this allows us to connect debuggers to it very easily.
 full_bin = "/build/compose/api-wrapper.sh"
 include_ext = ["sh", "go", "tpl", "tmpl", "html", "sql", "yaml"]
