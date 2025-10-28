@@ -54,9 +54,7 @@ services:
     restart: no
     build:
       context: .
-      dockerfile_inline: |
-        FROM node:20.19.5-trixie
-        RUN npm install -g pnpm
+      dockerfile: "@CMAKE_SOURCE_DIR@/compose/monetr-frontend.Dockerfile"
   ui:
     # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
     # do `pnpm install` before doing docker compose up.
