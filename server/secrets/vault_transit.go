@@ -19,6 +19,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	vault "github.com/hashicorp/vault/api"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/round"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -81,13 +82,27 @@ func NewVaultTransit(
 		closer:         nil,
 	}
 
+	trip := round.NewObservabilityRoundTripper(&http.Transport{
+		IdleConnTimeout: config.IdleConnTimeout,
+	}, func(ctx context.Context, request *http.Request, response *http.Response, err error) {
+		logEntry := log.WithContext(ctx).WithFields(logrus.Fields{
+			"vault": logrus.Fields{
+				"method": request.Method,
+				"url":    request.URL.String(),
+			},
+		})
+
+		if err != nil {
+			logEntry = logEntry.WithError(err)
+		}
+		logEntry.Trace("making request to vault API")
+	})
+
 	vaultConfig := &vault.Config{
 		Address: config.Address,
 		HttpClient: &http.Client{
-			Transport: &http.Transport{
-				IdleConnTimeout: config.IdleConnTimeout,
-			},
-			Timeout: config.Timeout,
+			Transport: trip,
+			Timeout:   config.Timeout,
 		},
 		MaxRetries:       3,
 		Timeout:          config.Timeout,

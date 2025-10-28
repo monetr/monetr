@@ -15,9 +15,11 @@ services:
       - -config=/data/config.toml
       - -dev
     environment:
+      VAULT_UI: "true"
       VAULT_ADDR: http://0.0.0.0:80
       VAULT_API_ADDR: http://0.0.0.0:80
       VAULT_TOKEN: "@VAULT_ROOT_TOKEN@"
+      VAULT_DISABLE_MLOCK: "true"
       VAULT_DEV_ROOT_TOKEN_ID: "@VAULT_ROOT_TOKEN@"
     volumes:
       - "@CMAKE_BINARY_DIR@/development/vault:/data"
