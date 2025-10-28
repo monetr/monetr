@@ -267,7 +267,7 @@ jobs:
           git config --global --add safe.directory ${PWD}
       - name: Build
         run: make docs
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         name: Upload Documentation As Artifact
         with:
           name: '${{ github.sha }}-docs'
