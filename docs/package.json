@@ -31,7 +31,7 @@
     "@untitaker/hyperlink": "0.1.44",
     "autoprefixer": "10.4.21",
     "cheerio": "1.1.2",
-    "cssnano": "7.1.1",
+    "cssnano": "7.1.2",
     "postcss": "8.5.6",
     "sass": "1.93.2",
     "spellchecker-cli": "7.0.0",
