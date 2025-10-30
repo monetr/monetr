@@ -25,7 +25,7 @@
     "tailwind-merge": "1.14.0"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^24.0.0",
     "@types/react": "18.3.26",
     "@types/react-dom": "18.3.7",
     "@untitaker/hyperlink": "0.1.44",

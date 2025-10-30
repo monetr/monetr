@@ -1,3 +1,3 @@
 # vim: set ft=dockerfile
-FROM node:20.19.5-trixie
+FROM node:24.11.0-trixie
 RUN npm install -g pnpm
