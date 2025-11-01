@@ -105,6 +105,12 @@ export default defineConfig({
       js: isDevelopment ? 'inline-source-map' : 'source-map',
       css: true,
     },
+    cssModules: isDevelopment
+      ? undefined
+      : {
+          // Hash the class names when we are in a production build.
+          localIdentName: '[hash:base64:6]',
+        },
     copy: [
       {
         from: 'public/manifest.json',

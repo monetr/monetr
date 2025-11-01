@@ -1,0 +1,120 @@
+.button {
+  font-weight: var(--semibold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-1);
+  border-radius: var(--border-radius);
+
+  padding-left: var(--size-3);
+  padding-right: var(--size-3);
+  padding-top: calc(1.5 * var(--size-1));
+  padding-bottom: calc(1.5 * var(--size-1));
+
+  &:disabled {
+    pointer-events: none;
+  };
+
+  &:focus {
+    outline-style: none;
+  }
+
+  &:focus-visible {
+    outline-style: solid;
+    outline-width: var(--outline-size);
+    outline-offset: var(--outline-size);
+  }
+
+  &:enabled:active {
+    filter: brightness(1.1);
+  }
+
+  /* Any child icons of this component should have this style */
+  svg {
+    width: var(--size-4);
+    height: var(--size-4);
+    pointer-events: none;
+  }
+}
+
+.primary {
+  background-color: var(--brand);
+  color: var(--content-emphasis);
+
+  &:enabled:hover {
+    background-color: var(--brand-subtle);
+  }
+
+  &:disabled {
+    background-color: var(--brand-disabled);
+  }
+
+  &:focus-visible {
+    outline-color: var(--brand-focused);
+  }
+}
+
+.secondary {
+  background-color: var(--background-subtle);
+  box-shadow: --inset-ring(var(--border), 1px);
+  color: var(--content-emphasis);
+
+  &:disabled {
+    box-shadow: --inset-ring(var(--border-subtle), 1px);
+    color: var(--content-subtle)
+  }
+
+  &:enabled:hover {
+    background-color: var(--background-emphasis);
+  }
+
+  &:focus-visible {
+    /* weird to use this but its the right color */
+    outline-color: var(--background-emphasis);
+  }
+}
+
+.outlinend {
+  box-shadow: --inset-ring(var(--border), 1px);
+  color: var(--content-emphasis);
+
+  &:enabled {
+    &:focus-visible, &:hover {
+      box-shadow: --inset-ring(var(--brand), 2px);
+    }
+  }
+
+  &:disabled {
+    box-shadow: --inset-ring(var(--border-subtle), 1px);
+    color: var(--content-muted);
+  }
+}
+
+.destructive {
+  background-color: var(--destructive);
+  color: var(--content-emphasis);
+
+  &:enabled:hover {
+    background-color: var(--destructive-subtle);
+  }
+
+  &:focus-visible {
+    outline-color: var(--destructive);
+  }
+}
+
+.text {
+  color: var(--content-emphasis);
+
+  &:enabled:hover {
+    background-color: var(--background-emphasis);
+  }
+
+  &:disabled {
+    color: var(--content-muted);
+  }
+
+  &:focus-visible {
+    outline-color: var(--brand-focused);
+  }
+}

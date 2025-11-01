@@ -4,6 +4,56 @@
 
 @tailwind utilities;
 
+:root {
+  --brand: #4E1AA0;
+  --brand-subtle: #5D1FC1;
+  --brand-muted: #9461E5;
+  --brand-faint: #AC84EB;
+  --brand-bright: #CFB9F4;
+  --brand-disabled: #b591ed;
+  --brand-focused: #3E157F;
+
+  --destructive: #dc2626;
+  --destructive-subtle: #ef4444;
+
+  --background-subtle: #27272a;
+  --background-emphasis: #3f3f46;
+
+  --border: #3f3f46;
+  --border-subtle: #27272a;
+
+  /* Content colors, used for test */
+  --content: #d4d4d8;
+  --content-muted: #52525b;
+  --content-subtle: #a1a1aa;
+  --content-placeholder: #9ca3af;
+  --content-disabled: #6b7280;
+  --content-emphasis: #fafafa;
+
+  /* Border radius large, ~8px */
+  --border-radius: 0.5rem;
+
+  /* Used for element outlines */
+  --outline-size: 2px;
+
+  /* Font weights */
+  --semibold: 600;
+
+  /* Sizes for things, to be used with width, height, gaps etc */
+  --size-1: 0.25rem; /* 4px */
+  --size-3: calc(3 * var(--size-1));
+  --size-4: 1rem;
+  --size-8: 2rem; /* 32px */
+}
+
+@function --inset-ring(--color, --size)  {
+  result: rgb(255, 255, 255) 0px 0px 0px 0px inset, 
+    var(--color) 0px 0px 0px var(--size) inset, 
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px;
+}
+
+
+
 html, body {
     height: 100%;
     @apply bg-background;
