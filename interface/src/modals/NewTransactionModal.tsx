@@ -133,16 +133,8 @@ function NewTransactionModal(): JSX.Element {
                     />
                     <MDatePicker className='w-full md:w-1/2' label='Date' name='date' required />
                   </div>
-                  <MSelectSpending
-                    className='w-full'
-                    name='spendingId'
-                    menuPosition='fixed'
-                    menuShouldScrollIntoView={false}
-                    menuShouldBlockScroll={true}
-                    menuPortalTarget={document.body}
-                    menuPlacement='bottom'
-                  />
-                  <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'>
+                  <MSelectSpending className='w-full' name='spendingId' />
+                  <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4 mt-2'>
                     <div className='space-y-0.5'>
                       <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>
                         Adjust Balance

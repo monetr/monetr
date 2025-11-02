@@ -4,6 +4,7 @@ import { useFormikContext } from 'formik';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
+import ErrorText from '@monetr/interface/components/ErrorText';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
@@ -109,7 +110,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
           className={classNames}
         />
       </div>
-      {Boolean(props.error) && <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>}
+      <ErrorText error={props.error} />
     </div>
   );
 }

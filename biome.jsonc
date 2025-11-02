@@ -48,6 +48,7 @@
                 "class-variance-authority",
                 "cmdk",
                 "date-fns",
+                "downshift",
                 "formik",
                 "input-otp",
                 "lucide-react",

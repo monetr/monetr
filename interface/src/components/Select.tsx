@@ -1,5 +1,6 @@
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cva } from 'class-variance-authority';
+import { type UseComboboxSelectedItemChange, useCombobox } from 'downshift';
 import { ArrowDown, ArrowUp, LoaderCircle, PanelBottomClose, PanelBottomOpen } from 'lucide-react';
 
 import { Drawer, DrawerContent, DrawerTrigger, DrawerWrapper } from '@monetr/interface/components/Drawer';
@@ -8,7 +9,10 @@ import { Skeleton } from '@monetr/interface/components/Skeleton';
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import { type UseComboboxSelectedItemChange, useCombobox } from 'downshift';
+import inputStyles from './Input.module.css';
+import selectStyles from './Select.module.css';
+import ErrorText from '@monetr/interface/components/ErrorText';
+import { input } from '@testing-library/user-event/dist/types/event';
 
 export interface SelectOption<V> {
   label: string;
@@ -57,35 +61,39 @@ export function DefaultSelectOptionComponent<V = unknown>(props: SelectOptionCom
 
 const SelectClasses = cva(
   [
-    'group',
-    'block',
-    'border-0',
-    'focus-within:ring-2 focus-within:ring-inset',
-    'placeholder:text-content-placeholder',
-    'px-3 py-1.5',
-    'ring-1 ring-inset',
-    'rounded-lg',
-    'shadow-sm',
-    'sm:leading-6',
-    'text-sm',
-    'w-full',
-    'dark:caret-zinc-50',
-    'min-h-[38px]',
-    // Disabled styles
-    'disabled:dark:bg-background-subtle',
-    'disabled:dark:ring-background-emphasis',
-    'disabled:ring-gray-200',
-    'disabled:text-content-disabled',
-    'aria-disabled:dark:bg-background-subtle',
-    'aria-disabled:dark:ring-background-emphasis',
-    'aria-disabled:ring-gray-200',
-    'aria-disabled:text-content-disabled',
-    // Enabled styles
-    'dark:bg-transparent',
-    'dark:text-content',
-    'text-gray-900',
-    // Default ring when we are not disabled or focused
-    'dark:ring-dark-monetr-border-string',
+    inputStyles.input,
+    // 'group',
+    // 'block',
+    // 'border-0',
+    // 'focus-within:ring-2 focus-within:ring-inset',
+    // 'placeholder:text-content-placeholder',
+    // 'px-3 py-1.5',
+    // 'ring-1 ring-inset',
+    // 'rounded-lg',
+    // 'shadow-sm',
+    // 'sm:leading-6',
+    // 'text-sm',
+    // 'w-full',
+    // 'dark:caret-zinc-50',
+    // 'min-h-[38px]',
+    // // Disabled styles
+    // 'disabled:dark:bg-background-subtle',
+    // 'disabled:dark:ring-background-emphasis',
+    //
+    // 'disabled:ring-gray-200',
+    // 'disabled:text-content-disabled',
+    //
+    // 'aria-disabled:dark:bg-background-subtle',
+    // 'aria-disabled:dark:ring-background-emphasis',
+    //
+    // 'aria-disabled:ring-gray-200',
+    // 'aria-disabled:text-content-disabled',
+    // // Enabled styles
+    // 'dark:bg-transparent',
+    // 'dark:text-content',
+    // 'text-gray-900',
+    // // Default ring when we are not disabled or focused
+    // 'dark:ring-dark-monetr-border-string',
   ],
   {
     variants: {
@@ -232,7 +240,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
   const LabelDecorator = props.labelDecorator || (() => null);
 
   return (
-    <div className={wrapperClassNames}>
+    <div className={inputStyles.wrapper}>
       <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
       </MLabel>
@@ -241,6 +249,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
         onClick={onOpenClickHandler}
         ref={inputWrapperRef}
         className={mergeTailwind(classNames, 'flex cursor-text gap-1 items-center')}
+        data-error={Boolean(props.error)}
         aria-disabled={props.disabled}
       >
         <input
@@ -248,21 +257,18 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
             disabled: props.disabled,
             'aria-disabled': props.disabled,
             placeholder: props.placeholder,
-            className: mergeTailwind('flex-1 bg-transparent disabled:text-gray-500'),
+            className: selectStyles.input,
             onFocus: openMenu,
             spellCheck: false,
           })}
         />
         <SelectIndicator disabled={props.disabled} isLoading={props.isLoading} open={isOpen} />
       </div>
-      {Boolean(props.error) && <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>}
+      <ErrorText error={props.error} />
       <ul
-        className={mergeTailwind(
-          'absolute dark:bg-dark-monetr-background-focused rounded-lg p-1 overflow-y-auto space-y-0.5',
-          {
-            hidden: !(isOpen && items.length),
-          },
-        )}
+        className={mergeTailwind(selectStyles.unorderedList, {
+          hidden: !(isOpen && items.length),
+        })}
         {...getMenuProps()}
         style={renderStyles}
       >
@@ -325,7 +331,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
   const LabelDecorator = props.labelDecorator || (() => null);
 
   return (
-    <div className={wrapperClassNames}>
+    <div className={inputStyles.wrapper}>
       <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
       </MLabel>
@@ -383,7 +389,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
           </DrawerWrapper>
         </DrawerContent>
       </Drawer>
-      {Boolean(props.error) && <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>}
+      <ErrorText error={props.error} />
     </div>
   );
 }

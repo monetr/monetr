@@ -1,0 +1,24 @@
+.input {
+  background-color: transparent;
+  flex: 1 1 0%;
+
+  &:disabled, &[aria-disabled="true"] {
+    color: var(--content-disabled);
+  }
+}
+
+.unorderedList {
+  position: absolute;
+  background-color: var(--background-darker);
+  border-radius: var(--border-radius);
+  padding: var(--size-1);
+  overflow-y: auto;
+  z-index: 50;
+
+  /* Add a half size gap on the top and bottom of every element in the list */
+  /* see space-y-0.5 */
+  > :not([hidden]) {
+    margin-top: calc(0.5 * var(--size-1));
+    margin-bottom: calc(0.5 * var(--size-1));
+  }
+}

@@ -1,0 +1,62 @@
+.input {
+  background-color: transparent;
+  color: var(--content);
+  display: block;
+  border-width: 0px;
+  box-shadow: --inset-ring(var(--border-string), 1px);
+  border-radius: var(--border-radius);
+
+  min-height: 38px;
+
+  /* Small text */
+  font-size: 0.875rem /* 14px */;
+  line-height: 1.25rem /* 20px */;
+
+  padding-left: var(--size-3);
+  padding-right: var(--size-3);
+  padding-top: calc(1.5 * var(--size-1));
+  padding-bottom: calc(1.5 * var(--size-1));
+
+  @media (min-width: 640px) {
+    line-height: 1.5rem /* 24px */;
+  }
+
+  ::placeholder {
+    color: var(--content-placeholder);
+  }
+
+  &:hover {
+    box-shadow: --inset-ring(var(--border-hover), 1px);
+  }
+
+  &:focus-within, &:hover:focus-within {
+    box-shadow: --inset-ring(var(--brand), 2px);
+  }
+
+  &[data-error="true"] {
+    box-shadow: --inset-ring(var(--error), 1px);
+
+    &:focus-within {
+      box-shadow: --inset-ring(var(--error), 2px);
+    }
+  }
+
+  &:disabled, &[aria-disabled="true"] {
+    background-color: var(--background-subtle);
+    box-shadow: --inset-ring(var(--background-emphasis), 1px);
+  }
+
+}
+
+.wrapper {
+  padding-bottom: 18px;
+
+  /* 
+    If the input wrapper (usually a div around the input component) has a child
+    that is a paragraph with the error message attribute then that means we need
+    to remove any padding because the error message will be the padding.
+  */
+  &:has(> p[aria-errormessage]) {
+    padding-bottom: unset;
+  }
+}
