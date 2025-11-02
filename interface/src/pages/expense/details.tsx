@@ -69,7 +69,7 @@ export default function ExpenseDetails(): JSX.Element {
   if (isError) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <HeartCrack className='dark:text-dark-monetr-content size-24' />
         <MSpan className='text-5xl'>Something isn't right...</MSpan>
         <MSpan className='text-2xl'>Couldn't find the expense you specified...</MSpan>
       </div>
@@ -83,7 +83,7 @@ export default function ExpenseDetails(): JSX.Element {
   if (spending.spendingType !== SpendingType.Expense) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <HeartCrack className='dark:text-dark-monetr-content size-24' />
         <MSpan className='text-5xl'>Something isn't right...</MSpan>
         <MSpan className='text-2xl'>This spending object is not an expense...</MSpan>
       </div>

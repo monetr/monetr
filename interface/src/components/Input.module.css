@@ -1,6 +1,6 @@
 .input {
   background-color: transparent;
-  color: var(--content);
+  color: var(--content-emphasis);
   display: block;
   border-width: 0px;
   box-shadow: --inset-ring(var(--border-string), 1px);
@@ -16,6 +16,10 @@
   padding-right: var(--size-3);
   padding-top: calc(1.5 * var(--size-1));
   padding-bottom: calc(1.5 * var(--size-1));
+
+  transition: ease-in-out;
+  transition-property: box-shadow;
+  transition-duration: 75ms;
 
   @media (min-width: 640px) {
     line-height: 1.5rem /* 24px */;
@@ -45,7 +49,6 @@
     background-color: var(--background-subtle);
     box-shadow: --inset-ring(var(--background-emphasis), 1px);
   }
-
 }
 
 .wrapper {

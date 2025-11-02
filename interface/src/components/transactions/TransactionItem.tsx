@@ -3,11 +3,10 @@ import { Link } from 'react-router-dom';
 import ArrowLink from '@monetr/interface/components/ArrowLink';
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
 import MSpan from '@monetr/interface/components/MSpan';
+import TransactionAmount from '@monetr/interface/components/transactions/TransactionAmount';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
-import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import type Transaction from '@monetr/interface/models/Transaction';
-import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface TransactionItemProps {
@@ -15,18 +14,8 @@ export interface TransactionItemProps {
 }
 
 export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
-  const { data: locale } = useLocaleCurrency();
   const { data: spending } = useSpending(transaction.spendingId);
   const detailsUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
-
-  const amountClassnames = mergeTailwind(
-    {
-      'dark:text-dark-monetr-green': transaction.getIsAddition(),
-      'dark:text-dark-monetr-red': !transaction.getIsAddition(),
-    },
-    'text-end',
-    'font-semibold',
-  );
 
   interface BudgetingInfoProps {
     className: string;
@@ -103,9 +92,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
         {!transaction.getIsAddition() && <MSelectSpendingTransaction transaction={transaction} />}
         {transaction.getIsAddition() && <BudgetingInfo className='hidden md:flex w-1/2 flex-1 items-center pl-6' />}
         <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
-          <span className={amountClassnames}>
-            {locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0)}
-          </span>
+          <TransactionAmount transaction={transaction} />
           <ArrowLink to={detailsUrl} />
         </div>
       </div>
