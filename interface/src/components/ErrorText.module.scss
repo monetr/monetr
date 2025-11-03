@@ -1,0 +1,25 @@
+@use '@monetr/interface/variables';
+@use '@monetr/interface/mixins';
+
+$marginTop: 0.5;
+
+.errorText {
+  @include mixins.text-extra-small;
+
+  font-weight: var(--medium);
+  color: var(--error);
+  margin-top: $marginTop * variables.$size;
+}
+
+.errorTextPadding {
+  // The padding on the bottom should be equal to the top margin of the error
+  // text plus the line height of the extra small text.
+  padding-bottom: $marginTop * variables.$size + mixins.$textExtraSmallLineHeight * variables.$size;
+
+  // If this wrapping component has a child with the error text then that means
+  // we should remove our padding so that way the error text does not get pushed
+  // down.
+  &:has(> p[aria-errormessage]) {
+    padding-bottom: unset;
+  }
+}

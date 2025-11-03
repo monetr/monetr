@@ -1,0 +1,53 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.input {
+  background-color: transparent;
+  color: var(--content-emphasis);
+  display: block;
+  border-width: 0px;
+  border-radius: var(--border-radius);
+  min-height: 9.5 * variables.$size;
+
+  @include mixins.text-small;
+
+  padding-left: 3 * variables.$size;
+  padding-right: 3 * variables.$size;
+  padding-top: 1.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+
+  // Apply the border style to the component, variations of this border style
+  // only need to change the ring color and size variables.
+  --ring-color: var(--border-string);
+  --ring-size: 1px;
+  @include mixins.inset-ring;
+
+  ::placeholder {
+    color: var(--content-placeholder);
+  }
+
+  &:hover {
+    --ring-color: var(--border-hover);
+    --ring-size: 1px;
+  }
+
+  &:focus-within, &:hover:focus-within {
+    --ring-color: var(--brand);
+    --ring-size: 2px;
+  }
+
+  &[data-error="true"] {
+    --ring-color: var(--error);
+    --ring-size: 1px;
+
+    &:focus-within {
+      --ring-size: 2px;
+    }
+  }
+
+  &:disabled, &[aria-disabled="true"] {
+    background-color: var(--background-subtle);
+    --ring-color: var(--background-emphasis);
+    --ring-size: 1px;
+  }
+}

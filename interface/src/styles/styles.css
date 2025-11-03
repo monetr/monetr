@@ -60,14 +60,6 @@
   --size-8: calc(8 * var(--size-1));
 }
 
-@function --inset-ring(--color, --size)  {
-  result: rgb(255, 255, 255) 0px 0px 0px 0px inset, 
-    var(--color) 0px 0px 0px var(--size) inset, 
-    rgba(0, 0, 0, 0) 0px 0px 0px 0px;
-}
-
-
-
 html, body {
     height: 100%;
     @apply bg-background;

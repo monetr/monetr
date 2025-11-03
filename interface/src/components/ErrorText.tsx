@@ -1,4 +1,4 @@
-import styles from './ErrorText.module.css';
+import styles from './ErrorText.module.scss';
 
 export interface ErrorTextProps {
   error?: string;

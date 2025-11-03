@@ -10,8 +10,9 @@ import { Skeleton } from '@monetr/interface/components/Skeleton';
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import inputStyles from './Input.module.css';
-import selectStyles from './Select.module.css';
+import errorTextStyles from './ErrorText.module.scss';
+import inputStyles from './Input.module.scss';
+import selectStyles from './Select.module.scss';
 
 export interface SelectOption<V> {
   label: string;
@@ -74,7 +75,7 @@ export default function Select<V>(props: SelectProps<V>): React.JSX.Element {
 export function SelectLoading<V>(props: SelectPropsLoading<V>): React.JSX.Element {
   const LabelDecorator = props.labelDecorator || (() => null);
   return (
-    <div className={mergeTailwind(inputStyles.wrapper, props.className)}>
+    <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
       <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
       </MLabel>
@@ -156,7 +157,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
   const LabelDecorator = props.labelDecorator || (() => null);
 
   return (
-    <div className={mergeTailwind(inputStyles.wrapper, props.className)}>
+    <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
       <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
       </MLabel>
@@ -237,7 +238,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
   const LabelDecorator = props.labelDecorator || (() => null);
 
   return (
-    <div className={mergeTailwind(inputStyles.wrapper, props.className)}>
+    <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
       <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
       </MLabel>
@@ -250,7 +251,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
           >
             <span
               aria-disabled={props.disabled}
-              className={mergeTailwind(selectStyles.selectText, {
+              className={mergeTailwind([selectStyles.selectText], {
                 // If we don't have a value then use the placeholder text style.
                 [selectStyles.selectTextPlaceholder]: !props.value?.label,
               })}

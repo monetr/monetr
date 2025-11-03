@@ -4,7 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import styles from './Button.module.css';
+import styles from './Button.module.scss';
 
 const buttonVariants = cva([styles.button], {
   variants: {
@@ -16,9 +16,9 @@ const buttonVariants = cva([styles.button], {
       text: styles.text,
     },
     size: {
-      default: 'h-8 text-sm',
-      select: 'h-[38px]',
-      md: 'min-h-10',
+      default: styles.sizeDefault,
+      select: styles.sizeSelect,
+      md: styles.sizeMedium,
     },
   },
   defaultVariants: {

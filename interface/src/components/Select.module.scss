@@ -1,3 +1,5 @@
+@use '@monetr/interface/variables';
+
 .selectLoading {
   display: flex;
   cursor: progress;
@@ -45,8 +47,8 @@
 
 .indicator {
   color: var(--content-placeholder);
-  width: calc(5 * var(--size-1));
-  height: calc(5 * var(--size-1));
+  width: 5 * variables.$size;
+  height: 5 * variables.$size;
   order: 9999;
 
   /* Match the transition on the input itself so that way it looks consistent */

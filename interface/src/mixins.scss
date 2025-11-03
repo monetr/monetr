@@ -1,0 +1,29 @@
+@use '@monetr/interface/variables';
+
+/*
+inset-ring creates a border around a component using boxshadow, however the
+border is inset on the component instead of outset. Use the variables
+`--ring-color` and `--ring-size` to control the ring.
+*/
+@mixin inset-ring {
+  box-shadow: rgb(255, 255, 255) 0px 0px 0px 0px inset,
+      var(--ring-color) 0px 0px 0px var(--ring-size) inset,
+      rgba(0, 0, 0, 0) 0px 0px 0px 0px;
+  transition: ease-in-out;
+  transition-property: box-shadow;
+  transition-duration: 75ms;
+}
+
+$textExtraSmallFontSize: 3;
+$textExtraSmallLineHeight: 4;
+@mixin text-extra-small {
+  font-size: $textExtraSmallFontSize * variables.$size; // 0.75rem 12px
+  line-height: $textExtraSmallLineHeight * variables.$size; // 1rem 16px
+}
+
+$textSmallFontSize: 3.5;
+$textSmallLineHeight: 5;
+@mixin text-small {
+  font-size: $textSmallFontSize * variables.$size; // 0.875rem 14px
+  line-height: $textSmallLineHeight * variables.$size; // 1.25rem 20px
+}

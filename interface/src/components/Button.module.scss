@@ -1,15 +1,19 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
 .button {
   font-weight: var(--semibold);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--size-1);
+  gap: variables.$size;
   border-radius: var(--border-radius);
 
-  padding-left: var(--size-3);
-  padding-right: var(--size-3);
-  padding-top: calc(1.5 * var(--size-1));
-  padding-bottom: calc(1.5 * var(--size-1));
+
+  padding-left: 3 * variables.$size;
+  padding-right: 3 * variables.$size;
+  padding-top: 1.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
 
   &:disabled, &[aria-disabled="true"] {
     pointer-events: none;
@@ -31,8 +35,8 @@
 
   /* Any child icons of this component should have this style */
   svg {
-    width: var(--size-4);
-    height: var(--size-4);
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
     pointer-events: none;
   }
 }
@@ -56,11 +60,15 @@
 
 .secondary {
   background-color: var(--background-subtle);
-  box-shadow: --inset-ring(var(--border), 1px);
   color: var(--content-emphasis);
 
+  --ring-color: var(--border);
+  --ring-size: 1px;
+  @include mixins.inset-ring;
+
   &:disabled, &[aria-disabled="true"] {
-    box-shadow: --inset-ring(var(--border-subtle), 1px);
+    --ring-color: var(--border-subtle);
+    --ring-size: 1px;
     color: var(--content-subtle)
   }
 
@@ -75,17 +83,20 @@
 }
 
 .outlinend {
-  box-shadow: --inset-ring(var(--border), 1px);
+  --ring-color: var(--border);
+  --ring-size: 1px;
+  @include mixins.inset-ring;
   color: var(--content-emphasis);
 
   &:enabled {
     &:focus-visible, &:hover {
-      box-shadow: --inset-ring(var(--brand), 2px);
+      --ring-color: var(--brand);
+      --ring-size: 2px;
     }
   }
 
   &:disabled, &[aria-disabled="true"] {
-    box-shadow: --inset-ring(var(--border-subtle), 1px);
+    --ring-color: var(--border-subtle);
     color: var(--content-muted);
   }
 }
@@ -117,4 +128,18 @@
   &:focus-visible {
     outline-color: var(--brand-focused);
   }
+}
+
+.sizeDefault {
+  @include mixins.text-small;
+  height: 8 * variables.$size;
+}
+
+.sizeSelect {
+  // Select component buttons are the same size as form inputs.
+  height: 9.5 * variables.$size;
+}
+
+.sizeMedium {
+  min-height: 10 * variables.$size;
 }

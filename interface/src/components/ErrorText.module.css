@@ -1,9 +1,0 @@
-.errorText {
-  /* Extra Small text */
-  font-size: 0.75rem /* 12px */;
-  line-height: 1rem /* 16px */;
-
-  font-weight: var(--medium);
-  color: var(--error);
-  margin-top: calc(0.5 * var(--size-1))
-}
