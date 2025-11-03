@@ -33,10 +33,7 @@
           "level": "on",
           "options": {
             "groups": [
-              [
-                "react",
-                "react-dom"
-              ],
+              ["react", "react-dom"],
               [
                 "@date-fns/tz",
                 "@ebay/nice-modal-react",
@@ -82,14 +79,10 @@
                 "react-test-renderer"
               ],
               ":BLANK_LINE:",
-              [
-                "@monetr/**"
-              ],
+              ["@monetr/**"],
               ":ALIAS:",
               ":BLANK_LINE:",
-              [
-                "./**"
-              ],
+              ["./**"],
               ":PATH:",
               ":BLANK_LINE:",
               [
@@ -149,11 +142,7 @@
         "noUnknownAtRules": {
           "level": "off",
           "options": {
-            "ignore": [
-              "apply",
-              "function",
-              "tailwind"
-            ]
+            "ignore": ["apply", "function", "tailwind"]
           }
         }
       },

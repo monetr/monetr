@@ -1,10 +1,10 @@
 import type React from 'react';
 import { useFormikContext } from 'formik';
 
+import ErrorText from '@monetr/interface/components/ErrorText';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
-import ErrorText from '@monetr/interface/components/ErrorText';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
