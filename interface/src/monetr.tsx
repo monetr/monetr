@@ -44,6 +44,8 @@ import VerifyEmail from '@monetr/interface/pages/verify/email';
 import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 
+import styles from './monetr.module.css';
+
 const RoutesImpl = Sentry.withSentryReactRouterV6Routing(Routes);
 
 export default function Monetr(): JSX.Element {
@@ -123,7 +125,7 @@ export default function Monetr(): JSX.Element {
   }
 
   return (
-    <div className='monetr h-screen w-screen bg-background flex'>
+    <div className={styles.layout}>
       <Sidebar />
       <div className='w-full h-full flex min-w-0 overflow-y-auto'>
         <RoutesImpl>
@@ -170,7 +172,7 @@ function BudgetingLayout(): JSX.Element {
   return (
     <Fragment>
       <BudgetingSidebar className='hidden lg:flex' />
-      <div className='w-full h-full min-w-0 flex flex-col'>
+      <div className='min-w-0 flex flex-col grow'>
         <Outlet />
       </div>
     </Fragment>

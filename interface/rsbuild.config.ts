@@ -76,6 +76,11 @@ export default defineConfig({
     // Dont use the favicon here, favicon is handled by the PWA plugin.
     mountId: 'root',
   },
+  tools: {
+    lightningcssLoader: {
+      minify: !isDevelopment,
+    },
+  },
   output: {
     target: 'web',
     distPath: {

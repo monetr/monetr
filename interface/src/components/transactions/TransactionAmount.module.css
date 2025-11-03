@@ -1,0 +1,9 @@
+.transactionAmount {
+  color: var(--amount-negative);
+  font-weight: var(--semibold);
+  text-align: end;
+
+  &[data-positive="true"] {
+    color: var(--amount-positive);
+  }
+}

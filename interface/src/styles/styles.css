@@ -13,14 +13,25 @@
   --brand-disabled: #b591ed;
   --brand-focused: #3E157F;
 
+  /* --error-focused: #f87171; */
+  --error: #ef4444;
+
   --destructive: #dc2626;
   --destructive-subtle: #ef4444;
 
+  --amount-negative: #ef4444;
+  --amount-positive: #22c55e;
+
+  --background: #19161f;
   --background-subtle: #27272a;
   --background-emphasis: #3f3f46;
+  --background-darker: #131118;
 
   --border: #3f3f46;
   --border-subtle: #27272a;
+  /* For input fields, these two borders are used, string is normal border */
+  --border-hover: #a1a1aa;
+  --border-string: #71717a;
 
   /* Content colors, used for test */
   --content: #d4d4d8;
@@ -37,13 +48,16 @@
   --outline-size: 2px;
 
   /* Font weights */
+  --medium: 500;
   --semibold: 600;
 
   /* Sizes for things, to be used with width, height, gaps etc */
   --size-1: 0.25rem; /* 4px */
+  --size-2: calc(2 * var(--size-1));
   --size-3: calc(3 * var(--size-1));
-  --size-4: 1rem;
-  --size-8: 2rem; /* 32px */
+  --size-4: calc(4 * var(--size-1));
+  --size-5: calc(5 * var(--size-1));
+  --size-8: calc(8 * var(--size-1));
 }
 
 @function --inset-ring(--color, --size)  {

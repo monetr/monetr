@@ -1,0 +1,101 @@
+.selectLoading {
+  display: flex;
+  cursor: progress;
+  gap: var(--size-1);
+  align-items: center;
+}
+
+.input {
+  background-color: transparent;
+  flex: 1 1 0%;
+
+  &:disabled, &[aria-disabled="true"] {
+    color: var(--content-disabled);
+  }
+}
+
+.select {
+  display: flex;
+  cursor: text;
+  gap: var(--size-1);
+  align-items: center;
+
+  &:is(button) {
+    text-align: start;
+    width: 100%;
+  }
+
+  &:hover .indicator, &:focus-within .indicator {
+    color: var(--content-emphasis);
+  }
+}
+
+.selectText {
+  flex: 1 1 0%;
+  background-color: transparent;
+
+  &:disabled, &[aria-disabled="true"] {
+    color: var(--content-disabled);
+  }
+}
+
+.selectTextPlaceholder {
+  color: var(--content-placeholder);
+}
+
+.indicator {
+  color: var(--content-placeholder);
+  width: calc(5 * var(--size-1));
+  height: calc(5 * var(--size-1));
+  order: 9999;
+
+  /* Match the transition on the input itself so that way it looks consistent */
+  transition: ease-in-out;
+  transition-property: color;
+  transition-duration: 75ms;
+
+  &:disabled, &[aria-disabled="true"] {
+    color: var(--content-disabled);
+  }
+
+  &[data-loading="true"] {
+    animation: spin 1s linear infinite;
+
+    @keyframes spin {
+      from {
+        transform: rotate(-360deg);
+      }
+      to {
+        transform: rotate(0deg);
+      }
+    }
+  }
+}
+
+.unorderedList {
+  position: absolute;
+  background-color: var(--background-darker);
+  border-radius: var(--border-radius);
+  padding: var(--size-1);
+  overflow-y: auto;
+  z-index: 50;
+
+  /* Add a half size gap on the top and bottom of every element in the list */
+  /* see space-y-0.5 */
+  > :not([hidden]) {
+    margin-top: calc(0.5 * var(--size-1));
+    margin-bottom: calc(0.5 * var(--size-1));
+  }
+}
+
+.unorderedListMobile {
+  padding-left: calc(2 * var(--size-1));
+  padding-right: calc(2 * var(--size-1));
+
+  /* Add a half size gap on the top and bottom of every element in the list */
+  /* see space-y-0.5 */
+  > :not([hidden]) {
+    margin-top: calc(0.5 * var(--size-1));
+    margin-bottom: calc(0.5 * var(--size-1));
+  }
+}
