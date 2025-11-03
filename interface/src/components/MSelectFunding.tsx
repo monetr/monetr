@@ -2,11 +2,10 @@ import { useFormikContext } from 'formik';
 import { Calendar } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
+import Label from '@monetr/interface/components/Label';
 import Select, { type SelectOption } from '@monetr/interface/components/Select';
 import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
-
-import MLabel from './MLabel';
 
 export interface MSelectFundingProps {
   label?: string;
@@ -57,7 +56,7 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
   if (funding.length === 0) {
     return (
       <div className='h-[84px] w-full'>
-        <MLabel label={props.label} required={props.required} />
+        <Label label={props.label} required={props.required} />
         <Button
           variant='primary'
           size='select'

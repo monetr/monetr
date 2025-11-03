@@ -7,6 +7,7 @@ import {
   type NumericFormatProps,
 } from 'react-number-format';
 
+import Label, { type LabelDecorator, type LabelDecoratorProps } from '@monetr/interface/components/Label';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import {
   getCurrencySymbolPrefixed,
@@ -17,8 +18,6 @@ import {
 } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
-
 type NumericField = Omit<
   NumericFormatProps<InputAttributes>,
   'decimalScale' | 'fixedDecimalScale' | 'prefix' | 'type' | 'onChange' | 'onValueChange'
@@ -27,13 +26,13 @@ type NumericField = Omit<
 export interface MAmountFieldProps extends NumericField {
   label?: string;
   error?: string;
-  labelDecorator?: MLabelDecorator;
+  labelDecorator?: LabelDecorator;
   currency?: string;
 }
 
 const MAmountFieldPropsDefaults: MAmountFieldProps = {
   label: null,
-  labelDecorator: (_: MLabelDecoratorProps) => null,
+  labelDecorator: (_: LabelDecoratorProps) => null,
   disabled: false,
 };
 
@@ -127,9 +126,9 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
 
   return (
     <div className={wrapperClassNames}>
-      <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
-      </MLabel>
+      </Label>
       <div>
         <NumericFormat
           /* These top properties might be overwritten by the ...otherProps below, this is intended. */

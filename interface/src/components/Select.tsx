@@ -5,7 +5,7 @@ import { ArrowDown, ArrowUp, LoaderCircle, PanelBottomClose, PanelBottomOpen } f
 
 import { Drawer, DrawerContent, DrawerTrigger, DrawerWrapper } from '@monetr/interface/components/Drawer';
 import ErrorText from '@monetr/interface/components/ErrorText';
-import MLabel, { type MLabelDecorator } from '@monetr/interface/components/MLabel';
+import Label, { type LabelDecorator } from '@monetr/interface/components/Label';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
@@ -29,7 +29,7 @@ export interface SelectProps<V = unknown> {
   name?: string;
   placeholder?: string;
   label?: string;
-  labelDecorator?: MLabelDecorator;
+  labelDecorator?: LabelDecorator;
   error?: string;
   required?: boolean;
   disabled?: boolean;
@@ -76,9 +76,9 @@ export function SelectLoading<V>(props: SelectPropsLoading<V>): React.JSX.Elemen
   const LabelDecorator = props.labelDecorator || (() => null);
   return (
     <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
-      <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
-      </MLabel>
+      </Label>
       <div className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)} data-error={props.error}>
         <Skeleton className='w-full h-5 mr-2' />
         <SelectIndicator disabled={props.disabled} isLoading={props.isLoading} open={false} />
@@ -158,9 +158,9 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
 
   return (
     <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
-      <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
-      </MLabel>
+      </Label>
       {/** biome-ignore lint/a11y/noStaticElementInteractions: Need to account for weird padding here */}
       <div
         onClick={onOpenClickHandler}
@@ -239,9 +239,9 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
 
   return (
     <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
-      <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
-      </MLabel>
+      </Label>
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           <button

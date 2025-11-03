@@ -1,0 +1,33 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.labelRequiredStar {
+  color: var(--error);
+}
+
+.labelText {
+  margin-bottom: 1 * variables.$size;
+  display: block;
+
+  @include mixins.text-small;
+  font-weight: var(--medium);
+  line-height: 6 * variables.$size;
+
+  color: var(--content-emphasis);
+
+  &:disabled, &[aria-disabled="true"] {
+    color: var(--content-disabled)
+  }
+}
+
+.labelContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.labelWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5 * variables.$size;
+}

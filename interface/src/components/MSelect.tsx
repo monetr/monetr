@@ -10,11 +10,11 @@ import Select, {
   type Theme,
 } from 'react-select';
 
+import Label, { type LabelDecorator, type LabelDecoratorProps } from '@monetr/interface/components/Label';
 import useTheme from '@monetr/interface/hooks/useTheme';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
-import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
 import MSpan from './MSpan';
 
 export interface Value<T> {
@@ -25,7 +25,7 @@ export interface Value<T> {
 export interface MSelectProps<V extends Value<any>>
   extends Omit<Parameters<Select>[0], 'theme' | 'styles' | 'isDisabled'> {
   label?: string;
-  labelDecorator?: MLabelDecorator;
+  labelDecorator?: LabelDecorator;
   error?: string;
   required?: boolean;
   disabled?: boolean;
@@ -43,7 +43,7 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
     className,
   );
 
-  const LabelDecorator = labelDecorator ?? ((_: MLabelDecoratorProps) => null);
+  const LabelDecorator = labelDecorator ?? ((_: LabelDecoratorProps) => null);
 
   const classNames = mergeTailwind(
     {
@@ -95,9 +95,9 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
 
   return (
     <div className={wrapperClassNames}>
-      <MLabel label={props.label} htmlFor={props.id} required={props.required} disabled={props.disabled}>
+      <Label label={props.label} htmlFor={props.id} required={props.required} disabled={props.disabled}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
-      </MLabel>
+      </Label>
       <button
         type='button'
         disabled={props.disabled}

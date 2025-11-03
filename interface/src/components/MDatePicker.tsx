@@ -6,11 +6,10 @@ import { Calendar as CalendarIcon, X } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import { Calendar } from '@monetr/interface/components/Calendar';
+import Label, { type LabelDecorator } from '@monetr/interface/components/Label';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
-import MLabel, { type MLabelDecorator } from './MLabel';
 
 import { enUS } from 'date-fns/locale/en-US';
 
@@ -24,7 +23,7 @@ export interface MDatePickerProps extends Omit<React.HTMLAttributes<HTMLButtonEl
   enableYearNavigation?: boolean;
   error?: string;
   label?: string;
-  labelDecorator?: MLabelDecorator;
+  labelDecorator?: LabelDecorator;
   name?: string;
   placeholder?: string;
   required?: boolean;
@@ -192,9 +191,9 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
 
   return (
     <div className={wrapperClassNames} data-testid={props['data-testid']}>
-      <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
-      </MLabel>
+      </Label>
       <Popover open={open}>
         <PopoverTrigger asChild>
           <Button

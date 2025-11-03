@@ -2,21 +2,20 @@ import type React from 'react';
 import { useFormikContext } from 'formik';
 
 import ErrorText from '@monetr/interface/components/ErrorText';
+import Label, { type LabelDecorator, type LabelDecoratorProps } from '@monetr/interface/components/Label';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
-import MLabel, { type MLabelDecorator, type MLabelDecoratorProps } from './MLabel';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
   label?: string;
   error?: string;
   uppercasetext?: boolean;
-  labelDecorator?: MLabelDecorator;
+  labelDecorator?: LabelDecorator;
 }
 
 const MTextFieldPropsDefaults: Omit<MTextFieldProps, 'InputProps'> = {
   label: null,
-  labelDecorator: (_: MLabelDecoratorProps) => null,
+  labelDecorator: (_: LabelDecoratorProps) => null,
   disabled: false,
   uppercasetext: undefined,
 };
@@ -97,9 +96,9 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
 
   return (
     <div className={wrapperClassNames}>
-      <MLabel label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
-      </MLabel>
+      </Label>
       <div>
         <input
           value={value}
