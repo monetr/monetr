@@ -138,7 +138,17 @@
       "suspicious": {
         "noShadowRestrictedNames": "error",
         "noExplicitAny": "warn",
-        "noExtraNonNullAssertion": "warn"
+        "noExtraNonNullAssertion": "warn",
+        "noUnknownAtRules": {
+          "level": "off",
+          "options": {
+            "ignore": [
+              "apply",
+              "function",
+              "tailwind"
+            ]
+          }
+        }
       },
       "performance": {
         "noDelete": "off"
@@ -184,8 +194,15 @@
     }
   },
   "css": {
+    "linter": {
+      "enabled": true
+    },
     "formatter": {
       "enabled": false
+    },
+    "parser": {
+      "cssModules": true,
+      "tailwindDirectives": true
     }
   },
   "json": {
