@@ -7,6 +7,7 @@ import {
   type NumericFormatProps,
 } from 'react-number-format';
 
+import ErrorText from '@monetr/interface/components/ErrorText';
 import Label, { type LabelDecorator, type LabelDecoratorProps } from '@monetr/interface/components/Label';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import {
@@ -17,6 +18,8 @@ import {
   intlNumberFormatter,
 } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import errorTextStyles from './ErrorText.module.scss';
 
 type NumericField = Omit<
   NumericFormatProps<InputAttributes>,
@@ -102,14 +105,6 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
     'min-h-[38px]',
   );
 
-  const wrapperClassNames = mergeTailwind(
-    {
-      // This will make it so the space below the input is the same when there is and isn't an error.
-      'pb-[18px]': !props.error,
-    },
-    props.className,
-  );
-
   // If we are working with a date picker, then take the current value and transform it for the actual input.
   const value = formikContext?.values[props.name];
 
@@ -125,7 +120,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
   );
 
   return (
-    <div className={wrapperClassNames}>
+    <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
       <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
         <LabelDecorator name={props.name} disabled={props.disabled} />
       </Label>
@@ -148,7 +143,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           prefix={getCurrencySymbolPrefixed(localeInfo.locale, props.currency)}
         />
       </div>
-      {Boolean(props.error) && <p className='text-xs font-medium text-red-500 mt-0.5'>{props.error}</p>}
+      <ErrorText error={props.error} />
     </div>
   );
 }
