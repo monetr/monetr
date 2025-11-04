@@ -4,8 +4,8 @@ import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { useNavigate } from 'react-router-dom';
 
+import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -92,7 +92,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
             How often do you get paid and how much do you get paid typically? monetr uses this to forecast balances
             based on the budgets you create.
           </MSpan>
-          <MDatePicker
+          <FormDatePicker
             name='nextPayday'
             label='When do you get paid next?'
             className='w-full'

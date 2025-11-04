@@ -11,7 +11,7 @@ import useIsMobile from '@monetr/interface/hooks/useIsMobile';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import errorTextStyles from './ErrorText.module.scss';
-import inputStyles from './Input.module.scss';
+import inputStyles from './FormTextField.module.scss';
 import selectStyles from './Select.module.scss';
 
 export interface SelectOption<V> {

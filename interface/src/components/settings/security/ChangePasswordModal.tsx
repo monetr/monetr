@@ -7,10 +7,10 @@ import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import request from '@monetr/interface/util/request';
 
 interface ChangePasswordValues {
@@ -88,7 +88,7 @@ function ChangePasswordModal(): JSX.Element {
           <MSpan weight='bold' size='xl' className='mb-2'>
             Change Your Password
           </MSpan>
-          <MTextField
+          <FormTextField
             autoFocus
             autoComplete='current-password'
             className='w-full'
@@ -97,7 +97,7 @@ function ChangePasswordModal(): JSX.Element {
             type='password'
             placeholder='********'
           />
-          <MTextField
+          <FormTextField
             autoComplete='new-password'
             className='w-full'
             label='New Password'
@@ -105,7 +105,7 @@ function ChangePasswordModal(): JSX.Element {
             type='password'
             placeholder='********'
           />
-          <MTextField
+          <FormTextField
             autoComplete='new-password'
             className='w-full'
             label='Repeat Password'

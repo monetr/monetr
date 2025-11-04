@@ -7,19 +7,20 @@ import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
+import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import { Switch } from '@monetr/interface/components/Switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monetr/interface/components/Tabs';
 import { type CreateTransactionRequest, useCreateTransaction } from '@monetr/interface/hooks/useCreateTransaction';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
+import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewTransactionValues {
@@ -75,7 +76,7 @@ function NewTransactionModal(): JSX.Element {
         // TODO Show toast that the transaction was created, include button to "view transaction".
         .then(() => modal.remove())
         .catch(
-          (error: AxiosError) =>
+          (error: AxiosError<APIError>) =>
             void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,
@@ -103,7 +104,7 @@ function NewTransactionModal(): JSX.Element {
               <Tabs
                 defaultValue='debit'
                 className='w-full mb-2'
-                onValueChange={value => setFieldValue('kind', value as any)}
+                onValueChange={value => setFieldValue('kind', value as unknown)}
               >
                 <TabsList className='w-full'>
                   <TabsTrigger className='w-full' value='debit'>
@@ -114,7 +115,7 @@ function NewTransactionModal(): JSX.Element {
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value='debit'>
-                  <MTextField
+                  <FormTextField
                     autoComplete='off'
                     autoFocus
                     data-1p-ignore
@@ -131,7 +132,7 @@ function NewTransactionModal(): JSX.Element {
                       className='w-full md:w-1/2'
                       allowNegative={false}
                     />
-                    <MDatePicker className='w-full md:w-1/2' label='Date' name='date' required />
+                    <FormDatePicker className='w-full md:w-1/2' label='Date' name='date' required />
                   </div>
                   <MSelectSpending className='w-full' name='spendingId' />
                   <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4 mt-2'>
@@ -150,7 +151,7 @@ function NewTransactionModal(): JSX.Element {
                   </div>
                 </TabsContent>
                 <TabsContent value='credit'>
-                  <MTextField
+                  <FormTextField
                     name='name'
                     label='Name / Description'
                     required
@@ -166,7 +167,7 @@ function NewTransactionModal(): JSX.Element {
                       className='w-full md:w-1/2'
                       allowNegative={false}
                     />
-                    <MDatePicker className='w-full md:w-1/2' label='Date' name='date' required />
+                    <FormDatePicker className='w-full md:w-1/2' label='Date' name='date' required />
                   </div>
                   <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'>
                     <div className='space-y-0.5'>

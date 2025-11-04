@@ -7,13 +7,13 @@ import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
+import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import { Switch } from '@monetr/interface/components/Switch';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -92,7 +92,7 @@ function NewFundingModal(): JSX.Element {
           <Fragment>
             <div className='flex flex-col'>
               <MSpan className='font-bold text-xl mb-2'>Create A New Funding Schedule</MSpan>
-              <MTextField
+              <FormTextField
                 autoFocus
                 name='name'
                 label='What do you want to call your funding schedule?'
@@ -101,7 +101,7 @@ function NewFundingModal(): JSX.Element {
                 placeholder='Example: Payday...'
                 data-1p-ignore
               />
-              <MDatePicker
+              <FormDatePicker
                 name='nextOccurrence'
                 label='When do you get paid next?'
                 required

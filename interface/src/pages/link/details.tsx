@@ -12,7 +12,6 @@ import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useBankAccountsForLink } from '@monetr/interface/hooks/useBankAccountsForLink';
 import { useLink } from '@monetr/interface/hooks/useLink';
@@ -21,6 +20,7 @@ import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import capitalize from '@monetr/interface/util/capitalize';
 import type { APIError } from '@monetr/interface/util/request';
+import FormTextField from '@monetr/interface/components/FormTextField';
 
 interface LinkValues {
   institutionName: string;
@@ -90,7 +90,7 @@ export default function LinkDetails(): React.JSX.Element {
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
             <MSpan className='text-xl my-2 w-full'>Details</MSpan>
-            <MTextField
+            <FormTextField
               className='w-full'
               label='Instituion / Budget Name'
               placeholder='Budget Name'

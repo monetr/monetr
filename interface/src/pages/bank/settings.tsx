@@ -7,9 +7,9 @@ import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
 import { useArchiveBankAccount } from '@monetr/interface/hooks/useArchiveBankAccount';
@@ -119,7 +119,13 @@ export default function BankAccountSettingsPage(): JSX.Element {
                 improve the UX and functionality.
               </MSpan>
             </Card>
-            <MTextField label='Name' placeholder='Bank account name...' name='name' className='w-full' data-1p-ignore />
+            <FormTextField
+              label='Name'
+              placeholder='Bank account name...'
+              name='name'
+              className='w-full'
+              data-1p-ignore
+            />
             <SelectCurrency name='currency' className='w-full' disabled={link?.getIsPlaid()} />
           </div>
         </div>

@@ -10,14 +10,14 @@ import { useMatch, useNavigate } from 'react-router-dom';
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormCheckbox from '@monetr/interface/components/FormCheckbox';
+import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import FundingTimeline from '@monetr/interface/components/funding/FundingTimeline';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -156,8 +156,15 @@ export default function FundingDetails(): JSX.Element {
       <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col'>
-            <MTextField className='w-full' label='Name' name='name' id={`${nameId}-funding-name-search`} required />
-            <MDatePicker
+            <FormTextField
+              className='w-full'
+              label='Name'
+              name='name'
+              id={`${nameId}-funding-name-search`}
+              required
+              error='test'
+            />
+            <FormDatePicker
               className='w-full'
               label='Next Recurrence'
               name='nextRecurrence'

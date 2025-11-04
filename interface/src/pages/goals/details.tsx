@@ -9,15 +9,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormCheckbox from '@monetr/interface/components/FormCheckbox';
+import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import GoalTimeline from '@monetr/interface/components/goals/GoalTimeline';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MDivider from '@monetr/interface/components/MDivider';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useRemoveSpending } from '@monetr/interface/hooks/useRemoveSpending';
@@ -206,9 +206,9 @@ export default function GoalDetails(): JSX.Element {
 
             <MDivider className='w-1/2 my-4' />
 
-            <MTextField className='w-full' label='Expense' name='name' required data-1p-ignore />
+            <FormTextField className='w-full' label='Expense' name='name' required data-1p-ignore />
             <MAmountField allowNegative={false} className='w-full' label='Amount' name='amount' required />
-            <MDatePicker
+            <FormDatePicker
               label='Target Date'
               name='nextRecurrence'
               className='w-full'

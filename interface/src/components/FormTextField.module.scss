@@ -2,12 +2,14 @@
 @use '@monetr/interface/variables';
 
 .input {
+  width: 100%;
   background-color: transparent;
   color: var(--content-emphasis);
   display: block;
   border-width: 0px;
   border-radius: var(--border-radius);
   min-height: 9.5 * variables.$size;
+  caret-color: var(--content-emphasis);
 
   @include mixins.text-small;
 
@@ -40,12 +42,14 @@
     --ring-color: var(--error);
     --ring-size: 1px;
 
-    &:focus-within {
+    &:focus-within, &:hover:focus-within {
+      --ring-color: var(--error);
       --ring-size: 2px;
     }
   }
 
   &:disabled, &[aria-disabled="true"] {
+    color: var(--content-disabled);
     background-color: var(--background-subtle);
     --ring-color: var(--background-emphasis);
     --ring-size: 1px;

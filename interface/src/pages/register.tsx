@@ -12,12 +12,12 @@ import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useSignUp, { type SignUpResponse } from '@monetr/interface/hooks/useSignUp';
 import { getLocale, getTimezone } from '@monetr/interface/util/locale';
 import type { APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
+import FormTextField from '@monetr/interface/components/FormTextField';
 
 interface RegisterValues {
   firstName: string;
@@ -40,7 +40,7 @@ const initialValues: RegisterValues = {
 const breakpoints = 'w-full md:w-1/2 lg:w-1/3 xl:w-1/4';
 
 function validator(values: RegisterValues): FormikErrors<RegisterValues> {
-  const errors = {};
+  const errors: FormikErrors<RegisterValues> = {};
 
   if (values?.firstName.length < 2) {
     errors.firstName = 'First name must have at least 2 characters.';
@@ -98,7 +98,9 @@ export default function Register(): JSX.Element {
       return null;
     }
 
-    return <MTextField label='Beta Code' name='betaCode' type='text' required uppercasetext className={breakpoints} />;
+    return (
+      <FormTextField label='Beta Code' name='betaCode' type='text' required uppercasetext className={breakpoints} />
+    );
   }
 
   async function submit(values: RegisterValues, helpers: FormikHelpers<RegisterValues>): Promise<void> {
@@ -163,7 +165,7 @@ export default function Register(): JSX.Element {
           </MSpan>
         </div>
         <div className='flex flex-col sm:flex-row gap-2.5 w-full'>
-          <MTextField
+          <FormTextField
             data-testid='register-first-name'
             autoFocus
             label='First Name'
@@ -172,7 +174,7 @@ export default function Register(): JSX.Element {
             required
             className='w-full'
           />
-          <MTextField
+          <FormTextField
             data-testid='register-last-name'
             label='Last Name'
             name='lastName'
@@ -181,7 +183,7 @@ export default function Register(): JSX.Element {
             className='w-full'
           />
         </div>
-        <MTextField
+        <FormTextField
           data-testid='register-email'
           label='Email Address'
           name='email'
@@ -189,7 +191,7 @@ export default function Register(): JSX.Element {
           required
           className='w-full'
         />
-        <MTextField
+        <FormTextField
           autoComplete='new-password'
           className='w-full'
           data-testid='register-password'
@@ -198,7 +200,7 @@ export default function Register(): JSX.Element {
           required
           type='password'
         />
-        <MTextField
+        <FormTextField
           autoComplete='new-password'
           className='w-full'
           data-testid='register-confirm-password'

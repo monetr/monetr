@@ -7,13 +7,13 @@ import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
+import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import { useCreateSpending } from '@monetr/interface/hooks/useCreateSpending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
@@ -84,7 +84,7 @@ function NewGoalModal(): JSX.Element {
       >
         <div className='flex flex-col'>
           <MSpan className='font-bold text-xl mb-2'>Create A New Goal</MSpan>
-          <MTextField
+          <FormTextField
             name='name'
             label='What are you budgeting for?'
             required
@@ -101,7 +101,7 @@ function NewGoalModal(): JSX.Element {
               className='w-full md:w-1/2'
               allowNegative={false}
             />
-            <MDatePicker
+            <FormDatePicker
               className='w-full md:w-1/2'
               label='How soon will you need it?'
               min={startOfTomorrow({

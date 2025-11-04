@@ -1,0 +1,19 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.datePickerButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  font-weight: var(--normal);
+  position: relative;
+  gap: 2 * variables.$size;
+
+  /* Any child icons of this component should have this style */
+  svg {
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
+    pointer-events: none;
+  }
+}

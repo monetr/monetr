@@ -4,12 +4,12 @@ import { useSnackbar } from 'notistack';
 import { useLocation } from 'react-router-dom';
 
 import FormButton from '@monetr/interface/components/FormButton';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import request from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
@@ -83,7 +83,7 @@ export default function ResendVerificationPage(): JSX.Element {
       <div className='max-w-xs flex flex-col items-center gap-2'>
         <MLogo className='h-24 w-24' />
         <RouteStateMessage />
-        <MTextField
+        <FormTextField
           name='email'
           autoComplete='username'
           autoFocus

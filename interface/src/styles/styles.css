@@ -48,6 +48,7 @@
   --outline-size: 2px;
 
   /* Font weights */
+  --normal: 400;
   --medium: 500;
   --semibold: 600;
 

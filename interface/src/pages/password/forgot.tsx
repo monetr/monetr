@@ -7,10 +7,10 @@ import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useSendForgotPassword from '@monetr/interface/hooks/useSendForgotPassword';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
+import FormTextField from '@monetr/interface/components/FormTextField';
 
 interface Values {
   email: string;
@@ -92,7 +92,7 @@ export default function ForgotPasswordNew(): JSX.Element {
           We can email you a link to reset it.
         </MSpan>
       </div>
-      <MTextField
+      <FormTextField
         autoFocus
         autoComplete='username'
         label='Email Address'

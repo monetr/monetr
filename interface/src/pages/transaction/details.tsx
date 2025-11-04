@@ -9,13 +9,13 @@ import { useParams } from 'react-router-dom';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import FormCheckbox from '@monetr/interface/components/FormCheckbox';
+import FormDatePicker from '@monetr/interface/components/FormDatePicker';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import RemoveTransactionButton from '@monetr/interface/components/transactions/RemoveTransactionButton';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
@@ -138,16 +138,24 @@ export default function TransactionDetails(): JSX.Element {
             <div className='w-full flex justify-center mb-2'>
               <MerchantIcon name={transaction?.name} />
             </div>
-            <MTextField label='Name' placeholder='Transaction name...' name='name' className='w-full' data-1p-ignore />
-            <MTextField
+            <FormTextField
+              label='Name'
+              autoComplete='off'
+              placeholder='Transaction name...'
+              name='name'
+              className='w-full'
+              data-1p-ignore
+            />
+            <FormTextField
               label='Original Name'
+              autoComplete='off'
               placeholder='No original name...?'
               name='originalName'
               className='w-full'
               disabled
             />
             <MAmountField className='w-full' disabled label='Amount' name='amount' />
-            <MDatePicker label='Date' name='date' className='w-full' disabled={!link.getIsManual()} />
+            <FormDatePicker label='Date' name='date' className='w-full' disabled={!link.getIsManual()} />
             <FormCheckbox
               data-testid='transaction-details-pending'
               name='isPending'

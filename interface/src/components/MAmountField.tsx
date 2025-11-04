@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useId } from 'react';
 import { useFormikContext } from 'formik';
 import {
   type InputAttributes,
@@ -20,6 +20,7 @@ import {
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import errorTextStyles from './ErrorText.module.scss';
+import inputStyles from './FormTextField.module.scss';
 
 type NumericField = Omit<
   NumericFormatProps<InputAttributes>,
@@ -40,6 +41,7 @@ const MAmountFieldPropsDefaults: MAmountFieldProps = {
 };
 
 export default function MAmountField(props: MAmountFieldProps = MAmountFieldPropsDefaults): JSX.Element {
+  const id = useId();
   const { data: localeInfo } = useLocaleCurrency(props.currency);
   const formikContext = useFormikContext();
   const getFormikError = () => {
@@ -51,6 +53,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
   };
 
   props = {
+    id,
     ...MAmountFieldPropsDefaults,
     currency: localeInfo.currency ?? 'USD',
     ...props,
@@ -61,49 +64,6 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
 
   const { labelDecorator, ...otherProps } = props;
   const LabelDecorator = labelDecorator || MAmountFieldPropsDefaults.labelDecorator;
-
-  const classNames = mergeTailwind(
-    {
-      'dark:focus:ring-dark-monetr-brand': !props.disabled && !props.error,
-      'dark:hover:ring-zinc-400': !props.disabled && !props.error,
-      'dark:ring-dark-monetr-border-string': !props.disabled && !props.error,
-      'dark:ring-red-500': !props.disabled && !!props.error,
-      'ring-gray-300': !props.disabled && !props.error,
-      'ring-red-300': !props.disabled && !!props.error,
-    },
-    {
-      'focus:ring-purple-400': !props.error,
-      'focus:ring-red-400': props.error,
-    },
-    {
-      'dark:bg-dark-monetr-background': !props.disabled,
-      'dark:text-zinc-200': !props.disabled,
-      'text-gray-900': !props.disabled,
-    },
-    {
-      'dark:bg-dark-monetr-background-subtle': props.disabled,
-      'dark:ring-dark-monetr-background-emphasis': props.disabled,
-      'ring-gray-200': props.disabled,
-      'text-gray-500': props.disabled,
-    },
-    'proportional-nums',
-    'block',
-    'border-0',
-    'focus:ring-2',
-    'focus:ring-inset',
-    'placeholder:text-gray-400',
-    'px-3',
-    'py-1.5',
-    'ring-1',
-    'ring-inset',
-    'rounded-lg',
-    'shadow-sm',
-    'sm:leading-6',
-    'text-sm',
-    'w-full',
-    'dark:caret-zinc-50',
-    'min-h-[38px]',
-  );
 
   // If we are working with a date picker, then take the current value and transform it for the actual input.
   const value = formikContext?.values[props.name];
@@ -132,7 +92,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           value={value}
           {...otherProps}
           /* Properties below this point cannot be overwritten by the caller! */
-          className={classNames}
+          className={inputStyles.input}
           fixedDecimalScale
           decimalScale={currencyInfo.maximumFractionDigits}
           decimalSeparator={getDecimalSeparator(localeInfo.locale)}
@@ -141,6 +101,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           renderText={intlNumberFormatter(localeInfo.locale, props.currency)}
           placeholder={intlNumberFormatter(localeInfo.locale, props.currency)('0')}
           prefix={getCurrencySymbolPrefixed(localeInfo.locale, props.currency)}
+          data-error={Boolean(props.error)}
         />
       </div>
       <ErrorText error={props.error} />

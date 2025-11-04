@@ -1,6 +1,6 @@
 import { Button } from '@monetr/interface/components/Button';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MSelect from '@monetr/interface/components/MSelect';
-import MTextField from '@monetr/interface/components/MTextField';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 export default function SettingsOverview(): JSX.Element {
@@ -14,21 +14,21 @@ export default function SettingsOverview(): JSX.Element {
   return (
     <div className='w-full h-full flex flex-col justify-between pb-4'>
       <div className='w-full flex p-4 flex-col'>
-        <MTextField
+        <FormTextField
           label='First Name'
           name='firstName'
           className='max-w-[24rem] w-full'
           value={me?.user?.login?.firstName}
           disabled
         />
-        <MTextField
+        <FormTextField
           label='Last Name'
           name='lastName'
           className='max-w-[24rem] w-full'
           value={me?.user?.login?.lastName}
           disabled
         />
-        <MTextField
+        <FormTextField
           label='Email Address'
           name='email'
           className='max-w-[24rem] w-full'

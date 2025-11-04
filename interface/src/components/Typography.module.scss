@@ -4,3 +4,9 @@
   @include mixins.text-small;
   color: var(--content);
 }
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

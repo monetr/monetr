@@ -2,12 +2,12 @@ import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useLogin from '@monetr/interface/hooks/useLogin';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
@@ -75,7 +75,7 @@ export default function Login(): JSX.Element {
         <MLogo />
       </div>
       <MSpan>Sign into your monetr account</MSpan>
-      <MTextField
+      <FormTextField
         data-testid='login-email'
         autoFocus
         label='Email Address'
@@ -85,7 +85,7 @@ export default function Login(): JSX.Element {
         className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'
         tabIndex={0}
       />
-      <MTextField
+      <FormTextField
         autoComplete='current-password'
         className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'
         data-testid='login-password'

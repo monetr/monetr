@@ -1,8 +1,8 @@
 import type { FormikHelpers } from 'formik';
 
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
-import MTextField from '@monetr/interface/components/MTextField';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
@@ -36,7 +36,7 @@ export default function ManualLinkSetupIntroName(): JSX.Element {
       <MSpan size='lg' color='subtle' className='text-center'>
         Let's create a new budget to get started. What do you want to call this budget?
       </MSpan>
-      <MTextField
+      <FormTextField
         name='budgetName'
         label='Bank or Budget Name'
         className='w-full'
