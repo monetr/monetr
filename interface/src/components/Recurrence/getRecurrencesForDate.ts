@@ -6,20 +6,24 @@ import { RRule, type Weekday } from 'rrule';
 import Recurrence from '@monetr/interface/components/Recurrence/Recurrence';
 import parseDate from '@monetr/interface/util/parseDate';
 
-export default function getRecurrencesForDate(inputDate: Date | string | null, timezone: string): Array<Recurrence> {
+export default function getRecurrencesForDate(
+  inputDate: Date | string | null,
+  timezoneString: string,
+): Array<Recurrence> {
   const date = parseDate(inputDate);
   if (!date) {
     return [];
   }
 
+  const timezone = tz(timezoneString);
   const input = startOfDay(date, {
-    in: tz(timezone),
+    in: timezone,
   });
   const endOfMonthDate = startOfDay(endOfMonth(input), {
-    in: tz(timezone),
+    in: timezone,
   });
   const startOfMonthDate = startOfDay(startOfMonth(input), {
-    in: tz(timezone),
+    in: timezone,
   });
   const isStartOfMonth = isEqual(input, startOfMonthDate);
   const isEndOfMonth = isEqual(input, endOfMonthDate);
@@ -55,7 +59,7 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
         dtstart: input,
         freq: RRule.MONTHLY,
         interval: 1,
-        bymonthday: getDate(input),
+        bymonthday: [getDate(input)],
       }),
     }),
     new Recurrence({
@@ -64,7 +68,7 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
         dtstart: input,
         freq: RRule.MONTHLY,
         interval: 2,
-        bymonthday: getDate(input),
+        bymonthday: [getDate(input)],
       }),
     }),
     new Recurrence({
@@ -73,7 +77,7 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
         dtstart: input,
         freq: RRule.MONTHLY,
         interval: 3,
-        bymonthday: getDate(input),
+        bymonthday: [getDate(input)],
       }),
     }),
     new Recurrence({
@@ -82,7 +86,7 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
         dtstart: input,
         freq: RRule.MONTHLY,
         interval: 6,
-        bymonthday: getDate(input),
+        bymonthday: [getDate(input)],
       }),
     }),
     new Recurrence({
@@ -91,8 +95,8 @@ export default function getRecurrencesForDate(inputDate: Date | string | null, t
         dtstart: input,
         freq: RRule.YEARLY,
         interval: 1,
-        bymonth: getMonth(input) + 1,
-        bymonthday: getDate(input),
+        bymonth: [getMonth(input) + 1],
+        bymonthday: [getDate(input)],
       }),
     }),
   ];

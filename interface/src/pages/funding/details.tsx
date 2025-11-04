@@ -66,7 +66,11 @@ export default function FundingDetails(): JSX.Element {
   function validate(values: FundingValues): FormikErrors<FundingValues> {
     const errors: FormikErrors<FundingValues> = {};
 
-    if (values.rule === '' || !values.rule) {
+    if (!values.name) {
+      errors.name = 'Name cannot be blank.';
+    }
+
+    if (!values.rule) {
       errors.rule = 'Frequency is required for funding schedules.';
     }
 
@@ -156,14 +160,7 @@ export default function FundingDetails(): JSX.Element {
       <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col'>
-            <FormTextField
-              className='w-full'
-              label='Name'
-              name='name'
-              id={`${nameId}-funding-name-search`}
-              required
-              error='test'
-            />
+            <FormTextField className='w-full' label='Name' name='name' id={`${nameId}-funding-name-search`} required />
             <FormDatePicker
               className='w-full'
               label='Next Recurrence'

@@ -19,7 +19,7 @@ const MModal = React.forwardRef<MModalRef, MModalProps>((props, ref) => {
 
   const classNames = mergeTailwind(
     'bg-background',
-    'overflow-auto',
+    'overflow-visible',
     'p-2',
     'relative',
     'rounded-none',

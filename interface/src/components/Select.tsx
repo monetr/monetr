@@ -105,8 +105,11 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
     defaultHighlightedIndex: 0,
     // But the initially highlighted item should be the one they have selected otherwise fallback to the first item.
     initialHighlightedIndex: props.value ? props.options.indexOf(props.value) : 0,
-    onInputValueChange({ inputValue }) {
-      setItems(props.options.filter(filterImplementation(inputValue)));
+    onInputValueChange({ inputValue, isOpen }) {
+      // Only filter items if we are open!
+      if (isOpen) {
+        setItems(props.options.filter(filterImplementation(inputValue)));
+      }
     },
     onSelectedItemChange(changes: UseComboboxSelectedItemChange<SelectOption<V>>) {
       if (changes.selectedItem) {
