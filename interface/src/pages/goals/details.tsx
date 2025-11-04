@@ -8,9 +8,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
+import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import GoalTimeline from '@monetr/interface/components/goals/GoalTimeline';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MCheckbox from '@monetr/interface/components/MCheckbox';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MDivider from '@monetr/interface/components/MDivider';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
@@ -224,7 +224,7 @@ export default function GoalDetails(): JSX.Element {
               name='fundingScheduleId'
               required
             />
-            <MCheckbox
+            <FormCheckbox
               data-testid='goal-details-paused'
               name='isPaused'
               label='Paused?'

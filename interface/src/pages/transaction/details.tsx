@@ -8,8 +8,8 @@ import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
 
 import FormButton from '@monetr/interface/components/FormButton';
+import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MCheckbox from '@monetr/interface/components/MCheckbox';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
@@ -148,7 +148,7 @@ export default function TransactionDetails(): JSX.Element {
             />
             <MAmountField className='w-full' disabled label='Amount' name='amount' />
             <MDatePicker label='Date' name='date' className='w-full' disabled={!link.getIsManual()} />
-            <MCheckbox
+            <FormCheckbox
               data-testid='transaction-details-pending'
               name='isPending'
               label='Is Pending'

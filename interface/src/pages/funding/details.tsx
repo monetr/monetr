@@ -9,9 +9,9 @@ import { useMatch, useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
+import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FundingTimeline from '@monetr/interface/components/funding/FundingTimeline';
 import MAmountField from '@monetr/interface/components/MAmountField';
-import MCheckbox from '@monetr/interface/components/MCheckbox';
 import MDatePicker from '@monetr/interface/components/MDatePicker';
 import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
@@ -176,7 +176,7 @@ export default function FundingDetails(): JSX.Element {
               placeholder='Select a funding frequency...'
               required
             />
-            <MCheckbox
+            <FormCheckbox
               data-testid='funding-details-exclude-weekends'
               name='excludeWeekends'
               label='Exclude weekends'

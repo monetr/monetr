@@ -15,16 +15,7 @@
     "lineEnding": "lf",
     "lineWidth": 120,
     "attributePosition": "auto",
-    "includes": [
-      "interface/**",
-      "docs/src/**",
-      "emails/src/**",
-      "stories/**",
-      "!**/*.html",
-      "!**/*.svg",
-      "!**/*.mdx",
-      "!**/*.css"
-    ]
+    "includes": ["interface/**", "docs/src/**", "emails/src/**", "stories/**", "!**/*.html", "!**/*.svg", "!**/*.mdx"]
   },
   "assist": {
     "actions": {
@@ -85,16 +76,7 @@
               ["./**"],
               ":PATH:",
               ":BLANK_LINE:",
-              [
-                "@/**/*.scss",
-                "@/**/*.css",
-                "@/**/*.svg",
-                "@/**/*.png",
-                "@/**/*.jpg",
-                "@/**/*.gif",
-                "@/**/*.jpeg",
-                "@/**/*.webp"
-              ],
+              ["**/*.scss", "**/*.css", "**/*.svg", "**/*.png", "**/*.jpg", "**/*.gif", "**/*.jpeg", "**/*.webp"],
               ":BLANK_LINE:"
             ]
           }
@@ -199,6 +181,9 @@
     "parser": {
       "cssModules": true,
       "tailwindDirectives": true
+    },
+    "assist": {
+      "enabled": true
     }
   },
   "json": {

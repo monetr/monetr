@@ -1,0 +1,44 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.checkboxRoot {
+  height: 4 * variables.$size;
+  width: 4 * variables.$size;
+  flex-shrink: 0;
+  border-radius: variables.$size;
+  border-width: 1px;
+  border-color: var(--border-string);
+  color: transparent;
+
+  transition: ease-in-out;
+  transition-property: border-color, background-color, color;
+  transition-duration: 75ms;
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-subtle);
+    outline-offset: 2px;
+  }
+
+  &:disabled, &[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  };
+
+  &[data-state="checked"] {
+    border-color: var(--brand-subtle);
+    background-color: var(--brand-subtle);
+    color: var(--content-emphasis);
+  }
+}
+
+.checkboxIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.checkboxCheck {
+  height: 4 * variables.$size;
+  width: 4 * variables.$size;
+}

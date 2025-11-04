@@ -1,0 +1,6 @@
+@use '@monetr/interface/mixins';
+
+.smallParagraph {
+  @include mixins.text-small;
+  color: var(--content);
+}
