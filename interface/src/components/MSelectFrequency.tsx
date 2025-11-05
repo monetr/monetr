@@ -40,7 +40,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
   // new frequency.
   // biome-ignore lint/correctness/useExhaustiveDependencies: I want to only re-run this hook when the date prop changes
   useEffect(() => {
-    const currentValue: string = formikContext?.values[props.name];
+    const currentValue: string = formikContext.values[props.name];
     const found = currentValue ? rules.find(rule => rule.equalSignature(currentValue)) : null;
     if (found) {
       setSelectedSignature(found.signature());

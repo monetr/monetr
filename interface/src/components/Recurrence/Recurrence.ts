@@ -44,7 +44,7 @@ export default class Recurrence {
    * signature returns a string representing a soft way of identifying a recurrence rule in a dropdown list.
    */
   signature(): string {
-    return signature(this.rule);
+    return ruleSignature(this.rule);
   }
 
   equalSignature(input: string): boolean {
@@ -63,8 +63,8 @@ export default class Recurrence {
       thisRule.options.bysecond = null;
       inputRule.options.tzid = null;
 
-      const a = signature(inputRule);
-      const b = signature(thisRule);
+      const a = ruleSignature(inputRule);
+      const b = ruleSignature(thisRule);
 
       return a === b;
     } catch {
@@ -74,8 +74,8 @@ export default class Recurrence {
   }
 }
 
-function signature(rule: RRule): string {
-  if (Array.isArray(rule.origOptions.bymonthday)) {
+export function ruleSignature(rule: RRule): string {
+  if (Array.isArray(rule.origOptions.bymonthday) && rule.origOptions.bymonthday.length > 1) {
     return `${rule.options.freq}::${rule.options.interval}::${rule.origOptions.bymonthday}`;
   }
 

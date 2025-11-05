@@ -30,7 +30,7 @@ import type { APIError } from '@monetr/interface/util/request';
 interface FundingValues {
   name: string;
   nextRecurrence: Date;
-  rule: string;
+  ruleset: string;
   excludeWeekends: boolean;
   estimatedDeposit: number | null;
 }
@@ -70,8 +70,8 @@ export default function FundingDetails(): JSX.Element {
       errors.name = 'Name cannot be blank.';
     }
 
-    if (!values.rule) {
-      errors.rule = 'Frequency is required for funding schedules.';
+    if (!values.ruleset) {
+      errors.ruleset = 'Frequency is required for funding schedules.';
     }
 
     return errors;
@@ -86,7 +86,7 @@ export default function FundingDetails(): JSX.Element {
       nextRecurrence: startOfDay(values.nextRecurrence, {
         in: tz(timezone),
       }),
-      ruleset: values.rule,
+      ruleset: values.ruleset,
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: locale.friendlyToAmount(values.estimatedDeposit),
     })
@@ -134,7 +134,7 @@ export default function FundingDetails(): JSX.Element {
   const initialValues: FundingValues = {
     name: funding.name,
     nextRecurrence: funding.nextRecurrenceOriginal,
-    rule: funding.ruleset,
+    ruleset: funding.ruleset,
     excludeWeekends: funding.excludeWeekends,
     // Because we store all amounts in cents, in order to use them in the UI we need to convert them back to dollars.
     estimatedDeposit: locale.amountToFriendly(funding.estimatedDeposit),
@@ -176,7 +176,7 @@ export default function FundingDetails(): JSX.Element {
               className='w-full'
               dateFrom='nextRecurrence'
               label='How often does this funding happen?'
-              name='rule'
+              name='ruleset'
               placeholder='Select a funding frequency...'
               required
             />

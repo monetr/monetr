@@ -35,7 +35,7 @@ interface ExpenseValues {
   amount: number;
   nextRecurrence: Date;
   fundingScheduleId: string;
-  recurrenceRule: string;
+  ruleset: string;
 }
 
 export default function ExpenseDetails(): JSX.Element {
@@ -117,7 +117,7 @@ export default function ExpenseDetails(): JSX.Element {
         in: tz(timezone),
       }),
       fundingScheduleId: values.fundingScheduleId,
-      ruleset: values.recurrenceRule,
+      ruleset: values.ruleset,
       targetAmount: locale.friendlyToAmount(values.amount),
     });
 
@@ -144,7 +144,7 @@ export default function ExpenseDetails(): JSX.Element {
     amount: locale.amountToFriendly(spending.targetAmount),
     nextRecurrence: spending.nextRecurrence,
     fundingScheduleId: spending.fundingScheduleId,
-    recurrenceRule: spending.ruleset,
+    ruleset: spending.ruleset,
   };
 
   const progress = ((Math.min(spending?.currentAmount, spending?.targetAmount) / spending?.targetAmount) * 100).toFixed(
@@ -219,7 +219,7 @@ export default function ExpenseDetails(): JSX.Element {
               className='w-full'
               dateFrom='nextRecurrence'
               label='How often do you need this expense?'
-              name='recurrenceRule'
+              name='ruleset'
               placeholder='Select a spending frequency...'
               required
             />
