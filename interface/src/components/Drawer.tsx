@@ -3,6 +3,8 @@ import { Drawer as DrawerPrimitive } from 'vaul';
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
+import styles from './Drawer.module.scss';
+
 const Drawer = ({ shouldScaleBackground = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
   <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
 );
@@ -37,15 +39,14 @@ const DrawerContent = React.forwardRef<
       className={mergeTailwind(
         'fixed',
         'inset-x-0',
-        'z-50', // mt-24',
+        'z-50',
         'flex flex-col',
         'rounded-t-[10px]',
         'bottom-0 left-0 right-0',
         'border border-b-0 border-dark-monetr-border bg-dark-monetr-background',
         'max-h-[60%]',
         'gap-4',
-        'pb-4',
-        // 'max-h-screen',
+        styles.drawerContent,
         className,
       )}
       {...props}

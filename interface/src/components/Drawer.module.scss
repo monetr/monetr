@@ -1,0 +1,8 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+$basePadding: 4 * variables.$size;
+
+.drawerContent {
+  padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
+}
