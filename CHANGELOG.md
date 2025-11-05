@@ -1,5 +1,103 @@
 # Changelog
 
+## [1.6.0](https://github.com/monetr/monetr/compare/v1.5.3...v1.6.0) (2025-11-05)
+
+
+### Features
+
+* **ci:** Adding linting to the CI/CD pipeline ([#2766](https://github.com/monetr/monetr/issues/2766)) ([3cc84ee](https://github.com/monetr/monetr/commit/3cc84ee8ebf59cee7f3d69a4f008a94345006615))
+* **ui:** New combobox/select component ([#2771](https://github.com/monetr/monetr/issues/2771)) ([9d79dcb](https://github.com/monetr/monetr/commit/9d79dcb8021c471532d7025532f88b47a8d144fe))
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.36.1 ([#2775](https://github.com/monetr/monetr/issues/2775)) ([99be280](https://github.com/monetr/monetr/commit/99be2801b1c520140ff1b68802fa681808f9f7dc))
+* **api:** update module github.com/getsentry/sentry-go to v0.36.2 ([#2798](https://github.com/monetr/monetr/issues/2798)) ([1c14439](https://github.com/monetr/monetr/commit/1c14439ead9301501b9bd5dc7eeaecea66457549))
+* **api:** update module github.com/prometheus/client_golang to v1.23.2 ([#2470](https://github.com/monetr/monetr/issues/2470)) ([326faf8](https://github.com/monetr/monetr/commit/326faf8a5e34b780dd530e6d10d82c046904b9f3))
+* **api:** update module github.com/spf13/viper to v1.21.0 ([#2545](https://github.com/monetr/monetr/issues/2545)) ([c6336d1](https://github.com/monetr/monetr/commit/c6336d174db1c392507bd5369ef48cd4e6e03ade))
+* **containers:** update ghcr.io/flipt-io/flipt docker tag to v2 ([#2748](https://github.com/monetr/monetr/issues/2748)) ([1746045](https://github.com/monetr/monetr/commit/1746045a8d4bbd54fb98de7d06b7f8bab219b573))
+* **containers:** update hashicorp/vault docker tag to v1.21.0 ([#2781](https://github.com/monetr/monetr/issues/2781)) ([cdf1d45](https://github.com/monetr/monetr/commit/cdf1d4519a653291e8192376a0b7997a0aa8eaae))
+* **containers:** update valkey/valkey docker tag to v9 ([#2780](https://github.com/monetr/monetr/issues/2780)) ([359fb6b](https://github.com/monetr/monetr/commit/359fb6ba2625df2e17ef6a7b249d67242272d3da))
+* **docs:** Upgrading react-query for the documentation site ([3aad459](https://github.com/monetr/monetr/commit/3aad4593dc1855b2e1089d6ae62bbfb9e98b7755))
+* **renovate:** update actions/download-artifact action to v5 ([#2782](https://github.com/monetr/monetr/issues/2782)) ([bbe100c](https://github.com/monetr/monetr/commit/bbe100c0ea3605cb80ad1024be801d4641f1c2f9))
+* **renovate:** update dependency @biomejs/biome to v2.2.7 ([#2777](https://github.com/monetr/monetr/issues/2777)) ([47f9b85](https://github.com/monetr/monetr/commit/47f9b85815b67391f9142366426ab8e81fa8dc97))
+* **renovate:** update dependency @biomejs/biome to v2.3.1 ([#2789](https://github.com/monetr/monetr/issues/2789)) ([428c7cc](https://github.com/monetr/monetr/commit/428c7cc7ce97570b77fa2e8e178dfde46d47c955))
+* **renovate:** update dependency @biomejs/biome to v2.3.2 ([#2799](https://github.com/monetr/monetr/issues/2799)) ([7ca439b](https://github.com/monetr/monetr/commit/7ca439b768086d5d921fcfd476015b7c84d551b0))
+* **renovate:** update github artifact actions ([#2794](https://github.com/monetr/monetr/issues/2794)) ([d848cef](https://github.com/monetr/monetr/commit/d848cef86428b4bc710752b1a8205dd98d3ca50b))
+* **ui:** Removing some extra dependencies ([5e18291](https://github.com/monetr/monetr/commit/5e18291dd9204189204ca158e6914bfe815bcdc4))
+* **ui:** update dependency @fontsource-variable/inter to v5.2.8 ([#2698](https://github.com/monetr/monetr/issues/2698)) ([b44865d](https://github.com/monetr/monetr/commit/b44865db939f6192f15f4af4121dcac494e76118))
+* **ui:** update dependency @react-email/components to v0.5.7 ([#2760](https://github.com/monetr/monetr/issues/2760)) ([e241118](https://github.com/monetr/monetr/commit/e241118a920eb2561db92b604807526ea029043c))
+* **ui:** update dependency @swc/core to v1.14.0 ([#2803](https://github.com/monetr/monetr/issues/2803)) ([e22a636](https://github.com/monetr/monetr/commit/e22a636ab27dec7c85bde8eac051504be30d2313))
+* **ui:** update dependency @tanstack/react-query to v5.90.5 ([#2756](https://github.com/monetr/monetr/issues/2756)) ([428ccc7](https://github.com/monetr/monetr/commit/428ccc78ad64f94f94a3f8b1b3b00699cf6a84d7))
+* **ui:** update dependency @testing-library/jest-dom to v6.9.1 ([#2744](https://github.com/monetr/monetr/issues/2744)) ([435003d](https://github.com/monetr/monetr/commit/435003d4d5831d9bc4696cfe8ad74f1c0e59b2bd))
+* **ui:** update dependency @types/node to v20.19.22 ([#2761](https://github.com/monetr/monetr/issues/2761)) ([93e70c2](https://github.com/monetr/monetr/commit/93e70c2eb7caac252a679664288c1d214c42f218))
+* **ui:** update dependency @types/node to v20.19.23 ([#2776](https://github.com/monetr/monetr/issues/2776)) ([4d42d08](https://github.com/monetr/monetr/commit/4d42d08c2be5fe514749c396388a8c25c2c493dc))
+* **ui:** update dependency axios to v1.13.0 ([#2792](https://github.com/monetr/monetr/issues/2792)) ([e582071](https://github.com/monetr/monetr/commit/e582071365a9134c097a5ca16b3148c221b93d3d))
+* **ui:** update dependency axios to v1.13.1 ([#2801](https://github.com/monetr/monetr/issues/2801)) ([efb4882](https://github.com/monetr/monetr/commit/efb4882643f2b051ded35e0662ea70989386f3ff))
+* **ui:** update dependency cheerio to v1.1.2 ([#2745](https://github.com/monetr/monetr/issues/2745)) ([d1033fe](https://github.com/monetr/monetr/commit/d1033fe2e721cfd4cff62b0af2fbeaa476900417))
+* **ui:** update dependency cmdk to v1.1.1 ([#2554](https://github.com/monetr/monetr/issues/2554)) ([7cf1ba5](https://github.com/monetr/monetr/commit/7cf1ba579fa701464e8a96200f6e49ee7592d44d))
+* **ui:** update dependency cssnano to v7.1.1 ([#2735](https://github.com/monetr/monetr/issues/2735)) ([5336a71](https://github.com/monetr/monetr/commit/5336a710fff5a27d642f4c4989ab5c9b4f7939a0))
+* **ui:** update dependency cssnano to v7.1.2 ([#2802](https://github.com/monetr/monetr/issues/2802)) ([5b385b1](https://github.com/monetr/monetr/commit/5b385b105aef5def441033249d19da68e33b663b))
+* **ui:** update dependency lucide-react to v0.546.0 ([#2750](https://github.com/monetr/monetr/issues/2750)) ([a11043f](https://github.com/monetr/monetr/commit/a11043f05da13ae15cf035b360138119818c7472))
+* **ui:** update dependency lucide-react to v0.548.0 ([#2790](https://github.com/monetr/monetr/issues/2790)) ([0fa793e](https://github.com/monetr/monetr/commit/0fa793e7fe93e9820462956e70870b3d6aefa05f))
+* **ui:** update dependency next to v15.5.6 ([#2746](https://github.com/monetr/monetr/issues/2746)) ([e692406](https://github.com/monetr/monetr/commit/e692406d64de2d86e1818054e3dda4bb2acb45a0))
+* **ui:** update dependency react-email to v4 ([#2751](https://github.com/monetr/monetr/issues/2751)) ([15b99ff](https://github.com/monetr/monetr/commit/15b99ff016e3e3c0e424dc53fe2225985db53bfd))
+* **ui:** update dependency react-email to v4.3.1 ([#2763](https://github.com/monetr/monetr/issues/2763)) ([40a9098](https://github.com/monetr/monetr/commit/40a9098d95d15215ad657b4794bf5b5d4af745dd))
+* **ui:** update dependency react-email to v4.3.2 ([#2788](https://github.com/monetr/monetr/issues/2788)) ([dec02fc](https://github.com/monetr/monetr/commit/dec02fc8bf92dad984c67448885b8ca5818b3379))
+* **ui:** update dependency react-infinite-scroll-hook to v6 ([#2795](https://github.com/monetr/monetr/issues/2795)) ([59119de](https://github.com/monetr/monetr/commit/59119de5c1f69a9517e3767eda7dc09e88f57ae8))
+* **ui:** update dependency react-plaid-link to v4 ([#2796](https://github.com/monetr/monetr/issues/2796)) ([04832b8](https://github.com/monetr/monetr/commit/04832b864f5e427b56823f208374d6f11a5d86f9))
+* **ui:** update embla-carousel monorepo to v8.6.0 ([#2762](https://github.com/monetr/monetr/issues/2762)) ([7d0a525](https://github.com/monetr/monetr/commit/7d0a525d8fb18cbb8bb53ebdf782156304ac6c1d))
+* **ui:** update rsbuild to v1.6.0 ([#2804](https://github.com/monetr/monetr/issues/2804)) ([465489f](https://github.com/monetr/monetr/commit/465489f1ce13953729b590e537bf7aac611f617d))
+* **ui:** update sentry-javascript monorepo to v10.20.0 ([#2765](https://github.com/monetr/monetr/issues/2765)) ([bacebd1](https://github.com/monetr/monetr/commit/bacebd107097d95d44588b203d3a555296b8e2dd))
+* **ui:** update sentry-javascript monorepo to v10.21.0 ([#2779](https://github.com/monetr/monetr/issues/2779)) ([62820d9](https://github.com/monetr/monetr/commit/62820d9f5daaaf08171b553901d45b3411e24bd0))
+* **ui:** update sentry-javascript monorepo to v10.22.0 ([#2793](https://github.com/monetr/monetr/issues/2793)) ([b43b7ae](https://github.com/monetr/monetr/commit/b43b7aec07cbf12e7be99b70caba2e9d30287931))
+
+
+### Bug Fixes
+
+* **build:** Fixed vault in local development ([7d618b3](https://github.com/monetr/monetr/commit/7d618b3a0d06b5a38eb295e6e29640274ee98b65)), closes [#2787](https://github.com/monetr/monetr/issues/2787)
+* **build:** Fixing local development setup ([#2797](https://github.com/monetr/monetr/issues/2797)) ([0a88510](https://github.com/monetr/monetr/commit/0a885107712c2cef98413423d060b675d3a69651))
+* **build:** Set the min node version to 20.12.0 ([b7f6667](https://github.com/monetr/monetr/commit/b7f666726f6d27a3635533a442ab01653184c262)), closes [#2773](https://github.com/monetr/monetr/issues/2773)
+* **build:** Updating renovate config to include biome schema ([2b7cbea](https://github.com/monetr/monetr/commit/2b7cbea7b2bc19ffb95b0b65c309f560404b456f))
+* **ui:** Don't show "weekend avoided" incorrectly on funding schedules ([f55a348](https://github.com/monetr/monetr/commit/f55a348e69261db28ea23ad0b32e69ea60337ae8))
+* **ui:** Fix mobile sidebar not auto-closing ([55fe490](https://github.com/monetr/monetr/commit/55fe490840ef143b3fdd1435ad0df12c34305d57))
+* **ui:** Fixed 1password extension adding scrolling to some pages ([c2c511a](https://github.com/monetr/monetr/commit/c2c511aeb4a6871e09c73415f920d549737cff36))
+* **ui:** Fixed broken transaction updates ([8a525c2](https://github.com/monetr/monetr/commit/8a525c26f738ae14201436f2912de9c8b7e037fe)), closes [#2774](https://github.com/monetr/monetr/issues/2774)
+* **ui:** Fixed issue where expense details didnt show frequency ([ac1e3ef](https://github.com/monetr/monetr/commit/ac1e3ef45a8c0ead9d48fb554dcd17c67f9e03c5))
+* **ui:** Fixed mobile padding for drawers on the bottom ([8be7f3b](https://github.com/monetr/monetr/commit/8be7f3b66aa4d27b226cf29560fbfdc8b216e8d6))
+* **ui:** Fixing bad types for several generics ([488ba56](https://github.com/monetr/monetr/commit/488ba56ce5619a5b2b9ec88265d2069059dbe7fa))
+* **ui:** Removed unnecessary console.log ([#2785](https://github.com/monetr/monetr/issues/2785)) ([4dc1af1](https://github.com/monetr/monetr/commit/4dc1af185118c860ff9a0feee7428c91598106e7)), closes [#2778](https://github.com/monetr/monetr/issues/2778)
+
+
+### Miscellaneous
+
+* **api:** Removing unused references to outdated configurations ([0bdc174](https://github.com/monetr/monetr/commit/0bdc174c393f63f5b4569500e7bc09823ec7af0a))
+* **build:** Removing feature flag provider cmake preset ([fc8199b](https://github.com/monetr/monetr/commit/fc8199b90cb3abe0e2d00178ec9eec3e2644c349))
+* **build:** Removing flipt from development environment ([16641db](https://github.com/monetr/monetr/commit/16641db74810180d77bf9a5fb6da02cdb9368221))
+* **build:** Removing unused storybook variables ([c08fb83](https://github.com/monetr/monetr/commit/c08fb830342cd1ed1a225811232b9e6c0b9587c8))
+* **ui:** Removing old storybook workspace ([8578214](https://github.com/monetr/monetr/commit/8578214b6163621b2a95317c2a326d6ce16d8728))
+
+
+### Refactor
+
+* **api:** Adding more test coverage for spending API endpoints ([1fa0363](https://github.com/monetr/monetr/commit/1fa0363164fd14ec664cef67a45ff39197fc9fd5))
+* **ui:** Fix linter warnings in resend email verification page ([94fa068](https://github.com/monetr/monetr/commit/94fa06892bb36244e01d56de0aa56dcdc4384583))
+* **ui:** Fixed all lintin errors ([4e7a3f3](https://github.com/monetr/monetr/commit/4e7a3f3b50b68e84f67674891464517e7b0fc365))
+* **ui:** Fixing linter warnings in funding details ([fcfa18e](https://github.com/monetr/monetr/commit/fcfa18e834cc54667fe53a9e2fee4eb1989d4cf2))
+* **ui:** Migrated part of tooltip component to css modules ([fbba57f](https://github.com/monetr/monetr/commit/fbba57f6f6ff7593b1b020080809a243abdeba72))
+* **ui:** Migrating checkbox component to css modules ([42f2150](https://github.com/monetr/monetr/commit/42f21508d8e20edff1113e54d00ae10a22ac7f01))
+* **ui:** Migrating more components to CSS modules ([#2809](https://github.com/monetr/monetr/issues/2809)) ([5c7d224](https://github.com/monetr/monetr/commit/5c7d22407007dc79594312afa4660cd70fde2a02))
+* **ui:** Migrating to new label component for forms ([f5d6be6](https://github.com/monetr/monetr/commit/f5d6be64d5fd62dbe4b7f5feddef25c424081337))
+* **ui:** More linting fixes ([4fd23b2](https://github.com/monetr/monetr/commit/4fd23b2d7f1245733080874bce7601380ebf7a5a))
+* **ui:** Moving even more components over to css modules ([92e8075](https://github.com/monetr/monetr/commit/92e80750cd442bc3a3e0e6dffec2dfa7eed13d6a))
+* **ui:** Moving more things to the new select component ([aa01c23](https://github.com/monetr/monetr/commit/aa01c2332b69169807b5c40d514c639626c2e410))
+* **ui:** Moving to SCSS to improve compatability ([a5d2a89](https://github.com/monetr/monetr/commit/a5d2a89d2030e365a64253dad8e0219c84385da4))
+* **ui:** Removing last mui/icon usages ([a9853ef](https://github.com/monetr/monetr/commit/a9853ef8cee06547138b2a5d61599b8542c0a902))
+* **ui:** Removing more usages of mui/icons ([74a7fd0](https://github.com/monetr/monetr/commit/74a7fd09c45bd702fb0b0fbace2b76397df5358c))
+* **ui:** Switched button component to CSS modules ([3da3e9e](https://github.com/monetr/monetr/commit/3da3e9ee7b633c5cbbf1697f7f6684d59359d6c6))
+* **ui:** Switching to biome instead of eslint ([#2758](https://github.com/monetr/monetr/issues/2758)) ([6173df2](https://github.com/monetr/monetr/commit/6173df2df49e0754f0a2b902a433c712e034e1e2))
+* **ui:** Updating label component for number inputs ([3179627](https://github.com/monetr/monetr/commit/31796278b735cfc8e1f4ca0123549a6b1ac69bed))
+
 ## [1.5.3](https://github.com/monetr/monetr/compare/v1.5.2...v1.5.3) (2025-10-16)
 
 
