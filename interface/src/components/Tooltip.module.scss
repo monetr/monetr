@@ -1,0 +1,20 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.tooltipContent {
+  z-index: 50;
+  overflow: hidden;
+  border-radius: var(--border-radius); // Might change this to be 1.5 $size
+  border-width: 1px;
+  border-color: var(--border);
+  background-color: var(--background);
+
+  padding-left: 3 * variables.$size;
+  padding-right: 3 * variables.$size;
+  padding-top: 1.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+
+  @include mixins.text-small;
+
+  color: var(--content-emphasis);
+}
