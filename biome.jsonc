@@ -140,9 +140,7 @@
         "noRestrictedImports": {
           "level": "warn",
           "options": {
-            "paths": {
-              "@mui/material": "use literally anything else instead"
-            }
+            "paths": { }
           }
         }
       },

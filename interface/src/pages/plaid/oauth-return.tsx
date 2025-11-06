@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import * as Sentry from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
+import MSpan from '@monetr/interface/components/MSpan';
+import MSpinner from '@monetr/interface/components/MSpinner';
 import { OAuthRedirectPlaidLink } from '@monetr/interface/components/Plaid/OAuthRedirectPlaidLink';
 import request from '@monetr/interface/util/request';
 
@@ -115,9 +116,9 @@ export default function OauthReturn(): JSX.Element {
     if (state.loading || !state.linkToken) {
       return (
         <div>
-          <Typography variant='h5'>One moment...</Typography>
-          <div className='flex justify-center items-center p-5 m-5'>
-            <CircularProgress />
+          <MSpan size='xl'>One moment...</MSpan>
+          <div className='flex flex-col justify-center items-center'>
+            <MSpinner />
           </div>
         </div>
       );
@@ -136,11 +137,7 @@ export default function OauthReturn(): JSX.Element {
 
   return (
     <div className='w-full h-full flex justify-center items-center p-10'>
-      <div>
-        <Card>
-          <CardContent>{renderContents()}</CardContent>
-        </Card>
-      </div>
+      <div>{renderContents()}</div>
     </div>
   );
 }

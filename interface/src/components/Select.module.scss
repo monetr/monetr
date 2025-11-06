@@ -26,8 +26,13 @@
     text-align: start;
   }
 
-  &:hover .indicator, &:focus-within .indicator {
-    color: var(--content-emphasis);
+  // Only show the hover state for the indicator when the select component is
+  // not disabled at all. If either aria-disabled or :disabled is true then it
+  // should not have a hover state. This selector is disgusting.
+  &:not(:disabled):not([aria-disabled="true"]) {
+    &:hover .indicator, &:focus-within .indicator {
+      color: var(--content-emphasis);
+    }
   }
 }
 

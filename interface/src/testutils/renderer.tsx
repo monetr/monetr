@@ -1,6 +1,5 @@
 import type React from 'react';
 import NiceModal from '@ebay/nice-modal-react';
-import { CssBaseline, ThemeProvider } from '@mui/material';
 import type { AxiosInstance } from 'axios';
 import { type Location, MemoryRouter } from 'react-router-dom';
 
@@ -9,7 +8,6 @@ import { type Queries, type queries, type RenderOptions, type RenderResult, rend
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
 import { TooltipProvider } from '@monetr/interface/components/Tooltip';
-import { newTheme } from '@monetr/interface/theme';
 
 export interface Options<Q extends Queries = typeof queries, Container extends Element | DocumentFragment = HTMLElement>
   extends RenderOptions<Q, Container> {
@@ -25,16 +23,11 @@ function testRenderer<Q extends Queries = typeof queries, Container extends Elem
     return (
       <MemoryRouter initialEntries={[options.initialRoute]}>
         <MQueryClient client={options.client}>
-          <ThemeProvider theme={newTheme}>
-            <MSnackbarProvider>
-              <TooltipProvider>
-                <NiceModal.Provider>
-                  <CssBaseline />
-                  {props.children}
-                </NiceModal.Provider>
-              </TooltipProvider>
-            </MSnackbarProvider>
-          </ThemeProvider>
+          <MSnackbarProvider>
+            <TooltipProvider>
+              <NiceModal.Provider>{props.children}</NiceModal.Provider>
+            </TooltipProvider>
+          </MSnackbarProvider>
         </MQueryClient>
       </MemoryRouter>
     );

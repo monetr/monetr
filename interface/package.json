@@ -23,7 +23,6 @@
     "@date-fns/tz": "1.4.1",
     "@ebay/nice-modal-react": "1.2.13",
     "@fontsource-variable/inter": "5.2.8",
-    "@mui/material": "5.11.3",
     "@radix-ui/react-avatar": "1.1.10",
     "@radix-ui/react-checkbox": "1.3.3",
     "@radix-ui/react-dialog": "1.1.15",

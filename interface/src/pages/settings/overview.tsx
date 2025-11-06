@@ -1,6 +1,6 @@
 import { Button } from '@monetr/interface/components/Button';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MSelect from '@monetr/interface/components/MSelect';
+import Select from '@monetr/interface/components/Select';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 export default function SettingsOverview(): JSX.Element {
@@ -35,12 +35,13 @@ export default function SettingsOverview(): JSX.Element {
           value={me?.user?.login.email}
           disabled
         />
-        <MSelect
+        <Select
           label='Timezone'
           name='timezone'
           className='max-w-[24rem] w-full'
           options={[timezone]}
           value={timezone}
+          onChange={() => {}}
           disabled
         />
       </div>
