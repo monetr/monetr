@@ -4,12 +4,12 @@ import { useSnackbar } from 'notistack';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import FormButton from '@monetr/interface/components/FormButton';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import useResetPassword from '@monetr/interface/hooks/useResetPassword';
-import FormTextField from '@monetr/interface/components/FormTextField';
 
 interface ResetPasswordValues {
   password: string;

@@ -8,6 +8,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
@@ -20,7 +21,6 @@ import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import capitalize from '@monetr/interface/util/capitalize';
 import type { APIError } from '@monetr/interface/util/request';
-import FormTextField from '@monetr/interface/components/FormTextField';
 
 interface LinkValues {
   institutionName: string;

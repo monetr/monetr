@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormikErrors, FormikHelpers } from 'formik';
 
 import FormButton from '@monetr/interface/components/FormButton';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
@@ -10,7 +11,6 @@ import MSpan from '@monetr/interface/components/MSpan';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useSendForgotPassword from '@monetr/interface/hooks/useSendForgotPassword';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
-import FormTextField from '@monetr/interface/components/FormTextField';
 
 interface Values {
   email: string;

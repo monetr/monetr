@@ -7,6 +7,7 @@ import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
 import FormButton from '@monetr/interface/components/FormButton';
+import FormTextField from '@monetr/interface/components/FormTextField';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
@@ -17,7 +18,6 @@ import useSignUp, { type SignUpResponse } from '@monetr/interface/hooks/useSignU
 import { getLocale, getTimezone } from '@monetr/interface/util/locale';
 import type { APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
-import FormTextField from '@monetr/interface/components/FormTextField';
 
 interface RegisterValues {
   firstName: string;
