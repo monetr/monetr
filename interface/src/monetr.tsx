@@ -45,6 +45,7 @@ import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend'
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 
 import styles from './monetr.module.css';
+import MobileSidebarContextProvider from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 
 const RoutesImpl = Sentry.withSentryReactRouterV6Routing(Routes);
 
@@ -125,46 +126,48 @@ export default function Monetr(): JSX.Element {
   }
 
   return (
-    <div className={styles.layout}>
-      <Sidebar />
-      <div className='w-full h-full flex min-w-0 overflow-y-auto'>
-        <RoutesImpl>
-          <Route path='/bank/:bankAccountId' element={<BudgetingLayout />}>
-            <Route path='settings' element={<BankAccountSettingsPage />} />
-            <Route path='transactions' element={<Transactions />} />
-            <Route path='transactions/:transactionId/details' element={<TransactionDetails />} />
-            <Route path='expenses' element={<Expenses />} />
-            <Route path='expenses/:spendingId/details' element={<ExpenseDetails />} />
-            <Route path='goals' element={<Goals />} />
-            <Route path='goals/:spendingId/details' element={<GoalDetails />} />
-            <Route path='funding' element={<Funding />} />
-            <Route path='funding/:fundingId/details' element={<FundingDetails />} />
-          </Route>
-          <Route path='/settings' element={<SettingsLayout />}>
-            <Route path='' element={<Navigate replace to='/settings/overview' />} />
-            <Route path='overview' element={<SettingsOverview />} />
-            <Route path='security' element={<SettingsSecurity />} />
-            {config?.billingEnabled && <Route path='billing' element={<SettingsBilling />} />}
-            <Route path='about' element={<SettingsAbout />} />
-          </Route>
-          <Route path='/link/:linkId/details' element={<LinkDetails />} />
-          <Route path='/link/create' element={<LinkCreatePage />} />
-          <Route path='/link/create/plaid' element={<PlaidSetup alreadyOnboarded />} />
-          <Route path='/link/create/manual' element={<CreateManualLinkPage />} />
-          <Route path='/logout' element={<LogoutPage />} />
-          <Route path='/plaid/oauth-return' element={<OauthReturn />} />
-          <Route path='/subscription' element={<SubscriptionPage />} />
-          <Route path='/account/subscribe' element={<Navigate replace to='/' />} />
-          <Route path='/account/subscribe/after' element={<AfterCheckoutPage />} />
-          <Route path='/setup' element={<Navigate replace to='/' />} />
-          <Route path='/password/reset' element={<Navigate replace to='/' />} />
-          <Route path='/register' element={<Navigate replace to='/' />} />
-          <Route path='/login' element={<Navigate replace to='/' />} />
-          <Route path='/login/multifactor' element={<Navigate replace to='/' />} />
-          <Route index path='/' element={<RedirectToBank />} />
-        </RoutesImpl>
+    <MobileSidebarContextProvider>
+      <div className={styles.layout}>
+        <Sidebar />
+        <div className='w-full h-full flex min-w-0 overflow-y-auto'>
+          <RoutesImpl>
+            <Route path='/bank/:bankAccountId' element={<BudgetingLayout />}>
+              <Route path='settings' element={<BankAccountSettingsPage />} />
+              <Route path='transactions' element={<Transactions />} />
+              <Route path='transactions/:transactionId/details' element={<TransactionDetails />} />
+              <Route path='expenses' element={<Expenses />} />
+              <Route path='expenses/:spendingId/details' element={<ExpenseDetails />} />
+              <Route path='goals' element={<Goals />} />
+              <Route path='goals/:spendingId/details' element={<GoalDetails />} />
+              <Route path='funding' element={<Funding />} />
+              <Route path='funding/:fundingId/details' element={<FundingDetails />} />
+            </Route>
+            <Route path='/settings' element={<SettingsLayout />}>
+              <Route path='' element={<Navigate replace to='/settings/overview' />} />
+              <Route path='overview' element={<SettingsOverview />} />
+              <Route path='security' element={<SettingsSecurity />} />
+              {config?.billingEnabled && <Route path='billing' element={<SettingsBilling />} />}
+              <Route path='about' element={<SettingsAbout />} />
+            </Route>
+            <Route path='/link/:linkId/details' element={<LinkDetails />} />
+            <Route path='/link/create' element={<LinkCreatePage />} />
+            <Route path='/link/create/plaid' element={<PlaidSetup alreadyOnboarded />} />
+            <Route path='/link/create/manual' element={<CreateManualLinkPage />} />
+            <Route path='/logout' element={<LogoutPage />} />
+            <Route path='/plaid/oauth-return' element={<OauthReturn />} />
+            <Route path='/subscription' element={<SubscriptionPage />} />
+            <Route path='/account/subscribe' element={<Navigate replace to='/' />} />
+            <Route path='/account/subscribe/after' element={<AfterCheckoutPage />} />
+            <Route path='/setup' element={<Navigate replace to='/' />} />
+            <Route path='/password/reset' element={<Navigate replace to='/' />} />
+            <Route path='/register' element={<Navigate replace to='/' />} />
+            <Route path='/login' element={<Navigate replace to='/' />} />
+            <Route path='/login/multifactor' element={<Navigate replace to='/' />} />
+            <Route index path='/' element={<RedirectToBank />} />
+          </RoutesImpl>
+        </div>
       </div>
-    </div>
+    </MobileSidebarContextProvider>
   );
 }
 

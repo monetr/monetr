@@ -187,7 +187,9 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   return (
     <button type='button' className={wrapperClasses} onClick={handleClick}>
       {props.active && <CircleCheck className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' />}
-      {React.createElement(props.icon, { className: 'w-16 h-12 md:w-20 md:h-12 ml-4 md:ml-0 md:mt-6' })}
+      {React.createElement(props.icon, {
+        className: 'w-16 h-12 md:w-20 md:h-12 ml-4 md:ml-0 md:mt-6 dark:text-dark-monetr-content-emphasis',
+      })}
       <div className='flex flex-col gap-2 items-center h-full md:mt-4 text-center w-full md:w-auto'>
         <MSpan className='text-lg font-medium'>{props.name}</MSpan>
         <MSpan color='subtle'>{props.description}</MSpan>

@@ -1,7 +1,8 @@
+import { useCallback, useContext } from 'react';
 import { ArrowLeft, PanelLeft, PanelLeftClose } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import useStore from '@monetr/interface/hooks/store';
+import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MSidebarToggleProps {
@@ -11,15 +12,15 @@ export interface MSidebarToggleProps {
 
 export default function MSidebarToggle(props: MSidebarToggleProps): JSX.Element {
   const navigate = useNavigate();
-  const { setMobileSidebarOpen, mobileSidebarOpen } = useStore();
+  const { isOpen, setIsOpen } = useContext(MobileSidebarContext);
 
-  function onClick() {
+  const onClick = useCallback(() => {
     if (props.backButton) {
       navigate(props.backButton);
     } else {
-      setMobileSidebarOpen(!mobileSidebarOpen);
+      setIsOpen(!isOpen);
     }
-  }
+  }, [props.backButton, isOpen, navigate, setIsOpen]);
 
   const className = mergeTailwind(
     'visible lg:hidden',
@@ -37,8 +38,8 @@ export default function MSidebarToggle(props: MSidebarToggleProps): JSX.Element 
 
   return (
     <button type='button' className={className} onClick={onClick}>
-      {!mobileSidebarOpen && <PanelLeft />}
-      {mobileSidebarOpen && <PanelLeftClose />}
+      {!isOpen && <PanelLeft />}
+      {isOpen && <PanelLeftClose />}
     </button>
   );
 }

@@ -198,6 +198,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
               key={item.label}
               className={mergeTailwind(
                 [
+                  'text-dark-monetr-content-emphasis',
                   'group w-full rounded-lg px-2 py-1.5',
                   'hover:bg-zinc-600 aria-selected:bg-zinc-600',
                   'cursor-pointer disabled:cursor-not-allowed',
@@ -273,6 +274,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
                     key={item.label}
                     className={mergeTailwind(
                       [
+                        'text-dark-monetr-content-emphasis',
                         'group w-full rounded-lg px-2 py-1.5',
                         'hover:bg-zinc-600 aria-selected:bg-zinc-600',
                         'active:bg-zinc-600 aria-selected:bg-zinc-600',

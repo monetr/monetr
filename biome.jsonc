@@ -59,8 +59,7 @@
                 "tailwindcss",
                 "tailwindcss-animate",
                 "tailwindcss/**",
-                "vaul",
-                "zustand"
+                "vaul"
               ],
               ":BLANK_LINE:",
               [
