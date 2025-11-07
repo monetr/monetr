@@ -29,7 +29,7 @@ const initialValues: LoginValues = {
 function validator(values: LoginValues): FormikErrors<LoginValues> {
   const errors: FormikErrors<LoginValues> = {};
 
-  if (values?.email.length === 0) {
+  if (values?.email?.trim() === '') {
     errors.email = 'Email must be provided.';
   }
 
@@ -37,7 +37,9 @@ function validator(values: LoginValues): FormikErrors<LoginValues> {
     errors.email = 'Email must be valid.';
   }
 
-  if (values?.password.length < 8) {
+  if (values?.password?.trim() === '') {
+    errors.password = 'Password cannot be blank or whitespace.';
+  } else if (values?.password.length < 8) {
     errors.password = 'Password must be at least 8 characters long.';
   }
 
