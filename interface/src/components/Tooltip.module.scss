@@ -8,6 +8,7 @@
   border-width: 1px;
   border-color: var(--border);
   background-color: var(--background);
+  color: var(--content-emphasis);
 
   padding-left: 3 * variables.$size;
   padding-right: 3 * variables.$size;
@@ -16,5 +17,53 @@
 
   @include mixins.text-small;
 
-  color: var(--content-emphasis);
+  // animation-name: enter;
+  // animation-duration: .15s;
+  // --enter-opacity: 0;
+  // --enter-scale: 0.95;
+  // --enter-rotate: initial;
+  // --enter-translate-x: initial;
+  // --enter-translate-y: initial;
+  // --exit-opacity: 0;
+  // --exit-scale: 0.95;
+  // --exit-rotate: initial;
+  // --exit-translate-x: initial;
+  // --exit-translate-y: initial;
+  // @keyframes enter {
+  //   0% {
+  //     opacity: var(--enter-opacity, 1);
+  //     transform: translate3d(var(--enter-translate-x, 0),var(--enter-translate-y, 0), 0)scale3d(var(--enter-scale, 1), var(--enter-scale, 1), var(--enter-scale, 1))rotate(var(--enter-rotate, 0))
+  //   }
+  // }
+  //
+  // &[data-state="closed"] {
+  //   animation-name: exit;
+  //   @keyframes exit {
+  //     to {
+  //       opacity: var(--exit-opacity,1);
+  //       transform: translate3d(var(--exit-translate-x,0),var(--exit-translate-y,0),0)scale3d(var(--exit-scale,1),var(--exit-scale,1),var(--exit-scale,1))rotate(var(--exit-rotate,0))
+  //     }
+  //   }
+  // }
+  //
+  // &[data-side="top"] {
+  //   // Slide in from the bottom
+  //   --enter-translate-y: 2 * variables.$size;
+  // }
+  //
+  // &[data-side="bottom"] {
+  //   // Slide in from the top
+  //   --enter-translate-y: -2 * variables.$size;
+  // }
+  //
+  // &[data-side="left"] {
+  //   // Slide in from the right
+  //   --enter-translate-x: 2 * variables.$size;
+  // }
+  //
+  // &[data-side="right"] {
+  //   // Slide in from the left
+  //   --enter-translate-x: -2 * variables.$size;
+  // }
+  //
 }
