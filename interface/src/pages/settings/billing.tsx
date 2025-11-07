@@ -7,7 +7,7 @@ import { useLocation } from 'react-router-dom';
 
 import Badge from '@monetr/interface/components/Badge';
 import { Button } from '@monetr/interface/components/Button';
-import MDivider from '@monetr/interface/components/MDivider';
+import Divider from '@monetr/interface/components/Divider';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
@@ -49,13 +49,13 @@ export default function SettingsBilling(): JSX.Element {
       <MSpan size='2xl' weight='bold' color='emphasis' className='mb-4'>
         Billing
       </MSpan>
-      <MDivider />
+      <Divider />
 
       <div className='flex justify-between py-4'>
         <MSpan>Subscription Status</MSpan>
         <SubscriptionStatusBadge />
       </div>
-      <MDivider />
+      <Divider />
 
       <Button
         className='ml-auto mt-4 max-w-xs'

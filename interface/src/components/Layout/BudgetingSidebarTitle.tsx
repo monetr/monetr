@@ -1,15 +1,14 @@
-/* eslint-disable max-len */
 import { Fragment, useCallback } from 'react';
 import { EllipsisVertical, LogIn, Plug, RefreshCw, Settings, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import Divider from '@monetr/interface/components/Divider';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@monetr/interface/components/DropdownMenu';
-import MDivider from '@monetr/interface/components/MDivider';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
@@ -54,7 +53,7 @@ export default function BudgetingSidebarTitle(): JSX.Element {
         <div className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis'>
           <Skeleton className='h-7 w-full' />
         </div>
-        <MDivider className='w-1/2' />
+        <Divider className='w-1/2' />
       </Fragment>
     );
   }
@@ -86,14 +85,14 @@ export default function BudgetingSidebarTitle(): JSX.Element {
             <Settings />
             Settings
           </MenuItem>
-          <MDivider />
+          <Divider />
           <MenuItem visible onClick={handleRemoveLink}>
             <Trash2 className='text-dark-monetr-red' />
             Remove {link?.getName()}
           </MenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <MDivider className='w-1/2' />
+      <Divider className='w-1/2' />
     </Fragment>
   );
 }

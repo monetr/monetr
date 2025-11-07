@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 
-import MDivider from '@monetr/interface/components/MDivider';
+import Divider from '@monetr/interface/components/Divider';
 import MSpan, { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 
@@ -15,7 +15,7 @@ export default function SettingsAbout(): JSX.Element {
         <MSpan size='2xl' weight='bold' color='emphasis' className='mb-4'>
           About monetr
         </MSpan>
-        <MDivider />
+        <Divider />
         <div className='flex flex-col md:flex-row p-4 gap-2'>
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
             Version
@@ -24,7 +24,7 @@ export default function SettingsAbout(): JSX.Element {
             {release || 'Unknown'}
           </MSpan>
         </div>
-        <MDivider />
+        <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
@@ -34,7 +34,7 @@ export default function SettingsAbout(): JSX.Element {
             {revision ? revision.slice(0, 7) : 'Unknown'}
           </MSpan>
         </div>
-        <MDivider />
+        <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
@@ -44,7 +44,7 @@ export default function SettingsAbout(): JSX.Element {
             {buildType || 'Unknown'}
           </MSpan>
         </div>
-        <MDivider />
+        <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
@@ -54,14 +54,14 @@ export default function SettingsAbout(): JSX.Element {
             {format(buildTime, 'LLLL do yyyy, h:mmaaa OOOO')}
           </MSpan>
         </div>
-        <MDivider />
+        <Divider />
       </div>
 
       <div className='w-full flex flex-col max-w-2xl'>
         <MSpan size='2xl' weight='bold' color='emphasis' className='mb-4'>
           Need Help?
         </MSpan>
-        <MDivider />
+        <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
@@ -69,7 +69,7 @@ export default function SettingsAbout(): JSX.Element {
           </MSpan>
           <AboutHyperlink href='https://github.com/monetr/monetr'>https://github.com/monetr/monetr</AboutHyperlink>
         </div>
-        <MDivider />
+        <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
@@ -77,7 +77,7 @@ export default function SettingsAbout(): JSX.Element {
           </MSpan>
           <AboutHyperlink href='mailto:support@monetr.app'>support@monetr.app</AboutHyperlink>
         </div>
-        <MDivider />
+        <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
@@ -87,7 +87,7 @@ export default function SettingsAbout(): JSX.Element {
             https://github.com/monetr/monetr/discussions
           </AboutHyperlink>
         </div>
-        <MDivider />
+        <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
@@ -95,7 +95,7 @@ export default function SettingsAbout(): JSX.Element {
           </MSpan>
           <AboutHyperlink href='https://discord.gg/68wTCXrhuq'>Join Discord Server</AboutHyperlink>
         </div>
-        <MDivider />
+        <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
@@ -103,7 +103,7 @@ export default function SettingsAbout(): JSX.Element {
           </MSpan>
           <AboutHyperlink href='https://monetr.app/policy/terms'>https://monetr.app/policy/terms</AboutHyperlink>
         </div>
-        <MDivider />
+        <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
@@ -111,7 +111,7 @@ export default function SettingsAbout(): JSX.Element {
           </MSpan>
           <AboutHyperlink href='https://monetr.app/policy/privacy'>https://monetr.app/policy/privacy</AboutHyperlink>
         </div>
-        <MDivider />
+        <Divider />
       </div>
     </div>
   );

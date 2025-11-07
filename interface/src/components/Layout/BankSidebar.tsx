@@ -2,8 +2,8 @@ import { CircleAlert, LogOut, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import Logo from '@monetr/interface/assets/Logo';
+import Divider from '@monetr/interface/components/Divider';
 import BankSidebarItem from '@monetr/interface/components/Layout/BankSidebarItem';
-import MDivider from '@monetr/interface/components/MDivider';
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
@@ -102,7 +102,7 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
       <div className='h-10 w-10'>
         <Logo className='w-full' />
       </div>
-      <MDivider className='w-1/2' />
+      <Divider className='w-1/2' />
       <div className='h-full w-full flex items-center flex-col overflow-y-auto'>{props?.children}</div>
       <BankSidebarSubscriptionItem />
       <SettingsButton />

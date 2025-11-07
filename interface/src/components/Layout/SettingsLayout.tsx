@@ -1,7 +1,7 @@
 import { Settings } from 'lucide-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
-import MDivider from '@monetr/interface/components/MDivider';
+import Divider from '@monetr/interface/components/Divider';
 import { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
@@ -18,7 +18,7 @@ export default function SettingsLayout(): JSX.Element {
         {config?.data?.billingEnabled && <SettingTab to='/settings/billing'>Billing</SettingTab>}
         <SettingTab to='/settings/about'>About</SettingTab>
       </div>
-      <MDivider />
+      <Divider />
       <Outlet />
     </div>
   );

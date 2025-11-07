@@ -2,13 +2,13 @@ import { CalendarSync, Infinity as InfinityIcon, PiggyBank, Receipt, ShoppingCar
 import { Link, useLocation } from 'react-router-dom';
 
 import Badge from '@monetr/interface/components/Badge';
+import Divider from '@monetr/interface/components/Divider';
 import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceAvailableAmount';
 import BalanceCurrentAmount from '@monetr/interface/components/Layout/BalanceCurrentAmount';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
-import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -61,7 +61,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
       <BudgetingSidebarTitle />
       <div className='flex h-full w-full flex-col items-center gap-4 px-2 pt-4'>
         <SelectBankAccount />
-        <MDivider className='w-1/2' />
+        <Divider className='w-1/2' />
 
         <div className='flex w-full flex-col items-center gap-2 px-2'>
           <BalanceFreeToUseAmount />
@@ -69,7 +69,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
           <BalanceCurrentAmount />
           <Limit />
         </div>
-        <MDivider className='w-1/2' />
+        <Divider className='w-1/2' />
 
         <div className='flex h-full w-full flex-col gap-2 pb-4'>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/transactions`}>

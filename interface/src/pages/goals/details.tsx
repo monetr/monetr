@@ -7,13 +7,13 @@ import { useSnackbar } from 'notistack';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
+import Divider from '@monetr/interface/components/Divider';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import GoalTimeline from '@monetr/interface/components/goals/GoalTimeline';
-import MDivider from '@monetr/interface/components/MDivider';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
@@ -204,7 +204,7 @@ export default function GoalDetails(): JSX.Element {
               </div>
             </div>
 
-            <MDivider className='w-1/2 my-4' />
+            <Divider className='w-1/2 my-4' />
 
             <FormTextField className='w-full' label='Expense' name='name' required data-1p-ignore />
             <FormAmountField allowNegative={false} className='w-full' label='Amount' name='amount' required />
@@ -231,7 +231,7 @@ export default function GoalDetails(): JSX.Element {
               description='Pause this goal to temporarily stop contributions to it.'
             />
           </div>
-          <MDivider className='block md:hidden w-1/2' />
+          <Divider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>
             <MSpan className='text-xl my-2'>Goal Timeline</MSpan>
             <GoalTimeline spendingId={spending.spendingId} />

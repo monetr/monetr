@@ -1,9 +1,8 @@
 import { Fragment } from 'react';
 
+import Divider from '@monetr/interface/components/Divider';
+import MSpan from '@monetr/interface/components/MSpan';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
-import MDivider from './MDivider';
-import MSpan from './MSpan';
 
 export interface MStepperProps {
   steps: Array<string>;
@@ -95,7 +94,7 @@ function MStep(props: MStepProps): JSX.Element {
         <MSpan className={numberClass}>{props.index + 1}</MSpan>
         <MSpan className={textClass}>{props.name}</MSpan>
       </MSpan>
-      {props.divider && <MDivider className={lineClass} />}
+      {props.divider && <Divider className={lineClass} />}
     </Fragment>
   );
 }

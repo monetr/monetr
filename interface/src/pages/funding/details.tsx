@@ -8,13 +8,13 @@ import { useSnackbar } from 'notistack';
 import { useMatch, useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
+import Divider from '@monetr/interface/components/Divider';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import FundingTimeline from '@monetr/interface/components/funding/FundingTimeline';
-import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -193,7 +193,7 @@ export default function FundingDetails(): JSX.Element {
               placeholder='Example: $ 1,000.00'
             />
           </div>
-          <MDivider className='block md:hidden w-1/2' />
+          <Divider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>
             <MSpan className='text-xl my-2'>Funding Timeline</MSpan>
             <FundingTimeline fundingScheduleId={funding.fundingScheduleId} />

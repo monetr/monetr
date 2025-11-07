@@ -7,9 +7,9 @@ import { useSnackbar } from 'notistack';
 import { Link, useParams } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
+import Divider from '@monetr/interface/components/Divider';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
@@ -98,7 +98,7 @@ export default function LinkDetails(): React.JSX.Element {
               data-1p-ignore
             />
           </div>
-          <MDivider className='block md:hidden w-1/2' />
+          <Divider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>
             <MSpan className='text-xl my-2'>Accounts</MSpan>
             <ul className='flex flex-col gap-2'>
