@@ -1,0 +1,29 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.avatar {
+  position: relative;
+  display: flex;
+  height: 10 * variables.$size;
+  width: 10 * variables.$size;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 100%;
+}
+
+.avatarImage {
+  aspect-ratio: 1 / 1;
+  height: 100%;
+  width: 100%;
+}
+
+.avatarFallback {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  background-color: var(--background-subtle);
+  color: var(--content);
+}

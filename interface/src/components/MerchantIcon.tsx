@@ -2,6 +2,9 @@ import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import { useIconSearch } from '@monetr/interface/hooks/useIconSearch';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
+import avatarStyles from './Avatar.module.scss';
+import merchantIconStyles from './MerchantIcon.module.scss';
+
 export interface MerchantIconProps {
   name?: string;
   className?: string;
@@ -11,18 +14,6 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
   const icon = useIconSearch(props?.name);
   const size = 30;
   if (icon?.svg) {
-    const classNames = mergeTailwind(
-      'dark:bg-dark-monetr-background-bright',
-      'flex',
-      'items-center',
-      'justify-center',
-      'h-10',
-      'w-10',
-      'rounded-full',
-      'flex-none',
-      props.className,
-    );
-
     // It is possible for colors to be missing for a given icon. When this happens just fall back to a black color.
     const colorStyles =
       icon?.colors?.length > 0 ? { backgroundColor: `#${icon.colors[0]}` } : { backgroundColor: '#000000' };
@@ -37,7 +28,7 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
     };
 
     return (
-      <div className={classNames}>
+      <div className={mergeTailwind(avatarStyles.avatar, merchantIconStyles.merchantIcon, props.className)}>
         <div style={styles} />
       </div>
     );
@@ -49,9 +40,7 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
   const letter = props?.name?.toUpperCase().charAt(0) || '?';
   return (
     <Avatar className={classNames}>
-      <AvatarFallback className='dark:bg-dark-monetr-background-subtle dark:text-dark-monetr-content'>
-        {letter}
-      </AvatarFallback>
+      <AvatarFallback>{letter}</AvatarFallback>
     </Avatar>
   );
 }

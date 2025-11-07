@@ -41,10 +41,8 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
       />
       <div className='flex items-center rounded-lg group-hover:bg-zinc-600 gap-2 md:gap-4 px-2 py-1 h-full cursor-pointer md:cursor-auto'>
-        <Avatar className='h-10 w-10'>
-          <AvatarFallback className='dark:bg-dark-monetr-background-subtle dark:text-dark-monetr-content'>
-            {letter}
-          </AvatarFallback>
+        <Avatar>
+          <AvatarFallback>{letter}</AvatarFallback>
         </Avatar>
         <div className='w-full md:w-1/2 flex flex-col flex-1 min-w-0 overflow-hidden'>
           <MSpan weight='semibold' color='emphasis' ellipsis>
