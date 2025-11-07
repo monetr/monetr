@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
+import MobileSidebarContextProvider from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
 import Sidebar from '@monetr/interface/components/Layout/Sidebar';
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
@@ -45,7 +46,6 @@ import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend'
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 
 import styles from './monetr.module.css';
-import MobileSidebarContextProvider from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 
 const RoutesImpl = Sentry.withSentryReactRouterV6Routing(Routes);
 
