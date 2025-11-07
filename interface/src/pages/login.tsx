@@ -13,6 +13,7 @@ import useLogin from '@monetr/interface/hooks/useLogin';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
 import styles from './login.module.scss';
+import Typography, { SpanProps } from '@monetr/interface/components/Typography';
 
 interface LoginValues {
   email: string;
@@ -71,7 +72,7 @@ export default function Login(): JSX.Element {
       <div className={styles.logo}>
         <MLogo />
       </div>
-      <MSpan>Sign into your monetr account</MSpan>
+      <Typography>Sign into your monetr account</Typography>
       <FormTextField
         data-testid='login-email'
         autoFocus
@@ -97,9 +98,9 @@ export default function Login(): JSX.Element {
       </FormButton>
       {Boolean(config?.allowSignUp) && (
         <div className={styles.signUpWrapper}>
-          <MSpan size='sm' color='subtle'>
+          <Typography size='sm' color='subtle'>
             Not a user?
-          </MSpan>
+          </Typography>
           <MLink to='/register' size='sm' data-testid='login-signup'>
             Sign up now
           </MLink>

@@ -27,3 +27,31 @@ $textSmallLineHeight: 5;
   font-size: $textSmallFontSize * variables.$size; // 0.875rem 14px
   line-height: $textSmallLineHeight * variables.$size; // 1.25rem 20px
 }
+
+$textBaseFontSize: 4;
+$textBaseLineHeight: 6;
+@mixin text-base {
+  font-size: $textBaseFontSize * variables.$size; // 1rem 16px
+  line-height: $textBaseLineHeight * variables.$size; // 1.5rem 24px
+}
+
+$textLargeFontSize: 4.5;
+$textLargeLineHeight: 7;
+@mixin text-large {
+  font-size: $textLargeFontSize * variables.$size; // 1.125rem 18px
+  line-height: $textLargeLineHeight * variables.$size; // 1.75rem 28px
+}
+
+$textExtraLargeFontSize: 5;
+$textExtraLargeLineHeight: 7;
+@mixin text-extra-large {
+  font-size: $textExtraLargeFontSize * variables.$size; // 1.5rem 20px
+  line-height: $textExtraLargeLineHeight * variables.$size; // 1.75rem 28px
+}
+
+$text5ExtraLargeFontSize: 12;
+$text5ExtraLargeLineHeight: 7;
+@mixin text-5-extra-large {
+  font-size: $text5ExtraLargeFontSize * variables.$size; // 3rem 48px
+  line-height: 1;
+}

@@ -51,6 +51,7 @@
   --normal: 400;
   --medium: 500;
   --semibold: 600;
+  --bold: 700;
 
   /* Sizes for things, to be used with width, height, gaps etc */
   --size-1: 0.25rem; /* 4px */

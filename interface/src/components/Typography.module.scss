@@ -1,12 +1,83 @@
 @use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
 
-.smallParagraph {
+.root {
+  display: flex;
+  gap: 2 * variables.$size;
+}
+
+.textExtraSmall {
+  @include mixins.text-extra-small;
+}
+
+.textSmall {
   @include mixins.text-small;
+}
+
+.textBase {
+  @include mixins.text-base;
+}
+
+.textLarge {
+  @include mixins.text-large;
+}
+
+.textExtraLarge {
+  @include mixins.text-extra-large;
+}
+
+.text5ExtraLarge {
+  @include mixins.text-5-extra-large;
+}
+
+.colorDefault {
   color: var(--content);
 }
 
-.truncate {
+.colorMuted {
+  color: var(--content-muted);
+}
+
+.colorSubtle {
+  color: var(--content-subtle);
+}
+
+.colorEmphasis {
+  color: var(--content-emphasis)
+}
+
+.colorInherit {
+  color: inherit;
+}
+
+.ellipsis {
+  display: block;
+  text-overflow: ellipsis;
+  min-width: 0px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.weightNormal {
+  font-weight: var(--normal);
+}
+
+.weightMedium {
+  font-weight: var(--medium);
+}
+
+.weightSemibold {
+  font-weight: var(--semibold);
+}
+
+.weightBold {
+  font-weight: var(--bold);
+}
+
+.code {
+  background-color: var(--background-subtle);
+  padding-left: 1.5 * variables.$size;
+  padding-right: 1.5 * variables.$size;
+  border-radius: var(--border-radius);
 }

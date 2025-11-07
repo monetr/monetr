@@ -18,6 +18,7 @@ import useSignUp, { type SignUpResponse } from '@monetr/interface/hooks/useSignU
 import { getLocale, getTimezone } from '@monetr/interface/util/locale';
 import type { APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
+import Typography from '@monetr/interface/components/Typography';
 
 interface RegisterValues {
   firstName: string;
@@ -77,10 +78,10 @@ export function RegisterSuccessful(): JSX.Element {
   // TODO Add a link to return to the login page, or close this window maybe?
   return (
     <div className='w-full h-full flex justify-center items-center flex-col'>
-      <MLogo className='h-24 w-24' />
-      <MSpan size='xl' weight='medium' className='max-w-md text-center'>
+      <MLogo className='size-24' />
+      <Typography size='xl' weight='medium' className='max-w-md text-center'>
         A verification message has been sent to your email address, please verify your email.
-      </MSpan>
+      </Typography>
     </div>
   );
 }
@@ -159,10 +160,10 @@ export default function Register(): JSX.Element {
           <MLogo />
         </div>
         <div className='flex flex-col items-center text-center'>
-          <MSpan className='text-5xl'>Get Started</MSpan>
-          <MSpan color='subtle' className='text-lg'>
+          <Typography size='5xl'>Get Started</Typography>
+          <Typography size='lg' color='subtle'>
             Create your monetr account now
-          </MSpan>
+          </Typography>
         </div>
         <div className='flex flex-col sm:flex-row gap-2.5 w-full'>
           <FormTextField
@@ -237,9 +238,9 @@ export default function Register(): JSX.Element {
           </MSpan>
         </div>
         <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
-          <MSpan color='subtle' className='text-sm'>
+          <Typography size='sm' color='subtle'>
             Already have an account?
-          </MSpan>
+          </Typography>
           <MLink to='/login' size='sm'>
             Sign in instead
           </MLink>
