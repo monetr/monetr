@@ -2,14 +2,13 @@ import type React from 'react';
 import { useCallback } from 'react';
 import type { AxiosError } from 'axios';
 import type { FormikHelpers } from 'formik';
-import { ChevronRight, Landmark, Save, Trash } from 'lucide-react';
+import { Badge, ChevronRight, Landmark, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { Link, useParams } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -131,7 +130,7 @@ function BankAccountItem(props: BankAccountItemProps): React.JSX.Element {
             <MSpan size='md' weight='semibold' color='emphasis' ellipsis className='group-hover:underline'>
               {props.bankAccount.name}
             </MSpan>
-            {Boolean(props.bankAccount.deletedAt) && <MBadge size='sm'>Archived</MBadge>}
+            {Boolean(props.bankAccount.deletedAt) && <Badge size='sm'>Archived</Badge>}
           </div>
           <MSpan size='sm' weight='medium' color='default' ellipsis>
             {capitalize(props.bankAccount.accountSubType)}

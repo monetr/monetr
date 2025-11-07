@@ -2,6 +2,7 @@ import React from 'react';
 import { Check, ChevronsUpDown, CirclePlus, Settings } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import Badge from '@monetr/interface/components/Badge';
 import { Button, buttonVariants } from '@monetr/interface/components/Button';
 import { type ComboboxItemProps, comboboxVariants } from '@monetr/interface/components/Combobox';
 import {
@@ -13,7 +14,6 @@ import {
   CommandList,
 } from '@monetr/interface/components/Command';
 import { Drawer, DrawerContent, DrawerTrigger } from '@monetr/interface/components/Drawer';
-import MBadge from '@monetr/interface/components/MBadge';
 import MSpan from '@monetr/interface/components/MSpan';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
@@ -182,14 +182,14 @@ function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccoun
         {props.option.label}
       </MSpan>
       {props.option.status === 'inactive' && (
-        <MBadge size='xs' className='bg-dark-monetr-border-subtle'>
+        <Badge size='xs' className='bg-dark-monetr-border-subtle'>
           Inactive
-        </MBadge>
+        </Badge>
       )}
       {props.option.mask !== '' && (
-        <MBadge size='xs' className='font-mono'>
+        <Badge size='xs' className='font-mono'>
           {props.option.mask}
-        </MBadge>
+        </Badge>
       )}
     </div>
   );

@@ -21,10 +21,10 @@ import Transaction from '@monetr/interface/models/Transaction';
 import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import MBadge from './MBadge';
 import MSpan from './MSpan';
 
 import './MSelectSpendingTransaction.scss';
+import Badge from '@monetr/interface/components/Badge';
 
 export interface MSelectSpendingTransactionProps {
   transaction: Transaction;
@@ -196,16 +196,16 @@ export function SpendingSelectOption({ children, ...props }: OptionProps<Spendin
         </MSpan>
         <div className='flex gap-2'>
           {props.data.spending?.spendingType === SpendingType.Goal && (
-            <MBadge size='sm' className='dark:bg-dark-monetr-blue  max-h-[24px]'>
+            <Badge size='sm' className='dark:bg-dark-monetr-blue  max-h-[24px]'>
               <PiggyBank />
-            </MBadge>
+            </Badge>
           )}
           {props.data.spending?.spendingType === SpendingType.Expense && (
-            <MBadge size='sm' className='dark:bg-dark-monetr-green max-h-[24px]'>
+            <Badge size='sm' className='dark:bg-dark-monetr-green max-h-[24px]'>
               <Receipt />
-            </MBadge>
+            </Badge>
           )}
-          <MBadge size='sm'>{amount}</MBadge>
+          <Badge size='sm'>{amount}</Badge>
         </div>
       </div>
     </components.Option>

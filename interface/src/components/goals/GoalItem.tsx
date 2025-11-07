@@ -3,13 +3,13 @@ import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
-import MBadge from '@monetr/interface/components/MBadge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import Badge from '@monetr/interface/components/Badge';
 
 export interface GoalItemProps {
   spending: Spending;
@@ -118,9 +118,9 @@ function GoalAmount({ spending }: GoalProps): JSX.Element {
 
   return (
     <div className='flex md:min-w-[12em] shrink-0 justify-end gap-2 items-center'>
-      <MBadge className='w-fit justify-end dark:bg-green-600' weight='medium'>
+      <Badge className='w-fit justify-end dark:bg-green-600' weight='medium'>
         {locale.formatAmount(spending.currentAmount, AmountType.Stored)}
-      </MBadge>
+      </Badge>
     </div>
   );
 }

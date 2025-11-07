@@ -1,0 +1,13 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.badge {
+  background-color: var(--brand);
+  color: var(--content-emphasis);
+  border-radius: var(--border-radius);
+
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-top: 0.5 * variables.$size;
+  padding-bottom: 0.5 * variables.$size;
+}

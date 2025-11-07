@@ -5,8 +5,8 @@ import { Clock } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useLocation } from 'react-router-dom';
 
+import Badge from '@monetr/interface/components/Badge';
 import { Button } from '@monetr/interface/components/Button';
-import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
@@ -76,9 +76,9 @@ function SubscriptionStatusBadge(): JSX.Element {
   // If they have a subscription and it is active then show active.
   if (auth?.hasSubscription && auth?.isActive) {
     return (
-      <MBadge className='bg-green-600' data-testid='billing-subscription-active'>
+      <Badge className='bg-green-600' data-testid='billing-subscription-active'>
         Active
-      </MBadge>
+      </Badge>
     );
   }
 
@@ -89,17 +89,17 @@ function SubscriptionStatusBadge(): JSX.Element {
       : format(auth?.trialingUntil, 'MMMM do, yyyy');
 
     return (
-      <MBadge className='bg-yellow-600' data-testid='billing-subscription-trialing'>
+      <Badge className='bg-yellow-600' data-testid='billing-subscription-trialing'>
         <Clock />
         Trialing Until {trialEndDate}
-      </MBadge>
+      </Badge>
     );
   }
 
   // Anything else is considered expired.
   return (
-    <MBadge className='bg-red-600' data-testid='billing-subscription-expired'>
+    <Badge className='bg-red-600' data-testid='billing-subscription-expired'>
       Expired
-    </MBadge>
+    </Badge>
   );
 }

@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { rrulestr } from 'rrule';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
-import MBadge from '@monetr/interface/components/MBadge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -12,6 +11,7 @@ import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import Badge from '@monetr/interface/components/Badge';
 
 export interface ExpenseItemProps {
   spending: Spending;
@@ -57,7 +57,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
               <span className='text-zinc-50 font-semibold text-base overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
                 {spending.name}
               </span>
-              <MBadge className='flex-none text-xs ml-1'>{dateString}</MBadge>
+              <Badge className='flex-none text-xs ml-1'>{dateString}</Badge>
             </div>
             {/* This block only shows on mobile screens */}
             <span className='hidden md:block text-zinc-200 font-sm text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>

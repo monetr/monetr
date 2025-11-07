@@ -1,13 +1,13 @@
 import { CalendarSync, Infinity as InfinityIcon, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
+import Badge from '@monetr/interface/components/Badge';
 import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceAvailableAmount';
 import BalanceCurrentAmount from '@monetr/interface/components/Layout/BalanceCurrentAmount';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
-import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
@@ -83,18 +83,18 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
             <MSpan ellipsis color='inherit'>
               Expenses
             </MSpan>
-            <MBadge className='ml-auto' size='sm'>
+            <Badge className='ml-auto' size='sm'>
               {locale.formatAmount(balance?.expenses, AmountType.Stored)}
-            </MBadge>
+            </Badge>
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/goals`}>
             <PiggyBank />
             <MSpan ellipsis color='inherit'>
               Goals
             </MSpan>
-            <MBadge className='ml-auto' size='sm'>
+            <Badge className='ml-auto' size='sm'>
               {locale.formatAmount(balance?.goals, AmountType.Stored)}
-            </MBadge>
+            </Badge>
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/funding`}>
             <CalendarSync />
@@ -158,8 +158,8 @@ function NextFundingBadge(): JSX.Element {
   }
 
   return (
-    <MBadge className='ml-auto' size='sm'>
+    <Badge className='ml-auto' size='sm'>
       {next}
-    </MBadge>
+    </Badge>
   );
 }

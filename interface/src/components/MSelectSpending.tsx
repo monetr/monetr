@@ -1,6 +1,7 @@
 import { useFormikContext } from 'formik';
 import { PiggyBank, Receipt } from 'lucide-react';
 
+import Badge from '@monetr/interface/components/Badge';
 import Select, {
   type SelectOption,
   type SelectOptionComponentProps,
@@ -12,7 +13,6 @@ import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 
-import MBadge from './MBadge';
 import MSpan from './MSpan';
 
 // Remove the props that we do not want to allow the caller to pass in.
@@ -120,16 +120,16 @@ function SelectSpendingOptionComponent(props: SelectOptionComponentProps<Spendin
       </MSpan>
       <div className='flex gap-2'>
         {props.value?.spendingType === SpendingType.Goal && (
-          <MBadge size='sm' className='dark:bg-dark-monetr-blue  max-h-[24px]'>
+          <Badge size='sm' className='dark:bg-dark-monetr-blue  max-h-[24px]'>
             <PiggyBank />
-          </MBadge>
+          </Badge>
         )}
         {props.value?.spendingType === SpendingType.Expense && (
-          <MBadge size='sm' className='dark:bg-dark-monetr-green max-h-[24px]'>
+          <Badge size='sm' className='dark:bg-dark-monetr-green max-h-[24px]'>
             <Receipt />
-          </MBadge>
+          </Badge>
         )}
-        <MBadge size='sm'>{amount}</MBadge>
+        <Badge size='sm'>{amount}</Badge>
       </div>
     </div>
   );
