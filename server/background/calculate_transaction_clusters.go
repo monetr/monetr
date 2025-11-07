@@ -74,7 +74,7 @@ func (c *CalculateTransactionClustersHandler) HandleConsumeJob(
 ) error {
 	var args CalculateTransactionClustersArguments
 	if err := errors.Wrap(c.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Calculate Transaction Clusters job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Calculate Transaction Clusters job.", "job", map[string]any{
 			"data": data,
 		})
 		return err

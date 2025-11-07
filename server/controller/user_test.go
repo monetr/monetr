@@ -23,7 +23,7 @@ func TestMe(t *testing.T) {
 		var token string
 		{ // Login to the user with their current password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword,
 				}).
@@ -75,7 +75,7 @@ func TestMe(t *testing.T) {
 		var token string
 		{ // Send the initial request and make sure it responds with the error.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": password,
 				}).
@@ -192,7 +192,7 @@ func TestChangePassword(t *testing.T) {
 		var token string
 		{ // Login to the user with their current password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword,
 				}).
@@ -208,7 +208,7 @@ func TestChangePassword(t *testing.T) {
 		{ // Change the user's password.
 			response := e.PUT(`/api/users/security/password`).
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"currentPassword": currentPassword,
 					"newPassword":     newPassword,
 				}).
@@ -231,7 +231,7 @@ func TestChangePassword(t *testing.T) {
 
 		{ // Try to authenticate the user with the old password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword, // Old password now.
 				}).
@@ -242,7 +242,7 @@ func TestChangePassword(t *testing.T) {
 
 		{ // Login to the user with their new password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": newPassword,
 				}).
@@ -263,7 +263,7 @@ func TestChangePassword(t *testing.T) {
 		var token string
 		{ // Login to the user with their current password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword,
 				}).
@@ -279,7 +279,7 @@ func TestChangePassword(t *testing.T) {
 		{ // Change the user's password.
 			response := e.PUT(`/api/users/security/password`).
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"currentPassword": wrongCurrentPassword,
 					"newPassword":     newPassword,
 				}).
@@ -291,7 +291,7 @@ func TestChangePassword(t *testing.T) {
 
 		{ // Make sure that even though the change password request failed that the password really didn't change.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword, // Old password now.
 				}).
@@ -304,7 +304,7 @@ func TestChangePassword(t *testing.T) {
 
 		{ // Make super duper extra sure that we cannot authenticate with the "new password".
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": newPassword,
 				}).
@@ -322,7 +322,7 @@ func TestChangePassword(t *testing.T) {
 		var token string
 		{ // Login to the user with their current password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword,
 				}).
@@ -338,7 +338,7 @@ func TestChangePassword(t *testing.T) {
 		{ // Change the user's password.
 			response := e.PUT(`/api/users/security/password`).
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"currentPassword": currentPassword,
 					"newPassword":     newPassword,
 				}).
@@ -356,7 +356,7 @@ func TestChangePassword(t *testing.T) {
 		var token string
 		{ // Login to the user with their current password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword,
 				}).
@@ -372,7 +372,7 @@ func TestChangePassword(t *testing.T) {
 		{ // Change the user's password.
 			response := e.PUT(`/api/users/security/password`).
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"currentPassword": currentPassword,
 					"newPassword":     currentPassword,
 				}).
@@ -390,7 +390,7 @@ func TestChangePassword(t *testing.T) {
 		var token string
 		{ // Login to the user with their current password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword,
 				}).
@@ -437,7 +437,7 @@ func TestChangePassword(t *testing.T) {
 		{ // Change the user's password.
 			response := e.PUT(`/api/users/security/password`).
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"currentPassword": bogusCurrentPassword,
 					"newPassword":     bogusNewPassword,
 				}).
@@ -455,7 +455,7 @@ func TestChangePassword(t *testing.T) {
 
 		response := e.PUT(`/api/users/security/password`).
 			WithCookie(TestCookieName, gofakeit.UUID()).
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"currentPassword": gofakeit.Generate("????????"),
 				"newPassword":     gofakeit.Generate("????????"),
 			}).
@@ -470,7 +470,7 @@ func TestChangePassword(t *testing.T) {
 		MustSendPasswordChangedEmail(t, app, 0)
 
 		response := e.PUT(`/api/users/security/password`).
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"currentPassword": gofakeit.Generate("????????"),
 				"newPassword":     gofakeit.Generate("????????"),
 			}).
@@ -488,7 +488,7 @@ func TestSetupTOTP(t *testing.T) {
 		var token string
 		{ // Login to the user with their current password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword,
 				}).
@@ -542,7 +542,7 @@ func TestSetupTOTP(t *testing.T) {
 		var token string
 		{ // Login to the user with their current password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword,
 				}).
@@ -582,7 +582,7 @@ func TestConfirmTOTP(t *testing.T) {
 		var token string
 		{ // Login to the user with their current password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword,
 				}).
@@ -632,7 +632,7 @@ func TestConfirmTOTP(t *testing.T) {
 
 		{ // This should not return an MFA required code.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword,
 				}).
@@ -652,7 +652,7 @@ func TestConfirmTOTP(t *testing.T) {
 		var token string
 		{ // Login to the user with their current password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": currentPassword,
 				}).

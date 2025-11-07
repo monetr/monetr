@@ -99,7 +99,7 @@ func (m *monetrHttpClient) GetMe(ctx context.Context) (*models.User, error) {
 	return result.User, nil
 }
 
-func (m *monetrHttpClient) request(ctx context.Context, path string, query url.Values, result interface{}) error {
+func (m *monetrHttpClient) request(ctx context.Context, path string, query url.Values, result any) error {
 	uri, err := url.Parse(m.endpoint)
 	if err != nil {
 		return errors.Wrap(err, "failed to parse monetr endpoint")

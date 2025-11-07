@@ -102,7 +102,7 @@ func (f *forecasterBase) GetForecast(
 ) (Forecast, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"start":    start,
 		"end":      end,
 		"timezone": timezone.String(),
@@ -216,7 +216,7 @@ func (f *forecasterBase) GetAverageContribution(
 ) (int64, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"start":    start,
 		"end":      end,
 		"timezone": timezone.String(),
@@ -263,7 +263,7 @@ func (f *forecasterBase) GetNextContribution(
 		return 0, err
 	}
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"start":             start,
 		"end":               end,
 		"fundingScheduleId": fundingScheduleId,

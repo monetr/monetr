@@ -19,7 +19,7 @@ func MockCreateLinkToken(t *testing.T, callbacks ...func(t *testing.T, request p
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/link/token/create"),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			ValidatePlaidAuthentication(t, request, DoNotRequireAccessToken)
 			var createLinkTokenRequest plaid.LinkTokenCreateRequest
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&createLinkTokenRequest), "must decode request")
@@ -60,7 +60,7 @@ func MockCreateLinkTokenFailure(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/link/token/create"),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			ValidatePlaidAuthentication(t, request, DoNotRequireAccessToken)
 			var createLinkTokenRequest plaid.LinkTokenCreateRequest
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&createLinkTokenRequest), "must decode request")

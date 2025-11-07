@@ -15,7 +15,7 @@ import (
 func (r *repositoryBase) GetLastPlaidSync(ctx context.Context, plaidLinkId ID[PlaidLink]) (*PlaidSync, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"plaidLinkId": plaidLinkId,
 	}
 
@@ -47,7 +47,7 @@ func (r *repositoryBase) RecordPlaidSync(
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"plaidLinkId": plaidLinkId,
 	}
 

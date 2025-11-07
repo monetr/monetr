@@ -16,7 +16,7 @@ func MockSync(t *testing.T, transactions []plaid.Transaction) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/transactions/sync"),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			ValidatePlaidAuthentication(t, request, RequireAccessToken)
 			var syncTransactionsRequest struct {
 				Cursor string `json:"cursor"`
@@ -49,7 +49,7 @@ func MockSyncError(t *testing.T, error plaid.PlaidError) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/transactions/sync"),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			ValidatePlaidAuthentication(t, request, RequireAccessToken)
 			var syncTransactionsRequest struct {
 				Cursor string `json:"cursor"`

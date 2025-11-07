@@ -93,7 +93,7 @@ func (b *baseBilling) CreateCheckout(
 
 	taxesEnabled := b.config.Stripe.TaxesEnabled
 
-	crumbs.Debug(span.Context(), "Creating Stripe Checkout Session", map[string]interface{}{
+	crumbs.Debug(span.Context(), "Creating Stripe Checkout Session", map[string]any{
 		"successUrl":   successUrl,
 		"cancelUrl":    cancelUrl,
 		"collectTaxes": taxesEnabled,
@@ -222,7 +222,7 @@ func (b *baseBilling) AfterCheckout(
 				},
 			},
 		}).Warn("stripe customer ID from checkout session does not match the stripe customer ID on the account")
-		crumbs.IndicateBug(span.Context(), "BUG: The Stripe customer Id for this account does not match the one from the checkout session", map[string]interface{}{
+		crumbs.IndicateBug(span.Context(), "BUG: The Stripe customer Id for this account does not match the one from the checkout session", map[string]any{
 			"accountCustomerId":         account.StripeCustomerId,
 			"checkoutSessionCustomerId": checkoutSession.Customer.ID,
 		})

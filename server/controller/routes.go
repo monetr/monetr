@@ -133,7 +133,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 					if panicErr := recover(); panicErr != nil {
 						hub.RecoverWithContext(span.Context(), panicErr)
 						c.getLog(ctx).Errorf("panic for request: %+v\n%s", panicErr, string(debug.Stack()))
-						returnErr = ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+						returnErr = ctx.JSON(http.StatusInternalServerError, map[string]any{
 							"error": "An internal error occurred.",
 						})
 						span.Status = sentry.SpanStatusInternalError
@@ -159,7 +159,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				hub.AddBreadcrumb(&sentry.Breadcrumb{
 					Type:     "http",
 					Category: ctx.Request().URL.Hostname(),
-					Data: map[string]interface{}{
+					Data: map[string]any{
 						"url":    ctx.Request().URL.String(),
 						"method": ctx.Request().Method,
 					},

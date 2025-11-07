@@ -46,7 +46,7 @@ func (s *stackDriverFormatterWrapper) Format(entry *logrus.Entry) ([]byte, error
 	})
 
 	// Build our labels map.
-	labels := map[string]interface{}{}
+	labels := map[string]any{}
 	for _, label := range fieldToLabels {
 		value, ok := duplicate.Data[label]
 		if !ok {

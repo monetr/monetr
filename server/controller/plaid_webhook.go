@@ -19,14 +19,14 @@ import (
 )
 
 type PlaidWebhook struct {
-	WebhookType           string                 `json:"webhook_type"`
-	WebhookCode           string                 `json:"webhook_code"`
-	ItemId                string                 `json:"item_id"`
-	Error                 map[string]interface{} `json:"error"`
-	NewWebhookURL         string                 `json:"new_webhook_url"`
-	NewTransactions       int64                  `json:"new_transactions"`
-	RemovedTransactions   []string               `json:"removed_transactions"`
-	ConsentExpirationTime *time.Time             `json:"consent_expiration_time"`
+	WebhookType           string         `json:"webhook_type"`
+	WebhookCode           string         `json:"webhook_code"`
+	ItemId                string         `json:"item_id"`
+	Error                 map[string]any `json:"error"`
+	NewWebhookURL         string         `json:"new_webhook_url"`
+	NewTransactions       int64          `json:"new_transactions"`
+	RemovedTransactions   []string       `json:"removed_transactions"`
+	ConsentExpirationTime *time.Time     `json:"consent_expiration_time"`
 }
 
 type PlaidClaims struct {

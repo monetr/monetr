@@ -137,7 +137,7 @@ func (c *Controller) getTransactionUploadProgress(ctx echo.Context) error {
 		switch upload.Status {
 		case TransactionUploadStatusComplete, TransactionUploadStatusFailed:
 			log.WithField("status", upload.Status).Debug("upload is already in a final status, sending message then closing")
-			_ = c.sendWebsocketMessage(ctx, ws, map[string]interface{}{
+			_ = c.sendWebsocketMessage(ctx, ws, map[string]any{
 				"status": upload.Status,
 			})
 			return
@@ -148,13 +148,13 @@ func (c *Controller) getTransactionUploadProgress(ctx echo.Context) error {
 			select {
 			case <-timeout.C:
 				log.Warn("transaction upload is taking too long, websocket will be terminated")
-				_ = c.sendWebsocketMessage(ctx, ws, map[string]interface{}{
+				_ = c.sendWebsocketMessage(ctx, ws, map[string]any{
 					"status": "timed out",
 				})
 				break ListenerLoop
 			case status := <-listener.Channel():
 				log.WithField("status", status).Debug("sending status message for transaction upload")
-				if err := c.sendWebsocketMessage(ctx, ws, map[string]interface{}{
+				if err := c.sendWebsocketMessage(ctx, ws, map[string]any{
 					"status": status.Payload(),
 				}); err != nil {
 					return

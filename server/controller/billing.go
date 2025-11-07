@@ -44,7 +44,7 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create checkout session")
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"url":       checkoutSession.URL,
 		"sessionId": checkoutSession.ID,
 	})
@@ -70,13 +70,13 @@ func (c *Controller) handleGetAfterCheckout(ctx echo.Context) error {
 	}
 
 	if active {
-		return ctx.JSON(http.StatusOK, map[string]interface{}{
+		return ctx.JSON(http.StatusOK, map[string]any{
 			"nextUrl":  "/",
 			"isActive": true,
 		})
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"message":  "Subscription is not active.",
 		"nextUrl":  "/account/subscribe",
 		"isActive": false,

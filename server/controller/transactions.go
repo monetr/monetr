@@ -228,7 +228,7 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "could not get updated balances")
 	}
 
-	returnedObject := map[string]interface{}{
+	returnedObject := map[string]any{
 		"transaction": request.Transaction,
 		"balance":     balance,
 	}
@@ -347,7 +347,7 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 
 	c.getLog(ctx).Debugf("successfully updated transaction")
 
-	result := map[string]interface{}{
+	result := map[string]any{
 		"transaction": transaction,
 		"balance":     balance,
 	}

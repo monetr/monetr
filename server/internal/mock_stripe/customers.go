@@ -15,7 +15,7 @@ import (
 func (m *MockStripeHelper) MockStripeCreateCustomerSuccess(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"POST", "/v1/customers",
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			body, err := io.ReadAll(request.Body)
 			require.NoError(t, err, "failed to read request body")
 

@@ -23,7 +23,7 @@ func TestNewPlaidBankAccountBalances(t *testing.T) {
 			IsoCurrencyCode:        *plaid.NewNullableString(myownsanity.StringP("USD")),
 			UnofficialCurrencyCode: *plaid.NewNullableString(myownsanity.StringP("USD")),
 			LastUpdatedDatetime:    plaid.NullableTime{}, // Leave this be so that is has no value.
-			AdditionalProperties:   map[string]interface{}{},
+			AdditionalProperties:   map[string]any{},
 		}
 
 		balances, err := NewPlaidBankAccountBalances(plaidBalances)

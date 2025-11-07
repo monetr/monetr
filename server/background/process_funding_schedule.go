@@ -58,7 +58,7 @@ func (p *ProcessFundingScheduleHandler) HandleConsumeJob(
 ) error {
 	var args ProcessFundingScheduleArguments
 	if err := errors.Wrap(p.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Process Funding Schedule job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Process Funding Schedule job.", "job", map[string]any{
 			"data": data,
 		})
 		return err
@@ -112,7 +112,7 @@ func (p *ProcessFundingScheduleHandler) EnqueueTriggeredJob(ctx context.Context,
 	}
 
 	log.WithField("count", len(fundingSchedules)).Info("preparing to enqueue funding schedules for processing")
-	crumbs.Debug(ctx, "Preparing to enqueue funding schedules for processing.", map[string]interface{}{
+	crumbs.Debug(ctx, "Preparing to enqueue funding schedules for processing.", map[string]any{
 		"count": len(fundingSchedules),
 	})
 
@@ -132,7 +132,7 @@ func (p *ProcessFundingScheduleHandler) EnqueueTriggeredJob(ctx context.Context,
 		})
 		if err != nil {
 			log.WithError(err).Warn("failed to enqueue job to process funding schedule")
-			crumbs.Warn(ctx, "Failed to enqueue job to process funding schedule", "job", map[string]interface{}{
+			crumbs.Warn(ctx, "Failed to enqueue job to process funding schedule", "job", map[string]any{
 				"error": err,
 			})
 			jobErrors = append(jobErrors, err)
@@ -220,7 +220,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 		}
 
 		if !fundingSchedule.CalculateNextOccurrence(span.Context(), p.clock.Now(), timezone) {
-			crumbs.IndicateBug(span.Context(), "bug: funding schedule for processing occurs in the future", map[string]interface{}{
+			crumbs.IndicateBug(span.Context(), "bug: funding schedule for processing occurs in the future", map[string]any{
 				"nextOccurrence": fundingSchedule.NextRecurrence,
 			})
 			span.Status = sentry.SpanStatusInvalidArgument
@@ -241,7 +241,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 
 		switch len(expenses) {
 		case 0:
-			crumbs.Debug(span.Context(), "There are no spending objects associated with this funding schedule", map[string]interface{}{
+			crumbs.Debug(span.Context(), "There are no spending objects associated with this funding schedule", map[string]any{
 				"fundingScheduleId": fundingScheduleId,
 			})
 		default:
@@ -252,7 +252,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 				})
 
 				if spending.IsPaused {
-					crumbs.Debug(span.Context(), "Spending object is paused, it will be skipped", map[string]interface{}{
+					crumbs.Debug(span.Context(), "Spending object is paused, it will be skipped", map[string]any{
 						"fundingScheduleId": fundingScheduleId,
 						"spendingId":        spending.SpendingId,
 					})
@@ -263,7 +263,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 				progressAmount := spending.GetProgressAmount()
 
 				if spending.TargetAmount <= progressAmount {
-					crumbs.Debug(span.Context(), "Spending object already has target amount, it will be skipped", map[string]interface{}{
+					crumbs.Debug(span.Context(), "Spending object already has target amount, it will be skipped", map[string]any{
 						"fundingScheduleId": fundingScheduleId,
 						"spendingId":        spending.SpendingId,
 					})
@@ -300,7 +300,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 
 	log.Debugf("preparing to update %d spending(s)", len(expensesToUpdate))
 
-	crumbs.Debug(span.Context(), "Updating spending objects with recalculated contributions", map[string]interface{}{
+	crumbs.Debug(span.Context(), "Updating spending objects with recalculated contributions", map[string]any{
 		"count": len(expensesToUpdate),
 	})
 
@@ -315,7 +315,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 	}
 
 	// Trying to determine how often balances go negative.
-	crumbs.Debug(ctx, "Funding result balances", map[string]interface{}{
+	crumbs.Debug(ctx, "Funding result balances", map[string]any{
 		"before": initialBalances,
 		"after":  updatedBalances,
 	})

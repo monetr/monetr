@@ -84,7 +84,7 @@ func (s *SyncPlaidAccountsHandler) HandleConsumeJob(
 ) error {
 	var args SyncPlaidAccountsArguments
 	if err := errors.Wrap(s.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Sync Plaid accounts job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Sync Plaid accounts job.", "job", map[string]any{
 			"data": data,
 		})
 		return err
@@ -174,7 +174,7 @@ func (s *SyncPlaidAccountsHandler) EnqueueTriggeredJob(ctx context.Context, enqu
 		})
 		if err != nil {
 			itemLog.WithError(err).Warn("failed to enqueue job to sync with plaid accounts")
-			crumbs.Warn(ctx, "Failed to enqueue job to sync with plaid accounts", "job", map[string]interface{}{
+			crumbs.Warn(ctx, "Failed to enqueue job to sync with plaid accounts", "job", map[string]any{
 				"error": err,
 			})
 			continue
@@ -228,7 +228,7 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 		crumbs.IndicateBug(
 			span.Context(),
 			"BUG: Link was queued to sync with plaid, but has no plaid details",
-			map[string]interface{}{
+			map[string]any{
 				"link": link,
 			},
 		)

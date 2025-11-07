@@ -109,7 +109,7 @@ func (s *stripeBase) stripeRoundTripper(
 		request.URL.String(),
 		request.Method,
 		statusCode,
-		map[string]interface{}{
+		map[string]any{
 			"Request-Id": requestId,
 		},
 	)
@@ -282,11 +282,11 @@ func (s *stripeBase) NewCheckoutSession(ctx context.Context, params *stripe.Chec
 	}
 
 	if result != nil {
-		span.Data = map[string]interface{}{
+		span.Data = map[string]any{
 			"checkoutSessionId": result.ID,
 		}
 	} else {
-		span.Data = map[string]interface{}{
+		span.Data = map[string]any{
 			"checkoutSessionId": nil,
 		}
 	}
@@ -298,7 +298,7 @@ func (s *stripeBase) GetCheckoutSession(ctx context.Context, checkoutSessionId s
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"checkoutSessionId": checkoutSessionId,
 	}
 
@@ -321,7 +321,7 @@ func (s *stripeBase) CancelSubscription(ctx context.Context, id string) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"subscriptionId": id,
 	}
 
@@ -344,7 +344,7 @@ func (s *stripeBase) RemoveCustomer(ctx context.Context, id string) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"customerId": id,
 	}
 

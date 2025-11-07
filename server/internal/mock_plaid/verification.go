@@ -16,7 +16,7 @@ import (
 func MockGetWebhookVerificationKey(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"POST", Path(t, "/webhook_verification_key/get"),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			ValidatePlaidAuthentication(t, request, DoNotRequireAccessToken)
 			var requestBody plaid.WebhookVerificationKeyGetRequest
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&requestBody), "must decode request")

@@ -71,7 +71,7 @@ func (h *RemoveFileHandler) HandleConsumeJob(
 ) error {
 	var args RemoveFileArguments
 	if err := errors.Wrap(h.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Remove File job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Remove File job.", "job", map[string]any{
 			"data": data,
 		})
 		return err

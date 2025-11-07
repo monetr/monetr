@@ -114,7 +114,7 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 			now := c.Clock.Now()
 			log := c.getLog(ctx)
 			var token string
-			data := map[string]interface{}{
+			data := map[string]any{
 				"source": "none",
 			}
 			breadcrumbMessage := "Request did not have valid auth"
@@ -155,7 +155,7 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 			claims, err := c.ClientTokens.Parse(token)
 			if err != nil {
 				c.updateAuthenticationCookie(ctx, ClearAuthentication)
-				crumbs.Error(c.getContext(ctx), "failed to parse token", "authentication", map[string]interface{}{
+				crumbs.Error(c.getContext(ctx), "failed to parse token", "authentication", map[string]any{
 					"error": err,
 				})
 				log.WithError(err).Warn("invalid token provided")

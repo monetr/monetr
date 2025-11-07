@@ -154,7 +154,7 @@ func (h *ProcessOFXUploadHandler) HandleConsumeJob(
 ) error {
 	var args ProcessOFXUploadArguments
 	if err := errors.Wrap(h.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Processing OFX Upload job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Processing OFX Upload job.", "job", map[string]any{
 			"data": data,
 		})
 		return err

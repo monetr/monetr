@@ -29,7 +29,7 @@ func TestPostTokenCallback(t *testing.T) {
 
 		response := e.POST("/api/plaid/link/token/callback").
 			WithCookie(TestCookieName, token).
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"publicToken":     publicToken,
 				"institutionId":   "123",
 				"institutionName": gofakeit.Company(),
@@ -175,7 +175,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 			Return(nil)
 
 		response := e.POST("/api/plaid/link/sync").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"linkId": link.LinkId,
 			}).
 			WithCookie(TestCookieName, token).
@@ -206,7 +206,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 
 		{ // First request should succeed.
 			response := e.POST("/api/plaid/link/sync").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"linkId": link.LinkId,
 				}).
 				WithCookie(TestCookieName, token).
@@ -217,7 +217,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 
 		{ // Second request should fail, its too soon.
 			response := e.POST("/api/plaid/link/sync").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"linkId": link.LinkId,
 				}).
 				WithCookie(TestCookieName, token).
@@ -249,7 +249,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 			Return(errors.New("queue is offline"))
 
 		response := e.POST("/api/plaid/link/sync").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"linkId": link.LinkId,
 			}).
 			WithCookie(TestCookieName, token).
@@ -266,7 +266,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.POST("/api/plaid/link/sync").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"linkId": "link_bogus",
 			}).
 			WithCookie(TestCookieName, token).
@@ -284,7 +284,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.POST("/api/plaid/link/sync").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"linkId": link.LinkId,
 			}).
 			WithCookie(TestCookieName, token).

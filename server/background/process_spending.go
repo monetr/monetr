@@ -64,7 +64,7 @@ func (p *ProcessSpendingHandler) HandleConsumeJob(
 ) error {
 	var args ProcessSpendingArguments
 	if err := errors.Wrap(p.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Process Spending job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Process Spending job.", "job", map[string]any{
 			"data": data,
 		})
 		return err
@@ -122,7 +122,7 @@ func (p *ProcessSpendingHandler) EnqueueTriggeredJob(ctx context.Context, enqueu
 	}
 
 	log.WithField("count", len(bankAccountsWithStaleSpending)).Info("found bank accounts with stale spending")
-	crumbs.Debug(ctx, "Found bank accounts with stale spending.", map[string]interface{}{
+	crumbs.Debug(ctx, "Found bank accounts with stale spending.", map[string]any{
 		"count": len(bankAccountsWithStaleSpending),
 	})
 
@@ -140,7 +140,7 @@ func (p *ProcessSpendingHandler) EnqueueTriggeredJob(ctx context.Context, enqueu
 		})
 		if err != nil {
 			log.WithError(err).Warn("failed to enqueue job to process stale spending")
-			crumbs.Warn(ctx, "Failed to enqueue job to process stale spending", "job", map[string]interface{}{
+			crumbs.Warn(ctx, "Failed to enqueue job to process stale spending", "job", map[string]any{
 				"error": err,
 			})
 			jobErrors = append(jobErrors, err)

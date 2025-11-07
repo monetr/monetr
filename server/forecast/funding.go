@@ -153,7 +153,7 @@ func (f *fundingScheduleBase) GetNFundingEventsAfter(
 						"i":        i,
 					}).
 					Error("timed out while trying to determine N funding events after")
-				crumbs.Error(ctx, "Timed out while trying to determine N funding events after", "forecast", map[string]interface{}{
+				crumbs.Error(ctx, "Timed out while trying to determine N funding events after", "forecast", map[string]any{
 					"n":        n,
 					"input":    input,
 					"timezone": timezone.String(),

@@ -390,7 +390,7 @@ func (v *VaultTransit) authenticate(ctx context.Context) error {
 	switch v.config.AuthMethod {
 	case "userpass":
 		log.Trace("authenticating to vault")
-		result, err := v.client.Logical().WriteWithContext(ctx, "auth/userpass/login/"+v.config.Username, map[string]interface{}{
+		result, err := v.client.Logical().WriteWithContext(ctx, "auth/userpass/login/"+v.config.Username, map[string]any{
 			"password": v.config.Password,
 			"role":     v.config.Role,
 		})
@@ -431,7 +431,7 @@ func (v *VaultTransit) authenticate(ctx context.Context) error {
 		result, err := v.client.Logical().WriteWithContext(
 			ctx,
 			"auth/kubernetes/login",
-			map[string]interface{}{
+			map[string]any{
 				"role": v.config.Role,
 				"jwt":  token,
 			},
@@ -471,11 +471,11 @@ func (v *VaultTransit) authenticate(ctx context.Context) error {
 func (v *VaultTransit) Write(
 	ctx context.Context,
 	key string,
-	value map[string]interface{},
+	value map[string]any,
 ) (*vault.Secret, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"key": key,
 	}
 
@@ -503,7 +503,7 @@ func (v *VaultTransit) Read(
 ) (*vault.Secret, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"key": key,
 	}
 
@@ -520,7 +520,7 @@ func (v *VaultTransit) Read(
 func (v *VaultTransit) Delete(ctx context.Context, key string) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"key": key,
 	}
 
@@ -550,7 +550,7 @@ func (v *VaultTransit) Decrypt(
 	secret, err := v.Write(
 		span.Context(),
 		fmt.Sprintf("transit/decrypt/%s", v.config.KeyID),
-		map[string]interface{}{
+		map[string]any{
 			"ciphertext": input,
 		},
 	)
@@ -577,7 +577,7 @@ func (v *VaultTransit) Encrypt(
 	secret, err := v.Write(
 		span.Context(),
 		fmt.Sprintf("transit/encrypt/%s", v.config.KeyID),
-		map[string]interface{}{
+		map[string]any{
 			"plaintext": base64.StdEncoding.EncodeToString([]byte(input)),
 		},
 	)

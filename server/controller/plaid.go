@@ -132,7 +132,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 			"",
 		); err == nil && len(linkToken) > 0 {
 			log.Info("successfully found existing link token in cache")
-			return ctx.JSON(http.StatusOK, map[string]interface{}{
+			return ctx.JSON(http.StatusOK, map[string]any{
 				"linkToken": linkToken,
 			})
 		}
@@ -165,7 +165,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 		log.WithError(err).Warn("failed to cache link token")
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"linkToken": token.Token(),
 	})
 }
@@ -225,7 +225,7 @@ func (c *Controller) putUpdatePlaidLink(ctx echo.Context) error {
 		log.WithError(err).Warn("failed to cache link token")
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"linkToken": token.Token(),
 	})
 }
@@ -524,7 +524,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		}
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"linkId": link.LinkId,
 	})
 }
@@ -574,7 +574,7 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 		}
 	}()
 
-	crumbs.Debug(c.getContext(ctx), "Waiting for notification on channel", map[string]interface{}{
+	crumbs.Debug(c.getContext(ctx), "Waiting for notification on channel", map[string]any{
 		"channel": channelName,
 	})
 

@@ -57,18 +57,18 @@ func NewPostgresJobEnqueuer(
 }
 
 // Deprecated: Use EnqueueJobTxn instead.
-func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, arguments interface{}) error {
+func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, arguments any) error {
 	return p.EnqueueJobTxn(ctx, p.db, queue, arguments)
 }
 
-func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, arguments interface{}) error {
+func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, arguments any) error {
 	span := sentry.StartSpan(ctx, "queue.publish")
 	defer span.Finish()
 	span.Description = queue
 	span.SetTag("queue", queue)
 	span.SetData("messaging.destination.name", queue)
 	span.SetData("messaging.system", "postgresql")
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"queue":     queue,
 		"arguments": arguments,
 	}
@@ -76,7 +76,7 @@ func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, que
 	crumbs.Debug(
 		span.Context(),
 		"Enqueueing job for background processing",
-		map[string]interface{}{
+		map[string]any{
 			"queue":     queue,
 			"arguments": arguments,
 		},

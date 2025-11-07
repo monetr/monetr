@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	_ gomock.Matcher = &GenericMatcher[interface{}]{}
+	_ gomock.Matcher = &GenericMatcher[any]{}
 )
 
 type GenericMatcher[T any] struct {
@@ -17,7 +17,7 @@ type GenericMatcher[T any] struct {
 }
 
 // Matches implements gomock.Matcher
-func (g *GenericMatcher[T]) Matches(x interface{}) bool {
+func (g *GenericMatcher[T]) Matches(x any) bool {
 	switch t := x.(type) {
 	case T:
 		return g.callback(t)
@@ -42,7 +42,7 @@ type equalValuesMatcher struct {
 }
 
 // Matches implements gomock.Matcher.
-func (e *equalValuesMatcher) Matches(received interface{}) bool {
+func (e *equalValuesMatcher) Matches(received any) bool {
 	return assert.ObjectsAreEqualValues(
 		dereference(e.expected),
 		dereference(received),

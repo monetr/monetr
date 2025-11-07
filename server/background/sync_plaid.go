@@ -511,7 +511,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 		if len(transactionsToUpdate) > 0 {
 			log.Infof("updating %d transactions", len(transactionsToUpdate))
-			crumbs.Debug(span.Context(), "Updating transactions.", map[string]interface{}{
+			crumbs.Debug(span.Context(), "Updating transactions.", map[string]any{
 				"count": len(transactionsToUpdate),
 			})
 			if err = s.repo.UpdateTransactions(span.Context(), transactionsToUpdate); err != nil {
@@ -530,7 +530,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 			})
 
 			log.Infof("creating %d transactions", len(transactionsToInsert))
-			crumbs.Debug(span.Context(), "Creating transactions.", map[string]interface{}{
+			crumbs.Debug(span.Context(), "Creating transactions.", map[string]any{
 				"count": len(transactionsToInsert),
 			})
 			if err = s.repo.InsertTransactions(span.Context(), transactionsToInsert); err != nil {
@@ -603,7 +603,7 @@ func (s *SyncPlaidJob) maintainLinkStatus(ctx context.Context, plaidLink *PlaidL
 	switch plaidLink.Status {
 	case PlaidLinkStatusSetup, PlaidLinkStatusPendingExpiration:
 	default:
-		crumbs.Debug(ctx, "Updating plaid link status.", map[string]interface{}{
+		crumbs.Debug(ctx, "Updating plaid link status.", map[string]any{
 			"old": plaidLink.Status,
 			"new": PlaidLinkStatusSetup,
 		})
@@ -775,7 +775,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 	}
 
 	if existingPlaidTransaction == nil && input.GetIsPending() {
-		crumbs.IndicateBug(ctx, "Existing transaction did not correctly have the associated pending plaid transaction stored", map[string]interface{}{
+		crumbs.IndicateBug(ctx, "Existing transaction did not correctly have the associated pending plaid transaction stored", map[string]any{
 			"plaidId":            input.GetTransactionId(),
 			"linkId":             link.LinkId,
 			"plaidLinkId":        link.PlaidLinkId,

@@ -76,7 +76,7 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 
 	// By default report the accountIds as "all accounts" to sentry. This way we know that if we are not requesting
 	// specific accounts then we are requesting all of them.
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountIds": "ALL_BANK_ACCOUNTS",
 	}
 
@@ -123,7 +123,7 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 			log.WithError(err).
 				WithField("bankAccountId", plaidAccount.GetAccountId()).
 				Errorf("failed to convert bank account")
-			crumbs.Error(span.Context(), "failed to convert bank account", "debug", map[string]interface{}{
+			crumbs.Error(span.Context(), "failed to convert bank account", "debug", map[string]any{
 				// Maybe we don't want to report the entire account object here, but it'll sure save us a ton of time
 				// if there is ever a problem with actually converting the account. This way we can actually see the
 				// account object that caused the problem -> when it caused the problem.
@@ -185,7 +185,7 @@ func (p *PlaidClient) GetTransactions(
 
 	span.SetTag("itemId", p.itemId)
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountIds": bankAccountIds,
 		"start":      start.Format("2006-01-02"),
 		"end":        end.Format("2006-01-02"),

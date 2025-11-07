@@ -39,7 +39,7 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ID
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"linkId":              linkId,
 		"plaidTransactionIds": plaidTransactionIds,
 	}
@@ -114,7 +114,7 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId ID[B
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId":     r.AccountId(),
 		"bankAccountId": bankAccountId,
 		"limit":         limit,
@@ -145,7 +145,7 @@ func (r *repositoryBase) GetTransactionsAfter(ctx context.Context, bankAccountId
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId":     r.AccountId(),
 		"bankAccountId": bankAccountId,
 		"after":         after,
@@ -181,7 +181,7 @@ func (r *repositoryBase) GetPendingTransactions(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId":     r.AccountId(),
 		"bankAccountId": bankAccountId,
 		"limit":         limit,
@@ -218,7 +218,7 @@ func (r *repositoryBase) GetTransactionsForSpending(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId":     r.AccountId(),
 		"bankAccountId": bankAccountId,
 		"spendingId":    spendingId,
@@ -251,7 +251,7 @@ func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId ID[Ba
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"bankAccountId": bankAccountId,
 		"transactionId": transactionId,
 	}
@@ -278,7 +278,7 @@ func (r *repositoryBase) CreateTransaction(ctx context.Context, bankAccountId ID
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"bankAccountId": bankAccountId,
 	}
 
@@ -300,7 +300,7 @@ func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId ID
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"bankAccountId": bankAccountId,
 	}
 

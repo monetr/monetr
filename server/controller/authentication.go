@@ -210,7 +210,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Could not generate token")
 		}
 
-		result := map[string]interface{}{
+		result := map[string]any{
 			"isActive": true,
 		}
 
@@ -281,7 +281,7 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 
 	c.updateAuthenticationCookie(ctx, token)
 
-	result := map[string]interface{}{
+	result := map[string]any{
 		"isActive": true,
 	}
 
@@ -505,7 +505,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 			return err
 		}
 
-		return ctx.JSON(http.StatusOK, map[string]interface{}{
+		return ctx.JSON(http.StatusOK, map[string]any{
 			"message":             "A verification email has been sent to your email address, please verify your email.",
 			"requireVerification": true,
 		})
@@ -533,7 +533,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 
 	c.updateAuthenticationCookie(ctx, token)
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"nextUrl":             "/setup",
 		"requireVerification": false,
 	})
@@ -570,7 +570,7 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"nextUrl": "/login",
 		"message": "Your email is now verified. Please login.",
 	})
@@ -679,7 +679,7 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 		sendForgotPasswordRequest.Email,
 	)
 	if err != nil {
-		crumbs.Debug(c.getContext(ctx), "No password reset email will be sent, login for email not found", map[string]interface{}{
+		crumbs.Debug(c.getContext(ctx), "No password reset email will be sent, login for email not found", map[string]any{
 			"error": err.Error(),
 		})
 		// Don't return an error to the client, don't want them to know if it failed to send.

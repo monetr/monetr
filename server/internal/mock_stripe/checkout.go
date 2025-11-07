@@ -19,7 +19,7 @@ import (
 func (m *MockStripeHelper) MockNewCheckoutSession(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"POST", RegexPath(t, `/v1/checkout/sessions\z`),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			body, err := io.ReadAll(request.Body)
 			require.NoError(t, err, "failed to read request body")
 
@@ -36,7 +36,7 @@ func (m *MockStripeHelper) MockNewCheckoutSession(t *testing.T) {
 			}
 
 			var lineItems []*stripe.LineItem
-			if lineItemsForm, ok := stripeForm["line_items"].(map[string]interface{}); ok {
+			if lineItemsForm, ok := stripeForm["line_items"].(map[string]any); ok {
 				lineItems = make([]*stripe.LineItem, len(lineItemsForm))
 				for indexStr, tupleRaw := range lineItemsForm {
 					var index int64
@@ -53,7 +53,7 @@ func (m *MockStripeHelper) MockNewCheckoutSession(t *testing.T) {
 						item = lineItems[index]
 					}
 
-					tuple, ok := tupleRaw.(map[string]interface{})
+					tuple, ok := tupleRaw.(map[string]any)
 					require.True(t, ok, "must be able to convert tupleRaw into a map")
 
 					// If a price ID is provided, then include that on the line item object.
@@ -120,12 +120,12 @@ func (m *MockStripeHelper) MockNewCheckoutSession(t *testing.T) {
 func (m *MockStripeHelper) MockGetCheckoutSession(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"GET", RegexPath(t, `/v1/checkout/sessions/.*\z`),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			checkoutSessionId := strings.TrimSpace(strings.TrimPrefix(request.URL.String(), Path(t, "/v1/checkout/sessions/")))
 
 			if checkoutSessionId == "" {
-				return map[string]interface{}{
-					"error": map[string]interface{}{
+				return map[string]any{
+					"error": map[string]any{
 						"message": "Unrecognized request URL (GET: /v1/checkout/sessions/). If you are trying to list objects, remove the trailing slash. If you are trying to retrieve an object, make sure you passed a valid (non-empty) identifier in your code. Please see https://stripe.com/docs or we can help at https://support.stripe.com/.",
 						"type":    "invalid_request_error",
 					},
@@ -134,8 +134,8 @@ func (m *MockStripeHelper) MockGetCheckoutSession(t *testing.T) {
 
 			checkoutSession, ok := m.checkoutSessions[checkoutSessionId]
 			if !ok {
-				return map[string]interface{}{
-					"error": map[string]interface{}{
+				return map[string]any{
+					"error": map[string]any{
 						"message": fmt.Sprintf("Invalid checkout.session id: %s", checkoutSessionId),
 						"type":    "invalid_request_error",
 					},

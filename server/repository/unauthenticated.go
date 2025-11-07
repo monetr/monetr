@@ -101,7 +101,7 @@ func (u *unauthenticatedRepo) CreateUser(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"loginId":   user.LoginId,
 		"accountId": user.AccountId,
 	}
@@ -162,7 +162,7 @@ func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string
 	span := sentry.StartSpan(ctx, "GetLinksForItem")
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"itemId": itemId,
 	}
 

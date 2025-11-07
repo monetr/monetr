@@ -81,7 +81,7 @@ func DetectRecurringTransactions(
 	// How many seconds elapse for each data point in the time series.
 	segment := float64(window) / float64(size)
 
-	crumbs.Debug(span.Context(), "Detecting recurring transactions", map[string]interface{}{
+	crumbs.Debug(span.Context(), "Detecting recurring transactions", map[string]any{
 		"start":   start,
 		"end":     end,
 		"segment": segment,

@@ -16,7 +16,7 @@ import (
 func MockStripeListProductsSuccess(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"GET", RegexPath(t, `/v1/products(?)*\z`),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			productIds := make([]string, 0)
 			for query, value := range request.URL.Query() {
 				queryNonIndexed := strings.Split(query, "[")[0]
@@ -77,7 +77,7 @@ func MockStripeListProductsSuccess(t *testing.T) {
 func MockStripeListProductsFailure(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"GET", RegexPath(t, `/v1/products(?)*\z`),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			return NewInternalServerError(t, "product"), http.StatusInternalServerError
 		},
 		StripeHeaders,

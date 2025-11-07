@@ -13,12 +13,12 @@ import (
 func (m *MockStripeHelper) MockGetSubscription(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"GET", RegexPath(t, `/v1/subscriptions/.*\z`),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			subscriptionId := strings.TrimSpace(strings.TrimPrefix(request.URL.String(), Path(t, "/v1/subscriptions/")))
 
 			if subscriptionId == "" {
-				return map[string]interface{}{
-					"error": map[string]interface{}{
+				return map[string]any{
+					"error": map[string]any{
 						"message": "Unrecognized request URL (GET: /v1/subscriptions/). If you are trying to list objects, remove the trailing slash. If you are trying to retrieve an object, make sure you passed a valid (non-empty) identifier in your code. Please see https://stripe.com/docs or we can help at https://support.stripe.com/.",
 						"type":    "invalid_request_error",
 					},
@@ -27,8 +27,8 @@ func (m *MockStripeHelper) MockGetSubscription(t *testing.T) {
 
 			subscription, ok := m.subscriptions[subscriptionId]
 			if !ok {
-				return map[string]interface{}{
-					"error": map[string]interface{}{
+				return map[string]any{
+					"error": map[string]any{
 						"message": fmt.Sprintf("Invalid subscription id: %s", subscriptionId),
 						"type":    "invalid_request_error",
 					},

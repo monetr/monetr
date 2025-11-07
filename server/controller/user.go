@@ -35,7 +35,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 
 	claims := c.mustGetClaims(ctx)
 
-	me := map[string]interface{}{
+	me := map[string]any{
 		"user":            user,
 		"mfaPending":      false,
 		"isSetup":         isSetup,
@@ -165,7 +165,7 @@ func (c *Controller) postSetupTOTP(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to setup TOTP")
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"uri":           uri,
 		"recoveryCodes": recoveryCodes,
 	})

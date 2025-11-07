@@ -81,7 +81,7 @@ func (p *plaidInstitutionsBase) GetInstitution(ctx context.Context, institutionI
 	span := sentry.StartSpan(ctx, "GetInstitution")
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"institutionId": institutionId,
 	}
 

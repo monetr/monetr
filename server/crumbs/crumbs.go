@@ -76,7 +76,7 @@ func Debug(ctx context.Context, message string, data map[string]any) {
 func HTTP(ctx context.Context, message, category, url, method string, statusCode int, data map[string]any) {
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
 		if data == nil {
-			data = map[string]interface{}{}
+			data = map[string]any{}
 		}
 
 		data["url"] = url

@@ -50,7 +50,7 @@ func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File
 	if !valid {
 		crumbs.Debug(c.getContext(ctx),
 			"Unsupported file type was provided!",
-			map[string]interface{}{
+			map[string]any{
 				"fileName":    header.Filename,
 				"contentType": contentType,
 				"extension":   extension,

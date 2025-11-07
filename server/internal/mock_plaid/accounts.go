@@ -76,7 +76,7 @@ func MockGetAccountsExtended(t *testing.T, plaidData *testutils.MockPlaidData) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/accounts/get"),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			accessToken := ValidatePlaidAuthentication(t, request, RequireAccessToken)
 			var getAccountsRequest struct {
 				Options struct {
@@ -112,7 +112,7 @@ func MockGetAccounts(t *testing.T, accounts []plaid.AccountBase) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/accounts/get"),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			var getAccountsRequest struct {
 				ClientId    string `json:"client_id"`
 				Secret      string `json:"secret"`
@@ -123,7 +123,7 @@ func MockGetAccounts(t *testing.T, accounts []plaid.AccountBase) {
 			}
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&getAccountsRequest), "must decode request")
 
-			return map[string]interface{}{
+			return map[string]any{
 				"accounts": accounts,
 			}, http.StatusOK
 		},
@@ -135,7 +135,7 @@ func MockGetAccountsError(t *testing.T, plaidError plaid.PlaidError) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/accounts/get"),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			var getAccountsRequest struct {
 				ClientId    string `json:"client_id"`
 				Secret      string `json:"secret"`

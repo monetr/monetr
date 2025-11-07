@@ -237,13 +237,13 @@ func (b *baseBilling) UpdateCustomerSubscription(
 	// solve potential race conditions in the order we receive webhooks from Stripe.
 	if account.StripeWebhookLatestTimestamp != nil {
 		if timestamp.Before(*account.StripeWebhookLatestTimestamp) {
-			crumbs.Debug(span.Context(), "Provided timestamp is older than the current subscription timestamp", map[string]interface{}{
+			crumbs.Debug(span.Context(), "Provided timestamp is older than the current subscription timestamp", map[string]any{
 				"stored":   *account.StripeWebhookLatestTimestamp,
 				"provided": timestamp,
 			})
 			return nil
 		} else if timestamp.Equal(*account.StripeWebhookLatestTimestamp) {
-			crumbs.Warn(span.Context(), "Provided timestamp is equal to the current subscription timestamp", "stripe", map[string]interface{}{
+			crumbs.Warn(span.Context(), "Provided timestamp is equal to the current subscription timestamp", "stripe", map[string]any{
 				"stored":   *account.StripeWebhookLatestTimestamp,
 				"provided": timestamp,
 			})
@@ -258,12 +258,12 @@ func (b *baseBilling) UpdateCustomerSubscription(
 			return nil
 		}
 
-		crumbs.Debug(span.Context(), "Provided timestamp is after the current subscription timestamp, change will be applied", map[string]interface{}{
+		crumbs.Debug(span.Context(), "Provided timestamp is after the current subscription timestamp, change will be applied", map[string]any{
 			"stored":   *account.StripeWebhookLatestTimestamp,
 			"provided": timestamp,
 		})
 	} else {
-		crumbs.Debug(span.Context(), "Current subscription timestamp is nil, webhook will be accepted", map[string]interface{}{
+		crumbs.Debug(span.Context(), "Current subscription timestamp is nil, webhook will be accepted", map[string]any{
 			"provided": timestamp,
 		})
 	}

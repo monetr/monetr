@@ -64,7 +64,7 @@ func (o *ObservabilityRoundTripper) RoundTrip(
 		}
 	} else {
 		span.Status = sentry.SpanStatusUnknown
-		crumbs.ReportError(span.Context(), err, "Unknown round tripper error", "http", map[string]interface{}{})
+		crumbs.ReportError(span.Context(), err, "Unknown round tripper error", "http", map[string]any{})
 	}
 
 	o.handler(request.Context(), request, response, err)

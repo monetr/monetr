@@ -67,7 +67,7 @@ func (a *AWSKMS) Encrypt(ctx context.Context, input string) (keyId, version *str
 	defer span.Finish()
 	span.SetTag("kms", "aws")
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"resource": keyId,
 	}
 
@@ -96,7 +96,7 @@ func (a *AWSKMS) Decrypt(ctx context.Context, keyId, version *string, encrypted 
 	defer span.Finish()
 	span.SetTag("kms", "aws")
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"resource": keyId,
 	}
 

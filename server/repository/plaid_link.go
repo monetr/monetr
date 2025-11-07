@@ -80,7 +80,7 @@ type plaidRepositoryBase struct {
 func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string) (*Link, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"itemId": itemId,
 	}
 
@@ -101,7 +101,7 @@ func (r *plaidRepositoryBase) GetLink(ctx context.Context, accountId ID[Account]
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId": accountId,
 		"linkId":    linkId,
 	}

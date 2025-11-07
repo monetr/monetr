@@ -119,7 +119,7 @@ func (h *NotificationTrialExpiryHandler) EnqueueTriggeredJob(
 		})
 		if err != nil {
 			itemLog.WithError(err).Warn("failed to enqueue job for trial expiry notification")
-			crumbs.Warn(ctx, "Failed to enqueue job for trial expiry notification", "job", map[string]interface{}{
+			crumbs.Warn(ctx, "Failed to enqueue job for trial expiry notification", "job", map[string]any{
 				"error": err,
 			})
 			continue
@@ -138,7 +138,7 @@ func (h *NotificationTrialExpiryHandler) HandleConsumeJob(
 ) error {
 	var args NotificationTrialExpiryArguments
 	if err := errors.Wrap(h.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for job.", "job", map[string]any{
 			"data": data,
 		})
 		return err

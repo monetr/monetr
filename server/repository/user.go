@@ -35,7 +35,7 @@ func (r *repositoryBase) GetMe(ctx context.Context) (*User, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId": r.AccountId(),
 		"userId":    r.UserId(),
 	}
@@ -70,7 +70,7 @@ func (r *repositoryBase) GetAccountOwner(ctx context.Context) (*User, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId": r.AccountId(),
 	}
 

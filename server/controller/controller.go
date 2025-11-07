@@ -98,7 +98,7 @@ func (c *Controller) getLog(ctx echo.Context) *logrus.Entry {
 
 // reportWrappedError just includes an errors.Wrapf around reportError. It does not modify the response body to include
 // the error.
-func (c *Controller) reportWrappedError(ctx echo.Context, err error, message string, args ...interface{}) {
+func (c *Controller) reportWrappedError(ctx echo.Context, err error, message string, args ...any) {
 	c.reportError(ctx, errors.Wrapf(err, message, args...))
 }
 

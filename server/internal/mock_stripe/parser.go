@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-type StripeForm map[string]interface{}
+type StripeForm map[string]any
 
 func ParseStripeForm(input url.Values) (StripeForm, error) {
-	data := map[string]interface{}{}
+	data := map[string]any{}
 
 	for key, values := range input {
-		var value interface{}
+		var value any
 		switch len(values) {
 		case 0:
 			value = nil
@@ -51,10 +51,10 @@ func ParseStripeForm(input url.Values) (StripeForm, error) {
 			}
 
 			if _, ok := part[item]; !ok {
-				part[item] = map[string]interface{}{}
+				part[item] = map[string]any{}
 			}
 
-			part = part[item].(map[string]interface{})
+			part = part[item].(map[string]any)
 		}
 	}
 

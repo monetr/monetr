@@ -78,7 +78,7 @@ func (d *DeactivateLinksHandler) HandleConsumeJob(
 ) error {
 	var args DeactivateLinksArguments
 	if err := errors.Wrap(d.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Deactivate Links job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Deactivate Links job.", "job", map[string]any{
 			"data": data,
 		})
 		return err
@@ -163,7 +163,7 @@ func (d *DeactivateLinksHandler) EnqueueTriggeredJob(ctx context.Context, enqueu
 		})
 		if err != nil {
 			log.WithError(err).Warn("failed to enqueue job to remove expired link")
-			crumbs.Warn(ctx, "Failed to enqueue job to remove expired link", "job", map[string]interface{}{
+			crumbs.Warn(ctx, "Failed to enqueue job to remove expired link", "job", map[string]any{
 				"error": err,
 			})
 			continue
@@ -209,7 +209,7 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 
 	if link.PlaidLink == nil {
 		log.Warn("provided link does not have any plaid credentials")
-		crumbs.Warn(span.Context(), "BUG: Link was queued to be deactivated, but has no plaid details", "jobs", map[string]interface{}{
+		crumbs.Warn(span.Context(), "BUG: Link was queued to be deactivated, but has no plaid details", "jobs", map[string]any{
 			"link": link,
 		})
 		span.Status = sentry.SpanStatusFailedPrecondition

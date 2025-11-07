@@ -22,7 +22,7 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.SetTag("itemId", p.itemId)
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"cursor": cursor,
 	}
 
@@ -97,7 +97,7 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 			log.WithError(err).
 				WithField("bankAccountId", plaidAccount.GetAccountId()).
 				Errorf("failed to convert bank account")
-			crumbs.Error(span.Context(), "failed to convert bank account", "debug", map[string]interface{}{
+			crumbs.Error(span.Context(), "failed to convert bank account", "debug", map[string]any{
 				// Maybe we don't want to report the entire account object here, but it'll sure save us a ton of time
 				// if there is ever a problem with actually converting the account. This way we can actually see the
 				// account object that caused the problem -> when it caused the problem.

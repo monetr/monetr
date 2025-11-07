@@ -14,11 +14,11 @@ import (
 func NewHttpMockJsonResponder(
 	t *testing.T,
 	method, path string,
-	handler func(t *testing.T, request *http.Request) (interface{}, int),
-	headersFn func(t *testing.T, request *http.Request, response interface{}, status int) map[string][]string,
+	handler func(t *testing.T, request *http.Request) (any, int),
+	headersFn func(t *testing.T, request *http.Request, response any, status int) map[string][]string,
 ) {
 	httpmock.RegisterResponder(method, path, func(request *http.Request) (*http.Response, error) {
-		var result interface{}
+		var result any
 		var status int
 		require.NotPanics(t, func() {
 			result, status = handler(t, request)

@@ -75,7 +75,7 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(
 				ilog.
 					WithError(err).
 					Error("timed out while trying to determine spending events between dates")
-				crumbs.Error(ctx, "Timed out while trying to determine spending events between dates", "forecast", map[string]interface{}{
+				crumbs.Error(ctx, "Timed out while trying to determine spending events between dates", "forecast", map[string]any{
 					"start":    start,
 					"end":      end,
 					"timezone": timezone.String(),
@@ -137,7 +137,7 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(
 			}).Error("calculated a spending event that does not come after the after date specified! there is a bug somewhere!!!")
 
 			// This might not make it into sentry because of sampling :(
-			crumbs.IndicateBug(ctx, "Calculated a spending event that does not come after the after date specified", map[string]interface{}{
+			crumbs.IndicateBug(ctx, "Calculated a spending event that does not come after the after date specified", map[string]any{
 				"spending":   s.spending,
 				"afterDate":  afterDate,
 				"start":      start,

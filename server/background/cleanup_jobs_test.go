@@ -17,7 +17,7 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 
 		handler := NewCleanupJobsHandler(log, db)
 
-		var args interface{}
+		var args any
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
 
@@ -45,7 +45,7 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 
 		handler := NewCleanupJobsHandler(log, db)
 
-		var args interface{}
+		var args any
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
 
@@ -77,7 +77,7 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 
 		handler := NewCleanupJobsHandler(log, db)
 
-		var args interface{}
+		var args any
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
 

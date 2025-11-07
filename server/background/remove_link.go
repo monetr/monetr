@@ -80,7 +80,7 @@ func (r *RemoveLinkHandler) HandleConsumeJob(
 ) error {
 	var args RemoveLinkArguments
 	if err := errors.Wrap(r.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Remove Link job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Remove Link job.", "job", map[string]any{
 			"data": data,
 		})
 		return err
@@ -194,7 +194,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	channelName := fmt.Sprintf("link:remove:%s:%s", accountId, linkId)
 	if err = r.publisher.Notify(span.Context(), channelName, "success"); err != nil {
 		log.WithError(err).Warn("failed to send notification about successfully removing link")
-		crumbs.Warn(span.Context(), "failed to send notification about successfully removing link", "pubsub", map[string]interface{}{
+		crumbs.Warn(span.Context(), "failed to send notification about successfully removing link", "pubsub", map[string]any{
 			"error": err.Error(),
 		})
 	}

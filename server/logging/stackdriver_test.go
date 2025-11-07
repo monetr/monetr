@@ -27,7 +27,7 @@ func TestStackDriverFormatterWrapper(t *testing.T) {
 	assert.NoError(t, err, "should format log successfully")
 	assert.True(t, json.Valid(result), "result must be valid json")
 
-	var object map[string]interface{}
+	var object map[string]any
 	assert.NoError(t, json.Unmarshal(result, &object), "must unmarshal log entry successfully")
 
 	assert.Contains(t, object, "severity", "must contain the severity field for stackdriver")

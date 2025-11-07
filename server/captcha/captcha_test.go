@@ -26,8 +26,8 @@ func TestCaptchaBase_VerifyCaptcha(t *testing.T) {
 
 		mock_http_helper.NewHttpMockJsonResponder(t,
 			"POST", "https://www.google.com/recaptcha/api/siteverify",
-			func(t *testing.T, request *http.Request) (interface{}, int) {
-				return map[string]interface{}{
+			func(t *testing.T, request *http.Request) (any, int) {
+				return map[string]any{
 					"success":      true,
 					"challenge_ts": time.Now(),
 					"hostname":     "monetr.mini",
@@ -50,8 +50,8 @@ func TestCaptchaBase_VerifyCaptcha(t *testing.T) {
 
 		mock_http_helper.NewHttpMockJsonResponder(t,
 			"POST", "https://www.google.com/recaptcha/api/siteverify",
-			func(t *testing.T, request *http.Request) (interface{}, int) {
-				return map[string]interface{}{
+			func(t *testing.T, request *http.Request) (any, int) {
+				return map[string]any{
 					"success":      false,
 					"challenge_ts": time.Now(),
 					"hostname":     "monetr.mini",

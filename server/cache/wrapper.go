@@ -16,10 +16,10 @@ import (
 type Cache interface {
 	Set(ctx context.Context, key string, value []byte) error
 	SetTTL(ctx context.Context, key string, value []byte, lifetime time.Duration) error
-	SetEz(ctx context.Context, key string, object interface{}) error
-	SetEzTTL(ctx context.Context, key string, object interface{}, lifetime time.Duration) error
+	SetEz(ctx context.Context, key string, object any) error
+	SetEzTTL(ctx context.Context, key string, object any, lifetime time.Duration) error
 	Get(ctx context.Context, key string) ([]byte, error)
-	GetEz(ctx context.Context, key string, output interface{}) error
+	GetEz(ctx context.Context, key string, output any) error
 	Delete(ctx context.Context, key string) error
 }
 
@@ -43,7 +43,7 @@ func NewCache(log *logrus.Entry, client *redis.Pool) Cache {
 	}
 }
 
-func (r *redisCache) send(ctx context.Context, commandName string, args ...interface{}) error {
+func (r *redisCache) send(ctx context.Context, commandName string, args ...any) error {
 	conn, err := r.client.GetContext(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve connection from pool")
@@ -57,7 +57,7 @@ func (r *redisCache) send(ctx context.Context, commandName string, args ...inter
 	return conn.Send(commandName, args...)
 }
 
-func (r *redisCache) do(ctx context.Context, commandName string, args ...interface{}) (interface{}, error) {
+func (r *redisCache) do(ctx context.Context, commandName string, args ...any) (any, error) {
 	conn, err := r.client.GetContext(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve connection from pool")
@@ -121,7 +121,7 @@ func (r *redisCache) SetTTL(ctx context.Context, key string, value []byte, lifet
 	return nil
 }
 
-func (r *redisCache) SetEz(ctx context.Context, key string, object interface{}) error {
+func (r *redisCache) SetEz(ctx context.Context, key string, object any) error {
 	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
 	span.Description = ""
@@ -134,7 +134,7 @@ func (r *redisCache) SetEz(ctx context.Context, key string, object interface{}) 
 	return r.Set(span.Context(), key, data)
 }
 
-func (r *redisCache) SetEzTTL(ctx context.Context, key string, object interface{}, lifetime time.Duration) error {
+func (r *redisCache) SetEzTTL(ctx context.Context, key string, object any, lifetime time.Duration) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -187,7 +187,7 @@ func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
 	}
 }
 
-func (r *redisCache) GetEz(ctx context.Context, key string, output interface{}) error {
+func (r *redisCache) GetEz(ctx context.Context, key string, output any) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Status = sentry.SpanStatusOK

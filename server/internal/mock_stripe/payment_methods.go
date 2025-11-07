@@ -36,7 +36,7 @@ func MockStripeAttachPaymentMethodCardDeclinedError(t *testing.T) {
 func mockStripeAttachPaymentMethodError(t *testing.T, stripeError StripeError, statusCode int) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"POST", RegexPath(t, `/v1/payment_methods/.+/attach`),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			paymentMethodId := strings.TrimSuffix(strings.TrimPrefix(request.URL.Path, "/v1/payment_methods/"), "/attach")
 			require.NotEmpty(t, paymentMethodId, "payment method Id must be provided")
 

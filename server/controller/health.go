@@ -15,7 +15,7 @@ func (c *Controller) handleHealth(ctx echo.Context) error {
 		status = http.StatusInternalServerError
 	}
 
-	result := map[string]interface{}{
+	result := map[string]any{
 		"dbHealthy":  err == nil,
 		"apiHealthy": true,
 		"revision":   build.Revision,

@@ -25,7 +25,7 @@ func TestLogin(t *testing.T) {
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    email,
 				"password": password,
 			}).
@@ -42,7 +42,7 @@ func TestLogin(t *testing.T) {
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    email,
 				"password": password,
 			}).
@@ -72,7 +72,7 @@ func TestLogin(t *testing.T) {
 		fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    user.Login.Email,
 				"password": password,
 			}).
@@ -94,7 +94,7 @@ func TestLogin(t *testing.T) {
 		fixtures.GivenIHaveAnAccount(t, app.Clock, login)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    login.Email,
 				"password": password,
 			}).
@@ -111,7 +111,7 @@ func TestLogin(t *testing.T) {
 		login, password := fixtures.GivenIHaveLogin(t, app.Clock)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    login.Email,
 				"password": password,
 			}).
@@ -133,7 +133,7 @@ func TestLogin(t *testing.T) {
 		assert.Equal(t, login.LoginId, user2.LoginId, "user should have the given login")
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    login.Email,
 				"password": password,
 			}).
@@ -146,7 +146,7 @@ func TestLogin(t *testing.T) {
 		_, e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    "notan.email",
 				"password": "atLeastThisIsAPassword",
 			}).
@@ -161,7 +161,7 @@ func TestLogin(t *testing.T) {
 		_, e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    "Barry Gibbs <bg@example.com>",
 				"password": "atLeastThisIsAPassword",
 			}).
@@ -176,7 +176,7 @@ func TestLogin(t *testing.T) {
 		_, e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    "example@example.com",
 				"password": "short",
 			}).
@@ -197,7 +197,7 @@ func TestLogin(t *testing.T) {
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    email,
 				"password": password,
 			}).
@@ -218,7 +218,7 @@ func TestLogin(t *testing.T) {
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    email,
 				"password": password,
 			}).
@@ -233,7 +233,7 @@ func TestLogin(t *testing.T) {
 		_, e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    gofakeit.Email(),
 				"password": "badPassword",
 			}).
@@ -258,8 +258,8 @@ func TestLogin(t *testing.T) {
 
 		mock_http_helper.NewHttpMockJsonResponder(t,
 			"POST", "https://www.google.com/recaptcha/api/siteverify",
-			func(t *testing.T, request *http.Request) (interface{}, int) {
-				return map[string]interface{}{
+			func(t *testing.T, request *http.Request) (any, int) {
+				return map[string]any{
 					"success":      true,
 					"challenge_ts": app.Clock.Now(),
 					"hostname":     "monetr.mini",
@@ -270,7 +270,7 @@ func TestLogin(t *testing.T) {
 		)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    email,
 				"password": password,
 				"captcha":  "Believe it or not, I am a valid captcha",
@@ -292,7 +292,7 @@ func TestLogin(t *testing.T) {
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    email,
 				"password": password,
 			}).
@@ -329,7 +329,7 @@ func TestLogin(t *testing.T) {
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email":    email,
 				"password": password,
 			}).
@@ -350,7 +350,7 @@ func TestLogout(t *testing.T) {
 		var token string
 		{ // Login to monetr and retrieve our token cookie.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    email,
 					"password": password,
 				}).
@@ -394,7 +394,7 @@ func TestMultifactor(t *testing.T) {
 		var token string
 		{ // Login, this should return an MFA required error.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": password,
 				}).
@@ -432,7 +432,7 @@ func TestMultifactor(t *testing.T) {
 		{ // Now actually provide the MFA token
 			response := e.POST("/api/authentication/multifactor").
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"totp": totp.AtTime(app.Clock.Now()),
 				}).
 				Expect()
@@ -455,7 +455,7 @@ func TestMultifactor(t *testing.T) {
 		var token string
 		{ // Login, this should return an MFA required error.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": password,
 				}).
@@ -497,7 +497,7 @@ func TestMultifactor(t *testing.T) {
 		var token string
 		{ // Login, this should not return an MFA required error.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    email,
 					"password": password,
 				}).
@@ -531,7 +531,7 @@ func TestMultifactor(t *testing.T) {
 		{ // Provide an MFA token that is old
 			response := e.POST("/api/authentication/multifactor").
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					// Generate a code with the old timestamp, this will be considered
 					// wrong by the server.
 					"totp": "123456",
@@ -551,7 +551,7 @@ func TestMultifactor(t *testing.T) {
 		var token string
 		{ // Login, this should return an MFA required error.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": password,
 				}).
@@ -591,7 +591,7 @@ func TestMultifactor(t *testing.T) {
 			app.Clock.Add(1 * time.Minute)
 			response := e.POST("/api/authentication/multifactor").
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					// Generate a code with the old timestamp, this will be considered
 					// wrong by the server.
 					"totp": totp.AtTime(timestamp),
@@ -612,7 +612,7 @@ func TestMultifactor(t *testing.T) {
 		var token string
 		{ // Login, this should return an MFA required error.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": password,
 				}).
@@ -669,7 +669,7 @@ func TestMultifactor(t *testing.T) {
 			// Progress the application's clock by 1 minute, making our timestamp old.
 			response := e.POST("/api/authentication/multifactor").
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					// Generate a code with the old timestamp, this will be considered
 					// wrong by the server.
 					"totp": firstTotpCode,
@@ -876,8 +876,8 @@ func TestRegister(t *testing.T) {
 
 		mock_http_helper.NewHttpMockJsonResponder(t,
 			"POST", "https://www.google.com/recaptcha/api/siteverify",
-			func(t *testing.T, request *http.Request) (interface{}, int) {
-				return map[string]interface{}{
+			func(t *testing.T, request *http.Request) (any, int) {
+				return map[string]any{
 					"success":      true,
 					"challenge_ts": time.Now(),
 					"hostname":     "monetr.mini",
@@ -1204,7 +1204,7 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Now that we have registered using this email. Try to login without verifying.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    registerRequest.Email,
 					"password": registerRequest.Password,
 				}).
@@ -1229,7 +1229,7 @@ func TestVerifyEmail(t *testing.T) {
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
 			response := e.POST("/api/authentication/verify").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"token": verificationToken,
 				}).
 				Expect()
@@ -1241,7 +1241,7 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Now try to login AFTER we have verified the email address.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    registerRequest.Email,
 					"password": registerRequest.Password,
 				}).
@@ -1308,7 +1308,7 @@ func TestVerifyEmail(t *testing.T) {
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
 			response := e.POST("/api/authentication/verify").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"token": verificationToken,
 				}).
 				Expect()
@@ -1322,7 +1322,7 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Make sure that even when the verify endpoint fails, that our login is still not verified.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    registerRequest.Email,
 					"password": registerRequest.Password,
 				}).
@@ -1383,7 +1383,7 @@ func TestVerifyEmail(t *testing.T) {
 			app.Clock.Add(10 * time.Minute) // Make the code expire
 
 			response := e.POST("/api/authentication/verify").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"token": verificationToken,
 				}).
 				Expect()
@@ -1397,7 +1397,7 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Make sure that even when the verify endpoint fails, that our login is still not verified.
 			response := e.POST("/api/authentication/login").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    registerRequest.Email,
 					"password": registerRequest.Password,
 				}).
@@ -1412,7 +1412,7 @@ func TestVerifyEmail(t *testing.T) {
 		_, e := NewTestApplicationWithConfig(t, config)
 
 		response := e.POST("/api/authentication/verify").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"token": "",
 			}).
 			Expect()
@@ -1478,7 +1478,7 @@ func TestResendVerificationEmail(t *testing.T) {
 
 		{ // Now try to resend the verification email.
 			response := e.POST("/api/authentication/verify/resend").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email": registerRequest.Email,
 				}).
 				Expect()
@@ -1495,7 +1495,7 @@ func TestResendVerificationEmail(t *testing.T) {
 		MustSendVerificationEmail(t, app, 0)
 
 		response := e.POST("/api/authentication/verify/resend").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email": testutils.GetUniqueEmail(t),
 			}).
 			Expect()
@@ -1511,7 +1511,7 @@ func TestResendVerificationEmail(t *testing.T) {
 		MustSendVerificationEmail(t, app, 0)
 
 		response := e.POST("/api/authentication/verify/resend").
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"email": "",
 			}).
 			Expect()
@@ -1635,7 +1635,7 @@ func TestSendForgotPassword(t *testing.T) {
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
 			response := e.POST("/api/authentication/verify").
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"token": verificationToken,
 				}).
 				Expect()
@@ -1685,7 +1685,7 @@ func TestSendForgotPassword(t *testing.T) {
 
 		{ // Send a request with invalid json body.
 			response := e.POST(`/api/authentication/forgot`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email": "",
 				}).
 				Expect()
@@ -1708,7 +1708,7 @@ func TestSendForgotPassword(t *testing.T) {
 
 		{ // Send a request with invalid json body.
 			response := e.POST(`/api/authentication/forgot`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":   testutils.GetUniqueEmail(t),
 					"captcha": "",
 				}).
@@ -1733,7 +1733,7 @@ func TestResetPassword(t *testing.T) {
 
 		{ // Make sure we can log in with the current password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": password,
 				}).
@@ -1763,7 +1763,7 @@ func TestResetPassword(t *testing.T) {
 			MustSendPasswordChangedEmail(t, app, 1, user.Login.Email)
 
 			response := e.POST(`/api/authentication/reset`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"password": newPassword,
 					"token":    token,
 				}).
@@ -1775,7 +1775,7 @@ func TestResetPassword(t *testing.T) {
 
 		{ // Try to log in with the old password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": password,
 				}).
@@ -1788,7 +1788,7 @@ func TestResetPassword(t *testing.T) {
 
 		{ // Try to log in with the new password.
 			response := e.POST(`/api/authentication/login`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"email":    user.Login.Email,
 					"password": newPassword,
 				}).
@@ -1839,7 +1839,7 @@ func TestResetPassword(t *testing.T) {
 
 		{ // Reset the password using the first token.
 			response := e.POST(`/api/authentication/reset`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"password": newPassword,
 					"token":    firstToken,
 				}).
@@ -1851,7 +1851,7 @@ func TestResetPassword(t *testing.T) {
 
 		{ // Try to reset the password with the second token, it should fail.
 			response := e.POST(`/api/authentication/reset`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"password": "aDifferentPassword",
 					"token":    secondToken,
 				}).
@@ -1888,7 +1888,7 @@ func TestResetPassword(t *testing.T) {
 
 		{ // Reset the password using the first token.
 			response := e.POST(`/api/authentication/reset`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"password": newPassword,
 					"token":    token,
 				}).
@@ -1900,7 +1900,7 @@ func TestResetPassword(t *testing.T) {
 
 		{ // Try to reset the password with the second token, it should fail.
 			response := e.POST(`/api/authentication/reset`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"password": "aDifferentPassword",
 					"token":    token,
 				}).
@@ -1940,7 +1940,7 @@ func TestResetPassword(t *testing.T) {
 
 		{ // Try to reset the password using the expired token.
 			response := e.POST(`/api/authentication/reset`).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"password": newPassword,
 					"token":    token,
 				}).
@@ -1972,7 +1972,7 @@ func TestResetPassword(t *testing.T) {
 		MustSendPasswordChangedEmail(t, app, 0)
 
 		response := e.POST(`/api/authentication/reset`).
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"password": "doesn'tEvenMatter",
 				"token":    token,
 			}).
@@ -2004,7 +2004,7 @@ func TestResetPassword(t *testing.T) {
 		MustSendPasswordChangedEmail(t, app, 0)
 
 		response := e.POST(`/api/authentication/reset`).
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"password": "doesn'tEvenMatter",
 				"token":    "",
 			}).
@@ -2032,7 +2032,7 @@ func TestResetPassword(t *testing.T) {
 		MustSendPasswordChangedEmail(t, app, 0)
 
 		response := e.POST(`/api/authentication/reset`).
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"password": "short",
 				"token":    token,
 			}).
@@ -2048,7 +2048,7 @@ func TestResetPassword(t *testing.T) {
 		MustSendPasswordChangedEmail(t, app, 0)
 
 		response := e.POST(`/api/authentication/reset`).
-			WithJSON(map[string]interface{}{
+			WithJSON(map[string]any{
 				"password": "thisIsAPasswordForSure",
 				"token":    "notAToken",
 			}).

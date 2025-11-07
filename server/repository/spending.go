@@ -13,7 +13,7 @@ func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId ID[BankA
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId":     r.AccountId(),
 		"bankAccountId": bankAccountId,
 	}
@@ -37,7 +37,7 @@ func (r *repositoryBase) GetSpendingExists(ctx context.Context, bankAccountId ID
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId":     r.AccountId(),
 		"bankAccountId": bankAccountId,
 		"spendingId":    spendingId,
@@ -62,7 +62,7 @@ func (r *repositoryBase) GetSpendingByFundingSchedule(ctx context.Context, bankA
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId":         r.AccountId(),
 		"bankAccountId":     bankAccountId,
 		"fundingScheduleId": fundingScheduleId,
@@ -88,7 +88,7 @@ func (r *repositoryBase) CreateSpending(ctx context.Context, spending *Spending)
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId":     r.AccountId(),
 		"bankAccountId": spending.BankAccountId,
 	}
@@ -120,7 +120,7 @@ func (r *repositoryBase) UpdateSpending(ctx context.Context, bankAccountId ID[Ba
 		spendingIds[i] = updates[i].SpendingId
 	}
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId":     r.AccountId(),
 		"bankAccountId": bankAccountId,
 		"spendingIds":   spendingIds,
@@ -142,7 +142,7 @@ func (r *repositoryBase) GetSpendingById(ctx context.Context, bankAccountId ID[B
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId":     r.AccountId(),
 		"bankAccountId": bankAccountId,
 		"spendingId":    spendingId,
@@ -169,7 +169,7 @@ func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId ID[Ba
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.Data = map[string]interface{}{
+	span.Data = map[string]any{
 		"accountId":     r.AccountId(),
 		"bankAccountId": bankAccountId,
 		"spendingId":    spendingId,

@@ -81,7 +81,7 @@ func (h *ReconcileSubscriptionHandler) HandleConsumeJob(
 ) error {
 	var args ReconcileSubscriptionArguments
 	if err := errors.Wrap(h.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for reconcile subscription job.", "job", map[string]interface{}{
+		crumbs.Error(ctx, "Failed to unmarshal arguments for reconcile subscription job.", "job", map[string]any{
 			"data": data,
 		})
 		return err
@@ -158,7 +158,7 @@ func (h *ReconcileSubscriptionHandler) EnqueueTriggeredJob(
 		})
 		if err != nil {
 			itemLog.WithError(err).Warn("failed to enqueue job to reconcile subscription")
-			crumbs.Warn(ctx, "Failed to enqueue job to reconcile subscription", "job", map[string]interface{}{
+			crumbs.Warn(ctx, "Failed to enqueue job to reconcile subscription", "job", map[string]any{
 				"error": err,
 			})
 			continue

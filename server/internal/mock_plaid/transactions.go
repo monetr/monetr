@@ -50,7 +50,7 @@ func MockGetTransactions(t *testing.T, transactions []plaid.Transaction) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/transactions/get"),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			ValidatePlaidAuthentication(t, request, RequireAccessToken)
 			var getTransactionsRequest struct {
 				Options struct {

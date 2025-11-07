@@ -21,7 +21,7 @@ func MockExchangePublicToken(t *testing.T) string {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/item/public_token/exchange"),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			ValidatePlaidAuthentication(t, request, DoNotRequireAccessToken)
 			var exchangeRequest struct {
 				PublicToken string `json:"public_token"`

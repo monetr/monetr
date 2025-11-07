@@ -35,7 +35,7 @@ func (q *queryHook) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (cont
 	if event.Stash != nil {
 		event.Stash["queryId"] = queryId
 	} else {
-		event.Stash = map[interface{}]interface{}{
+		event.Stash = map[any]any{
 			"queryId": queryId,
 		}
 	}
@@ -230,7 +230,7 @@ func Must[T any, A any](t *testing.T, generalFunction func(arg A) (T, error), ar
 	return result
 }
 
-func MustUnmarshalJSON(t *testing.T, data []byte, destination interface{}) {
+func MustUnmarshalJSON(t *testing.T, data []byte, destination any) {
 	err := json.Unmarshal(data, destination)
 	require.NoError(t, err, "must be able to unmarshal the provided json without an error")
 }

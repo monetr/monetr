@@ -43,7 +43,7 @@ func (e MFARequiredError) FriendlyMessage() string {
 }
 
 func (e MFARequiredError) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"error":   e.FriendlyMessage(),
 		"code":    "MFA_REQUIRED",
 		"nextUrl": "/login/multifactor",
@@ -67,7 +67,7 @@ func (e EmailNotVerifiedError) FriendlyMessage() string {
 }
 
 func (e EmailNotVerifiedError) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"error": e.FriendlyMessage(),
 		"code":  "EMAIL_NOT_VERIFIED",
 	})
@@ -90,7 +90,7 @@ func (e EmailAlreadyExists) FriendlyMessage() string {
 }
 
 func (e EmailAlreadyExists) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"error": e.FriendlyMessage(),
 		"code":  "EMAIL_IN_USE",
 	})
@@ -116,7 +116,7 @@ func (e PasswordResetRequiredError) FriendlyMessage() string {
 }
 
 func (e PasswordResetRequiredError) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"resetToken": e.ResetToken,
 		"error":      e.FriendlyMessage(),
 		"code":       "PASSWORD_CHANGE_REQUIRED",

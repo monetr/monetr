@@ -274,7 +274,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 
 	log.Debug("transfered allocated funds between budgets")
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"balance":  balance,
 		"spending": spendingToUpdate,
 	})

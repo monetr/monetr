@@ -46,7 +46,7 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 	// if response != nil {
 	// 	requestId := response.Header.Get("X-Request-Id")
 	// 	if span.Data == nil {
-	// 		span.Data = map[string]interface{}{}
+	// 		span.Data = map[string]any{}
 	// 	}
 	// 	span.Description = fmt.Sprintf(
 	// 		"%s %s",
@@ -54,7 +54,7 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 	// 		response.Request.URL.String(),
 	// 	)
 	//
-	// 	data := map[string]interface{}{}
+	// 	data := map[string]any{}
 	//
 	// 	// With plaid responses we can actually still use the body of the response :tada:. The request Id is also stored on
 	// 	// the response body itself in most of my testing. I could have sworn the documentation cited X-Request-Id as being
@@ -62,7 +62,7 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 	// 	// some degree of certainty that the response will always be an object and not an array. So a map with a string key
 	// 	// is safe. I can then extract the request Id and store that with my logging and diagnostic data.
 	// 	{
-	// 		var extractedResponseBody map[string]interface{}
+	// 		var extractedResponseBody map[string]any
 	// 		if e := json.NewDecoder(response.Body).Decode(&extractedResponseBody); e == nil {
 	// 			if requestId == "" {
 	// 				requestId = extractedResponseBody["request_id"].(string)
@@ -174,7 +174,7 @@ func NewPlaid(
 					request.URL.String(),
 					request.Method,
 					statusCode,
-					map[string]interface{}{
+					map[string]any{
 						"Request-Id": requestId,
 					},
 				)

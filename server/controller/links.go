@@ -221,7 +221,7 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		}
 
 		if err = client.RemoveItem(c.getContext(ctx)); err != nil {
-			crumbs.Error(c.getContext(ctx), "Failed to remove item", "plaid", map[string]interface{}{
+			crumbs.Error(c.getContext(ctx), "Failed to remove item", "plaid", map[string]any{
 				"linkId":   link.LinkId,
 				"itemId":   link.PlaidLink.PlaidId,
 				"secretId": secret.SecretId,

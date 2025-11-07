@@ -151,7 +151,7 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to forecast")
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"estimatedCost": result,
 	})
 }
@@ -208,7 +208,7 @@ func (c *Controller) postForecastNextFunding(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to forecast")
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]any{
 		"nextContribution": result,
 	})
 }

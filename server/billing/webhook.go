@@ -23,7 +23,7 @@ func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Even
 
 	log.Debug("handling webhook from stripe")
 
-	crumbs.Debug(span.Context(), "Handling Stripe webhook.", map[string]interface{}{
+	crumbs.Debug(span.Context(), "Handling Stripe webhook.", map[string]any{
 		"eventId":  event.ID,
 		"liveMode": event.Livemode,
 		"type":     event.Type,
@@ -72,7 +72,7 @@ func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Even
 		account, err := b.accounts.GetAccountByCustomerId(span.Context(), customer.ID)
 		if err != nil {
 			log.WithError(err).Warn("failed to retrieve account by customer Id")
-			crumbs.Warn(span.Context(), "Failed to retrieve an account for this provided customer Id", "stripe", map[string]interface{}{
+			crumbs.Warn(span.Context(), "Failed to retrieve an account for this provided customer Id", "stripe", map[string]any{
 				"customerId": customer.ID,
 			})
 

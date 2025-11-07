@@ -13,7 +13,7 @@ import (
 
 // wrapPgError will wrap and return an error to the client. But will try to infer a status code from the error it is
 // given. If it cannot infer a status code, an InternalServerError is used.
-func (c *Controller) wrapPgError(ctx echo.Context, err error, msg string, args ...interface{}) error {
+func (c *Controller) wrapPgError(ctx echo.Context, err error, msg string, args ...any) error {
 	switch errors.Cause(err) {
 	case pg.ErrNoRows:
 		friendlyError := fmt.Sprintf("%s: record does not exist", fmt.Sprintf(msg, args...))
@@ -22,7 +22,7 @@ func (c *Controller) wrapPgError(ctx echo.Context, err error, msg string, args .
 			c.getContext(ctx),
 			fmt.Sprintf(msg, args...),
 			ctx.Request().URL.Hostname(),
-			map[string]interface{}{
+			map[string]any{
 				"error": friendlyError,
 			},
 		)
@@ -59,7 +59,7 @@ func (c *Controller) sanitizePgError(err pg.Error) (error, int) {
 	}
 }
 
-func (c *Controller) wrapAndReturnError(ctx echo.Context, err error, status int, msg string, args ...interface{}) error {
+func (c *Controller) wrapAndReturnError(ctx echo.Context, err error, status int, msg string, args ...any) error {
 	wrapped := errors.Wrapf(err, msg, args...)
 	switch status {
 	case http.StatusInternalServerError:
@@ -70,7 +70,7 @@ func (c *Controller) wrapAndReturnError(ctx echo.Context, err error, status int,
 			c.getContext(ctx),
 			fmt.Sprintf(msg, args...),
 			ctx.Request().URL.Hostname(),
-			map[string]interface{}{
+			map[string]any{
 				"error": wrapped.Error(),
 			},
 		)
@@ -83,7 +83,7 @@ func (c *Controller) failure(ctx echo.Context, status int, error GenericAPIError
 		c.getContext(ctx),
 		error.FriendlyMessage(),
 		ctx.Request().URL.Hostname(),
-		map[string]interface{}{
+		map[string]any{
 			"error": error,
 		},
 	)
@@ -91,14 +91,14 @@ func (c *Controller) failure(ctx echo.Context, status int, error GenericAPIError
 	return echo.NewHTTPError(status, error.Error()).WithInternal(error)
 }
 
-func (c *Controller) returnError(ctx echo.Context, status int, msg string, args ...interface{}) error {
+func (c *Controller) returnError(ctx echo.Context, status int, msg string, args ...any) error {
 	err := errors.Errorf(msg, args...)
 
 	crumbs.Error(
 		c.getContext(ctx),
 		fmt.Sprintf(msg, args...),
 		ctx.Request().URL.Hostname(),
-		map[string]interface{}{
+		map[string]any{
 			"error": err.Error(),
 		},
 	)
@@ -118,13 +118,13 @@ func (c *Controller) unauthorizedError(ctx echo.Context, err error) error {
 	return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
 }
 
-func (c *Controller) badRequest(ctx echo.Context, msg string, args ...interface{}) error {
+func (c *Controller) badRequest(ctx echo.Context, msg string, args ...any) error {
 	requestSpan := c.getSpan(ctx)
 	requestSpan.Status = sentry.SpanStatusInvalidArgument
 	return c.returnError(ctx, http.StatusBadRequest, msg, args...)
 }
 
-func (c *Controller) badRequestError(ctx echo.Context, err error, msg string, args ...interface{}) error {
+func (c *Controller) badRequestError(ctx echo.Context, err error, msg string, args ...any) error {
 	requestSpan := c.getSpan(ctx)
 	requestSpan.Status = sentry.SpanStatusInvalidArgument
 	return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, msg, args...)
@@ -136,6 +136,6 @@ func (c *Controller) invalidJson(ctx echo.Context) error {
 	return c.returnError(ctx, http.StatusBadRequest, "invalid JSON body")
 }
 
-func (c *Controller) notFound(ctx echo.Context, msg string, args ...interface{}) error {
+func (c *Controller) notFound(ctx echo.Context, msg string, args ...any) error {
 	return c.returnError(ctx, http.StatusNotFound, msg, args...)
 }

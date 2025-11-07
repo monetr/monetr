@@ -365,7 +365,7 @@ func TestPostTransactions(t *testing.T) {
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
 					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
@@ -392,7 +392,7 @@ func TestPostTransactions(t *testing.T) {
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"name":              "Some Monthly Expense",
 					"ruleset":           FirstDayOfEveryMonth,
 					"fundingScheduleId": fundingScheduleId,
@@ -943,7 +943,7 @@ func TestDeleteTransactions(t *testing.T) {
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"name":        "Payday",
 					"description": "15th and the Last day of every month",
 					"ruleset":     FifthteenthAndLastDayOfEveryMonth,
@@ -966,7 +966,7 @@ func TestDeleteTransactions(t *testing.T) {
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"name":              "Some Monthly Expense",
 					"ruleset":           FirstDayOfEveryMonth,
 					"fundingScheduleId": fundingScheduleId,
@@ -1126,7 +1126,7 @@ func TestDeleteTransactions(t *testing.T) {
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"name":        "Payday",
 					"description": "15th and the Last day of every month",
 					"ruleset":     FifthteenthAndLastDayOfEveryMonth,
@@ -1149,7 +1149,7 @@ func TestDeleteTransactions(t *testing.T) {
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"name":              "Some Monthly Expense",
 					"ruleset":           FirstDayOfEveryMonth,
 					"fundingScheduleId": fundingScheduleId,

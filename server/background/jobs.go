@@ -35,8 +35,8 @@ type (
 		// jobs safely. This must be called by a wrapping function for the specific
 		// job.
 		// Deprecated: Use EnqueueJobTxn instead.
-		EnqueueJob(ctx context.Context, queue string, data interface{}) error
-		EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, data interface{}) error
+		EnqueueJob(ctx context.Context, queue string, data any) error
+		EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, data any) error
 	}
 
 	BackgroundJobs struct {
@@ -141,10 +141,10 @@ func (b *BackgroundJobs) Close() error {
 	return b.processor.Close()
 }
 
-func (b *BackgroundJobs) EnqueueJob(ctx context.Context, queue string, data interface{}) error {
+func (b *BackgroundJobs) EnqueueJob(ctx context.Context, queue string, data any) error {
 	return b.enqueuer.EnqueueJob(ctx, queue, data)
 }
 
-func (b *BackgroundJobs) EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, data interface{}) error {
+func (b *BackgroundJobs) EnqueueJobTxn(ctx context.Context, txn pg.DBI, queue string, data any) error {
 	return b.enqueuer.EnqueueJobTxn(ctx, txn, queue, data)
 }

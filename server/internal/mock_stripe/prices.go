@@ -28,7 +28,7 @@ func Path(t *testing.T, relative string) string {
 func MockStripeGetPriceSuccess(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"GET", RegexPath(t, `/v1/prices/.+\z`),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			basePath := Path(t, "/v1/prices/")
 			priceId := strings.SplitAfter(request.URL.String(), basePath)[1]
 			require.NotEmpty(t, priceId, "priceId from URL cannot be empty")
@@ -64,7 +64,7 @@ func MockStripeGetPriceSuccess(t *testing.T) {
 func MockStripeGetPriceNotFound(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"GET", RegexPath(t, `/v1/prices/.+\z`),
-		func(t *testing.T, request *http.Request) (interface{}, int) {
+		func(t *testing.T, request *http.Request) (any, int) {
 			basePath := Path(t, "/v1/prices/")
 			priceId := strings.SplitAfter(request.URL.String(), basePath)[1]
 			require.NotEmpty(t, priceId, "priceId from URL cannot be empty")

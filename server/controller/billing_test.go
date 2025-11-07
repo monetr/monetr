@@ -41,7 +41,7 @@ func TestGetAfterCheckout(t *testing.T) {
 		{ // Create a checkout session
 			result := e.POST("/api/billing/create_checkout").
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"priceId":    nil,
 					"cancelPath": nil,
 				}).
@@ -108,7 +108,7 @@ func TestGetAfterCheckout(t *testing.T) {
 		{ // Create a checkout session
 			result := e.POST("/api/billing/create_checkout").
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"priceId":    nil,
 					"cancelPath": nil,
 				}).
@@ -151,7 +151,7 @@ func TestGetAfterCheckout(t *testing.T) {
 		{
 			result := e.POST("/api/billing/create_checkout").
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"priceId":    nil,
 					"cancelPath": nil,
 				}).
@@ -203,7 +203,7 @@ func TestGetAfterCheckout(t *testing.T) {
 		{ // Create a checkout session
 			result := e.POST("/api/billing/create_checkout").
 				WithCookie(TestCookieName, token).
-				WithJSON(map[string]interface{}{
+				WithJSON(map[string]any{
 					"cancelPath": nil,
 				}).
 				Expect()
