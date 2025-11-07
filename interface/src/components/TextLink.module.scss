@@ -1,0 +1,27 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.textLink {
+  border-radius: var(--border-radius);
+
+  --ring-color: var(--brand);
+  --ring-size: 2px;
+
+  &:focus {
+    @include mixins.ring;
+  }
+}
+
+.primary {
+  color: var(--brand-faint);
+  &:hover {
+    color: var(--brand-bright);
+  }
+}
+
+.secondary {
+  color: var(--content);
+  &:hover {
+    color: var(--content-emphasis);
+  }
+}

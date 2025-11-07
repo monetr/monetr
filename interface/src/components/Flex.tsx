@@ -22,8 +22,9 @@ export const flexVariants = cva([styles.root], {
     },
     orientation: {
       row: styles.flexRow,
-      rowMobile: styles.flexStackMobile,
       column: styles.flexColumn,
+      stackSmall: styles.flexStackSmall,
+      stackMedium: styles.flexStackMedium,
     },
   },
   defaultVariants: {

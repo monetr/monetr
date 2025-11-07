@@ -1,15 +1,16 @@
+import Flex from '@monetr/interface/components/Flex';
 import MLink from '@monetr/interface/components/MLink';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 
 export default function LogoutFooter(): JSX.Element {
   return (
-    <div className='flex justify-center gap-1'>
-      <MSpan color='subtle' className='text-sm'>
+    <Flex justify='center' gap='sm'>
+      <Typography size='sm' color='subtle' className='text-sm'>
         Not ready to continue?
-      </MSpan>
+      </Typography>
       <MLink to='/logout' size='sm'>
         Logout for now
       </MLink>
-    </div>
+    </Flex>
   );
 }

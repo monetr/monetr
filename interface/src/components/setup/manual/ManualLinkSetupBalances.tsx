@@ -1,16 +1,15 @@
 import { Fragment } from 'react';
 import type { FormikHelpers } from 'formik';
 
+import { flexVariants } from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import MForm from '@monetr/interface/components/MForm';
-import MSpan from '@monetr/interface/components/MSpan';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
 import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
-import { useViewContext } from '@monetr/interface/components/ViewManager';
-import { flexVariants } from '@monetr/interface/components/Flex';
 import Typography from '@monetr/interface/components/Typography';
+import { useViewContext } from '@monetr/interface/components/ViewManager';
 
 export type ManualLinkSetupBalancesValues = {
   startingBalance: number;

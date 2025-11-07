@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
@@ -6,19 +5,20 @@ import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
+import Flex from '@monetr/interface/components/Flex';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
-import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
+import TextLink from '@monetr/interface/components/TextLink';
+import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useSignUp, { type SignUpResponse } from '@monetr/interface/hooks/useSignUp';
 import { getLocale, getTimezone } from '@monetr/interface/util/locale';
 import type { APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
-import Typography from '@monetr/interface/components/Typography';
 
 interface RegisterValues {
   firstName: string;
@@ -154,18 +154,20 @@ export default function Register(): JSX.Element {
         initialValues={initialValues}
         validate={validator}
         onSubmit={submit}
-        className='flex flex-col md:w-1/2 lg:w-1/3 xl:w-1/4 items-center'
+        className='flex flex-col md:w-1/2 lg:w-1/3 xl:w-1/4 items-center gap-1'
       >
         <div className='max-w-[96px] w-full'>
           <MLogo />
         </div>
-        <div className='flex flex-col items-center text-center'>
-          <Typography size='5xl'>Get Started</Typography>
-          <Typography size='lg' color='subtle'>
+        <Flex orientation='column' align='center'>
+          <Typography size='5xl' align='center'>
+            Get Started
+          </Typography>
+          <Typography size='lg' color='subtle' align='center'>
             Create your monetr account now
           </Typography>
-        </div>
-        <div className='flex flex-col sm:flex-row gap-2.5 w-full'>
+        </Flex>
+        <Flex orientation='stackSmall' gap='sm'>
           <FormTextField
             data-testid='register-first-name'
             autoFocus
@@ -183,7 +185,7 @@ export default function Register(): JSX.Element {
             required
             className='w-full'
           />
-        </div>
+        </Flex>
         <FormTextField
           data-testid='register-email'
           label='Email Address'
@@ -241,9 +243,9 @@ export default function Register(): JSX.Element {
           <Typography size='sm' color='subtle'>
             Already have an account?
           </Typography>
-          <MLink to='/login' size='sm'>
+          <TextLink to='/login' size='sm'>
             Sign in instead
-          </MLink>
+          </TextLink>
         </div>
       </MForm>
     </div>

@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
 
 import { Button } from '@monetr/interface/components/Button';
+import Flex from '@monetr/interface/components/Flex';
 import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
-import Flex from '@monetr/interface/components/Flex';
 
 export default function ManualLinkSetupButtons(): JSX.Element {
   const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();

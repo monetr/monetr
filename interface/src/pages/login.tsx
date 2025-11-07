@@ -5,15 +5,14 @@ import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
-import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
-import MSpan from '@monetr/interface/components/MSpan';
+import TextLink from '@monetr/interface/components/TextLink';
+import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useLogin from '@monetr/interface/hooks/useLogin';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
 import styles from './login.module.scss';
-import Typography, { SpanProps } from '@monetr/interface/components/Typography';
 
 interface LoginValues {
   email: string;
@@ -101,9 +100,9 @@ export default function Login(): JSX.Element {
           <Typography size='sm' color='subtle'>
             Not a user?
           </Typography>
-          <MLink to='/register' size='sm' data-testid='login-signup'>
+          <TextLink to='/register' size='sm' data-testid='login-signup'>
             Sign up now
-          </MLink>
+          </TextLink>
         </div>
       )}
     </MForm>
@@ -118,8 +117,8 @@ function ForgotPasswordButton(): JSX.Element {
   }
 
   return (
-    <MLink to='/password/forgot' size='sm' data-testid='login-forgot' tabIndex={-1}>
+    <TextLink to='/password/forgot' size='sm' data-testid='login-forgot' tabIndex={-1}>
       Forgot password?
-    </MLink>
+    </TextLink>
   );
 }

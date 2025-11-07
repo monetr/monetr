@@ -4,6 +4,23 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import styles from './Typography.module.scss';
 
+export const textSizes = {
+  xs: styles.textExtraSmall,
+  sm: styles.textSmall,
+  md: styles.textBase,
+  lg: styles.textLarge,
+  xl: styles.textExtraLarge,
+  '2xl': styles.text2ExtraLarge,
+  '5xl': styles.text5ExtraLarge,
+};
+
+export const textWeights = {
+  normal: styles.weightNormal,
+  medium: styles.weightMedium,
+  semibold: styles.weightSemibold,
+  bold: styles.weightBold,
+};
+
 export const textVariants = cva([styles.root], {
   variants: {
     component: {
@@ -22,21 +39,8 @@ export const textVariants = cva([styles.root], {
       true: styles.ellipsis,
       false: undefined,
     },
-    size: {
-      xs: styles.textExtraSmall,
-      sm: styles.textSmall,
-      md: styles.textBase,
-      lg: styles.textLarge,
-      xl: styles.textExtraLarge,
-      '2xl': styles.text2ExtraLarge,
-      '5xl': styles.text5ExtraLarge,
-    },
-    weight: {
-      normal: styles.weightNormal,
-      medium: styles.weightMedium,
-      semibold: styles.weightSemibold,
-      bold: styles.weightBold,
-    },
+    size: textSizes,
+    weight: textWeights,
     align: {
       left: styles.alignLeft,
       center: styles.alignCenter,

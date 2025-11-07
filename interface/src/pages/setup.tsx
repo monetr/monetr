@@ -6,7 +6,6 @@ import { Button } from '@monetr/interface/components/Button';
 import Flex from '@monetr/interface/components/Flex';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
 import MLogo from '@monetr/interface/components/MLogo';
-import MSpan from '@monetr/interface/components/MSpan';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
 import SetupBillingButton from '@monetr/interface/components/setup/SetupBillingButton';
 import Typography from '@monetr/interface/components/Typography';
@@ -79,7 +78,7 @@ function Greeting(props: GreetingProps): JSX.Element {
     <div className='w-full h-full flex lg:justify-center items-center gap-4 md:gap-8 flex-col overflow-y-auto p-4'>
       <MLogo className='w-16 h-16 md:w-24 md:h-24' />
       <Banner />
-      <Flex gap='lg' orientation='rowMobile'>
+      <Flex gap='lg' orientation='stackMedium'>
         <OnboardingTile
           icon={PlaidLogo}
           name='Plaid'

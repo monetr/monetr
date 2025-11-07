@@ -2,6 +2,7 @@
 
 .root {
   display: flex;
+  width: 100%;
 }
 
 .flexRow {
@@ -12,10 +13,18 @@
   flex-direction: column;
 }
 
-.flexStackMobile {
+.flexStackMedium {
   flex-direction: column;
 
   @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+  }
+}
+
+.flexStackSmall {
+  flex-direction: column;
+
+  @media (min-width: variables.$smallScreen) {
     flex-direction: row;
   }
 }
