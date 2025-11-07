@@ -6,10 +6,10 @@ import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
+import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MAmountField from '@monetr/interface/components/MAmountField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
@@ -111,17 +111,12 @@ function NewFundingModal(): JSX.Element {
               />
               <MSelectFrequency
                 dateFrom='nextOccurrence'
-                menuPosition='fixed'
-                menuShouldScrollIntoView={false}
-                menuShouldBlockScroll={true}
-                menuPortalTarget={document.body}
-                menuPlacement='bottom'
                 label='How often do you get paid?'
                 placeholder='Select a funding frequency...'
                 required
                 name='ruleset'
               />
-              <MAmountField
+              <FormAmountField
                 allowNegative={false}
                 label='Estimated Deposit'
                 name='estimatedDeposit'

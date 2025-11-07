@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import type { FormikHelpers } from 'formik';
 
-import MAmountField from '@monetr/interface/components/MAmountField';
+import FormAmountField from '@monetr/interface/components/FormAmountField';
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
@@ -41,7 +41,7 @@ export default function ManualLinkSetupBalances(): JSX.Element {
             time later on.
           </MSpan>
           <SelectCurrency name='currency' className='w-full' />
-          <MAmountField
+          <FormAmountField
             name='startingBalance'
             label='Starting Balance'
             className='w-full'

@@ -5,9 +5,9 @@ import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
+import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MAmountField from '@monetr/interface/components/MAmountField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -99,7 +99,7 @@ function NewBankAccountModal(): JSX.Element {
                 data-1p-ignore
               />
               <SelectCurrency name='currency' className='w-full' menuPortalTarget={document.body} required />
-              <MAmountField
+              <FormAmountField
                 data-testid='bank-account-balance'
                 name='balance'
                 label='Initial Balance'

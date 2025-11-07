@@ -16,7 +16,7 @@ function testRenderHook<TProps, TResult>(
   callback: (props: TProps) => TResult,
   options?: HooksOptions<TProps>,
 ): RenderHookResult<TProps, TResult> {
-  const Wrapper: WrapperComponent<TProps> = (props: React.PropsWithChildren<any>) => {
+  const Wrapper: WrapperComponent<TProps> = (props: React.PropsWithChildren<unknown>) => {
     return (
       <MemoryRouter
         initialEntries={[options.initialRoute]}

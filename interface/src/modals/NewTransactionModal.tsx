@@ -6,10 +6,10 @@ import { startOfDay, startOfToday } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
+import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MAmountField from '@monetr/interface/components/MAmountField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
@@ -125,7 +125,7 @@ function NewTransactionModal(): JSX.Element {
                     required
                   />
                   <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
-                    <MAmountField
+                    <FormAmountField
                       name='amount'
                       label='Amount'
                       required
@@ -160,7 +160,7 @@ function NewTransactionModal(): JSX.Element {
                     data-1p-ignore
                   />
                   <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
-                    <MAmountField
+                    <FormAmountField
                       name='amount'
                       label='Amount'
                       required

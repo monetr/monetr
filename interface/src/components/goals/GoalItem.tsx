@@ -3,13 +3,13 @@ import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
+import Badge from '@monetr/interface/components/Badge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-import Badge from '@monetr/interface/components/Badge';
 
 export interface GoalItemProps {
   spending: Spending;

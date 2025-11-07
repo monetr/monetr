@@ -4,8 +4,8 @@ import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { useNavigate } from 'react-router-dom';
 
+import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
-import MAmountField from '@monetr/interface/components/MAmountField';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -104,18 +104,13 @@ export default function ManualLinkSetupIncome(): JSX.Element {
           />
           <MSelectFrequency
             dateFrom='nextPayday'
-            menuPosition='fixed'
-            menuShouldScrollIntoView={false}
-            menuShouldBlockScroll={true}
-            menuPortalTarget={document.body}
-            menuPlacement='bottom'
             label='How often do you get paid?'
             placeholder='Select a funding frequency...'
             required
             className='w-full text-start'
             name='ruleset'
           />
-          <MAmountField
+          <FormAmountField
             name='paydayAmount'
             label='How much do you usually get paid?'
             className='w-full'

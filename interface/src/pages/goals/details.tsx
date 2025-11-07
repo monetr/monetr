@@ -7,12 +7,12 @@ import { useSnackbar } from 'notistack';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
+import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import GoalTimeline from '@monetr/interface/components/goals/GoalTimeline';
-import MAmountField from '@monetr/interface/components/MAmountField';
 import MDivider from '@monetr/interface/components/MDivider';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
@@ -207,7 +207,7 @@ export default function GoalDetails(): JSX.Element {
             <MDivider className='w-1/2 my-4' />
 
             <FormTextField className='w-full' label='Expense' name='name' required data-1p-ignore />
-            <MAmountField allowNegative={false} className='w-full' label='Amount' name='amount' required />
+            <FormAmountField allowNegative={false} className='w-full' label='Amount' name='amount' required />
             <FormDatePicker
               label='Target Date'
               name='nextRecurrence'

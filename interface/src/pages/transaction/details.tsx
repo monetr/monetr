@@ -7,11 +7,11 @@ import { HeartCrack, Save, ShoppingCart } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
 
+import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MAmountField from '@monetr/interface/components/MAmountField';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
@@ -154,7 +154,7 @@ export default function TransactionDetails(): JSX.Element {
               className='w-full'
               disabled
             />
-            <MAmountField className='w-full' disabled label='Amount' name='amount' />
+            <FormAmountField className='w-full' disabled label='Amount' name='amount' />
             <FormDatePicker label='Date' name='date' className='w-full' disabled={!link.getIsManual()} />
             <FormCheckbox
               data-testid='transaction-details-pending'

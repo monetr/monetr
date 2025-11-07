@@ -19,7 +19,7 @@ function testRenderer<Q extends Queries = typeof queries, Container extends Elem
   ui: React.ReactElement,
   options?: Options<Q, Container>,
 ): RenderResult<Q, Container> {
-  const Wrapper = (props: React.PropsWithChildren<any>) => {
+  const Wrapper = (props: React.PropsWithChildren<unknown>) => {
     return (
       <MemoryRouter initialEntries={[options.initialRoute]}>
         <MQueryClient client={options.client}>

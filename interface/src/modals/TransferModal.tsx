@@ -5,10 +5,10 @@ import { type FormikErrors, type FormikHelpers, useFormikContext } from 'formik'
 import { ArrowUpDown } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
+import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
-import MAmountField from '@monetr/interface/components/MAmountField';
+import type { LabelDecoratorProps } from '@monetr/interface/components/Label';
 import MForm from '@monetr/interface/components/MForm';
-import type { MLabelDecoratorProps } from '@monetr/interface/components/MLabel';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
@@ -130,7 +130,6 @@ function TransferModal(props: TransferModalProps): JSX.Element {
             excludeFrom='toSpendingId'
             label='From'
             labelDecorator={TransferSelectDecorator}
-            menuPortalTarget={document.body}
             name='fromSpendingId'
           />
           <ReverseTargetsButton />
@@ -138,10 +137,9 @@ function TransferModal(props: TransferModalProps): JSX.Element {
             excludeFrom='fromSpendingId'
             label='To'
             labelDecorator={TransferSelectDecorator}
-            menuPortalTarget={document.body}
             name='toSpendingId'
           />
-          <MAmountField
+          <FormAmountField
             name='amount'
             label='Amount'
             placeholder='Amount to move...'
@@ -193,7 +191,7 @@ function ReverseTargetsButton(): JSX.Element {
   );
 }
 
-function TransferSelectDecorator(props: MLabelDecoratorProps): JSX.Element {
+function TransferSelectDecorator(props: LabelDecoratorProps): JSX.Element {
   const formik = useFormikContext<TransferValues>();
   const value = formik.values[props.name];
   const { data: spending } = useSpendings();

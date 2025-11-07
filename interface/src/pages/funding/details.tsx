@@ -8,12 +8,12 @@ import { useSnackbar } from 'notistack';
 import { useMatch, useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
+import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import FundingTimeline from '@monetr/interface/components/funding/FundingTimeline';
-import MAmountField from '@monetr/interface/components/MAmountField';
 import MDivider from '@monetr/interface/components/MDivider';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
@@ -186,7 +186,7 @@ export default function FundingDetails(): JSX.Element {
               label='Exclude weekends'
               description='If it were to land on a weekend, it is adjusted to the previous weekday instead.'
             />
-            <MAmountField
+            <FormAmountField
               allowNegative={false}
               label='Estimated Deposit'
               name='estimatedDeposit'

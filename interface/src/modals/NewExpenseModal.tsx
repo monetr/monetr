@@ -6,10 +6,10 @@ import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
+import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MAmountField from '@monetr/interface/components/MAmountField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
@@ -100,7 +100,7 @@ function NewExpenseModal(): JSX.Element {
             data-1p-ignore
           />
           <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
-            <MAmountField
+            <FormAmountField
               name='amount'
               label='How much do you need?'
               required
@@ -125,11 +125,6 @@ function NewExpenseModal(): JSX.Element {
           />
           <MSelectFrequency
             dateFrom='nextOccurrence'
-            menuPosition='fixed'
-            menuShouldScrollIntoView={false}
-            menuShouldBlockScroll={true}
-            menuPortalTarget={document.body}
-            menuPlacement='bottom'
             label='How frequently do you need this expense?'
             placeholder='Select a spending frequency...'
             required

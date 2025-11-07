@@ -24,6 +24,7 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import MSpan from './MSpan';
 
 import './MSelectSpendingTransaction.scss';
+
 import Badge from '@monetr/interface/components/Badge';
 
 export interface MSelectSpendingTransactionProps {
