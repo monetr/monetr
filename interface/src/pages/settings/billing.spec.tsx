@@ -9,7 +9,7 @@ import monetrClient from '@monetr/interface/api/api';
 import SettingsBilling from '@monetr/interface/pages/settings/billing';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-const oldWindowLocation = window.location;
+const oldWindowLocation: typeof window.location = window.location;
 const locationAssignMock = jest.fn();
 
 describe('billing settings page', () => {
@@ -40,7 +40,7 @@ describe('billing settings page', () => {
 
   afterAll(() => {
     mockAxios.restore();
-    window.location = oldWindowLocation;
+    Object.defineProperty(window, 'location', oldWindowLocation);
   });
 
   it('will show a trial subscription', async () => {

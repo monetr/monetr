@@ -9,6 +9,7 @@ import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSpan from '@monetr/interface/components/MSpan';
+import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import type { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
@@ -19,11 +20,11 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 
-interface Values {
+export type ManualLinkSetupIncomeValues = {
   nextPayday: Date;
   ruleset: string;
   paydayAmount: number;
-}
+};
 
 export default function ManualLinkSetupIncome(): JSX.Element {
   const { data: timezone } = useTimezone();
@@ -31,9 +32,9 @@ export default function ManualLinkSetupIncome(): JSX.Element {
   const createBankAccount = useCreateBankAccount();
   const createFundingSchedule = useCreateFundingSchedule();
   const navigate = useNavigate();
-  const viewContext = useViewContext<ManualLinkSetupSteps, unknown>();
+  const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
   const { data: locale } = useLocaleCurrency(viewContext.formData.currency);
-  const initialValues: Values = {
+  const initialValues: ManualLinkSetupIncomeValues = {
     nextPayday: startOfTomorrow({
       in: tz(timezone),
     }),
@@ -42,7 +43,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
     ...viewContext.formData,
   };
 
-  async function submit(values: Values, helpers: FormikHelpers<Values>) {
+  async function submit(values: ManualLinkSetupIncomeValues, helpers: FormikHelpers<ManualLinkSetupIncomeValues>) {
     helpers.setSubmitting(true);
     const data = {
       ...viewContext.formData,

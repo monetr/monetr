@@ -15,6 +15,10 @@ export interface MQueryClientProps {
   client?: AxiosInstance;
 }
 
+interface RequestParams {
+  offset?: unknown;
+}
+
 export default function MQueryClient(props: MQueryClientProps): JSX.Element {
   const client = useMemo(() => {
     if (props.client) {
@@ -28,7 +32,7 @@ export default function MQueryClient(props: MQueryClientProps): JSX.Element {
     async (context: QueryFunctionContext<QueryKey>) => {
       let method = 'GET';
       let body: unknown;
-      let params = {};
+      let params: RequestParams = {};
       if (context.queryKey.length > 1 && context?.meta?.method !== QueryMethod.UseQuery) {
         method = 'POST';
         body = context.queryKey[1];

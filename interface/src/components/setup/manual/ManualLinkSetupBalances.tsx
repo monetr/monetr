@@ -5,24 +5,25 @@ import FormAmountField from '@monetr/interface/components/FormAmountField';
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
+import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 
-interface Values {
+export type ManualLinkSetupBalancesValues = {
   startingBalance: number;
   currency: string;
-}
+};
 
 export default function ManualLinkSetupBalances(): JSX.Element {
-  const viewContext = useViewContext<ManualLinkSetupSteps, unknown>();
-  const initialValues: Values = {
+  const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
+  const initialValues: ManualLinkSetupBalancesValues = {
     startingBalance: 0.0,
     currency: 'USD',
     ...viewContext.formData,
   };
 
-  function submit(values: Values, helpers: FormikHelpers<Values>) {
+  function submit(values: ManualLinkSetupBalancesValues, helpers: FormikHelpers<ManualLinkSetupBalancesValues>) {
     helpers.setSubmitting(true);
     viewContext.updateFormData(values);
     viewContext.goToView(ManualLinkSetupSteps.Income);

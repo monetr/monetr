@@ -48,8 +48,3 @@ export function useAppConfiguration(): UseQueryResult<AppConfiguration, unknown>
     select: data => new AppConfiguration(data),
   });
 }
-
-export function useAppConfigurationBAD(): AppConfiguration | null {
-  const { result } = useAppConfiguration();
-  return result;
-}

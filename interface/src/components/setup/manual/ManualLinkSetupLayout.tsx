@@ -3,7 +3,10 @@ import type { ReactNode } from 'react';
 import MLogo from '@monetr/interface/components/MLogo';
 import MStepper from '@monetr/interface/components/MStepper';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
-import type { ManualLinkSetupMetadata } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
+import type {
+  ManualLinkSetupForm,
+  ManualLinkSetupMetadata,
+} from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 
@@ -12,7 +15,7 @@ interface ManualLinkSetupLayoutProps {
 }
 
 export default function ManualLinkSetupLayout(props: ManualLinkSetupLayoutProps): JSX.Element {
-  const viewContext = useViewContext<ManualLinkSetupSteps, ManualLinkSetupMetadata>();
+  const viewContext = useViewContext<ManualLinkSetupSteps, ManualLinkSetupMetadata, ManualLinkSetupForm>();
   const steps = Object.values(ManualLinkSetupSteps);
   const step = steps.indexOf(viewContext.currentView);
   return (

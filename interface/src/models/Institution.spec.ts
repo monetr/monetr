@@ -39,7 +39,6 @@ describe('InstitutionPlaidIncident', () => {
       title: 'This institution was experiencing problems.',
     };
 
-    // @ts-expect-error We want to be able to pass a slightly invalid object date wise and make sure it gets parsed.
     const result = new InstitutionPlaidIncident(input);
     expect(result.start.toISOString()).toBe(start.toISOString());
     expect(result.end.toISOString()).toBe(end.toISOString());

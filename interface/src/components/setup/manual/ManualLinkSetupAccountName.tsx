@@ -3,22 +3,23 @@ import type { FormikHelpers } from 'formik';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MSpan from '@monetr/interface/components/MSpan';
+import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 
-interface Values {
+export interface ManualLinkSetupAccountNameValues {
   accountName: string;
 }
 
 export default function ManualLinkSetupAccountName(): JSX.Element {
-  const viewContext = useViewContext<ManualLinkSetupSteps, unknown>();
-  const initialValues: Values = {
+  const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
+  const initialValues: ManualLinkSetupAccountNameValues = {
     accountName: '',
     ...viewContext.formData,
   };
 
-  function submit(values: Values, helpers: FormikHelpers<Values>) {
+  function submit(values: ManualLinkSetupAccountNameValues, helpers: FormikHelpers<ManualLinkSetupAccountNameValues>) {
     helpers.setSubmitting(true);
     viewContext.updateFormData(values);
     viewContext.goToView(ManualLinkSetupSteps.Balances);

@@ -1,4 +1,4 @@
-import BankAccount from '@monetr/interface/models/BankAccount';
+import BankAccount, { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 
 import sortAccounts from './sortAccounts';
 
@@ -14,21 +14,17 @@ describe('sort accounts', () => {
   it('will make sure that checking is the highest priority', () => {
     const checkingAccount = new BankAccount({
       bankAccountId: 'abc',
-      availableBalance: 1234,
-      currentBalance: 1234,
       mask: '1234',
       name: 'Generic Checking',
-      accountType: 'depository',
-      accountSubType: 'checking',
+      accountType: 'depository' as BankAccountType,
+      accountSubType: 'checking' as BankAccountSubType,
     });
     const savingsAccount = new BankAccount({
       bankAccountId: 'abd',
-      availableBalance: 1234,
-      currentBalance: 1234,
       mask: '1234',
       name: 'Generic Savings',
-      accountType: 'depository',
-      accountSubType: 'savings',
+      accountType: 'depository' as BankAccountType,
+      accountSubType: 'savings' as BankAccountSubType,
     });
     const accounts = [savingsAccount, checkingAccount];
 
@@ -40,30 +36,25 @@ describe('sort accounts', () => {
   it('will also handle credit card', () => {
     const checkingAccount = new BankAccount({
       bankAccountId: 'abc',
-      availableBalance: 1234,
-      currentBalance: 1234,
       mask: '1234',
       name: 'Generic Checking',
-      accountType: 'depository',
-      accountSubType: 'checking',
+      accountType: 'depository' as BankAccountType,
+      accountSubType: 'checking' as BankAccountSubType,
     });
     const savingsAccount = new BankAccount({
       bankAccountId: 'abd',
-      availableBalance: 1234,
-      currentBalance: 1234,
       mask: '1234',
       name: 'Generic Savings',
-      accountType: 'depository',
-      accountSubType: 'savings',
+      accountType: 'depository' as BankAccountType,
+      accountSubType: 'savings' as BankAccountSubType,
     });
     const creditCard = new BankAccount({
       bankAccountId: 'abe',
-      availableBalance: 1234,
-      currentBalance: 1234,
       mask: '1234',
       name: 'Generic Credit Card',
-      accountType: 'credit',
-      accountSubType: 'credit card',
+      status: 'active',
+      accountType: 'credit' as BankAccountType,
+      accountSubType: 'credit card' as BankAccountSubType,
     });
     const accounts = [savingsAccount, creditCard, checkingAccount];
 
@@ -76,59 +67,47 @@ describe('sort accounts', () => {
   it('will put inactive last', () => {
     const checkingAccount = new BankAccount({
       bankAccountId: 'abc',
-      availableBalance: 1234,
-      currentBalance: 1234,
       mask: '1234',
       name: 'Generic Checking',
-      accountType: 'depository',
-      accountSubType: 'checking',
+      accountType: 'depository' as BankAccountType,
+      accountSubType: 'checking' as BankAccountSubType,
     });
     const checkingAccountInactive = new BankAccount({
       bankAccountId: 'abcinactive',
-      availableBalance: 1234,
-      currentBalance: 1234,
       mask: '1234',
       name: 'Generic Checking',
-      accountType: 'depository',
-      accountSubType: 'checking',
+      accountType: 'depository' as BankAccountType,
+      accountSubType: 'checking' as BankAccountSubType,
       status: 'inactive',
     });
     const savingsAccount = new BankAccount({
       bankAccountId: 'abd',
-      availableBalance: 1234,
-      currentBalance: 1234,
       mask: '1234',
       name: 'Generic Savings',
-      accountType: 'depository',
-      accountSubType: 'savings',
+      accountType: 'depository' as BankAccountType,
+      accountSubType: 'savings' as BankAccountSubType,
     });
     const savingsAccountInactive = new BankAccount({
       bankAccountId: 'abdinactive',
-      availableBalance: 1234,
-      currentBalance: 1234,
       mask: '1234',
       name: 'Generic Savings',
-      accountType: 'depository',
-      accountSubType: 'savings',
+      accountType: 'depository' as BankAccountType,
+      accountSubType: 'savings' as BankAccountSubType,
       status: 'inactive',
     });
     const creditCard = new BankAccount({
       bankAccountId: 'abe',
-      availableBalance: 1234,
-      currentBalance: 1234,
       mask: '1234',
       name: 'Generic Credit Card',
-      accountType: 'credit',
-      accountSubType: 'credit card',
+      accountType: 'credit' as BankAccountType,
+      accountSubType: 'credit card' as BankAccountSubType,
     });
     const autoInactive = new BankAccount({
       bankAccountId: 'autoinactive',
-      availableBalance: 1234,
-      currentBalance: 1234,
       mask: '1234',
       name: 'Generic Auto Loan',
-      accountType: 'loan',
-      accountSubType: 'auto',
+      accountType: 'loan' as BankAccountType,
+      accountSubType: 'auto' as BankAccountSubType,
       status: 'inactive',
     });
     const accounts = [

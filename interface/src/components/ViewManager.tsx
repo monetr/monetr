@@ -1,17 +1,16 @@
-// eslint-disable-next-line max-len
 import type React from 'react';
 import { type ComponentType, createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
 import { usePrevious } from '@monetr/interface/hooks/usePrevious';
 
-type ViewComponent = ComponentType<any>;
+type ViewComponent = ComponentType<unknown>;
 
-export interface ViewContextType<T extends string, M extends Record<string, any>> {
+export interface ViewContextType<T extends string, Metadata extends {}, Form extends {}> {
   currentView: T;
-  formData: Record<string, any>;
-  metadata: M;
-  updateFormData: (newData: Record<string, any>) => void;
-  updateMetadata: (updates: Partial<M>) => void;
+  formData: Form;
+  metadata: Metadata;
+  updateFormData: (newData: Partial<Form>) => void;
+  updateMetadata: (updates: Partial<Metadata>) => void;
   prevView: () => void;
   goToView: (view: T) => void;
   isInitialView: boolean;
@@ -19,36 +18,35 @@ export interface ViewContextType<T extends string, M extends Record<string, any>
   reset: () => void;
 }
 
-const ViewContext = createContext<ViewContextType<any, any> | undefined>(undefined);
+const ViewContext = createContext<ViewContextType<string, unknown, unknown> | undefined>(undefined);
 
-function useViewContext<T extends string, M extends Record<string, any>>() {
+function useViewContext<T extends string, Metadata extends {}, Form extends {}>() {
   const context = useContext(ViewContext);
   if (!context) {
     throw new Error('useViewContext must be used within a ViewManager');
   }
-  return context as ViewContextType<T, M>;
+  return context as ViewContextType<T, Metadata, Form>;
 }
 
-interface ViewManagerProps<T extends string, M extends Record<string, any>> {
+interface ViewManagerProps<T extends string, Metadata> {
   viewComponents: Record<T, ViewComponent>;
   initialView: T;
-  initialMetadata?: M;
+  initialMetadata?: Metadata;
   // Layout is an optional wrapper component that can accept the view context as a property.
   layout?: React.FC<{
-    children: ReactNode | undefined;
+    children?: ReactNode;
   }>;
 }
 
-function ViewManager<T extends string, M extends Record<string, any>>({
+function ViewManager<T extends string, Metadata, Form>({
   viewComponents,
   initialView,
-  initialMetadata = {} as M,
+  initialMetadata = {} as Metadata,
   layout = null,
-}: ViewManagerProps<T, M>) {
+}: ViewManagerProps<T, Metadata>) {
   const [currentView, setCurrentView] = useState<T>(initialView);
-  const [formData, setFormData] = useState<Record<string, any>>({});
-  const [metadata, setMetadata] = useState<M>(initialMetadata);
-
+  const [formData, setFormData] = useState<Form>({} as Form);
+  const [metadata, setMetadata] = useState<Metadata>(initialMetadata);
   const viewOrder = useMemo(() => Object.keys(viewComponents) as T[], [viewComponents]);
 
   const previousView = usePrevious(currentView);
@@ -71,21 +69,21 @@ function ViewManager<T extends string, M extends Record<string, any>>({
     [viewOrder],
   );
 
-  const updateFormData = useCallback((newData: Record<string, any>) => {
+  const updateFormData = useCallback((newData: Partial<Form>) => {
     setFormData(prevData => ({ ...prevData, ...newData }));
   }, []);
 
-  const updateMetadata = useCallback((updates: Partial<M>) => {
+  const updateMetadata = useCallback((updates: Partial<Metadata>) => {
     setMetadata(prevMetadata => ({ ...prevMetadata, ...updates }));
   }, []);
 
   const reset = useCallback(() => {
     setCurrentView(initialView);
-    setFormData({});
+    setFormData({} as Form);
     setMetadata(initialMetadata);
   }, [initialView, initialMetadata]);
 
-  const value: ViewContextType<T, M> = useMemo(
+  const value: ViewContextType<T, Metadata, Form> = useMemo(
     () => ({
       currentView,
       formData,
