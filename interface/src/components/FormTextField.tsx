@@ -61,6 +61,7 @@ export default function FormTextField(props: FormTextFieldProps = FormTextFieldP
           onChange={formikContext?.handleChange}
           onBlur={formikContext?.handleBlur}
           disabled={formikContext?.isSubmitting || props.disabled}
+          tabIndex={0}
           {...otherProps}
           className={inputStyles.input}
           data-error={Boolean(props.error)}

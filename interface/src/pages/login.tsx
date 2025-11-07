@@ -12,6 +12,8 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 import useLogin from '@monetr/interface/hooks/useLogin';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
+import styles from './login.module.scss';
+
 interface LoginValues {
   email: string;
   password: string;
@@ -65,13 +67,8 @@ export default function Login(): JSX.Element {
   }
 
   return (
-    <MForm
-      initialValues={initialValues}
-      validate={validator}
-      onSubmit={submit}
-      className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5'
-    >
-      <div className='max-w-[128px] w-full'>
+    <MForm initialValues={initialValues} validate={validator} onSubmit={submit} className={styles.root}>
+      <div className={styles.logo}>
         <MLogo />
       </div>
       <MSpan>Sign into your monetr account</MSpan>
@@ -82,53 +79,33 @@ export default function Login(): JSX.Element {
         name='email'
         type='email'
         required
-        className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'
-        tabIndex={0}
+        className={styles.input}
       />
       <FormTextField
         autoComplete='current-password'
-        className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'
+        className={styles.input}
         data-testid='login-password'
         label='Password'
         labelDecorator={ForgotPasswordButton}
         name='password'
         required
         type='password'
-        tabIndex={0}
       />
       <MCaptcha name='captcha' show={Boolean(config?.verifyLogin)} />
-      <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
-        <FormButton
-          data-testid='login-submit'
-          variant='primary'
-          role='form'
-          type='submit'
-          className='w-full'
-          tabIndex={0}
-        >
-          Sign In
-        </FormButton>
-      </div>
-      <SignUpButton />
+      <FormButton data-testid='login-submit' variant='primary' role='form' type='submit' className={styles.input}>
+        Sign In
+      </FormButton>
+      {Boolean(config?.allowSignUp) && (
+        <div className={styles.signUpWrapper}>
+          <MSpan size='sm' color='subtle'>
+            Not a user?
+          </MSpan>
+          <MLink to='/register' size='sm' data-testid='login-signup'>
+            Sign up now
+          </MLink>
+        </div>
+      )}
     </MForm>
-  );
-}
-
-function SignUpButton(): JSX.Element {
-  const { data: config } = useAppConfiguration();
-  if (!config?.allowSignUp) {
-    return null;
-  }
-
-  return (
-    <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
-      <MSpan color='subtle' className='text-sm'>
-        Not a user?
-      </MSpan>
-      <MLink to='/register' size='sm' data-testid='login-signup' tabIndex={-1}>
-        Sign up now
-      </MLink>
-    </div>
   );
 }
 

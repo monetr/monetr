@@ -15,6 +15,7 @@ export interface MLinkProps extends BaseLinkProps {
 const MLinkPropsDefaults: Omit<MLinkProps, 'children' | 'to'> = {
   size: 'md',
   color: 'primary',
+  tabIndex: 0,
 };
 
 export default function MLink(props: MLinkProps): JSX.Element {

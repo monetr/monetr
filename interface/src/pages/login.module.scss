@@ -1,0 +1,54 @@
+@use "sass:math";
+@use '@monetr/interface/variables';
+
+.logo {
+  max-width: 32 * variables.$size;
+  width: 100%;
+}
+
+.root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 1 * variables.$size;
+
+  padding-top: 10 * variables.$size;
+  padding-left: 5 * variables.$size;
+  padding-right: 5 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-top: unset;
+    padding-bottom: 10 * variables.$size;
+    justify-content: center;
+  }
+}
+
+.input {
+  width: 100%;
+
+  @media (min-width: variables.$smallScreen) {
+    width: percentage(1/2);
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    width: percentage(1/3);
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    width: percentage(1/4);
+  }
+
+  @media (min-width: variables.$extraLargeScreen) {
+    width: percentage(1/5);
+  }
+}
+
+.signUpWrapper {
+  width: 100%;
+  display: flex;
+  margin-top: 1 * variables.$size;
+  justify-content: center;
+  gap: 1 * variables.$size;
+}

@@ -1,3 +1,9 @@
 // Size is the basis for all of monetr's spacing and sizing. Multiples of this
 // variable are used for all of monetr's size properties.
 $size: 0.25rem; // 4px
+
+// Screen widths used for breakpoints.
+$smallScreen: 640px; // 160 -> 32
+$mediumScreen: 768px; // 192 -> 64
+$largeScreen: 1024px; // 256 -> 64
+$extraLargeScreen: 1280px; // 320
