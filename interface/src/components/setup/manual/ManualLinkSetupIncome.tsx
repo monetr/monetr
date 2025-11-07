@@ -4,14 +4,15 @@ import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { useNavigate } from 'react-router-dom';
 
+import { flexVariants } from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
-import MSpan from '@monetr/interface/components/MSpan';
 import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import type { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
+import Typography from '@monetr/interface/components/Typography';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 import { useCreateBankAccount } from '@monetr/interface/hooks/useCreateBankAccount';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
@@ -85,14 +86,18 @@ export default function ManualLinkSetupIncome(): JSX.Element {
     <MForm
       initialValues={initialValues}
       onSubmit={submit}
-      className='w-full flex flex-col justify-center items-center gap-2'
+      className={flexVariants({
+        orientation: 'column',
+        justify: 'center',
+        align: 'center',
+      })}
     >
       {({ values: { currency } }) => (
         <Fragment>
-          <MSpan size='lg' color='subtle' className='text-center'>
+          <Typography size='lg' color='subtle' align='center'>
             How often do you get paid and how much do you get paid typically? monetr uses this to forecast balances
             based on the budgets you create.
-          </MSpan>
+          </Typography>
           <FormDatePicker
             name='nextPayday'
             label='When do you get paid next?'

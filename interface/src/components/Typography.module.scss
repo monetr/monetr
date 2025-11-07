@@ -26,6 +26,10 @@
   @include mixins.text-extra-large;
 }
 
+.text2ExtraLarge {
+  @include mixins.text-2-extra-large;
+}
+
 .text5ExtraLarge {
   @include mixins.text-5-extra-large;
 }
@@ -48,6 +52,18 @@
 
 .colorInherit {
   color: inherit;
+}
+
+.alignLeft {
+  text-align: left;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+.alignRight {
+  text-align: right;
 }
 
 .ellipsis {

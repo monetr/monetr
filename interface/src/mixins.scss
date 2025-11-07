@@ -45,8 +45,15 @@ $textLargeLineHeight: 7;
 $textExtraLargeFontSize: 5;
 $textExtraLargeLineHeight: 7;
 @mixin text-extra-large {
-  font-size: $textExtraLargeFontSize * variables.$size; // 1.5rem 20px
+  font-size: $textExtraLargeFontSize * variables.$size; // 1.25rem 20px
   line-height: $textExtraLargeLineHeight * variables.$size; // 1.75rem 28px
+}
+
+$text2ExtraLargeFontSize: 6;
+$text2ExtraLargeLineHeight: 8;
+@mixin text-2-extra-large {
+  font-size: $text2ExtraLargeFontSize * variables.$size; // 1.5rem 24px
+  line-height: $text2ExtraLargeLineHeight * variables.$size; // 2rem 32px
 }
 
 $text5ExtraLargeFontSize: 12;

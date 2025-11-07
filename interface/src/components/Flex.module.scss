@@ -1,0 +1,45 @@
+@use '@monetr/interface/variables';
+
+.root {
+  display: flex;
+}
+
+.flexRow {
+  flex-direction: row;
+}
+
+.flexColumn {
+  flex-direction: column;
+}
+
+.flexStackMobile {
+  flex-direction: column;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+  }
+}
+
+.gapSmall {
+  gap: 1 * variables.$size;
+}
+
+.gapMedium {
+  gap: 2 * variables.$size;
+}
+
+.gapLarge {
+  gap: 4 * variables.$size;
+}
+
+.gapExtraLarge {
+  gap: 8 * variables.$size;
+}
+
+.justifyCenter {
+  justify-content: center;
+}
+
+.alignCenter {
+  align-items: center;
+}

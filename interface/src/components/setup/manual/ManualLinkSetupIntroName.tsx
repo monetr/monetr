@@ -1,11 +1,12 @@
 import type { FormikHelpers } from 'formik';
 
+import { flexVariants } from '@monetr/interface/components/Flex';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
-import MSpan from '@monetr/interface/components/MSpan';
 import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
+import Typography from '@monetr/interface/components/Typography';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 
 export type ManualLinkSetupIntroNameValues = {
@@ -29,14 +30,18 @@ export default function ManualLinkSetupIntroName(): JSX.Element {
     <MForm
       initialValues={initialValues}
       onSubmit={submit}
-      className='w-full flex flex-col justify-center items-center gap-2'
+      className={flexVariants({
+        orientation: 'column',
+        justify: 'center',
+        align: 'center',
+      })}
     >
-      <MSpan size='2xl' weight='medium'>
+      <Typography size='2xl' weight='medium'>
         Welcome to monetr!
-      </MSpan>
-      <MSpan size='lg' color='subtle' className='text-center'>
+      </Typography>
+      <Typography size='lg' color='subtle' align='center'>
         Let's create a new budget to get started. What do you want to call this budget?
-      </MSpan>
+      </Typography>
       <FormTextField
         name='budgetName'
         label='Bank or Budget Name'

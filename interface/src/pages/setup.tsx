@@ -3,11 +3,13 @@ import { CircleCheck, Pencil } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
+import Flex from '@monetr/interface/components/Flex';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
 import SetupBillingButton from '@monetr/interface/components/setup/SetupBillingButton';
+import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -50,40 +52,34 @@ function Greeting(props: GreetingProps): JSX.Element {
   function Banner(): JSX.Element {
     if (!props.alreadyOnboarded) {
       return (
-        <div className='flex flex-col justify-center items-center text-center'>
-          <MSpan size='2xl' weight='medium'>
+        <Flex gap='lg' justify='center' align='center' orientation='column'>
+          <Typography size='2xl' weight='medium' align='center'>
             Welcome to monetr!
-          </MSpan>
-          <MSpan size='lg' color='subtle'>
+          </Typography>
+          <Typography size='lg' color='subtle' align='center'>
             Before we get started, please select how you would like to continue.
-          </MSpan>
-        </div>
+          </Typography>
+        </Flex>
       );
     }
 
     return (
-      <div className='flex flex-col justify-center items-center text-center'>
-        <MSpan className='text-2xl font-medium'>Adding another bank?</MSpan>
-        <MSpan className='text-lg' color='subtle'>
+      <Flex gap='lg' justify='center' align='center' orientation='column'>
+        <Typography size='2xl' weight='medium'>
+          Adding another bank?
+        </Typography>
+        <Typography size='lg' color='subtle'>
           Please select what type of bank you want to setup below.
-        </MSpan>
-      </div>
+        </Typography>
+      </Flex>
     );
   }
 
-  function Footer(): JSX.Element {
-    if (props.alreadyOnboarded) {
-      return null;
-    }
-
-    return <LogoutFooter />;
-  }
-
   return (
-    <div className='w-full h-full flex lg:justify-center items-center gap-4 md:gap-8 flex-col overflow-y-auto py-4'>
+    <div className='w-full h-full flex lg:justify-center items-center gap-4 md:gap-8 flex-col overflow-y-auto p-4'>
       <MLogo className='w-16 h-16 md:w-24 md:h-24' />
       <Banner />
-      <div className='flex gap-4 flex-col md:flex-row p-2'>
+      <Flex gap='lg' orientation='rowMobile'>
         <OnboardingTile
           icon={PlaidLogo}
           name='Plaid'
@@ -100,12 +96,12 @@ function Greeting(props: GreetingProps): JSX.Element {
           onClick={() => setActive('manual')}
           disabled={!props.manualEnabled}
         />
-      </div>
+      </Flex>
       <Button color={!active ? 'secondary' : 'primary'} disabled={!active} onClick={() => props.onContinue(active)}>
         Continue
       </Button>
       {!props.alreadyOnboarded && <SetupBillingButton />}
-      <Footer />
+      {props.alreadyOnboarded && <LogoutFooter />}
     </div>
   );
 }
@@ -191,11 +187,21 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
         className: 'w-16 h-12 md:w-20 md:h-12 ml-4 md:ml-0 md:mt-6 dark:text-dark-monetr-content-emphasis',
       })}
       <div className='flex flex-col gap-2 items-center h-full md:mt-4 text-center w-full md:w-auto'>
-        <MSpan className='text-lg font-medium'>{props.name}</MSpan>
-        <MSpan color='subtle'>{props.description}</MSpan>
-        {!props.comingSoon && <MSpan className='md:block hidden'>&nbsp;</MSpan>}
-        {props.comingSoon && <MSpan className='md:mt-5 font-medium'>Coming Soon</MSpan>}
-        {props.disabled && <MSpan className='md:mt-5 font-medium'>Unavailable</MSpan>}
+        <Typography size='lg' weight='medium'>
+          {props.name}
+        </Typography>
+        <Typography color='subtle'>{props.description}</Typography>
+        {!props.comingSoon && <Typography className='md:block hidden'>&nbsp;</Typography>}
+        {props.comingSoon && (
+          <Typography weight='medium' className='md:mt-5'>
+            Coming Soon
+          </Typography>
+        )}
+        {props.disabled && (
+          <Typography weight='medium' className='md:mt-5'>
+            Unavailable
+          </Typography>
+        )}
       </div>
     </button>
   );

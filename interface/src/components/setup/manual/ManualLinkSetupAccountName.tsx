@@ -1,11 +1,12 @@
 import type { FormikHelpers } from 'formik';
 
+import { flexVariants } from '@monetr/interface/components/Flex';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
-import MSpan from '@monetr/interface/components/MSpan';
 import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
+import Typography from '@monetr/interface/components/Typography';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 
 export interface ManualLinkSetupAccountNameValues {
@@ -29,11 +30,15 @@ export default function ManualLinkSetupAccountName(): JSX.Element {
     <MForm
       initialValues={initialValues}
       onSubmit={submit}
-      className='w-full flex flex-col justify-center items-center gap-2'
+      className={flexVariants({
+        orientation: 'column',
+        justify: 'center',
+        align: 'center',
+      })}
     >
-      <MSpan size='lg' color='subtle' className='text-center'>
+      <Typography size='lg' color='subtle' align='center'>
         What do you want to call the primary account you want to use for budgeting? For example; your checking account?
-      </MSpan>
+      </Typography>
       <FormTextField
         name='accountName'
         label='Account Name'

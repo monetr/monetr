@@ -9,6 +9,8 @@ import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/man
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
+import { flexVariants } from '@monetr/interface/components/Flex';
+import Typography from '@monetr/interface/components/Typography';
 
 export type ManualLinkSetupBalancesValues = {
   startingBalance: number;
@@ -33,14 +35,18 @@ export default function ManualLinkSetupBalances(): JSX.Element {
     <MForm
       initialValues={initialValues}
       onSubmit={submit}
-      className='w-full flex flex-col justify-center items-center gap-2'
+      className={flexVariants({
+        orientation: 'column',
+        justify: 'center',
+        align: 'center',
+      })}
     >
       {({ values: { currency } }) => (
         <Fragment>
-          <MSpan size='lg' color='subtle' className='text-center'>
+          <Typography size='lg' color='subtle' align='center'>
             What is your current available balance? monetr will use this as a starting point, you can modify this at any
             time later on.
-          </MSpan>
+          </Typography>
           <SelectCurrency name='currency' className='w-full' />
           <FormAmountField
             name='startingBalance'

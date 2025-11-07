@@ -28,6 +28,7 @@ export const textVariants = cva([styles.root], {
       md: styles.textBase,
       lg: styles.textLarge,
       xl: styles.textExtraLarge,
+      '2xl': styles.text2ExtraLarge,
       '5xl': styles.text5ExtraLarge,
     },
     weight: {
@@ -35,6 +36,11 @@ export const textVariants = cva([styles.root], {
       medium: styles.weightMedium,
       semibold: styles.weightSemibold,
       bold: styles.weightBold,
+    },
+    align: {
+      left: styles.alignLeft,
+      center: styles.alignCenter,
+      right: styles.alignRight,
     },
   },
   defaultVariants: {
