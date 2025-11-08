@@ -1,12 +1,12 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/merge"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/validation"
@@ -67,49 +67,34 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 
 	var fundingSchedule FundingSchedule
 	fundingSchedule.BankAccountId = bankAccountId
-	body, err := c.readJsonMap(ctx)
-	if err != nil {
-		return c.invalidJsonError(ctx, err)
-	}
-
-	switch err := validation.ValidateWithContext(
+	err = fundingSchedule.UnmarshalRequest(
 		c.getContext(ctx),
-		body,
-		validation.Map(
-			fundingSchedule.CreateValidators()...,
-		),
-	).(type) {
+		ctx.Request().Body,
+		fundingSchedule.CreateValidators()...,
+	)
+	switch errors.Cause(err).(type) {
 	case validation.Errors:
 		return ctx.JSON(http.StatusBadRequest, map[string]any{
 			"error":    "Invalid request",
 			"problems": err,
 		})
+	case *json.SyntaxError:
+		return c.invalidJsonError(ctx, err)
 	case nil:
 		break
 	default:
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse post request")
 	}
 
-	// Merge the unstructured but now validated go map into the actual database
-	// struct for storage below.
-	if err := merge.Merge(
-		&fundingSchedule, body, merge.ErrorOnUnknownField,
-	); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Failed to merge posted data")
-	}
-
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	// Set the next occurrence based on the provided rule.
 
-	// If the next occurrence is not specified then assume that the rule is
-	// relative to now. If it is specified though then do nothing, and the
-	// subsequent occurrence will be calculated relative to the provided date. We
-	// also calculate the next occurrence if the provided occurrence is in the
-	// past. This technically should not happen via the UI. But it is currently
-	// possible for someone to select the current day in the UI. Which then gets
-	// adjusted for midnight that day, which will always be in the past for the
-	// user.
+	// If the next occurrence is not specified then assume that the rule is relative to now. If it is specified though
+	// then do nothing, and the subsequent occurrence will be calculated relative to the provided date.
+	// We also calculate the next occurrence if the provided occurrence is in the past. This technically should not
+	// happen via the UI. But it is currently possible for someone to select the current day in the UI. Which then gets
+	// adjusted for midnight that day, which will always be in the past for the user.
 	if fundingSchedule.NextRecurrence.IsZero() || c.Clock.Now().After(fundingSchedule.NextRecurrence) {
 		fundingSchedule.CalculateNextOccurrence(
 			c.getContext(ctx),
@@ -292,6 +277,8 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 			"error":    "Invalid request",
 			"problems": err,
 		})
+	case *json.SyntaxError:
+		return c.invalidJsonError(ctx, err)
 	case nil:
 		break
 	default:
