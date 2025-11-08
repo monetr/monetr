@@ -78,7 +78,7 @@ function Greeting(props: GreetingProps): JSX.Element {
     <div className='w-full h-full flex lg:justify-center items-center gap-4 md:gap-8 flex-col overflow-y-auto p-4'>
       <MLogo className='w-16 h-16 md:w-24 md:h-24' />
       <Banner />
-      <Flex gap='lg' orientation='stackMedium'>
+      <Flex gap='lg' orientation='stackMedium' justify='center'>
         <OnboardingTile
           icon={PlaidLogo}
           name='Plaid'
