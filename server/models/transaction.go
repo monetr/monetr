@@ -7,6 +7,8 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/validators"
+	"github.com/monetr/validation"
 	"github.com/sirupsen/logrus"
 )
 
@@ -300,4 +302,37 @@ func ProcessSpentFrom(
 	}
 
 	return updatedTransaction, updatedSpending
+}
+
+func (Transaction) CreateValidators() []*validation.KeyRules {
+	return []*validation.KeyRules{
+		validation.Key(
+			"bankAccountId",
+			validation.Required.Error("Must specify a bank account ID"),
+			ValidID[BankAccount]().Error("Bank account ID specified is not valid"),
+		).Required(validators.Require),
+		validation.Key(
+			"amount",
+			// TODO Require that it is a number
+			validation.Required.Error("Must specify a transaction amount"),
+		).Required(validators.Optional),
+		validation.Key(
+			"spendingId",
+			ValidID[Spending]().Error("Spending ID specified is not valid"),
+		).Required(validators.Optional),
+		validation.Key(
+			"spendingAmount",
+			validation.Min(0).Error("Spending amount cannot be less than zero"),
+		).Required(validators.Optional),
+		validation.Key(
+			"date",
+			validation.Required.Error("Must specify a transaction date"),
+			validation.Date(time.RFC3339).Error("Transaction date must be valid"),
+		).Required(validators.Require),
+		validators.Name(validators.Require),
+		validation.Key(
+			"isPending",
+			validation.In(true, false).Error("Is pending must be true or false"),
+		).Required(validators.Optional),
+	}
 }

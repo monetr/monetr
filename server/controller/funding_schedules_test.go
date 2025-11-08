@@ -235,7 +235,7 @@ func TestPostFundingSchedules(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("failed to parse post request")
+		response.JSON().Path("$.error").IsEqual("invalid JSON body")
 	})
 }
 

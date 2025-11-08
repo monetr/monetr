@@ -136,6 +136,12 @@ func (c *Controller) invalidJson(ctx echo.Context) error {
 	return c.returnError(ctx, http.StatusBadRequest, "invalid JSON body")
 }
 
+func (c *Controller) invalidJsonError(ctx echo.Context, err error) error {
+	requestSpan := c.getSpan(ctx)
+	requestSpan.Status = sentry.SpanStatusInvalidArgument
+	return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid JSON body")
+}
+
 func (c *Controller) notFound(ctx echo.Context, msg string, args ...any) error {
 	return c.returnError(ctx, http.StatusNotFound, msg, args...)
 }
