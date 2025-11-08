@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
@@ -69,11 +68,6 @@ type BaseRepository interface {
 	GetSpendingExists(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending]) (bool, error)
 	GetTransaction(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*Transaction, error)
 	GetTransactions(ctx context.Context, bankAccountId ID[BankAccount], limit, offset int) ([]Transaction, error)
-	// GetTransactionsAfter will return all of the transactions after the
-	// specified date, if the specified date is null then all transactions for an
-	// account is returned. This is intended to be used for partial syncing for
-	// file uploads or teller.
-	GetTransactionsAfter(ctx context.Context, bankAccountId ID[BankAccount], after *time.Time) ([]Transaction, error)
 	// GetPendingTransactions is the same as GetTransactions but will only return
 	// transactions that are currently in a pending state. It will not return
 	// transactions that have been deleted.

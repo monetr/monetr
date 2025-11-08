@@ -141,38 +141,6 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId ID[B
 	return items, nil
 }
 
-func (r *repositoryBase) GetTransactionsAfter(ctx context.Context, bankAccountId ID[BankAccount], after *time.Time) ([]Transaction, error) {
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-
-	span.Data = map[string]any{
-		"accountId":     r.AccountId(),
-		"bankAccountId": bankAccountId,
-		"after":         after,
-	}
-
-	var items []Transaction
-	query := r.txn.ModelContext(span.Context(), &items).
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
-		Order(`date DESC`).
-		Order(`transaction_id DESC`)
-
-	if after != nil {
-		query = query.Where(`"transaction"."date" >= ?`, *after)
-	}
-
-	err := query.Select(&items)
-	if err != nil {
-		span.Status = sentry.SpanStatusInternalError
-		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve transactions")
-	}
-
-	span.Status = sentry.SpanStatusOK
-
-	return items, nil
-}
-
 func (r *repositoryBase) GetPendingTransactions(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],
