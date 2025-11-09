@@ -12,4 +12,13 @@
   padding-right: 2 * variables.$size;
   padding-top: 0.5 * variables.$size;
   padding-bottom: 0.5 * variables.$size;
+
+  // Icons within the badge should not be much bigger than the text they are
+  // showing.
+  svg {
+    // TODO Make this based on the text size line height. Right now this is
+    // equivalent to text-small.
+    width: 5 * variables.$size;
+    height: 5 * variables.$size;
+  }
 }
