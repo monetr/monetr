@@ -34,6 +34,8 @@ export const textVariants = cva([styles.root], {
       subtle: styles.colorSubtle,
       emphasis: styles.colorEmphasis,
       inherit: styles.colorInherit,
+      negative: styles.colorNegative,
+      positive: styles.colorPositive,
     },
     ellipsis: {
       true: styles.ellipsis,

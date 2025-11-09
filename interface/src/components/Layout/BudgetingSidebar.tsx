@@ -18,6 +18,7 @@ import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
+import Typography from '@monetr/interface/components/Typography';
 
 export interface BudgetingSidebarProps {
   className?: string;
@@ -42,13 +43,13 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
       case 'credit card':
         return (
           <div className='flex w-full justify-between'>
-            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
+            <Typography color='emphasis' size='lg' weight='semibold'>
               <InfinityIcon />
               Limit:
-            </MSpan>
-            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
+            </Typography>
+            <Typography color='emphasis' size='lg' weight='semibold'>
               {locale.formatAmount(balance?.limit, AmountType.Stored)}
-            </MSpan>
+            </Typography>
           </div>
         );
     }

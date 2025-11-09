@@ -1,6 +1,7 @@
 import { Coins } from 'lucide-react';
 
-import MSpan from '@monetr/interface/components/MSpan';
+import Flex from '@monetr/interface/components/Flex';
+import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { AmountType } from '@monetr/interface/util/amounts';
@@ -10,14 +11,16 @@ export default function BalanceCurrentAmount(): JSX.Element {
   const { data: balance } = useCurrentBalance();
 
   return (
-    <div className='flex w-full justify-between'>
-      <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
+    <Flex justify='between' gap='sm'>
+      <Flex flex='shrink'>
         <Coins />
-        Current:
-      </MSpan>
-      <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
+        <Typography color='emphasis' size='lg' weight='semibold' ellipsis>
+          Current:
+        </Typography>
+      </Flex>
+      <Typography color='emphasis' size='lg' weight='semibold' align='left'>
         {locale.formatAmount(balance?.current, AmountType.Stored)}
-      </MSpan>
-    </div>
+      </Typography>
+    </Flex>
   );
 }

@@ -49,6 +49,19 @@
   justify-content: center;
 }
 
+.justifyBetween {
+  justify-content: space-between;
+}
+
 .alignCenter {
   align-items: center;
+}
+
+.flexGrow {
+  flex-grow: 1;
+}
+
+.flexShrink {
+  flex-shrink: 1;
+  min-width: 0px;
 }

@@ -7,6 +7,7 @@ import styles from './Flex.module.scss';
 export const flexVariants = cva([styles.root], {
   variants: {
     gap: {
+      none: undefined,
       sm: styles.gapSmall,
       md: styles.gapMedium,
       lg: styles.gapLarge,
@@ -15,6 +16,7 @@ export const flexVariants = cva([styles.root], {
     justify: {
       default: undefined,
       center: styles.justifyCenter,
+      between: styles.justifyBetween,
     },
     align: {
       default: undefined,
@@ -25,6 +27,11 @@ export const flexVariants = cva([styles.root], {
       column: styles.flexColumn,
       stackSmall: styles.flexStackSmall,
       stackMedium: styles.flexStackMedium,
+    },
+    flex: {
+      default: undefined,
+      grow: styles.flexGrow,
+      shrink: styles.flexShrink,
     },
   },
   defaultVariants: {
@@ -39,6 +46,16 @@ type VariantProps = Omit<Parameters<typeof flexVariants>[0], 'className' | 'clas
 
 type FlexProps = VariantProps & React.HTMLAttributes<HTMLDivElement>;
 
-export default function Flex({ gap, justify, align, orientation, className, ...props }: FlexProps): React.JSX.Element {
-  return <div className={mergeTailwind(flexVariants({ gap, justify, align, orientation }), className)} {...props} />;
+export default function Flex({
+  gap,
+  justify,
+  align,
+  orientation,
+  flex,
+  className,
+  ...props
+}: FlexProps): React.JSX.Element {
+  return (
+    <div className={mergeTailwind(flexVariants({ gap, justify, align, orientation, flex }), className)} {...props} />
+  );
 }

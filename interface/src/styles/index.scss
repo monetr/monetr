@@ -12,3 +12,8 @@ body > #root {
   font-size: inherit;
   line-height: inherit;
 }
+
+// None of the lucide icons should ever shrink!
+svg.lucide {
+  flex-shrink: 0;
+}

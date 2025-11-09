@@ -54,6 +54,14 @@
   color: inherit;
 }
 
+.colorNegative {
+  color: var(--amount-negative);
+}
+
+.colorPositive {
+  color: var(--amount-positive);
+}
+
 .alignLeft {
   text-align: left;
 }

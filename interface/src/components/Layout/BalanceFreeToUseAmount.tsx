@@ -1,11 +1,11 @@
 import { Wallet } from 'lucide-react';
 
-import MSpan from '@monetr/interface/components/MSpan';
+import Flex from '@monetr/interface/components/Flex';
+import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { AmountType } from '@monetr/interface/util/amounts';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export default function BalanceFreeToUseAmount(): JSX.Element {
   const { data: locale } = useLocaleCurrency();
@@ -15,22 +15,20 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
   switch (bankAccount?.accountSubType) {
     case 'checking':
     case 'savings': {
-      const valueClassName = mergeTailwind({
-        'dark:text-dark-monetr-content-emphasis': balance?.free >= 0,
-        'dark:text-dark-monetr-red': balance?.free < 0,
-      });
+      const color = balance?.free >= 0 ? 'emphasis' : 'negative';
 
       return (
-        <div className='flex w-full justify-between flex-shrink min-w-fit'>
-          <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
+        <Flex justify='between' gap='sm'>
+          <Flex flex='shrink'>
             <Wallet />
-            Free-To-Use:
-          </MSpan>
-          &nbsp;
-          <MSpan size='lg' weight='semibold' className={valueClassName}>
+            <Typography color='emphasis' size='lg' weight='semibold' ellipsis>
+              Free-To-Use:
+            </Typography>
+          </Flex>
+          <Typography color={color} size='lg' weight='semibold' align='left'>
             {locale.formatAmount(balance?.free, AmountType.Stored)}
-          </MSpan>
-        </div>
+          </Typography>
+        </Flex>
       );
     }
   }
