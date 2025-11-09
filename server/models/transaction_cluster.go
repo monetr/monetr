@@ -7,18 +7,28 @@ import (
 	"github.com/go-pg/pg/v10"
 )
 
+type TransactionClusterDebugItem struct {
+	Word      string  `json:"word"`
+	Sanitized string  `json:"sanitized"`
+	Order     int     `json:"order"`
+	Value     float32 `json:"value"`
+	Rank      float32 `json:"rank"`
+}
+
 type TransactionCluster struct {
 	tableName string `pg:"transaction_clusters"`
 
-	TransactionClusterId ID[TransactionCluster] `json:"transactionClusterId" pg:"transaction_cluster_id,notnull,pk"`
-	AccountId            ID[Account]            `json:"-" pg:"account_id,notnull"`
-	Account              *Account               `json:"-" pg:"rel:has-one"`
-	BankAccountId        ID[BankAccount]        `json:"bankAccountId" pg:"bank_account_id,notnull"`
-	BankAccount          *BankAccount           `json:"-" pg:"rel:has-one"`
-	Signature            string                 `json:"signature" pg:"signature"`
-	Name                 string                 `json:"name" pg:"name,notnull"`
-	Members              []ID[Transaction]      `json:"members" pg:"members,notnull,type:'varchar(32)[]'"`
-	CreatedAt            time.Time              `json:"createdAt" pg:"created_at,notnull,default:now()"`
+	TransactionClusterId ID[TransactionCluster]        `json:"transactionClusterId" pg:"transaction_cluster_id,notnull,pk"`
+	AccountId            ID[Account]                   `json:"-" pg:"account_id,notnull"`
+	Account              *Account                      `json:"-" pg:"rel:has-one"`
+	BankAccountId        ID[BankAccount]               `json:"bankAccountId" pg:"bank_account_id,notnull"`
+	BankAccount          *BankAccount                  `json:"-" pg:"rel:has-one"`
+	Signature            string                        `json:"signature" pg:"signature"`
+	Name                 string                        `json:"name" pg:"name,notnull"`
+	Members              []ID[Transaction]             `json:"members" pg:"members,notnull,type:'varchar(32)[]'"`
+	Debug                []TransactionClusterDebugItem `json:"debug" pg:"debug,type:'jsonb'"`
+	Merchant             []TransactionClusterDebugItem `json:"merchant" pg:"merchant,type:'jsonb'"`
+	CreatedAt            time.Time                     `json:"createdAt" pg:"created_at,notnull,default:now()"`
 }
 
 func (TransactionCluster) IdentityPrefix() string {

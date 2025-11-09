@@ -25,7 +25,7 @@ export default function ManualLinkSetupButtons(): JSX.Element {
       );
     case lastStep:
       return (
-        <Flex gap='lg'>
+        <Flex gap='lg' justify='center'>
           <Button variant='secondary' onClick={previousStep}>
             Back
           </Button>
@@ -36,7 +36,7 @@ export default function ManualLinkSetupButtons(): JSX.Element {
       );
     default:
       return (
-        <Flex gap='lg'>
+        <Flex gap='lg' justify='center'>
           <Button variant='secondary' onClick={previousStep}>
             Back
           </Button>

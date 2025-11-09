@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/monetr/monetr/server/crumbs"
@@ -95,9 +96,8 @@ type Document struct {
 	TF          map[string]float32
 	TFIDF       map[string]float32
 	Vector      []float32
+	Tokens      []Token
 	Transaction *models.Transaction
-	LowerParts  []string
-	UpperParts  []string
 	Valid       bool
 }
 
@@ -120,7 +120,6 @@ func (p *TFIDF) indexWords() (mapping map[string]int, vectorSize int) {
 	// Only calculate the index once. This way we can use it elsewhere if we need
 	// to get information back out of the transform after we are done.
 	if len(p.wordToIndex) == 0 {
-		index := 0
 		wordCount := len(p.wc) * 2
 		// Define the length of the vector and adjust it to be divisible by 16. This
 		// will enable us to leverage SIMD in the future. By using 16 we are
@@ -128,14 +127,19 @@ func (p *TFIDF) indexWords() (mapping map[string]int, vectorSize int) {
 		vectorLength := wordCount + (16 - (wordCount % 16))
 		p.wordToIndex = make(map[string]int)
 		p.indexToWord = make([]string, vectorLength)
+		allWords := make([]string, 0, len(p.wc))
 		for word, count := range p.wc {
 			if count == 1 {
 				continue
 			}
+			allWords = append(allWords, word)
+		}
+		// Make the order of word indicies consistent between runs of the same data.
+		sort.Strings(allWords)
+		for index, word := range allWords {
+			index = index * 2
 			p.wordToIndex[word] = index
 			p.indexToWord[index] = word
-			index++
-			index++
 		}
 	}
 
@@ -166,22 +170,26 @@ func TokenizeName(txn *models.Transaction) (lower, normal []string) {
 }
 
 func (p *TFIDF) AddTransaction(txn *models.Transaction) {
-	lower, upper := TokenizeName(txn)
-	wordCounts := make(map[string]float32, len(lower))
-	for _, word := range lower {
-		wordCounts[word]++
-		p.wc[word]++
+	tokens := Tokenize(txn)
+	// There may be more than len(tokens) words beacuse a single token may be
+	// multiple words depending on the replacement table. However the word count
+	// map will simply grow if this is the case.
+	wordCounts := make(map[string]float32, len(tokens))
+	for _, token := range tokens {
+		for _, word := range token.Final {
+			wordCounts[word]++
+			p.wc[word]++
+		}
 	}
 
 	tf := make(map[string]float32, len(wordCounts))
 	for word, count := range wordCounts {
-		tf[word] = count / float32(len(lower))
+		tf[word] = count / float32(len(wordCounts))
 	}
 
 	p.documents = append(p.documents, Document{
 		ID:          txn.TransactionId,
-		LowerParts:  lower,
-		UpperParts:  upper,
+		Tokens:      tokens,
 		Transaction: txn,
 		TF:          tf,
 		TFIDF:       map[string]float32{},

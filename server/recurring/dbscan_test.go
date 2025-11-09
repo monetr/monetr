@@ -81,9 +81,9 @@ func TestPreProcessor(t *testing.T) {
 		for index := range cluster.Items {
 			item := dbscan.dataset[index]
 			output[i] = append(output[i], Presentation{
-				ID:        item.ID,
-				Sanitized: strings.Join(item.UpperParts, " "),
-				Original:  strings.TrimSpace(item.Transaction.OriginalName + " " + item.Transaction.OriginalMerchantName),
+				ID: item.ID,
+				// Sanitized: strings.Join(item.UpperParts, " "),
+				Original: strings.TrimSpace(item.Transaction.OriginalName + " " + item.Transaction.OriginalMerchantName),
 			})
 		}
 	}
