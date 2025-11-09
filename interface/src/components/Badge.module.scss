@@ -3,6 +3,8 @@
 
 .badge {
   background-color: var(--brand);
+  // Override the typography text default color
+  --text-color: var(--content-emphasis);
   color: var(--content-emphasis);
   border-radius: var(--border-radius);
 

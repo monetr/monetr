@@ -35,7 +35,7 @@
 }
 
 .colorDefault {
-  color: var(--content);
+  color: var(--text-color, var(--content));
 }
 
 .colorMuted {
