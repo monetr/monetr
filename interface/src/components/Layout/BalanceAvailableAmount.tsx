@@ -23,7 +23,7 @@ export default function BalanceAvailableAmount(): JSX.Element {
               Available:
             </Typography>
           </Flex>
-          <Typography color='emphasis' size='lg' weight='semibold' align='left'>
+          <Typography color='emphasis' size='lg' weight='semibold'>
             {locale.formatAmount(balance?.available, AmountType.Stored)}
           </Typography>
         </Flex>

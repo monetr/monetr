@@ -71,6 +71,7 @@ export type TypographyProps = React.PropsWithChildren<
 
 export default function Typography({
   component = 'span',
+  align,
   color,
   ellipsis,
   size,
@@ -83,6 +84,7 @@ export default function Typography({
     <TextElement
       className={mergeTailwind(
         textVariants({
+          align,
           component,
           color,
           ellipsis,

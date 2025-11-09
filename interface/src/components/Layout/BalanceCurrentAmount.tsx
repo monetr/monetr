@@ -18,7 +18,7 @@ export default function BalanceCurrentAmount(): JSX.Element {
           Current:
         </Typography>
       </Flex>
-      <Typography color='emphasis' size='lg' weight='semibold' align='left'>
+      <Typography color='emphasis' size='lg' weight='semibold'>
         {locale.formatAmount(balance?.current, AmountType.Stored)}
       </Typography>
     </Flex>

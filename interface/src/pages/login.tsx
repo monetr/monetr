@@ -73,7 +73,7 @@ export default function Login(): JSX.Element {
       <div className={styles.logo}>
         <MLogo />
       </div>
-      <Typography>Sign into your monetr account</Typography>
+      <Typography component='p'>Sign into your monetr account</Typography>
       <FormTextField
         data-testid='login-email'
         autoFocus
