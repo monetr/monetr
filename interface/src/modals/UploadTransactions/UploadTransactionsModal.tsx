@@ -7,7 +7,7 @@ import { useDropzone } from 'react-dropzone';
 
 import { Button } from '@monetr/interface/components/Button';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import ErrorFileStage from '@monetr/interface/modals/UploadTransactions/ErrorFileStage';
 import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/ProcessingFileStage';
@@ -141,16 +141,16 @@ function UploadFileStage(props: StageProps) {
       <div className='h-full flex flex-col gap-2 p-2 justify-between'>
         <div className='flex flex-col gap-2 h-full'>
           <div className='flex justify-between'>
-            <MSpan weight='bold' size='xl'>
+            <Typography weight='bold' size='xl'>
               Upload Transactions
-            </MSpan>
+            </Typography>
             <div>{/* TODO Close button */}</div>
           </div>
 
           <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
             <FileUp className='size-12 text-dark-monetr-content' />
             <div className='flex flex-col py-1 w-full'>
-              <MSpan size='lg'>{file.name}</MSpan>
+              <Typography size='lg'>{file.name}</Typography>
               <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
                 <div
                   className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600'
@@ -169,18 +169,20 @@ function UploadFileStage(props: StageProps) {
       <form onSubmit={handleSubmit} className='h-full flex flex-col gap-2 p-2 justify-between'>
         <div className='flex flex-col gap-2 h-full'>
           <div className='flex justify-between'>
-            <MSpan weight='bold' size='xl'>
+            <Typography weight='bold' size='xl'>
               Upload Transactions
-            </MSpan>
+            </Typography>
             <div>{/* TODO Close button */}</div>
           </div>
-          <MSpan>Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.</MSpan>
+          <Typography>
+            Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.
+          </Typography>
 
           <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
             <FileUp className='size-12 text-dark-monetr-content' />
             <div className='flex flex-col py-1 w-full'>
-              <MSpan size='lg'>{file.name}</MSpan>
-              <MSpan>{fileSize(file.size)}</MSpan>
+              <Typography size='lg'>{file.name}</Typography>
+              <Typography>{fileSize(file.size)}</Typography>
             </div>
           </div>
         </div>
@@ -200,20 +202,22 @@ function UploadFileStage(props: StageProps) {
     <form onSubmit={handleSubmit} className='h-full flex flex-col gap-2 p-2 justify-between'>
       <div className='flex flex-col gap-2 h-full'>
         <div className='flex justify-between'>
-          <MSpan weight='bold' size='xl'>
+          <Typography weight='bold' size='xl'>
             Upload Transactions
-          </MSpan>
+          </Typography>
           <div>{/* TODO Close button */}</div>
         </div>
-        <MSpan>Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.</MSpan>
+        <Typography>
+          Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.
+        </Typography>
 
         <div {...getRootProps()} className={uploadClassNames}>
           <input {...getInputProps()} />
           <FileUp className='size-12 text-dark-monetr-content' />
-          <MSpan size='lg' weight='semibold'>
+          <Typography size='lg' weight='semibold'>
             Drag OFX file here
-          </MSpan>
-          <MSpan>Or click to browse</MSpan>
+          </Typography>
+          <Typography>Or click to browse</Typography>
         </div>
       </div>
       <div className='flex justify-end gap-2 mt-2'>
