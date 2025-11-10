@@ -12,7 +12,6 @@ import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-import Typography from '@monetr/interface/components/Typography';
 
 export interface ExpenseItemProps {
   spending: Spending;
@@ -55,12 +54,10 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
           <MerchantIcon name={spending.name} />
           <div className='flex flex-col overflow-hidden min-w-0'>
             <div className='flex'>
-              <Typography color='emphasis' weight='semibold' ellipsis>
+              <span className='text-zinc-50 font-semibold text-base overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
                 {spending.name}
-              </Typography>
-              <Badge size='xs' className='flex-none ml-1'>
-                {dateString}
-              </Badge>
+              </span>
+              <Badge className='flex-none text-xs ml-1'>{dateString}</Badge>
             </div>
             {/* This block only shows on mobile screens */}
             <span className='hidden md:block text-zinc-200 font-sm text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>

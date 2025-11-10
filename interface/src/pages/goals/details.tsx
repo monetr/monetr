@@ -19,7 +19,6 @@ import MForm from '@monetr/interface/components/MForm';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import Typography from '@monetr/interface/components/Typography';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useRemoveSpending } from '@monetr/interface/hooks/useRemoveSpending';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
@@ -52,8 +51,8 @@ export default function GoalDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content size-24' />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>There wasn't a goal specified...</Typography>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>There wasn't a goal specified...</MSpan>
       </div>
     );
   }
@@ -61,7 +60,7 @@ export default function GoalDetails(): JSX.Element {
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <Typography size='5xl'>One moment...</Typography>
+        <MSpan className='text-5xl'>One moment...</MSpan>
       </div>
     );
   }
@@ -70,8 +69,8 @@ export default function GoalDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content size-24' />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>Couldn't find the goal you specified...</Typography>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>Couldn't find the goal you specified...</MSpan>
       </div>
     );
   }
@@ -84,8 +83,8 @@ export default function GoalDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content size-24' />
-        <Typography size='5xl'>Something isn't right...</Typography>
-        <Typography size='2xl'>This spending object is not a goal...</Typography>
+        <MSpan className='text-5xl'>Something isn't right...</MSpan>
+        <MSpan className='text-2xl'>This spending object is not a goal...</MSpan>
       </div>
     );
   }
