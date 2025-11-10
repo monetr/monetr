@@ -1,0 +1,15 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.transactionItemRoot {
+  position: relative;
+  width: 100%;
+
+  padding-left: 1 * variables.$size;
+  padding-right: 1 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-left: 2 * variables.$size;
+    padding-right: 2 * variables.$size;
+  }
+}

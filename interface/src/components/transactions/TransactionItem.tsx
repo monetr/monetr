@@ -2,12 +2,14 @@ import { Link } from 'react-router-dom';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
-import MSpan from '@monetr/interface/components/MSpan';
 import TransactionAmount from '@monetr/interface/components/transactions/TransactionAmount';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import type Transaction from '@monetr/interface/models/Transaction';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import Typography from '@monetr/interface/components/Typography';
+
+import styles from './TransactionItem.module.scss';
 
 export interface TransactionItemProps {
   transaction: Transaction;
@@ -67,11 +69,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
   }
 
   return (
-    <li
-      className='group relative w-full px-1 md:px-2'
-      id={transaction.transactionId}
-      data-testid={transaction.transactionId}
-    >
+    <li className={styles.transactionItemRoot} id={transaction.transactionId} data-testid={transaction.transactionId}>
       <Link
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
         to={detailsUrl}
@@ -80,12 +78,12 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
         <div className='flex w-full min-w-0 flex-1 flex-row items-center gap-4 md:w-1/2'>
           <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
           <div className='flex min-w-0 flex-col overflow-hidden'>
-            <MSpan size='md' weight='semibold' color='emphasis' ellipsis>
+            <Typography size='md' weight='semibold' color='emphasis' ellipsis>
               {transaction.getName()}
-            </MSpan>
-            <span className='hidden w-full min-w-0 truncate text-sm font-medium dark:text-content md:block'>
+            </Typography>
+            <Typography size='sm' weight='medium' ellipsis className='hidden md:block'>
               {transaction.getMainCategory()}
-            </span>
+            </Typography>
             <BudgetingInfo className='flex w-full text-sm md:hidden' />
           </div>
         </div>
