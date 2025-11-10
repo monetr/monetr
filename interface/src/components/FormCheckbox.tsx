@@ -2,11 +2,11 @@ import { useCallback } from 'react';
 import { useFormikContext } from 'formik';
 
 import { Checkbox, type CheckedState } from '@monetr/interface/components/Checkbox';
+import Typography from '@monetr/interface/components/Typography';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import formCheckboxStyles from './FormCheckbox.module.scss';
 import labelStyles from './Label.module.scss';
-import typographyStyles from './Typography.module.scss';
 
 export interface FormCheckboxProps {
   id?: string;
@@ -50,7 +50,11 @@ export default function FormCheckbox(props: FormCheckboxProps): React.JSX.Elemen
             {props.label}
           </label>
         )}
-        {props.description && <p className={typographyStyles.smallParagraph}>{props.description}</p>}
+        {props.description && (
+          <Typography component='p' size='sm'>
+            {props.description}
+          </Typography>
+        )}
       </div>
     </div>
   );
