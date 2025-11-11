@@ -3,6 +3,7 @@ import { pluginPWA } from './pluginPWA';
 
 import path from 'node:path';
 import { defineConfig } from '@rsbuild/core';
+import { pluginBabel } from '@rsbuild/plugin-babel';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
 
@@ -136,6 +137,12 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginSass(),
+    pluginBabel({
+      include: /\.(?:jsx|tsx)$/,
+      babelLoaderOptions(opts) {
+        opts.plugins?.unshift(['babel-plugin-react-compiler', { target: '18' }]);
+      },
+    }),
     !isDevelopment &&
       pluginPWA({
         logo: path.resolve(__dirname, '../images/logo.png'),
