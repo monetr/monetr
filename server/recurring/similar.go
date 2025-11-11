@@ -218,6 +218,10 @@ func calculateSignature(group *models.TransactionCluster) {
 		slug[i] = part.Word
 		hashSlug[i] = strings.ToLower(part.Sanitized)
 	}
+	// This way the hash is consistent if the values of the top values changes
+	// slightly. As long as the words themselves are the same the hash stays the
+	// same.
+	sort.Strings(hashSlug)
 	consistentId.Write([]byte(strings.Join(hashSlug, "-")))
 	group.Name = strings.TrimSpace(strings.Join(slug, " "))
 	group.Signature = hex.EncodeToString(consistentId.Sum(nil))
