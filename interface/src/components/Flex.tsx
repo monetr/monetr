@@ -15,6 +15,7 @@ export const flexVariants = cva([styles.root], {
     },
     justify: {
       default: undefined,
+      start: styles.justifyStart,
       center: styles.justifyCenter,
       between: styles.justifyBetween,
       end: styles.justifyEnd,
@@ -53,9 +54,9 @@ export const flexVariants = cva([styles.root], {
   },
 });
 
-type VariantProps = Omit<Parameters<typeof flexVariants>[0], 'className' | 'class'>;
+export type VariantProps = Omit<Parameters<typeof flexVariants>[0], 'className' | 'class'>;
 
-type FlexProps = VariantProps & React.HTMLAttributes<HTMLDivElement>;
+export type FlexProps = VariantProps & React.HTMLAttributes<HTMLDivElement>;
 
 export default function Flex({
   gap,

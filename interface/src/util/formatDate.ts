@@ -1,4 +1,4 @@
-import { tz, TZDate } from '@date-fns/tz';
+import { type TZDate, tz } from '@date-fns/tz';
 import { format, isThisYear, type Locale } from 'date-fns';
 
 export enum DateLength {

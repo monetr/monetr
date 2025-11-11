@@ -44,6 +44,10 @@
   gap: 8 * variables.$size;
 }
 
+.justifyStart {
+  justify-content: start;
+}
+
 .justifyCenter {
   justify-content: center;
 }

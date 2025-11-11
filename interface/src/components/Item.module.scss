@@ -2,29 +2,14 @@
 @use '@monetr/interface/variables';
 
 .itemRoot {
-  position: relative;
-  width: 100%;
-
-  padding-left: 1 * variables.$size;
-  padding-right: 1 * variables.$size;
-
-  @media (min-width: variables.$mediumScreen) {
-    padding-left: 2 * variables.$size;
-    padding-right: 2 * variables.$size;
-  }
-
-  &:hover, &:active {
-    .itemLink {
-      background-color: var(--background-active);
-    }
-  }
-}
-
-.itemLink {
   display: flex;
-  height: 100%;
-  gap: 1 * variables.$size;
+  position: relative;
+  align-items: center;
+  gap: 2 * variables.$size;
   border-radius: var(--border-radius);
+
+  margin-left: 1 * variables.$size;
+  margin-right: 1 * variables.$size;
 
   padding-top: 1 * variables.$size;
   padding-bottom: 1 * variables.$size;
@@ -33,5 +18,16 @@
 
   @media (min-width: variables.$mediumScreen) {
     gap: 4 * variables.$size;
+
+    margin-left: 2 * variables.$size;
+    margin-right: 2 * variables.$size;
   }
+
+  &:hover, &:active {
+    background-color: var(--background-active);
+  }
+}
+
+.itemLink {
+  height: 100%;
 }

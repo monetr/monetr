@@ -1,5 +1,4 @@
 import { Fragment, useRef } from 'react';
-import { tz } from '@date-fns/tz';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
 import { startOfDay, startOfToday } from 'date-fns';

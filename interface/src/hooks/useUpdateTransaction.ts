@@ -53,10 +53,15 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<T
         // For all of the spending objects that were updated we need to make sure to update their individual items if
         // they have been requested.
         (spending || []).map(spending =>
-          queryClient.setQueryData(
-            [`/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}`],
-            spending,
-          ),
+          Promise.all([
+            queryClient.setQueryData(
+              [`/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}`],
+              spending,
+            ),
+            queryClient.invalidateQueries({
+              queryKey: [`/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}/transactions`],
+            }),
+          ]),
         ),
         queryClient.setQueryData<Partial<Balance>>(
           [`/bank_accounts/${transaction.bankAccountId}/balances`],

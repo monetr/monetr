@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
+import ExpenseTransactionList from '@monetr/interface/components/expenses/ExpenseTransactionList';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
@@ -223,6 +224,8 @@ export default function ExpenseDetails(): JSX.Element {
               placeholder='Select a spending frequency...'
               required
             />
+            <Divider className='w-1/2 my-8' />
+            <ExpenseTransactionList spending={spending} />
           </div>
           <Divider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>

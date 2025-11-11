@@ -1,16 +1,15 @@
 import { Link } from 'react-router-dom';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
-import Flex from '@monetr/interface/components/Flex';
+import { flexVariants } from '@monetr/interface/components/Flex';
+import { Item, ItemContent } from '@monetr/interface/components/Item';
 import Typography from '@monetr/interface/components/Typography';
 import TransactionAmount from '@monetr/interface/components/transactions/TransactionAmount';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransaction } from '@monetr/interface/hooks/useTransaction';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
-
-import styles from '../Item.module.scss';
-import useTimezone from '@monetr/interface/hooks/useTimezone';
 
 export interface SimilarTransactionItemProps {
   transactionId: string;
@@ -50,25 +49,42 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
 
   const redirectUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
 
-  return (
-    <li className={styles.itemRoot}>
-      <Link to={redirectUrl} className={styles.itemLink}>
-        <Flex orientation='row' align='center' gap='lg' flex='shrink'>
-          <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
-          <Flex orientation='column' gap='none' flex='shrink'>
-            <Typography color='emphasis' size='md' weight='semibold' ellipsis>
-              {transaction.getName()}
-            </Typography>
-            <Typography size='sm' weight='medium' ellipsis>
-              {formatDate(transaction.date, inTimezone, locale, DateLength.Long)}
-            </Typography>
-          </Flex>
-        </Flex>
-        <Flex align='center' justify='end' flex='grow' shrink='none' width='fit'>
+  if (props.disableNavigate) {
+    return (
+      <Item>
+        <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
+        <ItemContent orientation='column' gap='none' flex='shrink' justify='start' align='default' shrink='default'>
+          <Typography component='p' color='emphasis' size='md' weight='semibold' ellipsis>
+            {transaction.getName()}
+          </Typography>
+          <Typography component='p' size='sm' weight='medium' ellipsis>
+            {formatDate(transaction.date, inTimezone, locale, DateLength.Long)}
+          </Typography>
+        </ItemContent>
+        <ItemContent align='center' justify='end' flex='grow' shrink='none' width='fit'>
           <TransactionAmount transaction={transaction} />
-          {!props.disableNavigate && <ArrowLink to={redirectUrl} />}
-        </Flex>
+        </ItemContent>
+      </Item>
+    );
+  }
+
+  return (
+    <Item>
+      <Link className={flexVariants({ orientation: 'row' })} to={redirectUrl}>
+        <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
+        <ItemContent orientation='column' gap='none' flex='shrink' justify='start' align='default' shrink='default'>
+          <Typography component='p' color='emphasis' size='md' weight='semibold' ellipsis>
+            {transaction.getName()}
+          </Typography>
+          <Typography component='p' size='sm' weight='medium' ellipsis>
+            {formatDate(transaction.date, inTimezone, locale, DateLength.Long)}
+          </Typography>
+        </ItemContent>
+        <ItemContent align='center' justify='end' flex='grow' shrink='none' width='fit'>
+          <TransactionAmount transaction={transaction} />
+          <ArrowLink to={redirectUrl} />
+        </ItemContent>
       </Link>
-    </li>
+    </Item>
   );
 }
