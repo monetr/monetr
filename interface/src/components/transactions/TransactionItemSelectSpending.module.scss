@@ -26,6 +26,10 @@
       opacity: 100%;
     }
   }
+
+  &:focus-within {
+    --ring-size: 2px;
+  }
 }
 
 .selectSpendingInput {
@@ -40,6 +44,7 @@
   }
 
   &[data-freetouse="false"] {
+    font-weight: var(--semibold);
     color: var(--content-emphasis);
   }
 }
