@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, lazy } from 'react';
 import { withSentryReactRouterV6Routing } from '@sentry/react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
@@ -12,8 +12,6 @@ import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 import Loading from '@monetr/interface/loading';
-import SubscribePage from '@monetr/interface/pages/account/subscribe';
-import AfterCheckoutPage from '@monetr/interface/pages/account/subscribe/after';
 import BankAccountSettingsPage from '@monetr/interface/pages/bank/settings';
 import ConfigError from '@monetr/interface/pages/error/config';
 import ExpenseDetails from '@monetr/interface/pages/expense/details';
@@ -30,20 +28,27 @@ import MultifactorAuthenticationPage from '@monetr/interface/pages/login/multifa
 import LogoutPage from '@monetr/interface/pages/logout';
 import ForgotPasswordNew from '@monetr/interface/pages/password/forgot';
 import PasswordResetNew from '@monetr/interface/pages/password/reset';
-import OauthReturn from '@monetr/interface/pages/plaid/oauth-return';
 import Register from '@monetr/interface/pages/register';
 import SettingsAbout from '@monetr/interface/pages/settings/about';
-import SettingsBilling from '@monetr/interface/pages/settings/billing';
 import SettingsOverview from '@monetr/interface/pages/settings/overview';
 import SettingsSecurity from '@monetr/interface/pages/settings/security';
 import SetupPage from '@monetr/interface/pages/setup';
 import SetupManualLinkPage from '@monetr/interface/pages/setup/manual';
-import SubscriptionPage from '@monetr/interface/pages/subscription';
 import TransactionDetails from '@monetr/interface/pages/transaction/details';
 import Transactions from '@monetr/interface/pages/transactions';
 import VerifyEmail from '@monetr/interface/pages/verify/email';
 import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
+
+// Billing related pages do not need to be in the main bundle, this way self hosted deployments will in general just run
+// better since they never need to load billing related modules.
+const AfterCheckoutPage = lazy(() => import('@monetr/interface/pages/account/subscribe/after'));
+const SubscribePage = lazy(() => import('@monetr/interface/pages/account/subscribe'));
+const SettingsBilling = lazy(() => import('@monetr/interface/pages/settings/billing'));
+const SubscriptionPage = lazy(() => import('@monetr/interface/pages/subscription'));
+
+// Plaid OAuth return is barely ever used anymore so it can be broken apart as well.
+const OauthReturn = lazy(() => import('@monetr/interface/pages/plaid/oauth-return'));
 
 import styles from './monetr.module.css';
 
