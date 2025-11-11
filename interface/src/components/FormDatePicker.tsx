@@ -8,15 +8,16 @@ import { Calendar } from '@monetr/interface/components/Calendar';
 import ErrorText from '@monetr/interface/components/ErrorText';
 import Label, { type LabelDecorator } from '@monetr/interface/components/Label';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
+import { Skeleton } from '@monetr/interface/components/Skeleton';
+import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import errorTextStyles from './ErrorText.module.scss';
 import datePickerStyles from './FormDatePicker.module.scss';
 import inputStyles from './FormTextField.module.scss';
+import selectStyles from './Select.module.scss';
 import typographyStyles from './Typography.module.scss';
-
-import { enUS } from 'date-fns/locale/en-US';
 
 export interface FormDatePickerProps extends Omit<React.HTMLAttributes<HTMLButtonElement>, 'value' | 'defaultValue'> {
   value?: Date;
@@ -40,6 +41,8 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
   const today = startOfToday({
     in: inTimezone,
   });
+  // Load the locale data files so we can format dates with them.
+  const { data: locale, isLoading: localeIsLoading } = useLocale();
   const formikContext = useFormikContext();
 
   const getFormikError = () => {
@@ -87,7 +90,6 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
   }, [minDate, maxDate]);
 
   const hasValue = Boolean(selectedValue);
-  const formattedSelection = hasValue ? formatSelectedDates(selectedValue, undefined, enUS) : placeholder;
 
   const defaultMonth = startOfMonth(selectedValue ?? maxDate ?? today, {
     in: inTimezone,
@@ -133,6 +135,22 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
 
   const LabelDecorator = props.labelDecorator || (() => null);
 
+  if (localeIsLoading) {
+    return (
+      <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
+        <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
+          <LabelDecorator name={props.name} disabled={props.disabled} />
+        </Label>
+        <div className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)} data-error={props.error}>
+          <Skeleton className='w-full h-5 mr-2' />
+        </div>
+        <ErrorText error={props.error} />
+      </div>
+    );
+  }
+
+  const formattedSelection = hasValue ? formatSelectedDates(selectedValue, undefined, locale) : placeholder;
+
   return (
     <div
       className={mergeTailwind(errorTextStyles.errorTextPadding, 'relative', className)}
@@ -177,7 +195,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
               handleSelect(value);
               handleClose();
             }}
-            locale={enUS}
+            locale={locale}
             disabled={disabledDays}
             enableYearNavigation={enableYearNavigation}
             className='overflow-y-auto outline-none rounded-lg p-3 bg-dark-monetr-background'

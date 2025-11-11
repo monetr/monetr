@@ -1,10 +1,11 @@
-import { format, isThisYear } from 'date-fns';
+import { format } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { rrulestr } from 'rrule';
 
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import MSpan from '@monetr/interface/components/MSpan';
+import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useNextFundingForecast } from '@monetr/interface/hooks/useNextFundingForecast';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
@@ -16,7 +17,8 @@ export interface FundingItemProps {
 }
 
 export default function FundingItem(props: FundingItemProps): JSX.Element {
-  const { data: locale } = useLocaleCurrency();
+  const { data: localeCurrency } = useLocaleCurrency();
+  const { data: locale } = useLocale();
   const navigate = useNavigate();
   const { funding } = props;
   const contributionForecast = useNextFundingForecast(funding.fundingScheduleId);
@@ -26,9 +28,15 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
   const ruleDescription = capitalize(rule.toText());
 
   const next = funding.nextRecurrence;
-  const dateFormatString = isThisYear(next) ? 'EEEE LLLL do' : 'EEEE LLLL do, yyyy';
+
+  const dateFormatString = locale.formatLong.date({
+    width: 'long',
+  });
+  // const dateFormatString = isThisYear(next) ? 'EEEE LLLL do' : 'EEEE LLLL do, yyyy';
   // TODO look into format distance.
-  const nextOccurrenceString = format(next, dateFormatString);
+  const nextOccurrenceString = format(next, dateFormatString, {
+    locale,
+  });
 
   function openDetails() {
     navigate(`/bank/${funding.bankAccountId}/funding/${funding.fundingScheduleId}/details`);
@@ -64,7 +72,9 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
               <span className='block sm:hidden text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>Est.</span>
               &nbsp;
               <span className='text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>
-                {contributionForecast?.data ? locale.formatAmount(contributionForecast.data, AmountType.Stored) : '...'}
+                {contributionForecast?.data
+                  ? localeCurrency.formatAmount(contributionForecast.data, AmountType.Stored)
+                  : '...'}
               </span>
             </div>
           </div>

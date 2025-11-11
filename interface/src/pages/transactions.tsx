@@ -6,8 +6,8 @@ import { useNavigationType } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
-import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import Typography from '@monetr/interface/components/Typography';
 import TransactionDateItem from '@monetr/interface/components/transactions/TransactionDateItem';
 import TransactionItem from '@monetr/interface/components/transactions/TransactionItem';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
@@ -71,7 +71,7 @@ export default function Transactions(): JSX.Element {
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>One moment...</MSpan>
+        <Typography size='5xl'>One moment...</Typography>
       </div>
     );
   }
@@ -80,8 +80,8 @@ export default function Transactions(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content size-24' />
-        <MSpan className='text-5xl'>Something isn't right...</MSpan>
-        <MSpan className='text-2xl'>We weren't able to retrieve transactions at this time...</MSpan>
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>We weren't able to retrieve transactions at this time...</Typography>
       </div>
     );
   }
@@ -141,13 +141,13 @@ export default function Transactions(): JSX.Element {
             <div className='w-full flex justify-center space-x-4'>
               <ShoppingCart className='h-16 w-16 text-5xl dark:text-dark-monetr-content-muted' />
             </div>
-            <MSpan size='xl' color='subtle' className='text-center'>
+            <Typography size='xl' color='subtle' align='center'>
               You don't have any transactions yet...
-            </MSpan>
-            <MSpan size='lg' color='subtle' className='text-center'>
+            </Typography>
+            <Typography size='lg' color='subtle' align='center'>
               Transactions will show up here once we receive them from Plaid. Or the current account might not support
               transaction data from Plaid.
-            </MSpan>
+            </Typography>
           </div>
         </div>
       </Fragment>

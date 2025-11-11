@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import type { UseQueryResult } from '@tanstack/react-query';
 
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
+import { useCurrentLocale } from '@monetr/interface/hooks/useCurrentLocale';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { type AmountType, amountToFriendly, formatAmount, friendlyToAmount } from '@monetr/interface/util/amounts';
 
@@ -30,7 +31,7 @@ export const DefaultCurrency = 'USD';
 export default function useLocaleCurrency(forceCurrency?: string): UseQueryResult<LocaleCurrency, unknown> {
   const { data: me, ...authenticationState } = useAuthentication();
   const bankAccount = useSelectedBankAccount();
-  const locale = useMemo(() => me?.user?.account?.locale || 'en_US', [me]);
+  const locale = useCurrentLocale();
   const currency = useMemo(() => {
     // Return the first _defined_ currency.
     return [forceCurrency, bankAccount?.data?.currency, me?.defaultCurrency, DefaultCurrency].find(value => !!value);

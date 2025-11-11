@@ -10,6 +10,7 @@ import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankSt
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
 import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useNextFundingDate } from '@monetr/interface/hooks/useNextFundingDate';
@@ -18,7 +19,6 @@ import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
-import Typography from '@monetr/interface/components/Typography';
 
 export interface BudgetingSidebarProps {
   className?: string;

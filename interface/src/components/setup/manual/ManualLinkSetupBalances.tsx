@@ -10,6 +10,7 @@ import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/Ma
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import Typography from '@monetr/interface/components/Typography';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
+import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 
 export type ManualLinkSetupBalancesValues = {
   startingBalance: number;
@@ -18,17 +19,19 @@ export type ManualLinkSetupBalancesValues = {
 
 export default function ManualLinkSetupBalances(): JSX.Element {
   const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
-  const initialValues: ManualLinkSetupBalancesValues = {
-    startingBalance: 0.0,
-    currency: 'USD',
-    ...viewContext.formData,
-  };
+  const { data: currency } = useLocaleCurrency();
 
   function submit(values: ManualLinkSetupBalancesValues, helpers: FormikHelpers<ManualLinkSetupBalancesValues>) {
     helpers.setSubmitting(true);
     viewContext.updateFormData(values);
     viewContext.goToView(ManualLinkSetupSteps.Income);
   }
+
+  const initialValues: ManualLinkSetupBalancesValues = {
+    startingBalance: 0.0,
+    currency: currency.currency,
+    ...viewContext.formData,
+  };
 
   return (
     <MForm
