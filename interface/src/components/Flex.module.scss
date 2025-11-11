@@ -2,7 +2,6 @@
 
 .root {
   display: flex;
-  width: 100%;
 }
 
 .flexRow {
@@ -53,6 +52,10 @@
   justify-content: space-between;
 }
 
+.justifyEnd {
+  justify-content: end;
+}
+
 .alignCenter {
   align-items: center;
 }
@@ -64,4 +67,16 @@
 .flexShrink {
   flex-shrink: 1;
   min-width: 0px;
+}
+
+.shrinkNone {
+  flex-shrink: 0;
+}
+
+.widthDefault {
+  width: 100%;
+}
+
+.widthFit {
+  width: fit-content;
 }

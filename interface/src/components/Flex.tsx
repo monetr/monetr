@@ -17,6 +17,7 @@ export const flexVariants = cva([styles.root], {
       default: undefined,
       center: styles.justifyCenter,
       between: styles.justifyBetween,
+      end: styles.justifyEnd,
     },
     align: {
       default: undefined,
@@ -33,12 +34,22 @@ export const flexVariants = cva([styles.root], {
       grow: styles.flexGrow,
       shrink: styles.flexShrink,
     },
+    shrink: {
+      default: undefined,
+      none: styles.shrinkNone,
+    },
+    width: {
+      default: styles.widthDefault,
+      fit: styles.widthFit,
+    },
   },
   defaultVariants: {
     justify: 'default',
     align: 'default',
     gap: 'md',
     orientation: 'row',
+    shrink: 'default',
+    width: 'default',
   },
 });
 
@@ -52,10 +63,15 @@ export default function Flex({
   align,
   orientation,
   flex,
+  shrink,
+  width,
   className,
   ...props
 }: FlexProps): React.JSX.Element {
   return (
-    <div className={mergeTailwind(flexVariants({ gap, justify, align, orientation, flex }), className)} {...props} />
+    <div
+      className={mergeTailwind(flexVariants({ gap, justify, align, orientation, shrink, flex, width }), className)}
+      {...props}
+    />
   );
 }

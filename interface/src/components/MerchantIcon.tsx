@@ -34,12 +34,10 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
     );
   }
 
-  const classNames = mergeTailwind('h-10 w-10', props.className);
-
   // If we have no icon to work with then create an avatar with the first character of the transaction name.
   const letter = props?.name?.toUpperCase().charAt(0) || '?';
   return (
-    <Avatar className={classNames}>
+    <Avatar className={props.className}>
       <AvatarFallback>{letter}</AvatarFallback>
     </Avatar>
   );

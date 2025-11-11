@@ -1,0 +1,37 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.itemRoot {
+  position: relative;
+  width: 100%;
+
+  padding-left: 1 * variables.$size;
+  padding-right: 1 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-left: 2 * variables.$size;
+    padding-right: 2 * variables.$size;
+  }
+
+  &:hover, &:active {
+    .itemLink {
+      background-color: var(--background-active);
+    }
+  }
+}
+
+.itemLink {
+  display: flex;
+  height: 100%;
+  gap: 1 * variables.$size;
+  border-radius: var(--border-radius);
+
+  padding-top: 1 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    gap: 4 * variables.$size;
+  }
+}

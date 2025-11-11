@@ -1,11 +1,14 @@
 import { format, isThisYear } from 'date-fns';
+import { Link } from 'react-router-dom';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
+import Flex from '@monetr/interface/components/Flex';
+import Typography from '@monetr/interface/components/Typography';
+import TransactionAmount from '@monetr/interface/components/transactions/TransactionAmount';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
-import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useTransaction } from '@monetr/interface/hooks/useTransaction';
-import { AmountType } from '@monetr/interface/util/amounts';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import styles from '../Item.module.scss';
 
 export interface SimilarTransactionItemProps {
   transactionId: string;
@@ -16,7 +19,6 @@ export interface SimilarTransactionItemProps {
 }
 
 export default function SimilarTransactionItem(props: SimilarTransactionItemProps): JSX.Element {
-  const { data: locale } = useLocaleCurrency();
   const { data: transaction, isLoading, isError } = useTransaction(props.transactionId);
 
   if (isLoading) {
@@ -42,15 +44,6 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
     return null;
   }
 
-  const amountClassnames = mergeTailwind(
-    {
-      'dark:text-dark-monetr-green': transaction.getIsAddition(),
-      'dark:text-dark-monetr-red': !transaction.getIsAddition(),
-    },
-    'text-end',
-    'font-semibold',
-  );
-
   const redirectUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
 
   const dateString = isThisYear(transaction.date)
@@ -58,26 +51,24 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
     : format(transaction.date, 'MMMM do, yyyy');
 
   return (
-    <li className='group relative w-full px-1 md:px-2'>
-      <div className='group flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4'>
-        <div className='flex w-full min-w-0 flex-1 flex-row items-center gap-4 md:w-1/2'>
+    <li className={styles.itemRoot}>
+      <Link to={redirectUrl} className={styles.itemLink}>
+        <Flex orientation='row' align='center' gap='lg' flex='shrink'>
           <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
-          <div className='flex min-w-0 flex-col overflow-hidden'>
-            <span className='w-full min-w-0 truncate text-base font-semibold dark:text-dark-monetr-content-emphasis'>
+          <Flex orientation='column' gap='none' flex='shrink'>
+            <Typography color='emphasis' size='md' weight='semibold' ellipsis>
               {transaction.getName()}
-            </span>
-            <span className='w-full min-w-0 truncate text-sm font-medium dark:text-dark-monetr-content'>
+            </Typography>
+            <Typography size='sm' weight='medium' ellipsis>
               {dateString}
-            </span>
-          </div>
-        </div>
-        <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
-          <span className={amountClassnames}>
-            {locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0)}
-          </span>
+            </Typography>
+          </Flex>
+        </Flex>
+        <Flex align='center' justify='end' flex='grow' shrink='none' width='fit'>
+          <TransactionAmount transaction={transaction} />
           {!props.disableNavigate && <ArrowLink to={redirectUrl} />}
-        </div>
-      </div>
+        </Flex>
+      </Link>
     </li>
   );
 }
