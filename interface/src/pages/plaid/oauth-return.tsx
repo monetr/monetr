@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import * as Sentry from '@sentry/react';
+import { captureEvent } from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
@@ -67,7 +67,7 @@ export default function OauthReturn(): JSX.Element {
 
   function plaidLinkExit(error: null | PlaidLinkError, metadata: PlaidLinkOnExitMetadata) {
     if (error) {
-      Sentry.captureEvent({
+      captureEvent({
         message: 'Plaid link exited with error',
         level: 'error',
         tags: {

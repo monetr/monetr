@@ -1,7 +1,7 @@
 import '@fontsource-variable/inter';
 
 import React from 'react';
-import * as Sentry from '@sentry/react';
+import { init, reactRouterV6BrowserTracingIntegration, showReportDialog } from '@sentry/react';
 import { createRoutesFromChildren, matchRoutes, useLocation, useNavigationType } from 'react-router-dom';
 
 import Root from '@monetr/interface/Root';
@@ -16,11 +16,11 @@ const container = document.getElementById('root');
 const root = createRoot(container);
 
 if (window?.__MONETR__?.SENTRY_DSN) {
-  Sentry.init({
+  init({
     dsn: window?.__MONETR__?.SENTRY_DSN,
     transport: makeSneakyFetchTransport,
     integrations: [
-      Sentry.reactRouterV6BrowserTracingIntegration({
+      reactRouterV6BrowserTracingIntegration({
         useEffect: React.useEffect,
         useLocation,
         useNavigationType,
@@ -39,7 +39,7 @@ if (window?.__MONETR__?.SENTRY_DSN) {
       // Check if it is an exception, and if so, show the report dialog
       if (event.exception) {
         try {
-          Sentry.showReportDialog({ eventId: event.event_id });
+          showReportDialog({ eventId: event.event_id });
         } catch (e) {
           console.error(e);
         }

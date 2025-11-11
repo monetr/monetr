@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import * as Sentry from '@sentry/react';
+import { setUser } from '@sentry/react';
 import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import { DefaultCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
@@ -38,7 +38,7 @@ export function useAuthentication(): UseQueryResult<Authentication | undefined, 
   // When we go from not being logged in, to being logged in; we should automatically set the user context for sentry!
   useEffect(() => {
     if (result?.data?.user?.accountId) {
-      Sentry.setUser({
+      setUser({
         id: result.data.user.accountId,
         username: `account:${result.data.user.accountId}`,
       });

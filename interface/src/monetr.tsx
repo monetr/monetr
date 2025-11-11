@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import * as Sentry from '@sentry/react';
+import { withSentryReactRouterV6Routing } from '@sentry/react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
@@ -47,7 +47,7 @@ import sortAccounts from '@monetr/interface/util/sortAccounts';
 
 import styles from './monetr.module.css';
 
-const RoutesImpl = Sentry.withSentryReactRouterV6Routing(Routes);
+const RoutesImpl = withSentryReactRouterV6Routing(Routes);
 
 export default function Monetr(): JSX.Element {
   const { data: config, isLoading: configIsLoading, isError: configIsError } = useAppConfiguration();

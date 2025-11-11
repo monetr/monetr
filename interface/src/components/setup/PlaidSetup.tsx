@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import * as Sentry from '@sentry/react';
+import { captureEvent, captureException } from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   type PlaidLinkError,
@@ -72,7 +72,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
         'plaid.link_session_id': metadata.link_session_id,
         data: error,
       });
-      Sentry.captureEvent({
+      captureEvent({
         message: 'Plaid link exited with error',
         level: 'error',
         tags: {
@@ -177,7 +177,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
 
   useEffect(() => {
     if (plaidError) {
-      Sentry.captureException(plaidError);
+      captureException(plaidError);
     }
   }, [plaidError]);
 

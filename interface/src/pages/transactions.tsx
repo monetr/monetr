@@ -14,8 +14,12 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useTransactions } from '@monetr/interface/hooks/useTransactions';
 import { showNewTransactionModal } from '@monetr/interface/modals/NewTransactionModal';
-import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import type Transaction from '@monetr/interface/models/Transaction';
+
+const showUploadTransactionsModal = async () =>
+  await import('@monetr/interface/modals/UploadTransactions/UploadTransactionsModal').then(
+    modal => modal.showUploadTransactionsModal,
+  );
 
 let evilScrollPosition: number = 0;
 

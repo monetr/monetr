@@ -1,5 +1,5 @@
 import NiceModal from '@ebay/nice-modal-react';
-import * as Sentry from '@sentry/react';
+import { ErrorBoundary } from '@sentry/react';
 import { BrowserRouter } from 'react-router-dom';
 
 import MQueryClient from '@monetr/interface/components/MQueryClient';
@@ -11,7 +11,7 @@ import Monetr from '@monetr/interface/monetr';
 export default function Root(): JSX.Element {
   return (
     <BrowserRouter>
-      <Sentry.ErrorBoundary>
+      <ErrorBoundary>
         <MQueryClient>
           <MSnackbarProvider>
             <TooltipProvider>
@@ -22,7 +22,7 @@ export default function Root(): JSX.Element {
             </TooltipProvider>
           </MSnackbarProvider>
         </MQueryClient>
-      </Sentry.ErrorBoundary>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }
