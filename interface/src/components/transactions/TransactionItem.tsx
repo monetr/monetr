@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
+import Flex from '@monetr/interface/components/Flex';
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import TransactionAmount from '@monetr/interface/components/transactions/TransactionAmount';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
@@ -14,57 +15,7 @@ export interface TransactionItemProps {
 }
 
 export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
-  const { data: spending } = useSpending(transaction.spendingId);
   const detailsUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
-
-  interface BudgetingInfoProps {
-    className: string;
-  }
-
-  function BudgetingInfo(props: BudgetingInfoProps): JSX.Element {
-    const className = mergeTailwind(
-      'overflow-hidden',
-      'text-ellipsis',
-      'whitespace-nowrap',
-      'min-w-0',
-      props.className,
-    );
-
-    const spentFromClasses = mergeTailwind(
-      {
-        // Transaction does have spending
-        'font-bold': Boolean(transaction.spendingId),
-        'dark:text-dark-monetr-content-emphasis': Boolean(transaction.spendingId),
-        // No spending for the transaction
-        'font-medium': !transaction.spendingId,
-        'dark:text-dark-monetr-content': !transaction.spendingId,
-      },
-      'md:text-base',
-      'min-w-0',
-      'overflow-hidden',
-      'text-ellipsis',
-      'text-sm',
-      'whitespace-nowrap',
-    );
-
-    if (transaction.getIsAddition()) {
-      return (
-        <span className={className}>
-          <span className='min-w-0 flex-none truncate font-medium dark:text-dark-monetr-content-subtle'>
-            Contribution
-          </span>
-        </span>
-      );
-    }
-
-    return (
-      <span className={className}>
-        <span className='min-w-0 flex-none truncate font-medium dark:text-content'>Spent from</span>
-        &nbsp;
-        <span className={spentFromClasses}>{spending?.name || 'Free-To-Use'}</span>
-      </span>
-    );
-  }
 
   return (
     <li
@@ -79,23 +30,70 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
       <div className='group flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4'>
         <div className='flex w-full min-w-0 flex-1 flex-row items-center gap-4 md:w-1/2'>
           <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
-          <div className='flex min-w-0 flex-col overflow-hidden'>
-            <MSpan size='md' weight='semibold' color='emphasis' ellipsis>
+          <Flex orientation='column' gap='none' flex='shrink'>
+            <Typography size='md' weight='semibold' color='emphasis' ellipsis>
               {transaction.getName()}
-            </MSpan>
-            <span className='hidden w-full min-w-0 truncate text-sm font-medium dark:text-content md:block'>
+            </Typography>
+            <Typography size='sm' weight='medium' ellipsis className='hidden md:block'>
               {transaction.getMainCategory()}
-            </span>
-            <BudgetingInfo className='flex w-full text-sm md:hidden' />
-          </div>
+            </Typography>
+            <BudgetingInfo className='flex w-full text-sm md:hidden' transaction={transaction} />
+          </Flex>
         </div>
         {!transaction.getIsAddition() && <MSelectSpendingTransaction transaction={transaction} />}
-        {transaction.getIsAddition() && <BudgetingInfo className='hidden md:flex w-1/2 flex-1 items-center pl-6' />}
+        {transaction.getIsAddition() && (
+          <BudgetingInfo className='hidden md:flex w-1/2 flex-1 items-center pl-6' transaction={transaction} />
+        )}
         <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
           <TransactionAmount transaction={transaction} />
           <ArrowLink to={detailsUrl} />
         </div>
       </div>
     </li>
+  );
+}
+
+interface BudgetingInfoProps {
+  className: string;
+  transaction: Transaction;
+}
+
+function BudgetingInfo({ transaction, ...props }: BudgetingInfoProps): JSX.Element {
+  const { data: spending } = useSpending(transaction.spendingId);
+  const className = mergeTailwind('overflow-hidden', 'text-ellipsis', 'whitespace-nowrap', 'min-w-0', props.className);
+
+  const spentFromClasses = mergeTailwind(
+    {
+      // Transaction does have spending
+      'font-bold': Boolean(transaction.spendingId),
+      'dark:text-dark-monetr-content-emphasis': Boolean(transaction.spendingId),
+      // No spending for the transaction
+      'font-medium': !transaction.spendingId,
+      'dark:text-dark-monetr-content': !transaction.spendingId,
+    },
+    'md:text-base',
+    'min-w-0',
+    'overflow-hidden',
+    'text-ellipsis',
+    'text-sm',
+    'whitespace-nowrap',
+  );
+
+  if (transaction.getIsAddition()) {
+    return (
+      <span className={className}>
+        <span className='min-w-0 flex-none truncate font-medium dark:text-dark-monetr-content-subtle'>
+          Contribution
+        </span>
+      </span>
+    );
+  }
+
+  return (
+    <span className={className}>
+      <span className='min-w-0 flex-none truncate font-medium dark:text-content'>Spent from</span>
+      &nbsp;
+      <span className={spentFromClasses}>{spending?.name || 'Free-To-Use'}</span>
+    </span>
   );
 }
