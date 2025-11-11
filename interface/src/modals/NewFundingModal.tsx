@@ -1,5 +1,4 @@
 import { Fragment, useCallback, useId, useRef } from 'react';
-import { tz } from '@date-fns/tz';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
 import { startOfDay, startOfTomorrow } from 'date-fns';
@@ -33,7 +32,7 @@ interface NewFundingValues {
 
 function NewFundingModal(): JSX.Element {
   const switchId = useId();
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
   const { enqueueSnackbar } = useSnackbar();
@@ -46,7 +45,7 @@ function NewFundingModal(): JSX.Element {
   const initialValues: NewFundingValues = {
     name: '',
     nextOccurrence: startOfTomorrow({
-      in: tz(timezone),
+      in: inTimezone,
     }),
     ruleset: '',
     excludeWeekends: false,
@@ -60,7 +59,7 @@ function NewFundingModal(): JSX.Element {
         bankAccountId: selectedBankAccountId,
         name: values.name,
         nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
-          in: tz(timezone),
+          in: inTimezone,
         }),
         ruleset: values.ruleset,
         estimatedDeposit: values.estimatedDeposit > 0 ? friendlyToAmount(values.estimatedDeposit) : null,
@@ -77,7 +76,7 @@ function NewFundingModal(): JSX.Element {
         )
         .finally(() => helpers.setSubmitting(false));
     },
-    [createFundingSchedule, enqueueSnackbar, friendlyToAmount, modal, selectedBankAccountId, timezone],
+    [createFundingSchedule, enqueueSnackbar, friendlyToAmount, modal, selectedBankAccountId, inTimezone],
   );
 
   return (
@@ -106,7 +105,7 @@ function NewFundingModal(): JSX.Element {
                 label='When do you get paid next?'
                 required
                 min={startOfTomorrow({
-                  in: tz(timezone),
+                  in: inTimezone,
                 })}
               />
               <MSelectFrequency

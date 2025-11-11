@@ -1,9 +1,7 @@
-import { useMemo } from 'react';
-import { tz } from '@date-fns/tz';
 import { format, getUnixTime } from 'date-fns';
 import { ArrowDownRight, ArrowUpRight, TrendingUpDown } from 'lucide-react';
 
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { type ForecastEvent, useForecast } from '@monetr/interface/hooks/useForecast';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -30,19 +28,18 @@ interface TimelineItemData {
 }
 
 export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const { data: spending, isLoading: spendingLoading } = useSpending(props.spendingId);
   const { data: fundingSchedule, isLoading: fundingLoading } = useFundingSchedule(spending?.fundingScheduleId);
   const { data: forecast, isLoading, isError } = useForecast();
-  const inTimezone = useMemo(() => tz(timezone), [timezone]);
 
   if (isLoading || spendingLoading || fundingLoading) {
-    return <MSpan>Loading...</MSpan>;
+    return <Typography>Loading...</Typography>;
   }
 
   if (isError || !spending) {
-    return <MSpan>Failed to load expense forecast!</MSpan>;
+    return <Typography>Failed to load expense forecast!</Typography>;
   }
 
   // Keep only the events that have spending or contributions for this spending object.
@@ -108,9 +105,8 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
 }
 
 function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData & { last: boolean }): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
-  const inTimezone = useMemo(() => tz(timezone), [timezone]);
 
   let header = '';
   let body = '';
@@ -157,10 +153,12 @@ function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData 
       <time className='mb-1 text-sm font-normal leading-none text-zinc-400 dark:text-zinc-500'>
         {format(inTimezone(props.date), 'MMMM do')}
       </time>
-      <h3 className='text-lg font-semibold text-zinc-900 dark:text-white'>
+      <Typography component='h3' size='lg' weight='semibold' color='emphasis'>
         {header} {icon}
-      </h3>
-      <p className='text-base font-normal text-zinc-500 dark:text-zinc-400'>{body}</p>
+      </Typography>
+      <Typography color='subtle' component='p'>
+        {body}
+      </Typography>
       {secondaryBody && <p className='text-base font-normal text-zinc-500 dark:text-zinc-400'>{secondaryBody}</p>}
     </li>
   );

@@ -1,5 +1,4 @@
 import { useRef } from 'react';
-import { tz } from '@date-fns/tz';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
 import { startOfDay, startOfTomorrow } from 'date-fns';
@@ -30,7 +29,7 @@ interface NewGoalValues {
 }
 
 function NewGoalModal(): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
@@ -42,7 +41,7 @@ function NewGoalModal(): JSX.Element {
     name: '',
     amount: 0.0,
     nextOccurrence: startOfTomorrow({
-      in: tz(timezone),
+      in: inTimezone,
     }),
     fundingScheduleId: '',
   };
@@ -52,7 +51,7 @@ function NewGoalModal(): JSX.Element {
       bankAccountId: selectedBankAccountId,
       name: values.name.trim(),
       nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
-        in: tz(timezone),
+        in: inTimezone,
       }),
       spendingType: SpendingType.Goal,
       fundingScheduleId: values.fundingScheduleId,
@@ -105,7 +104,7 @@ function NewGoalModal(): JSX.Element {
               className='w-full md:w-1/2'
               label='How soon will you need it?'
               min={startOfTomorrow({
-                in: tz(timezone),
+                in: inTimezone,
               })}
               name='nextOccurrence'
               required

@@ -1,5 +1,4 @@
 import { useId } from 'react';
-import { tz } from '@date-fns/tz';
 import type { AxiosError } from 'axios';
 import { format, isEqual, startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikErrors, FormikHelpers } from 'formik';
@@ -37,7 +36,7 @@ interface FundingValues {
 
 export default function FundingDetails(): JSX.Element {
   const nameId = useId();
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   // I don't want to do it this way, but it seems like it's the only way to do it for tests without having the entire
   // router also present in the test?
@@ -84,7 +83,7 @@ export default function FundingDetails(): JSX.Element {
       bankAccountId: funding.bankAccountId,
       name: values.name,
       nextRecurrence: startOfDay(values.nextRecurrence, {
-        in: tz(timezone),
+        in: inTimezone,
       }),
       ruleset: values.ruleset,
       excludeWeekends: values.excludeWeekends,
@@ -169,7 +168,7 @@ export default function FundingDetails(): JSX.Element {
               required
               data-testid='funding-details-date-picker'
               min={startOfTomorrow({
-                in: tz(timezone),
+                in: inTimezone,
               })}
             />
             <MSelectFrequency

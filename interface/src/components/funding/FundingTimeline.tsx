@@ -1,6 +1,3 @@
-/* eslint-disable max-len */
-import { useMemo } from 'react';
-import { tz } from '@date-fns/tz';
 import { format, getUnixTime } from 'date-fns';
 import { ArrowUpRight } from 'lucide-react';
 
@@ -81,9 +78,8 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
 }
 
 function TimelineItem({ funding, ...props }: TimelineItemData & { last: boolean }): JSX.Element {
-  const { data: timezone } = useTimezone();
-  const { data: locale } = useLocaleCurrency();
-  const inTimezone = useMemo(() => tz(timezone), [timezone]);
+  const { inTimezone } = useTimezone();
+  const { data: currency } = useLocaleCurrency();
 
   let header = '';
   let body = '';
@@ -93,10 +89,10 @@ function TimelineItem({ funding, ...props }: TimelineItemData & { last: boolean 
   // Only contributed
   header = 'Contribution';
   icon = <ArrowUpRight className='inline-block' />;
-  body = `${funding.name} will contribute ${locale.formatAmount(props.contributedAmount, AmountType.Stored)} to ${props.spendingCount} budget(s), resulting in a total allocation of ${locale.formatAmount(props.endingAllocation, AmountType.Stored)}.`;
+  body = `${funding.name} will contribute ${currency.formatAmount(props.contributedAmount, AmountType.Stored)} to ${props.spendingCount} budget(s), resulting in a total allocation of ${currency.formatAmount(props.endingAllocation, AmountType.Stored)}.`;
   if (funding.estimatedDeposit) {
     body += ' ';
-    body += `An estimated ${locale.formatAmount(funding.estimatedDeposit - props.contributedAmount, AmountType.Stored)} will be left over for Free-to-Use after this contribution.`;
+    body += `An estimated ${currency.formatAmount(funding.estimatedDeposit - props.contributedAmount, AmountType.Stored)} will be left over for Free-to-Use after this contribution.`;
   }
   if (props.date.getDate() !== props.originalDate.getDate() && funding.excludeWeekends) {
     dateExtra = `(Avoided weekend or holiday on ${format(inTimezone(props.originalDate), 'MMMM do')})`;

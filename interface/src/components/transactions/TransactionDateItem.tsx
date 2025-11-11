@@ -1,12 +1,13 @@
-import { isThisYear } from 'date-fns';
-
 import { useLocale } from '@monetr/interface/hooks/useLocale';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
+import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
 
 interface TransactionDateItemProps {
   date: Date;
 }
 
 export default function TransactionDateItem({ date }: TransactionDateItemProps): JSX.Element {
+  const { inTimezone } = useTimezone();
   const { data: locale, isLoading } = useLocale();
 
   if (isLoading) {
@@ -19,13 +20,7 @@ export default function TransactionDateItem({ date }: TransactionDateItemProps):
     );
   }
 
-  const dateString = new Intl.DateTimeFormat(locale.code, {
-    month: 'long',
-    day: 'numeric',
-    // Only include the year if it is a different year than the current year.
-    year: isThisYear(date) ? undefined : 'numeric',
-  }).format(date);
-
+  const dateString = formatDate(date, inTimezone, locale, DateLength.Long);
   return (
     <li className='sticky top-0 z-10 h-10 flex items-center backdrop-blur-sm bg-gradient-to-t from-transparent dark:to-dark-monetr-background via-90% mr-4'>
       <span className='dark:text-dark-monetr-content-subtle font-semibold text-base z-10 px-3 md:px-4'>

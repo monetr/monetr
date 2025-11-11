@@ -1,4 +1,3 @@
-import { format, isThisYear } from 'date-fns';
 import { Link } from 'react-router-dom';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
@@ -6,9 +5,12 @@ import Flex from '@monetr/interface/components/Flex';
 import Typography from '@monetr/interface/components/Typography';
 import TransactionAmount from '@monetr/interface/components/transactions/TransactionAmount';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
+import { useLocale } from '@monetr/interface/hooks/useLocale';
 import { useTransaction } from '@monetr/interface/hooks/useTransaction';
+import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
 
 import styles from '../Item.module.scss';
+import useTimezone from '@monetr/interface/hooks/useTimezone';
 
 export interface SimilarTransactionItemProps {
   transactionId: string;
@@ -19,9 +21,11 @@ export interface SimilarTransactionItemProps {
 }
 
 export default function SimilarTransactionItem(props: SimilarTransactionItemProps): JSX.Element {
+  const { inTimezone } = useTimezone();
   const { data: transaction, isLoading, isError } = useTransaction(props.transactionId);
+  const { data: locale, isLoading: localeIsLoading } = useLocale();
 
-  if (isLoading) {
+  if (isLoading || localeIsLoading) {
     return (
       <li className='group relative w-full px-1 md:px-2'>
         <div className='group animate-pulse flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4'>
@@ -46,10 +50,6 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
 
   const redirectUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
 
-  const dateString = isThisYear(transaction.date)
-    ? format(transaction.date, 'MMMM do')
-    : format(transaction.date, 'MMMM do, yyyy');
-
   return (
     <li className={styles.itemRoot}>
       <Link to={redirectUrl} className={styles.itemLink}>
@@ -60,7 +60,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
               {transaction.getName()}
             </Typography>
             <Typography size='sm' weight='medium' ellipsis>
-              {dateString}
+              {formatDate(transaction.date, inTimezone, locale, DateLength.Long)}
             </Typography>
           </Flex>
         </Flex>

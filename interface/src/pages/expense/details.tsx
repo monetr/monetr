@@ -1,4 +1,3 @@
-import { tz } from '@date-fns/tz';
 import type { AxiosError } from 'axios';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
@@ -39,7 +38,8 @@ interface ExpenseValues {
 }
 
 export default function ExpenseDetails(): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
+  console.log(inTimezone);
   const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();
@@ -114,7 +114,7 @@ export default function ExpenseDetails(): JSX.Element {
       name: values.name,
       description: null,
       nextRecurrence: startOfDay(values.nextRecurrence, {
-        in: tz(timezone),
+        in: inTimezone,
       }),
       fundingScheduleId: values.fundingScheduleId,
       ruleset: values.ruleset,
@@ -205,7 +205,7 @@ export default function ExpenseDetails(): JSX.Element {
               className='w-full'
               required
               min={startOfTomorrow({
-                in: tz(timezone),
+                in: inTimezone,
               })}
             />
             <MSelectFunding

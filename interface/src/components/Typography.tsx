@@ -26,6 +26,7 @@ export const textVariants = cva([styles.root], {
     component: {
       span: undefined,
       p: undefined,
+      h3: undefined,
       code: styles.code,
     },
     color: {
@@ -64,6 +65,7 @@ export type TypographyProps = React.PropsWithChildren<
   VariantProps &
     (
       | ({ component?: 'span' } & React.HTMLAttributes<HTMLSpanElement>)
+      | ({ component?: 'h3' } & React.HTMLAttributes<HTMLHeadingElement>)
       | ({ component?: 'p' } & React.HTMLAttributes<HTMLParagraphElement>)
       | ({ component?: 'code' } & React.HTMLAttributes<HTMLElement>)
     )

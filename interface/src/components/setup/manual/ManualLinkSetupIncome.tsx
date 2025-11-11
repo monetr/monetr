@@ -1,5 +1,4 @@
 import { Fragment } from 'react';
-import { tz } from '@date-fns/tz';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { useNavigate } from 'react-router-dom';
@@ -28,7 +27,7 @@ export type ManualLinkSetupIncomeValues = {
 };
 
 export default function ManualLinkSetupIncome(): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const createLink = useCreateLink();
   const createBankAccount = useCreateBankAccount();
   const createFundingSchedule = useCreateFundingSchedule();
@@ -37,7 +36,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
   const { data: locale } = useLocaleCurrency(viewContext.formData.currency);
   const initialValues: ManualLinkSetupIncomeValues = {
     nextPayday: startOfTomorrow({
-      in: tz(timezone),
+      in: inTimezone,
     }),
     ruleset: '',
     paydayAmount: 0.0,
@@ -69,7 +68,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
           bankAccountId: bankAccount.bankAccountId,
           name: 'Payday',
           nextRecurrence: startOfDay(values.nextPayday, {
-            in: tz(timezone),
+            in: inTimezone,
           }),
           ruleset: values.ruleset,
           estimatedDeposit: locale.friendlyToAmount(values.paydayAmount),
@@ -104,7 +103,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
             className='w-full'
             required
             min={startOfTomorrow({
-              in: tz(timezone),
+              in: inTimezone,
             })}
             autoFocus
           />

@@ -4,6 +4,7 @@
 .root {
   display: flex;
   gap: 2 * variables.$size;
+  align-items: center;
 }
 
 .textExtraSmall {

@@ -1,4 +1,3 @@
-import { tz } from '@date-fns/tz';
 import type { AxiosError } from 'axios';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
@@ -39,7 +38,7 @@ interface GoalValues {
 }
 
 export default function GoalDetails(): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();
@@ -114,7 +113,7 @@ export default function GoalDetails(): JSX.Element {
       name: values.name,
       description: null,
       nextRecurrence: startOfDay(values.nextRecurrence, {
-        in: tz(timezone),
+        in: inTimezone,
       }),
       fundingScheduleId: values.fundingScheduleId,
       ruleset: null,
@@ -215,7 +214,7 @@ export default function GoalDetails(): JSX.Element {
               className='w-full'
               required
               min={startOfTomorrow({
-                in: tz(timezone),
+                in: inTimezone,
               })}
             />
             <MSelectFunding

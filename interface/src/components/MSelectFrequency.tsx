@@ -13,7 +13,7 @@ export interface MSelectFrequencyProps extends Omit<SelectProps<string>, 'onChan
 }
 
 export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { timezone } = useTimezone();
   const [selectedSignature, setSelectedSignature] = useState<string | null>(null);
   const formikContext = useFormikContext();
 

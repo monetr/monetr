@@ -30,12 +30,11 @@ interface TimelineItemData {
 }
 
 export default function GoalTimeline(props: GoalTimelineProps): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const { data: spending } = useSpending(props.spendingId);
   const { data: fundingSchedule } = useFundingSchedule(spending?.fundingScheduleId);
   const { data: forecast, isLoading, isError } = useForecast();
-  const inTimezone = useMemo(() => tz(timezone), [timezone]);
 
   if (isLoading) {
     return <MSpan>Loading...</MSpan>;
@@ -108,9 +107,8 @@ export default function GoalTimeline(props: GoalTimelineProps): JSX.Element {
 }
 
 function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData & { last: boolean }): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
-  const inTimezone = useMemo(() => tz(timezone), [timezone]);
 
   let header = '';
   let body = '';

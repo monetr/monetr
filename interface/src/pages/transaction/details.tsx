@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { tz } from '@date-fns/tz';
 import type { AxiosError } from 'axios';
 import { startOfDay } from 'date-fns';
 import type { FormikHelpers } from 'formik';
@@ -37,7 +36,7 @@ interface TransactionValues {
 }
 
 export default function TransactionDetails(): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const { data: link } = useCurrentLink();
   const { enqueueSnackbar } = useSnackbar();
@@ -53,7 +52,7 @@ export default function TransactionDetails(): JSX.Element {
         spendingId: values.spendingId,
         amount: locale.friendlyToAmount(values.amount),
         date: startOfDay(values.date, {
-          in: tz(timezone),
+          in: inTimezone,
         }),
         isPending: values.isPending,
       });
@@ -74,7 +73,7 @@ export default function TransactionDetails(): JSX.Element {
         )
         .finally(() => helpers.setSubmitting(false));
     },
-    [enqueueSnackbar, locale, transaction, updateTransaction, timezone],
+    [enqueueSnackbar, locale, transaction, updateTransaction, inTimezone],
   );
 
   if (isLoading) {

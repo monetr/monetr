@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { tz } from '@date-fns/tz';
 import { isEqual, type Locale, startOfMonth, startOfToday } from 'date-fns';
 import { useFormikContext } from 'formik';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
@@ -36,8 +35,7 @@ export interface FormDatePickerProps extends Omit<React.HTMLAttributes<HTMLButto
 }
 
 export default function FormDatePicker(props: FormDatePickerProps): JSX.Element {
-  const { data: timezone } = useTimezone();
-  const inTimezone = useMemo(() => tz(timezone), [timezone]);
+  const { inTimezone } = useTimezone();
   const today = startOfToday({
     in: inTimezone,
   });
@@ -72,9 +70,10 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
   const [selectedValue, setSelectedValue] = useState<Date | null>(value);
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Cannot include inTimezone here as it creates a problem.
   React.useEffect(() => {
     setSelectedValue(value ? inTimezone(value) : undefined);
-  }, [value, inTimezone]);
+  }, [value]);
 
   const open = Boolean(anchorEl);
 
@@ -130,7 +129,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
       setSelectedValue(value);
       handleClose();
     },
-    [formikContext, handleClose, inTimezone, props.name],
+    [formikContext, handleClose, props.name, inTimezone],
   );
 
   const LabelDecorator = props.labelDecorator || (() => null);

@@ -35,7 +35,7 @@ interface NewTransactionValues {
 }
 
 function NewTransactionModal(): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
@@ -46,7 +46,7 @@ function NewTransactionModal(): JSX.Element {
   const initialValues: NewTransactionValues = {
     name: '',
     date: startOfToday({
-      in: tz(timezone),
+      in: inTimezone,
     }),
     amount: 0,
     spendingId: null,
@@ -62,7 +62,7 @@ function NewTransactionModal(): JSX.Element {
       name: values.name,
       merchantName: null,
       date: startOfDay(new Date(values.date), {
-        in: tz(timezone),
+        in: inTimezone,
       }),
       isPending: values.isPending,
       spendingId: values.spendingId,

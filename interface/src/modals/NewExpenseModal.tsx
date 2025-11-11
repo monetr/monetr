@@ -1,5 +1,4 @@
 import { useRef } from 'react';
-import { tz } from '@date-fns/tz';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
 import { startOfDay, startOfTomorrow } from 'date-fns';
@@ -32,7 +31,7 @@ interface NewExpenseValues {
 }
 
 function NewExpenseModal(): JSX.Element {
-  const { data: timezone } = useTimezone();
+  const { inTimezone } = useTimezone();
   const {
     data: { friendlyToAmount },
   } = useLocaleCurrency();
@@ -47,7 +46,7 @@ function NewExpenseModal(): JSX.Element {
     name: '',
     amount: 0.0,
     nextOccurrence: startOfTomorrow({
-      in: tz(timezone),
+      in: inTimezone,
     }),
     ruleset: '',
     fundingScheduleId: '',
@@ -58,7 +57,7 @@ function NewExpenseModal(): JSX.Element {
       bankAccountId: selectedBankAccount.bankAccountId,
       name: values.name.trim(),
       nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
-        in: tz(timezone),
+        in: inTimezone,
       }),
       spendingType: SpendingType.Expense,
       fundingScheduleId: values.fundingScheduleId,
@@ -111,7 +110,7 @@ function NewExpenseModal(): JSX.Element {
               className='w-full md:w-1/2'
               label='When do you need it next?'
               min={startOfTomorrow({
-                in: tz(timezone),
+                in: inTimezone,
               })}
               name='nextOccurrence'
               required
