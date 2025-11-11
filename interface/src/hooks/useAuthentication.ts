@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { setUser } from '@sentry/react';
 import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
@@ -19,9 +19,8 @@ export interface Authentication {
 }
 
 export function useAuthentication(): UseQueryResult<Authentication | undefined, unknown> {
-  const result = useQuery<Partial<Authentication>, unknown, Authentication>({
-    queryKey: ['/users/me'],
-    select: data => ({
+  const select = useCallback(
+    (data: Partial<Authentication>) => ({
       user: Boolean(data?.user) && new User(data?.user),
       defaultCurrency: data?.defaultCurrency || DefaultCurrency,
       mfaPending: Boolean(data?.mfaPending),
@@ -32,6 +31,11 @@ export function useAuthentication(): UseQueryResult<Authentication | undefined, 
       trialingUntil: parseDate(data?.trialingUntil),
       hasSubscription: Boolean(data?.hasSubscription),
     }),
+    [],
+  );
+  const result = useQuery<Partial<Authentication>, unknown, Authentication>({
+    queryKey: ['/users/me'],
+    select,
     refetchOnWindowFocus: true, // Might want to change this to 'always' at some point?
   });
 

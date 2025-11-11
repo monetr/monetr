@@ -2,13 +2,15 @@ import { Link } from 'react-router-dom';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
 import Flex from '@monetr/interface/components/Flex';
-import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
 import Typography from '@monetr/interface/components/Typography';
 import TransactionAmount from '@monetr/interface/components/transactions/TransactionAmount';
+import TransactionItemSelectSpending from '@monetr/interface/components/transactions/TransactionItemSelectSpending';
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import type Transaction from '@monetr/interface/models/Transaction';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import styles from './TransactionItemSelectSpending.module.scss';
 
 export interface TransactionItemProps {
   transaction: Transaction;
@@ -19,7 +21,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
 
   return (
     <li
-      className='group relative w-full px-1 md:px-2'
+      className={mergeTailwind('group relative w-full px-1 md:px-2', styles.transactionItemRoot)}
       id={transaction.transactionId}
       data-testid={transaction.transactionId}
     >
@@ -40,7 +42,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
             <BudgetingInfo className='flex w-full text-sm md:hidden' transaction={transaction} />
           </Flex>
         </div>
-        {!transaction.getIsAddition() && <MSelectSpendingTransaction transaction={transaction} />}
+        {!transaction.getIsAddition() && <TransactionItemSelectSpending transaction={transaction} />}
         {transaction.getIsAddition() && (
           <BudgetingInfo className='hidden md:flex w-1/2 flex-1 items-center pl-6' transaction={transaction} />
         )}

@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useRef } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
 import { format, parse } from 'date-fns';
 import { HeartCrack, Plus, ShoppingCart, Upload } from 'lucide-react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
@@ -17,17 +17,14 @@ import { showNewTransactionModal } from '@monetr/interface/modals/NewTransaction
 import type Transaction from '@monetr/interface/models/Transaction';
 
 const showUploadTransactionsModal = async () =>
-  await import('@monetr/interface/modals/UploadTransactions/UploadTransactionsModal').then(
-    modal => modal.showUploadTransactionsModal,
+  await import('@monetr/interface/modals/UploadTransactions/UploadTransactionsModal').then(modal =>
+    modal.showUploadTransactionsModal(),
   );
 
 let evilScrollPosition: number = 0;
 
 export default function Transactions(): JSX.Element {
-  const { data: config } = useAppConfiguration();
   const { data: transactions, hasNextPage, isLoading, isError, isFetching, fetchNextPage } = useTransactions();
-
-  const { data: link } = useCurrentLink();
 
   // Scroll restoration code.
   const ref = useRef<HTMLUListElement>(null);
@@ -49,7 +46,6 @@ export default function Transactions(): JSX.Element {
       current.removeEventListener('scroll', onScroll);
     };
     // Fix bug with current impl.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigationType, onScroll]);
 
   const loading = isLoading || isFetching;
@@ -67,10 +63,15 @@ export default function Transactions(): JSX.Element {
     rootMargin: '0px 0px 0px 0px',
   });
 
-  // Uncomment this to make it so that transaction data is removed from memory upon navigating away.
-  // useEffect(() => {
-  //   return remove;
-  // }, [remove]);
+  const groups: { [date: string]: Array<Transaction> } = useMemo(
+    () =>
+      (transactions ?? []).reduce((accumulator, item) => {
+        // biome-ignore lint/suspicious/noAssignInExpressions: This is the cleanest way to do this group by...
+        (accumulator[format(item.date, 'yyyy-MM-dd')] ??= []).push(item);
+        return accumulator;
+      }, {}),
+    [transactions],
+  );
 
   if (isLoading) {
     return (
@@ -88,42 +89,6 @@ export default function Transactions(): JSX.Element {
         <Typography size='2xl'>We weren't able to retrieve transactions at this time...</Typography>
       </div>
     );
-  }
-
-  function UploadButtonMaybe(): JSX.Element {
-    if (!link?.getIsManual()) {
-      return null;
-    }
-
-    if (!config?.uploadsEnabled) {
-      return null;
-    }
-
-    return (
-      <Button variant='primary' onClick={showUploadTransactionsModal} className='hidden md:flex'>
-        <Upload />
-        Upload
-      </Button>
-    );
-  }
-
-  function TransactionItems() {
-    const groups: { [date: string]: Array<Transaction> } = transactions.reduce((accumulator, item) => {
-      // biome-ignore lint/suspicious/noAssignInExpressions: This is the cleanest way to do this group by...
-      (accumulator[format(item.date, 'yyyy-MM-dd')] ??= []).push(item);
-      return accumulator;
-    }, {});
-
-    return Object.entries(groups).map(([date, transactions]) => (
-      <li key={date}>
-        <ul className='flex gap-2 flex-col'>
-          <TransactionDateItem date={parse(date, 'yyyy-MM-dd', new Date())} />
-          {transactions.map(transaction => (
-            <TransactionItem key={transaction.transactionId} transaction={transaction} />
-          ))}
-        </ul>
-      </li>
-    ));
   }
 
   let message = 'No more transactions...';
@@ -171,7 +136,16 @@ export default function Transactions(): JSX.Element {
       <AddTransactionButton />
       <div className='flex flex-grow min-w-0 min-h-0'>
         <ul className='w-full overflow-y-auto pb-16' ref={ref}>
-          <TransactionItems />
+          {Object.entries(groups).map(([date, transactionGroup]) => (
+            <li key={date}>
+              <ul className='flex gap-2 flex-col'>
+                <TransactionDateItem date={parse(date, 'yyyy-MM-dd', new Date())} />
+                {transactionGroup.map(transaction => (
+                  <TransactionItem key={transaction.transactionId} transaction={transaction} />
+                ))}
+              </ul>
+            </li>
+          ))}
           {loading && (
             <li ref={sentryRef}>
               <div className='w-full flex justify-center p-5 opacity-70'>
@@ -214,5 +188,24 @@ function AddTransactionButton(): JSX.Element {
     >
       <Plus className='h-12 w-12 text-dark-monetr-content' />
     </button>
+  );
+}
+
+function UploadButtonMaybe(): JSX.Element {
+  const { data: config } = useAppConfiguration();
+  const { data: link } = useCurrentLink();
+  if (!link?.getIsManual()) {
+    return null;
+  }
+
+  if (!config?.uploadsEnabled) {
+    return null;
+  }
+
+  return (
+    <Button variant='primary' onClick={showUploadTransactionsModal} className='hidden md:flex'>
+      <Upload />
+      Upload
+    </Button>
   );
 }

@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import parseDate from '@monetr/interface/util/parseDate';
@@ -39,12 +40,14 @@ export class AppConfiguration {
 }
 
 export function useAppConfiguration(): UseQueryResult<AppConfiguration, unknown> {
+  const select = useCallback((data: Partial<AppConfiguration>) => new AppConfiguration(data), []);
   return useQuery<Partial<AppConfiguration>, unknown, AppConfiguration>({
     queryKey: ['/config'],
     staleTime: 60 * 1000, // One minute in milliseconds.
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
-    select: data => new AppConfiguration(data),
+    select,
+    notifyOnChangeProps: ['data', 'isLoading', 'isError'],
   });
 }

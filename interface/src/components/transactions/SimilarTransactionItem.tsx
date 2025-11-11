@@ -1,6 +1,6 @@
+import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import ArrowLink from '@monetr/interface/components/ArrowLink';
 import { flexVariants } from '@monetr/interface/components/Flex';
 import { Item, ItemContent } from '@monetr/interface/components/Item';
 import Typography from '@monetr/interface/components/Typography';
@@ -82,7 +82,9 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
         </ItemContent>
         <ItemContent align='center' justify='end' flex='grow' shrink='none' width='fit'>
           <TransactionAmount transaction={transaction} />
-          <ArrowLink to={redirectUrl} />
+          <Typography>
+            <ChevronRight />
+          </Typography>
         </ItemContent>
       </Link>
     </Item>

@@ -40,7 +40,6 @@ interface ExpenseValues {
 
 export default function ExpenseDetails(): JSX.Element {
   const { inTimezone } = useTimezone();
-  console.log(inTimezone);
   const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();

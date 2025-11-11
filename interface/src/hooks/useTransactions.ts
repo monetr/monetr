@@ -1,10 +1,15 @@
-import { type UseInfiniteQueryResult, useInfiniteQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { type InfiniteData, type UseInfiniteQueryResult, useInfiniteQuery } from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import Transaction from '@monetr/interface/models/Transaction';
 
 export function useTransactions(): UseInfiniteQueryResult<Array<Transaction>, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
+  const select = useCallback(
+    (data: InfiniteData<Array<Partial<Transaction>>>) => data.pages.flat().map(item => new Transaction(item)),
+    [],
+  );
   return useInfiniteQuery<Array<Partial<Transaction>>, unknown, Array<Transaction>>({
     queryKey: [`/bank_accounts/${selectedBankAccountId}/transactions`],
     initialPageParam: 0,
@@ -18,6 +23,6 @@ export function useTransactions(): UseInfiniteQueryResult<Array<Transaction>, un
     },
     enabled: Boolean(selectedBankAccountId),
     // We want to flatten the data we return to the caller so that way it is easier to work with.
-    select: data => data.pages.flat().map(item => new Transaction(item)),
+    select,
   });
 }

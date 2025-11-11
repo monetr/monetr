@@ -334,7 +334,7 @@ const SelectIndicatorClasses = cva([selectStyles.indicator], {
   },
 });
 
-function SelectIndicator({ isLoading, disabled, open }: SelectIndicator): React.JSX.Element {
+export function SelectIndicator({ isLoading, disabled, open }: SelectIndicator): React.JSX.Element {
   const isMobile = useIsMobile();
   const className = SelectIndicatorClasses({ isLoading, disabled });
   if (isLoading) {
