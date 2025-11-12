@@ -92,9 +92,9 @@ export default function TransactionDetails(): JSX.Element {
         <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
           <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
             <div className='w-full md:w-1/2 flex flex-col items-center'>
-              <div className='w-full flex justify-center mb-2'>
+              <Flex justify='center'>
                 <MerchantIcon name={transaction?.name} />
-              </div>
+              </Flex>
               <FormTextField
                 autoComplete='off'
                 className={layoutVariants({ width: 'full' })}
