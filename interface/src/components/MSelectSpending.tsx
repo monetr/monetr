@@ -12,8 +12,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
-
-import MSpan from './MSpan';
+import Typography from '@monetr/interface/components/Typography';
 
 // Remove the props that we do not want to allow the caller to pass in.
 type MSelectSpendingBaseProps = Omit<SelectProps<Spending>, 'options' | 'value' | 'onChange'>;
@@ -109,15 +108,15 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
   );
 }
 
-function SelectSpendingOptionComponent(props: SelectOptionComponentProps<Spending>): React.JSX.Element {
+export function SelectSpendingOptionComponent(props: SelectOptionComponentProps<Spending>): React.JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const notLoaded = props.value?.currentAmount === undefined;
   const amount = notLoaded ? 'N/A' : locale.formatAmount(props.value.currentAmount, AmountType.Stored);
   return (
     <div className='flex justify-between'>
-      <MSpan size='md' color='emphasis'>
+      <Typography size='md' color='emphasis' ellipsis>
         {props.label}
-      </MSpan>
+      </Typography>
       <div className='flex gap-2'>
         {props.value?.spendingType === SpendingType.Goal && (
           <Badge size='sm' className='dark:bg-dark-monetr-blue  max-h-[24px]'>

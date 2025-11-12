@@ -14,7 +14,7 @@
 }
 
 .selectSpendingRoot {
-  display: hidden;
+  display: none;
   width: 50%;
   flex: 1 1 0%;
   align-items: center;
@@ -48,6 +48,12 @@
   }
 }
 
+.selectSpendingSkeleton {
+  width: 50%;
+  height: 5 * variables.$size;
+  margin-right: 2 * variables.$size;
+}
+
 .selectSpendingInput {
   background-color: transparent;
   flex: 1 1 0%;
@@ -64,5 +70,6 @@
     color: var(--content-emphasis);
   }
 }
+
 
 

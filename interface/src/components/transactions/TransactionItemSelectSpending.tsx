@@ -19,6 +19,7 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import styles from './TransactionItemSelectSpending.module.scss';
 import inputStyles from '../FormTextField.module.scss';
 import selectStyles from '../Select.module.scss';
+import { SelectSpendingOptionComponent } from '@monetr/interface/components/MSelectSpending';
 
 const FREE_TO_USE = 'spnd_freeToUse';
 
@@ -83,10 +84,11 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
 
   if (spendingIsLoading || balancesIsLoading) {
     return (
-      <div className='hidden md:flex w-1/2 flex-1 items-center'>
-        <div className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)}>
-          <Skeleton className='w-full h-5 mr-2' />
-          <SelectIndicator isLoading open={false} />
+      <div className={styles.selectSpendingRoot}>
+        <div className={styles.selectSpendingBlock}>
+          <div className={mergeTailwind(inputStyles.input, selectStyles.select, styles.selectSpendingWrapper)}>
+            <Skeleton className={styles.selectSpendingSkeleton} />
+          </div>
         </div>
       </div>
     );
@@ -208,10 +210,7 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
                   index,
                 })}
               >
-                {React.createElement<SelectOptionComponentProps<Spending>>(DefaultSelectOptionComponent, {
-                  ...item,
-                  selected: selectedItem?.value === item.value,
-                })}
+                <SelectSpendingOptionComponent {...item} selected={selectedItem?.value === item.value} />
               </li>
             ))}
         </ul>

@@ -70,7 +70,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
 
   return (
     <Item>
-      <Link className={flexVariants({ orientation: 'row' })} to={redirectUrl}>
+      <Link className={flexVariants({ orientation: 'row', align: 'center' })} to={redirectUrl}>
         <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
         <ItemContent orientation='column' gap='none' flex='shrink' justify='start' align='default' shrink='default'>
           <Typography component='p' color='emphasis' size='md' weight='semibold' ellipsis>
