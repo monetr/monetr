@@ -21,7 +21,7 @@
   },
   "pnpm": {
     "overrides": {
-      "axios": "1.13.1",
+      "axios": "1.13.2",
       "form-data": "4.0.4",
       "next": "15.5.6"
     }
