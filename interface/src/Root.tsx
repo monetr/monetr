@@ -10,7 +10,7 @@ import Monetr from '@monetr/interface/monetr';
 
 export default function Root(): JSX.Element {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
       <ErrorBoundary>
         <MQueryClient>
           <MSnackbarProvider>
