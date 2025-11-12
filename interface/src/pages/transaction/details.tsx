@@ -6,11 +6,13 @@ import { HeartCrack, Save, ShoppingCart } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
 
+import Flex from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
@@ -95,7 +97,7 @@ export default function TransactionDetails(): JSX.Element {
               </div>
               <FormTextField
                 autoComplete='off'
-                className='w-full'
+                className={layoutVariants({ width: 'full' })}
                 data-1p-ignore
                 isLoading
                 label='Name'
@@ -104,26 +106,31 @@ export default function TransactionDetails(): JSX.Element {
               />
               <FormTextField
                 autoComplete='off'
-                className='w-full'
+                className={layoutVariants({ width: 'full' })}
                 disabled
                 isLoading
                 label='Original Name'
                 name='originalName'
                 placeholder='No original name...?'
               />
-              <FormAmountField className='w-full' disabled isLoading label='Amount' name='amount' />
-              <FormDatePicker className='w-full' disabled label='Date' name='date' />
+              <FormAmountField
+                className={layoutVariants({ width: 'full' })}
+                disabled
+                isLoading
+                label='Amount'
+                name='amount'
+              />
+              <FormDatePicker className={layoutVariants({ width: 'full' })} disabled label='Date' name='date' />
               <FormCheckbox
-                className='w-full'
+                className={layoutVariants({ width: 'full' })}
                 data-testid='transaction-details-pending'
                 description='Transaction has not yet cleared, the name or amount may change.'
                 disabled
                 label='Is Pending'
                 name='isPending'
               />
-              <MSelectSpending className='w-full' isLoading name='spendingId' />
+              <MSelectSpending className={layoutVariants({ width: 'full' })} isLoading name='spendingId' />
             </div>
-            <div className='w-full md:w-1/2 flex flex-col items-center'></div>
           </div>
         </div>
       </MForm>
@@ -180,12 +187,12 @@ export default function TransactionDetails(): JSX.Element {
       <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
-            <div className='w-full flex justify-center mb-2'>
+            <Flex justify='center'>
               <MerchantIcon name={transaction?.name} />
-            </div>
+            </Flex>
             <FormTextField
               autoComplete='off'
-              className='w-full'
+              className={layoutVariants({ width: 'full' })}
               data-1p-ignore
               label='Name'
               name='name'
@@ -193,23 +200,30 @@ export default function TransactionDetails(): JSX.Element {
             />
             <FormTextField
               autoComplete='off'
-              className='w-full'
+              className={layoutVariants({ width: 'full' })}
               disabled
               label='Original Name'
               name='originalName'
               placeholder='No original name...?'
             />
-            <FormAmountField className='w-full' disabled label='Amount' name='amount' />
-            <FormDatePicker className='w-full' disabled={!link?.getIsManual()} label='Date' name='date' />
+            <FormAmountField className={layoutVariants({ width: 'full' })} disabled label='Amount' name='amount' />
+            <FormDatePicker
+              className={layoutVariants({ width: 'full' })}
+              disabled={!link?.getIsManual()}
+              label='Date'
+              name='date'
+            />
             <FormCheckbox
-              className='w-full'
+              className={layoutVariants({ width: 'full' })}
               data-testid='transaction-details-pending'
               description='Transaction has not yet cleared, the name or amount may change.'
               disabled={!link?.getIsManual()}
               label='Is Pending'
               name='isPending'
             />
-            {!transaction.getIsAddition() && <MSelectSpending className='w-full' name='spendingId' />}
+            {!transaction.getIsAddition() && (
+              <MSelectSpending className={layoutVariants({ width: 'full' })} name='spendingId' />
+            )}
           </div>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
             <SimilarTransactions transaction={transaction} />

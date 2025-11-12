@@ -1,0 +1,17 @@
+@use '@monetr/interface/mixins';
+
+.widthQuarter {
+  @include mixins.width-quarter;
+}
+
+.widthThird {
+  @include mixins.width-third;
+}
+
+.widthHalf {
+  @include mixins.width-half;
+}
+
+.widthFull {
+  @include mixins.width-full;
+}

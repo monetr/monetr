@@ -86,7 +86,6 @@ const CommandGroup = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Group>
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Group
-    ref={ref}
     className={mergeTailwind(
       'overflow-hidden p-1 text-dark-monetr-content-emphasis',
       '[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5',
@@ -95,6 +94,7 @@ const CommandGroup = React.forwardRef<
       '[&_[cmdk-group-heading]]:text-dark-monetr-content-subtle',
       className,
     )}
+    ref={ref}
     {...props}
   />
 ));
@@ -105,7 +105,7 @@ const CommandSeparator = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Separator>
 >(({ className, ...props }, ref) => (
-  <CommandPrimitive.Separator ref={ref} className={mergeTailwind('-mx-1 h-px bg-border', className)} {...props} />
+  <CommandPrimitive.Separator className={mergeTailwind('-mx-1 h-px bg-border', className)} ref={ref} {...props} />
 ));
 CommandSeparator.displayName = CommandPrimitive.Separator.displayName;
 
@@ -114,7 +114,6 @@ const CommandItem = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item>
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Item
-    ref={ref}
     className={mergeTailwind(
       [
         'text-dark-monetr-content-emphasis data-[disabled="true"]:text-dark-monetr-content-muted',
@@ -127,6 +126,7 @@ const CommandItem = React.forwardRef<
       ],
       className,
     )}
+    ref={ref}
     {...props}
   />
 ));

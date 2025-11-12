@@ -1,4 +1,5 @@
 @use '@monetr/interface/variables';
+@use '@monetr/interface/mixins';
 
 .logo {
   max-width: 32 * variables.$size;
@@ -25,22 +26,22 @@
 }
 
 .input {
-  width: 100%;
+  @include mixins.width-full;
 
   @media (min-width: variables.$smallScreen) {
-    width: percentage(1/2);
+    @include mixins.width-half;
   }
 
   @media (min-width: variables.$mediumScreen) {
-    width: percentage(1/3);
+    @include mixins.width-third;
   }
 
   @media (min-width: variables.$largeScreen) {
-    width: percentage(1/4);
+    @include mixins.width-quarter;
   }
 
   @media (min-width: variables.$extraLargeScreen) {
-    width: percentage(1/5);
+    @include mixins.width-fifth;
   }
 }
 

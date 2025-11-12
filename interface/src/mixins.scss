@@ -75,3 +75,23 @@ $text5ExtraLargeLineHeight: 7;
   font-size: $text5ExtraLargeFontSize * variables.$size; // 3rem 48px
   line-height: 1;
 }
+
+@mixin width-fifth {
+  width: percentage(1/5);
+}
+
+@mixin width-quarter {
+  width: percentage(1/4);
+}
+
+@mixin width-third {
+  width: percentage(1/3);
+}
+
+@mixin width-half {
+  width: percentage(1/2);
+}
+
+@mixin width-full {
+  width: 100%;
+}

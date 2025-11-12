@@ -69,8 +69,8 @@ const DialogTitle = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
-    ref={ref}
     className={mergeTailwind('text-lg font-semibold leading-none tracking-tight', className)}
+    ref={ref}
     {...props}
   />
 ));
@@ -81,8 +81,8 @@ const DialogDescription = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
-    ref={ref}
     className={mergeTailwind('text-sm text-dark-monetr-content-subtle', className)}
+    ref={ref}
     {...props}
   />
 ));

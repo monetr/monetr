@@ -1,5 +1,6 @@
 import { cva } from 'class-variance-authority';
 
+import { widths } from '@monetr/interface/components/Layout';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import styles from './Flex.module.scss';
@@ -40,7 +41,7 @@ export const flexVariants = cva([styles.root], {
       none: styles.shrinkNone,
     },
     width: {
-      default: styles.widthDefault,
+      default: widths.full,
       fit: styles.widthFit,
     },
   },
