@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import type { FormikHelpers } from 'formik';
+import type { AxiosError } from 'axios';
+import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useLocation } from 'react-router-dom';
 
@@ -7,11 +8,11 @@ import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
-import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
-import MSpan from '@monetr/interface/components/MSpan';
+import TextLink from '@monetr/interface/components/TextLink';
+import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
-import request from '@monetr/interface/util/request';
+import request, { type APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
 interface ResendValues {
@@ -34,7 +35,7 @@ export default function ResendVerificationPage(): JSX.Element {
         })
         .then(() => setDone(true))
         .catch(
-          error =>
+          (error: AxiosError<APIError>) =>
             void enqueueSnackbar(error?.response?.data?.error || 'Failed to resend verification link', {
               variant: 'error',
               disableWindowBlurListener: true,
@@ -44,8 +45,8 @@ export default function ResendVerificationPage(): JSX.Element {
     [enqueueSnackbar],
   );
 
-  const validateInput = useCallback((values: ResendValues): Partial<ResendValues> | null => {
-    const errors: Partial<ResendValues> = {};
+  const validateInput = useCallback((values: ResendValues): FormikErrors<ResendValues> | null => {
+    const errors: FormikErrors<ResendValues> = {};
 
     if (values.email) {
       if (!verifyEmailAddress(values.email)) {
@@ -101,12 +102,12 @@ export default function ResendVerificationPage(): JSX.Element {
           Resend Verification
         </FormButton>
         <div className='mt-1 flex justify-center gap-1'>
-          <MSpan color='subtle' className='text-sm'>
+          <Typography color='subtle' size='sm'>
             Don't need to resend?
-          </MSpan>
-          <MLink to='/login' size='sm' data-testid='login-signup'>
+          </Typography>
+          <TextLink to='/login' size='sm' data-testid='login-signup'>
             Return to login
-          </MLink>
+          </TextLink>
         </div>
       </div>
     </MForm>
@@ -118,13 +119,13 @@ export function AfterEmailVerificationSent(): JSX.Element {
     <div className='h-full w-full flex flex-col items-center justify-center'>
       <div className='flex flex-col gap-2 max-w-xs items-center'>
         <MLogo className='h-24 w-24' />
-        <MSpan className='text-center' size='lg'>
+        <Typography align='center' size='lg'>
           A new verification link was sent to your email address...
-        </MSpan>
+        </Typography>
         <div className='mt-1 flex justify-center gap-1'>
-          <MLink to='/login' size='sm' data-testid='login-signup'>
+          <TextLink to='/login' size='sm' data-testid='login-signup'>
             Return to login
-          </MLink>
+          </TextLink>
         </div>
       </div>
     </div>
@@ -135,16 +136,16 @@ function RouteStateMessage(): JSX.Element {
   const { state: routeState } = useLocation();
   if (routeState) {
     return (
-      <MSpan className='text-center' size='sm' data-testid='resend-email-included'>
+      <Typography align='center' size='sm' data-testid='resend-email-included'>
         It looks like your email address has not been verified. Do you want to resend the email verification link?
-      </MSpan>
+      </Typography>
     );
   }
 
   return (
-    <MSpan className='text-center' size='sm' data-testid='resend-email-excluded'>
+    <Typography align='center' size='sm' data-testid='resend-email-excluded'>
       If your email verification link has expired, or you never got one. You can enter your email address below and
       another verification link will be sent to you.
-    </MSpan>
+    </Typography>
   );
 }

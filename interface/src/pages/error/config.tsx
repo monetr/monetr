@@ -1,15 +1,16 @@
 import { HeartCrack } from 'lucide-react';
 
 import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 
 export default function ConfigError(): JSX.Element {
   return (
     <div className='w-full h-full flex items-center justify-center flex-col p-4'>
       <MSpan className='w-full h-full justify-center flex-col text-center gap-4'>
         <HeartCrack className='size-24' />
-        <MSpan size='xl' weight='medium'>
+        <Typography size='xl' weight='medium'>
           There was a problem loading the monetr application config, the API may be unavailable at this time.
-        </MSpan>
+        </Typography>
         <MSpan size='lg' className='gap-1'>
           You can try reloading this page, but if the problem persists please contact
           <a

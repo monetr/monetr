@@ -28,8 +28,8 @@ import LinkDetails from '@monetr/interface/pages/link/details';
 import Login from '@monetr/interface/pages/login';
 import MultifactorAuthenticationPage from '@monetr/interface/pages/login/multifactor';
 import LogoutPage from '@monetr/interface/pages/logout';
-import ForgotPasswordNew from '@monetr/interface/pages/password/forgot';
-import PasswordResetNew from '@monetr/interface/pages/password/reset';
+import ForgotPassword from '@monetr/interface/pages/password/forgot';
+import PasswordReset from '@monetr/interface/pages/password/reset';
 import OauthReturn from '@monetr/interface/pages/plaid/oauth-return';
 import Register from '@monetr/interface/pages/register';
 import SettingsAbout from '@monetr/interface/pages/settings/about';
@@ -78,8 +78,8 @@ export default function Monetr(): JSX.Element {
         <Route path='/login' element={<Login />} />
         <Route path='/logout' element={<LogoutPage />} />
         {config?.allowSignUp && <Route path='/register' element={<Register />} />}
-        {config?.allowForgotPassword && <Route path='/password/forgot' element={<ForgotPasswordNew />} />}
-        <Route path='/password/reset' element={<PasswordResetNew />} />
+        {config?.allowForgotPassword && <Route path='/password/forgot' element={<ForgotPassword />} />}
+        <Route path='/password/reset' element={<PasswordReset />} />
         <Route path='/verify/email' element={<VerifyEmail />} />
         <Route path='/verify/email/resend' element={<ResendVerificationPage />} />
         <Route path='/' element={<Navigate replace to='/login' />} />

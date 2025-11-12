@@ -2,9 +2,9 @@ import { useCallback, useState } from 'react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
-import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
-import MSpan from '@monetr/interface/components/MSpan';
+import TextLink from '@monetr/interface/components/TextLink';
+import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
@@ -21,7 +21,7 @@ export default function SubscribePage(): JSX.Element {
   const [loading, setLoading] = useState(false);
   const handleContinue = useCallback(() => {
     setLoading(true);
-    let promise: Promise<any>;
+    let promise: Promise<{ data: { url: string } }>;
     if (initialPlan && !hasSubscription) {
       promise = request().post('/billing/create_checkout', {
         cancelPath: '/logout',
@@ -49,25 +49,25 @@ export default function SubscribePage(): JSX.Element {
         <div className='h-full flex flex-col max-w-md gap-4 items-center justify-between'>
           <div className='h-full flex flex-col justify-center items-center gap-4'>
             <MLogo className='max-h-24' />
-            <MSpan size='2xl' weight='semibold' className='text-center'>
+            <Typography size='2xl' weight='semibold' align='center'>
               Your subscription is no longer active
-            </MSpan>
-            <MSpan size='lg' className='text-center'>
+            </Typography>
+            <Typography size='lg' align='center'>
               Thank you for having subscribed to monetr before! If you'd like to continue using monetr you will have to
               resubscribe below. Click continue to proceed to our billing portal.
-            </MSpan>
+            </Typography>
             <Button variant='primary' disabled={loading} onClick={handleContinue}>
               Continue
             </Button>
           </div>
           {!loading && (
             <div className='flex justify-center gap-1'>
-              <MSpan color='subtle' className='text-sm'>
+              <Typography color='subtle' size='sm'>
                 Not ready to continue?
-              </MSpan>
-              <MLink to='/logout' size='sm'>
+              </Typography>
+              <TextLink to='/logout' size='sm'>
                 Logout for now
-              </MLink>
+              </TextLink>
             </div>
           )}
         </div>
@@ -80,25 +80,25 @@ export default function SubscribePage(): JSX.Element {
       <div className='h-full flex flex-col max-w-md gap-4 items-center justify-between'>
         <div className='h-full flex flex-col justify-center items-center gap-4'>
           <MLogo className='max-h-24' />
-          <MSpan size='2xl' weight='semibold' className='text-center'>
+          <Typography size='2xl' weight='semibold' align='center'>
             Your free trial has ended
-          </MSpan>
-          <MSpan size='lg' className='text-center'>
+          </Typography>
+          <Typography size='lg' align='center'>
             Thank you for trying out monetr! We hope that you found our budgeting tools useful during your trial. If
             you'd like to continue using monetr you can easily subscribe below.
-          </MSpan>
+          </Typography>
           <Button variant='primary' disabled={loading} onClick={handleContinue}>
             Continue
           </Button>
         </div>
         {!loading && (
           <div className='flex justify-center gap-1'>
-            <MSpan color='subtle' className='text-sm'>
+            <Typography color='subtle' size='sm'>
               Not ready to continue?
-            </MSpan>
-            <MLink to='/logout' size='sm'>
+            </Typography>
+            <TextLink to='/logout' size='sm'>
               Logout for now
-            </MLink>
+            </TextLink>
           </div>
         )}
       </div>
