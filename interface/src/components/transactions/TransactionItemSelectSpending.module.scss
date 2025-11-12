@@ -13,6 +13,22 @@
   }
 }
 
+.selectSpendingRoot {
+  display: hidden;
+  width: 50%;
+  flex: 1 1 0%;
+  align-items: center;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: flex;
+  }
+}
+
+.selectSpendingBlock {
+  width: 100%;
+  display: block;
+}
+
 .selectSpendingWrapper {
   --ring-size: 0px;
   transition-duration: 0ms;

@@ -160,8 +160,8 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
   }, [isOpen]);
 
   return (
-    <div className='hidden md:flex w-1/2 flex-1 items-center'>
-      <div className='w-full block'>
+    <div className={styles.selectSpendingRoot}>
+      <div className={styles.selectSpendingBlock}>
         {/** biome-ignore lint/a11y/noStaticElementInteractions: Need to account for weird padding here */}
         <div
           onClick={onOpenClickHandler}
