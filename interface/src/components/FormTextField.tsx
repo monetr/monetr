@@ -4,10 +4,12 @@ import { useFormikContext } from 'formik';
 
 import ErrorText from '@monetr/interface/components/ErrorText';
 import Label, { type LabelDecorator, type LabelDecoratorProps } from '@monetr/interface/components/Label';
+import { Skeleton } from '@monetr/interface/components/Skeleton';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import errorTextStyles from './ErrorText.module.scss';
 import inputStyles from './FormTextField.module.scss';
+import selectStyles from './Select.module.scss';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 
@@ -16,6 +18,7 @@ export interface FormTextFieldProps extends InputProps {
   error?: string;
   uppercasetext?: boolean;
   labelDecorator?: LabelDecorator;
+  isLoading?: boolean;
 }
 
 const FormTextFieldPropsDefaults: Omit<FormTextFieldProps, 'InputProps'> = {
@@ -49,6 +52,22 @@ export default function FormTextField(props: FormTextFieldProps = FormTextFieldP
 
   // If we are working with a date picker, then take the current value and transform it for the actual input.
   const value = formikContext?.values[props.name];
+
+  if (props.isLoading) {
+    return (
+      <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
+        <Label label={props.label} disabled htmlFor={props.id} required={props.required}>
+          <LabelDecorator name={props.name} disabled />
+        </Label>
+        <div>
+          <div aria-disabled='true' className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)}>
+            <Skeleton className='w-full h-5 mr-2' />
+          </div>
+        </div>
+        <ErrorText error={props.error} />
+      </div>
+    );
+  }
 
   return (
     <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>

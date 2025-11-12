@@ -7,12 +7,12 @@ import Select, {
   type SelectOptionComponentProps,
   type SelectProps,
 } from '@monetr/interface/components/Select';
+import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
-import Typography from '@monetr/interface/components/Typography';
 
 // Remove the props that we do not want to allow the caller to pass in.
 type MSelectSpendingBaseProps = Omit<SelectProps<Spending>, 'options' | 'value' | 'onChange'>;

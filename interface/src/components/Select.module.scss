@@ -1,7 +1,7 @@
 @use '@monetr/interface/variables';
 
 .selectLoading {
-  display: flex;
+  display: flex !important;
   cursor: progress;
   gap: var(--size-1);
   align-items: center;
@@ -17,7 +17,7 @@
 }
 
 .select {
-  display: flex;
+  display: flex !important;
   cursor: text;
   gap: var(--size-1);
   align-items: center;

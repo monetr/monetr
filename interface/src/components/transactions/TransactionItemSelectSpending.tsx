@@ -1,13 +1,9 @@
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { type UseComboboxSelectedItemChange, useCombobox } from 'downshift';
 
-import {
-  DefaultSelectOptionComponent,
-  defaultFilterImplementation,
-  SelectIndicator,
-  type SelectOption,
-  type SelectOptionComponentProps,
-} from '@monetr/interface/components/Select';
+import { SelectSpendingOptionComponent } from '@monetr/interface/components/MSelectSpending';
+import { defaultFilterImplementation, SelectIndicator, type SelectOption } from '@monetr/interface/components/Select';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
@@ -19,7 +15,6 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import styles from './TransactionItemSelectSpending.module.scss';
 import inputStyles from '../FormTextField.module.scss';
 import selectStyles from '../Select.module.scss';
-import { SelectSpendingOptionComponent } from '@monetr/interface/components/MSelectSpending';
 
 const FREE_TO_USE = 'spnd_freeToUse';
 

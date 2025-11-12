@@ -20,6 +20,7 @@ import RemoveTransactionButton from '@monetr/interface/components/transactions/R
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransaction } from '@monetr/interface/hooks/useTransaction';
 import { useUpdateTransaction } from '@monetr/interface/hooks/useUpdateTransaction';
@@ -38,7 +39,8 @@ interface TransactionValues {
 export default function TransactionDetails(): JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
-  const { data: link } = useCurrentLink();
+  const selectedBankAccountId = useSelectedBankAccountId();
+  const { data: link, isLoading: linkIsLoading } = useCurrentLink();
   const { enqueueSnackbar } = useSnackbar();
   const { transactionId: id } = useParams();
   const updateTransaction = useUpdateTransaction();
@@ -76,11 +78,55 @@ export default function TransactionDetails(): JSX.Element {
     [enqueueSnackbar, locale, transaction, updateTransaction, inTimezone],
   );
 
-  if (isLoading) {
+  if (isLoading || linkIsLoading) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>One moment...</MSpan>
-      </div>
+      <MForm initialValues={{}} enableReinitialize={true} onSubmit={submit} className='flex w-full h-full flex-col'>
+        <MTopNavigation
+          icon={ShoppingCart}
+          title='Transactions'
+          base={`/bank/${selectedBankAccountId}/transactions`}
+          breadcrumb={transaction?.name}
+        />
+        <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
+          <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
+            <div className='w-full md:w-1/2 flex flex-col items-center'>
+              <div className='w-full flex justify-center mb-2'>
+                <MerchantIcon name={transaction?.name} />
+              </div>
+              <FormTextField
+                label='Name'
+                autoComplete='off'
+                placeholder='Transaction name...'
+                name='name'
+                className='w-full'
+                data-1p-ignore
+                isLoading
+              />
+              <FormTextField
+                label='Original Name'
+                autoComplete='off'
+                placeholder='No original name...?'
+                name='originalName'
+                className='w-full'
+                disabled
+                isLoading
+              />
+              <FormAmountField className='w-full' disabled label='Amount' name='amount' isLoading />
+              <FormDatePicker label='Date' name='date' className='w-full' disabled />
+              <FormCheckbox
+                data-testid='transaction-details-pending'
+                name='isPending'
+                label='Is Pending'
+                description='Transaction has not yet cleared, the name or amount may change.'
+                className='w-full'
+                disabled
+              />
+              <MSelectSpending className='w-full' name='spendingId' isLoading />
+            </div>
+            <div className='w-full md:w-1/2 flex flex-col items-center'></div>
+          </div>
+        </div>
+      </MForm>
     );
   }
 
@@ -154,14 +200,14 @@ export default function TransactionDetails(): JSX.Element {
               disabled
             />
             <FormAmountField className='w-full' disabled label='Amount' name='amount' />
-            <FormDatePicker label='Date' name='date' className='w-full' disabled={!link.getIsManual()} />
+            <FormDatePicker label='Date' name='date' className='w-full' disabled={!link?.getIsManual()} />
             <FormCheckbox
               data-testid='transaction-details-pending'
               name='isPending'
               label='Is Pending'
               description='Transaction has not yet cleared, the name or amount may change.'
               className='w-full'
-              disabled={!link.getIsManual()}
+              disabled={!link?.getIsManual()}
             />
             {!transaction.getIsAddition() && <MSelectSpending className='w-full' name='spendingId' />}
           </div>
