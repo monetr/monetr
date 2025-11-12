@@ -64,7 +64,7 @@
     "vaul": "1.1.2"
   },
   "devDependencies": {
-    "@imagemagick/magick-wasm": "0.0.36",
+    "@imagemagick/magick-wasm": "0.0.37",
     "@rsbuild/core": "1.6.2",
     "@rsbuild/plugin-babel": "1.0.6",
     "@rsbuild/plugin-react": "1.4.2",

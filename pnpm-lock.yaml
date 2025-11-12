@@ -241,8 +241,8 @@ importers:
         version: 1.1.2(@types/react-dom@18.3.7(@types/react@18.3.26))(@types/react@18.3.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@imagemagick/magick-wasm':
-        specifier: 0.0.36
-        version: 0.0.36
+        specifier: 0.0.37
+        version: 0.0.37
       '@rsbuild/core':
         specifier: 1.6.2
         version: 1.6.2
@@ -951,8 +951,8 @@ packages:
   '@iconify/utils@2.1.33':
     resolution: {integrity: sha512-jP9h6v/g0BIZx0p7XGJJVtkVnydtbgTgt9mVNcGDYwaa7UhdHdI9dvoq+gKj9sijMSJKxUPEG2JyjsgXjxL7Kw==}
 
-  '@imagemagick/magick-wasm@0.0.36':
-    resolution: {integrity: sha512-qSe4DVkpaU9VKGpOjClUZPjlIOrzoJtP22qAb11Gsw+ZvGX5dLmBBE5pRpLxRTEgpp9lRXW29nas2oppjcVLPQ==}
+  '@imagemagick/magick-wasm@0.0.37':
+    resolution: {integrity: sha512-tVs9hcWu9u7I3Jz/XvUYVvCEniuxAR+JjZEzI+yKtQmYAtNsLF1WjoH1HZGCKPumaB9jAHZlcf2RGT9+1l3nxQ==}
 
   '@img/sharp-darwin-arm64@0.34.3':
     resolution: {integrity: sha512-ryFMfvxxpQRsgZJqBd4wsttYQbCxsJksrv9Lw/v798JcQ8+w84mBWuXwl+TT0WJ/WrYOLaYpwQXi3sA9nTIaIg==}
@@ -7386,7 +7386,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@imagemagick/magick-wasm@0.0.36': {}
+  '@imagemagick/magick-wasm@0.0.37': {}
 
   '@img/sharp-darwin-arm64@0.34.3':
     optionalDependencies:
