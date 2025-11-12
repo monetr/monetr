@@ -4,5 +4,5 @@
 $basePadding: 4 * variables.$size;
 
 .drawerContent {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
 }
