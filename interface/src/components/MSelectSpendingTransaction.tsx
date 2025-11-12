@@ -183,7 +183,6 @@ export interface SpendingOption {
   readonly spending: Spending | null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
 export function SpendingSelectOption({ children, ...props }: OptionProps<SpendingOption>): JSX.Element {
   const { data: locale } = useLocaleCurrency();
   // If the current amount is specified then format the amount, if it is not then use N/A.

@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import type MockAdapter from 'axios-mock-adapter';
 
 // apiSampleResponses will fill the mock adapter with most of the API calls that the application needs to render most

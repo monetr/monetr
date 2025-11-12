@@ -10,7 +10,6 @@ const cheerio = require('cheerio');
 
 function processHtmlFile(filePath) {
   const html = fs.readFileSync(filePath, 'utf8');
-  // eslint-disable-next-line id-length
   const $ = cheerio.load(html);
   $('html').attr('lang', 'en-US');
   fs.writeFileSync(filePath, $.html());

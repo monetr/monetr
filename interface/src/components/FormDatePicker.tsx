@@ -236,7 +236,6 @@ export function formatSelectedDates(startDate: Date | null, endDate: Date | null
         month: 'short',
         day: 'numeric',
       };
-      // eslint-disable-next-line max-len
       return `${startDate.toLocaleDateString(localeCode, optionsStartDate)} - ${endDate.getDate()}, ${endDate.getFullYear()}`;
     }
     const options: Intl.DateTimeFormatOptions = {

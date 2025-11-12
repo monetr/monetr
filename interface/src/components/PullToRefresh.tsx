@@ -1,5 +1,5 @@
-/* eslint-disable max-len */
 /*
+  @license Overseerr
   This code is from https://github.com/sct/overseerr
 
   MIT License

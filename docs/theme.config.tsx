@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React, { Fragment } from 'react';
 
 import Logo from '@monetr/docs/assets/logo.svg';
@@ -20,7 +19,7 @@ const config: DocsThemeConfig = {
   },
   logo: (
     <Fragment>
-      <Image src={ Logo } alt='monetr logo' className='w-8 h-8 lg:w-10 lg:h-10' />
+      <Image alt='monetr logo' className='w-8 h-8 lg:w-10 lg:h-10' src={ Logo } />
       <div className='flex items-center justify-center ml-3'>
         <span className='absolute mx-auto flex border w-fit bg-gradient-to-r blur-xl opacity-50 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-2xl lg:text-3xl box-content font-extrabold text-transparent text-center select-none'>
           monetr

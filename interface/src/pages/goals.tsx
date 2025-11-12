@@ -35,7 +35,6 @@ export default function Goals(): JSX.Element {
       current.removeEventListener('scroll', onScroll);
     };
     // Fix bug with current impl.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigationType, onScroll]);
 
   if (isLoading) {

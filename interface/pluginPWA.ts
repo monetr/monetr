@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';

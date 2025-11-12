@@ -1,7 +1,6 @@
 import type React from 'react';
 import { Body, Container, Head, Html, Preview, Tailwind } from '@react-email/components';
 
-// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import tailwindConfig from '../../tailwind.config.ts';
 
 export interface EmailLayoutProps {

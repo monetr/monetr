@@ -4,7 +4,7 @@ import PricingCards from '@monetr/docs/components/Pricing/PricingCards';
 export default function PricingPage(): JSX.Element {
   return (
     <div className='w-full relative m-view-height py-8 flex flex-col gap-16'>
-      <div className='absolute inset-0 overflow-hidden pointer-events-none -z-10' aria-hidden='true'>
+      <div aria-hidden='true' className='absolute inset-0 overflow-hidden pointer-events-none -z-10'>
         <div className='absolute flex items-center justify-center top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 w-full sm:w-1/2 aspect-square'>
           <div className='absolute inset-0 translate-z-0 bg-purple-500 rounded-full blur-[120px] opacity-50 min-h-[10vh]' />
         </div>

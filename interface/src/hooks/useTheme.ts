@@ -1,7 +1,6 @@
 import resolveConfig from 'tailwindcss/resolveConfig';
 import type { ThemeConfig } from 'tailwindcss/types/config.js';
 
-// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import tailwindConfig from '../../tailwind.config.ts';
 
 const realTailwindConfig = resolveConfig(tailwindConfig);

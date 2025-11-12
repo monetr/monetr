@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -56,7 +55,6 @@ export function BackgroundGradientAnimation(): JSX.Element {
       <svg className='hidden'>
         <title>Background animation</title>
         <defs>
-          {/** biome-ignore lint/correctness/useUniqueElementIds: Required hardcoded ID for it to work */}
           <filter id='blurMe'>
             <feGaussianBlur in='SourceGraphic' result='blur' stdDeviation='10' />
             <feColorMatrix in='blur' mode='matrix' result='goo' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8' />

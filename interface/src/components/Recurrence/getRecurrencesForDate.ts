@@ -1,4 +1,3 @@
-/* eslint-disable id-length */
 import { tz } from '@date-fns/tz';
 import { endOfMonth, format, getDate, getMonth, isEqual, startOfDay, startOfMonth } from 'date-fns';
 import { RRule, type Weekday } from 'rrule';

@@ -57,7 +57,6 @@ function ViewManager<T extends string, Metadata, Form>({
       setCurrentView(previousView);
       return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentView, previousView]);
 
   const goToView = useCallback(

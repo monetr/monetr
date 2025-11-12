@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-
 import React from 'react';
 import type { DialogProps } from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive } from 'cmdk';
@@ -14,11 +12,11 @@ const Command = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CommandPrimitive>
 >(({ className, ...props }, ref) => (
   <CommandPrimitive
-    ref={ref}
     className={mergeTailwind(
       'flex h-full w-full flex-col overflow-hidden rounded-lg bg-dark-monetr-background text-dark-monetr-content-emphasis',
       className,
     )}
+    ref={ref}
     {...props}
   />
 ));
@@ -50,11 +48,11 @@ const CommandInput = React.forwardRef<React.ElementRef<typeof CommandPrimitive.I
     >
       <Search className='mr-2 h-4 w-4 shrink-0 opacity-50' />
       <CommandPrimitive.Input
-        ref={ref}
         className={mergeTailwind(
           'flex h-11 w-full rounded-lg bg-transparent py-3 text-sm outline-none placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
           className,
         )}
+        ref={ref}
         {...props}
       />
     </div>
@@ -68,8 +66,8 @@ const CommandList = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.List
-    ref={ref}
     className={mergeTailwind('max-h-[300px] overflow-y-auto overflow-x-hidden', className)}
+    ref={ref}
     {...props}
   />
 ));
@@ -79,7 +77,7 @@ CommandList.displayName = CommandPrimitive.List.displayName;
 const CommandEmpty = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Empty>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
->((props, ref) => <CommandPrimitive.Empty ref={ref} className='py-6 text-center text-sm' {...props} />);
+>((props, ref) => <CommandPrimitive.Empty className='py-6 text-center text-sm' ref={ref} {...props} />);
 
 CommandEmpty.displayName = CommandPrimitive.Empty.displayName;
 

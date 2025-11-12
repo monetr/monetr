@@ -55,12 +55,10 @@ function useTransactionUploadProgress(
   // Bootstrap the socket to listen for the actual changes.
   useEffect(() => {
     const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-    // eslint-disable-next-line max-len
     const socket = new WebSocket(
       `${protocol}://${location.host}/api/bank_accounts/${bankAccountId}/transactions/upload/${transactionUploadId}/progress`,
     );
     socket.onopen = () => {
-      // eslint-disable-next-line no-console
       console.log('Listening for transaction upload progress messages for', {
         bankAccountId,
         transactionUploadId,

@@ -162,7 +162,6 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
           });
         }, 3000),
       );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

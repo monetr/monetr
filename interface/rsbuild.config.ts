@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { pluginPWA } from './pluginPWA';
 
 import path from 'node:path';
