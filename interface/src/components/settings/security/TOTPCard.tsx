@@ -3,8 +3,12 @@ import { Shield } from 'lucide-react';
 import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
 import MSpan from '@monetr/interface/components/MSpan';
-import { showEnableTOTPModal } from '@monetr/interface/components/settings/security/EnableTOTPMModal';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
+
+const showEnableTOTPModal = async () =>
+  await import('@monetr/interface/components/settings/security/EnableTOTPMModal').then(modal =>
+    modal.showEnableTOTPModal(),
+  );
 
 export default function TOTPCard(): JSX.Element {
   const {
