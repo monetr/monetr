@@ -76,8 +76,8 @@ export function SelectLoading<V>(props: SelectPropsLoading<V>): React.JSX.Elemen
   const LabelDecorator = props.labelDecorator || (() => null);
   return (
     <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
-      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
-        <LabelDecorator name={props.name} disabled={props.disabled} />
+      <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
+        <LabelDecorator disabled={props.disabled} name={props.name} />
       </Label>
       <div className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)} data-error={props.error}>
         <Skeleton className='w-full h-5 mr-2' />
@@ -161,16 +161,16 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
 
   return (
     <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
-      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
-        <LabelDecorator name={props.name} disabled={props.disabled} />
+      <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
+        <LabelDecorator disabled={props.disabled} name={props.name} />
       </Label>
       {/** biome-ignore lint/a11y/noStaticElementInteractions: Need to account for weird padding here */}
       <div
-        onClick={onOpenClickHandler}
-        ref={inputWrapperRef}
+        aria-disabled={props.disabled}
         className={mergeTailwind(inputStyles.input, selectStyles.select)}
         data-error={Boolean(props.error)}
-        aria-disabled={props.disabled}
+        onClick={onOpenClickHandler}
+        ref={inputWrapperRef}
       >
         <input
           {...getInputProps({
@@ -195,7 +195,6 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
         {isOpen &&
           items.map((item, index) => (
             <li
-              key={item.label}
               className={mergeTailwind(
                 [
                   'text-dark-monetr-content-emphasis',
@@ -208,6 +207,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
                   'bg-zinc-700': selectedItem?.value === item.value,
                 },
               )}
+              key={item.label}
               {...getItemProps({
                 item,
                 index,
@@ -243,15 +243,15 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
 
   return (
     <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
-      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
-        <LabelDecorator name={props.name} disabled={props.disabled} />
+      <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
+        <LabelDecorator disabled={props.disabled} name={props.name} />
       </Label>
-      <Drawer open={open} onOpenChange={setOpen}>
+      <Drawer onOpenChange={setOpen} open={open}>
         <DrawerTrigger asChild>
           <button
-            type='button'
-            className={mergeTailwind(inputStyles.input, selectStyles.select)}
             aria-disabled={props.disabled}
+            className={mergeTailwind(inputStyles.input, selectStyles.select)}
+            type='button'
           >
             <span
               aria-disabled={props.disabled}
@@ -271,7 +271,6 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
               {open &&
                 props.options.map(item => (
                   <li
-                    key={item.label}
                     className={mergeTailwind(
                       [
                         'text-dark-monetr-content-emphasis',
@@ -285,6 +284,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
                         'bg-zinc-700': props.value === item,
                       },
                     )}
+                    key={item.label}
                     onClick={() => onChange(item)}
                   >
                     {React.createElement<SelectOptionComponentProps<V>>(
@@ -338,7 +338,7 @@ export function SelectIndicator({ isLoading, disabled, open }: SelectIndicator):
   const isMobile = useIsMobile();
   const className = SelectIndicatorClasses({ isLoading, disabled });
   if (isLoading) {
-    return <LoaderCircle data-loading='true' className={className} />;
+    return <LoaderCircle className={className} data-loading='true' />;
   }
 
   if (isMobile) {

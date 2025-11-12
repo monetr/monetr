@@ -74,31 +74,31 @@ function NewGoalModal(): JSX.Element {
   }
 
   return (
-    <MModal open={modal.visible} ref={ref} className='sm:max-w-xl'>
+    <MModal className='sm:max-w-xl' open={modal.visible} ref={ref}>
       <MForm
-        onSubmit={submit}
-        initialValues={initialValues}
         className='h-full flex flex-col gap-2 p-2 justify-between'
         data-testid='new-goal-modal'
+        initialValues={initialValues}
+        onSubmit={submit}
       >
         <div className='flex flex-col'>
           <MSpan className='font-bold text-xl mb-2'>Create A New Goal</MSpan>
           <FormTextField
-            name='name'
-            label='What are you budgeting for?'
-            required
-            autoFocus
             autoComplete='off'
-            placeholder='Vacation, Furniture, Car...'
+            autoFocus
             data-1p-ignore
+            label='What are you budgeting for?'
+            name='name'
+            placeholder='Vacation, Furniture, Car...'
+            required
           />
           <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
             <FormAmountField
-              name='amount'
-              label='How much do you need?'
-              required
-              className='w-full md:w-1/2'
               allowNegative={false}
+              className='w-full md:w-1/2'
+              label='How much do you need?'
+              name='amount'
+              required
             />
             <FormDatePicker
               className='w-full md:w-1/2'
@@ -111,17 +111,17 @@ function NewGoalModal(): JSX.Element {
             />
           </div>
           <MSelectFunding
-            menuPortalTarget={document.body}
             label='When do you want to fund the goal?'
-            required
+            menuPortalTarget={document.body}
             name='fundingScheduleId'
+            required
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <FormButton variant='destructive' onClick={modal.remove} data-testid='close-new-goal-modal'>
+          <FormButton data-testid='close-new-goal-modal' onClick={modal.remove} variant='destructive'>
             Cancel
           </FormButton>
-          <FormButton variant='primary' type='submit'>
+          <FormButton type='submit' variant='primary'>
             Create
           </FormButton>
         </div>

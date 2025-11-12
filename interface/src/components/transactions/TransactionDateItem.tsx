@@ -14,7 +14,7 @@ export default function TransactionDateItem({ date }: TransactionDateItemProps):
   if (isLoading) {
     return (
       <li className='sticky top-0 z-10 h-10 flex items-center backdrop-blur-sm bg-gradient-to-t from-transparent dark:to-dark-monetr-background via-90% mr-4'>
-        <Typography color='subtle' weight='semibold' className='z-10 px-3 md:px-4'>
+        <Typography className='z-10 px-3 md:px-4' color='subtle' weight='semibold'>
           Loading...
         </Typography>
       </li>
@@ -24,7 +24,7 @@ export default function TransactionDateItem({ date }: TransactionDateItemProps):
   const dateString = formatDate(date, inTimezone, locale, DateLength.Long);
   return (
     <li className='sticky top-0 z-10 h-10 flex items-center backdrop-blur-sm bg-gradient-to-t from-transparent dark:to-dark-monetr-background via-90% mr-4'>
-      <Typography color='subtle' weight='semibold' className='z-10 px-3 md:px-4'>
+      <Typography className='z-10 px-3 md:px-4' color='subtle' weight='semibold'>
         {dateString}
       </Typography>
     </li>

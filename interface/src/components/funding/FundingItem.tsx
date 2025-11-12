@@ -45,21 +45,21 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
   return (
     <li className='group relative w-full px-1 md:px-2'>
       <Link
-        to={`/bank/${funding.bankAccountId}/funding/${funding.fundingScheduleId}/details`}
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
+        to={`/bank/${funding.bankAccountId}/funding/${funding.fundingScheduleId}/details`}
       />
       <div className='flex items-center rounded-lg group-hover:bg-zinc-600 gap-2 md:gap-4 px-2 py-1 h-full cursor-pointer md:cursor-auto'>
         <Avatar>
           <AvatarFallback>{letter}</AvatarFallback>
         </Avatar>
         <div className='w-full md:w-1/2 flex flex-col flex-1 min-w-0 overflow-hidden'>
-          <MSpan weight='semibold' color='emphasis' ellipsis>
+          <MSpan color='emphasis' ellipsis weight='semibold'>
             {funding.name}
           </MSpan>
-          <MSpan size='sm' weight='medium' ellipsis>
+          <MSpan ellipsis size='sm' weight='medium'>
             {ruleDescription}
           </MSpan>
-          <MSpan size='sm' weight='medium' ellipsis>
+          <MSpan ellipsis size='sm' weight='medium'>
             {nextOccurrenceString}
           </MSpan>
         </div>

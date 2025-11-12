@@ -152,22 +152,22 @@ export default function ExpenseDetails(): JSX.Element {
   );
 
   return (
-    <MForm initialValues={initialValues} onSubmit={submit} className='flex w-full h-full flex-col'>
+    <MForm className='flex w-full h-full flex-col' initialValues={initialValues} onSubmit={submit}>
       <MTopNavigation
-        icon={Receipt}
-        title='Expenses'
         base={`/bank/${spending.bankAccountId}/expenses`}
         breadcrumb={spending?.name}
+        icon={Receipt}
+        title='Expenses'
       >
-        <Button variant='secondary' onClick={() => showTransferModal({ initialToSpendingId: spending?.spendingId })}>
+        <Button onClick={() => showTransferModal({ initialToSpendingId: spending?.spendingId })} variant='secondary'>
           <ArrowUpDown />
           Transfer
         </Button>
-        <Button variant='destructive' onClick={deleteExpense}>
+        <Button onClick={deleteExpense} variant='destructive'>
           <Trash />
           Remove
         </Button>
-        <FormButton variant='primary' type='submit' role='form'>
+        <FormButton role='form' type='submit' variant='primary'>
           <Save />
           Save
         </FormButton>
@@ -177,7 +177,7 @@ export default function ExpenseDetails(): JSX.Element {
           <div className='w-full md:w-1/2 flex flex-col items-center'>
             <div className='flex flex-col w-full'>
               <div className='flex gap-4 items-center w-full overflow-hidden'>
-                <MerchantIcon name={spending?.name} className='flex-none' />
+                <MerchantIcon className='flex-none' name={spending?.name} />
                 <div className='flex flex-col flex-1 overflow-hidden'>
                   <p className='text-ellipsis truncate min-w-0'>{spending?.name}</p>
                   <MSpan weight='semibold'>
@@ -197,16 +197,16 @@ export default function ExpenseDetails(): JSX.Element {
 
             <Divider className='w-1/2 my-4' />
 
-            <FormTextField autoComplete='off' className='w-full' label='Expense' name='name' required data-1p-ignore />
+            <FormTextField autoComplete='off' className='w-full' data-1p-ignore label='Expense' name='name' required />
             <FormAmountField allowNegative={false} className='w-full' label='Amount' name='amount' required />
             <FormDatePicker
-              label='Next Occurrence'
-              name='nextRecurrence'
               className='w-full'
-              required
+              label='Next Occurrence'
               min={startOfTomorrow({
                 in: inTimezone,
               })}
+              name='nextRecurrence'
+              required
             />
             <MSelectFunding
               className='w-full'

@@ -77,45 +77,45 @@ function ChangePasswordModal(): JSX.Element {
   }
 
   return (
-    <MModal open={modal.visible} ref={ref} className='sm:max-w-sm'>
+    <MModal className='sm:max-w-sm' open={modal.visible} ref={ref}>
       <MForm
-        onSubmit={updatePassword}
-        initialValues={initialValues}
-        validate={validate}
         className='h-full flex flex-col gap-2 p-2 justify-between'
+        initialValues={initialValues}
+        onSubmit={updatePassword}
+        validate={validate}
       >
         <div className='flex flex-col'>
-          <MSpan weight='bold' size='xl' className='mb-2'>
+          <MSpan className='mb-2' size='xl' weight='bold'>
             Change Your Password
           </MSpan>
           <FormTextField
-            autoFocus
             autoComplete='current-password'
+            autoFocus
             className='w-full'
             label='Current Password'
             name='currentPassword'
-            type='password'
             placeholder='********'
+            type='password'
           />
           <FormTextField
             autoComplete='new-password'
             className='w-full'
             label='New Password'
             name='newPassword'
-            type='password'
             placeholder='********'
+            type='password'
           />
           <FormTextField
             autoComplete='new-password'
             className='w-full'
             label='Repeat Password'
             name='repeatPassword'
-            type='password'
             placeholder='********'
+            type='password'
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <Button variant='secondary' onClick={modal.remove} data-testid='close-change-password-modal'>
+          <Button data-testid='close-change-password-modal' onClick={modal.remove} variant='secondary'>
             Cancel
           </Button>
           <FormButton color='primary' type='submit'>

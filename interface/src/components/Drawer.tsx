@@ -21,8 +21,8 @@ const DrawerOverlay = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay
-    ref={ref}
     className={mergeTailwind('fixed inset-0 z-50 bg-black/80', className)}
+    ref={ref}
     {...props}
   />
 ));
@@ -35,7 +35,6 @@ const DrawerContent = React.forwardRef<
   <DrawerPortal>
     <DrawerOverlay />
     <DrawerPrimitive.Content
-      ref={ref}
       className={mergeTailwind(
         'fixed',
         'inset-x-0',
@@ -49,6 +48,7 @@ const DrawerContent = React.forwardRef<
         styles.drawerContent,
         className,
       )}
+      ref={ref}
       {...props}
     >
       <div className='mx-auto mt-4 h-2 min-h-2 w-[100px] rounded-full bg-dark-monetr-content-muted' />
@@ -62,7 +62,7 @@ DrawerContent.displayName = 'DrawerContent';
 // properly.
 const DrawerWrapper = React.forwardRef<HTMLDivElement, React.ButtonHTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
-    <div ref={ref} className={mergeTailwind('flex-shrink overflow-y-auto', className)} {...props}>
+    <div className={mergeTailwind('flex-shrink overflow-y-auto', className)} ref={ref} {...props}>
       {children}
     </div>
   ),
@@ -84,8 +84,8 @@ const DrawerTitle = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Title
-    ref={ref}
     className={mergeTailwind('text-lg font-semibold leading-none tracking-tight', className)}
+    ref={ref}
     {...props}
   />
 ));
@@ -96,8 +96,8 @@ const DrawerDescription = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Description
-    ref={ref}
     className={mergeTailwind('text-sm text-muted-foreground', className)}
+    ref={ref}
     {...props}
   />
 ));

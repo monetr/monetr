@@ -16,10 +16,10 @@ export default function BalanceAvailableAmount(): JSX.Element {
     case 'checking':
     case 'savings':
       return (
-        <Flex justify='between' gap='sm'>
+        <Flex gap='sm' justify='between'>
           <Flex flex='shrink'>
             <Banknote />
-            <Typography color='emphasis' size='lg' weight='semibold' ellipsis>
+            <Typography color='emphasis' ellipsis size='lg' weight='semibold'>
               Available:
             </Typography>
           </Flex>

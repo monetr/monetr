@@ -23,7 +23,7 @@ export default function ExpenseTransactionList(props: ExpenseTransactionListProp
   const { data: locale } = useLocale();
   return (
     <Fragment>
-      <Typography color='emphasis' size='xl' weight='medium' className='mb-4'>
+      <Typography className='mb-4' color='emphasis' size='xl' weight='medium'>
         Transactions
       </Typography>
       <ol
@@ -40,21 +40,21 @@ export default function ExpenseTransactionList(props: ExpenseTransactionListProp
             >
               <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
               <ItemContent
-                orientation='column'
-                gap='none'
-                flex='shrink'
-                justify='start'
                 align='default'
+                flex='shrink'
+                gap='none'
+                justify='start'
+                orientation='column'
                 shrink='default'
               >
-                <Typography component='p' color='emphasis' size='md' weight='semibold' ellipsis>
+                <Typography color='emphasis' component='p' ellipsis size='md' weight='semibold'>
                   {transaction.getName()}
                 </Typography>
-                <Typography component='p' size='sm' weight='medium' ellipsis>
+                <Typography component='p' ellipsis size='sm' weight='medium'>
                   {formatDate(transaction.date, inTimezone, locale, DateLength.Long)}
                 </Typography>
               </ItemContent>
-              <ItemContent align='center' justify='end' flex='grow' shrink='none' width='fit'>
+              <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
                 <TransactionAmount transaction={transaction} />
                 <Typography>
                   <ChevronRight />

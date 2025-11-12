@@ -74,13 +74,13 @@ export default function LinkDetails(): React.JSX.Element {
   };
 
   return (
-    <MForm initialValues={initialValues} className='flex w-full h-full flex-col' onSubmit={submit}>
+    <MForm className='flex w-full h-full flex-col' initialValues={initialValues} onSubmit={submit}>
       <MTopNavigation icon={Landmark} title={link.getName()}>
-        <Button variant='destructive' onClick={handleRemoveLink}>
+        <Button onClick={handleRemoveLink} variant='destructive'>
           <Trash />
           Remove
         </Button>
-        <FormButton variant='primary' type='submit' role='form'>
+        <FormButton role='form' type='submit' variant='primary'>
           <Save />
           Save Changes
         </FormButton>
@@ -91,11 +91,11 @@ export default function LinkDetails(): React.JSX.Element {
             <MSpan className='text-xl my-2 w-full'>Details</MSpan>
             <FormTextField
               className='w-full'
-              label='Instituion / Budget Name'
-              placeholder='Budget Name'
-              name='institutionName'
-              required
               data-1p-ignore
+              label='Instituion / Budget Name'
+              name='institutionName'
+              placeholder='Budget Name'
+              required
             />
           </div>
           <Divider className='block md:hidden w-1/2' />
@@ -103,7 +103,7 @@ export default function LinkDetails(): React.JSX.Element {
             <MSpan className='text-xl my-2'>Accounts</MSpan>
             <ul className='flex flex-col gap-2'>
               {bankAccounts.map(account => (
-                <BankAccountItem key={account.bankAccountId} bankAccount={account} />
+                <BankAccountItem bankAccount={account} key={account.bankAccountId} />
               ))}
             </ul>
           </div>
@@ -122,17 +122,17 @@ function BankAccountItem(props: BankAccountItemProps): React.JSX.Element {
   return (
     <li className='group relative w-full'>
       <Link
-        to={path}
         className='group flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4 items-center'
+        to={path}
       >
         <div className='flex min-w-0 flex-col overflow-hidden grow'>
           <div className='flex gap-2'>
-            <MSpan size='md' weight='semibold' color='emphasis' ellipsis className='group-hover:underline'>
+            <MSpan className='group-hover:underline' color='emphasis' ellipsis size='md' weight='semibold'>
               {props.bankAccount.name}
             </MSpan>
             {Boolean(props.bankAccount.deletedAt) && <Badge size='sm'>Archived</Badge>}
           </div>
-          <MSpan size='sm' weight='medium' color='default' ellipsis>
+          <MSpan color='default' ellipsis size='sm' weight='medium'>
             {capitalize(props.bankAccount.accountSubType)}
           </MSpan>
         </div>

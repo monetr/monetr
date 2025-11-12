@@ -15,8 +15,8 @@ export default function PlaidInstitutionLogo(props: PlaidInstitutionLogoProps): 
   if (!institution?.logo) {
     return (
       <Landmark
-        data-testid={`bank-sidebar-item-${props.link?.linkId}-logo-missing`}
         className={mergeTailwind('text-blue-500', props.className)}
+        data-testid={`bank-sidebar-item-${props.link?.linkId}-logo-missing`}
       />
     );
   }
@@ -24,9 +24,9 @@ export default function PlaidInstitutionLogo(props: PlaidInstitutionLogoProps): 
   return (
     <img
       alt={institution.name}
+      className={props.className}
       data-testid={`bank-sidebar-item-${props.link?.linkId}-logo`}
       src={`data:image/png;base64,${institution.logo}`}
-      className={props.className}
     />
   );
 }

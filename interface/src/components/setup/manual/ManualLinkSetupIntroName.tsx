@@ -28,26 +28,26 @@ export default function ManualLinkSetupIntroName(): JSX.Element {
 
   return (
     <MForm
-      initialValues={initialValues}
-      onSubmit={submit}
       className={flexVariants({
         orientation: 'column',
         justify: 'center',
         align: 'center',
       })}
+      initialValues={initialValues}
+      onSubmit={submit}
     >
       <Typography size='2xl' weight='medium'>
         Welcome to monetr!
       </Typography>
-      <Typography size='lg' color='subtle' align='center'>
+      <Typography align='center' color='subtle' size='lg'>
         Let's create a new budget to get started. What do you want to call this budget?
       </Typography>
       <FormTextField
-        name='budgetName'
-        label='Bank or Budget Name'
-        className='w-full'
-        placeholder='My Primary Bank'
         autoFocus
+        className='w-full'
+        label='Bank or Budget Name'
+        name='budgetName'
+        placeholder='My Primary Bank'
         required
       />
       <ManualLinkSetupButtons />

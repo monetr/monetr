@@ -137,8 +137,8 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
   if (localeIsLoading) {
     return (
       <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
-        <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
-          <LabelDecorator name={props.name} disabled={props.disabled} />
+        <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
+          <LabelDecorator disabled={props.disabled} name={props.name} />
         </Label>
         <div className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)} data-error={props.error}>
           <Skeleton className='w-full h-5 mr-2' />
@@ -155,22 +155,21 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
       className={mergeTailwind(errorTextStyles.errorTextPadding, 'relative', className)}
       data-testid={props['data-testid']}
     >
-      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
-        <LabelDecorator name={props.name} disabled={props.disabled} />
+      <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
+        <LabelDecorator disabled={props.disabled} name={props.name} />
       </Label>
       <Popover open={open}>
         <PopoverTrigger asChild>
           <button
-            type='button'
-            disabled={formikContext?.isSubmitting || disabled}
             className={mergeTailwind(inputStyles.input, datePickerStyles.datePickerButton)}
+            disabled={formikContext?.isSubmitting || disabled}
             onClick={handleClick}
+            type='button'
           >
             <CalendarIcon />
             <span className={typographyStyles.truncate}>{formattedSelection}</span>
             {isClearEnabled && selectedValue ? (
               <button
-                type='button'
                 className={mergeTailwind(
                   'absolute outline-none inset-y-0 right-2 flex items-center transition duration-100 dark:text-dark-monetr-content-subtle',
                 )}
@@ -178,6 +177,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
                   e.preventDefault();
                   handleReset();
                 }}
+                type='button'
               >
                 <X />
               </button>
@@ -186,18 +186,18 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
         </PopoverTrigger>
         <PopoverContent onPointerDownOutside={handleClose}>
           <Calendar
-            showOutsideDays={true}
-            mode='single'
+            className='overflow-y-auto outline-none rounded-lg p-3 bg-dark-monetr-background'
             defaultMonth={defaultMonth}
-            selected={selectedValue}
+            disabled={disabledDays}
+            enableYearNavigation={enableYearNavigation}
+            locale={locale}
+            mode='single'
             onSelect={(value: Date) => {
               handleSelect(value);
               handleClose();
             }}
-            locale={locale}
-            disabled={disabledDays}
-            enableYearNavigation={enableYearNavigation}
-            className='overflow-y-auto outline-none rounded-lg p-3 bg-dark-monetr-background'
+            selected={selectedValue}
+            showOutsideDays={true}
           />
         </PopoverContent>
       </Popover>

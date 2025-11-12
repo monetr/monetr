@@ -19,17 +19,17 @@ export default function ManualLinkSetupButtons(): JSX.Element {
   switch (step) {
     case 0:
       return (
-        <Button variant='primary' type='submit'>
+        <Button type='submit' variant='primary'>
           Next
         </Button>
       );
     case lastStep:
       return (
         <Flex gap='lg' justify='center'>
-          <Button variant='secondary' onClick={previousStep}>
+          <Button onClick={previousStep} variant='secondary'>
             Back
           </Button>
-          <Button variant='primary' type='submit'>
+          <Button type='submit' variant='primary'>
             Finish
           </Button>
         </Flex>
@@ -37,10 +37,10 @@ export default function ManualLinkSetupButtons(): JSX.Element {
     default:
       return (
         <Flex gap='lg' justify='center'>
-          <Button variant='secondary' onClick={previousStep}>
+          <Button onClick={previousStep} variant='secondary'>
             Back
           </Button>
-          <Button variant='primary' type='submit'>
+          <Button type='submit' variant='primary'>
             Next
           </Button>
         </Flex>

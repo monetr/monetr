@@ -85,8 +85,8 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
   if (props.isLoading) {
     return (
       <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
-        <Label label={props.label} disabled htmlFor={props.id} required={props.required}>
-          <LabelDecorator name={props.name} disabled />
+        <Label disabled htmlFor={props.id} label={props.label} required={props.required}>
+          <LabelDecorator disabled name={props.name} />
         </Label>
         <div>
           <div aria-disabled='true' className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)}>
@@ -100,8 +100,8 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
 
   return (
     <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
-      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
-        <LabelDecorator name={props.name} disabled={props.disabled} />
+      <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
+        <LabelDecorator disabled={props.disabled} name={props.name} />
       </Label>
       <div>
         <NumericFormat
@@ -112,15 +112,15 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           {...otherProps}
           /* Properties below this point cannot be overwritten by the caller! */
           className={inputStyles.input}
-          fixedDecimalScale
+          data-error={Boolean(props.error)}
           decimalScale={currencyInfo.maximumFractionDigits}
           decimalSeparator={getDecimalSeparator(localeInfo.locale)}
-          thousandSeparator={getNumberGroupSeparator(localeInfo.locale)}
+          fixedDecimalScale
           onValueChange={onChange}
-          renderText={intlNumberFormatter(localeInfo.locale, props.currency)}
           placeholder={intlNumberFormatter(localeInfo.locale, props.currency)('0')}
           prefix={getCurrencySymbolPrefixed(localeInfo.locale, props.currency)}
-          data-error={Boolean(props.error)}
+          renderText={intlNumberFormatter(localeInfo.locale, props.currency)}
+          thousandSeparator={getNumberGroupSeparator(localeInfo.locale)}
         />
       </div>
       <ErrorText error={props.error} />

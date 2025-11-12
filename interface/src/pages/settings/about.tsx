@@ -12,7 +12,7 @@ export default function SettingsAbout(): JSX.Element {
   return (
     <div className='w-full flex flex-col p-4 gap-8'>
       <div className='w-full flex flex-col max-w-2xl'>
-        <MSpan size='2xl' weight='bold' color='emphasis' className='mb-4'>
+        <MSpan className='mb-4' color='emphasis' size='2xl' weight='bold'>
           About monetr
         </MSpan>
         <Divider />
@@ -20,7 +20,7 @@ export default function SettingsAbout(): JSX.Element {
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
             Version
           </MSpan>
-          <MSpan component='code' size='lg' className='max-w-fit'>
+          <MSpan className='max-w-fit' component='code' size='lg'>
             {release || 'Unknown'}
           </MSpan>
         </div>
@@ -30,7 +30,7 @@ export default function SettingsAbout(): JSX.Element {
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
             Revision
           </MSpan>
-          <MSpan component='code' size='lg' className='max-w-fit'>
+          <MSpan className='max-w-fit' component='code' size='lg'>
             {revision ? revision.slice(0, 7) : 'Unknown'}
           </MSpan>
         </div>
@@ -40,7 +40,7 @@ export default function SettingsAbout(): JSX.Element {
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
             Build Type
           </MSpan>
-          <MSpan component='code' size='lg' className='max-w-fit'>
+          <MSpan className='max-w-fit' component='code' size='lg'>
             {buildType || 'Unknown'}
           </MSpan>
         </div>
@@ -50,7 +50,7 @@ export default function SettingsAbout(): JSX.Element {
           <MSpan className='md:w-1/3' size='lg' weight='semibold'>
             Build Time
           </MSpan>
-          <MSpan component='code' size='lg' className='max-w-fit' ellipsis>
+          <MSpan className='max-w-fit' component='code' ellipsis size='lg'>
             {format(buildTime, 'LLLL do yyyy, h:mmaaa OOOO')}
           </MSpan>
         </div>
@@ -58,7 +58,7 @@ export default function SettingsAbout(): JSX.Element {
       </div>
 
       <div className='w-full flex flex-col max-w-2xl'>
-        <MSpan size='2xl' weight='bold' color='emphasis' className='mb-4'>
+        <MSpan className='mb-4' color='emphasis' size='2xl' weight='bold'>
           Need Help?
         </MSpan>
         <Divider />
@@ -130,7 +130,7 @@ function AboutHyperlink(props: AboutHyperlinkProps): JSX.Element {
   });
 
   return (
-    <a className={className} target='_blank' href={props.href}>
+    <a className={className} href={props.href} target='_blank'>
       {props.children}
     </a>
   );

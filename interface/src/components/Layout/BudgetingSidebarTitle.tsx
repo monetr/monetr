@@ -67,26 +67,26 @@ export default function BudgetingSidebarTitle(): JSX.Element {
         </DropdownMenuTrigger>
         <DropdownMenuContent className='w-72'>
           <MenuItem
-            visible={link.getIsPlaid() && (link.getIsError() || link.getIsPendingExpiration())}
             onClick={handleReauthenticateLink}
+            visible={link.getIsPlaid() && (link.getIsError() || link.getIsPendingExpiration())}
           >
             <LogIn />
             Reauthenticate
           </MenuItem>
-          <MenuItem visible={link.getIsPlaid()} onClick={handleUpdateAccountSelection}>
+          <MenuItem onClick={handleUpdateAccountSelection} visible={link.getIsPlaid()}>
             <Plug />
             Update Account Selection
           </MenuItem>
-          <MenuItem visible={link.getIsPlaid() && !link.getIsRevoked()} onClick={handleTriggerResync}>
+          <MenuItem onClick={handleTriggerResync} visible={link.getIsPlaid() && !link.getIsRevoked()}>
             <RefreshCw />
             Manually Resync
           </MenuItem>
-          <MenuItem visible onClick={handleLinkSettings}>
+          <MenuItem onClick={handleLinkSettings} visible>
             <Settings />
             Settings
           </MenuItem>
           <Divider />
-          <MenuItem visible onClick={handleRemoveLink}>
+          <MenuItem onClick={handleRemoveLink} visible>
             <Trash2 className='text-dark-monetr-red' />
             Remove {link?.getName()}
           </MenuItem>

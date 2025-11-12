@@ -35,28 +35,28 @@ export default function ManualLinkSetupBalances(): JSX.Element {
 
   return (
     <MForm
-      initialValues={initialValues}
-      onSubmit={submit}
       className={flexVariants({
         orientation: 'column',
         justify: 'center',
         align: 'center',
       })}
+      initialValues={initialValues}
+      onSubmit={submit}
     >
       {({ values: { currency } }) => (
         <Fragment>
-          <Typography size='lg' color='subtle' align='center'>
+          <Typography align='center' color='subtle' size='lg'>
             What is your current available balance? monetr will use this as a starting point, you can modify this at any
             time later on.
           </Typography>
-          <SelectCurrency name='currency' className='w-full' />
+          <SelectCurrency className='w-full' name='currency' />
           <FormAmountField
-            name='startingBalance'
-            label='Starting Balance'
+            allowNegative
             className='w-full'
             currency={currency}
+            label='Starting Balance'
+            name='startingBalance'
             required
-            allowNegative
           />
           <ManualLinkSetupButtons />
         </Fragment>

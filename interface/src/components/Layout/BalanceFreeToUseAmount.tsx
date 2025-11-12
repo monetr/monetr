@@ -18,10 +18,10 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
       const color = balance?.free >= 0 ? 'emphasis' : 'negative';
 
       return (
-        <Flex justify='between' gap='sm'>
+        <Flex gap='sm' justify='between'>
           <Flex flex='shrink'>
             <Wallet />
-            <Typography color='emphasis' size='lg' weight='semibold' ellipsis>
+            <Typography color='emphasis' ellipsis size='lg' weight='semibold'>
               Free-To-Use:
             </Typography>
           </Flex>

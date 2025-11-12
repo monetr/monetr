@@ -86,12 +86,12 @@ function NewTransactionModal(): JSX.Element {
   }
 
   return (
-    <MModal open={modal.visible} ref={ref} className='sm:max-w-xl'>
-      <MForm onSubmit={submit} className='h-full flex flex-col gap-2 p-2 justify-between' initialValues={initialValues}>
+    <MModal className='sm:max-w-xl' open={modal.visible} ref={ref}>
+      <MForm className='h-full flex flex-col gap-2 p-2 justify-between' initialValues={initialValues} onSubmit={submit}>
         {({ setFieldValue, values }) => (
           <Fragment>
             <div className='flex flex-col'>
-              <MSpan weight='bold' size='xl' className='mb-2'>
+              <MSpan className='mb-2' size='xl' weight='bold'>
                 Create A New Transaction
               </MSpan>
 
@@ -101,8 +101,8 @@ function NewTransactionModal(): JSX.Element {
               */}
 
               <Tabs
-                defaultValue='debit'
                 className='w-full mb-2'
+                defaultValue='debit'
                 onValueChange={value => setFieldValue('kind', value as unknown)}
               >
                 <TabsList className='w-full'>
@@ -125,11 +125,11 @@ function NewTransactionModal(): JSX.Element {
                   />
                   <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
                     <FormAmountField
-                      name='amount'
-                      label='Amount'
-                      required
-                      className='w-full md:w-1/2'
                       allowNegative={false}
+                      className='w-full md:w-1/2'
+                      label='Amount'
+                      name='amount'
+                      required
                     />
                     <FormDatePicker className='w-full md:w-1/2' label='Date' name='date' required />
                   </div>
@@ -151,20 +151,20 @@ function NewTransactionModal(): JSX.Element {
                 </TabsContent>
                 <TabsContent value='credit'>
                   <FormTextField
-                    name='name'
-                    label='Name / Description'
-                    required
                     autoComplete='off'
-                    placeholder='Paycheck, Deposit...'
                     data-1p-ignore
+                    label='Name / Description'
+                    name='name'
+                    placeholder='Paycheck, Deposit...'
+                    required
                   />
                   <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
                     <FormAmountField
-                      name='amount'
-                      label='Amount'
-                      required
-                      className='w-full md:w-1/2'
                       allowNegative={false}
+                      className='w-full md:w-1/2'
+                      label='Amount'
+                      name='amount'
+                      required
                     />
                     <FormDatePicker className='w-full md:w-1/2' label='Date' name='date' required />
                   </div>
@@ -184,10 +184,10 @@ function NewTransactionModal(): JSX.Element {
               </Tabs>
             </div>
             <div className='flex justify-end gap-2'>
-              <FormButton variant='destructive' onClick={modal.remove} data-testid='close-new-transaction-modal'>
+              <FormButton data-testid='close-new-transaction-modal' onClick={modal.remove} variant='destructive'>
                 Cancel
               </FormButton>
-              <FormButton variant='primary' type='submit'>
+              <FormButton type='submit' variant='primary'>
                 Create
               </FormButton>
             </div>

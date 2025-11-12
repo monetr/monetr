@@ -11,10 +11,10 @@ export default function BalanceCurrentAmount(): JSX.Element {
   const { data: balance } = useCurrentBalance();
 
   return (
-    <Flex justify='between' gap='sm'>
+    <Flex gap='sm' justify='between'>
       <Flex flex='shrink'>
         <Coins />
-        <Typography color='emphasis' size='lg' weight='semibold' ellipsis>
+        <Typography color='emphasis' ellipsis size='lg' weight='semibold'>
           Current:
         </Typography>
       </Flex>

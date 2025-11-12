@@ -76,36 +76,36 @@ export default function ResendVerificationPage(): JSX.Element {
 
   return (
     <MForm
+      className='w-full h-full flex flex-col justify-center items-center gap-2 p-4'
       initialValues={initialValues}
       onSubmit={submit}
       validate={validateInput}
-      className='w-full h-full flex flex-col justify-center items-center gap-2 p-4'
     >
       <div className='max-w-xs flex flex-col items-center gap-2'>
         <MLogo className='h-24 w-24' />
         <RouteStateMessage />
         <FormTextField
-          name='email'
           autoComplete='username'
           autoFocus
-          label='Email'
           className='w-full'
           data-testid='resend-email'
+          label='Email'
+          name='email'
         />
         <MCaptcha
-          name='captcha'
-          // Show the captcha if there is a captcha key specified in the config.
-          show={Boolean(config?.ReCAPTCHAKey)}
           data-testid='resend-captcha'
+          // Show the captcha if there is a captcha key specified in the config.
+          name='captcha'
+          show={Boolean(config?.ReCAPTCHAKey)}
         />
-        <FormButton type='submit' color='primary' className='w-full'>
+        <FormButton className='w-full' color='primary' type='submit'>
           Resend Verification
         </FormButton>
         <div className='mt-1 flex justify-center gap-1'>
           <Typography color='subtle' size='sm'>
             Don't need to resend?
           </Typography>
-          <TextLink to='/login' size='sm' data-testid='login-signup'>
+          <TextLink data-testid='login-signup' size='sm' to='/login'>
             Return to login
           </TextLink>
         </div>
@@ -123,7 +123,7 @@ export function AfterEmailVerificationSent(): JSX.Element {
           A new verification link was sent to your email address...
         </Typography>
         <div className='mt-1 flex justify-center gap-1'>
-          <TextLink to='/login' size='sm' data-testid='login-signup'>
+          <TextLink data-testid='login-signup' size='sm' to='/login'>
             Return to login
           </TextLink>
         </div>
@@ -136,14 +136,14 @@ function RouteStateMessage(): JSX.Element {
   const { state: routeState } = useLocation();
   if (routeState) {
     return (
-      <Typography align='center' size='sm' data-testid='resend-email-included'>
+      <Typography align='center' data-testid='resend-email-included' size='sm'>
         It looks like your email address has not been verified. Do you want to resend the email verification link?
       </Typography>
     );
   }
 
   return (
-    <Typography align='center' size='sm' data-testid='resend-email-excluded'>
+    <Typography align='center' data-testid='resend-email-excluded' size='sm'>
       If your email verification link has expired, or you never got one. You can enter your email address below and
       another verification link will be sent to you.
     </Typography>

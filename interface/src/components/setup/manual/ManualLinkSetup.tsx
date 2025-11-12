@@ -30,17 +30,17 @@ export default function ManualLinkSetup(props: ManualLinkSetupProps): JSX.Elemen
 
   return (
     <ViewManager<ManualLinkSetupSteps, ManualLinkSetupMetadata, ManualLinkSetupForm>
-      initialView={initialView}
       initialMetadata={{
         showLogoutFooter: props.showLogoutFooter,
       }}
+      initialView={initialView}
+      layout={ManualLinkSetupLayout}
       viewComponents={{
         [ManualLinkSetupSteps.IntroName]: ManualLinkSetupIntroName,
         [ManualLinkSetupSteps.AccountName]: ManualLinkSetupAccountName,
         [ManualLinkSetupSteps.Balances]: ManualLinkSetupBalances,
         [ManualLinkSetupSteps.Income]: ManualLinkSetupIncome,
       }}
-      layout={ManualLinkSetupLayout}
     />
   );
 }

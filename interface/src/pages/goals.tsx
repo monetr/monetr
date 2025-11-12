@@ -66,7 +66,7 @@ export default function Goals(): JSX.Element {
         {goals
           ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
           .map(item => (
-            <GoalItem spending={item} key={item.spendingId} />
+            <GoalItem key={item.spendingId} spending={item} />
           ))}
       </ul>
     );
@@ -75,7 +75,7 @@ export default function Goals(): JSX.Element {
   return (
     <Fragment>
       <MTopNavigation icon={PiggyBank} title='Goals'>
-        <Button variant='primary' onClick={showNewGoalModal}>
+        <Button onClick={showNewGoalModal} variant='primary'>
           <Plus />
           New Goal
         </Button>
@@ -94,10 +94,10 @@ function EmptyState(): JSX.Element {
         <div className='w-full flex justify-center space-x-4'>
           <PiggyBank className='w-16 h-16 dark:text-dark-monetr-content-muted' />
         </div>
-        <MSpan size='xl' color='subtle' className='text-center'>
+        <MSpan className='text-center' color='subtle' size='xl'>
           You don't have any goals yet...
         </MSpan>
-        <MSpan size='lg' color='subtle' className='text-center'>
+        <MSpan className='text-center' color='subtle' size='lg'>
           Goals are longer budgets that don't recur. They are meant to be used to put money aside for something like
           saving up for a vaction, or paying off a loan.
         </MSpan>

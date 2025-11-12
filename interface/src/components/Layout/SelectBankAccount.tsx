@@ -52,18 +52,18 @@ export default function SelectBankAccount(): JSX.Element {
   if (isMobile) {
     return (
       <div className='flex w-full gap-[1px]'>
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer onOpenChange={setOpen} open={open}>
           <DrawerTrigger asChild>
             <Button
-              size='select'
-              variant='text'
-              role='combobox'
               aria-expanded={open}
-              disabled={false}
               className={mergeTailwind(
                 comboboxVariants({ variant: 'text', size: 'select' }),
                 'h-[34px] group flex flex-auto',
               )}
+              disabled={false}
+              role='combobox'
+              size='select'
+              variant='text'
             >
               <div className='text-inherit flex-shrink truncate min-w-0'>
                 {current?.value
@@ -79,15 +79,14 @@ export default function SelectBankAccount(): JSX.Element {
           </DrawerTrigger>
           <DrawerContent>
             <SelectBankAccountPicker
-              value={current?.value}
-              setOpen={setOpen}
-              options={accounts}
               onSelect={value => navigate(`/bank/${value}/transactions`)}
+              options={accounts}
+              setOpen={setOpen}
+              value={current?.value}
             />
           </DrawerContent>
         </Drawer>
         <Link
-          role='combobox'
           aria-expanded={open}
           className={mergeTailwind(
             buttonVariants({ variant: 'text', size: 'select' }),
@@ -97,6 +96,7 @@ export default function SelectBankAccount(): JSX.Element {
             'enabled:hover:ring-dark-monetr-border-string',
             'focus:ring-dark-monetr-brand focus:ring-2',
           )}
+          role='combobox'
           to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
         >
           <Settings className='h-3 w-3 opacity-50 group-hover:opacity-100' />
@@ -107,18 +107,18 @@ export default function SelectBankAccount(): JSX.Element {
 
   return (
     <div className='flex w-full gap-[1px]'>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover onOpenChange={setOpen} open={open}>
         <PopoverTrigger asChild>
           <Button
-            size='select'
-            variant='text'
-            role='combobox'
             aria-expanded={open}
-            disabled={false}
             className={mergeTailwind(
               comboboxVariants({ variant: 'text', size: 'select' }),
               'h-[34px] group flex flex-auto',
             )}
+            disabled={false}
+            role='combobox'
+            size='select'
+            variant='text'
           >
             <div className='text-inherit flex-shrink truncate min-w-0'>
               {current?.value
@@ -134,14 +134,13 @@ export default function SelectBankAccount(): JSX.Element {
         </PopoverTrigger>
         <PopoverContent className='w-80'>
           <SelectBankAccountPicker
-            value={current?.value}
-            setOpen={setOpen}
-            options={accounts}
             onSelect={value => navigate(`/bank/${value}/transactions`)}
+            options={accounts}
+            setOpen={setOpen}
+            value={current?.value}
           />
         </PopoverContent>
         <Link
-          role='combobox'
           className={mergeTailwind(
             buttonVariants({ variant: 'text', size: 'select' }),
             comboboxVariants({ variant: 'text', size: 'select' }),
@@ -150,6 +149,7 @@ export default function SelectBankAccount(): JSX.Element {
             'enabled:hover:ring-dark-monetr-border-string',
             'focus:ring-0', // DIFFERENT FROM MOBILE
           )}
+          role='combobox'
           to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
         >
           <Settings className='h-4 w-4 opacity-50 group-hover:opacity-100' />
@@ -182,12 +182,12 @@ function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccoun
         {props.option.label}
       </MSpan>
       {props.option.status === 'inactive' && (
-        <Badge size='xs' className='bg-dark-monetr-border-subtle'>
+        <Badge className='bg-dark-monetr-border-subtle' size='xs'>
           Inactive
         </Badge>
       )}
       {props.option.mask !== '' && (
-        <Badge size='xs' className='font-mono'>
+        <Badge className='font-mono' size='xs'>
           {props.option.mask}
         </Badge>
       )}
@@ -215,12 +215,12 @@ function SelectBankAccountPicker(props: SelectBankAccountPickerProps): JSX.Eleme
         {link?.getIsManual() && (
           <CommandGroup className='' heading='Controls'>
             <CommandItem
-              value='null'
-              title='Create an account'
               onSelect={() => {
                 props.setOpen(false);
                 showNewBankAccountModal();
               }}
+              title='Create an account'
+              value='null'
             >
               <div className='flex items-center w-full gap-1'>
                 <CirclePlus className='mr-1 h-5 w-5 flex-none' />
@@ -235,12 +235,12 @@ function SelectBankAccountPicker(props: SelectBankAccountPickerProps): JSX.Eleme
           {props.options.map(option => (
             <CommandItem
               key={option.value}
-              value={`${option.label} ${option.value}` /* makes search work properly :( */}
-              title={option.label}
               onSelect={() => {
                 props.onSelect?.(option.value);
                 props.setOpen(false);
               }}
+              title={option.label}
+              value={`${option.label} ${option.value}` /* makes search work properly :( */}
             >
               <BankAccountSelectItem currentValue={props.value} option={option} />
             </CommandItem>

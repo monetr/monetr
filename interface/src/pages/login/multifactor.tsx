@@ -59,11 +59,11 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
 
   return (
     <MForm
+      className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-2 px-5'
       initialValues={initialValues}
       onSubmit={submit}
       validate={validate}
       validateOnMount
-      className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-2 px-5'
     >
       {formik => (
         <Fragment>
@@ -74,12 +74,12 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
             Please provide the 6-digit code from your authenticator app
           </MSpan>
           <InputOTP
-            name='totp'
-            maxLength={6}
-            required
-            onChange={value => formik.setFieldValue('totp', value)}
-            disabled={formik.isSubmitting}
             autoFocus
+            disabled={formik.isSubmitting}
+            maxLength={6}
+            name='totp'
+            onChange={value => formik.setFieldValue('totp', value)}
+            required
           >
             <InputOTPGroup>
               <InputOTPSlot index={0} />
@@ -95,12 +95,12 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
           </InputOTP>
           <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
             <FormButton
-              disabled={!formik.isValid}
+              className='w-full'
               data-testid='multifactor-submit'
-              variant='primary'
+              disabled={!formik.isValid}
               role='form'
               type='submit'
-              className='w-full'
+              variant='primary'
             >
               {formatContinueButton(formik.values as MultifactorValues)}
             </FormButton>

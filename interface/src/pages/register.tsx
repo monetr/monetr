@@ -79,7 +79,7 @@ export function RegisterSuccessful(): JSX.Element {
   return (
     <div className='w-full h-full flex justify-center items-center flex-col'>
       <MLogo className='size-24' />
-      <Typography size='xl' weight='medium' className='max-w-md text-center'>
+      <Typography className='max-w-md text-center' size='xl' weight='medium'>
         A verification message has been sent to your email address, please verify your email.
       </Typography>
     </div>
@@ -100,7 +100,7 @@ export default function Register(): JSX.Element {
     }
 
     return (
-      <FormTextField label='Beta Code' name='betaCode' type='text' required uppercasetext className={breakpoints} />
+      <FormTextField className={breakpoints} label='Beta Code' name='betaCode' required type='text' uppercasetext />
     );
   }
 
@@ -151,48 +151,48 @@ export default function Register(): JSX.Element {
   return (
     <div className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5 overflow-y-auto py-4'>
       <MForm
-        initialValues={initialValues}
-        validate={validator}
-        onSubmit={submit}
         className='flex flex-col md:w-1/2 lg:w-1/3 xl:w-1/4 items-center gap-1'
+        initialValues={initialValues}
+        onSubmit={submit}
+        validate={validator}
       >
         <div className='max-w-[96px] w-full'>
           <MLogo />
         </div>
-        <Flex orientation='column' align='center'>
-          <Typography size='5xl' align='center'>
+        <Flex align='center' orientation='column'>
+          <Typography align='center' size='5xl'>
             Get Started
           </Typography>
-          <Typography size='lg' color='subtle' align='center'>
+          <Typography align='center' color='subtle' size='lg'>
             Create your monetr account now
           </Typography>
         </Flex>
-        <Flex orientation='stackSmall' gap='sm'>
+        <Flex gap='sm' orientation='stackSmall'>
           <FormTextField
-            data-testid='register-first-name'
             autoFocus
+            className='w-full'
+            data-testid='register-first-name'
             label='First Name'
             name='firstName'
-            type='text'
             required
-            className='w-full'
+            type='text'
           />
           <FormTextField
+            className='w-full'
             data-testid='register-last-name'
             label='Last Name'
             name='lastName'
-            type='text'
             required
-            className='w-full'
+            type='text'
           />
         </Flex>
         <FormTextField
+          className='w-full'
           data-testid='register-email'
           label='Email Address'
           name='email'
-          type='email'
           required
-          className='w-full'
+          type='email'
         />
         <FormTextField
           autoComplete='new-password'
@@ -214,36 +214,36 @@ export default function Register(): JSX.Element {
         />
         <BetaCodeInput />
         <MCaptcha className='mb-1' name='captcha' show={Boolean(config?.verifyRegister)} />
-        <FormButton data-testid='register-submit' className='w-full mt-1' role='form' type='submit' variant='primary'>
+        <FormButton className='w-full mt-1' data-testid='register-submit' role='form' type='submit' variant='primary'>
           Sign Up
         </FormButton>
         <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
-          <MSpan className='gap-1 inline-block text-center' size='sm' color='subtle' component='p'>
+          <MSpan className='gap-1 inline-block text-center' color='subtle' component='p' size='sm'>
             By signing up you agree to monetr's&nbsp;
             <a
-              target='_blank'
               className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
               href='https://monetr.app/policy/terms'
               rel='noopener'
+              target='_blank'
             >
               Terms & Conditions
             </a>{' '}
             and&nbsp;
             <a
-              target='_blank'
               className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
               href='https://monetr.app/policy/privacy'
               rel='noopener'
+              target='_blank'
             >
               Privacy Policy
             </a>
           </MSpan>
         </div>
         <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
-          <Typography size='sm' color='subtle'>
+          <Typography color='subtle' size='sm'>
             Already have an account?
           </Typography>
-          <TextLink to='/login' size='sm'>
+          <TextLink size='sm' to='/login'>
             Sign in instead
           </TextLink>
         </div>

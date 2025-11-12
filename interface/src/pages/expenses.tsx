@@ -59,7 +59,7 @@ export default function Expenses(): JSX.Element {
   return (
     <Fragment>
       <MTopNavigation icon={Receipt} title='Expenses'>
-        <Button variant='primary' className='gap-1 py-1 px-2' onClick={showNewExpenseModal}>
+        <Button className='gap-1 py-1 px-2' onClick={showNewExpenseModal} variant='primary'>
           <Plus />
           New Expense
         </Button>
@@ -71,7 +71,7 @@ export default function Expenses(): JSX.Element {
             {expenses
               ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
               .map(item => (
-                <ExpenseItem spending={item} key={item.spendingId} />
+                <ExpenseItem key={item.spendingId} spending={item} />
               ))}
           </ul>
         )}
@@ -87,10 +87,10 @@ function EmptyState(): JSX.Element {
         <div className='w-full flex justify-center space-x-4'>
           <Receipt className='dark:text-dark-monetr-content-muted h-12 w-12' />
         </div>
-        <MSpan size='xl' color='subtle' className='text-center'>
+        <MSpan className='text-center' color='subtle' size='xl'>
           You don't have any expenses yet...
         </MSpan>
-        <MSpan size='lg' color='subtle' className='text-center'>
+        <MSpan className='text-center' color='subtle' size='lg'>
           Expenses are budgets for recurring spending. Things like your streaming subscription, rent, or car payments.
         </MSpan>
       </div>

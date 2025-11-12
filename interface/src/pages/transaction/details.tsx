@@ -80,12 +80,12 @@ export default function TransactionDetails(): JSX.Element {
 
   if (isLoading || linkIsLoading) {
     return (
-      <MForm initialValues={{}} enableReinitialize={true} onSubmit={submit} className='flex w-full h-full flex-col'>
+      <MForm className='flex w-full h-full flex-col' enableReinitialize={true} initialValues={{}} onSubmit={submit}>
         <MTopNavigation
-          icon={ShoppingCart}
-          title='Transactions'
           base={`/bank/${selectedBankAccountId}/transactions`}
           breadcrumb={transaction?.name}
+          icon={ShoppingCart}
+          title='Transactions'
         />
         <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
           <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
@@ -94,34 +94,34 @@ export default function TransactionDetails(): JSX.Element {
                 <MerchantIcon name={transaction?.name} />
               </div>
               <FormTextField
-                label='Name'
                 autoComplete='off'
-                placeholder='Transaction name...'
-                name='name'
                 className='w-full'
                 data-1p-ignore
                 isLoading
+                label='Name'
+                name='name'
+                placeholder='Transaction name...'
               />
               <FormTextField
-                label='Original Name'
                 autoComplete='off'
-                placeholder='No original name...?'
-                name='originalName'
                 className='w-full'
                 disabled
                 isLoading
+                label='Original Name'
+                name='originalName'
+                placeholder='No original name...?'
               />
-              <FormAmountField className='w-full' disabled label='Amount' name='amount' isLoading />
-              <FormDatePicker label='Date' name='date' className='w-full' disabled />
+              <FormAmountField className='w-full' disabled isLoading label='Amount' name='amount' />
+              <FormDatePicker className='w-full' disabled label='Date' name='date' />
               <FormCheckbox
-                data-testid='transaction-details-pending'
-                name='isPending'
-                label='Is Pending'
-                description='Transaction has not yet cleared, the name or amount may change.'
                 className='w-full'
+                data-testid='transaction-details-pending'
+                description='Transaction has not yet cleared, the name or amount may change.'
                 disabled
+                label='Is Pending'
+                name='isPending'
               />
-              <MSelectSpending className='w-full' name='spendingId' isLoading />
+              <MSelectSpending className='w-full' isLoading name='spendingId' />
             </div>
             <div className='w-full md:w-1/2 flex flex-col items-center'></div>
           </div>
@@ -160,19 +160,19 @@ export default function TransactionDetails(): JSX.Element {
 
   return (
     <MForm
-      initialValues={initialValues}
-      enableReinitialize={true}
-      onSubmit={submit}
       className='flex w-full h-full flex-col'
+      enableReinitialize={true}
+      initialValues={initialValues}
+      onSubmit={submit}
     >
       <MTopNavigation
-        icon={ShoppingCart}
-        title='Transactions'
         base={`/bank/${transaction.bankAccountId}/transactions`}
         breadcrumb={transaction?.name}
+        icon={ShoppingCart}
+        title='Transactions'
       >
         <RemoveTransactionButton transaction={transaction} />
-        <FormButton variant='primary' type='submit' role='form'>
+        <FormButton role='form' type='submit' variant='primary'>
           <Save />
           Save Changes
         </FormButton>
@@ -184,30 +184,30 @@ export default function TransactionDetails(): JSX.Element {
               <MerchantIcon name={transaction?.name} />
             </div>
             <FormTextField
-              label='Name'
               autoComplete='off'
-              placeholder='Transaction name...'
-              name='name'
               className='w-full'
               data-1p-ignore
+              label='Name'
+              name='name'
+              placeholder='Transaction name...'
             />
             <FormTextField
-              label='Original Name'
               autoComplete='off'
-              placeholder='No original name...?'
-              name='originalName'
               className='w-full'
               disabled
+              label='Original Name'
+              name='originalName'
+              placeholder='No original name...?'
             />
             <FormAmountField className='w-full' disabled label='Amount' name='amount' />
-            <FormDatePicker label='Date' name='date' className='w-full' disabled={!link?.getIsManual()} />
+            <FormDatePicker className='w-full' disabled={!link?.getIsManual()} label='Date' name='date' />
             <FormCheckbox
-              data-testid='transaction-details-pending'
-              name='isPending'
-              label='Is Pending'
-              description='Transaction has not yet cleared, the name or amount may change.'
               className='w-full'
+              data-testid='transaction-details-pending'
+              description='Transaction has not yet cleared, the name or amount may change.'
               disabled={!link?.getIsManual()}
+              label='Is Pending'
+              name='isPending'
             />
             {!transaction.getIsAddition() && <MSelectSpending className='w-full' name='spendingId' />}
           </div>

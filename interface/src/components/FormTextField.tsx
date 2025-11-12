@@ -56,8 +56,8 @@ export default function FormTextField(props: FormTextFieldProps = FormTextFieldP
   if (props.isLoading) {
     return (
       <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
-        <Label label={props.label} disabled htmlFor={props.id} required={props.required}>
-          <LabelDecorator name={props.name} disabled />
+        <Label disabled htmlFor={props.id} label={props.label} required={props.required}>
+          <LabelDecorator disabled name={props.name} />
         </Label>
         <div>
           <div aria-disabled='true' className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)}>
@@ -71,16 +71,16 @@ export default function FormTextField(props: FormTextFieldProps = FormTextFieldP
 
   return (
     <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
-      <Label label={props.label} disabled={props.disabled} htmlFor={props.id} required={props.required}>
-        <LabelDecorator name={props.name} disabled={props.disabled} />
+      <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
+        <LabelDecorator disabled={props.disabled} name={props.name} />
       </Label>
       <div>
         <input
-          value={value}
-          onChange={formikContext?.handleChange}
-          onBlur={formikContext?.handleBlur}
           disabled={formikContext?.isSubmitting || props.disabled}
+          onBlur={formikContext?.handleBlur}
+          onChange={formikContext?.handleChange}
           tabIndex={0}
+          value={value}
           {...otherProps}
           className={inputStyles.input}
           data-error={Boolean(props.error)}

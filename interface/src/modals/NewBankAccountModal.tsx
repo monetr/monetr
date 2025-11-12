@@ -78,42 +78,42 @@ function NewBankAccountModal(): JSX.Element {
   return (
     <MModal open={modal.visible} ref={ref}>
       <MForm
-        onSubmit={submit}
-        initialValues={initialValues}
         className='h-full flex flex-col gap-2 p-2 justify-between'
         data-testid='new-bank-account-modal'
+        initialValues={initialValues}
+        onSubmit={submit}
       >
         {({ values }) => (
           <Fragment>
             <div className='flex flex-col'>
-              <MSpan weight='bold' size='xl' className='mb-2'>
+              <MSpan className='mb-2' size='xl' weight='bold'>
                 Create A New Bank Account
               </MSpan>
               <FormTextField
-                data-testid='bank-account-name'
-                name='name'
-                label="What is the account's name ?"
-                required
                 autoComplete='off'
-                placeholder='Personal Checking...'
                 data-1p-ignore
-              />
-              <SelectCurrency name='currency' className='w-full' menuPortalTarget={document.body} required />
-              <FormAmountField
-                data-testid='bank-account-balance'
-                name='balance'
-                label='Initial Balance'
+                data-testid='bank-account-name'
+                label="What is the account's name ?"
+                name='name'
+                placeholder='Personal Checking...'
                 required
+              />
+              <SelectCurrency className='w-full' menuPortalTarget={document.body} name='currency' required />
+              <FormAmountField
                 allowNegative
                 currency={values.currency}
                 data-1p-ignore
+                data-testid='bank-account-balance'
+                label='Initial Balance'
+                name='balance'
+                required
               />
             </div>
             <div className='flex justify-end gap-2'>
-              <FormButton variant='secondary' onClick={modal.remove} data-testid='close-new-bank-account-modal'>
+              <FormButton data-testid='close-new-bank-account-modal' onClick={modal.remove} variant='secondary'>
                 Cancel
               </FormButton>
-              <FormButton variant='primary' type='submit' data-testid='bank-account-submit'>
+              <FormButton data-testid='bank-account-submit' type='submit' variant='primary'>
                 Create
               </FormButton>
             </div>

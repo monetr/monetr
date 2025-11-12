@@ -80,40 +80,40 @@ function NewFundingModal(): JSX.Element {
   );
 
   return (
-    <MModal open={modal.visible} ref={ref} className='md:max-w-md'>
+    <MModal className='md:max-w-md' open={modal.visible} ref={ref}>
       <MForm
-        initialValues={initialValues}
-        onSubmit={submit}
         className='h-full flex flex-col gap-2 p-2 justify-between'
         data-testid='new-funding-modal'
+        initialValues={initialValues}
+        onSubmit={submit}
       >
         {({ setFieldValue, values }) => (
           <Fragment>
             <div className='flex flex-col'>
               <MSpan className='font-bold text-xl mb-2'>Create A New Funding Schedule</MSpan>
               <FormTextField
-                autoFocus
-                name='name'
-                label='What do you want to call your funding schedule?'
-                required
                 autoComplete='off'
-                placeholder='Example: Payday...'
+                autoFocus
                 data-1p-ignore
+                label='What do you want to call your funding schedule?'
+                name='name'
+                placeholder='Example: Payday...'
+                required
               />
               <FormDatePicker
-                name='nextOccurrence'
                 label='When do you get paid next?'
-                required
                 min={startOfTomorrow({
                   in: inTimezone,
                 })}
+                name='nextOccurrence'
+                required
               />
               <MSelectFrequency
                 dateFrom='nextOccurrence'
                 label='How often do you get paid?'
+                name='ruleset'
                 placeholder='Select a funding frequency...'
                 required
-                name='ruleset'
               />
               <FormAmountField
                 allowNegative={false}
@@ -124,8 +124,8 @@ function NewFundingModal(): JSX.Element {
               <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'>
                 <div className='space-y-0.5'>
                   <label
-                    htmlFor={switchId}
                     className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'
+                    htmlFor={switchId}
                   >
                     Exclude Weekends
                   </label>
@@ -134,17 +134,17 @@ function NewFundingModal(): JSX.Element {
                   </p>
                 </div>
                 <Switch
-                  id={switchId}
                   checked={values.excludeWeekends}
+                  id={switchId}
                   onCheckedChange={() => setFieldValue('excludeWeekends', !values.excludeWeekends)}
                 />
               </div>
             </div>
             <div className='flex justify-end gap-2'>
-              <FormButton variant='destructive' onClick={modal.remove} data-testid='close-new-funding-modal'>
+              <FormButton data-testid='close-new-funding-modal' onClick={modal.remove} variant='destructive'>
                 Cancel
               </FormButton>
-              <FormButton variant='primary' type='submit'>
+              <FormButton type='submit' variant='primary'>
                 Create
               </FormButton>
             </div>

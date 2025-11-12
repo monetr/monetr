@@ -16,8 +16,6 @@ const TooltipContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
 >(({ className, sideOffset = 4, ...props }, ref) => (
   <TooltipPrimitive.Content
-    ref={ref}
-    sideOffset={sideOffset}
     className={mergeTailwind(
       styles.tooltipContent,
       'animate-in fade-in-0 zoom-in-95',
@@ -28,6 +26,8 @@ const TooltipContent = React.forwardRef<
       'data-[side=top]:slide-in-from-bottom-2',
       className,
     )}
+    ref={ref}
+    sideOffset={sideOffset}
     {...props}
   />
 ));

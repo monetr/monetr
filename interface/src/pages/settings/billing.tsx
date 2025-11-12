@@ -46,7 +46,7 @@ export default function SettingsBilling(): JSX.Element {
 
   return (
     <div className='w-full flex flex-col p-4 max-w-xl'>
-      <MSpan size='2xl' weight='bold' color='emphasis' className='mb-4'>
+      <MSpan className='mb-4' color='emphasis' size='2xl' weight='bold'>
         Billing
       </MSpan>
       <Divider />
@@ -59,10 +59,10 @@ export default function SettingsBilling(): JSX.Element {
 
       <Button
         className='ml-auto mt-4 max-w-xs'
-        variant='primary'
+        data-testid='billing-subscribe'
         disabled={loading}
         onClick={handleManageSubscription}
-        data-testid='billing-subscribe'
+        variant='primary'
       >
         {manageSubscriptionText}
       </Button>

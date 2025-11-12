@@ -43,24 +43,24 @@ function UploadTransactionsModal(): JSX.Element {
   }, [stage, modal, queryClient, selectedBankAccountId]);
 
   return (
-    <MModal open={modal.visible} ref={ref} className='sm:max-w-xl'>
+    <MModal className='sm:max-w-xl' open={modal.visible} ref={ref}>
       {(() => {
         switch (stage) {
           case UploadTransactionStage.FileUpload:
             return (
               <UploadFileStage
+                close={modal.remove}
+                setError={setError}
                 setResult={setMonetrUpload}
                 setStage={setStage}
-                setError={setError}
-                close={modal.remove}
               />
             );
           case UploadTransactionStage.Processing:
-            return <ProcessingFileStage upload={monetrUpload} setStage={setStage} close={onClose} />;
+            return <ProcessingFileStage close={onClose} setStage={setStage} upload={monetrUpload} />;
           case UploadTransactionStage.Completed:
             return null;
           case UploadTransactionStage.Error:
-            return <ErrorFileStage error={error} close={onClose} />;
+            return <ErrorFileStage close={onClose} error={error} />;
           default:
             return null;
         }
@@ -141,7 +141,7 @@ function UploadFileStage(props: StageProps) {
       <div className='h-full flex flex-col gap-2 p-2 justify-between'>
         <div className='flex flex-col gap-2 h-full'>
           <div className='flex justify-between'>
-            <Typography weight='bold' size='xl'>
+            <Typography size='xl' weight='bold'>
               Upload Transactions
             </Typography>
             <div>{/* TODO Close button */}</div>
@@ -166,10 +166,10 @@ function UploadFileStage(props: StageProps) {
 
   if (file) {
     return (
-      <form onSubmit={handleSubmit} className='h-full flex flex-col gap-2 p-2 justify-between'>
+      <form className='h-full flex flex-col gap-2 p-2 justify-between' onSubmit={handleSubmit}>
         <div className='flex flex-col gap-2 h-full'>
           <div className='flex justify-between'>
-            <Typography weight='bold' size='xl'>
+            <Typography size='xl' weight='bold'>
               Upload Transactions
             </Typography>
             <div>{/* TODO Close button */}</div>
@@ -187,10 +187,10 @@ function UploadFileStage(props: StageProps) {
           </div>
         </div>
         <div className='flex justify-end gap-2 mt-2'>
-          <Button variant='secondary' onClick={props.close}>
+          <Button onClick={props.close} variant='secondary'>
             Cancel
           </Button>
-          <Button variant='primary' type='submit'>
+          <Button type='submit' variant='primary'>
             Upload
           </Button>
         </div>
@@ -199,10 +199,10 @@ function UploadFileStage(props: StageProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className='h-full flex flex-col gap-2 p-2 justify-between'>
+    <form className='h-full flex flex-col gap-2 p-2 justify-between' onSubmit={handleSubmit}>
       <div className='flex flex-col gap-2 h-full'>
         <div className='flex justify-between'>
-          <Typography weight='bold' size='xl'>
+          <Typography size='xl' weight='bold'>
             Upload Transactions
           </Typography>
           <div>{/* TODO Close button */}</div>
@@ -221,10 +221,10 @@ function UploadFileStage(props: StageProps) {
         </div>
       </div>
       <div className='flex justify-end gap-2 mt-2'>
-        <Button variant='secondary' onClick={props.close}>
+        <Button onClick={props.close} variant='secondary'>
           Cancel
         </Button>
-        <Button variant='primary' type='submit'>
+        <Button type='submit' variant='primary'>
           Upload
         </Button>
       </div>

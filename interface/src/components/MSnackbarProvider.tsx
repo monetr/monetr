@@ -15,7 +15,7 @@ export interface MSnackbarProviderProps {
 
 export default function MSnackbarProvider(props: MSnackbarProviderProps): JSX.Element {
   return (
-    <SnackbarProvider maxSnack={5} iconVariant={snackbarIcons}>
+    <SnackbarProvider iconVariant={snackbarIcons} maxSnack={5}>
       {props.children}
     </SnackbarProvider>
   );

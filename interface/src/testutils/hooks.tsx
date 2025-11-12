@@ -19,8 +19,8 @@ function testRenderHook<TProps, TResult>(
   const Wrapper: WrapperComponent<TProps> = (props: React.PropsWithChildren<unknown>) => {
     return (
       <MemoryRouter
-        initialEntries={[options.initialRoute]}
         future={{ v7_startTransition: false, v7_relativeSplatPath: false }}
+        initialEntries={[options.initialRoute]}
       >
         <MQueryClient>
           <MSnackbarProvider>

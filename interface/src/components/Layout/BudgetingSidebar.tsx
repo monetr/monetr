@@ -75,13 +75,13 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
         <div className='flex h-full w-full flex-col gap-2 pb-4'>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/transactions`}>
             <ShoppingCart />
-            <MSpan ellipsis color='inherit'>
+            <MSpan color='inherit' ellipsis>
               Transactions
             </MSpan>
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/expenses`}>
             <Receipt />
-            <MSpan ellipsis color='inherit'>
+            <MSpan color='inherit' ellipsis>
               Expenses
             </MSpan>
             <Badge className='ml-auto' size='sm'>
@@ -90,7 +90,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/goals`}>
             <PiggyBank />
-            <MSpan ellipsis color='inherit'>
+            <MSpan color='inherit' ellipsis>
               Goals
             </MSpan>
             <Badge className='ml-auto' size='sm'>
@@ -99,7 +99,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/funding`}>
             <CalendarSync />
-            <MSpan ellipsis color='inherit'>
+            <MSpan color='inherit' ellipsis>
               Funding Schedules
             </MSpan>
             <NextFundingBadge />

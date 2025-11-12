@@ -55,10 +55,10 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
           <MerchantIcon name={spending.name} />
           <div className='flex flex-col overflow-hidden min-w-0'>
             <div className='flex'>
-              <Typography color='emphasis' weight='semibold' ellipsis>
+              <Typography color='emphasis' ellipsis weight='semibold'>
                 {spending.name}
               </Typography>
-              <Badge size='xs' className='flex-none ml-1'>
+              <Badge className='flex-none ml-1' size='xs'>
                 {dateString}
               </Badge>
             </div>

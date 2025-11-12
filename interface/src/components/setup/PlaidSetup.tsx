@@ -233,10 +233,10 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
         <MSpan size='2xl' weight='medium'>
           Something isn't quite right
         </MSpan>
-        <MSpan size='lg' color='subtle'>
+        <MSpan color='subtle' size='lg'>
           Plaid exited, did you want to set it up later?
         </MSpan>
-        <MSpan size='md' color='subtle'>
+        <MSpan color='subtle' size='md'>
           Or <MLink to={backUrl}>go back</MLink> and pick another option?
         </MSpan>
       </div>

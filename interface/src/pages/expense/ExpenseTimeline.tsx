@@ -153,7 +153,7 @@ function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData 
       <time className='mb-1 text-sm font-normal leading-none text-zinc-400 dark:text-zinc-500'>
         {format(inTimezone(props.date), 'MMMM do')}
       </time>
-      <Typography component='h3' size='lg' weight='semibold' color='emphasis'>
+      <Typography color='emphasis' component='h3' size='lg' weight='semibold'>
         {header} {icon}
       </Typography>
       <Typography color='subtle' component='p'>

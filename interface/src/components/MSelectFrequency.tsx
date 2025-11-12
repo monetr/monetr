@@ -69,13 +69,13 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
   return (
     <Select<string>
       {...props}
-      placeholder='Select a frequency...'
       disabled={props.disabled || formikContext.isSubmitting}
       error={formikContext.errors[props.name]}
       label={props.label}
       name={props.name}
       onChange={onChange}
       options={options}
+      placeholder='Select a frequency...'
       value={value}
     />
   );

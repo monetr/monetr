@@ -109,20 +109,20 @@ function TransferModal(props: TransferModalProps): JSX.Element {
   );
 
   return (
-    <MModal open={modal.visible} ref={ref} className='md:max-w-sm'>
+    <MModal className='md:max-w-sm' open={modal.visible} ref={ref}>
       <MForm
-        onSubmit={submit}
-        initialValues={initialValues}
-        validate={validate}
         className='h-full flex flex-col gap-2 p-2 justify-between'
         data-testid='transfer-modal'
+        initialValues={initialValues}
+        onSubmit={submit}
+        validate={validate}
       >
         <div className='flex flex-col gap-2'>
           <div className='flex flex-col items-center'>
             <MSpan size='2xl' weight='semibold'>
               Transfer
             </MSpan>
-            <MSpan size='lg' weight='medium' color='subtle'>
+            <MSpan color='subtle' size='lg' weight='medium'>
               Move funds between your budgets
             </MSpan>
           </div>
@@ -140,18 +140,18 @@ function TransferModal(props: TransferModalProps): JSX.Element {
             name='toSpendingId'
           />
           <FormAmountField
-            name='amount'
+            allowNegative={false}
             label='Amount'
+            name='amount'
             placeholder='Amount to move...'
             step='0.01'
-            allowNegative={false}
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <FormButton variant='secondary' onClick={modal.remove} data-testid='close-new-expense-modal'>
+          <FormButton data-testid='close-new-expense-modal' onClick={modal.remove} variant='secondary'>
             Cancel
           </FormButton>
-          <FormButton variant='primary' type='submit'>
+          <FormButton type='submit' variant='primary'>
             Transfer
           </FormButton>
         </div>
@@ -185,7 +185,7 @@ function ReverseTargetsButton(): JSX.Element {
   }, [formik]);
 
   return (
-    <button type='button' className='w-full flex justify-center mb-1 group' onClick={swap}>
+    <button className='w-full flex justify-center mb-1 group' onClick={swap} type='button'>
       <ArrowUpDown className='size-10 dark:text-dark-monetr-content-subtle group-hover:dark:text-dark-monetr-content' />
     </button>
   );
@@ -250,10 +250,10 @@ function AmountButton({ amount }: AmountButtonProps): JSX.Element {
 
   return (
     <MSpan
-      size='sm'
-      weight='medium'
       className='cursor-pointer hover:dark:text-dark-monetr-content-emphasis'
       onClick={onClick}
+      size='sm'
+      weight='medium'
     >
       {typeof amount === 'number' && locale.formatAmount(amount, AmountType.Stored)}
     </MSpan>

@@ -15,38 +15,38 @@ export default function SettingsOverview(): JSX.Element {
     <div className='w-full h-full flex flex-col justify-between pb-4'>
       <div className='w-full flex p-4 flex-col'>
         <FormTextField
+          className='max-w-[24rem] w-full'
+          disabled
           label='First Name'
           name='firstName'
-          className='max-w-[24rem] w-full'
           value={me?.user?.login?.firstName}
-          disabled
         />
         <FormTextField
+          className='max-w-[24rem] w-full'
+          disabled
           label='Last Name'
           name='lastName'
-          className='max-w-[24rem] w-full'
           value={me?.user?.login?.lastName}
-          disabled
         />
         <FormTextField
+          className='max-w-[24rem] w-full'
+          disabled
           label='Email Address'
           name='email'
-          className='max-w-[24rem] w-full'
           value={me?.user?.login.email}
-          disabled
         />
         <Select
+          className='max-w-[24rem] w-full'
+          disabled
           label='Timezone'
           name='timezone'
-          className='max-w-[24rem] w-full'
+          onChange={() => {}}
           options={[timezone]}
           value={timezone}
-          onChange={() => {}}
-          disabled
         />
       </div>
       <div className='w-full flex justify-end px-4'>
-        <Button variant='primary' disabled>
+        <Button disabled variant='primary'>
           Save Settings
         </Button>
       </div>

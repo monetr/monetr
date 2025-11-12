@@ -18,5 +18,5 @@ export function Item({ className, ...props }: ItemProps): React.JSX.Element {
 export type ItemContentProps = FlexProps;
 
 export function ItemContent(props: ItemContentProps): React.JSX.Element {
-  return <Flex align='center' justify='end' flex='grow' shrink='none' width='fit' {...props} />;
+  return <Flex align='center' flex='grow' justify='end' shrink='none' width='fit' {...props} />;
 }

@@ -90,20 +90,20 @@ export default function BankAccountSettingsPage(): JSX.Element {
   };
 
   return (
-    <MForm initialValues={initialValues} onSubmit={submit} className='w-full h-full flex flex-col'>
+    <MForm className='w-full h-full flex flex-col' initialValues={initialValues} onSubmit={submit}>
       <MTopNavigation
-        icon={Settings}
-        title={bankAccount.name}
         base={`/bank/${bankAccount.bankAccountId}/transactions`}
         breadcrumb='Settings'
+        icon={Settings}
+        title={bankAccount.name}
       >
         {!bankAccount.deletedAt && Boolean(link?.getIsManual()) && (
-          <Button variant='destructive' onClick={archive}>
+          <Button onClick={archive} variant='destructive'>
             <Archive />
             Archive
           </Button>
         )}
-        <Button variant='primary' type='submit'>
+        <Button type='submit' variant='primary'>
           <Save />
           Save Changes
         </Button>
@@ -120,13 +120,13 @@ export default function BankAccountSettingsPage(): JSX.Element {
               </MSpan>
             </Card>
             <FormTextField
-              label='Name'
-              placeholder='Bank account name...'
-              name='name'
               className='w-full'
               data-1p-ignore
+              label='Name'
+              name='name'
+              placeholder='Bank account name...'
             />
-            <SelectCurrency name='currency' className='w-full' disabled={link?.getIsPlaid()} />
+            <SelectCurrency className='w-full' disabled={link?.getIsPlaid()} name='currency' />
           </div>
         </div>
       </div>

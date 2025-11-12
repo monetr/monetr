@@ -83,45 +83,45 @@ export default function ManualLinkSetupIncome(): JSX.Element {
 
   return (
     <MForm
-      initialValues={initialValues}
-      onSubmit={submit}
       className={flexVariants({
         orientation: 'column',
         justify: 'center',
         align: 'center',
       })}
+      initialValues={initialValues}
+      onSubmit={submit}
     >
       {({ values: { currency } }) => (
         <Fragment>
-          <Typography size='lg' color='subtle' align='center'>
+          <Typography align='center' color='subtle' size='lg'>
             How often do you get paid and how much do you get paid typically? monetr uses this to forecast balances
             based on the budgets you create.
           </Typography>
           <FormDatePicker
-            name='nextPayday'
-            label='When do you get paid next?'
+            autoFocus
             className='w-full'
-            required
+            label='When do you get paid next?'
             min={startOfTomorrow({
               in: inTimezone,
             })}
-            autoFocus
+            name='nextPayday'
+            required
           />
           <MSelectFrequency
+            className='w-full text-start'
             dateFrom='nextPayday'
             label='How often do you get paid?'
+            name='ruleset'
             placeholder='Select a funding frequency...'
             required
-            className='w-full text-start'
-            name='ruleset'
           />
           <FormAmountField
-            name='paydayAmount'
-            label='How much do you usually get paid?'
-            className='w-full'
-            required
             allowNegative={false}
+            className='w-full'
             currency={currency}
+            label='How much do you usually get paid?'
+            name='paydayAmount'
+            required
           />
           <ManualLinkSetupButtons />
         </Fragment>

@@ -89,7 +89,7 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
     );
   }
 
-  return <InnerSelect id={id} options={options} value={value} onChange={onChange} />;
+  return <InnerSelect id={id} onChange={onChange} options={options} value={value} />;
 }
 
 interface InnerSelectProps<Spending> {
@@ -161,9 +161,9 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
       <div className={styles.selectSpendingBlock}>
         {/** biome-ignore lint/a11y/noStaticElementInteractions: Need to account for weird padding here */}
         <div
+          className={mergeTailwind(inputStyles.input, selectStyles.select, styles.selectSpendingWrapper)}
           onClick={onOpenClickHandler}
           ref={inputWrapperRef}
-          className={mergeTailwind(inputStyles.input, selectStyles.select, styles.selectSpendingWrapper)}
         >
           <input
             {...getInputProps({
@@ -187,7 +187,6 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
           {isOpen &&
             items.map((item, index) => (
               <li
-                key={item.label}
                 className={mergeTailwind(
                   [
                     'text-dark-monetr-content-emphasis',
@@ -200,6 +199,7 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
                     'bg-zinc-700': selectedItem?.value === item.value,
                   },
                 )}
+                key={item.label}
                 {...getItemProps({
                   item,
                   index,

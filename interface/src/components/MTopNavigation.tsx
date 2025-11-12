@@ -49,18 +49,18 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
   return (
     <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-x-2 justify-between'>
       <div className='flex gap-2 min-w-0 h-12 items-center flex-shrink'>
-        <MSidebarToggle className='mr-2' backButton={props.base} />
+        <MSidebarToggle backButton={props.base} className='mr-2' />
         <span className='flex gap-2 flex-grow min-w-0'>
-          <MSpan weight='bold' size='2xl' className={className} onClick={onInitialClick} ellipsis>
+          <MSpan className={className} ellipsis onClick={onInitialClick} size='2xl' weight='bold'>
             <Icon className={iconClassName} />
             <span className={titleClassName}>{props.title}</span>
           </MSpan>
           {Boolean(props.breadcrumb) && (
             <Fragment>
-              <MSpan weight='bold' size='2xl' color='subtle' className='hidden md:block order-2'>
+              <MSpan className='hidden md:block order-2' color='subtle' size='2xl' weight='bold'>
                 /
               </MSpan>
-              <MSpan weight='bold' size='2xl' color='emphasis' ellipsis className='order-3'>
+              <MSpan className='order-3' color='emphasis' ellipsis size='2xl' weight='bold'>
                 {props.breadcrumb}
               </MSpan>
             </Fragment>

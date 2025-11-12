@@ -49,14 +49,14 @@ export default function SubscribePage(): JSX.Element {
         <div className='h-full flex flex-col max-w-md gap-4 items-center justify-between'>
           <div className='h-full flex flex-col justify-center items-center gap-4'>
             <MLogo className='max-h-24' />
-            <Typography size='2xl' weight='semibold' align='center'>
+            <Typography align='center' size='2xl' weight='semibold'>
               Your subscription is no longer active
             </Typography>
-            <Typography size='lg' align='center'>
+            <Typography align='center' size='lg'>
               Thank you for having subscribed to monetr before! If you'd like to continue using monetr you will have to
               resubscribe below. Click continue to proceed to our billing portal.
             </Typography>
-            <Button variant='primary' disabled={loading} onClick={handleContinue}>
+            <Button disabled={loading} onClick={handleContinue} variant='primary'>
               Continue
             </Button>
           </div>
@@ -65,7 +65,7 @@ export default function SubscribePage(): JSX.Element {
               <Typography color='subtle' size='sm'>
                 Not ready to continue?
               </Typography>
-              <TextLink to='/logout' size='sm'>
+              <TextLink size='sm' to='/logout'>
                 Logout for now
               </TextLink>
             </div>
@@ -80,14 +80,14 @@ export default function SubscribePage(): JSX.Element {
       <div className='h-full flex flex-col max-w-md gap-4 items-center justify-between'>
         <div className='h-full flex flex-col justify-center items-center gap-4'>
           <MLogo className='max-h-24' />
-          <Typography size='2xl' weight='semibold' align='center'>
+          <Typography align='center' size='2xl' weight='semibold'>
             Your free trial has ended
           </Typography>
-          <Typography size='lg' align='center'>
+          <Typography align='center' size='lg'>
             Thank you for trying out monetr! We hope that you found our budgeting tools useful during your trial. If
             you'd like to continue using monetr you can easily subscribe below.
           </Typography>
-          <Button variant='primary' disabled={loading} onClick={handleContinue}>
+          <Button disabled={loading} onClick={handleContinue} variant='primary'>
             Continue
           </Button>
         </div>
@@ -96,7 +96,7 @@ export default function SubscribePage(): JSX.Element {
             <Typography color='subtle' size='sm'>
               Not ready to continue?
             </Typography>
-            <TextLink to='/logout' size='sm'>
+            <TextLink size='sm' to='/logout'>
               Logout for now
             </TextLink>
           </div>

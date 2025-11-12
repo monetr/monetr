@@ -36,17 +36,17 @@ export default function FormCheckbox(props: FormCheckboxProps): React.JSX.Elemen
     <div className={mergeTailwind(formCheckboxStyles.formCheckboxRoot, props.className)}>
       <div className={formCheckboxStyles.formCheckboxWrapper}>
         <Checkbox
+          checked={props.checked}
+          disabled={props.disabled}
           id={props.id}
           name={props.name}
-          disabled={props.disabled}
-          checked={props.checked}
-          onCheckedChange={onCheckedChange}
           onBlur={formikContext?.handleBlur}
+          onCheckedChange={onCheckedChange}
         />
       </div>
       <div>
         {props.label && (
-          <label htmlFor={props.id} className={labelStyles.labelText}>
+          <label className={labelStyles.labelText} htmlFor={props.id}>
             {props.label}
           </label>
         )}

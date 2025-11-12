@@ -115,7 +115,38 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
   return (
     <div className='hidden md:flex w-1/2 flex-1 items-center'>
       <Select
+        className='w-full'
+        classNamePrefix='m-select-spending-transaction'
+        components={{
+          Option: SpendingSelectOption,
+        }}
+        formatOptionLabel={formatOptionsLabel}
         inputId={id}
+        isLoading={isLoading || (spendingIsLoading && Boolean(transaction.spendingId))}
+        menuPortalTarget={document.body}
+        onChange={onChangeSpentFrom}
+        options={options}
+        styles={{
+          placeholder: (base: object) => ({
+            ...base,
+            fontSize: '0.875rem', // Equivalent to text-sm and leading-6
+            lineHeight: '1.5rem',
+          }),
+          valueContainer: (base: object) => ({
+            ...base,
+            fontSize: '0.875rem', // Equivalent to text-sm and leading-6
+            lineHeight: '1.5rem',
+            padding: '0px 5px',
+          }),
+          option: (base: object) => ({
+            ...base,
+            color: theme.tailwind.colors['dark-monetr'].content.emphasized,
+          }),
+          menuPortal: (base: object) => ({
+            ...base,
+            zIndex: 9999,
+          }),
+        }}
         theme={(baseTheme: Theme): Theme => ({
           ...baseTheme,
           borderRadius: 8,
@@ -140,38 +171,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
             primary: theme.tailwind.colors['dark-monetr'].brand.DEFAULT,
           },
         })}
-        menuPortalTarget={document.body}
-        components={{
-          Option: SpendingSelectOption,
-        }}
-        styles={{
-          placeholder: (base: object) => ({
-            ...base,
-            fontSize: '0.875rem', // Equivalent to text-sm and leading-6
-            lineHeight: '1.5rem',
-          }),
-          valueContainer: (base: object) => ({
-            ...base,
-            fontSize: '0.875rem', // Equivalent to text-sm and leading-6
-            lineHeight: '1.5rem',
-            padding: '0px 5px',
-          }),
-          option: (base: object) => ({
-            ...base,
-            color: theme.tailwind.colors['dark-monetr'].content.emphasized,
-          }),
-          menuPortal: (base: object) => ({
-            ...base,
-            zIndex: 9999,
-          }),
-        }}
-        classNamePrefix='m-select-spending-transaction'
-        isLoading={isLoading || (spendingIsLoading && Boolean(transaction.spendingId))}
-        onChange={onChangeSpentFrom}
-        formatOptionLabel={formatOptionsLabel}
-        options={options}
         value={selectedItem}
-        className='w-full'
       />
     </div>
   );
@@ -192,17 +192,17 @@ export function SpendingSelectOption({ children, ...props }: OptionProps<Spendin
   return (
     <components.Option {...props}>
       <div className='flex justify-between'>
-        <MSpan size='md' color='emphasis'>
+        <MSpan color='emphasis' size='md'>
           {props.label}
         </MSpan>
         <div className='flex gap-2'>
           {props.data.spending?.spendingType === SpendingType.Goal && (
-            <Badge size='sm' className='dark:bg-dark-monetr-blue  max-h-[24px]'>
+            <Badge className='dark:bg-dark-monetr-blue  max-h-[24px]' size='sm'>
               <PiggyBank />
             </Badge>
           )}
           {props.data.spending?.spendingType === SpendingType.Expense && (
-            <Badge size='sm' className='dark:bg-dark-monetr-green max-h-[24px]'>
+            <Badge className='dark:bg-dark-monetr-green max-h-[24px]' size='sm'>
               <Receipt />
             </Badge>
           )}

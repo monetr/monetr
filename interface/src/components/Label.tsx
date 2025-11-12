@@ -20,7 +20,7 @@ export default function Label(props: LabelProps): React.JSX.Element {
     <div className={styles.labelContainer}>
       <div className={styles.labelWrapper}>
         {props.label && (
-          <label htmlFor={props.htmlFor} className={styles.labelText} aria-disabled={props.disabled}>
+          <label aria-disabled={props.disabled} className={styles.labelText} htmlFor={props.htmlFor}>
             {props.label}
           </label>
         )}

@@ -60,10 +60,10 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
       ))}
       <div className='w-full h-12 flex items-center justify-center relative group'>
         <Link
-          to='/link/create'
           className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'
+          to='/link/create'
         >
-          <MSpan weight='bold' size='xl' color='emphasis'>
+          <MSpan color='emphasis' size='xl' weight='bold'>
             +1
           </MSpan>
         </Link>
@@ -113,7 +113,7 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
 
 function SettingsButton(): JSX.Element {
   return (
-    <Link to='/settings' data-testid='bank-sidebar-settings'>
+    <Link data-testid='bank-sidebar-settings' to='/settings'>
       <Settings className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
     </Link>
   );
@@ -123,7 +123,7 @@ function LogoutButton(): JSX.Element {
   // By doing reloadDocument, we are forcing the @tanstack/react-query cache to be emptied. This will naturally just make it
   // easier to prevent the current user's data from leaking into another session.
   return (
-    <Link to='/logout' data-testid='bank-sidebar-logout'>
+    <Link data-testid='bank-sidebar-logout' to='/logout'>
       <LogOut className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
     </Link>
   );

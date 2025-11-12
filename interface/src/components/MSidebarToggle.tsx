@@ -30,14 +30,14 @@ export default function MSidebarToggle(props: MSidebarToggleProps): JSX.Element 
 
   if (props.backButton) {
     return (
-      <button type='button' className={className} onClick={onClick}>
+      <button className={className} onClick={onClick} type='button'>
         <ArrowLeft />
       </button>
     );
   }
 
   return (
-    <button type='button' className={className} onClick={onClick}>
+    <button className={className} onClick={onClick} type='button'>
       {!isOpen && <PanelLeft />}
       {isOpen && <PanelLeftClose />}
     </button>

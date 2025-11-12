@@ -30,7 +30,7 @@ export default function MStepper(props: MStepperProps): JSX.Element {
     // We will show the divider when we are not the last item.
     const divider = index !== steps.length - 1;
 
-    return <MStep key={name} state={state} name={name} currentIndex={activeIndex} index={index} divider={divider} />;
+    return <MStep currentIndex={activeIndex} divider={divider} index={index} key={name} name={name} state={state} />;
   });
 
   return <div className='w-full flex gap-2 items-center bg-dark-monetr-background-focused p-2 rounded-xl'>{items}</div>;

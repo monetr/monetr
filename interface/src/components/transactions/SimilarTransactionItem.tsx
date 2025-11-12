@@ -53,15 +53,15 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
     return (
       <Item>
         <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
-        <ItemContent orientation='column' gap='none' flex='shrink' justify='start' align='default' shrink='default'>
-          <Typography component='p' color='emphasis' size='md' weight='semibold' ellipsis>
+        <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
+          <Typography color='emphasis' component='p' ellipsis size='md' weight='semibold'>
             {transaction.getName()}
           </Typography>
-          <Typography component='p' size='sm' weight='medium' ellipsis>
+          <Typography component='p' ellipsis size='sm' weight='medium'>
             {formatDate(transaction.date, inTimezone, locale, DateLength.Long)}
           </Typography>
         </ItemContent>
-        <ItemContent align='center' justify='end' flex='grow' shrink='none' width='fit'>
+        <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
           <TransactionAmount transaction={transaction} />
         </ItemContent>
       </Item>
@@ -72,15 +72,15 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
     <Item>
       <Link className={flexVariants({ orientation: 'row', align: 'center' })} to={redirectUrl}>
         <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
-        <ItemContent orientation='column' gap='none' flex='shrink' justify='start' align='default' shrink='default'>
-          <Typography component='p' color='emphasis' size='md' weight='semibold' ellipsis>
+        <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
+          <Typography color='emphasis' component='p' ellipsis size='md' weight='semibold'>
             {transaction.getName()}
           </Typography>
-          <Typography component='p' size='sm' weight='medium' ellipsis>
+          <Typography component='p' ellipsis size='sm' weight='medium'>
             {formatDate(transaction.date, inTimezone, locale, DateLength.Long)}
           </Typography>
         </ItemContent>
-        <ItemContent align='center' justify='end' flex='grow' shrink='none' width='fit'>
+        <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
           <TransactionAmount transaction={transaction} />
           <Typography>
             <ChevronRight />

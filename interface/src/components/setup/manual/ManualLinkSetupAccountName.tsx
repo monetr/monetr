@@ -28,23 +28,23 @@ export default function ManualLinkSetupAccountName(): JSX.Element {
 
   return (
     <MForm
-      initialValues={initialValues}
-      onSubmit={submit}
       className={flexVariants({
         orientation: 'column',
         justify: 'center',
         align: 'center',
       })}
+      initialValues={initialValues}
+      onSubmit={submit}
     >
-      <Typography size='lg' color='subtle' align='center'>
+      <Typography align='center' color='subtle' size='lg'>
         What do you want to call the primary account you want to use for budgeting? For example; your checking account?
       </Typography>
       <FormTextField
-        name='accountName'
-        label='Account Name'
-        className='w-full'
-        placeholder='My Checking Account'
         autoFocus
+        className='w-full'
+        label='Account Name'
+        name='accountName'
+        placeholder='My Checking Account'
         required
       />
       <ManualLinkSetupButtons />

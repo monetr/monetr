@@ -11,7 +11,7 @@ const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
 >(({ className, ...props }, ref) => (
-  <CheckboxPrimitive.Root ref={ref} className={mergeTailwind(styles.checkboxRoot, 'peer', className)} {...props}>
+  <CheckboxPrimitive.Root className={mergeTailwind(styles.checkboxRoot, 'peer', className)} ref={ref} {...props}>
     <CheckboxPrimitive.Indicator className={styles.checkboxIndicator}>
       <Check className={styles.checkboxCheck} />
     </CheckboxPrimitive.Indicator>

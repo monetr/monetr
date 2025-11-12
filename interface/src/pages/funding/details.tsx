@@ -142,16 +142,16 @@ export default function FundingDetails(): JSX.Element {
   return (
     <MForm className='flex w-full h-full flex-col' initialValues={initialValues} onSubmit={submit} validate={validate}>
       <MTopNavigation
-        title='Funding Schedules'
-        icon={CalendarSync}
-        breadcrumb={funding.name}
         base={`/bank/${funding.bankAccountId}/funding`}
+        breadcrumb={funding.name}
+        icon={CalendarSync}
+        title='Funding Schedules'
       >
-        <Button variant='destructive' onClick={removeFunding}>
+        <Button onClick={removeFunding} variant='destructive'>
           <Trash />
           Remove
         </Button>
-        <FormButton variant='primary' className='gap-1 py-1 px-2' type='submit' role='form'>
+        <FormButton className='gap-1 py-1 px-2' role='form' type='submit' variant='primary'>
           <Save />
           Save
         </FormButton>
@@ -159,17 +159,17 @@ export default function FundingDetails(): JSX.Element {
       <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col'>
-            <FormTextField className='w-full' label='Name' name='name' id={`${nameId}-funding-name-search`} required />
+            <FormTextField className='w-full' id={`${nameId}-funding-name-search`} label='Name' name='name' required />
             <FormDatePicker
               className='w-full'
-              label='Next Recurrence'
-              name='nextRecurrence'
-              labelDecorator={() => <NextOccurrenceDecorator fundingSchedule={funding} />}
-              required
               data-testid='funding-details-date-picker'
+              label='Next Recurrence'
+              labelDecorator={() => <NextOccurrenceDecorator fundingSchedule={funding} />}
               min={startOfTomorrow({
                 in: inTimezone,
               })}
+              name='nextRecurrence'
+              required
             />
             <MSelectFrequency
               className='w-full'
@@ -181,9 +181,9 @@ export default function FundingDetails(): JSX.Element {
             />
             <FormCheckbox
               data-testid='funding-details-exclude-weekends'
-              name='excludeWeekends'
-              label='Exclude weekends'
               description='If it were to land on a weekend, it is adjusted to the previous weekday instead.'
+              label='Exclude weekends'
+              name='excludeWeekends'
             />
             <FormAmountField
               allowNegative={false}

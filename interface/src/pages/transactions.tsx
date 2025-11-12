@@ -110,10 +110,10 @@ export default function Transactions(): JSX.Element {
             <div className='w-full flex justify-center space-x-4'>
               <ShoppingCart className='h-16 w-16 text-5xl dark:text-dark-monetr-content-muted' />
             </div>
-            <Typography size='xl' color='subtle' align='center'>
+            <Typography align='center' color='subtle' size='xl'>
               You don't have any transactions yet...
             </Typography>
-            <Typography size='lg' color='subtle' align='center'>
+            <Typography align='center' color='subtle' size='lg'>
               Transactions will show up here once we receive them from Plaid. Or the current account might not support
               transaction data from Plaid.
             </Typography>
@@ -182,9 +182,9 @@ function AddTransactionButton(): JSX.Element {
 
   return (
     <button
-      type='button'
       className='fixed md:bottom-4 bottom-14 right-4 w-14 h-14 rounded-full bg-dark-monetr-brand-subtle backdrop-blur-sm bg-opacity-75 backdrop-brightness-200 z-20 flex items-center justify-center active:backdrop-brightness-50'
       onClick={showNewTransactionModal}
+      type='button'
     >
       <Plus className='h-12 w-12 text-dark-monetr-content' />
     </button>
@@ -203,7 +203,7 @@ function UploadButtonMaybe(): JSX.Element {
   }
 
   return (
-    <Button variant='primary' onClick={showUploadTransactionsModal} className='hidden md:flex'>
+    <Button className='hidden md:flex' onClick={showUploadTransactionsModal} variant='primary'>
       <Upload />
       Upload
     </Button>

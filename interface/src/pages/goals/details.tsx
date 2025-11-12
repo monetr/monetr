@@ -157,22 +157,22 @@ export default function GoalDetails(): JSX.Element {
   ).toFixed(0);
 
   return (
-    <MForm initialValues={initialValues} onSubmit={submit} className='flex w-full h-full flex-col'>
+    <MForm className='flex w-full h-full flex-col' initialValues={initialValues} onSubmit={submit}>
       <MTopNavigation
-        icon={PiggyBank}
-        title='Goals'
         base={`/bank/${spending.bankAccountId}/goals`}
         breadcrumb={spending?.name}
+        icon={PiggyBank}
+        title='Goals'
       >
-        <Button variant='secondary' onClick={() => showTransferModal({ initialToSpendingId: spending?.spendingId })}>
+        <Button onClick={() => showTransferModal({ initialToSpendingId: spending?.spendingId })} variant='secondary'>
           <ArrowUpDown />
           Transfer
         </Button>
-        <Button variant='destructive' onClick={deleteGoal}>
+        <Button onClick={deleteGoal} variant='destructive'>
           <Trash />
           Remove
         </Button>
-        <FormButton variant='primary' type='submit' role='form'>
+        <FormButton role='form' type='submit' variant='primary'>
           <Save />
           Save
         </FormButton>
@@ -182,7 +182,7 @@ export default function GoalDetails(): JSX.Element {
           <div className='w-full md:w-1/2 flex flex-col'>
             <div className='flex flex-col w-full'>
               <div className='flex gap-4 items-center w-full overflow-hidden'>
-                <MerchantIcon name={spending?.name} className='flex-none' />
+                <MerchantIcon className='flex-none' name={spending?.name} />
                 <div className='flex flex-col flex-1 overflow-hidden'>
                   <p className='text-ellipsis truncate min-w-0'>{spending?.name}</p>
                   <MSpan weight='semibold'>
@@ -206,16 +206,16 @@ export default function GoalDetails(): JSX.Element {
 
             <Divider className='w-1/2 my-4' />
 
-            <FormTextField className='w-full' label='Expense' name='name' required data-1p-ignore />
+            <FormTextField className='w-full' data-1p-ignore label='Expense' name='name' required />
             <FormAmountField allowNegative={false} className='w-full' label='Amount' name='amount' required />
             <FormDatePicker
-              label='Target Date'
-              name='nextRecurrence'
               className='w-full'
-              required
+              label='Target Date'
               min={startOfTomorrow({
                 in: inTimezone,
               })}
+              name='nextRecurrence'
+              required
             />
             <MSelectFunding
               className='w-full'
@@ -226,9 +226,9 @@ export default function GoalDetails(): JSX.Element {
             />
             <FormCheckbox
               data-testid='goal-details-paused'
-              name='isPaused'
-              label='Paused?'
               description='Pause this goal to temporarily stop contributions to it.'
+              label='Paused?'
+              name='isPaused'
             />
           </div>
           <Divider className='block md:hidden w-1/2' />

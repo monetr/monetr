@@ -11,13 +11,13 @@ export default function ConfigError(): JSX.Element {
         <Typography size='xl' weight='medium'>
           There was a problem loading the monetr application config, the API may be unavailable at this time.
         </Typography>
-        <MSpan size='lg' className='gap-1'>
+        <MSpan className='gap-1' size='lg'>
           You can try reloading this page, but if the problem persists please contact
           <a
-            target='_blank'
             className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
             href='mailto:support@monetr.app'
             rel='noopener'
+            target='_blank'
           >
             support@monetr.app
           </a>

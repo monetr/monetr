@@ -69,19 +69,19 @@ export default function Login(): JSX.Element {
   }
 
   return (
-    <MForm initialValues={initialValues} validate={validator} onSubmit={submit} className={styles.root}>
+    <MForm className={styles.root} initialValues={initialValues} onSubmit={submit} validate={validator}>
       <div className={styles.logo}>
         <MLogo />
       </div>
       <Typography component='p'>Sign into your monetr account</Typography>
       <FormTextField
-        data-testid='login-email'
         autoFocus
+        className={styles.input}
+        data-testid='login-email'
         label='Email Address'
         name='email'
-        type='email'
         required
-        className={styles.input}
+        type='email'
       />
       <FormTextField
         autoComplete='current-password'
@@ -94,15 +94,15 @@ export default function Login(): JSX.Element {
         type='password'
       />
       <MCaptcha name='captcha' show={Boolean(config?.verifyLogin)} />
-      <FormButton data-testid='login-submit' variant='primary' role='form' type='submit' className={styles.input}>
+      <FormButton className={styles.input} data-testid='login-submit' role='form' type='submit' variant='primary'>
         Sign In
       </FormButton>
       {Boolean(config?.allowSignUp) && (
         <div className={styles.signUpWrapper}>
-          <Typography size='sm' color='subtle'>
+          <Typography color='subtle' size='sm'>
             Not a user?
           </Typography>
-          <TextLink to='/register' size='sm' data-testid='login-signup'>
+          <TextLink data-testid='login-signup' size='sm' to='/register'>
             Sign up now
           </TextLink>
         </div>
@@ -119,7 +119,7 @@ function ForgotPasswordButton(): JSX.Element {
   }
 
   return (
-    <TextLink to='/password/forgot' size='sm' data-testid='login-forgot' tabIndex={-1}>
+    <TextLink data-testid='login-forgot' size='sm' tabIndex={-1} to='/password/forgot'>
       Forgot password?
     </TextLink>
   );

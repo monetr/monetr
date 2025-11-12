@@ -128,8 +128,8 @@ export default function OauthReturn(): JSX.Element {
       <div>
         <OAuthRedirectPlaidLink
           linkToken={state.linkToken}
-          plaidOnSuccess={plaidLinkSuccess}
           plaidOnExit={plaidLinkExit}
+          plaidOnSuccess={plaidLinkSuccess}
         />
       </div>
     );

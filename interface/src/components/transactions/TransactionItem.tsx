@@ -22,8 +22,8 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
   return (
     <li
       className={mergeTailwind('group relative w-full px-1 md:px-2', styles.transactionItemRoot)}
-      id={transaction.transactionId}
       data-testid={transaction.transactionId}
+      id={transaction.transactionId}
     >
       <Link
         className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
@@ -32,11 +32,11 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
       <div className='group flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4'>
         <div className='flex w-full min-w-0 flex-1 flex-row items-center gap-4 md:w-1/2'>
           <TransactionMerchantIcon name={transaction.getName()} pending={transaction.isPending} />
-          <Flex orientation='column' gap='none' flex='shrink'>
-            <Typography size='md' weight='semibold' color='emphasis' ellipsis>
+          <Flex flex='shrink' gap='none' orientation='column'>
+            <Typography color='emphasis' ellipsis size='md' weight='semibold'>
               {transaction.getName()}
             </Typography>
-            <Typography size='sm' weight='medium' ellipsis className='hidden md:block'>
+            <Typography className='hidden md:block' ellipsis size='sm' weight='medium'>
               {transaction.getMainCategory()}
             </Typography>
             <BudgetingInfo className='flex w-full text-sm md:hidden' transaction={transaction} />

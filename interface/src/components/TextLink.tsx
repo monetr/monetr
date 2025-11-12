@@ -30,7 +30,6 @@ export type TextLinkProps = VariantProps & LinkProps;
 export default function TextLink({ variant, size, className, ...props }: TextLinkProps): React.JSX.Element {
   return (
     <Link
-      tabIndex={0}
       className={mergeTailwind(
         textLinkVariants({
           variant,
@@ -38,6 +37,7 @@ export default function TextLink({ variant, size, className, ...props }: TextLin
         }),
         className,
       )}
+      tabIndex={0}
       {...props}
     />
   );

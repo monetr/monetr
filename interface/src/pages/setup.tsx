@@ -27,7 +27,7 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
   switch (step) {
     case 'greeting':
       return (
-        <Greeting onContinue={setStep} manualEnabled={props.manualEnabled} alreadyOnboarded={props.alreadyOnboarded} />
+        <Greeting alreadyOnboarded={props.alreadyOnboarded} manualEnabled={props.manualEnabled} onContinue={setStep} />
       );
     case 'plaid':
       return <Navigate to={plaidPath} />;
@@ -51,11 +51,11 @@ function Greeting(props: GreetingProps): JSX.Element {
   function Banner(): JSX.Element {
     if (!props.alreadyOnboarded) {
       return (
-        <Flex gap='lg' justify='center' align='center' orientation='column'>
-          <Typography size='2xl' weight='medium' align='center'>
+        <Flex align='center' gap='lg' justify='center' orientation='column'>
+          <Typography align='center' size='2xl' weight='medium'>
             Welcome to monetr!
           </Typography>
-          <Typography size='lg' color='subtle' align='center'>
+          <Typography align='center' color='subtle' size='lg'>
             Before we get started, please select how you would like to continue.
           </Typography>
         </Flex>
@@ -63,11 +63,11 @@ function Greeting(props: GreetingProps): JSX.Element {
     }
 
     return (
-      <Flex gap='lg' justify='center' align='center' orientation='column'>
+      <Flex align='center' gap='lg' justify='center' orientation='column'>
         <Typography size='2xl' weight='medium'>
           Adding another bank?
         </Typography>
-        <Typography size='lg' color='subtle'>
+        <Typography color='subtle' size='lg'>
           Please select what type of bank you want to setup below.
         </Typography>
       </Flex>
@@ -78,22 +78,22 @@ function Greeting(props: GreetingProps): JSX.Element {
     <div className='w-full h-full flex lg:justify-center items-center gap-4 md:gap-8 flex-col overflow-y-auto p-4'>
       <MLogo className='w-16 h-16 md:w-24 md:h-24' />
       <Banner />
-      <Flex gap='lg' orientation='stackMedium' justify='center'>
+      <Flex gap='lg' justify='center' orientation='stackMedium'>
         <OnboardingTile
+          active={active === 'plaid'}
+          description='Plaid makes connecting your monetr account to your bank easy.'
+          disabled={!config?.plaidEnabled}
           icon={PlaidLogo}
           name='Plaid'
-          description='Plaid makes connecting your monetr account to your bank easy.'
-          active={active === 'plaid'}
           onClick={() => setActive('plaid')}
-          disabled={!config?.plaidEnabled}
         />
         <OnboardingTile
+          active={active === 'manual'}
+          description='Manage your transactions and budget manually with monetr.'
+          disabled={!props.manualEnabled}
           icon={Pencil}
           name='Manual'
-          description='Manage your transactions and budget manually with monetr.'
-          active={active === 'manual'}
           onClick={() => setActive('manual')}
-          disabled={!props.manualEnabled}
         />
       </Flex>
       <Button color={!active ? 'secondary' : 'primary'} disabled={!active} onClick={() => props.onContinue(active)}>
@@ -180,7 +180,7 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   }
 
   return (
-    <button type='button' className={wrapperClasses} onClick={handleClick}>
+    <button className={wrapperClasses} onClick={handleClick} type='button'>
       {props.active && <CircleCheck className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' />}
       {React.createElement(props.icon, {
         className: 'w-16 h-12 md:w-20 md:h-12 ml-4 md:ml-0 md:mt-6 dark:text-dark-monetr-content-emphasis',
@@ -192,12 +192,12 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
         <Typography color='subtle'>{props.description}</Typography>
         {!props.comingSoon && <Typography className='md:block hidden'>&nbsp;</Typography>}
         {props.comingSoon && (
-          <Typography weight='medium' className='md:mt-5'>
+          <Typography className='md:mt-5' weight='medium'>
             Coming Soon
           </Typography>
         )}
         {props.disabled && (
-          <Typography weight='medium' className='md:mt-5'>
+          <Typography className='md:mt-5' weight='medium'>
             Unavailable
           </Typography>
         )}

@@ -39,10 +39,10 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
   };
 
   if (isLoading) {
-    return <Select {...props} options={[]} isLoading disabled placeholder='Loading...' onChange={() => {}} />;
+    return <Select {...props} disabled isLoading onChange={() => {}} options={[]} placeholder='Loading...' />;
   }
   if (isError) {
-    return <Select {...props} options={[]} disabled placeholder='Failed to load spending...' onChange={() => {}} />;
+    return <Select {...props} disabled onChange={() => {}} options={[]} placeholder='Failed to load spending...' />;
   }
 
   const freeToUse: SelectOption<Spending> = {
@@ -100,10 +100,10 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
   return (
     <Select
       {...props}
-      value={current}
-      options={options}
       onChange={onSelect}
       optionComponent={SelectSpendingOptionComponent}
+      options={options}
+      value={current}
     />
   );
 }
@@ -114,17 +114,17 @@ export function SelectSpendingOptionComponent(props: SelectOptionComponentProps<
   const amount = notLoaded ? 'N/A' : locale.formatAmount(props.value.currentAmount, AmountType.Stored);
   return (
     <div className='flex justify-between'>
-      <Typography size='md' color='emphasis' ellipsis>
+      <Typography color='emphasis' ellipsis size='md'>
         {props.label}
       </Typography>
       <div className='flex gap-2'>
         {props.value?.spendingType === SpendingType.Goal && (
-          <Badge size='sm' className='dark:bg-dark-monetr-blue  max-h-[24px]'>
+          <Badge className='dark:bg-dark-monetr-blue  max-h-[24px]' size='sm'>
             <PiggyBank />
           </Badge>
         )}
         {props.value?.spendingType === SpendingType.Expense && (
-          <Badge size='sm' className='dark:bg-dark-monetr-green max-h-[24px]'>
+          <Badge className='dark:bg-dark-monetr-green max-h-[24px]' size='sm'>
             <Receipt />
           </Badge>
         )}

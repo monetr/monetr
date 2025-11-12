@@ -38,7 +38,7 @@ function SettingTab(props: SettingTabProps): JSX.Element {
   });
 
   return (
-    <Link to={props.to} className={className}>
+    <Link className={className} to={props.to}>
       {props.children}
     </Link>
   );

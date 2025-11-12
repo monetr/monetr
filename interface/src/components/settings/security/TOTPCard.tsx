@@ -23,11 +23,11 @@ export default function TOTPCard(): JSX.Element {
         <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
           <Shield />
         </div>
-        <Button variant='primary' disabled={Boolean(login.totpEnabledAt)} onClick={showEnableTOTPModal}>
+        <Button disabled={Boolean(login.totpEnabledAt)} onClick={showEnableTOTPModal} variant='primary'>
           {login.totpEnabledAt ? 'Already Enabled' : 'Enable TOTP'}
         </Button>
       </div>
-      <MSpan size='md' weight='medium' color='emphasis'>
+      <MSpan color='emphasis' size='md' weight='medium'>
         Authenticator App (TOTP)
       </MSpan>
       <MSpan component='p'>

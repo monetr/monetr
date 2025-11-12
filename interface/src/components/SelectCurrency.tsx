@@ -25,13 +25,13 @@ export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element 
   if (currenciesLoading) {
     return (
       <Select
-        disabled
-        label='Currency'
-        options={[]}
-        isLoading
-        placeholder='Select a currency...'
         className={props.className}
+        disabled
+        isLoading
+        label='Currency'
         onChange={onChange}
+        options={[]}
+        placeholder='Select a currency...'
       />
     );
   }
@@ -41,15 +41,15 @@ export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element 
 
   return (
     <Select
+      className={props.className}
       disabled={props.disabled || formikContext.isSubmitting}
+      isLoading={currenciesLoading || formikContext.isSubmitting}
       label='Currency'
       name={props.name}
       onChange={onChange}
       options={options}
-      isLoading={currenciesLoading || formikContext.isSubmitting}
       placeholder='Select a currency...'
       required={props.required}
-      className={props.className}
       value={value}
     />
   );

@@ -73,23 +73,23 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
   );
 
   return (
-    <MModal open={modal.visible} ref={ref} className='md:max-w-md'>
+    <MModal className='md:max-w-md' open={modal.visible} ref={ref}>
       <MForm
-        onSubmit={submit}
-        initialValues={initialValues}
         className='h-full flex flex-col gap-stack p-2 justify-between'
+        initialValues={initialValues}
+        onSubmit={submit}
       >
         {({ setFieldValue, values, isSubmitting }) => (
           <Fragment>
             <div className='flex flex-col gap-stack'>
-              <MSpan weight='bold' size='xl' className='mb-2'>
+              <MSpan className='mb-2' size='xl' weight='bold'>
                 <Trash />
                 Remove Transaction
               </MSpan>
               <div className='flex flex-col gap-stack'>
                 <MSpan>Are you sure you want to remove this transaction?</MSpan>
                 <ul>
-                  <SimilarTransactionItem transactionId={transaction.transactionId} disableNavigate />
+                  <SimilarTransactionItem disableNavigate transactionId={transaction.transactionId} />
                 </ul>
                 <MSpan>You will not be able to undo this action.</MSpan>
                 <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string gap-component'>
@@ -122,10 +122,10 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
                 </div>
               </div>
               <div className='flex justify-end gap-stack mt-4'>
-                <Button disabled={isSubmitting} variant='secondary' onClick={modal.remove}>
+                <Button disabled={isSubmitting} onClick={modal.remove} variant='secondary'>
                   Cancel
                 </Button>
-                <FormButton variant='destructive' type='submit'>
+                <FormButton type='submit' variant='destructive'>
                   Remove
                 </FormButton>
               </div>

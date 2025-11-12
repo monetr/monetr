@@ -27,10 +27,10 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
         disabled
         isLoading
         label={label}
+        onChange={() => {}}
+        options={[]}
         placeholder='Select a funding schedule...'
         required={props?.required}
-        options={[]}
-        onChange={() => {}}
       />
     );
   }
@@ -41,10 +41,10 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
         className={props?.className}
         disabled
         label={label}
+        onChange={() => {}}
+        options={[]}
         placeholder='Failed to loading funding schedules...'
         required={props?.required}
-        options={[]}
-        onChange={() => {}}
       />
     );
   }
@@ -58,10 +58,10 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
       <div className='h-[84px] w-full'>
         <Label label={props.label} required={props.required} />
         <Button
-          variant='primary'
-          size='select'
           className='w-full font-normal text-start justify-start gap-2'
           onClick={createAndSetFunding}
+          size='select'
+          variant='primary'
         >
           <Calendar />
           Create a new funding schedule...
@@ -83,6 +83,7 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
 
   return (
     <Select
+      className={props.className}
       label={props.label ?? 'Funding'}
       name='fundingScheduleId'
       onChange={onSelect}
@@ -90,7 +91,6 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
       placeholder='Select a funding schedule...'
       required={props.required}
       value={value}
-      className={props.className}
     />
   );
 }

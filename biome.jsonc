@@ -79,6 +79,12 @@
               ":BLANK_LINE:"
             ]
           }
+        },
+        "useSortedAttributes": {
+          "level": "on",
+          "options": {
+            "sortOrder": "natural"
+          }
         }
       }
     }

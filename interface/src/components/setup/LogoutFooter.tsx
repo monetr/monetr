@@ -4,11 +4,11 @@ import Typography from '@monetr/interface/components/Typography';
 
 export default function LogoutFooter(): JSX.Element {
   return (
-    <Flex justify='center' gap='sm'>
-      <Typography size='sm' color='subtle' className='text-sm'>
+    <Flex gap='sm' justify='center'>
+      <Typography className='text-sm' color='subtle' size='sm'>
         Not ready to continue?
       </Typography>
-      <MLink to='/logout' size='sm'>
+      <MLink size='sm' to='/logout'>
         Logout for now
       </MLink>
     </Flex>

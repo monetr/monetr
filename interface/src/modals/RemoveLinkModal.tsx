@@ -41,10 +41,10 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
   }
 
   return (
-    <MModal open={modal.visible} ref={ref} className='py-4 md:max-w-md'>
+    <MModal className='py-4 md:max-w-md' open={modal.visible} ref={ref}>
       <div className='h-full flex flex-col gap-4 p-2 justify-between'>
         <div className='flex flex-col'>
-          <MSpan weight='bold' size='xl' className='mb-2'>
+          <MSpan className='mb-2' size='xl' weight='bold'>
             <Trash />
             Remove {props.link.getName()}?
           </MSpan>
@@ -56,10 +56,10 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
           </MSpan>
         </div>
         <div className='flex justify-end gap-2'>
-          <Button disabled={submitting} variant='secondary' onClick={modal.remove}>
+          <Button disabled={submitting} onClick={modal.remove} variant='secondary'>
             Cancel
           </Button>
-          <FormButton disabled={submitting} variant='destructive' type='submit' onClick={submit}>
+          <FormButton disabled={submitting} onClick={submit} type='submit' variant='destructive'>
             Remove
           </FormButton>
         </div>

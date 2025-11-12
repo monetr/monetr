@@ -21,7 +21,7 @@ export default function ManualLinkSetupLayout(props: ManualLinkSetupLayoutProps)
   return (
     <div className='w-full h-full flex justify-between items-center gap-8 flex-col p-4 md:p-2 overflow-auto'>
       <div className='p-0 md:p-8 w-full'>
-        <MStepper steps={['Intro', 'Account', 'Balances', 'Income']} activeIndex={step} />
+        <MStepper activeIndex={step} steps={['Intro', 'Account', 'Balances', 'Income']} />
       </div>
       <div className='flex flex-col md:justify-center items-center max-w-sm h-full'>
         <MLogo className='w-24 h-24' />

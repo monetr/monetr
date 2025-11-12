@@ -75,15 +75,15 @@ export default function Monetr(): JSX.Element {
   if (!isAuthenticated) {
     return (
       <RoutesImpl>
-        <Route path='/login' element={<Login />} />
-        <Route path='/logout' element={<LogoutPage />} />
-        {config?.allowSignUp && <Route path='/register' element={<Register />} />}
-        {config?.allowForgotPassword && <Route path='/password/forgot' element={<ForgotPassword />} />}
-        <Route path='/password/reset' element={<PasswordReset />} />
-        <Route path='/verify/email' element={<VerifyEmail />} />
-        <Route path='/verify/email/resend' element={<ResendVerificationPage />} />
-        <Route path='/' element={<Navigate replace to='/login' />} />
-        <Route path='*' element={<Navigate replace to='/login' />} />
+        <Route element={<Login />} path='/login' />
+        <Route element={<LogoutPage />} path='/logout' />
+        {config?.allowSignUp && <Route element={<Register />} path='/register' />}
+        {config?.allowForgotPassword && <Route element={<ForgotPassword />} path='/password/forgot' />}
+        <Route element={<PasswordReset />} path='/password/reset' />
+        <Route element={<VerifyEmail />} path='/verify/email' />
+        <Route element={<ResendVerificationPage />} path='/verify/email/resend' />
+        <Route element={<Navigate replace to='/login' />} path='/' />
+        <Route element={<Navigate replace to='/login' />} path='*' />
       </RoutesImpl>
     );
   }
@@ -92,9 +92,9 @@ export default function Monetr(): JSX.Element {
   if (auth?.mfaPending) {
     return (
       <RoutesImpl>
-        <Route path='/login/multifactor' element={<MultifactorAuthenticationPage />} />
-        <Route path='/logout' element={<LogoutPage />} />
-        <Route path='*' element={<Navigate replace to='/login/multifactor' />} />
+        <Route element={<MultifactorAuthenticationPage />} path='/login/multifactor' />
+        <Route element={<LogoutPage />} path='/logout' />
+        <Route element={<Navigate replace to='/login/multifactor' />} path='*' />
       </RoutesImpl>
     );
   }
@@ -102,10 +102,10 @@ export default function Monetr(): JSX.Element {
   if (!auth?.isActive) {
     return (
       <RoutesImpl>
-        <Route path='/logout' element={<LogoutPage />} />
-        <Route path='/account/subscribe' element={<SubscribePage />} />
-        <Route path='/account/subscribe/after' element={<AfterCheckoutPage />} />
-        <Route path='*' element={<Navigate replace to='/account/subscribe' />} />
+        <Route element={<LogoutPage />} path='/logout' />
+        <Route element={<SubscribePage />} path='/account/subscribe' />
+        <Route element={<AfterCheckoutPage />} path='/account/subscribe/after' />
+        <Route element={<Navigate replace to='/account/subscribe' />} path='*' />
       </RoutesImpl>
     );
   }
@@ -114,13 +114,13 @@ export default function Monetr(): JSX.Element {
   if (!hasAnyLinks) {
     return (
       <RoutesImpl>
-        <Route path='/logout' element={<LogoutPage />} />
-        <Route path='/setup' element={<SetupPage manualEnabled={config?.manualEnabled} />} />
-        <Route path='/setup/plaid' element={<PlaidSetup alreadyOnboarded />} />
-        <Route path='/setup/manual' element={<SetupManualLinkPage />} />
-        <Route path='/plaid/oauth-return' element={<OauthReturn />} />
-        <Route path='/account/subscribe/after' element={<Navigate replace to='/setup' />} />
-        <Route index path='*' element={<Navigate replace to='/setup' />} />
+        <Route element={<LogoutPage />} path='/logout' />
+        <Route element={<SetupPage manualEnabled={config?.manualEnabled} />} path='/setup' />
+        <Route element={<PlaidSetup alreadyOnboarded />} path='/setup/plaid' />
+        <Route element={<SetupManualLinkPage />} path='/setup/manual' />
+        <Route element={<OauthReturn />} path='/plaid/oauth-return' />
+        <Route element={<Navigate replace to='/setup' />} path='/account/subscribe/after' />
+        <Route element={<Navigate replace to='/setup' />} index path='*' />
       </RoutesImpl>
     );
   }
@@ -131,39 +131,39 @@ export default function Monetr(): JSX.Element {
         <Sidebar />
         <div className='w-full h-full flex min-w-0 overflow-y-auto'>
           <RoutesImpl>
-            <Route path='/bank/:bankAccountId' element={<BudgetingLayout />}>
-              <Route path='settings' element={<BankAccountSettingsPage />} />
-              <Route path='transactions' element={<Transactions />} />
-              <Route path='transactions/:transactionId/details' element={<TransactionDetails />} />
-              <Route path='expenses' element={<Expenses />} />
-              <Route path='expenses/:spendingId/details' element={<ExpenseDetails />} />
-              <Route path='goals' element={<Goals />} />
-              <Route path='goals/:spendingId/details' element={<GoalDetails />} />
-              <Route path='funding' element={<Funding />} />
-              <Route path='funding/:fundingId/details' element={<FundingDetails />} />
+            <Route element={<BudgetingLayout />} path='/bank/:bankAccountId'>
+              <Route element={<BankAccountSettingsPage />} path='settings' />
+              <Route element={<Transactions />} path='transactions' />
+              <Route element={<TransactionDetails />} path='transactions/:transactionId/details' />
+              <Route element={<Expenses />} path='expenses' />
+              <Route element={<ExpenseDetails />} path='expenses/:spendingId/details' />
+              <Route element={<Goals />} path='goals' />
+              <Route element={<GoalDetails />} path='goals/:spendingId/details' />
+              <Route element={<Funding />} path='funding' />
+              <Route element={<FundingDetails />} path='funding/:fundingId/details' />
             </Route>
-            <Route path='/settings' element={<SettingsLayout />}>
-              <Route path='' element={<Navigate replace to='/settings/overview' />} />
-              <Route path='overview' element={<SettingsOverview />} />
-              <Route path='security' element={<SettingsSecurity />} />
-              {config?.billingEnabled && <Route path='billing' element={<SettingsBilling />} />}
-              <Route path='about' element={<SettingsAbout />} />
+            <Route element={<SettingsLayout />} path='/settings'>
+              <Route element={<Navigate replace to='/settings/overview' />} path='' />
+              <Route element={<SettingsOverview />} path='overview' />
+              <Route element={<SettingsSecurity />} path='security' />
+              {config?.billingEnabled && <Route element={<SettingsBilling />} path='billing' />}
+              <Route element={<SettingsAbout />} path='about' />
             </Route>
-            <Route path='/link/:linkId/details' element={<LinkDetails />} />
-            <Route path='/link/create' element={<LinkCreatePage />} />
-            <Route path='/link/create/plaid' element={<PlaidSetup alreadyOnboarded />} />
-            <Route path='/link/create/manual' element={<CreateManualLinkPage />} />
-            <Route path='/logout' element={<LogoutPage />} />
-            <Route path='/plaid/oauth-return' element={<OauthReturn />} />
-            <Route path='/subscription' element={<SubscriptionPage />} />
-            <Route path='/account/subscribe' element={<Navigate replace to='/' />} />
-            <Route path='/account/subscribe/after' element={<AfterCheckoutPage />} />
-            <Route path='/setup' element={<Navigate replace to='/' />} />
-            <Route path='/password/reset' element={<Navigate replace to='/' />} />
-            <Route path='/register' element={<Navigate replace to='/' />} />
-            <Route path='/login' element={<Navigate replace to='/' />} />
-            <Route path='/login/multifactor' element={<Navigate replace to='/' />} />
-            <Route index path='/' element={<RedirectToBank />} />
+            <Route element={<LinkDetails />} path='/link/:linkId/details' />
+            <Route element={<LinkCreatePage />} path='/link/create' />
+            <Route element={<PlaidSetup alreadyOnboarded />} path='/link/create/plaid' />
+            <Route element={<CreateManualLinkPage />} path='/link/create/manual' />
+            <Route element={<LogoutPage />} path='/logout' />
+            <Route element={<OauthReturn />} path='/plaid/oauth-return' />
+            <Route element={<SubscriptionPage />} path='/subscription' />
+            <Route element={<Navigate replace to='/' />} path='/account/subscribe' />
+            <Route element={<AfterCheckoutPage />} path='/account/subscribe/after' />
+            <Route element={<Navigate replace to='/' />} path='/setup' />
+            <Route element={<Navigate replace to='/' />} path='/password/reset' />
+            <Route element={<Navigate replace to='/' />} path='/register' />
+            <Route element={<Navigate replace to='/' />} path='/login' />
+            <Route element={<Navigate replace to='/' />} path='/login/multifactor' />
+            <Route element={<RedirectToBank />} index path='/' />
           </RoutesImpl>
         </div>
       </div>

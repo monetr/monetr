@@ -58,8 +58,8 @@ export function BackgroundGradientAnimation(): JSX.Element {
         <defs>
           {/** biome-ignore lint/correctness/useUniqueElementIds: Required hardcoded ID for it to work */}
           <filter id='blurMe'>
-            <feGaussianBlur in='SourceGraphic' stdDeviation='10' result='blur' />
-            <feColorMatrix in='blur' mode='matrix' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8' result='goo' />
+            <feGaussianBlur in='SourceGraphic' result='blur' stdDeviation='10' />
+            <feColorMatrix in='blur' mode='matrix' result='goo' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8' />
             <feBlend in='SourceGraphic' in2='goo' />
           </filter>
         </defs>

@@ -131,10 +131,10 @@ function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaid
   }
 
   return (
-    <MModal open={modal.visible} className='py-4 md:max-w-md'>
+    <MModal className='py-4 md:max-w-md' open={modal.visible}>
       <div className='h-full flex flex-col gap-4 p-2 justify-between'>
         <div className='flex flex-col'>
-          <MSpan weight='bold' size='xl' className='mb-2'>
+          <MSpan className='mb-2' size='xl' weight='bold'>
             {title}
           </MSpan>
           <MSpan size='lg' weight='medium'>

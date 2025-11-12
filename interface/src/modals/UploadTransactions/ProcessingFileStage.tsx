@@ -20,7 +20,7 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): JS
     <div className='h-full flex flex-col gap-2 p-2 justify-between'>
       <div className='flex flex-col gap-2 h-full'>
         <div className='flex justify-between'>
-          <MSpan weight='bold' size='xl'>
+          <MSpan size='xl' weight='bold'>
             Upload Transactions
           </MSpan>
           <div>{/* TODO Close button */}</div>
@@ -39,7 +39,7 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): JS
         </div>
       </div>
       <div className='flex justify-end gap-2 mt-2'>
-        <Button variant='secondary' onClick={props.close}>
+        <Button onClick={props.close} variant='secondary'>
           Done
         </Button>
       </div>
