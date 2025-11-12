@@ -1,5 +1,81 @@
 # Changelog
 
+## [1.7.0](https://github.com/monetr/monetr/compare/v1.6.0...v1.7.0) (2025-11-12)
+
+
+### Features
+
+* **api:** Improve similar transaction calculations ([603748a](https://github.com/monetr/monetr/commit/603748a09b76f66c665bd36245ba9e13e9da9c1c))
+* **ui:** Add react-compiler to frontend build ([7f0a92e](https://github.com/monetr/monetr/commit/7f0a92e2b65bde5ed4aafd83a087195735c5493d))
+* **ui:** Adding transactions to expense details view ([acd4dda](https://github.com/monetr/monetr/commit/acd4ddab12efb666ca6b631b97f492af81e52a5d))
+* **ui:** Implemented some Locale based date formatting ([73cfaef](https://github.com/monetr/monetr/commit/73cfaef593d31add8e57f69319d34bd66c16f3de))
+* **ui:** Improving loading state of transaction details view ([b130bad](https://github.com/monetr/monetr/commit/b130bad67aac6380200216e9f40c65d0df5e7dd0))
+* **ui:** More date formatting improvements ([b216027](https://github.com/monetr/monetr/commit/b216027de060a3321d43c785e1a4a8d2028bb6df))
+* **ui:** Move TOTP modal into its own lazy loading ([37b4f04](https://github.com/monetr/monetr/commit/37b4f043d8313a7af10d05469560defd4e187611))
+* **ui:** Splitting out some components asynchronously ([15aa904](https://github.com/monetr/monetr/commit/15aa904e9a8953824b6d01b6c21076e488ca3978))
+
+
+### Dependencies
+
+* **renovate:** update dependency @biomejs/biome to v2.3.4 ([#2811](https://github.com/monetr/monetr/issues/2811)) ([32925c8](https://github.com/monetr/monetr/commit/32925c85cba241c27074b20bdbbc52ccaa17531e))
+* **renovate:** update getsentry/action-release action to v3 ([#2784](https://github.com/monetr/monetr/issues/2784)) ([91a08ae](https://github.com/monetr/monetr/commit/91a08ae5f9f12d414fc0a47a85e648153899f76c))
+* **ui:** update dependency @swc/core to v1.15.0 ([#2817](https://github.com/monetr/monetr/issues/2817)) ([6f03f6f](https://github.com/monetr/monetr/commit/6f03f6f4a61805e01ba3cb4d44b30bde6c213d15))
+* **ui:** update dependency @tanstack/react-query to v5.90.7 ([#2812](https://github.com/monetr/monetr/issues/2812)) ([e7e00a8](https://github.com/monetr/monetr/commit/e7e00a82e36125dea149211e41749ab5be60b0f8))
+* **ui:** update radix-ui-primitives monorepo ([#2814](https://github.com/monetr/monetr/issues/2814)) ([7dd630a](https://github.com/monetr/monetr/commit/7dd630a20ead4437d8a7ab469791e89cbe446948))
+* **ui:** update rsbuild ([#2815](https://github.com/monetr/monetr/issues/2815)) ([61ad7fe](https://github.com/monetr/monetr/commit/61ad7fe9baacdd4e1d0b29b585ccc64de8489fb1))
+* **ui:** update sass to v1.93.3 ([#2816](https://github.com/monetr/monetr/issues/2816)) ([9984274](https://github.com/monetr/monetr/commit/99842749f07df936641ef3042b626c432cc2146a))
+* **ui:** update sentry-javascript monorepo to v10.23.0 ([#2818](https://github.com/monetr/monetr/issues/2818)) ([ec87cc8](https://github.com/monetr/monetr/commit/ec87cc82b41fcb075abda802fc8958edbc7e4fd1))
+
+
+### Bug Fixes
+
+* **api:** Fixed similar transaction hash consistency ([bc64ea2](https://github.com/monetr/monetr/commit/bc64ea2950fa5f7591e199cf8d312a1d7d2146a8))
+* **lint:** Fixing linting issues ([42641dd](https://github.com/monetr/monetr/commit/42641dd55a00f856bb80468f7115e94d9e2326e9))
+* **ui:** Bundle size optimizations ([320f1d9](https://github.com/monetr/monetr/commit/320f1d9f2a3edc487fe6c7eaec8f33800eaac779))
+* **ui:** Fix badge text color ([e41551b](https://github.com/monetr/monetr/commit/e41551bd14681b462b0f2247ed59fcb9f9965b4c))
+* **ui:** Fix how icons appear in badge components ([f1d0fbd](https://github.com/monetr/monetr/commit/f1d0fbd57b505d4966c768e8b8d2dffbdbfe6b2d))
+* **ui:** Fix positioning of setup cards for new links ([52deb23](https://github.com/monetr/monetr/commit/52deb23a2efc6f6c6a4d3dfe03cfd5555b712d75))
+* **ui:** Fix transaction spent from styles ([aa1f2ac](https://github.com/monetr/monetr/commit/aa1f2ac95d62ec89b793d3f35b0ec9f197b5166a))
+* **ui:** Fixed bad prop passing for typography component ([4a62a77](https://github.com/monetr/monetr/commit/4a62a77a757dbf1a4a980be126748aa046ee7adb))
+* **ui:** Fixed checkbox description text styles ([eb562c0](https://github.com/monetr/monetr/commit/eb562c09ea4245f26161e39c9db1ea34ff27fd93)), closes [#2820](https://github.com/monetr/monetr/issues/2820)
+* **ui:** Fixed loading state of of transaction select item ([34adffd](https://github.com/monetr/monetr/commit/34adffd8365e87b5f21533b27368be09157d0000))
+* **ui:** Fixing budget sidebar text styles ([a182477](https://github.com/monetr/monetr/commit/a18247722509c69f4a705e3956c27f4557f3132f))
+* **ui:** Improve transaction select spending component ([85422cb](https://github.com/monetr/monetr/commit/85422cbb216c1b0ec1318c7eb09caf76ddc1d67f))
+* **ui:** Improved login form validation functions ([dbdefe6](https://github.com/monetr/monetr/commit/dbdefe65647526de6ced2fd728b68db748f93304))
+* **ui:** Silence react-router warnings ([4ace68e](https://github.com/monetr/monetr/commit/4ace68e29de9883fd3c0e706103c81d2356c585e))
+
+
+### Miscellaneous
+
+* **api:** Fixing many linting errors ([2a0f873](https://github.com/monetr/monetr/commit/2a0f873b90cd7a1cf0822c9867c0d0b4c3bdf0b1))
+* **api:** Tweaking funding schedules ([f7d8d1b](https://github.com/monetr/monetr/commit/f7d8d1b71f5a6ef541da3eb07fb3770964d61782))
+* **ui:** Deduplicating pnpm dependencies ([d70ae8b](https://github.com/monetr/monetr/commit/d70ae8b9a18dc1a0448c75eb3de866c1750ae8c8))
+* **ui:** Fixing package.json mistake ([0e2926e](https://github.com/monetr/monetr/commit/0e2926e8aebd0f7ef1728ae8d0e643868256312d))
+* **ui:** Fixing typescript issues ([5dc7901](https://github.com/monetr/monetr/commit/5dc79010d820ff69fba1ac59138e09f3ce9002b8))
+* **ui:** Linting ([b639f7c](https://github.com/monetr/monetr/commit/b639f7c8883a830a0a10fa830b35e18878a7a549))
+* **ui:** Tweaks to tooltip styles ([62d38f4](https://github.com/monetr/monetr/commit/62d38f4b7a35bc0b3bff6c16bd812461939aa740))
+
+
+### Refactor
+
+* **api:** Removing unused repository funnction ([8d7f41e](https://github.com/monetr/monetr/commit/8d7f41e5f8cc91f62944289576cb5c589ee08157))
+* **api:** Tweaking how API validators work a bit ([d389917](https://github.com/monetr/monetr/commit/d389917983f60a119276d32f113530518ef8939f))
+* **ui:** Adding css modules to transaction items ([39519d2](https://github.com/monetr/monetr/commit/39519d2eabb736a4482492b68b712a1ee7198b43))
+* **ui:** Adding new typography component ([eb5e9a4](https://github.com/monetr/monetr/commit/eb5e9a46c4ef0f54b5c3c42b7a65953cb588d2e3))
+* **ui:** Cleaning up amount field input ([d5665dd](https://github.com/monetr/monetr/commit/d5665dd468a1bad36e97dd337d62675487f49d1f))
+* **ui:** Improvements to transaction list item component ([ba778b7](https://github.com/monetr/monetr/commit/ba778b799875042b3fbe6f84b0918b8d00dd9054))
+* **ui:** Migrate divider component to css modules ([5e4a7e0](https://github.com/monetr/monetr/commit/5e4a7e06155b681da8eef299b6273329389bc75a))
+* **ui:** Migrating avatar component over to css modules ([0739196](https://github.com/monetr/monetr/commit/07391966876a0c4a2fa5753fcd9c47140daeed14))
+* **ui:** Migrating badge to css modules ([c73d17d](https://github.com/monetr/monetr/commit/c73d17df7c512b85e2d188ce130393bf418c5eb6))
+* **ui:** Migrating similar transaction item to css modules ([64ae7ba](https://github.com/monetr/monetr/commit/64ae7ba69872077a02ebfbc1f2091626828b0a2f))
+* **ui:** More css module migration ([8e3b432](https://github.com/monetr/monetr/commit/8e3b4325a28734765e4b06776e99a8dd1fc09ca2))
+* **ui:** More css module migrations ([bb48b45](https://github.com/monetr/monetr/commit/bb48b45a106f49cda2dba156cfe9d28ae480de10))
+* **ui:** Moving away from react-select ([38c4cf4](https://github.com/monetr/monetr/commit/38c4cf4843a371846ff691eb99f959812201b46e))
+* **ui:** Refactor login page to use css modules ([a13c001](https://github.com/monetr/monetr/commit/a13c001d5813c78de42e12472bfb77ea4f282b4d))
+* **ui:** Removing last mui/material usages ([73f5e96](https://github.com/monetr/monetr/commit/73f5e967436f528be78418098fe09aed5ece4597))
+* **ui:** Removing zustand, as it was only used for mobile sidebar ([b040bd3](https://github.com/monetr/monetr/commit/b040bd317e8aba41f92b8b6e3d87530cad3f95df))
+* **ui:** Tweaking styles for various components ([e663556](https://github.com/monetr/monetr/commit/e663556c84b838a64274cefe8a0e00e0be25ef80))
+
 ## [1.6.0](https://github.com/monetr/monetr/compare/v1.5.3...v1.6.0) (2025-11-05)
 
 
