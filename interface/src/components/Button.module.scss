@@ -130,6 +130,37 @@
   }
 }
 
+.calendar {
+  height: 8 * variables.$size;
+  width: 8 * variables.$size;
+  background-color: transparent;
+  color: var(--content-emphasis);
+  padding: 0px;
+  opacity: 50%;
+
+  --ring-color: var(--border);
+  --ring-size: 1px;
+  @include mixins.inset-ring;
+
+  &:enabled {
+    &:focus-visible, &:hover {
+      --ring-color: var(--brand);
+      --ring-size: 2px;
+      opacity: 100%;
+    }
+  }
+
+  &:disabled, &[aria-disabled="true"] {
+    --ring-color: var(--border-subtle);
+    color: var(--content-muted);
+  }
+
+  svg {
+    height: 4 * variables.$size;
+    width: 4 * variables.$size;
+  }
+}
+
 .sizeDefault {
   @include mixins.text-small;
   height: 8 * variables.$size;

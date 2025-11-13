@@ -14,6 +14,7 @@ const buttonVariants = cva([styles.button], {
       outlined: styles.outlinend,
       destructive: styles.destructive,
       text: styles.text,
+      calendar: styles.calendar,
     },
     size: {
       default: styles.sizeDefault,
