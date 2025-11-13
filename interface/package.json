@@ -42,7 +42,7 @@
     "cmdk": "1.1.1",
     "date-fns": "4.1.0",
     "downshift": "9.0.10",
-    "formik": "2.4.6",
+    "formik": "2.4.9",
     "input-otp": "1.4.2",
     "lucide-react": "0.553.0",
     "notistack": "3.0.2",

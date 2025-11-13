@@ -186,8 +186,8 @@ importers:
         specifier: 9.0.10
         version: 9.0.10(react@18.3.1)
       formik:
-        specifier: 2.4.6
-        version: 2.4.6(react@18.3.1)
+        specifier: 2.4.9
+        version: 2.4.9(react@18.3.1)
       input-otp:
         specifier: 1.4.2
         version: 1.4.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3763,8 +3763,8 @@ packages:
     resolution: {integrity: sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww==}
     engines: {node: '>=0.4.x'}
 
-  formik@2.4.6:
-    resolution: {integrity: sha512-A+2EI7U7aG296q2TLGvNapDNTZp1khVt5Vk0Q/fyfSROss0V/V6+txt2aJnwEos44IxTCW/LYAi/zgWzlevj+g==}
+  formik@2.4.9:
+    resolution: {integrity: sha512-5nI94BMnlFDdQRBY4Sz39WkhxajZJ57Fzs8wVbtsQlm5ScKIR1QLYqv/ultBnobObtlUyxpxoLodpixrsf36Og==}
     peerDependencies:
       react: '>=16.8.0'
 
@@ -10381,7 +10381,7 @@ snapshots:
 
   format@0.2.2: {}
 
-  formik@2.4.6(react@18.3.1):
+  formik@2.4.9(react@18.3.1):
     dependencies:
       '@types/hoist-non-react-statics': 3.3.5
       deepmerge: 2.2.1
