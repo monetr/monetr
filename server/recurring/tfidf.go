@@ -120,7 +120,7 @@ func (p *TFIDF) indexWords() (mapping map[string]int, vectorSize int) {
 	// Only calculate the index once. This way we can use it elsewhere if we need
 	// to get information back out of the transform after we are done.
 	if len(p.wordToIndex) == 0 {
-		wordCount := len(p.wc) * 2
+		wordCount := len(p.wc)
 		// Define the length of the vector and adjust it to be divisible by 16. This
 		// will enable us to leverage SIMD in the future. By using 16 we are
 		// compatible with both AVX and AVX512.
@@ -137,7 +137,6 @@ func (p *TFIDF) indexWords() (mapping map[string]int, vectorSize int) {
 		// Make the order of word indicies consistent between runs of the same data.
 		sort.Strings(allWords)
 		for index, word := range allWords {
-			index = index * 2
 			p.wordToIndex[word] = index
 			p.indexToWord[index] = word
 		}
