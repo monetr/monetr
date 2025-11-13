@@ -1,4 +1,3 @@
-// vim: nospell
 import type { Config } from 'tailwindcss';
 import plugin from 'tailwindcss/plugin';
 
@@ -71,19 +70,13 @@ const config: Partial<Config> = {
   ],
   theme: {
     extend: {
-      // borderRadius: {
-      //   lg: 'var(--radius)',
-      //   md: 'calc(var(--radius) - 2px)',
-      //   sm: 'calc(var(--radius) - 4px)',
-      // },
       fontFamily: {
         sans: ['Inter Variable', 'sans-serif'],
         body: ['Inter Variable', 'sans-serif'],
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
       keyframes: {
         'accordion-down': {

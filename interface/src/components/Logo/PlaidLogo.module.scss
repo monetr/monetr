@@ -1,0 +1,10 @@
+@use '@monetr/interface/variables';
+
+.svg {
+  width: 28 * variables.$size;
+}
+
+.path {
+  fill: #ffffff;
+  color: #ffffff;
+}
