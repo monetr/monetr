@@ -2,7 +2,7 @@ import { LoaderCircle } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
-import CenteredLogo from '@monetr/interface/components/Logo/CenteredLogo';
+import Logo from '@monetr/interface/assets/Logo';
 import MSpan from '@monetr/interface/components/MSpan';
 import useMountEffect from '@monetr/interface/hooks/useMountEffect';
 import request from '@monetr/interface/util/request';
@@ -33,7 +33,7 @@ export default function SubscriptionPage(): JSX.Element {
           <Logo className='w-1/3' />
         </div>
         <div className='w-full pt-2.5 pb-2.5'>
-          <MSpan size='xl' className='w-full text-center'>
+          <MSpan className='w-full text-center' size='xl'>
             Loading the billing portal...
           </MSpan>
         </div>
