@@ -83,6 +83,20 @@ func Tokenize(transaction *models.Transaction) []Token {
 			continue
 		}
 
+		// Throw out words that are excluded out right
+		if weight, ok := specialWeights[lower]; ok && weight == 0 {
+			token.Excluded = true
+			tokens = append(tokens, token)
+			continue
+		}
+
+		// Same with state codes
+		if weight, ok := states[lower]; ok && weight == 0 {
+			token.Excluded = true
+			tokens = append(tokens, token)
+			continue
+		}
+
 		if replacement, ok := replacementTable[lower]; ok {
 			token.Equivalent = replacement
 		} else {
