@@ -12,6 +12,7 @@ import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
@@ -119,12 +120,12 @@ function TransferModal(props: TransferModalProps): JSX.Element {
       >
         <div className='flex flex-col gap-2'>
           <div className='flex flex-col items-center'>
-            <MSpan size='2xl' weight='semibold'>
+            <Typography size='2xl' weight='semibold'>
               Transfer
-            </MSpan>
-            <MSpan color='subtle' size='lg' weight='medium'>
+            </Typography>
+            <Typography color='subtle' size='lg' weight='medium'>
               Move funds between your budgets
-            </MSpan>
+            </Typography>
           </div>
           <MSelectSpending
             excludeFrom='toSpendingId'

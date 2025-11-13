@@ -1,7 +1,7 @@
 import { format, getUnixTime } from 'date-fns';
 import { ArrowUpRight, CircleCheck, TrendingUpDown } from 'lucide-react';
 
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { type ForecastEvent, useForecast } from '@monetr/interface/hooks/useForecast';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -35,11 +35,11 @@ export default function GoalTimeline(props: GoalTimelineProps): JSX.Element {
   const { data: forecast, isLoading, isError } = useForecast();
 
   if (isLoading) {
-    return <MSpan>Loading...</MSpan>;
+    return <Typography>Loading...</Typography>;
   }
 
   if (isError || !spending) {
-    return <MSpan>Failed to load goal forecast!</MSpan>;
+    return <Typography>Failed to load goal forecast!</Typography>;
   }
 
   // Keep only the events that have spending or contributions for this spending object.

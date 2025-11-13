@@ -13,7 +13,7 @@ import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useCreateSpending } from '@monetr/interface/hooks/useCreateSpending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
@@ -88,7 +88,9 @@ function NewExpenseModal(): JSX.Element {
         onSubmit={submit}
       >
         <div className='flex flex-col'>
-          <MSpan className='font-bold text-xl mb-2'>Create A New Expense</MSpan>
+          <Typography className='mb-2' size='xl' weight='bold'>
+            Create A New Expense
+          </Typography>
           <FormTextField
             autoComplete='off'
             autoFocus

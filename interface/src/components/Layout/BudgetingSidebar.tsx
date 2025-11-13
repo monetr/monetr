@@ -9,7 +9,6 @@ import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceF
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
-import MSpan from '@monetr/interface/components/MSpan';
 import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -19,6 +18,7 @@ import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
+import BudgetingSidebarItem from '@monetr/interface/components/Layout/BudgetingSidebarItem';
 
 export interface BudgetingSidebarProps {
   className?: string;
@@ -73,35 +73,30 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
         <Divider className='w-1/2' />
 
         <div className='flex h-full w-full flex-col gap-2 pb-4'>
-          <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/transactions`}>
-            <ShoppingCart />
-            <MSpan color='inherit' ellipsis>
-              Transactions
-            </MSpan>
-          </NavigationItem>
-          <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/expenses`}>
-            <Receipt />
-            <MSpan color='inherit' ellipsis>
-              Expenses
-            </MSpan>
-            <Badge className='ml-auto' size='sm'>
-              {locale.formatAmount(balance?.expenses, AmountType.Stored)}
-            </Badge>
-          </NavigationItem>
+          <BudgetingSidebarItem icon={ShoppingCart} to={`/bank/${bankAccount?.bankAccountId}/transactions`}>
+            Transactions
+          </BudgetingSidebarItem>
+          <BudgetingSidebarItem
+            badge={balance?.expenses && locale.formatAmount(balance?.expenses, AmountType.Stored)}
+            icon={Receipt}
+            to={`/bank/${bankAccount?.bankAccountId}/expenses`}
+          >
+            Expenses
+          </BudgetingSidebarItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/goals`}>
             <PiggyBank />
-            <MSpan color='inherit' ellipsis>
+            <Typography color='inherit' ellipsis size='lg'>
               Goals
-            </MSpan>
+            </Typography>
             <Badge className='ml-auto' size='sm'>
               {locale.formatAmount(balance?.goals, AmountType.Stored)}
             </Badge>
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/funding`}>
             <CalendarSync />
-            <MSpan color='inherit' ellipsis>
+            <Typography color='inherit' ellipsis size='lg'>
               Funding Schedules
-            </MSpan>
+            </Typography>
             <NextFundingBadge />
           </NavigationItem>
         </div>

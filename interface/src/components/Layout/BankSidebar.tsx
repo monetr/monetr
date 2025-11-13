@@ -5,7 +5,7 @@ import Logo from '@monetr/interface/assets/Logo';
 import Divider from '@monetr/interface/components/Divider';
 import BankSidebarItem from '@monetr/interface/components/Layout/BankSidebarItem';
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -63,9 +63,9 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
           className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'
           to='/link/create'
         >
-          <MSpan color='emphasis' size='xl' weight='bold'>
+          <Typography color='emphasis' size='xl' weight='bold'>
             +1
-          </MSpan>
+          </Typography>
         </Link>
       </div>
     </SidebarWrapper>
