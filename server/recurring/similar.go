@@ -65,7 +65,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 		mostValuableIndicies := make([]struct {
 			Word         string
 			OriginalWord string
-			Placement    int
+			Placement    float32
 			Value        float32
 		}, len(indicies))
 
@@ -106,11 +106,26 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 								} else {
 									tracker.OriginalWord = originalToken.Original
 								}
-								tracker.Placement = originalToken.Index
 								break
 							}
 						}
 					}
+
+					// Then consider all of the transactions that contained the same word,
+					// what was the position of that word within those transactions. We
+					// want the average position so that way its relative to other words.
+					var position, count float32
+					for _, originalToken := range datum.Tokens {
+						for _, tokenWord := range originalToken.Final {
+							if strings.EqualFold(indicies[wordIndex], tokenWord) {
+								position += float32(originalToken.Index)
+								count++
+								break
+							}
+						}
+					}
+
+					tracker.Placement = position / count
 				}
 
 				mostValuableIndicies[wordIndex] = tracker
@@ -193,7 +208,7 @@ func calculateRankings(group *models.TransactionCluster) {
 
 func calculatedMerchantName(group *models.TransactionCluster) {
 	maximum, minimum := group.Debug[0].Rank, group.Debug[len(group.Debug)-1].Rank
-	var cutoff float32 = 0.8 // I want values in the top 90% of rankings
+	var cutoff float32 = 0.75 // I want values in the top 90% of rankings
 	threshold := minimum + (maximum-minimum)*cutoff
 	items := make([]models.TransactionClusterDebugItem, 0, len(group.Debug))
 	for i := range group.Debug {

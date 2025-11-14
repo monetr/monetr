@@ -10,7 +10,7 @@ import (
 type TransactionClusterDebugItem struct {
 	Word      string  `json:"word"`
 	Sanitized string  `json:"sanitized"`
-	Order     int     `json:"order"`
+	Order     float32 `json:"order"`
 	Value     float32 `json:"value"`
 	Rank      float32 `json:"rank"`
 }

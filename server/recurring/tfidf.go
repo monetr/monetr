@@ -199,10 +199,6 @@ func (p *TFIDF) GetDocuments(ctx context.Context) []Document {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	crumbs.Debug(span.Context(), "Organizing documents for DBSCAN clustering (transaction similarity)", map[string]any{
-		"count": len(p.documents),
-	})
-
 	resultDocuments := make([]Document, 0, len(p.documents))
 	docCount := float32(len(p.documents))
 	p.idf = make(map[string]float32, len(p.wc))
@@ -211,6 +207,10 @@ func (p *TFIDF) GetDocuments(ctx context.Context) []Document {
 	}
 	// Get a map of all the meaningful words and their index to use in the vector
 	minified, vectorSize := p.indexWords()
+	crumbs.Debug(span.Context(), "Organizing documents for DBSCAN clustering (transaction similarity)", map[string]any{
+		"count":      len(p.documents),
+		"vectorSize": vectorSize,
+	})
 	for i := range p.documents {
 		// Get the current document we are working with
 		document := p.documents[i]
