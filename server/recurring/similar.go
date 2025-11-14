@@ -208,7 +208,7 @@ func calculateRankings(group *models.TransactionCluster) {
 
 func calculatedMerchantName(group *models.TransactionCluster) {
 	maximum, minimum := group.Debug[0].Rank, group.Debug[len(group.Debug)-1].Rank
-	var cutoff float32 = 0.75 // I want values in the top 90% of rankings
+	var cutoff float32 = 0.75 // I want values in the top 75% of rankings
 	threshold := minimum + (maximum-minimum)*cutoff
 	items := make([]models.TransactionClusterDebugItem, 0, len(group.Debug))
 	for i := range group.Debug {

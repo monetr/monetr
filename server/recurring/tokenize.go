@@ -99,8 +99,14 @@ func Tokenize(transaction *models.Transaction) []Token {
 
 		if replacement, ok := replacementTable[lower]; ok {
 			token.Equivalent = replacement
-		} else {
+		} else if len(lower) > 2 {
 			token.Equivalent = []string{lower}
+		} else {
+			// Exclude words that are 2 letterss or fewer unless they are a
+			// replacement
+			token.Excluded = true
+			tokens = append(tokens, token)
+			continue
 		}
 
 		token.Final = make([]string, len(token.Equivalent))
