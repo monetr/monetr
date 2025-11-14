@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -157,7 +159,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 			group.Debug = make([]models.TransactionClusterDebugItem, 0, len(mostValuableIndicies))
 			for _, item := range mostValuableIndicies {
 				if item.Value == 0 {
-					break
+					continue
 				}
 
 				group.Debug = append(group.Debug, models.TransactionClusterDebugItem{
@@ -207,6 +209,10 @@ func calculateRankings(group *models.TransactionCluster) {
 }
 
 func calculatedMerchantName(group *models.TransactionCluster) {
+	if len(group.Debug) == 0 {
+		j, _ := json.MarshalIndent(group, "", "  ")
+		panic(fmt.Sprintf("Transaction cluster does not contain valuable words?\n%s", string(j)))
+	}
 	maximum, minimum := group.Debug[0].Rank, group.Debug[len(group.Debug)-1].Rank
 	var cutoff float32 = 0.75 // I want values in the top 75% of rankings
 	threshold := minimum + (maximum-minimum)*cutoff
