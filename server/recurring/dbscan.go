@@ -130,6 +130,12 @@ func (d *DBSCAN) getNeighbors(index int) []int {
 			continue
 		}
 
+		// If we have already visited a node then it is either already apart of a
+		// cluster or it is noise and we can skip it.
+		if _, visited := d.labels[counterpoint.ID]; visited {
+			continue
+		}
+
 		// Calculate the distance from our Q point to our P point.
 		distance := calc.EuclideanDistance32(point.Vector, counterpoint.Vector)
 		// If we are close enough then we could be part of a core cluster point. Add it to the list.
