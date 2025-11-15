@@ -26,9 +26,9 @@ export default function Feature(props: FeatureProps): JSX.Element {
       </div>
       {props.link && (
         <Link
+          className='w-full bottom-0 block px-8 py-3 text-md font-semibold text-center text-gray-100 transition duration-100 bg-white outline-none bg-opacity-10 hover:bg-opacity-20 md:text-base'
           href={props.link}
           target={props.linkExternal ? '_blank' : undefined}
-          className='w-full bottom-0 block px-8 py-3 text-md font-semibold text-center text-gray-100 transition duration-100 bg-white outline-none bg-opacity-10 hover:bg-opacity-20 md:text-base'
         >
           {props.linkText ?? 'Learn More'}
         </Link>

@@ -10,7 +10,7 @@ export default function SettingsSecurity(): JSX.Element {
   return (
     <div className='p-4 flex flex-col gap-4'>
       <div>
-        <MSpan size='3xl' weight='semibold' color='emphasis' component='h1'>
+        <MSpan color='emphasis' component='h1' size='3xl' weight='semibold'>
           Security Settings
         </MSpan>
         <MSpan size='md' weight='normal'>
@@ -24,11 +24,11 @@ export default function SettingsSecurity(): JSX.Element {
             <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
               <RectangleEllipsis />
             </div>
-            <Button variant='primary' onClick={showChangePasswordModal}>
+            <Button onClick={showChangePasswordModal} variant='primary'>
               Change Password
             </Button>
           </div>
-          <MSpan size='md' weight='medium' color='emphasis'>
+          <MSpan color='emphasis' size='md' weight='medium'>
             Account Password
           </MSpan>
           <MSpan component='p'>Set a secure and unique password to make sure your account stays protected.</MSpan>
@@ -39,11 +39,11 @@ export default function SettingsSecurity(): JSX.Element {
             <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
               <Mail />
             </div>
-            <Button variant='primary' disabled>
+            <Button disabled variant='primary'>
               Update Email
             </Button>
           </div>
-          <MSpan size='md' weight='medium' color='emphasis'>
+          <MSpan color='emphasis' size='md' weight='medium'>
             Email Address
           </MSpan>
           <MSpan component='p'>

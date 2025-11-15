@@ -16,7 +16,7 @@ export default React.forwardRef<MFormRef, MFormProps<FormikValues>>(function MFo
   return (
     <Formik {...formikConfig}>
       {(formik: FormikProps<Values>) => (
-        <form onSubmit={formik.handleSubmit} className={className} data-testid={props['data-testid']} ref={ref}>
+        <form className={className} data-testid={props['data-testid']} onSubmit={formik.handleSubmit} ref={ref}>
           {typeof children === 'function' ? children(formik) : children}
         </form>
       )}

@@ -9,9 +9,8 @@ import MSpan from '@monetr/interface/components/MSpan';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
-
 import styles from './BankSidebar.module.scss';
+import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
 
 export interface BankSidebarProps {
   className?: string;

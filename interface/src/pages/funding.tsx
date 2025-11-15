@@ -42,7 +42,7 @@ export default function Funding(): JSX.Element {
   return (
     <Fragment>
       <MTopNavigation icon={CalendarSync} title='Funding Schedules'>
-        <Button variant='primary' onClick={showNewFundingModal}>
+        <Button onClick={showNewFundingModal} variant='primary'>
           <Plus />
           New Funding Schedule
         </Button>
@@ -61,10 +61,10 @@ function EmptyState(): JSX.Element {
         <div className='w-full flex justify-center space-x-4'>
           <CalendarSync className='dark:text-dark-monetr-content-muted h-12 w-12' />
         </div>
-        <MSpan size='xl' color='subtle' className='text-center'>
+        <MSpan className='text-center' color='subtle' size='xl'>
           You don't have any funding schedules yet...
         </MSpan>
-        <MSpan size='lg' color='subtle' className='text-center'>
+        <MSpan className='text-center' color='subtle' size='lg'>
           Funding schedules tell monetr when to allocate funds towards your expenses and goals.
         </MSpan>
       </div>

@@ -19,7 +19,6 @@ import { AmountType } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
-
 import styles from './BudgetSidebar.module.scss';
 
 export interface BudgetingSidebarProps {

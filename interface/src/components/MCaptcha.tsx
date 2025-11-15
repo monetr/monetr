@@ -38,7 +38,7 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
 
   return (
     <div className={classes}>
-      {!loading && <ReCAPTCHA data-testid={props['data-testid']} sitekey={config.ReCAPTCHAKey} onChange={onVerify} />}
+      {!loading && <ReCAPTCHA data-testid={props['data-testid']} onChange={onVerify} sitekey={config.ReCAPTCHAKey} />}
       {loading && <LoaderCircle className='spin' />}
     </div>
   );

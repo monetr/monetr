@@ -38,7 +38,7 @@ export default function SetupBillingButton(): JSX.Element {
   }
 
   return (
-    <Button className='max-w-xs' variant='secondary' disabled={loading} onClick={handleManageSubscription}>
+    <Button className='max-w-xs' disabled={loading} onClick={handleManageSubscription} variant='secondary'>
       <CreditCard className='mr-2' />
       Manage Your Subscription
     </Button>

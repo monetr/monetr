@@ -9,11 +9,11 @@ export default function BlogHeader(): JSX.Element {
     <div className='flex flex-col gap-1 items-center my-10 text-center'>
       {config.frontMatter?.image && (
         <Image
-          src={config.frontMatter.image}
           alt={config.frontMatter.title}
-          width={1280}
-          height={720}
           className='rounded-lg mb-4'
+          height={720}
+          src={config.frontMatter.image}
+          width={1280}
         />
       )}
       <span className='text-dark-monetr-content'>

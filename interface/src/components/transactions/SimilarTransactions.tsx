@@ -30,7 +30,7 @@ export default function SimilarTransactions(props: SimilarTransactionsProps): JS
 
   return (
     <div className='w-full flex flex-col gap-2'>
-      <MSpan size='xl' weight='semibold' className='pl-4'>
+      <MSpan className='pl-4' size='xl' weight='semibold'>
         Similar Transactions
       </MSpan>
       <ul className='w-full flex gap-2 flex-col'>{items}</ul>

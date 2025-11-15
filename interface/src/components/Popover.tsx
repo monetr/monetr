@@ -13,9 +13,7 @@ const PopoverContent = React.forwardRef<
 >(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (
   <PopoverPrimitive.Portal>
     <PopoverPrimitive.Content
-      ref={ref}
       align={align}
-      sideOffset={sideOffset}
       className={mergeTailwind(
         'z-50 w-72 rounded-lg bg-dark-monetr-popover p-0 text-dark-monetr-content-emphasis',
         'border border-dark-monetr-border',
@@ -28,6 +26,8 @@ const PopoverContent = React.forwardRef<
         'data-[side=top]:slide-in-from-bottom-2',
         className,
       )}
+      ref={ref}
+      sideOffset={sideOffset}
       {...props}
     />
   </PopoverPrimitive.Portal>

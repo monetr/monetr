@@ -116,12 +116,12 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
             {props.options.map(option => (
               <CommandItem
                 key={option.value}
-                value={`${option.label} ${option.value}` /* makes search work properly :( */}
-                title={option.label}
                 onSelect={() => {
                   props.onSelect?.(option.value);
                   setOpen(false);
                 }}
+                title={option.label}
+                value={`${option.label} ${option.value}` /* makes search work properly :( */}
               >
                 <Item currentValue={props.value} option={option} />
               </CommandItem>
@@ -134,15 +134,15 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={setOpen}>
+      <Drawer onOpenChange={setOpen} open={open}>
         <DrawerTrigger asChild>
           <Button
+            aria-expanded={open}
+            className={mergeTailwind(comboboxVariants({ variant: props.variant, size: props.size }), props.className)}
+            disabled={props.disabled}
+            role='combobox'
             size={props.size}
             variant={props.variant}
-            role='combobox'
-            aria-expanded={open}
-            disabled={props.disabled}
-            className={mergeTailwind(comboboxVariants({ variant: props.variant, size: props.size }), props.className)}
           >
             <div className='text-ellipsis text-nowrap min-w-0 overflow-hidden text-inherit'>
               {props.value ? props.options.find(option => option.value === props.value)?.label : props.placeholder}
@@ -161,15 +161,15 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>
         <Button
+          aria-expanded={open}
+          className={mergeTailwind(comboboxVariants({ variant: props.variant, size: props.size }), props.className)}
+          disabled={props.disabled}
+          role='combobox'
           size={props.size}
           variant={props.variant}
-          role='combobox'
-          aria-expanded={open}
-          disabled={props.disabled}
-          className={mergeTailwind(comboboxVariants({ variant: props.variant, size: props.size }), props.className)}
         >
           <div className='text-ellipsis text-nowrap min-w-0 overflow-hidden text-inherit'>
             {props.value ? props.options.find(option => option.value === props.value)?.label : props.placeholder}

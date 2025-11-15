@@ -45,7 +45,7 @@ export const VerifyEmailAddress = ({
         </span>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
         communication please reach out to{' '}
-        <Link href={`mailto:${supportEmail}`} className='text-blue-600 no-underline'>
+        <Link className='text-blue-600 no-underline' href={`mailto:${supportEmail}`}>
           {supportEmail}
         </Link>
         .

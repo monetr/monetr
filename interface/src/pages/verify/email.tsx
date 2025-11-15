@@ -52,7 +52,7 @@ export function VerifyEmailView(): JSX.Element {
       <MSpan size='2xl' weight='bold'>
         Email Verification
       </MSpan>
-      <MSpan size='xl' className='text-center'>
+      <MSpan className='text-center' size='xl'>
         Your email is being verified, one moment...
       </MSpan>
     </div>

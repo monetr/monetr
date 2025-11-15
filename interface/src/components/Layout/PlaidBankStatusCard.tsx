@@ -31,8 +31,8 @@ export default function PlaidBankStatusCard(): JSX.Element {
 
   return (
     <div className='p-2 group border-[thin] border-dark-monetr-border rounded-lg w-full flex gap-2'>
-      <PlaidInstitutionLogo link={link} className={mergeTailwind('w-6 h-6', additionalClasses)} />
-      <MSpan size='sm' color='subtle'>
+      <PlaidInstitutionLogo className={mergeTailwind('w-6 h-6', additionalClasses)} link={link} />
+      <MSpan color='subtle' size='sm'>
         {status}
       </MSpan>
     </div>

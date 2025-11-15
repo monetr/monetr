@@ -49,16 +49,16 @@ export default function BlogIndex(): JSX.Element {
         {(getPagesUnderRoute('/blog') as Array<Page & { frontMatter: FrontMatter }>)
           .sort((a, b) => new Date(b.frontMatter.date).getTime() - new Date(a.frontMatter.date).getTime())
           .map(page => (
-            <Link key={page.route} href={page.route} className='block mb-8 group flex-shrink-0 w-full lg:w-1/2'>
+            <Link className='block mb-8 group flex-shrink-0 w-full lg:w-1/2' href={page.route} key={page.route}>
               {page.frontMatter?.ogImage ? (
                 <div className='mt-4 rounded relative aspect-video overflow-hidden'>
                   <Image
-                    src={page.frontMatter.ogImage}
-                    className='object-cover transform group-hover:scale-105 transition-transform'
                     alt={page.frontMatter?.title ?? 'Blog post image'}
+                    className='object-cover transform group-hover:scale-105 transition-transform'
                     fill={true}
-                    sizes='(min-width: 1024px) 33vw, 100vw'
                     priority
+                    sizes='(min-width: 1024px) 33vw, 100vw'
+                    src={page.frontMatter.ogImage}
                   />
                 </div>
               ) : null}

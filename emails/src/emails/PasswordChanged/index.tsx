@@ -26,7 +26,7 @@ export const PasswordChanged = ({
       <Text className='text-black text-sm leading-6'>Hello {firstName},</Text>
       <Text className='text-black text-sm leading-6'>
         If you did not initiate the change in your password please reach out to us immediately via our support email:{' '}
-        <Link href={`mailto:${supportEmail}`} className='text-blue-600 no-underline'>
+        <Link className='text-blue-600 no-underline' href={`mailto:${supportEmail}`}>
           {supportEmail}
         </Link>
       </Text>
@@ -38,7 +38,7 @@ export const PasswordChanged = ({
         </span>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
         communication please reach out to{' '}
-        <Link href={`mailto:${supportEmail}`} className='text-blue-600 no-underline'>
+        <Link className='text-blue-600 no-underline' href={`mailto:${supportEmail}`}>
           {supportEmail}
         </Link>
         .

@@ -28,7 +28,7 @@ export default function RemoveTransactionButton(props: RemoveTransactionButtonPr
   }
 
   return (
-    <Button variant='destructive' onClick={promptRemoveTransaction}>
+    <Button onClick={promptRemoveTransaction} variant='destructive'>
       <Trash />
       Remove
     </Button>

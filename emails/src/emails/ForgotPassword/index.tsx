@@ -45,7 +45,7 @@ export const ForgotPassword = ({
           {firstName} {lastName}
         </span>
         . If you did not make this request or you are concerned about this communication please reach out to{' '}
-        <Link href={`mailto:${supportEmail}`} className='text-blue-600 no-underline'>
+        <Link className='text-blue-600 no-underline' href={`mailto:${supportEmail}`}>
           {supportEmail}
         </Link>
         .

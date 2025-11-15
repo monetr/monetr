@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Fragment, useMemo, useRef } from 'react';
 import { format, parse } from 'date-fns';
 import { HeartCrack, Plus, ShoppingCart, Upload } from 'lucide-react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';

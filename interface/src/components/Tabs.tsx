@@ -10,7 +10,6 @@ const TabsList = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
-    ref={ref}
     className={mergeTailwind(
       'inline-flex justify-center items-center',
       'rounded-md p-1 h-10',
@@ -18,6 +17,7 @@ const TabsList = React.forwardRef<
       'bg-dark-monetr-background-subtle',
       className,
     )}
+    ref={ref}
     {...props}
   />
 ));
@@ -28,7 +28,6 @@ const TabsTrigger = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Trigger
-    ref={ref}
     className={mergeTailwind(
       'inline-flex items-center justify-center',
       'whitespace-nowrap',
@@ -44,6 +43,7 @@ const TabsTrigger = React.forwardRef<
       'data-[state=active]:shadow-sm',
       className,
     )}
+    ref={ref}
     {...props}
   />
 ));
@@ -54,7 +54,6 @@ const TabsContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Content
-    ref={ref}
     className={mergeTailwind(
       'mt-2',
       'ring-offset-background',
@@ -62,6 +61,7 @@ const TabsContent = React.forwardRef<
       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
       className,
     )}
+    ref={ref}
     {...props}
   />
 ));

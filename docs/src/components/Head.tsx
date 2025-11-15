@@ -43,37 +43,37 @@ export default function Head(): JSX.Element {
 
   return (
     <React.Fragment>
-      <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+      <meta content='width=device-width, initial-scale=1.0' name='viewport' />
       <title>{title}</title>
-      <meta name='title' content={shortTitle} />
-      <meta name='description' content={description} />
-      <meta property='og:title' content={shortTitle} />
-      <meta property='og:type' content={type} /> {/* TODO, make this change to article for blog posts */}
-      <meta property='og:url' content={url} />
-      <meta property='og:description' content={description} />
-      {frontMatter?.ogImage && <meta property='og:image' content={realUrl(frontMatter.ogImage)} />}
+      <meta content={shortTitle} name='title' />
+      <meta content={description} name='description' />
+      <meta content={shortTitle} property='og:title' />
+      <meta content={type} property='og:type' /> {/* TODO, make this change to article for blog posts */}
+      <meta content={url} property='og:url' />
+      <meta content={description} property='og:description' />
+      {frontMatter?.ogImage && <meta content={realUrl(frontMatter.ogImage)} property='og:image' />}
       {authors.map(author => (
-        <meta key={author} property='article:author' content={author} />
+        <meta content={author} key={author} property='article:author' />
       ))}
       {published.map(timestamp => (
-        <meta key={timestamp} property='article:published_time' content={timestamp} />
+        <meta content={timestamp} key={timestamp} property='article:published_time' />
       ))}
       {modified.map(timestamp => (
-        <meta key={timestamp} property='article:modified_time' content={timestamp} />
+        <meta content={timestamp} key={timestamp} property='article:modified_time' />
       ))}
-      <meta httpEquiv='Content-Language' content='en' />
-      <meta property='twitter:domain' content='monetr.app' />
-      <meta property='twitter:url' content={url} />
-      <meta name='twitter:title' content={shortTitle} />
-      <meta name='twitter:description' content={description} />
+      <meta content='en' httpEquiv='Content-Language' />
+      <meta content='monetr.app' property='twitter:domain' />
+      <meta content={url} property='twitter:url' />
+      <meta content={shortTitle} name='twitter:title' />
+      <meta content={description} name='twitter:description' />
       {frontMatter?.ogImage && (
         <Fragment>
-          <meta name='twitter:card' content='summary_large_image' />
-          <meta name='twitter:image' content={realUrl(frontMatter.ogImage)} />
+          <meta content='summary_large_image' name='twitter:card' />
+          <meta content={realUrl(frontMatter.ogImage)} name='twitter:image' />
         </Fragment>
       )}
       {process.env.NODE_ENV !== 'development' && (
-        <script defer src='https://a.monetr.app/script.js' data-website-id='ccbdfaf9-683f-4487-b97f-5516e1353715' />
+        <script data-website-id='ccbdfaf9-683f-4487-b97f-5516e1353715' defer src='https://a.monetr.app/script.js' />
       )}
       <ChatwootIntegration />
     </React.Fragment>

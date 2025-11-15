@@ -36,7 +36,7 @@ export default function AfterCheckoutPage(): JSX.Element {
           <Logo className='w-1/3' />
         </div>
         <div className='w-full pt-2.5 pb-2.5'>
-          <MSpan size='xl' className='w-full text-center'>
+          <MSpan className='w-full text-center' size='xl'>
             Getting your account setup...
           </MSpan>
         </div>
