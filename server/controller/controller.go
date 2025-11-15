@@ -102,28 +102,44 @@ func (c *Controller) reportWrappedError(ctx echo.Context, err error, message str
 	c.reportError(ctx, errors.Wrapf(err, message, args...))
 }
 
-// reportError is a simple wrapper to report errors to sentry.io. It is meant to be used to keep track of errors that
-// we encounter that we might not want to return to the end user. But might still need in order to diagnose issues.
+// reportError is a simple wrapper to report errors to sentry.io. It is meant to
+// be used to keep track of errors that we encounter that we might not want to
+// return to the end user. But might still need in order to diagnose issues.
 func (c *Controller) reportError(ctx echo.Context, err error) {
-	if spanContext := c.getContext(ctx); spanContext != nil {
-		if hub := sentry.GetHubFromContext(spanContext); hub != nil {
-			_ = hub.CaptureException(err)
-			hub.Scope().SetLevel(sentry.LevelError)
-		} else if hub = sentryecho.GetHubFromContext(ctx); hub != nil {
-			_ = hub.CaptureException(err)
-			hub.Scope().SetLevel(sentry.LevelError)
-		} else {
-			sentry.CaptureException(err)
-		}
-	} else {
-		if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
-			_ = hub.CaptureException(err)
-			hub.Scope().SetLevel(sentry.LevelError)
-		} else {
-			sentry.CaptureException(err)
-		}
+	level := sentry.LevelError
+	report := true
+	if errors.Is(err, context.Canceled) {
+		level = sentry.LevelWarning
+		report = false
 	}
-	c.getLog(ctx).WithError(err).Errorf("error in request: %s", err)
+	var hub *sentry.Hub
+	// Try to derive the hub from the current span's context if possible.
+	if spanContext := c.getContext(ctx); spanContext != nil {
+		hub = sentry.GetHubFromContext(spanContext)
+	}
+	// But if we can't then try to derive the hub from the normal context.
+	if hub == nil {
+		hub = sentryecho.GetHubFromContext(ctx)
+	}
+
+	// If hub is defined then capture the exception here.
+	if hub != nil {
+		_ = hub.CaptureException(err)
+		// Use the level from above, if we are dealing with a dumb error that isn't
+		// important we don't want to set an error level.
+		hub.Scope().SetLevel(level)
+	} else if report {
+		sentry.CaptureException(err)
+	}
+
+	switch level {
+	case sentry.LevelError:
+		c.getLog(ctx).WithError(err).Errorf("error in request: %s", err)
+	case sentry.LevelWarning:
+		c.getLog(ctx).WithError(err).Warnf("error in request: %s", err)
+	default:
+		c.getLog(ctx).WithError(err).Debugf("error in request: %s", err)
+	}
 }
 
 func urlParamIntDefault(ctx echo.Context, param string, defaultValue int) int {
