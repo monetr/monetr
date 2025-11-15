@@ -25,6 +25,7 @@
   @media (min-width: variables.$largeScreen) {
     .budgetSidebarRoot {
       display: flex;
+      width: calc(var(--bank-sidebar-width-static) + var(--budget-sidebar-width));
     }
   }
 }
