@@ -1,8 +1,7 @@
-import { Fragment } from 'react';
 import { withSentryReactRouterV6Routing } from '@sentry/react';
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
+import BudgetingLayout from '@monetr/interface/components/Layout/BudgetLayout';
 import MobileSidebarContextProvider from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
 import Sidebar from '@monetr/interface/components/Layout/Sidebar';
@@ -44,7 +43,6 @@ import Transactions from '@monetr/interface/pages/transactions';
 import VerifyEmail from '@monetr/interface/pages/verify/email';
 import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
-import BudgetingLayout from '@monetr/interface/components/Layout/BudgetLayout';
 
 const RoutesImpl = withSentryReactRouterV6Routing(Routes);
 
