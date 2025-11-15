@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { rrulestr } from 'rrule';
 
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useNextFundingForecast } from '@monetr/interface/hooks/useNextFundingForecast';
@@ -53,15 +53,15 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
           <AvatarFallback>{letter}</AvatarFallback>
         </Avatar>
         <div className='w-full md:w-1/2 flex flex-col flex-1 min-w-0 overflow-hidden'>
-          <MSpan color='emphasis' ellipsis weight='semibold'>
+          <Typography color='emphasis' ellipsis weight='semibold'>
             {funding.name}
-          </MSpan>
-          <MSpan ellipsis size='sm' weight='medium'>
+          </Typography>
+          <Typography ellipsis size='sm' weight='medium'>
             {ruleDescription}
-          </MSpan>
-          <MSpan ellipsis size='sm' weight='medium'>
+          </Typography>
+          <Typography ellipsis size='sm' weight='medium'>
             {nextOccurrenceString}
-          </MSpan>
+          </Typography>
         </div>
         <div className='flex md:min-w-[14em] shrink-0 justify-end gap-2 items-center'>
           <div className='flex flex-col'>

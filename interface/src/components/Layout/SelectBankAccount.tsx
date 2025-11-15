@@ -14,9 +14,10 @@ import {
   CommandList,
 } from '@monetr/interface/components/Command';
 import { Drawer, DrawerContent, DrawerTrigger } from '@monetr/interface/components/Drawer';
-import MSpan from '@monetr/interface/components/MSpan';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
+import Typography from '@monetr/interface/components/Typography';
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';
@@ -178,9 +179,9 @@ function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccoun
           props.currentValue === props.option.value ? 'opacity-100' : 'opacity-0',
         )}
       />
-      <MSpan className='w-full' color='emphasis' ellipsis>
+      <Typography className={layoutVariants({ width: 'full' })} color='emphasis' ellipsis>
         {props.option.label}
-      </MSpan>
+      </Typography>
       {props.option.status === 'inactive' && (
         <Badge className='bg-dark-monetr-border-subtle' size='xs'>
           Inactive
@@ -224,9 +225,9 @@ function SelectBankAccountPicker(props: SelectBankAccountPickerProps): JSX.Eleme
             >
               <div className='flex items-center w-full gap-1'>
                 <CirclePlus className='mr-1 h-5 w-5 flex-none' />
-                <MSpan className='w-full' color='emphasis' ellipsis>
+                <Typography className={layoutVariants({ width: 'full' })} color='emphasis' ellipsis>
                   Add Another Account
-                </MSpan>
+                </Typography>
               </div>
             </CommandItem>
           </CommandGroup>
