@@ -2,7 +2,6 @@ import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
 import { format, parse } from 'date-fns';
 import { HeartCrack, Plus, ShoppingCart, Upload } from 'lucide-react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
-import { useNavigationType } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
@@ -21,32 +20,30 @@ const showUploadTransactionsModal = async () =>
     modal.showUploadTransactionsModal(),
   );
 
-let evilScrollPosition: number = 0;
-
 export default function Transactions(): JSX.Element {
   const { data: transactions, hasNextPage, isLoading, isError, isFetching, fetchNextPage } = useTransactions();
 
   // Scroll restoration code.
   const ref = useRef<HTMLUListElement>(null);
-  const navigationType = useNavigationType();
-  const onScroll = useCallback(() => {
-    evilScrollPosition = ref.current.scrollTop;
-  }, []);
-  useEffect(() => {
-    if (!ref.current) {
-      return undefined;
-    }
-
-    if (navigationType === 'POP') {
-      ref.current.scrollTop = evilScrollPosition;
-    }
-    const current = ref.current;
-    ref.current.addEventListener('scroll', onScroll);
-    return () => {
-      current.removeEventListener('scroll', onScroll);
-    };
-    // Fix bug with current impl.
-  }, [navigationType, onScroll]);
+  // const navigationType = useNavigationType();
+  // const onScroll = useCallback(() => {
+  //   evilScrollPosition = ref.current.scrollTop;
+  // }, []);
+  // useEffect(() => {
+  //   if (!ref.current) {
+  //     return undefined;
+  //   }
+  //
+  //   if (navigationType === 'POP') {
+  //     ref.current.scrollTop = evilScrollPosition;
+  //   }
+  //   const current = ref.current;
+  //   ref.current.addEventListener('scroll', onScroll);
+  //   return () => {
+  //     current.removeEventListener('scroll', onScroll);
+  //   };
+  //   // Fix bug with current impl.
+  // }, [navigationType, onScroll]);
 
   const loading = isLoading || isFetching;
 

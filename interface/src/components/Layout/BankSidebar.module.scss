@@ -1,0 +1,43 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+:global(.sidebar-open) {
+  .bankSidebarWrapperRoot {
+    display: flex;
+  }
+}
+
+:global(.sidebar-close) {
+  .bankSidebarWrapperRoot {
+    display: none;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    .bankSidebarWrapperRoot {
+      display: flex;
+    }
+  }
+}
+
+.bankSidebarWrapperRoot {
+  z-index: 41;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+
+  border-right: 1px solid var(--border);
+  flex-direction: column;
+  width: var(--bank-sidebar-width-static);
+  gap: 4 * variables.$size;
+  height: 100vh;
+  align-items: center;
+
+  // TODO, make this a bit more dynamic for screen size
+  // 'lg:py-4',
+  // 'pt-2',
+  // 'pb-8',
+  // 'lg:pb-4',
+  padding-top: 2 * variables.$size;
+  padding-bottom: calc(2 * variables.$size + env(safe-area-inset-bottom));
+}

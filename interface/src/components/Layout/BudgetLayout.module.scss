@@ -1,0 +1,9 @@
+@use '@monetr/interface/variables';
+
+.budgetLayoutRoot {
+  position: absolute;
+  min-width: 0px; 
+  top: 0;
+  padding-left: calc(var(--bank-sidebar-width) + var(--budget-sidebar-width));
+  width: 100%;
+}

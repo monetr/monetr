@@ -11,6 +11,8 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
 
+import styles from './BankSidebar.module.scss';
+
 export interface BankSidebarProps {
   className?: string;
 }
@@ -78,26 +80,8 @@ interface SidebarWrapperProps {
 }
 
 function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
-  const className = mergeTailwind(
-    'border',
-    'border-transparent',
-    'dark:border-r-dark-monetr-border',
-    'flex',
-    'flex-col',
-    'flex-none',
-    'gap-4',
-    'h-full',
-    'items-center',
-    'lg:py-4',
-    'pt-2',
-    'pb-8',
-    'lg:pb-4',
-    'w-16',
-    props.className,
-  );
-
   return (
-    <div className={className} data-testid='bank-sidebar'>
+    <div className={mergeTailwind(styles.bankSidebarWrapperRoot, props.className)} data-testid='bank-sidebar'>
       <MSidebarToggle className='flex lg:hidden' />
       <div className='h-10 w-10'>
         <Logo className='w-full' />

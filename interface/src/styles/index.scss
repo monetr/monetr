@@ -1,11 +1,14 @@
+@use '@monetr/interface/variables';
+
 body {
+  background-color: var(--background);
   margin: 0;
   color: var(--content-emphasis);
-}
 
-body > #root {
-  height: 100%;
-  max-height: 100vh;
+  #root {
+    min-height: 100vh;
+    display: flex;
+  }
 }
 
 .text-size-inherit {
@@ -16,4 +19,74 @@ body > #root {
 // None of the lucide icons should ever shrink!
 svg.lucide {
   flex-shrink: 0;
+}
+
+:root {
+  --brand: #4E1AA0;
+  --brand-subtle: #5D1FC1;
+  --brand-muted: #9461E5;
+  --brand-faint: #AC84EB;
+  --brand-bright: #CFB9F4;
+  --brand-disabled: #b591ed;
+  --brand-focused: #3E157F;
+
+  /* --error-focused: #f87171; */
+  --error: #ef4444;
+
+  --destructive: #dc2626;
+  --destructive-subtle: #ef4444;
+
+  --amount-negative: #ef4444;
+  --amount-positive: #22c55e;
+
+  --background: #19161f;
+  --background-subtle: #27272a;
+  --background-emphasis: #3f3f46;
+  --background-darker: #131118;
+  --background-active: #52525b;
+
+  --border: #3f3f46;
+  --border-subtle: #27272a;
+  /* For input fields, these two borders are used, string is normal border */
+  --border-hover: #a1a1aa;
+  --border-string: #71717a;
+
+  /* Content colors, used for test */
+  --content: #d4d4d8;
+  --content-muted: #52525b;
+  --content-subtle: #a1a1aa;
+  --content-placeholder: #9ca3af;
+  --content-disabled: #6b7280;
+  --content-emphasis: #fafafa;
+
+  /* Border radius large, ~8px */
+  --border-radius: 0.5rem;
+
+  /* Used for element outlines */
+  --outline-size: 2px;
+
+  /* Font weights */
+  --normal: 400;
+  --medium: 500;
+  --semibold: 600;
+  --bold: 700;
+
+  /* Sizes for things, to be used with width, height, gaps etc */
+  --size-1: 0.25rem; /* 4px */
+  --size-2: calc(2 * var(--size-1));
+  --size-3: calc(3 * var(--size-1));
+  --size-4: calc(4 * var(--size-1));
+  --size-5: calc(5 * var(--size-1));
+  --size-8: calc(8 * var(--size-1));
+
+  --bank-sidebar-width-static: #{16 * variables.$size};
+  --bank-sidebar-width: 0px;
+  --budget-sidebar-width: 0px;
+
+  @media (min-width: variables.$largeScreen) {
+    --bank-sidebar-width: #{16 * variables.$size};
+    --budget-sidebar-width: #{72 * variables.$size};
+  }
+
+
 }

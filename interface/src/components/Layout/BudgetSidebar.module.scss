@@ -1,0 +1,49 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+:global(.sidebar-open) {
+  .budgetSidebarRoot {
+    display: flex;
+    width: 100%;
+    background-color: rgba(var(--background), 0.5);
+    backdrop-filter: blur(4px) brightness(0.5);
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    .budgetSidebarRoot {
+      display: flex;
+      width: calc(var(--bank-sidebar-width-static) + var(--budget-sidebar-width));
+    }
+  }
+}
+
+:global(.sidebar-close) {
+  .budgetSidebarRoot {
+    display: none;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    .budgetSidebarRoot {
+      display: flex;
+    }
+  }
+}
+
+.budgetSidebarRoot {
+  z-index: 40;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  padding-left: var(--bank-sidebar-width-static);
+  
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  align-items: center;
+
+  padding-bottom: calc(4 * variables.$size + env(safe-area-inset-bottom));
+}
+
+

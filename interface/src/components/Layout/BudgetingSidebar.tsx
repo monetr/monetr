@@ -20,6 +20,8 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
 
+import styles from './BudgetSidebar.module.scss';
+
 export interface BudgetingSidebarProps {
   className?: string;
 }
@@ -30,7 +32,12 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
   const { data: balance } = useCurrentBalance();
 
   const className = mergeTailwind(
-    'w-72 h-full flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center pb-6 lg:pb-4 overflow-auto',
+    styles.budgetSidebarRoot,
+    // 'w-72',
+    // 'h-full',
+    // 'flex-none flex flex-col',
+    // 'dark:border-r-dark-monetr-border border border-transparent',
+    // 'items-center pb-6 lg:pb-4 overflow-auto',
     props.className,
   );
 
