@@ -19,7 +19,7 @@ export default function MobileSidebarContextProvider(props: MobileSidebarContext
   useEffect(() => {
     const root = document.querySelector('#root');
     if (root) {
-      root.className = `relative ${isOpen ? 'sidebar-open' : 'sidebar-close'}`;
+      root.className = `${isOpen ? 'sidebar-open' : 'sidebar-close'}`;
     }
   });
   return <MobileSidebarContext.Provider value={{ isOpen, setIsOpen }}>{props.children}</MobileSidebarContext.Provider>;

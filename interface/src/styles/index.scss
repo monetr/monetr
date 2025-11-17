@@ -1,13 +1,17 @@
 @use '@monetr/interface/variables';
 
+html {
+  background-color: var(--background);
+}
+
 body {
   background-color: var(--background);
   margin: 0;
   color: var(--content-emphasis);
 
   #root {
-    min-height: 100vh;
     display: flex;
+    position: relative;
   }
 }
 
@@ -89,4 +93,24 @@ svg.lucide {
   }
 
 
+}
+
+// Custom scrollbar styles
+::-webkit-scrollbar {
+    width: 16px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: inherit;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-zinc-700;
+    border-radius: 20px;
+    border: 6px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-500;
 }
