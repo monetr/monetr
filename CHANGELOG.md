@@ -1,5 +1,68 @@
 # Changelog
 
+## [1.7.1](https://github.com/monetr/monetr/compare/v1.7.0...v1.7.1) (2025-11-20)
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.37.0 ([#2832](https://github.com/monetr/monetr/issues/2832)) ([3ad5d08](https://github.com/monetr/monetr/commit/3ad5d0866676c812c9c2d30b63922eda7f60ab62))
+* **api:** update module golang.org/x/crypto to v0.44.0 ([#2830](https://github.com/monetr/monetr/issues/2830)) ([f981cf1](https://github.com/monetr/monetr/commit/f981cf1f209c60b1a27f655f3e55e9c111acb3b5))
+* **api:** update module golang.org/x/crypto to v0.45.0 [security] ([#2845](https://github.com/monetr/monetr/issues/2845)) ([cbaa498](https://github.com/monetr/monetr/commit/cbaa49842ba4b57ac39177047c4b12df63710105))
+* **api:** update module golang.org/x/net to v0.47.0 ([#2834](https://github.com/monetr/monetr/issues/2834)) ([7923c2b](https://github.com/monetr/monetr/commit/7923c2b59bc7b58a3a0ed2e58f9500e56feecd26))
+* **renovate:** update dependency @biomejs/biome to v2.3.5 ([#2823](https://github.com/monetr/monetr/issues/2823)) ([9334c02](https://github.com/monetr/monetr/commit/9334c02ce0fb7cc06f14d5be9c6a73e930ebc145))
+* **renovate:** update dependency @biomejs/biome to v2.3.6 ([#2839](https://github.com/monetr/monetr/issues/2839)) ([3845084](https://github.com/monetr/monetr/commit/3845084d27c71e43c2070548ee29655e4d2e709f))
+* **ui:** update dependency @imagemagick/magick-wasm to v0.0.37 ([#2824](https://github.com/monetr/monetr/issues/2824)) ([cecc7a6](https://github.com/monetr/monetr/commit/cecc7a6dfc171b9fa1af5d23ba6f18b54dbc0c6a))
+* **ui:** update dependency @swc/core to v1.15.1 ([#2825](https://github.com/monetr/monetr/issues/2825)) ([01f8a39](https://github.com/monetr/monetr/commit/01f8a39c009cc1a2eeb14c6b6148bbb6934fc4bc))
+* **ui:** update dependency @swc/core to v1.15.2 ([#2837](https://github.com/monetr/monetr/issues/2837)) ([be1f399](https://github.com/monetr/monetr/commit/be1f399ced179cca63a3ad9b6b7d0a7d44565b31))
+* **ui:** update dependency @tanstack/react-query to v5.90.10 ([#2840](https://github.com/monetr/monetr/issues/2840)) ([1e584d3](https://github.com/monetr/monetr/commit/1e584d33a188ef7b6144ec77b8ff566bfae4bc33))
+* **ui:** update dependency @tanstack/react-query to v5.90.8 ([#2826](https://github.com/monetr/monetr/issues/2826)) ([e0dadcf](https://github.com/monetr/monetr/commit/e0dadcf047777cc65f2a1be96b3c94b6c2701a04))
+* **ui:** update dependency autoprefixer to v10.4.22 ([#2827](https://github.com/monetr/monetr/issues/2827)) ([c8265ff](https://github.com/monetr/monetr/commit/c8265ff04c9a5a71345f9b208edc3f281f0aa06c))
+* **ui:** update dependency axios to v1.13.2 ([#2813](https://github.com/monetr/monetr/issues/2813)) ([e8981b8](https://github.com/monetr/monetr/commit/e8981b8708db8c6ff0aab67aec418ee847bbcacb))
+* **ui:** update dependency formik to v2.4.9 ([#2828](https://github.com/monetr/monetr/issues/2828)) ([e85a161](https://github.com/monetr/monetr/commit/e85a1612c6ef2f3736754f9f7791f796a062b754))
+* **ui:** update dependency lucide-react to v0.553.0 ([#2807](https://github.com/monetr/monetr/issues/2807)) ([71da89c](https://github.com/monetr/monetr/commit/71da89c3727e63fa41746194fceed6112688cf72))
+* **ui:** update rsbuild ([#2829](https://github.com/monetr/monetr/issues/2829)) ([516a95b](https://github.com/monetr/monetr/commit/516a95b91f8bedff999511c308f463b51174115f))
+
+
+### Bug Fixes
+
+* **api:** Don't recalculate neighbors on noisy points ([a44122f](https://github.com/monetr/monetr/commit/a44122f0276bf3d0471bd42a35ba71b611cfcb37))
+* **api:** Don't report non-actionable errors to sentry ([c045e85](https://github.com/monetr/monetr/commit/c045e854df034940f501e605b07f24eb889f7ea4))
+* **api:** Fixing dumb mistake in similar transactions ([a14b48d](https://github.com/monetr/monetr/commit/a14b48dca99a89bd3bd70bcd2c2a7d1986496ac3))
+* **api:** Throw out stopwords at the tokenization stage ([d5936f0](https://github.com/monetr/monetr/commit/d5936f016f727563e3e7a0a02d86fe0bd2ad632c))
+* **test:** Fixing mobile sidebar breaking tests ([4add086](https://github.com/monetr/monetr/commit/4add08665a0e1e2d290998290d8e502eaa93a03a))
+* **ui:** Fixed bad logo import ([52efdc8](https://github.com/monetr/monetr/commit/52efdc85965ad682753d95bb34e13e38f9d8ab2a))
+* **ui:** Fixed drawer padding on mobile ([75f52ee](https://github.com/monetr/monetr/commit/75f52ee00cf42e0be9ab7cc55ce3ffaf3dc111b2))
+* **ui:** Fixing loading state of avatar on transaction details ([6390ff6](https://github.com/monetr/monetr/commit/6390ff665f0258ac41263e21284202dcdfa07de1))
+* **ui:** Fixing viewport fit attribute ([3dbf261](https://github.com/monetr/monetr/commit/3dbf2614e40670eb675ceffe33d11b22a347631c))
+* **ui:** Trying to fix scroll container for new page ([2840902](https://github.com/monetr/monetr/commit/2840902916ed41f1977de07fe49fb0a898cff307))
+* **ui:** Tweaking env safe inset area for drawer ([118fb37](https://github.com/monetr/monetr/commit/118fb3751430fe6663bed93e71c0a0cbed0a701b))
+
+
+### Miscellaneous
+
+* **api:** Adding more transaction validation ([eb483b4](https://github.com/monetr/monetr/commit/eb483b4b88bdda21cfe3dd2903ef8e2b164e165c))
+* **api:** Tweak what words are used in similar calculations ([3334d7b](https://github.com/monetr/monetr/commit/3334d7bf64d727be73132e4814a370c438e8b6af))
+* **api:** Tweaking similarity again ([97e1ccb](https://github.com/monetr/monetr/commit/97e1ccb49c3d1bf48e7e466ad2893282200d16e2))
+* Fixing linting issues ([e8f6dc6](https://github.com/monetr/monetr/commit/e8f6dc67bbd73b22b7230c0c8100855e54a6cb53))
+* Tweaking sidebar styles ([f413081](https://github.com/monetr/monetr/commit/f4130819da73b54572b0c3cabdc964229fe8752f))
+* **ui:** Cleaning up old eslint comments ([87bf157](https://github.com/monetr/monetr/commit/87bf157838aca9f146536acf9e9b3fee559f7e2e))
+
+
+### Refactor
+
+* **api:** Tweaking transaction similarity again ([027e180](https://github.com/monetr/monetr/commit/027e1807f094f1032637a118e5efeab32eb50eed))
+* **ui:** Adding basic layout CSS modules ([986b967](https://github.com/monetr/monetr/commit/986b967d16bc181ce3a489379e5cdd3d6a0c82a0))
+* **ui:** Improving calendar month picker buttons ([e211ae4](https://github.com/monetr/monetr/commit/e211ae43d3854dc08d213cc5b69954c7d5de4242))
+* **ui:** Migrating more things to Typography component ([83e879c](https://github.com/monetr/monetr/commit/83e879cc3d9340a624eee808bb8ebb1df3afc26e))
+* **ui:** Movinng more components to CSS modules ([97bbd1c](https://github.com/monetr/monetr/commit/97bbd1c6c9a38e5b4af198982a35b16dcdf9477a))
+* **ui:** Rebuilding scroll containers in order to improve mobile ([aa9f572](https://github.com/monetr/monetr/commit/aa9f572603ae1599a4b0784bd35c2163df13af4a))
+* **ui:** Updating biome config ([d085d5d](https://github.com/monetr/monetr/commit/d085d5d85efa8cbbd677a8d462900978fa0bee67))
+
+
+### Documentation
+
+* Fixed typo in example configuration yaml ([#2846](https://github.com/monetr/monetr/issues/2846)) ([efec895](https://github.com/monetr/monetr/commit/efec895ff8b2fbb0c44965106b105707fd7bd733))
+
 ## [1.7.0](https://github.com/monetr/monetr/compare/v1.6.0...v1.7.0) (2025-11-12)
 
 
