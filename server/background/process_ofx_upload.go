@@ -3,6 +3,7 @@ package background
 import (
 	"context"
 	"fmt"
+	"io"
 	"slices"
 	"strings"
 	"time"
@@ -559,10 +560,13 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 					statementTransactions.STMTRS.LEDGERBAL.BALAMT,
 					j.currency,
 				)
-				if err != nil {
+				// EOF means the amount is blank, we can treat this as zero
+				switch errors.Cause(err) {
+				case nil, io.EOF:
+					break
+				default:
 					return errors.Wrap(err, "failed to parse ledger balance amount")
 				}
-
 			}
 
 			if statementTransactions.STMTRS.AVAILBAL != nil {
@@ -570,7 +574,11 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 					statementTransactions.STMTRS.AVAILBAL.BALAMT,
 					j.currency,
 				)
-				if err != nil {
+				// EOF means the amount is blank, we can treat this as zero
+				switch errors.Cause(err) {
+				case nil, io.EOF:
+					break
+				default:
 					return errors.Wrap(err, "failed to parse available balance amount")
 				}
 			}
@@ -583,7 +591,11 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 					statementTransactions.CCSTMTRS.LEDGERBAL.BALAMT,
 					j.currency,
 				)
-				if err != nil {
+				// EOF means the amount is blank, we can treat this as zero
+				switch errors.Cause(err) {
+				case nil, io.EOF:
+					break
+				default:
 					return errors.Wrap(err, "failed to parse ledger balance amount")
 				}
 			}
@@ -593,7 +605,11 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 					statementTransactions.CCSTMTRS.AVAILBAL.BALAMT,
 					j.currency,
 				)
-				if err != nil {
+				// EOF means the amount is blank, we can treat this as zero
+				switch errors.Cause(err) {
+				case nil, io.EOF:
+					break
+				default:
 					return errors.Wrap(err, "failed to parse available balance amount")
 				}
 			}

@@ -102,7 +102,11 @@ func ParseTransactionAmount(
 		transaction.TRNAMT,
 		txnCurrency,
 	)
-	if err != nil {
+	// EOF means the amount is blank, we can treat this as zero
+	switch errors.Cause(err) {
+	case nil, io.EOF:
+		break
+	default:
 		return 0, err
 	}
 
