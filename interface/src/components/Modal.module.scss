@@ -1,0 +1,25 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+$basePadding: 2 * variables.$size;
+
+.modalWindow {
+  background-color: var(--background);
+  overflow: visible;
+  padding: $basePadding;
+  position: relative;
+
+  // On mobile these are the values
+  height: 100vh;
+  width: 100vw;
+  border-radius: 0px;
+  padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
+
+  @media (min-width: variables.$smallScreen) {
+    border-radius: var(--border-radius);
+    height: auto;
+    width: 100%;
+    max-width: 128 * variables.$size;
+    padding-bottom: $basePadding;
+  }
+}
