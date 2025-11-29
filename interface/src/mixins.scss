@@ -95,3 +95,12 @@ $text5ExtraLargeLineHeight: 7;
 @mixin width-full {
   width: 100%;
 }
+
+// screen will always fill the entire view window, note that on some mobile
+// devices such as iPhones the view window may not be the entire screen but may
+// include spacing at the bottom or the top to account for browser UX such as
+// the URL bar.
+@mixin screen {
+  width: 100vw;
+  height: 100vh;
+}

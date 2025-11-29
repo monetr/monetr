@@ -69,7 +69,7 @@ export default function Login(): JSX.Element {
   }
 
   return (
-    <MForm className={styles.root} initialValues={initialValues} onSubmit={submit} validate={validator}>
+    <MForm className={styles.loginPageRoot} initialValues={initialValues} onSubmit={submit} validate={validator}>
       <div className={styles.logo}>
         <MLogo />
       </div>
