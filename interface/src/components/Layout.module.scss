@@ -15,3 +15,11 @@
 .widthFull {
   @include mixins.width-full;
 }
+
+.widthScreen {
+  width: 100vw;
+}
+
+.heightScreen {
+  height: 100vh;
+}

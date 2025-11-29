@@ -1,0 +1,49 @@
+@use '@monetr/interface/variables';
+@use '@monetr/interface/mixins';
+
+.logo {
+  width: 24 * variables.$size;
+  height: 24 * variables.$size;
+}
+
+.dot {
+  transform: translateX(0);
+  animation: dot 3.2s infinite;
+  background-color: var(--brand);
+
+  width: 4rem;
+  height: 4rem;
+  border-radius: 100%;
+
+  @keyframes dot {
+    50% {
+      transform: translateX(18rem);
+    }
+  }
+}
+
+.dots {
+  transform: translateX(0);
+  animation: dots 3.2s infinite;
+  background-color: var(--brand);
+
+  width: 4rem;
+  height: 4rem;
+  border-radius: 100%;
+
+  @keyframes dots {
+    50% {
+      transform: translateX(-6rem);
+    }
+  }
+}
+
+.blobs {
+  filter: url("#magic");
+  gap: 2rem;
+}
+
+.filter {
+  display: none;
+}
+

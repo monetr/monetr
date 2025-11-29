@@ -5,11 +5,13 @@ import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@monetr/interface/components/InputOTP';
+import UnauthenticatedLogo from '@monetr/interface/components/Layout/UnauthenticatedLogo';
 import MForm from '@monetr/interface/components/MForm';
-import MLogo from '@monetr/interface/components/MLogo';
-import MSpan from '@monetr/interface/components/MSpan';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
+import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
+
+import styles from './multifactor.module.scss';
 
 interface MultifactorValues {
   totp: string;
@@ -59,7 +61,7 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
 
   return (
     <MForm
-      className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-2 px-5'
+      className={styles.multifactorRoot}
       initialValues={initialValues}
       onSubmit={submit}
       validate={validate}
@@ -67,12 +69,10 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
     >
       {formik => (
         <Fragment>
-          <div className='max-w-[128px] w-full'>
-            <MLogo />
-          </div>
-          <MSpan className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1 text-center'>
+          <UnauthenticatedLogo />
+          <Typography align='center' component='p'>
             Please provide the 6-digit code from your authenticator app
-          </MSpan>
+          </Typography>
           <InputOTP
             autoFocus
             disabled={formik.isSubmitting}
@@ -93,18 +93,16 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
               <InputOTPSlot index={5} />
             </InputOTPGroup>
           </InputOTP>
-          <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
-            <FormButton
-              className='w-full'
-              data-testid='multifactor-submit'
-              disabled={!formik.isValid}
-              role='form'
-              type='submit'
-              variant='primary'
-            >
-              {formatContinueButton(formik.values as MultifactorValues)}
-            </FormButton>
-          </div>
+          <FormButton
+            className={styles.input}
+            data-testid='multifactor-submit'
+            disabled={!formik.isValid}
+            role='form'
+            type='submit'
+            variant='primary'
+          >
+            {formatContinueButton(formik.values)}
+          </FormButton>
           <LogoutFooter />
         </Fragment>
       )}

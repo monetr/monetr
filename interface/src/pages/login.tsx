@@ -3,9 +3,9 @@ import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
+import UnauthenticatedLogo from '@monetr/interface/components/Layout/UnauthenticatedLogo';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
-import MLogo from '@monetr/interface/components/MLogo';
 import TextLink from '@monetr/interface/components/TextLink';
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
@@ -70,10 +70,10 @@ export default function Login(): JSX.Element {
 
   return (
     <MForm className={styles.loginPageRoot} initialValues={initialValues} onSubmit={submit} validate={validator}>
-      <div className={styles.logo}>
-        <MLogo />
-      </div>
-      <Typography component='p'>Sign into your monetr account</Typography>
+      <UnauthenticatedLogo />
+      <Typography align='center' component='p'>
+        Sign into your monetr account
+      </Typography>
       <FormTextField
         autoFocus
         className={styles.input}

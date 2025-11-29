@@ -1,20 +1,29 @@
+import { flexVariants } from '@monetr/interface/components/Flex';
+import { heights, widths } from '@monetr/interface/components/Layout';
 import MLogo from '@monetr/interface/components/MLogo';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import '@monetr/interface/loading.css';
+import styles from './loading.module.scss';
 
 export default function Loading(): JSX.Element {
   return (
-    <div className='w-full h-full items-center justify-center flex flex-col gap-8'>
-      <MLogo className='w-24 h-24' />
-      <div className='blobs flex items-center justify-center'>
-        <div className='dot blob dark:bg-dark-monetr-brand' />
-        <div className='dots blob dark:bg-dark-monetr-brand' />
-        <div className='dots blob dark:bg-dark-monetr-brand' />
-        <div className='dots blob dark:bg-dark-monetr-brand' />
+    <div
+      className={mergeTailwind(
+        flexVariants({ justify: 'center', align: 'center', orientation: 'column', gap: 'xl' }),
+        heights.screen,
+        widths.screen,
+      )}
+    >
+      <MLogo className={styles.logo} />
+      <div className={mergeTailwind(styles.blobs, flexVariants({ align: 'center', justify: 'center' }))}>
+        <div className={styles.dot} />
+        <div className={styles.dots} />
+        <div className={styles.dots} />
+        <div className={styles.dots} />
       </div>
-      <MSpan className='text-3xl'>Loading...</MSpan>
-      <svg className='hidden' version='1.1' xmlns='http://www.w3.org/2000/svg'>
+      <Typography size='5xl'>Loading...</Typography>
+      <svg className={styles.filter} version='1.1' xmlns='http://www.w3.org/2000/svg'>
         <title>Loading...</title>
         <defs>
           <filter id='magic'>

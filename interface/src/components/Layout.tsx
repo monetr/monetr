@@ -8,13 +8,21 @@ export const widths = {
   '1/3': styles.widthThird,
   '1/2': styles.widthHalf,
   full: styles.widthFull,
+  screen: styles.widthScreen,
+};
+
+export const heights = {
+  default: undefined,
+  screen: styles.heightScreen,
 };
 
 export const layoutVariants = cva([], {
   variants: {
     width: widths,
+    height: heights,
   },
   defaultVariants: {
     width: 'default',
+    height: 'default',
   },
 });

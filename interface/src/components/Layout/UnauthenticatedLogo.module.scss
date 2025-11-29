@@ -1,0 +1,7 @@
+@use '@monetr/interface/variables';
+@use '@monetr/interface/mixins';
+
+.logo {
+  max-width: 32 * variables.$size;
+  @include mixins.width-full;
+}

@@ -1,11 +1,12 @@
 @use '@monetr/interface/variables';
 @use '@monetr/interface/mixins';
 
-.loginPageRoot {
+.multifactorRoot {
   @include mixins.screen;
   display: flex;
   align-items: center;
   flex-direction: column;
+
   gap: 1 * variables.$size;
 
   padding-top: 10 * variables.$size;
@@ -39,10 +40,3 @@
   }
 }
 
-.signUpWrapper {
-  width: 100%;
-  display: flex;
-  margin-top: 1 * variables.$size;
-  justify-content: center;
-  gap: 1 * variables.$size;
-}

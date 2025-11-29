@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import MLogo from '@monetr/interface/components/MLogo';
@@ -9,10 +9,13 @@ export default function VerifyEmail(): JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
 
-  function errorRedirect(message: string, nextUrl: string = '/login') {
-    window.alert(message);
-    navigate(nextUrl);
-  }
+  const errorRedirect = useCallback(
+    (message: string, nextUrl: string = '/login') => {
+      window.alert(message);
+      navigate(nextUrl);
+    },
+    [navigate],
+  );
 
   const search = location.search;
   const query = new URLSearchParams(search);

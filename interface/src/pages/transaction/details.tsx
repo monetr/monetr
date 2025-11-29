@@ -82,7 +82,12 @@ export default function TransactionDetails(): JSX.Element {
 
   if (isLoading || linkIsLoading) {
     return (
-      <MForm className='flex w-full h-full flex-col' enableReinitialize={true} initialValues={{}} onSubmit={submit}>
+      <MForm
+        className='flex w-full h-full flex-col'
+        enableReinitialize={true}
+        initialValues={{} as unknown}
+        onSubmit={submit}
+      >
         <MTopNavigation
           base={`/bank/${selectedBankAccountId}/transactions`}
           breadcrumb={transaction?.name}
