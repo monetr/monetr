@@ -25,7 +25,7 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
               Free-To-Use:
             </Typography>
           </Flex>
-          <Typography color={color} size='lg' weight='semibold'>
+          <Typography color={color} size='lg' weight='semibold' wrapping='nowrap'>
             {locale.formatAmount(balance?.free, AmountType.Stored)}
           </Typography>
         </Flex>

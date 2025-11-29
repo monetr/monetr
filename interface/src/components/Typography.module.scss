@@ -106,3 +106,7 @@
   padding-right: 1.5 * variables.$size;
   border-radius: var(--border-radius);
 }
+
+.noWrap {
+  text-wrap-mode: nowrap;
+}

@@ -49,6 +49,10 @@ export const textVariants = cva([styles.root], {
       center: styles.alignCenter,
       right: styles.alignRight,
     },
+    wrapping: {
+      default: undefined,
+      nowrap: styles.noWrap,
+    },
   },
   defaultVariants: {
     component: 'span',
@@ -56,6 +60,7 @@ export const textVariants = cva([styles.root], {
     ellipsis: false,
     size: 'md',
     weight: 'normal',
+    wrapping: 'default',
   },
 });
 
