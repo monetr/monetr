@@ -83,6 +83,7 @@ export default function Typography({
   ellipsis,
   size,
   weight,
+  wrapping,
   className,
   ...props
 }: TypographyProps): React.JSX.Element {
@@ -97,6 +98,7 @@ export default function Typography({
           ellipsis,
           size,
           weight,
+          wrapping,
         }),
         className,
       )}
