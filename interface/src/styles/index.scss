@@ -13,6 +13,12 @@ body {
     display: flex;
     position: relative;
   }
+
+  // When a modal is open, don't let the window scroll. Scroll containers in the
+  // modal are fine, but the entire window shouldn't scroll.
+  &:has(> #root > div[aria-modal="true"]) {
+    overflow: hidden;
+  }
 }
 
 .text-size-inherit {
