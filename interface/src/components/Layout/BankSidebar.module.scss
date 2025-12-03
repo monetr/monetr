@@ -30,7 +30,6 @@
   flex-direction: column;
   width: var(--bank-sidebar-width-static);
   gap: 4 * variables.$size;
-  height: 100vh;
   align-items: center;
 
   // TODO, make this a bit more dynamic for screen size
@@ -38,6 +37,6 @@
   // 'pt-2',
   // 'pb-8',
   // 'lg:pb-4',
-  padding-top: 2 * variables.$size;
+  padding-top: calc(2 * variables.$size + env(safe-area-inset-top));
   padding-bottom: calc(2 * variables.$size + env(safe-area-inset-bottom));
 }
