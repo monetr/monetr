@@ -13,6 +13,7 @@ type TransactionClusterDebugItem struct {
 	Order     float32 `json:"order"`
 	Value     float32 `json:"value"`
 	Rank      float32 `json:"rank"`
+	Count     float32 `json:"count"`
 }
 
 type TransactionCluster struct {

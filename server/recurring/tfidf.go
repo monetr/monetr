@@ -20,6 +20,8 @@ var (
 	specialWeights = map[string]float32{
 		"null": 0, // Shows up in manual imports somtimes
 
+		"inc": 0, // Common busines suffix, not valauble
+
 		"merchant": 0, // Shows up in almost all mercury transactions.
 		"name":     0, // Shows up in almost all mercury transactions.
 
@@ -120,7 +122,16 @@ func (p *TFIDF) indexWords() (mapping map[string]int, vectorSize int) {
 	// Only calculate the index once. This way we can use it elsewhere if we need
 	// to get information back out of the transform after we are done.
 	if len(p.wordToIndex) == 0 {
-		wordCount := len(p.wc)
+		// Count the number of words that have more than one appearance, words that
+		// only have a single appearance are not important to include in the vector.
+		wordCount := 0
+		for _, count := range p.wc {
+			if count == 1 {
+				continue
+			}
+			wordCount++
+		}
+
 		// Define the length of the vector and adjust it to be divisible by 16. This
 		// will enable us to leverage SIMD in the future. By using 16 we are
 		// compatible with both AVX and AVX512.
