@@ -2,6 +2,7 @@ package round
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -34,8 +35,10 @@ func (o *ObservabilityRoundTripper) RoundTrip(
 	span.Description = fmt.Sprintf("%s %s", strings.ToUpper(request.Method), request.URL.String())
 	span.SetTag("http.url", request.URL.String())
 	span.SetData("http.url", request.URL.String())
-	span.SetTag("http.query", "?"+request.URL.RawQuery)
-	span.SetData("http.query", "?"+request.URL.RawQuery)
+	if request.URL.RawQuery != "" {
+		span.SetTag("http.query", "?"+request.URL.RawQuery)
+		span.SetData("http.query", "?"+request.URL.RawQuery)
+	}
 	span.SetTag("http.request.method", request.Method)
 	span.SetData("http.request.method", request.Method)
 	span.SetTag("server.address", request.URL.Hostname())
@@ -63,8 +66,12 @@ func (o *ObservabilityRoundTripper) RoundTrip(
 			span.Status = sentry.SpanStatusOK
 		}
 	} else {
-		span.Status = sentry.SpanStatusUnknown
-		crumbs.ReportError(span.Context(), err, "Unknown round tripper error", "http", map[string]any{})
+		if !errors.Is(err, context.Canceled) {
+			span.Status = sentry.SpanStatusInternalError
+			crumbs.ReportError(span.Context(), err, "Unknown round tripper error", "http", map[string]any{})
+		} else {
+			span.Status = sentry.SpanStatusCanceled
+		}
 	}
 
 	o.handler(request.Context(), request, response, err)
