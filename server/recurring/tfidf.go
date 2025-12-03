@@ -2,6 +2,7 @@ package recurring
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"regexp"
 	"sort"
@@ -252,8 +253,57 @@ func (p *TFIDF) GetDocuments(ctx context.Context) []Document {
 			continue
 		}
 		document.Valid = true
+
+		if *document.Transaction.UploadIdentifier == "8a34ad459a8beeb2019ae4378a9f7c59" {
+			var min, max float32
+			for i, val := range document.Vector {
+				// if val == 0 {
+				// 	continue
+				// }
+
+				fmt.Printf("%f, // %s\n", val, p.indexToWord[i])
+				if min == 0 {
+					min = val
+				} else if min > val && val > 0 {
+					min = val
+				}
+
+				if max == 0 {
+					max = val
+				} else if max < val {
+					max = val
+				}
+			}
+			fmt.Printf("Distance: %f - %f = %f\n", max, min, max-min)
+			fmt.Println("===")
+		}
+
 		// Normalize the document's tfidf vector.
 		calc.NormalizeVector32(document.Vector)
+
+		if *document.Transaction.UploadIdentifier == "8a34ad459a8beeb2019ae4378a9f7c59" {
+			var min, max float32
+			for i, val := range document.Vector {
+				// if val == 0 {
+				// 	continue
+				// }
+
+				fmt.Printf("%f, // %s\n", val, p.indexToWord[i])
+				if min == 0 {
+					min = val
+				} else if min > val && val > 0 {
+					min = val
+				}
+
+				if max == 0 {
+					max = val
+				} else if max < val {
+					max = val
+				}
+			}
+			fmt.Printf("Distance: %f - %f = %f\n", max, min, max-min)
+			fmt.Println("===")
+		}
 		p.documents[i] = document
 		// Then store the document back in
 		if document.Valid {

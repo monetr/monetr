@@ -3,6 +3,7 @@ package recurring_test
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/monetr/monetr/server/models"
@@ -39,5 +40,23 @@ func TestTokenize(t *testing.T) {
 		tokens := recurring.Tokenize(&txn)
 		j, _ := json.MarshalIndent(tokens, "", "  ")
 		fmt.Println(string(j))
+	})
+
+	t.Run("for blog post", func(t *testing.T) {
+		txn := models.Transaction{
+			OriginalName: "POS DEBIT-DC 5988 TST* CARIBOU COFFE NORTH BRANCH MN",
+		}
+
+		tokens := recurring.Tokenize(&txn)
+		j, _ := json.MarshalIndent(tokens, "", "  ")
+		fmt.Println(string(j))
+
+		strs := make([]string, 0, len(tokens))
+		for _, token := range tokens {
+			strs = append(strs, token.Final...)
+		}
+
+		fmt.Println(strings.Join(strs, " "))
+
 	})
 }
