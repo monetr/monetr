@@ -23,7 +23,8 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-const SampleDataPath = "/home/elliotcourant/Downloads/transactions sample.ofx"
+// const SampleDataPath = "/home/elliotcourant/Downloads/transactions sample.ofx"
+const SampleDataPath = "/home/elliotcourant/Downloads/transactions sample 2025.ofx"
 
 func GetTxnByUploadIdentifier(t *testing.T, bankAccount BankAccount, uploadId string) *Transaction {
 	db := testutils.GetPgDatabase(t)
@@ -156,6 +157,15 @@ func TestSimilarTransactionsBlogPost(t *testing.T) {
 	}
 
 	// Example Transaction from the file
-	txn := GetTxnByUploadIdentifier(t, bankAccount, "8a34a85e9506be8d019563cb185e4496")
-	PPrint(t, txn)
+	// Lunds
+	// txn := GetTxnByUploadIdentifier(t, bankAccount, "8a34a85e9506be8d019563cb185e4496")
+	// Discord
+	// txn := GetTxnByUploadIdentifier(t, bankAccount, "8a34b9c89506be8c0195711720250751")
+	txn := GetTxnByUploadIdentifier(t, bankAccount, "8a349fa38f3c0e9401902bc261102dff")
+	// PPrint(t, txn)
+
+	cluster, err := repo.GetTransactionClusterByMember(t.Context(), bankAccount.BankAccountId, txn.TransactionId)
+	assert.NoError(t, err, "Must be able to retrieve the transaction cluster for our desired transaction")
+
+	PPrint(t, cluster)
 }
