@@ -875,10 +875,9 @@ func (p *postgresJobProcessor) buildJobExecutor(
 				})
 				span.Status = sentry.SpanStatusOK
 			}
-
 			p.markJobStatus(span.Context(), job, err)
+			span.Finish()
 		}()
-		defer span.Finish()
 
 		jobLog.Trace("handling job")
 
