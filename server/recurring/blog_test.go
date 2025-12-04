@@ -161,7 +161,7 @@ func TestSimilarTransactionsBlogPost(t *testing.T) {
 	// txn := GetTxnByUploadIdentifier(t, bankAccount, "8a34a85e9506be8d019563cb185e4496")
 	// Discord
 	// txn := GetTxnByUploadIdentifier(t, bankAccount, "8a34b9c89506be8c0195711720250751")
-	txn := GetTxnByUploadIdentifier(t, bankAccount, "8a349fa38f3c0e9401902bc261102dff")
+	txn := GetTxnByUploadIdentifier(t, bankAccount, "8a34ad459a8beeb2019ae4378a9f7c59")
 	// PPrint(t, txn)
 
 	cluster, err := repo.GetTransactionClusterByMember(t.Context(), bankAccount.BankAccountId, txn.TransactionId)
