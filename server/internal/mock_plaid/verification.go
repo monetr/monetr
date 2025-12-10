@@ -35,7 +35,7 @@ func MockGetWebhookVerificationKey(t *testing.T) {
 					X:         "",
 					Y:         "",
 					CreatedAt: int32(time.Now().Unix()),
-					ExpiredAt: *plaid.NewNullableInt32(myownsanity.Int32P(int32(time.Now().Add(10 * time.Second).Unix()))),
+					ExpiredAt: *plaid.NewNullableInt32(myownsanity.Pointer(int32(time.Now().Add(10 * time.Second).Unix()))),
 				},
 				RequestId:            gofakeit.UUID(),
 				AdditionalProperties: nil,

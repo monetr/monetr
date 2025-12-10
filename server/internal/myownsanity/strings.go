@@ -1,5 +1,6 @@
 package myownsanity
 
+// Deprecated: Use Pointer instead.
 func StringP(input string) *string {
 	return &input
 }

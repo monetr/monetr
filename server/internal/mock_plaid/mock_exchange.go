@@ -35,8 +35,8 @@ func MockExchangePublicToken(t *testing.T) string {
 					ErrorType:      "INVALID_REQUEST",
 					ErrorCode:      "1234",
 					ErrorMessage:   "public_token is not valid",
-					DisplayMessage: *plaid.NewNullableString(myownsanity.StringP("public_token is not valid")),
-					Status:         *plaid.NewNullableInt32(myownsanity.Int32P(http.StatusBadRequest)),
+					DisplayMessage: *plaid.NewNullableString(myownsanity.Pointer("public_token is not valid")),
+					Status:         *plaid.NewNullableInt32(myownsanity.Pointer[int32](http.StatusBadRequest)),
 				}, http.StatusBadRequest
 			}
 

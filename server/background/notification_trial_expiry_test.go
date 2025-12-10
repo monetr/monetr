@@ -246,8 +246,8 @@ func TestNotificationTrialExpiryHandler_EnqueueTriggeredJob(t *testing.T) {
 		status := stripe.SubscriptionStatusActive
 		user.Account.SubscriptionActiveUntil = myownsanity.TimeP(clock.Now().AddDate(0, 0, 30))
 		user.Account.SubscriptionStatus = &status
-		user.Account.StripeCustomerId = myownsanity.StringP(mock_stripe.FakeStripeCustomerId(t))
-		user.Account.StripeSubscriptionId = myownsanity.StringP(mock_stripe.FakeStripeSubscriptionId(t))
+		user.Account.StripeCustomerId = myownsanity.Pointer(mock_stripe.FakeStripeCustomerId(t))
+		user.Account.StripeSubscriptionId = myownsanity.Pointer(mock_stripe.FakeStripeSubscriptionId(t))
 		testutils.MustDBUpdate(t, user.Account)
 
 		// First time, no notifications should be enqueued and we should not have an

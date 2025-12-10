@@ -13,6 +13,7 @@ import (
 
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/calc"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/sirupsen/logrus"
 )
@@ -153,7 +154,15 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 
 		{ // Calculate a consistent ID and a "name" for the cluster
 			sort.SliceStable(mostValuableIndicies, func(i, j int) bool {
-				return mostValuableIndicies[i].Value > mostValuableIndicies[j].Value
+				// TODO: This is technically not perfect, I'm still digging into why
+				// some values can end up being negative but it can happen. And when it
+				// does this sort ends up fucking things up where the highest value
+				// items will have a value of 0 because the real items have a negative
+				// value. So sorting by the absolute value should be good enough for
+				// now but long term I need to improve this.
+				// See https://github.com/monetr/monetr/issues/2833 for more info.
+				return myownsanity.AbsFloat32(mostValuableIndicies[i].Value) >
+					myownsanity.AbsFloat32(mostValuableIndicies[j].Value)
 			})
 
 			group.Debug = make([]models.TransactionClusterDebugItem, 0, len(mostValuableIndicies))

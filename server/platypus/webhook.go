@@ -44,7 +44,7 @@ func NewWebhookVerificationKeyFromPlaid(input plaid.JWKPublicKey) (WebhookVerifi
 		X:         input.GetX(),
 		Y:         input.GetY(),
 		CreatedAt: input.GetCreatedAt(),
-		ExpiredAt: myownsanity.Int32P(input.GetExpiredAt()),
+		ExpiredAt: myownsanity.Pointer(input.GetExpiredAt()),
 	}, nil
 }
 

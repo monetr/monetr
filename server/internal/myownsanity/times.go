@@ -2,6 +2,7 @@ package myownsanity
 
 import "time"
 
+// Deprecated: Use Pointer instead.
 func TimeP(input time.Time) *time.Time {
 	return &input
 }

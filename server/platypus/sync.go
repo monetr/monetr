@@ -40,7 +40,7 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 		TransactionsSyncRequest(plaid.TransactionsSyncRequest{
 			AccessToken: p.accessToken,
 			Cursor:      cursor,
-			Count:       myownsanity.Int32P(500),
+			Count:       myownsanity.Pointer[int32](500),
 			Options: &plaid.TransactionsSyncRequestOptions{
 				// Why does the constructor for the nullable bool return a pointer to a
 				// nullable wrapper type? What the fuck? Absolutely fucking garbage
