@@ -81,3 +81,25 @@ func TestParseFloatToAmount(t *testing.T) {
 		assert.EqualValues(t, 57567, result, "should")
 	})
 }
+
+func TestParseCurrency(t *testing.T) {
+	t.Run("EUR", func(t *testing.T) {
+		result, err := currency.ParseCurrency("1239.99", "EUR")
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, 123999, result, "should return an exact int64")
+	})
+
+	t.Run("EUR whole number", func(t *testing.T) {
+		result, err := currency.ParseCurrency("1239", "EUR")
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, 123900, result, "should return an exact int64")
+	})
+
+	t.Run("huge number USD", func(t *testing.T) {
+		// Unlike the old implementation, this implementation can handle huge
+		// numbers without rounding issues.
+		result, err := currency.ParseCurrency("23456789123456789.99", "USD")
+		assert.NoError(t, err, "should not return an error")
+		assert.EqualValues(t, int64(2345678912345678999), result, "should return an exact int64")
+	})
+}
