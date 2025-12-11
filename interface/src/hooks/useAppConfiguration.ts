@@ -22,6 +22,7 @@ export class AppConfiguration {
   billingEnabled: boolean;
   iconsEnabled: boolean;
   plaidEnabled: boolean;
+  lunchFlowEnabled: boolean;
   manualEnabled: true;
   uploadsEnabled: boolean;
   release: string | null;
