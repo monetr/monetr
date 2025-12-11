@@ -1,0 +1,19 @@
+---
+title: "Configure - Lunch Flow"
+description: "Configure Lunch Flow integration"
+---
+
+# Lunch Flow 
+
+By default Lunch Flow is enabled for all monetr deployments. This means that when you add a new link or budget to monetr
+you will be presented with the option to connect to an institution via Lunch Flow. For information on setting up Lunch
+Flow you can follow the guide here: [Integrate with Lunch Flow](/documentation/lunchflow)
+
+```yaml filename="config.yaml"
+lunchflow:
+  enabled: true
+```
+
+| **Name**  | **Type** | **Default** | **Description**                                          |
+| ---       | ---      | ---         | ---                                                      |
+| `enabled` | Boolean  | `true`      | Allow Lunch Flow connections to be configured in monetr. |
