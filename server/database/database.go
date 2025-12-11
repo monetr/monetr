@@ -5,10 +5,11 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/go-pg/pg/v10"
@@ -27,9 +28,9 @@ func GetDatabase(
 	stats *metrics.Stats,
 ) (*pg.DB, error) {
 	pgOptions := &pg.Options{
-		Addr: fmt.Sprintf("%s:%d",
+		Addr: net.JoinHostPort(
 			configuration.PostgreSQL.Address,
-			configuration.PostgreSQL.Port,
+			strconv.Itoa(configuration.PostgreSQL.Port),
 		),
 		User:            configuration.PostgreSQL.Username,
 		Password:        configuration.PostgreSQL.Password,
