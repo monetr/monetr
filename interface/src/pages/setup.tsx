@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CircleCheck, Pencil } from 'lucide-react';
+import { CircleCheck, Coins, Pencil } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -20,12 +20,13 @@ export interface SetupPageProps {
   manualEnabled?: boolean;
 }
 
-type Step = 'greeting' | 'plaid' | 'teller' | 'manual' | 'loading';
+type Step = 'greeting' | 'plaid' | 'lunchflow' | 'manual' | 'loading';
 
 export default function SetupPage(props: SetupPageProps): JSX.Element {
   const [step, setStep] = useState<Step>('greeting');
   const plaidPath = props.alreadyOnboarded ? '/link/create/plaid' : '/setup/plaid';
   const manualPath = props.alreadyOnboarded ? '/link/create/manual' : '/setup/manual';
+  const lunchFlowPath = props.alreadyOnboarded ? '/link/create/lunchflow' : '/setup/lunchflow';
 
   switch (step) {
     case 'greeting':
@@ -34,6 +35,8 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
       );
     case 'plaid':
       return <Navigate to={plaidPath} />;
+    case 'lunchflow':
+      return <Navigate to={lunchFlowPath} />;
     case 'manual':
       return <Navigate to={manualPath} />;
     default:
@@ -49,7 +52,7 @@ interface GreetingProps {
 
 function Greeting(props: GreetingProps): JSX.Element {
   const { data: config } = useAppConfiguration();
-  const [active, setActive] = useState<'plaid' | 'teller' | 'manual' | null>(null);
+  const [active, setActive] = useState<'plaid' | 'lunchflow' | 'manual' | null>(null);
 
   function Banner(): JSX.Element {
     if (!props.alreadyOnboarded) {
@@ -100,6 +103,14 @@ function Greeting(props: GreetingProps): JSX.Element {
           icon={PlaidLogo}
           name='Plaid'
           onClick={() => setActive('plaid')}
+        />
+        <OnboardingTile
+          active={active === 'lunchflow'}
+          description='Connect to EU/UK institutions via Lunch Flow.'
+          disabled={!config.lunchFlowEnabled}
+          icon={Coins}
+          name='Lunch Flow'
+          onClick={() => setActive('lunchflow')}
         />
         <OnboardingTile
           active={active === 'manual'}
