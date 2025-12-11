@@ -22,8 +22,9 @@ const _PlaidLinkStatus_name = "PlaidLinkStatusUnknownPlaidLinkStatusPendingPlaid
 var _PlaidLinkStatus_index = [...]uint8{0, 22, 44, 64, 84, 116, 138, 164}
 
 func (i PlaidLinkStatus) String() string {
-	if i >= PlaidLinkStatus(len(_PlaidLinkStatus_index)-1) {
+	idx := int(i) - 0
+	if i < 0 || idx >= len(_PlaidLinkStatus_index)-1 {
 		return "PlaidLinkStatus(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _PlaidLinkStatus_name[_PlaidLinkStatus_index[i]:_PlaidLinkStatus_index[i+1]]
+	return _PlaidLinkStatus_name[_PlaidLinkStatus_index[idx]:_PlaidLinkStatus_index[idx+1]]
 }

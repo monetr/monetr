@@ -219,7 +219,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 
 	var redirectUri *string
 	if p.config.OAuthDomain != "" {
-		redirectUri = myownsanity.StringP(fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain))
+		redirectUri = myownsanity.Pointer(fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain))
 	}
 
 	var webhooksUrl *string
@@ -227,7 +227,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 		if p.config.WebhooksDomain == "" {
 			crumbs.Warn(span.Context(), "BUG: Plaid webhook domain is not present but webhooks are enabled.", "bug", nil)
 		} else {
-			webhooksUrl = myownsanity.StringP(p.config.GetWebhooksURL())
+			webhooksUrl = myownsanity.Pointer(p.config.GetWebhooksURL())
 		}
 	}
 
@@ -261,7 +261,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 			IncomeVerification:    nil,
 			Auth:                  nil,
 			Transactions: &plaid.LinkTokenTransactions{
-				DaysRequested: myownsanity.Int32P(2 * 365), // 2 years
+				DaysRequested: myownsanity.Pointer[int32](2 * 365), // 2 years
 			},
 		})
 

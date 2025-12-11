@@ -24,6 +24,9 @@ type (
 		// used to resolve issues with the link and its authentication. Or can be used to add/remove accounts that monetr
 		// has access to via Plaid's API.
 		UpdateItem(ctx context.Context, updateAccountSelection bool) (LinkToken, error)
+		// UpdateWebhook will update the webhook endpoint for the current link based
+		// on the currently configured webhook domain.
+		UpdateWebhook(ctx context.Context) error
 		RemoveItem(ctx context.Context) error
 		// Sync takes a cursor (or lack of one) and retrieves transaction data from Plaid that is newer than that cursor.
 		Sync(ctx context.Context, cursor *string) (*SyncResult, error)
@@ -48,22 +51,13 @@ type PlaidClient struct {
 
 func (p *PlaidClient) getLog(span *sentry.Span) *logrus.Entry {
 	return p.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"plaid":  span.Op,
+		"operation": span.Op,
+		"plaid": logrus.Fields{
+			"itemId": p.itemId,
+		},
+		// TODO Eventually remove this from the log structure.
 		"itemId": p.itemId,
 	})
-}
-
-func (p *PlaidClient) toTransactionMap(input []plaid.Transaction) (map[string]Transaction, error) {
-	var err error
-	transactions := map[string]Transaction{}
-	for _, transaction := range input {
-		transactions[transaction.TransactionId], err = NewTransactionFromPlaid(transaction)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return transactions, nil
 }
 
 func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error) {
@@ -179,9 +173,8 @@ func (p *PlaidClient) GetTransactions(
 	count, offset int32,
 	bankAccountIds []string,
 ) ([]Transaction, error) {
-	span := sentry.StartSpan(ctx, "http.client")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Plaid - GetTransactions"
 
 	span.SetTag("itemId", p.itemId)
 
@@ -247,9 +240,10 @@ func (p *PlaidClient) UpdateItem(
 
 	var redirectUri *string
 	if p.config.OAuthDomain != "" {
-		// Normally we would substitute the configured protocol, but Plaid _requires_ that we use HTTPS for oauth callbacks.
-		// So if the monetr server is not configured for TLS that sucks because this won't work.
-		redirectUri = myownsanity.StringP(fmt.Sprintf(
+		// Normally we would substitute the configured protocol, but Plaid
+		// _requires_ that we use HTTPS for oauth callbacks. So if the monetr server
+		// is not configured for TLS that sucks because this won't work.
+		redirectUri = myownsanity.Pointer(fmt.Sprintf(
 			"https://%s/plaid/oauth-return", p.config.OAuthDomain,
 		))
 		log = log.WithField("redirectUri", *redirectUri)
@@ -260,7 +254,7 @@ func (p *PlaidClient) UpdateItem(
 		if p.config.WebhooksDomain == "" {
 			crumbs.Warn(span.Context(), "BUG: Plaid webhook domain is not present but webhooks are enabled.", "bug", nil)
 		} else {
-			webhooksUrl = myownsanity.StringP(p.config.GetWebhooksURL())
+			webhooksUrl = myownsanity.Pointer(p.config.GetWebhooksURL())
 			log = log.WithField("webhooksUrl", *webhooksUrl)
 		}
 	}
@@ -368,6 +362,46 @@ func (p *PlaidClient) RefeshTransactions(ctx context.Context) error {
 		"failed to trigger transaction refresh for Plaid item",
 	); err != nil {
 		log.WithError(err).Errorf("failed to trigger transaction refresh for Plaid item")
+		return err
+	}
+
+	return nil
+}
+
+func (p *PlaidClient) UpdateWebhook(ctx context.Context) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var webhookUrl *string = nil
+	if p.config.WebhooksEnabled {
+		webhookUrl = myownsanity.Pointer(p.config.GetWebhooksURL())
+	}
+
+	log := p.getLog(span).WithFields(logrus.Fields{
+		"plaid": logrus.Fields{
+			"itemId":     p.itemId,
+			"webhookUrl": webhookUrl,
+		},
+	})
+
+	log.Info("updating webhook URL for plaid link")
+
+	request := p.client.PlaidApi.
+		ItemWebhookUpdate(span.Context()).
+		ItemWebhookUpdateRequest(plaid.ItemWebhookUpdateRequest{
+			AccessToken: p.accessToken,
+			Webhook:     *plaid.NewNullableString(webhookUrl),
+		})
+
+	_, response, err := request.Execute()
+	if err = after(
+		span,
+		response,
+		err,
+		"Updating webhook URL for Plaid link",
+		"failed to update webhook url for plaid link",
+	); err != nil {
+		log.WithError(err).Errorf("failed to update webhook url for plaid link")
 		return err
 	}
 

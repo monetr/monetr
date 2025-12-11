@@ -14,6 +14,7 @@ func AdminCommand(parent *cobra.Command) {
 	adminKMSCheck(adminCommand)
 	adminKMSMigrate(adminCommand)
 	adminPlaidRefresh(adminCommand)
+	adminPlaidUpdateWebhook(adminCommand)
 	adminRegisterCode(adminCommand)
 	adminSecretView(adminCommand)
 

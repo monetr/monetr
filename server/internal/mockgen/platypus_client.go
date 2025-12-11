@@ -134,3 +134,17 @@ func (mr *MockClientMockRecorder) UpdateItem(ctx, updateAccountSelection any) *g
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateItem", reflect.TypeOf((*MockClient)(nil).UpdateItem), ctx, updateAccountSelection)
 }
+
+// UpdateWebhook mocks base method.
+func (m *MockClient) UpdateWebhook(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateWebhook", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateWebhook indicates an expected call of UpdateWebhook.
+func (mr *MockClientMockRecorder) UpdateWebhook(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateWebhook", reflect.TypeOf((*MockClient)(nil).UpdateWebhook), ctx)
+}
