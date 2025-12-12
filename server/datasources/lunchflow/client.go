@@ -32,7 +32,8 @@ type Transaction struct {
 	Description *string     `json:"description"`
 }
 
-type Client interface {
+//go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=client.go -package=mockgen -destination=../../internal/mockgen/lunchflow_client.go LunchFlowClient
+type LunchFlowClient interface {
 	GetAccounts(ctx context.Context) ([]Account, error)
 	GetBalance(ctx context.Context, accountId AccountId) (*Balance, error)
 	GetTransactions(ctx context.Context, accountId AccountId) ([]Transaction, error)

@@ -12,11 +12,12 @@ func _() {
 	_ = x[PlaidLinkType-1]
 	_ = x[ManualLinkType-2]
 	_ = x[StripeLinkType-3]
+	_ = x[LunchFlowLinkType-4]
 }
 
-const _LinkType_name = "UnknownLinkTypePlaidLinkTypeManualLinkTypeStripeLinkType"
+const _LinkType_name = "UnknownLinkTypePlaidLinkTypeManualLinkTypeStripeLinkTypeLunchFlowLinkType"
 
-var _LinkType_index = [...]uint8{0, 15, 28, 42, 56}
+var _LinkType_index = [...]uint8{0, 15, 28, 42, 56, 73}
 
 func (i LinkType) String() string {
 	idx := int(i) - 0

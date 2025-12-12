@@ -8,4 +8,5 @@ const (
 	PlaidLinkType
 	ManualLinkType
 	StripeLinkType
+	LunchFlowLinkType
 )
