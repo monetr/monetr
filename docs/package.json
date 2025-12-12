@@ -34,7 +34,7 @@
     "cssnano": "7.1.2",
     "postcss": "8.5.6",
     "sass": "1.93.3",
-    "spellchecker-cli": "7.0.0",
+    "spellchecker-cli": "7.0.2",
     "tailwindcss": "3.4.18",
     "typescript": "5.9.3"
   }
