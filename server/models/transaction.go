@@ -15,9 +15,10 @@ import (
 type TransactionSource string
 
 const (
-	TransactionSourcePlaid  TransactionSource = "plaid"
-	TransactionSourceUpload TransactionSource = "upload"
-	TransactionSourceManual TransactionSource = "manual"
+	TransactionSourcePlaid     TransactionSource = "plaid"
+	TransactionSourceUpload    TransactionSource = "upload"
+	TransactionSourceManual    TransactionSource = "manual"
+	TransactionSourceLunchFlow TransactionSource = "lunchflow"
 )
 
 type Transaction struct {
