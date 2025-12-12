@@ -108,27 +108,29 @@ var (
 type BankAccount struct {
 	tableName string `pg:"bank_accounts"`
 
-	BankAccountId      ID[BankAccount]       `json:"bankAccountId" pg:"bank_account_id,notnull,pk"`
-	AccountId          ID[Account]           `json:"-" pg:"account_id,notnull,pk"`
-	Account            *Account              `json:"-" pg:"rel:has-one"`
-	LinkId             ID[Link]              `json:"linkId" pg:"link_id,notnull"`
-	Link               *Link                 `json:"-,omitempty" pg:"rel:has-one"`
-	PlaidBankAccountId *ID[PlaidBankAccount] `json:"-" pg:"plaid_bank_account_id"`
-	PlaidBankAccount   *PlaidBankAccount     `json:"plaidBankAccount,omitempty" pg:"rel:has-one"`
-	Currency           string                `json:"currency" pg:"currency,notnull"`
-	AvailableBalance   int64                 `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
-	CurrentBalance     int64                 `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
-	LimitBalance       int64                 `json:"limitBalance" pg:"limit_balance,notnull,use_zero"`
-	Mask               string                `json:"mask" pg:"mask"`
-	Name               string                `json:"name,omitempty" pg:"name,notnull"`
-	OriginalName       string                `json:"originalName" pg:"original_name,notnull"`
-	AccountType        BankAccountType       `json:"accountType" pg:"account_type"`
-	AccountSubType     BankAccountSubType    `json:"accountSubType" pg:"account_sub_type"`
-	Status             BankAccountStatus     `json:"status" pg:"status,notnull"`
-	LastUpdated        time.Time             `json:"lastUpdated" pg:"last_updated,notnull"`
-	CreatedAt          time.Time             `json:"createdAt" pg:"created_at,notnull"`
-	UpdatedAt          time.Time             `json:"updatedAt" pg:"updated_at,notnull"`
-	DeletedAt          *time.Time            `json:"deletedAt,omitempty" pg:"deleted_at"`
+	BankAccountId          ID[BankAccount]           `json:"bankAccountId" pg:"bank_account_id,notnull,pk"`
+	AccountId              ID[Account]               `json:"-" pg:"account_id,notnull,pk"`
+	Account                *Account                  `json:"-" pg:"rel:has-one"`
+	LinkId                 ID[Link]                  `json:"linkId" pg:"link_id,notnull"`
+	Link                   *Link                     `json:"-,omitempty" pg:"rel:has-one"`
+	PlaidBankAccountId     *ID[PlaidBankAccount]     `json:"-" pg:"plaid_bank_account_id"`
+	PlaidBankAccount       *PlaidBankAccount         `json:"plaidBankAccount,omitempty" pg:"rel:has-one"`
+	LunchFlowBankAccountId *ID[LunchFlowBankAccount] `json:"-" pg:"lunchflow_bank_account_id"`
+	LunchFlowBankAccount   *LunchFlowBankAccount     `json:"lunchFlowBankAccount,omitempty" pg:"rel:has-one"`
+	Currency               string                    `json:"currency" pg:"currency,notnull"`
+	AvailableBalance       int64                     `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
+	CurrentBalance         int64                     `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
+	LimitBalance           int64                     `json:"limitBalance" pg:"limit_balance,notnull,use_zero"`
+	Mask                   string                    `json:"mask" pg:"mask"`
+	Name                   string                    `json:"name,omitempty" pg:"name,notnull"`
+	OriginalName           string                    `json:"originalName" pg:"original_name,notnull"`
+	AccountType            BankAccountType           `json:"accountType" pg:"account_type"`
+	AccountSubType         BankAccountSubType        `json:"accountSubType" pg:"account_sub_type"`
+	Status                 BankAccountStatus         `json:"status" pg:"status,notnull"`
+	LastUpdated            time.Time                 `json:"lastUpdated" pg:"last_updated,notnull"`
+	CreatedAt              time.Time                 `json:"createdAt" pg:"created_at,notnull"`
+	UpdatedAt              time.Time                 `json:"updatedAt" pg:"updated_at,notnull"`
+	DeletedAt              *time.Time                `json:"deletedAt,omitempty" pg:"deleted_at"`
 }
 
 func (BankAccount) IdentityPrefix() string {
