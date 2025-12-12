@@ -9,6 +9,7 @@ import (
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/secrets"
 	"github.com/sirupsen/logrus"
 )
 
@@ -25,6 +26,7 @@ type (
 	SyncLunchFlowHandler struct {
 		log          *logrus.Entry
 		db           *pg.DB
+		kms          secrets.KeyManagement
 		publisher    pubsub.Publisher
 		enqueuer     JobEnqueuer
 		unmarshaller JobUnmarshaller
@@ -53,12 +55,14 @@ func NewSyncLunchFlowHandler(
 	log *logrus.Entry,
 	db *pg.DB,
 	clock clock.Clock,
+	kms secrets.KeyManagement,
 	publisher pubsub.Publisher,
 	enqueuer JobEnqueuer,
 ) *SyncLunchFlowHandler {
 	return &SyncLunchFlowHandler{
 		log:          log,
 		db:           db,
+		kms:          kms,
 		publisher:    publisher,
 		enqueuer:     enqueuer,
 		unmarshaller: DefaultJobUnmarshaller,
