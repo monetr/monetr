@@ -96,6 +96,15 @@ func NewBackgroundJobs(
 		)
 	}
 
+	// Only enable the Lunch Flow background job if we have it enabled in the
+	// config. This runs a cron job that shouldn't be used if we aren't actually
+	// using Lunch Flow.
+	if configuration.LunchFlow.Enabled {
+		jobs = append(jobs,
+			NewSyncLunchFlowHandler(log, db, clock, publisher, enqueuer),
+		)
+	}
+
 	// Setup jobs
 	for _, jobHandler := range jobs {
 		if err := processor.RegisterJob(ctx, jobHandler); err != nil {
