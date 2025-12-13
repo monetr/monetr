@@ -13,6 +13,12 @@ export default {
   install: '',
   configure: '',
 
+  '-- Integrations': {
+    type: 'separator',
+    title: 'Integrations',
+  },
+  lunchflow: '',
+
   '-- Contributing': {
     type: 'separator',
     title: 'Contributing',
