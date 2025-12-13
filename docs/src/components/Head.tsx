@@ -1,7 +1,6 @@
 import React, { Fragment } from 'react';
 import { parse } from 'date-fns';
 
-import ChatwootIntegration from '@monetr/docs/components/ChatwootIntegration';
 import realUrl from '@monetr/docs/components/utils/realUrl';
 
 import { useRouter } from 'next/router';
@@ -75,7 +74,6 @@ export default function Head(): JSX.Element {
       {process.env.NODE_ENV !== 'development' && (
         <script data-website-id='ccbdfaf9-683f-4487-b97f-5516e1353715' defer src='https://a.monetr.app/script.js' />
       )}
-      <ChatwootIntegration />
     </React.Fragment>
   );
 }

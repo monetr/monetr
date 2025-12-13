@@ -210,9 +210,6 @@ jobs:
         run: |
           git config --global --add safe.directory ${PWD}
       - name: Build
-        env:
-          CHATWOOT_URL: ${{ secrets.CHATWOOT_URL }}
-          CHATWOOT_TOKEN: ${{ secrets.CHATWOOT_TOKEN }}
         run: |
           make docs
       - name: Deploy
