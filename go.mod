@@ -30,6 +30,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v30 v30.0.0
+	github.com/plaid/plaid-go/v40 v40.1.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/robfig/cron v1.2.0
 	github.com/sirupsen/logrus v1.9.3
