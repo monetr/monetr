@@ -92,10 +92,10 @@ func GivenIHaveAnAccount(t *testing.T, clock clock.Clock, login models.Login) mo
 	account := models.Account{
 		Timezone:                     gofakeit.TimeZoneRegion(),
 		Locale:                       "en_US",
-		StripeCustomerId:             myownsanity.StringP(mock_stripe.FakeStripeCustomerId(t)),
-		StripeSubscriptionId:         myownsanity.StringP(mock_stripe.FakeStripeSubscriptionId(t)),
-		StripeWebhookLatestTimestamp: myownsanity.TimeP(clock.Now().Add(-4 * time.Minute)),
-		SubscriptionActiveUntil:      myownsanity.TimeP(clock.Now().Add(10 * time.Minute)),
+		StripeCustomerId:             myownsanity.Pointer(mock_stripe.FakeStripeCustomerId(t)),
+		StripeSubscriptionId:         myownsanity.Pointer(mock_stripe.FakeStripeSubscriptionId(t)),
+		StripeWebhookLatestTimestamp: myownsanity.Pointer(clock.Now().Add(-4 * time.Minute)),
+		SubscriptionActiveUntil:      myownsanity.Pointer(clock.Now().Add(10 * time.Minute)),
 		SubscriptionStatus:           &subStatus,
 		TrialEndsAt:                  nil,
 	}
