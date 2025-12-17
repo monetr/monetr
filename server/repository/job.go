@@ -16,6 +16,7 @@ type JobRepository interface {
 	GetLinksForExpiredAccounts(ctx context.Context) ([]Link, error)
 	GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error)
 	GetAccountsWithTooManyFiles(ctx context.Context) ([]AccountWithTooManyFiles, error)
+	GetStaleAccounts(ctx context.Context) ([]Account, error)
 }
 
 type ProcessFundingSchedulesItem struct {
@@ -107,6 +108,25 @@ func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]Link,
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve Plaid links for expired accounts")
+	}
+
+	return result, nil
+}
+
+func (j *jobRepository) GetStaleAccounts(ctx context.Context) ([]Account, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	// Accounts that have been expired for at least 100 days should be considered
+	// stale.
+	staleCutoff := j.clock.Now().Add(-100 * 24 * time.Hour).UTC()
+
+	var result []Account
+	err := j.txn.ModelContext(span.Context(), &result).
+		Where(`GREATEST("account"."subscription_active_until", "account"."trial_ends_at") < ?`, staleCutoff).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve stale accounts")
 	}
 
 	return result, nil
