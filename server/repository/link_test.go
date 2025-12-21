@@ -4,10 +4,12 @@ import (
 	"testing"
 
 	"github.com/benbjohnson/clock"
+	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,7 +30,7 @@ func TestRepositoryBase_DeleteLink(t *testing.T) {
 			t.Context(),
 			models.ID[models.Link]("link_bogus"),
 		)
-		assert.EqualError(t, err, repository.ErrLinkNotFound.Error())
+		assert.True(t, errors.Is(err, pg.ErrNoRows), "no rows error should be returned when link does not exist")
 	})
 
 	t.Run("happy path", func(t *testing.T) {

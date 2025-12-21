@@ -10,7 +10,6 @@ import (
 )
 
 var (
-	ErrLinkNotFound    = errors.New("could not find link")
 	ErrLinkIsPlaidLink = errors.New("cannot remove a Plaid Link via DeleteLink")
 )
 
@@ -162,7 +161,7 @@ func (r *repositoryBase) DeleteLink(
 
 	var link Link
 	// Update the link record to indicate that it is no longer active.
-	result, err := r.txn.ModelContext(span.Context(), &link).
+	_, err := r.txn.ModelContext(span.Context(), &link).
 		Set(`"deleted_at" = ?`, r.clock.Now()).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."link_id" = ?`, linkId).
@@ -170,10 +169,6 @@ func (r *repositoryBase) DeleteLink(
 		Update(&link)
 	if err != nil {
 		return errors.Wrap(err, "failed to mark a link as soft-deleted")
-	}
-
-	if result.RowsAffected() == 0 {
-		return errors.WithStack(ErrLinkNotFound)
 	}
 
 	if link.LinkType != ManualLinkType {
