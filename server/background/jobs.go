@@ -93,7 +93,7 @@ func NewBackgroundJobs(
 			NewDeactivateLinksHandler(log, db, clock, configuration, kms, plaidPlatypus),
 			NewNotificationTrialExpiryHandler(log, db, clock, configuration, email),
 			NewReconcileSubscriptionHandler(log, db, clock, publisher, billing),
-			NewRemoveStaleAccountsHandler(log, db, clock, configuration),
+			NewRemoveStaleAccountsHandler(log, db, clock, configuration, enqueuer),
 		)
 	}
 
