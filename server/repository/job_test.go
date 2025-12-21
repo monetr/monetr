@@ -242,3 +242,80 @@ func TestJobRepository_GetAccountsWithTooManyFiles(t *testing.T) {
 		}
 	})
 }
+
+func TestJobRepository_GetStaleAccounts(t *testing.T) {
+	t.Run("subscribed account", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+
+		{ // Before updating the subscription, sh
+			result, err := jobRepo.GetStaleAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving stale accounts")
+			assert.Empty(t, result, "there should not be any stale accounts at the moment")
+		}
+
+		account := user.Account
+		account.SubscriptionActiveUntil = myownsanity.Pointer(clock.Now())
+		testutils.MustDBUpdate(t, account)
+
+		{ // After gaining a subscription, we should still not remove the account.
+			result, err := jobRepo.GetStaleAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving stale accounts")
+			assert.Empty(t, result, "there should not be any stale accounts at the moment")
+		}
+
+		// But if the subscription has not been updated in 101 days, then we should.
+		clock.Add(101 * 24 * time.Hour)
+
+		{ // The subscription is now old enough to be considered stale
+			result, err := jobRepo.GetStaleAccounts(context.Background())
+			assert.NoError(t, err)
+			assert.Len(t, result, 1, "should have the one stale now")
+			assert.EqualValues(t, user.AccountId, result[0].AccountId, "should contain our account as stale")
+		}
+	})
+
+	t.Run("trial account", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+
+		// Update the account to be the same as it would be in a trial state.
+		account := user.Account
+		account.SubscriptionActiveUntil = nil
+		account.SubscriptionStatus = nil
+		account.StripeCustomerId = nil
+		account.StripeSubscriptionId = nil
+		account.TrialEndsAt = myownsanity.Pointer(clock.Now().AddDate(0, 0, 30))
+		testutils.MustDBUpdate(t, account)
+
+		{ // Then check to make sure that we don't consider this a stale account.
+			result, err := jobRepo.GetStaleAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving stale accounts")
+			assert.Empty(t, result, "there should not be any stale accounts at the moment")
+		}
+
+		// Move the clock forward 31 days. The trial has now expired.
+		clock.Add(31 * 24 * time.Hour)
+		{ // But the account is not yet eligible for removal.
+			result, err := jobRepo.GetStaleAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving stale accounts")
+			assert.Empty(t, result, "there should not be any stale accounts at the moment")
+		}
+
+		// Move the clock forward 101 days, now the account should be eligible.
+		clock.Add(101 * 24 * time.Hour)
+
+		{ // 131 days after signup the account is now eligible for removal.
+			result, err := jobRepo.GetStaleAccounts(context.Background())
+			assert.NoError(t, err)
+			assert.Len(t, result, 1, "should have the one stale now")
+			assert.EqualValues(t, user.AccountId, result[0].AccountId, "should contain our account as stale")
+		}
+	})
+}

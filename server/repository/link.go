@@ -9,6 +9,11 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	ErrLinkNotFound    = errors.New("could not find link")
+	ErrLinkIsPlaidLink = errors.New("cannot remove a Plaid Link via DeleteLink")
+)
+
 func (r *repositoryBase) GetLink(
 	ctx context.Context,
 	linkId ID[Link],
@@ -141,4 +146,46 @@ func (r *repositoryBase) UpdateLink(ctx context.Context, link *Link) error {
 		Returning(`*`).
 		Update(link)
 	return errors.Wrap(err, "failed to update link")
+}
+
+// DeleteLink is the counterpart to the DeletePlaidLink function, this function
+// however only handles the soft delete of the link itself and does not handle
+// the soft delete of the Plaid Link. It does, however, assert that the link is
+// not a Plaid Link type. If this assert fails, then ErrLinkIsPlaidLink will be
+// returned.
+func (r *repositoryBase) DeleteLink(
+	ctx context.Context,
+	linkId ID[Link],
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var link Link
+	// Update the link record to indicate that it is no longer active.
+	result, err := r.txn.ModelContext(span.Context(), &link).
+		Set(`"deleted_at" = ?`, r.clock.Now()).
+		Where(`"link"."account_id" = ?`, r.AccountId()).
+		Where(`"link"."link_id" = ?`, linkId).
+		Returning("*").
+		Update(&link)
+	if err != nil {
+		return errors.Wrap(err, "failed to mark a link as soft-deleted")
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.WithStack(ErrLinkNotFound)
+	}
+
+	if link.LinkType != ManualLinkType {
+		// TODO Eventually I would love to leverage savepoints in PostgreSQL for
+		// some things like this where the errors are in the busines logic side of
+		// things and not in the database side.
+		// More precisely, I would want to revert any change that has been applied
+		// to the database that could be deemed as "incorrect". If we mark a link as
+		// deleted but then that link isn't a manual link, we should undo that
+		// deletion.
+		return errors.WithStack(ErrLinkIsPlaidLink)
+	}
+
+	return nil
 }
