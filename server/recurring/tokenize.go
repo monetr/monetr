@@ -48,12 +48,12 @@ func Tokenize(transaction *models.Transaction) []Token {
 		len(transaction.OriginalName),
 	)
 
-	// if transaction.OriginalMerchantName != "" {
-	// 	words = append(words, clusterCleanStringRegex.FindAllString(
-	// 		transaction.OriginalMerchantName,
-	// 		len(transaction.OriginalMerchantName),
-	// 	)...)
-	// }
+	if transaction.OriginalMerchantName != "" {
+		words = append(words, clusterCleanStringRegex.FindAllString(
+			transaction.OriginalMerchantName,
+			len(transaction.OriginalMerchantName),
+		)...)
+	}
 
 	tokens := make([]Token, 0, len(words))
 	for i := range words {
