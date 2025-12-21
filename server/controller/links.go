@@ -6,9 +6,10 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/validation"
+	"github.com/pkg/errors"
 )
 
 func (c *Controller) getLinks(ctx echo.Context) error {
@@ -189,25 +190,51 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve the specified link")
 	}
 
-	link.DeletedAt = myownsanity.TimeP(c.Clock.Now().UTC())
-	if err := repo.UpdateLink(c.getContext(ctx), link); err != nil {
-		return c.wrapPgError(ctx, err, "failed to mark the link as deleted")
+	// Don't let users try to re-delete a link. If this is a Plaid link it could
+	// cause weird things?
+	if link.DeletedAt != nil {
+		return c.badRequest(ctx, "link has already been deleted")
 	}
 
-	secretsRepo := c.mustGetSecretsRepository(ctx)
-
 	if link.PlaidLink != nil {
+		secretsRepo := c.mustGetSecretsRepository(ctx)
+		if err := repo.DeletePlaidLink(c.getContext(ctx), *link.PlaidLinkId); err != nil {
+			crumbs.Error(
+				c.getContext(ctx),
+				"Failed to mark Plaid Link as deleted before actual removal",
+				"database",
+				map[string]any{
+					"linkId":      link.LinkId,
+					"plaidLinkId": link.PlaidLinkId,
+					"itemId":      link.PlaidLink.PlaidId,
+				},
+			)
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"Failed to mark Plaid Link as deleted",
+			)
+		}
+
 		secret, err := secretsRepo.Read(c.getContext(ctx), link.PlaidLink.SecretId)
 		if err != nil {
 			crumbs.Error(
 				c.getContext(ctx),
-				"Failed to retrieve access token for plaid link.", "secrets", map[string]any{
+				"Failed to retrieve access token for plaid link.",
+				"secrets",
+				map[string]any{
 					"linkId":   link.LinkId,
 					"itemId":   link.PlaidLink.PlaidId,
 					"secretId": secret.SecretId,
 				},
 			)
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"failed to retrieve access token for removal",
+			)
 		}
 
 		client, err := c.Plaid.NewClient(
@@ -217,17 +244,56 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 			link.PlaidLink.PlaidId,
 		)
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client")
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"failed to create plaid client",
+			)
 		}
 
 		if err = client.RemoveItem(c.getContext(ctx)); err != nil {
-			crumbs.Error(c.getContext(ctx), "Failed to remove item", "plaid", map[string]any{
-				"linkId":   link.LinkId,
-				"itemId":   link.PlaidLink.PlaidId,
-				"secretId": secret.SecretId,
-				"error":    err.Error(),
-			})
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
+			crumbs.Error(
+				c.getContext(ctx),
+				"Failed to remove item",
+				"plaid",
+				map[string]any{
+					"linkId":   link.LinkId,
+					"itemId":   link.PlaidLink.PlaidId,
+					"secretId": secret.SecretId,
+					"error":    err.Error(),
+				},
+			)
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"failed to remove item from Plaid",
+			)
+		}
+	} else {
+		// If the link is not a plaid link then try to remove it as if it is a
+		// manual link. There is still a weird path here where we have a link that
+		// is designated as a plaid link type but has no plaid link ID. If that
+		// happens we will report a bug!
+		if err := repo.DeleteLink(c.getContext(ctx), linkId); err != nil {
+			if errors.Is(err, repository.ErrLinkIsPlaidLink) {
+				crumbs.IndicateBug(
+					c.getContext(ctx),
+					"Trying to remove Plaid Link as a Manual Link",
+					map[string]any{
+						"linkId":      linkId,
+						"accountId":   link.AccountId,
+						"linkType":    link.LinkType,
+						"plaidLinkId": link.PlaidLinkId,
+					},
+				)
+			}
+			return c.wrapPgError(
+				ctx,
+				err,
+				"failed to remove link",
+			)
 		}
 	}
 
@@ -239,7 +305,12 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 			LinkId:    link.LinkId,
 		},
 	); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to enqueue link removal job")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"failed to enqueue link removal job",
+		)
 	}
 
 	return ctx.NoContent(http.StatusOK)

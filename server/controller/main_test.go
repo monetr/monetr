@@ -90,9 +90,11 @@ func NewTestApplication(t *testing.T) (*TestApp, *httpexpect.Expect) {
 
 type TestApp struct {
 	Configuration config.Configuration
+	Mock          *gomock.Controller
 	Email         *mockgen.MockEmailCommunication
 	Storage       *mockgen.MockStorage
 	Jobs          *mockgen.MockJobController
+	Plaid         *mockgen.MockPlatypus
 	Clock         *clock.Mock
 	Tokens        security.ClientTokens
 }
@@ -110,13 +112,6 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 	kms := secrets.NewPlaintextKMS()
-	plaidClient := platypus.NewPlaid(log, clock, kms, db, configuration.Plaid)
-
-	plaidWebhooks := platypus.NewInMemoryWebhookVerification(
-		log,
-		plaidClient,
-		1*time.Hour,
-	)
 
 	publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
 	require.NoError(t, err, "must be able to generate keys")
@@ -150,6 +145,13 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 	fileStorage := mockgen.NewMockStorage(mockController)
 	jobRunner := mockgen.NewMockJobController(mockController)
 	email := mockgen.NewMockEmailCommunication(mockController)
+	plaidClient := mockgen.NewMockPlatypus(mockController)
+
+	plaidWebhooks := platypus.NewInMemoryWebhookVerification(
+		log,
+		plaidClient,
+		1*time.Hour,
+	)
 
 	var recaptcha captcha.Verification
 	if configuration.ReCAPTCHA.Enabled {
@@ -239,9 +241,11 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 
 	return &TestApp{
 		Configuration: configuration,
+		Mock:          mockController,
 		Email:         email,
 		Storage:       fileStorage,
 		Jobs:          jobRunner,
+		Plaid:         plaidClient,
 		Clock:         clock,
 		Tokens:        clientTokens,
 	}, expect
