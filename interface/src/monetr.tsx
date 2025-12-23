@@ -48,7 +48,7 @@ const RoutesImpl = withSentryReactRouterV6Routing(Routes);
 
 export default function Monetr(): JSX.Element {
   const { data: config, isLoading: configIsLoading, isError: configIsError } = useAppConfiguration();
-  const { isLoading: authIsLoading, data: auth } = useAuthentication();
+  const { isLoading: authIsLoading, data: auth, isError: isAuthError } = useAuthentication();
   const { isLoading: linksIsLoading, data: links } = useLinks();
   const { isLoading: bankAccountsIsLoading } = useBankAccounts();
 
@@ -65,7 +65,7 @@ export default function Monetr(): JSX.Element {
   }
 
   // If the config fails to load or is simply not present, show the error page.
-  if (configIsError) {
+  if (configIsError || isAuthError) {
     return <ConfigError />;
   }
 
