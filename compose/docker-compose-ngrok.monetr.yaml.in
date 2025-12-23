@@ -1,12 +1,8 @@
 services:
   ngrok:
     image: ngrok/ngrok:latest
-    healthcheck:
-      test: timeout 10s bash -c ':> /dev/tcp/127.0.0.1/4040' || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 12
-      start_period: 10s
+    # Healthcheck does not work with the nix images anymore? Running any command simply returns:
+    # openat etc/passwd: path escapes from parent
     command:
       - http
       - --domain=@NGROK_HOSTNAME@

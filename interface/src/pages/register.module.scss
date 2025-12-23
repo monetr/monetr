@@ -1,0 +1,22 @@
+@use '@monetr/interface/variables';
+@use '@monetr/interface/mixins';
+
+.registerPageRoot {
+  @include mixins.screen;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 1 * variables.$size;
+
+  padding-top: 10 * variables.$size;
+  padding-bottom: 10 * variables.$size;
+  padding-left: 5 * variables.$size;
+  padding-right: 5 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-top: 5 * variables.$size;
+    padding-bottom: 10 * variables.$size;
+    justify-content: center;
+  }
+  min-height: fit-content;
+}

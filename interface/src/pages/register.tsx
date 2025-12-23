@@ -19,6 +19,9 @@ import useSignUp, { type SignUpResponse } from '@monetr/interface/hooks/useSignU
 import { getLocale, getTimezone } from '@monetr/interface/util/locale';
 import type { APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
+import BetaCodeInput from '@monetr/interface/components/register/BetaCodeInput';
+
+import styles from './register.module.scss';
 
 interface RegisterValues {
   firstName: string;
@@ -37,8 +40,6 @@ const initialValues: RegisterValues = {
   password: '',
   confirmPassword: '',
 };
-
-const breakpoints = 'w-full md:w-1/2 lg:w-1/3 xl:w-1/4';
 
 function validator(values: RegisterValues): FormikErrors<RegisterValues> {
   const errors: FormikErrors<RegisterValues> = {};
@@ -75,13 +76,20 @@ function validator(values: RegisterValues): FormikErrors<RegisterValues> {
 }
 
 export function RegisterSuccessful(): JSX.Element {
-  // TODO Add a link to return to the login page, or close this window maybe?
   return (
-    <div className='w-full h-full flex justify-center items-center flex-col'>
+    <div className={styles.registerPageRoot}>
       <MLogo className='size-24' />
-      <Typography className='max-w-md text-center' size='xl' weight='medium'>
+      <Typography align='center' className='max-w-md' size='xl' weight='medium'>
         A verification message has been sent to your email address, please verify your email.
       </Typography>
+      <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
+        <Typography color='subtle' size='sm'>
+          Return to
+        </Typography>
+        <TextLink size='sm' to='/login'>
+          Sign in
+        </TextLink>
+      </div>
     </div>
   );
 }
@@ -93,16 +101,6 @@ export default function Register(): JSX.Element {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [successful, setSuccessful] = useState(false);
-
-  function BetaCodeInput(): JSX.Element {
-    if (!config?.requireBetaCode) {
-      return null;
-    }
-
-    return (
-      <FormTextField className={breakpoints} label='Beta Code' name='betaCode' required type='text' uppercasetext />
-    );
-  }
 
   async function submit(values: RegisterValues, helpers: FormikHelpers<RegisterValues>): Promise<void> {
     helpers.setSubmitting(true);
@@ -149,7 +147,7 @@ export default function Register(): JSX.Element {
   }
 
   return (
-    <div className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5 overflow-y-auto py-4'>
+    <div className={styles.registerPageRoot}>
       <MForm
         className='flex flex-col md:w-1/2 lg:w-1/3 xl:w-1/4 items-center gap-1'
         initialValues={initialValues}
