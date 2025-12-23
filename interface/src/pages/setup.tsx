@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import Flex from '@monetr/interface/components/Flex';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
 import MLogo from '@monetr/interface/components/MLogo';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
@@ -13,6 +14,8 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface SetupPageProps {
+  // TODO Remove this prop and instead just use "does the user have any links". If they do then we can assume this is
+  // true and if they don't we can treat this as false.
   alreadyOnboarded?: boolean;
   manualEnabled?: boolean;
 }
@@ -75,7 +78,13 @@ function Greeting(props: GreetingProps): JSX.Element {
   }
 
   return (
-    <div className='w-full h-full flex lg:justify-center items-center gap-4 md:gap-8 flex-col overflow-y-auto p-4'>
+    <Flex
+      align='center'
+      className={layoutVariants({ width: 'screen', height: 'screen' })}
+      gap='lg'
+      justify='center'
+      orientation='column'
+    >
       <MLogo className='w-16 h-16 md:w-24 md:h-24' />
       <Banner />
       <Flex gap='lg' justify='center' orientation='stackMedium'>
@@ -100,8 +109,8 @@ function Greeting(props: GreetingProps): JSX.Element {
         Continue
       </Button>
       {!props.alreadyOnboarded && <SetupBillingButton />}
-      {props.alreadyOnboarded && <LogoutFooter />}
-    </div>
+      {!props.alreadyOnboarded && <LogoutFooter />}
+    </Flex>
   );
 }
 

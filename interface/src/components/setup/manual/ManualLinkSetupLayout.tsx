@@ -10,6 +10,8 @@ import type {
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 
+import styles from './ManualLinkSetupLayout.module.scss';
+
 interface ManualLinkSetupLayoutProps {
   children: ReactNode | undefined;
 }
@@ -19,7 +21,7 @@ export default function ManualLinkSetupLayout(props: ManualLinkSetupLayoutProps)
   const steps = Object.values(ManualLinkSetupSteps);
   const step = steps.indexOf(viewContext.currentView);
   return (
-    <div className='w-full h-full flex justify-between items-center gap-8 flex-col p-4 md:p-2 overflow-auto'>
+    <div className={styles.manualLinkSetupLayoutRoot}>
       <div className='p-0 md:p-8 w-full'>
         <MStepper activeIndex={step} steps={['Intro', 'Account', 'Balances', 'Income']} />
       </div>

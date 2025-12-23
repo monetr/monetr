@@ -1,0 +1,19 @@
+@use '@monetr/interface/variables';
+@use '@monetr/interface/mixins';
+
+.manualLinkSetupLayoutRoot {
+  @include mixins.screen;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 1 * variables.$size;
+
+  @include mixins.screen;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 1 * variables.$size;
+  min-height: fit-content;
+
+  padding:5 * variables.$size;
+}

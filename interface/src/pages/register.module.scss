@@ -7,6 +7,7 @@
   align-items: center;
   flex-direction: column;
   gap: 1 * variables.$size;
+  min-height: fit-content;
 
   padding-top: 10 * variables.$size;
   padding-bottom: 10 * variables.$size;
@@ -18,5 +19,4 @@
     padding-bottom: 10 * variables.$size;
     justify-content: center;
   }
-  min-height: fit-content;
 }

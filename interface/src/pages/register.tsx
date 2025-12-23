@@ -12,6 +12,7 @@ import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
+import BetaCodeInput from '@monetr/interface/components/register/BetaCodeInput';
 import TextLink from '@monetr/interface/components/TextLink';
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
@@ -19,7 +20,6 @@ import useSignUp, { type SignUpResponse } from '@monetr/interface/hooks/useSignU
 import { getLocale, getTimezone } from '@monetr/interface/util/locale';
 import type { APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
-import BetaCodeInput from '@monetr/interface/components/register/BetaCodeInput';
 
 import styles from './register.module.scss';
 
