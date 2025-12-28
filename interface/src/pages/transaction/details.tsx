@@ -94,7 +94,7 @@ export default function TransactionDetails(): JSX.Element {
           icon={ShoppingCart}
           title='Transactions'
         />
-        <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
+        <div className='w-full h-full min-w-0 p-4 pb-16 md:pb-4'>
           <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
             <div className='w-full md:w-1/2 flex flex-col items-center'>
               <Flex justify='center'>
@@ -189,7 +189,7 @@ export default function TransactionDetails(): JSX.Element {
           Save Changes
         </FormButton>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
+      <div className='w-full h-full min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
             <Flex justify='center'>
