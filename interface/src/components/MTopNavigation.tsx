@@ -77,8 +77,6 @@ interface ActionAreaProps {
 }
 
 function ActionArea(props: ActionAreaProps): JSX.Element {
-  // Testing something on mobile!
-  return null;
   if (!props.children) {
     return null;
   }
