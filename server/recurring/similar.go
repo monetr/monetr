@@ -168,9 +168,6 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 
 		{ // Based on the center most datum, calculate the merchant
 			datum, _ := s.dbscan.GetDocumentByIndex(centerIndex)
-			// if debug {
-			// 	PPrint(datum)
-			// }
 
 			sort.Slice(datum.Tokens, func(i, j int) bool {
 				return rankWordComposition(datum.Tokens[i].Original) < rankWordComposition(datum.Tokens[j].Original)

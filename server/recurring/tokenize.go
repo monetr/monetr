@@ -19,6 +19,18 @@ var (
 		"coffe":       {"Coffee"},
 		"lak":         {"Lake"},
 	}
+
+	dropWords = map[string]struct{}{
+		"null": {}, // Shows up in manual imports somtimes
+
+		"inc": {}, // Common busines suffix, not valauble
+
+		"merchant": {}, // Shows up in almost all mercury transactions.
+		"name":     {}, // Shows up in almost all mercury transactions.
+
+		// TODO, get a list of country codes to exclude?
+		"us": {},
+	}
 )
 
 type Token struct {
@@ -84,7 +96,7 @@ func Tokenize(transaction *models.Transaction) []Token {
 		}
 
 		// Throw out words that are excluded out right
-		if weight, ok := specialWeights[lower]; ok && weight == 0 {
+		if _, ok := dropWords[lower]; ok {
 			token.Excluded = true
 			tokens = append(tokens, token)
 			continue
