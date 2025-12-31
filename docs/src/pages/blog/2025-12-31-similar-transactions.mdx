@@ -20,7 +20,7 @@ import BlogHeader from '@monetr/docs/components/Blog/BlogHeader';
 </div>
 
 <Callout>
-  This blog post contains information that is loosely understood and probably **wrong**, do not mistake this blog post
+  This blog post contains information that is loosely understood and probably **wrong**. Do not mistake this blog post
   and the achievement of the desired results as proof that I know what I'm doing, or that the things discussed here are
   100% factual. This blog post covers what I have done based on my loose understanding and assumptions only. **I am
   simply making mistakes in public so that people can point them out sooner.**
@@ -267,7 +267,7 @@ Distance](https://en.wikipedia.org/wiki/Euclidean_distance) as the distance func
 The way DBSCAN works is it iterates over all of the data procedurally. It takes the first vector and looks for other
 vectors in the dataset that are "neighbors". Vectors within a certain euclidean distance of the initial vector. If it
 finds at least a minimum number of neighbors within that distance, then that is considered the "root" of a cluster. If
-it does not find the minimum number of neighbors though then that means that are are no other transactions that are
+it does not find the minimum number of neighbors though, then that means that there are no other transactions that are
 "similar" to that initial one (or at the very least, that there are not a sufficient number of transactions for this
 transaction to be considered part of a group of similar transactions). That transaction is marked as "noise" or
 "visited" so that it is excluded from future calculations.
@@ -303,7 +303,7 @@ identical transaction names used for this calculation, there may be multiple tra
 criteria. If that is the case, we use the transaction with the lowest ID alphabetically as our centroid or base
 transaction.
 
-From this we take all of the words that appear in the centeroid transaction and sort them by their value. The most
+From this we take all of the words that appear in the centroid transaction and sort them by their value. The most
 valuable words for a transaction rise to the top here. For example, a cluster of transactions for the Caribou Coffee
 transaction above would have the most valuable words like this:
 
@@ -361,8 +361,8 @@ have a word that is considered very valuable or meaningful, but might not be pre
 the other transactions in the same cluster.
 
 You can see that the value of the two meaningful words is much higher than the less meaningful words (the location of
-the transaction). We then take the the top 75% of ranked words within this list and we sort them by the order they
-appeared in the transaction (because the order of the words is not represented by their value necessarily).
+the transaction). We then take the top 75% of ranked words within this list and we sort them by the order they appeared
+in the transaction (because the order of the words is not represented by their value necessarily).
 
 ```json filename="Tokens In The Top 75%"
 [
@@ -390,7 +390,7 @@ words in that cluster.
 Caribou Coffee
 ```
 
-This ends up being a pretty reasonable way to derive a merchant name from a transaction without the data being santized
+This ends up being a pretty reasonable way to derive a merchant name from a transaction without the data being sanitized
 for us already (something that Plaid offers). So this can be used as a way to enrich offline data that is provided via
 file imports or less reliable data connectors in the future.
 
@@ -437,10 +437,10 @@ enough"[^3]. However with that there are some huge spaces for improvement.
    first.
    - It is worth noting here that the DBSCAN portion of this is _the most expensive part of this by far_. Calculating the
      tf-idf for every transaction (including querying the database for every transaction for a specific bank account) is
-     essentially negligable compared to how long the DBSCAN can take. This can be seen in the screenshot below which is
+     essentially negligible compared to how long the DBSCAN can take. This can be seen in the screenshot below which is
      a trace from a production account calculating similar transactions after having received a Plaid webhook.
      ![Similar Transaction Trace](./2025-12-31-similar-transactions/similar-trace.png)
-     As you can see, even the innefficient N+1 query and the tf-idf code is just insignificant compared to the time it
+     As you can see, even the inefficient N+1 query and the tf-idf code is just insignificant compared to the time it
      takes to perform the DBSCAN. (**Note**: monetr's production servers are not using AVX512)
 
 There are surely more ways that I can improve this process, but these are the two that are front of mind for me at the
