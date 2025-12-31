@@ -26,6 +26,18 @@ export const pageMap = [{
       "author": "Elliot Courant",
       "searchable": true
     }
+  }, {
+    name: "2025-12-31-similar-transactions",
+    route: "/blog/2025-12-31-similar-transactions",
+    frontMatter: {
+      "title": "How monetr's similar transactions work",
+      "date": "2025/12/31",
+      "description": "A technical deep-dive into how monetr detects similar transactions offline and without AI.",
+      "tag": "Engineering",
+      "ogImage": "/blog/2025-12-31-similar-transactions/preview.png",
+      "author": "Elliot Courant",
+      "searchable": true
+    }
   }]
 }, {
   name: "blog",
