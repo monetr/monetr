@@ -1,0 +1,162 @@
+#!/usr/bin/env node
+
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import { Resvg } from '@resvg/resvg-js';
+import satori from 'satori';
+
+
+const require = createRequire(import.meta.url);
+
+const WIDTH = 1200;
+const HEIGHT = 630;
+
+async function generateOg() {
+  // TODO Make this work with woff2 files.
+  const fontPath = require.resolve('@fontsource-variable/inter/files/inter-latin-standard-normal.woff2');
+  // TODO Since it doesn't work with woff2 files, just use the downloaded files from fontsource for now.
+  const fontData = fs.readFileSync('/home/elliotcourant/Downloads/inter_5.2.8/ttf/inter-latin-400-normal.ttf');
+
+  const logoPath = path.join('images/logo.png');
+  const logoBase64 = fs.readFileSync(logoPath).toString('base64');
+
+  const svg = await satori(
+    {
+      type: 'div',
+      props: {
+        style: {
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '96px',
+          background: '#19161f',
+          color: '#fafafa',
+          fontFamily: 'Inter',
+        },
+        children: [
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                alignItems: 'center',
+                gap: '24px',
+              },
+              children: [
+
+                {
+                  type: "div",
+                  props: {
+                    style: {
+                      width: 96,
+                      height: 96,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                    },
+                    children: [
+                      {
+                        type: "img",
+                        props: {
+                          src: `data:image/png;base64,${logoBase64}`,
+                          style: {
+                            width: "100%",
+                            height: "100%",
+                            display: "block",
+                            objectFit: "contain",
+                            objectPosition: "center",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  type: 'span',
+                  props: {
+                    style: {
+                      fontSize: 40,
+                      fontWeight: 600,
+                    },
+                    children: 'monetr.app',
+                  },
+                },
+              ],
+            },
+          },
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                flexDirection: 'column',
+              },
+              children: [
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex',
+                      fontSize: 64,
+                      fontWeight: 700,
+                      lineHeight: 1.1,
+                      marginBottom: '24px',
+                    },
+                    children: `How monetr's similar transactions work`,
+                  },
+                },
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex',
+                      fontSize: 32,
+                      opacity: 0.85,
+                    },
+                    children: 'A technical deep-dive into how monetr detects similar transactions offline and without AI.',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      width: WIDTH,
+      height: HEIGHT,
+      fonts: [
+        {
+          name: 'Inter',
+          data: fontData,
+          weight: 400,
+          style: 'normal',
+        },
+      ],
+    },
+  );
+
+  const resvg = new Resvg(svg, {
+    fitTo: {
+      mode: 'width',
+      value: WIDTH,
+    },
+  });
+
+  const pngData = resvg.render().asPng();
+
+  const outputPaths = [
+    'docs/public/blog/2025-12-31-similar-transactions/preview.png',
+    'docs/src/pages/blog/2025-12-31-similar-transactions/preview.png',
+  ];
+  outputPaths.forEach(outputPath => {
+    fs.writeFileSync(outputPath, pngData);
+    console.log(`Wrote to: ${outputPath}`);
+  });
+}
+
+generateOg().catch(console.error);
