@@ -19,16 +19,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func PPrint(thing any) {
-	j, err := json.MarshalIndent(thing, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(j))
-}
-
-const NumberOfMostValuableWords = 2
-
 type SimilarTransactionDetection interface {
 	AddTransaction(txn *models.Transaction)
 	DetectSimilarTransactions(ctx context.Context) []models.TransactionCluster
