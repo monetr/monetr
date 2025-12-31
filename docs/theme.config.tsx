@@ -35,9 +35,7 @@ const config: DocsThemeConfig = {
     dismissible: true,
     key: 'monetr-launched-january-2025',
     content: (<p>
-      🎉 monetr is now live!
-      Read the announcement <Link className='font-bold hover:text-dark-monetr-blue hover:underline' href='/blog/2024-12-30-introduction'>here</Link>.
-      Or <Link className='font-bold hover:text-dark-monetr-blue hover:underline' href='https://my.monetr.app/register'>Sign Up</Link>!
+      🎉 Read the latest blog post about similar transactions <Link className='font-bold hover:text-dark-monetr-blue hover:underline' href='/blog/2025-12-31-similar-transactions'>here</Link>.
     </p>
     ),
   },

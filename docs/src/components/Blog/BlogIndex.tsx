@@ -77,7 +77,7 @@ export default function BlogIndex(): JSX.Element {
                   Read more <ArrowRight className='h-4' />
                 </span>
               </div>
-              <div className='flex gap-2 flex-wrap mt-3 items-baseline'>
+              <div className='flex gap-1 flex-wrap mt-3 items-baseline'>
                 {page.frontMatter?.date ? (
                   <span className='opacity-60 text-sm group-hover:opacity-100'>
                     {format(parse(page.frontMatter.date, 'yyyy/MM/dd', new Date()), 'MMMM dd, yyyy')}
