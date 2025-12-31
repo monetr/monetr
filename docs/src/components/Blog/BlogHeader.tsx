@@ -19,11 +19,11 @@ export default function BlogHeader(): JSX.Element {
       <span className='text-dark-monetr-content'>
         {format(parse(config.frontMatter.date, 'yyyy/MM/dd', new Date()), 'MMMM dd, yyyy')}
       </span>
-      <div className='flex items-center justify-center'>
-        <span className='absolute mx-auto flex border w-fit bg-gradient-to-r blur-xl opacity-50 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-5xl sm:text-6xl font-extrabold text-transparent text-center select-none'>
+      <div className='flex items-center justify-center relative'>
+        <span className='absolute mx-auto flex w-fit bg-gradient-to-r blur-xl opacity-50 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-5xl sm:text-6xl font-extrabold text-transparent text-center select-none'>
           {config.frontMatter.title}
         </span>
-        <h1 className='h-24 relative top-0 justify-center flex bg-gradient-to-r items-center from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-5xl sm:text-6xl font-extrabold text-transparent text-center select-auto'>
+        <h1 className='relative top-0 justify-center flex bg-gradient-to-r items-center from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-5xl sm:text-6xl font-extrabold text-transparent text-center select-auto'>
           {config.frontMatter.title}
         </h1>
       </div>

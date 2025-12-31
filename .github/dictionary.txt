@@ -1,5 +1,8 @@
 1Password
+3D
 API.*
+AVX
+AVX512
 AboutFeatures
 BackgroundGradientAnimation
 Biometric
@@ -16,6 +19,7 @@ Chatwoot
 Chisago
 CloudNativePG
 ConfigMap
+DBSCAN
 DNS
 DNT
 DSN
@@ -35,6 +39,7 @@ IntellJ
 JSON
 KMS.*
 LLC
+Levenshtein
 Leyna
 Lindstrom
 Link2
@@ -52,6 +57,8 @@ ReCAPTCHA
 S3
 S3-compatible
 SDK
+SHA256
+SIMD
 SMS
 SMTP
 SSL
@@ -69,6 +76,7 @@ UI
 Umami
 VM
 Valkey
+X86's
 YAML
 [aA]uthenticator
 [cC]onfig
@@ -94,6 +102,7 @@ automations
 backend
 build-time
 captcha
+centroid
 conveniens
 cors
 customizations
@@ -111,6 +120,7 @@ hardcoded
 hostname
 href
 identityless
+idf
 integrations
 kms.*
 licensors
@@ -118,6 +128,7 @@ local-kms
 localhost
 logrus
 macOS
+mathbf
 merchantability
 minio
 miniredis
@@ -128,6 +139,7 @@ non-HTTPS
 npm
 pnpm
 pre-screen
+procedurally
 radosgw
 recaptcha
 self-hostable
@@ -135,6 +147,9 @@ severable
 sexualized
 submodule.*
 templating
+tf-idf
+tokenization
+tokenized
 unbudgeted
 uncomment
 valkey
