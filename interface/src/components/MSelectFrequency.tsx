@@ -3,8 +3,7 @@ import { useFormikContext } from 'formik';
 
 import Select, { type SelectOption, type SelectProps } from '@monetr/interface/components/Select';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-
-import getRecurrencesForDate from './Recurrence/getRecurrencesForDate';
+import getRecurrencesForDate from '@monetr/interface/util/getRecurrencesForDate';
 
 export interface MSelectFrequencyProps extends Omit<SelectProps<string>, 'onChange' | 'options'> {
   name: string;

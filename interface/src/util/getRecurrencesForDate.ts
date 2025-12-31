@@ -2,7 +2,7 @@ import { tz } from '@date-fns/tz';
 import { endOfMonth, format, getDate, getMonth, isEqual, startOfDay, startOfMonth } from 'date-fns';
 import { RRule, type Weekday } from 'rrule';
 
-import Recurrence from '@monetr/interface/components/Recurrence/Recurrence';
+import Recurrence from '@monetr/interface/models/Recurrence';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export default function getRecurrencesForDate(
