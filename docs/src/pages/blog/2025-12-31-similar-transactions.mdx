@@ -12,6 +12,439 @@ import BlogHeader from '@monetr/docs/components/Blog/BlogHeader';
 
 <BlogHeader />
 
-# Foreword
+<div className="flex justify-center">
+  <div className="w-1/2 sm:w-1/3">
+    ![Dumb Stuff](./2025-12-31-similar-transactions/dumbstuff.png)
+  </div>
+</div>
 
-Blog content here
+One of the coolest problems that I was able to work on with monetr was trying to come up with a way to group
+transactions together. I wanted to be able to view a transaction and in the same view see other similar transactions.
+This simple idea has a lot of things that can be built on top of it. Similar transactions will have patterns, like
+recurring dates, or amounts that vary seasonally. I can surface data to the user about these patterns and even use some
+of them to automate parts of setting up a user's budget. At least that's the long term idea.
+
+But getting there the first problem is "group similar transactions". Initially I explored simply comparing every
+transaction to every other transaction using [Levenshtein Distance](https://en.wikipedia.org/wiki/Levenshtein_distance)
+with the names or memo of the transaction. This was _extremely_ computationally expensive and even for a dataset of
+around 1000 transactions was very slow. It also didn't handle nuances very well since the value or meaningfulness of
+each word in a transactions memo was the same. Two transactions for different merchants but with slightly similar
+spelling could be considered the same. The false positive rate seemed very high even just testing this against my own
+transaction data.
+
+Eventually I found [tf-idf](https://en.wikipedia.org/wiki/Tf%E2%80%93idf), or "term frequency-inverse document
+frequency". This algorithm measures the frequency of words in a set of documents (transactions in this case) and gives
+each word a value that intends to represent how significant that word is in that document. Words that appear in every
+document are given less value overall, and words appearing in fewer documents are given more value. Words that appear
+more often in a single document are also considered more valuable within that document, but this is weighted against how
+often that word appears in all of the other documents.
+
+Here is an example of a transaction name or memo that I'm dealing with in my own dataset:
+
+```
+POS DEBIT-DC 1234 TST* CARIBOU COFFE NORTH BRANCH MN
+```
+
+Most of the transactions in my dataset follow this format. The first word is the payment method, in this case `POS` or
+"Point of Sale". Other transactions may have other payment methods like `ACH` though. Then the direction of the payment,
+`DEBIT` in this case. The last 4 of my card number. Then the actual merchant information.
+
+An assumption I made is that not all of the transaction data that monetr deals with will follow this same pattern. But
+that generally, within a single institution; transactions would follow a consistent format. Even if the order of the
+data changed, a bank will always have these pieces of information in some form in the memo of their transaction. The
+words they use might change as well, maybe `WITHDRAWAL` instead of `DEBIT`. But as long as every transaction from that
+bank used the same pattern, it shouldn't matter.
+
+That assumption plays into how I ended up using tf-idf, and how tf-idf ultimately ended up being the solution. There are
+shortfalls here that I'll address later on, but the premise of this is basically: All transactions from an institution
+will follow a consistent pattern, so meaningless words such as "debit", "pos", "transfer" or things that appear in
+almost every transaction are easy to assign a low value using tf-idf. With that, the more meaningful parts of a
+transaction will naturally become more valuable. Not every transaction will contain the words `CARIBOU COFFE`, so those
+words will be more significant.
+
+The way this works in monetr is a transaction memo such as the one above is taken and "tokenized". The result of that
+tokenization looks like this:
+
+**TODO**
+
+First it takes all of the known good words out of the text.
+
+```text /POS/ /DEBIT/ /CARIBOU/ /COFFE/ /NORTH/ /BRANCH/
+POS DEBIT-DC 1234 TST* CARIBOU COFFE NORTH BRANCH MN
+```
+
+Then it transforms them all to be cased consistently and removes unnecessary text.
+
+```text /pos/ /debit/ /caribou/ /coffee/ /north/ /branch/
+pos debit caribou coffee north branch
+```
+
+The "tokenization" step performs a few operations:
+- Split the string by non-word characters.
+- Throw out any words that are purely numeric or contain no vowels, these are usually pieces of information that are not
+  valuable anyway.
+- Throw out any words from a lookup table, this lookup table will remove words that are in a list of state 2 letter
+  characters. So `CA` or `NY` is thrown out.
+- Correct any words using a lookup table, some basic spelling things can be corrected here as sometimes words are
+  truncated. `COFFE` becomes `Coffee`.
+- Store a copy of all of the words in lower case so that our tf-idf is not case sensitive.
+These transformations give us an array of words or "tokens" that can now be fed into our tf-idf algorithm.
+
+## tf-idf
+
+Now that the data has been transformed into a useful format, the data is fed into the tf-idf algorithm. For every
+transaction (or document) each word is taken and added to a "word count" map that is specific to that document. Then the
+term frequency of each word is calculated. Taking the number of times that specific word is seen in the document divided
+by the number of words in the document. This term frequency is then stored for later use. We also increment the global
+counts for each word.
+
+```math
+\text{tf}_{word} = \frac{\text{frequency within document}_{word}}{\text{number of unique words within document}}
+```
+
+**TODO CHECK THIS!**
+
+- **Note** this implementation may also not be quite right, and it may be better to consider the total number of words
+  in the document period, instead of the number of unique words in a document.
+
+Once all of the documents have been added, the "idf" can be calculated. This is done using the following formula.
+
+```math
+\text{idf}_{word} = \log(\frac{\text{number of documents}} {(\text{count}_{word} + 1)})
+```
+**Note** This isn't quite the same weighting scheme as inverse document frequency or inverse document frequency
+smoothed. I've simply translated what I have in code and its very possible (likely) that I implemented this part wrong.
+
+Now we have an individual document frequency for every word among all of our transactions. This on its own is valuable
+in that it will already show which words show up in almost every transaction.
+
+Then for each document monetr will calculate two parts. The first part is the final tf-idf for that specific document as
+well as a "vector" which monetr uses for the next stage. The tf-idf is per word, so for every word in a single document
+we look up what the idf of that word is that we calculated above and we multiply it by the term frequency inside that
+specific document:
+
+```math
+\text{tfidf}_{word} = \text{tf}_{word} \times \text{idf}_{word}
+```
+
+In code this is represented as:
+
+```go
+for word, tfValue := range document.TF {
+	document.TFIDF[word] = tfValue * p.idf[word]
+}
+```
+
+**TODO This code snippet is kind of useless lol**
+
+However monetr also applies a few more modifications. If the particular word is "special" and has a special weight
+multiplier defined in monetr, then the tf-idf is multiplied by that modifier. At the time of writing this monetr has a
+few words that are essentially "thrown out" at this stage.
+
+```go
+specialWeights = map[string]float32{
+	"null": 0, // Shows up in manual imports sometimes
+	"merchant": 0, // Shows up in almost all mercury transactions.
+	"name": 0, // Shows up in almost all mercury transactions.
+	"us": 0, // TODO, get a list of country codes to exclude?
+}
+```
+
+**TODO** It doesn't work like this anymore
+
+- **Note** This needs to be improved and these words should be thrown out in the tokenization stage.
+
+Now monetr knows how much each word in each transaction is "worth" and it needs to turn this data into a way of finding
+similar transactions. Simply, we can take all of these values of all of these words and assign each unique word a
+position in a vector. Words that are more significant will have a higher value in the vector and words that are less
+significant will have a lower value. Words that aren't present in that document will have a value of `0` in this vector.
+
+To make this easy monetr takes all of the words observed in all of the transactions and sorts them alphabetically. Then
+creates a vector that is at least 2x the number of words seen but rounded _up_ to the nearest size that is divisible by
+16.
+
+- What does multiplying it by 2 do, and why do I store the values at alternating indicies.
+	- I should remove this it is stupid.
+	- https://github.com/monetr/monetr/commit/af554fcf834cd956134f19ce0c2ccc6a70d9de43#r170485143
+
+**TODO This has been updated**
+
+The reason we round up to 16 is so that the vector fits nicely into SIMD registers used for our normalization and
+distance functions. On computers that support X86's AVX instructions these registers allow us to work with 8 values from
+the vector at a time, on newer hardware that supports AVX512 we can work with 16 values at a time. Keeping the vector a
+size that is divisible by 16 means that we never need to worry about aligning memory for these operations or handling
+tailing values of odd sizes. Which keeps the assembly code much simpler and doesn't require branching logic outside of
+iterating over the vector.
+
+This ends up looking like this:
+
+```go
+vector := []float32{
+  0.000000, // acctverify
+  0.000000, // ach
+  0.000000, // adjustment
+  // ...
+  0.293779, // branch
+  // ...
+  0.340398, // caribou
+  // ...
+  0.339518, // coffee
+  // ...
+  0.014512, // debit
+  // ...
+  0.294113, // north
+  // ...
+  0.045037, // pos
+  // ...
+  0.000000, // withdrawal
+  0.000000, // xfer
+  0.000000, //
+}
+```
+
+Note that there is some padding at the end, even though these values are `0` I included it above to show how the vector
+is padded to the nearest value divisible by 16. You can see above though that the words that are actually in our example
+transaction are represented with a positive value in the vector. With more significant words being a higher value and
+more common words (such as "debit") being a much lower value because they are less identifying of a transaction.
+
+Once we have this vector built we modify the vector using [Euclidean
+normalization](https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm):
+
+```math
+\mathbf{x} = [x_1, x_2, \dots, x_n]
+```
+
+Given the vector above where $n$ is divisible by 16, we can use SIMD for the following operations. Create a sum of the
+squared values of the vector and calculate it's square root. This is our "norm" that we'll use below.
+
+```math
+\|\mathbf{x}\|_2 = \sqrt{\sum_{i=1}^{n} x_i^2}
+```
+
+Then change the original vector, dividing each value by the "norm" we derived from above.
+
+```math
+\hat{x}_i = \frac{x_i}{\|\mathbf{x}\|_2}
+\quad\text{for } i = 1, \dots, n
+```
+
+**TODO Why is this the case**
+
+This normalizes the vector and exaggerates values in the vector that are higher and suppresses values that are lower.
+For example, consider the original vector above. The result after normalization would be:
+
+```go
+vector := []float32{
+  0.000000, // acctverify
+  0.000000, // ach
+  0.000000, // adjustment
+  // ...
+  0.460952, // branch
+  // ...
+  0.534099, // caribou
+  // ...
+  0.532719, // coffee
+  // ...
+  0.022770, // debit
+  // ...
+  0.461476, // north
+  // ...
+  0.070664, // pos
+  // ...
+  0.000000, // withdrawal
+  0.000000, // xfer
+  0.000000, //
+}
+```
+
+This normalization scales the values such that the distance from the smallest non-zero value is now `0.511329` compared
+to `0.325886` from the non-normalized vector.
+
+## DBSCAN
+
+At this point monetr has an array of vectors with each vector representing what is "meaningful" about the associated
+transaction. This data can now be used to determine which transactions are similar to each other. To do that monetr uses
+an algorithm called [DBSCAN](https://en.wikipedia.org/wiki/DBSCAN) and [Euclidean
+Distance](https://en.wikipedia.org/wiki/Euclidean_distance) as the distance function.
+
+The way DBSCAN works is it iterates over all of the data procedurally. It takes the first vector and looks for other
+vectors in the dataset that are "neighbors". Vectors within a certain euclidean distance of the initial vector. If it
+finds at least a minimum number of neighbors within that distance, then that is considered the "root" of a cluster. If
+it does not find the minimum number of neighbors though then that means that are are no other transactions that are
+"similar" to that initial one. That transaction is marked as "noise" or "visited" so that it is excluded from future
+calculations.
+
+But transactions that do have neighbors get built out even more. Each of the neighbors are then address recursively,
+looking for each of _their_ neighbors. This allows the cluster to expand as long as there are vectors within the
+distance threshold specified. This process is repeated until the cluster cannot expand anymore.
+
+Because each word in our dataset is given a specific index in our vector, each word represents a dimension for every
+transaction. Words that aren't present in that transaction have no value in that dimension. If there were only 3 words
+in the dataset then you could express the similarity of transactions with X, Y and Z coordinates. If a transaction
+contains the word for the X coordinate, then that transaction is pushed out in 3D space on that coordinate. But if the
+transaction also contains the word for the Y coordinate, then it is also pushed out on the Y coordinate. This results in
+each transaction having some location within this 3D space, and all DBSCAN is doing is looking for clusters of these
+coordinates that are close together. Transactions might share the same word but words that are more valuable will have
+more influence on the coordinates of the transaction, and transactions that share words that are valuable will have
+coordinates that are proximate in this highly dimensional space.
+
+The result of all of this is that we now have an array of clusters of transactions. We know that within each cluster the
+transactions therein are at least somewhat similar. The similarity however is not perfect, as I'll cover below.
+
+**TODO (showing output of something)**
+
+## Consistently identifying clusters
+
+The next important part of this process is being able to consistently identify the clusters, this way as transactions
+are added and clusters grow we can still know that it is the same cluster over time. This is not as simple as selecting
+a transaction ID from the cluster and deciding that it is the "basis" of a cluster and using it as the unique
+identifier. The cluster could be built poorly initially when there is not sufficient data, but then changes as more data
+makes the similarities more accurate. This ID would stay the same but the members of the cluster will have changed.
+
+Instead I've tried to do something that more meaningfully identifies the cluster using data from the members, but
+independent of the members themselves. A member could be added or removed but the identifier should be the same. To do
+this I take the most valuable words from a cluster and I normalize their values using the same L2 normalization above.
+This means the most valuable words within a cluster are further apart relatively from the lesser valuable words. I can
+then take the top 80% of the words in terms of value and derive a signature from them. For example, a cluster of
+transactions for the Caribou Coffee transaction above would have the most valuable words like this:
+
+```json
+[
+  {
+    "word": "Caribou",
+    "sanitized": "caribou",
+    "order": 4,
+    "value": 151.68399,
+    "rank": 0.5677639
+  },
+  {
+    "word": "Coffee",
+    "sanitized": "coffee",
+    "order": 5,
+    "value": 151.29242,
+    "rank": 0.5648364
+  },
+  {
+    "word": "North",
+    "sanitized": "north",
+    "order": 6,
+    "value": 131.05951,
+    "rank": 0.42386284
+  },
+  {
+    "word": "Branch",
+    "sanitized": "branch",
+    "order": 7,
+    "value": 130.91055,
+    "rank": 0.42289993
+  },
+  {
+    "word": "Pos",
+    "sanitized": "pos",
+    "order": 0,
+    "value": 20.068632,
+    "rank": 0.009938569
+  },
+  {
+    "word": "Debit",
+    "sanitized": "debit",
+    "order": 1,
+    "value": 6.466796,
+    "rank": 0.001031969
+  }
+]
+```
+
+You can see that the value of the two meaningful words is much higher than the less meaningful words (the location of
+the transaction). The `rank` here is the normalized value, pushing the values even further apart. So our most valuable
+words become just the two words we really care about:
+
+```json
+[
+    {
+      "word": "Caribou",
+      "sanitized": "caribou",
+      "order": 4,
+      "value": 151.68399,
+      "rank": 0.5677639
+    },
+    {
+      "word": "Coffee",
+      "sanitized": "coffee",
+      "order": 5,
+      "value": 151.29242,
+      "rank": 0.5648364
+    }
+  ]
+```
+
+**TODO This has changed slightly in code, and now the most valuable words of the oldest centroid is used**
+
+For consistently identifying clusters, we'll take these most valuable words and we'll sort them alphabetically, convert
+them to lowercase and then simply SHA256 hash them. This way clusters that share the same signature can also be merged
+meaningfully, but it also means that we can lookup this signature in the database when we append or modify transaction
+clusters in the future.
+
+These most valuable words also serve as a way of deriving a very basic merchant name for a transaction. Since the most
+valuable words will isolate things that are special about a transactions name, the other words fall away. If we keep
+track of the order the words appeared in these transactions then we can sort the most valuable words in the order they
+appear in to get the merchant name. This example already has them sorted in that order, but other transactions can be
+more odd where they are not in the right order or have the exact same values.
+
+- TODO This is actually kind of broken at the moment.
+
+## Room for improvement
+
+This entire process is very much "good enough"[^1], my goal was to build something that provided similar transactions in a
+way that did not rely on the use of AI models that were difficult to scrutinize. Or in a way that required huge sets of
+training data to get just right. The assumptions I made here about how transaction data exists is very much "good
+enough". However with that there are some huge spaces for improvement.
+
+1. There are too many dimensions, there is one dimension per word for the entire transaction dataset. While this might
+   not necessarily diminish the "accuracy" of the process on its own, it makes the process significantly less efficient.
+   Most vectors that are compared in the DBSCAN process are primarily `0.0` values, with the exception of maybe 2-6
+   non-zero values. This means that a lot of the "optimized" assembly code I've written is computing _nothing_ most of
+   the time. There are some safe assumptions I could make to improve this. Right now the values are only ever positive,
+   but they don't _need_ to be. For example, I could combine two words into a single dimension as long as those two
+   words never appear on the same transaction. A negative value on that dimension would represent one word, and a
+   positive value would represent another word. This would reduce the size of the vector (potentially significantly)
+   without any loss in the quality of the output.
+2. Words are not exactly the greatest things to index on and some words can be shared between irrelevant transactions.
+   For example, if you have a transaction `POS DEBIT-DC    1234 WHITE CASTLE  0800 FOREST LAKE MN` and a transaction
+   `POS DEBIT-DC    1234 TST* CARIBOU COFFE WHITE BEAR LA MN`. The tf-idf process has no way of distinguishing the
+   `WHITE` in the first transaction from the `WHITE` in the second transaction. This can skew transaction similarity and
+   cause some weird issues where some words that _are_ meaningful are not treated as such because of how common the word
+   is. The way I would try to solve this is by instead calculating the tf-idf values of word pairs. For example `["pos
+   debit", "debit white", "white castle", "castle forest", "forest lake"]`. This rolling pairwise tokenization would
+   allow for better values of pairs of words that are significant. However this essentially ruins any concept of
+   "document frequency" because a word won't ever appear in a document twice. So I would still need to take into
+   consideration individual words somehow.
+3. Right now this entire process is re-performed from scratch every time there are transaction changes (file upload or
+   Plaid webhook). This is not efficient at all and while the entire process is pretty quick (a few seconds even for
+   huge accounts) it could be improved significantly if I could capture parts of the data and cache it or store it
+   somewhere and only recalculate what was needed. I have some ideas here but want to get the output really refined
+   first.
+
+There are surely more ways that I can improve this process, but these are the two that are front of mind for me at the
+moment. I am not a mathematics expert by any means either so its very possible that the calculations or my
+implementation of them is not correct. If you would be interested in correcting me and helping me learn more, please let
+me know. monetr is built in the open and the code is fully available to everyone. I'm here making stupid choices in
+public so people can point them out sooner.
+
+---
+
+## Afterword
+
+It's been almost a year since monetr hit version 1.0, in that time not as much has changed as I would have liked. I
+still have lots of plans for improvements and features I want to add to the application. This year has been a chaotic
+one for me and has not left me with a lot of time to dedicate to these bigger improvements that I want to make, I'm
+hoping that 2026 will give me some more leeway there.
+
+I'd also like to thank everyone who has reached out to express their support, interest and ideas for monetr. It is
+genuinely appreciated and I do my best to take all of the feedback that I receive; though I do apologize that I've been
+slow to act on a lot of the feedback this year.
+
+---
+
+[^1]: This has not been certified as good enough by the [certified good enough certification
+    authority](https://youtu.be/44-NAlPruD4?t=700).

@@ -55,3 +55,8 @@ img[data-nimg], img[data-rmiz-modal-img] {
     @apply rounded-xl bg-dark-monetr-background shadow-lg col-span-2 relative
   }
 }
+
+/* Make it so highlighting text in a code block works properly */
+mark {
+  color: var(--shiki-dark);
+}
