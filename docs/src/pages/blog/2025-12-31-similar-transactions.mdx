@@ -5,9 +5,10 @@ description: "A technical deep-dive into how monetr detects similar transactions
 tag: Engineering
 ogImage: /blog/2025-12-31-similar-transactions/preview.png
 author: Elliot Courant
-searchable: true # TODO, should blog posts be searchable?
+searchable: true
 ---
 
+import { Callout } from 'nextra/components';
 import BlogHeader from '@monetr/docs/components/Blog/BlogHeader';
 
 <BlogHeader />
@@ -45,15 +46,23 @@ Here is an example of a transaction name or memo that I'm dealing with in my own
 POS DEBIT-DC 1234 TST* CARIBOU COFFE NORTH BRANCH MN
 ```
 
+<Callout type="info">
+  **Note**: In this example I'm only using the "original name" of the transaction. In practice, monetr uses both the
+  "original name" and the "original merchant name" of the transaction concatenated into a single string. This way if a
+  word appears in both then it will appear multiple times in the combined string and be considered more valuable by
+  tf-idf.
+</Callout>
+
 Most of the transactions in my dataset follow this format. The first word is the payment method, in this case `POS` or
 "Point of Sale". Other transactions may have other payment methods like `ACH` though. Then the direction of the payment,
-`DEBIT` in this case. The last 4 of my card number. Then the actual merchant information.
+`DEBIT` in this case. The last 4 of my card number. Then the actual merchant information, and in this case the town that
+the merchant is located in.
 
 An assumption I made is that not all of the transaction data that monetr deals with will follow this same pattern. But
-that generally, within a single institution; transactions would follow a consistent format. Even if the order of the
-data changed, a bank will always have these pieces of information in some form in the memo of their transaction. The
-words they use might change as well, maybe `WITHDRAWAL` instead of `DEBIT`. But as long as every transaction from that
-bank used the same pattern, it shouldn't matter.
+that generally, within a single institution (your own bank); transactions would follow a consistent format. Even if the
+order of the data changed, a bank will always have these pieces of information in some form in the memo of their
+transaction. The words they use might change as well, maybe `WITHDRAWAL` instead of `DEBIT`. But as long as every
+transaction from that bank used the same pattern, it shouldn't matter.
 
 That assumption plays into how I ended up using tf-idf, and how tf-idf ultimately ended up being the solution. There are
 shortfalls here that I'll address later on, but the premise of this is basically: All transactions from an institution
@@ -65,29 +74,32 @@ words will be more significant.
 The way this works in monetr is a transaction memo such as the one above is taken and "tokenized". The result of that
 tokenization looks like this:
 
-**TODO**
-
-First it takes all of the known good words out of the text.
+First it takes all of the known good words out of the text. This step can sometimes omit specific words that are simply
+known to be useless, such as `null` or `inc`.
 
 ```text /POS/ /DEBIT/ /CARIBOU/ /COFFE/ /NORTH/ /BRANCH/
 POS DEBIT-DC 1234 TST* CARIBOU COFFE NORTH BRANCH MN
 ```
 
-Then it transforms them all to be cased consistently and removes unnecessary text.
+Then it transforms them all to be cased consistently and removes unnecessary text. This step also might apply some basic
+spelling corrections, such as adjusting `coffe` to be `coffee`.
 
 ```text /pos/ /debit/ /caribou/ /coffee/ /north/ /branch/
 pos debit caribou coffee north branch
 ```
 
-The "tokenization" step performs a few operations:
+Overall this is what is happening:
 - Split the string by non-word characters.
 - Throw out any words that are purely numeric or contain no vowels, these are usually pieces of information that are not
   valuable anyway.
-- Throw out any words from a lookup table, this lookup table will remove words that are in a list of state 2 letter
-  characters. So `CA` or `NY` is thrown out.
+- Throw out any words from a "drop word" lookup table, this table (as mentioned above) removes words that are
+  universally considered low value regardless of context. Such as `null` or `inc`.
+- Throw out any words from a state lookup table, this lookup table will remove words that are in a list of state 2
+  letter characters. So `CA` or `NY` is thrown out.
 - Correct any words using a lookup table, some basic spelling things can be corrected here as sometimes words are
   truncated. `COFFE` becomes `Coffee`.
 - Store a copy of all of the words in lower case so that our tf-idf is not case sensitive.
+
 These transformations give us an array of words or "tokens" that can now be fed into our tf-idf algorithm.
 
 ## tf-idf
