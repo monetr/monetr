@@ -24,7 +24,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/vault/api v1.20.0
 	github.com/jarcoal/httpmock v1.4.1
-	github.com/labstack/echo/v4 v4.13.4
+	github.com/labstack/echo/v4 v4.15.0
 	github.com/mileusna/useragent v1.3.5
 	github.com/monetr/validation v1.0.5
 	github.com/oklog/ulid/v2 v2.1.1
@@ -43,7 +43,7 @@ require (
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.46.0
-	golang.org/x/net v0.47.0
+	golang.org/x/net v0.48.0
 	golang.org/x/sys v0.39.0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
@@ -121,7 +121,7 @@ require (
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/text v0.32.0
-	golang.org/x/time v0.11.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/protobuf v1.36.8 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	mellium.im/sasl v0.3.1 // indirect
