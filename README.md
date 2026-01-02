@@ -11,8 +11,6 @@
   <img width="460" height="300" src="https://raw.githubusercontent.com/monetr/monetr/main/docs/src/assets/logo.svg">
 </p>
 
-**monetr is live! [Read the announcement post!](https://monetr.app/blog/2024-12-30-introduction/)**
-
 monetr is a budgeting application that aims to make it easier for people to budget around recurring expenses. While
 making it absolutely clear how much you have left over to budget or use for other unplanned spending. It is based off of
 the now defunct [Simple](https://web.archive.org/web/20201128231953/https://www.simple.com/). It is also completely free
