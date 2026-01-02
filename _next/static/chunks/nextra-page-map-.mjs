@@ -95,7 +95,8 @@ export const pageMap = [{
       name: "plaid",
       route: "/documentation/configure/plaid",
       frontMatter: {
-        "sidebarTitle": "Plaid"
+        "title": "Plaid",
+        "description": "Configure your self hosted monetr instance to allow Plaid to provide updates to bank account data directly from your bank."
       }
     }, {
       name: "postgres",
