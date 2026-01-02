@@ -90,9 +90,7 @@ func GivenIHaveAnAccount(t *testing.T, clock clock.Clock, login models.Login) mo
 	repo := repository.NewUnauthenticatedRepository(clock, db)
 	subStatus := stripe.SubscriptionStatusActive
 	account := models.Account{
-		// TODO Using a random timezone breaks things for some reason? Forcing
-		// central for now?
-		Timezone:                     "America/Chicago", //gofakeit.TimeZoneRegion(),
+		Timezone:                     gofakeit.TimeZoneRegion(),
 		Locale:                       "en_US",
 		StripeCustomerId:             myownsanity.StringP(mock_stripe.FakeStripeCustomerId(t)),
 		StripeSubscriptionId:         myownsanity.StringP(mock_stripe.FakeStripeSubscriptionId(t)),
