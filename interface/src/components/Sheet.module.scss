@@ -1,0 +1,33 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.sheetOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  transition-property: opacity;
+  // Start with being transparent
+  opacity: 0%;
+
+  &[data-state="open"] {
+    animation-name: enter;
+    animation-duration: 150ms;
+    // When we open the sheet, fade the overlay in.
+    opacity: 100%;
+  }
+
+  &[data-state="closed"] {
+    animation-name: exit;
+    animation-duration: 150ms;
+    // Fade the overlay out when we close the sheet.
+    opacity: 0%;
+  }
+}
+
+.sheet {
+  position: fixed;
+  z-index: 50;
+  gap: 4 * variables.$size;
+  background-color: var(--background);
+  padding: 6 * variables.$size;
+}
