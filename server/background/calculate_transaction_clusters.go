@@ -135,7 +135,7 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 
 	clustering := recurring.NewSimilarTransactions_TFIDF_DBSCAN(log)
 
-	limit := 500
+	limit := 2000
 	offset := 0
 	for {
 		txnLog := log.WithFields(logrus.Fields{
