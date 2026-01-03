@@ -28,6 +28,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 		BillingEnabled       bool         `json:"billingEnabled"`
 		IconsEnabled         bool         `json:"iconsEnabled"`
 		PlaidEnabled         bool         `json:"plaidEnabled"`
+		LunchFlowEnabled     bool         `json:"lunchFlowEnabled"`
 		ManualEnabled        bool         `json:"manualEnabled"`
 		UploadsEnabled       bool         `json:"uploadsEnabled"`
 		Release              string       `json:"release"`
@@ -87,6 +88,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 
 	configuration.IconsEnabled = icons.GetIconsEnabled()
 	configuration.PlaidEnabled = c.Configuration.Plaid.GetEnabled()
+	configuration.LunchFlowEnabled = c.Configuration.LunchFlow.Enabled
 	configuration.ManualEnabled = true
 	configuration.UploadsEnabled = c.Configuration.Storage.Enabled
 
