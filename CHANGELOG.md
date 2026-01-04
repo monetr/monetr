@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.8.1](https://github.com/monetr/monetr/compare/v1.8.0...v1.8.1) (2026-01-04)
+
+
+### Dependencies
+
+* **api:** update module github.com/labstack/echo/v4 to v4.15.0 ([#2877](https://github.com/monetr/monetr/issues/2877)) ([666acf2](https://github.com/monetr/monetr/commit/666acf2aadbfc56adacdf5126f8c0d3638f4f001))
+* **ui:** update dependency @untitaker/hyperlink to v0.2.0 ([#2883](https://github.com/monetr/monetr/issues/2883)) ([cfd81a8](https://github.com/monetr/monetr/commit/cfd81a828d34850ba0ce307a3997584b748f5bbf))
+
+
+### Bug Fixes
+
+* **api:** Handle deadline exceeded errors from the database ([307173f](https://github.com/monetr/monetr/commit/307173fff06c4e8d2741706fb894ab59309ef6eb))
+* **api:** Moving away from deprecated timeout middleware ([a220789](https://github.com/monetr/monetr/commit/a2207896e1101591a86a9d93cb189427bb5f0ebd))
+* **ui:** Fixed styles of manual setup page ([31e7ae9](https://github.com/monetr/monetr/commit/31e7ae97320ef35f6fc504fcdcd62cee7e51759e))
+* **ui:** Make the top navigation bar fixed ([1ae179a](https://github.com/monetr/monetr/commit/1ae179ad443f4e8159de3230c656d3b2e4a8f145))
+
 ## [1.8.0](https://github.com/monetr/monetr/compare/v1.7.0...v1.8.0) (2026-01-04)
 
 
