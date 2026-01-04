@@ -5,6 +5,7 @@ import BudgetingLayout from '@monetr/interface/components/Layout/BudgetLayout';
 import MobileSidebarContextProvider from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
 import Sidebar from '@monetr/interface/components/Layout/Sidebar';
+import SidebarPaddingLayout from '@monetr/interface/components/Layout/SidebarPaddingLayout';
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
@@ -43,7 +44,6 @@ import Transactions from '@monetr/interface/pages/transactions';
 import VerifyEmail from '@monetr/interface/pages/verify/email';
 import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
-import SidebarPaddingLayout from '@monetr/interface/components/Layout/SidebarPaddingLayout';
 
 const RoutesImpl = withSentryReactRouterV6Routing(Routes);
 
