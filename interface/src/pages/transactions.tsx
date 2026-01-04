@@ -57,7 +57,7 @@ export default function Transactions(): JSX.Element {
     // `rootMargin` is passed to `IntersectionObserver`.
     // We can use it to trigger 'onLoadMore' when the sentry comes near to become
     // visible, instead of becoming fully visible on the screen.
-    rootMargin: '0px 0px 0px 0px',
+    rootMargin: '0px 0px 400px 0px',
   });
 
   const groups: { [date: string]: Array<Transaction> } = useMemo(
