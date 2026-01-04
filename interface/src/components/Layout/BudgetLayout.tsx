@@ -8,9 +8,10 @@ import styles from './BudgetLayout.module.scss';
 export default function BudgetingLayout(): JSX.Element {
   // className='hidden lg:flex'
   // className='min-w-0 flex flex-col grow'
+  //
+  // <BudgetingSidebar />
   return (
     <Fragment>
-      <BudgetingSidebar />
       <div className={styles.budgetLayoutRoot}>
         <Outlet />
       </div>

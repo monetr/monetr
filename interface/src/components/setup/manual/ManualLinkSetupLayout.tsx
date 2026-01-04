@@ -22,7 +22,7 @@ export default function ManualLinkSetupLayout(props: ManualLinkSetupLayoutProps)
   const step = steps.indexOf(viewContext.currentView);
   return (
     <div className={styles.manualLinkSetupLayoutRoot}>
-      <div className='p-0 md:p-8 w-full'>
+      <div className='p-0 md:p-2 w-full'>
         <MStepper activeIndex={step} steps={['Intro', 'Account', 'Balances', 'Income']} />
       </div>
       <div className='flex flex-col md:justify-center items-center max-w-sm h-full'>

@@ -1,10 +1,9 @@
 import { withSentryReactRouterV6Routing } from '@sentry/react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
 import BudgetingLayout from '@monetr/interface/components/Layout/BudgetLayout';
 import MobileSidebarContextProvider from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
-import Sidebar from '@monetr/interface/components/Layout/Sidebar';
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
@@ -43,6 +42,8 @@ import Transactions from '@monetr/interface/pages/transactions';
 import VerifyEmail from '@monetr/interface/pages/verify/email';
 import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
+import SidebarProvider from '@monetr/interface/components/Layout/Sidebar/SidebarProvider';
+import Sidebar from '@monetr/interface/components/Layout/Sidebar/Sidebar';
 
 const RoutesImpl = withSentryReactRouterV6Routing(Routes);
 
@@ -123,7 +124,7 @@ export default function Monetr(): JSX.Element {
   }
 
   return (
-    <MobileSidebarContextProvider>
+    <SidebarProvider>
       <Sidebar />
       <RoutesImpl>
         <Route element={<BudgetingLayout />} path='/bank/:bankAccountId'>
@@ -144,24 +145,30 @@ export default function Monetr(): JSX.Element {
           {config?.billingEnabled && <Route element={<SettingsBilling />} path='billing' />}
           <Route element={<SettingsAbout />} path='about' />
         </Route>
-        <Route element={<LinkDetails />} path='/link/:linkId/details' />
-        <Route element={<LinkCreatePage />} path='/link/create' />
-        <Route element={<PlaidSetup alreadyOnboarded />} path='/link/create/plaid' />
-        <Route element={<CreateManualLinkPage />} path='/link/create/manual' />
-        <Route element={<LogoutPage />} path='/logout' />
-        <Route element={<OauthReturn />} path='/plaid/oauth-return' />
-        <Route element={<SubscriptionPage />} path='/subscription' />
-        <Route element={<Navigate replace to='/' />} path='/account/subscribe' />
-        <Route element={<AfterCheckoutPage />} path='/account/subscribe/after' />
-        <Route element={<Navigate replace to='/' />} path='/setup' />
-        <Route element={<Navigate replace to='/' />} path='/password/reset' />
-        <Route element={<Navigate replace to='/' />} path='/register' />
-        <Route element={<Navigate replace to='/' />} path='/login' />
-        <Route element={<Navigate replace to='/' />} path='/login/multifactor' />
-        <Route element={<RedirectToBank />} index path='/' />
+        <Route element={<BogusLayout />}>
+          <Route element={<LinkDetails />} path='/link/:linkId/details' />
+          <Route element={<LinkCreatePage />} path='/link/create' />
+          <Route element={<PlaidSetup alreadyOnboarded />} path='/link/create/plaid' />
+          <Route element={<CreateManualLinkPage />} path='/link/create/manual' />
+          <Route element={<LogoutPage />} path='/logout' />
+          <Route element={<OauthReturn />} path='/plaid/oauth-return' />
+          <Route element={<SubscriptionPage />} path='/subscription' />
+          <Route element={<Navigate replace to='/' />} path='/account/subscribe' />
+          <Route element={<AfterCheckoutPage />} path='/account/subscribe/after' />
+          <Route element={<Navigate replace to='/' />} path='/setup' />
+          <Route element={<Navigate replace to='/' />} path='/password/reset' />
+          <Route element={<Navigate replace to='/' />} path='/register' />
+          <Route element={<Navigate replace to='/' />} path='/login' />
+          <Route element={<Navigate replace to='/' />} path='/login/multifactor' />
+          <Route element={<RedirectToBank />} index path='/' />
+        </Route>
       </RoutesImpl>
-    </MobileSidebarContextProvider>
+    </SidebarProvider>
   );
+}
+
+function BogusLayout(): React.JSX.Element {
+  return <Outlet />;
 }
 
 function RedirectToBank(): JSX.Element {

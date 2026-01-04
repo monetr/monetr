@@ -1,0 +1,13 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.sidebarRoot {
+  z-index: 40;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-right: 1px solid var(--border);
+  flex-direction: column;
+  width: var(--sidebar-width);
+}

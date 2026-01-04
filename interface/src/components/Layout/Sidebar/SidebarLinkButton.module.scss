@@ -1,0 +1,11 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.sidebarLinkButton {
+  cursor: pointer;
+  color: var(--content-subtle);
+
+  &:hover {
+    color: var(--content-emphasis);
+  }
+}
