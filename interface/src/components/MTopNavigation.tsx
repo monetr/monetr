@@ -48,7 +48,8 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
 
   return (
     <Fragment>
-      <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-x-2 justify-between fixed z-30 top-0 backdrop-blur-sm bg-gradient-to-t from-transparent dark:to-dark-monetr-background via-90%'>
+      <div className='pb-12' />
+      <div className='h-auto w-full md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-x-2 justify-between fixed z-30 top-0 backdrop-blur-sm bg-gradient-to-t from-transparent dark:to-dark-monetr-background via-90%'>
         <div className='flex gap-2 min-w-0 h-12 items-center flex-shrink'>
           <MSidebarToggle backButton={props.base} className='mr-2' />
           <span className='flex gap-2 flex-grow min-w-0'>
@@ -69,7 +70,6 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
           </span>
         </div>
       </div>
-      <div className='pb-12' />
       <ActionArea>{props.children}</ActionArea>
     </Fragment>
   );
@@ -85,13 +85,12 @@ function ActionArea(props: ActionAreaProps): JSX.Element {
   }
 
   const styles = mergeTailwind(
-    'flex justify-end gap-x-4 md:gap-x-2',
+    'flex justify-end gap-x-4 md:gap-x-2 z-40',
     'flex-shrink-0',
-    'md:relative fixed -bottom-1 md:bottom-auto left-0 md:left-auto',
+    'fixed -bottom-1 top-[unset] md:top-2 md:bottom-[unset] left-0 md:left-[unset] md:right-4',
     // Hacky width and padding to make sure scrollbar renders properly
     'p-6 pt-2 pr-[calc(1.5rem-16px)] md:p-0 pb-8 md:pb-0',
     'w-[calc(100vw-16px)] md:w-auto',
-    'z-20',
     'backdrop-blur-sm bg-dark-monetr-background/50',
   );
 
