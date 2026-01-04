@@ -19,6 +19,12 @@ body {
   &:has(> #root > div[aria-modal="true"]) {
     overflow: hidden;
   }
+
+  @media (max-width: variables.$largeScreen) {
+    &:has(> #root.sidebar-open) {
+      overflow: hidden;
+    }
+  }
 }
 
 .text-size-inherit {

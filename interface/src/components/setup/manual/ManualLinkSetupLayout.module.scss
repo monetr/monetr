@@ -2,13 +2,11 @@
 @use '@monetr/interface/mixins';
 
 .manualLinkSetupLayoutRoot {
-  @include mixins.screen;
   display: flex;
   align-items: center;
   flex-direction: column;
   gap: 1 * variables.$size;
 
-  @include mixins.screen;
   display: flex;
   align-items: center;
   flex-direction: column;

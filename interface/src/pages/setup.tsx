@@ -3,7 +3,7 @@ import { CircleCheck, Pencil } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
-import Flex from '@monetr/interface/components/Flex';
+import Flex, { flexVariants } from '@monetr/interface/components/Flex';
 import { layoutVariants } from '@monetr/interface/components/Layout';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
 import MLogo from '@monetr/interface/components/MLogo';
@@ -78,12 +78,17 @@ function Greeting(props: GreetingProps): JSX.Element {
   }
 
   return (
-    <Flex
-      align='center'
-      className={layoutVariants({ width: 'screen', height: 'screen' })}
-      gap='lg'
-      justify='center'
-      orientation='column'
+    <div
+      className={mergeTailwind(
+        'p-4',
+        flexVariants({
+          align: 'center',
+          gap: 'lg',
+          justify: 'center',
+          orientation: 'column',
+        }),
+        layoutVariants({ width: 'full', height: 'screen' }),
+      )}
     >
       <MLogo className='w-16 h-16 md:w-24 md:h-24' />
       <Banner />
@@ -110,7 +115,7 @@ function Greeting(props: GreetingProps): JSX.Element {
       </Button>
       {!props.alreadyOnboarded && <SetupBillingButton />}
       {!props.alreadyOnboarded && <LogoutFooter />}
-    </Flex>
+    </div>
   );
 }
 

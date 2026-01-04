@@ -5,8 +5,13 @@
   .budgetSidebarRoot {
     display: flex;
     width: 100%;
-    background-color: rgba(var(--background), 0.5);
-    backdrop-filter: blur(4px) brightness(0.5);
+  }
+
+  @media (max-width: variables.$largeScreen) {
+    .budgetSidebarRoot {
+      background-color: rgba(var(--background), 0.5);
+      backdrop-filter: blur(4px) brightness(0.3);
+    }
   }
 
   @media (min-width: variables.$largeScreen) {

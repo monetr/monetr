@@ -5,6 +5,13 @@
   .bankSidebarWrapperRoot {
     display: flex;
   }
+
+  @media (max-width: variables.$largeScreen) {
+    .bankSidebarWrapperRoot {
+      background-color: rgba(var(--background), 0.5);
+      backdrop-filter: blur(4px) brightness(0.3);
+    }
+  }
 }
 
 :global(.sidebar-close) {
