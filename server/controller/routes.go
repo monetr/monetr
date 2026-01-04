@@ -22,8 +22,8 @@ import (
 
 func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	if false {
-		app.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
-			OnTimeoutRouteErrorHandler: func(err error, ctx echo.Context) {
+		app.Use(middleware.ContextTimeoutWithConfig(middleware.ContextTimeoutConfig{
+			ErrorHandler: func(err error, ctx echo.Context) error {
 				txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
 				if ok {
 					log := c.getLog(ctx)
@@ -32,6 +32,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 						log.WithError(terr).Error("failed to rollback transaction for timed out request")
 					}
 				}
+				return err
 			},
 			Timeout: 30 * time.Second,
 		}))
