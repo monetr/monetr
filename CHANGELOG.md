@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.2](https://github.com/monetr/monetr/compare/v1.8.1...v1.8.2) (2026-01-04)
+
+
+### Bug Fixes
+
+* **ui:** Fix top nav buttons not rendering properly ([1a2a526](https://github.com/monetr/monetr/commit/1a2a526bf2258597dec0c5a9cec9f3cae9f36405))
+
 ## [1.8.1](https://github.com/monetr/monetr/compare/v1.8.0...v1.8.1) (2026-01-04)
 
 
