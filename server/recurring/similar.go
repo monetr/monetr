@@ -25,9 +25,11 @@ type SimilarTransactionDetection interface {
 }
 
 type SimilarTransactions_TFIDF_DBSCAN struct {
-	log    *logrus.Entry
-	tfidf  *TFIDF
-	dbscan *DBSCAN
+	log      *logrus.Entry
+	tfidf    *TFIDF
+	dbscan   *DBSCAN
+	datums   []Document
+	clusters []Cluster
 }
 
 func NewSimilarTransactions_TFIDF_DBSCAN(log *logrus.Entry) SimilarTransactionDetection {
@@ -47,18 +49,14 @@ type memberItem struct {
 	Date time.Time
 }
 
-func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
+func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 	ctx context.Context,
 ) []models.TransactionCluster {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-
-	datums := s.tfidf.GetDocuments(span.Context())
-	s.dbscan = NewDBSCAN(datums, Epsilon, MinNeighbors)
-	result := s.dbscan.Calculate(span.Context())
-	similar := make([]models.TransactionCluster, 0, len(result))
+	similar := make([]models.TransactionCluster, 0, len(s.clusters))
 	indicies := s.tfidf.indexToWord
-	for _, cluster := range result {
+	for _, cluster := range s.clusters {
 		group := models.TransactionCluster{
 			Members: make([]models.ID[models.Transaction], len(cluster.Items)),
 		}
@@ -73,7 +71,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 		}, len(indicies))
 
 		items := make([]memberItem, 0, len(cluster.Items))
-		centroid := make([]float32, len(datums[0].Vector))
+		centroid := make([]float32, len(s.datums[0].Vector))
 
 		for index := range cluster.Items {
 			datum, ok := s.dbscan.GetDocumentByIndex(index)
@@ -246,6 +244,20 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 	}
 
 	return similar
+}
+
+func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
+	ctx context.Context,
+) []models.TransactionCluster {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	s.datums = s.tfidf.GetDocuments(span.Context())
+	s.dbscan = NewDBSCAN(s.datums, Epsilon, MinNeighbors)
+	s.clusters = s.dbscan.Calculate(span.Context())
+	// Doing all this work in its own function fixes sentry's "no instrumentation"
+	// warning.
+	return s.enrichClusters(span.Context())
 }
 
 // calculateRankings takes all of the values of the most valuable tokens in a
