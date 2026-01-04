@@ -14,7 +14,7 @@ export default function BalanceCurrentAmount(): JSX.Element {
     <Flex gap='sm' justify='between'>
       <Flex flex='shrink'>
         <Coins />
-        <Typography color='emphasis' ellipsis size='lg' weight='semibold'>
+        <Typography color='emphasis' ellipsis size='lg' weight='semibold' wrapping='nowrap'>
           Current:
         </Typography>
       </Flex>

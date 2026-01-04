@@ -1,4 +1,4 @@
-import { CalendarSync, Infinity as InfinityIcon, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
+import { CalendarSync, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 import Badge from '@monetr/interface/components/Badge';
@@ -6,11 +6,11 @@ import Divider from '@monetr/interface/components/Divider';
 import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceAvailableAmount';
 import BalanceCurrentAmount from '@monetr/interface/components/Layout/BalanceCurrentAmount';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
+import BalanceLimitAmount from '@monetr/interface/components/Layout/BalanceLimitAmount';
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
 import MSpan from '@monetr/interface/components/MSpan';
-import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useNextFundingDate } from '@monetr/interface/hooks/useNextFundingDate';
@@ -30,41 +30,12 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
   const { data: bankAccount, isError } = useSelectedBankAccount();
   const { data: balance } = useCurrentBalance();
 
-  const className = mergeTailwind(
-    styles.budgetSidebarRoot,
-    // 'w-72',
-    // 'h-full',
-    // 'flex-none flex flex-col',
-    // 'dark:border-r-dark-monetr-border border border-transparent',
-    // 'items-center pb-6 lg:pb-4 overflow-auto',
-    props.className,
-  );
-
   if (isError) {
     return null;
   }
 
-  function Limit(): JSX.Element {
-    switch (bankAccount?.accountSubType) {
-      case 'credit card':
-        return (
-          <div className='flex w-full justify-between'>
-            <Typography color='emphasis' size='lg' weight='semibold'>
-              <InfinityIcon />
-              Limit:
-            </Typography>
-            <Typography color='emphasis' size='lg' weight='semibold'>
-              {locale.formatAmount(balance?.limit, AmountType.Stored)}
-            </Typography>
-          </div>
-        );
-    }
-
-    return null;
-  }
-
   return (
-    <div className={className}>
+    <div className={mergeTailwind(styles.budgetSidebarRoot, props.className)}>
       <BudgetingSidebarTitle />
       <div className='flex h-full w-full flex-col items-center gap-4 px-2 pt-4'>
         <SelectBankAccount />
@@ -74,7 +45,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
           <BalanceFreeToUseAmount />
           <BalanceAvailableAmount />
           <BalanceCurrentAmount />
-          <Limit />
+          <BalanceLimitAmount />
         </div>
         <Divider className='w-1/2' />
 
