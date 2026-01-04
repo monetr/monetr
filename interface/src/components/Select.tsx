@@ -246,7 +246,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
       <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
         <LabelDecorator disabled={props.disabled} name={props.name} />
       </Label>
-      <Drawer noBodyStyles onOpenChange={setOpen} open={open}>
+      <Drawer onOpenChange={setOpen} open={open}>
         <DrawerTrigger asChild>
           <button
             aria-disabled={props.disabled}
