@@ -141,7 +141,7 @@ export function useLocale<LocaleName extends keyof typeof localeTable>(
 }
 
 function sanitizeLocaleName(localeName: string): [sanitized: string, languageOnly: string] {
-  const sanitized = localeName.replace(/[-|_]/, '');
+  const sanitized = localeName.replace(/[-|_]/g, '');
   const languageOnly = localeName.slice(0, 2);
   return [sanitized, languageOnly];
 }
