@@ -47,28 +47,31 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
   });
 
   return (
-    <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-x-2 justify-between'>
-      <div className='flex gap-2 min-w-0 h-12 items-center flex-shrink'>
-        <MSidebarToggle backButton={props.base} className='mr-2' />
-        <span className='flex gap-2 flex-grow min-w-0'>
-          <MSpan className={className} ellipsis onClick={onInitialClick} size='2xl' weight='bold'>
-            <Icon className={iconClassName} />
-            <span className={titleClassName}>{props.title}</span>
-          </MSpan>
-          {Boolean(props.breadcrumb) && (
-            <Fragment>
-              <MSpan className='hidden md:block order-2' color='subtle' size='2xl' weight='bold'>
-                /
-              </MSpan>
-              <MSpan className='order-3' color='emphasis' ellipsis size='2xl' weight='bold'>
-                {props.breadcrumb}
-              </MSpan>
-            </Fragment>
-          )}
-        </span>
+    <Fragment>
+      <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-x-2 justify-between fixed z-30 top-0 backdrop-blur-sm bg-gradient-to-t from-transparent dark:to-dark-monetr-background via-90%'>
+        <div className='flex gap-2 min-w-0 h-12 items-center flex-shrink'>
+          <MSidebarToggle backButton={props.base} className='mr-2' />
+          <span className='flex gap-2 flex-grow min-w-0'>
+            <MSpan className={className} ellipsis onClick={onInitialClick} size='2xl' weight='bold'>
+              <Icon className={iconClassName} />
+              <span className={titleClassName}>{props.title}</span>
+            </MSpan>
+            {Boolean(props.breadcrumb) && (
+              <Fragment>
+                <MSpan className='hidden md:block order-2' color='subtle' size='2xl' weight='bold'>
+                  /
+                </MSpan>
+                <MSpan className='order-3' color='emphasis' ellipsis size='2xl' weight='bold'>
+                  {props.breadcrumb}
+                </MSpan>
+              </Fragment>
+            )}
+          </span>
+        </div>
       </div>
+      <div className='pb-12' />
       <ActionArea>{props.children}</ActionArea>
-    </div>
+    </Fragment>
   );
 }
 
