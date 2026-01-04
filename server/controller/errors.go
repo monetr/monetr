@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -44,6 +45,9 @@ func (c *Controller) wrapPgError(ctx echo.Context, err error, msg string, args .
 				return c.wrapAndReturnError(ctx, cleanedErr, status, formattedMessage, []any{}...)
 			}
 		default:
+			if errors.Is(err, context.DeadlineExceeded) {
+				return c.wrapAndReturnError(ctx, err, http.StatusRequestTimeout, msg, args...)
+			}
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, msg, args...)
 		}
 	}
