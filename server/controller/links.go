@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/validation"
 )
@@ -189,7 +188,14 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve the specified link")
 	}
 
-	link.DeletedAt = myownsanity.TimeP(c.Clock.Now().UTC())
+	// This way we don't end up making a call to Plaid twice or enqueuing the job
+	// multiple times.
+	if link.DeletedAt != nil {
+		return c.badRequest(ctx, "Link has already been deleted and cannot be deleted again")
+	}
+
+	now := c.Clock.Now().UTC()
+	link.DeletedAt = &now
 	if err := repo.UpdateLink(c.getContext(ctx), link); err != nil {
 		return c.wrapPgError(ctx, err, "failed to mark the link as deleted")
 	}
@@ -202,12 +208,32 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 			crumbs.Error(
 				c.getContext(ctx),
 				"Failed to retrieve access token for plaid link.", "secrets", map[string]any{
-					"linkId":   link.LinkId,
-					"itemId":   link.PlaidLink.PlaidId,
-					"secretId": secret.SecretId,
+					"plaidLinkId": link.PlaidLink.PlaidLinkId,
+					"linkId":      link.LinkId,
+					"itemId":      link.PlaidLink.PlaidId,
+					"secretId":    secret.SecretId,
 				},
 			)
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
+		}
+
+		{ // Mark the plaid link as soft deleted too!
+			link.PlaidLink.DeletedAt = &now
+			link.PlaidLink.Status = PlaidLinkStatusDeactivated
+			if err := repo.UpdatePlaidLink(
+				c.getContext(ctx),
+				link.PlaidLink,
+			); err != nil {
+				crumbs.Error(
+					c.getContext(ctx),
+					"Failed to mark Plaid Link as deleted prior to deactivation", "links", map[string]any{
+						"plaidLinkId": link.PlaidLink.PlaidLinkId,
+						"linkId":      link.LinkId,
+						"itemId":      link.PlaidLink.PlaidId,
+					},
+				)
+				return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
+			}
 		}
 
 		client, err := c.Plaid.NewClient(

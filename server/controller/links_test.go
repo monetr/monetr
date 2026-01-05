@@ -7,8 +7,10 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/mock_plaid"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
@@ -526,6 +528,9 @@ func TestPatchLink(t *testing.T) {
 
 func TestDeleteLink(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
 		clock := clock.New()
 		app, e := NewTestApplication(t)
 
@@ -595,5 +600,144 @@ func TestDeleteLink(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.deletedAt").NotNull()
 		}
+
+		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{}, "should not have made ANY plaid API calls")
+	})
+
+	t.Run("remove plaid link", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		clock := clock.New()
+		app, e := NewTestApplication(t)
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+
+		{ // Retrieve the link and do some tests to make sure its a plaid link
+			response := e.GET("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Object().NotEmpty()
+			response.JSON().Path("$.deletedAt").IsNull()
+			response.JSON().Path("$.plaidLink").Object().NotEmpty()
+			response.JSON().Path("$.plaidLink.status").IsEqual(models.PlaidLinkStatusSetup)
+			response.JSON().Path("$.plaidLink.deletedAt").IsNull()
+			response.JSON().Path("$.linkType").IsEqual(models.PlaidLinkType)
+		}
+
+		mock_plaid.MockDeactivateItemTokenSuccess(t)
+
+		app.Jobs.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				gomock.Eq(background.RemoveLink),
+				testutils.NewGenericMatcher(func(args background.RemoveLinkArguments) bool {
+					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
+					b := assert.EqualValues(t, user.AccountId, args.AccountId, "Account ID should match")
+					return a && b
+				}),
+			).
+			Times(1).
+			Return(nil)
+
+		{ // Try to delete it.
+			response := e.DELETE("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				WithTimeout(5 * time.Second).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.NoContent()
+		}
+
+		{ // Try to retrieve the link after it's been deleted.
+			response := e.GET("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.deletedAt").NotNull()
+			response.JSON().Path("$.plaidLink.status").IsEqual(models.PlaidLinkStatusDeactivated)
+			response.JSON().Path("$.plaidLink.deletedAt").NotNull()
+		}
+
+		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
+			"POST https://sandbox.plaid.com/item/remove": 1,
+		}, "must match expected Plaid API calls")
+	})
+
+	t.Run("wont remove link twice", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		clock := clock.New()
+		app, e := NewTestApplication(t)
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+
+		{ // Retrieve the link and do some tests to make sure its a plaid link
+			response := e.GET("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Object().NotEmpty()
+			response.JSON().Path("$.deletedAt").IsNull()
+			response.JSON().Path("$.plaidLink").Object().NotEmpty()
+			response.JSON().Path("$.plaidLink.status").IsEqual(models.PlaidLinkStatusSetup)
+			response.JSON().Path("$.plaidLink.deletedAt").IsNull()
+			response.JSON().Path("$.linkType").IsEqual(models.PlaidLinkType)
+		}
+
+		mock_plaid.MockDeactivateItemTokenSuccess(t)
+
+		app.Jobs.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				gomock.Eq(background.RemoveLink),
+				testutils.NewGenericMatcher(func(args background.RemoveLinkArguments) bool {
+					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
+					b := assert.EqualValues(t, user.AccountId, args.AccountId, "Account ID should match")
+					return a && b
+				}),
+			).
+			Times(1).
+			Return(nil)
+
+		{ // Try to delete it.
+			response := e.DELETE("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				WithTimeout(5 * time.Second).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.NoContent()
+		}
+
+		{ // If we try to delete it again it should return an error
+			response := e.DELETE("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				WithTimeout(5 * time.Second).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").IsEqual("Link has already been deleted and cannot be deleted again")
+		}
+
+		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
+			"POST https://sandbox.plaid.com/item/remove": 1,
+		}, "must match expected Plaid API calls")
 	})
 }
