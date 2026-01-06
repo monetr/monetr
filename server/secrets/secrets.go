@@ -67,7 +67,7 @@ func GetKMS(
 		log.WithFields(logrus.Fields{
 			"keyId": openbaoConfig.KeyID,
 		}).Trace("using openbao transit KMS")
-		kms, err = NewVaultTransit(ctx, VaultTransitConfig{
+		kms, err = NewOpenBaoTransit(ctx, OpenBaoTransitConfig{
 			Log:                log,
 			KeyID:              openbaoConfig.KeyID,
 			Address:            openbaoConfig.Endpoint,

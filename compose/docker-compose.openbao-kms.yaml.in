@@ -1,0 +1,55 @@
+# vim: set ft=yaml
+services:
+  openbao:
+    image: ghcr.io/openbao/openbao:2.4.4
+    restart: always # If something goes wrong just restart the container, this is for development only.
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80/v1/sys/health || exit 1
+      interval: 3s
+      timeout: 15s
+      retries: 10
+      start_period: 5s
+    command:
+      - bao
+      - server
+      - -config=/data/config.toml
+      - -dev
+    environment:
+      # TODO, What variables need to change here?
+      # https://openbao.org/docs/2.3.x/commands/#environment-variables
+      VAULT_UI: "true"
+      VAULT_ADDR: http://0.0.0.0:80
+      VAULT_API_ADDR: http://0.0.0.0:80
+      VAULT_TOKEN: "@VAULT_ROOT_TOKEN@"
+      VAULT_DISABLE_MLOCK: "true"
+      VAULT_DEV_ROOT_TOKEN_ID: "@VAULT_ROOT_TOKEN@"
+    volumes:
+      - "@CMAKE_BINARY_DIR@/development/openbao:/data"
+  openbao-bootstrap:
+    image: ghcr.io/openbao/openbao:2.4.4
+    restart: no
+    entrypoint: >
+      /bin/sh -c "
+      bao secrets enable transit;
+      bao write -f transit/keys/monetr;
+      "
+    environment:
+      VAULT_ADDR: http://openbao:80
+      VAULT_API_ADDR: http://openbao:80
+      VAULT_TOKEN: "@VAULT_ROOT_TOKEN@"
+    links:
+      - openbao
+    depends_on:
+      openbao:
+        condition: service_healthy
+  monetr:
+    links:
+      - openbao
+    environment:
+      # If openbao is the KMS provider then these settings will be used
+      MONETR_OPENBAO_TOKEN: "@VAULT_ROOT_TOKEN@"
+    depends_on:
+      openbao:
+        condition: service_started
+      openbao-bootstrap:
+        condition: service_completed_successfully

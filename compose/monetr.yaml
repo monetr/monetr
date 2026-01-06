@@ -63,6 +63,10 @@ keyManagement:
   google:
     credentialsJson: /etc/monetr/google-service-account.json
     # Resource name must be specified using MONETR_KMS_RESOURCE_NAME
+  openbao:
+    keyId: monetr
+    authMethod: token
+    endpoint: http://openbao:80
   vault:
     keyId: monetr
     authMethod: token

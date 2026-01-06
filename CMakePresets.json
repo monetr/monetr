@@ -19,7 +19,7 @@
         "MONETR_LOCAL_DOMAIN": "monetr.local",
         "MONETR_EMAIL_VERIFICATION_ENABLED": "true",
         "MONETR_STRIPE_TAXES_ENABLED": "true",
-        "MONETR_KMS_PROVIDER": "plaintext",
+        "MONETR_KMS_PROVIDER": "openbao",
         "MONETR_STORAGE_PROVIDER": "s3",
         "MONETR_DEVELOPMENT_LITE_TARGET": "my.monetr.dev",
         "DISABLE_GO_RELOAD": "false"

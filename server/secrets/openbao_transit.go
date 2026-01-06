@@ -412,6 +412,12 @@ func (o *OpenBaoTransit) authenticate(ctx context.Context) error {
 		auth = result.Auth
 	case "token":
 		// https://openbao.org/docs/auth/token/
+		o.client.SetToken(o.config.Token)
+		_, err := o.client.Auth().Token().LookupSelfWithContext(ctx)
+		if err != nil {
+			log.WithError(err).Error("failed to authenticate to openbao")
+			return errors.Wrap(err, "failed to authenticate to openbao")
+		}
 		auth = &openbao.SecretAuth{
 			ClientToken:   o.config.Token,
 			LeaseDuration: 0,
