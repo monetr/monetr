@@ -36,6 +36,14 @@ if (window?.__MONETR__?.SENTRY_DSN) {
     environment: window.location.hostname,
     normalizeDepth: 20,
     beforeSend(event, _) {
+      // If the exception's stack trace includes a single line that is from any kind of browser extension then we don't
+      // want to hear about the error in sentry. It isn't helpful and creates noise.
+      if ((event?.exception?.values ?? []).find(exception =>
+        (exception?.stacktrace?.frames ?? []).find(stacktrace => (stacktrace?.filename ?? '').includes('extension://')),
+      )) {
+        return null;
+      }
+
       // Check if it is an exception, and if so, show the report dialog
       if (event.exception) {
         try {
