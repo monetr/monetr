@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.8.3](https://github.com/monetr/monetr/compare/v1.8.2...v1.8.3) (2026-01-06)
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.40.0 ([#2876](https://github.com/monetr/monetr/issues/2876)) ([66d992a](https://github.com/monetr/monetr/commit/66d992a4e738e0bf45af4864752a58bc80f8cd51))
+
+
+### Bug Fixes
+
+* **api:** Improvements to API to remove links ([a5f7f34](https://github.com/monetr/monetr/commit/a5f7f34bc160f19c48dc014fb81691c1f717c13b))
+* **build:** Fixed weird babel cache issue ([19cbe2f](https://github.com/monetr/monetr/commit/19cbe2f2b5039e11b0e91374e6499fc8d7c804e2))
+* **ui:** Don't send errors to Sentry from browser extensions ([4f3fa38](https://github.com/monetr/monetr/commit/4f3fa38e12e18df8938686e1bf4c957533916753))
+* **ui:** Fixed layout of email verification pages ([661f5dd](https://github.com/monetr/monetr/commit/661f5dd0b8c97f512ab442bacbb93368ed37fdb2))
+* **ui:** Fixed layout of the forgot password page ([72954ef](https://github.com/monetr/monetr/commit/72954ef2dbda6344aef012db35c7613fbf47fcc4))
+
 ## [1.8.2](https://github.com/monetr/monetr/compare/v1.8.1...v1.8.2) (2026-01-04)
 
 
