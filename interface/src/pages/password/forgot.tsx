@@ -24,7 +24,7 @@ const initialValues: Values = {
 
 export function ForgotPasswordComplete(): JSX.Element {
   return (
-    <div className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5'>
+    <div className='h-screen w-screen flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5'>
       <div className='max-w-[128px] w-full'>
         <MLogo />
       </div>
@@ -78,7 +78,7 @@ export default function ForgotPasswordNew(): JSX.Element {
 
   return (
     <MForm
-      className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5'
+      className='h-screen w-screen flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5'
       initialValues={initialValues}
       onSubmit={submit}
       validate={validate}
