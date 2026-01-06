@@ -17,6 +17,8 @@ var (
 	FilePath []string
 	// LogLevel is set via a flag in pkg/cmd.
 	LogLevel string
+	// Migrate database!
+	Migrate bool
 )
 
 type PlaidEnvironment string
@@ -282,7 +284,7 @@ func (s Stripe) IsBillingEnabled() bool {
 }
 
 func getViper(configFilePath []string) *viper.Viper {
-	v := viper.GetViper()
+	v := viper.New()
 	v.SetConfigType("yaml")
 
 	setupDefaults(v)
@@ -454,4 +456,5 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Stripe.BillingEnabled", "MONETR_STRIPE_BILLING_ENABLED")
 	_ = v.BindEnv("Stripe.TaxesEnabled", "MONETR_STRIPE_TAXES_ENABLED")
 	_ = v.BindEnv("Stripe.InitialPlan.StripePriceId", "MONETR_STRIPE_DEFAULT_PRICE_ID")
+	v.AutomaticEnv()
 }
