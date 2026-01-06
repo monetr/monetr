@@ -14,9 +14,10 @@ To that end, monetr supports a few different providers. An outline of the config
 
 ```yaml filename="config.yaml"
 keyManagement:
-  provider: "<plaintext|aws|vault>" # KMS provider, must be one of these values
-  aws: { ... }    # AWS KMS specific configuration, only used when `provider: aws`
-  vault: { ... }  # Hashicorp Vault configuration, only used when `provider: vault`
+  provider: "<plaintext|aws|openbao|vault>" # KMS provider, must be one of these values
+  aws: { ... }     # AWS KMS specific configuration, only used when `provider: aws`
+  openbao: { ... } # OpenBao specific configuration, only used when `provider: openbao`
+  vault: { ... }   # Hashicorp Vault configuration, only used when `provider: vault`
 ```
 
 <Callout type="info">
@@ -55,7 +56,51 @@ keyManagement:
 | `keyID`     | String   |             | The actual Key ID in AWS, this must be the ID of the key to use for encryption and decryption and should not be changed. If this ID is changed then values encrypted with another key will not be able to be decrypted with this new key. |
 | `endpoint`  | String   | `null`      | The AWS KMS API endpoint, this is intended to be used only for local development environments.                                                                                                                                            |
 
+## OpenBao Transit Configuration
+
+[OpenBao](https://openbao.org/) is a self-hostable option for encryption. OpenBao keeps track of the encryption keys
+themselves while monetr leverages the [Transit](https://openbao.org/docs/secrets/transit/) secrets engine to encrypt and
+decrypt data.
+
+When running inside Kubernetes, monetr can use the `kubernetes` authentication method to access OpenBao. When this is
+configured, monetr will automatically renew its OpenBao credentials a few moments before they expire. Other
+authentication methods may require a non-expiring token such as the root token.
+
+```yaml filename="config.yaml"
+keyManagement:
+  openbao:
+    keyID: monetr
+    authMethod: kubernetes
+    role: monetr
+    endpoint: https://your-openbao-server.local:8200
+    tlsCertificatePath: /etc/monetr/openbao/tls.crt
+    tlsKeyPath: /etc/monetr/openbao/tls.key
+    tlsCAPath: /etc/monetr/openbao/ca.crt
+    insecureSkipVerify: false
+```
+
+| **Name**             | **Type** | **Default** | **Description**                                                                                                                                                                                            |
+| ---                  | ---      | ---         | ---                                                                                                                                                                                                        |
+| `keyID`              | String   |             | Name of the transit mount to use for KMS.                                                                                                                                                                  |
+| `authMethod`         | String   |             | Valid values are:<br/>- `token`: Use a hardcoded token to authenticate OpenBao.<br/>- `kubernetes`: Use the container's Kubernetes Service Account Token.<br/>- `userpass`: Provide a username and password. |
+| `token`              | String   |             | When using token authentication, you can provide the raw token here.                                                                                                                                       |
+| `tokenFile`          | String   |             | As an alternative to providing the token directly in the config file, specify a path to a file containing the token itself.                                                                                |
+| `username`           | String   |             | If you are using `userpass` authentication, then this field and the `password` field must be specified.                                                                                                    |
+| `password`           | String   |             | If you are using `userpass` authentication, then this field and the `username` field must be specified.                                                                                                    |
+| `role`               | String   |             | Role in OpenBao that monetr should authenticate for, decides what permissions monetr has.                                                                                                                    |
+| `endpoint`           | String   |             | The URL that OpenBao API requests should be made to, should be the complete URL including protocol (https), as well as port if non-standard and path if the API is on a sub-route.                           |
+| `tlsCertificatePath` | String   |             | Path to the TLS certificate file, used if OpenBao is being hosted with a self signed certificate.                                                                                                            |
+| `tlsKeyPath`         | String   |             | Path to the TLS key file, used if OpenBao is being hosted with a self signed certificate.                                                                                                                    |
+| `tlsCAPath`          | String   |             | Path to the Certificate Authority file, used if OpenBao is being hosted with a self signed certificate.                                                                                                      |
+| `insecureSkipVerify` | Boolean  | `false`     | When `true`, monetr will not verify the TLS certificate of the OpenBao server, **less secure**.                                                                                                              |
+
 ## Vault Transit Configuration
+
+<Callout type="warning">
+  The Vault Transit KMS provider is being deprecated in an upcoming monetr release. If you are currently using the Vault
+  Transit KMS provider then please follow the [Migration Guide](/documentation/guides/migrate-kms) as soon as possible
+  to avoid future problems.
+</Callout>
 
 [Hashicorp Vault](https://www.vaultproject.io/) is a self-hostable option for encryption. Vault keeps track of the
 encryption keys themselves while monetr leverages the

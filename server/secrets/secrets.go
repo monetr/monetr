@@ -44,6 +44,7 @@ func GetKMS(
 		log.WithFields(logrus.Fields{
 			"keyId": vaultConfig.KeyID,
 		}).Trace("using vault transit KMS")
+		log.Warn("vault transit KMS is going to be deprecated in a future release, see guide for migrating to another KMS provider")
 		kms, err = NewVaultTransit(ctx, VaultTransitConfig{
 			Log:                log,
 			KeyID:              vaultConfig.KeyID,
@@ -59,6 +60,28 @@ func GetKMS(
 			TLSKeyPath:         vaultConfig.TLSKeyPath,
 			TLSCAPath:          vaultConfig.TLSCAPath,
 			InsecureSkipVerify: vaultConfig.InsecureSkipVerify,
+			IdleConnTimeout:    15 * time.Second,
+		})
+	case "openbao":
+		openbaoConfig := configuration.KeyManagement.OpenBao
+		log.WithFields(logrus.Fields{
+			"keyId": openbaoConfig.KeyID,
+		}).Trace("using openbao transit KMS")
+		kms, err = NewVaultTransit(ctx, VaultTransitConfig{
+			Log:                log,
+			KeyID:              openbaoConfig.KeyID,
+			Address:            openbaoConfig.Endpoint,
+			Role:               openbaoConfig.Role,
+			AuthMethod:         openbaoConfig.AuthMethod,
+			Token:              openbaoConfig.Token,
+			TokenFile:          openbaoConfig.TokenFile,
+			Username:           openbaoConfig.Username,
+			Password:           openbaoConfig.Password,
+			Timeout:            15 * time.Second,
+			TLSCertificatePath: openbaoConfig.TLSCertificatePath,
+			TLSKeyPath:         openbaoConfig.TLSKeyPath,
+			TLSCAPath:          openbaoConfig.TLSCAPath,
+			InsecureSkipVerify: openbaoConfig.InsecureSkipVerify,
 			IdleConnTimeout:    15 * time.Second,
 		})
 	case "plaintext":
