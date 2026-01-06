@@ -50,7 +50,7 @@ export default function VerifyEmail(): JSX.Element {
 
 export function VerifyEmailView(): JSX.Element {
   return (
-    <div className='w-full h-full flex flex-col justify-center items-center gap-2 p-4'>
+    <div className='h-screen w-screen flex flex-col justify-center items-center gap-2 p-4'>
       <MLogo className='h-24 w-24' />
       <MSpan size='2xl' weight='bold'>
         Email Verification

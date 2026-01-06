@@ -76,7 +76,7 @@ export default function ResendVerificationPage(): JSX.Element {
 
   return (
     <MForm
-      className='w-full h-full flex flex-col justify-center items-center gap-2 p-4'
+      className='h-screen w-screen flex flex-col justify-center items-center gap-2 p-4'
       initialValues={initialValues}
       onSubmit={submit}
       validate={validateInput}
@@ -116,7 +116,7 @@ export default function ResendVerificationPage(): JSX.Element {
 
 export function AfterEmailVerificationSent(): JSX.Element {
   return (
-    <div className='h-full w-full flex flex-col items-center justify-center'>
+    <div className='h-screen w-screen flex flex-col items-center justify-center'>
       <div className='flex flex-col gap-2 max-w-xs items-center'>
         <MLogo className='h-24 w-24' />
         <Typography align='center' size='lg'>
