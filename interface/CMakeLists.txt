@@ -41,7 +41,7 @@ add_custom_command(
   # in the output directory.
   COMMAND ${GIT_EXECUTABLE} clean -f -X ${UI_DIST_DIR}
   # Once the output directory is clean, then actually build the user interface.
-  COMMAND ${RSBUILD_EXECUTABLE} build --mode production
+  COMMAND ${CMAKE_COMMAND} -E env BABEL_DISABLE_CACHE=1 ${RSBUILD_EXECUTABLE} build --mode production
   COMMAND ${CMAKE_COMMAND} -E make_directory ${UI_DIST_DIR}/assets/resources
   COMMENT "Building monetr's user interface"
   WORKING_DIRECTORY ${UI_SRC_DIR}
@@ -61,7 +61,7 @@ add_custom_target(
 
 add_custom_target(
   development.lite
-  COMMAND ${CMAKE_COMMAND} -E env MONETR_DEVELOPMENT_LITE=true MONETR_DEVELOPMENT_LITE_TARGET=${MONETR_DEVELOPMENT_LITE_TARGET} ${RSBUILD_EXECUTABLE} dev
+  COMMAND ${CMAKE_COMMAND} -E env BABEL_DISABLE_CACHE=1 MONETR_DEVELOPMENT_LITE=true MONETR_DEVELOPMENT_LITE_TARGET=${MONETR_DEVELOPMENT_LITE_TARGET} ${RSBUILD_EXECUTABLE} dev
   COMMENT "Starting frontend lite local development"
   WORKING_DIRECTORY ${UI_SRC_DIR}
   DEPENDS
