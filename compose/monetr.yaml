@@ -67,6 +67,7 @@ keyManagement:
     keyId: monetr
     authMethod: token
     endpoint: http://openbao:80
+    token: null
   vault:
     keyId: monetr
     authMethod: token
