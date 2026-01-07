@@ -54,10 +54,6 @@ func ServeCommand(parent *cobra.Command) {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clock := clock.New()
 			configuration := config.LoadConfiguration()
-			// TODO Figure out a better way to do this going forward. I've fixed how
-			// environment variables propagate to viper but now I've broken how
-			// command line flags are passed.
-			configuration.PostgreSQL.Migrate = arguments.MigrateDatabase
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
