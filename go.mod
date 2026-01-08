@@ -28,6 +28,7 @@ require (
 	github.com/mileusna/useragent v1.3.5
 	github.com/monetr/validation v1.0.5
 	github.com/oklog/ulid/v2 v2.1.1
+	github.com/openbao/openbao/api/v2 v2.5.0
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v30 v30.0.0
 	github.com/prometheus/client_golang v1.23.2
@@ -50,7 +51,6 @@ require (
 
 require (
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
-	github.com/openbao/openbao/api/v2 v2.5.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 )
