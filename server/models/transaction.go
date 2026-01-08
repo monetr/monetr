@@ -24,18 +24,20 @@ const (
 type Transaction struct {
 	tableName string `pg:"transactions"`
 
-	TransactionId             ID[Transaction]       `json:"transactionId" pg:"transaction_id,notnull,pk"`
-	AccountId                 ID[Account]           `json:"-" pg:"account_id,notnull,pk"`
-	Account                   *Account              `json:"-" pg:"rel:has-one"`
-	BankAccountId             ID[BankAccount]       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank_account"`
-	BankAccount               *BankAccount          `json:"-" pg:"rel:has-one"`
-	PlaidTransactionId        *ID[PlaidTransaction] `json:"-" pg:"plaid_transaction_id"`
-	PlaidTransaction          *PlaidTransaction     `json:"plaidTransaction" pg:"rel:has-one"`
-	PendingPlaidTransactionId *ID[PlaidTransaction] `json:"-" pg:"pending_plaid_transaction_id"`
-	PendingPlaidTransaction   *PlaidTransaction     `json:"pendingPlaidTransaction" pg:"rel:has-one,fk:pending_"` // fk: is the prefix of the column we want to use to join on in a multikey join.
-	Amount                    int64                 `json:"amount" pg:"amount,notnull,use_zero"`
-	SpendingId                *ID[Spending]         `json:"spendingId" pg:"spending_id,on_delete:SET NULL"`
-	Spending                  *Spending             `json:"spending,omitempty" pg:"rel:has-one"`
+	TransactionId             ID[Transaction]           `json:"transactionId" pg:"transaction_id,notnull,pk"`
+	AccountId                 ID[Account]               `json:"-" pg:"account_id,notnull,pk"`
+	Account                   *Account                  `json:"-" pg:"rel:has-one"`
+	BankAccountId             ID[BankAccount]           `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank_account"`
+	BankAccount               *BankAccount              `json:"-" pg:"rel:has-one"`
+	PlaidTransactionId        *ID[PlaidTransaction]     `json:"-" pg:"plaid_transaction_id"`
+	PlaidTransaction          *PlaidTransaction         `json:"plaidTransaction" pg:"rel:has-one"`
+	PendingPlaidTransactionId *ID[PlaidTransaction]     `json:"-" pg:"pending_plaid_transaction_id"`
+	PendingPlaidTransaction   *PlaidTransaction         `json:"pendingPlaidTransaction" pg:"rel:has-one,fk:pending_"` // fk: is the prefix of the column we want to use to join on in a multikey join.
+	LunchFlowTransactionId    *ID[LunchFlowTransaction] `json:"-" pg:"lunchflow_transaction_id"`
+	LunchFlowTransaction      *LunchFlowTransaction     `json:"lunchFlowTransaction,omitempty" pg:"rel:has-one"`
+	Amount                    int64                     `json:"amount" pg:"amount,notnull,use_zero"`
+	SpendingId                *ID[Spending]             `json:"spendingId" pg:"spending_id,on_delete:SET NULL"`
+	Spending                  *Spending                 `json:"spending,omitempty" pg:"rel:has-one"`
 	// SpendingAmount is the amount deducted from the expense this transaction was
 	// spent from. This is used when a transaction is more than the expense
 	// currently has allocated. If the transaction were to be deleted or changed
