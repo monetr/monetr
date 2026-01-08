@@ -4,8 +4,8 @@ import "strings"
 
 func CoalesceStrings(str ...string) string {
 	for _, value := range str {
-		if strings.TrimSpace(value) != "" {
-			return value
+		if trimmed := strings.TrimSpace(value); trimmed != "" {
+			return trimmed
 		}
 	}
 

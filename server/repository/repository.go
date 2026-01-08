@@ -85,6 +85,14 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		uploadIdentifiers []string,
 	) (map[string]Transaction, error)
+	// GetTransactionsByLunchFlowId is meant to be used by the lunch flow sync
+	// code and will retrieve all of the transactions that already exist in the
+	// database for a given sync.
+	GetTransactionsByLunchFlowId(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		lunchFlowIds []string,
+	) (map[string]Transaction, error)
 
 	// Deprecated: Use GetTransactionsByPlaidId
 	GetTransactionsByPlaidTransactionId(ctx context.Context, linkId ID[Link], plaidTransactionIds []string) ([]Transaction, error)

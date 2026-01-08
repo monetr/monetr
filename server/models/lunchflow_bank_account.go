@@ -10,9 +10,18 @@ import (
 type LunchFlowBankAccountStatus string
 
 const (
-	LunchFlowBankAccountStatusActive       LunchFlowBankAccountStatus = "active"
-	LunchFlowBankAccountStatusDisconnected LunchFlowBankAccountStatus = "disconnected"
-	LunchFlowBankAccountStatusError        LunchFlowBankAccountStatus = "error"
+	// LunchFlowBankAccountStatusActive means that the bank account can and will
+	// automatically sync with Lunch Flow's API.
+	LunchFlowBankAccountStatusActive LunchFlowBankAccountStatus = "active"
+	// LunchFlowBankAccountStatusInactive means that the bank account does exist
+	// in Lunch Flow's API, however it is not being actively synced with monetr.
+	// Inactive items may not have a bank account in monetr associated with them.
+	LunchFlowBankAccountStatusInactive LunchFlowBankAccountStatus = "inactive"
+	// LunchFlowBankAccountStatusError means that sync attempts for this account
+	// have failed and the account will no longer be automatically synced. For
+	// data to continue to be synced the user must manually enable the account
+	// again in the UI.
+	LunchFlowBankAccountStatusError LunchFlowBankAccountStatus = "error"
 )
 
 type LunchFlowBankAccount struct {

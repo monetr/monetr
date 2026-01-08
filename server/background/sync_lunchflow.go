@@ -2,14 +2,21 @@ package background
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/benbjohnson/clock"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/currency"
+	"github.com/monetr/monetr/server/datasources/lunchflow"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -42,12 +49,16 @@ type (
 		args      SyncLunchFlowArguments
 		log       *logrus.Entry
 		repo      repository.BaseRepository
+		secrets   repository.SecretsRepository
 		publisher pubsub.Publisher
 		enqueuer  JobEnqueuer
 		clock     clock.Clock
 		timezone  *time.Location
 
-		existingTransactions map[string]Transaction
+		client                lunchflow.LunchFlowClient
+		bankAccount           *BankAccount
+		lunchFlowTransactions []lunchflow.Transaction
+		existingTransactions  map[string]Transaction
 	}
 )
 
@@ -77,13 +88,109 @@ func (s *SyncLunchFlowHandler) DefaultSchedule() string {
 }
 
 // EnqueueTriggeredJob implements ScheduledJobHandler.
-func (s *SyncLunchFlowHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
-	panic("unimplemented")
+func (s *SyncLunchFlowHandler) EnqueueTriggeredJob(
+	ctx context.Context,
+	enqueuer JobEnqueuer,
+) error {
+	log := s.log.WithContext(ctx)
+
+	log.Info("retrieving bank accounts to sync with Lunch Flow")
+
+	jobRepo := repository.NewJobRepository(s.db, s.clock)
+
+	bankAccounts, err := jobRepo.GetLunchFlowAccountsToSync(ctx)
+	if err != nil {
+		return err
+	}
+
+	if len(bankAccounts) == 0 {
+		log.Info("no bank accounts to by synced with Lunch Flow at this time")
+		return nil
+	}
+
+	for _, item := range bankAccounts {
+		itemLog := log.WithFields(logrus.Fields{
+			"accountId":     item.AccountId,
+			"bankAccountId": item.BankAccountId,
+			"linkId":        item.LinkId,
+		})
+
+		itemLog.Trace("enqueuing bank account to be synced with Lunch Flow")
+
+		err := enqueuer.EnqueueJobTxn(
+			ctx,
+			s.db,
+			s.QueueName(),
+			SyncLunchFlowArguments{
+				AccountId:     item.AccountId,
+				BankAccountId: item.BankAccountId,
+			},
+		)
+		if err != nil {
+			itemLog.WithError(err).Warn("failed to enqueue job to sync with Lunch Flow")
+			crumbs.Warn(ctx, "Failed to enqueue job to sync with Lunch Flow", "job", map[string]any{
+				"error": err,
+			})
+			continue
+		}
+
+		itemLog.Trace("successfully enqueued bank account to be synced with Lunch Flow")
+	}
+
+	return nil
 }
 
 // HandleConsumeJob implements ScheduledJobHandler.
 func (s *SyncLunchFlowHandler) HandleConsumeJob(ctx context.Context, log *logrus.Entry, data []byte) error {
-	panic("unimplemented")
+	var args SyncLunchFlowArguments
+	if err := errors.Wrap(s.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Sync Lunch Flow job.", "job", map[string]any{
+			"data": data,
+		})
+		return err
+	}
+
+	crumbs.IncludeUserInScope(ctx, args.AccountId)
+	log = log.WithFields(logrus.Fields{
+		"accountId":     args.AccountId,
+		"bankAccountId": args.BankAccountId,
+	})
+
+	return s.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
+		span := sentry.StartSpan(ctx, "db.transaction")
+		defer span.Finish()
+
+		log := log.WithContext(span.Context())
+		repo := repository.NewRepositoryFromSession(
+			s.clock,
+			"user_lunchflow",
+			args.AccountId,
+			txn,
+			log,
+		)
+		secretsRepo := repository.NewSecretsRepository(
+			log,
+			s.clock,
+			txn,
+			s.kms,
+			args.AccountId,
+		)
+
+		job, err := NewSyncLunchFlowJob(
+			log,
+			repo,
+			s.clock,
+			secretsRepo,
+			s.publisher,
+			s.enqueuer,
+			args,
+		)
+		if err != nil {
+			return err
+		}
+
+		return job.Run(span.Context())
+	})
 }
 
 // QueueName implements ScheduledJobHandler.
@@ -91,7 +198,267 @@ func (s *SyncLunchFlowHandler) QueueName() string {
 	return SyncLunchFlow
 }
 
+func NewSyncLunchFlowJob(
+	log *logrus.Entry,
+	repo repository.BaseRepository,
+	clock clock.Clock,
+	secrets repository.SecretsRepository,
+	publisher pubsub.Publisher,
+	enqueuer JobEnqueuer,
+	args SyncLunchFlowArguments,
+) (*SyncLunchFlowJob, error) {
+	return &SyncLunchFlowJob{
+		args:      args,
+		log:       log,
+		repo:      repo,
+		secrets:   secrets,
+		publisher: publisher,
+		enqueuer:  enqueuer,
+		clock:     clock,
+		timezone:  nil,
+
+		existingTransactions: make(map[string]Transaction),
+	}, nil
+}
+
 // Run implements JobImplementation.
 func (s *SyncLunchFlowJob) Run(ctx context.Context) error {
+	span := sentry.StartSpan(ctx, "job.exec")
+	defer span.Finish()
+
+	s.log = s.log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"accountId":     s.args.AccountId,
+		"bankAccountId": s.args.BankAccountId,
+	})
+
+	{ // Retrieve the bank account from the database, store the details for later
+		bankAccount, err := s.repo.GetBankAccount(
+			span.Context(),
+			s.args.BankAccountId,
+		)
+		if err != nil {
+			return err
+		}
+
+		if bankAccount.LunchFlowBankAccount == nil {
+			s.log.Warn("bank account does not have a lunch flow account associated with it")
+			span.Status = sentry.SpanStatusFailedPrecondition
+			return nil
+		}
+		s.log = s.log.WithFields(logrus.Fields{
+			"lunchFlow": logrus.Fields{
+				"lunchFlowId":     bankAccount.LunchFlowBankAccount.LunchFlowId,
+				"institutionName": bankAccount.LunchFlowBankAccount.InstitutionName,
+			},
+		})
+		s.bankAccount = bankAccount
+	}
+
+	if err := s.setupClient(span.Context()); err != nil {
+		return err
+	}
+
+	if err := s.hydrateTransactions(span.Context()); err != nil {
+		return err
+	}
+
 	panic("unimplemented")
+}
+
+func (s *SyncLunchFlowJob) setupClient(ctx context.Context) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	link, err := s.repo.GetLink(span.Context(), s.bankAccount.LinkId)
+	if err != nil {
+		return err
+	}
+
+	if link.LunchFlowLink == nil {
+		s.log.Warn("provided link does not have any lunch flow credentials")
+		crumbs.IndicateBug(
+			span.Context(),
+			"BUG: Link was queued to sync with lunch flow, but has no lunch flow details",
+			map[string]any{
+				"link": link,
+			},
+		)
+		return nil
+	}
+	s.log = s.log.WithFields(logrus.Fields{
+		"linkId":          link.LinkId,
+		"lunchFlowLinkId": link.LunchFlowLinkId,
+	})
+
+	{ // Store the account's timezone information
+		account, err := s.repo.GetAccount(span.Context())
+		if err != nil {
+			s.log.WithError(err).Error("failed to retrieve account for job")
+			return err
+		}
+
+		s.timezone, err = account.GetTimezone()
+		if err != nil {
+			s.log.WithError(err).Warn("failed to get account's time zone, defaulting to UTC")
+			s.timezone = time.UTC
+		}
+	}
+
+	{ // Retrieve the secret and setup the API client
+		secret, err := s.secrets.Read(span.Context(), link.LunchFlowLink.SecretId)
+		if err = errors.Wrap(err, "failed to retrieve credentials for lunch flow"); err != nil {
+			s.log.WithError(err).Error("could not retrieve API credentials for lunch flow for link")
+			return err
+		}
+
+		client, err := lunchflow.NewLunchFlowClient(
+			s.log,
+			link.LunchFlowLink.ApiUrl,
+			secret.Value,
+		)
+		if err != nil {
+			return errors.Wrap(err, "failed to create lunch flow API client")
+		}
+
+		s.client = client
+	}
+
+	return nil
+}
+
+func (s *SyncLunchFlowJob) hydrateTransactions(ctx context.Context) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var err error
+	s.lunchFlowTransactions, err = s.client.GetTransactions(
+		span.Context(),
+		lunchflow.AccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve transactions from lunch flow for sync")
+	}
+
+	lunchFlowIds := make([]string, len(s.lunchFlowTransactions))
+	for i := range s.lunchFlowTransactions {
+		lunchFlowIds[i] = s.lunchFlowTransactions[i].Id
+	}
+
+	s.existingTransactions, err = s.repo.GetTransactionsByLunchFlowId(
+		span.Context(),
+		s.bankAccount.BankAccountId,
+		lunchFlowIds,
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve existing lunch flow transactions")
+	}
+
+	if count := len(s.existingTransactions); count > 0 {
+		s.log.WithContext(span.Context()).WithFields(logrus.Fields{
+			"existingTransactions": count,
+		}).Debug("found existing transactions for upload")
+	}
+
+	return nil
+}
+
+func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	log := s.log.WithContext(span.Context())
+
+	transactionsToUpdate := make([]*Transaction, 0)
+	transactionsToCreate := make([]Transaction, 0)
+
+	for i := range s.lunchFlowTransactions {
+		externalTransaction := s.lunchFlowTransactions[i]
+		tlog := log.WithFields(logrus.Fields{
+			"lunchFlowTransaction": logrus.Fields{
+				"lunchFlowId": externalTransaction.Id,
+				"amount":      externalTransaction.Amount.String(),
+				"currency":    externalTransaction.Currency,
+			},
+		})
+
+		amount, err := currency.ParseFriendlyToAmount(
+			externalTransaction.Amount.String(),
+			externalTransaction.Currency,
+		)
+		if err != nil {
+			tlog.WithError(err).Error("failed to parse transaction amount")
+			continue
+		}
+
+		fallbackName := fmt.Sprintf(
+			"Transaction %s %s %s",
+			externalTransaction.Date,
+			externalTransaction.Amount.String(),
+			externalTransaction.Currency,
+		)
+
+		// Note the order of the fields here, for the name field we want to
+		// prioritize the merchant name if there is one. If their isn't we'll fall
+		// back to the description, and if there is nothing else then we will use
+		// our generated fallback name.
+		name := myownsanity.CoalesceStrings(
+			externalTransaction.Merchant,
+			externalTransaction.Description,
+			fallbackName,
+		)
+		// Original name prioritizes the description instead.
+		originalName := myownsanity.CoalesceStrings(
+			externalTransaction.Description,
+			externalTransaction.Merchant,
+			fallbackName,
+		)
+
+		// TODO Parse date
+		date := time.Now()
+
+		transaction, ok := s.existingTransactions[externalTransaction.Id]
+		if !ok {
+			lunchFlowTransaction := LunchFlowTransaction{
+				LunchFlowTransactionId: NewID(&LunchFlowTransaction{}),
+				AccountId:              s.bankAccount.AccountId,
+				LunchFlowBankAccountId: *s.bankAccount.LunchFlowBankAccountId,
+				LunchFlowId:            externalTransaction.Id,
+				Merchant:               externalTransaction.Merchant,
+				Description:            externalTransaction.Description,
+				Date:                   date,
+				Currency:               externalTransaction.Currency,
+				Amount:                 amount,
+				IsPending:              false,
+			}
+
+			transaction = Transaction{
+				AccountId:              s.bankAccount.AccountId,
+				BankAccountId:          s.bankAccount.BankAccountId,
+				LunchFlowTransactionId: &lunchFlowTransaction.LunchFlowTransactionId,
+				LunchFlowTransaction:   &lunchFlowTransaction,
+				Amount:                 amount,
+				Date:                   date,
+				Name:                   name,
+				OriginalName:           originalName,
+				MerchantName:           externalTransaction.Merchant,
+				OriginalMerchantName:   externalTransaction.Merchant,
+				IsPending:              false,
+				Source:                 "lunchflow",
+			}
+			transactionsToCreate = append(transactionsToCreate, transaction)
+		}
+		// TODO Handle updating transactions too!
+		continue
+	}
+
+	// Persist any new transactions.
+	if count := len(transactionsToCreate); count > 0 {
+		log.WithField("new", count).Info("creating new lunch flowtransactions from import")
+		// TODO Create the lunch flow transaction first!
+		if err := s.repo.InsertTransactions(span.Context(), transactionsToCreate); err != nil {
+			return errors.Wrap(err, "failed to persist new transactions")
+		}
+	}
+
+	return nil
 }

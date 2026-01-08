@@ -31,7 +31,11 @@ func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []
 	return errors.Wrap(err, "failed to insert transactions")
 }
 
-func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ID[Link], plaidTransactionIds []string) (map[string]Transaction, error) {
+func (r *repositoryBase) GetTransactionsByPlaidId(
+	ctx context.Context,
+	linkId ID[Link],
+	plaidTransactionIds []string,
+) (map[string]Transaction, error) {
 	if len(plaidTransactionIds) == 0 {
 		return map[string]Transaction{}, nil
 	}
@@ -78,6 +82,41 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ID
 		if item.PendingPlaidTransaction != nil {
 			result[item.PendingPlaidTransaction.PlaidId] = item
 		}
+	}
+
+	return result, nil
+}
+
+func (r *repositoryBase) GetTransactionsByLunchFlowId(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	lunchFlowIds []string,
+) (map[string]Transaction, error) {
+	if len(lunchFlowIds) == 0 {
+		return map[string]Transaction{}, nil
+	}
+
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	items := make([]Transaction, 0)
+	// Deliberatly include all transactions, regardless of delete status.
+	err := r.txn.ModelContext(span.Context(), &items).
+		Relation("LunchFlowTransaction").
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		WhereIn(`"lunchflow_transaction"."lunchflow_id" IN (?)`, lunchFlowIds).
+		Select(&items)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve transactions for lunch flow Ids")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	result := map[string]Transaction{}
+	for i := range items {
+		item := items[i]
+		result[item.LunchFlowTransaction.LunchFlowId] = item
 	}
 
 	return result, nil

@@ -19,6 +19,7 @@ func (r *repositoryBase) GetBankAccounts(
 	result := make([]BankAccount, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation("PlaidBankAccount").
+		Relation("LunchFlowBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."deleted_at" IS NULL`).
 		Select(&result)
@@ -141,6 +142,7 @@ func (r *repositoryBase) GetBankAccount(
 	var result BankAccount
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation("PlaidBankAccount").
+		Relation("LunchFlowBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."bank_account_id" = ? `, bankAccountId).
 		Select(&result)
