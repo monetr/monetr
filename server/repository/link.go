@@ -20,6 +20,7 @@ func (r *repositoryBase) GetLink(
 	var link Link
 	err := r.txn.ModelContext(span.Context(), &link).
 		Relation("PlaidLink").
+		Relation("LunchFlowLink").
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."link_id" = ?`, linkId).
 		Limit(1).
@@ -38,6 +39,7 @@ func (r *repositoryBase) GetLinks(ctx context.Context) ([]Link, error) {
 	result := make([]Link, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation("PlaidLink").
+		Relation("LunchFlowLink").
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Where(`"link"."deleted_at" IS NULL`).
 		Select(&result)

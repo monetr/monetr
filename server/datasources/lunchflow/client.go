@@ -37,8 +37,8 @@ type Transaction struct {
 	Amount      json.Number `json:"amount"`
 	Currency    string      `json:"currency"`
 	Date        string      `json:"date"`
-	Merchant    *string     `json:"merchant"`
-	Description *string     `json:"description"`
+	Merchant    string      `json:"merchant"`
+	Description string      `json:"description"`
 }
 
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=client.go -package=mockgen -destination=../../internal/mockgen/lunchflow_client.go LunchFlowClient
