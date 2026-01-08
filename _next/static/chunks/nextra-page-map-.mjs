@@ -195,6 +195,17 @@ export const pageMap = [{
       "description": "Guides on how to contribute to monetr, make changes to the application's code."
     }
   }, {
+    name: "guides",
+    route: "/documentation/guides",
+    children: [{
+      name: "migrate-kms",
+      route: "/documentation/guides/migrate-kms",
+      frontMatter: {
+        "title": "Migrate KMS Provider",
+        "description": "This guide explains how you can migrate monetr from one KMS provider to another without losing any data."
+      }
+    }]
+  }, {
     name: "index",
     route: "/documentation",
     frontMatter: {
@@ -225,7 +236,7 @@ export const pageMap = [{
     name: "install",
     route: "/documentation/install",
     frontMatter: {
-      "title": "Self-Hosted Installation",
+      "title": "Install",
       "description": "Learn how to self-host monetr for free using Docker or Podman. Explore the benefits of self-hosting and get an overview of installation requirements and options."
     }
   }, {
