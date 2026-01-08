@@ -181,7 +181,7 @@ func (o *OpenBaoTransit) dialTLS(
 //	│               ├── Handles errors from watcher.Errors
 //	│               ├── Handles events from watcher.Events
 //	│               │   └── Calls reloadTLS() on file changes
-//	│               └── Handles closure of the watcher via v.closer channel
+//	│               └── Handles closure of the watcher via o.closer channel
 //
 // This function is called when the client is initialized and runs until Close()
 // is called on the client.
@@ -243,8 +243,8 @@ func (o *OpenBaoTransit) watchCertificates() {
 //	├── If key and certificate paths are provided:
 //	│   ├── Loads TLS key pair
 //	│   └── Adds key pair to tls.Config
-//	├── Acquires lock on v.lock
-//	│   └── Updates v.tls with new tls.Config
+//	├── Acquires lock on o.lock
+//	│   └── Updates o.tls with new tls.Config
 //	└── Returns nil if successful, otherwise an error
 //
 // This function is called when the OpenBao client is initialized and every time
@@ -312,7 +312,7 @@ func (o *OpenBaoTransit) reloadTLS() error {
 //	│               ├── Checks token expiration status at each tick
 //	│               │   └── If token will expire before the next check, refreshes the token
 //	│               │       └── Calls authenticate() to refresh the token
-//	│               └── Handles closure of the worker via v.tokenCloser channel
+//	│               └── Handles closure of the worker via o.tokenCloser channel
 //
 // This function is called once when the client is created and runs a background
 // job until Close() is called.
@@ -360,8 +360,8 @@ func (o *OpenBaoTransit) authenticationWorker() {
 // methods based on the configuration.
 //
 //	authenticate(ctx context.Context) error
-//	├── Acquires lock on v.tokenSync
-//	├── Switches on v.config.Auth for different authentication methods:
+//	├── Acquires lock on o.tokenSync
+//	├── Switches on o.config.Auth for different authentication methods:
 //	│   ├── "userpass":
 //	│   │   ├── Authenticates using username and password
 //	│   │   ├── If successful, retrieves auth information
