@@ -6,12 +6,13 @@ export default {
   },
   use: 'Using monetr',
 
-  '-- Installation': {
+  '-- Self-Hosting': {
     type: 'separator',
-    title: 'Installation',
+    title: 'Self-Hosting',
   },
   install: '',
   configure: '',
+  guides: 'Guides',
 
   '-- Contributing': {
     type: 'separator',

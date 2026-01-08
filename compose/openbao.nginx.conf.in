@@ -1,0 +1,28 @@
+    upstream docker-openbao {
+        server openbao:80;
+    }
+
+    server {
+        listen 443 ssl;
+
+        ssl_certificate /etc/nginx/tls/cert.pem;
+        ssl_certificate_key /etc/nginx/tls/key.pem;
+        server_name openbao.@MONETR_LOCAL_DOMAIN@;
+
+        access_log /dev/stdout;
+        error_log /dev/stdout;
+
+        location / {
+            proxy_pass http://docker-openbao;
+            proxy_redirect off;
+            proxy_set_header X-Request-Id $request_id;
+            proxy_set_header X-Real-IP  $remote_addr;
+            proxy_set_header X-Forwarded-For $remote_addr;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            proxy_read_timeout 30s;
+            proxy_buffering off;
+        }
+    }

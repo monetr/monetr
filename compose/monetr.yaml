@@ -53,7 +53,6 @@ server:
   listenport: 4000
   statsport: 9000
 keyManagement:
-  enabled: true
   aws:
     region: us-east-1
     accessKey: foo
@@ -63,6 +62,10 @@ keyManagement:
   google:
     credentialsJson: /etc/monetr/google-service-account.json
     # Resource name must be specified using MONETR_KMS_RESOURCE_NAME
+  openbao:
+    keyId: monetr
+    authMethod: token
+    endpoint: http://openbao:80
   vault:
     keyId: monetr
     authMethod: token

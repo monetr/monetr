@@ -1,0 +1,142 @@
+---
+title: Migrate KMS Provider
+description: This guide explains how you can migrate monetr from one KMS provider to another without losing any data.
+---
+
+import { Callout } from 'nextra/components'
+import { Steps } from 'nextra/components'
+
+# Introduction
+
+This guide exists primarily to help users if they are using the [Vault
+Transit](/documentation/configure/kms/#vault-transit-configuration) KMS provider for their self-hosted instances of
+monetr. This provider is being deprecated in an upcoming release and it is recommended to move to OpenBao instead. This
+guide will cover migrating from any provider you currently have configured to the OpenBao KMS provider.
+
+<Callout type="warning">
+  It is always recommended to make a backup of monetr's data before performing a migration like this. While this
+  migration should be non-destructive up until the final steps, it is always possible that the dry run succeeds and the
+  actual migration may fail. While monetr does try to perform the migration atomically such that there is no data loss
+  even in the event of a failure, it is always better to be safe and have a backup just incase.
+</Callout>
+
+## Migrating KMS Providers
+
+<Steps>
+
+{<h3>Getting Started</h3>}
+
+To get started with the migration, you first need to make sure you have both the current encryption provider and the new
+desired encryption provider configured in your configuration file for monetr. For example, if you are moving from
+Vault to OpenBao your configuration file should look like this:
+
+```yaml filename="config.yaml"
+# ...
+keyManagement:
+  provider: vault
+  vault:
+    keyId: monetr
+    authMethod: token
+    endpoint: http://vault:80
+  openbao:
+    keyId: monetr
+    authMethod: token
+    endpoint: http://openbao:80
+# ...
+```
+
+This configuration file example indicates that the current configured provider is Vault but both the Vault and OpenBao
+providers are configured.
+
+{<h3>Dry Run</h3>}
+
+Once you have configured both KMS providers you can perform a dry run of the migration. This dry run will test that
+monetr can use both the new and old KMS provider, and will read all of the secrets from the database and re-encrypt them
+using the new KMS provider but _will not store them again_. This way the functionality of the new KMS provider can be
+validated without the potential loss of any data.
+
+<Callout type="warning">
+  Some KMS providers charge per encrypt or decrypt operation performed. This dry run will perform several operations for
+  every secret currently stored on your monetr instance. Depending on your KMS provider this may incur additional
+  charges. Please be aware of this before proceeding.
+</Callout>
+
+Inside your monetr container run the following command:
+
+<Callout type="info">
+  **Note**: Before running this command, you will need to make sure that your config is either stored in the default
+  location for monetr or you will need to pass `-c ${path to your config}` to monetr before the `admin` command.
+  For example: `monetr -c ${path to your config} admin ...`.
+</Callout>
+
+```shell
+monetr admin kms:migrate --from-provider=vault --to-provider=openbao --dry-run
+```
+
+This command will perform the test migration from one KMS provider to another. If there are any problems, monetr will
+provide some information about the problem it encountered and print some debug information to potentially help resolve
+the issue. If a problem is encountered then monetr will stop the dry run and not proceed.
+
+If the dry run completes successfully though, then that means the migration will be successful and you can proceed to
+the next step.
+
+{<h3>Migrate Secrets</h3>}
+
+You can now proceed to migrate the secrets for monetr, however this migration cannot be done without downtime and
+requires that monetr is taken down briefly in order to complete the migration properly. Before proceeding you should
+shut down the monetr server or halt any HTTP traffic to the monetr server while the migration is being performed. This
+is to avoid the situation where a user attempts to perform an action that requires accessing a secret such as updating
+their Plaid link or receiving a Plaid webhook.
+
+To perform the migration, simply re-run the command you had run in the dry-run but without the `--dry-run` flag. Once
+again, include any additional configuration flags necessary for your own deployment.
+
+```shell
+monetr admin kms:migrate --from-provider=vault --to-provider=openbao
+```
+
+{<h3>Update Configuration</h3>}
+
+Once the migration is completed you can modify your configuration file to point to the new provider. Using the example
+configuration file from above our updated config would look like this:
+
+```yaml filename="config.yaml"
+# ...
+keyManagement:
+  provider: openbao
+  # This block can be removed entirely, but has been simply commented out here
+  # for simplicity
+  # vault:
+  #   keyId: monetr
+  #   authMethod: token
+  #   endpoint: http://vault:80
+  openbao:
+    keyId: monetr
+    authMethod: token
+    endpoint: http://openbao:80
+# ...
+```
+
+Note that the provider has been updated to reflect our new KMS, this is required because the secrets now stored in our
+database are no longer able to be decrypted with our previous KMS provider.
+
+{<h3>Restart monetr</h3>}
+
+Once your configuration file has been updated, you should restart monetr's server in order to pick up the new
+configuration values.
+
+In order to test to make sure everything is working properly you can attempt a manual Plaid sync or other operation that
+utilizes secrets.
+
+</Steps>
+
+
+## Other Notes
+
+If you are currently using the `plaintext` KMS provider, then there is no configuration block you need to include for
+this provider. You only need to include the new provider's configuration block (such as `aws` or `openbao`) in order to
+migrate your non-encrypted secrets to encrypted ones.
+
+At the time of writing this, only Plaid secrets as well as some other third party secrets are being encrypted using the
+KMS provider here. If you are managing your budgeting entirely manually or through file uploads, then your usage does
+not require using a KMS provider at this time.

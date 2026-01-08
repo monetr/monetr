@@ -155,7 +155,7 @@ elseif("${MONETR_KMS_PROVIDER}" STREQUAL "vault")
   # file and template it into that directory for later.
   file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/vault)
   set(VAULT_TOKEN_FILE ${COMPOSE_OUTPUT_DIRECTORY}/vault/token.txt)
-  if(NOT EXISTS ${VAULT_TOKEN_FILE}) 
+  if(NOT EXISTS ${VAULT_TOKEN_FILE})
     string(RANDOM LENGTH 24 ALPHABET abcdefghijklmnopqrstuvwxyz1234567890 VAULT_ROOT_TOKEN)
     set(VAULT_ROOT_TOKEN "dev-${VAULT_ROOT_TOKEN}")
     message(STATUS "  Writing vault token file: ${VAULT_ROOT_TOKEN}")
@@ -170,6 +170,28 @@ elseif("${MONETR_KMS_PROVIDER}" STREQUAL "vault")
   list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.vault-kms.yaml.in)
   list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/vault.nginx.conf.in)
   list(APPEND LOCAL_DOMAINS "vault.${MONETR_LOCAL_DOMAIN}")
+elseif("${MONETR_KMS_PROVIDER}" STREQUAL "openbao")
+  message(STATUS "OpenBao Transit (Local) will be used for local development as the KMS provider")
+  # If we are using the OpenBao KMS provider, then make a OpenBao directory in
+  # our build tree. And take the config file and template it into that
+  # directory for later.
+  file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY}/openbao)
+  set(VAULT_TOKEN_FILE ${COMPOSE_OUTPUT_DIRECTORY}/openbao/token.txt)
+  if(NOT EXISTS ${VAULT_TOKEN_FILE})
+    string(RANDOM LENGTH 24 ALPHABET abcdefghijklmnopqrstuvwxyz1234567890 VAULT_ROOT_TOKEN)
+    set(VAULT_ROOT_TOKEN "dev-${VAULT_ROOT_TOKEN}")
+    message(STATUS "  Writing openbao token file: ${VAULT_ROOT_TOKEN}")
+    file(WRITE ${VAULT_TOKEN_FILE} "${VAULT_ROOT_TOKEN}")
+  else()
+    file(READ ${VAULT_TOKEN_FILE} VAULT_ROOT_TOKEN)
+    message(STATUS "  Using existing openbao token file: ${VAULT_ROOT_TOKEN}")
+  endif()
+  file(READ ${VAULT_TOKEN_FILE} VAULT_ROOT_TOKEN)
+  configure_file("${CMAKE_SOURCE_DIR}/compose/openbao-config.toml.in" "${COMPOSE_OUTPUT_DIRECTORY}/openbao/config.toml" @ONLY)
+  # And then add our openbao container to our compose list.
+  list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.openbao-kms.yaml.in)
+  list(APPEND NGINX_CONFIG_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/openbao.nginx.conf.in)
+  list(APPEND LOCAL_DOMAINS "openbao.${MONETR_LOCAL_DOMAIN}")
 elseif("${MONETR_KMS_PROVIDER}" STREQUAL "")
   set(MONETR_KMS_PROVIDER "plaintext")
 elseif("${MONETR_KMS_PROVIDER}" STREQUAL "plaintext")
@@ -218,12 +240,17 @@ endforeach()
 
 # And then find all of the nginx configs that we generated.
 set(S3_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/s3.nginx.conf")
+set(OPENBAO_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/openbao.nginx.conf")
 set(VAULT_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/vault.nginx.conf")
 set(NGROK_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/ngrok.nginx.conf")
 set(MAIL_NGINX_CONFIG_FILE "${NGINX_DIRECTORY}/mail.nginx.conf")
 
 if(EXISTS "${S3_NGINX_CONFIG_FILE}")
   file(READ "${S3_NGINX_CONFIG_FILE}" S3_NGINX_CONFIG)
+endif()
+
+if(EXISTS "${OPENBAO_NGINX_CONFIG_FILE}")
+  file(READ "${OPENBAO_NGINX_CONFIG_FILE}" OPENBAO_NGINX_CONFIG)
 endif()
 
 if(EXISTS "${VAULT_NGINX_CONFIG_FILE}")
@@ -288,6 +315,7 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E echo "-- Optional Services:"
   COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://ngrok.${MONETR_LOCAL_DOMAIN} External: https://${NGROK_HOSTNAME}"
   COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://s3.${MONETR_LOCAL_DOMAIN} User: monetr Pass: password"
+  COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://openbao.${MONETR_LOCAL_DOMAIN} Token: ${VAULT_ROOT_TOKEN}"
   COMMAND ${CMAKE_COMMAND} -E echo "--  ${LOCAL_PROTOCOL}://vault.${MONETR_LOCAL_DOMAIN} Token: ${VAULT_ROOT_TOKEN}"
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- Optional services might not all be available and depend on your personal configuration."
@@ -320,7 +348,7 @@ add_custom_target(
   USES_TERMINAL
 )
 
-if(DOCKER_SERVER) 
+if(DOCKER_SERVER)
   add_custom_target(
     development.down
     COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:plaid || ${CMAKE_COMMAND} -E true

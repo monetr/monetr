@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "build": "rsbuild build --mode=production",
-    "start": "MONETR_ENV=${MONETR_ENV:=local} rsbuild dev",
-    "lite": "MONETR_ENV=${MONETR_ENV:=local} MONETR_DEVELOPMENT_LITE=true rsbuild dev"
+    "start": "BABEL_DISABLE_CACHE=1 MONETR_ENV=${MONETR_ENV:=local} rsbuild dev"
   },
   "browserslist": {
     "production": [

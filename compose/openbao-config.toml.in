@@ -1,0 +1,13 @@
+# vim: set ft=toml
+disable_mlock      = true
+ui                 = true
+cluster_addr       = "http://0.0.0.0:81"
+api_addr           = "http://0.0.0.0:80"
+log_requests_level = "debug"
+log_level          = "debug"
+
+listener "tcp" {
+  address = "0.0.0.0:80"
+  tls_disable = true
+}
+

@@ -48,6 +48,7 @@ MONETR
 Mastercard
 OAuth.*
 OFX
+OpenBao
 PEM
 PiggyBank
 PricingPage
@@ -130,6 +131,7 @@ logrus
 macOS
 mathbf
 merchantability
+migrate-kms
 minio
 miniredis
 mkcert

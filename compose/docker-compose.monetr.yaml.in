@@ -50,6 +50,7 @@ services:
       - mail
   ui_builder:
     image: monetr-ui:local
+    user: "${UID:-1000}:${GID:-1000}"
     pull_policy: never
     restart: no
     build:
@@ -61,7 +62,7 @@ services:
     tty: true # Color output.
     image: monetr-ui:local
     pull_policy: never
-    user: "${UID:-0}:${GID:-0}"
+    user: "${UID:-1000}:${GID:-1000}"
     working_dir: "@CMAKE_SOURCE_DIR@/interface"
     restart: always
     healthcheck:
@@ -71,8 +72,8 @@ services:
       retries: 12
       start_period: 60s
     environment:
-      UID: "${UID:-0}"
-      GID: "${GID:-0}"
+      UID: "${UID:-1000}"
+      GID: "${GID:-1000}"
       WS_PROTO: 'wss' # TODO Make this based on the local protocol
       INSECURE_WS: "false" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
       NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
