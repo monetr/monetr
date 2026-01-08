@@ -16,7 +16,7 @@ const (
 )
 
 type LunchFlowBankAccount struct {
-	tableName string `pg:"lunchflow_bank_account"`
+	tableName string `pg:"lunchflow_bank_accounts"`
 
 	LunchFlowBankAccountId ID[LunchFlowBankAccount]   `json:"lunchFlowBankAccountId" pg:"lunchflow_bank_account_id,notnull,pk"`
 	AccountId              ID[Account]                `json:"-" pg:"account_id,notnull,pk"`
