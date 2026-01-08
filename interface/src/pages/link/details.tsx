@@ -6,6 +6,7 @@ import { ChevronRight, Landmark, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { Link, useParams } from 'react-router-dom';
 
+import Badge from '@monetr/interface/components/Badge';
 import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
 import FormButton from '@monetr/interface/components/FormButton';
@@ -20,7 +21,6 @@ import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import capitalize from '@monetr/interface/util/capitalize';
 import type { APIError } from '@monetr/interface/util/request';
-import Badge from '@monetr/interface/components/Badge';
 
 interface LinkValues {
   institutionName: string;
