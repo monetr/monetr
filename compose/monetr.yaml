@@ -53,7 +53,6 @@ server:
   listenport: 4000
   statsport: 9000
 keyManagement:
-  enabled: true
   aws:
     region: us-east-1
     accessKey: foo

@@ -3,6 +3,8 @@ title: Migrate KMS Provider
 description: This guide explains how you can migrate monetr from one KMS provider to another without losing any data.
 ---
 
+import { Steps } from 'nextra/components'
+
 # Introduction
 
 This guide exists primarily to help users if they are using the [Vault
@@ -10,5 +12,46 @@ Transit](/documentation/configure/kms/#vault-transit-configuration) KMS provider
 monetr. This provider is being deprecated in an upcoming release and it is recommended to move to OpenBao instead. This
 guide will cover migrating from any provider you currently have configured to the OpenBao KMS provider.
 
-**TODO Write Guide**
+## Migrating KMS Providers
 
+<Steps>
+
+{<h3>Getting Started</h3>}
+
+To get started with the migration, you first need to make sure you have both the current encryption provider and the new
+desired encryption provider configured in your configuration file for monetr. For example, if you are moving from
+Vault to OpenBao your configuration file should look like this:
+
+```yaml filename="config.yaml"
+# ...
+keyManagement:
+  provider: vault
+  vault:
+    keyId: monetr
+    authMethod: token
+    endpoint: http://vault:80
+  openbao:
+    keyId: monetr
+    authMethod: token
+    endpoint: http://openbao:80
+# ...
+```
+
+This configuration file example indicates that the current configured provider is Vault but both the Vault and OpenBao
+providers are configured.
+
+{<h3>Dry Run</h3>}
+
+Once you have configured both KMS providers you can perform a dry run of the migration. This dry run will test that
+monetr can use both the new and old KMS provider, and will read all of the secrets from the database and re-encrypt them
+using the new KMS provider but _will not store them again_. This way the functionality of the new KMS provider can be
+validated without the potential loss of any data.
+
+Inside your monetr container run the following command:
+
+```shell
+
+```
+
+
+</Steps>

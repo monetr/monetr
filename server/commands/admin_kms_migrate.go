@@ -22,7 +22,7 @@ func adminKMSMigrate(parent *cobra.Command) {
 	}
 
 	command := &cobra.Command{
-		Use:   "migrate-kms",
+		Use:   "kms:migrate",
 		Short: "Migrate all stored secrets from one method of encryption to another.",
 		Long:  "Migrate all stored secrets from one method of encryption to another. This can be used to go from plaintext secret storage to an encrypted storage setup or vice versa. It can also allow you to easily migrate from one encrypted KMS provider to another. In order to perform the migration, specify the configuration for both KMS providers you require, and specify the new one as the provider in the config. Specify the old one as an argument to this command `--from-provider=`.",
 		RunE: func(cmd *cobra.Command, args []string) error {
