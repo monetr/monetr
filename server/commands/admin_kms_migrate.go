@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/monetr/monetr/server/config"
@@ -24,7 +25,15 @@ func adminKMSMigrate(parent *cobra.Command) {
 	command := &cobra.Command{
 		Use:   "kms:migrate",
 		Short: "Migrate all stored secrets from one method of encryption to another.",
-		Long:  "Migrate all stored secrets from one method of encryption to another. This can be used to go from plaintext secret storage to an encrypted storage setup or vice versa. It can also allow you to easily migrate from one encrypted KMS provider to another. In order to perform the migration, specify the configuration for both KMS providers you require, and specify the new one as the provider in the config. Specify the old one as an argument to this command `--from-provider=`.",
+		Long: strings.Join([]string{
+			"Migrate all stored secrets from one method of encryption to another.",
+			"This can be used to go from plaintext secret storage to an encrypted",
+			"storage setup or vice versa. It can also allow you to easily migrate",
+			"from one encrypted KMS provider to another. In order to perform the",
+			"migration, specify the configuration for both KMS providers you require,",
+			"and specify the new one as the provider in the config. Specify the old",
+			"one as an argument to this command `--from-provider=`.",
+		}, " "),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configuration := config.LoadConfiguration()
 			fromConfiguration := configuration
@@ -174,9 +183,33 @@ func adminKMSMigrate(parent *cobra.Command) {
 		},
 	}
 
-	command.PersistentFlags().StringVar(&arguments.FromKMS, "from-provider", "", "Specify the KMS provider you are migrating from. Valid values are: plaintext, aws, google, vault")
-	command.PersistentFlags().StringVar(&arguments.ToKMS, "to-provider", "", "Specify the KMS provider you are migrating to. Valid values are: plaintext, aws, google, vault")
-	command.PersistentFlags().BoolVar(&arguments.DryRun, "dry-run", false, "Don't persist the changes to the database, but still perform all the rotations in memory to ensure they all succeed.")
+	command.PersistentFlags().StringVar(
+		&arguments.FromKMS,
+		"from-provider",
+		"",
+		strings.Join([]string{
+			"Specify the KMS provider you are migrating from. Valid values are:",
+			"plaintext, aws, openbao, vault",
+		}, " "),
+	)
+	command.PersistentFlags().StringVar(
+		&arguments.ToKMS,
+		"to-provider",
+		"",
+		strings.Join([]string{
+			"Specify the KMS provider you are migrating to. Valid values are:",
+			"plaintext, aws, openbao, vault",
+		}, " "),
+	)
+	command.PersistentFlags().BoolVar(
+		&arguments.DryRun,
+		"dry-run",
+		false,
+		strings.Join([]string{
+			"Don't persist the changes to the database, but still perform all the",
+			"rotations in memory to ensure they all succeed.",
+		}, " "),
+	)
 
 	command.MarkPersistentFlagRequired("from-provider")
 	command.MarkPersistentFlagRequired("to-provider")

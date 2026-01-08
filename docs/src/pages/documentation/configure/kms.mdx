@@ -4,6 +4,8 @@ description: Configure your self hosted monetr instance to encrypt secrets using
 ---
 
 import { Callout } from 'nextra/components'
+import { Cards } from 'nextra/components';
+import { ShoppingCart, Link2 } from 'lucide-react';
 
 # Encryption (Key Management)
 
@@ -24,9 +26,6 @@ keyManagement:
   If you are using the `plaintext` provider (which is the default), no additional options needs to be provided for the
   key management configuration.
 </Callout>
-
-It is possible to migrate to another KMS provider using the monetr CLI, however this workflow is not documented at this
-time. It is recommended you pick the key management provider you want to stick with initially and not change it.
 
 ## Plaintext
 
@@ -137,3 +136,12 @@ keyManagement:
 | `tlsKeyPath`         | String   |             | Path to the TLS key file, used if Vault is being hosted with a self signed certificate.                                                                                                                    |
 | `tlsCAPath`          | String   |             | Path to the Certificate Authority file, used if Vault is being hosted with a self signed certificate.                                                                                                      |
 | `insecureSkipVerify` | Boolean  | `false`     | When `true`, monetr will not verify the TLS certificate of the Vault server, **less secure**.                                                                                                              |
+
+## Related Topics
+
+<Cards.Card
+  icon={<Link2 />}
+  title="Migrate Between KMS Providers"
+  description="Migrate Between KMS Providers"
+  href="/documentation/guides/migrate-kms"
+/>

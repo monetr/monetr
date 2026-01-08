@@ -119,7 +119,7 @@ Here is a sample of a user presets file with a few customized options:
         "CMAKE_BUILD_TYPE": "Debug",
         "MONETR_LOCAL_DOMAIN": "monetr.local",
         "MONETR_EMAIL_VERIFICATION_ENABLED": "true",
-        "MONETR_KMS_PROVIDER": "vault",
+        "MONETR_KMS_PROVIDER": "openbao",
         "MONETR_STORAGE_PROVIDER": "s3",
         "MONETR_DEVELOPMENT_LITE_TARGET": "my.monetr.dev",
         "DISABLE_GO_RELOAD": "false"
@@ -141,7 +141,7 @@ This config specifically changes the following options:
   verify their email address when creating a new user. Valid values are `true` or `false`.
 - `MONETR_KMS_PROVIDER`: As configured, enables a local instance of [Hashicorp Vault](https://www.vaultproject.io/) as
   well as configures monetr to use Vault Transit for secret encryption and decryption. Valid values are `plaintext`,
-  `aws` or `vault`. **Note:** The AWS setting runs a local KMS service compatible with AWS KMS's API.
+  `aws`, `openbao` or `vault`. **Note:** The AWS setting runs a local KMS service compatible with AWS KMS's API.
 - `MONETR_STORAGE_PROVIDER`: A minio instance will be run as part of the local development stack. Valid values are `s3`
   or `filesystem`. When using `filesystem` uploaded files will be stored in your `$PWD/build/development/storage`
   folder.
@@ -216,6 +216,8 @@ As part of the local development stack, several services are run to support mone
 - [Mailpit](https://github.com/axllent/mailpit) An SMTP server that allows emails to be sent without really sending
   them. This is used to validate and test communication functionality locally. This service is accessible via
   `https://mail.monetr.local` when the local environment is running.
+- [OpenBao](https://openbao.org/) An open-source fork of Vault that provides a self-hostable secret management and
+  encryption service. Available at `https://openbao.monetr.local` if you have OpenBao enabled in your user preset.
 - [Vault](https://www.vaultproject.io/) Vault secret management and encryption, Transit is used by monetr for storing
   secrets securely. Available at `https://vault.monetr.local` if you have Vault enabled in your user preset.
 
