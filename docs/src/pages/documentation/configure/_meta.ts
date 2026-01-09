@@ -4,7 +4,7 @@ export default {
   kms: 'Key Management',
   links: 'Links',
   logging: 'Logging',
-  lunchflow: 'Lunch Flow',
+  lunch_flow: 'Lunch Flow',
   plaid: 'Plaid',
   postgres: 'PostgreSQL',
   recaptcha: 'ReCAPTCHA',
