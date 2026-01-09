@@ -425,7 +425,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 
 	secrets := c.mustGetSecretsRepository(ctx)
 	secret := repository.SecretData{
-		Kind:  PlaidSecretKind,
+		Kind:  SecretKindPlaid,
 		Value: result.AccessToken,
 	}
 	if err = secrets.Store(c.getContext(ctx), &secret); err != nil {
@@ -597,7 +597,7 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 	}
 }
 
-func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
+func (c *Controller) postPlaidLinkSync(ctx echo.Context) error {
 	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
