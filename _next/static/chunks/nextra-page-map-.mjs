@@ -70,7 +70,8 @@ export const pageMap = [{
       name: "email",
       route: "/documentation/configure/email",
       frontMatter: {
-        "sidebarTitle": "Email"
+        "title": "Email/SMTP",
+        "description": "Configure Email/SMTP for self-hosted monetr instances, allowing users to recover credentials via forgot password or verify users before they sign up."
       }
     }, {
       name: "kms",
@@ -114,7 +115,8 @@ export const pageMap = [{
       name: "redis",
       route: "/documentation/configure/redis",
       frontMatter: {
-        "title": "Redis"
+        "title": "Redis",
+        "description": "Configure cache for self-hosted monetr instances."
       }
     }, {
       name: "security",
