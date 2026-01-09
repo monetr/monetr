@@ -14,12 +14,6 @@ export default {
   configure: '',
   guides: 'Guides',
 
-  '-- Integrations': {
-    type: 'separator',
-    title: 'Integrations',
-  },
-  lunchflow: '',
-
   '-- Contributing': {
     type: 'separator',
     title: 'Contributing',
