@@ -28,7 +28,7 @@ func TestSecretsRepository_Store(t *testing.T) {
 		repo := repository.NewSecretsRepository(log, clock, db, kms, "acct_bogus")
 
 		err := repo.Store(ctx, &repository.SecretData{
-			Kind:  models.PlaidSecretKind,
+			Kind:  models.SecretKindPlaid,
 			Value: gofakeit.UUID(),
 		})
 		assert.EqualError(t, err, `failed to store secret: ERROR #23503 insert or update on table "secrets" violates foreign key constraint "fk_secrets_account"`)
@@ -46,7 +46,7 @@ func TestSecretsRepository_Store(t *testing.T) {
 		repo := repository.NewSecretsRepository(log, clock, db, kms, user.AccountId)
 
 		secret := repository.SecretData{
-			Kind:  models.PlaidSecretKind,
+			Kind:  models.SecretKindPlaid,
 			Value: accessToken,
 		}
 		err := repo.Store(ctx, &secret)
@@ -89,7 +89,7 @@ func TestSecretsRepository_Store(t *testing.T) {
 		repo := repository.NewSecretsRepository(log, clock, db, kms, user.AccountId)
 
 		secret := repository.SecretData{
-			Kind:  models.PlaidSecretKind,
+			Kind:  models.SecretKindPlaid,
 			Value: accessToken,
 		}
 		err := repo.Store(ctx, &secret)
@@ -126,7 +126,7 @@ func TestSecretsRepository_Store(t *testing.T) {
 		repo := repository.NewSecretsRepository(log, clock, db, kms, user.AccountId)
 
 		secret := repository.SecretData{
-			Kind:  models.PlaidSecretKind,
+			Kind:  models.SecretKindPlaid,
 			Value: accessToken,
 		}
 		err := repo.Store(ctx, &secret)
