@@ -10,8 +10,8 @@ import (
 type SecretKind string
 
 const (
-	PlaidSecretKind  SecretKind = "plaid"
-	TellerSecretKind SecretKind = "teller"
+	SecretKindPlaid     SecretKind = "plaid"
+	SecretKindLunchFlow SecretKind = "lunchflow"
 )
 
 type Secret struct {
