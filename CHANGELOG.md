@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.9.0](https://github.com/monetr/monetr/compare/v1.8.3...v1.9.0) (2026-01-13)
+
+
+### Features
+
+* **api:** Adding support for OpenBao as a KMS provider ([#2889](https://github.com/monetr/monetr/issues/2889)) ([b09f55f](https://github.com/monetr/monetr/commit/b09f55f04e7a1e9313722e3683f53e0c118bb26e))
+
+
+### Dependencies
+
+* **renovate:** update dependency @biomejs/biome to v2.3.11 ([#2891](https://github.com/monetr/monetr/issues/2891)) ([04907b3](https://github.com/monetr/monetr/commit/04907b3479a880a89c8c5dfe6f49c747cf3359bf))
+* **renovate:** update module golang.org/x/tools/cmd/stringer to v0.40.0 ([6918ee5](https://github.com/monetr/monetr/commit/6918ee5f6ecf3b3f2e9d7de3082533894a7d4b55))
+* **ui:** update dependency @tanstack/react-query to v5.90.16 ([#2874](https://github.com/monetr/monetr/issues/2874)) ([99b9099](https://github.com/monetr/monetr/commit/99b90992e1f8dea4f8abf9316bbe75ef8f910f5f))
+* **ui:** update dependency react-router-dom to v6.30.3 ([#2895](https://github.com/monetr/monetr/issues/2895)) ([72f85d1](https://github.com/monetr/monetr/commit/72f85d1827ff31e401512b722b510702db1f871c))
+
+
+### Refactor
+
+* **ui:** Fixing lint issues ([d5a9c88](https://github.com/monetr/monetr/commit/d5a9c88d2441320e16fcfc2683700ced87d7f5b0))
+
+
+### Documentation
+
+* Bump security.txt expiration date ([1a7548e](https://github.com/monetr/monetr/commit/1a7548e23737807f8862dc1d980e43b7908d3bcd))
+* Minor documentation improvements ([0058871](https://github.com/monetr/monetr/commit/00588718964f4456c70d34a0b8991c6125254c70))
+
 ## [1.8.3](https://github.com/monetr/monetr/compare/v1.8.2...v1.8.3) (2026-01-06)
 
 
