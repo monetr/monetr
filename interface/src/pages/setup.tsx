@@ -70,7 +70,7 @@ function Greeting(props: GreetingProps): JSX.Element {
         <Typography size='2xl' weight='medium'>
           Adding another bank?
         </Typography>
-        <Typography color='subtle' size='lg'>
+        <Typography align='center' color='subtle' size='lg'>
           Please select what type of bank you want to setup below.
         </Typography>
       </Flex>
@@ -87,7 +87,7 @@ function Greeting(props: GreetingProps): JSX.Element {
           justify: 'center',
           orientation: 'column',
         }),
-        layoutVariants({ width: 'full', height: 'screen' }),
+        layoutVariants({ width: 'full', height: 'full' }),
       )}
     >
       <MLogo className='w-16 h-16 md:w-24 md:h-24' />

@@ -20,6 +20,10 @@
   width: 100vw;
 }
 
+.heightFull {
+  @include mixins.height-full;
+}
+
 .heightScreen {
   height: 100vh;
 }

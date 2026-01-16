@@ -39,11 +39,6 @@
   gap: 4 * variables.$size;
   align-items: center;
 
-  // TODO, make this a bit more dynamic for screen size
-  // 'lg:py-4',
-  // 'pt-2',
-  // 'pb-8',
-  // 'lg:pb-4',
-  padding-top: calc(2 * variables.$size + env(safe-area-inset-top));
-  padding-bottom: calc(2 * variables.$size + env(safe-area-inset-bottom));
+  padding-top: calc(4 * variables.$size + env(safe-area-inset-top));
+  padding-bottom: calc(4 * variables.$size + env(safe-area-inset-bottom));
 }

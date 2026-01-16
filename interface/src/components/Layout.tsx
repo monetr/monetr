@@ -13,6 +13,7 @@ export const widths = {
 
 export const heights = {
   default: undefined,
+  full: styles.heightFull,
   screen: styles.heightScreen,
 };
 

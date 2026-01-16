@@ -1,5 +1,9 @@
 @use '@monetr/interface/variables';
 
+.sidebarPaddingLayout {
+  min-height: 100vh;
+}
+
 :global(.sidebar-open) {
   .sidebarPaddingLayout {
     min-width: 0px;

@@ -24,6 +24,7 @@ export type ManualLinkSetupIncomeValues = {
   nextPayday: Date;
   ruleset: string;
   paydayAmount: number;
+  currency: string;
 };
 
 export default function ManualLinkSetupIncome(): JSX.Element {

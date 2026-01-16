@@ -99,7 +99,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
     return defaultFilterImplementation<V>;
   }, [props.filterImpl]);
 
-  const { isOpen, getMenuProps, getInputProps, getItemProps, openMenu, selectedItem } = useCombobox({
+  const { isOpen, getMenuProps, getInputProps, getItemProps, openMenu, selectedItem, selectItem } = useCombobox({
     selectedItem: props.value,
     // By default the highest item should be "highlighted" unless the user moves the highlight themselves.
     defaultHighlightedIndex: 0,
@@ -137,6 +137,16 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
       setItems(props.options);
     }
   }, [props.options, isOpen]);
+
+  // This effect gives the parent component some basic control over the state of the value of this combobox. Mainly this
+  // makes it so that if the parent component (specifically select frequency) changes its value to null. Then we need to
+  // clear the combobox value here as well so that way we reflect it. This is because it is a managed component in that
+  // sense.
+  useEffect(() => {
+    if (!props.value) {
+      selectItem(null);
+    }
+  }, [props.value, selectItem]);
 
   const renderStyles = useMemo(() => {
     // Controls the height of the menu that is rendered, makes sure that we dont render past the bottom of the page.

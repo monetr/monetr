@@ -22,28 +22,7 @@ const showUploadTransactionsModal = async () =>
 
 export default function Transactions(): JSX.Element {
   const { data: transactions, hasNextPage, isLoading, isError, isFetching, fetchNextPage } = useTransactions();
-
-  // Scroll restoration code.
   const ref = useRef<HTMLUListElement>(null);
-  // const navigationType = useNavigationType();
-  // const onScroll = useCallback(() => {
-  //   evilScrollPosition = ref.current.scrollTop;
-  // }, []);
-  // useEffect(() => {
-  //   if (!ref.current) {
-  //     return undefined;
-  //   }
-  //
-  //   if (navigationType === 'POP') {
-  //     ref.current.scrollTop = evilScrollPosition;
-  //   }
-  //   const current = ref.current;
-  //   ref.current.addEventListener('scroll', onScroll);
-  //   return () => {
-  //     current.removeEventListener('scroll', onScroll);
-  //   };
-  //   // Fix bug with current impl.
-  // }, [navigationType, onScroll]);
 
   const loading = isLoading || isFetching;
 
@@ -179,7 +158,7 @@ function AddTransactionButton(): JSX.Element {
 
   return (
     <button
-      className='fixed md:bottom-4 bottom-14 right-4 w-14 h-14 rounded-full bg-dark-monetr-brand-subtle backdrop-blur-sm bg-opacity-75 backdrop-brightness-200 z-20 flex items-center justify-center active:backdrop-brightness-50'
+      className='fixed md:bottom-4 bottom-14 right-4 w-14 h-14 rounded-full bg-dark-monetr-brand-subtle backdrop-blur-sm bg-opacity-75 backdrop-brightness-200 z-30 flex items-center justify-center active:backdrop-brightness-50'
       onClick={showNewTransactionModal}
       type='button'
     >

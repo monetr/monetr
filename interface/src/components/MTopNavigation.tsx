@@ -85,7 +85,7 @@ function ActionArea(props: ActionAreaProps): JSX.Element {
   }
 
   const styles = mergeTailwind(
-    'flex justify-end gap-x-4 md:gap-x-2 z-40',
+    'flex justify-end gap-x-4 md:gap-x-2 z-[30]',
     'flex-shrink-0',
     'fixed -bottom-1 top-[unset] md:top-2 md:bottom-[unset] left-0 md:left-[unset] md:right-4',
     // Hacky width and padding to make sure scrollbar renders properly

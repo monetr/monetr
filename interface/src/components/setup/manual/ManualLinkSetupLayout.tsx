@@ -30,6 +30,7 @@ export default function ManualLinkSetupLayout(props: ManualLinkSetupLayoutProps)
         {props.children}
       </div>
       {viewContext.metadata.showLogoutFooter && <LogoutFooter />}
+      {!viewContext.metadata.showLogoutFooter && <div />}
     </div>
   );
 }

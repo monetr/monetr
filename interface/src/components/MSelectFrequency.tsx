@@ -16,7 +16,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
   const [selectedSignature, setSelectedSignature] = useState<string | null>(null);
   const formikContext = useFormikContext();
 
-  const date = formikContext.values[props.dateFrom];
+  const date = useMemo(() => formikContext.values[props.dateFrom], [props.dateFrom, formikContext.values]);
 
   const rules = useMemo(() => getRecurrencesForDate(date, timezone), [date, timezone]);
   const options = useMemo(
@@ -74,7 +74,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
       name={props.name}
       onChange={onChange}
       options={options}
-      placeholder='Select a frequency...'
+      placeholder={options.length > 0 ? 'Select a frequency...' : 'Select a date first...'}
       value={value}
     />
   );
