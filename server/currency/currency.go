@@ -182,3 +182,9 @@ func ParseFloatToAmount[T float32 | float64](
 ) (int64, error) {
 	return ParseFriendlyToAmount(fmt.Sprint(input), currency)
 }
+
+type Currency struct {
+	Code             string `json:"code"`
+	Name             string `json:"name"`
+	FractionalDigits int    `json:"fractionalDigits"`
+}
