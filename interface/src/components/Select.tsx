@@ -190,6 +190,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
             className: selectStyles.input,
             onFocus: openMenu,
             spellCheck: false,
+            'data-1p-ingore': true,
           })}
         />
         <SelectIndicator disabled={props.disabled} isLoading={props.isLoading} open={isOpen} />
