@@ -4,7 +4,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/monetr/monetr/server/models"
+	"github.com/jarcoal/httpmock"
+	"github.com/monetr/monetr/server/datasources/lunch_flow"
+	"github.com/monetr/monetr/server/internal/mock_lunch_flow"
+	. "github.com/monetr/monetr/server/models"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPostLunchFlowLink(t *testing.T) {
@@ -21,14 +25,9 @@ func TestPostLunchFlowLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.linkId").String().IsASCII()
-		response.JSON().Path("$.linkType").IsEqual(models.LunchFlowLinkType)
-		response.JSON().Path("$.institutionName").String().NotEmpty()
-		response.JSON().Path("$.description").IsNull()
 		response.JSON().Path("$.lunchFlowLinkId").String().IsASCII()
-		response.JSON().Path("$.lunchFlowLink.lunchFlowLinkId").String().IsASCII()
-		response.JSON().Path("$.lunchFlowLink.status").String().IsEqual("active")
-		response.JSON().Path("$.lunchFlowLink").Object().Keys().NotContainsAll("secretId", "secret")
+		response.JSON().Path("$.status").String().IsEqual("pending")
+		response.JSON().Object().Keys().NotContainsAll("secretId", "secret")
 	})
 
 	t.Run("invalid API URL, no protocol", func(t *testing.T) {
@@ -97,5 +96,56 @@ func TestPostLunchFlowLink(t *testing.T) {
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
 		response.JSON().Path("$.problems.apiKey").String().IsEqual("Lunch Flow API Key must be provided to setup a Lunch Flow link")
+	})
+}
+
+func TestPostLunchFlowLinkBankAccountsRefresh(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		mock_lunch_flow.MockFetchAccounts(t, []lunch_flow.Account{
+			lunch_flow.Account{
+				Id:              "1234",
+				Name:            "Main Account",
+				InstitutionName: "Finance",
+				InstitutionLogo: nil,
+				Provider:        "gocardless",
+				Status:          "ACTIVE",
+			},
+		})
+
+		var id ID[LunchFlowLink]
+		{
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "US Bank",
+					"lunchFlowURL": "https://lunchflow.com/api/v1",
+					"apiKey":       "foobar",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.lunchFlowLinkId").String().IsASCII()
+			response.JSON().Path("$.status").String().IsEqual("pending")
+			id = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+		}
+
+		{
+			response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
+				WithPath("lunchFlowLinkId", id).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNoContent)
+		}
+
+		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
+			"GET https://lunchflow.com/api/v1/accounts": 1,
+		}, "must match Lunch Flow API calls")
 	})
 }
