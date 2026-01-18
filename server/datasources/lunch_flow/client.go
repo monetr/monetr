@@ -14,7 +14,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type AccountId string
+const DefaultBaseURL = "https://lunchflow.com/"
+
+type AccountId json.Number
 
 type Account struct {
 	Id              AccountId `json:"id"`
