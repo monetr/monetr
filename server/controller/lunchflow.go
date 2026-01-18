@@ -2,11 +2,12 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/merge"
+	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
@@ -88,12 +89,50 @@ func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 		return c.badRequestError(ctx, err, "failed to parse post request")
 	}
 
+	secret := repository.SecretData{
+		Kind:  models.SecretKindLunchFlow,
+		Value: request.APIKey,
+	}
+
+	{ // Store the secret and generate an ID
+		secrets := c.mustGetSecretsRepository(ctx)
+		if err := secrets.Store(c.getContext(ctx), &secret); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to store Lunch Flow secret")
+		}
+	}
+
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	// TODO Create the
-	fmt.Sprint(repo)
+	lunchFlowLink := models.LunchFlowLink{
+		SecretId:  secret.SecretId,
+		ApiUrl:    request.LunchFlowURL,
+		Status:    models.LunchFlowLinkStatusActive,
+		CreatedBy: c.mustGetUserId(ctx),
+	}
 
-	return nil
+	// The lunch flow link itself needs to be created first.
+	if err := repo.CreateLunchFlowLink(
+		c.getContext(ctx),
+		&lunchFlowLink,
+	); err != nil {
+		return c.wrapPgError(ctx, err, "Failed to create Lunch Flow link")
+	}
+
+	// Then create the regular link record to make it available to the user via
+	// the API and UI.
+	link := models.Link{
+		LinkType:        models.LunchFlowLinkType,
+		LunchFlowLinkId: &lunchFlowLink.LunchFlowLinkId,
+		LunchFlowLink:   &lunchFlowLink,
+		InstitutionName: request.Name,
+		CreatedBy:       lunchFlowLink.CreatedBy,
+	}
+
+	if err := repo.CreateLink(c.getContext(ctx), &link); err != nil {
+		return c.wrapPgError(ctx, err, "Failed to create Lunch Flow link")
+	}
+
+	return ctx.JSON(http.StatusOK, link)
 }
 
 func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
