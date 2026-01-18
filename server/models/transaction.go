@@ -18,7 +18,7 @@ const (
 	TransactionSourcePlaid     TransactionSource = "plaid"
 	TransactionSourceUpload    TransactionSource = "upload"
 	TransactionSourceManual    TransactionSource = "manual"
-	TransactionSourceLunchFlow TransactionSource = "lunchflow"
+	TransactionSourceLunchFlow TransactionSource = "lunch_flow"
 )
 
 type Transaction struct {
@@ -33,7 +33,7 @@ type Transaction struct {
 	PlaidTransaction          *PlaidTransaction         `json:"plaidTransaction" pg:"rel:has-one"`
 	PendingPlaidTransactionId *ID[PlaidTransaction]     `json:"-" pg:"pending_plaid_transaction_id"`
 	PendingPlaidTransaction   *PlaidTransaction         `json:"pendingPlaidTransaction" pg:"rel:has-one,fk:pending_"` // fk: is the prefix of the column we want to use to join on in a multikey join.
-	LunchFlowTransactionId    *ID[LunchFlowTransaction] `json:"-" pg:"lunchflow_transaction_id"`
+	LunchFlowTransactionId    *ID[LunchFlowTransaction] `json:"-" pg:"lunch_flow_transaction_id"`
 	LunchFlowTransaction      *LunchFlowTransaction     `json:"lunchFlowTransaction,omitempty" pg:"rel:has-one"`
 	Amount                    int64                     `json:"amount" pg:"amount,notnull,use_zero"`
 	SpendingId                *ID[Spending]             `json:"spendingId" pg:"spending_id,on_delete:SET NULL"`

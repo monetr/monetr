@@ -8,14 +8,14 @@ import (
 )
 
 type LunchFlowTransaction struct {
-	tableName string `pg:"lunchflow_transactions"`
+	tableName string `pg:"lunch_flow_transactions"`
 
-	LunchFlowTransactionId ID[LunchFlowTransaction] `json:"lunchFlowTransactionId" pg:"lunchflow_transaction_id,notnull,pk"`
+	LunchFlowTransactionId ID[LunchFlowTransaction] `json:"lunchFlowTransactionId" pg:"lunch_flow_transaction_id,notnull,pk"`
 	AccountId              ID[Account]              `json:"-" pg:"account_id,notnull,pk"`
 	Account                *Account                 `json:"-" pg:"rel:has-one"`
-	LunchFlowBankAccountId ID[LunchFlowBankAccount] `json:"-" pg:"lunchflow_bank_account_id,notnull,unique:per_bank_account"`
+	LunchFlowBankAccountId ID[LunchFlowBankAccount] `json:"-" pg:"lunch_flow_bank_account_id,notnull,unique:per_bank_account"`
 	LunchFlowBankAccount   *LunchFlowBankAccount    `json:"-" pg:"rel:has-one"`
-	LunchFlowId            string                   `json:"-" pg:"lunchflow_id,notnull,unique:per_bank_account"`
+	LunchFlowId            string                   `json:"-" pg:"lunch_flow_id,notnull,unique:per_bank_account"`
 	Merchant               string                   `json:"merchant" pg:"merchant"`
 	Description            string                   `json:"description" pg:"description"`
 	Date                   time.Time                `json:"date" pg:"date,notnull"`

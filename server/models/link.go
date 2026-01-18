@@ -22,7 +22,7 @@ type Link struct {
 	LinkType        LinkType           `json:"linkType" pg:"link_type,notnull"`
 	PlaidLinkId     *ID[PlaidLink]     `json:"-" pg:"plaid_link_id"`
 	PlaidLink       *PlaidLink         `json:"plaidLink,omitempty" pg:"rel:has-one"`
-	LunchFlowLinkId *ID[LunchFlowLink] `json:"lunchFlowLinkId,omitempty" pg:"lunchflow_link_id"`
+	LunchFlowLinkId *ID[LunchFlowLink] `json:"lunchFlowLinkId,omitempty" pg:"lunch_flow_link_id"`
 	LunchFlowLink   *LunchFlowLink     `json:"lunchFlowLink,omitempty" pg:"rel:has-one"`
 	InstitutionName string             `json:"institutionName" pg:"institution_name"`
 	Description     *string            `json:"description" pg:"description"`
