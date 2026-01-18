@@ -368,7 +368,7 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 
 	log := s.log.WithContext(span.Context())
 
-	transactionsToUpdate := make([]*Transaction, 0)
+	// transactionsToUpdate := make([]*Transaction, 0)
 	transactionsToCreate := make([]Transaction, 0)
 
 	for i := range s.lunchFlowTransactions {
