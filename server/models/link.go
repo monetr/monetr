@@ -71,7 +71,7 @@ func (Link) CreateValidators() []*validation.KeyRules {
 		validation.Key(
 			"lunchFlowLinkId",
 			ValidID[LunchFlowLink]().Error("Lunch Flow Link ID must be valid if provided"),
-		),
+		).Required(validators.Optional),
 	}
 }
 

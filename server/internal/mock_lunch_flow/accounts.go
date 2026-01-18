@@ -72,7 +72,7 @@ func LunchFlowHeaders(
 func MockFetchAccounts(t *testing.T, accounts []lunch_flow.Account) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
-		"POST", Path(t, "/api/v1/accounts"),
+		"GET", Path(t, "/api/v1/accounts"),
 		func(t *testing.T, request *http.Request) (any, int) {
 			if token := ValidateLunchFlowAuthentication(
 				t,
