@@ -336,8 +336,8 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/plaid/link/setup/wait/:linkId", c.getWaitForPlaid)
 	billed.POST("/plaid/link/sync", c.postPlaidLinkSync)
 	// Lunch Flow Links
-	billed.POST("/lunchflow/link", c.postLunchFlowLink)
-	billed.POST("/lunchflow/link/sync", c.postLunchFlowLinkSync)
-	billed.GET("/lunchflow/link/bank_accounts", c.getLunchFlowLinkBankAccounts)
-	billed.PATCH("/lunchflow/link/:lunchFlowLinkId", c.patchLunchFlowLink)
+	billed.POST("/lunch_flow/link", c.postLunchFlowLink)
+	billed.POST("/lunch_flow/link/sync", c.postLunchFlowLinkSync)
+	billed.GET("/lunch_flow/link/bank_accounts", c.getLunchFlowLinkBankAccounts)
+	billed.PATCH("/lunch_flow/link/:lunchFlowLinkId", c.patchLunchFlowLink)
 }

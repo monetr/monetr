@@ -3,6 +3,8 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/merge"
@@ -43,11 +45,33 @@ func (c *Controller) parsePostLunchFlowLinkRequest(
 			validation.Key(
 				"lunchFlowURL",
 				validation.Required.Error("Lunch Flow API URL is required to setup a Lunch Flow link"),
-				is.URL.Error("Lunch Flow URL must be a valid URL"),
+				validation.NewStringRule(func(input string) bool {
+					parsed, err := url.Parse(input)
+					if err != nil {
+						return false
+					}
+					// Do not allow query parameters in the URL as these will be removed
+					// when requests are made!
+					if len(parsed.Query()) > 0 {
+						return false
+					}
+
+					// Require a scheme to be specified
+					switch strings.ToLower(parsed.Scheme) {
+					case "http", "https":
+						// These are considered valid!
+					default:
+						// Any other scheme is not considered valid here!
+						return false
+					}
+
+					return true
+				}, "Lunch Flow API URL must be a full valid URL"),
 			).Required(validators.Require),
 			validation.Key(
 				"apiKey",
 				validation.Required.Error("Lunch Flow API Key must be provided to setup a Lunch Flow link"),
+				validation.Length(1, 100).Error("Lunch flow API Key must be between 1 and 100 characters"),
 				is.UTFLetterNumeric,
 			).Required(validators.Require),
 		),
