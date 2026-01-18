@@ -25,14 +25,14 @@ const (
 )
 
 type LunchFlowBankAccount struct {
-	tableName string `pg:"lunchflow_bank_accounts"`
+	tableName string `pg:"lunch_flow_bank_accounts"`
 
-	LunchFlowBankAccountId ID[LunchFlowBankAccount]   `json:"lunchFlowBankAccountId" pg:"lunchflow_bank_account_id,notnull,pk"`
+	LunchFlowBankAccountId ID[LunchFlowBankAccount]   `json:"lunchFlowBankAccountId" pg:"lunch_flow_bank_account_id,notnull,pk"`
 	AccountId              ID[Account]                `json:"-" pg:"account_id,notnull,pk"`
 	Account                *Account                   `json:"-" pg:"rel:has-one"`
-	LunchFlowLinkId        ID[LunchFlowLink]          `json:"lunchFlowLinkId" pg:"lunchflow_link_id,notnull"`
+	LunchFlowLinkId        ID[LunchFlowLink]          `json:"lunchFlowLinkId" pg:"lunch_flow_link_id,notnull"`
 	LunchFlowLink          *LunchFlowLink             `json:"-" pg:"rel:has-one"`
-	LunchFlowId            string                     `json:"lunchFlowId" pg:"lunchflow_id,notnull"`
+	LunchFlowId            string                     `json:"lunchFlowId" pg:"lunch_flow_id,notnull"`
 	Name                   string                     `json:"name" pg:"name,notnull"`
 	InstitutionName        string                     `json:"institutionName" pg:"institution_name,notnull"`
 	Provider               string                     `json:"provider" pg:"provider,notnull"`
