@@ -16,7 +16,7 @@ import (
 
 const DefaultBaseURL = "https://lunchflow.com/"
 
-type AccountId json.Number
+type AccountId = json.Number
 
 type Account struct {
 	Id              AccountId `json:"id"`

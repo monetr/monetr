@@ -23,7 +23,7 @@ type LunchFlowTransaction struct {
 	Amount                 int64                    `json:"amount" pg:"amount,notnull,use_zero"`
 	IsPending              bool                     `json:"isPending" pg:"is_pending,notnull,use_zero"`
 	CreatedAt              time.Time                `json:"createdAt" pg:"created_at,notnull,default:now()"`
-	DeletedAt              *time.Time               `json:"deletedAt" pg:"deleted_at"`
+	DeletedAt              *time.Time               `json:"deletedAt,omitempty" pg:"deleted_at"`
 }
 
 func (LunchFlowTransaction) IdentityPrefix() string {
