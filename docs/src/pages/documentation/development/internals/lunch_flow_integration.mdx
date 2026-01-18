@@ -22,16 +22,53 @@ The setup process for Lunch Flow will be different than Plaid or a manual link. 
 standalone object first, with a `pending` status. This object contains the information necessary for monetr to make
 requests to Lunch Flow's API and retrieve accounts.
 
-1. The user creates a Lunch Flow Link object, containing the API URL and the API secret.
-2. The user/client calls `POST /api/lunch_flow/link/:lunchFlowLinkId/bank_accounts/refresh`. This triggers the backend
-   to synchronously refresh what accounts are available from lunch flow and store them in the database. Upon completing
-   this API call the frontend can then call `GET /api/lunch_flow/link/:lunchFlowLinkId/bank_accounts` to see what bank
-   accounts are currently active for this link. By default all bank accounts added are inactive.
-3. The user is presented with a UI to select which bank accounts they want to sync. Making an account active will make a
-   POST request to create a monetr bank account record. When this happens for the first time it will mark the lunch flow
-   link as whole as active.
-4. If the user aborts this process at any time then the Lunch Flow link is left in a `pending` status and is eventually
-   cleaned up. If the user completes the process then the Lunch Flow link is associated with a real link and is moved to
-   the status of `active`.
+1. The client makes an API call to `POST /api/lunch_flow/link` with their desired API URL, secret and name of the link.
+   this lets the server store the link and its secret data. The status of the link is kept `pending` since the
+   credentials have not been verified yet and no accounts have been setup. The API returns the created lunch flow link
+   ID and other details to the client.
+2. The client then navigates forward in the process, going from the `.../lunchflow` setup page to
+   `.../lunchflow/:lunchFlowLinkId`. This page then makes a request to `POST
+   /api/lunch_flow/link/:lunchFlowLinkId/bank_accounts/refresh` which calls the actual Lunch Flow API using the stored
+   credentials. If there are any problems then an error is shown and then **TODO**. If the API call succeeds then this
+   endpoint will store the user's accounts in monetr with an `inactive` status.
+3. If there was no error then the client now makes an API call to `GET
+   /api/lunch_flow/link/:lunchFlowLinkId/bank_accounts` which will list the accounts retrieved from the Lunch Flow API.
+   These are show on the frontend so the user can select which ones they want to sync on this link.
+4. The user selects the accounts they want to sync and completes the setup by making the following API calls:
+    - Calling `POST /api/link` with the Lunch Flow link ID from above. This will move the link to an `active` status.
+    - Calling `POST /api/bank_account` with the link created in the previous step and the lunch flow bank account IDs
+      that the user wants to sync.
+5. The client then calls a sync API endpoint for lunch flow to kick off the background sync. The frontend observes this
+   sync via websocket.
+6. Once the sync is complete the frontend redirects the user to one of the bank account pages.
 
+## Modification
 
+If the user wants to modify what accounts are synced. They can simply archive a bank account to make it inactive. This
+will make it so that the account will not be synced anymore but does not remove the data for the account (until the link
+itself is deleted).
+
+To add a bank account the user can go to the link settings page, where they will see the current list of accounts that
+are active. As well as a list of accounts that could be added.
+
+The user will _not_ be able to update their API secret initially, though this would be easy to add.
+
+### Individual Accounts
+
+The user can modify the names of individual accounts as well as their currency. Currency can be reported at the top
+level of each account from Lunch Flow or at an individual transaction level. monetr does not currently handle individual
+transaction level currency codes in the sense that if one is different from the others then all the math that monetr
+does for that individual transaction will be wrong.
+
+## Removal
+
+Removing a lunch flow link is the same as removing any other link, just with more tables. All lunch flow records are
+deleted along with the monetr copies of those records.
+
+## Syncing
+
+Lunch Flow accounts will be synced multiple times per day, I have not decided on a frequency yet. Though someone
+mentioned that SimpleFin only allows 24 requests per day which would amount to hourly syncing. Unless lunch flow
+supplies data more frequently than hourly its not worth doing it this frequently unless a user manually triggers it.
+
+Realistically monetr will probably sync with Lunch Flow every 6 or 12 hours.
