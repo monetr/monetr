@@ -133,6 +133,11 @@ type BaseRepository interface {
 		transactionUpload *TransactionUpload,
 	) error
 
+	CreateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
+	UpdateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
+	DeleteLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) error
+	GetLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) (*LunchFlowLink, error)
+
 	fileRepositoryInterface
 }
 
