@@ -1,6 +1,7 @@
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum LunchFlowLinkStatus {
+  Pending = 'pending',
   Active = 'active',
   Deactivated = 'deactivated',
   Error = 'error',

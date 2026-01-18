@@ -115,7 +115,7 @@ type BankAccount struct {
 	Link                   *Link                     `json:"-,omitempty" pg:"rel:has-one"`
 	PlaidBankAccountId     *ID[PlaidBankAccount]     `json:"-" pg:"plaid_bank_account_id"`
 	PlaidBankAccount       *PlaidBankAccount         `json:"plaidBankAccount,omitempty" pg:"rel:has-one"`
-	LunchFlowBankAccountId *ID[LunchFlowBankAccount] `json:"-" pg:"lunch_flow_bank_account_id"`
+	LunchFlowBankAccountId *ID[LunchFlowBankAccount] `json:"lunchFlowBankAccountId" pg:"lunch_flow_bank_account_id"`
 	LunchFlowBankAccount   *LunchFlowBankAccount     `json:"lunchFlowBankAccount,omitempty" pg:"rel:has-one"`
 	Currency               string                    `json:"currency" pg:"currency,notnull"`
 	AvailableBalance       int64                     `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
@@ -169,6 +169,10 @@ func (BankAccount) CreateValidators() []*validation.KeyRules {
 			"linkId",
 			validation.Required.Error("Link ID must be provided"),
 			ValidID[Link]().Error("Link ID must be valid"),
+		),
+		validation.Key(
+			"lunchFlowBankAccountId",
+			ValidID[LunchFlowBankAccount]().Error("Lunch Flow Bank Account ID must be valid if provided"),
 		),
 		validators.CurrencyCode(validators.Optional),
 		validators.LimitBalance("limitBalance"),

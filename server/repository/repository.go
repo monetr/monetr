@@ -136,7 +136,12 @@ type BaseRepository interface {
 	CreateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
 	UpdateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
 	DeleteLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) error
+	GetLunchFlowLinks(ctx context.Context) ([]LunchFlowLink, error)
 	GetLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) (*LunchFlowLink, error)
+
+	GetLunchFlowBankAccountsByLunchFlowLink(
+		ctx context.Context, id ID[LunchFlowLink],
+	) ([]LunchFlowBankAccount, error)
 
 	fileRepositoryInterface
 }

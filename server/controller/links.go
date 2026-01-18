@@ -140,7 +140,7 @@ func (c *Controller) patchLink(ctx echo.Context) error {
 	case nil:
 		break
 	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
+		return c.badRequestError(ctx, err, "Failed to parse patch request")
 	}
 
 	if err = repo.UpdateLink(c.getContext(ctx), existingLink); err != nil {
@@ -166,6 +166,8 @@ func (c *Controller) convertLink(ctx echo.Context) error {
 	if link.LinkType == ManualLinkType {
 		return c.badRequest(ctx, "link is already manual")
 	}
+
+	// TODO Don't allow this for Plaid links that are not disconnected!
 
 	link.LinkType = ManualLinkType
 
@@ -202,6 +204,7 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 
 	secretsRepo := c.mustGetSecretsRepository(ctx)
 
+	// TODO Handle lunch flow link deletion here!
 	if link.PlaidLink != nil {
 		secret, err := secretsRepo.Read(c.getContext(ctx), link.PlaidLink.SecretId)
 		if err != nil {
