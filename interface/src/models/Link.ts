@@ -1,3 +1,4 @@
+import LunchFlowLink, { LunchFlowLinkStatus } from '@monetr/interface/models/LunchFlowLink';
 import PlaidLink, { PlaidLinkStatus } from '@monetr/interface/models/PlaidLink';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -5,6 +6,8 @@ export enum LinkType {
   Unknown = 0,
   Plaid = 1,
   Manual = 2,
+  Stripe = 3,
+  LunchFlow = 4,
 }
 
 export const errorMessages = {
@@ -30,12 +33,14 @@ export default class Link {
   createdBy: string;
 
   plaidLink: PlaidLink | null;
+  lunchFlowLink: LunchFlowLink | null;
 
   constructor(data?: Partial<Link>) {
     if (data) {
       Object.assign(this, {
         ...data,
         plaidLink: data?.plaidLink && new PlaidLink(data.plaidLink),
+        lunchFlowLink: data?.lunchFlowLink && new LunchFlowLink(data.lunchFlowLink),
         updatedAt: parseDate(data?.updatedAt),
         createdAt: parseDate(data?.createdAt),
       });
@@ -59,7 +64,7 @@ export default class Link {
   }
 
   getIsError(): boolean {
-    return this.plaidLink?.status === PlaidLinkStatus.Error;
+    return this.plaidLink?.status === PlaidLinkStatus.Error || this.lunchFlowLink?.status === LunchFlowLinkStatus.Error;
   }
 
   getIsPendingExpiration(): boolean {
