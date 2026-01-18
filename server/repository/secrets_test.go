@@ -23,11 +23,10 @@ func TestSecretsRepository_Store(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		kms := secrets.NewPlaintextKMS()
-		ctx := context.Background()
 
 		repo := repository.NewSecretsRepository(log, clock, db, kms, "acct_bogus")
 
-		err := repo.Store(ctx, &repository.SecretData{
+		err := repo.Store(t.Context(), &repository.SecretData{
 			Kind:  models.SecretKindPlaid,
 			Value: gofakeit.UUID(),
 		})
