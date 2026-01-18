@@ -124,16 +124,28 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	// Some fields cannot be overwritten, so we set those after we unmarshal.
 	bankAccount.LastUpdated = c.Clock.Now().UTC()
 
-	// Bank accounts can only be created this way when they are associated with a
-	// link that allows manual management. If the link they specified does not,
-	// then a bank account cannot be created for this link.
-	isManual, err := repo.GetLinkIsManual(c.getContext(ctx), bankAccount.LinkId)
+	// Bank accounts can only be created via the API on manual links or on Lunch
+	// Flow or other simple integration links. Validate this before proceeding.
+	link, err := repo.GetLink(c.getContext(ctx), bankAccount.LinkId)
 	if err != nil {
-		return c.wrapPgError(ctx, err, "Could not validate link is manual")
+		return c.wrapPgError(ctx, err, "Could not validate link allows bank account creation")
 	}
 
-	// TODO Create a custom validator
-	if !isManual {
+	// If we are a lunch flow link then we can only create lunch flow bank
+	// accounts!
+	if link.LinkType == LunchFlowLinkType {
+		if bankAccount.LunchFlowBankAccountId == nil ||
+			bankAccount.LunchFlowBankAccountId.IsZero() {
+			return ctx.JSON(http.StatusBadRequest, map[string]any{
+				"error": "Invalid request",
+				"problems": map[string]any{
+					"lunchFlowBankAccountId": "Lunch Flow Bank Account ID required to create a bank account for this link",
+				},
+			})
+		}
+	} else if link.LinkType != ManualLinkType {
+		// Otherwise if we are not a manual link then we simply don't allow bank
+		// accounts to be created.
 		return ctx.JSON(http.StatusBadRequest, map[string]any{
 			"error": "Invalid request",
 			"problems": map[string]any{
@@ -343,6 +355,8 @@ func (c *Controller) deleteBankAccount(ctx echo.Context) error {
 	if existingBankAccount.PlaidBankAccount != nil {
 		return c.badRequest(ctx, "Plaid bank account cannot be removed this way")
 	}
+
+	// TODO Handle Lunch flow bank account status here!
 
 	existingBankAccount.DeletedAt = myownsanity.TimeP(c.Clock.Now())
 	if err = repo.UpdateBankAccount(
