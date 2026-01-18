@@ -1,0 +1,37 @@
+---
+title: "Lunch Flow Integration"
+description: "Details about how monetr's Lunch Flow integration works and developer notes for maintaining it."
+---
+
+# Overview
+
+The Lunch Flow integration is based loosely on the OFX/QFX file integration. It assumes the following things:
+
+- Transaction IDs are immutable.
+- All recent and relevant transactions are present in the API request.
+
+This means that when the syncing process takes place, monetr can simply check to see which of the transaction IDs
+retrieve from Lunch Flow are present in its own database and then determine which items still need to be created.
+
+At the time of writing this, monetr does not handle updating transactions after they have been created via the sync
+process.
+
+## Setup
+
+The setup process for Lunch Flow will be different than Plaid or a manual link. A Lunch Flow link will be created as a
+standalone object first, with a `pending` status. This object contains the information necessary for monetr to make
+requests to Lunch Flow's API and retrieve accounts.
+
+1. The user creates a Lunch Flow Link object, containing the API URL and the API secret.
+2. The user/client calls `POST /api/lunch_flow/link/:lunchFlowLinkId/bank_accounts/refresh`. This triggers the backend
+   to synchronously refresh what accounts are available from lunch flow and store them in the database. Upon completing
+   this API call the frontend can then call `GET /api/lunch_flow/link/:lunchFlowLinkId/bank_accounts` to see what bank
+   accounts are currently active for this link. By default all bank accounts added are inactive.
+3. The user is presented with a UI to select which bank accounts they want to sync. Making an account active will make a
+   POST request to create a monetr bank account record. When this happens for the first time it will mark the lunch flow
+   link as whole as active.
+4. If the user aborts this process at any time then the Lunch Flow link is left in a `pending` status and is eventually
+   cleaned up. If the user completes the process then the Lunch Flow link is associated with a real link and is moved to
+   the status of `active`.
+
+

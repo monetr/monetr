@@ -64,6 +64,24 @@ func (r *repositoryBase) DeleteLunchFlowLink(
 	return errors.Wrap(err, "failed to delete Lunch Flow link")
 }
 
+func (r *repositoryBase) GetLunchFlowLinks(
+	ctx context.Context,
+) ([]LunchFlowLink, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	result := make([]LunchFlowLink, 0)
+	err := r.txn.ModelContext(span.Context(), &result).
+		Where(`"lunch_flow_link"."account_id" = ?`, r.AccountId()).
+		Where(`"lunch_flow_link"."deleted_at" IS NULL`).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve Lunch Flow links")
+	}
+
+	return result, nil
+}
+
 func (r *repositoryBase) GetLunchFlowLink(
 	ctx context.Context,
 	id ID[LunchFlowLink],

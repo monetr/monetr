@@ -7,14 +7,43 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/datasources/lunch_flow"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/merge"
-	"github.com/monetr/monetr/server/models"
+	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
+
+func (c *Controller) getLunchFlowLinks(ctx echo.Context) error {
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	links, err := repo.GetLunchFlowLinks(c.getContext(ctx))
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow links")
+	}
+
+	return ctx.JSON(http.StatusOK, links)
+}
+
+func (c *Controller) getLunchFlowLink(ctx echo.Context) error {
+	id, err := ParseID[LunchFlowLink](ctx.Param("lunchFlowLinkId"))
+	if err != nil || id.IsZero() {
+		return c.badRequest(ctx, "Must specify a valid Lunch Flow Link Id to retrieve")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	link, err := repo.GetLunchFlowLink(c.getContext(ctx), id)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow link")
+	}
+
+	return ctx.JSON(http.StatusOK, link)
+}
 
 type postLunchFlowLinkRequest struct {
 	Name         string `json:"name"`
@@ -89,10 +118,6 @@ func (c *Controller) parsePostLunchFlowLinkRequest(
 	return nil
 }
 
-// postLunchFlowLink will create a new lunch flow link from the API request.
-// This requires that the user provide a name for the link (which can be changed
-// later) as well as the Lunch Flow API URL they want to use and the API Key for
-// that URL.
 func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 	var request postLunchFlowLinkRequest
 	err := c.parsePostLunchFlowLinkRequest(
@@ -114,7 +139,7 @@ func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 	}
 
 	secret := repository.SecretData{
-		Kind:  models.SecretKindLunchFlow,
+		Kind:  SecretKindLunchFlow,
 		Value: request.APIKey,
 	}
 
@@ -127,10 +152,10 @@ func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	lunchFlowLink := models.LunchFlowLink{
+	lunchFlowLink := LunchFlowLink{
 		SecretId:  secret.SecretId,
 		ApiUrl:    request.LunchFlowURL,
-		Status:    models.LunchFlowLinkStatusActive,
+		Status:    LunchFlowLinkStatusPending,
 		CreatedBy: c.mustGetUserId(ctx),
 	}
 
@@ -142,29 +167,127 @@ func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "Failed to create Lunch Flow link")
 	}
 
-	// Then create the regular link record to make it available to the user via
-	// the API and UI.
-	link := models.Link{
-		LinkType:        models.LunchFlowLinkType,
-		LunchFlowLinkId: &lunchFlowLink.LunchFlowLinkId,
-		LunchFlowLink:   &lunchFlowLink,
-		InstitutionName: request.Name,
-		CreatedBy:       lunchFlowLink.CreatedBy,
-	}
-
-	if err := repo.CreateLink(c.getContext(ctx), &link); err != nil {
-		return c.wrapPgError(ctx, err, "Failed to create Lunch Flow link")
-	}
-
-	return ctx.JSON(http.StatusOK, link)
+	return ctx.JSON(http.StatusOK, lunchFlowLink)
 }
 
-func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
-	// TODO
-	return nil
+// postLunchFlowLinkBankAccountsRefresh is the endpoint that takes a lunch flow
+// link ID and performs a reconciliation of the accounts available in the API
+// versus the ones we store locally. It will not remove local items but it will
+// add new ones if they become available. It does not return content but should
+// be called during the setup process to fetch accounts and validate that the
+// API is working properly.
+func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) error {
+	id, err := ParseID[LunchFlowLink](ctx.Param("lunchFlowLinkId"))
+	if err != nil || id.IsZero() {
+		return c.badRequest(ctx, "Must specify a valid Lunch Flow Link Id to retrieve")
+	}
+
+	log := c.getLog(ctx)
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	link, err := repo.GetLunchFlowLink(c.getContext(ctx), id)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow link")
+	}
+
+	secretsRepo := c.mustGetSecretsRepository(ctx)
+	secret, err := secretsRepo.Read(c.getContext(ctx), link.SecretId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow link secret")
+	}
+
+	client, err := lunch_flow.NewLunchFlowClient(
+		log,
+		link.ApiUrl,
+		secret.Value,
+	)
+	if err != nil {
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"Failed to create Lunch Flow API client",
+		)
+	}
+
+	externalAccounts, err := client.GetAccounts(c.getContext(ctx))
+	if err != nil {
+		// TODO Should we expose actual error information here to the frontend to
+		// make it so that the user does not need to check server logs to debug any
+		// issues? This is for self-hosted instances only so it may be worth it?
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"Failed to retrieve accounts from Lunch Flow",
+		)
+	}
+
+	lunchFlowAccounts, err := repo.GetLunchFlowBankAccountsByLunchFlowLink(
+		c.getContext(ctx),
+		link.LunchFlowLinkId,
+	)
+	for _, joined := range myownsanity.LeftJoin(
+		externalAccounts,
+		lunchFlowAccounts,
+		func(external lunch_flow.Account, internal LunchFlowBankAccount) bool {
+			return external.Id == lunch_flow.AccountId(internal.LunchFlowId)
+		},
+	) {
+		if len(joined.Join) == 0 {
+			log.Info("Found Lunch Flow account with no record in monetr, creating")
+			// TODO Create the bank account here!
+		} else if len(joined.Join) > 1 {
+			// Report a bug here! If anyone ever sees this in their logs please know
+			// that there is a bug and you should report it via github issues on
+			// monetr. You may be asked to provide additional information upon
+			// reporting this bug!
+			log.WithFields(logrus.Fields{
+				"bug":         true,
+				"lunchFlowId": joined.From.Id,
+				"count":       len(joined.Join),
+			}).Error("multiple lunch flow bank accounts found for the same external ID, this should not be possible!")
+			crumbs.IndicateBug(
+				c.getContext(ctx),
+				"Multiple Lunch Flow Bank Accounts found for the same external ID, this should not be possible!",
+				map[string]any{
+					"lunchFlowId": joined.From.Id,
+					"count":       len(joined.Join),
+				},
+			)
+		}
+
+		// Otherwise the account already exists and we are good to go!
+	}
+
+	// Return no content to indicate success!
+	return ctx.NoContent(http.StatusNoContent)
 }
 
 func (c *Controller) getLunchFlowLinkBankAccounts(ctx echo.Context) error {
+	id, err := ParseID[LunchFlowLink](ctx.Param("lunchFlowLinkId"))
+	if err != nil || id.IsZero() {
+		return c.badRequest(ctx, "Must specify a valid Lunch Flow Link Id to retrieve")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	link, err := repo.GetLunchFlowLink(c.getContext(ctx), id)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow link")
+	}
+
+	lunchFlowAccounts, err := repo.GetLunchFlowBankAccountsByLunchFlowLink(
+		c.getContext(ctx),
+		link.LunchFlowLinkId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow bank accounts")
+	}
+
+	return ctx.JSON(http.StatusOK, lunchFlowAccounts)
+}
+
+func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 	// TODO
 	return nil
 }

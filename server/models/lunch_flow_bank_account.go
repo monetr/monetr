@@ -11,11 +11,15 @@ type LunchFlowBankAccountStatus string
 
 const (
 	// LunchFlowBankAccountStatusActive means that the bank account can and will
-	// automatically sync with Lunch Flow's API.
+	// automatically sync with Lunch Flow's API. This also means that the lunch
+	// flow bank account has been associated with a monetr bank account record.
 	LunchFlowBankAccountStatusActive LunchFlowBankAccountStatus = "active"
 	// LunchFlowBankAccountStatusInactive means that the bank account does exist
 	// in Lunch Flow's API, however it is not being actively synced with monetr.
 	// Inactive items may not have a bank account in monetr associated with them.
+	// Inactive items may or may not be associated with a monetr bank account
+	// record. Depending on whether they were previously active and then
+	// deactivated or whether they had never been activated.
 	LunchFlowBankAccountStatusInactive LunchFlowBankAccountStatus = "inactive"
 	// LunchFlowBankAccountStatusError means that sync attempts for this account
 	// have failed and the account will no longer be automatically synced. For
