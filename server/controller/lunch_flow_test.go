@@ -163,6 +163,23 @@ func TestPostLunchFlowLinkBankAccountsRefresh(t *testing.T) {
 			response.Body().IsEmpty()
 		}
 
+		{ // Check for bank account in the responsne
+			response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts").
+				WithPath("lunchFlowLinkId", id).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(1)
+			response.JSON().Path("$[0].lunchFlowBankAccountId").String().IsASCII()
+			response.JSON().Path("$[0].lunchFlowId").String().IsEqual("1234")
+			response.JSON().Path("$[0].name").String().IsEqual("Main Account")
+			response.JSON().Path("$[0].institutionName").String().IsEqual("Finance")
+			response.JSON().Path("$[0].provider").String().IsEqual("gocardless")
+			response.JSON().Path("$[0].lunchFlowStatus").String().IsEqual("ACTIVE")
+			response.JSON().Path("$[0].status").String().IsEqual("inactive")
+		}
+
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
 			"GET https://lunchflow.com/api/v1/accounts": 1,
 		}, "must match Lunch Flow API calls")

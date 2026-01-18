@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/internal/myownsanity"
@@ -177,15 +178,15 @@ func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 // be called during the setup process to fetch accounts and validate that the
 // API is working properly.
 func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) error {
-	id, err := ParseID[LunchFlowLink](ctx.Param("lunchFlowLinkId"))
-	if err != nil || id.IsZero() {
+	linkId, err := ParseID[LunchFlowLink](ctx.Param("lunchFlowLinkId"))
+	if err != nil || linkId.IsZero() {
 		return c.badRequest(ctx, "Must specify a valid Lunch Flow Link Id to retrieve")
 	}
 
 	log := c.getLog(ctx)
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	link, err := repo.GetLunchFlowLink(c.getContext(ctx), id)
+	link, err := repo.GetLunchFlowLink(c.getContext(ctx), linkId)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow link")
 	}
@@ -227,6 +228,11 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 		c.getContext(ctx),
 		link.LunchFlowLinkId,
 	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve stored Lunch Flow accounts")
+	}
+
+	// Join the stored accounts against what we get from the API
 	for _, joined := range myownsanity.LeftJoin(
 		externalAccounts,
 		lunchFlowAccounts,
@@ -236,7 +242,26 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 	) {
 		if len(joined.Join) == 0 {
 			log.Info("Found Lunch Flow account with no record in monetr, creating")
-			// TODO Create the bank account here!
+			if err := repo.CreateLunchFlowBankAccount(
+				c.getContext(ctx),
+				&LunchFlowBankAccount{
+					LunchFlowLinkId: linkId,
+					LunchFlowId:     joined.From.Id.String(),
+					LunchFlowStatus: LunchFlowBankAccountExternalStatus(joined.From.Status),
+					Name:            joined.From.Name,
+					InstitutionName: joined.From.InstitutionName,
+					Provider:        joined.From.Provider,
+					Currency: myownsanity.CoalesceStrings(
+						joined.From.Currency,
+						consts.DefaultCurrencyCode,
+					),
+					Status:         LunchFlowBankAccountStatusInactive,
+					CurrentBalance: 0,
+					CreatedBy:      c.mustGetUserId(ctx),
+				},
+			); err != nil {
+				return c.wrapPgError(ctx, err, "Failed to Lunch Flow bank account")
+			}
 		} else if len(joined.Join) > 1 {
 			// Report a bug here! If anyone ever sees this in their logs please know
 			// that there is a bug and you should report it via github issues on

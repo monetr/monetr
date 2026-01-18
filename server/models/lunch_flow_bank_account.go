@@ -28,26 +28,35 @@ const (
 	LunchFlowBankAccountStatusError LunchFlowBankAccountStatus = "error"
 )
 
+type LunchFlowBankAccountExternalStatus string
+
+const (
+	LunchFlowBankAccountExternalStatusActive       LunchFlowBankAccountExternalStatus = "ACTIVE"
+	LunchFlowBankAccountExternalStatusDisconnected LunchFlowBankAccountExternalStatus = "DISCONNECTED"
+	LunchFlowBankAccountExternalStatusError        LunchFlowBankAccountExternalStatus = "ERROR"
+)
+
 type LunchFlowBankAccount struct {
 	tableName string `pg:"lunch_flow_bank_accounts"`
 
-	LunchFlowBankAccountId ID[LunchFlowBankAccount]   `json:"lunchFlowBankAccountId" pg:"lunch_flow_bank_account_id,notnull,pk"`
-	AccountId              ID[Account]                `json:"-" pg:"account_id,notnull,pk"`
-	Account                *Account                   `json:"-" pg:"rel:has-one"`
-	LunchFlowLinkId        ID[LunchFlowLink]          `json:"lunchFlowLinkId" pg:"lunch_flow_link_id,notnull"`
-	LunchFlowLink          *LunchFlowLink             `json:"-" pg:"rel:has-one"`
-	LunchFlowId            string                     `json:"lunchFlowId" pg:"lunch_flow_id,notnull"`
-	Name                   string                     `json:"name" pg:"name,notnull"`
-	InstitutionName        string                     `json:"institutionName" pg:"institution_name,notnull"`
-	Provider               string                     `json:"provider" pg:"provider,notnull"`
-	Currency               string                     `json:"currency" pg:"currency,notnull"`
-	Status                 LunchFlowBankAccountStatus `json:"status" pg:"status,notnull"`
-	CurrentBalance         int64                      `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
-	CreatedAt              time.Time                  `json:"createdAt" pg:"created_at,notnull"`
-	CreatedBy              ID[User]                   `json:"createdBy" pg:"created_by,notnull"`
-	CreatedByUser          *User                      `json:"-" pg:"rel:has-one,fk:created_by"`
-	UpdatedAt              time.Time                  `json:"updatedAt" pg:"updated_at,notnull"`
-	DeletedAt              *time.Time                 `json:"deletedAt" pg:"deleted_at"`
+	LunchFlowBankAccountId ID[LunchFlowBankAccount]           `json:"lunchFlowBankAccountId" pg:"lunch_flow_bank_account_id,notnull,pk"`
+	AccountId              ID[Account]                        `json:"-" pg:"account_id,notnull,pk"`
+	Account                *Account                           `json:"-" pg:"rel:has-one"`
+	LunchFlowLinkId        ID[LunchFlowLink]                  `json:"lunchFlowLinkId" pg:"lunch_flow_link_id,notnull"`
+	LunchFlowLink          *LunchFlowLink                     `json:"-" pg:"rel:has-one"`
+	LunchFlowId            string                             `json:"lunchFlowId" pg:"lunch_flow_id,notnull"`
+	LunchFlowStatus        LunchFlowBankAccountExternalStatus `json:"lunchFlowStatus" pg:"lunch_flow_status,notnull"`
+	Name                   string                             `json:"name" pg:"name,notnull"`
+	InstitutionName        string                             `json:"institutionName" pg:"institution_name,notnull"`
+	Provider               string                             `json:"provider" pg:"provider,notnull"`
+	Currency               string                             `json:"currency" pg:"currency,notnull"`
+	Status                 LunchFlowBankAccountStatus         `json:"status" pg:"status,notnull"`
+	CurrentBalance         int64                              `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
+	CreatedAt              time.Time                          `json:"createdAt" pg:"created_at,notnull"`
+	CreatedBy              ID[User]                           `json:"createdBy" pg:"created_by,notnull"`
+	CreatedByUser          *User                              `json:"-" pg:"rel:has-one,fk:created_by"`
+	UpdatedAt              time.Time                          `json:"updatedAt" pg:"updated_at,notnull"`
+	DeletedAt              *time.Time                         `json:"deletedAt,omitempty" pg:"deleted_at"`
 }
 
 func (LunchFlowBankAccount) IdentityPrefix() string {
