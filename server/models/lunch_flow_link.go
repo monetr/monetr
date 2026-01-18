@@ -16,9 +16,9 @@ const (
 )
 
 type LunchFlowLink struct {
-	tableName string `pg:"lunchflow_links"`
+	tableName string `pg:"lunch_flow_links"`
 
-	LunchFlowLinkId      ID[LunchFlowLink]   `json:"lunchFlowLinkId" pg:"lunchflow_link_id,notnull,pk"`
+	LunchFlowLinkId      ID[LunchFlowLink]   `json:"lunchFlowLinkId" pg:"lunch_flow_link_id,notnull,pk"`
 	AccountId            ID[Account]         `json:"-" pg:"account_id,pk,notnull"`
 	Account              *Account            `json:"-" pg:"rel:has-one"`
 	SecretId             ID[Secret]          `json:"-" pg:"secret_id,notnull"`

@@ -10,7 +10,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/currency"
-	"github.com/monetr/monetr/server/datasources/lunchflow"
+	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
@@ -55,9 +55,9 @@ type (
 		clock     clock.Clock
 		timezone  *time.Location
 
-		client                lunchflow.LunchFlowClient
+		client                lunch_flow.LunchFlowClient
 		bankAccount           *BankAccount
-		lunchFlowTransactions []lunchflow.Transaction
+		lunchFlowTransactions []lunch_flow.Transaction
 		existingTransactions  map[string]Transaction
 	}
 )
@@ -163,7 +163,7 @@ func (s *SyncLunchFlowHandler) HandleConsumeJob(ctx context.Context, log *logrus
 		log := log.WithContext(span.Context())
 		repo := repository.NewRepositoryFromSession(
 			s.clock,
-			"user_lunchflow",
+			"user_lunch_flow",
 			args.AccountId,
 			txn,
 			log,
@@ -311,7 +311,7 @@ func (s *SyncLunchFlowJob) setupClient(ctx context.Context) error {
 			return err
 		}
 
-		client, err := lunchflow.NewLunchFlowClient(
+		client, err := lunch_flow.NewLunchFlowClient(
 			s.log,
 			link.LunchFlowLink.ApiUrl,
 			secret.Value,
@@ -333,7 +333,7 @@ func (s *SyncLunchFlowJob) hydrateTransactions(ctx context.Context) error {
 	var err error
 	s.lunchFlowTransactions, err = s.client.GetTransactions(
 		span.Context(),
-		lunchflow.AccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
+		lunch_flow.AccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve transactions from lunch flow for sync")
@@ -443,7 +443,7 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 				MerchantName:           externalTransaction.Merchant,
 				OriginalMerchantName:   externalTransaction.Merchant,
 				IsPending:              false,
-				Source:                 "lunchflow",
+				Source:                 "lunch_flow",
 			}
 			transactionsToCreate = append(transactionsToCreate, transaction)
 		}

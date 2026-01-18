@@ -261,18 +261,18 @@ func (r *RemoveLinkJob) getLunchFlowTransactionsToRemove(
 ) []ID[LunchFlowTransaction] {
 	ids := make([]ID[LunchFlowTransaction], 0)
 	err := r.db.ModelContext(ctx, &LunchFlowTransaction{}).
-		Join(`INNER JOIN "lunchflow_bank_accounts" AS "lunchflow_bank_account"`).
-		JoinOn(`"lunchflow_bank_account"."lunchflow_bank_account_id" = "lunchflow_transaction"."lunchflow_bank_account_id"`).
-		JoinOn(`"lunchflow_bank_account"."account_id" = "lunchflow_transaction"."account_id"`).
+		Join(`INNER JOIN "lunch_flow_bank_accounts" AS "lunch_flow_bank_account"`).
+		JoinOn(`"lunch_flow_bank_account"."lunch_flow_bank_account_id" = "lunch_flow_transaction"."lunch_flow_bank_account_id"`).
+		JoinOn(`"lunch_flow_bank_account"."account_id" = "lunch_flow_transaction"."account_id"`).
 		// Lunch flow bank accounts might not be associated with a monetr bank
 		// account if they are inactive, so we instead need to traverse upwards to
 		// the link instead.
 		Join(`INNER JOIN "links" AS "link"`).
-		JoinOn(`"link"."lunchflow_link_id" = "lunchflow_bank_account"."lunchflow_link_id"`).
-		JoinOn(`"link"."account_id" = "lunchflow_bank_account"."account_id"`).
-		Where(`"lunchflow_transaction"."account_id" = ?`, r.args.AccountId).
+		JoinOn(`"link"."lunch_flow_link_id" = "lunch_flow_bank_account"."lunch_flow_link_id"`).
+		JoinOn(`"link"."account_id" = "lunch_flow_bank_account"."account_id"`).
+		Where(`"lunch_flow_transaction"."account_id" = ?`, r.args.AccountId).
 		Where(`"link"."link_id" = ?`, r.args.LinkId).
-		Column("lunchflow_transaction.lunchflow_transaction_id").
+		Column("lunch_flow_transaction.lunch_flow_transaction_id").
 		Select(&ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find lunch flow transactions to be removed"))
@@ -291,7 +291,7 @@ func (r *RemoveLinkJob) removeLunchFlowTransactions(
 
 	result, err := r.db.ModelContext(ctx, &LunchFlowTransaction{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"lunchflow_transaction_id" IN (?)`, ids).
+		WhereIn(`"lunch_flow_transaction_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
 		r.log.WithError(err).Errorf("failed to remove lunch flow transactions for link")
@@ -425,14 +425,14 @@ func (r *RemoveLinkJob) getLunchFlowBankAccountsToRemove(
 	ids := make([]ID[LunchFlowBankAccount], 0)
 	err := r.db.ModelContext(ctx, &LunchFlowBankAccount{}).
 		Join(`INNER JOIN "links" AS "link"`).
-		JoinOn(`"link"."lunchflow_link_id" = "lunchflow_bank_account"."lunchflow_link_id"`).
-		JoinOn(`"link"."account_id" = "lunchflow_bank_account"."account_id"`).
-		Where(`"lunchflow_bank_account"."account_id" = ?`, r.args.AccountId).
+		JoinOn(`"link"."lunch_flow_link_id" = "lunch_flow_bank_account"."lunch_flow_link_id"`).
+		JoinOn(`"link"."account_id" = "lunch_flow_bank_account"."account_id"`).
+		Where(`"lunch_flow_bank_account"."account_id" = ?`, r.args.AccountId).
 		Where(`"link"."account_id" = ?`, r.args.AccountId).
-		Column("lunchflow_bank_account.lunchflow_bank_account_id").
+		Column("lunch_flow_bank_account.lunch_flow_bank_account_id").
 		Select(&ids)
 	if err != nil {
-		panic(errors.Wrap(err, "failed to find lunchflow bank accounts to remove"))
+		panic(errors.Wrap(err, "failed to find lunch_flow bank accounts to remove"))
 	}
 
 	return ids
@@ -448,7 +448,7 @@ func (r *RemoveLinkJob) removeLunchFlowBankAccounts(
 
 	result, err := r.db.ModelContext(ctx, &LunchFlowBankAccount{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"lunchflow_bank_account_id" IN (?)`, ids).
+		WhereIn(`"lunch_flow_bank_account_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
 		r.log.WithError(err).Errorf("failed to remove lunch flow bank accounts for link")

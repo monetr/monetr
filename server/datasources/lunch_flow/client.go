@@ -1,4 +1,4 @@
-package lunchflow
+package lunch_flow
 
 import (
 	"context"
@@ -41,7 +41,7 @@ type Transaction struct {
 	Description string      `json:"description"`
 }
 
-//go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=client.go -package=mockgen -destination=../../internal/mockgen/lunchflow_client.go LunchFlowClient
+//go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=client.go -package=mockgen -destination=../../internal/mockgen/lunch_flow_client.go LunchFlowClient
 type LunchFlowClient interface {
 	GetAccounts(ctx context.Context) ([]Account, error)
 	GetBalance(ctx context.Context, accountId AccountId) (*Balance, error)
@@ -75,13 +75,13 @@ func NewLunchFlowClient(
 				err error,
 			) {
 				requestLog := log.WithContext(ctx).WithFields(logrus.Fields{
-					"lunchflow_method": request.Method,
-					"lunchflow_url":    request.URL.String(),
+					"lunch_flow_method": request.Method,
+					"lunch_flow_url":    request.URL.String(),
 				})
 				var statusCode int
 				if response != nil {
 					statusCode = response.StatusCode
-					requestLog = requestLog.WithField("lunchflow_statusCode", statusCode)
+					requestLog = requestLog.WithField("lunch_flow_statusCode", statusCode)
 				}
 
 				// If you get a nil reference panic here during testing, its probably
@@ -89,7 +89,7 @@ func NewLunchFlowClient(
 				// error is a "no responder found" error.
 				crumbs.HTTP(ctx,
 					"Lunch Flow API Call",
-					"lunchflow",
+					"lunch_flow",
 					request.URL.String(),
 					request.Method,
 					statusCode,
