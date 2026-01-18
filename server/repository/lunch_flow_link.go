@@ -15,8 +15,10 @@ func (r *repositoryBase) CreateLunchFlowLink(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
+	now := r.clock.Now()
 	link.AccountId = r.AccountId()
-	link.CreatedAt = r.clock.Now().UTC()
+	link.CreatedAt = now
+	link.UpdatedAt = now
 	link.CreatedBy = r.UserId()
 	_, err := r.txn.ModelContext(span.Context(), link).Insert(link)
 	return errors.Wrap(err, "failed to create Lunch Flow link")

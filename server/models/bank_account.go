@@ -160,7 +160,7 @@ func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error)
 func (BankAccount) CreateValidators() []*validation.KeyRules {
 	return []*validation.KeyRules{
 		validators.Mask(),
-		validators.Name(true),
+		validators.Name(validators.Require),
 		validation.Key(
 			"originalName",
 			validation.Length(1, 300).Error("Original name must be between 1 and 300 characters"),
@@ -173,7 +173,7 @@ func (BankAccount) CreateValidators() []*validation.KeyRules {
 		validation.Key(
 			"lunchFlowBankAccountId",
 			ValidID[LunchFlowBankAccount]().Error("Lunch Flow Bank Account ID must be valid if provided"),
-		),
+		).Required(validators.Optional),
 		validators.CurrencyCode(validators.Optional),
 		validators.LimitBalance("limitBalance"),
 		validators.Balance("currentBalance"),

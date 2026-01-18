@@ -30,6 +30,24 @@ func TestPostLunchFlowLink(t *testing.T) {
 		response.JSON().Object().Keys().NotContainsAll("secretId", "secret")
 	})
 
+	t.Run("lunch flow is disabled", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.LunchFlow.Enabled = false
+		_, e := NewTestApplicationWithConfig(t, config)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":         "US Bank",
+				"lunchFlowURL": "https://lunchflow.com/api/v1",
+				"apiKey":       "foobar",
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("Lunch Flow is not enabled on this server")
+	})
+
 	t.Run("invalid API URL, no protocol", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
@@ -108,7 +126,7 @@ func TestPostLunchFlowLinkBankAccountsRefresh(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 
 		mock_lunch_flow.MockFetchAccounts(t, []lunch_flow.Account{
-			lunch_flow.Account{
+			{
 				Id:              "1234",
 				Name:            "Main Account",
 				InstitutionName: "Finance",
@@ -135,17 +153,32 @@ func TestPostLunchFlowLinkBankAccountsRefresh(t *testing.T) {
 			id = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
 		}
 
-		{
+		{ // Refresh the accounts
 			response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
 				WithPath("lunchFlowLinkId", id).
 				WithCookie(TestCookieName, token).
 				Expect()
 
 			response.Status(http.StatusNoContent)
+			response.Body().IsEmpty()
 		}
 
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
 			"GET https://lunchflow.com/api/v1/accounts": 1,
 		}, "must match Lunch Flow API calls")
+	})
+
+	t.Run("lunch flow is disabled", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.LunchFlow.Enabled = false
+		_, e := NewTestApplicationWithConfig(t, config)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
+			WithPath("lunchFlowLinkId", "bogus").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("Lunch Flow is not enabled on this server")
 	})
 }
