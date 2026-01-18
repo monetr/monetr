@@ -42,7 +42,7 @@ type Configuration struct {
 	KeyManagement KeyManagement `yaml:"keyManagement"`
 	Links         Links         `yaml:"links"`
 	Logging       Logging       `yaml:"logging"`
-	LunchFlow     LunchFlow     `yaml:"lunchflow"`
+	LunchFlow     LunchFlow     `yaml:"lunchFlow"`
 	Plaid         Plaid         `yaml:"plaid"`
 	PostgreSQL    PostgreSQL    `yaml:"postgreSql"`
 	ReCAPTCHA     ReCAPTCHA     `yaml:"reCAPTCHA"`
