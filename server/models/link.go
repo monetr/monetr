@@ -68,6 +68,10 @@ func (Link) CreateValidators() []*validation.KeyRules {
 			"description",
 			validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
 		).Required(validators.Optional),
+		validation.Key(
+			"lunchFlowLinkId",
+			ValidID[LunchFlowLink]().Error("Lunch Flow Link ID must be valid if provided"),
+		),
 	}
 }
 
