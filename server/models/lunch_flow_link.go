@@ -51,7 +51,7 @@ type LunchFlowLink struct {
 	CreatedAt            time.Time           `json:"createdAt" pg:"created_at,notnull"`
 	CreatedBy            ID[User]            `json:"createdBy" pg:"created_by,notnull"`
 	CreatedByUser        *User               `json:"-" pg:"rel:has-one,fk:created_by"`
-	DeletedAt            *time.Time          `json:"deletedAt" pg:"deleted_at"`
+	DeletedAt            *time.Time          `json:"deletedAt,omitempty" pg:"deleted_at"`
 }
 
 func (LunchFlowLink) IdentityPrefix() string {

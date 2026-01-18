@@ -25,6 +25,7 @@ CREATE TABLE "lunch_flow_bank_accounts" (
   "lunch_flow_link_id"         VARCHAR(32) NOT NULL,
   "account_id"                 VARCHAR(32) NOT NULL,
   "lunch_flow_id"              TEXT        NOT NULL,
+  "lunch_flow_status"          TEXT        NOT NULL,
   "name"                       TEXT        NOT NULL,
   "institution_name"           TEXT        NOT NULL,
   "provider"                   TEXT        NOT NULL,
