@@ -16,6 +16,7 @@ type JobRepository interface {
 	GetLinksForExpiredAccounts(ctx context.Context) ([]Link, error)
 	GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error)
 	GetAccountsWithTooManyFiles(ctx context.Context) ([]AccountWithTooManyFiles, error)
+	GetLunchFlowAccountsToSync(ctx context.Context) ([]BankAccount, error)
 }
 
 type ProcessFundingSchedulesItem struct {
@@ -160,4 +161,45 @@ func (j *jobRepository) GetAccountsWithTooManyFiles(ctx context.Context) ([]Acco
 	}
 
 	return result, nil
+}
+
+// GetLunchFlowAccountsToSync will return an array of bank account objects only
+// that have lunch_flow links associated with them, but have not attempted a sync
+// in the past 6 hours.
+func (j *jobRepository) GetLunchFlowAccountsToSync(
+	ctx context.Context,
+) ([]BankAccount, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	bankAccounts := make([]BankAccount, 0)
+	cutoff := j.clock.Now().Add(-6 * time.Hour)
+	err := j.txn.ModelContext(ctx, &bankAccounts).
+		// Retrieve all of the bank accounts and their associated links.
+		Join(`INNER JOIN "links" AS "link"`).
+		JoinOn(`"link"."link_id" = "bank_account"."link_id" AND "link"."account_id" = "bank_account"."account_id`).
+		// But only the links that have a lunch_flow associated record.
+		Join(`INNER JOIN "lunch_flow_links" AS "lunch_flow_link"`).
+		JoinOn(`"lunch_flow_link"."lunch_flow_link_id" = "link"."lunch_flow_link_id" AND "lunch_flow_link"."account_id" = "link"."account_id"`).
+		// But make sure it is still a lunch_flow link. This check makes sure that we
+		// don't accidently check this for a link that was converted to be a manual
+		// link.
+		Where(`"link"."link_type" = ?`, LunchFlowLinkType).
+		// Where the lunch_flow link is active and an attempt to update it has not
+		// been made in the past 6 hours.
+		Where(`"lunch_flow_link"."status" = ?`, LunchFlowLinkStatusActive).
+		Where(`"lunch_flow_bank_account"."status" = ?`, LunchFlowBankAccountStatusActive).
+		Where(`"lunch_flow_bank_account"."lunch_flow_status" = ?`, LunchFlowBankAccountExternalStatusActive).
+		Where(`("lunch_flow_link"."last_attempted_update" < ? OR "lunch_flow_link"."last_attempted_update" IS NULL)`, cutoff).
+		// And make sure that nothing has been deleted.
+		Where(`"lunch_flow_link"."deleted_at" IS NULL`).
+		Where(`"lunch_flow_bank_account"."deleted_at" IS NULL`).
+		Where(`"link"."deleted_at" IS NULL`).
+		Where(`"bank_account"."deleted_at" IS NULL`).
+		Select(&bankAccounts)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to find lunch flow bank accounts to sync")
+	}
+
+	return bankAccounts, nil
 }

@@ -22,7 +22,7 @@ export default class PlaidLink {
   lastAttemptedUpdate?: Date;
   updatedAt: Date;
   createdAt: Date;
-  createdByUserId: number;
+  createdBy: string;
 
   constructor(data?: Partial<PlaidLink>) {
     if (data) {

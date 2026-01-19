@@ -235,3 +235,18 @@ func (c *Controller) requireToken(scopes ...security.Scope) func(next echo.Handl
 		}
 	}
 }
+
+// requireLunchFlowEnabledMiddleware is added before the lunch flow API routes
+// are registered. This makes sure that if the server is not configured to use
+// lunch flow then the routes are not accessible.
+func (c *Controller) requireLunchFlowEnabledMiddleware(
+	next echo.HandlerFunc,
+) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		if !c.Configuration.LunchFlow.Enabled {
+			return c.notFound(ctx, "Lunch Flow is not enabled on this server")
+		}
+
+		return next(ctx)
+	}
+}
