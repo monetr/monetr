@@ -369,7 +369,7 @@ func (s *SyncLunchFlowJob) hydrateTransactions(ctx context.Context) error {
 	if count := len(s.existingTransactions); count > 0 {
 		s.log.WithContext(span.Context()).WithFields(logrus.Fields{
 			"existingTransactions": count,
-		}).Debug("found existing transactions for upload")
+		}).Debug("found existing transactions for sync")
 	}
 
 	return nil
