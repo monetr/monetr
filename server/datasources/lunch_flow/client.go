@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const DefaultBaseURL = "https://lunchflow.com/"
+const DefaultBaseURL = "https://lunchflow.app/"
 
 type AccountId = json.Number
 
