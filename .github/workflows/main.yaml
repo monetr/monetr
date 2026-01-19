@@ -249,17 +249,17 @@ jobs:
         id: tag
         run: |
           echo POST_TAG=$(git describe --tag | cut -d "v" -f 2) >> $GITHUB_OUTPUT
-      - name: Login to containers.monetr.dev
+      - name: Login to registry.monetr.dev
         uses: docker/login-action@v3
         with:
-          registry: containers.monetr.dev
+          registry: registry.monetr.dev
           username: ${{ secrets.CONTAINERS_MONETR_DEV_USERNAME }}
           password: ${{ secrets.CONTAINERS_MONETR_DEV_PASSWORD }}
       - name: Build
         run: |
           git config --global --add safe.directory ${PWD}
 
-          make container-push CONTAINER_REGISTRY=containers.monetr.dev/monetr/monetr CMAKE_OPTIONS="-DBUILD_CONTAINER_TAG_LATEST=OFF -DBUILD_PLATFORMS=linux/amd64" RELEASE_VERSION=${{ steps.tag.outputs.POST_TAG }}A
+          make container-push CONTAINER_REGISTRY=registry.monetr.dev/monetr/monetr CMAKE_OPTIONS="-DBUILD_CONTAINER_TAG_LATEST=OFF -DBUILD_PLATFORMS=linux/amd64" RELEASE_VERSION=${{ steps.tag.outputs.POST_TAG }}
 
   deploy:
     needs:
