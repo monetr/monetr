@@ -144,6 +144,8 @@ type BaseRepository interface {
 		ctx context.Context, id ID[LunchFlowLink],
 	) ([]LunchFlowBankAccount, error)
 
+	CreateLunchFlowTransactions(ctx context.Context, transaction []LunchFlowTransaction) error
+
 	fileRepositoryInterface
 }
 
