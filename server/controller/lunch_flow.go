@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
@@ -313,8 +315,75 @@ func (c *Controller) getLunchFlowLinkBankAccounts(ctx echo.Context) error {
 }
 
 func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
-	// TODO
-	return nil
+	var request struct {
+		LinkId ID[Link] `json:"linkId"`
+	}
+	if err := ctx.Bind(&request); err != nil {
+		return c.invalidJson(ctx)
+	}
+
+	log := c.getLog(ctx).WithFields(logrus.Fields{
+		"linkId": request.LinkId,
+	})
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	link, err := repo.GetLink(c.getContext(ctx), request.LinkId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve link")
+	}
+
+	if link.LinkType != LunchFlowLinkType {
+		return c.badRequest(ctx, "cannot manually sync a non-Lunch Flow link")
+	}
+
+	switch link.LunchFlowLink.Status {
+	case LunchFlowLinkStatusActive, LunchFlowLinkStatusError:
+		log.WithField("status", link.LunchFlowLink.Status).Debug("link is not deactivated, triggering manual sync")
+	case LunchFlowLinkStatusDeactivated:
+		return c.badRequest(ctx, "Link is not active and will not be synced")
+	}
+
+	lunchFlowLink := link.LunchFlowLink
+	if lastManualSync := lunchFlowLink.LastManualSync; lastManualSync != nil && lastManualSync.After(c.Clock.Now().Add(-30*time.Minute)) {
+		return c.returnError(ctx, http.StatusTooEarly, "Link has been manually synced too recently")
+	}
+
+	lunchFlowLink.LastManualSync = myownsanity.Pointer(c.Clock.Now())
+	if err := repo.UpdateLunchFlowLink(c.getContext(ctx), lunchFlowLink); err != nil {
+		return c.wrapPgError(ctx, err, "could not manually sync link")
+	}
+
+	bankAccounts, err := repo.GetBankAccountsByLinkId(
+		c.getContext(ctx),
+		link.LinkId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve bank accounts to sync")
+	}
+
+	// Get the database instance from the request context, this should be a
+	// database transaction for this endpoint.
+	db := c.mustGetDatabase(ctx)
+	for _, bankAccount := range bankAccounts {
+		log.WithFields(logrus.Fields{
+			"bankAccountId": bankAccount.BankAccountId,
+		}).Debug("triggering lunch flow sync for bank account")
+		if err := background.TriggerSyncLunchFlowTxn(
+			c.getContext(ctx),
+			c.JobRunner,
+			db,
+			background.SyncLunchFlowArguments{
+				AccountId:     bankAccount.AccountId,
+				BankAccountId: bankAccount.BankAccountId,
+			},
+		); err != nil {
+			log.WithFields(logrus.Fields{
+				"bankAccountId": bankAccount.BankAccountId,
+			}).WithError(err).Warn("failed to enqueue lunch flow sync")
+		}
+	}
+
+	return ctx.NoContent(http.StatusAccepted)
 }
 
 func (c *Controller) patchLunchFlowLink(ctx echo.Context) error {
