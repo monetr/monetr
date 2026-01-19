@@ -72,3 +72,6 @@ mentioned that SimpleFin only allows 24 requests per day which would amount to h
 supplies data more frequently than hourly its not worth doing it this frequently unless a user manually triggers it.
 
 Realistically monetr will probably sync with Lunch Flow every 6 or 12 hours.
+
+**Note**: The lunch flow sync API does not take a lunch flow link ID. Instead it takes a regular link ID that must be a
+lunch flow link type. This signature is the same used for the plaid sync API.

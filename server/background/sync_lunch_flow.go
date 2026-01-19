@@ -62,6 +62,15 @@ type (
 	}
 )
 
+func TriggerSyncLunchFlowTxn(
+	ctx context.Context,
+	backgroundJobs JobController,
+	txn pg.DBI,
+	arguments SyncLunchFlowArguments,
+) error {
+	return backgroundJobs.EnqueueJobTxn(ctx, txn, SyncLunchFlow, arguments)
+}
+
 func NewSyncLunchFlowHandler(
 	log *logrus.Entry,
 	db *pg.DB,
