@@ -65,6 +65,7 @@ func (r *repositoryBase) GetBankAccountsByLinkId(
 	var result []BankAccount
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation("PlaidBankAccount").
+		Relation("LunchFlowBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ? `, linkId).
 		Select(&result)
