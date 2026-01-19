@@ -188,9 +188,12 @@ func (j *jobRepository) GetLunchFlowAccountsToSync(
 		// Where the lunch_flow link is active and an attempt to update it has not
 		// been made in the past 6 hours.
 		Where(`"lunch_flow_link"."status" = ?`, LunchFlowLinkStatusActive).
+		Where(`"lunch_flow_bank_account"."status" = ?`, LunchFlowBankAccountStatusActive).
+		Where(`"lunch_flow_bank_account"."lunch_flow_status" = ?`, LunchFlowBankAccountExternalStatusActive).
 		Where(`("lunch_flow_link"."last_attempted_update" < ? OR "lunch_flow_link"."last_attempted_update" IS NULL)`, cutoff).
 		// And make sure that nothing has been deleted.
 		Where(`"lunch_flow_link"."deleted_at" IS NULL`).
+		Where(`"lunch_flow_bank_account"."deleted_at" IS NULL`).
 		Where(`"link"."deleted_at" IS NULL`).
 		Where(`"bank_account"."deleted_at" IS NULL`).
 		Select(&bankAccounts)
