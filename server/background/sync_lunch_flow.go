@@ -271,6 +271,10 @@ func (s *SyncLunchFlowJob) Run(ctx context.Context) error {
 		return err
 	}
 
+	if err := s.syncTransactions(span.Context()); err != nil {
+		return err
+	}
+
 	panic("unimplemented")
 }
 
@@ -378,6 +382,7 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 	log := s.log.WithContext(span.Context())
 
 	// transactionsToUpdate := make([]*Transaction, 0)
+	lunchFlowTransactionsToCreate := make([]LunchFlowTransaction, 0)
 	transactionsToCreate := make([]Transaction, 0)
 
 	for i := range s.lunchFlowTransactions {
@@ -422,8 +427,20 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 			fallbackName,
 		)
 
-		// TODO Parse date
-		date := time.Now()
+		date, err := time.ParseInLocation(
+			"2006-01-02",
+			externalTransaction.Date,
+			s.timezone,
+		)
+		if err != nil {
+			log.
+				WithError(err).
+				WithFields(logrus.Fields{
+					"value": externalTransaction.Date,
+				}).
+				Error("failed to parse transaction date from lunch flow")
+			continue
+		}
 
 		transaction, ok := s.existingTransactions[externalTransaction.Id]
 		if !ok {
@@ -454,6 +471,7 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 				IsPending:              false,
 				Source:                 "lunch_flow",
 			}
+			lunchFlowTransactionsToCreate = append(lunchFlowTransactionsToCreate, lunchFlowTransaction)
 			transactionsToCreate = append(transactionsToCreate, transaction)
 		}
 		// TODO Handle updating transactions too!
@@ -462,9 +480,21 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 
 	// Persist any new transactions.
 	if count := len(transactionsToCreate); count > 0 {
-		log.WithField("new", count).Info("creating new lunch flowtransactions from import")
-		// TODO Create the lunch flow transaction first!
-		if err := s.repo.InsertTransactions(span.Context(), transactionsToCreate); err != nil {
+		log.WithField("new", count).Info("creating new lunch flow transactions")
+
+		// Create lunch flow transactions first
+		if err := s.repo.CreateLunchFlowTransactions(
+			span.Context(),
+			lunchFlowTransactionsToCreate,
+		); err != nil {
+			return errors.Wrap(err, "failed to persist new lunch flow transactions")
+		}
+
+		// Create actual monetr transactions
+		if err := s.repo.InsertTransactions(
+			span.Context(),
+			transactionsToCreate,
+		); err != nil {
 			return errors.Wrap(err, "failed to persist new transactions")
 		}
 	}
