@@ -154,6 +154,38 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 
 	if link.PlaidLink != nil {
 		crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.PlaidId)
+		if link.PlaidLink.Status != PlaidLinkStatusDeactivated {
+			crumbs.Error(
+				span.Context(),
+				"Cannot remove data for link that is not a deactivated status",
+				"plaid",
+				map[string]any{
+					"linkId":    link.LinkId,
+					"accountId": link.AccountId,
+					"plaidLink": map[string]any{
+						"plaidLinkId":   link.PlaidLinkId,
+						"itemId":        link.PlaidLink.PlaidId,
+						"status":        link.PlaidLink.Status.String(),
+						"institution":   link.PlaidLink.InstitutionName,
+						"institutionId": link.PlaidLink.InstitutionId,
+					},
+				},
+			)
+			log.WithFields(logrus.Fields{
+				// Make it really easy to filter and find this exact log entry.
+				"needle":    "CANT_REMOVE_PLAID_LINK",
+				"linkId":    link.LinkId,
+				"accountId": link.AccountId,
+				"plaidLink": logrus.Fields{
+					"plaidLinkId":   link.PlaidLinkId,
+					"itemId":        link.PlaidLink.PlaidId,
+					"status":        link.PlaidLink.Status.String(),
+					"institution":   link.PlaidLink.InstitutionName,
+					"institutionId": link.PlaidLink.InstitutionId,
+				},
+			}).Error("cannot remove data for link that is not in a deactivated status!")
+			return errors.Errorf("cannot remove data for link that is not in a deactivated status")
+		}
 	}
 
 	bankAccountIds := make([]ID[BankAccount], 0)
