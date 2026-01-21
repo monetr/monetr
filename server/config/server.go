@@ -21,6 +21,12 @@ type Cookies struct {
 	// host of monetr use HTTPS. If you are not using HTTPS then this must be
 	// disabled for API calls to succeed.
 	Secure bool `yaml:"secure"`
+	// Determines whether or not the cookies issued to clients will be HTTP only
+	// cookies. HTTP only cookies cannot be read by the javascript executed in
+	// client browsers, as such they are slightly more secure. This setting
+	// defaults to true and should only be disabled if you understand what you are
+	// doing and need access to the token in a client side application.
+	HttpOnly bool `yaml:"httpOnly"`
 	// Name defines the name of the cookie to use for authentication. This
 	// defaults to `M-Token` but can be customized if the host wants to.
 	Name string `yaml:"name"`
