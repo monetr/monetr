@@ -171,6 +171,8 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	r.log = log.WithField("bankAccountIds", bankAccountIds)
 	r.log.Info("removing data for bank account Ids for link")
 
+	secretIds := r.getSecretsToRemove(span.Context())
+
 	// Need to find these before we delete the transactions to avoid foreign key
 	// issues and stray data being left behind.
 	plaidTransactionIds := r.getPlaidTransactionsToRemove(span.Context(), bankAccountIds)
@@ -196,6 +198,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	r.removeLunchFlowBankAccounts(span.Context(), lunchFlowBankAccountIds)
 	r.removeLink(span.Context())
 	r.removePlaidLinks(span.Context(), plaidLinkIds)
+	r.removeSecrets(span.Context(), secretIds)
 
 	channelName := fmt.Sprintf("link:remove:%s:%s", accountId, linkId)
 	if err = r.publisher.Notify(span.Context(), channelName, "success"); err != nil {
@@ -535,6 +538,48 @@ func (r *RemoveLinkJob) removePlaidLinks(
 	}
 
 	r.log.WithField("removed", result.RowsAffected()).Info("removed plaid link(s)")
+}
+
+func (r *RemoveLinkJob) getSecretsToRemove(
+	ctx context.Context,
+) []ID[Secret] {
+	ids := make([]ID[Secret], 0)
+	err := r.db.ModelContext(ctx, &Secret{}).
+		// The secret can be associated with either a Plaid link or a lunch flow
+		// link. But must be associated with the desired link from the arguments!
+		Join(`LEFT JOIN "plaid_links" as "plaid_link"`).
+		JoinOn(`"plaid_link"."secret_id" = "secret"."secret_id"`).
+		JoinOn(`"plaid_link"."account_id" = "secret"."account_id"`).
+		Join(`LEFT JOIN "lunch_flow_links" as "lunch_flow_link"`).
+		JoinOn(`"lunch_flow_link"."secret_id" = "secret"."secret_id"`).
+		JoinOn(`"lunch_flow_link"."account_id" = "secret"."account_id"`).
+		Join(`INNER JOIN "links" AS "link"`).
+		JoinOn(`("plaid_link"."plaid_link_id" = "link"."plaid_link_id" AND "plaid_link"."account_id" = "link"."account_id") OR ("lunch_flow_link"."lunch_flow_link_id" = "link"."lunch_flow_link_id" AND "lunch_flow_link"."account_id" = "link"."account_id")`).
+		Where(`"link"."account_id" = ?`, r.args.AccountId).
+		Where(`"link"."link_id" = ?`, r.args.LinkId).
+		Column("secret.secret_id").
+		Select(&ids)
+	if err != nil {
+		panic(errors.Wrap(err, "failed to find secrets to remove"))
+	}
+
+	return ids
+}
+
+func (r *RemoveLinkJob) removeSecrets(
+	ctx context.Context,
+	secretIds []ID[Secret],
+) {
+	result, err := r.db.ModelContext(ctx, &Secret{}).
+		Where(`"account_id" = ?`, r.args.AccountId).
+		WhereIn(`"secret_id" IN (?)`, secretIds).
+		Delete()
+	if err != nil {
+		r.log.WithError(err).Errorf("failed to remove secrets for link")
+		panic(errors.Wrap(err, "failed to remove secrets for link"))
+	}
+
+	r.log.WithField("removed", result.RowsAffected()).Info("removed secret(s)")
 }
 
 func (r *RemoveLinkJob) removeBankAccounts(

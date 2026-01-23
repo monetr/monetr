@@ -285,6 +285,14 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 			})
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
 		}
+	} else if link.LunchFlowLink != nil {
+		link.LunchFlowLink.Status = LunchFlowLinkStatusDeactivated
+		if err := repo.UpdateLunchFlowLink(
+			c.getContext(ctx),
+			link.LunchFlowLink,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow Link")
+		}
 	}
 
 	if err = background.TriggerRemoveLink(
@@ -295,7 +303,12 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 			LinkId:    link.LinkId,
 		},
 	); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to enqueue link removal job")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"failed to enqueue link removal job",
+		)
 	}
 
 	return ctx.NoContent(http.StatusOK)

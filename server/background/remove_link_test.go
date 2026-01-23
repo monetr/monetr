@@ -62,6 +62,10 @@ func TestRemoveLinkJob_Run(t *testing.T) {
 			testutils.MustDBNotExist(t, bankAccount)
 			testutils.MustDBNotExist(t, *link.PlaidLink)
 			testutils.MustDBNotExist(t, link)
+			testutils.MustDBNotExist(t, models.Secret{
+				SecretId:  link.PlaidLink.SecretId,
+				AccountId: link.AccountId,
+			})
 		}
 	})
 
