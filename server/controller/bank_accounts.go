@@ -77,7 +77,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 		c.mustGetAccountId(ctx),
 	)
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to read account details")
+		return c.wrapPgError(ctx, err, "Failed to read account details")
 	}
 
 	// If we cannot determine what currencyCode we should default to based on the
@@ -118,7 +118,12 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	case nil:
 		break
 	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse request")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusBadRequest,
+			"failed to parse request",
+		)
 	}
 
 	// Some fields cannot be overwritten, so we set those after we unmarshal.
@@ -133,7 +138,8 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 
 	// If we are a lunch flow link then we can only create lunch flow bank
 	// accounts!
-	if link.LinkType == LunchFlowLinkType {
+	switch link.LinkType {
+	case LunchFlowLinkType:
 		if bankAccount.LunchFlowBankAccountId == nil ||
 			bankAccount.LunchFlowBankAccountId.IsZero() {
 			return ctx.JSON(http.StatusBadRequest, map[string]any{
@@ -143,7 +149,8 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 				},
 			})
 		}
-	} else if link.LinkType != ManualLinkType {
+	case ManualLinkType:
+	default:
 		// Otherwise if we are not a manual link then we simply don't allow bank
 		// accounts to be created.
 		return ctx.JSON(http.StatusBadRequest, map[string]any{
@@ -154,7 +161,10 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 		})
 	}
 
-	if err := repo.CreateBankAccounts(c.getContext(ctx), &bankAccount); err != nil {
+	if err := repo.CreateBankAccounts(
+		c.getContext(ctx),
+		&bankAccount,
+	); err != nil {
 		return c.wrapPgError(ctx, err, "Could not create bank account")
 	}
 

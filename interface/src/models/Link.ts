@@ -3,11 +3,11 @@ import PlaidLink, { PlaidLinkStatus } from '@monetr/interface/models/PlaidLink';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum LinkType {
-  Unknown = 0,
-  Plaid = 1,
-  Manual = 2,
-  Stripe = 3,
-  LunchFlow = 4,
+  Unknown = 'unknown',
+  Plaid = 'plaid',
+  Manual = 'manual',
+  Stripe = 'stripe',
+  LunchFlow = 'lunch_flow',
 }
 
 export const errorMessages = {
