@@ -57,10 +57,37 @@ func (c *Controller) postLinks(ctx echo.Context) error {
 	case nil:
 		break
 	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse post request")
+		return c.badRequestError(ctx, err, "Failed to parse post request")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	// If the user is creating a lunch flow link then we need to validate that the
+	// link is valid and can be activated. If it is then activate it as part of
+	// this creation step.
+	if link.LunchFlowLinkId != nil {
+		link.LinkType = LunchFlowLinkType
+		lunchFlowLink, err := repo.GetLunchFlowLink(
+			c.getContext(ctx),
+			*link.LunchFlowLinkId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "Failed to retrieve lunch flow link")
+		}
+
+		if lunchFlowLink.Status != LunchFlowLinkStatusPending {
+			return c.badRequest(ctx, "Cannot create a link from a Lunch Flow link that is not in a pending status")
+		}
+
+		lunchFlowLink.Status = LunchFlowLinkStatusActive
+		if err := repo.UpdateLunchFlowLink(
+			c.getContext(ctx),
+			lunchFlowLink,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow link")
+		}
+	}
+
 	if err := repo.CreateLink(c.getContext(ctx), &link); err != nil {
 		return c.wrapPgError(ctx, err, "Could not create a manual link")
 	}
