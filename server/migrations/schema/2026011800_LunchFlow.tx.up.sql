@@ -74,3 +74,11 @@ CREATE TABLE "lunch_flow_transactions" (
 
 ALTER TABLE "transactions" ADD COLUMN "lunch_flow_transaction_id" VARCHAR(32);
 ALTER TABLE "transactions" ADD CONSTRAINT "fk_transactions_lunch_flow_transaction" FOREIGN KEY ("lunch_flow_transaction_id", "account_id") REFERENCES "lunch_flow_transactions" ("lunch_flow_transaction_id", "account_id") ON DELETE SET NULL;
+
+ALTER TABLE "links" ADD COLUMN "link_type_new" TEXT NOT NULL DEFAULT 'unknown';
+UPDATE "links" SET "link_type_new" = 'plaid' WHERE "link_type" = 1;
+UPDATE "links" SET "link_type_new" = 'manual' WHERE "link_type" = 2;
+UPDATE "links" SET "link_type_new" = 'stripe' WHERE "link_type" = 3;
+UPDATE "links" SET "link_type_new" = 'lunch_flow' WHERE "link_type" = 4;
+ALTER TABLE "links" DROP COLUMN "link_type";
+ALTER TABLE "links" RENAME COLUMN "link_type_new" TO "link_type";
