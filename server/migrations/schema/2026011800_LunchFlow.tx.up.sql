@@ -19,6 +19,9 @@ CREATE TABLE "lunch_flow_links" (
 
 ALTER TABLE "links" ADD COLUMN "lunch_flow_link_id" VARCHAR(32);
 ALTER TABLE "links" ADD CONSTRAINT "fk_links_lunch_flow_link" FOREIGN KEY ("lunch_flow_link_id", "account_id") REFERENCES "lunch_flow_links" ("lunch_flow_link_id", "account_id") ON DELETE SET NULL;
+-- You cannot have the same lunch flow link associated with multiple links. You
+-- must create multiple lunch flow links!
+ALTER TABLE "links" ADD CONSTRAINT "uq_links_lunch_flow_link" UNIQUE ("lunch_flow_link_id");
 
 CREATE TABLE "lunch_flow_bank_accounts" (
   "lunch_flow_bank_account_id" VARCHAR(32) NOT NULL,
@@ -49,6 +52,7 @@ CREATE TABLE "lunch_flow_bank_accounts" (
 
 ALTER TABLE "bank_accounts" ADD COLUMN "lunch_flow_bank_account_id" VARCHAR(32);
 ALTER TABLE "bank_accounts" ADD CONSTRAINT "fk_bank_accounts_lunch_flow_bank_account" FOREIGN KEY ("lunch_flow_bank_account_id", "account_id") REFERENCES "lunch_flow_bank_accounts" ("lunch_flow_bank_account_id", "account_id") ON DELETE SET NULL;
+ALTER TABLE "bank_accounts" ADD CONSTRAINT "uq_bank_accounts_lunch_flow_bank_account" UNIQUE ("lunch_flow_bank_account_id");
 
 CREATE TABLE "lunch_flow_transactions" (
   "lunch_flow_transaction_id"  VARCHAR(32) NOT NULL,
@@ -74,7 +78,9 @@ CREATE TABLE "lunch_flow_transactions" (
 
 ALTER TABLE "transactions" ADD COLUMN "lunch_flow_transaction_id" VARCHAR(32);
 ALTER TABLE "transactions" ADD CONSTRAINT "fk_transactions_lunch_flow_transaction" FOREIGN KEY ("lunch_flow_transaction_id", "account_id") REFERENCES "lunch_flow_transactions" ("lunch_flow_transaction_id", "account_id") ON DELETE SET NULL;
+ALTER TABLE "transactions" ADD CONSTRAINT "uq_transactions_lunch_flow_bank_account" UNIQUE ("lunch_flow_transaction_id");
 
+-- Update the enum for the link type too.
 ALTER TABLE "links" ADD COLUMN "link_type_new" TEXT NOT NULL DEFAULT 'unknown';
 UPDATE "links" SET "link_type_new" = 'plaid' WHERE "link_type" = 1;
 UPDATE "links" SET "link_type_new" = 'manual' WHERE "link_type" = 2;
