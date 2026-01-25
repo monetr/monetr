@@ -296,6 +296,16 @@ func (s *SyncLunchFlowJob) Run(ctx context.Context) error {
 		return err
 	}
 
+	// Also kick off the transaction similarity job.
+	s.enqueuer.EnqueueJob(
+		span.Context(),
+		CalculateTransactionClusters,
+		CalculateTransactionClustersArguments{
+			AccountId:     s.args.AccountId,
+			BankAccountId: s.args.BankAccountId,
+		},
+	)
+
 	s.progress(span.Context(), LunchFlowSyncStatusComplete)
 	s.log.Info("finished syncing Lunch Flow account")
 
