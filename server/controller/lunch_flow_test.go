@@ -7,6 +7,7 @@ import (
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/internal/mock_lunch_flow"
+	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -192,6 +193,100 @@ func TestPostLunchFlowLinkBankAccountsRefresh(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 		response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
 			WithPath("lunchFlowLinkId", "bogus").
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("Lunch Flow is not enabled on this server")
+	})
+}
+
+func TestGetLunchFlowLinks(t *testing.T) {
+	t.Run("can list lunch flow links", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var firstLink models.ID[models.LunchFlowLink]
+		var secondLink models.ID[models.LunchFlowLink]
+
+		{ // Create two lunch flow links to test listing!
+			{
+				response := e.POST("/api/lunch_flow/link").
+					WithCookie(TestCookieName, token).
+					WithJSON(map[string]any{
+						"name":         "US Bank",
+						"lunchFlowURL": "https://lunchflow.app/api/v1",
+						"apiKey":       "foobar",
+					}).
+					Expect()
+
+				response.Status(http.StatusOK)
+				firstLink = models.ID[models.LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+			}
+
+			{
+				response := e.POST("/api/lunch_flow/link").
+					WithCookie(TestCookieName, token).
+					WithJSON(map[string]any{
+						"name":         "Chase Bank",
+						"lunchFlowURL": "https://lunchflow.app/api/v1",
+						"apiKey":       "foobar2",
+					}).
+					Expect()
+
+				response.Status(http.StatusOK)
+				secondLink = models.ID[models.LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+			}
+		}
+
+		{ // Make sure that we list both links and in the order we expect
+			response := e.GET("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().IsArray()
+			response.JSON().Array().Length().IsEqual(2)
+			response.JSON().Path("$[0].lunchFlowLinkId").IsEqual(secondLink)
+			response.JSON().Path("$[1].lunchFlowLinkId").IsEqual(firstLink)
+		}
+	})
+
+	t.Run("no cross user reads", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		{
+			token := GivenIHaveToken(t, e)
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "US Bank",
+					"lunchFlowURL": "https://lunchflow.app/api/v1",
+					"apiKey":       "foobar",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		{ // Using a different token, make sure we can't read the lunch flow link
+			token := GivenIHaveToken(t, e)
+			response := e.GET("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().IsArray()
+			response.JSON().Array().IsEmpty()
+		}
+	})
+
+	t.Run("lunch flow is disabled", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.LunchFlow.Enabled = false
+		_, e := NewTestApplicationWithConfig(t, config)
+		token := GivenIHaveToken(t, e)
+		response := e.GET("/api/lunch_flow/link").
 			WithCookie(TestCookieName, token).
 			Expect()
 
