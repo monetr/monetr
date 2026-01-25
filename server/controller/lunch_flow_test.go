@@ -19,7 +19,7 @@ func TestPostLunchFlowLink(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"name":         "US Bank",
-				"lunchFlowURL": "https://lunchflow.com/api/v1",
+				"lunchFlowURL": "https://lunchflow.app/api/v1",
 				"apiKey":       "foobar",
 			}).
 			Expect()
@@ -39,7 +39,7 @@ func TestPostLunchFlowLink(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"name":         "US Bank",
-				"lunchFlowURL": "https://lunchflow.com/api/v1",
+				"lunchFlowURL": "https://lunchflow.app/api/v1",
 				"apiKey":       "foobar",
 			}).
 			Expect()
@@ -55,7 +55,7 @@ func TestPostLunchFlowLink(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"name":         "US Bank",
-				"lunchFlowURL": "lunchflow.com/api/v1",
+				"lunchFlowURL": "lunchflow.app/api/v1",
 				"apiKey":       "foobar",
 			}).
 			Expect()
@@ -72,7 +72,7 @@ func TestPostLunchFlowLink(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"name":         "US Bank",
-				"lunchFlowURL": "https://lunchflow.com/api/v1?testparam=true",
+				"lunchFlowURL": "https://lunchflow.app/api/v1?testparam=true",
 				"apiKey":       "foobar",
 			}).
 			Expect()
@@ -89,7 +89,7 @@ func TestPostLunchFlowLink(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"name":         "US Bank",
-				"lunchFlowURL": "ssh://lunchflow.com/api/v1",
+				"lunchFlowURL": "ssh://lunchflow.app/api/v1",
 				"apiKey":       "foobar",
 			}).
 			Expect()
@@ -106,7 +106,7 @@ func TestPostLunchFlowLink(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"name":         "US Bank",
-				"lunchFlowURL": "https://lunchflow.com/api/v1",
+				"lunchFlowURL": "https://lunchflow.app/api/v1",
 				"apiKey":       "",
 			}).
 			Expect()
@@ -142,7 +142,7 @@ func TestPostLunchFlowLinkBankAccountsRefresh(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
 					"name":         "US Bank",
-					"lunchFlowURL": "https://lunchflow.com/api/v1",
+					"lunchFlowURL": "https://lunchflow.app/api/v1",
 					"apiKey":       "foobar",
 				}).
 				Expect()
@@ -181,7 +181,7 @@ func TestPostLunchFlowLinkBankAccountsRefresh(t *testing.T) {
 		}
 
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-			"GET https://lunchflow.com/api/v1/accounts": 1,
+			"GET https://lunchflow.app/api/v1/accounts": 1,
 		}, "must match Lunch Flow API calls")
 	})
 

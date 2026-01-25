@@ -95,7 +95,7 @@ func TestPostLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("failed to parse post request")
+		response.JSON().Path("$.error").IsEqual("Failed to parse post request")
 	})
 
 	t.Run("unauthenticated", func(t *testing.T) {
