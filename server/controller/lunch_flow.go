@@ -103,7 +103,7 @@ func (c *Controller) parsePostLunchFlowLinkRequest(
 			validation.Key(
 				"apiKey",
 				validation.Required.Error("Lunch Flow API Key must be provided to setup a Lunch Flow link"),
-				validation.Length(1, 100).Error("Lunch flow API Key must be between 1 and 100 characters"),
+				validation.Length(1, 100).Error("Lunch Flow API Key must be between 1 and 100 characters"),
 				is.UTFLetterNumeric,
 			).Required(validators.Require),
 		),
@@ -162,7 +162,7 @@ func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 		CreatedBy: c.mustGetUserId(ctx),
 	}
 
-	// The lunch flow link itself needs to be created first.
+	// The Lunch Flow link itself needs to be created first.
 	if err := repo.CreateLunchFlowLink(
 		c.getContext(ctx),
 		&lunchFlowLink,
@@ -173,7 +173,7 @@ func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, lunchFlowLink)
 }
 
-// postLunchFlowLinkBankAccountsRefresh is the endpoint that takes a lunch flow
+// postLunchFlowLinkBankAccountsRefresh is the endpoint that takes a Lunch Flow
 // link ID and performs a reconciliation of the accounts available in the API
 // versus the ones we store locally. It will not remove local items but it will
 // add new ones if they become available. It does not return content but should
@@ -273,7 +273,7 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 				"bug":         true,
 				"lunchFlowId": joined.From.Id,
 				"count":       len(joined.Join),
-			}).Error("multiple lunch flow bank accounts found for the same external ID, this should not be possible!")
+			}).Error("multiple Lunch Flow bank accounts found for the same external ID, this should not be possible!")
 			crumbs.IndicateBug(
 				c.getContext(ctx),
 				"Multiple Lunch Flow Bank Accounts found for the same external ID, this should not be possible!",
@@ -367,7 +367,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 	for _, bankAccount := range bankAccounts {
 		log.WithFields(logrus.Fields{
 			"bankAccountId": bankAccount.BankAccountId,
-		}).Debug("triggering lunch flow sync for bank account")
+		}).Debug("triggering Lunch Flow sync for bank account")
 		if err := background.TriggerSyncLunchFlowTxn(
 			c.getContext(ctx),
 			c.JobRunner,
@@ -379,7 +379,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 		); err != nil {
 			log.WithFields(logrus.Fields{
 				"bankAccountId": bankAccount.BankAccountId,
-			}).WithError(err).Warn("failed to enqueue lunch flow sync")
+			}).WithError(err).Warn("failed to enqueue Lunch Flow sync")
 		}
 	}
 

@@ -182,7 +182,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 
 	lunchFlowTransactionIds := r.getLunchFlowTransactionsToRemove(span.Context())
 	lunchFlowBankAccountIds := r.getLunchFlowBankAccountsToRemove(span.Context())
-	// TODO Also read lunch flow links
+	lunchFlowLinkIds := r.getLunchFlowLinksToRemove(span.Context())
 
 	r.removeTransactionClusters(span.Context(), bankAccountIds)
 	// TODO Also remove any non-reconciled files
@@ -198,6 +198,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	r.removeLunchFlowBankAccounts(span.Context(), lunchFlowBankAccountIds)
 	r.removeLink(span.Context())
 	r.removePlaidLinks(span.Context(), plaidLinkIds)
+	r.removeLunchFlowLinks(span.Context(), lunchFlowLinkIds)
 	r.removeSecrets(span.Context(), secretIds)
 
 	channelName := fmt.Sprintf("link:remove:%s:%s", accountId, linkId)
@@ -267,7 +268,7 @@ func (r *RemoveLinkJob) getLunchFlowTransactionsToRemove(
 		Join(`INNER JOIN "lunch_flow_bank_accounts" AS "lunch_flow_bank_account"`).
 		JoinOn(`"lunch_flow_bank_account"."lunch_flow_bank_account_id" = "lunch_flow_transaction"."lunch_flow_bank_account_id"`).
 		JoinOn(`"lunch_flow_bank_account"."account_id" = "lunch_flow_transaction"."account_id"`).
-		// Lunch flow bank accounts might not be associated with a monetr bank
+		// Lunch Flow bank accounts might not be associated with a monetr bank
 		// account if they are inactive, so we instead need to traverse upwards to
 		// the link instead.
 		Join(`INNER JOIN "links" AS "link"`).
@@ -278,7 +279,7 @@ func (r *RemoveLinkJob) getLunchFlowTransactionsToRemove(
 		Column("lunch_flow_transaction.lunch_flow_transaction_id").
 		Select(&ids)
 	if err != nil {
-		panic(errors.Wrap(err, "failed to find lunch flow transactions to be removed"))
+		panic(errors.Wrap(err, "failed to find Lunch Flow transactions to be removed"))
 	}
 
 	return ids
@@ -297,11 +298,11 @@ func (r *RemoveLinkJob) removeLunchFlowTransactions(
 		WhereIn(`"lunch_flow_transaction_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove lunch flow transactions for link")
-		panic(errors.Wrap(err, "failed to remove lunch flow transactions for link"))
+		r.log.WithError(err).Errorf("failed to remove Lunch Flow transactions for link")
+		panic(errors.Wrap(err, "failed to remove Lunch Flow transactions for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed lunch flow transaction(s)")
+	r.log.WithField("removed", result.RowsAffected()).Info("removed Lunch Flow transaction(s)")
 }
 
 func (r *RemoveLinkJob) getPlaidTransactionsToRemove(
@@ -454,11 +455,11 @@ func (r *RemoveLinkJob) removeLunchFlowBankAccounts(
 		WhereIn(`"lunch_flow_bank_account_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove lunch flow bank accounts for link")
-		panic(errors.Wrap(err, "failed to remove lunch flow bank accounts for link"))
+		r.log.WithError(err).Errorf("failed to remove Lunch Flow bank accounts for link")
+		panic(errors.Wrap(err, "failed to remove Lunch Flow bank accounts for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed lunch flow bank account(s)")
+	r.log.WithField("removed", result.RowsAffected()).Info("removed Lunch Flow bank account(s)")
 }
 
 func (r *RemoveLinkJob) getPlaidBankAccountsToRemove(
@@ -540,12 +541,51 @@ func (r *RemoveLinkJob) removePlaidLinks(
 	r.log.WithField("removed", result.RowsAffected()).Info("removed plaid link(s)")
 }
 
+func (r *RemoveLinkJob) getLunchFlowLinksToRemove(
+	ctx context.Context,
+) []ID[LunchFlowLink] {
+	ids := make([]ID[LunchFlowLink], 0)
+	err := r.db.ModelContext(ctx, &LunchFlowLink{}).
+		Join(`INNER JOIN "links" AS "link"`).
+		JoinOn(`"lunch_flow_link"."lunch_flow_link_id" = "link"."lunch_flow_link_id"`).
+		JoinOn(`"lunch_flow_link"."account_id" = "link"."account_id"`).
+		Where(`"lunch_flow_link"."account_id" = ?`, r.args.AccountId).
+		Where(`"link"."link_id" = ?`, r.args.LinkId).
+		Column("lunch_flow_link.lunch_flow_link_id").
+		Select(&ids)
+	if err != nil {
+		panic(errors.Wrap(err, "failed to find Lunch Flow links to remove"))
+	}
+
+	return ids
+}
+
+func (r *RemoveLinkJob) removeLunchFlowLinks(
+	ctx context.Context,
+	ids []ID[LunchFlowLink],
+) {
+	if len(ids) == 0 {
+		return
+	}
+
+	result, err := r.db.ModelContext(ctx, &LunchFlowLink{}).
+		Where(`"account_id" = ?`, r.args.AccountId).
+		WhereIn(`"lunch_flow_link_id" IN (?)`, ids).
+		Delete()
+	if err != nil {
+		r.log.WithError(err).Errorf("failed to remove Lunch Flow links for link")
+		panic(errors.Wrap(err, "failed to remove Lunch Flow links for link"))
+	}
+
+	r.log.WithField("removed", result.RowsAffected()).Info("removed Lunch Flow link(s)")
+}
+
 func (r *RemoveLinkJob) getSecretsToRemove(
 	ctx context.Context,
 ) []ID[Secret] {
 	ids := make([]ID[Secret], 0)
 	err := r.db.ModelContext(ctx, &Secret{}).
-		// The secret can be associated with either a Plaid link or a lunch flow
+		// The secret can be associated with either a Plaid link or a Lunch Flow
 		// link. But must be associated with the desired link from the arguments!
 		Join(`LEFT JOIN "plaid_links" as "plaid_link"`).
 		JoinOn(`"plaid_link"."secret_id" = "secret"."secret_id"`).
