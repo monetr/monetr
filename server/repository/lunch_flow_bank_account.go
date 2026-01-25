@@ -36,6 +36,7 @@ func (r *repositoryBase) GetLunchFlowBankAccountsByLunchFlowLink(
 		Where(`"lunch_flow_bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"lunch_flow_bank_account"."lunch_flow_link_id" = ?`, id).
 		Where(`"lunch_flow_bank_account"."deleted_at" IS NULL`).
+		Order(`lunch_flow_bank_account_id DESC`).
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve Lunch Flow bank account")
