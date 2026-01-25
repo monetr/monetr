@@ -1,3 +1,101 @@
+import { useCallback, useMemo } from 'react';
+import type { FormikHelpers } from 'formik';
+import { useNavigate } from 'react-router-dom';
+
+import { flexVariants } from '@monetr/interface/components/Flex';
+import FormTextField from '@monetr/interface/components/FormTextField';
+import MForm from '@monetr/interface/components/MForm';
+import LunchFlowSetupButtons from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupButtons';
+import Typography from '@monetr/interface/components/Typography';
+import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import LunchFlowLink from '@monetr/interface/models/LunchFlowLink';
+import request from '@monetr/interface/util/request';
+import { LunchFlowSetupSteps } from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSteps';
+import LunchFlowSetupLayout from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupLayout';
+import { Button } from '@monetr/interface/components/Button';
+
+export type LunchFlowSetupIntroValues = {
+  name: string;
+  apiURL: string;
+  apiKey: string;
+};
+
 export default function LunchFlowSetupIntro(): React.JSX.Element {
-  return <div />;
+  const { data: config } = useAppConfiguration();
+  const navigate = useNavigate();
+
+  const initialValues: LunchFlowSetupIntroValues = useMemo(
+    () => ({
+      name: '',
+      apiKey: '',
+      apiURL: config.lunchFlowDefaultAPIURL,
+    }),
+    [config],
+  );
+
+  const submit = useCallback(
+    (values: LunchFlowSetupIntroValues, helpers: FormikHelpers<LunchFlowSetupIntroValues>) => {
+      helpers.setSubmitting(true);
+      request()
+        .post<Partial<LunchFlowLink>>(`/lunch_flow/link`, {
+          name: values.name,
+          lunchFlowURL: values.apiURL,
+          apiKey: values.apiKey,
+        })
+        .then(result => new LunchFlowLink(result?.data))
+        .then(lunchFlowLink =>
+          navigate(lunchFlowLink.lunchFlowLinkId, {
+            relative: 'path',
+          }),
+        )
+        .catch(error => {
+          helpers.setSubmitting(false);
+          console.error(error);
+        });
+    },
+    [navigate],
+  );
+
+  return (
+    <LunchFlowSetupLayout step={LunchFlowSetupSteps.Intro}>
+      <MForm
+        className={flexVariants({
+          orientation: 'column',
+          justify: 'center',
+          align: 'center',
+        })}
+        initialValues={initialValues}
+        onSubmit={submit}
+      >
+        <Typography size='2xl' weight='medium'>
+          Lunch Flow Setup
+        </Typography>
+        <Typography align='center' color='subtle' size='lg'>
+          Let us know what you want to call this budget, and what your Lunch Flow API key is.
+        </Typography>
+        <FormTextField
+          autoFocus
+          className='w-full'
+          data-1p-ignore
+          label='Budget Name'
+          name='name'
+          placeholder='My Primary Bank'
+          required
+        />
+        <FormTextField
+          className='w-full'
+          data-1p-ignore
+          label='API URL'
+          name='apiURL'
+          placeholder='https://.../api/v1'
+          required
+          type='url'
+        />
+        <FormTextField className='w-full' data-1p-ignore label='API Secret' name='apiKey' required type='password' />
+        <Button type='submit' variant='primary'>
+          Next
+        </Button>
+      </MForm>
+    </LunchFlowSetupLayout>
+  );
 }

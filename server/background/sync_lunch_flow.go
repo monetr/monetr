@@ -2,6 +2,7 @@ package background
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -24,6 +25,16 @@ const (
 	SyncLunchFlow = "SyncLunchFlow"
 )
 
+type LunchFlowSyncStatus string
+
+const (
+	LunchFlowSyncStatusBegin        LunchFlowSyncStatus = "begin"
+	LunchFlowSyncStatusTransactions LunchFlowSyncStatus = "transactions"
+	LunchFlowSyncStatusBalances     LunchFlowSyncStatus = "balances"
+	LunchFlowSyncStatusComplete     LunchFlowSyncStatus = "complete"
+	LunchFlowSyncStatusError        LunchFlowSyncStatus = "error"
+)
+
 var (
 	_ ScheduledJobHandler = &SyncLunchFlowHandler{}
 	_ JobImplementation   = &SyncLunchFlowJob{}
@@ -43,6 +54,7 @@ type (
 	SyncLunchFlowArguments struct {
 		AccountId     ID[Account]     `json:"accountId"`
 		BankAccountId ID[BankAccount] `json:"bankAccountId"`
+		LinkId        ID[Link]        `json:"linkId"`
 	}
 
 	SyncLunchFlowJob struct {
@@ -133,6 +145,7 @@ func (s *SyncLunchFlowHandler) EnqueueTriggeredJob(
 			SyncLunchFlowArguments{
 				AccountId:     item.AccountId,
 				BankAccountId: item.BankAccountId,
+				LinkId:        item.LinkId,
 			},
 		)
 		if err != nil {
@@ -235,6 +248,8 @@ func (s *SyncLunchFlowJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
+	s.progress(span.Context(), LunchFlowSyncStatusBegin)
+
 	s.log = s.log.WithContext(span.Context()).WithFields(logrus.Fields{
 		"accountId":     s.args.AccountId,
 		"bankAccountId": s.args.BankAccountId,
@@ -267,6 +282,7 @@ func (s *SyncLunchFlowJob) Run(ctx context.Context) error {
 		return err
 	}
 
+	s.progress(span.Context(), LunchFlowSyncStatusTransactions)
 	if err := s.hydrateTransactions(span.Context()); err != nil {
 		return err
 	}
@@ -275,11 +291,40 @@ func (s *SyncLunchFlowJob) Run(ctx context.Context) error {
 		return err
 	}
 
+	s.progress(span.Context(), LunchFlowSyncStatusBalances)
 	if err := s.syncBalances(span.Context()); err != nil {
 		return err
 	}
 
+	s.progress(span.Context(), LunchFlowSyncStatusComplete)
 	s.log.Info("finished syncing Lunch Flow account")
+
+	return nil
+}
+
+func (s *SyncLunchFlowJob) progress(ctx context.Context, status LunchFlowSyncStatus) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	log := s.log.WithContext(span.Context())
+
+	log.WithField("status", status).Debug("sending progress update")
+
+	channel := fmt.Sprintf(
+		"account:%s:link:%s:bank_account:%s:lunch_flow_sync_progress",
+		s.args.AccountId, s.args.LinkId, s.args.BankAccountId,
+	)
+	j, err := json.Marshal(map[string]any{
+		"bankAccountId": s.args.BankAccountId,
+		"status":        status,
+	})
+	if err != nil {
+		log.WithError(err).Error("failed to encode progress message")
+		return nil
+	}
+	if err := s.publisher.Notify(ctx, channel, string(j)); err != nil {
+		return errors.Wrap(err, "failed to send progress notification for job")
+	}
 
 	return nil
 }
@@ -570,6 +615,7 @@ func (s *SyncLunchFlowJob) syncBalances(ctx context.Context) error {
 	account.CurrentBalance = amount
 	account.AvailableBalance = amount
 
+	// TODO UPDATE THE BALANCE ON THE LUNCH FLOW OBJECT TOOOOOO!
 	if err := s.repo.UpdateBankAccount(span.Context(), &account); err != nil {
 		return errors.Wrap(err, "failed to update bank account balances")
 	}
