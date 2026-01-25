@@ -16,6 +16,10 @@ import (
 
 const DefaultBaseURL = "https://lunchflow.app/"
 
+func DefaultAPIURL() string {
+	return DefaultBaseURL + "api/v1"
+}
+
 type AccountId = json.Number
 
 type Account struct {
@@ -126,7 +130,7 @@ func (l *lunchFlowClient) doRequest(ctx context.Context, path string, result any
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return errors.Errorf("lunch flow request failed %s [%d]", requestUrl, response.StatusCode)
+		return errors.Errorf("Lunch Flow request failed %s [%d]", requestUrl, response.StatusCode)
 	}
 
 	if err := json.NewDecoder(response.Body).Decode(result); err != nil {
@@ -149,7 +153,7 @@ func (l *lunchFlowClient) GetAccounts(ctx context.Context) ([]Account, error) {
 		"/api/v1/accounts",
 		&result,
 	); err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve accounts from lunch flow")
+		return nil, errors.Wrap(err, "failed to retrieve accounts from Lunch Flow")
 	}
 
 	return result.Accounts, nil
@@ -167,7 +171,7 @@ func (l *lunchFlowClient) GetBalance(ctx context.Context, accountId AccountId) (
 		fmt.Sprintf("/api/v1/accounts/%s/balance", accountId),
 		&result,
 	); err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve account balance from lunch flow")
+		return nil, errors.Wrap(err, "failed to retrieve account balance from Lunch Flow")
 	}
 
 	return &result.Balance, nil
@@ -186,7 +190,7 @@ func (l *lunchFlowClient) GetTransactions(ctx context.Context, accountId Account
 		fmt.Sprintf("/api/v1/accounts/%s/transactions", accountId),
 		&result,
 	); err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve account transactions from lunch flow")
+		return nil, errors.Wrap(err, "failed to retrieve account transactions from Lunch Flow")
 	}
 
 	return result.Transactions, nil

@@ -66,6 +66,10 @@ func (c *Controller) postLinks(ctx echo.Context) error {
 	// link is valid and can be activated. If it is then activate it as part of
 	// this creation step.
 	if link.LunchFlowLinkId != nil {
+		if !c.Configuration.LunchFlow.Enabled {
+			return c.notFound(ctx, "Lunch Flow is not enabled on this server")
+		}
+
 		link.LinkType = LunchFlowLinkType
 		lunchFlowLink, err := repo.GetLunchFlowLink(
 			c.getContext(ctx),

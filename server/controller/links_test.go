@@ -132,6 +132,25 @@ func TestPostLink(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("Failed to retrieve lunch flow link: record does not exist")
 	})
 
+	t.Run("lunch flow is not enabled", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.LunchFlow.Enabled = false
+		_, e := NewTestApplicationWithConfig(t, config)
+
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"description":     "My personal link",
+				"lunchFlowLinkId": "lfx_bogus",
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("Lunch Flow is not enabled on this server")
+	})
+
 	t.Run("lunch flow link", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)

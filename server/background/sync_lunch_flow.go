@@ -250,7 +250,7 @@ func (s *SyncLunchFlowJob) Run(ctx context.Context) error {
 		}
 
 		if bankAccount.LunchFlowBankAccount == nil {
-			s.log.Warn("bank account does not have a lunch flow account associated with it")
+			s.log.Warn("bank account does not have a Lunch Flow account associated with it")
 			span.Status = sentry.SpanStatusFailedPrecondition
 			return nil
 		}
@@ -275,7 +275,13 @@ func (s *SyncLunchFlowJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	panic("unimplemented")
+	if err := s.syncBalances(span.Context()); err != nil {
+		return err
+	}
+
+	s.log.Info("finished syncing Lunch Flow account")
+
+	return nil
 }
 
 func (s *SyncLunchFlowJob) setupClient(ctx context.Context) error {
@@ -288,10 +294,10 @@ func (s *SyncLunchFlowJob) setupClient(ctx context.Context) error {
 	}
 
 	if link.LunchFlowLink == nil {
-		s.log.Warn("provided link does not have any lunch flow credentials")
+		s.log.Warn("provided link does not have any Lunch Flow credentials")
 		crumbs.IndicateBug(
 			span.Context(),
-			"BUG: Link was queued to sync with lunch flow, but has no lunch flow details",
+			"BUG: Link was queued to sync with Lunch Flow, but has no Lunch Flow details",
 			map[string]any{
 				"link": link,
 			},
@@ -319,8 +325,8 @@ func (s *SyncLunchFlowJob) setupClient(ctx context.Context) error {
 
 	{ // Retrieve the secret and setup the API client
 		secret, err := s.secrets.Read(span.Context(), link.LunchFlowLink.SecretId)
-		if err = errors.Wrap(err, "failed to retrieve credentials for lunch flow"); err != nil {
-			s.log.WithError(err).Error("could not retrieve API credentials for lunch flow for link")
+		if err = errors.Wrap(err, "failed to retrieve credentials for Lunch Flow"); err != nil {
+			s.log.WithError(err).Error("could not retrieve API credentials for Lunch Flow for link")
 			return err
 		}
 
@@ -330,7 +336,7 @@ func (s *SyncLunchFlowJob) setupClient(ctx context.Context) error {
 			secret.Value,
 		)
 		if err != nil {
-			return errors.Wrap(err, "failed to create lunch flow API client")
+			return errors.Wrap(err, "failed to create Lunch Flow API client")
 		}
 
 		s.client = client
@@ -343,13 +349,15 @@ func (s *SyncLunchFlowJob) hydrateTransactions(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
+	s.log.WithContext(span.Context()).Debug("fetching Lunch Flow transactions")
+
 	var err error
 	s.lunchFlowTransactions, err = s.client.GetTransactions(
 		span.Context(),
 		lunch_flow.AccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
 	)
 	if err != nil {
-		return errors.Wrap(err, "failed to retrieve transactions from lunch flow for sync")
+		return errors.Wrap(err, "failed to retrieve transactions from Lunch Flow for sync")
 	}
 
 	lunchFlowIds := make([]string, len(s.lunchFlowTransactions))
@@ -363,7 +371,7 @@ func (s *SyncLunchFlowJob) hydrateTransactions(ctx context.Context) error {
 		lunchFlowIds,
 	)
 	if err != nil {
-		return errors.Wrap(err, "failed to retrieve existing lunch flow transactions")
+		return errors.Wrap(err, "failed to retrieve existing Lunch Flow transactions")
 	}
 
 	if count := len(s.existingTransactions); count > 0 {
@@ -380,6 +388,7 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 	defer span.Finish()
 
 	log := s.log.WithContext(span.Context())
+	log.Debug("syncing Lunch Flow transactions")
 
 	// transactionsToUpdate := make([]*Transaction, 0)
 	lunchFlowTransactionsToCreate := make([]LunchFlowTransaction, 0)
@@ -395,9 +404,18 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 			},
 		})
 
+		if externalTransaction.Currency != s.bankAccount.Currency {
+			tlog.WithFields(logrus.Fields{
+				"currency": logrus.Fields{
+					"expected": s.bankAccount.Currency,
+					"received": externalTransaction.Currency,
+				},
+			}).Warn("currency on transaction does not match bank account's stored currency, this may cause problems!")
+		}
+
 		amount, err := currency.ParseFriendlyToAmount(
 			externalTransaction.Amount.String(),
-			externalTransaction.Currency,
+			s.bankAccount.Currency,
 		)
 		if err != nil {
 			tlog.WithError(err).Error("failed to parse transaction amount")
@@ -438,7 +456,7 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 				WithFields(logrus.Fields{
 					"value": externalTransaction.Date,
 				}).
-				Error("failed to parse transaction date from lunch flow")
+				Error("failed to parse transaction date from Lunch Flow")
 			continue
 		}
 
@@ -473,21 +491,23 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 			}
 			lunchFlowTransactionsToCreate = append(lunchFlowTransactionsToCreate, lunchFlowTransaction)
 			transactionsToCreate = append(transactionsToCreate, transaction)
+			continue
 		}
 		// TODO Handle updating transactions too!
+		tlog.Trace("transaction from Lunch Flow already exists in monetr, skipping")
 		continue
 	}
 
 	// Persist any new transactions.
 	if count := len(transactionsToCreate); count > 0 {
-		log.WithField("new", count).Info("creating new lunch flow transactions")
+		log.WithField("new", count).Info("creating new Lunch Flow transactions")
 
-		// Create lunch flow transactions first
+		// Create Lunch Flow transactions first
 		if err := s.repo.CreateLunchFlowTransactions(
 			span.Context(),
 			lunchFlowTransactionsToCreate,
 		); err != nil {
-			return errors.Wrap(err, "failed to persist new lunch flow transactions")
+			return errors.Wrap(err, "failed to persist new Lunch Flow transactions")
 		}
 
 		// Create actual monetr transactions
@@ -497,6 +517,61 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 		); err != nil {
 			return errors.Wrap(err, "failed to persist new transactions")
 		}
+	}
+
+	return nil
+}
+
+func (s *SyncLunchFlowJob) syncBalances(ctx context.Context) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	log := s.log.WithContext(span.Context())
+
+	log.Debug("fetching balance from Lunch Flow")
+	balance, err := s.client.GetBalance(
+		span.Context(),
+		lunch_flow.AccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve balance for Lunch Flow sync")
+	}
+
+	log.Debug("syncing Lunch Flow balances")
+
+	if balance.Currency != s.bankAccount.Currency {
+		log.WithFields(logrus.Fields{
+			"currency": logrus.Fields{
+				"expected": s.bankAccount.Currency,
+				"received": balance.Currency,
+			},
+		}).Warn("currency returned from Lunch Flow API does not match bank account's currency, this may cause problems!")
+	}
+
+	amount, err := currency.ParseFriendlyToAmount(
+		balance.Amount.String(),
+		s.bankAccount.Currency,
+	)
+	if err != nil {
+		log.WithError(err).Error("failed to parse account balance amount")
+		return errors.Wrap(err, "failed to parse Lunch Flow account balance")
+	}
+
+	account := *s.bankAccount
+
+	// TODO Log the balance changes and include the new and old balances for
+	// debugging reasons.
+
+	// TODO Figure out how available/current should work with Lunch Flow? Since we
+	// aren't looking for pending transactions then current is kind of accurate.
+	// But if we include pending transactionns in the future then we should
+	// subtract their value from the current balance in order to determine the
+	// available balance.
+	account.CurrentBalance = amount
+	account.AvailableBalance = amount
+
+	if err := s.repo.UpdateBankAccount(span.Context(), &account); err != nil {
+		return errors.Wrap(err, "failed to update bank account balances")
 	}
 
 	return nil
