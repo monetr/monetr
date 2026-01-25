@@ -1,7 +1,6 @@
 package mock_lunch_flow
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -38,14 +37,14 @@ func ValidateLunchFlowAuthentication(
 	request *http.Request,
 	requireAccessToken bool,
 ) (accessToken string) {
-	original := request.Header.Get("Authorization")
-	authorization := strings.TrimSpace(strings.TrimPrefix(original, "Bearer "))
+	original := request.Header.Get("x-api-key")
+	authorization := strings.TrimSpace(original)
 	// Only perform assertions if they are required by the caller. If they are not
 	// then simply parse the authorization and return it to the caller. This way
 	// things like unauthorized errors can be implemented by the mock handler!
 	if requireAccessToken {
 		assert.NotEqual(t, "", authorization, "Token cannot be empty!")
-		assert.Equal(t, fmt.Sprintf("Bearer %s", authorization), original, "Bearer token format does not match the expected format")
+		assert.Equal(t, authorization, original, "Bearer token format does not match the expected format")
 	}
 	return authorization
 }

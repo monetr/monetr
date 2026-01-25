@@ -5,14 +5,20 @@ import MStepper from '@monetr/interface/components/MStepper';
 import { LunchFlowSetupSteps } from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSteps';
 
 import styles from './LunchFlowSetupLayout.module.scss';
+import { useViewContext } from '@monetr/interface/components/ViewManager';
+import {
+  LunchFlowSetupForm,
+  LunchFlowSetupMetadata,
+} from '@monetr/interface/components/setup/lunchflow/LunchFlowSetup';
 
 interface LunchFlowSetupLayoutProps {
+  step?: LunchFlowSetupSteps;
   children: ReactNode;
 }
 
 export default function LunchFlowSetupLayout(props: LunchFlowSetupLayoutProps): React.JSX.Element {
   const steps = Object.values(LunchFlowSetupSteps);
-  const step = steps.indexOf(LunchFlowSetupSteps.Intro);
+  const step = steps.indexOf(props.step ?? LunchFlowSetupSteps.Intro);
   return (
     <div className={styles.lunchFlowSetupLayoutRoot}>
       <div className='p-0 md:p-8 w-full'>

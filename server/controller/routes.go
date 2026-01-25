@@ -350,4 +350,5 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	lunchFlow.POST("/lunch_flow/link/:lunchFlowLinkId/bank_accounts/refresh", c.postLunchFlowLinkBankAccountsRefresh)
 	lunchFlow.GET("/lunch_flow/link/:lunchFlowLinkId/bank_accounts", c.getLunchFlowLinkBankAccounts)
 	lunchFlow.POST("/lunch_flow/link/sync", c.postLunchFlowLinkSync)
+	lunchFlow.GET("/lunch_flow/link/sync/:linkId/bank_account/:bankAccountId/progress", c.getLunchFlowLinkSyncProgress)
 }

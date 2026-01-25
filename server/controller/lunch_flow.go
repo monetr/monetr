@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -21,6 +22,7 @@ import (
 	"github.com/monetr/validation/is"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/net/websocket"
 )
 
 func (c *Controller) getLunchFlowLinks(ctx echo.Context) error {
@@ -375,6 +377,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 			background.SyncLunchFlowArguments{
 				AccountId:     bankAccount.AccountId,
 				BankAccountId: bankAccount.BankAccountId,
+				LinkId:        bankAccount.LinkId,
 			},
 		); err != nil {
 			log.WithFields(logrus.Fields{
@@ -384,6 +387,84 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusAccepted)
+}
+
+func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
+	linkId, err := ParseID[Link](ctx.Param("linkId"))
+	if err != nil || linkId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid link Id")
+	}
+
+	bankAccountId, err := ParseID[Link](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	log := c.getLog(ctx)
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	link, err := repo.GetLink(c.getContext(ctx), linkId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Failed to retrieve link")
+	}
+
+	if link.LinkType != LunchFlowLinkType {
+		return c.badRequest(ctx, "Link must be a Lunch Flow link type")
+	}
+
+	channel := fmt.Sprintf(
+		"account:%s:link:%s:bank_account:%s:lunch_flow_sync_progress",
+		c.mustGetAccountId(ctx), linkId, bankAccountId,
+	)
+	listener, err := c.PubSub.Subscribe(c.getContext(ctx), channel)
+	if err != nil {
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"Failed to subscribe to Lunch Flow sync progress",
+		)
+	}
+	defer listener.Close()
+
+	timeout := time.NewTimer(1 * time.Minute)
+	defer timeout.Stop()
+
+	websocket.Handler(func(ws *websocket.Conn) {
+		defer ws.Close()
+		log.Debug("started Lunch Flow sync websocket!")
+	ListenerLoop:
+		for {
+			select {
+			case <-timeout.C:
+				log.Warn("exiting Lunch Flow sync progress due to timeout")
+				break ListenerLoop
+			case notification := <-listener.Channel():
+				// TODO Actually parse the notification here and check the status, exit
+				// the loop on a complete or error status.
+				log.WithField("notification", notification).Debug("received Lunch Flow sync progress notification")
+				if err := c.sendWebsocketMessage(
+					ctx,
+					ws,
+					notification.Payload(),
+				); err != nil {
+					log.WithError(err).Warn("failed to send websocket message")
+					return
+				}
+			}
+		}
+
+		log.Debug("finished listening for Lunch Flow sync updates")
+		if err := c.sendWebsocketMessage(ctx, ws, map[string]any{
+			"done": true,
+		}); err != nil {
+			log.WithError(err).Warn("failed to send websocket message")
+			return
+		}
+	}).ServeHTTP(ctx.Response(), ctx.Request())
+
+	return nil
 }
 
 func (c *Controller) patchLunchFlowLink(ctx echo.Context) error {

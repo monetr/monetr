@@ -16,10 +16,6 @@ import (
 
 const DefaultBaseURL = "https://lunchflow.app/"
 
-func DefaultAPIURL() string {
-	return DefaultBaseURL + "api/v1"
-}
-
 type AccountId = json.Number
 
 type Account struct {
@@ -121,7 +117,7 @@ func (l *lunchFlowClient) doRequest(ctx context.Context, path string, result any
 	if err != nil {
 		return errors.Wrap(err, "failed to create HTTP request")
 	}
-	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", l.accessToken))
+	request.Header.Add("x-api-key", l.accessToken)
 
 	response, err := l.httpClient.Do(request)
 	if err != nil {
