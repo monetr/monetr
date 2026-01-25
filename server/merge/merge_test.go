@@ -102,6 +102,22 @@ func TestMerge(t *testing.T) {
 		assert.EqualValues(t, 1, dst.RuleSet.GetRRule().Options.Interval)
 	})
 
+	t.Run("handle weird nullable custom types", func(t *testing.T) {
+		type Foo struct {
+			SpendingId *models.ID[models.Spending] `json:"spendingId"`
+		}
+
+		dst := Foo{}
+		src := map[string]any{
+			"spendingId": "spnd_12345",
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.NoError(t, err, "Must be able to merge with odd destination type aliases")
+		// Make sure that we parsed it properly!
+		assert.EqualValues(t, src["spendingId"], *dst.SpendingId)
+	})
+
 	t.Run("handle json numbers", func(t *testing.T) {
 		type Foo struct {
 			Amount int64 `json:"amount"`
