@@ -5,7 +5,7 @@ import Typography from '@monetr/interface/components/Typography';
 
 export default function ConfigError(): JSX.Element {
   return (
-    <div className='w-full h-full flex items-center justify-center flex-col p-4'>
+    <div className='w-screen h-screen flex items-center justify-center flex-col p-4'>
       <MSpan className='w-full h-full justify-center flex-col text-center gap-4'>
         <HeartCrack className='size-24' />
         <Typography size='xl' weight='medium'>
