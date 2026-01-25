@@ -115,6 +115,84 @@ func TestPostLink(t *testing.T) {
 		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").String().IsEqual("unauthorized")
 	})
+
+	t.Run("lunch flow link, invalid ID", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"institutionName": "U.S. Bank",
+				"description":     "My personal link",
+				"lunchFlowLinkId": "lfx_bogus",
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("Failed to retrieve lunch flow link: record does not exist")
+	})
+
+	t.Run("lunch flow link", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var lunchFlowLinkId models.ID[models.LunchFlowLink]
+		{ // Create the lunch flow link first!
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "US Bank",
+					"lunchFlowURL": "https://lunchflow.app/api/v1",
+					"apiKey":       "foobar",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Link should be in pending when its first created
+			response.JSON().Path("$.status").IsEqual(models.LunchFlowLinkStatusPending)
+			lunchFlowLinkId = models.ID[models.LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+		}
+
+		{ // Then create the actual link!
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
+					"lunchFlowLinkId": lunchFlowLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII()
+			response.JSON().Path("$.linkType").IsEqual(models.LunchFlowLinkType)
+			response.JSON().Path("$.lunchFlowLinkId").String().IsEqual(lunchFlowLinkId.String())
+		}
+
+		{ // Then check the status of the lunch flow link to make sure its active
+			response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}").
+				WithPath("lunchFlowLinkId", lunchFlowLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.status").IsEqual(models.LunchFlowLinkStatusActive)
+		}
+
+		{ // Make sure we can't reuse the lunch flow link!
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
+					"lunchFlowLinkId": lunchFlowLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Cannot create a link from a Lunch Flow link that is not in a pending status")
+		}
+	})
 }
 
 func TestGetLink(t *testing.T) {
