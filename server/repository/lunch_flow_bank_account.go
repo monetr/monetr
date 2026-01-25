@@ -44,3 +44,20 @@ func (r *repositoryBase) GetLunchFlowBankAccountsByLunchFlowLink(
 
 	return result, nil
 }
+
+// DeleteLunchFlowBankAccount removes the Lunch Flow bank account from the
+// database, this is **NOT** a soft-delete.
+func (r *repositoryBase) DeleteLunchFlowBankAccount(
+	ctx context.Context,
+	id ID[LunchFlowBankAccount],
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	_, err := r.txn.ModelContext(span.Context(), &LunchFlowBankAccount{}).
+		Where(`"account_id" = ?`, r.AccountId()).
+		Where(`"lunch_flow_bank_account_id" = ?`, id).
+		ForceDelete()
+
+	return errors.Wrap(err, "failed to delete Lunch Flow bank account")
+}

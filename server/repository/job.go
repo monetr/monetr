@@ -17,6 +17,7 @@ type JobRepository interface {
 	GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error)
 	GetAccountsWithTooManyFiles(ctx context.Context) ([]AccountWithTooManyFiles, error)
 	GetLunchFlowAccountsToSync(ctx context.Context) ([]BankAccount, error)
+	GetStaleLunchFlowLinks(ctx context.Context) ([]LunchFlowLink, error)
 }
 
 type ProcessFundingSchedulesItem struct {
@@ -202,4 +203,27 @@ func (j *jobRepository) GetLunchFlowAccountsToSync(
 	}
 
 	return bankAccounts, nil
+}
+
+// GetStaleLunchFlowLinks returns Lunch Flow links that are in a pending status
+// 24 hours after having been created. These links are considered stale and are
+// safe to be removed.
+func (j *jobRepository) GetStaleLunchFlowLinks(
+	ctx context.Context,
+) ([]LunchFlowLink, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	links := make([]LunchFlowLink, 0)
+	cutoff := j.clock.Now().Add(-24 * time.Hour)
+	err := j.txn.ModelContext(ctx, &links).
+		Where(`"created_at" < ?`, cutoff).
+		Where(`"status" = ?`, LunchFlowLinkStatusPending).
+		Order(`lunch_flow_link_id DESC`).
+		Select(&links)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to find stale lunch flow links")
+	}
+
+	return links, nil
 }

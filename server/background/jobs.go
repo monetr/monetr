@@ -102,6 +102,7 @@ func NewBackgroundJobs(
 	if configuration.LunchFlow.Enabled {
 		jobs = append(jobs,
 			NewSyncLunchFlowHandler(log, db, clock, kms, publisher, enqueuer),
+			NewCleanupLunchFlowHandler(log, db, clock, kms),
 		)
 	}
 
