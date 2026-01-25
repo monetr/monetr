@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/build"
+	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/icons"
 )
 
@@ -13,28 +14,29 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 		Price int64 `json:"price"`
 	}
 	var configuration struct {
-		RequireLegalName     bool         `json:"requireLegalName"`
-		RequirePhoneNumber   bool         `json:"requirePhoneNumber"`
-		VerifyLogin          bool         `json:"verifyLogin"`
-		VerifyRegister       bool         `json:"verifyRegister"`
-		VerifyEmailAddress   bool         `json:"verifyEmailAddress"`
-		VerifyForgotPassword bool         `json:"verifyForgotPassword"`
-		ReCAPTCHAKey         string       `json:"ReCAPTCHAKey,omitempty"`
-		AllowSignUp          bool         `json:"allowSignUp"`
-		AllowForgotPassword  bool         `json:"allowForgotPassword"`
-		LongPollPlaidSetup   bool         `json:"longPollPlaidSetup"`
-		RequireBetaCode      bool         `json:"requireBetaCode"`
-		InitialPlan          *InitialPlan `json:"initialPlan"`
-		BillingEnabled       bool         `json:"billingEnabled"`
-		IconsEnabled         bool         `json:"iconsEnabled"`
-		PlaidEnabled         bool         `json:"plaidEnabled"`
-		LunchFlowEnabled     bool         `json:"lunchFlowEnabled"`
-		ManualEnabled        bool         `json:"manualEnabled"`
-		UploadsEnabled       bool         `json:"uploadsEnabled"`
-		Release              string       `json:"release"`
-		Revision             string       `json:"revision"`
-		BuildType            string       `json:"buildType"`
-		BuildTime            string       `json:"buildTime"`
+		RequireLegalName       bool         `json:"requireLegalName"`
+		RequirePhoneNumber     bool         `json:"requirePhoneNumber"`
+		VerifyLogin            bool         `json:"verifyLogin"`
+		VerifyRegister         bool         `json:"verifyRegister"`
+		VerifyEmailAddress     bool         `json:"verifyEmailAddress"`
+		VerifyForgotPassword   bool         `json:"verifyForgotPassword"`
+		ReCAPTCHAKey           string       `json:"ReCAPTCHAKey,omitempty"`
+		AllowSignUp            bool         `json:"allowSignUp"`
+		AllowForgotPassword    bool         `json:"allowForgotPassword"`
+		LongPollPlaidSetup     bool         `json:"longPollPlaidSetup"`
+		RequireBetaCode        bool         `json:"requireBetaCode"`
+		InitialPlan            *InitialPlan `json:"initialPlan"`
+		BillingEnabled         bool         `json:"billingEnabled"`
+		IconsEnabled           bool         `json:"iconsEnabled"`
+		PlaidEnabled           bool         `json:"plaidEnabled"`
+		LunchFlowEnabled       bool         `json:"lunchFlowEnabled"`
+		LunchFlowDefaultAPIURL string       `json:"lunchFlowDefaultAPIURL"`
+		ManualEnabled          bool         `json:"manualEnabled"`
+		UploadsEnabled         bool         `json:"uploadsEnabled"`
+		Release                string       `json:"release"`
+		Revision               string       `json:"revision"`
+		BuildType              string       `json:"buildType"`
+		BuildTime              string       `json:"buildTime"`
 	}
 
 	configuration.Release = build.Release
@@ -88,9 +90,11 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 
 	configuration.IconsEnabled = icons.GetIconsEnabled()
 	configuration.PlaidEnabled = c.Configuration.Plaid.GetEnabled()
-	configuration.LunchFlowEnabled = c.Configuration.LunchFlow.Enabled
 	configuration.ManualEnabled = true
 	configuration.UploadsEnabled = c.Configuration.Storage.Enabled
+
+	configuration.LunchFlowEnabled = c.Configuration.LunchFlow.Enabled
+	configuration.LunchFlowDefaultAPIURL = lunch_flow.DefaultAPIURL()
 
 	return ctx.JSON(http.StatusOK, configuration)
 }
