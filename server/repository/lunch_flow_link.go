@@ -78,6 +78,7 @@ func (r *repositoryBase) GetLunchFlowLinks(
 	err := r.txn.ModelContext(span.Context(), &result).
 		Where(`"lunch_flow_link"."account_id" = ?`, r.AccountId()).
 		Where(`"lunch_flow_link"."deleted_at" IS NULL`).
+		Order(`lunch_flow_link_id DESC`).
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve Lunch Flow links")
