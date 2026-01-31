@@ -36,6 +36,7 @@ type Configuration struct {
 
 	Environment   string        `yaml:"environment"`
 	AllowSignUp   bool          `yaml:"allowSignUp"`
+	Backup        Backup        `yaml:"backup"`
 	Beta          Beta          `yaml:"beta"`
 	CORS          CORS          `yaml:"cors"`
 	Email         Email         `yaml:"email"`
