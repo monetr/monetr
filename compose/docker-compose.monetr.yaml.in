@@ -164,6 +164,5 @@ services:
         condition: service_completed_successfully
 
 volumes:
-  kmsData:
   tmpData:
   goData:
