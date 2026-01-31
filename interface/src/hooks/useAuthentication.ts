@@ -46,6 +46,8 @@ export function useAuthentication(): UseQueryResult<Authentication | undefined, 
         id: result.data.user.accountId,
         username: `account:${result.data.user.accountId}`,
       });
+    } else {
+      setUser(null);
     }
   }, [result]);
 
