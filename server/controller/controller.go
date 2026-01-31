@@ -59,12 +59,17 @@ func (c *Controller) Close() error {
 	return nil
 }
 
-func (c *Controller) getContext(ctx echo.Context) context.Context {
+func ctxFromRequest(ctx echo.Context) context.Context {
 	if requestContext, ok := ctx.Get(spanContextKey).(context.Context); ok {
 		return requestContext
 	}
 
 	return ctx.Request().Context()
+}
+
+// Deprecated: Use [ctxFromRequest] instead!
+func (c *Controller) getContext(ctx echo.Context) context.Context {
+	return ctxFromRequest(ctx)
 }
 
 func (c *Controller) getSpan(ctx echo.Context) *sentry.Span {

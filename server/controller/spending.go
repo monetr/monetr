@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/schema"
 	"github.com/sirupsen/logrus"
 )
 
@@ -57,31 +58,15 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	spending := &Spending{}
-	if err := ctx.Bind(spending); err != nil {
-		return c.invalidJson(ctx)
+	spending, httpErr := parseRequest[Spending](ctx, schema.CreateSpending)
+	if httpErr != nil {
+		return ctx.JSON(httpErr.Code, map[string]any{
+			"error": httpErr.Message,
+		})
 	}
 
 	log := c.getLog(ctx)
-
-	spending.SpendingId = "" // Make sure we create a new spending.
 	spending.BankAccountId = bankAccountId
-	spending.Name, err = c.cleanString(ctx, "Name", spending.Name)
-	if err != nil {
-		return err
-	}
-	spending.Description, err = c.cleanString(ctx, "Description", spending.Description)
-	if err != nil {
-		return err
-	}
-	if spending.Name == "" {
-		return c.badRequest(ctx, "spending must have a name")
-	}
-
-	if spending.TargetAmount <= 0 {
-		return c.badRequest(ctx, "target amount must be greater than 0")
-	}
-
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	// We need to calculate what the next contribution will be for this new
@@ -96,24 +81,11 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "could not find funding schedule specified")
 	}
 
-	spending.LastRecurrence = nil
-
 	// Once we know that the next recurrence is not in the past we can just store
 	// it here; itll be sanitized and converted to midnight below.
 	next := spending.NextRecurrence
 	if next.Before(c.Clock.Now()) {
 		return c.badRequest(ctx, "next due date cannot be in the past")
-	}
-
-	switch spending.SpendingType {
-	case SpendingTypeExpense:
-		if spending.RuleSet == nil {
-			return c.badRequest(ctx, "recurrence rule must be specified for expenses")
-		}
-	case SpendingTypeGoal:
-		if spending.RuleSet != nil {
-			return c.badRequest(ctx, "recurrence rule cannot be specified for goals")
-		}
 	}
 
 	// Make sure that the next recurrence date is properly in the user's timezone.
