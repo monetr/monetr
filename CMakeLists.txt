@@ -46,6 +46,7 @@ include(GolangUtils)
 add_subdirectory("${CMAKE_SOURCE_DIR}/images")
 add_subdirectory("${CMAKE_SOURCE_DIR}/interface")
 add_subdirectory("${CMAKE_SOURCE_DIR}/emails")
+add_subdirectory("${CMAKE_SOURCE_DIR}/site")
 
 add_custom_target(
   dependencies
