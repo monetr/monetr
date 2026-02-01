@@ -9,6 +9,19 @@ export default defineConfig({
   logoText: 'monetr',
   themeConfig: {
     darkMode: true,
+    enableScrollToTop: true,
+    socialLinks: [
+      {
+        icon: 'github',
+        mode: 'link',
+        content: 'https://github.com/monetr/monetr',
+      },
+      {
+        icon: 'discord',
+        mode: 'link',
+        content: 'https://discord.gg/68wTCXrhuq',
+      },
+    ]
   },
   locales: [
     {
