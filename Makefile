@@ -108,6 +108,9 @@ develop-lite: | $(CMAKE_CONFIGURATION_DIRECTORY)
 develop-docs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.documentation.up $(BUILD_ARGS)
 
+develop-site: | $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.site.up $(BUILD_ARGS)
+
 develop-email: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.email $(BUILD_ARGS)
 

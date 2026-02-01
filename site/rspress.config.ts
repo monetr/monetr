@@ -1,12 +1,14 @@
+import * as path from 'node:path';
+import { pluginSass } from '@rsbuild/plugin-sass';
 import { defineConfig } from '@rspress/core';
 
 export default defineConfig({
-  root: 'src',
+  root: path.join(__dirname, 'src'),
   lang: 'en',
   logo: 'https://monetr.app/_next/static/media/logo.77f6bc96.svg',
   logoText: 'monetr',
   themeConfig: {
-    darkMode: false,
+    darkMode: true,
   },
   locales: [
     {
@@ -28,6 +30,11 @@ export default defineConfig({
     versioned: true,
   },
   builderConfig: {
+    resolve: {
+      alias: {
+        '@monetr/site': __dirname,
+      }
+    },
     html: {
       tags: [
         {
@@ -37,5 +44,8 @@ export default defineConfig({
         },
       ],
     },
+    plugins: [
+      pluginSass(),
+    ]
   },
 });
