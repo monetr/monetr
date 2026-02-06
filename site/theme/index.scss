@@ -1,0 +1,21 @@
+:root {
+  --rp-font-family-base: 'Inter Variable', sans-serif;
+}
+
+body {
+  font-family: 'Inter Variable', sans-serif;
+}
+
+.rp-search-button {
+
+  @media (min-width: 768px) {
+    width: 16rem;
+  }
+
+
+  .rp-search-button__hotkey {
+    display: flex;
+    gap: 0.25rem;
+  }
+}
+

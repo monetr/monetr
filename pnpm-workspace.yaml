@@ -2,3 +2,6 @@ packages:
   - docs
   - interface
   - emails
+  - site
+
+blockExoticSubdeps: true

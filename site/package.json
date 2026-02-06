@@ -1,0 +1,36 @@
+{
+  "name": "@monetr/site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fontsource-variable/inter": "5.2.8",
+    "@radix-ui/react-slot": "1.2.4",
+    "@tanstack/react-query": "5.90.16",
+    "date-fns": "4.1.0",
+    "embla-carousel-autoplay": "8.6.0",
+    "embla-carousel-react": "8.6.0",
+    "lucide-react": "0.553.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "tailwind-merge": "1.14.0"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "2.6.2",
+    "@rsbuild/plugin-sass": "1.5.0",
+    "@rspress/core": "2.0.1",
+    "@types/node": "^20",
+    "@types/react": "18.3.26",
+    "@types/react-dom": "18.3.7",
+    "@untitaker/hyperlink": "0.2.0",
+    "autoprefixer": "10.4.22",
+    "cheerio": "1.1.2",
+    "cssnano": "7.1.2",
+    "postcss": "8.5.6",
+    "sass": "1.93.3",
+    "satori": "0.18.3",
+    "spellchecker-cli": "7.0.2",
+    "tailwindcss": "3.4.18",
+    "typescript": "5.9.3"
+  }
+}

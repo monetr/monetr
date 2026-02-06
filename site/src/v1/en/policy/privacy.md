@@ -1,0 +1,479 @@
+---
+title: Privacy Policy
+sidebar: false
+footer: false
+pageType: doc-wide
+---
+
+# Privacy Policy
+
+This Privacy Notice for monetr LLC (doing business as monetr) ("**we**," "**us**," or "**our**"), describes how and why
+we might access, collect, store, use, and/or share ("**process**") your personal information when you use our services
+("**Services**"), including when you:
+
+- Visit our website at [https://monetr.app](https://monetr.app), [https://my.monetr.app](https://my.monetr.app), or
+  any website of ours that links to this Privacy Notice.
+- Engage with us in other related ways, including any sales, marketing, or events.
+
+**Questions or concerns?** We’re here to help! Understanding this Privacy Notice is key to making informed decisions
+about your privacy rights and choices. If you have questions or concerns, or if there’s anything in this policy that
+doesn’t sit right with you, we encourage you to reach out to us at [support@monetr.app](mailto:support@monetr.app).
+We’ll do our best to address your concerns and provide clarity.
+
+Please note that we recommend not using our Services until you’re comfortable with how your personal information is
+handled under this policy. Your privacy and trust are important to us, and we’re committed to working with you to ensure
+your concerns are addressed.
+
+## Summary Of Key Points
+
+**_This summary provides key points from our Privacy Policy, but you can find more details about any of these topics by
+clicking the link following each key point or by using our [table of contents](#table-of-contents) below to navigate to
+the relevant section._**
+
+**What personal information do we collect?** We collect personal information that you provide to us, such as names,
+email addresses, passwords, and payment details. Financial data can be provided either manually or through Plaid, with
+your explicit consent. Learn more about [personal information you provide to
+us](#11-personal-information-you-provide-to-us).
+
+**Do we process any sensitive personal information?** We may process sensitive information such as financial data, but
+only with your explicit consent or as otherwise permitted by law. You have full control over how this information is
+shared. Learn more about [sensitive information we process](#12-sensitive-information).
+
+**Do we collect any information from third parties?** We may use publicly available information, such as data from
+merchant websites, to enhance your experience. We do not collect data from marketing partners, affiliates, or
+advertisers. Learn more about [information collected from other sources](#13-information-from-other-sources).
+
+**How do we process your information?** We process your information to provide and improve our Services, ensure
+security, and comply with legal obligations. We do not share your information externally without your explicit consent.
+Learn more about [how we process your information](#2-how-do-we-process-your-information).
+
+**In what situations and with whom do we share personal information?** We only share your information with trusted
+service providers like Stripe or Plaid, and only when necessary to deliver the Services you request. Data sharing with
+Plaid is entirely opt-in and requires your explicit consent. Learn more about [when and with whom we share your personal
+information](#3-when-and-with-whom-do-we-share-your-personal-information).
+
+**How do we keep your information safe?** We use industry-standard security measures such as encryption, restricted
+access, and regular updates to protect your information. While we strive to safeguard your data, no system can guarantee
+100% security. Learn more about [how we keep your information safe](#6-how-do-we-keep-your-information-safe).
+
+**What are your privacy rights?** Depending on your location, you may have the right to access, correct, delete, or
+restrict the use of your personal information. Learn more about [what are your privacy
+rights](#8-what-are-your-privacy-rights).
+
+**How do you exercise your rights?** You can exercise your rights by visiting [https://monetr.app/contact/](/contact) or
+contacting us directly. We will respond in accordance with applicable data protection laws.
+
+Want to learn more about what we do with any information we collect? [Review the Privacy Policy in
+full](#table-of-contents).
+
+## Table Of Contents
+
+[1. What Information Do We Collect?](#1-what-information-do-we-collect)
+
+[2. How Do We Process Your Information?](#2-how-do-we-process-your-information)
+
+[3. When and With Whom Do We Share Your Personal Information?](#3-when-and-with-whom-do-we-share-your-personal-information)
+
+[4. Do We Use Cookies And Other Tracking Technologies?](#4-do-we-use-cookies-and-other-tracking-technologies)
+
+[5. How Long Do We Keep Your Information?](#5-how-long-do-we-keep-your-information)
+
+[6. How Do We Keep Your Information Safe?](#6-how-do-we-keep-your-information-safe)
+
+[7. Do We Collect Information From Minors?](#7-do-we-collect-information-from-minors)
+
+[8. What Are Your Privacy Rights?](#8-what-are-your-privacy-rights)
+
+[9. Controls For Do-Not-Track Features](#9-controls-for-do-not-track-features)
+
+[10. Do United States Residents Have Specific Privacy Rights?](#10-do-united-states-residents-have-specific-privacy-rights)
+
+[11. Do We Make Updates To This Notice?](#11-do-we-make-updates-to-this-notice)
+
+[12. How Can You Contact Us About This Notice?](#12-how-can-you-contact-us-about-this-notice)
+
+[13. How Can You Review, Update, Or Delete The Data We Collect From You?](#13-how-can-you-review-update-or-delete-the-data-we-collect-from-you)
+
+## 1. What Information Do We Collect?
+
+### 1.1. Personal Information You Provide to Us
+
+**_In Short:_** _We only collect personal information that you choose to share with us._
+
+We collect personal information directly from you when you interact with our Services. This includes information you
+provide when you:
+
+- Register for an account.
+- Express interest in our products or services.
+- Participate in activities on the Services.
+- Contact us for support or inquiries.
+
+**Personal Information We Collect:** The specific information we collect depends on how you interact with our Services
+and the features you use. This may include:
+
+- **Names:** To identify you in your account and communications.
+- **Email addresses:** To communicate with you and provide account-related notifications.
+- **Passwords:** To secure your account and enable authentication (encrypted for your protection).
+- **Payment details (e.g., debit/credit card numbers, billing addresses):** Collected solely to process transactions.
+  Payment data is securely handled by our third-party provider, [Stripe](https://stripe.com/privacy).
+
+### 1.2. Sensitive Information
+
+**Sensitive Information:** With your explicit consent or as permitted by applicable law, we process the following
+categories of sensitive information:
+
+- **Financial Data:** This includes information such as account numbers, transaction histories, and balances. Financial
+  data can be provided in the following ways:
+  - **Via Plaid (Third-Party Integration):** To provide certain services, we utilize Plaid, a third-party service that
+    facilitates secure connections to your financial accounts. Data is shared with Plaid only on an opt-in basis,
+    requiring your explicit consent. You must authenticate and authorize Plaid to access your financial information for
+    data retrieval or sharing to occur. For more details on Plaid's data handling practices, please review their
+    [Privacy Policy](https://plaid.com/legal/).
+  - **Manually by You:** Financial data may also be provided directly by you, either through manual entry or by
+    uploading a file containing the relevant information. This option gives you full control over what data you share
+    with us.
+
+**Payment Data:** If you choose to make purchases, we may collect data necessary to process your payment, such as your
+payment instrument number and associated security code. All payment data is handled and stored by Stripe. You can find
+their privacy notice here: [https://stripe.com/privacy](https://stripe.com/privacy).
+
+For certain types of information, such as billing or payment details, we rely on you to provide accurate and complete
+information to process transactions and maintain your account.
+
+### 1.3. Information from Other Sources
+
+**_In Short:_** _We may collect limited data from public sources to enhance your experience and provide accurate
+information._
+
+In some cases, we may use publicly available information to improve our Services. This includes:
+
+- **Public databases**: We may access publicly available information, such as a merchant’s website or similar resources,
+to provide additional context for a transaction (e.g., verifying the merchant’s name or categorizing a transaction).
+
+This data is used solely to enhance the accuracy and functionality of our Services. It is not directly related to your
+personal information and is only processed to improve your experience.
+
+We do not source data from marketing partners, affiliates, or third-party advertisers.
+
+## 2. How Do We Process Your Information?
+
+**_In Short:_** _We process your information to provide, improve, and administer our Services, communicate with you,
+ensure security and fraud prevention, and comply with legal obligations. We will never share your information without
+your direct consent._
+
+**We process your personal information for a variety of reasons, depending on how you interact with our Services,
+including:**
+
+- **To facilitate account creation and authentication and manage user accounts.** We may process your information so you
+  can create and log in to your account, as well as maintain its functionality.
+
+- **To deliver and facilitate delivery of services to you.** We may process your information to provide you with the
+  requested service.
+
+- **To request feedback.** We may process your information to request feedback and communicate with you about your use
+  of our Services.
+
+- **To protect our Services.** We may process your information as part of our efforts to keep our Services safe and
+  secure, including fraud monitoring and prevention.
+
+- **To evaluate and improve our Services and your experience.** We may process your information to identify usage
+  trends, evaluate product performance, and improve the features and functionality of our Services. However, your
+  information will never be shared externally, even in anonymized form, without your explicit consent.
+
+**Note on Aggregate Metrics:** We may use aggregate, identityless data—such as the total number of active users or
+general platform statistics—for public communication, marketing, or internal analysis. This data does not include any
+information that could identify you or any other user.
+
+## 3. When and With Whom Do We Share Your Personal Information?
+
+**_In Short:_** _We do not share your personal information with third parties except when absolutely necessary to
+provide the Services you request._
+
+We are committed to maintaining your privacy and will only share your personal information in the following situations:
+
+- **Service Providers.** We may share information with trusted third-party service providers who assist in delivering
+  the functionality of our Services (e.g., payment processing via Stripe or secure data integrations via Plaid).
+
+  **Note:** Sharing financial data with Plaid is entirely optional and requires your explicit consent. You must
+  authenticate and authorize the connection to Plaid before any data is retrieved or shared. If you choose not to connect
+  with Plaid, this will not limit your ability to use our Services, as manual data entry and file uploads are supported.
+
+- **Legal Obligations.** We may disclose information if required to do so by law or in response to valid legal requests,
+  such as subpoenas or court orders.
+
+We will never sell, rent, or share your personal information for marketing, advertising, or other unrelated purposes
+without your explicit consent.
+
+## 4. Do We Use Cookies And Other Tracking Technologies?
+
+**_In Short:_** _We use cookies only for essential functionality, such as authentication and customer support. We do not
+use cookies for analytics or advertising._
+
+We may use cookies and similar tracking technologies to facilitate certain essential functions when you interact with
+our Services. Specifically, we use cookies to:
+
+- Enable authentication and secure access to your account.
+- Provide customer support and maintain the functionality of our Services
+
+**Customer Support Cookies:** We use [Chatwoot](https://github.com/chatwoot/chatwoot), a self-hosted customer support
+application. Chatwoot uses cookies to maintain chat session continuity, ensuring a seamless support experience. These
+cookies are used solely to provide customer support and do not track your activity outside the support chat.
+
+**Analytics Without Cookies:**  We use [Umami](https://github.com/umami-software/umami), a privacy-focused, cookieless,
+and self-hosted analytics solution. Umami collects anonymous usage data to help us improve our Services. No personal
+data is ever collected, and no data is shared externally.
+
+**No Advertising or Third-Party Tracking:**  We do not permit third-party services to use tracking technologies on our
+platform for advertising, targeting, or analytics purposes. Your interactions with our Services are never shared with
+advertisers or external analytics providers.
+
+If you have any questions about our use of cookies or tracking technologies, please contact us at
+[support@monetr.app](mailto:support@monetr.app).
+
+## 5. How Long Do We Keep Your Information?
+
+**_In Short:_** _We retain your information only as long as necessary to provide our Services, comply with legal
+obligations, or fulfill the purposes described in this Privacy Notice. Once it is no longer needed, we securely delete
+or anonymize it._
+
+We will only keep your personal information for as long as it is necessary for the purposes set out in this Privacy
+Notice, unless a longer retention period is required or permitted by law (such as tax, accounting, or other legal
+requirements). No purpose in this notice will require us keeping your personal information for longer than 90 days past
+the termination of the user's account.
+
+When we have no ongoing legitimate business need to process your personal information, we will either delete or
+anonymize such information, or, if this is not possible (for example, because your personal information has been stored
+in backup archives), then we will securely store your personal information and isolate it from any further processing
+until deletion is possible.
+
+## 6. How Do We Keep Your Information Safe?
+
+**_In Short:_** _We aim to protect your personal information through a system of organizational and technical security
+measures._
+
+We have implemented appropriate and reasonable technical and organizational security measures designed to protect the
+security of any personal information we process. However, despite our safeguards and efforts to secure your information,
+no electronic transmission over the Internet or information storage technology can be guaranteed to be 100% secure, so
+we cannot promise or guarantee that hackers, cybercriminals, or other unauthorized third parties will not be able to
+defeat our security and improperly collect, access, steal, or modify your information. Although we will do our best to
+protect your personal information, transmission of personal information to and from our Services is at your own risk.
+You should only access the Services within a secure environment.
+
+## 7. Do We Collect Information From Minors?
+
+**_In Short:_** _We do not knowingly collect data from or market to children under 18 years of age._
+
+We do not knowingly collect or solicit data from, or market to, children under 18 years of age. By using the Services,
+you represent that you are at least 18 years old or are the parent or guardian of a minor and consent to their use of
+the Services.
+
+If we learn that personal information from users under the age of 18 has been collected, we will deactivate the account
+and take reasonable measures to promptly delete such data from our records. If you become aware of any data we may have
+collected from children under 18, please contact us at [support@monetr.app](mailto:support@monetr.app).
+
+## 8. What Are Your Privacy Rights?
+
+**_In Short:_**  _You may review, change, or terminate your account at any time, depending on your country, province, or
+state of residence._
+
+**Withdrawing your consent:** If we are relying on your consent to process your personal information, which may be
+express and/or implied consent depending on the applicable law, you have the right to withdraw your consent at any time.
+You can withdraw your consent at any time by contacting us by using the contact details provided in the section "[How
+Can You Contact Us About This Notice?](#12-how-can-you-contact-us-about-this-notice)" below.
+
+However, please note that this will not affect the lawfulness of the processing before its withdrawal nor, when
+applicable law allows, will it affect the processing of your personal information conducted in reliance on lawful
+processing grounds other than consent.
+
+**Account Information**
+
+If you would at any time like to review or change the information in your account or terminate your account, you can:
+
+- Log in to your account settings and update your user account.
+- Contact us using the contact information provided.
+
+Upon your request to terminate your account, we will deactivate or delete your account and information from our active
+databases. However, we may retain some information in our files to prevent fraud, troubleshoot problems, assist with any
+investigations, enforce our legal terms and/or comply with applicable legal requirements.
+
+**Cookies and similar technologies:** Most Web browsers are set to accept cookies by default. If you prefer, you can
+usually choose to set your browser to remove cookies and to reject cookies. If you choose to remove cookies or reject
+cookies, this could affect certain features or services of our Services.
+
+If you have questions or comments about your privacy rights, you may email us at
+[support@monetr.app](mailto:support@monetr.app).
+
+## 9. Controls For Do-Not-Track Features
+
+Most web browsers and some mobile operating systems and mobile applications include a Do-Not-Track ("DNT") feature or
+setting you can activate to signal your privacy preference not to have data about your online browsing activities
+monitored and collected. At this stage, no uniform technology standard for recognizing and implementing DNT signals has
+been finalized. As such, we do not currently respond to DNT browser signals or any other mechanism that automatically
+communicates your choice not to be tracked online. If a standard for online tracking is adopted that we must follow in
+the future, we will inform you about that practice in a revised version of this Privacy Notice.
+
+California law requires us to let you know how we respond to web browser DNT signals. Because there currently is not an
+industry or legal standard for recognizing or honoring DNT signals, we do not respond to them at this time.
+
+## 10. Do United States Residents Have Specific Privacy Rights?
+
+**_In Short:_** _If you are a resident of California, Colorado, Connecticut, Delaware, Florida, Indiana, Iowa, Kentucky,
+Minnesota, Montana, Nebraska, New Hampshire, New Jersey, Oregon, Tennessee, Texas, Utah, or Virginia, you may have the
+right to request access to and receive details about the personal information we maintain about you and how we have
+processed it, correct inaccuracies, get a copy of, or delete your personal information. You may also have the right to
+withdraw your consent to our processing of your personal information. These rights may be limited in some circumstances
+by applicable law. More information is provided below._
+
+**Categories of Personal Information We Collect**
+
+We have collected the following categories of personal information in the past twelve (12) months:
+
+| **Category**                                                                      | **Examples**                                                                                                                                                                                             | **Collected** |
+| ---                                                                               | ---                                                                                                                                                                                                      | ---           |
+| **A. Identifiers**                                                                | Contact details, such as real name, alias, postal address, telephone or mobile contact number, unique personal identifier, online identifier, Internet Protocol address, email address, and account name | YES           |
+| **B. Personal information as defined in the California Customer Records statute** | Name, contact information, education, employment, employment history, and financial information                                                                                                          | YES           |
+| **C. Protected classification characteristics under state or federal law**        | Gender, age, date of birth, race and ethnicity, national origin, marital status, and other demographic data                                                                                              | NO            |
+| **D. Commercial information**                                                     | Transaction information, purchase history, financial details, and payment information                                                                                                                    | YES           |
+| **E. Biometric information**                                                      | Fingerprints and voiceprints                                                                                                                                                                             | NO            |
+| **F. Internet or other similar network activity**                                 | Browsing history, search history, online behavior, interest data, and interactions with our and other websites, applications, systems, and advertisements                                                | NO            |
+| **G. Geolocation data**                                                           | Device location                                                                                                                                                                                          | NO            |
+| **H. Audio, electronic, sensory, or similar information**                         | Images and audio, video or call recordings created in connection with our business activities                                                                                                            | NO            |
+| **I. Professional or employment-related information**                             | Business contact details in order to provide you our Services at a business level or job title, work history, and professional qualifications if you apply for a job with us                             | NO            |
+| **J. Education Information**                                                      | Student records and directory information                                                                                                                                                                | NO            |
+| **K. Inferences drawn from collected personal information**                       | Inferences drawn from any of the collected personal information listed above to create a profile or summary about, for example, an individual’s preferences and characteristics                          | NO            |
+| **L. Sensitive personal Information**                                             | Account login information, debit or credit card numbers and financial information including account access details                                                                                       | YES           |
+
+We only collect sensitive personal information, as defined by applicable privacy laws or the purposes allowed by law or
+with your consent. Sensitive personal information may be used, or disclosed to a service provider or contractor, for
+additional, specified purposes. You may have the right to limit the use or disclosure of your sensitive personal
+information. We do not collect or process sensitive personal information for the purpose of inferring characteristics
+about you.
+
+We may also collect other personal information outside of these categories through instances where you interact with us
+in person, online, or by phone or mail in the context of:
+
+- Receiving help through our customer support channels;
+- Participation in customer surveys or contests; and
+- Facilitation in the delivery of our Services and to respond to your inquiries.
+
+We will use and retain the collected personal information as needed to provide the Services or for:
+
+- Category A - As long as the user has an account with us
+- Category B - As long as the user has an account with us
+- Category D - As long as the user has an account with us
+- Category L - As long as the user has an account with us
+
+**Sources of Personal Information**
+
+Learn more about the sources of personal information we collect in "[What Information Do We
+Collect?](#1-what-information-do-we-collect)"
+
+**How We Use and Share Personal Information**
+
+Learn more about how we use your personal information in the section, "[How Do We Process Your
+Information?](#2-how-do-we-process-your-information)"
+
+**Will your information be shared with anyone else?**
+
+We may disclose your personal information with our service providers pursuant to a written contract between us and each
+service provider. Learn more about how we disclose personal information to in the section, "[When and With Whom Do We
+Share Your Personal Information?](#3-when-and-with-whom-do-we-share-your-personal-information)"
+
+We may use your personal information for our own business purposes, such as for undertaking internal research for
+technological development. This is not considered to be "selling" of your personal information.
+
+We have not disclosed, sold, or shared any personal information to third parties for a business or commercial purpose in
+the preceding twelve (12) months. We will not sell or share personal information in the future belonging to website
+visitors, users, and other consumers.
+
+**Your Rights**
+
+You have rights under certain US state data protection laws. However, these rights are not absolute, and in certain
+cases, we may decline your request as permitted by law. These rights include:
+
+- **Right to know** whether or not we are processing your personal data
+- **Right to access** your personal data
+- **Right to correct** inaccuracies in your personal data
+- **Right to request** the deletion of your personal data
+- **Right to obtain a copy** of the personal data you previously shared with us
+- **Right to non-discrimination** for exercising your rights
+- **Right to opt out** of the processing of your personal data if it is used for targeted advertising (or sharing as
+  defined under California’s privacy law), the sale of personal data, or profiling in furtherance of decisions that
+  produce legal or similarly significant effects ("profiling")
+
+Depending upon the state where you live, you may also have the following rights:
+
+- Right to access the categories of personal data being processed (as permitted by applicable law, including
+  Minnesota’s privacy law)
+- Right to obtain a list of the categories of third parties to which we have disclosed personal data (as permitted by
+  applicable law, including California's and Delaware's privacy law)
+- Right to obtain a list of specific third parties to which we have disclosed personal data (as permitted by
+  applicable law, including Minnesota's and Oregon's privacy law)
+- Right to review, understand, question, and correct how personal data has been profiled (as permitted by applicable
+  law, including Minnesota’s privacy law)
+- Right to limit use and disclosure of sensitive personal data (as permitted by applicable law, including California’s
+  privacy law)
+- Right to opt out of the collection of sensitive data and personal data collected through the operation of a voice or
+  facial recognition feature (as permitted by applicable law, including Florida’s privacy law)
+
+**How to Exercise Your Rights**
+
+To exercise these rights, you can contact us by visiting [https://monetr.app/contact/](/contact), by emailing us at
+[support@monetr.app](mailto:support@monetr.app), by calling toll-free at (651) 243-0035, or by referring to the contact
+details at the bottom of this document.
+
+Under certain US state data protection laws, you can designate an authorized agent to make a request on your behalf. We
+may deny a request from an authorized agent that does not submit proof that they have been validly authorized to act on
+your behalf in accordance with applicable laws.
+
+**Request Verification**
+
+Upon receiving your request, we will need to verify your identity to determine you are the same person about whom we
+have the information in our system. We will only use personal information provided in your request to verify your
+identity or authority to make the request. However, if we cannot verify your identity from the information already
+maintained by us, we may request that you provide additional information for the purposes of verifying your identity and
+for security or fraud-prevention purposes.
+
+If you submit the request through an authorized agent, we may need to collect additional information to verify your
+identity before processing your request and the agent will need to provide a written and signed permission from you to
+submit such request on your behalf.
+
+**Appeals**
+
+Under certain US state data protection laws, if we decline to take action regarding your request, you may appeal our
+decision by emailing us at [support@monetr.app](mailto:support@monetr.app). We will inform you in writing of any action
+taken or not taken in response to the appeal, including a written explanation of the reasons for the decisions. If your
+appeal is denied, you may submit a complaint to your state attorney general.
+
+**California "Shine The Light" Law**
+
+California Civil Code Section 1798.83, also known as the "Shine The Light" law, permits our users who are California
+residents to request and obtain from us, once a year and free of charge, information about categories of personal
+information (if any) we disclosed to third parties for direct marketing purposes and the names and addresses of all
+third parties with which we shared personal information in the immediately preceding calendar year. If you are a
+California resident and would like to make such a request, please submit your request in writing to us by using the
+contact details provided in the section "[How Can You Contact Us About This
+Notice?](#12-how-can-you-contact-us-about-this-notice)"
+
+## 11. Do We Make Updates To This Notice?
+
+_**In Short:** Yes, we will update this notice as necessary to stay compliant with relevant laws._
+
+We may update this Privacy Notice from time to time. The updated version will be indicated by an updated "Revised" date
+at the top of this Privacy Notice. If we make material changes to this Privacy Notice, we may notify you either by
+prominently posting a notice of such changes or by directly sending you a notification. We encourage you to review this
+Privacy Notice frequently to be informed of how we are protecting your information.
+
+## 12. How Can You Contact Us About This Notice?
+
+If you have questions or comments about this notice, you may email us at
+[support@monetr.app](mailto:support@monetr.app):
+
+## 13. How Can You Review, Update, Or Delete The Data We Collect From You?
+
+You have the right to request access to the personal information we collect from you, details about how we have
+processed it, correct inaccuracies, or delete your personal information. You may also have the right to withdraw your
+consent to our processing of your personal information. These rights may be limited in some circumstances by applicable
+law. To request to review, update, or delete your personal information, please visit:
+[https://monetr.app/contact/](/contact).
+
