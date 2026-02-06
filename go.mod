@@ -28,7 +28,7 @@ require (
 	github.com/mileusna/useragent v1.3.5
 	github.com/monetr/validation v1.0.5
 	github.com/oklog/ulid/v2 v2.1.1
-	github.com/openbao/openbao/api/v2 v2.5.0
+	github.com/openbao/openbao/api/v2 v2.5.1
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v30 v30.0.0
 	github.com/prometheus/client_golang v1.23.2
@@ -44,7 +44,7 @@ require (
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.47.0
-	golang.org/x/net v0.48.0
+	golang.org/x/net v0.49.0
 	golang.org/x/sys v0.40.0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
