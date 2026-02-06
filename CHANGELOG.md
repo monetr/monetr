@@ -1,5 +1,49 @@
 # Changelog
 
+## [1.9.1](https://github.com/monetr/monetr/compare/v1.9.0...v1.9.1) (2026-02-06)
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.41.0 ([#2901](https://github.com/monetr/monetr/issues/2901)) ([335cc4d](https://github.com/monetr/monetr/commit/335cc4d5cdeb50dac58eff2ae3f614f54145aa31))
+* **api:** update module github.com/openbao/openbao/api/v2 to v2.5.1 ([#2919](https://github.com/monetr/monetr/issues/2919)) ([9c75a67](https://github.com/monetr/monetr/commit/9c75a673c1647819e5078e96274c22e726a1a981))
+* **api:** update module github.com/sirupsen/logrus to v1.9.4 ([#2898](https://github.com/monetr/monetr/issues/2898)) ([c45476f](https://github.com/monetr/monetr/commit/c45476f2be105d9f0e89f684cac39872f448d184))
+* **api:** update module golang.org/x/crypto to v0.47.0 ([#2902](https://github.com/monetr/monetr/issues/2902)) ([34f89f9](https://github.com/monetr/monetr/commit/34f89f97e589d9a4295a96d4cc6d0f6176d2cac9))
+* **renovate:** update dependency @biomejs/biome to v2.3.14 ([#2913](https://github.com/monetr/monetr/issues/2913)) ([78a7d7d](https://github.com/monetr/monetr/commit/78a7d7dfeb68d2c4270ac2f8f04eb5e4c75bfd58))
+* **ui:** update dependency @swc/core to v1.15.10 ([#2893](https://github.com/monetr/monetr/issues/2893)) ([8943447](https://github.com/monetr/monetr/commit/89434471fc49a1f8978db9090d1bb1963597aa65))
+* **ui:** update dependency @tanstack/react-query to v5.90.19 ([#2899](https://github.com/monetr/monetr/issues/2899)) ([d87b22e](https://github.com/monetr/monetr/commit/d87b22e694856617c6053ad75a552e849df7014f))
+* **ui:** update dependency @testing-library/react to v16.3.1 ([#2871](https://github.com/monetr/monetr/issues/2871)) ([92a208d](https://github.com/monetr/monetr/commit/92a208d0e451ef3604eff9e00adbfea1841fdf61))
+* **ui:** update dependency lucide-react to v0.562.0 ([#2907](https://github.com/monetr/monetr/issues/2907)) ([1c29d3d](https://github.com/monetr/monetr/commit/1c29d3df49d72ac2b0c6deb96e7b4d9090d94d99))
+* **ui:** update dependency tailwindcss to v3.4.19 ([#2864](https://github.com/monetr/monetr/issues/2864)) ([2efdb3a](https://github.com/monetr/monetr/commit/2efdb3a606a78a838cc856b0db7acef511c9e61e))
+* **ui:** update rsbuild ([#2908](https://github.com/monetr/monetr/issues/2908)) ([e5c84e3](https://github.com/monetr/monetr/commit/e5c84e349b7838d03ff07469150009b3bee7d9fb))
+* **ui:** update sass ([#2900](https://github.com/monetr/monetr/issues/2900)) ([eec82b3](https://github.com/monetr/monetr/commit/eec82b3f736e0072053000150b6bd9a9808412b0))
+* **ui:** update sentry-javascript monorepo to v10.35.0 ([#2909](https://github.com/monetr/monetr/issues/2909)) ([c15681a](https://github.com/monetr/monetr/commit/c15681a7e30d0b89e7d195cacceffe111a84fd24))
+
+
+### Bug Fixes
+
+* **api:** Re-adding fused-multiply-add x86 implementations ([#2911](https://github.com/monetr/monetr/issues/2911)) ([4761174](https://github.com/monetr/monetr/commit/476117479500200ef2652966ff8c638b49b1d0fa)), closes [#2695](https://github.com/monetr/monetr/issues/2695)
+* **ui:** Don't let 1password autofill in combo boxes ([3d1d36d](https://github.com/monetr/monetr/commit/3d1d36d98c6e5bebd2dc13d0ce89d07eae24d9ec))
+* **ui:** Fixed Add transaction button rendering wrong ([c79385b](https://github.com/monetr/monetr/commit/c79385beb6c101120437411658f9baaa70b388ac))
+* **ui:** Fixed bug with select frequency dropdown ([c79385b](https://github.com/monetr/monetr/commit/c79385beb6c101120437411658f9baaa70b388ac))
+* **ui:** Fixed logout button being too close to the bottom ([c79385b](https://github.com/monetr/monetr/commit/c79385beb6c101120437411658f9baaa70b388ac))
+* **ui:** Fixed view height of manual setup wizard ([c79385b](https://github.com/monetr/monetr/commit/c79385beb6c101120437411658f9baaa70b388ac))
+* **ui:** Handle logout with sentry user ([c8fa523](https://github.com/monetr/monetr/commit/c8fa523091b3075b688cd4c9838a6edd2da97aed))
+* **ui:** Several UI improvements and bug fixes ([c79385b](https://github.com/monetr/monetr/commit/c79385beb6c101120437411658f9baaa70b388ac))
+
+
+### Miscellaneous
+
+* **build:** Updating staging container registry ([f4480b9](https://github.com/monetr/monetr/commit/f4480b9753cfa3fb1a07dcc43089db12deb44081))
+* **deps:** Bump diff from 4.0.2 to 4.0.4 ([#2912](https://github.com/monetr/monetr/issues/2912)) ([3b821df](https://github.com/monetr/monetr/commit/3b821df48faa9983541a2ed981d7de47de13bf96))
+* **deps:** Bump next from 15.5.9 to 15.5.10 in /docs ([#2920](https://github.com/monetr/monetr/issues/2920)) ([8b81c67](https://github.com/monetr/monetr/commit/8b81c67c5d4647bb3acaaec42893806dc11d8c32))
+* **ui:** Lint link create file ([cee0d34](https://github.com/monetr/monetr/commit/cee0d342913e6b62d99b0360497d3b5587222473))
+
+
+### Documentation
+
+* Remove outdated documentation ([d84b70d](https://github.com/monetr/monetr/commit/d84b70d07145f0b8bafab8293fb95d00d6c6b2f2))
+
 ## [1.9.0](https://github.com/monetr/monetr/compare/v1.8.3...v1.9.0) (2026-01-13)
 
 
