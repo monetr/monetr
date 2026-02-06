@@ -109,6 +109,7 @@ add_custom_command(
     build.interface
     build.email
     sourcemaps.golang
+    download.cldr-json
 )
 
 if(BUILD_SIMPLE_ICONS)
