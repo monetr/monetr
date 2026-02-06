@@ -253,8 +253,8 @@ importers:
         version: 1.1.2(@types/react-dom@18.3.7(@types/react@18.3.26))(@types/react@18.3.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@imagemagick/magick-wasm':
-        specifier: 0.0.37
-        version: 0.0.37
+        specifier: 0.0.38
+        version: 0.0.38
       '@rsbuild/core':
         specifier: 1.7.2
         version: 1.7.2
@@ -965,8 +965,8 @@ packages:
   '@iconify/utils@2.1.33':
     resolution: {integrity: sha512-jP9h6v/g0BIZx0p7XGJJVtkVnydtbgTgt9mVNcGDYwaa7UhdHdI9dvoq+gKj9sijMSJKxUPEG2JyjsgXjxL7Kw==}
 
-  '@imagemagick/magick-wasm@0.0.37':
-    resolution: {integrity: sha512-tVs9hcWu9u7I3Jz/XvUYVvCEniuxAR+JjZEzI+yKtQmYAtNsLF1WjoH1HZGCKPumaB9jAHZlcf2RGT9+1l3nxQ==}
+  '@imagemagick/magick-wasm@0.0.38':
+    resolution: {integrity: sha512-xg3q6ZMqUADyyy0h/1IndT9DUWUXY5lRhevF2WB+AYvphJ5yraH+R0IGO7H7DFnLSMrJ6zsxEbXfOnhNfark9w==}
 
   '@img/sharp-darwin-arm64@0.34.3':
     resolution: {integrity: sha512-ryFMfvxxpQRsgZJqBd4wsttYQbCxsJksrv9Lw/v798JcQ8+w84mBWuXwl+TT0WJ/WrYOLaYpwQXi3sA9nTIaIg==}
@@ -4011,11 +4011,13 @@ packages:
 
   glob@10.4.5:
     resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@11.0.3:
     resolution: {integrity: sha512-2Nim7dha1KVkaiF4q6Dj+ngPPMdfvLJEOpZk/jKiUAkqKebpGAWQXAq9z1xu9HKu5lWfqw/FASuccEjyznjPaA==}
     engines: {node: 20 || >=22}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@13.0.0:
@@ -4024,7 +4026,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   globby@11.1.0:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
@@ -7600,7 +7602,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@imagemagick/magick-wasm@0.0.37': {}
+  '@imagemagick/magick-wasm@0.0.38': {}
 
   '@img/sharp-darwin-arm64@0.34.3':
     optionalDependencies:
