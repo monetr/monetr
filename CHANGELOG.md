@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.9.2](https://github.com/monetr/monetr/compare/v1.9.1...v1.9.2) (2026-02-07)
+
+
+### Dependencies
+
+* **ui:** update dependency @imagemagick/magick-wasm to v0.0.38 ([#2921](https://github.com/monetr/monetr/issues/2921)) ([5a3a99c](https://github.com/monetr/monetr/commit/5a3a99ce98167555043bb8f673e4bb1727997359))
+
+
+### Bug Fixes
+
+* **ui:** Fixed issue when updating an expense date ([5ed42aa](https://github.com/monetr/monetr/commit/5ed42aaec5121b4215526c05c49339a7d4a93241)), closes [#2918](https://github.com/monetr/monetr/issues/2918)
+
 ## [1.9.1](https://github.com/monetr/monetr/compare/v1.9.0...v1.9.1) (2026-02-06)
 
 
