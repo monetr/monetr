@@ -43,6 +43,9 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
     const found = currentValue ? rules.find(rule => rule.equalSignature(currentValue)) : null;
     if (found) {
       setSelectedSignature(found.signature());
+      formikContext.setFieldValue(props.name, found.ruleString());
+      formikContext.setFieldTouched(props.name, true);
+      formikContext.validateField(props.name);
       return;
     }
 
