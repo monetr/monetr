@@ -44,6 +44,9 @@ import Transactions from '@monetr/interface/pages/transactions';
 import VerifyEmail from '@monetr/interface/pages/verify/email';
 import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
+import LunchFlowSetupPage from '@monetr/interface/pages/setup/lunchflow';
+import LunchFlowSetupIntro from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupIntro';
+import LunchFlowSetupAccounts from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupAccounts';
 
 const RoutesImpl = withSentryReactRouterV6Routing(Routes);
 
@@ -116,6 +119,8 @@ export default function Monetr(): JSX.Element {
         <Route element={<SetupPage manualEnabled={config?.manualEnabled} />} path='/setup' />
         <Route element={<PlaidSetup alreadyOnboarded />} path='/setup/plaid' />
         <Route element={<SetupManualLinkPage />} path='/setup/manual' />
+        <Route element={<LunchFlowSetupIntro />} path='/setup/lunchflow' />
+        <Route element={<LunchFlowSetupAccounts />} path='/setup/lunchflow/:lunchFlowLinkId' />
         <Route element={<OauthReturn />} path='/plaid/oauth-return' />
         <Route element={<Navigate replace to='/setup' />} path='/account/subscribe/after' />
         <Route element={<Navigate replace to='/setup' />} index path='*' />
@@ -150,6 +155,8 @@ export default function Monetr(): JSX.Element {
           <Route element={<LinkCreatePage />} path='/link/create' />
           <Route element={<PlaidSetup alreadyOnboarded />} path='/link/create/plaid' />
           <Route element={<CreateManualLinkPage />} path='/link/create/manual' />
+          <Route element={<LunchFlowSetupPage />} path='/link/create/lunchflow' />
+          <Route element={<LunchFlowSetupPage />} path='/link/create/lunchflow/:lunchFlowLinkId' />
           <Route element={<LogoutPage />} path='/logout' />
           <Route element={<OauthReturn />} path='/plaid/oauth-return' />
           <Route element={<SubscriptionPage />} path='/subscription' />

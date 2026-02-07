@@ -161,9 +161,21 @@ func (m *mergeContext) merge() error {
 				// custom type matching.
 				return errors.Errorf("cannot assign field '%s', source is %s and destination is %s", key, srcValue.Type(), dstField.Type())
 			}
-			value := reflect.New(srcValue.Type())
-			value.Elem().Set(srcValue)
-			dstField.Set(value)
+
+			switch {
+			case dstField.Type().Elem().Kind() == reflect.String:
+				// Special path for assigning string pointers, this way we can handle
+				// custom types as well that just wrap string pointers.
+				value := reflect.New(dstField.Type().Elem())
+				// We already know from the check above that the base kind of each type
+				// is the same. So it is safe to just set this as a string here.
+				value.Elem().SetString(srcValue.String())
+				dstField.Set(value)
+			default:
+				value := reflect.New(srcValue.Type())
+				value.Elem().Set(srcValue)
+				dstField.Set(value)
+			}
 		default:
 			return errors.Errorf("cannot assign field '%s', source is %s and destination is %s", key, srcValue.Type(), dstField.Type())
 		}

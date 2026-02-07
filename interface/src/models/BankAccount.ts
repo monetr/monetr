@@ -50,7 +50,7 @@ export default class BankAccount {
         plaidBankAccount: data?.plaidBankAccount && new PlaidBankAccount(data.plaidBankAccount),
         lastUpdated: parseDate(data?.lastUpdated),
         createdAt: parseDate(data?.createdAt),
-        deletedAt: Boolean(data?.deletedAt) && parseDate(data.deletedAt),
+        deletedAt: parseDate(data?.deletedAt),
       });
     }
   }
