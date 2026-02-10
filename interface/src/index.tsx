@@ -1,5 +1,3 @@
-import '@fontsource-variable/inter';
-
 import React from 'react';
 import { init, reactRouterV6BrowserTracingIntegration, showReportDialog } from '@sentry/react';
 import { createRoutesFromChildren, matchRoutes, useLocation, useNavigationType } from 'react-router-dom';

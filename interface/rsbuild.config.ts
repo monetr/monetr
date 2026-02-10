@@ -81,6 +81,12 @@ export default defineConfig({
       minify: !isDevelopment,
     },
   },
+  performance: {
+    preload: {
+      type: 'all-assets',
+      include: [/\.woff2$/],
+    },
+  },
   output: {
     target: 'web',
     distPath: {
