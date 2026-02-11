@@ -35,7 +35,7 @@
     "@sentry/core": "10.35.0",
     "@sentry/react": "10.35.0",
     "@sentry/utils": "8.55.0",
-    "@tanstack/react-query": "5.90.19",
+    "@tanstack/react-query": "5.90.21",
     "axios": "1.13.5",
     "class-variance-authority": "0.7.1",
     "cmdk": "1.1.1",
