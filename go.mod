@@ -8,6 +8,7 @@ require (
 	aidanwoods.dev/go-paseto v1.6.0
 	github.com/MicahParks/keyfunc v1.9.0
 	github.com/ahmetb/go-linq/v3 v3.2.0
+	github.com/ahmetb/go-linq/v4 v4.0.0
 	github.com/alicebob/miniredis/v2 v2.36.1
 	github.com/aws/aws-sdk-go v1.55.8
 	github.com/benbjohnson/clock v1.3.5
