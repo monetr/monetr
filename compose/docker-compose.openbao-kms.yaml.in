@@ -1,7 +1,7 @@
 # vim: set ft=yaml
 services:
   openbao:
-    image: ghcr.io/openbao/openbao:2.4.4
+    image: ghcr.io/openbao/openbao:2.5.0
     restart: always # If something goes wrong just restart the container, this is for development only.
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80/v1/sys/health || exit 1
@@ -26,7 +26,7 @@ services:
     volumes:
       - "@CMAKE_BINARY_DIR@/development/openbao:/data"
   openbao-bootstrap:
-    image: ghcr.io/openbao/openbao:2.4.4
+    image: ghcr.io/openbao/openbao:2.5.0
     restart: no
     entrypoint: >
       /bin/sh -c "
