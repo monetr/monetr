@@ -189,8 +189,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       downshift:
-        specifier: 9.0.13
-        version: 9.0.13(react@18.3.1)
+        specifier: 9.3.0
+        version: 9.3.0(react@18.3.1)
       formik:
         specifier: 2.4.9
         version: 2.4.9(react@18.3.1)
@@ -3195,6 +3195,9 @@ packages:
   compute-scroll-into-view@3.1.0:
     resolution: {integrity: sha512-rj8l8pD4bJ1nx+dAkMhV1xB5RuZEyVysfxJqB1pRchh1KVvwOv9b7CGB8ZfjTImVv2oF+sYMUkMZq6Na5Ftmbg==}
 
+  compute-scroll-into-view@3.1.1:
+    resolution: {integrity: sha512-VRhuHOLoKYOy4UbilLbUzbYg93XLjv2PncJC50EuTWPA3gaja1UjBsUP/D/9/juV3vQFr6XBEzn9KCAHdUvOHw==}
+
   concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
@@ -3644,8 +3647,8 @@ packages:
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
 
-  downshift@9.0.13:
-    resolution: {integrity: sha512-fPV+K5jwEzfEAhNhprgCmpWQ23MKwKNzdbtK0QQFiw4hbFcKhMeGB+ccorfWJzmsLR5Dty+CmLDduWlIs74G/w==}
+  downshift@9.3.0:
+    resolution: {integrity: sha512-/ZJCU6IudoFEtvbZb5Y2FbZcjxskF8a2w6Fanfz9g6Erl6+yJnkmT4TtFXmPXYU81tVlo/iEwnpW3YODqM7+tA==}
     peerDependencies:
       react: '>=16.12.0'
 
@@ -5737,9 +5740,6 @@ packages:
 
   react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
-
-  react-is@18.2.0:
-    resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
@@ -9886,6 +9886,8 @@ snapshots:
 
   compute-scroll-into-view@3.1.0: {}
 
+  compute-scroll-into-view@3.1.1: {}
+
   concat-map@0.0.1: {}
 
   confbox@0.1.8: {}
@@ -10357,13 +10359,13 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
 
-  downshift@9.0.13(react@18.3.1):
+  downshift@9.3.0(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.28.4
-      compute-scroll-into-view: 3.1.0
+      '@babel/runtime': 7.28.6
+      compute-scroll-into-view: 3.1.1
       prop-types: 15.8.1
       react: 18.3.1
-      react-is: 18.2.0
+      react-is: 18.3.1
       tslib: 2.8.1
 
   dunder-proto@1.0.1:
@@ -13277,8 +13279,6 @@ snapshots:
   react-is@16.13.1: {}
 
   react-is@17.0.2: {}
-
-  react-is@18.2.0: {}
 
   react-is@18.3.1: {}
 
