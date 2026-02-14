@@ -14,7 +14,6 @@ import (
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -132,9 +131,8 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			file := testutils.MustInsert(t, File{
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-part-two.ofx",
-				ContentType: string(storage.IntuitQFXContentType),
+				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
-				BlobUri:     "bogus:///bogus-part-two",
 				CreatedBy:   user.UserId,
 			})
 
@@ -162,11 +160,10 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				store.EXPECT().
 					Read(
 						gomock.Any(),
-						gomock.Eq(file.BlobUri),
+						gomock.Eq(file),
 					).
 					Return(
 						io.NopCloser(bytes.NewReader(sampleFileData)),
-						storage.IntuitQFXContentType,
 						nil,
 					)
 
@@ -226,9 +223,8 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			file := testutils.MustInsert(t, File{
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-part-one.ofx",
-				ContentType: string(storage.IntuitQFXContentType),
+				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
-				BlobUri:     "bogus:///bogus-part-one",
 				CreatedBy:   user.UserId,
 			})
 
@@ -256,11 +252,10 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				store.EXPECT().
 					Read(
 						gomock.Any(),
-						gomock.Eq(file.BlobUri),
+						gomock.Eq(file),
 					).
 					Return(
 						io.NopCloser(bytes.NewReader(sampleFileData)),
-						storage.IntuitQFXContentType,
 						nil,
 					)
 
@@ -317,9 +312,8 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			file := testutils.MustInsert(t, File{
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-no-amount.ofx",
-				ContentType: string(storage.IntuitQFXContentType),
+				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
-				BlobUri:     "bogus:///bogus-part-one",
 				CreatedBy:   user.UserId,
 			})
 
@@ -347,11 +341,10 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				store.EXPECT().
 					Read(
 						gomock.Any(),
-						gomock.Eq(file.BlobUri),
+						gomock.Eq(file),
 					).
 					Return(
 						io.NopCloser(bytes.NewReader(sampleFileData)),
-						storage.IntuitQFXContentType,
 						nil,
 					)
 
@@ -424,9 +417,8 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			file := testutils.MustInsert(t, File{
 				AccountId:   bankAccount.AccountId,
 				Name:        "no-curdef-mxn.ofx",
-				ContentType: string(storage.IntuitQFXContentType),
+				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
-				BlobUri:     "bogus:///bogus-part-one",
 				CreatedBy:   user.UserId,
 			})
 
@@ -454,11 +446,10 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				store.EXPECT().
 					Read(
 						gomock.Any(),
-						gomock.Eq(file.BlobUri),
+						gomock.Eq(file),
 					).
 					Return(
 						io.NopCloser(bytes.NewReader(sampleFileData)),
-						storage.IntuitQFXContentType,
 						nil,
 					)
 

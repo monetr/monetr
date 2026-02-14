@@ -148,9 +148,8 @@ func (j *RemoveFileJob) Run(ctx context.Context) error {
 		return nil
 	}
 
-	log = log.WithField("uri", file.BlobUri)
 	log.Debug("removing file")
-	if err = j.files.Remove(span.Context(), file.BlobUri); err != nil {
+	if err = j.files.Remove(span.Context(), *file); err != nil {
 		log.WithError(err).Error("failed to remove file")
 	}
 
