@@ -14,7 +14,7 @@ import (
 	io "io"
 	reflect "reflect"
 
-	storage "github.com/monetr/monetr/server/storage"
+	models "github.com/monetr/monetr/server/models"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -43,46 +43,44 @@ func (m *MockStorage) EXPECT() *MockStorageMockRecorder {
 }
 
 // Read mocks base method.
-func (m *MockStorage) Read(ctx context.Context, uri string) (io.ReadCloser, storage.ContentType, error) {
+func (m *MockStorage) Read(ctx context.Context, file models.File) (io.ReadCloser, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Read", ctx, uri)
+	ret := m.ctrl.Call(m, "Read", ctx, file)
 	ret0, _ := ret[0].(io.ReadCloser)
-	ret1, _ := ret[1].(storage.ContentType)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Read indicates an expected call of Read.
-func (mr *MockStorageMockRecorder) Read(ctx, uri any) *gomock.Call {
+func (mr *MockStorageMockRecorder) Read(ctx, file any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Read", reflect.TypeOf((*MockStorage)(nil).Read), ctx, uri)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Read", reflect.TypeOf((*MockStorage)(nil).Read), ctx, file)
 }
 
 // Remove mocks base method.
-func (m *MockStorage) Remove(ctx context.Context, uri string) error {
+func (m *MockStorage) Remove(ctx context.Context, file models.File) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Remove", ctx, uri)
+	ret := m.ctrl.Call(m, "Remove", ctx, file)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Remove indicates an expected call of Remove.
-func (mr *MockStorageMockRecorder) Remove(ctx, uri any) *gomock.Call {
+func (mr *MockStorageMockRecorder) Remove(ctx, file any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockStorage)(nil).Remove), ctx, uri)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockStorage)(nil).Remove), ctx, file)
 }
 
 // Store mocks base method.
-func (m *MockStorage) Store(ctx context.Context, buf io.ReadSeekCloser, info storage.FileInfo) (string, error) {
+func (m *MockStorage) Store(ctx context.Context, buf io.ReadSeekCloser, file models.File) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Store", ctx, buf, info)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Store", ctx, buf, file)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Store indicates an expected call of Store.
-func (mr *MockStorageMockRecorder) Store(ctx, buf, info any) *gomock.Call {
+func (mr *MockStorageMockRecorder) Store(ctx, buf, file any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockStorage)(nil).Store), ctx, buf, info)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockStorage)(nil).Store), ctx, buf, file)
 }

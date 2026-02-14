@@ -6,9 +6,10 @@ import (
 
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/monetr/monetr/server/storage"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -30,11 +31,13 @@ func TestPostTransaactionUpload(t *testing.T) {
 			Store(
 				gomock.Any(),
 				gomock.Any(),
-				gomock.Eq(storage.FileInfo{
-					Name:        "transactions.ofx",
-					Kind:        "transactions/uploads",
-					AccountId:   bank.AccountId,
-					ContentType: storage.IntuitQFXContentType,
+				testutils.NewGenericMatcher(func(file models.File) bool {
+					return myownsanity.Every(
+						assert.Equal(t, "transactions.ofx", file.Name),
+						assert.Equal(t, "transactions/uploads", file.Kind),
+						assert.Equal(t, bank.AccountId, file.AccountId),
+						assert.Equal(t, models.IntuitQFXContentType, file.ContentType),
+					)
 				}),
 			).
 			Times(1).
@@ -48,9 +51,10 @@ func TestPostTransaactionUpload(t *testing.T) {
 				gomock.Any(),
 				background.ProcessOFXUpload,
 				testutils.NewGenericMatcher(func(args background.ProcessOFXUploadArguments) bool {
-					a := assert.EqualValues(t, bank.AccountId, args.AccountId, "Account ID should match")
-					b := assert.EqualValues(t, bank.BankAccountId, args.BankAccountId, "Bank Account ID should match")
-					return a && b
+					return myownsanity.Every(
+						assert.EqualValues(t, bank.AccountId, args.AccountId, "Account ID should match"),
+						assert.EqualValues(t, bank.BankAccountId, args.BankAccountId, "Bank Account ID should match"),
+					)
 				}),
 			).
 			Times(1).

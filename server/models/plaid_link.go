@@ -58,7 +58,7 @@ var (
 
 func (o *PlaidLink) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.PlaidLinkId.IsZero() {
-		o.PlaidLinkId = NewID(o)
+		o.PlaidLinkId = NewID[PlaidLink]()
 	}
 
 	now := time.Now()

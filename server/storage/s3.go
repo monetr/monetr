@@ -2,13 +2,12 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"io"
-	"net/url"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -34,24 +33,23 @@ func NewS3StorageBackend(
 func (s *s3Storage) Store(
 	ctx context.Context,
 	buf io.ReadSeekCloser,
-	info FileInfo,
-) (uri string, err error) {
+	file models.File,
+) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	key, err := getStorePath(info)
+	key, err := file.GetStorePath()
 	if err != nil {
-		return "", err
+		return err
 	}
-	uri = fmt.Sprintf("s3://%s/%s", s.bucket, key)
 
 	log := s.log.
 		WithContext(span.Context()).
 		WithFields(logrus.Fields{
-			"destination": uri,
+			"uri": key,
 		})
 
-	span.SetData("destination", uri)
+	span.SetData("destination", key)
 
 	log.Debug("uploading file to S3")
 
@@ -61,60 +59,60 @@ func (s *s3Storage) Store(
 			Body:        buf,
 			Bucket:      &s.bucket,
 			Key:         &key,
-			ContentType: aws.String(string(info.ContentType)),
-			Metadata:    map[string]*string{},
+			ContentType: aws.String(string(file.ContentType)),
+			Metadata: map[string]*string{
+				"fileId":    aws.String(file.FileId.String()),
+				"accountId": aws.String(file.AccountId.String()),
+			},
 		},
 	)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to store file in s3")
-	}
 
-	return uri, nil
+	return errors.Wrap(err, "failed to store file in s3")
 }
 
 func (s *s3Storage) Read(
 	ctx context.Context,
-	uri string,
-) (buf io.ReadCloser, contentType ContentType, err error) {
+	file models.File,
+) (buf io.ReadCloser, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	url, err := url.Parse(uri)
+	key, err := file.GetStorePath()
 	if err != nil {
-		return nil, "", errors.Wrap(err, "failed to parse file uri")
+		return nil, err
 	}
 
 	result, err := s.session.GetObjectWithContext(
 		span.Context(),
 		&s3.GetObjectInput{
-			Bucket: aws.String(url.Host),
-			Key:    aws.String(url.Path),
+			Bucket: aws.String(s.bucket),
+			Key:    aws.String(key),
 		},
 	)
 	if err != nil {
-		return nil, "", errors.Wrap(err, "failed to retrieve object from s3")
+		return nil, errors.Wrap(err, "failed to retrieve object from s3")
 	}
 
-	return result.Body, ContentType(*result.ContentType), nil
+	return result.Body, nil
 }
 
 func (s *s3Storage) Head(
 	ctx context.Context,
-	uri string,
+	file models.File,
 ) (exists bool, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	url, err := url.Parse(uri)
+	key, err := file.GetStorePath()
 	if err != nil {
-		return false, errors.Wrap(err, "failed to parse file uri")
+		return false, err
 	}
 
 	result, err := s.session.HeadObjectWithContext(
 		span.Context(),
 		&s3.HeadObjectInput{
-			Bucket: aws.String(url.Host),
-			Key:    aws.String(url.Path),
+			Bucket: aws.String(s.bucket),
+			Key:    aws.String(key),
 		},
 	)
 	if err != nil {
@@ -126,21 +124,21 @@ func (s *s3Storage) Head(
 
 func (s *s3Storage) Remove(
 	ctx context.Context,
-	uri string,
+	file models.File,
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	url, err := url.Parse(uri)
+	key, err := file.GetStorePath()
 	if err != nil {
-		return errors.Wrap(err, "failed to parse file uri")
+		return err
 	}
 
 	result, err := s.session.DeleteObjectWithContext(
 		span.Context(),
 		&s3.DeleteObjectInput{
-			Bucket: aws.String(url.Host),
-			Key:    aws.String(url.Path),
+			Bucket: aws.String(s.bucket),
+			Key:    aws.String(key),
 		},
 	)
 	if err != nil {
@@ -148,7 +146,7 @@ func (s *s3Storage) Remove(
 	}
 
 	s.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"uri": uri,
+		"uri": key,
 		"s3DeleteResult": logrus.Fields{
 			"deleteMarker":   result.DeleteMarker,
 			"versionId":      result.VersionId,

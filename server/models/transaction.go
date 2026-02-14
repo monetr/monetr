@@ -64,7 +64,7 @@ var (
 
 func (o *Transaction) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.TransactionId.IsZero() {
-		o.TransactionId = NewID(o)
+		o.TransactionId = NewID[Transaction]()
 	}
 
 	now := time.Now()

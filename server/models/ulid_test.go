@@ -4,14 +4,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewID(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		account := Account{}
-		id := NewID(&account)
+		id := NewID[Account]()
 		assert.NotEmpty(t, id, "generated ID must not be empty")
 		assert.True(t, strings.HasPrefix(id.String(), string(AccountIDKind)), "must have the account prefix for this ID")
 		assert.False(t, id.IsZero(), "ID should not be zero")
@@ -53,5 +53,13 @@ func TestParseID(t *testing.T) {
 		assert.EqualError(t, err, "failed to parse ID for models.Account, expected prefix: acct ID: user_abc123")
 		assert.Empty(t, output, "output should be empty when there is an error")
 		assert.True(t, output.IsZero(), "output should be zero with an error")
+	})
+}
+
+func TestIDWithoutPrefix(t *testing.T) {
+	t.Run("will trim prefix properly", func(t *testing.T) {
+		id := models.NewID[models.Account]()
+		prefix := (models.Account{}).IdentityPrefix()
+		assert.NotContains(t, id.WithoutPrefix(), prefix, "should not contain the prefix")
 	})
 }

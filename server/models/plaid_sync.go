@@ -33,7 +33,7 @@ var (
 
 func (o *PlaidSync) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.PlaidSyncId.IsZero() {
-		o.PlaidSyncId = NewID(o)
+		o.PlaidSyncId = NewID[PlaidSync]()
 	}
 
 	return ctx, nil

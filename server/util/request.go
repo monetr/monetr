@@ -25,6 +25,8 @@ func GetRequestID(ctx echo.Context) string {
 		return storedRequestId
 	}
 
+	// TODO Get rid of this and replace it with some kind of middleware or fall
+	// back to ULID generation.
 	id := uuid.New().String()
 	ctx.Set("X-Request-Id", id)
 

@@ -60,7 +60,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 		group := models.TransactionCluster{
 			Members: make([]models.ID[models.Transaction], len(cluster.Items)),
 		}
-		group.TransactionClusterId = models.NewID(&group)
+		group.TransactionClusterId = models.NewID[models.TransactionCluster]()
 
 		mostValuableIndicies := make([]struct {
 			Word         string

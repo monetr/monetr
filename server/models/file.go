@@ -2,11 +2,67 @@ package models
 
 import (
 	"context"
+	"encoding/hex"
+	"hash/fnv"
+	"path"
+	"strings"
 	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
+	"github.com/pkg/errors"
 )
+
+var (
+	ErrInvalidContentType = errors.New("invalid content type")
+)
+
+type ContentType string
+
+const (
+	TextCSVContentType      ContentType = "text/csv"
+	OpenXMLExcelContentType ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	IntuitQFXContentType    ContentType = "application/vnd.intu.QFX"
+	CAMT053ContentType      ContentType = "application/vnd.camt-053" // Not a real content type, but what monetr will use.
+)
+
+var (
+	contentTypeExtensions = map[ContentType][]string{
+		CAMT053ContentType:      {"xml"},
+		IntuitQFXContentType:    {"qfx", "ofx"},
+		OpenXMLExcelContentType: {"xlsx"},
+		TextCSVContentType:      {"csv"},
+	}
+)
+
+func GetExtensionForContentType(contentType ContentType) (string, error) {
+	ext, ok := contentTypeExtensions[contentType]
+	if !ok {
+		return "", errors.WithStack(ErrInvalidContentType)
+	}
+	return ext[0], nil
+}
+
+func GetContentTypeByFilePath(filePath string) (ContentType, error) {
+	extension := strings.TrimPrefix(path.Ext(filePath), ".")
+	// TODO Potential bug here, if we ever have the same extension for two
+	// different content types then we could return either content type for that
+	// extension randomly.
+	for contentType, extensions := range contentTypeExtensions {
+		for _, ext := range extensions {
+			if ext == extension {
+				return contentType, nil
+			}
+		}
+	}
+
+	return "", errors.WithStack(ErrInvalidContentType)
+}
+
+func GetContentTypeIsValid(contentType string) bool {
+	_, ok := contentTypeExtensions[ContentType(contentType)]
+	return ok
+}
 
 type Uploadable interface {
 	// FileKind can be added to a model struct, and indicates that this model can
@@ -30,10 +86,10 @@ type File struct {
 	FileId        ID[File]    `json:"fileId" pg:"file_id,notnull,pk"`
 	AccountId     ID[Account] `json:"-" pg:"account_id,notnull,pk"`
 	Account       *Account    `json:"-" pg:"rel:has-one"`
+	Kind          string      `json:"kind" pg:"kind,notnull"`
 	Name          string      `json:"name" pg:"name,notnull"`
-	ContentType   string      `json:"contentType" pg:"content_type,notnull"`
+	ContentType   ContentType `json:"contentType" pg:"content_type,notnull"`
 	Size          uint64      `json:"size" pg:"size,notnull"`
-	BlobUri       string      `json:"-" pg:"blob_uri,notnull"`
 	CreatedAt     time.Time   `json:"createdAt" pg:"created_at,notnull"`
 	CreatedBy     ID[User]    `json:"createdBy" pg:"created_by,notnull"`
 	CreatedByUser *User       `json:"-" pg:"rel:has-one,fk:created_by"`
@@ -48,7 +104,7 @@ func (File) IdentityPrefix() string {
 
 func (o *File) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.FileId.IsZero() {
-		o.FileId = NewID(o)
+		o.FileId = NewID[File]()
 	}
 
 	now := time.Now()
@@ -57,4 +113,38 @@ func (o *File) BeforeInsert(ctx context.Context) (context.Context, error) {
 	}
 
 	return ctx, nil
+}
+
+func (o *File) GetStorePath() (string, error) {
+	if o.FileId.IsZero() {
+		return "", errors.New("no valid file ID")
+	}
+
+	if o.AccountId.IsZero() {
+		return "", errors.New("no valid account ID")
+	}
+
+	if o.Kind == "" {
+		return "", errors.New("no valid file kind")
+	}
+
+	// Hex gives us a 2 character prefix that we can use in the directory in order
+	// to break files up. This makes some filesystems happier and avoids the
+	// potential of having a single directory with a LOT of folders in in.
+	// But we also want it in its own directory per account ID, so we are breaking
+	// that up as well.
+	accountHex := hex.EncodeToString(fnv.New32().Sum([]byte(o.AccountId)))
+	// Same thing with the file, if one account has a ton of files we want to
+	// break it up a bit. This is kind of future planning where monetr will at
+	// some point support things like transaction attachments and there could
+	// theoretically be multiple attachments per transactions for some users.
+	fileHex := hex.EncodeToString(fnv.New32().Sum([]byte(o.FileId)))
+	return path.Join(
+		"data",
+		o.Kind,
+		accountHex[0:2],
+		o.AccountId.WithoutPrefix(),
+		fileHex[0:2],
+		o.FileId.WithoutPrefix(),
+	), nil
 }

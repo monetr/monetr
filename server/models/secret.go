@@ -38,7 +38,7 @@ var (
 
 func (o *Secret) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.SecretId.IsZero() {
-		o.SecretId = NewID(o)
+		o.SecretId = NewID[Secret]()
 	}
 
 	now := time.Now()

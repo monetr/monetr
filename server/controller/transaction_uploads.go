@@ -10,7 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/background"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/monetr/monetr/server/storage"
 	"golang.org/x/net/websocket"
 )
 
@@ -37,7 +36,8 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 	upload.FileId = file.FileId
 	upload.File = file
 
-	if !strings.EqualFold(file.ContentType, string(storage.IntuitQFXContentType)) {
+	// TODO Just build a content type equal function?
+	if !strings.EqualFold(string(file.ContentType), string(IntuitQFXContentType)) {
 		c.getLog(ctx).
 			WithField("contentType", file.ContentType).
 			Debug("could not create transaction upload because the file is not the expected content type: OFX")

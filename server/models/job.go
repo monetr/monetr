@@ -44,7 +44,7 @@ var (
 
 func (o *Job) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.JobId.IsZero() {
-		o.JobId = NewID(o)
+		o.JobId = NewID[Job]()
 	}
 
 	now := time.Now()

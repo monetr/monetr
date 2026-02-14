@@ -57,7 +57,7 @@ func (TransactionUpload) IdentityPrefix() string {
 
 func (o *TransactionUpload) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.TransactionUploadId.IsZero() {
-		o.TransactionUploadId = NewID(o)
+		o.TransactionUploadId = NewID[TransactionUpload]()
 	}
 
 	now := time.Now()

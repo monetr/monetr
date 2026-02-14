@@ -59,6 +59,11 @@ func (i ID[T]) Kind() Kind {
 	return Kind(prefix)
 }
 
+func (i ID[T]) WithoutPrefix() string {
+	inst := *new(T)
+	return strings.TrimPrefix(i.String(), inst.IdentityPrefix()+"_")
+}
+
 var (
 	entropy     io.Reader
 	entropyOnce sync.Once
@@ -73,11 +78,12 @@ func cryptoEntropy() io.Reader {
 	return entropy
 }
 
-func NewID[T Identifiable](object *T) ID[T] {
+func NewID[T Identifiable]() ID[T] {
+	inst := *new(T)
 	id := ulid.MustNew(ulid.Now(), cryptoEntropy())
 	return ID[T](fmt.Sprintf(
 		"%s_%s",
-		(*object).IdentityPrefix(),
+		inst.IdentityPrefix(),
 		strings.ToLower(id.String()),
 	))
 }

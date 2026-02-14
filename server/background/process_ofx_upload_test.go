@@ -10,6 +10,7 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
@@ -61,9 +62,8 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			file := testutils.MustInsert(t, File{
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-part-one.ofx",
-				ContentType: string(storage.IntuitQFXContentType),
+				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
-				BlobUri:     "bogus:///bogus-part-one",
 				CreatedBy:   user.UserId,
 			})
 
@@ -91,11 +91,10 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				store.EXPECT().
 					Read(
 						gomock.Any(),
-						gomock.Eq(file.BlobUri),
+						gomock.Eq(file),
 					).
 					Return(
 						io.NopCloser(bytes.NewReader(sampleFileData)),
-						storage.IntuitQFXContentType,
 						nil,
 					)
 

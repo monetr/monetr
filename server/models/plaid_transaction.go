@@ -40,7 +40,7 @@ var (
 
 func (o *PlaidTransaction) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.PlaidTransactionId.IsZero() {
-		o.PlaidTransactionId = NewID(o)
+		o.PlaidTransactionId = NewID[PlaidTransaction]()
 	}
 
 	now := time.Now()

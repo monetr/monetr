@@ -27,7 +27,7 @@ var (
 
 func (o *Beta) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.BetaId.IsZero() {
-		o.BetaId = NewID(o)
+		o.BetaId = NewID[Beta]()
 	}
 
 	return ctx, nil

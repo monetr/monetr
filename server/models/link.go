@@ -41,7 +41,7 @@ var (
 
 func (o *Link) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.LinkId.IsZero() {
-		o.LinkId = NewID(o)
+		o.LinkId = NewID[Link]()
 	}
 
 	now := time.Now()
