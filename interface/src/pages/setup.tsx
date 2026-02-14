@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { CircleCheck, Pencil } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
+import Logo from '@monetr/interface/assets/Logo';
 import { Button } from '@monetr/interface/components/Button';
 import Flex, { flexVariants } from '@monetr/interface/components/Flex';
 import { layoutVariants } from '@monetr/interface/components/Layout';
 import LunchFlowLogo from '@monetr/interface/components/Logo/LunchFlowLogo';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
-import MLogo from '@monetr/interface/components/MLogo';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
 import SetupBillingButton from '@monetr/interface/components/setup/SetupBillingButton';
 import Typography from '@monetr/interface/components/Typography';
@@ -95,7 +95,7 @@ function Greeting(props: GreetingProps): JSX.Element {
         layoutVariants({ width: 'full', height: 'full' }),
       )}
     >
-      <MLogo className='w-16 h-16 md:w-24 md:h-24' />
+      <Logo className='size-16 md:size-24' />
       <Banner />
       <Flex gap='lg' justify='center' orientation='stackMedium'>
         <OnboardingTile
