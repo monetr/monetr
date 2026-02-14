@@ -1,5 +1,5 @@
 # vim: set ft=dockerfile
-FROM golang:1.24.8-trixie
+FROM golang:1.26.0-trixie
 RUN apt-get update && apt-get install -y locales-all tzdata
 RUN groupadd -g ${GID:-1000} monetr
 RUN useradd -rm -d /home/monetr -s /bin/bash -g root -g monetr -G sudo -u ${PID:-1000} monetr
