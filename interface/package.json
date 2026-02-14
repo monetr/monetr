@@ -40,7 +40,7 @@
     "class-variance-authority": "0.7.1",
     "cmdk": "1.1.1",
     "date-fns": "4.1.0",
-    "downshift": "9.3.0",
+    "downshift": "9.3.1",
     "formik": "2.4.9",
     "input-otp": "1.4.2",
     "lucide-react": "0.562.0",
