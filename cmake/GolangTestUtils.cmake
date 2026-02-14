@@ -17,58 +17,62 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
       message(STATUS "Preparing tests for: ${PACKAGE}")
 
       string(JSON PACKAGE_TESTS ERROR_VARIABLE _ GET "${GOLANG_TEST_LIST}" "${CMAKE_CURRENT_SOURCE_DIR}")
-      set(PACKAGE_TEST_DIRECTORY ${CMAKE_BINARY_DIR}/tests/${PACKAGE})
-      set(PACKAGE_COVERAGE_DIRECTORY ${PACKAGE_TEST_DIRECTORY}/coverage)
-      file(MAKE_DIRECTORY ${PACKAGE_COVERAGE_DIRECTORY})
-      file(MAKE_DIRECTORY ${PACKAGE_TEST_DIRECTORY})
 
-      # If we are on windows then generate the executable properly
-      if(WIN32)
-        set(PACKAGE_TEST_BINARY ${PACKAGE_TEST_DIRECTORY}/runner.exe)
-      else()
-        set(PACKAGE_TEST_BINARY ${PACKAGE_TEST_DIRECTORY}/runner)
-      endif()
-
-      # Default arguments are basically just "compile a binary from the test package" and "put that binary somewhere".
-      # We stash the binary deep in the cmake binary directory so we can execute it later. We also co-locate test
-      # artifacts with that binary.
-      set(TEST_BINARY_BUILD_ARGS "-c" "-o" "${PACKAGE_TEST_BINARY}")
-      if(TEST_RACE)
-        # If we are doing race testing then we should include this flag on the binary when it is built. This needs to be
-        # done in the build stage and not in the execute stage for Golang.
-        list(PREPEND TEST_BINARY_BUILD_ARGS "-race")
-      endif()
-      if(TEST_COVERAGE)
-        # If we want to have code coverage in our tests then we should add the cover flags to the test binary we are
-        # creating. We also want to make sure to have the coverpkg set because we are collecting coverage from ALL of
-        # monetr. Not just from the package we are currently testing.
-        list(PREPEND TEST_BINARY_BUILD_ARGS "-cover" "-coverpkg=github.com/monetr/monetr/server/...")
-      endif()
-
-      set(TAGS_FLAG)
-      if(TEST_GO_TAGS)
-        set(TAGS_FLAG "-tags=${TEST_GO_TAGS}")
-      endif()
-
-
-      # Then we create a test that compiles the current package into a test binary we can use later.
-      add_test(
-        NAME precompile/${PACKAGE}
-        COMMAND ${CMAKE_Go_COMPILER} test ${TEST_BINARY_BUILD_ARGS} ${TAGS_FLAG}
-        WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
-      )
-      # We make sure that we have our go.mod (basically our dependencies) setup before we do this. We also denote this
-      # test as a fixture setup. The actual tests for this package then depend on this fixture being setup.
-      # TODO Should we do a fixture cleanup to delete this binary afterwards?
-      set_tests_properties(
-        precompile/${PACKAGE}
-        PROPERTIES
-        FIXTURES_REQUIRED go.mod
-        FIXTURES_SETUP ${PACKAGE}
-        RESOURCE_LOCK GO_BUILD_LOCK
-      )
-
+      # Only provision tests for this package if there are actually tests
       if(NOT "${PACKAGE_TESTS}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}-NOTFOUND")
+        message(DEBUG "${PACKAGE_TESTS}")
+
+        set(PACKAGE_TEST_DIRECTORY ${CMAKE_BINARY_DIR}/tests/${PACKAGE})
+        set(PACKAGE_COVERAGE_DIRECTORY ${PACKAGE_TEST_DIRECTORY}/coverage)
+        file(MAKE_DIRECTORY ${PACKAGE_COVERAGE_DIRECTORY})
+        file(MAKE_DIRECTORY ${PACKAGE_TEST_DIRECTORY})
+
+        # If we are on windows then generate the executable properly
+        if(WIN32)
+          set(PACKAGE_TEST_BINARY ${PACKAGE_TEST_DIRECTORY}/runner.exe)
+        else()
+          set(PACKAGE_TEST_BINARY ${PACKAGE_TEST_DIRECTORY}/runner)
+        endif()
+
+        # Default arguments are basically just "compile a binary from the test package" and "put that binary somewhere".
+        # We stash the binary deep in the cmake binary directory so we can execute it later. We also co-locate test
+        # artifacts with that binary.
+        set(TEST_BINARY_BUILD_ARGS "-c" "-o" "${PACKAGE_TEST_BINARY}")
+        if(TEST_RACE)
+          # If we are doing race testing then we should include this flag on the binary when it is built. This needs to be
+          # done in the build stage and not in the execute stage for Golang.
+          list(PREPEND TEST_BINARY_BUILD_ARGS "-race")
+        endif()
+        if(TEST_COVERAGE)
+          # If we want to have code coverage in our tests then we should add the cover flags to the test binary we are
+          # creating. We also want to make sure to have the coverpkg set because we are collecting coverage from ALL of
+          # monetr. Not just from the package we are currently testing.
+          list(PREPEND TEST_BINARY_BUILD_ARGS "-cover" "-coverpkg=github.com/monetr/monetr/server/...")
+        endif()
+
+        set(TAGS_FLAG)
+        if(TEST_GO_TAGS)
+          set(TAGS_FLAG "-tags=${TEST_GO_TAGS}")
+        endif()
+
+
+        # Then we create a test that compiles the current package into a test binary we can use later.
+        add_test(
+          NAME precompile/${PACKAGE}
+          COMMAND ${CMAKE_Go_COMPILER} test ${TEST_BINARY_BUILD_ARGS} ${TAGS_FLAG}
+          WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
+        )
+        # We make sure that we have our go.mod (basically our dependencies) setup before we do this. We also denote this
+        # test as a fixture setup. The actual tests for this package then depend on this fixture being setup.
+        # TODO Should we do a fixture cleanup to delete this binary afterwards?
+        set_tests_properties(
+          precompile/${PACKAGE}
+          PROPERTIES
+          FIXTURES_REQUIRED go.mod
+          FIXTURES_SETUP ${PACKAGE}
+          RESOURCE_LOCK GO_BUILD_LOCK
+        )
+
         # Get the number of tests in our current package.
         string(JSON L LENGTH "${PACKAGE_TESTS}")
         math(EXPR L "${L}-1") # Subtract one because we are 0 indexed.
@@ -145,6 +149,8 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
             PROPERTY LABELS "server"
           )
         endforeach()
+      else()
+        message(STATUS "\tNo tests found for: ${PACKAGE}")
       endif()
     endif()
   endif()

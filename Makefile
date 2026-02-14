@@ -35,7 +35,7 @@ else
 endif
 
 ifdef DEBUG
-	CMAKE_ARGS += --debug-output
+	CMAKE_OPTIONS += --debug-output --log-level=DEBUG
 	BUILD_ARGS += -v
 	CONCURRENCY = 1
 endif
@@ -51,7 +51,7 @@ CMAKE_CONFIGURATION_DIRECTORY=build
 # cmake -S . -B $(CMAKE_CONFIGURATION_DIRECTORY) -G $(GENERATOR) $(CMAKE_OPTIONS) $(CMAKE_ARGS)
 
 .PHONY: $(CMAKE_CONFIGURATION_DIRECTORY)
-$(CMAKE_CONFIGURATION_DIRECTORY): CMakeLists.txt CMakePresets.json
+$(CMAKE_CONFIGURATION_DIRECTORY): CMakeLists.txt CMakePresets.json Makefile
 	cmake --preset $(CMAKE_PRESET) $(CMAKE_OPTIONS)
 
 clean:
@@ -90,7 +90,7 @@ ifdef PATTERN
 PATTERN_ARG=-R $(PATTERN)
 endif
 test:
-	cmake --preset testing
+	cmake --preset testing $(CMAKE_OPTIONS)
 	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure --output-junit $(PWD)$(CMAKE_CONFIGURATION_DIRECTORY)/junit.xml -j $(CONCURRENCY) $(PATTERN_ARG)
 
 lint: | $(CMAKE_CONFIGURATION_DIRECTORY)
