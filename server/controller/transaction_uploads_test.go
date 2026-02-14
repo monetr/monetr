@@ -42,7 +42,6 @@ func TestPostTransaactionUpload(t *testing.T) {
 			).
 			Times(1).
 			Return(
-				"blob:///bogus.ofx",
 				nil,
 			)
 
@@ -94,7 +93,6 @@ func TestPostTransaactionUpload(t *testing.T) {
 			).
 			Times(0).
 			Return(
-				"",
 				nil,
 			)
 
@@ -140,7 +138,6 @@ func TestPostTransaactionUpload(t *testing.T) {
 			).
 			Times(0).
 			Return(
-				"blob:///bogus.ofx",
 				nil,
 			)
 

@@ -61,6 +61,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			file := testutils.MustInsert(t, File{
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-part-one.ofx",
+				Kind:        "transactions/uploads",
 				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
@@ -131,6 +132,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			file := testutils.MustInsert(t, File{
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-part-two.ofx",
+				Kind:        "transactions/uploads",
 				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
@@ -223,6 +225,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			file := testutils.MustInsert(t, File{
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-part-one.ofx",
+				Kind:        "transactions/uploads",
 				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
@@ -312,6 +315,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			file := testutils.MustInsert(t, File{
 				AccountId:   bankAccount.AccountId,
 				Name:        "sample-no-amount.ofx",
+				Kind:        "transactions/uploads",
 				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
@@ -417,6 +421,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			file := testutils.MustInsert(t, File{
 				AccountId:   bankAccount.AccountId,
 				Name:        "no-curdef-mxn.ofx",
+				Kind:        "transactions/uploads",
 				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,

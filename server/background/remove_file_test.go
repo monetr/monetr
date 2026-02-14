@@ -33,6 +33,7 @@ func TestRemoveFileJob_Run(t *testing.T) {
 		file := testutils.MustInsert(t, File{
 			AccountId:   bankAccount.AccountId,
 			Name:        "sample-part-one.ofx",
+			Kind:        "transactions/uploads",
 			ContentType: models.IntuitQFXContentType,
 			Size:        uint64(10),
 			CreatedBy:   user.UserId,

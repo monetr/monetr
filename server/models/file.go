@@ -107,7 +107,8 @@ func (o *File) BeforeInsert(ctx context.Context) (context.Context, error) {
 		o.FileId = NewID[File]()
 	}
 
-	now := time.Now()
+	// Fixes weird bug in tests where the time gets truncated by the database
+	now := time.Now().UTC().Truncate(time.Millisecond)
 	if o.CreatedAt.IsZero() {
 		o.CreatedAt = now
 	}

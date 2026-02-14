@@ -220,6 +220,7 @@ func TestJobRepository_GetAccountsWithTooManyFiles(t *testing.T) {
 		for i := 0; i < 100; i++ {
 			testutils.MustDBInsert(t, &File{
 				AccountId:   bankAccount.AccountId,
+				Kind:        "transactions/uploads",
 				Name:        gofakeit.UUID(),
 				ContentType: "text/csv",
 				Size:        100,
