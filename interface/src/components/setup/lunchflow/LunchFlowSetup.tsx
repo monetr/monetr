@@ -1,12 +1,11 @@
+import { useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+
 import LunchFlowSetupAccounts from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupAccounts';
-import LunchFlowSetupIntro, {
-  LunchFlowSetupIntroValues,
-} from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupIntro';
+import LunchFlowSetupIntro from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupIntro';
 import LunchFlowSetupLayout from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupLayout';
 import { LunchFlowSetupSteps } from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSteps';
 import { ViewManager } from '@monetr/interface/components/ViewManager';
-import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 
 interface LunchFlowSetupProps {
   className?: string;
