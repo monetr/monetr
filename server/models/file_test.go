@@ -7,6 +7,31 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGetContentTypeIsValid(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		data := []struct {
+			ContentType string
+			Valid       bool
+		}{
+			{
+				ContentType: "text/csv",
+				Valid:       true,
+			},
+			{
+				ContentType: "application/json",
+				Valid:       false,
+			},
+		}
+		for _, test := range data {
+			assert.Equal(t,
+				models.GetContentTypeIsValid(test.ContentType),
+				test.Valid,
+				"Should match the expectation for whether the content type is valid",
+			)
+		}
+	})
+}
+
 func TestFile_GetStorePath(t *testing.T) {
 	t.Run("will generate a good path", func(t *testing.T) {
 		file := models.File{

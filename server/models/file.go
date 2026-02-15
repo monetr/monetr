@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"hash/fnv"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -34,30 +33,6 @@ var (
 		TextCSVContentType:      {"csv"},
 	}
 )
-
-func GetExtensionForContentType(contentType ContentType) (string, error) {
-	ext, ok := contentTypeExtensions[contentType]
-	if !ok {
-		return "", errors.WithStack(ErrInvalidContentType)
-	}
-	return ext[0], nil
-}
-
-func GetContentTypeByFilePath(filePath string) (ContentType, error) {
-	extension := strings.TrimPrefix(path.Ext(filePath), ".")
-	// TODO Potential bug here, if we ever have the same extension for two
-	// different content types then we could return either content type for that
-	// extension randomly.
-	for contentType, extensions := range contentTypeExtensions {
-		for _, ext := range extensions {
-			if ext == extension {
-				return contentType, nil
-			}
-		}
-	}
-
-	return "", errors.WithStack(ErrInvalidContentType)
-}
 
 func GetContentTypeIsValid(contentType string) bool {
 	_, ok := contentTypeExtensions[ContentType(contentType)]
@@ -108,9 +83,8 @@ func (o *File) BeforeInsert(ctx context.Context) (context.Context, error) {
 	}
 
 	// Fixes weird bug in tests where the time gets truncated by the database
-	now := time.Now().UTC().Truncate(time.Millisecond)
 	if o.CreatedAt.IsZero() {
-		o.CreatedAt = now
+		o.CreatedAt = time.Now()
 	}
 
 	return ctx, nil
