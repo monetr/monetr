@@ -37,6 +37,7 @@ func TestRemoveFileJob_Run(t *testing.T) {
 			ContentType: models.IntuitQFXContentType,
 			Size:        uint64(10),
 			CreatedBy:   user.UserId,
+			CreatedAt:   clock.Now().UTC(),
 		})
 
 		store := mockgen.NewMockStorage(ctrl)

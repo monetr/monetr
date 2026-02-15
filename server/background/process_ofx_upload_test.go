@@ -65,7 +65,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
-				CreatedAt:   clock.Now(),
+				CreatedAt:   clock.Now().UTC(),
 			})
 
 			// Create the file upload record for the job.
@@ -137,7 +137,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
-				CreatedAt:   clock.Now(),
+				CreatedAt:   clock.Now().UTC(),
 			})
 
 			// Create the file upload record for the job.
@@ -231,7 +231,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
-				CreatedAt:   clock.Now(),
+				CreatedAt:   clock.Now().UTC(),
 			})
 
 			// Create the file upload record for the job.
@@ -322,7 +322,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
-				CreatedAt:   clock.Now(),
+				CreatedAt:   clock.Now().UTC(),
 			})
 
 			// Create the file upload record for the job.
@@ -429,7 +429,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				ContentType: models.IntuitQFXContentType,
 				Size:        uint64(len(sampleFileData)),
 				CreatedBy:   user.UserId,
-				CreatedAt:   clock.Now(),
+				CreatedAt:   clock.Now().UTC(),
 			})
 
 			// Create the file upload record for the job.
