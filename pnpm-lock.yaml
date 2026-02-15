@@ -189,8 +189,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       downshift:
-        specifier: 9.3.0
-        version: 9.3.0(react@18.3.1)
+        specifier: 9.3.1
+        version: 9.3.1(react@18.3.1)
       formik:
         specifier: 2.4.9
         version: 2.4.9(react@18.3.1)
@@ -3192,9 +3192,6 @@ packages:
     resolution: {integrity: sha512-e2i4wANQiSXgnrBlIatyHtP1odfUp0BbV5Y5nEGbxtIrStkEOAAzCUirvLBNXHLr7kwLvJl6V+4V3XV9x7Wd9w==}
     engines: {node: ^12.20.0 || >=14}
 
-  compute-scroll-into-view@3.1.0:
-    resolution: {integrity: sha512-rj8l8pD4bJ1nx+dAkMhV1xB5RuZEyVysfxJqB1pRchh1KVvwOv9b7CGB8ZfjTImVv2oF+sYMUkMZq6Na5Ftmbg==}
-
   compute-scroll-into-view@3.1.1:
     resolution: {integrity: sha512-VRhuHOLoKYOy4UbilLbUzbYg93XLjv2PncJC50EuTWPA3gaja1UjBsUP/D/9/juV3vQFr6XBEzn9KCAHdUvOHw==}
 
@@ -3647,8 +3644,8 @@ packages:
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
 
-  downshift@9.3.0:
-    resolution: {integrity: sha512-/ZJCU6IudoFEtvbZb5Y2FbZcjxskF8a2w6Fanfz9g6Erl6+yJnkmT4TtFXmPXYU81tVlo/iEwnpW3YODqM7+tA==}
+  downshift@9.3.1:
+    resolution: {integrity: sha512-d/Bt/c74+TvG2MJW/xnoN8+zNTc2cYjbZ8yqlMPxmKbvsncJR0sXd4U1eu+JAbeKuwE8AppYRgmjkh4X0Us1hQ==}
     peerDependencies:
       react: '>=16.12.0'
 
@@ -9888,8 +9885,6 @@ snapshots:
 
   commander@9.2.0: {}
 
-  compute-scroll-into-view@3.1.0: {}
-
   compute-scroll-into-view@3.1.1: {}
 
   concat-map@0.0.1: {}
@@ -10363,7 +10358,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
 
-  downshift@9.3.0(react@18.3.1):
+  downshift@9.3.1(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.28.6
       compute-scroll-into-view: 3.1.1
@@ -13918,7 +13913,7 @@ snapshots:
 
   scroll-into-view-if-needed@3.1.0:
     dependencies:
-      compute-scroll-into-view: 3.1.0
+      compute-scroll-into-view: 3.1.1
 
   section-matter@1.0.0:
     dependencies:
