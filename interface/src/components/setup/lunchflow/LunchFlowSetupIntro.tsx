@@ -2,17 +2,17 @@ import { useCallback, useMemo } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useNavigate } from 'react-router-dom';
 
+import { Button } from '@monetr/interface/components/Button';
 import { flexVariants } from '@monetr/interface/components/Flex';
 import FormTextField from '@monetr/interface/components/FormTextField';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import MForm from '@monetr/interface/components/MForm';
-import LunchFlowSetupButtons from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupButtons';
+import LunchFlowSetupLayout from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupLayout';
+import { LunchFlowSetupSteps } from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSteps';
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import LunchFlowLink from '@monetr/interface/models/LunchFlowLink';
 import request from '@monetr/interface/util/request';
-import { LunchFlowSetupSteps } from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSteps';
-import LunchFlowSetupLayout from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupLayout';
-import { Button } from '@monetr/interface/components/Button';
 
 export type LunchFlowSetupIntroValues = {
   name: string;
@@ -75,7 +75,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
         </Typography>
         <FormTextField
           autoFocus
-          className='w-full'
+          className={layoutVariants({ width: 'full' })}
           data-1p-ignore
           label='Budget Name'
           name='name'
@@ -83,7 +83,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           required
         />
         <FormTextField
-          className='w-full'
+          className={layoutVariants({ width: 'full' })}
           data-1p-ignore
           label='API URL'
           name='apiURL'
@@ -91,7 +91,14 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           required
           type='url'
         />
-        <FormTextField className='w-full' data-1p-ignore label='API Secret' name='apiKey' required type='password' />
+        <FormTextField
+          className={layoutVariants({ width: 'full' })}
+          data-1p-ignore
+          label='API Secret'
+          name='apiKey'
+          required
+          type='password'
+        />
         <Button type='submit' variant='primary'>
           Next
         </Button>
