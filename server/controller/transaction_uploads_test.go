@@ -1,6 +1,7 @@
 package controller_test
 
 import (
+	"errors"
 	"net/http"
 	"testing"
 
@@ -71,6 +72,50 @@ func TestPostTransaactionUpload(t *testing.T) {
 		response.JSON().Path("$.bankAccountId").String().IsEqual(bank.BankAccountId.String())
 		response.JSON().Path("$.fileId").String().NotEmpty()
 		response.JSON().Path("$.status").String().IsEqual("pending")
+	})
+
+	t.Run("fails to upload a malformed body", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Seed data
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		app.Storage.EXPECT().
+			Store(
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(0)
+
+		app.Jobs.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				background.ProcessOFXUpload,
+				testutils.NewGenericMatcher(func(args background.ProcessOFXUploadArguments) bool {
+					return myownsanity.Every(
+						assert.EqualValues(t, bank.AccountId, args.AccountId, "Account ID should match"),
+						assert.EqualValues(t, bank.BankAccountId, args.BankAccountId, "Bank Account ID should match"),
+					)
+				}),
+			).
+			Times(0)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions/upload").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithMultipart().
+			WithFileBytes("bogus", "transactions.ofx", fixtures.LoadFile(t, "sample-part-one.ofx")).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Failed to read file upload")
 	})
 
 	t.Run("upload camt.053 to the wrong endpoint", func(t *testing.T) {
@@ -159,5 +204,54 @@ func TestPostTransaactionUpload(t *testing.T) {
 
 		response.Status(http.StatusNotFound)
 		response.JSON().Path("$.error").String().IsEqual("File uploads are not enabled on this server")
+	})
+
+	t.Run("storage failure", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Seed data
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		app.Storage.EXPECT().
+			Store(
+				gomock.Any(),
+				gomock.Any(),
+				testutils.NewGenericMatcher(func(file models.File) bool {
+					return myownsanity.Every(
+						assert.Equal(t, "transactions.ofx", file.Name),
+						assert.Equal(t, "transactions/uploads", file.Kind),
+						assert.Equal(t, bank.AccountId, file.AccountId),
+						assert.Equal(t, models.IntuitQFXContentType, file.ContentType),
+					)
+				}),
+			).
+			Times(1).
+			Return(
+				errors.New("no space available"),
+			)
+
+		app.Jobs.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				background.ProcessOFXUpload,
+				gomock.Any(),
+			).
+			Times(0)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions/upload").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithMultipart().
+			WithFileBytes("data", "transactions.ofx", fixtures.LoadFile(t, "sample-part-one.ofx")).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusInternalServerError)
+		response.JSON().Path("$.error").String().IsEqual("Failed to upload file")
 	})
 }
