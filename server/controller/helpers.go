@@ -2,14 +2,19 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/schema"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
@@ -288,4 +293,37 @@ func (c *Controller) scrubSentryBody(ctx echo.Context) {
 			scope.SetRequestBody(nil)
 		}
 	}
+}
+
+func parseRequest[T any](
+	request echo.Context,
+	requestSchema *jsonschema.Resolved,
+) (*T, *echo.HTTPError) {
+	span := crumbs.StartFnTrace(ctxFromRequest(request))
+	defer span.Finish()
+
+	rawData := map[string]any{}
+	decoder := json.NewDecoder(request.Request().Body)
+	decoder.UseNumber()
+	if err := decoder.Decode(&rawData); err != nil {
+		return nil, echo.NewHTTPError(
+			http.StatusBadRequest,
+			"Invalid JSON body",
+		).WithInternal(errors.WithStack(err))
+	}
+
+	result := new(T)
+	if err := schema.Parse(
+		span.Context(),
+		result,
+		rawData,
+		requestSchema,
+	); err != nil {
+		return nil, echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Sprintf("Invalid request: %v", err),
+		).WithInternal(errors.WithStack(err))
+	}
+
+	return result, nil
 }
