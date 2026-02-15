@@ -96,7 +96,7 @@ var (
 
 func (o *LoginWithHash) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.LoginId.IsZero() {
-		o.LoginId = NewID(&o.Login)
+		o.LoginId = NewID[Login]()
 	}
 
 	return ctx, nil

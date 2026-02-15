@@ -38,7 +38,7 @@ var (
 
 func (o *PlaidBankAccount) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.PlaidBankAccountId.IsZero() {
-		o.PlaidBankAccountId = NewID(o)
+		o.PlaidBankAccountId = NewID[PlaidBankAccount]()
 	}
 
 	now := time.Now()

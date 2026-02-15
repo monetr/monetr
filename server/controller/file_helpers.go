@@ -7,12 +7,15 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/monetr/monetr/server/storage"
 	"github.com/sirupsen/logrus"
 )
 
-func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File, error) {
+func (c *Controller) consumeFileUpload(
+	ctx echo.Context,
+	kind Uploadable,
+) (*File, error) {
 	if !c.Configuration.Storage.Enabled {
 		return nil, c.notFound(ctx, "File uploads are not enabled on this server")
 	}
@@ -23,7 +26,7 @@ func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File
 
 	reader, header, err := ctx.Request().FormFile("data")
 	if err != nil {
-		return nil, c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Failed to read file upload")
+		return nil, c.badRequestError(ctx, err, "Failed to read file upload")
 	}
 	defer reader.Close()
 
@@ -41,12 +44,12 @@ func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File
 		switch extension {
 		case ".qfx", ".ofx":
 			log.Debug("detected OFX file format")
-			contentType = string(storage.IntuitQFXContentType)
+			contentType = string(models.IntuitQFXContentType)
 		default:
 			log.Warn("could not determine file format by file extension")
 		}
 	}
-	valid := storage.GetContentTypeIsValid(contentType)
+	valid := models.GetContentTypeIsValid(contentType)
 	if !valid {
 		crumbs.Debug(c.getContext(ctx),
 			"Unsupported file type was provided!",
@@ -59,31 +62,30 @@ func (c *Controller) consumeFileUpload(ctx echo.Context, kind Uploadable) (*File
 		return nil, c.badRequest(ctx, "Unsupported file type!")
 	}
 
-	fileUri, err := c.FileStorage.Store(
-		c.getContext(ctx),
-		reader,
-		storage.FileInfo{
-			Name:        header.Filename,
-			Kind:        kind.FileKind(),
-			AccountId:   c.mustGetAccountId(ctx),
-			ContentType: storage.ContentType(contentType),
-		},
-	)
-	if err != nil {
-		return nil, c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to upload file")
-	}
-
 	file := File{
-		AccountId:   c.mustGetAccountId(ctx),
 		Name:        header.Filename,
-		ContentType: contentType,
+		Kind:        kind.FileKind(),
+		ContentType: ContentType(contentType),
 		Size:        uint64(header.Size),
-		BlobUri:     fileUri,
 		ExpiresAt:   kind.FileExpiration(c.Clock),
 	}
 
 	if err := repo.CreateFile(c.getContext(ctx), &file); err != nil {
 		return nil, c.wrapPgError(ctx, err, "Failed to create file")
+	}
+
+	err = c.FileStorage.Store(
+		c.getContext(ctx),
+		reader,
+		file,
+	)
+	if err != nil {
+		return nil, c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"Failed to upload file",
+		)
 	}
 
 	return &file, nil

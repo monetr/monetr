@@ -8,9 +8,9 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/storage"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -33,17 +33,18 @@ func TestRemoveFileJob_Run(t *testing.T) {
 		file := testutils.MustInsert(t, File{
 			AccountId:   bankAccount.AccountId,
 			Name:        "sample-part-one.ofx",
-			ContentType: string(storage.IntuitQFXContentType),
+			Kind:        "transactions/uploads",
+			ContentType: models.IntuitQFXContentType,
 			Size:        uint64(10),
-			BlobUri:     "bogus:///bogus-part-one",
 			CreatedBy:   user.UserId,
+			CreatedAt:   clock.Now().UTC(),
 		})
 
 		store := mockgen.NewMockStorage(ctrl)
 		store.EXPECT().
 			Remove(
 				gomock.Any(),
-				gomock.Eq(file.BlobUri),
+				gomock.Eq(file),
 			).
 			Times(1).
 			Return(

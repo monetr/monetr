@@ -722,7 +722,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 	// to do here.
 	if !exists {
 		plaidTransaction := PlaidTransaction{
-			PlaidTransactionId: NewID(&PlaidTransaction{}),
+			PlaidTransactionId: NewID[PlaidTransaction](),
 			AccountId:          link.AccountId,
 			PlaidBankAccountId: plaidBankAccount.PlaidBankAccountId,
 			PlaidId:            input.GetTransactionId(),
@@ -738,7 +738,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 		}
 
 		existingTransaction = Transaction{
-			TransactionId:        NewID(&Transaction{}),
+			TransactionId:        NewID[Transaction](),
 			AccountId:            link.AccountId,
 			BankAccountId:        bankAccount.BankAccountId,
 			Amount:               amount,
@@ -795,7 +795,7 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 	create := existingPlaidTransaction == nil
 	if existingPlaidTransaction == nil {
 		existingPlaidTransaction = &PlaidTransaction{
-			PlaidTransactionId: NewID(&PlaidTransaction{}),
+			PlaidTransactionId: NewID[PlaidTransaction](),
 			AccountId:          link.AccountId,
 			PlaidBankAccountId: plaidBankAccount.PlaidBankAccountId,
 			PlaidId:            input.GetTransactionId(),

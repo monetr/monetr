@@ -2,13 +2,12 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"io"
-	"net/url"
 	"os"
 	"path"
 
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -57,89 +56,81 @@ func NewFilesystemStorage(
 func (f *filesystemStorage) Store(
 	ctx context.Context,
 	buf io.ReadSeekCloser,
-	info FileInfo,
-) (uri string, err error) {
+	file models.File,
+) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	key, err := getStorePath(info)
+	filePath, err := f.getFullPath(file)
 	if err != nil {
-		return "", err
+		return err
 	}
-
-	uri = fmt.Sprintf("file:///%s", key)
-	filePath := path.Join(f.baseDirectory, key)
 	directory := path.Dir(filePath)
 
-	if err := os.MkdirAll(directory, 0755); err != nil {
-		return "", errors.Wrap(err, "failed to create destination directory")
+	if err := os.MkdirAll(directory, filesystemPermissions); err != nil {
+		return errors.Wrap(err, "failed to create destination directory")
 	}
 
 	log := f.log.
 		WithContext(span.Context()).
 		WithFields(logrus.Fields{
-			"destination": uri,
+			"uri": filePath,
 		})
 
-	span.SetData("destination", uri)
+	span.SetData("destination", filePath)
 
 	log.Debug("writing file to filesystem")
 
-	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0755)
+	fd, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, filesystemPermissions)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to open file")
+		return errors.Wrap(err, "failed to open file")
 	}
-	defer file.Close()
+	defer fd.Close()
 
-	_, err = io.Copy(file, buf)
+	_, err = io.Copy(fd, buf)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to copy buffer to file")
+		return errors.Wrap(err, "failed to copy buffer to file")
 	}
-	if err := file.Sync(); err != nil {
-		return "", errors.Wrap(err, "failed to fsync file")
+	if err := fd.Sync(); err != nil {
+		return errors.Wrap(err, "failed to fsync file")
 	}
 
-	return uri, nil
+	return nil
 }
 
+// Read will open a file on the filesystem available to the current process as
+// read only and return it as an io.ReadCloser. If the file cannot be found or
+// opened then an error will be returned.
 func (f *filesystemStorage) Read(
 	ctx context.Context,
-	uri string,
-) (buf io.ReadCloser, contentType ContentType, err error) {
+	file models.File,
+) (buf io.ReadCloser, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	url, err := url.Parse(uri)
+	filePath, err := f.getFullPath(file)
 	if err != nil {
-		return nil, "", errors.Wrap(err, "failed to parse file uri")
+		return nil, err
 	}
-	filePath := path.Join(f.baseDirectory, url.Path)
-
-	contentType, err = getContentTypeByPath(filePath)
+	fd, err := os.OpenFile(filePath, os.O_RDONLY, filesystemPermissions)
 	if err != nil {
-		return nil, "", errors.Wrap(err, "failed to determine content type")
+		return nil, errors.Wrap(err, "failed to open file")
 	}
 
-	file, err := os.OpenFile(filePath, os.O_RDONLY, filesystemPermissions)
-	if err != nil {
-		return nil, "", errors.Wrap(err, "failed to open file")
-	}
-
-	return file, contentType, nil
+	return fd, nil
 }
 
 func (f *filesystemStorage) Head(
 	ctx context.Context,
-	uri string,
+	file models.File,
 ) (exists bool, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	url, err := url.Parse(uri)
+	filePath, err := f.getFullPath(file)
 	if err != nil {
-		return false, errors.Wrap(err, "failed to parse file uri")
+		return false, err
 	}
-	filePath := path.Join(f.baseDirectory, url.Path)
 
 	stat, err := os.Stat(filePath)
 	if err != nil {
@@ -152,25 +143,31 @@ func (f *filesystemStorage) Head(
 
 func (f *filesystemStorage) Remove(
 	ctx context.Context,
-	uri string,
+	file models.File,
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	url, err := url.Parse(uri)
+	filePath, err := f.getFullPath(file)
 	if err != nil {
-		return errors.Wrap(err, "failed to parse file uri")
+		return err
 	}
-
-	filePath := path.Join(f.baseDirectory, url.Path)
-
 	if err := os.Remove(filePath); err != nil {
 		return errors.Wrap(err, "failed to remove file from filesystem")
 	}
 
 	f.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"uri": uri,
+		"uri": filePath,
 	}).Debug("file was removed from storage")
 
 	return nil
+}
+
+func (f *filesystemStorage) getFullPath(file models.File) (string, error) {
+	storedPath, err := file.GetStorePath()
+	if err != nil {
+		return "", errors.Wrap(err, "failed to determine file path")
+	}
+
+	return path.Join(f.baseDirectory, storedPath), nil
 }

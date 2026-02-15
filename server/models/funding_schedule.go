@@ -45,7 +45,7 @@ var (
 
 func (o *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.FundingScheduleId.IsZero() {
-		o.FundingScheduleId = NewID(o)
+		o.FundingScheduleId = NewID[FundingSchedule]()
 	}
 
 	return ctx, nil

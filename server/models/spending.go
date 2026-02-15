@@ -55,7 +55,7 @@ var (
 
 func (o *Spending) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.SpendingId.IsZero() {
-		o.SpendingId = NewID(o)
+		o.SpendingId = NewID[Spending]()
 	}
 
 	now := time.Now()

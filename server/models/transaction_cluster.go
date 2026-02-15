@@ -42,7 +42,7 @@ var (
 
 func (o *TransactionCluster) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.TransactionClusterId.IsZero() {
-		o.TransactionClusterId = NewID(o)
+		o.TransactionClusterId = NewID[TransactionCluster]()
 	}
 
 	now := time.Now()

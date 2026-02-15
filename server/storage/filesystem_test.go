@@ -3,14 +3,13 @@ package storage
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
-	"net/url"
 	"os"
 	"path"
 	"testing"
 
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -35,18 +34,20 @@ func TestFilesystemStorage(t *testing.T) {
 		input := []byte("i am a test string")
 		buf := &bufferWrapper{bytes.NewReader(input)}
 
-		uri, err := fs.Store(context.Background(), buf, FileInfo{
+		file := models.File{
+			FileId:      models.ID[models.File]("file_01kheqbr884scw3wt8v70g95yk"),
+			AccountId:   models.ID[models.Account]("acct_01kheqbr884scw3wt8vacxg1sd"),
 			Name:        "Test file.csv",
-			AccountId:   "acct_123",
-			ContentType: TextCSVContentType,
-		})
+			ContentType: models.TextCSVContentType,
+			Kind:        "transactions/uploads",
+			Size:        100,
+		}
+		err = fs.Store(context.Background(), buf, file)
 		assert.NoError(t, err, "should not have an error storing a file")
-		assert.NotEmpty(t, uri, "should have returned a valid uri")
-		fmt.Println(uri)
 
-		content, contentType, err := fs.Read(context.Background(), uri)
+		content, err := fs.Read(context.Background(), file)
+		defer content.Close()
 		assert.NoError(t, err, "should read file back")
-		assert.Equal(t, TextCSVContentType, contentType, "should have a csv content type")
 		assert.NotNil(t, content, "content buffer should not be nil")
 
 		allContent, err := io.ReadAll(content)
@@ -100,19 +101,15 @@ func TestFilesystemStorageStore(t *testing.T) {
 		fs, err := NewFilesystemStorage(log, tempDir)
 		assert.NoError(t, err, "must not have an error creating the filesystem storage interface")
 
-		uri, err := fs.Store(context.Background(), buf, FileInfo{
-			Name:        "Test file.csv",
-			Kind:        "transaction/uploads",
-			AccountId:   "acct_01jcvdac6dzbrzm1ht90zyt65r",
-			ContentType: TextCSVContentType,
-		})
+		file := models.File{
+			FileId:      models.NewID[models.File](),
+			AccountId:   models.NewID[models.Account](),
+			Kind:        "transactions/upload",
+			Name:        "transactions (10).ofx",
+			ContentType: models.IntuitQFXContentType,
+			Size:        100,
+		}
+		err = fs.Store(context.Background(), buf, file)
 		assert.NoError(t, err, "should be able to store file successfully")
-		assert.NotEmpty(t, uri, "URI returned should not be blank")
-
-		parsed, err := url.Parse(uri)
-		assert.NoError(t, err, "store must return a valid URI")
-		assert.Equal(t, "file", parsed.Scheme, "URI scheme should be file")
-		assert.Empty(t, parsed.Host, "URI host should be empty for filesystem")
-		assert.NotEmpty(t, parsed.Path, "URI path should not be empty")
 	})
 }

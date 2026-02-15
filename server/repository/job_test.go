@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/google/uuid"
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
@@ -220,10 +220,10 @@ func TestJobRepository_GetAccountsWithTooManyFiles(t *testing.T) {
 		for i := 0; i < 100; i++ {
 			testutils.MustDBInsert(t, &File{
 				AccountId:   bankAccount.AccountId,
-				Name:        uuid.NewString(),
+				Kind:        "transactions/uploads",
+				Name:        gofakeit.UUID(),
 				ContentType: "text/csv",
 				Size:        100,
-				BlobUri:     "bogus://temp",
 				CreatedAt:   time.Now(),
 				CreatedBy:   user.UserId,
 			})

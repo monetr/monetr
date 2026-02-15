@@ -137,7 +137,7 @@ func (BankAccount) IdentityPrefix() string {
 
 func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.BankAccountId.IsZero() {
-		o.BankAccountId = NewID(o)
+		o.BankAccountId = NewID[BankAccount]()
 	}
 
 	now := time.Now()

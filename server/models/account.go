@@ -38,7 +38,7 @@ func (Account) IdentityPrefix() string {
 
 func (o *Account) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.AccountId.IsZero() {
-		o.AccountId = NewID(o)
+		o.AccountId = NewID[Account]()
 	}
 
 	now := time.Now()

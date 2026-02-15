@@ -342,7 +342,7 @@ func (j *ProcessOFXUploadJob) loadFile(ctx context.Context) error {
 		return errors.New("cannot import transactions from a deleted file")
 	}
 
-	fileReader, _, err := j.files.Read(span.Context(), file.BlobUri)
+	fileReader, err := j.files.Read(span.Context(), *file)
 	if err != nil {
 		return errors.Wrap(err, "failed to access file from storage")
 	}
@@ -505,7 +505,7 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 		transaction, ok := j.existingTransactions[uploadIdentifier]
 		if !ok {
 			transaction = Transaction{
-				TransactionId:        NewID(&transaction),
+				TransactionId:        NewID[Transaction](),
 				AccountId:            j.args.AccountId,
 				BankAccountId:        j.args.BankAccountId,
 				Amount:               amount,

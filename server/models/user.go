@@ -31,7 +31,7 @@ var (
 
 func (o *User) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.UserId.IsZero() {
-		o.UserId = NewID(o)
+		o.UserId = NewID[User]()
 	}
 
 	return ctx, nil
