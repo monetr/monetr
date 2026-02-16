@@ -86,7 +86,11 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
   // TODO Add an empty state here too!
   return (
     <LunchFlowSetupLayout step={LunchFlowSetupSteps.Accounts}>
-      <MForm className={flexVariants({ orientation: 'column' })} initialValues={initialValues} onSubmit={() => {}}>
+      <MForm
+        className={flexVariants({ orientation: 'column', shrink: 'default' })}
+        initialValues={initialValues}
+        onSubmit={() => {}}
+      >
         <Typography align='center'>
           monetr has found the following accounts in Lunch Flow, please select the accounts you want monetr to import.
         </Typography>
