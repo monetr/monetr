@@ -5,8 +5,8 @@ import LunchFlowSetupAccounts from '@monetr/interface/components/setup/lunchflow
 import LunchFlowSetupIntro from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupIntro';
 import LunchFlowSetupLayout from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupLayout';
 import { LunchFlowSetupSteps } from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSteps';
-import { ViewManager } from '@monetr/interface/components/ViewManager';
 import LunchFlowSetupSync from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSync';
+import { ViewManager } from '@monetr/interface/components/ViewManager';
 
 interface LunchFlowSetupProps {
   className?: string;
