@@ -2,15 +2,14 @@ import { useCallback, useMemo } from 'react';
 import { useFormikContext } from 'formik';
 
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
-import { flexVariants } from '@monetr/interface/components/Flex';
-import { Item } from '@monetr/interface/components/Item';
+import { Item, ItemContent } from '@monetr/interface/components/Item';
 import { Switch } from '@monetr/interface/components/Switch';
 import type { LunchFlowSetupAccountsForm } from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupAccounts';
 import Typography from '@monetr/interface/components/Typography';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import type LunchFlowBankAccount from '@monetr/interface/models/LunchFlowBankAccount';
-import { AmountType } from '@monetr/interface/util/amounts';
 import { LunchFlowBankAccountStatus } from '@monetr/interface/models/LunchFlowBankAccount';
+import { AmountType } from '@monetr/interface/util/amounts';
 
 export interface LunchFlowSetupAccountItemProps {
   data: LunchFlowBankAccount;
@@ -37,24 +36,24 @@ export default function LunchFlowSetupAccountItem(props: LunchFlowSetupAccountIt
   );
 
   return (
-    <li>
-      <Item>
-        <Avatar>
-          <AvatarFallback>{props.data.name.toUpperCase().charAt(0) || '?'}</AvatarFallback>
-        </Avatar>
-        <div className={flexVariants({ flex: 'shrink', orientation: 'column', gap: 'none' })}>
-          <Typography ellipsis weight='medium'>
-            {props.data.institutionName}
-          </Typography>
-          <Typography ellipsis>{props.data.name}</Typography>
-        </div>
+    <Item>
+      <Avatar>
+        <AvatarFallback>{props.data.name.toUpperCase().charAt(0) || '?'}</AvatarFallback>
+      </Avatar>
+      <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
+        <Typography ellipsis weight='medium'>
+          {props.data.institutionName}
+        </Typography>
+        <Typography ellipsis>{props.data.name}</Typography>
+      </ItemContent>
+      <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
         <Typography>{locale.formatAmount(props.data.currentBalance, AmountType.Stored, false)}</Typography>
         <Switch
           checked={checked}
           disabled={props.data.status === LunchFlowBankAccountStatus.Active}
           onCheckedChange={onChange}
         />
-      </Item>
-    </li>
+      </ItemContent>
+    </Item>
   );
 }
