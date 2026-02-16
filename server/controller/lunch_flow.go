@@ -373,7 +373,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 
 	lunchFlowLink := link.LunchFlowLink
 	if lastManualSync := lunchFlowLink.LastManualSync; lastManualSync != nil && lastManualSync.After(c.Clock.Now().Add(-30*time.Minute)) {
-		// return c.returnError(ctx, http.StatusTooEarly, "Link has been manually synced too recently")
+		return c.returnError(ctx, http.StatusTooEarly, "Link has been manually synced too recently")
 	}
 
 	lunchFlowLink.LastManualSync = myownsanity.Pointer(c.Clock.Now())
@@ -458,7 +458,7 @@ func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
 	}
 	defer listener.Close()
 
-	timeout := time.NewTimer(1 * time.Minute)
+	timeout := time.NewTimer(5 * time.Minute)
 	defer timeout.Stop()
 
 	websocket.Handler(func(ws *websocket.Conn) {
@@ -471,10 +471,11 @@ func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
 				log.Warn("exiting Lunch Flow sync progress due to timeout")
 				break ListenerLoop
 			case notification := <-listener.Channel():
-				// TODO Actually parse the notification here and check the status, exit
-				// the loop on a complete or error status.
-				var hack map[string]any
-				if err := json.Unmarshal([]byte(notification.Payload()), &hack); err != nil {
+				var status struct {
+					BankAccountId ID[BankAccount]                `json:"bankAccountId"`
+					Status        background.LunchFlowSyncStatus `json:"status"`
+				}
+				if err := json.Unmarshal([]byte(notification.Payload()), &status); err != nil {
 					log.WithError(err).Warn("failed to unmarshal notification for websocket!")
 					continue
 				}
@@ -482,21 +483,21 @@ func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
 				if err := c.sendWebsocketMessage(
 					ctx,
 					ws,
-					hack,
+					status,
 				); err != nil {
 					log.WithError(err).Warn("failed to send websocket message")
 					return
+				}
+
+				if status.Status == background.LunchFlowSyncStatusComplete ||
+					status.Status == background.LunchFlowSyncStatusError {
+					log.Info("received terminal status for Lunch Flow sync, exiting socket")
+					break ListenerLoop
 				}
 			}
 		}
 
 		log.Debug("finished listening for Lunch Flow sync updates")
-		if err := c.sendWebsocketMessage(ctx, ws, map[string]any{
-			"done": true,
-		}); err != nil {
-			log.WithError(err).Warn("failed to send websocket message")
-			return
-		}
 	}).ServeHTTP(ctx.Response(), ctx.Request())
 
 	return nil
