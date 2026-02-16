@@ -35,6 +35,11 @@ func GetConfig(t *testing.T) config.Configuration {
 			SMTP:   config.SMTPClient{},
 		},
 		ReCAPTCHA: config.ReCAPTCHA{},
+		LunchFlow: config.LunchFlow{
+			// By default lunch flow is enabled in tests, disable it to simulate
+			// alternate behaviors.
+			Enabled: true,
+		},
 		Plaid: config.Plaid{
 			Enabled:      true,
 			ClientID:     gofakeit.UUID(),
