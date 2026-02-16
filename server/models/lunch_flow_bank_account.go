@@ -70,7 +70,7 @@ var (
 
 func (o *LunchFlowBankAccount) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.LunchFlowBankAccountId.IsZero() {
-		o.LunchFlowBankAccountId = NewID(o)
+		o.LunchFlowBankAccountId = NewID[LunchFlowBankAccount]()
 	}
 
 	now := time.Now()

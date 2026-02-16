@@ -36,7 +36,7 @@ var (
 
 func (o *LunchFlowTransaction) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.LunchFlowTransactionId.IsZero() {
-		o.LunchFlowTransactionId = NewID(o)
+		o.LunchFlowTransactionId = NewID[LunchFlowTransaction]()
 	}
 
 	now := time.Now()

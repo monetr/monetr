@@ -64,7 +64,7 @@ var (
 
 func (o *LunchFlowLink) BeforeInsert(ctx context.Context) (context.Context, error) {
 	if o.LunchFlowLinkId.IsZero() {
-		o.LunchFlowLinkId = NewID(o)
+		o.LunchFlowLinkId = NewID[LunchFlowLink]()
 	}
 
 	now := time.Now()

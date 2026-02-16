@@ -2,8 +2,8 @@ import { useCallback, useMemo } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useNavigate } from 'react-router-dom';
 
-import { Button } from '@monetr/interface/components/Button';
 import { flexVariants } from '@monetr/interface/components/Flex';
+import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import { layoutVariants } from '@monetr/interface/components/Layout';
 import MForm from '@monetr/interface/components/MForm';
@@ -99,9 +99,9 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           required
           type='password'
         />
-        <Button type='submit' variant='primary'>
+        <FormButton type='submit' variant='primary'>
           Next
-        </Button>
+        </FormButton>
       </MForm>
     </LunchFlowSetupLayout>
   );
