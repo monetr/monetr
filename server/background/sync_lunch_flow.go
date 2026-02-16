@@ -136,7 +136,7 @@ func (s *SyncLunchFlowHandler) EnqueueTriggeredJob(
 			"linkId":        item.LinkId,
 		})
 
-		// itemLog.Trace("enqueuing bank account to be synced with Lunch Flow")
+		itemLog.Trace("enqueuing bank account to be synced with Lunch Flow")
 
 		err := enqueuer.EnqueueJobTxn(
 			ctx,
@@ -156,7 +156,7 @@ func (s *SyncLunchFlowHandler) EnqueueTriggeredJob(
 			continue
 		}
 
-		// itemLog.Trace("successfully enqueued bank account to be synced with Lunch Flow")
+		itemLog.Trace("successfully enqueued bank account to be synced with Lunch Flow")
 	}
 
 	return nil
@@ -562,7 +562,7 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 			continue
 		}
 		// TODO Handle updating transactions too!
-		// tlog.Trace("transaction from Lunch Flow already exists in monetr, skipping")
+		tlog.Trace("transaction from Lunch Flow already exists in monetr, skipping")
 		continue
 	}
 

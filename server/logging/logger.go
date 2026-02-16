@@ -14,11 +14,11 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 	logger := logrus.New()
 	logger.Out = os.Stderr
 
-	// level, err := logrus.ParseLevel(configuration.Level)
-	// if err != nil {
-	// 	level = logrus.InfoLevel
-	// }
-	logger.SetLevel(logrus.DebugLevel)
+	level, err := logrus.ParseLevel(configuration.Level)
+	if err != nil {
+		level = logrus.InfoLevel
+	}
+	logger.SetLevel(level)
 
 	switch strings.ToLower(configuration.Format) {
 	default:
