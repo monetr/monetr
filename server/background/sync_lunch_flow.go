@@ -518,7 +518,7 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 		transaction, ok := s.existingTransactions[externalTransaction.Id]
 		if !ok {
 			lunchFlowTransaction := LunchFlowTransaction{
-				LunchFlowTransactionId: NewID(&LunchFlowTransaction{}),
+				LunchFlowTransactionId: NewID[LunchFlowTransaction](),
 				AccountId:              s.bankAccount.AccountId,
 				LunchFlowBankAccountId: *s.bankAccount.LunchFlowBankAccountId,
 				LunchFlowId:            externalTransaction.Id,

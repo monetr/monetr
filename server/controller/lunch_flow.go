@@ -12,6 +12,7 @@ import (
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/merge"
@@ -246,6 +247,29 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 	) {
 		if len(joined.Join) == 0 {
 			log.Info("Found Lunch Flow account with no record in monetr, creating")
+
+			log.Debug("requesting balance information first!")
+
+			var currentBalance int64
+			var currencyCode string
+			balance, err := client.GetBalance(c.getContext(ctx), joined.From.Id)
+			if err != nil {
+				log.WithError(err).Warn("failed to retrieve balance information for Lunch Flow account")
+			} else {
+				currencyCode = myownsanity.CoalesceStrings(
+					balance.Currency,
+					joined.From.Currency,
+					consts.DefaultCurrencyCode,
+				)
+				currentBalance, err = currency.ParseCurrency(
+					balance.Amount.String(),
+					currencyCode,
+				)
+				if err != nil {
+					log.WithError(err).Warn("failed to parse account balance, will default to 0")
+				}
+			}
+
 			if err := repo.CreateLunchFlowBankAccount(
 				c.getContext(ctx),
 				&LunchFlowBankAccount{
@@ -256,11 +280,12 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 					InstitutionName: joined.From.InstitutionName,
 					Provider:        joined.From.Provider,
 					Currency: myownsanity.CoalesceStrings(
+						balance.Currency,
 						joined.From.Currency,
 						consts.DefaultCurrencyCode,
 					),
 					Status:         LunchFlowBankAccountStatusInactive,
-					CurrentBalance: 0,
+					CurrentBalance: currentBalance,
 					CreatedBy:      c.mustGetUserId(ctx),
 				},
 			); err != nil {

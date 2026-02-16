@@ -1,6 +1,7 @@
-import request from '@monetr/interface/util/request';
-import { UseMutateFunction, useMutation, UseMutationResult } from '@tanstack/react-query';
+import { type UseMutationResult, useMutation } from '@tanstack/react-query';
 import { HttpStatusCode } from 'axios';
+
+import request from '@monetr/interface/util/request';
 
 export default function useLunchFlowBankAccountsRefresh(): UseMutationResult<string, Error, string, unknown> {
   return useMutation({
