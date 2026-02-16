@@ -17,7 +17,8 @@ require (
 	github.com/getsentry/sentry-go v0.42.0
 	github.com/go-pg/migrations/v8 v8.1.0
 	github.com/go-pg/pg/v10 v10.15.0
-	github.com/golang-jwt/jwt/v4 v4.5.2
+	github.com/golang-jwt/jwt/v4 v4.4.2
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/gomodule/redigo v1.9.3
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/vault/api v1.20.0
