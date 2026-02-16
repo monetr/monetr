@@ -561,7 +561,11 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 
 	channelName := fmt.Sprintf("initial:plaid:link:%s:%s", link.AccountId, link.LinkId)
 
-	listener, err := c.PubSub.Subscribe(c.getContext(ctx), channelName)
+	listener, err := c.PubSub.Subscribe(
+		c.getContext(ctx),
+		link.AccountId,
+		channelName,
+	)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to listen on channel")
 	}
@@ -636,7 +640,7 @@ func (c *Controller) postPlaidLinkSync(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusTooEarly, "link has been manually synced too recently")
 	}
 
-	plaidLink.LastManualSync = myownsanity.TimeP(c.Clock.Now().UTC())
+	plaidLink.LastManualSync = myownsanity.Pointer(c.Clock.Now().UTC())
 	if err := repo.UpdatePlaidLink(c.getContext(ctx), plaidLink); err != nil {
 		return c.wrapPgError(ctx, err, "could not manually sync link")
 	}

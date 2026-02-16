@@ -2,7 +2,6 @@ package billing
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -282,7 +281,7 @@ func (b *baseBilling) UpdateCustomerSubscription(
 	// pass before Stripe has processed the renewal. Causing (usually) around an
 	// hour or more of time where monetr believed the subscription to not be
 	// active anymore.
-	account.SubscriptionActiveUntil = myownsanity.TimeP(
+	account.SubscriptionActiveUntil = myownsanity.Pointer(
 		activeUntil.AddDate(0, 0, SubscriptionPaddingDays),
 	)
 	account.StripeWebhookLatestTimestamp = &timestamp
@@ -295,25 +294,10 @@ func (b *baseBilling) UpdateCustomerSubscription(
 
 	// Check to see if the subscription status of the account has changed with this update to be.
 	if account.IsSubscriptionActive(b.clock.Now()) != currentlyActive {
-		// If it has check to see if it was previously active.
-		updatedChannelName := fmt.Sprintf("account:%s:subscription:updated", account.AccountId)
-		activatedChannelName := fmt.Sprintf("account:%s:subscription:activated", account.AccountId)
-		canceledChannelName := fmt.Sprintf("account:%s:subscription:canceled", account.AccountId)
-
-		if err := b.notify.Notify(span.Context(), updatedChannelName, "0"); err != nil {
-			log.WithError(err).WithField("channel", updatedChannelName).Warn("failed to send updated notification")
-		}
-
 		if currentlyActive {
 			log.Info("account subscription is no longer active")
-			if err := b.notify.Notify(span.Context(), canceledChannelName, "0"); err != nil {
-				log.WithError(err).Warn("failed to send updated notification")
-			}
 		} else {
 			log.Info("account subscription is now active")
-			if err := b.notify.Notify(span.Context(), activatedChannelName, "0"); err != nil {
-				log.WithError(err).Warn("failed to send updated notification")
-			}
 		}
 	}
 

@@ -104,7 +104,7 @@ func (r *repositoryBase) GetTransactionsByLunchFlowId(
 	err := r.txn.ModelContext(span.Context(), &items).
 		Relation("LunchFlowTransaction").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		WhereIn(`"lunchflow_transaction"."lunchflow_id" IN (?)`, lunchFlowIds).
+		WhereIn(`"lunch_flow_transaction"."lunch_flow_id" IN (?)`, lunchFlowIds).
 		Select(&items)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError

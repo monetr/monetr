@@ -136,7 +136,7 @@ func (s *SyncLunchFlowHandler) EnqueueTriggeredJob(
 			"linkId":        item.LinkId,
 		})
 
-		itemLog.Trace("enqueuing bank account to be synced with Lunch Flow")
+		// itemLog.Trace("enqueuing bank account to be synced with Lunch Flow")
 
 		err := enqueuer.EnqueueJobTxn(
 			ctx,
@@ -156,7 +156,7 @@ func (s *SyncLunchFlowHandler) EnqueueTriggeredJob(
 			continue
 		}
 
-		itemLog.Trace("successfully enqueued bank account to be synced with Lunch Flow")
+		// itemLog.Trace("successfully enqueued bank account to be synced with Lunch Flow")
 	}
 
 	return nil
@@ -332,7 +332,12 @@ func (s *SyncLunchFlowJob) progress(ctx context.Context, status LunchFlowSyncSta
 		log.WithError(err).Error("failed to encode progress message")
 		return nil
 	}
-	if err := s.publisher.Notify(ctx, channel, string(j)); err != nil {
+	if err := s.publisher.Notify(
+		ctx,
+		s.args.AccountId,
+		channel,
+		string(j),
+	); err != nil {
 		return errors.Wrap(err, "failed to send progress notification for job")
 	}
 
@@ -500,6 +505,12 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 			fallbackName,
 		)
 
+		description := myownsanity.CoalesceStrings(
+			externalTransaction.Description,
+			externalTransaction.Merchant,
+			fallbackName,
+		)
+
 		date, err := time.ParseInLocation(
 			"2006-01-02",
 			externalTransaction.Date,
@@ -523,7 +534,7 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 				LunchFlowBankAccountId: *s.bankAccount.LunchFlowBankAccountId,
 				LunchFlowId:            externalTransaction.Id,
 				Merchant:               externalTransaction.Merchant,
-				Description:            externalTransaction.Description,
+				Description:            description,
 				Date:                   date,
 				Currency:               externalTransaction.Currency,
 				Amount:                 amount,
@@ -549,7 +560,7 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 			continue
 		}
 		// TODO Handle updating transactions too!
-		tlog.Trace("transaction from Lunch Flow already exists in monetr, skipping")
+		// tlog.Trace("transaction from Lunch Flow already exists in monetr, skipping")
 		continue
 	}
 
@@ -625,9 +636,25 @@ func (s *SyncLunchFlowJob) syncBalances(ctx context.Context) error {
 	account.CurrentBalance = amount
 	account.AvailableBalance = amount
 
-	// TODO UPDATE THE BALANCE ON THE LUNCH FLOW OBJECT TOOOOOO!
 	if err := s.repo.UpdateBankAccount(span.Context(), &account); err != nil {
 		return errors.Wrap(err, "failed to update bank account balances")
+	}
+
+	lunchFlowBankAccount, err := s.repo.GetLunchFlowBankAccount(
+		span.Context(),
+		*account.LunchFlowBankAccountId,
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to read Lunch Flow bank account for balance update")
+	}
+
+	lunchFlowBankAccount.CurrentBalance = amount
+
+	if err := s.repo.UpdateLunchFlowBankAccount(
+		span.Context(),
+		lunchFlowBankAccount,
+	); err != nil {
+		return errors.Wrap(err, "failed to update Lunch Flow bank account balance")
 	}
 
 	return nil

@@ -118,7 +118,11 @@ func (c *Controller) getTransactionUploadProgress(ctx echo.Context) error {
 		"account:%s:transaction_upload:%s:progress",
 		c.mustGetAccountId(ctx), transactionUploadId,
 	)
-	listener, err := c.PubSub.Subscribe(c.getContext(ctx), channel)
+	listener, err := c.PubSub.Subscribe(
+		c.getContext(ctx),
+		c.mustGetAccountId(ctx),
+		channel,
+	)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to subscribe to transaction upload changes")
 	}

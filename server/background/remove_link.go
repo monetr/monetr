@@ -185,7 +185,8 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	lunchFlowLinkIds := r.getLunchFlowLinksToRemove(span.Context())
 
 	r.removeTransactionClusters(span.Context(), bankAccountIds)
-	// TODO Also remove any non-reconciled files
+	// TODO Also remove any non-reconciled files. Really this should also be
+	// calling to files in S3 or the underlying to remove them.
 	r.removeTransactionUploads(span.Context(), bankAccountIds)
 	r.removeTransactions(span.Context(), bankAccountIds)
 	r.removePlaidTransactions(span.Context(), plaidTransactionIds)
@@ -202,7 +203,12 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	r.removeSecrets(span.Context(), secretIds)
 
 	channelName := fmt.Sprintf("link:remove:%s:%s", accountId, linkId)
-	if err = r.publisher.Notify(span.Context(), channelName, "success"); err != nil {
+	if err = r.publisher.Notify(
+		span.Context(),
+		accountId,
+		channelName,
+		"success",
+	); err != nil {
 		log.WithError(err).Warn("failed to send notification about successfully removing link")
 		crumbs.Warn(span.Context(), "failed to send notification about successfully removing link", "pubsub", map[string]any{
 			"error": err.Error(),

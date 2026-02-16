@@ -373,7 +373,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 
 	lunchFlowLink := link.LunchFlowLink
 	if lastManualSync := lunchFlowLink.LastManualSync; lastManualSync != nil && lastManualSync.After(c.Clock.Now().Add(-30*time.Minute)) {
-		return c.returnError(ctx, http.StatusTooEarly, "Link has been manually synced too recently")
+		// return c.returnError(ctx, http.StatusTooEarly, "Link has been manually synced too recently")
 	}
 
 	lunchFlowLink.LastManualSync = myownsanity.Pointer(c.Clock.Now())
@@ -421,7 +421,7 @@ func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
 		return c.badRequest(ctx, "must specify a valid link Id")
 	}
 
-	bankAccountId, err := ParseID[Link](ctx.Param("bankAccountId"))
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
 	if err != nil || bankAccountId.IsZero() {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
@@ -443,7 +443,11 @@ func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
 		"account:%s:link:%s:bank_account:%s:lunch_flow_sync_progress",
 		c.mustGetAccountId(ctx), linkId, bankAccountId,
 	)
-	listener, err := c.PubSub.Subscribe(c.getContext(ctx), channel)
+	listener, err := c.PubSub.Subscribe(
+		c.getContext(ctx),
+		c.mustGetAccountId(ctx),
+		channel,
+	)
 	if err != nil {
 		return c.wrapAndReturnError(
 			ctx,
