@@ -108,7 +108,7 @@ function Greeting(props: GreetingProps): JSX.Element {
         />
         <OnboardingTile
           active={active === 'lunchflow'}
-          description='Connect to EU/UK institutions via Lunch Flow.'
+          description='Connect to EU/UK/Global institutions via Lunch Flow.'
           disabled={!config.lunchFlowEnabled}
           icon={LunchFlowLogo}
           name='Lunch Flow'

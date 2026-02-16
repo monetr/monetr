@@ -1,6 +1,6 @@
 ---
 title: Lunch Flow
-description: Connect to your bank for self-hosted deployments of monetr.
+description: Connect to your EU/UK/Global bank for self-hosted deployments of monetr.
 ---
 
 import { Callout } from 'nextra/components'
@@ -12,10 +12,22 @@ import { Callout } from 'nextra/components'
   Lunch Flow is only supported for **self-hosted** instances of monetr, and is not available on the hosted version.
 </Callout>
 
+<Callout type="info">
+  **Note**  
+  The Lunch Flow integration is currently considered a "beta" integration. There may be bugs and issues with the data
+  connection that lead to unexpected or undesired behaviors. Please report any bugs you have to monetr, though please
+  understand that some bugs may need to be escalated to the Lunch Flow team if the issue is upstream. 
+</Callout>
+
 [Lunch Flow](https://www.lunchflow.app/) allows you to connect your self hosted budgeting applications to your bank
 directly. This way you can automatically get transaction and balance updates directly in your budgeting app. monetr
 supports connecting to Lunch Flow via their API connection.
 
+The benefit of Lunch Flow is that it supports institutions beyond just the United States, instead it supports a wide
+array of global institutions all through the same connection. Lunch Flow also supports investment accounts, however
+monetr does not support this data just yet.
+
+You can see if your specific institution is supported [here](https://www.lunchflow.app/coverage).
 
 ## Setup Instructions
 
@@ -26,3 +38,12 @@ supports connecting to Lunch Flow via their API connection.
 3. Add your bank as a connection
 4. Add an API destination for monetr
 5. Provide API information to monetr
+
+## Nuances
+
+Currently there are a few nuances of the Lunch Flow integration while it is still in beta.
+
+- Pending transactions are not currently synced with monetr.
+- All accounts default to a "checking account" once they are imported into monetr.
+- Only the "current" balance of the account is available at this time.
+

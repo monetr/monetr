@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo } from 'react';
 import type { FormikErrors, FormikHelpers } from 'formik';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { Button } from '@monetr/interface/components/Button';
 import { flexVariants } from '@monetr/interface/components/Flex';
 import FormButton from '@monetr/interface/components/FormButton';
 import MForm from '@monetr/interface/components/MForm';
@@ -17,6 +16,7 @@ import useLunchFlowBankAccountsRefresh from '@monetr/interface/hooks/useLunchFlo
 import { useLunchFlowLink } from '@monetr/interface/hooks/useLunchFlowLink';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import { LunchFlowBankAccountStatus } from '@monetr/interface/models/LunchFlowBankAccount';
+import { LunchFlowLinkStatus } from '@monetr/interface/models/LunchFlowLink';
 
 export interface LunchFlowSetupAccountsForm {
   items: { [key: string]: boolean };
@@ -145,6 +145,15 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
     );
   }
 
+  if (lunchFlowLink.status !== LunchFlowLinkStatus.Pending) {
+    return (
+      <LunchFlowSetupLayout step={LunchFlowSetupSteps.Accounts}>
+        <Typography align='center'>Lunch Flow link is not in a pending status.</Typography>
+        <Typography align='center'>You cannot proceed to setup accounts on this link...</Typography>
+      </LunchFlowSetupLayout>
+    );
+  }
+
   return (
     <LunchFlowSetupLayout step={LunchFlowSetupSteps.Accounts}>
       <MForm
@@ -162,7 +171,6 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
           ))}
         </ul>
         <div className={flexVariants({ justify: 'center' })}>
-          <Button variant='secondary'>Cancel</Button>
           <FormButton type='submit' variant='primary'>
             Continue
           </FormButton>
