@@ -481,6 +481,8 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 			tlog.WithError(err).Error("failed to parse transaction amount")
 			continue
 		}
+		// Invert the amount for monetr!
+		amount *= -1
 
 		fallbackName := fmt.Sprintf(
 			"Transaction %s %s %s",

@@ -6,6 +6,9 @@ import MobileSidebarContextProvider from '@monetr/interface/components/Layout/Mo
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
 import Sidebar from '@monetr/interface/components/Layout/Sidebar';
 import SidebarPaddingLayout from '@monetr/interface/components/Layout/SidebarPaddingLayout';
+import LunchFlowSetupAccounts from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupAccounts';
+import LunchFlowSetupIntro from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupIntro';
+import LunchFlowSetupSync from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSync';
 import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
@@ -44,10 +47,6 @@ import Transactions from '@monetr/interface/pages/transactions';
 import VerifyEmail from '@monetr/interface/pages/verify/email';
 import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
-import LunchFlowSetupPage from '@monetr/interface/pages/setup/lunchflow';
-import LunchFlowSetupIntro from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupIntro';
-import LunchFlowSetupAccounts from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupAccounts';
-import LunchFlowSetupSync from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSync';
 
 const RoutesImpl = withSentryReactRouterV6Routing(Routes);
 
@@ -156,15 +155,15 @@ export default function Monetr(): JSX.Element {
           <Route element={<LinkCreatePage />} path='/link/create' />
           <Route element={<PlaidSetup alreadyOnboarded />} path='/link/create/plaid' />
           <Route element={<CreateManualLinkPage />} path='/link/create/manual' />
-          <Route element={<LunchFlowSetupPage />} path='/link/create/lunchflow' />
-          <Route element={<LunchFlowSetupPage />} path='/link/create/lunchflow/:lunchFlowLinkId' />
+          <Route element={<LunchFlowSetupIntro />} path='/link/create/lunchflow' />
+          <Route element={<LunchFlowSetupAccounts />} path='/link/create/lunchflow/:lunchFlowLinkId' />
+          <Route element={<LunchFlowSetupSync />} path='/link/create/lunchflow/:linkId/sync' />
           <Route element={<LogoutPage />} path='/logout' />
           <Route element={<OauthReturn />} path='/plaid/oauth-return' />
           <Route element={<SubscriptionPage />} path='/subscription' />
           <Route element={<Navigate replace to='/' />} path='/account/subscribe' />
           <Route element={<AfterCheckoutPage />} path='/account/subscribe/after' />
           <Route element={<LunchFlowSetupAccounts />} path='/setup/lunchflow/:lunchFlowLinkId' />
-          <Route element={<LunchFlowSetupSync />} path='/link/:linkId/lunchflow/sync' />
         </Route>
         <Route element={<Navigate replace to='/' />} path='/setup' />
         <Route element={<Navigate replace to='/' />} path='/password/reset' />

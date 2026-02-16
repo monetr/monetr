@@ -473,11 +473,16 @@ func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
 			case notification := <-listener.Channel():
 				// TODO Actually parse the notification here and check the status, exit
 				// the loop on a complete or error status.
+				var hack map[string]any
+				if err := json.Unmarshal([]byte(notification.Payload()), &hack); err != nil {
+					log.WithError(err).Warn("failed to unmarshal notification for websocket!")
+					continue
+				}
 				log.WithField("notification", notification).Debug("received Lunch Flow sync progress notification")
 				if err := c.sendWebsocketMessage(
 					ctx,
 					ws,
-					notification.Payload(),
+					hack,
 				); err != nil {
 					log.WithError(err).Warn("failed to send websocket message")
 					return

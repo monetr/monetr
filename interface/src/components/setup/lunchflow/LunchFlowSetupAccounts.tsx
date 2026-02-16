@@ -78,7 +78,7 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
               ),
           ),
         )
-        .then(accounts => navigate(`/link/${accounts[0].linkId}/lunchflow/sync`))
+        .then(accounts => navigate(`/link/create/lunchflow/${accounts[0].linkId}/sync`))
         .finally(() => helpers.setSubmitting(false));
     },
     [createBankAccount, createLink, lunchFlowAccounts, lunchFlowLink, navigate],

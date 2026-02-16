@@ -1,3 +1,4 @@
+import LunchFlowBankAccount from '@monetr/interface/models/LunchFlowBankAccount';
 import PlaidBankAccount from '@monetr/interface/models/PlaidBankAccount';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -47,12 +48,14 @@ export default class BankAccount {
   deletedAt?: Date;
 
   plaidBankAccount: PlaidBankAccount | null;
+  lunchFlowBankAccount: LunchFlowBankAccount | null;
 
   constructor(data?: Partial<BankAccount>) {
     if (data) {
       Object.assign(this, {
         ...data,
         plaidBankAccount: data?.plaidBankAccount && new PlaidBankAccount(data.plaidBankAccount),
+        lunchFlowBankAccount: data?.lunchFlowBankAccount && new LunchFlowBankAccount(data.lunchFlowBankAccount),
         lastUpdated: parseDate(data?.lastUpdated),
         createdAt: parseDate(data?.createdAt),
         deletedAt: parseDate(data?.deletedAt),

@@ -265,6 +265,7 @@ func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId ID[Ba
 
 	var result Transaction
 	err := r.txn.ModelContext(span.Context(), &result).
+		Relation("LunchFlowTransaction").
 		Relation("PlaidTransaction").
 		Relation("PendingPlaidTransaction").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
