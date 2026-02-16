@@ -9,7 +9,7 @@ export default function FormButton(props: FormButtonProps): JSX.Element {
   const formikContext = useFormikContext();
   props = {
     ...props,
-    disabled: formikContext?.isSubmitting || props?.disabled,
+    disabled: formikContext?.isSubmitting || props?.disabled || !formikContext?.isValid,
     onSubmit: props?.onSubmit || (props.type === 'submit' ? formikContext?.submitForm : undefined),
   };
   return <Button {...props} />;

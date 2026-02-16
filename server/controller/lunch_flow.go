@@ -159,6 +159,7 @@ func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	lunchFlowLink := LunchFlowLink{
+		Name:      request.Name,
 		SecretId:  secret.SecretId,
 		ApiUrl:    request.LunchFlowURL,
 		Status:    LunchFlowLinkStatusPending,

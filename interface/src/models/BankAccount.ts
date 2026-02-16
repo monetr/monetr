@@ -29,6 +29,7 @@ export enum BankAccountSubType {
 export default class BankAccount {
   bankAccountId: string;
   linkId: string;
+  lunchFlowBankAccountId?: string;
   mask?: string;
   name: string;
   originalName: string;
@@ -36,6 +37,10 @@ export default class BankAccount {
   accountType: BankAccountType;
   accountSubType: BankAccountSubType;
   currency: string;
+  // Don't use these fields directly except when creating!
+  currentBalance: number;
+  availableBalance: number;
+  limitBalance?: number;
   lastUpdated: Date;
   createdAt: Date;
   createdBy: string;

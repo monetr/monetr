@@ -25,6 +25,7 @@ export default class Link {
    * This value is generated automatically by the API upon creation, and cannot be changed.
    */
   linkId: string;
+  lunchFlowLinkId?: string;
   linkType: LinkType;
   institutionName: string;
   description: string | null;

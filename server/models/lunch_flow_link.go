@@ -42,6 +42,7 @@ type LunchFlowLink struct {
 	Account              *Account            `json:"-" pg:"rel:has-one"`
 	SecretId             ID[Secret]          `json:"-" pg:"secret_id,notnull"`
 	Secret               *Secret             `json:"-" pg:"rel:has-one"`
+	Name                 string              `json:"name" pg:"name,notnull"`
 	ApiUrl               string              `json:"apiUrl" pg:"api_url,notnull"`
 	Status               LunchFlowLinkStatus `json:"status" pg:"status,notnull"`
 	LastManualSync       *time.Time          `json:"lastManualSync" pg:"last_manual_sync"`

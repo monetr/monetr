@@ -50,7 +50,7 @@ export default function LunchFlowSetupAccountItem(props: LunchFlowSetupAccountIt
         <Typography>{locale.formatAmount(props.data.currentBalance, AmountType.Stored, false)}</Typography>
         <Switch
           checked={checked}
-          disabled={props.data.status === LunchFlowBankAccountStatus.Active}
+          disabled={props.data.status === LunchFlowBankAccountStatus.Active || formik.isSubmitting}
           onCheckedChange={onChange}
         />
       </ItemContent>

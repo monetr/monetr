@@ -9,6 +9,7 @@ export enum LunchFlowLinkStatus {
 
 export default class LunchFlowLink {
   lunchFlowLinkId: string;
+  name: string;
   apiUrl: string;
   status: LunchFlowLinkStatus;
   lastManualSync?: Date;

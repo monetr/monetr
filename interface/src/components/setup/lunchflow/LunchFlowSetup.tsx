@@ -6,6 +6,7 @@ import LunchFlowSetupIntro from '@monetr/interface/components/setup/lunchflow/Lu
 import LunchFlowSetupLayout from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupLayout';
 import { LunchFlowSetupSteps } from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSteps';
 import { ViewManager } from '@monetr/interface/components/ViewManager';
+import LunchFlowSetupSync from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSync';
 
 interface LunchFlowSetupProps {
   className?: string;
@@ -36,7 +37,7 @@ export default function LunchFlowSetup(props: LunchFlowSetupProps): React.JSX.El
       viewComponents={{
         [LunchFlowSetupSteps.Intro]: LunchFlowSetupIntro,
         [LunchFlowSetupSteps.Accounts]: LunchFlowSetupAccounts,
-        [LunchFlowSetupSteps.Sync]: () => <div />,
+        [LunchFlowSetupSteps.Sync]: LunchFlowSetupSync,
       }}
     />
   );

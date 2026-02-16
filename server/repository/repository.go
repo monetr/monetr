@@ -143,6 +143,14 @@ type BaseRepository interface {
 	GetLunchFlowBankAccountsByLunchFlowLink(
 		ctx context.Context, id ID[LunchFlowLink],
 	) ([]LunchFlowBankAccount, error)
+	GetLunchFlowBankAccount(
+		ctx context.Context,
+		id ID[LunchFlowBankAccount],
+	) (*LunchFlowBankAccount, error)
+	UpdateLunchFlowBankAccount(
+		ctx context.Context,
+		bankAccount *LunchFlowBankAccount,
+	) error
 	DeleteLunchFlowBankAccount(
 		ctx context.Context,
 		id ID[LunchFlowBankAccount],

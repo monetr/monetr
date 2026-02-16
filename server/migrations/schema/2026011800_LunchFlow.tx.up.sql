@@ -2,6 +2,7 @@ CREATE TABLE "lunch_flow_links" (
   "lunch_flow_link_id"     VARCHAR(32) NOT NULL,
   "account_id"             VARCHAR(32) NOT NULL,
   "secret_id"              VARCHAR(32) NOT NULL,
+  "name"                   TEXT        NOT NULL,
   "api_url"                TEXT        NOT NULL,
   "status"                 TEXT        NOT NULL,
   "last_manual_sync"       TIMESTAMP WITHOUT TIME ZONE,

@@ -6,6 +6,7 @@ import request from '@monetr/interface/util/request';
 export interface CreateLinkRequest {
   institutionName: string;
   description?: string;
+  lunchFlowLinkId?: string;
 }
 
 export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {

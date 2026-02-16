@@ -5,7 +5,6 @@ import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
-import FormButton from '@monetr/interface/components/FormButton';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useRemoveLink } from '@monetr/interface/hooks/useRemoveLink';
@@ -59,9 +58,9 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
           <Button disabled={submitting} onClick={modal.remove} variant='secondary'>
             Cancel
           </Button>
-          <FormButton disabled={submitting} onClick={submit} type='submit' variant='destructive'>
+          <Button disabled={submitting} onClick={submit} type='submit' variant='destructive'>
             Remove
-          </FormButton>
+          </Button>
         </div>
       </div>
     </MModal>

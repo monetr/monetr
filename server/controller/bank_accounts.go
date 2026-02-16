@@ -149,6 +149,21 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 				},
 			})
 		}
+
+		lunchFlowBankAccount, err := repo.GetLunchFlowBankAccount(
+			c.getContext(ctx),
+			*bankAccount.LunchFlowBankAccountId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow bank account")
+		}
+		lunchFlowBankAccount.Status = LunchFlowBankAccountStatusActive
+		if err := repo.UpdateLunchFlowBankAccount(
+			c.getContext(ctx),
+			lunchFlowBankAccount,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow bank account")
+		}
 	case ManualLinkType:
 	default:
 		// Otherwise if we are not a manual link then we simply don't allow bank
