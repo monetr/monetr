@@ -5,6 +5,7 @@ go 1.26.0
 require (
 	aidanwoods.dev/go-paseto v1.6.0
 	github.com/MicahParks/keyfunc v1.9.0
+	github.com/MicahParks/keyfunc/v3 v3.8.0
 	github.com/ahmetb/go-linq/v3 v3.2.0
 	github.com/alicebob/miniredis/v2 v2.36.1
 	github.com/aws/aws-sdk-go v1.55.8
