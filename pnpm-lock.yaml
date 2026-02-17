@@ -216,8 +216,8 @@ importers:
         specifier: 14.3.8
         version: 14.3.8(react@18.3.1)
       react-google-recaptcha:
-        specifier: 2.1.0
-        version: 2.1.0(react@18.3.1)
+        specifier: 3.1.0
+        version: 3.1.0(react@18.3.1)
       react-infinite-scroll-hook:
         specifier: 4.1.1
         version: 4.1.1(react@18.3.1)
@@ -5717,8 +5717,8 @@ packages:
   react-fast-compare@2.0.4:
     resolution: {integrity: sha512-suNP+J1VU1MWFKcyt7RtjiSWUjvidmQSlqu+eHslq+342xCbGTYmC0mEhPCOHxlW0CywylOC1u2DFAT+bv4dBw==}
 
-  react-google-recaptcha@2.1.0:
-    resolution: {integrity: sha512-K9jr7e0CWFigi8KxC3WPvNqZZ47df2RrMAta6KmRoE4RUi7Ys6NmNjytpXpg4HI/svmQJLKR+PncEPaNJ98DqQ==}
+  react-google-recaptcha@3.1.0:
+    resolution: {integrity: sha512-cYW2/DWas8nEKZGD7SCu9BSuVz8iOcOLHChHyi7upUuVhkpkhYG/6N3KDiTQ3XAiZ2UAZkfvYKMfAHOzBOcGEg==}
     peerDependencies:
       react: '>=16.4.1'
 
@@ -13257,7 +13257,7 @@ snapshots:
 
   react-fast-compare@2.0.4: {}
 
-  react-google-recaptcha@2.1.0(react@18.3.1):
+  react-google-recaptcha@3.1.0(react@18.3.1):
     dependencies:
       prop-types: 15.8.1
       react: 18.3.1
