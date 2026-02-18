@@ -1,6 +1,7 @@
 package mock_lunch_flow
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -87,6 +88,48 @@ func MockFetchAccounts(t *testing.T, accounts []lunch_flow.Account) {
 			return map[string]any{
 				"accounts": accounts,
 				"total":    len(accounts),
+			}, http.StatusOK
+		},
+		LunchFlowHeaders,
+	)
+}
+
+func MockFetchAccountsError(t *testing.T) {
+	mock_http_helper.NewHttpMockJsonResponder(
+		t,
+		"GET", Path(t, "/api/v1/accounts"),
+		func(t *testing.T, request *http.Request) (any, int) {
+			return map[string]any{
+				"error":   "Forbidden",
+				"message": "Invalid API key.",
+			}, http.StatusForbidden
+		},
+		LunchFlowHeaders,
+	)
+}
+
+func MockFetchBalance(
+	t *testing.T,
+	accountId lunch_flow.AccountId,
+	balance lunch_flow.Balance,
+) {
+	mock_http_helper.NewHttpMockJsonResponder(
+		t,
+		"GET", Path(t, fmt.Sprintf("/api/v1/accounts/%s/balance", accountId)),
+		func(t *testing.T, request *http.Request) (any, int) {
+			if token := ValidateLunchFlowAuthentication(
+				t,
+				request,
+				RequireAccessToken,
+			); token == TestInvalidAPIToken {
+				return map[string]any{
+					"error":   "Forbidden",
+					"message": "Invalid API key.",
+				}, http.StatusForbidden
+			}
+
+			return map[string]any{
+				"balance": balance,
 			}, http.StatusOK
 		},
 		LunchFlowHeaders,

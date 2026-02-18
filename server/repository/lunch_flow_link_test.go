@@ -38,6 +38,7 @@ func TestRepositoryBase_CreateLunchFlowLink(t *testing.T) {
 		)
 
 		link := models.LunchFlowLink{
+			Name:      "Testing",
 			SecretId:  secret.SecretId,
 			ApiUrl:    "https://example.com/",
 			Status:    models.LunchFlowLinkStatusActive,
