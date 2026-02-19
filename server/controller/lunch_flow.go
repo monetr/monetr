@@ -502,8 +502,3 @@ func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
 
 	return nil
 }
-
-func (c *Controller) patchLunchFlowLink(ctx echo.Context) error {
-	// TODO
-	return nil
-}

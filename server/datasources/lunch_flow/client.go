@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path"
 	"time"
 
 	"github.com/monetr/monetr/server/crumbs"
@@ -14,7 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const DefaultBaseURL = "https://lunchflow.app/"
+const DefaultBaseURL = "https://lunchflow.app/api/v1"
 
 type AccountId = json.Number
 
@@ -109,9 +110,11 @@ func NewLunchFlowClient(
 	}, nil
 }
 
-func (l *lunchFlowClient) doRequest(ctx context.Context, path string, result any) error {
+func (l *lunchFlowClient) doRequest(ctx context.Context, relativePath string, result any) error {
+	// TODO Write a test to make sure this doesn't fuck up the stored value. It
+	// shouldn't
 	url := l.apiUrl
-	url.Path = path
+	url.Path = path.Join(url.Path, relativePath)
 	requestUrl := url.String()
 	request, err := http.NewRequestWithContext(ctx, "GET", requestUrl, nil)
 	if err != nil {
@@ -146,7 +149,7 @@ func (l *lunchFlowClient) GetAccounts(ctx context.Context) ([]Account, error) {
 	}
 	if err := l.doRequest(
 		span.Context(),
-		"/api/v1/accounts",
+		"/accounts",
 		&result,
 	); err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve accounts from Lunch Flow")
@@ -164,7 +167,7 @@ func (l *lunchFlowClient) GetBalance(ctx context.Context, accountId AccountId) (
 	}
 	if err := l.doRequest(
 		span.Context(),
-		fmt.Sprintf("/api/v1/accounts/%s/balance", accountId),
+		fmt.Sprintf("/accounts/%s/balance", accountId),
 		&result,
 	); err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve account balance from Lunch Flow")
@@ -183,7 +186,7 @@ func (l *lunchFlowClient) GetTransactions(ctx context.Context, accountId Account
 	}
 	if err := l.doRequest(
 		span.Context(),
-		fmt.Sprintf("/api/v1/accounts/%s/transactions", accountId),
+		fmt.Sprintf("/accounts/%s/transactions", accountId),
 		&result,
 	); err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve account transactions from Lunch Flow")

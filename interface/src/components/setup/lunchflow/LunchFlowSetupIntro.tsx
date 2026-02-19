@@ -74,12 +74,13 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           Let us know what you want to call this budget, and what your Lunch Flow API key is.
         </Typography>
         <FormTextField
+          autoComplete='off'
           autoFocus
           className={layoutVariants({ width: 'full' })}
           data-1p-ignore
           label='Budget Name'
           name='name'
-          placeholder='My Primary Bank'
+          placeholder='Lunch Flow'
           required
         />
         <FormTextField
@@ -92,10 +93,12 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           type='url'
         />
         <FormTextField
+          autoComplete='off'
           className={layoutVariants({ width: 'full' })}
           data-1p-ignore
           label='API Secret'
           name='apiKey'
+          placeholder='●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●'
           required
           type='password'
         />
