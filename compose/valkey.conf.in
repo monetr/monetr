@@ -1,0 +1,5 @@
+# Disable the default user
+user default off
+
+# Create a user named monetr with a cmake generated password
+user monetr on >@VALKEY_PASSWORD@ ~* +@all

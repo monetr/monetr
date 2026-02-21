@@ -23,6 +23,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    command:
+      - valkey-server
+      - /etc/valkey/valkey.conf
+    volumes:
+      - "@VALKEY_CONFIG_FILE@:/etc/valkey/valkey.conf"
   postgres:
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
@@ -135,6 +140,8 @@ services:
       MONETR_SENTRY_DSN: "${MONETR_SENTRY_DSN:-@MONETR_SENTRY_DSN@}"
       MONETR_SENTRY_EXTERNAL_DSN: "${MONETR_SENTRY_DSN:-@MONETR_SENTRY_DSN@}"
       MONETR_EMAIL_VERIFICATION_ENABLED: "@MONETR_EMAIL_VERIFICATION_ENABLED@"
+      MONETR_REDIS_USERNAME: "monetr"
+      MONETR_REDIS_PASSWORD: "@VALKEY_PASSWORD@"
       # If vault is the KMS provider then these settings will be used
       MONETR_VAULT_TOKEN: "@VAULT_ROOT_TOKEN@"
       MONETR_STORAGE_ENABLED: "@MONETR_STORAGE_ENABLED@"
