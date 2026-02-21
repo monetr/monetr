@@ -1,5 +1,46 @@
 # Changelog
 
+## [1.10.0](https://github.com/monetr/monetr/compare/v1.9.2...v1.10.0) (2026-02-21)
+
+
+### Features
+
+* **api:** Add support for Redis/Valkey credentials ([#2957](https://github.com/monetr/monetr/issues/2957)) ([14322a1](https://github.com/monetr/monetr/commit/14322a1343e74126cc9254dac0615e8d6f63bbee))
+
+
+### Dependencies
+
+* **api:** update module github.com/alicebob/miniredis/v2 to v2.36.1 ([b1d75aa](https://github.com/monetr/monetr/commit/b1d75aa5a10ca6bff9462ae6a68aed705bbfd325))
+* **api:** update module github.com/getsentry/sentry-go to v0.42.0 ([9541d73](https://github.com/monetr/monetr/commit/9541d73da84f6b39d375cc8138b685ffedb128c9))
+* **api:** update module golang.org/x/crypto to v0.48.0 ([5e41d86](https://github.com/monetr/monetr/commit/5e41d86a805312d0d4e2d33a0f5dbdd4d640245a))
+* **api:** update module golang.org/x/net to v0.50.0 ([faea1b3](https://github.com/monetr/monetr/commit/faea1b3b05bede371cebb9a69c74d64a09298b4e))
+* **api:** Upgrading to Go 1.26.0 ([#2945](https://github.com/monetr/monetr/issues/2945)) ([7261dce](https://github.com/monetr/monetr/commit/7261dcec3f215d5d78aa209bbdf3881011c0fffd))
+* **containers:** update ghcr.io/openbao/openbao docker tag to v2.5.0 ([#2939](https://github.com/monetr/monetr/issues/2939)) ([2795292](https://github.com/monetr/monetr/commit/2795292f8eed6af49b416508d4d2f78b51bdd7e1))
+* **renovate:** update dependency @biomejs/biome to v2.3.15 ([e1afb31](https://github.com/monetr/monetr/commit/e1afb3183aa8988ebae74432aa21e1797bd2e20c))
+* **renovate:** update dependency @biomejs/biome to v2.4.2 ([bc1a0d5](https://github.com/monetr/monetr/commit/bc1a0d5fd6e06dc9cf190bb9e9322d13c13de0aa))
+* **renovate:** update dependency go to v1.26.0 ([#2677](https://github.com/monetr/monetr/issues/2677)) ([01e80e6](https://github.com/monetr/monetr/commit/01e80e6e834780e17475506de964422e8a5eb17a))
+* **renovate:** update module golang.org/x/tools/cmd/stringer to v0.42.0 ([#2906](https://github.com/monetr/monetr/issues/2906)) ([e199e00](https://github.com/monetr/monetr/commit/e199e009270ef879c745cc78f5be012813faec62))
+* **ui:** update dependency @swc/core to v1.15.11 ([#2923](https://github.com/monetr/monetr/issues/2923)) ([0c3c336](https://github.com/monetr/monetr/commit/0c3c336e6d66f7f4d9106d30616ce3e8eec643f9))
+* **ui:** update dependency @tanstack/react-query to v5.90.21 ([12b5d5a](https://github.com/monetr/monetr/commit/12b5d5a2898847bb9dd0370ddbbe5286bfbd3f62))
+* **ui:** update dependency @testing-library/react to v16.3.2 ([c62daf4](https://github.com/monetr/monetr/commit/c62daf40ab09a3d8f6020452b6485536878694d1))
+* **ui:** update dependency autoprefixer to v10.4.24 ([#2872](https://github.com/monetr/monetr/issues/2872)) ([283c0d2](https://github.com/monetr/monetr/commit/283c0d2e2ce3269c5b4340f08ef43284b1fb642f))
+* **ui:** update dependency axios to v1.13.5 [security] ([031085e](https://github.com/monetr/monetr/commit/031085e00f7d7bf2257c153a65bb068e45a17c99))
+* **ui:** update dependency cheerio to v1.2.0 ([#2940](https://github.com/monetr/monetr/issues/2940)) ([1ee90b8](https://github.com/monetr/monetr/commit/1ee90b8b4395f94207185c62112ae8cf50414802))
+* **ui:** update dependency downshift to v9.3.0 ([#2941](https://github.com/monetr/monetr/issues/2941)) ([44bef73](https://github.com/monetr/monetr/commit/44bef7344552b1f021a01e22c60b25680606ba09))
+* **ui:** update dependency downshift to v9.3.1 ([#2946](https://github.com/monetr/monetr/issues/2946)) ([b55cada](https://github.com/monetr/monetr/commit/b55cada4c4d39638a2fd50873386eacadbceeb60))
+* **ui:** update dependency form-data to v4.0.5 ([#2842](https://github.com/monetr/monetr/issues/2842)) ([f66813d](https://github.com/monetr/monetr/commit/f66813d9b4b7115b94f070dcc9e857770fba105c))
+* **ui:** update dependency lucide-react to v0.564.0 ([44856ab](https://github.com/monetr/monetr/commit/44856abddcec6e3d8fcab2b52ab544b944df557b))
+* **ui:** update dependency next to v15.5.10 [security] ([#2915](https://github.com/monetr/monetr/issues/2915)) ([54a720a](https://github.com/monetr/monetr/commit/54a720afc25c9bab593afa2235d7f6714fb518d0))
+* **ui:** update dependency next to v15.5.12 ([0ff23fd](https://github.com/monetr/monetr/commit/0ff23fd0a313420f24f6ee4d5acac99b7caa9d17))
+* **ui:** update sass ([#2948](https://github.com/monetr/monetr/issues/2948)) ([b8fab8f](https://github.com/monetr/monetr/commit/b8fab8fc6ed92375102e681c914cfd8490b7ccb6))
+* **ui:** update sentry-javascript monorepo to v10.38.0 ([#2950](https://github.com/monetr/monetr/issues/2950)) ([ac2b587](https://github.com/monetr/monetr/commit/ac2b5878b8e41321168e5459d1c8449b10033a18))
+* **ui:** update sentry-javascript monorepo to v10.39.0 ([a03bc50](https://github.com/monetr/monetr/commit/a03bc50e11ae0dcf00fff468fa0cec611e014530))
+
+
+### Refactor
+
+* **api:** Refactoring storage code ([#2947](https://github.com/monetr/monetr/issues/2947)) ([9baecca](https://github.com/monetr/monetr/commit/9baecca621bc5b0ed1e98e1b85788003df4c48e5))
+
 ## [1.9.2](https://github.com/monetr/monetr/compare/v1.9.1...v1.9.2) (2026-02-07)
 
 
