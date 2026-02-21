@@ -85,6 +85,14 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		uploadIdentifiers []string,
 	) (map[string]Transaction, error)
+	// GetTransactionsByLunchFlowId is meant to be used by the lunch flow sync
+	// code and will retrieve all of the transactions that already exist in the
+	// database for a given sync.
+	GetTransactionsByLunchFlowId(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		lunchFlowIds []string,
+	) (map[string]Transaction, error)
 
 	// Deprecated: Use GetTransactionsByPlaidId
 	GetTransactionsByPlaidTransactionId(ctx context.Context, linkId ID[Link], plaidTransactionIds []string) ([]Transaction, error)
@@ -124,6 +132,31 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		transactionUpload *TransactionUpload,
 	) error
+
+	CreateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
+	UpdateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
+	DeleteLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) error
+	GetLunchFlowLinks(ctx context.Context) ([]LunchFlowLink, error)
+	GetLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) (*LunchFlowLink, error)
+
+	CreateLunchFlowBankAccount(ctx context.Context, bankAccount *LunchFlowBankAccount) error
+	GetLunchFlowBankAccountsByLunchFlowLink(
+		ctx context.Context, id ID[LunchFlowLink],
+	) ([]LunchFlowBankAccount, error)
+	GetLunchFlowBankAccount(
+		ctx context.Context,
+		id ID[LunchFlowBankAccount],
+	) (*LunchFlowBankAccount, error)
+	UpdateLunchFlowBankAccount(
+		ctx context.Context,
+		bankAccount *LunchFlowBankAccount,
+	) error
+	DeleteLunchFlowBankAccount(
+		ctx context.Context,
+		id ID[LunchFlowBankAccount],
+	) error
+
+	CreateLunchFlowTransactions(ctx context.Context, transaction []LunchFlowTransaction) error
 
 	fileRepositoryInterface
 }

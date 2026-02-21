@@ -53,6 +53,10 @@ func NewSecretsRepository(
 	}
 }
 
+// Store will take a secret that may be existing or may not be. If the ID of the
+// secret is unset then a new secret will be created and an ID will be
+// generated. If the ID is set, then the existing secret in the database will be
+// updated.
 func (b *baseSecretsRepository) Store(ctx context.Context, secret *SecretData) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()

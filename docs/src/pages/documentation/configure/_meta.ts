@@ -1,0 +1,16 @@
+export default {
+  cors: 'CORS',
+  email: 'Email',
+  kms: 'Key Management',
+  links: 'Links',
+  logging: 'Logging',
+  lunch_flow: 'Lunch Flow',
+  plaid: 'Plaid',
+  postgres: 'PostgreSQL',
+  recaptcha: 'ReCAPTCHA',
+  redis: 'Redis',
+  security: 'Security',
+  sentry: 'Sentry',
+  server: 'Server',
+  storage: 'Storage',
+};

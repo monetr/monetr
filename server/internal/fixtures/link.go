@@ -41,7 +41,7 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user User) Link {
 	)
 
 	secret := repository.SecretData{
-		Kind:  PlaidSecretKind,
+		Kind:  SecretKindPlaid,
 		Value: gofakeit.UUID(),
 	}
 	err := secretsRepo.Store(t.Context(), &secret)

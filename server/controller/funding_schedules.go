@@ -83,7 +83,7 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 	case nil:
 		break
 	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse post request")
+		return c.badRequestError(ctx, err, "failed to parse post request")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)

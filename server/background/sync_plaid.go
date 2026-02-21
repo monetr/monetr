@@ -411,7 +411,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 		// If we received nothing to insert/update/remove then do nothing
 		if len(syncData.New)+len(syncData.Updated)+len(syncData.Deleted) == 0 {
-			plaidLink.LastAttemptedUpdate = myownsanity.TimeP(s.clock.Now().UTC())
+			plaidLink.LastAttemptedUpdate = myownsanity.Pointer(s.clock.Now().UTC())
 			if err = s.repo.UpdatePlaidLink(span.Context(), plaidLink); err != nil {
 				log.WithError(err).Error("failed to update link with last attempt timestamp")
 				return err
@@ -610,8 +610,8 @@ func (s *SyncPlaidJob) maintainLinkStatus(ctx context.Context, plaidLink *PlaidL
 		plaidLink.Status = PlaidLinkStatusSetup
 		linkWasSetup = true
 	}
-	plaidLink.LastSuccessfulUpdate = myownsanity.TimeP(s.clock.Now().UTC())
-	plaidLink.LastAttemptedUpdate = myownsanity.TimeP(s.clock.Now().UTC())
+	plaidLink.LastSuccessfulUpdate = myownsanity.Pointer(s.clock.Now().UTC())
+	plaidLink.LastAttemptedUpdate = myownsanity.Pointer(s.clock.Now().UTC())
 	if err := s.repo.UpdatePlaidLink(ctx, plaidLink); err != nil {
 		s.log.WithError(err).Error("failed to update link after transaction sync")
 		return err
@@ -621,6 +621,7 @@ func (s *SyncPlaidJob) maintainLinkStatus(ctx context.Context, plaidLink *PlaidL
 		channelName := fmt.Sprintf("initial:plaid:link:%s:%s", s.args.AccountId, s.args.LinkId)
 		if notifyErr := s.publisher.Notify(
 			ctx,
+			s.args.AccountId,
 			channelName,
 			"success",
 		); notifyErr != nil {

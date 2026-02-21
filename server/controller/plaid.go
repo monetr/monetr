@@ -425,7 +425,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 
 	secrets := c.mustGetSecretsRepository(ctx)
 	secret := repository.SecretData{
-		Kind:  PlaidSecretKind,
+		Kind:  SecretKindPlaid,
 		Value: result.AccessToken,
 	}
 	if err = secrets.Store(c.getContext(ctx), &secret); err != nil {
@@ -561,7 +561,11 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 
 	channelName := fmt.Sprintf("initial:plaid:link:%s:%s", link.AccountId, link.LinkId)
 
-	listener, err := c.PubSub.Subscribe(c.getContext(ctx), channelName)
+	listener, err := c.PubSub.Subscribe(
+		c.getContext(ctx),
+		link.AccountId,
+		channelName,
+	)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to listen on channel")
 	}
@@ -597,7 +601,7 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 	}
 }
 
-func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
+func (c *Controller) postPlaidLinkSync(ctx echo.Context) error {
 	if !c.Configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
@@ -636,7 +640,7 @@ func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusTooEarly, "link has been manually synced too recently")
 	}
 
-	plaidLink.LastManualSync = myownsanity.TimeP(c.Clock.Now().UTC())
+	plaidLink.LastManualSync = myownsanity.Pointer(c.Clock.Now().UTC())
 	if err := repo.UpdatePlaidLink(c.getContext(ctx), plaidLink); err != nil {
 		return c.wrapPgError(ctx, err, "could not manually sync link")
 	}

@@ -334,5 +334,20 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/plaid/link/token/new", c.newPlaidToken)
 	billed.POST("/plaid/link/token/callback", c.postPlaidTokenCallback)
 	billed.GET("/plaid/link/setup/wait/:linkId", c.getWaitForPlaid)
-	billed.POST("/plaid/link/sync", c.postSyncPlaidManually)
+	billed.POST("/plaid/link/sync", c.postPlaidLinkSync)
+
+	// These endpoints should only be made available when lunch flow is actually
+	// enabled in the configuration. This way the endpoints are not available for
+	// the hosted version of monetr, but are available for self-hosted instances.
+	lunchFlow := billed.Group("",
+		c.requireLunchFlowEnabledMiddleware,
+	)
+	// Lunch Flow Links
+	lunchFlow.GET("/lunch_flow/link", c.getLunchFlowLinks)
+	lunchFlow.POST("/lunch_flow/link", c.postLunchFlowLink)
+	lunchFlow.GET("/lunch_flow/link/:lunchFlowLinkId", c.getLunchFlowLink)
+	lunchFlow.POST("/lunch_flow/link/:lunchFlowLinkId/bank_accounts/refresh", c.postLunchFlowLinkBankAccountsRefresh)
+	lunchFlow.GET("/lunch_flow/link/:lunchFlowLinkId/bank_accounts", c.getLunchFlowLinkBankAccounts)
+	lunchFlow.POST("/lunch_flow/link/sync", c.postLunchFlowLinkSync)
+	lunchFlow.GET("/lunch_flow/link/sync/:linkId/bank_account/:bankAccountId/progress", c.getLunchFlowLinkSyncProgress)
 }

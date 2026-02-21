@@ -5,8 +5,12 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/jarcoal/httpmock"
+	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/mock_lunch_flow"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -63,6 +67,104 @@ func TestPostBankAccount(t *testing.T) {
 			response.JSON().Path("$.originalName").String().IsEqual("PERSONAL CHECKING")
 			response.JSON().Path("$.accountType").String().IsEqual(string(DepositoryBankAccountType))
 			response.JSON().Path("$.accountSubType").String().IsEqual(string(CheckingBankAccountSubType))
+			response.JSON().Path("$.status").String().IsEqual(string(ActiveBankAccountStatus))
+		}
+	})
+
+	t.Run("create a lunch flow bank account", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.Deactivate()
+
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var lunchFlowLinkId ID[LunchFlowLink]
+		{ // Create the lunch flow link first!
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "US Bank",
+					"lunchFlowURL": "https://lunchflow.app/api/v1",
+					"apiKey":       "foobar",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Link should be in pending when its first created
+			response.JSON().Path("$.status").IsEqual(LunchFlowLinkStatusPending)
+			lunchFlowLinkId = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+		}
+
+		mock_lunch_flow.MockFetchAccounts(t, []lunch_flow.Account{
+			{
+				Id:              "1234",
+				Name:            "Test Account",
+				InstitutionName: "US Bank",
+				Provider:        "Bogus",
+				Currency:        "USD",
+				Status:          "ACTIVE",
+			},
+		})
+
+		mock_lunch_flow.MockFetchBalance(t, "1234", lunch_flow.Balance{
+			Amount:   "1234.00",
+			Currency: "USD",
+		})
+
+		{ // Refresh the accounts
+			response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
+				WithPath("lunchFlowLinkId", lunchFlowLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNoContent)
+			response.Body().IsEmpty()
+		}
+
+		var lunchFlowBankAccountId ID[LunchFlowBankAccount]
+		{ // Check for bank account in the responsne
+			response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts").
+				WithPath("lunchFlowLinkId", lunchFlowLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(1)
+			lunchFlowBankAccountId = ID[LunchFlowBankAccount](response.JSON().Path("$[0].lunchFlowBankAccountId").String().Raw())
+		}
+
+		var linkId ID[Link]
+		{ // Then create the actual link!
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
+					"lunchFlowLinkId": lunchFlowLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII()
+			response.JSON().Path("$.linkType").IsEqual(models.LunchFlowLinkType)
+			response.JSON().Path("$.lunchFlowLinkId").String().IsEqual(lunchFlowLinkId.String())
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		{ // Create the lunch flow bank account
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId":                 linkId,
+					"lunchFlowBankAccountId": lunchFlowBankAccountId,
+					"name":                   "Test account",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.linkId").String().IsEqual(linkId.String())
+			response.JSON().Path("$.lunchFlowBankAccountId").String().IsEqual(string(lunchFlowBankAccountId))
 			response.JSON().Path("$.status").String().IsEqual(string(ActiveBankAccountStatus))
 		}
 	})

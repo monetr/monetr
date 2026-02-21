@@ -133,7 +133,12 @@ func (h *ProcessOFXUploadHandler) updateStatus(
 		args.AccountId, args.TransactionUploadId,
 	)
 	payload := string(status)
-	if err := h.publisher.Notify(ctx, channel, payload); err != nil {
+	if err := h.publisher.Notify(
+		ctx,
+		args.AccountId,
+		channel,
+		payload,
+	); err != nil {
 		return errors.Wrap(err, "failed to send progress notification for job")
 	}
 	log.WithFields(logrus.Fields{

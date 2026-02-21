@@ -1,3 +1,4 @@
+import LunchFlowBankAccount from '@monetr/interface/models/LunchFlowBankAccount';
 import PlaidBankAccount from '@monetr/interface/models/PlaidBankAccount';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -29,6 +30,7 @@ export enum BankAccountSubType {
 export default class BankAccount {
   bankAccountId: string;
   linkId: string;
+  lunchFlowBankAccountId?: string;
   mask?: string;
   name: string;
   originalName: string;
@@ -36,21 +38,27 @@ export default class BankAccount {
   accountType: BankAccountType;
   accountSubType: BankAccountSubType;
   currency: string;
+  // Don't use these fields directly except when creating!
+  currentBalance: number;
+  availableBalance: number;
+  limitBalance?: number;
   lastUpdated: Date;
   createdAt: Date;
   createdBy: string;
   deletedAt?: Date;
 
   plaidBankAccount: PlaidBankAccount | null;
+  lunchFlowBankAccount: LunchFlowBankAccount | null;
 
   constructor(data?: Partial<BankAccount>) {
     if (data) {
       Object.assign(this, {
         ...data,
         plaidBankAccount: data?.plaidBankAccount && new PlaidBankAccount(data.plaidBankAccount),
+        lunchFlowBankAccount: data?.lunchFlowBankAccount && new LunchFlowBankAccount(data.lunchFlowBankAccount),
         lastUpdated: parseDate(data?.lastUpdated),
         createdAt: parseDate(data?.createdAt),
-        deletedAt: Boolean(data?.deletedAt) && parseDate(data.deletedAt),
+        deletedAt: parseDate(data?.deletedAt),
       });
     }
   }

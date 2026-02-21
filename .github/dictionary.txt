@@ -106,6 +106,7 @@ captcha
 centroid
 conveniens
 cors
+cron
 customizations
 decrypt.*
 dev

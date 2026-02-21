@@ -41,6 +41,7 @@ export const flexVariants = cva([styles.root], {
       none: styles.shrinkNone,
     },
     width: {
+      auto: undefined,
       default: widths.full,
       fit: styles.widthFit,
     },

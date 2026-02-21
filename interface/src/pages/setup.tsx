@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { CircleCheck, Pencil } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
+import Logo from '@monetr/interface/assets/Logo';
 import { Button } from '@monetr/interface/components/Button';
 import Flex, { flexVariants } from '@monetr/interface/components/Flex';
 import { layoutVariants } from '@monetr/interface/components/Layout';
+import LunchFlowLogo from '@monetr/interface/components/Logo/LunchFlowLogo';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
-import MLogo from '@monetr/interface/components/MLogo';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
 import SetupBillingButton from '@monetr/interface/components/setup/SetupBillingButton';
 import Typography from '@monetr/interface/components/Typography';
@@ -20,12 +21,13 @@ export interface SetupPageProps {
   manualEnabled?: boolean;
 }
 
-type Step = 'greeting' | 'plaid' | 'teller' | 'manual' | 'loading';
+type Step = 'greeting' | 'plaid' | 'lunchflow' | 'manual' | 'loading';
 
 export default function SetupPage(props: SetupPageProps): JSX.Element {
   const [step, setStep] = useState<Step>('greeting');
   const plaidPath = props.alreadyOnboarded ? '/link/create/plaid' : '/setup/plaid';
   const manualPath = props.alreadyOnboarded ? '/link/create/manual' : '/setup/manual';
+  const lunchFlowPath = props.alreadyOnboarded ? '/link/create/lunchflow' : '/setup/lunchflow';
 
   switch (step) {
     case 'greeting':
@@ -34,6 +36,8 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
       );
     case 'plaid':
       return <Navigate to={plaidPath} />;
+    case 'lunchflow':
+      return <Navigate to={lunchFlowPath} />;
     case 'manual':
       return <Navigate to={manualPath} />;
     default:
@@ -49,7 +53,7 @@ interface GreetingProps {
 
 function Greeting(props: GreetingProps): JSX.Element {
   const { data: config } = useAppConfiguration();
-  const [active, setActive] = useState<'plaid' | 'teller' | 'manual' | null>(null);
+  const [active, setActive] = useState<'plaid' | 'lunchflow' | 'manual' | null>(null);
 
   function Banner(): JSX.Element {
     if (!props.alreadyOnboarded) {
@@ -81,6 +85,7 @@ function Greeting(props: GreetingProps): JSX.Element {
     <div
       className={mergeTailwind(
         'p-4',
+        { 'h-screen': !props.alreadyOnboarded },
         flexVariants({
           align: 'center',
           gap: 'lg',
@@ -90,7 +95,7 @@ function Greeting(props: GreetingProps): JSX.Element {
         layoutVariants({ width: 'full', height: 'full' }),
       )}
     >
-      <MLogo className='w-16 h-16 md:w-24 md:h-24' />
+      <Logo className='size-16 md:size-24' />
       <Banner />
       <Flex gap='lg' justify='center' orientation='stackMedium'>
         <OnboardingTile
@@ -100,6 +105,14 @@ function Greeting(props: GreetingProps): JSX.Element {
           icon={PlaidLogo}
           name='Plaid'
           onClick={() => setActive('plaid')}
+        />
+        <OnboardingTile
+          active={active === 'lunchflow'}
+          description='Connect to EU/UK/Global institutions via Lunch Flow.'
+          disabled={!config.lunchFlowEnabled}
+          icon={LunchFlowLogo}
+          name='Lunch Flow'
+          onClick={() => setActive('lunchflow')}
         />
         <OnboardingTile
           active={active === 'manual'}
@@ -197,7 +210,7 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
     <button className={wrapperClasses} onClick={handleClick} type='button'>
       {props.active && <CircleCheck className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' />}
       {React.createElement(props.icon, {
-        className: 'w-16 h-12 md:w-20 md:h-12 ml-4 md:ml-0 md:mt-6 dark:text-dark-monetr-content-emphasis',
+        className: 'w-auto h-12 md:h-10 ml-4 md:ml-0 md:mt-6 dark:text-dark-monetr-content-emphasis',
       })}
       <div className='flex flex-col gap-2 items-center h-full md:mt-4 text-center w-full md:w-auto'>
         <Typography size='lg' weight='medium'>

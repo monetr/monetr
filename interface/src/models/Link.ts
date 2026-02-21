@@ -1,10 +1,13 @@
+import LunchFlowLink, { LunchFlowLinkStatus } from '@monetr/interface/models/LunchFlowLink';
 import PlaidLink, { PlaidLinkStatus } from '@monetr/interface/models/PlaidLink';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum LinkType {
-  Unknown = 0,
-  Plaid = 1,
-  Manual = 2,
+  Unknown = 'unknown',
+  Plaid = 'plaid',
+  Manual = 'manual',
+  Stripe = 'stripe',
+  LunchFlow = 'lunch_flow',
 }
 
 export const errorMessages = {
@@ -22,6 +25,7 @@ export default class Link {
    * This value is generated automatically by the API upon creation, and cannot be changed.
    */
   linkId: string;
+  lunchFlowLinkId?: string;
   linkType: LinkType;
   institutionName: string;
   description: string | null;
@@ -30,12 +34,14 @@ export default class Link {
   createdBy: string;
 
   plaidLink: PlaidLink | null;
+  lunchFlowLink: LunchFlowLink | null;
 
   constructor(data?: Partial<Link>) {
     if (data) {
       Object.assign(this, {
         ...data,
         plaidLink: data?.plaidLink && new PlaidLink(data.plaidLink),
+        lunchFlowLink: data?.lunchFlowLink && new LunchFlowLink(data.lunchFlowLink),
         updatedAt: parseDate(data?.updatedAt),
         createdAt: parseDate(data?.createdAt),
       });
@@ -59,7 +65,7 @@ export default class Link {
   }
 
   getIsError(): boolean {
-    return this.plaidLink?.status === PlaidLinkStatus.Error;
+    return this.plaidLink?.status === PlaidLinkStatus.Error || this.lunchFlowLink?.status === LunchFlowLinkStatus.Error;
   }
 
   getIsPendingExpiration(): boolean {

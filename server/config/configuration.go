@@ -42,6 +42,7 @@ type Configuration struct {
 	KeyManagement KeyManagement `yaml:"keyManagement"`
 	Links         Links         `yaml:"links"`
 	Logging       Logging       `yaml:"logging"`
+	LunchFlow     LunchFlow     `yaml:"lunchFlow"`
 	Plaid         Plaid         `yaml:"plaid"`
 	PostgreSQL    PostgreSQL    `yaml:"postgreSql"`
 	ReCAPTCHA     ReCAPTCHA     `yaml:"reCAPTCHA"`
@@ -343,6 +344,8 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("Logging.Level", LogLevel) // Info
 	v.SetDefault("Logging.StackDriver.Enabled", false)
+	// Lunch Flow is enabled by default for self-hosted deployments!
+	v.SetDefault("LunchFlow.Enabled", true)
 	v.SetDefault("KeyManagement.Provider", "plaintext")
 	v.SetDefault("Plaid.Enabled", true)
 	v.SetDefault("Plaid.CountryCodes", []plaid.CountryCode{plaid.COUNTRYCODE_US})

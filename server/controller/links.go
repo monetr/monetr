@@ -57,10 +57,41 @@ func (c *Controller) postLinks(ctx echo.Context) error {
 	case nil:
 		break
 	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse post request")
+		return c.badRequestError(ctx, err, "Failed to parse post request")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	// If the user is creating a lunch flow link then we need to validate that the
+	// link is valid and can be activated. If it is then activate it as part of
+	// this creation step.
+	if link.LunchFlowLinkId != nil {
+		if !c.Configuration.LunchFlow.Enabled {
+			return c.notFound(ctx, "Lunch Flow is not enabled on this server")
+		}
+
+		link.LinkType = LunchFlowLinkType
+		lunchFlowLink, err := repo.GetLunchFlowLink(
+			c.getContext(ctx),
+			*link.LunchFlowLinkId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "Failed to retrieve lunch flow link")
+		}
+
+		if lunchFlowLink.Status != LunchFlowLinkStatusPending {
+			return c.badRequest(ctx, "Cannot create a link from a Lunch Flow link that is not in a pending status")
+		}
+
+		lunchFlowLink.Status = LunchFlowLinkStatusActive
+		if err := repo.UpdateLunchFlowLink(
+			c.getContext(ctx),
+			lunchFlowLink,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow link")
+		}
+	}
+
 	if err := repo.CreateLink(c.getContext(ctx), &link); err != nil {
 		return c.wrapPgError(ctx, err, "Could not create a manual link")
 	}
@@ -140,7 +171,7 @@ func (c *Controller) patchLink(ctx echo.Context) error {
 	case nil:
 		break
 	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
+		return c.badRequestError(ctx, err, "Failed to parse patch request")
 	}
 
 	if err = repo.UpdateLink(c.getContext(ctx), existingLink); err != nil {
@@ -166,6 +197,8 @@ func (c *Controller) convertLink(ctx echo.Context) error {
 	if link.LinkType == ManualLinkType {
 		return c.badRequest(ctx, "link is already manual")
 	}
+
+	// TODO Don't allow this for Plaid links that are not disconnected!
 
 	link.LinkType = ManualLinkType
 
@@ -202,6 +235,7 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 
 	secretsRepo := c.mustGetSecretsRepository(ctx)
 
+	// TODO Handle lunch flow link deletion here!
 	if link.PlaidLink != nil {
 		secret, err := secretsRepo.Read(c.getContext(ctx), link.PlaidLink.SecretId)
 		if err != nil {
@@ -255,6 +289,14 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 			})
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
 		}
+	} else if link.LunchFlowLink != nil {
+		link.LunchFlowLink.Status = LunchFlowLinkStatusDeactivated
+		if err := repo.UpdateLunchFlowLink(
+			c.getContext(ctx),
+			link.LunchFlowLink,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow Link")
+		}
 	}
 
 	if err = background.TriggerRemoveLink(
@@ -265,7 +307,12 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 			LinkId:    link.LinkId,
 		},
 	); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to enqueue link removal job")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"failed to enqueue link removal job",
+		)
 	}
 
 	return ctx.NoContent(http.StatusOK)

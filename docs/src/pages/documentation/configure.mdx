@@ -4,7 +4,7 @@ description: Learn how to configure your self-hosted monetr installation using t
 ---
 
 import { Cards } from 'nextra/components';
-import { Server, Database, Shield, Link, ClipboardList, Link2, Lock, Send, Network, AlertTriangle, Terminal, Mail, Folder } from 'lucide-react';
+import { Coins, Server, Database, Shield, Link, ClipboardList, Link2, Lock, Send, Network, AlertTriangle, Terminal, Mail, Folder } from 'lucide-react';
 
 # Configure monetr
 
@@ -25,6 +25,7 @@ email: { ... }         # Email/SMTP configuration
 keyManagement: { ... } # KMS/Encryption configuration
 links: { ... }         # Connected/Manual Links configuration
 logging: { ... }       # Logging configuration
+lunchflow: { ... }     # Lunch Flow configuration (enable/disable)
 plaid: { ... }         # Plaid bank data provider configuration
 postgreSql: { ... }    # Primary database configuration
 recaptcha: { ... }     # Anti-Bot, spam mitigation configuration
@@ -81,6 +82,8 @@ links:
 logging:
   level: "debug"
   format: "text" # Can also be set to JSON depending on your preferences
+lunchflow:
+  enabled: true # Allow users to connect to their institution via Lunch Flow.
 plaid:
   enabled: true
   # # Uncomment this section if you do not want to provide credentials via environment variables.
@@ -156,6 +159,12 @@ Each of the sub-configurations noted above are documented in more detail in the 
   title="Logging"
   description="Configure logging levels and destinations for application debugging and monitoring."
   href="/documentation/configure/logging"
+/>
+<Cards.Card
+  icon={<Coins />}
+  title="Lunch Flow"
+  description="Enable Lunch Flow connections as a data source."
+  href="/documentation/configure/lunch_flow"
 />
 <Cards.Card
   icon={<Link2 />}
