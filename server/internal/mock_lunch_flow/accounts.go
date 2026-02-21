@@ -22,7 +22,7 @@ const (
 
 func Path(t *testing.T, relative string) string {
 	require.NotEmpty(t, relative, "relative url cannot be empty")
-	parsed, err := url.Parse(lunch_flow.DefaultBaseURL)
+	parsed, err := url.Parse(lunch_flow.DefaultAPIURL)
 	require.NoError(t, err, "must be able to parse lunch flow's default base URL")
 	parsed.Path = relative
 	return parsed.String()
@@ -131,6 +131,23 @@ func MockFetchBalance(
 			return map[string]any{
 				"balance": balance,
 			}, http.StatusOK
+		},
+		LunchFlowHeaders,
+	)
+}
+
+func MockFetchBalanceError(
+	t *testing.T,
+	accountId lunch_flow.AccountId,
+) {
+	mock_http_helper.NewHttpMockJsonResponder(
+		t,
+		"GET", Path(t, fmt.Sprintf("/api/v1/accounts/%s/balance", accountId)),
+		func(t *testing.T, request *http.Request) (any, int) {
+			return map[string]any{
+				"error":   "Forbidden",
+				"message": "Invalid API key.",
+			}, http.StatusForbidden
 		},
 		LunchFlowHeaders,
 	)

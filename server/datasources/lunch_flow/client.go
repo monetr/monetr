@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"path"
@@ -15,7 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const DefaultBaseURL = "https://lunchflow.app/api/v1"
+const DefaultAPIURL = "https://lunchflow.app/api/v1"
 
 type AccountId = json.Number
 
@@ -129,7 +130,8 @@ func (l *lunchFlowClient) doRequest(ctx context.Context, relativePath string, re
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return errors.Errorf("Lunch Flow request failed %s [%d]", requestUrl, response.StatusCode)
+		bodyStr, _ := io.ReadAll(response.Body)
+		return errors.Errorf("Lunch Flow request failed %s [%d]: %s", requestUrl, response.StatusCode, string(bodyStr))
 	}
 
 	if err := json.NewDecoder(response.Body).Decode(result); err != nil {

@@ -94,7 +94,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 	configuration.UploadsEnabled = c.Configuration.Storage.Enabled
 
 	configuration.LunchFlowEnabled = c.Configuration.LunchFlow.Enabled
-	configuration.LunchFlowDefaultAPIURL = lunch_flow.DefaultBaseURL
+	configuration.LunchFlowDefaultAPIURL = lunch_flow.DefaultAPIURL
 
 	return ctx.JSON(http.StatusOK, configuration)
 }

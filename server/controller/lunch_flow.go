@@ -262,6 +262,10 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 					joined.From.Currency,
 					consts.DefaultCurrencyCode,
 				)
+				// TODO The currency will be a json string or something similar, so it
+				// may not have a comma delimiting the fractional digits. I should
+				// write a specific parse currency function that will always consume
+				// json numbers.
 				currentBalance, err = currency.ParseCurrency(
 					balance.Amount.String(),
 					currencyCode,
