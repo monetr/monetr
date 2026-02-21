@@ -13,7 +13,7 @@ include(GolangUtils)
 # The compose directory will contain a few docker compose files that have had
 # some values replaced via `configure_file`. All of the compose files in this
 # directory are eventually passed to the docker compose up command.
-set(COMPOSE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/development)
+set(COMPOSE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/development)
 file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY})
 # The nginx directory is a child of the development directory. This directory
 # contains stubs of templated nginx configuration as well as the final nginx
@@ -77,12 +77,17 @@ if (CLOUD_MAGIC)
   set(NGINX_CONFIG_FILE "${CMAKE_SOURCE_DIR}/compose/nginx-cloud.conf")
 endif()
 
-set(LOCAL_CERTIFICATE_DIR ${CMAKE_BINARY_DIR}/certificates/${MONETR_LOCAL_DOMAIN})
+# Setup valkey too
+set(VALKEY_CONFIG_FILE "${COMPOSE_OUTPUT_DIRECTORY}/valkey.conf")
+string(RANDOM LENGTH 24 ALPHABET abcdefghijklmnopqrstuvwxyz1234567890 VALKEY_PASSWORD)
+configure_file("${CMAKE_SOURCE_DIR}/compose/valkey.conf.in" "${VALKEY_CONFIG_FILE}" @ONLY)
+
+set(LOCAL_CERTIFICATE_DIR ${CMAKE_CURRENT_BINARY_DIR}/certificates/${MONETR_LOCAL_DOMAIN})
 set(LOCAL_CERTIFICATE_KEY ${LOCAL_CERTIFICATE_DIR}/key.pem)
 set(LOCAL_CERTIFICATE_CERT ${LOCAL_CERTIFICATE_DIR}/cert.pem)
 file(MAKE_DIRECTORY ${LOCAL_CERTIFICATE_DIR})
 
-set(LOCAL_HOSTS_MARKER ${CMAKE_BINARY_DIR}/etc-hosts.marker)
+set(LOCAL_HOSTS_MARKER ${CMAKE_CURRENT_BINARY_DIR}/etc-hosts.marker)
 
 set(SUDO_EXECUTABLE "")
 if(NOT WIN32)
@@ -354,7 +359,7 @@ if(DOCKER_SERVER)
     COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:plaid || ${CMAKE_COMMAND} -E true
     COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:stripe || ${CMAKE_COMMAND} -E true
     COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} down --remove-orphans -v || ${CMAKE_COMMAND} -E true
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/development || ${CMAKE_COMMAND} -E true
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/development || ${CMAKE_COMMAND} -E true
     COMMAND_EXPAND_LISTS
     USES_TERMINAL
   )

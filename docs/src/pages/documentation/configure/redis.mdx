@@ -21,24 +21,33 @@ redis:
   enabled: <true|false> # If this is set to false then miniredis is used.
   address: "localhost"
   port: 6379
+  database: 0
+  username: ""
+  password: ""
 ```
 
-| **Name**  | **Type** | **Default** | **Description**                                                                                                 |
-| ---       | ---      | ---         | ---                                                                                                             |
-| `enabled` | Boolean  | `false`     | Enable a dedicated cache server, if this is set to `false` then an embedded miniredis instance is used instead. |
-| `address` | String   |             | The IP, or DNS resolvable address of your Redis-compatible cache server.                                        |
-| `port`    | Number   | `6379`      | Port that the Redis-compatible cache server can be reached at.                                                  |
+| **Name**   | **Type** | **Default** | **Description**                                                                                                 |
+| ---        | ---      | ---         | ---                                                                                                             |
+| `enabled`  | Boolean  | `false`     | Enable a dedicated cache server, if this is set to `false` then an embedded miniredis instance is used instead. |
+| `address`  | String   |             | The IP, or DNS resolvable address of your Redis-compatible cache server.                                        |
+| `port`     | Number   | `6379`      | Port that the Redis-compatible cache server can be reached at.                                                  |
+| `database` | Number   | `0`         | Database number that you want monetr to use for caching. Defaults to `0`.                                       |
+| `username` | String   |             | Username used to authenticate to the Redis-compatible server, defaults to an empty string.                      |
+| `password` | String   |             | Password used to authenticate to the Redis-compatible server, defaults to an empty string.                      |
 
 <Callout type="info">
-  monetr does not support credentials or TLS for this cache server at this time. Sensitive information is never cached
-  on this server and the use of the cache is purely for performance.
+  monetr does not support TLS for this cache server at this time. Sensitive information is never cached on this server
+  and the use of the cache is purely for performance.
 </Callout>
 
 The following environment variables map to the following configuration file fields. Each field is documented below.
 
-| Variable               | Config File Field |
-| ---                    | ---               |
-| `MONETR_REDIS_ENABLED` | `redis.enabled`   |
-| `MONETR_REDIS_ADDRESS` | `redis.address`   |
-| `MONETR_REDIS_PORT`    | `redis.port`      |
+| Variable                | Config File Field |
+| ---                     | ---               |
+| `MONETR_REDIS_ENABLED`  | `redis.enabled`   |
+| `MONETR_REDIS_ADDRESS`  | `redis.address`   |
+| `MONETR_REDIS_PORT`     | `redis.port`      |
+| `MONETR_REDIS_DATABASE` | `redis.database`  |
+| `MONETR_REDIS_USERNAME` | `redis.username`  |
+| `MONETR_REDIS_PASSWORD` | `redis.password`  |
 

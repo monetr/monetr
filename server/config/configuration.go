@@ -229,17 +229,6 @@ type CORS struct {
 	Debug          bool     `yaml:"debug"`
 }
 
-// Redis defines the config used to connect to a redis for our worker pool. If
-// these are left blank or default then we will instead use a mock redis pool
-// that is internal only. This is fine for single instance deployments, but
-// anytime more than one instance of the API is running a redis instance will be
-// required.
-type Redis struct {
-	Enabled bool   `yaml:"enabled"`
-	Address string `yaml:"address"`
-	Port    int    `yaml:"port"`
-}
-
 type Logging struct {
 	Level       string             `yaml:"level"`
 	Format      string             `yaml:"format"`
@@ -362,6 +351,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("PostgreSQL.Port", 5432)
 	v.SetDefault("PostgreSQL.Username", "postgres")
 	v.SetDefault("Redis.Port", 6379)
+	v.SetDefault("Redis.Database", 0)
 	v.SetDefault("ReCAPTCHA.Enabled", false)
 	v.SetDefault("ReCAPTCHA.VerifyLogin", true)
 	v.SetDefault("ReCAPTCHA.VerifyRegister", true)
@@ -435,6 +425,9 @@ func setupEnv(v *viper.Viper) {
 	v.MustBindEnv("Redis.Enabled", "MONETR_REDIS_ENABLED")
 	v.MustBindEnv("Redis.Address", "MONETR_REDIS_ADDRESS")
 	v.MustBindEnv("Redis.Port", "MONETR_REDIS_PORT")
+	v.MustBindEnv("Redis.Database", "MONETR_REDIS_DATABASE")
+	v.MustBindEnv("Redis.Username", "MONETR_REDIS_USERNAME")
+	v.MustBindEnv("Redis.Password", "MONETR_REDIS_PASSWORD")
 	v.MustBindEnv("Sentry.Enabled", "MONETR_SENTRY_ENABLED")
 	v.MustBindEnv("Sentry.DSN", "MONETR_SENTRY_DSN")
 	v.MustBindEnv("Sentry.ExternalDSN", "MONETR_SENTRY_EXTERNAL_DSN")

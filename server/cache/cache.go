@@ -33,6 +33,12 @@ func NewRedisCache(
 			return nil, errors.Wrap(err, "failed to run miniredis")
 		}
 
+		if conf.Username != "" && conf.Password != "" {
+			controller.mini.RequireUserAuth(conf.Username, conf.Password)
+		} else if conf.Password != "" {
+			controller.mini.RequireAuth(conf.Password)
+		}
+
 		// Store our "embedded" redis address for use below.
 		redisAddress = controller.mini.Server().Addr().String()
 		log.Info("no redis config was provided, using miniredis!")
@@ -45,7 +51,13 @@ func NewRedisCache(
 		Dial: func() (redis.Conn, error) {
 			// TODO (elliotcourant) Eventually support other networks besides
 			//  tcp? Can redis even run on a unix socket?
-			return redis.Dial("tcp", redisAddress)
+			return redis.Dial(
+				"tcp",
+				redisAddress,
+				redis.DialUsername(conf.Username),
+				redis.DialPassword(conf.Password),
+				redis.DialDatabase(conf.Database),
+			)
 		},
 	}
 
