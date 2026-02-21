@@ -30,6 +30,8 @@ var (
 
 		// TODO, get a list of country codes to exclude?
 		"us": {},
+
+		"check": {},
 	}
 )
 
