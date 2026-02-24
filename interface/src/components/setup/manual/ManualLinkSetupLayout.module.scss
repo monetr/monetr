@@ -3,13 +3,11 @@
 
 .manualLinkSetupLayoutRoot {
   display: flex;
+  flex: 1;
   align-items: center;
   flex-direction: column;
   gap: 2 * variables.$size;
   min-height: fit-content;
   justify-content: space-between;
   padding: 5 * variables.$size;
-
-  width: 100%;
-  height: 100vh;
 }

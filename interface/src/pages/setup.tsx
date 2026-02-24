@@ -85,14 +85,13 @@ function Greeting(props: GreetingProps): JSX.Element {
     <div
       className={mergeTailwind(
         'p-4',
-        { 'h-screen': !props.alreadyOnboarded },
+        'flex-1',
         flexVariants({
           align: 'center',
           gap: 'lg',
           justify: 'center',
           orientation: 'column',
         }),
-        layoutVariants({ width: 'full', height: 'full' }),
       )}
     >
       <Logo className='size-16 md:size-24' />

@@ -2,6 +2,7 @@
 
 .sidebarPaddingLayout {
   min-height: 100vh;
+  display: flex;
 }
 
 :global(.sidebar-open) {
