@@ -5,7 +5,6 @@ import { Navigate } from 'react-router-dom';
 import Logo from '@monetr/interface/assets/Logo';
 import { Button } from '@monetr/interface/components/Button';
 import Flex, { flexVariants } from '@monetr/interface/components/Flex';
-import { layoutVariants } from '@monetr/interface/components/Layout';
 import LunchFlowLogo from '@monetr/interface/components/Logo/LunchFlowLogo';
 import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
