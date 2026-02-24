@@ -222,6 +222,9 @@ func (r *RemoveLinkJob) removeTransactionClusters(
 	ctx context.Context,
 	bankAccountIds []ID[BankAccount],
 ) {
+	if len(bankAccountIds) == 0 {
+		return
+	}
 	result, err := r.db.ModelContext(ctx, &TransactionCluster{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
@@ -238,6 +241,9 @@ func (r *RemoveLinkJob) removeTransactionUploads(
 	ctx context.Context,
 	bankAccountIds []ID[BankAccount],
 ) {
+	if len(bankAccountIds) == 0 {
+		return
+	}
 	result, err := r.db.ModelContext(ctx, &TransactionUpload{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
@@ -254,6 +260,9 @@ func (r *RemoveLinkJob) removeTransactions(
 	ctx context.Context,
 	bankAccountIds []ID[BankAccount],
 ) {
+	if len(bankAccountIds) == 0 {
+		return
+	}
 	result, err := r.db.ModelContext(ctx, &Transaction{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
@@ -358,6 +367,10 @@ func (r *RemoveLinkJob) removeSpending(
 	ctx context.Context,
 	bankAccountIds []ID[BankAccount],
 ) {
+	if len(bankAccountIds) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &Spending{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
@@ -374,6 +387,10 @@ func (r *RemoveLinkJob) removeFundingSchedules(
 	ctx context.Context,
 	bankAccountIds []ID[BankAccount],
 ) {
+	if len(bankAccountIds) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &FundingSchedule{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
@@ -614,11 +631,15 @@ func (r *RemoveLinkJob) getSecretsToRemove(
 
 func (r *RemoveLinkJob) removeSecrets(
 	ctx context.Context,
-	secretIds []ID[Secret],
+	ids []ID[Secret],
 ) {
+	if len(ids) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &Secret{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"secret_id" IN (?)`, secretIds).
+		WhereIn(`"secret_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
 		r.log.WithError(err).Errorf("failed to remove secrets for link")
@@ -632,6 +653,10 @@ func (r *RemoveLinkJob) removeBankAccounts(
 	ctx context.Context,
 	bankAccountIds []ID[BankAccount],
 ) {
+	if len(bankAccountIds) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &BankAccount{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).

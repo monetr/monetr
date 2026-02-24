@@ -90,6 +90,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           name='apiURL'
           placeholder='https://.../api/v1'
           required
+          spellCheck='false'
           type='url'
         />
         <FormTextField

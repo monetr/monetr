@@ -85,8 +85,8 @@ function Greeting(props: GreetingProps): JSX.Element {
     <div
       className={mergeTailwind(
         'p-4',
-        'flex-1',
         flexVariants({
+          flex: 'grow',
           align: 'center',
           gap: 'lg',
           justify: 'center',
