@@ -15,7 +15,7 @@ func (r *repositoryBase) CreateLunchFlowLink(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	now := r.clock.Now()
+	now := r.clock.Now().UTC()
 	link.AccountId = r.AccountId()
 	link.CreatedAt = now
 	link.UpdatedAt = now
@@ -32,7 +32,7 @@ func (r *repositoryBase) UpdateLunchFlowLink(
 	defer span.Finish()
 
 	link.AccountId = r.AccountId()
-	link.UpdatedAt = r.clock.Now()
+	link.UpdatedAt = r.clock.Now().UTC()
 	_, err := r.txn.ModelContext(span.Context(), link).
 		WherePK().
 		Update(link)
