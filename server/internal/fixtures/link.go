@@ -7,6 +7,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/consts"
+	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -84,6 +85,71 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user User) Link {
 
 	err = repo.CreateLink(t.Context(), &link)
 	require.NoError(t, err, "must be able to seed link")
+
+	return link
+}
+
+func GivenIHaveALunchFlowLink(t *testing.T, clock clock.Clock, user User) Link {
+	log := testutils.GetLog(t)
+	db := testutils.GetPgDatabase(t)
+
+	repo := repository.NewRepositoryFromSession(
+		clock,
+		user.UserId,
+		user.AccountId,
+		db,
+		log,
+	)
+	secretsRepo := repository.NewSecretsRepository(
+		log,
+		clock,
+		db,
+		secrets.NewPlaintextKMS(),
+		user.AccountId,
+	)
+
+	secret := repository.SecretData{
+		Kind:  SecretKindLunchFlow,
+		Value: gofakeit.UUID(),
+	}
+	err := secretsRepo.Store(t.Context(), &secret)
+	require.NoError(t, err, "must be able to store lunch flow token secret")
+
+	lunchFlowLink := LunchFlowLink{
+		AccountId:            user.AccountId,
+		SecretId:             secret.SecretId,
+		Name:                 fmt.Sprintf("Lunch Flow Budget %s", gofakeit.City()),
+		ApiUrl:               lunch_flow.DefaultAPIURL,
+		Status:               LunchFlowLinkStatusActive,
+		LastManualSync:       nil,
+		LastSuccessfulUpdate: nil,
+		LastAttemptedUpdate:  nil,
+		CreatedBy:            user.UserId,
+	}
+	require.NoError(
+		t,
+		repo.CreateLunchFlowLink(t.Context(), &lunchFlowLink),
+		"Must be able to create lunch flow link",
+	)
+
+	link := Link{
+		AccountId:       user.AccountId,
+		Account:         user.Account,
+		LinkType:        LunchFlowLinkType,
+		LunchFlowLinkId: &lunchFlowLink.LunchFlowLinkId,
+		LunchFlowLink:   &lunchFlowLink,
+		InstitutionName: lunchFlowLink.Name,
+		CreatedAt:       clock.Now(),
+		CreatedBy:       user.UserId,
+		CreatedByUser:   &user,
+		UpdatedAt:       clock.Now(),
+	}
+
+	require.NoError(
+		t,
+		repo.CreateLink(t.Context(), &link),
+		"must be able to seed link",
+	)
 
 	return link
 }

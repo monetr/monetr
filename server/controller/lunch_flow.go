@@ -279,7 +279,7 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 				c.getContext(ctx),
 				&LunchFlowBankAccount{
 					LunchFlowLinkId: linkId,
-					LunchFlowId:     joined.From.Id.String(),
+					LunchFlowId:     joined.From.Id,
 					LunchFlowStatus: LunchFlowBankAccountExternalStatus(joined.From.Status),
 					Name:            joined.From.Name,
 					InstitutionName: joined.From.InstitutionName,

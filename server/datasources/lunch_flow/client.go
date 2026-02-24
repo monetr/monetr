@@ -18,7 +18,9 @@ import (
 
 const DefaultAPIURL = "https://lunchflow.app/api/v1"
 
-type AccountId = json.Number
+const DateFormat = "2006-01-02"
+
+type AccountId = string
 
 type Account struct {
 	Id              AccountId `json:"id"`
@@ -195,4 +197,16 @@ func (l *lunchFlowClient) GetTransactions(ctx context.Context, accountId Account
 	}
 
 	return result.Transactions, nil
+}
+
+// ParseDate takes the date string from a Lunch Flow transaction and converts it
+// to a timestamp in the user's timezone. It will return an empty time if there
+// is an error parsing the date.
+func ParseDate(input string, timezone *time.Location) (time.Time, error) {
+	date, err := time.ParseInLocation(
+		"2006-01-02",
+		input,
+		timezone,
+	)
+	return date, errors.WithStack(err)
 }

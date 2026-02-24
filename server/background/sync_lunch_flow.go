@@ -513,11 +513,7 @@ func (s *SyncLunchFlowJob) syncTransactions(ctx context.Context) error {
 			fallbackName,
 		)
 
-		date, err := time.ParseInLocation(
-			"2006-01-02",
-			externalTransaction.Date,
-			s.timezone,
-		)
+		date, err := lunch_flow.ParseDate(externalTransaction.Date, s.timezone)
 		if err != nil {
 			log.
 				WithError(err).
