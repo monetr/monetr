@@ -4,15 +4,21 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
+	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/platypus"
+	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/secrets"
 	"github.com/plaid/plaid-go/v30/plaid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
@@ -46,18 +52,48 @@ func TestPostTokenCallback(t *testing.T) {
 
 func TestPutUpdatePlaidLink(t *testing.T) {
 	t.Run("successful with account select enabled", func(t *testing.T) {
-		httpmock.Activate()
-		defer httpmock.DeactivateAndReset()
-
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		mock_plaid.MockCreateLinkToken(t, func(t *testing.T, request plaid.LinkTokenCreateRequest) {
-			assert.NotNil(t, request.GetUpdate().AccountSelectionEnabled, "account selection enabled cannot be nil")
-			assert.True(t, *request.GetUpdate().AccountSelectionEnabled, "account selection enabled must be true")
-		})
+		var linkToken string
+		{ // Retrieve the link token that was generated in the fixture
+			secretsRepo := repository.NewSecretsRepository(
+				testutils.GetLog(t),
+				app.Clock,
+				testutils.GetPgDatabase(t),
+				secrets.NewPlaintextKMS(),
+				user.AccountId,
+			)
+
+			secret, err := secretsRepo.Read(t.Context(), link.PlaidLink.SecretId)
+			require.NoError(t, err, "must be able to see plaid token secret")
+			linkToken = secret.Value
+		}
+
+		client := mockgen.NewMockClient(app.Mock)
+
+		app.Plaid.EXPECT().
+			NewClientFromLink(
+				gomock.Any(),
+				gomock.Eq(link.AccountId),
+				gomock.Eq(link.LinkId),
+			).
+			Times(1).
+			Return(client, nil)
+
+		client.EXPECT().
+			UpdateItem(
+				gomock.Any(),
+				// True = update account selection.
+				gomock.Eq(true),
+			).
+			Times(1).
+			Return(platypus.PlaidLinkToken{
+				LinkToken: linkToken,
+				Expires:   app.Clock.Now().Add(30 * time.Second),
+			}, nil)
 
 		response := e.PUT("/api/plaid/link/update/{linkId}").
 			WithPath("linkId", link.LinkId).
@@ -67,9 +103,6 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.linkToken").String().NotEmpty()
-		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-			"POST https://sandbox.plaid.com/link/token/create": 1,
-		}, "must match expected Plaid API calls")
 	})
 
 	t.Run("successful with account select disabled", func(t *testing.T) {

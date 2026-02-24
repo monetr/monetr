@@ -11,6 +11,7 @@ import (
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
+	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
@@ -739,5 +740,91 @@ func TestDeleteLink(t *testing.T) {
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
 			"POST https://sandbox.plaid.com/item/remove": 1,
 		}, "must match expected Plaid API calls")
+	})
+
+	t.Run("can remove plaid link", func(t *testing.T) {
+		clock := clock.New()
+		app, e := NewTestApplication(t)
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		client := mockgen.NewMockClient(app.Mock)
+
+		{ // Block of our mock interactions.
+			// Create a new Plaid client for this specific link.
+			app.Plaid.EXPECT().
+				NewClient(
+					gomock.Any(),
+					testutils.NewGenericMatcher(func(input *models.Link) bool {
+						a := assert.EqualValues(t, link.LinkId, input.LinkId, "Link ID should match")
+						b := assert.EqualValues(t, link.AccountId, input.AccountId, "Account ID should match")
+						return a && b
+					}),
+					gomock.Any(),
+					link.PlaidLink.PlaidId,
+				).
+				Times(1).
+				Return(client, nil)
+
+			// Call the remove item function on that Plaid client.
+			client.EXPECT().
+				RemoveItem(
+					gomock.Any(),
+				).
+				Times(1).
+				Return(nil)
+
+			// Enqueue a job to clean up the link's actual data.
+			app.Jobs.EXPECT().
+				EnqueueJob(
+					gomock.Any(),
+					gomock.Eq(background.RemoveLink),
+					testutils.NewGenericMatcher(func(args background.RemoveLinkArguments) bool {
+						a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
+						b := assert.EqualValues(t, link.AccountId, args.AccountId, "Account ID should match")
+						return a && b
+					}),
+				).
+				Times(1).
+				Return(nil)
+		}
+
+		{ // Try to retrieve the link before it's been deleted.
+			response := e.GET("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Object().NotEmpty()
+			response.JSON().Path("$.linkType").IsEqual(models.PlaidLinkType)
+			response.JSON().Path("$.deletedAt").IsNull()
+		}
+
+		{ // Try to delete it.
+			response := e.DELETE("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				WithTimeout(5 * time.Second).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.NoContent()
+		}
+
+		{ // Try to retrieve the link after it's been deleted.
+			response := e.GET("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// When deleting a plaid link, the type will be converted into a manual
+			// link once plaid has confirmed the link is deactivated.
+			response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
+			response.JSON().Path("$.deletedAt").NotNull()
+		}
 	})
 }

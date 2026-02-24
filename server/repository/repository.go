@@ -22,6 +22,7 @@ type BaseRepository interface {
 	CreateBankAccounts(ctx context.Context, bankAccounts ...*BankAccount) error
 	CreateFundingSchedule(ctx context.Context, fundingSchedule *FundingSchedule) error
 	CreateLink(ctx context.Context, link *Link) error
+	DeleteLink(ctx context.Context, linkId ID[Link]) error
 	CreatePlaidLink(ctx context.Context, link *PlaidLink) error
 	CreateSpending(ctx context.Context, expense *Spending) error
 	CreateTransaction(ctx context.Context, bankAccountId ID[BankAccount], transaction *Transaction) error
