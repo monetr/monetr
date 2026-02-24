@@ -22,7 +22,7 @@ export default function LunchFlowSetupSync(): React.JSX.Element {
   }, [linkId]);
 
   return (
-    <LunchFlowSetupLayout step={LunchFlowSetupSteps.Accounts}>
+    <LunchFlowSetupLayout step={LunchFlowSetupSteps.Sync}>
       <Typography align='center'>Loading...</Typography>
       <Typography align='center'>Getting your accounts setup, this can take a few seconds...</Typography>
       <ul>
