@@ -37,3 +37,20 @@ func MockFetchTransactions(
 		LunchFlowHeaders,
 	)
 }
+
+func MockFetchTransactionsError(
+	t *testing.T,
+	accountId lunch_flow.AccountId,
+) {
+	mock_http_helper.NewHttpMockJsonResponder(
+		t,
+		"GET", Path(t, fmt.Sprintf("/api/v1/accounts/%s/transactions", accountId)),
+		func(t *testing.T, request *http.Request) (any, int) {
+			return map[string]any{
+				"error":   "Forbidden",
+				"message": "Invalid API key.",
+			}, http.StatusForbidden
+		},
+		LunchFlowHeaders,
+	)
+}
