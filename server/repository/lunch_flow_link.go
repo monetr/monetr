@@ -39,7 +39,34 @@ func (r *repositoryBase) UpdateLunchFlowLink(
 	return errors.Wrap(err, "failed to update Lunch Flow link")
 }
 
-func (r *repositoryBase) DeleteLunchFlowLink(
+func (r *repositoryBase) RemoveLunchFlowLink(
+	ctx context.Context,
+	id ID[LunchFlowLink],
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	// Update the link record to indicate that it is no longer a Lunch Flow link
+	// but instead a manual one. This way some data is still preserved.
+	_, err := r.txn.ModelContext(span.Context(), &Link{}).
+		Set(`"link_type" = ?`, ManualLinkType).
+		Set(`"lunch_flow_link_id" = NULL`).
+		Where(`"link"."account_id" = ?`, r.AccountId()).
+		Where(`"link"."lunch_flow_link_id" = ?`, id).
+		Update()
+	if err != nil {
+		return errors.Wrap(err, "failed to clean Lunch Flow link prior to removal")
+	}
+
+	// Then delete the Plaid link itself.
+	_, err = r.txn.ModelContext(span.Context(), &LunchFlowLink{}).
+		Where(`"lunch_flow_link"."account_id" = ?`, r.AccountId()).
+		Where(`"lunch_flow_link"."lunch_flow_link_id" = ?`, id).
+		Delete()
+	return errors.Wrap(err, "failed to delete Lunch Flow link")
+}
+
+func (r *repositoryBase) ArchiveLunchFlowLink(
 	ctx context.Context,
 	id ID[LunchFlowLink],
 ) error {

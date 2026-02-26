@@ -72,7 +72,10 @@ func (c *CleanupLunchFlowHandler) DefaultSchedule() string {
 }
 
 // EnqueueTriggeredJob implements ScheduledJobHandler.
-func (c *CleanupLunchFlowHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
+func (c *CleanupLunchFlowHandler) EnqueueTriggeredJob(
+	ctx context.Context,
+	enqueuer JobEnqueuer,
+) error {
 	log := c.log.WithContext(ctx)
 
 	log.Info("retrieving bank accounts to sync with Lunch Flow")
@@ -189,10 +192,11 @@ func NewCleanupLunchFlowJob(
 	args CleanupLunchFlowArguments,
 ) (*CleanupLunchFlowJob, error) {
 	return &CleanupLunchFlowJob{
-		args:  args,
-		log:   log,
-		clock: clock,
-		repo:  repo,
+		args:    args,
+		log:     log,
+		clock:   clock,
+		secrets: secrets,
+		repo:    repo,
 	}, nil
 }
 
@@ -219,29 +223,13 @@ func (c *CleanupLunchFlowJob) Run(ctx context.Context) error {
 		return nil
 	}
 
-	lunchFlowBankAccounts, err := c.repo.GetLunchFlowBankAccountsByLunchFlowLink(
+	// Because we cascade deletes for lunch flow links, we do not need additional
+	// complexity or steps here. We just need to delete child objects that won't
+	// get cascaded, such as secrets.
+	if err := c.repo.RemoveLunchFlowLink(
 		span.Context(),
 		lunchFlowLink.LunchFlowLinkId,
-	)
-	if err != nil {
-		return err
-	}
-
-	for _, lunchFlowBankAccount := range lunchFlowBankAccounts {
-		if err := c.repo.DeleteLunchFlowBankAccount(
-			span.Context(),
-			lunchFlowBankAccount.LunchFlowBankAccountId,
-		); err != nil {
-			log.WithError(err).
-				WithFields(logrus.Fields{
-					"lunchFlowBankAccountId": lunchFlowBankAccount.LunchFlowBankAccountId,
-				}).
-				Error("failed to remove Lunch Flow bank account!")
-			return err
-		}
-	}
-
-	if err := c.repo.DeleteLunchFlowLink(span.Context(), lunchFlowLink.LunchFlowLinkId); err != nil {
+	); err != nil {
 		log.WithError(err).
 			Error("failed to remove Lunch Flow link!")
 		return err

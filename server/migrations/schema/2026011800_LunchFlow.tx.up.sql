@@ -13,13 +13,18 @@ CREATE TABLE "lunch_flow_links" (
   "created_at"             TIMESTAMP WITHOUT TIME ZONE NOT NULL,
   "deleted_at"             TIMESTAMP WITHOUT TIME ZONE,
   CONSTRAINT "pk_lunch_flow_links"            PRIMARY KEY ("lunch_flow_link_id", "account_id"),
-  CONSTRAINT "fk_lunch_flow_links_account"    FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
-  CONSTRAINT "fk_lunch_flow_links_secret"     FOREIGN KEY ("secret_id", "account_id") REFERENCES "secrets" ("secret_id", "account_id"),
-  CONSTRAINT "fk_lunch_flow_links_created_by" FOREIGN KEY ("created_by") REFERENCES "users" ("user_id")
+  CONSTRAINT "fk_lunch_flow_links_account"    FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE,
+  CONSTRAINT "fk_lunch_flow_links_secret"     FOREIGN KEY ("secret_id", "account_id") REFERENCES "secrets" ("secret_id", "account_id") ON DELETE CASCADE,
+  CONSTRAINT "fk_lunch_flow_links_created_by" FOREIGN KEY ("created_by") REFERENCES "users" ("user_id") ON DELETE CASCADE
 );
 
 ALTER TABLE "links" ADD COLUMN "lunch_flow_link_id" VARCHAR(32);
-ALTER TABLE "links" ADD CONSTRAINT "fk_links_lunch_flow_link" FOREIGN KEY ("lunch_flow_link_id", "account_id") REFERENCES "lunch_flow_links" ("lunch_flow_link_id", "account_id") ON DELETE SET NULL;
+
+-- We want to restrict deletes on this because if we fail to update the link
+-- type to be manual then the link is corrupt.
+ALTER TABLE "links" ADD CONSTRAINT "fk_links_lunch_flow_link" FOREIGN KEY ("lunch_flow_link_id", "account_id")
+REFERENCES "lunch_flow_links" ("lunch_flow_link_id", "account_id") ON DELETE RESTRICT;
+
 -- You cannot have the same lunch flow link associated with multiple links. You
 -- must create multiple lunch flow links!
 ALTER TABLE "links" ADD CONSTRAINT "uq_links_lunch_flow_link" UNIQUE ("lunch_flow_link_id");
@@ -41,8 +46,8 @@ CREATE TABLE "lunch_flow_bank_accounts" (
   "created_at"                 TIMESTAMP WITHOUT TIME ZONE NOT NULL,
   "deleted_at"                 TIMESTAMP WITHOUT TIME ZONE,
   CONSTRAINT "pk_lunch_flow_bank_accounts"                 PRIMARY KEY ("lunch_flow_bank_account_id", "account_id"),
-  CONSTRAINT "fk_lunch_flow_bank_accounts_account"         FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
-  CONSTRAINT "fk_lunch_flow_bank_accounts_lunch_flow_link" FOREIGN KEY ("lunch_flow_link_id", "account_id") REFERENCES "lunch_flow_links" ("lunch_flow_link_id", "account_id"),
+  CONSTRAINT "fk_lunch_flow_bank_accounts_account"         FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE,
+  CONSTRAINT "fk_lunch_flow_bank_accounts_lunch_flow_link" FOREIGN KEY ("lunch_flow_link_id", "account_id") REFERENCES "lunch_flow_links" ("lunch_flow_link_id", "account_id") ON DELETE CASCADE,
   CONSTRAINT "fk_lunch_flow_bank_accounts_created_by"      FOREIGN KEY ("created_by") REFERENCES "users" ("user_id"),
   -- Maintain uniqueness per link, we cannot have an account twice within the
   -- same link. However if the user wants to have the same data multiple times
@@ -69,7 +74,7 @@ CREATE TABLE "lunch_flow_transactions" (
   "created_at"                 TIMESTAMP WITHOUT TIME ZONE NOT NULL,
   "deleted_at"                 TIMESTAMP WITHOUT TIME ZONE,
   CONSTRAINT "pk_lunch_flow_transactions"                         PRIMARY KEY ("lunch_flow_transaction_id", "account_id"),
-  CONSTRAINT "fk_lunch_flow_transactions_account"                 FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+  CONSTRAINT "fk_lunch_flow_transactions_account"                 FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE,
   CONSTRAINT "fk_lunch_flow_transactions_lunch_flow_bank_account" FOREIGN KEY ("lunch_flow_bank_account_id", "account_id") REFERENCES "lunch_flow_bank_accounts" ("lunch_flow_bank_account_id", "account_id"),
   -- Only allow a transaction to appear once per lunch flow bank account. Again
   -- if the user wants to have data duplicated for some reason they need to do
