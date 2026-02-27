@@ -53,4 +53,3 @@ func MockFetchBalanceError(
 		LunchFlowHeaders,
 	)
 }
-
