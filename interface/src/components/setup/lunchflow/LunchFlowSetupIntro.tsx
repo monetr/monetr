@@ -12,7 +12,9 @@ import { LunchFlowSetupSteps } from '@monetr/interface/components/setup/lunchflo
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import LunchFlowLink from '@monetr/interface/models/LunchFlowLink';
-import request from '@monetr/interface/util/request';
+import request, { type APIError } from '@monetr/interface/util/request';
+import { useSnackbar } from 'notistack';
+import type { AxiosError } from 'axios';
 
 export type LunchFlowSetupIntroValues = {
   name: string;
@@ -22,6 +24,7 @@ export type LunchFlowSetupIntroValues = {
 
 export default function LunchFlowSetupIntro(): React.JSX.Element {
   const { data: config } = useAppConfiguration();
+  const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
   const initialValues: LunchFlowSetupIntroValues = useMemo(
@@ -48,12 +51,25 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
             relative: 'path',
           }),
         )
-        .catch(error => {
-          helpers.setSubmitting(false);
-          console.error(error);
-        });
+        .catch((error: AxiosError<APIError>) =>
+          enqueueSnackbar(
+            <div>
+              <Typography size='sm'>{error?.response?.data?.error || 'Failed to create Lunch Flow link!'}</Typography>
+              {Object.entries(error?.response?.data?.problems).map(([key, problem]) => (
+                <Typography component='code' key={key} size='xs'>
+                  {`${key}: ${problem}`}
+                </Typography>
+              ))}
+            </div>,
+            {
+              variant: 'error',
+              disableWindowBlurListener: true,
+            },
+          ),
+        )
+        .finally(() => helpers.setSubmitting(false));
     },
-    [navigate],
+    [navigate, enqueueSnackbar],
   );
 
   return (
