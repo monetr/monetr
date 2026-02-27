@@ -6,7 +6,11 @@ file(REMOVE ${outputCoverageFile} ${outputHtmlFile})
 file(GLOB_RECURSE coverageFiles "${CMAKE_SOURCE_DIR}/build/tests/*.txt")
 execute_process(
   COMMAND go run ${CMAKE_SOURCE_DIR}/cmake/scripts/merge_go_coverage.go ${outputCoverageFile} ${coverageFiles}
-  COMMAND go tool cover -html=${outputCoverageFile} -o ${outputHtmlFile}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 file(REMOVE ${coverageFiles})
+
+execute_process(
+  COMMAND go tool cover -html=${outputCoverageFile} -o ${outputHtmlFile}
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
