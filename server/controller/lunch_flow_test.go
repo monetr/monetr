@@ -278,7 +278,7 @@ func TestPostLunchFlowLinkBankAccountsRefresh(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusInternalServerError)
-			response.JSON().Path("$.error").IsEqual("Failed to retrieve accounts from Lunch Flow")
+			response.JSON().Path("$.error").String().Contains("Failed to retrieve Lunch Flow accounts:")
 		}
 
 		{ // Check for bank account in the responsne
