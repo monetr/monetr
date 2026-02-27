@@ -15,15 +15,17 @@ export default function LunchFlowSetupSync(): React.JSX.Element {
   const { linkId } = useParams();
   const { data: bankAccounts } = useBankAccountsForLink(linkId);
 
-  useEffect(() => {
-    request().post(`/lunch_flow/link/sync`, {
-      linkId,
-    });
-  }, [linkId]);
+  // As soon as this page loads immediately trigger the lunch flow sync
+  useEffect(
+    () =>
+      void request().post(`/lunch_flow/link/sync`, {
+        linkId,
+      }),
+    [linkId],
+  );
 
   return (
     <LunchFlowSetupLayout step={LunchFlowSetupSteps.Sync}>
-      <Typography align='center'>Loading...</Typography>
       <Typography align='center'>Getting your accounts setup, this can take a few seconds...</Typography>
       <ul>
         {bankAccounts?.map(item => (
@@ -31,8 +33,11 @@ export default function LunchFlowSetupSync(): React.JSX.Element {
         ))}
       </ul>
       <div className={flexVariants({ justify: 'center' })}>
-        {/* TODO, Instead redirect to one of the accounts we just setup! */}
-        <Button onClick={() => navigate('/')} type='submit' variant='primary'>
+        <Button
+          onClick={() => navigate(`/bank/${bankAccounts?.at(0).bankAccountId}/transactions`)}
+          type='submit'
+          variant='primary'
+        >
           Continue
         </Button>
       </div>

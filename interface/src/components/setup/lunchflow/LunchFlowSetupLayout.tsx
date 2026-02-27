@@ -22,7 +22,7 @@ export default function LunchFlowSetupLayout(props: LunchFlowSetupLayoutProps): 
       <div className='p-0 md:p-8 w-full'>
         <MStepper activeIndex={step} steps={['Intro', 'Accounts', 'Sync']} />
       </div>
-      <div className='flex flex-col md:justify-center items-center max-w-sm gap-4'>
+      <div className='flex flex-col md:justify-center items-center max-w-md gap-4'>
         <div className={flexVariants({ gap: 'sm', width: 'auto' })}>
           <MLogo className='size-16' />
           <Plus className='h-16' />

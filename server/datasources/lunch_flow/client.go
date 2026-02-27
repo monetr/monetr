@@ -20,7 +20,7 @@ const DefaultAPIURL = "https://lunchflow.app/api/v1"
 
 const DateFormat = "2006-01-02"
 
-type AccountId = string
+type AccountId = json.Number
 
 type Account struct {
 	Id              AccountId `json:"id"`

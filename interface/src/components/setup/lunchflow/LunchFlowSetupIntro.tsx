@@ -84,6 +84,16 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           required
         />
         <FormTextField
+          autoComplete='off'
+          className={layoutVariants({ width: 'full' })}
+          data-1p-ignore
+          label='API Key'
+          name='apiKey'
+          placeholder='●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●'
+          required
+          type='password'
+        />
+        <FormTextField
           className={layoutVariants({ width: 'full' })}
           data-1p-ignore
           label='API URL'
@@ -92,16 +102,6 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           required
           spellCheck='false'
           type='url'
-        />
-        <FormTextField
-          autoComplete='off'
-          className={layoutVariants({ width: 'full' })}
-          data-1p-ignore
-          label='API Secret'
-          name='apiKey'
-          placeholder='●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●'
-          required
-          type='password'
         />
         <FormButton type='submit' variant='primary'>
           Next

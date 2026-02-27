@@ -226,7 +226,8 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 			ctx,
 			err,
 			http.StatusInternalServerError,
-			"Failed to retrieve accounts from Lunch Flow",
+			"Failed to retrieve Lunch Flow accounts: %s",
+			err.Error(),
 		)
 	}
 
@@ -279,7 +280,7 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 				c.getContext(ctx),
 				&LunchFlowBankAccount{
 					LunchFlowLinkId: linkId,
-					LunchFlowId:     joined.From.Id,
+					LunchFlowId:     joined.From.Id.String(),
 					LunchFlowStatus: LunchFlowBankAccountExternalStatus(joined.From.Status),
 					Name:            joined.From.Name,
 					InstitutionName: joined.From.InstitutionName,

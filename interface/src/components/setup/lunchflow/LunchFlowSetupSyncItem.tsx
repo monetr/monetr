@@ -12,7 +12,7 @@ export interface LunchFlowSetupSyncItemProps {
 }
 
 export default function LunchFlowSetupSyncItem({ bankAccount }: LunchFlowSetupSyncItemProps): React.JSX.Element {
-  const { data } = useLunchFlowLinkSyncProgress(bankAccount.linkId, bankAccount.bankAccountId);
+  const { data, isError } = useLunchFlowLinkSyncProgress(bankAccount.linkId, bankAccount.bankAccountId);
 
   return (
     <Item>
@@ -29,7 +29,7 @@ export default function LunchFlowSetupSyncItem({ bankAccount }: LunchFlowSetupSy
         <Typography ellipsis>{capitalize(data?.status ?? 'Waiting')}</Typography>
         {data?.status !== 'complete' && <LoaderCircle className='animate-spin' data-loading='true' />}
         {data?.status === 'complete' && <Check className='text-green-500' />}
-        {data?.status === 'error' && <X className='text-red-500' />}
+        {(data?.status === 'error' || isError) && <X className='text-red-500' />}
       </ItemContent>
     </Item>
   );

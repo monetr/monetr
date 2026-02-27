@@ -34,12 +34,13 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
     data: idToFetch,
     mutateAsync: refreshAccounts,
     isPending: isRefreshing,
+    error: refreshError,
     isError: isErrorRefreshing,
     isSuccess: isRefreshComplete,
   } = useLunchFlowBankAccountsRefresh();
+  console.log(refreshError);
   // Once the hook above has completed, it will return an ID to fetch which we can then pass to the link hook and to the
   // bank accounts hook in order to proceed.
-  // TODO If the lunch flow link is in an active status then this page should not work!
   const { data: lunchFlowLink, isLoading: isLoadingLink, isError: isErrorLink } = useLunchFlowLink(idToFetch);
   const {
     data: lunchFlowAccounts,
@@ -49,6 +50,14 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
 
   // Trigger the actual refresh as soon as we mount the page to make sure everything fetches!
   useEffect(() => void refreshAccounts(lunchFlowLinkId), [lunchFlowLinkId, refreshAccounts]);
+
+  // If the lunch flow link is in an active status then this page should not work!
+  useEffect(() => {
+    if (lunchFlowLink && lunchFlowLink?.status !== LunchFlowLinkStatus.Pending) {
+      alert('Lunch Flow link is not in a pending status and cannot be setup this way. Redirecting you...');
+      navigate('/');
+    }
+  }, [lunchFlowLink, navigate]);
 
   const submit = useCallback(
     async (values: LunchFlowSetupAccountsForm, helpers: FormikHelpers<LunchFlowSetupAccountsForm>) => {
@@ -119,6 +128,7 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
         <Typography align='center'>
           Failed to fetch accounts from Lunch Flow, please check your API credentials...
         </Typography>
+        <Typography component='code'>{refreshError?.response?.data?.error}</Typography>
       </LunchFlowSetupLayout>
     );
   }
@@ -128,10 +138,10 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
   if (isLoadingLink || isLoadingAccounts || isRefreshing || !isRefreshComplete) {
     return (
       <LunchFlowSetupLayout step={LunchFlowSetupSteps.Accounts}>
-        <Typography align='center'>Loading...</Typography>
         <Typography align='center'>
           This can take several seconds while initial data is retrieved from Lunch Flow...
         </Typography>
+        <Typography align='center'>Loading...</Typography>
       </LunchFlowSetupLayout>
     );
   }

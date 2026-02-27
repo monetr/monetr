@@ -1,6 +1,7 @@
 package fixtures
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/benbjohnson/clock"
@@ -182,7 +183,7 @@ func GivenIHaveALunchFlowBankAccount(
 		AccountId:       link.AccountId,
 		LunchFlowLinkId: *link.LunchFlowLinkId,
 		LunchFlowLink:   link.LunchFlowLink,
-		LunchFlowId:     gofakeit.UUID(),
+		LunchFlowId:     fmt.Sprint(gofakeit.Number(1000, 10000000)),
 		LunchFlowStatus: models.LunchFlowBankAccountExternalStatusActive,
 		Name:            "Primary Checking - 1234",
 		InstitutionName: "Lehman Brothers",

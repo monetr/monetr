@@ -57,7 +57,7 @@ CREATE TABLE "lunch_flow_bank_accounts" (
 );
 
 ALTER TABLE "bank_accounts" ADD COLUMN "lunch_flow_bank_account_id" VARCHAR(32);
-ALTER TABLE "bank_accounts" ADD CONSTRAINT "fk_bank_accounts_lunch_flow_bank_account" FOREIGN KEY ("lunch_flow_bank_account_id", "account_id") REFERENCES "lunch_flow_bank_accounts" ("lunch_flow_bank_account_id", "account_id") ON DELETE SET NULL;
+ALTER TABLE "bank_accounts" ADD CONSTRAINT "fk_bank_accounts_lunch_flow_bank_account" FOREIGN KEY ("lunch_flow_bank_account_id", "account_id") REFERENCES "lunch_flow_bank_accounts" ("lunch_flow_bank_account_id", "account_id") ON DELETE CASCADE;
 ALTER TABLE "bank_accounts" ADD CONSTRAINT "uq_bank_accounts_lunch_flow_bank_account" UNIQUE ("lunch_flow_bank_account_id");
 
 CREATE TABLE "lunch_flow_transactions" (
@@ -83,7 +83,7 @@ CREATE TABLE "lunch_flow_transactions" (
 );
 
 ALTER TABLE "transactions" ADD COLUMN "lunch_flow_transaction_id" VARCHAR(32);
-ALTER TABLE "transactions" ADD CONSTRAINT "fk_transactions_lunch_flow_transaction" FOREIGN KEY ("lunch_flow_transaction_id", "account_id") REFERENCES "lunch_flow_transactions" ("lunch_flow_transaction_id", "account_id") ON DELETE SET NULL;
+ALTER TABLE "transactions" ADD CONSTRAINT "fk_transactions_lunch_flow_transaction" FOREIGN KEY ("lunch_flow_transaction_id", "account_id") REFERENCES "lunch_flow_transactions" ("lunch_flow_transaction_id", "account_id") ON DELETE CASCADE;
 ALTER TABLE "transactions" ADD CONSTRAINT "uq_transactions_lunch_flow_bank_account" UNIQUE ("lunch_flow_transaction_id");
 
 -- Update the enum for the link type too.
