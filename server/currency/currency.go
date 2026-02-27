@@ -155,7 +155,7 @@ func ParseFriendlyToAmount(
 	// unit for that currency.
 	f = f.Mul(f, modifier)
 	str := f.String()
-	parts := strings.Split(str, ".")
+	parts := strings.SplitN(str, ".", 2)
 	switch {
 	case len(parts) == 2 && fractionalDigits == 0:
 		return 0, errors.Errorf("invalid input for currency provided, cannot have more than [%d] fractional digits, input: [%s], result: [%s]", fractionalDigits, input, str)
