@@ -4,5 +4,4 @@ export default {
   build: '',
   local_development: '',
   credentials: '',
-  internals: 'Internals',
 };
