@@ -38,7 +38,6 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
     isError: isErrorRefreshing,
     isSuccess: isRefreshComplete,
   } = useLunchFlowBankAccountsRefresh();
-  console.log(refreshError);
   // Once the hook above has completed, it will return an ID to fetch which we can then pass to the link hook and to the
   // bank accounts hook in order to proceed.
   const { data: lunchFlowLink, isLoading: isLoadingLink, isError: isErrorLink } = useLunchFlowLink(idToFetch);

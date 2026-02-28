@@ -26,7 +26,6 @@ export default function useLunchFlowLinkSyncProgress(
 
     // Whenever we receive a progress message, update our state to represent the new status.
     socket.onmessage = event => {
-      console.log(event);
       const data: LunchFlowLinkSyncProgress = JSON.parse(event.data);
       const queryKey = [`/lunch_flow/link/sync/${linkId}/bank_account/${bankAccountId}/progress`];
       queryClient.setQueryData(queryKey, data);
