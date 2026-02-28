@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.10.1](https://github.com/monetr/monetr/compare/v1.10.0...v1.10.1) (2026-02-28)
+
+
+### Dependencies
+
+* **ui:** update dependency @swc/core to v1.15.17 ([#2964](https://github.com/monetr/monetr/issues/2964)) ([e6174b0](https://github.com/monetr/monetr/commit/e6174b035c852fee53d84011b69453edff59c5b5))
+* **ui:** update dependency satori to v0.19.2 ([#2944](https://github.com/monetr/monetr/issues/2944)) ([2d0ab45](https://github.com/monetr/monetr/commit/2d0ab45599ed1e05c35506edea63be826bb0e27b))
+
+
+### Bug Fixes
+
+* **ui:** Fixed overflow-x for long transaction names ([2d1651a](https://github.com/monetr/monetr/commit/2d1651afde2c333ed721a95c900525cbd41f5b94))
+
 ## [1.10.0](https://github.com/monetr/monetr/compare/v1.9.2...v1.10.0) (2026-02-28)
 
 This release adds support for EU/UK/Global institutions for **self-hosted** monetr instances via [Lunch
