@@ -11,12 +11,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type SpendingType uint8
+type SpendingType string
 
 const (
-	SpendingTypeExpense SpendingType = iota
-	SpendingTypeGoal
-	SpendingTypeOverflow
+	SpendingTypeExpense  SpendingType = "expense"
+	SpendingTypeGoal     SpendingType = "goal"
+	SpendingTypeOverflow SpendingType = "overflow"
 )
 
 type Spending struct {
