@@ -2,6 +2,7 @@
   "name": "@monetr/interface",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "rsbuild build --mode=production",
     "start": "BABEL_DISABLE_CACHE=1 MONETR_ENV=${MONETR_ENV:=local} rsbuild dev"

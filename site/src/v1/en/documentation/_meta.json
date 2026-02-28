@@ -1,0 +1,27 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Documentation"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "use",
+    "label": "Help"
+  },
+  {
+    "type": "section-header",
+    "name": "install",
+    "label": "Self-Hosting"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "configure",
+    "label": "Configure"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "guides",
+    "label": "Guides"
+  }
+]

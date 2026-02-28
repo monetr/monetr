@@ -7,56 +7,43 @@ find_program(NPM_EXECUTABLE NAMES npm)
 find_package(Pnpm REQUIRED)
 
 set(NODE_MODULES ${CMAKE_SOURCE_DIR}/node_modules)
-set(NODE_MODULES_BIN ${NODE_MODULES}/.bin)
 set(NODE_MODULES_MARKER ${CMAKE_BINARY_DIR}/node-modules-marker.txt)
-if(WIN32)
-  set(JS_EXECUTABLE_SUFFIX ".CMD")
-else()
-  set(JS_EXECUTABLE_SUFFIX "")
-endif()
-set(BIOME_EXECUTABLE ${NODE_MODULES_BIN}/biome${JS_EXECUTABLE_SUFFIX})
-set(HYPERLINK_EXECUTABLE ${NODE_MODULES_BIN}/hyperlink${JS_EXECUTABLE_SUFFIX})
-set(JEST_EXECUTABLE ${NODE_MODULES_BIN}/jest${JS_EXECUTABLE_SUFFIX})
-set(NEXT_EXECUTABLE ${NODE_MODULES_BIN}/next${JS_EXECUTABLE_SUFFIX})
-set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES_BIN}/email${JS_EXECUTABLE_SUFFIX})
-set(RSBUILD_EXECUTABLE ${NODE_MODULES_BIN}/rsbuild${JS_EXECUTABLE_SUFFIX})
-set(RSPACK_EXECUTABLE ${NODE_MODULES_BIN}/rspack${JS_EXECUTABLE_SUFFIX})
-set(SITEMAP_EXECUTABLE ${NODE_MODULES_BIN}/next-sitemap${JS_EXECUTABLE_SUFFIX})
-set(SPELLCHECKER_EXECUTABLE ${NODE_MODULES_BIN}/spellchecker${JS_EXECUTABLE_SUFFIX})
+# Global Commands
+set(BIOME_EXECUTABLE ${PNPM_EXECUTABLE} biome)
+
+# Documentation Commands
+set(HYPERLINK_EXECUTABLE ${PNPM_EXECUTABLE} hyperlink)
+set(SITEMAP_EXECUTABLE ${PNPM_EXECUTABLE} next-sitemap)
+set(SPELLCHECKER_EXECUTABLE ${PNPM_EXECUTABLE} spellchecker)
+set(NEXT_EXECUTABLE ${PNPM_EXECUTABLE} next)
+
+# New Documentation Commands
+set(RSPRESS_EXECUTABLE ${PNPM_EXECUTABLE} rspress)
+
+# Email Template Commands
+set(REACT_EMAIL_EXECUTABLE ${PNPM_EXECUTABLE} email)
+
+# Frontend Commands
+set(JEST_EXECUTABLE ${PNPM_EXECUTABLE} jest)
+set(RSBUILD_EXECUTABLE ${PNPM_EXECUTABLE} rsbuild)
 
 set(PNPM_ARGUMENTS "--frozen-lockfile" "--ignore-scripts")
 
 add_custom_command(
   OUTPUT ${NODE_MODULES}
          ${NODE_MODULES_MARKER}
-         ${BIOME_EXECUTABLE}
-         ${HYPERLINK_EXECUTABLE}
-         ${JEST_EXECUTABLE}
-         ${NEXT_EXECUTABLE}
-         ${REACT_EMAIL_EXECUTABLE}
-         ${RSBUILD_EXECUTABLE}
-         ${RSPACK_EXECUTABLE}
-         ${SITEMAP_EXECUTABLE}
-         ${SPELLCHECKER_EXECUTABLE}
          ${CMAKE_SOURCE_DIR}/docs/node_modules
          ${CMAKE_SOURCE_DIR}/emails/node_modules
          ${CMAKE_SOURCE_DIR}/interface/node_modules
          ${CMAKE_SOURCE_DIR}/stories/node_modules
+         ${CMAKE_SOURCE_DIR}/site/node_modules
   BYPRODUCTS ${NODE_MODULES}
              ${NODE_MODULES_MARKER}
-             ${BIOME_EXECUTABLE}
-             ${HYPERLINK_EXECUTABLE}
-             ${JEST_EXECUTABLE}
-             ${NEXT_EXECUTABLE}
-             ${REACT_EMAIL_EXECUTABLE}
-             ${RSBUILD_EXECUTABLE}
-             ${RSPACK_EXECUTABLE}
-             ${SITEMAP_EXECUTABLE}
-             ${SPELLCHECKER_EXECUTABLE}
              ${CMAKE_SOURCE_DIR}/docs/node_modules
              ${CMAKE_SOURCE_DIR}/emails/node_modules
              ${CMAKE_SOURCE_DIR}/interface/node_modules
              ${CMAKE_SOURCE_DIR}/stories/node_modules
+             ${CMAKE_SOURCE_DIR}/site/node_modules
   # Run the actual pnpm install with our args
   COMMAND ${PNPM_EXECUTABLE} install ${PNPM_ARGUMENTS}
   # By having a marker we make sure that if we cancel the install but the node_modules dir was created we still end up
@@ -66,8 +53,9 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   DEPENDS
     ${CMAKE_SOURCE_DIR}/docs/package.json
-    ${CMAKE_SOURCE_DIR}/interface/package.json
     ${CMAKE_SOURCE_DIR}/emails/package.json
+    ${CMAKE_SOURCE_DIR}/interface/package.json
+    ${CMAKE_SOURCE_DIR}/site/package.json
     ${CMAKE_SOURCE_DIR}/package.json
     ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
     tools.pnpm

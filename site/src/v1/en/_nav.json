@@ -1,0 +1,17 @@
+[
+  {
+    "text": "Pricing",
+    "link": "/pricing",
+    "activeMatch": "^/pricing"
+  },
+  {
+    "text": "Blog",
+    "link": "/blog",
+    "activeMatch": "^/blog"
+  },
+  {
+    "text": "Documentation",
+    "link": "/documentation",
+    "activeMatch": "^/documentation/"
+  }
+]
