@@ -157,6 +157,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 		if err != nil {
 			return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow bank account")
 		}
+		bankAccount.OriginalName = lunchFlowBankAccount.Name
 		lunchFlowBankAccount.Status = LunchFlowBankAccountStatusActive
 		if err := repo.UpdateLunchFlowBankAccount(
 			c.getContext(ctx),
