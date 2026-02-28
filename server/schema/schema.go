@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io"
@@ -39,6 +40,36 @@ func Parse[T any](
 	}
 
 	return nil
+}
+
+func ParseInto[T any](
+	ctx context.Context,
+	reader io.Reader,
+	schema *jsonschema.Resolved,
+) (*T, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	duplicate := bytes.NewBuffer(nil)
+	{ // Decode the reader into a map and then validate it
+		teeReader := io.TeeReader(reader, duplicate)
+		raw := map[string]any{}
+		decoder := json.NewDecoder(teeReader)
+		if err := decoder.Decode(&raw); err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		if err := schema.Validate(raw); err != nil {
+			return nil, errors.WithStack(err)
+		}
+	}
+
+	result := new(T)
+	if err := json.NewDecoder(duplicate).Decode(result); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return result, nil
 }
 
 func ParseReaderInto[T any](

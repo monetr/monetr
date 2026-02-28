@@ -302,6 +302,19 @@ func parseRequest[T any](
 	span := crumbs.StartFnTrace(ctxFromRequest(request))
 	defer span.Finish()
 
+	// result, err := schema.ParseInto[T](
+	// 	ctxFromRequest(request),
+	// 	request.Request().Body,
+	// 	requestSchema,
+	// )
+	// if err != nil {
+	// 	return nil, echo.NewHTTPError(
+	// 		http.StatusBadRequest,
+	// 		fmt.Sprintf("Invalid request: %v", err),
+	// 	).WithInternal(errors.WithStack(err))
+	// }
+	// return result, nil
+
 	rawData := map[string]any{}
 	decoder := json.NewDecoder(request.Request().Body)
 	decoder.UseNumber()

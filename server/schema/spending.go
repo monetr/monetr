@@ -24,8 +24,8 @@ var (
 				Pattern:   `^\S+(?:\s+\S+)*$`,
 			},
 			"description": {
-				ID:        "name",
-				Comment:   "The name of the Spending object",
+				ID:        "description",
+				Comment:   "The description of the Spending object",
 				Type:      "string",
 				MaxLength: myownsanity.Pointer(300),
 				MinLength: myownsanity.Pointer(0),
@@ -33,7 +33,7 @@ var (
 			},
 			"spendingType": {
 				ID:   "spendingType",
-				Type: "integer",
+				Type: "string",
 				Enum: []any{
 					models.SpendingTypeGoal,
 					models.SpendingTypeExpense,
