@@ -213,7 +213,7 @@ jobs:
         run: |
           make docs
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.7.3
+        uses: JamesIves/github-pages-deploy-action@v4.8.0
         with:
           branch: monetr.app
           folder: docs/out
