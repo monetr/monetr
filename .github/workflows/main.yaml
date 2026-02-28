@@ -53,7 +53,7 @@ jobs:
         run: |
           make monetr
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         name: Upload UI As Artifact
         with:
           name: '${{ github.sha }}-maps'
@@ -282,7 +282,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v8
         name: Download UI As Artifact
         with:
           name: '${{ github.sha }}-maps'
