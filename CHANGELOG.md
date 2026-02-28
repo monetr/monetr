@@ -2,6 +2,14 @@
 
 ## [1.10.0](https://github.com/monetr/monetr/compare/v1.9.2...v1.10.0) (2026-02-28)
 
+This release adds support for EU/UK/Global institutions for **self-hosted** monetr instances via [Lunch
+Flow](https://lunchflow.app).
+
+After upgrading to this version of monetr you can follow the guide here to get started:
+https://monetr.app/documentation/use/lunch_flow/
+
+Please note that this integration is still considered "Beta", if you run into any issues with the integration please
+provide feedback!
 
 ### ⚠ BREAKING CHANGES
 
