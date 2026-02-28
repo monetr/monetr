@@ -2,7 +2,9 @@ package fixtures
 
 import (
 	"context"
+	"fmt"
 	"net/url"
+	"os"
 	"testing"
 	"time"
 
@@ -90,7 +92,11 @@ func GivenIHaveAnAccount(t *testing.T, clock clock.Clock, login models.Login) mo
 	repo := repository.NewUnauthenticatedRepository(clock, db)
 	subStatus := stripe.SubscriptionStatusActive
 	account := models.Account{
-		Timezone:                     gofakeit.TimeZoneRegion(),
+		Timezone: myownsanity.CoalesceStrings(
+			// Force the timezone if we want to
+			os.Getenv("MONETR_TIMEZONE"),
+			gofakeit.TimeZoneRegion(),
+		),
 		Locale:                       "en_US",
 		StripeCustomerId:             myownsanity.StringP(mock_stripe.FakeStripeCustomerId(t)),
 		StripeSubscriptionId:         myownsanity.StringP(mock_stripe.FakeStripeSubscriptionId(t)),
@@ -101,6 +107,21 @@ func GivenIHaveAnAccount(t *testing.T, clock clock.Clock, login models.Login) mo
 	}
 	err := repo.CreateAccountV2(context.Background(), &account)
 	require.NoError(t, err, "must be able to seed basic account")
+
+	// If the test fails then print the timestamp that was used for the test. This
+	// helps make sure the test can be reproduced later.
+	t.Cleanup(func() {
+		if t.Failed() {
+			fmt.Println("# Timezone for account", account.AccountId)
+			fmt.Println(
+				"MONETR_TIMEZONE",
+				myownsanity.CoalesceStrings(
+					os.Getenv("MONETR_TIMEZONE"),
+					account.Timezone,
+				),
+			)
+		}
+	})
 
 	user := models.User{
 		LoginId:   login.LoginId,

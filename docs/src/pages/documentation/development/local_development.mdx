@@ -91,7 +91,7 @@ to use a custom CMake configuration you can create a `CMakeUserPresets.json` fil
 ignored by Git) and populate it with the configuration variables you want to override. If you want to always use a
 specific preset when running general make targets you can create a `.cmakepreset` file in the project directory. Inside
 that file you can put the name of the preset you want to use by default. Or you can pass `CMAKE_PRESET=...` when running
-a make target. 
+a make target.
 
 <Callout type="info">
   `CMAKE_PRESET` is ignored for some make targets, such as `release` and `test`. As each of those targets have a
@@ -272,6 +272,32 @@ make test CONCURRENCY=16 PATTERN=interface
 the maximum number of tests to run at the same time. **Note**: Interface/UI tests do not necessarily run at the max
 concurrency as those tests will consume more than a single CPU core.
 
+#### Environment Variables
+
+There are additional environment variables that specifically manipulate how tests run. For example, all controller tests
+will use a specific timestamp by default. But if there is a problem, or you want to force a specific timestamp to be
+used in the test by default you can include the following environment variable in this format:
+
+```env filename="Test Environment Variables"
+MONETR_TIMESTAMP="2006-01-02 15:04:05.999999999 -0700 MST"
+```
+
+This will set the tests mock clock to be in the specified timestamp when the test runs. If the test fails it will also
+print its own timestamp so that tests using random timestamps can have their bug reproduced. This is not widely
+available throughout the entire test suite at this time, but it will be in the future.
+
+In addition, accounts that are seeded using the controller fixtures package can have their timezone forced in a similar
+way.
+
+```env filename="Test Environment Variables"
+MONETR_TIMEZONE="America/Chicago"
+```
+
+This will force the timezone of any accounts created to be in the timezone specified by the environment variable. By
+default a random timezone is used. This is also printed at the end of the test if the test fails. This is not yet
+implemented in the entire test suite but moving forward more tests will support these environment variables and more in
+order to make reproducing issues easier, while still keeping the test suite somewhat random.
+
 ### Frontend
 
 An alternative to work on only the frontend components of monetr is to run a "lite" development environment. The lite
@@ -294,7 +320,7 @@ in the [CMake](#cmake) section.
 
 <Callout type="warning">
     Be extremely conscious about what actions you perform in the lite development environment, if you have your
-    development environment pointed at the production instance for example; any actions you take locally will affect 
+    development environment pointed at the production instance for example; any actions you take locally will affect
     your real account. Any data modified or deleted will not be recoverable.
 </Callout>
 
@@ -310,7 +336,7 @@ This will setup everything the documentation site needs and run the Next.JS deve
 changes to the documentation and see those changes reflected in your browser.
 
 **Note:** The "hero" or interface example on the documentation site's homepage _does not work_ in development mode.
-    
+
 In order to build the complete documentation site as it is hosted online you can run the follow command:
 
 ```shell filename="Shell"

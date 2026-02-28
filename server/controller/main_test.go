@@ -26,6 +26,7 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/controller"
 	"github.com/monetr/monetr/server/internal/mockgen"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
@@ -73,6 +74,7 @@ func TestJsonDecode(t *testing.T) {
 const (
 	FifthteenthAndLastDayOfEveryMonth = "DTSTART:20211231T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1"
 	FirstDayOfEveryMonth              = "DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1"
+	EveryFriday                       = "DTSTART:20220101T060000Z\nRRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR" // Probably isn't a friday DTSTART but it shouldn't matter.
 )
 
 const (
@@ -106,7 +108,28 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		defer mockController.Finish()
 	})
 	clock := clock.NewMock()
-	clock.Set(time.Date(2023, 10, 9, 13, 32, 0, 0, time.UTC))
+	clock.Set(testutils.MustEz(t, func() (time.Time, error) {
+		return time.Parse(
+			"2006-01-02 15:04:05.999999999 -0700 MST",
+			myownsanity.CoalesceStrings(
+				os.Getenv("MONETR_TIMESTAMP"),
+				time.Date(2023, 10, 9, 13, 32, 0, 0, time.UTC).String(),
+			),
+		)
+	}))
+	// If the test fails then print the timestamp that was used for the test. This
+	// helps make sure the test can be reproduced later.
+	t.Cleanup(func() {
+		if t.Failed() {
+			fmt.Println(
+				"MONETR_TIMESTAMP",
+				myownsanity.CoalesceStrings(
+					os.Getenv("MONETR_TIMESTAMP"),
+					clock.Now().String(),
+				),
+			)
+		}
+	})
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 	kms := secrets.NewPlaintextKMS()

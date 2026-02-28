@@ -43,3 +43,17 @@ func RuleToSet(t *testing.T, timezone *time.Location, ruleString string, now tim
 
 	return set
 }
+
+// RuleSetInTimezone is similar to [RuleToSet] except this one does not take
+// only a rule string, instead taking a ruleset string complete with a dtstart
+// parameter. It converts the dtstart parameter into a midnight timestamp in the
+// specified time zone.
+func RuleSetInTimezone(t *testing.T, timezone *time.Location, ruleset string) *models.RuleSet {
+	set, err := models.NewRuleSet(ruleset)
+	require.NoError(t, err, "Must not encounter an error building the rule set from a string")
+
+	midnight := util.Midnight(set.GetDTStart(), timezone)
+	set.DTStart(midnight)
+
+	return set
+}
