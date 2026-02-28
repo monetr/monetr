@@ -15,7 +15,12 @@
     "label": "Self-Hosting"
   },
   {
-    "type": "dir",
+    "type": "dir-section-header",
+    "name": "configure",
+    "label": "Configure"
+  },
+  {
+    "type": "dir-section-header",
     "name": "guides",
     "label": "Guides"
   }
