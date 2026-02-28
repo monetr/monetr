@@ -50,8 +50,11 @@ func NewStripeHelper(log *logrus.Entry, apiKey string) Stripe {
 
 	config := &stripe.BackendConfig{
 		HTTPClient: &http.Client{
-			Transport: round.NewObservabilityRoundTripper(http.DefaultTransport, base.stripeRoundTripper),
-			Timeout:   time.Second * 30,
+			Transport: round.NewObservabilityRoundTripper(
+				http.DefaultTransport,
+				base.stripeRoundTripper,
+			),
+			Timeout: time.Second * 30,
 		},
 		LeveledLogger: log,
 	}
@@ -74,8 +77,11 @@ func NewStripeHelperWithCache(log *logrus.Entry, apiKey string, cacheClient cach
 
 	config := &stripe.BackendConfig{
 		HTTPClient: &http.Client{
-			Transport: round.NewObservabilityRoundTripper(http.DefaultTransport, base.stripeRoundTripper),
-			Timeout:   time.Second * 30,
+			Transport: round.NewObservabilityRoundTripper(
+				http.DefaultTransport,
+				base.stripeRoundTripper,
+			),
+			Timeout: time.Second * 30,
 		},
 		LeveledLogger: log,
 	}
@@ -131,7 +137,11 @@ func (s *stripeBase) GetPriceById(ctx context.Context, id string) (*stripe.Price
 		},
 	})
 	if err != nil {
-		log.WithError(err).Error("failed to retrieve stripe price")
+		if errors.Is(err, context.Canceled) {
+			log.WithError(err).Warn("failed to retrieve stripe price")
+		} else {
+			log.WithError(err).Error("failed to retrieve stripe price")
+		}
 		return nil, errors.Wrap(err, "failed to retrieve stripe price")
 	}
 
