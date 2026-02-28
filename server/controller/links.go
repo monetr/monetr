@@ -182,34 +182,6 @@ func (c *Controller) patchLink(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, *existingLink)
 }
 
-func (c *Controller) convertLink(ctx echo.Context) error {
-	linkId, err := ParseID[Link](ctx.Param("linkId"))
-	if err != nil || linkId.IsZero() {
-		return c.badRequest(ctx, "must specify a valid link Id to convert")
-	}
-
-	repo := c.mustGetAuthenticatedRepository(ctx)
-
-	link, err := repo.GetLink(c.getContext(ctx), linkId)
-	if err != nil {
-		return c.wrapPgError(ctx, err, "could not retrieve link to convert")
-	}
-
-	if link.LinkType == ManualLinkType {
-		return c.badRequest(ctx, "link is already manual")
-	}
-
-	// TODO Don't allow this for Plaid links that are not disconnected!
-
-	link.LinkType = ManualLinkType
-
-	if err = repo.UpdateLink(c.getContext(ctx), link); err != nil {
-		return c.wrapPgError(ctx, err, "failed to convert link to manual")
-	}
-
-	return ctx.JSON(http.StatusOK, link)
-}
-
 func (c *Controller) deleteLink(ctx echo.Context) error {
 	linkId, err := ParseID[Link](ctx.Param("linkId"))
 	if err != nil || linkId.IsZero() {
@@ -236,7 +208,6 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 
 	secretsRepo := c.mustGetSecretsRepository(ctx)
 
-	// TODO Handle lunch flow link deletion here!
 	if link.PlaidLink != nil {
 		secret, err := secretsRepo.Read(c.getContext(ctx), link.PlaidLink.SecretId)
 		if err != nil {

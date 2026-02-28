@@ -219,9 +219,11 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 
 	externalAccounts, err := client.GetAccounts(c.getContext(ctx))
 	if err != nil {
-		// TODO Should we expose actual error information here to the frontend to
-		// make it so that the user does not need to check server logs to debug any
-		// issues? This is for self-hosted instances only so it may be worth it?
+		// Note that this exposes the actual error from the API client back to the
+		// caller. This is intentional here since this is used only on self hosted
+		// instances. This should not be done for really any other type of error.
+		// All errors should always be sanitized before being returned to the client
+		// normally.
 		return c.wrapAndReturnError(
 			ctx,
 			err,
@@ -263,10 +265,6 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 					joined.From.Currency,
 					consts.DefaultCurrencyCode,
 				)
-				// TODO The currency will be a json string or something similar, so it
-				// may not have a comma delimiting the fractional digits. I should
-				// write a specific parse currency function that will always consume
-				// json numbers.
 				currentBalance, err = currency.ParseCurrency(
 					balance.Amount.String(),
 					currencyCode,

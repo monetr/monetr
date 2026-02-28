@@ -113,8 +113,9 @@ func NewLunchFlowClient(
 }
 
 func (l *lunchFlowClient) doRequest(ctx context.Context, relativePath string, result any) error {
-	// TODO Write a test to make sure this doesn't fuck up the stored value. It
-	// shouldn't
+	// This should copy the url object since we arent taking the pointer. This way
+	// we can modify the URL object with our new path and proceed with the actual
+	// request.
 	url := l.apiUrl
 	url.Path = path.Join(url.Path, relativePath)
 	requestUrl := url.String()
