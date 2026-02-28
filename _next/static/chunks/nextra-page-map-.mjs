@@ -1,6 +1,7 @@
 import meta from "../../../src/pages/_meta.ts";
 import blog_meta from "../../../src/pages/blog/_meta.ts";
 import documentation_meta from "../../../src/pages/documentation/_meta.ts";
+import documentation_configure_meta from "../../../src/pages/documentation/configure/_meta.ts";
 import documentation_development_meta from "../../../src/pages/documentation/development/_meta.ts";
 import documentation_install_meta from "../../../src/pages/documentation/install/_meta.ts";
 import documentation_use_meta from "../../../src/pages/documentation/use/_meta.ts";
@@ -61,6 +62,8 @@ export const pageMap = [{
     name: "configure",
     route: "/documentation/configure",
     children: [{
+      data: documentation_configure_meta
+    }, {
       name: "cors",
       route: "/documentation/configure/cors",
       frontMatter: {
@@ -91,6 +94,13 @@ export const pageMap = [{
       route: "/documentation/configure/logging",
       frontMatter: {
         "sidebarTitle": "Logging"
+      }
+    }, {
+      name: "lunch_flow",
+      route: "/documentation/configure/lunch_flow",
+      frontMatter: {
+        "title": "Configure - Lunch Flow",
+        "description": "Configure Lunch Flow integration for monetr, allowing self-hosted instances to get automatic updates from their banking institution."
       }
     }, {
       name: "plaid",
@@ -294,6 +304,13 @@ export const pageMap = [{
       frontMatter: {
         "title": "Goals",
         "description": "Learn how to use monetr's Goals feature to save for one-time financial targets like vacations, loans, or down payments. Understand how Goals track contributions and spending, helping you plan effectively and meet your financial objectives without over-funding."
+      }
+    }, {
+      name: "lunch_flow",
+      route: "/documentation/use/lunch_flow",
+      frontMatter: {
+        "title": "Lunch Flow",
+        "description": "Connect to your EU/UK/Global bank for self-hosted deployments of monetr."
       }
     }, {
       name: "plaid",
