@@ -38,6 +38,12 @@ func ParseCurrency(input string, currency string) (int64, error) {
 	// the data from `locales.h` to get this data. But I want to instead derive
 	// the data from CLDR long term, for example:
 	// https://github.com/unicode-org/cldr-json/blob/c20dc7d37c1080addee64d4f94fbeabbc34f0cc3/cldr-json/cldr-numbers-full/main/nl/numbers.json#L14
+	// TODO At some point these values will be populated by CLDR's dataset or
+	// something similar. When this happens I need to introduce a ParseCurrency
+	// function that specifically only parses json numbers. Potentially a currency
+	// datatype as well that I can use in models internally. JSON should only ever
+	// use the decimal separator and no thousands separator in numbers. Unless its
+	// a string.
 	decimalSymbol := "."
 	seperatorSymbol := ","
 	currencySymbol := "" // Blank for now, eventually should be from locale.
@@ -155,7 +161,7 @@ func ParseFriendlyToAmount(
 	// unit for that currency.
 	f = f.Mul(f, modifier)
 	str := f.String()
-	parts := strings.Split(str, ".")
+	parts := strings.SplitN(str, ".", 2)
 	switch {
 	case len(parts) == 2 && fractionalDigits == 0:
 		return 0, errors.Errorf("invalid input for currency provided, cannot have more than [%d] fractional digits, input: [%s], result: [%s]", fractionalDigits, input, str)

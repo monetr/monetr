@@ -102,6 +102,8 @@
 
 .code {
   background-color: var(--background-subtle);
+  padding-top: 0.5 * variables.$size;
+  padding-bottom: 0.5 * variables.$size;
   padding-left: 1.5 * variables.$size;
   padding-right: 1.5 * variables.$size;
   border-radius: var(--border-radius);

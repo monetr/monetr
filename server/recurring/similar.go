@@ -283,6 +283,12 @@ func calculatedMerchantName(group *models.TransactionCluster) {
 	maximum, minimum := group.Debug[0].Rank, group.Debug[len(group.Debug)-1].Rank
 	var cutoff float32 = 0.75 // I want values in the top 75% of rankings
 	threshold := minimum + (maximum-minimum)*cutoff
+	// If the maximum equals the minimum that means all of the "tokens" are
+	// valuable to the cluster. So just set the threshold to be beloww the minimum
+	// and we will include every token!
+	if maximum == minimum {
+		threshold = minimum - 1
+	}
 	items := make([]models.TransactionClusterDebugItem, 0, len(group.Debug))
 	for i := range group.Debug {
 		item := group.Debug[i]

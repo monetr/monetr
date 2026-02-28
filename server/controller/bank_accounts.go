@@ -77,7 +77,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 		c.mustGetAccountId(ctx),
 	)
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to read account details")
+		return c.wrapPgError(ctx, err, "Failed to read account details")
 	}
 
 	// If we cannot determine what currencyCode we should default to based on the
@@ -100,7 +100,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 
 	var bankAccount BankAccount
 	// Pre-set the default values for these fields.
-	bankAccount.Status = ActiveBankAccountStatus
+	bankAccount.Status = BankAccountStatusActive
 	bankAccount.AccountType = DepositoryBankAccountType
 	bankAccount.AccountSubType = CheckingBankAccountSubType
 	bankAccount.Currency = currencyCode
@@ -118,22 +118,56 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	case nil:
 		break
 	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse request")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusBadRequest,
+			"failed to parse request",
+		)
 	}
 
 	// Some fields cannot be overwritten, so we set those after we unmarshal.
 	bankAccount.LastUpdated = c.Clock.Now().UTC()
 
-	// Bank accounts can only be created this way when they are associated with a
-	// link that allows manual management. If the link they specified does not,
-	// then a bank account cannot be created for this link.
-	isManual, err := repo.GetLinkIsManual(c.getContext(ctx), bankAccount.LinkId)
+	// Bank accounts can only be created via the API on manual links or on Lunch
+	// Flow or other simple integration links. Validate this before proceeding.
+	link, err := repo.GetLink(c.getContext(ctx), bankAccount.LinkId)
 	if err != nil {
-		return c.wrapPgError(ctx, err, "Could not validate link is manual")
+		return c.wrapPgError(ctx, err, "Could not validate link allows bank account creation")
 	}
 
-	// TODO Create a custom validator
-	if !isManual {
+	// If we are a lunch flow link then we can only create lunch flow bank
+	// accounts!
+	switch link.LinkType {
+	case LunchFlowLinkType:
+		if bankAccount.LunchFlowBankAccountId == nil ||
+			bankAccount.LunchFlowBankAccountId.IsZero() {
+			return ctx.JSON(http.StatusBadRequest, map[string]any{
+				"error": "Invalid request",
+				"problems": map[string]any{
+					"lunchFlowBankAccountId": "Lunch Flow Bank Account ID required to create a bank account for this link",
+				},
+			})
+		}
+
+		lunchFlowBankAccount, err := repo.GetLunchFlowBankAccount(
+			c.getContext(ctx),
+			*bankAccount.LunchFlowBankAccountId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow bank account")
+		}
+		lunchFlowBankAccount.Status = LunchFlowBankAccountStatusActive
+		if err := repo.UpdateLunchFlowBankAccount(
+			c.getContext(ctx),
+			lunchFlowBankAccount,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow bank account")
+		}
+	case ManualLinkType:
+	default:
+		// Otherwise if we are not a manual link then we simply don't allow bank
+		// accounts to be created.
 		return ctx.JSON(http.StatusBadRequest, map[string]any{
 			"error": "Invalid request",
 			"problems": map[string]any{
@@ -142,7 +176,10 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 		})
 	}
 
-	if err := repo.CreateBankAccounts(c.getContext(ctx), &bankAccount); err != nil {
+	if err := repo.CreateBankAccounts(
+		c.getContext(ctx),
+		&bankAccount,
+	); err != nil {
 		return c.wrapPgError(ctx, err, "Could not create bank account")
 	}
 
@@ -342,9 +379,23 @@ func (c *Controller) deleteBankAccount(ctx echo.Context) error {
 
 	if existingBankAccount.PlaidBankAccount != nil {
 		return c.badRequest(ctx, "Plaid bank account cannot be removed this way")
+	} else if existingBankAccount.LunchFlowBankAccountId != nil {
+		// This is kind of like soft-deleting the lunch flow bank account. Basically
+		// we keep it around until the link itself is removed. This might change in
+		// the future but this seems fine for now since we have this same behavior
+		// for manual links.
+		existingBankAccount.LunchFlowBankAccount.Status = LunchFlowBankAccountStatusInactive
+		existingBankAccount.LunchFlowBankAccount.DeletedAt = myownsanity.Pointer(c.Clock.Now())
+		if err := repo.UpdateLunchFlowBankAccount(
+			c.getContext(ctx),
+			existingBankAccount.LunchFlowBankAccount,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow bank account")
+		}
 	}
 
-	existingBankAccount.DeletedAt = myownsanity.TimeP(c.Clock.Now())
+	existingBankAccount.Status = BankAccountStatusInactive
+	existingBankAccount.DeletedAt = myownsanity.Pointer(c.Clock.Now())
 	if err = repo.UpdateBankAccount(
 		c.getContext(ctx),
 		existingBankAccount,

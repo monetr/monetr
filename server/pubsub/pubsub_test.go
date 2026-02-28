@@ -9,6 +9,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +21,8 @@ func TestPostgresPubSub_Notify(t *testing.T) {
 
 		ps := NewPostgresPubSub(log, db)
 
-		listener, err := ps.Subscribe(context.Background(), channelName)
+		accountId := models.NewID[models.Account]()
+		listener, err := ps.Subscribe(context.Background(), accountId, channelName)
 		assert.NoError(t, err, "must not receive an error just trying to subscribe to a channel")
 
 		var wg sync.WaitGroup
@@ -32,7 +34,7 @@ func TestPostgresPubSub_Notify(t *testing.T) {
 			defer wg.Done()
 			time.Sleep(1 * time.Second)
 			log.Info("sending test notification")
-			err = ps.Notify(context.Background(), channelName, "test")
+			err = ps.Notify(context.Background(), accountId, channelName, "test")
 		}()
 
 		select {

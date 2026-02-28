@@ -488,7 +488,7 @@ func TestPostTransactions(t *testing.T) {
 					"originalName":     "PERSONAL CHECKING",
 					"accountType":      DepositoryBankAccountType,
 					"accountSubType":   CheckingBankAccountSubType,
-					"status":           ActiveBankAccountStatus,
+					"status":           BankAccountStatusActive,
 				}).
 				Expect()
 
@@ -503,7 +503,7 @@ func TestPostTransactions(t *testing.T) {
 			response.JSON().Path("$.originalName").String().IsEqual("PERSONAL CHECKING")
 			response.JSON().Path("$.accountType").String().IsEqual(string(DepositoryBankAccountType))
 			response.JSON().Path("$.accountSubType").String().IsEqual(string(CheckingBankAccountSubType))
-			response.JSON().Path("$.status").String().IsEqual(string(ActiveBankAccountStatus))
+			response.JSON().Path("$.status").String().IsEqual(string(BankAccountStatusActive))
 			bankAccountId = ID[BankAccount](response.JSON().Path("$.bankAccountId").String().Raw())
 		}
 
