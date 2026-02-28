@@ -81,9 +81,9 @@ func ParseBankAccountSubType[T string | BankAccountSubType](input T) BankAccount
 type BankAccountStatus string
 
 const (
-	UnknownBankAccountStatus  BankAccountStatus = "unknown"
-	ActiveBankAccountStatus   BankAccountStatus = "active"
-	InactiveBankAccountStatus BankAccountStatus = "inactive"
+	BankAccountStatusUnknown  BankAccountStatus = "unknown"
+	BankAccountStatusActive   BankAccountStatus = "active"
+	BankAccountStatusInactive BankAccountStatus = "inactive"
 )
 
 // ParseBankAccountStatus takes a string or a BankAccountStatus value and
@@ -93,10 +93,10 @@ const (
 func ParseBankAccountStatus[T string | BankAccountStatus](input T) BankAccountStatus {
 	value := BankAccountStatus(input)
 	switch value {
-	case ActiveBankAccountStatus, InactiveBankAccountStatus:
+	case BankAccountStatusActive, BankAccountStatusInactive:
 		return value
 	default:
-		return UnknownBankAccountStatus
+		return BankAccountStatusUnknown
 	}
 }
 
@@ -181,9 +181,9 @@ func (BankAccount) CreateValidators() []*validation.KeyRules {
 		validation.Key(
 			"status",
 			validation.In(
-				string(ActiveBankAccountStatus),
-				string(InactiveBankAccountStatus),
-				string(UnknownBankAccountStatus),
+				string(BankAccountStatusActive),
+				string(BankAccountStatusInactive),
+				string(BankAccountStatusUnknown),
 			).Error("Invalid bank account status"),
 		).Required(validators.Optional),
 		validation.Key(
@@ -235,9 +235,9 @@ func (o *BankAccount) UpdateValidator() []*validation.KeyRules {
 		validation.Key(
 			"status",
 			validation.In(
-				string(ActiveBankAccountStatus),
-				string(InactiveBankAccountStatus),
-				string(UnknownBankAccountStatus),
+				string(BankAccountStatusActive),
+				string(BankAccountStatusInactive),
+				string(BankAccountStatusUnknown),
 			).Error("Invalid bank account status"),
 		).Required(validators.Optional),
 		validation.Key(

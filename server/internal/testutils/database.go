@@ -260,6 +260,13 @@ func MustDBRead[T any](t *testing.T, model T) T {
 func MustDBNotExist[T any](t *testing.T, model T) {
 	db := GetPgDatabase(t) // Don't need options, DB should already be in cache
 	exists, err := db.Model(&model).WherePK().Exists()
-	require.NoError(t, err, "must be able to read updated record")
+	require.NoError(t, err, "must be able to read without an error")
 	require.Falsef(t, exists, "%T must not exist", model)
+}
+
+func MustDBExist[T any](t *testing.T, model T) {
+	db := GetPgDatabase(t) // Don't need options, DB should already be in cache
+	exists, err := db.Model(&model).WherePK().Exists()
+	require.NoError(t, err, "must be able to read record from the database")
+	require.Truef(t, exists, "%T must exist", model)
 }

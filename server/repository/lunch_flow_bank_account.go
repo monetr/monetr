@@ -39,7 +39,7 @@ func (r *repositoryBase) GetLunchFlowBankAccount(
 		Limit(1).
 		Select(&bankAccount)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve Lunch Flow bank account")
+		return nil, errors.WithStack(err)
 	}
 
 	return &bankAccount, nil
@@ -57,7 +57,7 @@ func (r *repositoryBase) UpdateLunchFlowBankAccount(
 	_, err := r.txn.ModelContext(span.Context(), bankAccount).
 		WherePK().
 		Update(bankAccount)
-	return errors.Wrap(err, "failed to update Lunch Flow bank account")
+	return errors.WithStack(err)
 }
 
 func (r *repositoryBase) GetLunchFlowBankAccountsByLunchFlowLink(
@@ -78,21 +78,4 @@ func (r *repositoryBase) GetLunchFlowBankAccountsByLunchFlowLink(
 	}
 
 	return result, nil
-}
-
-// DeleteLunchFlowBankAccount removes the Lunch Flow bank account from the
-// database, this is **NOT** a soft-delete.
-func (r *repositoryBase) DeleteLunchFlowBankAccount(
-	ctx context.Context,
-	id ID[LunchFlowBankAccount],
-) error {
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-
-	_, err := r.txn.ModelContext(span.Context(), &LunchFlowBankAccount{}).
-		Where(`"account_id" = ?`, r.AccountId()).
-		Where(`"lunch_flow_bank_account_id" = ?`, id).
-		ForceDelete()
-
-	return errors.Wrap(err, "failed to delete Lunch Flow bank account")
 }

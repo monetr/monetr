@@ -296,7 +296,7 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 		}).Info("found newly inactive accounts, updating status")
 
 		for _, bankAccount := range missingAccounts {
-			bankAccount.Status = InactiveBankAccountStatus
+			bankAccount.Status = BankAccountStatusInactive
 			j.log.WithFields(logrus.Fields{
 				"bankAccountId":       bankAccount.BankAccountId,
 				"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
@@ -317,7 +317,7 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 		}).Info("found reactivated accounts, updating status")
 
 		for _, bankAccount := range activeAccounts {
-			bankAccount.Status = ActiveBankAccountStatus
+			bankAccount.Status = BankAccountStatusActive
 			j.log.WithFields(logrus.Fields{
 				"bankAccountId":       bankAccount.BankAccountId,
 				"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
@@ -362,7 +362,7 @@ MissingAccounts:
 			}
 		}
 
-		if bankAccount.Status == InactiveBankAccountStatus {
+		if bankAccount.Status == BankAccountStatusInactive {
 			// Bank account is already considered missing, skip it.
 			j.log.WithFields(logrus.Fields{
 				"bankAccountId":       bankAccount.BankAccountId,
@@ -391,7 +391,7 @@ ActiveAccounts:
 		bankAccount := j.bankAccounts[x]
 
 		// If the account is already marked as active then skip it.
-		if bankAccount.Status == ActiveBankAccountStatus {
+		if bankAccount.Status == BankAccountStatusActive {
 			continue ActiveAccounts
 		}
 

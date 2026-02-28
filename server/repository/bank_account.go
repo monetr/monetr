@@ -37,7 +37,7 @@ func (r *repositoryBase) CreateBankAccounts(
 	for i := range bankAccounts {
 		bankAccounts[i].AccountId = r.AccountId()
 		if bankAccounts[i].Status == "" {
-			bankAccounts[i].Status = ActiveBankAccountStatus
+			bankAccounts[i].Status = BankAccountStatusActive
 		}
 	}
 	if _, err := r.txn.ModelContext(

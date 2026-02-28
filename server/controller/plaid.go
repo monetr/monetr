@@ -506,7 +506,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 			AccountSubType:     BankAccountSubType(plaidAccount.GetSubType()),
 			Currency:           plaidAccount.GetCurrencyCode(),
 			LastUpdated:        now,
-			Status:             ActiveBankAccountStatus,
+			Status:             BankAccountStatusActive,
 		}
 	}
 

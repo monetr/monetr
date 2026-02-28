@@ -1001,23 +1001,23 @@ func (s *SyncPlaidJob) syncPlaidBankAccount(
 
 	// If input is nil that means we are no longer seeing this specific account
 	// and we should mark it as inactive.
-	if input == nil && bankAccount.Status != InactiveBankAccountStatus {
+	if input == nil && bankAccount.Status != BankAccountStatusInactive {
 		changes = append(changes, SyncChange{
 			Field: "status",
-			Old:   ActiveBankAccountStatus,
-			New:   InactiveBankAccountStatus,
+			Old:   BankAccountStatusActive,
+			New:   BankAccountStatusInactive,
 		})
-		bankAccount.Status = InactiveBankAccountStatus
+		bankAccount.Status = BankAccountStatusInactive
 	}
 
 	// If we observe the account again, then change it back to active.
-	if input != nil && bankAccount.Status == InactiveBankAccountStatus {
+	if input != nil && bankAccount.Status == BankAccountStatusInactive {
 		changes = append(changes, SyncChange{
 			Field: "status",
-			Old:   InactiveBankAccountStatus,
-			New:   ActiveBankAccountStatus,
+			Old:   BankAccountStatusInactive,
+			New:   BankAccountStatusActive,
 		})
-		bankAccount.Status = ActiveBankAccountStatus
+		bankAccount.Status = BankAccountStatusActive
 	}
 
 	if input.GetName() != plaidBankAccount.Name {

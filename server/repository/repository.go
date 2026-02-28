@@ -136,7 +136,6 @@ type BaseRepository interface {
 	CreateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
 	UpdateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
 	RemoveLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) error
-	ArchiveLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) error
 	GetLunchFlowLinks(ctx context.Context) ([]LunchFlowLink, error)
 	GetLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) (*LunchFlowLink, error)
 
@@ -151,10 +150,6 @@ type BaseRepository interface {
 	UpdateLunchFlowBankAccount(
 		ctx context.Context,
 		bankAccount *LunchFlowBankAccount,
-	) error
-	DeleteLunchFlowBankAccount(
-		ctx context.Context,
-		id ID[LunchFlowBankAccount],
 	) error
 
 	CreateLunchFlowTransactions(ctx context.Context, transaction []LunchFlowTransaction) error

@@ -79,7 +79,7 @@ func TestParseBankAccountStatus(t *testing.T) {
 
 		for _, value := range values {
 			assert.NotEqual(t,
-				models.UnknownBankAccountStatus, models.ParseBankAccountStatus(value),
+				models.BankAccountStatusUnknown, models.ParseBankAccountStatus(value),
 				"Must not return an unknown status",
 			)
 		}
@@ -93,7 +93,7 @@ func TestParseBankAccountStatus(t *testing.T) {
 
 		for _, value := range values {
 			assert.NotEqual(t,
-				models.UnknownBankAccountStatus, models.ParseBankAccountStatus(value),
+				models.BankAccountStatusUnknown, models.ParseBankAccountStatus(value),
 				"Must not return an unknown status",
 			)
 		}
@@ -101,7 +101,7 @@ func TestParseBankAccountStatus(t *testing.T) {
 
 	t.Run("invalid status", func(t *testing.T) {
 		assert.Equal(t,
-			models.UnknownBankAccountStatus, models.ParseBankAccountStatus("something"),
+			models.BankAccountStatusUnknown, models.ParseBankAccountStatus("something"),
 			"Must return an unknown status for an invalid input",
 		)
 	})

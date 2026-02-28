@@ -100,7 +100,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 
 	var bankAccount BankAccount
 	// Pre-set the default values for these fields.
-	bankAccount.Status = ActiveBankAccountStatus
+	bankAccount.Status = BankAccountStatusActive
 	bankAccount.AccountType = DepositoryBankAccountType
 	bankAccount.AccountSubType = CheckingBankAccountSubType
 	bankAccount.Currency = currencyCode
@@ -379,11 +379,23 @@ func (c *Controller) deleteBankAccount(ctx echo.Context) error {
 
 	if existingBankAccount.PlaidBankAccount != nil {
 		return c.badRequest(ctx, "Plaid bank account cannot be removed this way")
+	} else if existingBankAccount.LunchFlowBankAccountId != nil {
+		// This is kind of like soft-deleting the lunch flow bank account. Basically
+		// we keep it around until the link itself is removed. This might change in
+		// the future but this seems fine for now since we have this same behavior
+		// for manual links.
+		existingBankAccount.LunchFlowBankAccount.Status = LunchFlowBankAccountStatusInactive
+		existingBankAccount.LunchFlowBankAccount.DeletedAt = myownsanity.Pointer(c.Clock.Now())
+		if err := repo.UpdateLunchFlowBankAccount(
+			c.getContext(ctx),
+			existingBankAccount.LunchFlowBankAccount,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow bank account")
+		}
 	}
 
-	// TODO Handle Lunch flow bank account status here!
-
-	existingBankAccount.DeletedAt = myownsanity.TimeP(c.Clock.Now())
+	existingBankAccount.Status = BankAccountStatusInactive
+	existingBankAccount.DeletedAt = myownsanity.Pointer(c.Clock.Now())
 	if err = repo.UpdateBankAccount(
 		c.getContext(ctx),
 		existingBankAccount,

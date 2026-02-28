@@ -215,9 +215,9 @@ func TestSyncPlaidAccountsJob_Run(t *testing.T) {
 
 		{ // Checking account and savings account should be active before the job
 			checkingAccountBefore := testutils.MustRetrieve(t, checkingAccount)
-			assert.Equal(t, checkingAccountBefore.Status, models.ActiveBankAccountStatus)
+			assert.Equal(t, checkingAccountBefore.Status, models.BankAccountStatusActive)
 			savingsAccountBefore := testutils.MustRetrieve(t, savingsAccount)
-			assert.Equal(t, savingsAccountBefore.Status, models.ActiveBankAccountStatus)
+			assert.Equal(t, savingsAccountBefore.Status, models.BankAccountStatusActive)
 		}
 
 		// Then we run the job
@@ -226,9 +226,9 @@ func TestSyncPlaidAccountsJob_Run(t *testing.T) {
 
 		{ // Now the checking is active but the savings is inactive
 			checkingAccountBefore := testutils.MustRetrieve(t, checkingAccount)
-			assert.Equal(t, checkingAccountBefore.Status, models.ActiveBankAccountStatus)
+			assert.Equal(t, checkingAccountBefore.Status, models.BankAccountStatusActive)
 			savingsAccountBefore := testutils.MustRetrieve(t, savingsAccount)
-			assert.Equal(t, savingsAccountBefore.Status, models.InactiveBankAccountStatus)
+			assert.Equal(t, savingsAccountBefore.Status, models.BankAccountStatusInactive)
 		}
 	})
 
@@ -260,7 +260,7 @@ func TestSyncPlaidAccountsJob_Run(t *testing.T) {
 		)
 
 		{ // Update the savings account to have an inactive status.
-			savingsAccount.Status = models.InactiveBankAccountStatus
+			savingsAccount.Status = models.BankAccountStatusInactive
 			testutils.MustDBUpdate(t, &savingsAccount)
 		}
 
@@ -317,9 +317,9 @@ func TestSyncPlaidAccountsJob_Run(t *testing.T) {
 
 		{ // Only checking should be active befre the job runs
 			checkingAccountBefore := testutils.MustRetrieve(t, checkingAccount)
-			assert.Equal(t, checkingAccountBefore.Status, models.ActiveBankAccountStatus)
+			assert.Equal(t, checkingAccountBefore.Status, models.BankAccountStatusActive)
 			savingsAccountBefore := testutils.MustRetrieve(t, savingsAccount)
-			assert.Equal(t, savingsAccountBefore.Status, models.InactiveBankAccountStatus)
+			assert.Equal(t, savingsAccountBefore.Status, models.BankAccountStatusInactive)
 		}
 
 		// Then we run the job
@@ -328,9 +328,9 @@ func TestSyncPlaidAccountsJob_Run(t *testing.T) {
 
 		{ // Now both accounts should be active
 			checkingAccountBefore := testutils.MustRetrieve(t, checkingAccount)
-			assert.Equal(t, checkingAccountBefore.Status, models.ActiveBankAccountStatus)
+			assert.Equal(t, checkingAccountBefore.Status, models.BankAccountStatusActive)
 			savingsAccountBefore := testutils.MustRetrieve(t, savingsAccount)
-			assert.Equal(t, savingsAccountBefore.Status, models.ActiveBankAccountStatus)
+			assert.Equal(t, savingsAccountBefore.Status, models.BankAccountStatusActive)
 		}
 	})
 }
