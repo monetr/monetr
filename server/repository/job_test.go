@@ -242,3 +242,42 @@ func TestJobRepository_GetAccountsWithTooManyFiles(t *testing.T) {
 		}
 	})
 }
+
+func TestJobRepository_GetLunchFlowAccountsToSync(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &link)
+
+		{
+			result, err := jobRepo.GetLunchFlowAccountsToSync(t.Context())
+			assert.NoError(t, err, "must not return an error")
+			assert.Len(t, result, 1, "should return one lunch flow bank account")
+			assert.EqualValues(t, bankAccount.BankAccountId, result[0].BankAccountId, "returned bank account must match")
+		}
+
+		// Once an attempt is made recently, it should not be returned.
+		link.LunchFlowLink.LastAttemptedUpdate = myownsanity.Pointer(clock.Now())
+		testutils.MustDBUpdate(t, link.LunchFlowLink)
+
+		{
+			result, err := jobRepo.GetLunchFlowAccountsToSync(t.Context())
+			assert.NoError(t, err, "must not return an error")
+			assert.Empty(t, result, "should not return bank accounts updated in the past 6 hours")
+		}
+
+		// After 6+ hours the link should be eligible again.
+		clock.Add(7 * time.Hour)
+
+		{
+			result, err := jobRepo.GetLunchFlowAccountsToSync(t.Context())
+			assert.NoError(t, err, "must not return an error")
+			assert.Len(t, result, 1, "should return one lunch flow bank account after waiting")
+			assert.EqualValues(t, bankAccount.BankAccountId, result[0].BankAccountId, "returned bank account must match")
+		}
+	})
+}
