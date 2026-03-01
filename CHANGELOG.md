@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.10.2](https://github.com/monetr/monetr/compare/v1.10.1...v1.10.2) (2026-03-01)
+
+
+### Dependencies
+
+* **ui:** update dependency autoprefixer to v10.4.27 ([#2966](https://github.com/monetr/monetr/issues/2966)) ([4c400a4](https://github.com/monetr/monetr/commit/4c400a482fecefcc4a2023efafdfdb9771c19de4))
+
+
+### Bug Fixes
+
+* **api:** Fixed lunch flow links not syncing automatically ([c7336d9](https://github.com/monetr/monetr/commit/c7336d9ad4e317c035239d78ccd120cc041ac7f6)), closes [#2970](https://github.com/monetr/monetr/issues/2970)
+
 ## [1.10.1](https://github.com/monetr/monetr/compare/v1.10.0...v1.10.1) (2026-02-28)
 
 
