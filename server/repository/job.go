@@ -176,9 +176,10 @@ func (j *jobRepository) GetLunchFlowAccountsToSync(
 	bankAccounts := make([]BankAccount, 0)
 	cutoff := j.clock.Now().Add(-6 * time.Hour)
 	err := j.txn.ModelContext(ctx, &bankAccounts).
+		Relation("LunchFlowBankAccount").
 		// Retrieve all of the bank accounts and their associated links.
 		Join(`INNER JOIN "links" AS "link"`).
-		JoinOn(`"link"."link_id" = "bank_account"."link_id" AND "link"."account_id" = "bank_account"."account_id`).
+		JoinOn(`"link"."link_id" = "bank_account"."link_id" AND "link"."account_id" = "bank_account"."account_id"`).
 		// But only the links that have a lunch_flow associated record.
 		Join(`INNER JOIN "lunch_flow_links" AS "lunch_flow_link"`).
 		JoinOn(`"lunch_flow_link"."lunch_flow_link_id" = "link"."lunch_flow_link_id" AND "lunch_flow_link"."account_id" = "link"."account_id"`).
