@@ -1,11 +1,13 @@
+import { tz } from '@date-fns/tz';
 import { parse } from 'date-fns';
 
 import getRecurrencesForDate from '@monetr/interface/util/getRecurrencesForDate';
 
 describe('get recurrences for date', () => {
   it('will return the last day of every month when the last day is selected', () => {
+    const timezone = tz('America/Chicago');
     // Last day of march should generate a rule for the last day of every month
-    const input = parse('2026-03-31', 'yyyy-MM-dd', new Date());
+    const input = timezone(parse('2026-03-31', 'yyyy-MM-dd', new Date()));
 
     const result = getRecurrencesForDate(input, 'America/Chicago');
 
@@ -17,6 +19,9 @@ RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=-1`,
     );
     // If this rule exists in the result then that means we are properly building the last day of every month rule.
     expect(lastDayOfEveryMonth).not.toBeUndefined();
+    if (!lastDayOfEveryMonth) {
+      console.log(JSON.stringify(result));
+    }
 
     const lastDayOfEveryMonthWrong = result.find(
       item =>
