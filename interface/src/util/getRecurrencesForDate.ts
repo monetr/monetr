@@ -31,7 +31,8 @@ export default function getRecurrencesForDate(
 
   const ruleWeekday = getRuleDayOfWeek(input);
 
-  const dayStr = isEndOfMonth ? ' last day of the month' : ordinalSuffixOf(getDate(input));
+  const dayOfMonth = getDate(input);
+  const dayStr = isEndOfMonth ? 'last day of the month' : ordinalSuffixOf(dayOfMonth);
 
   const rules = [
     new Recurrence({
@@ -58,7 +59,7 @@ export default function getRecurrencesForDate(
         dtstart: input,
         freq: RRule.MONTHLY,
         interval: 1,
-        bymonthday: [getDate(input)],
+        bymonthday: [isEndOfMonth ? -1 : dayOfMonth],
       }),
     }),
     new Recurrence({
@@ -67,7 +68,7 @@ export default function getRecurrencesForDate(
         dtstart: input,
         freq: RRule.MONTHLY,
         interval: 2,
-        bymonthday: [getDate(input)],
+        bymonthday: [isEndOfMonth ? -1 : dayOfMonth],
       }),
     }),
     new Recurrence({
@@ -76,7 +77,7 @@ export default function getRecurrencesForDate(
         dtstart: input,
         freq: RRule.MONTHLY,
         interval: 3,
-        bymonthday: [getDate(input)],
+        bymonthday: [isEndOfMonth ? -1 : dayOfMonth],
       }),
     }),
     new Recurrence({
@@ -85,11 +86,11 @@ export default function getRecurrencesForDate(
         dtstart: input,
         freq: RRule.MONTHLY,
         interval: 6,
-        bymonthday: [getDate(input)],
+        bymonthday: [isEndOfMonth ? -1 : dayOfMonth],
       }),
     }),
     new Recurrence({
-      name: `Every year on the ${ordinalSuffixOf(getDate(input))} of ${format(input, 'MMMM')}`,
+      name: `Every year on the ${ordinalSuffixOf(dayOfMonth)} of ${format(input, 'MMMM')}`,
       rule: new RRule({
         dtstart: input,
         freq: RRule.YEARLY,
@@ -100,7 +101,7 @@ export default function getRecurrencesForDate(
     }),
   ];
 
-  if (isStartOfMonth || getDate(input) === 15) {
+  if (isStartOfMonth || dayOfMonth === 15) {
     rules.push(
       new Recurrence({
         name: '1st and 15th of every month',
@@ -114,7 +115,7 @@ export default function getRecurrencesForDate(
     );
   }
 
-  if (isEndOfMonth || getDate(input) === 15) {
+  if (isEndOfMonth || dayOfMonth === 15) {
     rules.push(
       new Recurrence({
         name: '15th and last day of every month',
