@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.10.3](https://github.com/monetr/monetr/compare/v1.10.2...v1.10.3) (2026-03-03)
+
+
+### Dependencies
+
+* **ui:** update dependency @swc/core to v1.15.18 ([6341973](https://github.com/monetr/monetr/commit/6341973e9d64b57f4fb622cb15a8f330987c4854))
+
+
+### Bug Fixes
+
+* **test:** Fixing tests that fail in CI but work locally? ([04354d8](https://github.com/monetr/monetr/commit/04354d896945b67400b6774d163369f7edd5a5ad))
+* **test:** This is what I get for pushing to main ([63a1b0b](https://github.com/monetr/monetr/commit/63a1b0bb1d2d6514023588f8713b07189dd177d6))
+* **ui:** Don't generate an invalid last day of month rule ([a62b50d](https://github.com/monetr/monetr/commit/a62b50df979debe218d60010bca2c9cf4dd5666c)), closes [#2972](https://github.com/monetr/monetr/issues/2972)
+
+
+### Miscellaneous
+
+* Disabling bad test for now ([1f5e192](https://github.com/monetr/monetr/commit/1f5e19220f0d0cb3246b5c69a45ad720bf632553))
+
 ## [1.10.2](https://github.com/monetr/monetr/compare/v1.10.1...v1.10.2) (2026-03-01)
 
 
