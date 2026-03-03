@@ -2,10 +2,11 @@ import { tz } from '@date-fns/tz';
 import { parse } from 'date-fns';
 
 import getRecurrencesForDate from '@monetr/interface/util/getRecurrencesForDate';
+import { getTimezone } from '@monetr/interface/util/locale';
 
 describe('get recurrences for date', () => {
-  it.skip('will return the last day of every month when the last day is selected', () => {
-    const timezone = tz('America/Chicago');
+  it('will return the last day of every month when the last day is selected', () => {
+    const timezone = tz(getTimezone());
     // Last day of march should generate a rule for the last day of every month
     const input = timezone(parse('2026-03-31', 'yyyy-MM-dd', new Date()));
 
