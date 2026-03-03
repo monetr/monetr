@@ -27,4 +27,24 @@ describe('get recurrences for date', () => {
     // Make sure we don't see the old rule which was incorrect.
     expect(lastDayOfEveryMonthWrong).toBeUndefined();
   });
+
+  it('will return first and fifthteenth and fifthteenth and last', () => {
+    const timezone = tz(getTimezone());
+    // Last day of march should generate a rule for the last day of every month
+    const input = timezone(parse('2026-03-15', 'yyyy-MM-dd', new Date()));
+
+    const result = getRecurrencesForDate(input, getTimezone());
+
+    const firstAndFifthteenth = result.find(item =>
+      item.ruleString().includes('RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1,15'),
+    );
+    const fifthteenthAndLast = result.find(item =>
+      item.ruleString().includes('RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1'),
+    );
+    if (!fifthteenthAndLast) {
+      console.log(JSON.stringify(result));
+    }
+    expect(firstAndFifthteenth).not.toBeUndefined();
+    expect(fifthteenthAndLast).not.toBeUndefined();
+  });
 });
