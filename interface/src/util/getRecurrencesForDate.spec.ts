@@ -10,7 +10,7 @@ describe('get recurrences for date', () => {
     // Last day of march should generate a rule for the last day of every month
     const input = timezone(parse('2026-03-31', 'yyyy-MM-dd', new Date()));
 
-    const result = getRecurrencesForDate(input, 'America/Chicago');
+    const result = getRecurrencesForDate(input, getTimezone());
 
     const lastDayOfEveryMonth = result.find(item =>
       item.ruleString().includes('RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=-1'),
