@@ -3,6 +3,84 @@
 
 $basePadding: 4 * variables.$size;
 
+.drawerOverlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+// Note: the global tailwind config has `important: true`, which previously
+// caused all utility classes to emit with `!important`, silently winning over
+// any vaul-injected styles. These SCSS module classes do not get that
+// treatment. If drawer positioning or layout ever breaks while open, add
+// `!important` to the offending property here — see .selectLoading in
+// Select.module.scss for precedent. vaul's own attribute-scoped CSS
+// ([vaul-drawer]) handles structural positioning itself, so this has not been
+// an issue in practice.
 .drawerContent {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  border-radius: 2.5 * variables.$size 2.5 * variables.$size 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  background-color: var(--background);
+  max-height: 60%;
+  gap: 4 * variables.$size;
   padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
+}
+
+.drawerHandle {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 4 * variables.$size;
+  height: 2 * variables.$size;
+  min-height: 2 * variables.$size;
+  width: 25 * variables.$size;
+  border-radius: 9999px;
+  background-color: var(--content-muted);
+}
+
+.drawerWrapper {
+  flex-shrink: 1;
+  overflow-y: auto;
+}
+
+.drawerHeader {
+  display: grid;
+  gap: 1.5 * variables.$size;
+  padding: 4 * variables.$size;
+  text-align: center;
+
+  @media (min-width: variables.$smallScreen) {
+    text-align: left;
+  }
+}
+
+.drawerFooter {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  padding: 4 * variables.$size;
+}
+
+.drawerTitle {
+  font-size: 4.5 * variables.$size;
+  font-weight: var(--semibold);
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.drawerDescription {
+  @include mixins.text-small;
+  color: var(--content-subtle);
 }
