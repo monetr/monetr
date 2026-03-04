@@ -103,17 +103,13 @@ describe('get recurrences for date', () => {
 
     const result = getRecurrencesForDate(input, getTimezone());
 
-    const everyTuesday = result.find(item =>
-      item.ruleString().includes('RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=TU'),
-    );
+    const everyTuesday = result.find(item => item.ruleString().includes('RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=TU'));
     if (!everyTuesday) {
       console.log(JSON.stringify(result));
     }
     expect(everyTuesday).not.toBeUndefined();
 
-    const everyOtherTuesday = result.find(item =>
-      item.ruleString().includes('RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU'),
-    );
+    const everyOtherTuesday = result.find(item => item.ruleString().includes('RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU'));
     expect(everyOtherTuesday).not.toBeUndefined();
   });
 
@@ -128,9 +124,7 @@ describe('get recurrences for date', () => {
     );
     expect(everyOtherMonth).not.toBeUndefined();
 
-    const everyQuarter = result.find(item =>
-      item.ruleString().includes('RRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=10'),
-    );
+    const everyQuarter = result.find(item => item.ruleString().includes('RRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=10'));
     expect(everyQuarter).not.toBeUndefined();
 
     const everySixMonths = result.find(item =>
@@ -155,9 +149,7 @@ describe('get recurrences for date', () => {
     expect(lastDayOfEveryMonth).not.toBeUndefined();
 
     // Should not hardcode 28 since that is not always the last day of the month
-    const lastDayWrong = result.find(item =>
-      item.ruleString().includes('RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=28'),
-    );
+    const lastDayWrong = result.find(item => item.ruleString().includes('RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=28'));
     expect(lastDayWrong).toBeUndefined();
 
     // Last day of February also qualifies for the 15th and last rule
