@@ -12,6 +12,9 @@ function useIosScrollLock() {
   const scrollY = React.useRef(0);
 
   const lock = React.useCallback(() => {
+    if (document.body.style.position === 'fixed') {
+      return;
+    }
     scrollY.current = window.scrollY;
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollY.current}px`;
@@ -19,6 +22,9 @@ function useIosScrollLock() {
   }, []);
 
   const unlock = React.useCallback(() => {
+    if (document.body.style.position !== 'fixed') {
+      return;
+    }
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.width = '';
@@ -31,18 +37,30 @@ function useIosScrollLock() {
 const Drawer = ({
   shouldScaleBackground = false,
   onOpenChange,
+  open,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) => {
   const { lock, unlock } = useIosScrollLock();
 
+  // When the drawer is used as a controlled component, the parent can change `open` directly
+  // (e.g. closing after selecting a value). In that case vaul does NOT fire onOpenChange —
+  // doing so would be circular — so we watch the prop ourselves to catch that path.
+  React.useEffect(() => {
+    if (open === true) {
+      lock();
+    } else if (open === false) {
+      unlock();
+    }
+  }, [open, lock, unlock]);
+
   const handleOpenChange = React.useCallback(
-    (open: boolean) => {
-      if (open) {
+    (newOpen: boolean) => {
+      if (newOpen) {
         lock();
       } else {
         unlock();
       }
-      onOpenChange?.(open);
+      onOpenChange?.(newOpen);
     },
     [lock, unlock, onOpenChange],
   );
@@ -51,6 +69,7 @@ const Drawer = ({
     <DrawerPrimitive.Root
       noBodyStyles
       onOpenChange={handleOpenChange}
+      open={open}
       shouldScaleBackground={shouldScaleBackground}
       {...props}
     />
