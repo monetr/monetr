@@ -1,0 +1,22 @@
+@use '@monetr/interface/variables';
+
+.root {
+  height: 10 * variables.$size;
+  display: flex;
+  align-items: center;
+  // TODO Add this back in once I re-add sticky headers!
+  // backdrop-filter: blur(4px);
+  // background: linear-gradient(to top, transparent, transparent 90%, var(--background));
+  margin-right: 4 * variables.$size;
+}
+
+.label {
+  z-index: 10;
+  padding-left: 3 * variables.$size;
+  padding-right: 3 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-left: 4 * variables.$size;
+    padding-right: 4 * variables.$size;
+  }
+}
