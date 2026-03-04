@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 
 import Typography from '@monetr/interface/components/Typography';
-import styles from './TransactionDateItem.module.scss';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
+
+import styles from './TransactionDateItem.module.scss';
 
 interface TransactionDateItemProps {
   date: Date;
