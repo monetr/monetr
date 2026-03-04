@@ -1,0 +1,164 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  position: relative;
+  width: 100%;
+  padding-left: 1 * variables.$size;
+  padding-right: 1 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-left: 2 * variables.$size;
+    padding-right: 2 * variables.$size;
+  }
+
+  &:hover {
+    .inner {
+      background-color: var(--background-active);
+    }
+
+    .arrowLink {
+      color: var(--content-emphasis);
+    }
+  }
+}
+
+.inner {
+  display: flex;
+  height: 100%;
+  gap: 1 * variables.$size;
+  border-radius: var(--border-radius);
+  padding: 1 * variables.$size 2 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    gap: 4 * variables.$size;
+  }
+}
+
+.mobileLink {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+.leftSection {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  gap: 4 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: 50%;
+  }
+}
+
+.categoryLabel {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: block;
+  }
+}
+
+.budgetingMobile {
+  display: flex;
+  width: 100%;
+  @include mixins.text-small;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+.budgetingAddition {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: flex;
+    width: 50%;
+    flex: 1;
+    align-items: center;
+    padding-left: 6 * variables.$size;
+  }
+}
+
+.amountSection {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    min-width: 8em;
+  }
+}
+
+.arrowLink {
+  flex: none;
+  color: var(--content-subtle);
+
+  @media (min-width: variables.$mediumScreen) {
+    cursor: pointer;
+  }
+}
+
+.budgetingInfo {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.spentFromLabel {
+  min-width: 0;
+  flex: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--medium);
+  color: var(--content);
+}
+
+.contributionLabel {
+  min-width: 0;
+  flex: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--medium);
+  color: var(--content-subtle);
+}
+
+.spentFromValue {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  @include mixins.text-small;
+
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.text-base;
+  }
+
+  &[data-hasspending="true"] {
+    font-weight: var(--bold);
+    color: var(--content-emphasis);
+  }
+
+  &[data-hasspending="false"] {
+    font-weight: var(--medium);
+    color: var(--content);
+  }
+}
