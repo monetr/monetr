@@ -5,9 +5,9 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import styles from './Drawer.module.scss';
 
-// iOS Safari/WebView ignores `overflow: hidden` on the body. The correct workaround is
-// `position: fixed` with a negative `top` equal to the current scroll offset. We opt out
-// of vaul's own body style handling (noBodyStyles) and do it ourselves so we control timing.
+// iOS Safari/WebView ignores `overflow: hidden` on the body. The correct workaround is `position: fixed` with a
+// negative `top` equal to the current scroll offset. We opt out of vaul's own body style handling (noBodyStyles) and do
+// it ourselves so we control timing.
 function useIosScrollLock() {
   const scrollY = React.useRef(0);
 
@@ -42,9 +42,9 @@ const Drawer = ({
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) => {
   const { lock, unlock } = useIosScrollLock();
 
-  // When the drawer is used as a controlled component, the parent can change `open` directly
-  // (e.g. closing after selecting a value). In that case vaul does NOT fire onOpenChange —
-  // doing so would be circular — so we watch the prop ourselves to catch that path.
+  // When the drawer is used as a controlled component, the parent can change `open` directly (e.g. closing after
+  // selecting a value). In that case vaul does NOT fire onOpenChange — doing so would be circular — so we watch the
+  // prop ourselves to catch that path.
   React.useEffect(() => {
     if (open === true) {
       lock();
@@ -87,11 +87,7 @@ const DrawerOverlay = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Overlay
-    className={mergeTailwind(styles.drawerOverlay, className)}
-    ref={ref}
-    {...props}
-  />
+  <DrawerPrimitive.Overlay className={mergeTailwind(styles.drawerOverlay, className)} ref={ref} {...props} />
 ));
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
@@ -101,11 +97,7 @@ const DrawerContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay />
-    <DrawerPrimitive.Content
-      className={mergeTailwind(styles.drawerContent, className)}
-      ref={ref}
-      {...props}
-    >
+    <DrawerPrimitive.Content className={mergeTailwind(styles.drawerContent, className)} ref={ref} {...props}>
       <div className={styles.drawerHandle} />
       {children}
     </DrawerPrimitive.Content>
@@ -138,11 +130,7 @@ const DrawerTitle = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Title
-    className={mergeTailwind(styles.drawerTitle, className)}
-    ref={ref}
-    {...props}
-  />
+  <DrawerPrimitive.Title className={mergeTailwind(styles.drawerTitle, className)} ref={ref} {...props} />
 ));
 DrawerTitle.displayName = DrawerPrimitive.Title.displayName;
 
@@ -150,11 +138,7 @@ const DrawerDescription = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Description
-    className={mergeTailwind(styles.drawerDescription, className)}
-    ref={ref}
-    {...props}
-  />
+  <DrawerPrimitive.Description className={mergeTailwind(styles.drawerDescription, className)} ref={ref} {...props} />
 ));
 DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
