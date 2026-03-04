@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import Typography from '@monetr/interface/components/Typography';
+import styles from './TransactionDateItem.module.scss';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
@@ -28,8 +29,8 @@ export default function TransactionDateItem({ date }: TransactionDateItemProps):
   // );
 
   return (
-    <li className='h-10 flex items-center backdrop-blur-sm bg-gradient-to-t from-transparent dark:to-dark-monetr-background via-90% mr-4'>
-      <Typography className='z-10 px-3 md:px-4' color='subtle' weight='semibold'>
+    <li className={styles.root}>
+      <Typography className={styles.label} color='subtle' weight='semibold'>
         {dateString}
       </Typography>
     </li>
