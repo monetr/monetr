@@ -8,6 +8,8 @@
   display: block;
   border-width: 0px;
   border-radius: var(--border-radius);
+  appearance: none;
+  -webkit-appearance: none;
   min-height: 9.5 * variables.$size;
   caret-color: var(--content-emphasis);
 
