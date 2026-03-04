@@ -5,9 +5,57 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import styles from './Drawer.module.scss';
 
-const Drawer = ({ shouldScaleBackground = false, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
-);
+// iOS Safari/WebView ignores `overflow: hidden` on the body. The correct workaround is
+// `position: fixed` with a negative `top` equal to the current scroll offset. We opt out
+// of vaul's own body style handling (noBodyStyles) and do it ourselves so we control timing.
+function useIosScrollLock() {
+  const scrollY = React.useRef(0);
+
+  const lock = React.useCallback(() => {
+    scrollY.current = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY.current}px`;
+    document.body.style.width = '100%';
+  }, []);
+
+  const unlock = React.useCallback(() => {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollY.current);
+  }, []);
+
+  return { lock, unlock };
+}
+
+const Drawer = ({
+  shouldScaleBackground = false,
+  onOpenChange,
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) => {
+  const { lock, unlock } = useIosScrollLock();
+
+  const handleOpenChange = React.useCallback(
+    (open: boolean) => {
+      if (open) {
+        lock();
+      } else {
+        unlock();
+      }
+      onOpenChange?.(open);
+    },
+    [lock, unlock, onOpenChange],
+  );
+
+  return (
+    <DrawerPrimitive.Root
+      noBodyStyles
+      onOpenChange={handleOpenChange}
+      shouldScaleBackground={shouldScaleBackground}
+      {...props}
+    />
+  );
+};
 Drawer.displayName = 'Drawer';
 
 const DrawerTrigger = DrawerPrimitive.Trigger;
