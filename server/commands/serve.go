@@ -60,6 +60,12 @@ func ServeCommand(parent *cobra.Command) {
 				log.WithField("config", configFileName).Info("config file loaded")
 			}
 
+			if configuration.ReCAPTCHA.Enabled {
+				log.
+					WithField("issueUrl", "https://github.com/monetr/monetr/issues/2979").
+					Warn("DEPRECATION WARNING: ReCAPTCHA will be removed in a future release. If you are currently using it then please comment on the issue on GitHub. It is recommended to instead rate limit monetr authentication endpoints instead of using a captcha at this time.")
+			}
+
 			// Load any timezone aliases from the host operating system.
 			zoneinfo.LoadAliasesFromHost(cmd.Context(), log)
 
