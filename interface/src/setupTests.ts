@@ -1,10 +1,8 @@
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom';
-
+import { expect } from '@rstest/core';
+import * as jestDomMatchers from '@testing-library/jest-dom/matchers';
 import { cleanup, configure } from '@testing-library/react';
+
+expect.extend(jestDomMatchers);
 
 configure({
   asyncUtilTimeout: 10000,
@@ -26,15 +24,15 @@ beforeAll(() => {
 
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: jest.fn().mockImplementation(query => ({
+    value: rstest.fn().mockImplementation(query => ({
       matches: false,
       media: query,
       onchange: null,
-      addListener: jest.fn(), // Deprecated
-      removeListener: jest.fn(), // Deprecated
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
+      addListener: rstest.fn(), // Deprecated
+      removeListener: rstest.fn(), // Deprecated
+      addEventListener: rstest.fn(),
+      removeEventListener: rstest.fn(),
+      dispatchEvent: rstest.fn(),
     })),
   });
 });

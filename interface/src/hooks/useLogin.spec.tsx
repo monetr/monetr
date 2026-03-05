@@ -1,24 +1,47 @@
-import { act } from 'react';
+import { act, useEffect } from 'react';
 
+import { renderHook } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
+import NiceModal from '@ebay/nice-modal-react';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 
 import monetrClient from '@monetr/interface/api/api';
 import useLogin from '@monetr/interface/hooks/useLogin';
-import testRenderHook from '@monetr/interface/testutils/hooks';
+import MQueryClient from '@monetr/interface/components/MQueryClient';
+import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
 
-const mockUseNavigate = jest.fn((_url: string) => {});
-jest.mock('react-router-dom', () => ({
-  __esModule: true,
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockUseNavigate,
-}));
+let currentLocation: ReturnType<typeof useLocation> | null = null;
+
+function LocationSpy() {
+  const location = useLocation();
+  useEffect(() => {
+    currentLocation = location;
+  }, [location]);
+  return null;
+}
+
+function wrapper({ children }: React.PropsWithChildren) {
+  return (
+    <MemoryRouter
+      future={{ v7_startTransition: false, v7_relativeSplatPath: false }}
+      initialEntries={['/login']}
+    >
+      <LocationSpy />
+      <MQueryClient>
+        <MSnackbarProvider>
+          <NiceModal.Provider>{children}</NiceModal.Provider>
+        </MSnackbarProvider>
+      </MQueryClient>
+    </MemoryRouter>
+  );
+}
 
 describe('login', () => {
   let mockAxios: MockAdapter;
 
   beforeEach(() => {
     mockAxios = new MockAdapter(monetrClient);
-    mockUseNavigate.mockReset();
+    currentLocation = null;
   });
   afterEach(() => {
     mockAxios.reset();
@@ -31,19 +54,17 @@ describe('login', () => {
       nextUrl: '/account/subscribe',
     });
 
-    const {
-      result: { current: login },
-    } = testRenderHook(useLogin, { initialRoute: '/login' });
+    const { result } = renderHook(useLogin, { wrapper });
 
     await act(() => {
-      return login({
+      return result.current({
         email: 'test@test.com',
         password: 'password',
       });
     });
 
     // Make sure we end up navigating to the url returned by the login endpoint.
-    expect(mockUseNavigate).toBeCalledWith('/account/subscribe');
+    expect(currentLocation?.pathname).toBe('/account/subscribe');
   });
 
   it('will navigate without a next url', async () => {
@@ -51,19 +72,17 @@ describe('login', () => {
       isActive: true,
     });
 
-    const {
-      result: { current: login },
-    } = testRenderHook(useLogin, { initialRoute: '/login' });
+    const { result } = renderHook(useLogin, { wrapper });
 
     await act(() => {
-      return login({
+      return result.current({
         email: 'test@test.com',
         password: 'password',
       });
     });
 
     // When the login endpoint does not return a next url, navigate to an index route.
-    expect(mockUseNavigate).toBeCalledWith('/');
+    expect(currentLocation?.pathname).toBe('/');
   });
 
   it('will require a password reset', async () => {
@@ -72,12 +91,10 @@ describe('login', () => {
       resetToken: 'abc123',
     });
 
-    const {
-      result: { current: login },
-    } = testRenderHook(useLogin, { initialRoute: '/login' });
+    const { result } = renderHook(useLogin, { wrapper });
 
     await act(() => {
-      return login({
+      return result.current({
         email: 'test@test.com',
         password: 'password',
       });
@@ -85,11 +102,10 @@ describe('login', () => {
 
     // When the login endpoint returns a password change required error; then make sure we navigate to the password
     // reset page.
-    expect(mockUseNavigate).toBeCalledWith('/password/reset', {
-      state: {
-        message: 'You are required to change your password before authenticating.',
-        token: 'abc123',
-      },
+    expect(currentLocation?.pathname).toBe('/password/reset');
+    expect(currentLocation?.state).toEqual({
+      message: 'You are required to change your password before authenticating.',
+      token: 'abc123',
     });
   });
 
@@ -98,22 +114,19 @@ describe('login', () => {
       code: 'EMAIL_NOT_VERIFIED',
     });
 
-    const {
-      result: { current: login },
-    } = testRenderHook(useLogin, { initialRoute: '/login' });
+    const { result } = renderHook(useLogin, { wrapper });
 
     await act(() => {
-      return login({
+      return result.current({
         email: 'test@test.com',
         password: 'password',
       });
     });
 
     // When our email is not verified, make sure we navigate to the resend page.
-    expect(mockUseNavigate).toBeCalledWith('/verify/email/resend', {
-      state: {
-        emailAddress: 'test@test.com',
-      },
+    expect(currentLocation?.pathname).toBe('/verify/email/resend');
+    expect(currentLocation?.state).toEqual({
+      emailAddress: 'test@test.com',
     });
   });
 });

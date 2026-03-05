@@ -6,12 +6,12 @@ describe('sentry relay transport', () => {
       {
         fetchOptions: undefined,
         url: 'http://my.monetr.dev',
-        recordDroppedEvent: jest.fn(),
+        recordDroppedEvent: rstest.fn(),
         headers: {
           Key: 'value',
         },
       },
-      jest.fn(),
+      rstest.fn(),
     );
 
     // TODO This is fine for now but eventually I'd love to just mock the actual make transport function inside so we

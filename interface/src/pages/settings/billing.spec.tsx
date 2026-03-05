@@ -10,7 +10,7 @@ import SettingsBilling from '@monetr/interface/pages/settings/billing';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 const oldWindowLocation: typeof window.location = window.location;
-const locationAssignMock = jest.fn();
+const locationAssignMock = rstest.fn();
 
 describe('billing settings page', () => {
   let mockAxios: MockAdapter;
