@@ -154,20 +154,21 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 			}
 		}
 
-		{ // Based on the center most datum, calculate the merchant
-			datum, _ := s.dbscan.GetDocumentByIndex(centerIndex)
+		{ // Based on the center most centroid, calculate the merchant
+			centroid, _ := s.dbscan.GetDocumentByIndex(centerIndex)
 
-			sort.Slice(datum.Tokens, func(i, j int) bool {
-				return rankWordComposition(datum.Tokens[i].Original) < rankWordComposition(datum.Tokens[j].Original)
+			sort.Slice(centroid.Tokens, func(i, j int) bool {
+				return rankWordComposition(centroid.Tokens[i].Original) <
+					rankWordComposition(centroid.Tokens[j].Original)
 			})
 
 			// Then we take the center most transaction in the cluster and we use the
 			// original words from that transaction in our most valuable indicies
 			// tracker. This way the most valuable words remain consistent as long as
 			// the center transaction does not change significantly over time.
-			for wordIndex := range datum.Vector {
+			for wordIndex := range centroid.Vector {
 				tracker := mostValuableIndicies[wordIndex]
-				for _, originalToken := range datum.Tokens {
+				for _, originalToken := range centroid.Tokens {
 					for tokenIndex, tokenWord := range originalToken.Final {
 						if strings.EqualFold(indicies[wordIndex], tokenWord) {
 							if len(originalToken.Final) > 1 {
@@ -182,6 +183,11 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 
 				mostValuableIndicies[wordIndex] = tracker
 			}
+
+			// Store the ID of the centroid. I want to track if this changes
+			// frequently or if it can also be used in combination with the signature
+			// to create a strong consistent identifier.
+			group.Centroid = &centroid.ID
 		}
 
 		// Post processing steps for the similar transaction cluster...

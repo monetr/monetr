@@ -25,6 +25,7 @@ type TransactionCluster struct {
 	BankAccountId        ID[BankAccount]               `json:"bankAccountId" pg:"bank_account_id,notnull"`
 	BankAccount          *BankAccount                  `json:"-" pg:"rel:has-one"`
 	Signature            string                        `json:"signature" pg:"signature"`
+	Centroid             *ID[Transaction]              `json:"centroid" pg:"centroid"`
 	Name                 string                        `json:"name" pg:"name,notnull"`
 	Members              []ID[Transaction]             `json:"members" pg:"members,notnull,type:'varchar(32)[]'"`
 	Debug                []TransactionClusterDebugItem `json:"debug" pg:"debug,type:'jsonb'"`
