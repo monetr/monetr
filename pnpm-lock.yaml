@@ -189,8 +189,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       downshift:
-        specifier: 9.3.1
-        version: 9.3.1(react@18.3.1)
+        specifier: 9.3.2
+        version: 9.3.2(react@18.3.1)
       formik:
         specifier: 2.4.9
         version: 2.4.9(react@18.3.1)
@@ -3644,8 +3644,8 @@ packages:
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
 
-  downshift@9.3.1:
-    resolution: {integrity: sha512-d/Bt/c74+TvG2MJW/xnoN8+zNTc2cYjbZ8yqlMPxmKbvsncJR0sXd4U1eu+JAbeKuwE8AppYRgmjkh4X0Us1hQ==}
+  downshift@9.3.2:
+    resolution: {integrity: sha512-5VD0WZLQDhipWiDU+K5ili3VDhGrXwlvOlSaSG1Cb0eS4XpssxVuoD09JNgju+bAzxB2Wvlwx+FwTE/FNdrqow==}
     peerDependencies:
       react: '>=16.12.0'
 
@@ -10358,7 +10358,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
 
-  downshift@9.3.1(react@18.3.1):
+  downshift@9.3.2(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.28.6
       compute-scroll-into-view: 3.1.1
