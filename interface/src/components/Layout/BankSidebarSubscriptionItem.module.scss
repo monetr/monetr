@@ -1,0 +1,55 @@
+@use '@monetr/interface/variables';
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.link {
+  position: relative;
+  color: var(--content-subtle);
+
+  &:hover .icon {
+    color: var(--content-emphasis);
+  }
+}
+
+.icon {
+  cursor: pointer;
+}
+
+.iconTrialing {
+  margin-top: 1.5 * variables.$size;
+}
+
+.statusIndicator {
+  position: absolute;
+  display: flex;
+  height: 2 * variables.$size;
+  width: 2 * variables.$size;
+  right: 0;
+  bottom: 0;
+}
+
+.statusPing {
+  position: absolute;
+  display: inline-flex;
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  // TODO Multiple stylesheets are now using this exact color. Just make this a
+  // variable!
+  background-color: #facc15; // yellow-400
+}
+
+.statusDot {
+  position: relative;
+  display: inline-flex;
+  border-radius: 9999px;
+  height: 2 * variables.$size;
+  width: 2 * variables.$size;
+  background-color: #eab308; // yellow-500
+}

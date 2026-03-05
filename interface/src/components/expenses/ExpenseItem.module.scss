@@ -1,0 +1,233 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  position: relative;
+  width: 100%;
+  padding-left: 1 * variables.$size;
+  padding-right: 1 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-left: 2 * variables.$size;
+    padding-right: 2 * variables.$size;
+  }
+
+  &:hover {
+    .inner {
+      background-color: var(--background-active);
+    }
+
+    .targetAmount {
+      color: var(--content);
+    }
+
+    .ofLabel {
+      color: var(--content-subtle);
+    }
+
+    .arrowLink {
+      color: var(--content-emphasis);
+    }
+  }
+}
+
+.mobileLink {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+.inner {
+  width: 100%;
+  display: flex;
+  border-radius: var(--border-radius);
+  gap: 2 * variables.$size;
+  align-items: center;
+  padding: 1 * variables.$size 2 * variables.$size;
+  cursor: pointer;
+
+  @media (min-width: variables.$mediumScreen) {
+    cursor: auto;
+  }
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  width: 100%;
+  gap: 4 * variables.$size;
+  min-width: 0;
+  padding-right: 1 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: 50%;
+  }
+}
+
+.nameColumn {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+}
+
+.dateBadge {
+  flex: none;
+  margin-left: 1 * variables.$size;
+}
+
+.ruleText {
+  display: none;
+  color: #e4e4e7; // zinc-200
+  @include mixins.text-small;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: block;
+  }
+}
+
+.mobileContribution {
+  color: #e4e4e7; // zinc-200
+  @include mixins.text-small;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+.desktopContribution {
+  display: none;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: flex;
+    width: 50%;
+  }
+}
+
+.contributionValue {
+  color: rgba(#fafafa, 0.75); // zinc-50/75
+  font-weight: var(--medium);
+  @include mixins.text-base;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.mobileAmountSection {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+.amountColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.currentAmount {
+  text-align: end;
+  font-weight: var(--semibold);
+
+  &[data-status='funded'] {
+    color: var(--amount-positive);
+  }
+
+  &[data-status='ahead'] {
+    color: #3b82f6; // blue-500
+  }
+
+  &[data-status='behind'] {
+    color: var(--amount-negative);
+  }
+
+  &[data-status='overfunded'] {
+    color: #facc15; // yellow-400
+  }
+}
+
+.divider {
+  width: 100%;
+  border: 0;
+  border-bottom: thin solid var(--content-muted);
+}
+
+.targetAmount {
+  text-align: end;
+  color: var(--content-subtle);
+  font-weight: var(--medium);
+}
+
+.chevron {
+  color: var(--content-muted);
+  flex: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    cursor: pointer;
+  }
+}
+
+.desktopAmountSection {
+  display: none;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  gap: 2 * variables.$size;
+  align-items: center;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: flex;
+    min-width: 12em;
+  }
+}
+
+.desktopAmountRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ofLabel {
+  text-align: end;
+  color: #71717a; // zinc-500
+  font-weight: var(--medium);
+}
+
+.arrowLink {
+  flex: none;
+  color: var(--content-subtle);
+
+  @media (min-width: variables.$mediumScreen) {
+    cursor: pointer;
+  }
+}
