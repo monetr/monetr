@@ -1,5 +1,6 @@
 import { InfinityIcon } from 'lucide-react';
 
+import Flex from '@monetr/interface/components/Flex';
 import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -15,15 +16,17 @@ export default function BalanceLimitAmount(): React.JSX.Element {
   switch (bankAccount?.accountSubType) {
     case BankAccountSubType.CreditCard:
       return (
-        <div className='flex w-full justify-between'>
-          <Typography color='emphasis' size='lg' weight='semibold'>
-            <InfinityIcon />
-            Limit:
-          </Typography>
+        <Flex gap='sm' justify='between'>
+          <Flex flex='shrink'>
+            <Typography color='emphasis' ellipsis size='lg' weight='semibold' wrapping='nowrap'>
+              <InfinityIcon />
+              Limit:
+            </Typography>
+          </Flex>
           <Typography color='emphasis' size='lg' weight='semibold'>
             {locale.formatAmount(balance?.limit, AmountType.Stored)}
           </Typography>
-        </div>
+        </Flex>
       );
   }
 

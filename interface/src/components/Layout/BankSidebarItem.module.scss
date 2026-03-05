@@ -1,0 +1,95 @@
+@use '@monetr/interface/variables';
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.root {
+  width: 100%;
+  height: 12 * variables.$size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  &:hover .indicator[data-active='false'] {
+    transform: scaleX(1) scaleY(1);
+  }
+}
+
+.indicator {
+  position: absolute;
+  background-color: var(--border);
+  right: 0;
+  border-top-left-radius: 0.75rem;
+  border-bottom-left-radius: 0.75rem;
+  transition: transform 150ms;
+  width: 1.5 * variables.$size;
+
+  &[data-active='true'] {
+    height: 8 * variables.$size;
+    transform: scaleX(1) scaleY(1);
+  }
+
+  &[data-active='false'] {
+    height: 4 * variables.$size;
+    transform: scaleX(0) scaleY(0.5);
+  }
+}
+
+.link {
+  position: absolute;
+  border-radius: 9999px;
+  width: 10 * variables.$size;
+  height: 10 * variables.$size;
+  background-color: var(--background-subtle);
+  filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.statusIndicator {
+  position: absolute;
+  display: flex;
+  height: 3 * variables.$size;
+  width: 3 * variables.$size;
+  right: 0;
+  bottom: 0;
+}
+
+.statusPing {
+  position: absolute;
+  display: inline-flex;
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.statusDot {
+  position: relative;
+  display: inline-flex;
+  border-radius: 9999px;
+  height: 3 * variables.$size;
+  width: 3 * variables.$size;
+}
+
+.warningPing {
+  background-color: #facc15; // yellow-400
+}
+
+.warningDot {
+  background-color: #eab308; // yellow-500
+}
+
+.revokedPing {
+  background-color: #f87171; // red-400
+}
+
+.revokedDot {
+  background-color: #ef4444; // red-500
+}
