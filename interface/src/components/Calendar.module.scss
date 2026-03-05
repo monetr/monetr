@@ -1,0 +1,207 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  padding: 3 * variables.$size;
+}
+
+.months {
+  display: flex;
+  flex-direction: column;
+  gap: 4 * variables.$size;
+
+  @media (min-width: variables.$smallScreen) {
+    flex-direction: row;
+    gap: 0 4 * variables.$size;
+  }
+}
+
+.month {
+  display: flex;
+  flex-direction: column;
+  gap: 4 * variables.$size;
+}
+
+.captionRow {
+  display: flex;
+  justify-content: center;
+  padding-top: 1 * variables.$size;
+  position: relative;
+  align-items: center;
+}
+
+.captionLabel {
+  @include mixins.text-small;
+  font-weight: var(--medium);
+}
+
+.nav {
+  gap: 1 * variables.$size;
+  display: flex;
+  align-items: center;
+}
+
+.navButtonPrevious {
+  position: absolute;
+  left: 1 * variables.$size;
+}
+
+.navButtonNext {
+  position: absolute;
+  right: 1 * variables.$size;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.headRow {
+  display: flex;
+}
+
+.headCell {
+  color: var(--content-subtle);
+  border-radius: 1.5 * variables.$size; // rounded-md
+  width: 9 * variables.$size;
+  font-weight: var(--normal);
+  font-size: 0.8rem;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+  margin-top: 2 * variables.$size;
+}
+
+// The `day-range-end` class is kept as a global (non-module) string in the
+// classNames prop so that this :has() selector can reference it without
+// needing to know the hashed module name.
+.cell {
+  height: 9 * variables.$size;
+  width: 9 * variables.$size;
+  text-align: center;
+  @include mixins.text-small;
+  padding: 0;
+  position: relative;
+
+  &:has([aria-selected]:global(.day-range-end)) {
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  }
+
+  &:first-child:has([aria-selected]) {
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+  }
+
+  &:last-child:has([aria-selected]) {
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  }
+
+  &:focus-within {
+    position: relative;
+    z-index: 20;
+  }
+}
+
+// Day buttons are styled from scratch here rather than composing buttonVariants
+// to avoid specificity conflicts with Button's size classes.
+.day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius);
+  height: 9 * variables.$size;
+  width: 9 * variables.$size;
+  padding: 0;
+  font-weight: var(--normal);
+  color: var(--content-emphasis);
+
+  &[aria-selected] {
+    opacity: 1;
+  }
+
+  &:enabled:hover {
+    background-color: var(--background-emphasis);
+  }
+
+  &:disabled, &[aria-disabled='true'] {
+    pointer-events: none;
+  }
+
+  &:focus {
+    outline-style: none;
+  }
+
+  &:focus-visible {
+    outline-style: solid;
+    outline-width: var(--outline-size);
+    outline-offset: var(--outline-size);
+    outline-color: var(--brand-focused);
+  }
+}
+
+.daySelected {
+  background-color: var(--brand);
+  color: var(--content-emphasis);
+
+  &:enabled:hover {
+    background-color: var(--brand-subtle);
+    color: var(--content-emphasis);
+  }
+
+  &:focus {
+    background-color: var(--brand);
+    color: var(--content-emphasis);
+  }
+}
+
+.dayToday {
+  background-color: var(--background-darker);
+  color: var(--brand-muted);
+
+  &:hover {
+    color: var(--brand-bright);
+  }
+}
+
+.dayOutside {
+  color: var(--content-subtle);
+
+  &[aria-selected] {
+    color: var(--content);
+    background-color: rgba(78, 26, 160, 0.5); // brand/50
+  }
+}
+
+.dayDisabled {
+  color: var(--content-muted);
+}
+
+.dayRangeMiddle {
+  &[aria-selected] {
+    background-color: var(--background-emphasis); // accent
+    color: var(--content-emphasis); // accent-foreground
+  }
+}
+
+.dayHidden {
+  visibility: hidden;
+}
+
+// Custom Caption component elements
+.caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navGroup {
+  display: flex;
+  align-items: center;
+  gap: 1 * variables.$size;
+}
+
+.monthLabel {
+  margin-left: 1 * variables.$size;
+  margin-right: 1 * variables.$size;
+}
