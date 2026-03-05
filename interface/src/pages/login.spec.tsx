@@ -6,12 +6,14 @@ import monetrClient from '@monetr/interface/api/api';
 import Login from '@monetr/interface/pages/login';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-const mockUseNavigate = jest.fn((_url: string) => {});
-jest.mock('react-router-dom', () => ({
-  __esModule: true,
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockUseNavigate,
-}));
+const mockUseNavigate = rstest.fn((_url: string) => {});
+rstest.mock('react-router-dom', async () => {
+  const actual = await rstest.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockUseNavigate,
+  };
+});
 
 describe('login page', () => {
   let mockAxios: MockAdapter;
