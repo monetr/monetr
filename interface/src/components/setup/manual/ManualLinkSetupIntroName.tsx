@@ -8,6 +8,7 @@ import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/Ma
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import Typography from '@monetr/interface/components/Typography';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 
 export type ManualLinkSetupIntroNameValues = {
   budgetName: string;
@@ -44,7 +45,7 @@ export default function ManualLinkSetupIntroName(): JSX.Element {
       </Typography>
       <FormTextField
         autoFocus
-        className='w-full'
+        className={layoutVariants({ width: 'full' })}
         label='Bank or Budget Name'
         name='budgetName'
         placeholder='My Primary Bank'

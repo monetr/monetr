@@ -1,5 +1,7 @@
 @use '@monetr/interface/variables';
 
+$basePadding: 4 * variables.$size;
+
 .selectLoading {
   display: flex !important;
   cursor: progress;
@@ -104,4 +106,6 @@
     margin-top: calc(0.5 * var(--size-1));
     margin-bottom: calc(0.5 * var(--size-1));
   }
+
+  padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
 }

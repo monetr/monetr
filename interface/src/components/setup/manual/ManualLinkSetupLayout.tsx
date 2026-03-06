@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import Flex from '@monetr/interface/components/Flex';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import MLogo from '@monetr/interface/components/MLogo';
 import MStepper from '@monetr/interface/components/MStepper';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
@@ -25,10 +27,10 @@ export default function ManualLinkSetupLayout(props: ManualLinkSetupLayoutProps)
       <div className='p-0 md:p-8 w-full'>
         <MStepper activeIndex={step} steps={['Intro', 'Account', 'Balances', 'Income']} />
       </div>
-      <div className='flex flex-col md:justify-center items-center max-w-sm'>
-        <MLogo className='w-24 h-24' />
+      <Flex align='center' className={layoutVariants({ maxWidth: 'small' })} justify='center' orientation='column'>
+        <MLogo className='size-24' />
         {props.children}
-      </div>
+      </Flex>
       {viewContext.metadata.showLogoutFooter && <LogoutFooter />}
       {!viewContext.metadata.showLogoutFooter && <div />}
     </div>

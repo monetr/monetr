@@ -35,7 +35,7 @@ $basePadding: 4 * variables.$size;
   background-color: var(--background);
   max-height: 60%;
   gap: 4 * variables.$size;
-  padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
+  // padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
 }
 
 .drawerHandle {

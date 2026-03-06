@@ -1,4 +1,5 @@
 @use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
 
 .widthQuarter {
   @include mixins.width-quarter;
@@ -26,4 +27,21 @@
 
 .heightScreen {
   height: 100vh;
+}
+
+.maxWidthSmall {
+  // Max width for sizes is just 60% of that screen's size.
+  max-width: 0.6 * variables.$smallScreen;
+}
+
+.maxWidthMedium {
+  max-width: 0.6 * variables.$mediumScreen;
+}
+
+.maxWidthLarge {
+  max-width: 0.6 * variables.$largeScreen;
+}
+
+.maxWidthExtraLarge {
+  max-width: 0.6 * variables.$extraLargeScreen;
 }
