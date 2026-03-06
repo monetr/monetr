@@ -68,12 +68,11 @@ func ServeCommand(parent *cobra.Command) {
 
 			// Load any timezone aliases from the host operating system.
 			zoneinfo.LoadAliasesFromHost(cmd.Context(), log)
-
-			log.WithFields(logrus.Fields{
-				"privateKeyPath":       configuration.Security.PrivateKey,
-				"generateCertificates": arguments.GenerateCertificates,
-			}).Debug("loading certificates")
-			publicKey, privateKey, err := loadCertificates(configuration, arguments.GenerateCertificates)
+			publicKey, privateKey, err := loadCertificates(
+				configuration,
+				log,
+				arguments.GenerateCertificates,
+			)
 			if err != nil {
 				log.WithError(err).Fatal("failed to load ed25519 public and private key")
 				return err
