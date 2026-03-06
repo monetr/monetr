@@ -32,7 +32,7 @@
     "@untitaker/hyperlink": "0.2.0",
     "autoprefixer": "10.4.27",
     "cheerio": "1.2.0",
-    "cssnano": "7.1.2",
+    "cssnano": "7.1.3",
     "postcss": "8.5.6",
     "sass": "1.97.3",
     "satori": "0.19.2",
