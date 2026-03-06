@@ -2,12 +2,16 @@ package platypus
 
 import (
 	"context"
-	"encoding/json"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"encoding/base64"
+	"math/big"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	"github.com/MicahParks/keyfunc"
+	"github.com/MicahParks/jwkset"
+	keyfunc "github.com/MicahParks/keyfunc/v3"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
@@ -49,7 +53,7 @@ func NewWebhookVerificationKeyFromPlaid(input plaid.JWKPublicKey) (WebhookVerifi
 }
 
 type WebhookVerification interface {
-	GetVerificationKey(ctx context.Context, keyId string) (*keyfunc.JWKS, error)
+	GetVerificationKey(ctx context.Context, keyId string) (keyfunc.Keyfunc, error)
 	Close() error
 }
 
@@ -74,7 +78,7 @@ func NewInMemoryWebhookVerification(log *logrus.Entry, plaid Platypus, cleanupIn
 
 type keyCacheItem struct {
 	expiration  time.Time
-	keyFunction *keyfunc.JWKS
+	keyFunction keyfunc.Keyfunc
 }
 
 type memoryWebhookVerification struct {
@@ -87,7 +91,7 @@ type memoryWebhookVerification struct {
 	closer        chan chan error
 }
 
-func (m *memoryWebhookVerification) GetVerificationKey(ctx context.Context, keyId string) (*keyfunc.JWKS, error) {
+func (m *memoryWebhookVerification) GetVerificationKey(ctx context.Context, keyId string) (keyfunc.Keyfunc, error) {
 	if atomic.LoadUint32(&m.closed) > 0 {
 		return nil, errors.New("webhook verification is closed")
 	}
@@ -128,22 +132,38 @@ func (m *memoryWebhookVerification) GetVerificationKey(ctx context.Context, keyI
 		expiration = time.Unix(int64(result.CreatedAt), 0).Add(30 * time.Minute)
 	}
 
-	var keys = struct {
-		Keys []WebhookVerificationKey `json:"keys"`
-	}{
-		Keys: []WebhookVerificationKey{
-			*result,
-		},
-	}
-
-	encodedKeys, err := json.Marshal(keys)
+	xBytes, err := base64.RawURLEncoding.DecodeString(result.X)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to convert plaid verification key to json")
+		return nil, errors.Wrap(err, "failed to decode x coordinate for webhook verification key")
+	}
+	yBytes, err := base64.RawURLEncoding.DecodeString(result.Y)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to decode y coordinate for webhook verification key")
+	}
+	pubKey := &ecdsa.PublicKey{
+		Curve: elliptic.P256(),
+		X:     new(big.Int).SetBytes(xBytes),
+		Y:     new(big.Int).SetBytes(yBytes),
 	}
 
-	var jwksJSON json.RawMessage = encodedKeys
+	jwk, err := jwkset.NewJWKFromKey(pubKey, jwkset.JWKOptions{
+		Metadata: jwkset.JWKMetadataOptions{
+			KID: result.Kid,
+		},
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create JWK from webhook verification key")
+	}
 
-	jwksFunc, err := keyfunc.NewJSON(jwksJSON)
+	storage := jwkset.NewMemoryStorage()
+	if err = storage.KeyWrite(ctx, jwk); err != nil {
+		return nil, errors.Wrap(err, "failed to write JWK to storage")
+	}
+
+	jwksFunc, err := keyfunc.New(keyfunc.Options{
+		Ctx:     ctx,
+		Storage: storage,
+	})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create key function")
 	}

@@ -1,13 +1,12 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/crumbs"
@@ -30,42 +29,7 @@ type PlaidWebhook struct {
 }
 
 type PlaidClaims struct {
-	jwt.StandardClaims
-}
-
-func (c PlaidClaims) Valid() error {
-	vErr := new(jwt.ValidationError)
-	now := jwt.TimeFunc().Unix()
-
-	// The claims below are optional, by default, so if they are set to the
-	// default value in Go, let's not fail the verification for them.
-	if !c.VerifyExpiresAt(now, false) {
-		delta := time.Unix(now, 0).Sub(time.Unix(c.ExpiresAt, 0))
-		vErr.Inner = fmt.Errorf("token is expired by %v", delta)
-		vErr.Errors |= jwt.ValidationErrorExpired
-	}
-
-	// I'm adding 5 seconds onto the now timestamp because I was running into an
-	// issue periodically that the clock on the server would be slightly different
-	// than the clock on Plaid's side. And the issued at was causing a conflict
-	// where it was just a few seconds (sometimes just one) out of bounds for this
-	// to be handled. So adding a buffer of 5 seconds to account for any clock
-	// drift between our servers and Plaid's.
-	if !c.VerifyIssuedAt(now+5, false) {
-		vErr.Inner = fmt.Errorf("token used before issued, %d | %d", now, c.IssuedAt)
-		vErr.Errors |= jwt.ValidationErrorIssuedAt
-	}
-
-	if !c.VerifyNotBefore(now, false) {
-		vErr.Inner = fmt.Errorf("token is not valid yet")
-		vErr.Errors |= jwt.ValidationErrorNotValidYet
-	}
-
-	if vErr.Errors == 0 {
-		return nil
-	}
-
-	return vErr
+	jwt.RegisteredClaims
 }
 
 func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
@@ -121,6 +85,10 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 
 			return keyFunction.Keyfunc(token)
 		},
+		// Enable iat validation and allow 5 seconds of leeway to account for
+		// clock drift between our servers and Plaid's.
+		jwt.WithIssuedAt(),
+		jwt.WithLeeway(5*time.Second),
 	)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")

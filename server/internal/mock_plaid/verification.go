@@ -10,7 +10,7 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/plaid/plaid-go/v30/plaid"
@@ -69,9 +69,9 @@ func MockGetWebhookVerificationKeyFailure(t *testing.T) {
 }
 
 func SignWebhookJWT(t *testing.T, clk clock.Clock, privateKey *ecdsa.PrivateKey, kid string) string {
-	claims := jwt.StandardClaims{
-		IssuedAt:  clk.Now().Unix(),
-		ExpiresAt: clk.Now().Add(5 * time.Minute).Unix(),
+	claims := jwt.RegisteredClaims{
+		IssuedAt:  jwt.NewNumericDate(clk.Now()),
+		ExpiresAt: jwt.NewNumericDate(clk.Now().Add(5 * time.Minute)),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
 	token.Header["kid"] = kid

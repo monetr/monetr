@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/controller"
@@ -84,6 +84,9 @@ func TestPlaidWebhook(t *testing.T) {
 		config.Plaid.WebhooksEnabled = true
 		app, e := NewTestApplicationWithConfig(t, config)
 
+		// Because the in memory webhook code does not use a mock clock.
+		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 
@@ -97,9 +100,6 @@ func TestPlaidWebhook(t *testing.T) {
 			kid,
 			&privateKey.PublicKey,
 		)
-
-		jwt.TimeFunc = app.Clock.Now
-		t.Cleanup(func() { jwt.TimeFunc = time.Now })
 
 		verificationToken := mock_plaid.SignWebhookJWT(
 			t,
@@ -152,9 +152,6 @@ func TestPlaidWebhook(t *testing.T) {
 			kid,
 			&privateKey.PublicKey,
 		)
-
-		jwt.TimeFunc = app.Clock.Now
-		t.Cleanup(func() { jwt.TimeFunc = time.Now })
 
 		app.Jobs.EXPECT().
 			EnqueueJob(gomock.Any(), background.SyncPlaid, background.SyncPlaidArguments{
@@ -225,6 +222,9 @@ func TestPlaidWebhook(t *testing.T) {
 		config.Plaid.WebhooksEnabled = true
 		app, e := NewTestApplicationWithConfig(t, config)
 
+		// Because the in memory webhook code does not use a mock clock.
+		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 
@@ -238,9 +238,6 @@ func TestPlaidWebhook(t *testing.T) {
 			kid,
 			&privateKey.PublicKey,
 		)
-
-		jwt.TimeFunc = app.Clock.Now
-		t.Cleanup(func() { jwt.TimeFunc = time.Now })
 
 		verificationToken := mock_plaid.SignWebhookJWT(
 			t,
@@ -273,6 +270,9 @@ func TestPlaidWebhook(t *testing.T) {
 		config.Plaid.WebhooksEnabled = true
 		app, e := NewTestApplicationWithConfig(t, config)
 
+		// Because the in memory webhook code does not use a mock clock.
+		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+
 		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		require.NoError(t, err, "must generate EC key")
 
@@ -284,13 +284,10 @@ func TestPlaidWebhook(t *testing.T) {
 			&privateKey.PublicKey,
 		)
 
-		jwt.TimeFunc = app.Clock.Now
-		t.Cleanup(func() { jwt.TimeFunc = time.Now })
-
 		claims := controller.PlaidClaims{
-			StandardClaims: jwt.StandardClaims{
-				IssuedAt:  app.Clock.Now().Add(-10 * time.Minute).Unix(),
-				ExpiresAt: app.Clock.Now().Add(-5 * time.Minute).Unix(),
+			RegisteredClaims: jwt.RegisteredClaims{
+				IssuedAt:  jwt.NewNumericDate(app.Clock.Now().Add(-10 * time.Minute)),
+				ExpiresAt: jwt.NewNumericDate(app.Clock.Now().Add(-5 * time.Minute)),
 			},
 		}
 		expiredToken := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
@@ -322,14 +319,14 @@ func TestPlaidWebhook(t *testing.T) {
 		config.Plaid.WebhooksEnabled = true
 		app, e := NewTestApplicationWithConfig(t, config)
 
+		// Because the in memory webhook code does not use a mock clock.
+		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+
 		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		require.NoError(t, err, "must generate EC key")
 
 		kid := gofakeit.UUID()
 		mock_plaid.MockGetWebhookVerificationKeyFailure(t)
-
-		jwt.TimeFunc = app.Clock.Now
-		t.Cleanup(func() { jwt.TimeFunc = time.Now })
 
 		verificationToken := mock_plaid.SignWebhookJWT(
 			t,
@@ -362,6 +359,9 @@ func TestPlaidWebhook(t *testing.T) {
 		config.Plaid.WebhooksEnabled = true
 		app, e := NewTestApplicationWithConfig(t, config)
 
+		// Because the in memory webhook code does not use a mock clock.
+		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+
 		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		require.NoError(t, err, "must generate EC key")
 
@@ -372,9 +372,6 @@ func TestPlaidWebhook(t *testing.T) {
 			kid,
 			&privateKey.PublicKey,
 		)
-
-		jwt.TimeFunc = app.Clock.Now
-		t.Cleanup(func() { jwt.TimeFunc = time.Now })
 
 		verificationToken := mock_plaid.SignWebhookJWT(
 			t,
