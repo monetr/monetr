@@ -128,6 +128,95 @@ func TestPlaidWebhook(t *testing.T) {
 		}, httpmock.GetCallCountInfo(), "must match expected Plaid API calls")
 	})
 
+	t.Run("won't re-request the same key ID", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		config := NewTestApplicationConfig(t)
+		config.Plaid.WebhooksEnabled = true
+		app, e := NewTestApplicationWithConfig(t, config)
+
+		// Because the in memory webhook code does not use a mock clock.
+		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+
+		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		require.NoError(t, err, "must generate EC key")
+
+		kid := gofakeit.UUID()
+		mock_plaid.MockGetWebhookVerificationKey(
+			t,
+			app.Clock,
+			kid,
+			&privateKey.PublicKey,
+		)
+
+		jwt.TimeFunc = app.Clock.Now
+		t.Cleanup(func() { jwt.TimeFunc = time.Now })
+
+		app.Jobs.EXPECT().
+			EnqueueJob(gomock.Any(), background.SyncPlaid, background.SyncPlaidArguments{
+				AccountId: link.AccountId,
+				LinkId:    link.LinkId,
+				Trigger:   "webhook",
+			}).
+			Return(nil).
+			Times(2)
+
+		{ // First request goes through and should succeed
+			// Generate a verification token right now, using the key ID that we have
+			// picked.
+			verificationToken := mock_plaid.SignWebhookJWT(
+				t,
+				app.Clock,
+				privateKey,
+				kid,
+			)
+			response := e.POST(`/api/plaid/webhook`).
+				WithHeader("Plaid-Verification", verificationToken).
+				WithJSON(controller.PlaidWebhook{
+					WebhookType: "TRANSACTIONS",
+					WebhookCode: "SYNC_UPDATES_AVAILABLE",
+					ItemId:      link.PlaidLink.PlaidId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		// Progress time forward a few seconds so the next verification key is a bit
+		// different.
+		app.Clock.Add(5 * time.Second)
+
+		{ // First request goes through and should succeed
+			// Generate another verification key using the new timestamp but the same
+			// Key ID. We shouldn't request the key again from Plaid which we will
+			// assert at the bottom!
+			verificationToken := mock_plaid.SignWebhookJWT(
+				t,
+				app.Clock,
+				privateKey,
+				kid,
+			)
+			response := e.POST(`/api/plaid/webhook`).
+				WithHeader("Plaid-Verification", verificationToken).
+				WithJSON(controller.PlaidWebhook{
+					WebhookType: "TRANSACTIONS",
+					WebhookCode: "SYNC_UPDATES_AVAILABLE",
+					ItemId:      link.PlaidLink.PlaidId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		assert.EqualValues(t, map[string]int{
+			"POST https://sandbox.plaid.com/webhook_verification_key/get": 1,
+		}, httpmock.GetCallCountInfo(), "must match expected Plaid API calls")
+	})
+
 	t.Run("successful item error webhook updates link status", func(t *testing.T) {
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
