@@ -1,41 +1,45 @@
 package mock_plaid
 
 import (
+	"crypto/ecdsa"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/plaid/plaid-go/v30/plaid"
 	"github.com/stretchr/testify/require"
 )
 
-func MockGetWebhookVerificationKey(t *testing.T) {
+func MockGetWebhookVerificationKey(t *testing.T, clk clock.Clock, kid string, publicKey *ecdsa.PublicKey) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"POST", Path(t, "/webhook_verification_key/get"),
 		func(t *testing.T, request *http.Request) (any, int) {
 			ValidatePlaidAuthentication(t, request, DoNotRequireAccessToken)
 			var requestBody plaid.WebhookVerificationKeyGetRequest
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&requestBody), "must decode request")
+			require.Equal(t, kid, requestBody.KeyId, "key ID in request must match expected kid")
 
-			// TODO webhooks: Properly implement testing for webhook verification keys.
-			// I have little to know idea how to actually implement the key issuing side of this code. I will need to learn
-			// how it actually works and then build a mock system off of it. In the mean time I will leave this blank for
-			// now.
+			x := base64.RawURLEncoding.EncodeToString(publicKey.X.Bytes())
+			y := base64.RawURLEncoding.EncodeToString(publicKey.Y.Bytes())
+
 			return plaid.WebhookVerificationKeyGetResponse{
 				Key: plaid.JWKPublicKey{
-					Alg:       "",
-					Crv:       "",
-					Kid:       requestBody.KeyId,
-					Kty:       "",
-					Use:       "",
-					X:         "",
-					Y:         "",
-					CreatedAt: int32(time.Now().Unix()),
-					ExpiredAt: *plaid.NewNullableInt32(myownsanity.Pointer(int32(time.Now().Add(10 * time.Second).Unix()))),
+					Alg:       "ES256",
+					Crv:       "P-256",
+					Kid:       kid,
+					Kty:       "EC",
+					Use:       "sig",
+					X:         x,
+					Y:         y,
+					CreatedAt: int32(clk.Now().Unix()),
+					ExpiredAt: *plaid.NewNullableInt32(myownsanity.Pointer(int32(clk.Now().Add(30 * time.Minute).Unix()))),
 				},
 				RequestId:            gofakeit.UUID(),
 				AdditionalProperties: nil,
@@ -43,4 +47,35 @@ func MockGetWebhookVerificationKey(t *testing.T) {
 		},
 		PlaidHeaders,
 	)
+}
+
+func MockGetWebhookVerificationKeyFailure(t *testing.T) {
+	mock_http_helper.NewHttpMockJsonResponder(t,
+		"POST", Path(t, "/webhook_verification_key/get"),
+		func(t *testing.T, request *http.Request) (any, int) {
+			ValidatePlaidAuthentication(t, request, DoNotRequireAccessToken)
+			var requestBody plaid.WebhookVerificationKeyGetRequest
+			require.NoError(t, json.NewDecoder(request.Body).Decode(&requestBody), "must decode request")
+
+			return plaid.PlaidError{
+				ErrorType:      "API_ERROR",
+				ErrorCode:      "INTERNAL_SERVER_ERROR",
+				DisplayMessage: *plaid.NewNullableString(myownsanity.Pointer("Something went wrong.")),
+				RequestId:      myownsanity.Pointer(gofakeit.UUID()),
+			}, http.StatusInternalServerError
+		},
+		PlaidHeaders,
+	)
+}
+
+func SignWebhookJWT(t *testing.T, clk clock.Clock, privateKey *ecdsa.PrivateKey, kid string) string {
+	claims := jwt.StandardClaims{
+		IssuedAt:  clk.Now().Unix(),
+		ExpiresAt: clk.Now().Add(5 * time.Minute).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	token.Header["kid"] = kid
+	signed, err := token.SignedString(privateKey)
+	require.NoError(t, err, "must sign webhook JWT")
+	return signed
 }
