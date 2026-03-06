@@ -1,11 +1,23 @@
 package controller_test
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/jarcoal/httpmock"
+	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/controller"
+	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/mock_plaid"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func TestPlaidWebhook(t *testing.T) {
@@ -62,5 +74,238 @@ func TestPlaidWebhook(t *testing.T) {
 
 		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").String().IsEqual("unauthorized")
+	})
+
+	t.Run("successful transaction sync webhook", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		config := NewTestApplicationConfig(t)
+		config.Plaid.WebhooksEnabled = true
+		app, e := NewTestApplicationWithConfig(t, config)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+
+		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		require.NoError(t, err, "must generate EC key")
+
+		kid := gofakeit.UUID()
+		mock_plaid.MockGetWebhookVerificationKey(
+			t,
+			app.Clock,
+			kid,
+			&privateKey.PublicKey,
+		)
+
+		jwt.TimeFunc = app.Clock.Now
+		t.Cleanup(func() { jwt.TimeFunc = time.Now })
+
+		verificationToken := mock_plaid.SignWebhookJWT(
+			t,
+			app.Clock,
+			privateKey,
+			kid,
+		)
+
+		app.Jobs.EXPECT().
+			EnqueueJob(gomock.Any(), background.SyncPlaid, gomock.Any()).
+			Return(nil).
+			Times(1)
+
+		response := e.POST(`/api/plaid/webhook`).
+			WithHeader("Plaid-Verification", verificationToken).
+			WithJSON(controller.PlaidWebhook{
+				WebhookType: "TRANSACTIONS",
+				WebhookCode: "SYNC_UPDATES_AVAILABLE",
+				ItemId:      link.PlaidLink.PlaidId,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		assert.EqualValues(t, map[string]int{
+			"POST https://sandbox.plaid.com/webhook_verification_key/get": 1,
+		}, httpmock.GetCallCountInfo(), "must match expected Plaid API calls")
+	})
+
+	t.Run("successful item error webhook updates link status", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		config := NewTestApplicationConfig(t)
+		config.Plaid.WebhooksEnabled = true
+		app, e := NewTestApplicationWithConfig(t, config)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+
+		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		require.NoError(t, err, "must generate EC key")
+
+		kid := gofakeit.UUID()
+		mock_plaid.MockGetWebhookVerificationKey(
+			t,
+			app.Clock,
+			kid,
+			&privateKey.PublicKey,
+		)
+
+		jwt.TimeFunc = app.Clock.Now
+		t.Cleanup(func() { jwt.TimeFunc = time.Now })
+
+		verificationToken := mock_plaid.SignWebhookJWT(
+			t,
+			app.Clock,
+			privateKey,
+			kid,
+		)
+
+		response := e.POST(`/api/plaid/webhook`).
+			WithHeader("Plaid-Verification", verificationToken).
+			WithJSON(controller.PlaidWebhook{
+				WebhookType: "ITEM",
+				WebhookCode: "ERROR",
+				ItemId:      link.PlaidLink.PlaidId,
+				Error:       map[string]any{"error_code": "ITEM_LOGIN_REQUIRED"},
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		assert.EqualValues(t, map[string]int{
+			"POST https://sandbox.plaid.com/webhook_verification_key/get": 1,
+		}, httpmock.GetCallCountInfo(), "must match expected Plaid API calls")
+	})
+
+	t.Run("expired JWT is rejected", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		config := NewTestApplicationConfig(t)
+		config.Plaid.WebhooksEnabled = true
+		app, e := NewTestApplicationWithConfig(t, config)
+
+		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		require.NoError(t, err, "must generate EC key")
+
+		kid := gofakeit.UUID()
+		mock_plaid.MockGetWebhookVerificationKey(
+			t,
+			app.Clock,
+			kid,
+			&privateKey.PublicKey,
+		)
+
+		jwt.TimeFunc = app.Clock.Now
+		t.Cleanup(func() { jwt.TimeFunc = time.Now })
+
+		claims := controller.PlaidClaims{
+			StandardClaims: jwt.StandardClaims{
+				IssuedAt:  app.Clock.Now().Add(-10 * time.Minute).Unix(),
+				ExpiresAt: app.Clock.Now().Add(-5 * time.Minute).Unix(),
+			},
+		}
+		expiredToken := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+		expiredToken.Header["kid"] = kid
+		verificationToken, err := expiredToken.SignedString(privateKey)
+		require.NoError(t, err, "must sign expired webhook JWT")
+
+		response := e.POST(`/api/plaid/webhook`).
+			WithHeader("Plaid-Verification", verificationToken).
+			WithJSON(controller.PlaidWebhook{
+				WebhookType: "TRANSACTIONS",
+				WebhookCode: "SYNC_UPDATES_AVAILABLE",
+				ItemId:      gofakeit.UUID(),
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
+		assert.EqualValues(t, map[string]int{
+			"POST https://sandbox.plaid.com/webhook_verification_key/get": 1,
+		}, httpmock.GetCallCountInfo(), "must match expected Plaid API calls")
+	})
+
+	t.Run("failed JWK retrieval is rejected", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		config := NewTestApplicationConfig(t)
+		config.Plaid.WebhooksEnabled = true
+		app, e := NewTestApplicationWithConfig(t, config)
+
+		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		require.NoError(t, err, "must generate EC key")
+
+		kid := gofakeit.UUID()
+		mock_plaid.MockGetWebhookVerificationKeyFailure(t)
+
+		jwt.TimeFunc = app.Clock.Now
+		t.Cleanup(func() { jwt.TimeFunc = time.Now })
+
+		verificationToken := mock_plaid.SignWebhookJWT(
+			t,
+			app.Clock,
+			privateKey,
+			kid,
+		)
+
+		response := e.POST(`/api/plaid/webhook`).
+			WithHeader("Plaid-Verification", verificationToken).
+			WithJSON(controller.PlaidWebhook{
+				WebhookType: "TRANSACTIONS",
+				WebhookCode: "SYNC_UPDATES_AVAILABLE",
+				ItemId:      gofakeit.UUID(),
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
+		assert.EqualValues(t, map[string]int{
+			"POST https://sandbox.plaid.com/webhook_verification_key/get": 1,
+		}, httpmock.GetCallCountInfo(), "must match expected Plaid API calls")
+	})
+
+	t.Run("valid JWT for unknown item returns 200", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		config := NewTestApplicationConfig(t)
+		config.Plaid.WebhooksEnabled = true
+		app, e := NewTestApplicationWithConfig(t, config)
+
+		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		require.NoError(t, err, "must generate EC key")
+
+		kid := gofakeit.UUID()
+		mock_plaid.MockGetWebhookVerificationKey(
+			t,
+			app.Clock,
+			kid,
+			&privateKey.PublicKey,
+		)
+
+		jwt.TimeFunc = app.Clock.Now
+		t.Cleanup(func() { jwt.TimeFunc = time.Now })
+
+		verificationToken := mock_plaid.SignWebhookJWT(
+			t,
+			app.Clock,
+			privateKey,
+			kid,
+		)
+
+		response := e.POST(`/api/plaid/webhook`).
+			WithHeader("Plaid-Verification", verificationToken).
+			WithJSON(controller.PlaidWebhook{
+				WebhookType: "TRANSACTIONS",
+				WebhookCode: "SYNC_UPDATES_AVAILABLE",
+				ItemId:      gofakeit.UUID(),
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		assert.EqualValues(t, map[string]int{
+			"POST https://sandbox.plaid.com/webhook_verification_key/get": 1,
+		}, httpmock.GetCallCountInfo(), "must match expected Plaid API calls")
 	})
 }
