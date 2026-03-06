@@ -14,9 +14,12 @@ import {
   CommandList,
 } from '@monetr/interface/components/Command';
 import { Drawer, DrawerContent, DrawerTrigger } from '@monetr/interface/components/Drawer';
+import Flex from '@monetr/interface/components/Flex';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import MSpan from '@monetr/interface/components/MSpan';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
+import Typography from '@monetr/interface/components/Typography';
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';
@@ -25,9 +28,6 @@ import { showNewBankAccountModal } from '@monetr/interface/modals/NewBankAccount
 import type { BankAccountStatus } from '@monetr/interface/models/BankAccount';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
-import Typography from '@monetr/interface/components/Typography';
-import { layoutVariants } from '@monetr/interface/components/Layout';
-import Flex from '@monetr/interface/components/Flex';
 
 export default function SelectBankAccount(): JSX.Element {
   const navigate = useNavigate();

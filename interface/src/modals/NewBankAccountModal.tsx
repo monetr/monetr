@@ -9,6 +9,7 @@ import Flex from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
@@ -19,7 +20,6 @@ import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankA
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
-import { layoutVariants } from '@monetr/interface/components/Layout';
 
 interface NewBankAccountValues {
   name: string;

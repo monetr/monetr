@@ -2,13 +2,13 @@ import type { FormikHelpers } from 'formik';
 
 import { flexVariants } from '@monetr/interface/components/Flex';
 import FormTextField from '@monetr/interface/components/FormTextField';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import MForm from '@monetr/interface/components/MForm';
 import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import Typography from '@monetr/interface/components/Typography';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
-import { layoutVariants } from '@monetr/interface/components/Layout';
 
 export interface ManualLinkSetupAccountNameValues {
   accountName: string;
