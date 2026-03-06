@@ -4,7 +4,7 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/plaid/plaid-go/v30/plaid"
+	"github.com/plaid/plaid-go/v41/plaid"
 )
 
 type (

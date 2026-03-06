@@ -1,7 +1,7 @@
 package consts
 
 import (
-	"github.com/plaid/plaid-go/v30/plaid"
+	"github.com/plaid/plaid-go/v41/plaid"
 )
 
 var (

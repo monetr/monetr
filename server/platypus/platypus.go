@@ -21,7 +21,7 @@ import (
 	"github.com/monetr/monetr/server/round"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v30/plaid"
+	"github.com/plaid/plaid-go/v41/plaid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -237,7 +237,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 			ClientName:   consts.PlaidClientName,
 			Language:     consts.PlaidLanguage,
 			CountryCodes: p.config.CountryCodes,
-			User: plaid.LinkTokenCreateRequestUser{
+			User: &plaid.LinkTokenCreateRequestUser{
 				ClientUserId:             options.ClientUserID,
 				LegalName:                &options.LegalName,
 				PhoneNumber:              options.PhoneNumber,
@@ -257,7 +257,6 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 			EuConfig:              nil,
 			InstitutionId:         nil,
 			PaymentInitiation:     nil,
-			DepositSwitch:         nil,
 			IncomeVerification:    nil,
 			Auth:                  nil,
 			Transactions: &plaid.LinkTokenTransactions{
