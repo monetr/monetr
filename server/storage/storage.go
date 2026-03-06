@@ -4,11 +4,11 @@ import (
 	"context"
 	"io"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/monetr/monetr/server/config"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	monetrConfig "github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -47,7 +47,7 @@ type Storage interface {
 // is not configured then this will return nil.
 func GetStorage(
 	log *logrus.Entry,
-	configuration config.Configuration,
+	configuration monetrConfig.Configuration,
 ) (fileStorage Storage, err error) {
 	if !configuration.Storage.Enabled {
 		log.Trace("file storage is not enabled")
@@ -58,32 +58,37 @@ func GetStorage(
 	case "s3":
 		log.Trace("setting up file storage interface using S3 protocol")
 		s3Config := configuration.Storage.S3
-		awsConfig := aws.NewConfig().WithS3ForcePathStyle(s3Config.ForcePathStyle)
-		if endpoint := s3Config.Endpoint; endpoint != nil {
-			awsConfig = awsConfig.WithEndpoint(*endpoint)
+
+		var configOptions []func(*config.LoadOptions) error
+
+		if s3Config.Region != "" {
+			configOptions = append(configOptions, config.WithRegion(s3Config.Region))
 		}
 
-		if useEnvCredentials := s3Config.UseEnvCredentials; useEnvCredentials {
-			awsConfig = awsConfig.WithCredentials(credentials.NewEnvCredentials())
+		if s3Config.UseEnvCredentials {
+			// Default config loading will pick up environment credentials automatically.
 		} else if s3Config.AccessKey != nil {
-			awsConfig = awsConfig.WithCredentials(credentials.NewStaticCredentials(
-				*s3Config.AccessKey,
-				*s3Config.SecretKey,
-				"", // Not requiured since we aren't using temporary credentials.
+			configOptions = append(configOptions, config.WithCredentialsProvider(
+				credentials.NewStaticCredentialsProvider(
+					*s3Config.AccessKey,
+					*s3Config.SecretKey,
+					"", // Not required since we aren't using temporary credentials.
+				),
 			))
 		}
 
-		if s3Config.Region != "" {
-			awsConfig = awsConfig.WithRegion(s3Config.Region)
-		}
-
-		session, err := session.NewSession(awsConfig)
+		cfg, err := config.LoadDefaultConfig(context.Background(), configOptions...)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to create s3 session")
 		}
 
-		client := s3.New(session)
+		client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+			if endpoint := s3Config.Endpoint; endpoint != nil && *endpoint != "" {
+				o.BaseEndpoint = aws.String(*endpoint)
+			}
 
+			o.UsePathStyle = s3Config.ForcePathStyle
+		})
 		fileStorage = NewS3StorageBackend(log, s3Config.Bucket, client)
 	case "filesystem":
 		log.Trace("setting up file storage interface using local filesystem")
