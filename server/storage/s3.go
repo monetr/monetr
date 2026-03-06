@@ -4,8 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
@@ -13,20 +12,20 @@ import (
 )
 
 type s3Storage struct {
-	log     *logrus.Entry
-	bucket  string
-	session *s3.S3
+	log    *logrus.Entry
+	bucket string
+	client *s3.Client
 }
 
 func NewS3StorageBackend(
 	log *logrus.Entry,
 	bucket string,
-	s3client *s3.S3,
+	s3client *s3.Client,
 ) Storage {
 	return &s3Storage{
-		log:     log,
-		bucket:  bucket,
-		session: s3client,
+		log:    log,
+		bucket: bucket,
+		client: s3client,
 	}
 }
 
@@ -53,16 +52,17 @@ func (s *s3Storage) Store(
 
 	log.Debug("uploading file to S3")
 
-	_, err = s.session.PutObjectWithContext(
+	contentType := string(file.ContentType)
+	_, err = s.client.PutObject(
 		span.Context(),
 		&s3.PutObjectInput{
 			Body:        buf,
 			Bucket:      &s.bucket,
 			Key:         &key,
-			ContentType: aws.String(string(file.ContentType)),
-			Metadata: map[string]*string{
-				"fileId":    aws.String(file.FileId.String()),
-				"accountId": aws.String(file.AccountId.String()),
+			ContentType: &contentType,
+			Metadata: map[string]string{
+				"fileId":    file.FileId.String(),
+				"accountId": file.AccountId.String(),
 			},
 		},
 	)
@@ -82,11 +82,11 @@ func (s *s3Storage) Read(
 		return nil, err
 	}
 
-	result, err := s.session.GetObjectWithContext(
+	result, err := s.client.GetObject(
 		span.Context(),
 		&s3.GetObjectInput{
-			Bucket: aws.String(s.bucket),
-			Key:    aws.String(key),
+			Bucket: &s.bucket,
+			Key:    &key,
 		},
 	)
 	if err != nil {
@@ -108,11 +108,11 @@ func (s *s3Storage) Head(
 		return false, err
 	}
 
-	result, err := s.session.HeadObjectWithContext(
+	result, err := s.client.HeadObject(
 		span.Context(),
 		&s3.HeadObjectInput{
-			Bucket: aws.String(s.bucket),
-			Key:    aws.String(key),
+			Bucket: &s.bucket,
+			Key:    &key,
 		},
 	)
 	if err != nil {
@@ -134,11 +134,11 @@ func (s *s3Storage) Remove(
 		return err
 	}
 
-	result, err := s.session.DeleteObjectWithContext(
+	result, err := s.client.DeleteObject(
 		span.Context(),
 		&s3.DeleteObjectInput{
-			Bucket: aws.String(s.bucket),
-			Key:    aws.String(key),
+			Bucket: &s.bucket,
+			Key:    &key,
 		},
 	)
 	if err != nil {
@@ -150,7 +150,7 @@ func (s *s3Storage) Remove(
 		"s3DeleteResult": logrus.Fields{
 			"deleteMarker":   result.DeleteMarker,
 			"versionId":      result.VersionId,
-			"requestCharged": result.RequestCharged,
+			"requestCharged": string(result.RequestCharged),
 		},
 	}).Debug("file was removed from storage")
 
