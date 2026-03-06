@@ -5,19 +5,21 @@ import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
+import Flex from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
-import MSpan from '@monetr/interface/components/MSpan';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
+import Typography from '@monetr/interface/components/Typography';
 import { useCreateBankAccount } from '@monetr/interface/hooks/useCreateBankAccount';
 import useLocaleCurrency, { DefaultCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 
 interface NewBankAccountValues {
   name: string;
@@ -85,20 +87,25 @@ function NewBankAccountModal(): JSX.Element {
       >
         {({ values }) => (
           <Fragment>
-            <div className='flex flex-col'>
-              <MSpan className='mb-2' size='xl' weight='bold'>
+            <Flex orientation='column'>
+              <Typography className='mb-2' size='xl' weight='bold'>
                 Create A New Bank Account
-              </MSpan>
+              </Typography>
               <FormTextField
                 autoComplete='off'
                 data-1p-ignore
                 data-testid='bank-account-name'
-                label="What is the account's name ?"
+                label="What is the account's name?"
                 name='name'
                 placeholder='Personal Checking...'
                 required
               />
-              <SelectCurrency className='w-full' menuPortalTarget={document.body} name='currency' required />
+              <SelectCurrency
+                className={layoutVariants({ width: 'full' })}
+                menuPortalTarget={document.body}
+                name='currency'
+                required
+              />
               <FormAmountField
                 allowNegative
                 currency={values.currency}
@@ -108,15 +115,15 @@ function NewBankAccountModal(): JSX.Element {
                 name='balance'
                 required
               />
-            </div>
-            <div className='flex justify-end gap-2'>
+            </Flex>
+            <Flex gap='md' justify='end'>
               <FormButton data-testid='close-new-bank-account-modal' onClick={modal.remove} variant='secondary'>
                 Cancel
               </FormButton>
               <FormButton data-testid='bank-account-submit' type='submit' variant='primary'>
                 Create
               </FormButton>
-            </div>
+            </Flex>
           </Fragment>
         )}
       </MForm>

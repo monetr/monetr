@@ -25,6 +25,9 @@ import { showNewBankAccountModal } from '@monetr/interface/modals/NewBankAccount
 import type { BankAccountStatus } from '@monetr/interface/models/BankAccount';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
+import Typography from '@monetr/interface/components/Typography';
+import { layoutVariants } from '@monetr/interface/components/Layout';
+import Flex from '@monetr/interface/components/Flex';
 
 export default function SelectBankAccount(): JSX.Element {
   const navigate = useNavigate();
@@ -152,7 +155,7 @@ export default function SelectBankAccount(): JSX.Element {
           role='combobox'
           to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
         >
-          <Settings className='h-4 w-4 opacity-50 group-hover:opacity-100' />
+          <Settings className='size-5 opacity-50 group-hover:opacity-100' />
         </Link>
       </Popover>
     </div>
@@ -171,27 +174,27 @@ interface SelectBankAccountPickerOption {
 
 function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccountPickerOption>): JSX.Element {
   return (
-    <div className='flex items-center w-full gap-1'>
+    <Flex align='center' gap='sm'>
       <Check
         className={mergeTailwind(
-          'mr-1 h-5 w-5 flex-none',
+          'mr-1 size-5 flex-none',
           props.currentValue === props.option.value ? 'opacity-100' : 'opacity-0',
         )}
       />
-      <MSpan className='w-full' color='emphasis' ellipsis>
+      <Typography className={layoutVariants({ width: 'full' })} color='emphasis' ellipsis>
         {props.option.label}
-      </MSpan>
+      </Typography>
       {props.option.status === 'inactive' && (
         <Badge className='bg-dark-monetr-border-subtle' size='xs'>
           Inactive
         </Badge>
       )}
-      {props.option.mask !== '' && (
+      {props.option.mask && props.option.mask !== '' && (
         <Badge className='font-mono' size='xs'>
           {props.option.mask}
         </Badge>
       )}
-    </div>
+    </Flex>
   );
 }
 
