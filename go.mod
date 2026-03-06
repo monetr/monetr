@@ -4,7 +4,8 @@ go 1.26.0
 
 require (
 	aidanwoods.dev/go-paseto v1.6.0
-	github.com/MicahParks/keyfunc v1.9.0
+	github.com/MicahParks/jwkset v0.11.0
+	github.com/MicahParks/keyfunc/v3 v3.8.0
 	github.com/ahmetb/go-linq/v3 v3.2.0
 	github.com/alicebob/miniredis/v2 v2.37.0
 	github.com/aws/aws-sdk-go v1.55.8
@@ -21,7 +22,7 @@ require (
 	github.com/getsentry/sentry-go v0.43.0
 	github.com/go-pg/migrations/v8 v8.1.0
 	github.com/go-pg/pg/v10 v10.15.0
-	github.com/golang-jwt/jwt/v4 v4.5.2
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/gomodule/redigo v1.9.3
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/vault/api v1.20.0
