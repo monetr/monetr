@@ -4,11 +4,13 @@ import (
 	"context"
 	"time"
 
+	"log/slog"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v81"
 )
 
@@ -21,9 +23,7 @@ func (b *baseBilling) ReconcileSubscription(ctx context.Context, accountId ID[Ac
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := b.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"accountId": accountId,
-	})
+	log := b.log.With("accountId", accountId)
 
 	// Gather the account details from the repo. This data might be cached but
 	// should be considered accurate as all writes for subscription data go
@@ -35,28 +35,28 @@ func (b *baseBilling) ReconcileSubscription(ctx context.Context, accountId ID[Ac
 	}
 
 	if account.StripeCustomerId == nil {
-		log.Trace("account does not have a customer, no subscription to reconcile")
+		log.Log(span.Context(), logging.LevelTrace, "account does not have a customer, no subscription to reconcile")
 		return nil
 	}
 
 	if account.StripeSubscriptionId == nil {
-		log.Trace("account does not have a subscription to reconcile")
+		log.Log(span.Context(), logging.LevelTrace, "account does not have a subscription to reconcile")
 		return nil
 	}
 
-	log = log.WithFields(logrus.Fields{
-		"stripe": logrus.Fields{
-			"subscriptionId": account.StripeSubscriptionId,
-			"customerId":     account.StripeCustomerId,
-		},
-	})
+	log = log.With(
+		slog.Group("stripe",
+			"subscriptionId", account.StripeSubscriptionId,
+			"customerId", account.StripeCustomerId,
+		),
+	)
 
 	subscription, err := b.stripe.GetSubscription(
 		span.Context(),
 		*account.StripeSubscriptionId,
 	)
 	if err != nil {
-		log.WithError(err).Error("failed to retrieve subscription from stripe for recon")
+		log.ErrorContext(span.Context(), "failed to retrieve subscription from stripe for recon", "err", err)
 		return err
 	}
 
@@ -72,23 +72,14 @@ func (b *baseBilling) ReconcileSubscription(ctx context.Context, accountId ID[Ac
 		actualSubscriptionId = nil
 	}
 
-	log.WithFields(logrus.Fields{
-		"status": map[string]any{
-			"old": currentStatus,
-			"new": actualStatus,
-		},
-		"activeUntil": map[string]any{
-			"old": currentActiveUntil,
-			"new": actualActiveUntil,
-		},
-		"stripe": logrus.Fields{
-			"customerId": account.StripeCustomerId,
-			"subscriptionId": map[string]any{
-				"old": currentSubscriptionId,
-				"new": actualSubscriptionId,
-			},
-		},
-	}).Info("subscription is being reconciled")
+	log.InfoContext(span.Context(), "subscription is being reconciled",
+		slog.Group("status", "old", currentStatus, "new", actualStatus),
+		slog.Group("activeUntil", "old", currentActiveUntil, "new", actualActiveUntil),
+		slog.Group("stripe",
+			"customerId", account.StripeCustomerId,
+			slog.Group("subscriptionId", "old", currentSubscriptionId, "new", actualSubscriptionId),
+		),
+	)
 
 	return b.UpdateCustomerSubscription(
 		span.Context(),

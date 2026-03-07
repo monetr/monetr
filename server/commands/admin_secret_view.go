@@ -30,13 +30,13 @@ func adminSecretView(parent *cobra.Command) {
 
 			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
-				log.WithError(err).Fatalf("failed to initialze database")
+				log.Error("failed to initialze database", "err", err)
 				return errors.Wrap(err, "failed to initialize database")
 			}
 
 			kms, err := secrets.GetKMS(log, configuration)
 			if err != nil {
-				log.WithError(err).Fatal("failed to setup KMS")
+				log.Error("failed to setup KMS", "err", err)
 				return err
 			}
 
@@ -46,13 +46,13 @@ func adminSecretView(parent *cobra.Command) {
 				Limit(1).
 				Select(&token)
 			if err != nil {
-				log.WithError(err).Fatalf("failed to retrieve secret")
+				log.Error("failed to retrieve secret", "err", err)
 				return errors.Wrap(err, "failed to retrieve secret")
 			}
 
 			decrypted, err := kms.Decrypt(cmd.Context(), token.KeyID, token.Version, token.AccessToken)
 			if err != nil {
-				log.WithError(err).Fatal("failed to decrypt secret")
+				log.Error("failed to decrypt secret", "err", err)
 				return err
 			}
 

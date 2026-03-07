@@ -36,7 +36,6 @@ import (
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/ui"
 	"github.com/monetr/monetr/server/zoneinfo"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -57,13 +56,13 @@ func ServeCommand(parent *cobra.Command) {
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
-				log.WithField("config", configFileName).Info("config file loaded")
+				log.Info("config file loaded", "config", configFileName)
 			}
 
 			if configuration.ReCAPTCHA.Enabled {
-				log.
-					WithField("issueUrl", "https://github.com/monetr/monetr/issues/2979").
-					Warn("DEPRECATION WARNING: ReCAPTCHA will be removed in a future release. If you are currently using it then please comment on the issue on GitHub. It is recommended to instead rate limit monetr authentication endpoints instead of using a captcha at this time.")
+				log.Warn("DEPRECATION WARNING: ReCAPTCHA will be removed in a future release. If you are currently using it then please comment on the issue on GitHub. It is recommended to instead rate limit monetr authentication endpoints instead of using a captcha at this time.",
+					"issueUrl", "https://github.com/monetr/monetr/issues/2979",
+				)
 			}
 
 			// Load any timezone aliases from the host operating system.
@@ -74,7 +73,7 @@ func ServeCommand(parent *cobra.Command) {
 				arguments.GenerateCertificates,
 			)
 			if err != nil {
-				log.WithError(err).Fatal("failed to load ed25519 public and private key")
+				log.Error("failed to load ed25519 public and private key", "err", err)
 				return err
 			}
 
@@ -86,12 +85,12 @@ func ServeCommand(parent *cobra.Command) {
 				privateKey,
 			)
 			if err != nil {
-				log.WithError(err).Fatal("failed to init paseto client tokens interface")
+				log.Error("failed to init paseto client tokens interface", "err", err)
 				return err
 			}
 
 			if configuration.Plaid.WebhooksEnabled {
-				log.WithField("domain", configuration.Plaid.WebhooksDomain).Trace("plaid webhooks are enabled")
+				log.Log(cmd.Context(), logging.LevelTrace, "plaid webhooks are enabled", "domain", configuration.Plaid.WebhooksDomain)
 			}
 
 			stats := metrics.NewStats()
@@ -102,7 +101,7 @@ func ServeCommand(parent *cobra.Command) {
 				log.Debug("sentry is enabled, setting up")
 				hostname, err := os.Hostname()
 				if err != nil {
-					log.WithError(err).Warn("failed to get hostname for sentry")
+					log.Warn("failed to get hostname for sentry", "err", err)
 				}
 
 				err = sentry.Init(sentry.ClientOptions{
@@ -138,7 +137,7 @@ func ServeCommand(parent *cobra.Command) {
 					},
 				})
 				if err != nil {
-					log.WithError(err).Error("failed to init sentry")
+					log.Error("failed to init sentry", "err", err)
 				}
 
 				sentry.ConfigureScope(func(scope *sentry.Scope) {
@@ -163,14 +162,14 @@ func ServeCommand(parent *cobra.Command) {
 
 			db, err := database.GetDatabase(log, configuration, stats)
 			if err != nil {
-				log.WithError(err).Fatalf("failed to setup database connection: %+v", err)
+				log.Error("failed to setup database connection", "err", err)
 				return err
 			}
 			defer db.Close()
 
 			redisController, err := cache.NewRedisCache(log, configuration.Redis)
 			if err != nil {
-				log.WithError(err).Fatalf("failed to create redis cache: %+v", err)
+				log.Error("failed to create redis cache", "err", err)
 				return err
 			}
 			defer redisController.Close()
@@ -179,7 +178,7 @@ func ServeCommand(parent *cobra.Command) {
 
 			fileStorage, err := storage.GetStorage(log, configuration)
 			if err != nil {
-				log.WithError(err).Fatal("could not setup file storage")
+				log.Error("could not setup file storage", "err", err)
 				return err
 			}
 
@@ -219,7 +218,7 @@ func ServeCommand(parent *cobra.Command) {
 
 			kms, err := secrets.GetKMS(log, configuration)
 			if err != nil {
-				log.WithError(err).Fatal("failed to initialize KMS")
+				log.Error("failed to initialize KMS", "err", err)
 				return err
 			}
 
@@ -227,7 +226,7 @@ func ServeCommand(parent *cobra.Command) {
 			if configuration.Plaid.Enabled {
 				log.Debug("plaid is enabled and will be setup")
 				if configuration.Plaid.WebhooksEnabled {
-					log.Debugf("plaid webhooks are enabled and will be sent to: %s", configuration.Plaid.WebhooksDomain)
+					log.Debug(fmt.Sprintf("plaid webhooks are enabled and will be sent to: %s", configuration.Plaid.WebhooksDomain))
 				}
 				plaidClient = platypus.NewPlaid(log, clock, kms, db, configuration.Plaid)
 			}
@@ -277,19 +276,19 @@ func ServeCommand(parent *cobra.Command) {
 				)
 				if err != nil {
 					cancel()
-					log.WithError(err).Fatalf("failed to setup background job proceessor")
+					log.Error("failed to setup background job proceessor", "err", err)
 					return err
 				}
 				cancel()
 			}
 
 			if err = backgroundJobs.Start(); err != nil {
-				log.WithError(err).Fatalf("failed to start background job worker")
+				log.Error("failed to start background job worker", "err", err)
 				return err
 			}
 			defer func() {
 				if err := backgroundJobs.Close(); err != nil {
-					log.WithError(err).Error("failed to close background jobs processor gracefully")
+					log.Error("failed to close background jobs processor gracefully", "err", err)
 				}
 			}()
 
@@ -342,23 +341,23 @@ func ServeCommand(parent *cobra.Command) {
 					err = app.Start(listenAddress)
 				}
 				if err != nil && err != http.ErrServerClosed {
-					log.WithError(err).Fatal("failed to start the server")
+					log.Error("failed to start the server", "err", err)
 				}
 			}()
 
 			quit := make(chan os.Signal, 1)
 			signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
-			log.WithFields(logrus.Fields{
-				"listenAddress":   fmt.Sprintf("%s://%s", protocol, listenAddress),
-				"externalAddress": configuration.Server.GetBaseURL().String(),
-			}).Info("monetr is running")
+			log.Info("monetr is running",
+				"listenAddress", fmt.Sprintf("%s://%s", protocol, listenAddress),
+				"externalAddress", configuration.Server.GetBaseURL().String(),
+			)
 
 			<-quit
 			log.Info("shutting down")
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			if err := app.Shutdown(ctx); err != nil {
-				log.WithError(err).Fatal("failed to gracefully shutdown the server")
+				log.Error("failed to gracefully shutdown the server", "err", err)
 			}
 			log.Info("http server shutdown complete")
 

@@ -5,13 +5,14 @@ import (
 	"strings"
 	"time"
 
+	"log/slog"
+
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/database"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -45,31 +46,31 @@ func adminKMSMigrate(parent *cobra.Command) {
 
 			kms, err := secrets.GetKMS(log, toConfiguration)
 			if err != nil {
-				log.WithError(err).Fatal("failed to setup new KMS")
+				log.Error("failed to setup new KMS", "err", err)
 				return err
 			}
 
 			oldKms, err := secrets.GetKMS(log, fromConfiguration)
 			if err != nil {
-				log.WithError(err).Fatal("failed to setup old KMS")
+				log.Error("failed to setup old KMS", "err", err)
 				return err
 			}
 
 			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
-				log.WithError(err).Fatalf("failed to initialze database")
+				log.Error("failed to initialze database", "err", err)
 				return errors.Wrap(err, "failed to initialize database")
 			}
 
 			txn, err := db.Begin()
 			if err != nil {
-				log.WithError(err).Fatal("failed to begin database transaction")
+				log.Error("failed to begin database transaction", "err", err)
 				return errors.Wrap(err, "failed to being database transaction")
 			}
 
 			offset := 0
 			for {
-				log.WithField("offset", offset).Trace("querying batch of 100 secrets")
+				log.Log(context.Background(), logging.LevelTrace, "querying batch of 100 secrets", "offset", offset)
 				var secrets []models.Secret
 				err := txn.Model(&secrets).
 					Order(`secret_id ASC`).
@@ -77,9 +78,7 @@ func adminKMSMigrate(parent *cobra.Command) {
 					Offset(offset).
 					Select(&secrets)
 				if err != nil {
-					log.WithField("offset", offset).
-						WithError(err).
-						Fatal("failed to retrieve batch of secrets")
+					log.Error("failed to retrieve batch of secrets", "offset", offset, "err", err)
 					return err
 				}
 
@@ -91,45 +90,33 @@ func adminKMSMigrate(parent *cobra.Command) {
 
 						plaintext, err := oldKms.Decrypt(ctx, secret.KeyID, secret.Version, secret.Secret)
 						if err != nil {
-							log.
-								WithFields(logrus.Fields{
-									"secretId":  secret.SecretId,
-									"accountId": secret.AccountId,
-									"keyId":     secret.KeyID,
-									"version":   secret.Version,
-								}).
-								WithError(err).
-								Fatal("failed to decrypt secret using old provider")
+							log.Error("failed to decrypt secret using old provider",
+								"secretId", secret.SecretId,
+								"accountId", secret.AccountId,
+								"keyId", secret.KeyID,
+								"version", secret.Version,
+								"err", err,
+							)
 							panic(err)
 						}
 
 						newKeyId, newVersion, newCiphertext, err := kms.Encrypt(ctx, plaintext)
 						if err != nil {
-							log.
-								WithFields(logrus.Fields{
-									"secretId":  secret.SecretId,
-									"accountId": secret.AccountId,
-								}).
-								WithError(err).
-								Fatal("failed to re-encrypt secret using new provider")
+							log.Error("failed to re-encrypt secret using new provider",
+								"secretId", secret.SecretId,
+								"accountId", secret.AccountId,
+								"err", err,
+							)
 							panic(err)
 						}
 
 						if arguments.DryRun {
-							log.
-								WithFields(logrus.Fields{
-									"secretId":  secret.SecretId,
-									"accountId": secret.AccountId,
-									"old": logrus.Fields{
-										"keyId":   secret.KeyID,
-										"version": secret.Version,
-									},
-									"new": logrus.Fields{
-										"keyId":   newKeyId,
-										"version": newVersion,
-									},
-								}).
-								Info("successfully re-encrypted secret with new kms, changes wont be persisted due to dry run")
+							log.Info("successfully re-encrypted secret with new kms, changes wont be persisted due to dry run",
+								"secretId", secret.SecretId,
+								"accountId", secret.AccountId,
+								slog.Group("old", "keyId", secret.KeyID, "version", secret.Version),
+								slog.Group("new", "keyId", newKeyId, "version", newVersion),
+							)
 							return
 						}
 
@@ -138,29 +125,20 @@ func adminKMSMigrate(parent *cobra.Command) {
 						secret.Secret = newCiphertext
 						_, err = txn.Model(&secret).WherePK().Update(&secret)
 						if err != nil {
-							log.WithFields(logrus.Fields{
-								"secretId":  secret.SecretId,
-								"accountId": secret.AccountId,
-							}).
-								WithError(err).
-								Fatal("failed to update secret with rotated ciphertext")
+							log.Error("failed to update secret with rotated ciphertext",
+								"secretId", secret.SecretId,
+								"accountId", secret.AccountId,
+								"err", err,
+							)
 							panic(err)
 						}
 
-						log.
-							WithFields(logrus.Fields{
-								"secretId":  secret.SecretId,
-								"accountId": secret.AccountId,
-								"old": logrus.Fields{
-									"keyId":   secret.KeyID,
-									"version": secret.Version,
-								},
-								"new": logrus.Fields{
-									"keyId":   newKeyId,
-									"version": newVersion,
-								},
-							}).
-							Info("successfully re-encrypted secret with new kms")
+						log.Info("successfully re-encrypted secret with new kms",
+							"secretId", secret.SecretId,
+							"accountId", secret.AccountId,
+							slog.Group("old", "keyId", secret.KeyID, "version", secret.Version),
+							slog.Group("new", "keyId", newKeyId, "version", newVersion),
+						)
 					}()
 				}
 

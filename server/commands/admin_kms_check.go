@@ -31,7 +31,7 @@ func adminKMSCheck(parent *cobra.Command) {
 
 			kms, err := secrets.GetKMS(log, configuration)
 			if err != nil {
-				log.WithError(err).Fatal("failed to setup KMS")
+				log.Error("failed to setup KMS", "err", err)
 				return err
 			}
 
@@ -45,7 +45,7 @@ func adminKMSCheck(parent *cobra.Command) {
 
 			keyID, version, result, err := kms.Encrypt(context.Background(), testString)
 			if err != nil {
-				log.WithError(err).Error("failed to encrypt test string")
+				log.Error("failed to encrypt test string", "err", err)
 				return err
 			}
 
@@ -62,7 +62,7 @@ func adminKMSCheck(parent *cobra.Command) {
 
 			decrypted, err := kms.Decrypt(context.Background(), keyID, version, result)
 			if err != nil {
-				log.WithError(err).Error("failed to dencrypt test string")
+				log.Error("failed to dencrypt test string", "err", err)
 				return err
 			}
 

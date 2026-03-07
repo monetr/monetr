@@ -43,7 +43,7 @@ func jobRemoveLink(parent *cobra.Command) {
 
 			redisController, err := cache.NewRedisCache(log, configuration.Redis)
 			if err != nil {
-				log.WithError(err).Fatalf("failed to create redis cache: %+v", err)
+				log.Error("failed to create redis cache", "err", err)
 				return err
 			}
 			defer redisController.Close()
@@ -85,7 +85,7 @@ func jobRemoveLink(parent *cobra.Command) {
 			if arguments.Local || arguments.DryRun {
 				txn, err := db.BeginContext(ctx)
 				if err != nil {
-					log.WithError(err).Fatalf("failed to begin transaction to remove link")
+					log.Error("failed to begin transaction to remove link", "err", err)
 					return err
 				}
 
@@ -101,7 +101,7 @@ func jobRemoveLink(parent *cobra.Command) {
 				}
 
 				if err := job.Run(ctx); err != nil {
-					log.WithError(err).Fatalf("failed to run remove link job")
+					log.Error("failed to run remove link job", "err", err)
 					_ = txn.RollbackContext(ctx)
 					return err
 				}

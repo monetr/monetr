@@ -25,18 +25,18 @@ func developmentCleanPlaid(parent *cobra.Command) {
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
-				log.WithField("config", configFileName).Info("config file loaded")
+				log.Info("config file loaded", "config", configFileName)
 			}
 
 			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
-				log.WithError(err).Fatal("failed to setup database")
+				log.Error("failed to setup database", "err", err)
 				return err
 			}
 
 			kms, err := secrets.GetKMS(log, configuration)
 			if err != nil {
-				log.WithError(err).Fatal("failed to initialize KMS")
+				log.Error("failed to initialize KMS", "err", err)
 				return err
 			}
 
@@ -51,7 +51,7 @@ func developmentCleanPlaid(parent *cobra.Command) {
 				return nil
 			}
 
-			log.WithField("count", len(plaidLinks)).Info("found Plaid link(s)")
+			log.Info("found Plaid link(s)", "count", len(plaidLinks))
 
 			plaid := platypus.NewPlaid(
 				log,
@@ -64,13 +64,13 @@ func developmentCleanPlaid(parent *cobra.Command) {
 			for _, link := range plaidLinks {
 				client, err := plaid.NewClientFromLink(context.Background(), link.AccountId, link.LinkId)
 				if err != nil {
-					log.WithError(err).Warn("failed to create Plaid client")
+					log.Warn("failed to create Plaid client", "err", err)
 					continue
 				}
 
-				log.WithField("itemId", link.PlaidLink.PlaidId).Info("removing item")
+				log.Info("removing item", "itemId", link.PlaidLink.PlaidId)
 				if err = client.RemoveItem(context.Background()); err != nil {
-					log.WithError(err).Warn("failed to remove item")
+					log.Warn("failed to remove item", "err", err)
 					continue
 				}
 

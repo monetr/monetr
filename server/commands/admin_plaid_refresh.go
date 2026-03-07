@@ -27,23 +27,23 @@ func adminPlaidRefresh(parent *cobra.Command) {
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
-				log.WithField("config", configFileName).Info("config file loaded")
+				log.Info("config file loaded", "config", configFileName)
 			}
 
 			if arguments.LinkID == "" {
-				log.Fatal("link ID must be specified via --link")
+				log.Error("link ID must be specified via --link")
 				return cmd.Help()
 			}
 
 			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
-				log.WithError(err).Fatal("failed to setup database")
+				log.Error("failed to setup database", "err", err)
 				return err
 			}
 
 			kms, err := secrets.GetKMS(log, configuration)
 			if err != nil {
-				log.WithError(err).Fatal("failed to initialize KMS")
+				log.Error("failed to initialize KMS", "err", err)
 				return err
 			}
 
@@ -54,12 +54,12 @@ func adminPlaidRefresh(parent *cobra.Command) {
 				Where(`"link"."link_id" = ?`, arguments.LinkID).
 				Limit(1).
 				Select(&link); err != nil {
-				log.WithError(err).Fatal("failed to retrieve link specified")
+				log.Error("failed to retrieve link specified", "err", err)
 				return err
 			}
 
 			if link.PlaidLink == nil {
-				log.Fatal("link does not have a plaid link!")
+				log.Error("link does not have a plaid link!")
 				return errors.New("link is not a valid plaid link")
 			}
 
@@ -77,14 +77,14 @@ func adminPlaidRefresh(parent *cobra.Command) {
 				link.LinkId,
 			)
 			if err != nil {
-				log.WithError(err).Warn("failed to create Plaid client")
+				log.Warn("failed to create Plaid client", "err", err)
 				return err
 			}
 
 			log.Info("triggering transaction refresh")
 
 			if err := client.RefeshTransactions(context.Background()); err != nil {
-				log.WithError(err).Fatal("failed to refresh transactions")
+				log.Error("failed to refresh transactions", "err", err)
 				return err
 			}
 
