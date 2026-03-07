@@ -13,7 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/plaid/plaid-go/v30/plaid"
+	"github.com/plaid/plaid-go/v41/plaid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -68,11 +68,26 @@ func MockGetWebhookVerificationKeyFailure(t *testing.T) {
 	)
 }
 
-func SignWebhookJWT(t *testing.T, clk clock.Clock, privateKey *ecdsa.PrivateKey, kid string) string {
-	claims := jwt.RegisteredClaims{
-		IssuedAt:  jwt.NewNumericDate(clk.Now()),
-		ExpiresAt: jwt.NewNumericDate(clk.Now().Add(5 * time.Minute)),
+func SignWebhookJWT(
+	t *testing.T,
+	clk clock.Clock,
+	privateKey *ecdsa.PrivateKey,
+	kid string,
+	request any,
+) string {
+	var claims struct {
+		jwt.RegisteredClaims
+		RequestBodySHA256 string `json:"request_body_sha256"`
 	}
+	claims.IssuedAt = jwt.NewNumericDate(clk.Now())
+	// Technically Plaid's webhooks don't have an expiration. At least not from
+	// what I've observed? Instead relying entirely on the webhook verification.
+	claims.ExpiresAt = jwt.NewNumericDate(clk.Now().Add(5 * time.Minute))
+
+	body, err := json.Marshal(request)
+	require.NoError(t, err, "must be able to convert request to json")
+	claims.RequestBodySHA256 = myownsanity.SHA256(body)
+
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
 	token.Header["kid"] = kid
 	signed, err := token.SignedString(privateKey)

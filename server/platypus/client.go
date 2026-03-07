@@ -11,7 +11,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
-	"github.com/plaid/plaid-go/v30/plaid"
+	"github.com/plaid/plaid-go/v41/plaid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -267,7 +267,7 @@ func (p *PlaidClient) UpdateItem(
 			ClientName:   consts.PlaidClientName,
 			Language:     consts.PlaidLanguage,
 			CountryCodes: p.config.CountryCodes,
-			User: plaid.LinkTokenCreateRequestUser{
+			User: &plaid.LinkTokenCreateRequestUser{
 				ClientUserId: p.accountId.String(),
 				EmailAddress: nil,
 			},

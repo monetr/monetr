@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/monetr/monetr/server/util"
-	"github.com/plaid/plaid-go/v30/plaid"
+	"github.com/plaid/plaid-go/v41/plaid"
 	"github.com/spf13/viper"
 )
 

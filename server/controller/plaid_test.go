@@ -11,7 +11,7 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/plaid/plaid-go/v30/plaid"
+	"github.com/plaid/plaid-go/v41/plaid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )

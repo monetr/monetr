@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -30,6 +32,7 @@ type PlaidWebhook struct {
 
 type PlaidClaims struct {
 	jwt.RegisteredClaims
+	RequestBodySHA256 string `json:"request_body_sha256"`
 }
 
 func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
@@ -41,6 +44,13 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 	if strings.TrimSpace(verification) == "" {
 		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 	}
+
+	bodyBytes, err := io.ReadAll(ctx.Request().Body)
+	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
+	}
+
+	signature := myownsanity.SHA256(bodyBytes)
 
 	var kid string
 	var claims PlaidClaims
@@ -89,6 +99,7 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 		// clock drift between our servers and Plaid's.
 		jwt.WithIssuedAt(),
 		jwt.WithLeeway(5*time.Second),
+		jwt.WithTimeFunc(c.Clock.Now),
 	)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
@@ -98,8 +109,16 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 	}
 
+	if !strings.EqualFold(signature, claims.RequestBodySHA256) {
+		c.getLog(ctx).WithFields(logrus.Fields{
+			"expected": signature,
+			"received": claims.RequestBodySHA256,
+		}).Error("received plaid request with valid token but invalid signature!")
+		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
+	}
+
 	var hook PlaidWebhook
-	if err = ctx.Bind(&hook); err != nil {
+	if err = json.Unmarshal(bodyBytes, &hook); err != nil {
 		return c.badRequest(ctx, "malformed JSON")
 	}
 
