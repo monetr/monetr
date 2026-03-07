@@ -168,7 +168,7 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 	// Create a temporary directory for file uploads.
 	tempDirectory, err := os.MkdirTemp("", fmt.Sprintf("monetr-test-%x", t.Name()))
 	require.NoError(t, err, "must be able to create a temp directory for uploads")
-	log.Debugf("[TEST] created temporary directory for uploads: %s", tempDirectory)
+	log.Debug("[TEST] created temporary directory for uploads", "tempDirectory", tempDirectory)
 
 	fileStorage := mockgen.NewMockStorage(mockController)
 	jobRunner := mockgen.NewMockJobController(mockController)
