@@ -17,7 +17,7 @@ func TestPostgresPubSub_Notify(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 		channelName := gofakeit.UUID()
-		log := testutils.GetLog(t).WithField("channel", channelName)
+		log := testutils.GetLog(t).With("channel", channelName)
 
 		ps := NewPostgresPubSub(log, db)
 
@@ -39,7 +39,7 @@ func TestPostgresPubSub_Notify(t *testing.T) {
 
 		select {
 		case <-deadline.C:
-			log.Fatal("pubsub deadline was reached before a notification was received")
+			log.Error("pubsub deadline was reached before a notification was received")
 			t.FailNow()
 			return
 		case <-listener.Channel():
