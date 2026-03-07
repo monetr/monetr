@@ -1,21 +1,23 @@
 package migrations
 
 import (
+	"context"
+	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-pg/migrations/v8"
 	"github.com/monetr/monetr/server/migrations/functional"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type MonetrMigrationsManager struct {
 	collection *migrations.Collection
-	log        *logrus.Entry
+	log        *slog.Logger
 	db         migrations.DB
 }
 
-func NewMigrationsManager(log *logrus.Entry, db migrations.DB) (*MonetrMigrationsManager, error) {
+func NewMigrationsManager(log *slog.Logger, db migrations.DB) (*MonetrMigrationsManager, error) {
 	collection := migrations.NewCollection(functional.FunctionalMigrations...)
 	if err := collection.DiscoverSQLMigrationsFromFilesystem(http.FS(embededMigrations), "schema"); err != nil {
 		return nil, errors.Wrap(err, "failed to discover embedded sql migrations")
@@ -55,32 +57,32 @@ func (m *MonetrMigrationsManager) Up() (oldVersion, newVersion int64, err error)
 	return
 }
 
-func RunMigrations(log *logrus.Entry, db migrations.DB) {
+func RunMigrations(log *slog.Logger, db migrations.DB) {
 	collection := migrations.NewCollection()
 	collection.DiscoverSQLMigrationsFromFilesystem(http.FS(embededMigrations), "schema")
 
 	if _, _, err := collection.Run(db, "init"); err != nil {
-		log.Fatalf("failed to init schema migrations: %+v", err)
+		log.ErrorContext(context.Background(), fmt.Sprintf("failed to init schema migrations: %+v", err))
 		return
 	}
 
 	currentVersion, err := collection.Version(db)
 	if err != nil {
-		log.Fatalf("failed to get database version: %+v", err)
+		log.ErrorContext(context.Background(), fmt.Sprintf("failed to get database version: %+v", err))
 		return
 	}
 
-	log.Infof("current database version is %d", currentVersion)
+	log.InfoContext(context.Background(), fmt.Sprintf("current database version is %d", currentVersion))
 
 	oldVersion, newVersion, err := collection.Run(db, "up")
 	if err != nil {
-		log.Fatalf("failed to run migrations: %+v", err)
+		log.ErrorContext(context.Background(), fmt.Sprintf("failed to run migrations: %+v", err))
 		return
 	}
 
 	if oldVersion == newVersion {
-		log.Info("no database updates")
+		log.InfoContext(context.Background(), "no database updates")
 	} else {
-		log.Infof("database upgraded from %d to %d", oldVersion, newVersion)
+		log.InfoContext(context.Background(), fmt.Sprintf("database upgraded from %d to %d", oldVersion, newVersion))
 	}
 }

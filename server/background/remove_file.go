@@ -2,6 +2,7 @@ package background
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
@@ -11,7 +12,6 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -24,7 +24,7 @@ var (
 
 type (
 	RemoveFileHandler struct {
-		log          *logrus.Entry
+		log          *slog.Logger
 		db           *pg.DB
 		files        storage.Storage
 		unmarshaller JobUnmarshaller
@@ -38,7 +38,7 @@ type (
 
 	RemoveFileJob struct {
 		args  RemoveFileArguments
-		log   *logrus.Entry
+		log   *slog.Logger
 		repo  repository.BaseRepository
 		files storage.Storage
 		clock clock.Clock
@@ -46,7 +46,7 @@ type (
 )
 
 func NewRemoveFileHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 	files storage.Storage,
@@ -66,7 +66,7 @@ func (h *RemoveFileHandler) QueueName() string {
 
 func (h *RemoveFileHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	var args RemoveFileArguments
@@ -83,10 +83,10 @@ func (h *RemoveFileHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := log.WithContext(span.Context()).WithFields(logrus.Fields{
-			"accountId": args.AccountId,
-			"fileId":    args.FileId,
-		})
+		log := log.With(
+			"accountId", args.AccountId,
+			"fileId", args.FileId,
+		)
 		repo := repository.NewRepositoryFromSession(
 			h.clock,
 			"user_system",
@@ -111,7 +111,7 @@ func (h *RemoveFileHandler) HandleConsumeJob(
 }
 
 func NewRemoveFileJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	repo repository.BaseRepository,
 	clock clock.Clock,
 	fileStorage storage.Storage,
@@ -130,27 +130,25 @@ func (j *RemoveFileJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
-	log := j.log.
-		WithContext(span.Context()).
-		WithFields(logrus.Fields{
-			"accountId": j.args.AccountId,
-			"fileId":    j.args.FileId,
-		})
+	log := j.log.With(
+		"accountId", j.args.AccountId,
+		"fileId", j.args.FileId,
+	)
 
 	file, err := j.repo.GetFile(span.Context(), j.args.FileId)
 	if err != nil {
-		log.WithError(err).Error("failed to retrieve file from database")
+		log.ErrorContext(span.Context(), "failed to retrieve file from database", "err", err)
 		return err
 	}
 
 	if file.ReconciledAt != nil {
-		log.Info("file is already deleted")
+		log.InfoContext(span.Context(), "file is already deleted")
 		return nil
 	}
 
-	log.Debug("removing file")
+	log.DebugContext(span.Context(), "removing file")
 	if err = j.files.Remove(span.Context(), *file); err != nil {
-		log.WithError(err).Error("failed to remove file")
+		log.ErrorContext(span.Context(), "failed to remove file", "err", err)
 	}
 
 	now := j.clock.Now()
@@ -161,10 +159,10 @@ func (j *RemoveFileJob) Run(ctx context.Context) error {
 	}
 
 	if err := j.repo.UpdateFile(span.Context(), file); err != nil {
-		log.WithError(err).Error("failed to update file's reconciled at")
+		log.ErrorContext(span.Context(), "failed to update file's reconciled at", "err", err)
 		return err
 	}
 
-	log.Debug("file successfully removed")
+	log.DebugContext(span.Context(), "file successfully removed")
 	return nil
 }

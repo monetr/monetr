@@ -2,15 +2,16 @@ package repository
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type SecretData struct {
@@ -28,7 +29,7 @@ type SecretsRepository interface {
 type baseSecretsRepository struct {
 	accountId ID[Account]
 	clock     clock.Clock
-	log       *logrus.Entry
+	log       *slog.Logger
 	db        pg.DBI
 	kms       secrets.KeyManagement
 }
@@ -38,7 +39,7 @@ func (b *baseSecretsRepository) AccountId() ID[Account] {
 }
 
 func NewSecretsRepository(
-	log *logrus.Entry,
+	log *slog.Logger,
 	clock clock.Clock,
 	db pg.DBI,
 	kms secrets.KeyManagement,
@@ -61,11 +62,11 @@ func (b *baseSecretsRepository) Store(ctx context.Context, secret *SecretData) e
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := b.log.WithContext(span.Context())
+	log := b.log
 
 	var item Secret
 	if !secret.SecretId.IsZero() {
-		log = log.WithField("secretId", secret.SecretId)
+		log = log.With("secretId", secret.SecretId)
 		err := b.db.ModelContext(span.Context(), &item).
 			Where(`"secret"."account_id" = ?`, b.AccountId()).
 			Where(`"secret"."secret_id" = ?`, secret.SecretId).
@@ -73,13 +74,13 @@ func (b *baseSecretsRepository) Store(ctx context.Context, secret *SecretData) e
 			For(`UPDATE`).
 			Select(&item)
 		if err != nil {
-			log.WithError(err).Error("failed to read an existing secret for update")
+			log.ErrorContext(span.Context(), "failed to read an existing secret for update", "err", err)
 			return errors.Wrap(err, "failed to retrieve secretfor update")
 		}
-		log.Trace("found an existing secret to update")
+		log.Log(span.Context(), logging.LevelTrace, "found an existing secret to update")
 		item.UpdatedAt = b.clock.Now().UTC()
 	} else {
-		log.Trace("secret does not exist, a new secret will be stored")
+		log.Log(span.Context(), logging.LevelTrace, "secret does not exist, a new secret will be stored")
 		item = Secret{
 			AccountId: b.AccountId(),
 			Kind:      secret.Kind,
@@ -112,8 +113,8 @@ func (b *baseSecretsRepository) Store(ctx context.Context, secret *SecretData) e
 		return errors.Wrap(err, "failed to store secret")
 	}
 
-	log = log.WithField("secretId", item.SecretId)
-	log.Trace("successfully stored secret")
+	log = log.With("secretId", item.SecretId)
+	log.Log(span.Context(), logging.LevelTrace, "successfully stored secret")
 
 	span.Status = sentry.SpanStatusOK
 

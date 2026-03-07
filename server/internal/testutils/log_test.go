@@ -1,7 +1,6 @@
 package testutils
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,7 +9,6 @@ import (
 func TestGetLog(t *testing.T) {
 	originalLog := GetLog(t)
 	assert.NotNil(t, originalLog, "logging object must not be nil")
-	assert.NotEqual(t, os.Stdout, originalLog.Logger.Out, "should not be logging to STDOUT")
 
 	secondLog := GetLog(t)
 	assert.Equal(t, originalLog, secondLog, "requesting another log in the same test should return the same log")

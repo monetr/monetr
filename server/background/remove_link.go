@@ -3,6 +3,7 @@ package background
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
@@ -12,7 +13,6 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -26,7 +26,7 @@ var (
 
 type (
 	RemoveLinkHandler struct {
-		log          *logrus.Entry
+		log          *slog.Logger
 		db           *pg.DB
 		publisher    pubsub.Publisher
 		unmarshaller JobUnmarshaller
@@ -40,7 +40,7 @@ type (
 
 	RemoveLinkJob struct {
 		args      RemoveLinkArguments
-		log       *logrus.Entry
+		log       *slog.Logger
 		db        pg.DBI
 		publisher pubsub.Publisher
 		clock     clock.Clock
@@ -55,7 +55,7 @@ func TriggerRemoveLink(ctx context.Context, backgroundJobs JobController, argume
 }
 
 func NewRemoveLinkHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 	publisher pubsub.Publisher,
@@ -75,7 +75,7 @@ func (r RemoveLinkHandler) QueueName() string {
 
 func (r *RemoveLinkHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	var args RemoveLinkArguments
@@ -92,10 +92,10 @@ func (r *RemoveLinkHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := log.WithContext(span.Context()).WithFields(logrus.Fields{
-			"accountId": args.AccountId,
-			"linkId":    args.LinkId,
-		})
+		log := log.With(
+			"accountId", args.AccountId,
+			"linkId", args.LinkId,
+		)
 
 		job, err := NewRemoveLinkJob(
 			log,
@@ -113,7 +113,7 @@ func (r *RemoveLinkHandler) HandleConsumeJob(
 }
 
 func NewRemoveLinkJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db pg.DBI,
 	clock clock.Clock,
 	publisher pubsub.Publisher,
@@ -132,7 +132,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
-	log := r.log.WithContext(span.Context())
+	log := r.log
 
 	accountId := r.args.AccountId
 	linkId := r.args.LinkId
@@ -148,7 +148,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	link, err := repo.GetLink(span.Context(), linkId)
 	if err != nil {
 		crumbs.Warn(span.Context(), "failed to retrieve link to be removed, this job will not be retried", "weirdness", nil)
-		log.WithError(err).Error("failed to retrieve link that to be removed, this job will not be retried")
+		log.ErrorContext(span.Context(), "failed to retrieve link that to be removed, this job will not be retried", "err", err)
 		return nil
 	}
 
@@ -164,12 +164,12 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 			Column("bank_account_id").
 			Select(&bankAccountIds)
 		if err != nil {
-			log.WithError(err).Errorf("failed to retrieve bank account Ids for link")
+			log.ErrorContext(span.Context(), "failed to retrieve bank account Ids for link", "err", err)
 			return errors.Wrap(err, "failed to retrieve bank account Ids for link")
 		}
 	}
-	r.log = log.WithField("bankAccountIds", bankAccountIds)
-	r.log.Info("removing data for bank account Ids for link")
+	r.log = log.With("bankAccountIds", bankAccountIds)
+	r.log.InfoContext(span.Context(), "removing data for bank account Ids for link")
 
 	secretIds := r.getSecretsToRemove(span.Context())
 
@@ -209,7 +209,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 		channelName,
 		"success",
 	); err != nil {
-		log.WithError(err).Warn("failed to send notification about successfully removing link")
+		log.WarnContext(span.Context(), "failed to send notification about successfully removing link", "err", err)
 		crumbs.Warn(span.Context(), "failed to send notification about successfully removing link", "pubsub", map[string]any{
 			"error": err.Error(),
 		})
@@ -230,11 +230,11 @@ func (r *RemoveLinkJob) removeTransactionClusters(
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove transaction clusters for link")
+		r.log.ErrorContext(ctx, "failed to remove transaction clusters for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove transaction clusters for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed transaction cluster(s)")
+	r.log.InfoContext(ctx, "removed transaction cluster(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) removeTransactionUploads(
@@ -249,11 +249,11 @@ func (r *RemoveLinkJob) removeTransactionUploads(
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove transaction uploads for link")
+		r.log.ErrorContext(ctx, "failed to remove transaction uploads for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove transaction uploads for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed transaction upload(s)")
+	r.log.InfoContext(ctx, "removed transaction upload(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) removeTransactions(
@@ -268,11 +268,11 @@ func (r *RemoveLinkJob) removeTransactions(
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove transactions for link")
+		r.log.ErrorContext(ctx, "failed to remove transactions for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove transactions for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed transaction(s)")
+	r.log.InfoContext(ctx, "removed transaction(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) getLunchFlowTransactionsToRemove(
@@ -313,11 +313,11 @@ func (r *RemoveLinkJob) removeLunchFlowTransactions(
 		WhereIn(`"lunch_flow_transaction_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove Lunch Flow transactions for link")
+		r.log.ErrorContext(ctx, "failed to remove Lunch Flow transactions for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove Lunch Flow transactions for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed Lunch Flow transaction(s)")
+	r.log.InfoContext(ctx, "removed Lunch Flow transaction(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) getPlaidTransactionsToRemove(
@@ -356,11 +356,11 @@ func (r *RemoveLinkJob) removePlaidTransactions(
 		WhereIn(`"plaid_transaction_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove plaid transactions for link")
+		r.log.ErrorContext(ctx, "failed to remove plaid transactions for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove plaid transactions for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed plaid transaction(s)")
+	r.log.InfoContext(ctx, "removed plaid transaction(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) removeSpending(
@@ -376,11 +376,11 @@ func (r *RemoveLinkJob) removeSpending(
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove spending for link")
+		r.log.ErrorContext(ctx, "failed to remove spending for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove spending for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed spending(s)")
+	r.log.InfoContext(ctx, "removed spending(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) removeFundingSchedules(
@@ -396,11 +396,11 @@ func (r *RemoveLinkJob) removeFundingSchedules(
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove funding schedules for link")
+		r.log.ErrorContext(ctx, "failed to remove funding schedules for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove funding schedules for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed funding schedule(s)")
+	r.log.InfoContext(ctx, "removed funding schedule(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) getPlaidSyncsToRemove(
@@ -439,11 +439,11 @@ func (r *RemoveLinkJob) removePlaidSyncs(
 		WhereIn(`"plaid_sync_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove plaid syncs for link")
+		r.log.ErrorContext(ctx, "failed to remove plaid syncs for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove plaid syncs for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed plaid sync(s)")
+	r.log.InfoContext(ctx, "removed plaid sync(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) getLunchFlowBankAccountsToRemove(
@@ -478,11 +478,11 @@ func (r *RemoveLinkJob) removeLunchFlowBankAccounts(
 		WhereIn(`"lunch_flow_bank_account_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove Lunch Flow bank accounts for link")
+		r.log.ErrorContext(ctx, "failed to remove Lunch Flow bank accounts for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove Lunch Flow bank accounts for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed Lunch Flow bank account(s)")
+	r.log.InfoContext(ctx, "removed Lunch Flow bank account(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) getPlaidBankAccountsToRemove(
@@ -518,11 +518,11 @@ func (r *RemoveLinkJob) removePlaidBankAccounts(
 		WhereIn(`"plaid_bank_account_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove plaid bank accounts for link")
+		r.log.ErrorContext(ctx, "failed to remove plaid bank accounts for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove plaid bank accounts for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed plaid bank account(s)")
+	r.log.InfoContext(ctx, "removed plaid bank account(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) getPlaidLinksToRemove(
@@ -557,11 +557,11 @@ func (r *RemoveLinkJob) removePlaidLinks(
 		WhereIn(`"plaid_link_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove plaid links for link")
+		r.log.ErrorContext(ctx, "failed to remove plaid links for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove plaid links for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed plaid link(s)")
+	r.log.InfoContext(ctx, "removed plaid link(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) getLunchFlowLinksToRemove(
@@ -596,11 +596,11 @@ func (r *RemoveLinkJob) removeLunchFlowLinks(
 		WhereIn(`"lunch_flow_link_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove Lunch Flow links for link")
+		r.log.ErrorContext(ctx, "failed to remove Lunch Flow links for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove Lunch Flow links for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed Lunch Flow link(s)")
+	r.log.InfoContext(ctx, "removed Lunch Flow link(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) getSecretsToRemove(
@@ -642,11 +642,11 @@ func (r *RemoveLinkJob) removeSecrets(
 		WhereIn(`"secret_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove secrets for link")
+		r.log.ErrorContext(ctx, "failed to remove secrets for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove secrets for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed secret(s)")
+	r.log.InfoContext(ctx, "removed secret(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) removeBankAccounts(
@@ -662,11 +662,11 @@ func (r *RemoveLinkJob) removeBankAccounts(
 		WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove bank accounts for link")
+		r.log.ErrorContext(ctx, "failed to remove bank accounts for link", "err", err)
 		panic(errors.Wrap(err, "failed to remove bank accounts for link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed bank account(s)")
+	r.log.InfoContext(ctx, "removed bank account(s)", "removed", result.RowsAffected())
 }
 
 func (r *RemoveLinkJob) removeLink(
@@ -677,9 +677,9 @@ func (r *RemoveLinkJob) removeLink(
 		Where(`"link_id" = ?`, r.args.LinkId).
 		Delete()
 	if err != nil {
-		r.log.WithError(err).Errorf("failed to remove link")
+		r.log.ErrorContext(ctx, "failed to remove link", "err", err)
 		panic(errors.Wrap(err, "failed to remove link"))
 	}
 
-	r.log.WithField("removed", result.RowsAffected()).Info("removed link")
+	r.log.InfoContext(ctx, "removed link", "removed", result.RowsAffected())
 }

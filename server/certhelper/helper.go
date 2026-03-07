@@ -1,15 +1,16 @@
 package certhelper
 
 import (
+	"context"
 	"hash/fnv"
 	"io"
+	"log/slog"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type CertificateWatcher interface {
@@ -20,14 +21,14 @@ type CertificateWatcher interface {
 type Callback = func(path string) error
 
 type fsnotifyCertificateWatcher struct {
-	log           *logrus.Entry
+	log           *slog.Logger
 	once          sync.Once
 	cancelChannel chan chan error
 	watcher       *fsnotify.Watcher
 	callback      Callback
 }
 
-func NewFileCertificateHelper(log *logrus.Entry, paths []string, callback Callback) (CertificateWatcher, error) {
+func NewFileCertificateHelper(log *slog.Logger, paths []string, callback Callback) (CertificateWatcher, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create watcher for the root certificate")
@@ -93,7 +94,7 @@ func (f *fsnotifyCertificateWatcher) Stop() error {
 	return <-callback
 }
 
-func NewManualCertificateWatcher(log *logrus.Entry, paths []string, callback Callback) (CertificateWatcher, error) {
+func NewManualCertificateWatcher(log *slog.Logger, paths []string, callback Callback) (CertificateWatcher, error) {
 	return &manualCertificateWatcher{
 		log:           log,
 		once:          sync.Once{},
@@ -105,7 +106,7 @@ func NewManualCertificateWatcher(log *logrus.Entry, paths []string, callback Cal
 }
 
 type manualCertificateWatcher struct {
-	log           *logrus.Entry
+	log           *slog.Logger
 	once          sync.Once
 	cancelChannel chan chan error
 	callback      Callback
@@ -155,17 +156,17 @@ func (f *manualCertificateWatcher) hasChanged() bool {
 	hit := map[string]uint64{}
 
 	for _, path := range f.paths {
-		log := f.log.WithField("path", path)
+		log := f.log.With("path", path)
 
 		stat, err := os.Stat(path)
 		if err != nil {
-			log.WithError(err).Warn("failed to get stat for path")
+			log.WarnContext(context.Background(), "failed to get stat for path", "err", err)
 			continue
 		}
 
 		hash, err := f.hashItem(stat)
 		if err != nil {
-			log.WithError(err).Warn("failed to hash item")
+			log.WarnContext(context.Background(), "failed to hash item", "err", err)
 			continue
 		}
 

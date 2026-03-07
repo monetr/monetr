@@ -8,8 +8,9 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"log/slog"
 )
 
 type SpendingEvent struct {
@@ -32,13 +33,13 @@ type SpendingInstructions interface {
 }
 
 type spendingInstructionBase struct {
-	log      *logrus.Entry
+	log      *slog.Logger
 	ruleset  *RuleSet
 	spending Spending
 	funding  FundingInstructions
 }
 
-func NewSpendingInstructions(log *logrus.Entry, spending Spending, fundingInstructions FundingInstructions) SpendingInstructions {
+func NewSpendingInstructions(log *slog.Logger, spending Spending, fundingInstructions FundingInstructions) SpendingInstructions {
 	instructions := &spendingInstructionBase{
 		log:      log,
 		ruleset:  nil,
@@ -60,21 +61,13 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(
 	events := make([]SpendingEvent, 0)
 
 	var err error
-	log := s.log.
-		WithContext(ctx).
-		WithFields(logrus.Fields{
-			"start":    start,
-			"end":      end,
-			"timezone": timezone.String(),
-		})
+	log := s.log.With("start", start, "end", end, "timezone", timezone.String())
 	for i := 0; ; i++ {
-		ilog := log.WithField("i", i)
+		ilog := log.With("i", i)
 		select {
 		case <-ctx.Done():
 			if err := ctx.Err(); err != nil {
-				ilog.
-					WithError(err).
-					Error("timed out while trying to determine spending events between dates")
+				ilog.ErrorContext(ctx, "timed out while trying to determine spending events between dates", "err", err)
 				crumbs.Error(ctx, "Timed out while trying to determine spending events between dates", "forecast", map[string]any{
 					"start":    start,
 					"end":      end,
@@ -97,7 +90,7 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(
 			allocation = events[i-1].RollingAllocation
 		}
 
-		ilog = ilog.WithField("after", start)
+		ilog = ilog.With("after", start)
 		event, err = s.getNextSpendingEventAfter(ctx, afterDate, timezone, allocation)
 		if err != nil {
 			return nil, err
@@ -105,12 +98,12 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(
 
 		// No event returned means there are no more.
 		if event == nil {
-			ilog.Trace("no more spending events to calculate")
+			ilog.Log(ctx, logging.LevelTrace, "no more spending events to calculate")
 			break
 		}
 
 		if event.Date.After(end) {
-			ilog.Trace("calculated next spending event, but it happens after the end window, discarding and exiting calculation")
+			ilog.Log(ctx, logging.LevelTrace, "calculated next spending event, but it happens after the end window, discarding and exiting calculation")
 			break
 		}
 
@@ -120,21 +113,18 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(
 		if !event.Date.After(afterDate) {
 			// Don't log the name of the spending object, its nobodies business.
 			s.spending.Name = "[REDACTED]"
-			ilog.WithFields(logrus.Fields{
-				"bug": true,
-				"debug": logrus.Fields{
-					"badEvent":      event,
-					"previousEvent": events[i-1],
-					"spending":      s.spending,
-					"afterDate":     afterDate,
-					"timezone":      timezone,
-					"allocation":    allocation,
-					"i":             i,
-					"count":         len(events),
-					"start":         start,
-					"end":           end,
-				},
-			}).Error("calculated a spending event that does not come after the after date specified! there is a bug somewhere!!!")
+			ilog.ErrorContext(ctx, "calculated a spending event that does not come after the after date specified! there is a bug somewhere!!!",
+				"bug", true,
+				"badEvent", event,
+				"previousEvent", events[i-1],
+				"spending", s.spending,
+				"afterDate", afterDate,
+				"timezone", timezone,
+				"allocation", allocation,
+				"count", len(events),
+				"start", start,
+				"end", end,
+			)
 
 			// This might not make it into sentry because of sampling :(
 			crumbs.IndicateBug(ctx, "Calculated a spending event that does not come after the after date specified", map[string]any{
@@ -151,12 +141,12 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(
 			panic("calculated a spending event that does not come after the after date specified")
 		}
 
-		ilog.Trace("calculated next spending event, adding to return set")
+		ilog.Log(ctx, logging.LevelTrace, "calculated next spending event, adding to return set")
 
 		events = append(events, *event)
 	}
 
-	log.WithField("count", len(events)).Trace("returning calculated events")
+	log.Log(ctx, logging.LevelTrace, "returning calculated events", "count", len(events))
 
 	return events, nil
 }
@@ -430,12 +420,7 @@ func (s *spendingInstructionBase) GetNextInflowEventAfter(
 	input time.Time,
 	timezone *time.Location,
 ) (*SpendingEvent, error) {
-	log := s.log.
-		WithContext(ctx).
-		WithFields(logrus.Fields{
-			"input":    input,
-			"timezone": timezone.String(),
-		})
+	log := s.log.With("input", input, "timezone", timezone.String())
 
 	afterDate := input
 	allocation := s.spending.CurrentAmount
@@ -443,9 +428,7 @@ func (s *spendingInstructionBase) GetNextInflowEventAfter(
 		select {
 		case <-ctx.Done():
 			if err := ctx.Err(); err != nil {
-				log.
-					WithError(err).
-					Error("timed out while trying to determine next inflow event")
+				log.ErrorContext(ctx, "timed out while trying to determine next inflow event", "err", err)
 				return nil, errors.WithStack(err)
 			}
 			crumbs.Warn(ctx, "Received done context signal with no error", "spending", nil)
@@ -480,7 +463,7 @@ type SpendingContribution struct {
 
 func CalculateSpendingContributionAfter(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	spending Spending,
 	funding FundingSchedule,
 	input time.Time,

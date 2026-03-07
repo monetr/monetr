@@ -5,6 +5,8 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"encoding/base64"
+	"fmt"
+	"log/slog"
 	"math/big"
 	"sync"
 	"sync/atomic"
@@ -14,9 +16,9 @@ import (
 	keyfunc "github.com/MicahParks/keyfunc/v3"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/v41/plaid"
-	"github.com/sirupsen/logrus"
 )
 
 type WebhookVerificationKey struct {
@@ -61,7 +63,7 @@ var (
 	_ WebhookVerification = &memoryWebhookVerification{}
 )
 
-func NewInMemoryWebhookVerification(log *logrus.Entry, plaid Platypus, cleanupInterval time.Duration) WebhookVerification {
+func NewInMemoryWebhookVerification(log *slog.Logger, plaid Platypus, cleanupInterval time.Duration) WebhookVerification {
 	verification := &memoryWebhookVerification{
 		closed:        0,
 		log:           log,
@@ -83,7 +85,7 @@ type keyCacheItem struct {
 
 type memoryWebhookVerification struct {
 	closed        uint32
-	log           *logrus.Entry
+	log           *slog.Logger
 	plaid         Platypus
 	lock          sync.Mutex
 	cache         map[string]*keyCacheItem
@@ -99,7 +101,7 @@ func (m *memoryWebhookVerification) GetVerificationKey(ctx context.Context, keyI
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := m.log.WithField("keyId", keyId).WithContext(ctx)
+	log := m.log.With("keyId", keyId)
 
 	m.lock.Lock()
 	defer m.lock.Unlock()
@@ -107,15 +109,15 @@ func (m *memoryWebhookVerification) GetVerificationKey(ctx context.Context, keyI
 	item, ok := m.cache[keyId]
 	if ok {
 		if item.expiration.After(time.Now()) {
-			log.Trace("jwk function already present in cache, returning")
+			log.Log(ctx, logging.LevelTrace, "jwk function already present in cache, returning")
 			return item.keyFunction, nil
 		}
 
-		log.Trace("jwk function present in cache, but is expired; the cached function will be removed and a new one will be retrieved")
+		log.Log(ctx, logging.LevelTrace, "jwk function present in cache, but is expired; the cached function will be removed and a new one will be retrieved")
 		delete(m.cache, keyId)
 	}
 
-	log.Trace("retrieving jwk from plaid")
+	log.Log(ctx, logging.LevelTrace, "retrieving jwk from plaid")
 
 	result, err := m.plaid.GetWebhookVerificationKey(span.Context(), keyId)
 	if err != nil {
@@ -182,7 +184,7 @@ func (m *memoryWebhookVerification) cacheWorker() {
 		case <-m.cleanupTicker.C:
 			m.cleanup()
 		case promise := <-m.closer:
-			m.log.Debug("closing jwk cache, stopping background worker")
+			m.log.DebugContext(context.Background(), "closing jwk cache, stopping background worker")
 			promise <- nil
 			return
 		}
@@ -194,11 +196,11 @@ func (m *memoryWebhookVerification) cleanup() {
 	defer m.lock.Unlock()
 
 	if len(m.cache) == 0 {
-		m.log.Trace("no items in Plaid jwk cache, nothing to cleanup")
+		m.log.Log(context.Background(), logging.LevelTrace, "no items in Plaid jwk cache, nothing to cleanup")
 		return
 	}
 
-	m.log.Trace("cleaning up Plaid jwk cache")
+	m.log.Log(context.Background(), logging.LevelTrace, "cleaning up Plaid jwk cache")
 
 	itemsToRemove := make([]string, 0, len(m.cache))
 	for key, item := range m.cache {
@@ -209,11 +211,11 @@ func (m *memoryWebhookVerification) cleanup() {
 	}
 
 	if len(itemsToRemove) == 0 {
-		m.log.Trace("no items have expired in cache")
+		m.log.Log(context.Background(), logging.LevelTrace, "no items have expired in cache")
 		return
 	}
 
-	m.log.Tracef("found %d expired item(s); cleaning them up", len(itemsToRemove))
+	m.log.Log(context.Background(), logging.LevelTrace, fmt.Sprintf("found %d expired item(s); cleaning them up", len(itemsToRemove)))
 
 	for _, key := range itemsToRemove {
 		delete(m.cache, key)

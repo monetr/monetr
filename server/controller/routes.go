@@ -16,8 +16,9 @@ import (
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
+	"log/slog"
+
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func (c *Controller) RegisterRoutes(app *echo.Echo) {
@@ -27,9 +28,9 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
 				if ok {
 					log := c.getLog(ctx)
-					log.WithError(err).Warn("request timed out, rolling back transaction")
+					log.WarnContext(c.getContext(ctx), "request timed out, rolling back transaction", "err", err)
 					if terr := txn.Rollback(); terr != nil {
-						log.WithError(terr).Error("failed to rollback transaction for timed out request")
+						log.ErrorContext(c.getContext(ctx), "failed to rollback transaction for timed out request", "err", terr)
 					}
 				}
 				return err
@@ -62,31 +63,29 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 			// Log after the request completes, this way we have information about the
 			// authenticated user (if there is one).
 			defer func(ctx echo.Context) {
-				log := c.Log.
-					WithContext(c.getContext(ctx)).
-					WithFields(logrus.Fields{
-						"method":    ctx.Request().Method,
-						"path":      ctx.Path(),
-						"requestId": util.GetRequestID(ctx),
-					})
+				log := c.Log.With(
+					"method", ctx.Request().Method,
+					"path", ctx.Path(),
+					"requestId", util.GetRequestID(ctx),
+				)
 
 				claims, err := c.getClaims(ctx)
 				if err == nil {
 					if claims.LoginId != "" {
-						log = log.WithField("loginId", claims.LoginId)
+						log = log.With("loginId", claims.LoginId)
 					}
 					if claims.AccountId != "" {
-						log = log.WithField("accountId", claims.AccountId)
+						log = log.With("accountId", claims.AccountId)
 					}
 					if claims.UserId != "" {
-						log = log.WithField("userId", claims.UserId)
+						log = log.With("userId", claims.UserId)
 					}
 					if claims.Scope != "" {
-						log = log.WithField("scope", claims.Scope)
+						log = log.With("scope", claims.Scope)
 					}
 				}
 
-				log.Debugf("%s %s", ctx.Request().Method, ctx.Path())
+				log.DebugContext(c.getContext(ctx), fmt.Sprintf("%s %s", ctx.Request().Method, ctx.Path()))
 			}(ctx)
 
 			return next(ctx)
@@ -133,7 +132,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				defer func() {
 					if panicErr := recover(); panicErr != nil {
 						hub.RecoverWithContext(span.Context(), panicErr)
-						c.getLog(ctx).Errorf("panic for request: %+v\n%s", panicErr, string(debug.Stack()))
+						c.getLog(ctx).ErrorContext(c.getContext(ctx), fmt.Sprintf("panic for request: %+v\n%s", panicErr, string(debug.Stack())))
 						returnErr = ctx.JSON(http.StatusInternalServerError, map[string]any{
 							"error": "An internal error occurred.",
 						})
@@ -175,22 +174,22 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 			log := c.getLog(ctx)
 			err := next(ctx)
 			if err != nil { // Log the error for the request.
-				level := logrus.ErrorLevel
+				level := slog.LevelError
 				switch raw := err.(type) {
 				case *echo.HTTPError:
 					// If this is an error for the user, then don't log at an error level.
 					if raw.Code < 500 {
-						level = logrus.WarnLevel
+						level = slog.LevelWarn
 					}
 				}
 
 				// Don't log an error level if we are logging for a context canceled
 				// error.
 				if errors.Is(err, context.Canceled) {
-					level = logrus.WarnLevel
+					level = slog.LevelWarn
 				}
 
-				log.WithError(err).Logf(level, "%s", err.Error())
+				log.Log(c.getContext(ctx), level, err.Error(), "err", err)
 			}
 
 			switch actualError := err.(type) {

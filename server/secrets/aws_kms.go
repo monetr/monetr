@@ -8,13 +8,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"log/slog"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type AWSKMSConfig struct {
-	Log       *logrus.Entry
+	Log       *slog.Logger
 	KeyID     string
 	Region    string
 	AccessKey string
@@ -23,7 +24,7 @@ type AWSKMSConfig struct {
 }
 
 type AWSKMS struct {
-	log    *logrus.Entry
+	log    *slog.Logger
 	config AWSKMSConfig
 	client *kms.KMS
 }

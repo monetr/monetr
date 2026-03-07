@@ -2,16 +2,17 @@ package background
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -29,7 +30,7 @@ var (
 
 type (
 	CleanupLunchFlowHandler struct {
-		log          *logrus.Entry
+		log          *slog.Logger
 		db           *pg.DB
 		kms          secrets.KeyManagement
 		unmarshaller JobUnmarshaller
@@ -43,7 +44,7 @@ type (
 
 	CleanupLunchFlowJob struct {
 		args    CleanupLunchFlowArguments
-		log     *logrus.Entry
+		log     *slog.Logger
 		clock   clock.Clock
 		repo    repository.BaseRepository
 		secrets repository.SecretsRepository
@@ -51,7 +52,7 @@ type (
 )
 
 func NewCleanupLunchFlowHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 	kms secrets.KeyManagement,
@@ -76,9 +77,9 @@ func (c *CleanupLunchFlowHandler) EnqueueTriggeredJob(
 	ctx context.Context,
 	enqueuer JobEnqueuer,
 ) error {
-	log := c.log.WithContext(ctx)
+	log := c.log
 
-	log.Info("retrieving bank accounts to sync with Lunch Flow")
+	log.InfoContext(ctx, "retrieving bank accounts to sync with Lunch Flow")
 
 	jobRepo := repository.NewJobRepository(c.db, c.clock)
 
@@ -88,17 +89,17 @@ func (c *CleanupLunchFlowHandler) EnqueueTriggeredJob(
 	}
 
 	if len(staleLinks) == 0 {
-		log.Info("no stale Lunch Flow links to be cleaned up")
+		log.InfoContext(ctx, "no stale Lunch Flow links to be cleaned up")
 		return nil
 	}
 
 	for _, item := range staleLinks {
-		itemLog := log.WithFields(logrus.Fields{
-			"accountId":       item.AccountId,
-			"lunchFlowLinkId": item.LunchFlowLinkId,
-		})
+		itemLog := log.With(
+			"accountId", item.AccountId,
+			"lunchFlowLinkId", item.LunchFlowLinkId,
+		)
 
-		itemLog.Trace("enqueuing Lunch Flow link to be cleand up")
+		itemLog.Log(ctx, logging.LevelTrace, "enqueuing Lunch Flow link to be cleand up")
 
 		err := enqueuer.EnqueueJobTxn(
 			ctx,
@@ -110,7 +111,7 @@ func (c *CleanupLunchFlowHandler) EnqueueTriggeredJob(
 			},
 		)
 		if err != nil {
-			itemLog.WithError(err).Warn("failed to enqueue job to cleanup Lunch Flow link")
+			itemLog.WarnContext(ctx, "failed to enqueue job to cleanup Lunch Flow link", "err", err)
 			crumbs.Warn(
 				ctx,
 				"Failed to enqueue job to cleanup Lunch Flow link",
@@ -122,14 +123,14 @@ func (c *CleanupLunchFlowHandler) EnqueueTriggeredJob(
 			continue
 		}
 
-		itemLog.Trace("successfully enqueued Lunch Flow link for cleanup")
+		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued Lunch Flow link for cleanup")
 	}
 
 	return nil
 }
 
 // HandleConsumeJob implements ScheduledJobHandler.
-func (c *CleanupLunchFlowHandler) HandleConsumeJob(ctx context.Context, log *logrus.Entry, data []byte) error {
+func (c *CleanupLunchFlowHandler) HandleConsumeJob(ctx context.Context, log *slog.Logger, data []byte) error {
 	var args CleanupLunchFlowArguments
 	if err := errors.Wrap(c.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
 		crumbs.Error(ctx, "Failed to unmarshal arguments for cleanup Lunch Flow link job.", "job", map[string]any{
@@ -139,16 +140,15 @@ func (c *CleanupLunchFlowHandler) HandleConsumeJob(ctx context.Context, log *log
 	}
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
-	log = log.WithFields(logrus.Fields{
-		"accountId":       args.AccountId,
-		"lunchFlowLinkId": args.LunchFlowLinkId,
-	})
+	log = log.With(
+		"accountId", args.AccountId,
+		"lunchFlowLinkId", args.LunchFlowLinkId,
+	)
 
 	return c.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := log.WithContext(span.Context())
 		repo := repository.NewRepositoryFromSession(
 			c.clock,
 			"user_lunch_flow",
@@ -185,7 +185,7 @@ func (c *CleanupLunchFlowHandler) QueueName() string {
 }
 
 func NewCleanupLunchFlowJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	repo repository.BaseRepository,
 	secrets repository.SecretsRepository,
 	clock clock.Clock,
@@ -213,13 +213,10 @@ func (c *CleanupLunchFlowJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	log := c.log.WithContext(span.Context()).
-		WithFields(logrus.Fields{
-			"lunchFlowLinkId": lunchFlowLink.LunchFlowLinkId,
-		})
+	log := c.log.With("lunchFlowLinkId", lunchFlowLink.LunchFlowLinkId)
 
 	if lunchFlowLink.Status != LunchFlowLinkStatusPending {
-		log.WithField("bug", true).Warn("Lunch Flow link is not in a pending status! There is a bug, please report this!")
+		log.WarnContext(span.Context(), "Lunch Flow link is not in a pending status! There is a bug, please report this!", "bug", true)
 		return nil
 	}
 
@@ -230,17 +227,15 @@ func (c *CleanupLunchFlowJob) Run(ctx context.Context) error {
 		span.Context(),
 		lunchFlowLink.LunchFlowLinkId,
 	); err != nil {
-		log.WithError(err).
-			Error("failed to remove Lunch Flow link!")
+		log.ErrorContext(span.Context(), "failed to remove Lunch Flow link!", "err", err)
 		return err
 	}
 
 	if err := c.secrets.Delete(span.Context(), lunchFlowLink.SecretId); err != nil {
-		log.WithError(err).
-			WithFields(logrus.Fields{
-				"secretId": lunchFlowLink.SecretId,
-			}).
-			Error("failed to remove Lunch Flow link secret!")
+		log.ErrorContext(span.Context(), "failed to remove Lunch Flow link secret!",
+			"err", err,
+			"secretId", lunchFlowLink.SecretId,
+		)
 		return err
 	}
 

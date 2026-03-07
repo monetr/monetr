@@ -1,11 +1,11 @@
 package ui
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/monetr/monetr/server/application"
 	"github.com/monetr/monetr/server/config"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -13,7 +13,7 @@ var (
 )
 
 type UIController struct {
-	log           *logrus.Entry
+	log           *slog.Logger
 	configuration config.Configuration
 	filesystem    http.FileSystem
 }
@@ -22,7 +22,7 @@ type UIController struct {
 // filesystem to serve UI files to the client. This requires that the UI files
 // have been built and have been placed in the correct directory at the time
 // that the go executable is compiled.
-func NewUIController(log *logrus.Entry, configuration config.Configuration) *UIController {
+func NewUIController(log *slog.Logger, configuration config.Configuration) *UIController {
 	return NewUIControllerCustomFS(log, configuration, http.FS(builtUi))
 }
 
@@ -30,7 +30,7 @@ func NewUIController(log *logrus.Entry, configuration config.Configuration) *UIC
 // anything that implements the http.FileSystem interface in order to serve UI
 // files to the client.
 func NewUIControllerCustomFS(
-	log *logrus.Entry,
+	log *slog.Logger,
 	configuration config.Configuration,
 	filesystem http.FileSystem,
 ) *UIController {

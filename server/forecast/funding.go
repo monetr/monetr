@@ -8,7 +8,7 @@ import (
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"log/slog"
 )
 
 type FundingEvent struct {
@@ -31,13 +31,13 @@ type FundingInstructions interface {
 }
 
 type fundingScheduleBase struct {
-	log             *logrus.Entry
+	log             *slog.Logger
 	ruleset         *RuleSet
 	fundingSchedule FundingSchedule
 }
 
 func NewFundingScheduleFundingInstructions(
-	log *logrus.Entry,
+	log *slog.Logger,
 	fundingSchedule FundingSchedule,
 ) FundingInstructions {
 	return &fundingScheduleBase{
@@ -143,16 +143,7 @@ func (f *fundingScheduleBase) GetNFundingEventsAfter(
 		select {
 		case <-ctx.Done():
 			if err := ctx.Err(); err != nil {
-				f.log.
-					WithContext(ctx).
-					WithError(err).
-					WithFields(logrus.Fields{
-						"n":        n,
-						"input":    input,
-						"timezone": timezone.String(),
-						"i":        i,
-					}).
-					Error("timed out while trying to determine N funding events after")
+				f.log.ErrorContext(ctx, "timed out while trying to determine N funding events after", "n", n, "input", input, "timezone", timezone.String(), "i", i, "err", err)
 				crumbs.Error(ctx, "Timed out while trying to determine N funding events after", "forecast", map[string]any{
 					"n":        n,
 					"input":    input,

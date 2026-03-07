@@ -2,12 +2,12 @@ package repository
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/sirupsen/logrus"
 )
 
 type BaseRepository interface {
@@ -181,7 +181,7 @@ func NewRepositoryFromSession(
 	userId ID[User],
 	accountId ID[Account],
 	database pg.DBI,
-	log *logrus.Entry,
+	log *slog.Logger,
 ) Repository {
 	return &repositoryBase{
 		userId:    userId,

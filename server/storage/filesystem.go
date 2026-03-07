@@ -6,21 +6,22 @@ import (
 	"os"
 	"path"
 
+	"log/slog"
+
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const filesystemPermissions = 0755
 
 type filesystemStorage struct {
-	log           *logrus.Entry
+	log           *slog.Logger
 	baseDirectory string
 }
 
 func NewFilesystemStorage(
-	log *logrus.Entry,
+	log *slog.Logger,
 	baseDirectory string,
 ) (Storage, error) {
 	// This will make it so that the base directory path cannot be a relative path
@@ -71,15 +72,9 @@ func (f *filesystemStorage) Store(
 		return errors.Wrap(err, "failed to create destination directory")
 	}
 
-	log := f.log.
-		WithContext(span.Context()).
-		WithFields(logrus.Fields{
-			"uri": filePath,
-		})
-
 	span.SetData("destination", filePath)
 
-	log.Debug("writing file to filesystem")
+	f.log.DebugContext(span.Context(), "writing file to filesystem", "uri", filePath)
 
 	fd, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, filesystemPermissions)
 	if err != nil {
@@ -156,9 +151,7 @@ func (f *filesystemStorage) Remove(
 		return errors.Wrap(err, "failed to remove file from filesystem")
 	}
 
-	f.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"uri": filePath,
-	}).Debug("file was removed from storage")
+	f.log.DebugContext(span.Context(), "file was removed from storage", "uri", filePath)
 
 	return nil
 }

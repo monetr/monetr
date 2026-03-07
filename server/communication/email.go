@@ -10,11 +10,12 @@ import (
 	textTemplate "text/template"
 	"time"
 
+	"log/slog"
+
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/wneessen/go-mail"
 )
 
@@ -26,7 +27,7 @@ type EmailCommunication interface {
 	SendEmail(ctx context.Context, email Email) error
 }
 
-func NewEmailCommunication(log *logrus.Entry, configuration config.Configuration) EmailCommunication {
+func NewEmailCommunication(log *slog.Logger, configuration config.Configuration) EmailCommunication {
 	return &emailCommunicationBase{
 		log:    log,
 		config: configuration,
@@ -34,7 +35,7 @@ func NewEmailCommunication(log *logrus.Entry, configuration config.Configuration
 }
 
 type emailCommunicationBase struct {
-	log    *logrus.Entry
+	log    *slog.Logger
 	config config.Configuration
 }
 
@@ -132,7 +133,7 @@ func (e *emailCommunicationBase) sendMessage(ctx context.Context, payload *mail.
 	payload.SetDate()
 	payload.SetUserAgent(strings.TrimSpace(fmt.Sprintf("monetr %s", build.Release)))
 
-	e.log.WithContext(span.Context()).Debug("sending email message")
+	e.log.DebugContext(span.Context(), "sending email message")
 	if err := c.DialAndSendWithContext(span.Context(), payload); err != nil {
 		return errors.Wrap(err, "failed to send email")
 	}

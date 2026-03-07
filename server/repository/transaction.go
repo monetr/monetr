@@ -9,7 +9,6 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type TransactionUpdateId struct {
@@ -452,10 +451,10 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := r.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"bankAccountId": bankAccountId,
-		"transactionId": existing.TransactionId,
-	})
+	log := r.log.With(
+		"bankAccountId", bankAccountId,
+		"transactionId", existing.TransactionId,
+	)
 
 	account, err := r.GetAccount(span.Context())
 	if err != nil {
@@ -488,15 +487,15 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(
 	case existingSpendingId.IsZero() && !newSpendingId.IsZero():
 		// Spending is being added to the transaction.
 		expensePlan = AddExpense
-		log = log.WithField("transactionAction", "AddExpense")
+		log = log.With("transactionAction", "AddExpense")
 	case !existingSpendingId.IsZero() && newSpendingId != existingSpendingId && !newSpendingId.IsZero():
 		// Spending is being changed from one expense to another.
 		expensePlan = ChangeExpense
-		log = log.WithField("transactionAction", "ChangeExpense")
+		log = log.With("transactionAction", "ChangeExpense")
 	case !existingSpendingId.IsZero() && newSpendingId.IsZero():
 		// Spending is being removed from the transaction.
 		expensePlan = RemoveExpense
-		log = log.WithField("transactionAction", "RemoveExpense")
+		log = log.With("transactionAction", "RemoveExpense")
 	default:
 		// TODO Handle transaction amount changes with expenses.
 		return nil, nil
@@ -626,11 +625,11 @@ func (r *repositoryBase) AddExpenseToTransaction(
 		return err
 	}
 
-	log := r.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"bankAccountId": transaction.BankAccountId,
-		"transactionId": transaction.TransactionId,
-		"spendingId":    spending.SpendingId,
-	})
+	log := r.log.With(
+		"bankAccountId", transaction.BankAccountId,
+		"transactionId", transaction.TransactionId,
+		"spendingId", spending.SpendingId,
+	)
 
 	var allocationAmount int64
 	// If the amount allocated to the spending we are adding to the transaction is less than the amount of the

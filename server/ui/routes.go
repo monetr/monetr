@@ -16,8 +16,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/monetr/monetr/server/internal/sentryecho"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -65,7 +65,7 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 			if err := recover(); err != nil {
 				hub := sentryecho.GetHubFromContext(ctx)
 				hub.Recover(err)
-				c.log.Errorf("panic for request: %+v\n%s", err, string(debug.Stack()))
+				c.log.ErrorContext(ctx.Request().Context(), fmt.Sprintf("panic for request: %+v\n%s", err, string(debug.Stack())))
 				_ = ctx.String(http.StatusInternalServerError, "Something went very wrong!")
 			}
 		}(ctx)
@@ -84,16 +84,16 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 			return ctx.Redirect(http.StatusPermanentRedirect, url)
 		}
 
-		log := c.log.WithFields(logrus.Fields{
-			"path":            requestedPath,
-			"ext":             path.Ext(requestedPath),
-			"resolvedToIndex": false,
-		})
+		log := c.log.With(
+			"path", requestedPath,
+			"ext", path.Ext(requestedPath),
+			"resolvedToIndex", false,
+		)
 
 		content, err := c.filesystem.Open(requestedPath)
 		switch c.fixFilesystemError(err) {
 		case fs.ErrNotExist, fs.ErrInvalid:
-			log = log.WithField("resolvedToIndex", true)
+			log = log.With("resolvedToIndex", true)
 
 			// Only apply these headers and content security permissions to the
 			// index.html return result.
@@ -104,7 +104,7 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 			c.ApplyContentSecurityPolicy(ctx)
 			c.ApplyPermissionsPolicy(ctx)
 
-			log.WithField("contentType", "text/html").Tracef("%s %s", ctx.Request().Method, ctx.Request().URL.Path)
+			log.With("contentType", "text/html").Log(ctx.Request().Context(), logging.LevelTrace, fmt.Sprintf("%s %s", ctx.Request().Method, ctx.Request().URL.Path))
 			return ctx.Render(http.StatusOK, indexFile, indexParams{
 				SentryDSN: c.configuration.Sentry.ExternalDSN,
 			})
@@ -118,13 +118,13 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 				ctx.Response().Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", seconds))
 			}
 		default:
-			log.WithError(err).Error("failed to read the embedded file specified")
+			log.ErrorContext(ctx.Request().Context(), "failed to read the embedded file specified", "err", err)
 			return ctx.NoContent(http.StatusInternalServerError)
 		}
 
 		data, err := io.ReadAll(content)
 		if err != nil {
-			log.WithError(err).Error("failed to read content from embedded file")
+			log.ErrorContext(ctx.Request().Context(), "failed to read content from embedded file", "err", err)
 			return ctx.NoContent(http.StatusInternalServerError)
 		}
 
@@ -139,7 +139,7 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 		default:
 			contentType = http.DetectContentType(data)
 		}
-		log.WithField("contentType", contentType).Tracef("%s %s", ctx.Request().Method, ctx.Request().URL.Path)
+		log.With("contentType", contentType).Log(ctx.Request().Context(), logging.LevelTrace, fmt.Sprintf("%s %s", ctx.Request().Method, ctx.Request().URL.Path))
 		return ctx.Blob(http.StatusOK, contentType, data)
 	}, middleware.Gzip())
 }

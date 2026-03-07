@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"path"
@@ -13,7 +14,6 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/round"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const DefaultAPIURL = "https://lunchflow.app/api/v1"
@@ -56,12 +56,12 @@ type LunchFlowClient interface {
 type lunchFlowClient struct {
 	accessToken string
 	apiUrl      url.URL
-	log         *logrus.Entry
+	log         *slog.Logger
 	httpClient  *http.Client
 }
 
 func NewLunchFlowClient(
-	log *logrus.Entry,
+	log *slog.Logger,
 	apiUrl string,
 	accessToken string,
 ) (LunchFlowClient, error) {
@@ -79,14 +79,14 @@ func NewLunchFlowClient(
 				response *http.Response,
 				err error,
 			) {
-				requestLog := log.WithContext(ctx).WithFields(logrus.Fields{
-					"lunch_flow_method": request.Method,
-					"lunch_flow_url":    request.URL.String(),
-				})
+				requestLog := log.With(
+					"lunch_flow_method", request.Method,
+					"lunch_flow_url", request.URL.String(),
+				)
 				var statusCode int
 				if response != nil {
 					statusCode = response.StatusCode
-					requestLog = requestLog.WithField("lunch_flow_statusCode", statusCode)
+					requestLog = requestLog.With("lunch_flow_statusCode", statusCode)
 				}
 
 				// If you get a nil reference panic here during testing, its probably
@@ -100,7 +100,7 @@ func NewLunchFlowClient(
 					statusCode,
 					map[string]any{},
 				)
-				requestLog.Debug("Lunch Flow API call")
+				requestLog.DebugContext(ctx, "Lunch Flow API call")
 			}),
 	}
 

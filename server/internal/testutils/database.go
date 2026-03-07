@@ -10,14 +10,16 @@ import (
 	"sync"
 	"testing"
 
+	"log/slog"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/migrations"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +28,7 @@ var (
 )
 
 type queryHook struct {
-	log   *logrus.Entry
+	log   *slog.Logger
 	stats *metrics.Stats
 }
 
@@ -45,7 +47,7 @@ func (q *queryHook) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (cont
 		return ctx, nil
 	}
 
-	q.log.WithContext(ctx).WithField("queryId", queryId).Trace(string(query))
+	q.log.Log(ctx, logging.LevelTrace, string(query), "queryId", queryId)
 
 	return ctx, nil
 }
@@ -56,13 +58,13 @@ func (q *queryHook) AfterQuery(ctx context.Context, event *pg.QueryEvent) error 
 	}
 
 	if event.Err != nil {
-		log := q.log.WithContext(ctx)
+		log := q.log
 		if event.Stash != nil {
 			if queryId, ok := event.Stash["queryId"].(string); ok {
-				log = log.WithField("queryId", queryId)
+				log = log.With("queryId", queryId)
 			}
 		}
-		log.WithError(event.Err).Warn("query failed")
+		log.WarnContext(ctx, "query failed", "err", event.Err)
 	}
 
 	return nil
@@ -165,7 +167,7 @@ func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 		for _, option := range databaseOptions {
 			switch option {
 			case IsolatedDatabase:
-				log.Debug("creating isolated database for test")
+				log.DebugContext(context.Background(), "creating isolated database for test")
 				databaseName := fmt.Sprintf("%x", sha256.Sum256([]byte(t.Name())))
 
 				_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS "%s";`, databaseName))

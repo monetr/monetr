@@ -2,6 +2,7 @@ package background
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -9,11 +10,11 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v81"
 )
 
@@ -23,7 +24,7 @@ const (
 
 type (
 	ReconcileSubscriptionHandler struct {
-		log          *logrus.Entry
+		log          *slog.Logger
 		db           *pg.DB
 		publisher    pubsub.Publisher
 		billing      billing.Billing
@@ -37,7 +38,7 @@ type (
 
 	ReconcileSubscriptionJob struct {
 		args      ReconcileSubscriptionArguments
-		log       *logrus.Entry
+		log       *slog.Logger
 		repo      repository.BaseRepository
 		publisher pubsub.Publisher
 		billing   billing.Billing
@@ -54,7 +55,7 @@ func TriggerReconcileSubscription(
 }
 
 func NewReconcileSubscriptionHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 	publisher pubsub.Publisher,
@@ -76,7 +77,7 @@ func (h ReconcileSubscriptionHandler) QueueName() string {
 
 func (h *ReconcileSubscriptionHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	var args ReconcileSubscriptionArguments
@@ -89,9 +90,7 @@ func (h *ReconcileSubscriptionHandler) HandleConsumeJob(
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
 
-	log = log.WithContext(ctx).WithFields(logrus.Fields{
-		"accountId": args.AccountId,
-	})
+	log = log.With("accountId", args.AccountId)
 
 	repo := repository.NewRepositoryFromSession(
 		h.clock,
@@ -123,7 +122,7 @@ func (h *ReconcileSubscriptionHandler) EnqueueTriggeredJob(
 	ctx context.Context,
 	enqueuer JobEnqueuer,
 ) error {
-	log := h.log.WithContext(ctx)
+	log := h.log
 
 	var accounts []Account
 	cutoff := h.clock.Now().Add(-12 * time.Hour)
@@ -140,38 +139,35 @@ func (h *ReconcileSubscriptionHandler) EnqueueTriggeredJob(
 	}
 
 	if len(accounts) == 0 {
-		log.Info("no accounts have missed webhooks, no subscriptions to reconcile")
+		log.InfoContext(ctx, "no accounts have missed webhooks, no subscriptions to reconcile")
 		return nil
 	}
 
-	log.WithField("count", len(accounts)).
-		Info("accounts have missed stripe webhooks, subscriptions need to be reconciled")
+	log.InfoContext(ctx, "accounts have missed stripe webhooks, subscriptions need to be reconciled", "count", len(accounts))
 
 	for _, item := range accounts {
-		itemLog := log.WithFields(logrus.Fields{
-			"accountId": item.AccountId,
-		})
+		itemLog := log.With("accountId", item.AccountId)
 
-		itemLog.Trace("enqueuing account to have subscription reconciled")
+		itemLog.Log(ctx, logging.LevelTrace, "enqueuing account to have subscription reconciled")
 		err := enqueuer.EnqueueJob(ctx, h.QueueName(), ReconcileSubscriptionArguments{
 			AccountId: item.AccountId,
 		})
 		if err != nil {
-			itemLog.WithError(err).Warn("failed to enqueue job to reconcile subscription")
+			itemLog.WarnContext(ctx, "failed to enqueue job to reconcile subscription", "err", err)
 			crumbs.Warn(ctx, "Failed to enqueue job to reconcile subscription", "job", map[string]any{
 				"error": err,
 			})
 			continue
 		}
 
-		itemLog.Trace("successfully enqueued account for subscription reconciliation")
+		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued account for subscription reconciliation")
 	}
 
 	return nil
 }
 
 func NewReconcileSubscriptionJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	repo repository.BaseRepository,
 	clock clock.Clock,
 	publisher pubsub.Publisher,

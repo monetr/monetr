@@ -2,16 +2,17 @@ package background
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/recurring"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -24,7 +25,7 @@ var (
 )
 
 type CalculateTransactionClustersHandler struct {
-	log          *logrus.Entry
+	log          *slog.Logger
 	db           pg.DBI
 	clock        clock.Clock
 	unmarshaller JobUnmarshaller
@@ -37,7 +38,7 @@ type CalculateTransactionClustersArguments struct {
 
 type CalculateTransactionClustersJob struct {
 	args  CalculateTransactionClustersArguments
-	log   *logrus.Entry
+	log   *slog.Logger
 	db    pg.DBI
 	clock clock.Clock
 }
@@ -51,7 +52,7 @@ func TriggerCalculateTransactionClusters(
 }
 
 func NewCalculateTransactionClustersHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db pg.DBI,
 	clock clock.Clock,
 ) *CalculateTransactionClustersHandler {
@@ -69,7 +70,7 @@ func (c CalculateTransactionClustersHandler) QueueName() string {
 
 func (c *CalculateTransactionClustersHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	var args CalculateTransactionClustersArguments
@@ -87,7 +88,7 @@ func (c *CalculateTransactionClustersHandler) HandleConsumeJob(
 		defer span.Finish()
 
 		job, err := NewCalculateTransactionClustersJob(
-			log.WithContext(span.Context()),
+			log,
 			txn,
 			c.clock,
 			args,
@@ -101,7 +102,7 @@ func (c *CalculateTransactionClustersHandler) HandleConsumeJob(
 }
 
 func NewCalculateTransactionClustersJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db pg.DBI,
 	clock clock.Clock,
 	args CalculateTransactionClustersArguments,
@@ -120,10 +121,10 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 
 	accountId := c.args.AccountId
 	bankAccountId := c.args.BankAccountId
-	log := c.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"accountId":     accountId,
-		"bankAccountId": bankAccountId,
-	})
+	log := c.log.With(
+		"accountId", accountId,
+		"bankAccountId", bankAccountId,
+	)
 
 	repo := repository.NewRepositoryFromSession(
 		c.clock,
@@ -138,11 +139,10 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 	limit := 2000
 	offset := 0
 	for {
-		txnLog := log.WithFields(logrus.Fields{
-			"limit":  limit,
-			"offset": offset,
-		})
-		txnLog.Trace("requesting next batch of transactions")
+		log.Log(span.Context(), logging.LevelTrace, "requesting next batch of transactions",
+			"limit", limit,
+			"offset", offset,
+		)
 		transactions, err := repo.GetTransactions(
 			span.Context(),
 			bankAccountId,
@@ -152,14 +152,15 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 		if err != nil {
 			return errors.Wrap(err, "failed to read transactions for clustering")
 		}
-		txnLog = log.WithField("count", len(transactions))
 
 		for i := range transactions {
 			clustering.AddTransaction(&transactions[i])
 		}
 
 		if len(transactions) < limit {
-			txnLog.Trace("reached end of transactions")
+			log.Log(span.Context(), logging.LevelTrace, "reached end of transactions",
+				"count", len(transactions),
+			)
 			break
 		}
 
@@ -169,13 +170,11 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 	result := clustering.DetectSimilarTransactions(span.Context())
 
 	if len(result) == 0 {
-		log.Info("no similar transactions detected, nothing to persist")
+		log.InfoContext(span.Context(), "no similar transactions detected, nothing to persist")
 		return nil
 	}
 
-	log.WithFields(logrus.Fields{
-		"clusters": len(result),
-	}).Info("similar transaction clusters detected")
+	log.InfoContext(span.Context(), "similar transaction clusters detected", "clusters", len(result))
 
 	if err := repo.WriteTransactionClusters(span.Context(), bankAccountId, result); err != nil {
 		return errors.Wrap(err, "failed to persist the calculated transaction clusters")

@@ -2,15 +2,17 @@ package background
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -26,7 +28,7 @@ func TriggerProcessFundingSchedules(ctx context.Context, runner JobController, a
 }
 
 type ProcessFundingScheduleHandler struct {
-	log          *logrus.Entry
+	log          *slog.Logger
 	db           *pg.DB
 	repo         repository.JobRepository
 	unmarshaller JobUnmarshaller
@@ -34,7 +36,7 @@ type ProcessFundingScheduleHandler struct {
 }
 
 func NewProcessFundingScheduleHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 ) *ProcessFundingScheduleHandler {
@@ -53,7 +55,7 @@ func (p ProcessFundingScheduleHandler) QueueName() string {
 
 func (p *ProcessFundingScheduleHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	var args ProcessFundingScheduleArguments
@@ -69,10 +71,10 @@ func (p *ProcessFundingScheduleHandler) HandleConsumeJob(
 	return p.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
-		log = log.WithContext(span.Context()).WithFields(logrus.Fields{
-			"accountId":     args.AccountId,
-			"bankAccountId": args.BankAccountId,
-		})
+		log = log.With(
+			"accountId", args.AccountId,
+			"bankAccountId", args.BankAccountId,
+		)
 		job := &ProcessFundingScheduleJob{
 			args:  args,
 			log:   log,
@@ -97,9 +99,9 @@ func (p ProcessFundingScheduleHandler) DefaultSchedule() string {
 }
 
 func (p *ProcessFundingScheduleHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
-	log := p.log.WithContext(ctx)
+	log := p.log
 
-	log.Info("retrieving funding schedules to process")
+	log.InfoContext(ctx, "retrieving funding schedules to process")
 	fundingSchedules, err := p.repo.GetFundingSchedulesToProcess(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve funding schedules to process")
@@ -107,11 +109,11 @@ func (p *ProcessFundingScheduleHandler) EnqueueTriggeredJob(ctx context.Context,
 
 	if len(fundingSchedules) == 0 {
 		crumbs.Debug(ctx, "No funding schedules to be processed at this time.", nil)
-		log.Info("no funding schedules to be processed at this time")
+		log.InfoContext(ctx, "no funding schedules to be processed at this time")
 		return nil
 	}
 
-	log.WithField("count", len(fundingSchedules)).Info("preparing to enqueue funding schedules for processing")
+	log.InfoContext(ctx, "preparing to enqueue funding schedules for processing", "count", len(fundingSchedules))
 	crumbs.Debug(ctx, "Preparing to enqueue funding schedules for processing.", map[string]any{
 		"count": len(fundingSchedules),
 	})
@@ -119,19 +121,19 @@ func (p *ProcessFundingScheduleHandler) EnqueueTriggeredJob(ctx context.Context,
 	jobErrors := make([]error, 0)
 
 	for _, item := range fundingSchedules {
-		itemLog := log.WithFields(logrus.Fields{
-			"accountId":          item.AccountId,
-			"bankAccountId":      item.BankAccountId,
-			"fundingScheduleIds": item.FundingScheduleIds,
-		})
-		itemLog.Trace("enqueuing funding schedules to be processed for bank account")
+		itemLog := log.With(
+			"accountId", item.AccountId,
+			"bankAccountId", item.BankAccountId,
+			"fundingScheduleIds", item.FundingScheduleIds,
+		)
+		itemLog.Log(ctx, logging.LevelTrace, "enqueuing funding schedules to be processed for bank account")
 		err = enqueuer.EnqueueJob(ctx, p.QueueName(), ProcessFundingScheduleArguments{
 			AccountId:          item.AccountId,
 			BankAccountId:      item.BankAccountId,
 			FundingScheduleIds: item.FundingScheduleIds,
 		})
 		if err != nil {
-			log.WithError(err).Warn("failed to enqueue job to process funding schedule")
+			log.WarnContext(ctx, "failed to enqueue job to process funding schedule", "err", err)
 			crumbs.Warn(ctx, "Failed to enqueue job to process funding schedule", "job", map[string]any{
 				"error": err,
 			})
@@ -139,7 +141,7 @@ func (p *ProcessFundingScheduleHandler) EnqueueTriggeredJob(ctx context.Context,
 			continue
 		}
 
-		itemLog.Trace("successfully enqueued funding schedules for processing")
+		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued funding schedules for processing")
 	}
 
 	return nil
@@ -153,7 +155,7 @@ type ProcessFundingScheduleArguments struct {
 
 type ProcessFundingScheduleJob struct {
 	args  ProcessFundingScheduleArguments
-	log   *logrus.Entry
+	log   *slog.Logger
 	repo  repository.BaseRepository
 	clock clock.Clock
 }
@@ -162,18 +164,17 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
-	log := p.log.WithContext(ctx)
-	log = log.WithField("bankAccountId", p.args.BankAccountId)
+	log := p.log.With("bankAccountId", p.args.BankAccountId)
 
 	account, err := p.repo.GetAccount(span.Context())
 	if err != nil {
-		log.WithError(err).Error("could not retrieve account for funding schedule processing")
+		log.ErrorContext(span.Context(), "could not retrieve account for funding schedule processing", "err", err)
 		return err
 	}
 
 	timezone, err := account.GetTimezone()
 	if err != nil {
-		log.WithError(err).Error("could not parse account's timezone")
+		log.ErrorContext(span.Context(), "could not parse account's timezone", "err", err)
 		return err
 	}
 
@@ -181,17 +182,15 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 
 	initialBalances, err := p.repo.GetBalances(ctx, p.args.BankAccountId)
 	if err != nil {
-		log.WithError(err).Warn("failed to retrieve initial balances")
+		log.WarnContext(ctx, "failed to retrieve initial balances", "err", err)
 	}
 
 	for _, fundingScheduleId := range p.args.FundingScheduleIds {
-		fundingLog := log.WithFields(logrus.Fields{
-			"fundingScheduleId": fundingScheduleId,
-		})
+		fundingLog := log.With("fundingScheduleId", fundingScheduleId)
 
 		fundingSchedule, err := p.repo.GetFundingSchedule(span.Context(), p.args.BankAccountId, fundingScheduleId)
 		if err != nil {
-			fundingLog.WithError(err).Error("failed to retrieve funding schedule for processing")
+			fundingLog.ErrorContext(span.Context(), "failed to retrieve funding schedule for processing", "err", err)
 			return err
 		}
 
@@ -200,21 +199,21 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 		//  deposit enabled. But then they never receive a deposit, or maybe the plaid link isn't active anymore, or
 		//  some other scenario. We would continue to try and process these over and over again.
 		if fundingSchedule.WaitForDeposit {
-			log.Info("funding schedule requires a deposit to be present before processing")
+			log.InfoContext(span.Context(), "funding schedule requires a deposit to be present before processing")
 			// TODO Eventually this should be moved out of the for loop.
 			// TODO Maybe this could just be a count? Idk what I'd like to use these transactions for in the future.
 			deposits, err := p.repo.GetRecentDepositTransactions(span.Context(), p.args.BankAccountId)
 			if err != nil {
-				fundingLog.WithError(err).Error("failed to retrieve recent deposits to process funding schedule")
+				fundingLog.ErrorContext(span.Context(), "failed to retrieve recent deposits to process funding schedule", "err", err)
 				return err
 			}
 
 			// If there were any deposits then process the funding schedule, if there were not any deposits then do
 			// nothing.
 			if count := len(deposits); count > 0 {
-				fundingLog.WithField("count", count).Info("found deposits in the last 24 hours")
+				fundingLog.InfoContext(span.Context(), fmt.Sprintf("found %d deposits in the last 24 hours", count))
 			} else {
-				fundingLog.Info("did not find any deposits in the past 24 hours, funding schedule will not be processed")
+				fundingLog.InfoContext(span.Context(), "did not find any deposits in the past 24 hours, funding schedule will not be processed")
 				continue
 			}
 		}
@@ -224,18 +223,18 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 				"nextOccurrence": fundingSchedule.NextRecurrence,
 			})
 			span.Status = sentry.SpanStatusInvalidArgument
-			fundingLog.Warn("skipping processing funding schedule, it does not occur yet")
+			fundingLog.WarnContext(span.Context(), "skipping processing funding schedule, it does not occur yet")
 			continue
 		}
 
 		if err = p.repo.UpdateFundingSchedule(span.Context(), fundingSchedule); err != nil {
-			fundingLog.WithError(err).Error("failed to update the funding schedule with the updated next recurrence")
+			fundingLog.ErrorContext(span.Context(), "failed to update the funding schedule with the updated next recurrence", "err", err)
 			return err
 		}
 
 		expenses, err := p.repo.GetSpendingByFundingSchedule(span.Context(), p.args.BankAccountId, fundingScheduleId)
 		if err != nil {
-			fundingLog.WithError(err).Error("failed to retrieve expenses for processing")
+			fundingLog.ErrorContext(span.Context(), "failed to retrieve expenses for processing", "err", err)
 			return err
 		}
 
@@ -247,16 +246,14 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 		default:
 			for i := range expenses {
 				spending := expenses[i]
-				spendingLog := fundingLog.WithFields(logrus.Fields{
-					"spendingId": spending.SpendingId,
-				})
+				spendingLog := fundingLog.With("spendingId", spending.SpendingId)
 
 				if spending.IsPaused {
 					crumbs.Debug(span.Context(), "Spending object is paused, it will be skipped", map[string]any{
 						"fundingScheduleId": fundingScheduleId,
 						"spendingId":        spending.SpendingId,
 					})
-					spendingLog.Debug("skipping funding spending item, it is paused")
+					spendingLog.DebugContext(span.Context(), "skipping funding spending item, it is paused")
 					continue
 				}
 
@@ -267,7 +264,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 						"fundingScheduleId": fundingScheduleId,
 						"spendingId":        spending.SpendingId,
 					})
-					spendingLog.Trace("skipping spending, target amount is already achieved")
+					spendingLog.Log(span.Context(), logging.LevelTrace, "skipping spending, target amount is already achieved")
 					continue
 				}
 
@@ -294,24 +291,24 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 
 	if len(expensesToUpdate) == 0 {
 		crumbs.Debug(span.Context(), "No spending objects to update for funding schedule", nil)
-		log.Info("no spending objects to update for funding schedule")
+		log.InfoContext(span.Context(), "no spending objects to update for funding schedule")
 		return nil
 	}
 
-	log.Debugf("preparing to update %d spending(s)", len(expensesToUpdate))
+	log.DebugContext(span.Context(), fmt.Sprintf("preparing to update %d spending(s)", len(expensesToUpdate)))
 
 	crumbs.Debug(span.Context(), "Updating spending objects with recalculated contributions", map[string]any{
 		"count": len(expensesToUpdate),
 	})
 
 	if err = p.repo.UpdateSpending(span.Context(), p.args.BankAccountId, expensesToUpdate); err != nil {
-		log.WithError(err).Error("failed to update spending")
+		log.ErrorContext(span.Context(), "failed to update spending", "err", err)
 		return err
 	}
 
 	updatedBalances, err := p.repo.GetBalances(ctx, p.args.BankAccountId)
 	if err != nil {
-		log.WithError(err).Warn("failed to retrieve updated balances")
+		log.WarnContext(ctx, "failed to retrieve updated balances", "err", err)
 	}
 
 	// Trying to determine how often balances go negative.

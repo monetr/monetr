@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"log/slog"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/vmihailenco/msgpack/v5"
 )
 
@@ -32,11 +33,11 @@ var (
 )
 
 type redisCache struct {
-	log    *logrus.Entry
+	log    *slog.Logger
 	client *redis.Pool
 }
 
-func NewCache(log *logrus.Entry, client *redis.Pool) Cache {
+func NewCache(log *slog.Logger, client *redis.Pool) Cache {
 	return &redisCache{
 		log:    log,
 		client: client,
@@ -50,7 +51,7 @@ func (r *redisCache) send(ctx context.Context, commandName string, args ...any) 
 	}
 	defer func() {
 		if err := conn.Close(); err != nil {
-			r.log.WithContext(ctx).WithError(err).Warn("failed to close/release redis connection")
+			r.log.WarnContext(ctx, "failed to close/release redis connection", "err", err)
 		}
 	}()
 
@@ -64,7 +65,7 @@ func (r *redisCache) do(ctx context.Context, commandName string, args ...any) (a
 	}
 	defer func() {
 		if err := conn.Close(); err != nil {
-			r.log.WithContext(ctx).WithError(err).Warn("failed to close/release redis connection")
+			r.log.WarnContext(ctx, "failed to close/release redis connection", "err", err)
 		}
 	}()
 

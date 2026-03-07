@@ -1,34 +1,35 @@
 package logging
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"log/slog"
 	"testing"
-	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStackDriverFormatterWrapper(t *testing.T) {
-	log := logrus.NewEntry(logrus.StandardLogger())
-	log.Logger.SetLevel(logrus.TraceLevel)
+func TestStackDriverHandler(t *testing.T) {
+	var buf bytes.Buffer
+	inner := slog.NewJSONHandler(&buf, &slog.HandlerOptions{
+		Level: LevelTrace,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			if len(groups) == 0 && a.Key == slog.MessageKey {
+				a.Key = "message"
+			}
+			return a
+		},
+	})
+	handler := NewStackDriverHandler(inner)
+	logger := slog.New(handler).With("accountId", uint64(1234))
 
-	log = log.WithField("accountId", uint64(1234))
+	logger.InfoContext(context.Background(), "I am a log message")
 
-	formatter, err := NewStackDriverFormatterWrapper(&logrus.JSONFormatter{})
-	assert.NoError(t, err, "must not return an error just creating the wrapper")
-	assert.NotNil(t, formatter, "returned formatter must not be nil")
-
-	log.Message = "I am a log message"
-	log.Level = logrus.InfoLevel
-	log.Time = time.Now()
-
-	result, err := formatter.Format(log)
-	assert.NoError(t, err, "should format log successfully")
-	assert.True(t, json.Valid(result), "result must be valid json")
+	assert.True(t, json.Valid(buf.Bytes()), "result must be valid json")
 
 	var object map[string]any
-	assert.NoError(t, json.Unmarshal(result, &object), "must unmarshal log entry successfully")
+	assert.NoError(t, json.Unmarshal(buf.Bytes(), &object), "must unmarshal log entry successfully")
 
 	assert.Contains(t, object, "severity", "must contain the severity field for stackdriver")
 	assert.Contains(t, object, "logging.googleapis.com/labels", "must contain the labels field for stackdriver")

@@ -19,7 +19,6 @@ import (
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/zoneinfo"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const ClearAuthentication = ""
@@ -112,12 +111,12 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	// I want to track how many of these types of things we get.
 	crumbs.AddTag(c.getContext(ctx), "requiresPasswordChange", fmt.Sprint(requiresPasswordChange))
 
-	log := c.getLog(ctx).WithField("loginId", login.LoginId)
+	log := c.getLog(ctx).With("loginId", login.LoginId)
 
 	// If we want to verify emails and the login does not have a verified email address, then return an error to the
 	// user.
 	if c.Configuration.Email.ShouldVerifyEmails() && !login.IsEmailVerified {
-		log.Debug("login email address is not verified, please verify before continuing")
+		log.DebugContext(c.getContext(ctx), "login email address is not verified, please verify before continuing")
 		return c.failure(ctx, http.StatusPreconditionRequired, EmailNotVerifiedError{})
 	}
 
@@ -145,7 +144,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			Scope:   security.ResetPasswordScope,
 		})
 
-		log.Info("login requires a password change")
+		log.InfoContext(c.getContext(ctx), "login requires a password change")
 		return c.failure(ctx, http.StatusPreconditionRequired, PasswordResetRequiredError{
 			ResetToken: passwordResetToken,
 		})
@@ -162,7 +161,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 
 		// Check if the login requires MFA in order to authenticate.
 		if login.TOTPEnabledAt != nil {
-			log.Debug("login requires TOTP MFA")
+			log.DebugContext(c.getContext(ctx), "login requires TOTP MFA")
 			ctx.Set(authenticationKey, security.Claims{
 				LoginId:   login.LoginId.String(),
 				AccountId: user.AccountId.String(),
@@ -358,9 +357,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	}
 
 	if _, err := locale.GetLConv(registerRequest.Locale); err != nil {
-		log.WithFields(logrus.Fields{
-			"locale": registerRequest.Locale,
-		}).WithError(err).Warn("invalid locale in register request, falling back to global default")
+		log.WarnContext(c.getContext(ctx), "invalid locale in register request, falling back to global default", "locale", registerRequest.Locale, "err", err)
 		registerRequest.Locale = consts.DefaultLocale
 	}
 
@@ -420,15 +417,12 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 			)
 		}
 	}
-	log = log.WithField("loginId", login.LoginId)
+	log = log.With("loginId", login.LoginId)
 
 	var trialEndsAt *time.Time
 	if c.Configuration.Stripe.IsBillingEnabled() {
 		expiration := c.Clock.Now().AddDate(0, 0, c.Configuration.Stripe.FreeTrialDays)
-		log.WithFields(logrus.Fields{
-			"trialDays":   c.Configuration.Stripe.FreeTrialDays,
-			"trialEndsAt": expiration,
-		}).Debug("billing is enabled, new account for login will be on a trial")
+		log.DebugContext(c.getContext(ctx), "billing is enabled, new account for login will be on a trial", "trialDays", c.Configuration.Stripe.FreeTrialDays, "trialEndsAt", expiration)
 
 		trialEndsAt = &expiration
 	}
@@ -609,7 +603,7 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 	unauthedRepo := c.mustGetUnauthenticatedRepository(ctx)
 	login, err := unauthedRepo.GetLoginForEmail(c.getContext(ctx), request.Email)
 	if err != nil {
-		log.WithError(err).Warn("failed to get login for email address to resend verification")
+		log.WarnContext(c.getContext(ctx), "failed to get login for email address to resend verification", "err", err)
 		return ctx.NoContent(http.StatusOK)
 	}
 

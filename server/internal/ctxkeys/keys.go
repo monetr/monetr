@@ -2,9 +2,9 @@ package ctxkeys
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/sirupsen/logrus"
 )
 
 type MonetrContextKey string
@@ -27,34 +27,24 @@ var (
 	}
 )
 
-// LogrusFieldsFromContext will extract known fields from the Go context in
-// order to better support logging. This allows monetr to more easily provide
-// useful context for all of its log entries for every action that occurs.
-func LogrusFieldsFromContext(
-	ctx context.Context,
-	existingFields logrus.Fields,
-) logrus.Fields {
-	fields := logrus.Fields{}
+// SlogAttrsFromContext extracts known fields from the Go context in order to
+// enrich log records. This allows monetr to automatically include useful
+// context (request ID, user ID, etc.) on every log entry.
+func SlogAttrsFromContext(ctx context.Context) []slog.Attr {
+	attrs := make([]slog.Attr, 0, len(keys)+1)
 	for _, key := range keys {
-		// If the field is already on the log entry then do not overwrite it.
-		if _, ok := existingFields[string(key)]; ok {
-			continue
-		}
-
 		if value := ctx.Value(key); value != nil {
-			fields[string(key)] = value
+			attrs = append(attrs, slog.Any(string(key), value))
 		}
 	}
 
-	// Add tracing details to our log messages to make it easier to go from a
-	// trace in Sentry to logs elsewhere.
 	if span := sentry.SpanFromContext(ctx); span != nil {
-		fields["sentry"] = logrus.Fields{
-			"traceId":      span.TraceID,
-			"spanId":       span.SpanID,
-			"parentSpanId": span.ParentSpanID,
-		}
+		attrs = append(attrs, slog.Group("sentry",
+			slog.Any("traceId", span.TraceID),
+			slog.Any("spanId", span.SpanID),
+			slog.Any("parentSpanId", span.ParentSpanID),
+		))
 	}
 
-	return fields
+	return attrs
 }

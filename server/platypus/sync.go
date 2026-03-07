@@ -5,8 +5,8 @@ import (
 
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/plaid/plaid-go/v41/plaid"
-	"github.com/sirupsen/logrus"
 )
 
 type SyncResult struct {
@@ -27,13 +27,9 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 	}
 
 	log := p.getLog(span)
-	if cursor != nil {
-		log = log.WithField("cursor", cursor)
-	} else {
-		log = log.WithField("cursor", nil)
-	}
+	log = log.With("cursor", cursor)
 
-	log.Trace("syncing with plaid")
+	log.Log(span.Context(), logging.LevelTrace, "syncing with plaid")
 
 	request := p.client.PlaidApi.
 		TransactionsSync(span.Context()).
@@ -61,7 +57,7 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 		"Syncing with Plaid",
 		"failed to sync data with Plaid",
 	); err != nil {
-		log.WithError(err).Warn("failed to sync data with Plaid")
+		log.WarnContext(span.Context(), "failed to sync data with Plaid", "err", err)
 		return nil, err
 	}
 	span.SetTag("plaid.requestId", result.GetRequestId())
@@ -94,9 +90,10 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 	for i, plaidAccount := range plaidAccounts {
 		accounts[i], err = NewPlaidBankAccount(plaidAccount)
 		if err != nil {
-			log.WithError(err).
-				WithField("bankAccountId", plaidAccount.GetAccountId()).
-				Errorf("failed to convert bank account")
+			log.ErrorContext(span.Context(), "failed to convert bank account",
+				"err", err,
+				"bankAccountId", plaidAccount.GetAccountId(),
+			)
 			crumbs.Error(span.Context(), "failed to convert bank account", "debug", map[string]any{
 				// Maybe we don't want to report the entire account object here, but it'll sure save us a ton of time
 				// if there is ever a problem with actually converting the account. This way we can actually see the
@@ -108,13 +105,13 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 	}
 
 	if len(added)+len(modified)+len(removed) == 0 {
-		log.Debug("no changes observed from Plaid via sync")
+		log.DebugContext(span.Context(), "no changes observed from Plaid via sync")
 	} else {
-		log.WithFields(logrus.Fields{
-			"added":    len(added),
-			"modified": len(modified),
-			"removed":  len(removed),
-		}).Debug("received changes from Plaid via sync")
+		log.DebugContext(span.Context(), "received changes from Plaid via sync",
+			"added", len(added),
+			"modified", len(modified),
+			"removed", len(removed),
+		)
 	}
 
 	return &SyncResult{

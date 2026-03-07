@@ -4,10 +4,9 @@ package zoneinfo
 
 import (
 	"context"
-
-	"github.com/sirupsen/logrus"
+	"log/slog"
 )
 
-func LoadAliasesFromHost(ctx context.Context, log *logrus.Entry) {
+func LoadAliasesFromHost(ctx context.Context, log *slog.Logger) {
 	// no-op
 }

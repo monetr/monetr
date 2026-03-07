@@ -16,12 +16,14 @@ import (
 	"sync/atomic"
 	"time"
 
+	"log/slog"
+
 	"github.com/fsnotify/fsnotify"
 	vault "github.com/hashicorp/vault/api"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/round"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -29,7 +31,7 @@ var (
 )
 
 type VaultTransitConfig struct {
-	Log                *logrus.Entry
+	Log                *slog.Logger
 	KeyID              string
 	Address            string
 	Role               string
@@ -52,7 +54,7 @@ type VaultTransit struct {
 	tokenCloser     chan chan error
 	host            string
 	config          VaultTransitConfig
-	log             *logrus.Entry
+	log             *slog.Logger
 	client          *vault.Client
 	usingCustomTLS  bool
 	tlsWatch        sync.Once
@@ -68,7 +70,7 @@ func NewVaultTransit(
 	log := config.Log
 	host, err := url.Parse(config.Address)
 	if err != nil {
-		log.WithField("url", config.Address).WithError(err).Errorf("failed to parse vault URL")
+		log.ErrorContext(ctx, "failed to parse vault URL", "url", config.Address, "err", err)
 		return nil, errors.Wrap(err, "failed to parse vault URL")
 	}
 
@@ -85,17 +87,14 @@ func NewVaultTransit(
 	trip := round.NewObservabilityRoundTripper(&http.Transport{
 		IdleConnTimeout: config.IdleConnTimeout,
 	}, func(ctx context.Context, request *http.Request, response *http.Response, err error) {
-		logEntry := log.WithContext(ctx).WithFields(logrus.Fields{
-			"vault": logrus.Fields{
-				"method": request.Method,
-				"url":    request.URL.String(),
-			},
-		})
-
+		logEntry := log.With(slog.Group("vault",
+			"method", request.Method,
+			"url", request.URL.String(),
+		))
 		if err != nil {
-			logEntry = logEntry.WithError(err)
+			logEntry = logEntry.With("err", err)
 		}
-		logEntry.Trace("making request to vault API")
+		logEntry.Log(ctx, logging.LevelTrace, "making request to vault API")
 	})
 
 	vaultConfig := &vault.Config{
@@ -119,7 +118,7 @@ func NewVaultTransit(
 	// if they change at all.
 	if helper.usingCustomTLS {
 		if err = helper.reloadTLS(); err != nil {
-			log.WithError(err).Errorf("failed to configure TLS")
+			log.ErrorContext(ctx, "failed to configure TLS", "err", err)
 			return nil, err
 		}
 		helper.watchCertificates()
@@ -131,7 +130,7 @@ func NewVaultTransit(
 
 	helper.client, err = vault.NewClient(vaultConfig)
 	if err != nil {
-		log.WithError(err).Errorf("failed to create vault client")
+		log.ErrorContext(ctx, "failed to create vault client", "err", err)
 		return nil, errors.Wrap(err, "failed to create vault client")
 	}
 
@@ -187,7 +186,7 @@ func (v *VaultTransit) watchCertificates() {
 			log := v.log
 			watcher, err := fsnotify.NewWatcher()
 			if err != nil {
-				log.WithError(err).Errorf("failed to create file system watcher, vault TLS certificates cannot be auto rotated")
+				log.ErrorContext(context.Background(), "failed to create file system watcher, vault TLS certificates cannot be auto rotated", "err", err)
 				return
 			}
 
@@ -199,24 +198,23 @@ func (v *VaultTransit) watchCertificates() {
 				v.config.TLSCAPath,
 			}
 			for _, path := range paths {
-				fileLog := log.WithField("file", path)
-				fileLog.Trace("watching file for changes for vault TLS")
+				log.Log(context.Background(), logging.LevelTrace, "watching file for changes for vault TLS", "file", path)
 				if err = watcher.Add(v.config.TLSCertificatePath); err != nil {
-					fileLog.WithError(err).Errorf("failed to watch file for vault TLS")
+					log.ErrorContext(context.Background(), "failed to watch file for vault TLS", "file", path, "err", err)
 				}
 			}
 
 			for {
 				select {
 				case err = <-watcher.Errors:
-					log.WithError(err).Warn("error watching file for vault TLS")
+					log.WarnContext(context.Background(), "error watching file for vault TLS", "err", err)
 				case event := <-watcher.Events:
-					log.WithField("file", event.Name).Trace("observed changed in vault TLS file")
+					log.Log(context.Background(), logging.LevelTrace, "observed changed in vault TLS file", "file", event.Name)
 					if err = v.reloadTLS(); err != nil {
-						log.WithError(err).Errorf("failed to reload vault TLS")
+						log.ErrorContext(context.Background(), "failed to reload vault TLS", "err", err)
 					}
 				case promise := <-v.closer:
-					log.Info("closing vault helper TLS watcher")
+					log.InfoContext(context.Background(), "closing vault helper TLS watcher")
 					promise <- watcher.Close()
 					return
 				}
@@ -247,11 +245,11 @@ func (v *VaultTransit) watchCertificates() {
 // certificate change is detected.
 func (v *VaultTransit) reloadTLS() error {
 	log := v.log
-	log.Debugf("reloading vault TLS config")
+	log.DebugContext(context.Background(), "reloading vault TLS config")
 
 	caCert, err := os.ReadFile(v.config.TLSCAPath)
 	if err != nil {
-		log.WithField("file", v.config.TLSCAPath).Errorf("failed to read CA for vault TLS")
+		log.ErrorContext(context.Background(), "failed to read CA for vault TLS", "file", v.config.TLSCAPath)
 		return errors.Wrap(err, "failed to read CA for vault TLS")
 	}
 
@@ -272,10 +270,11 @@ func (v *VaultTransit) reloadTLS() error {
 			v.config.TLSKeyPath,
 		)
 		if err != nil {
-			log.WithFields(logrus.Fields{
-				"certPath": v.config.TLSCertificatePath,
-				"keyPath":  v.config.TLSKeyPath,
-			}).WithError(err).Errorf("failed to load TLS key pair for vault")
+			log.ErrorContext(context.Background(), "failed to load TLS key pair for vault",
+				"certPath", v.config.TLSCertificatePath,
+				"keyPath", v.config.TLSKeyPath,
+				"err", err,
+			)
 			return errors.Wrap(err, "failed to load TLS key pair for vault")
 		}
 
@@ -316,12 +315,12 @@ func (v *VaultTransit) authenticationWorker() {
 	v.tokenTTL.Do(func() {
 		log := v.log
 		if atomic.LoadInt64(&v.tokenExpiration) == math.MaxInt64 {
-			log.Info("vault token will never expire, background token refresher will not be started")
+			log.InfoContext(context.Background(), "vault token will never expire, background token refresher will not be started")
 			return
 		}
 
 		go func() {
-			log.Debug("vault token refresh worker has started, tokens will be refreshed before they expire")
+			log.DebugContext(context.Background(), "vault token refresh worker has started, tokens will be refreshed before they expire")
 			v.tokenCloser = make(chan chan error, 1)
 
 			// Check to see if the token is going to expire every minute
@@ -332,18 +331,18 @@ func (v *VaultTransit) authenticationWorker() {
 				case <-ticker.C:
 					// If the token will expire before we check it next, then refresh the token.
 					if atomic.LoadInt64(&v.tokenExpiration) < time.Now().Add(frequency).Unix() {
-						log.Debug("token will expire before the next check, refreshing token")
+						log.DebugContext(context.Background(), "token will expire before the next check, refreshing token")
 						err := func() error {
 							ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 							defer cancel()
 							return v.authenticate(ctx)
 						}()
 						if err != nil {
-							log.WithError(err).Error("failed to refresh vault token")
+							log.ErrorContext(context.Background(), "failed to refresh vault token", "err", err)
 						}
 					}
 				case promise := <-v.tokenCloser:
-					log.Info("stopping refresh token worker")
+					log.InfoContext(context.Background(), "stopping refresh token worker")
 					promise <- nil
 					return
 				}
@@ -384,18 +383,18 @@ func (v *VaultTransit) authenticationWorker() {
 func (v *VaultTransit) authenticate(ctx context.Context) error {
 	v.tokenSync.Lock()
 	defer v.tokenSync.Unlock()
-	log := v.log.WithField("method", v.config.AuthMethod)
+	log := v.log.With("method", v.config.AuthMethod)
 
 	var auth *vault.SecretAuth
 	switch v.config.AuthMethod {
 	case "userpass":
-		log.Trace("authenticating to vault")
+		log.Log(ctx, logging.LevelTrace, "authenticating to vault")
 		result, err := v.client.Logical().WriteWithContext(ctx, "auth/userpass/login/"+v.config.Username, map[string]any{
 			"password": v.config.Password,
 			"role":     v.config.Role,
 		})
 		if err != nil {
-			log.WithError(err).Errorf("failed to authenticate to vault")
+			log.ErrorContext(ctx, "failed to authenticate to vault", "err", err)
 			return errors.Wrap(err, "failed to authenticate to vault")
 		}
 		auth = result.Auth
@@ -405,29 +404,28 @@ func (v *VaultTransit) authenticate(ctx context.Context) error {
 			LeaseDuration: 0,
 		}
 	case "kubernetes":
-		log.Trace("authenticating to vault")
+		log.Log(ctx, logging.LevelTrace, "authenticating to vault")
 		var token string
 		tokenPath := "/var/run/secrets/kubernetes.io/serviceaccount/token"
 
 		switch {
 		case v.config.Token != "":
-			log.Trace("using included token")
+			log.Log(ctx, logging.LevelTrace, "using included token")
 			token = v.config.Token
 		case v.config.TokenFile != "":
 			tokenPath = v.config.TokenFile
 			fallthrough
 		default:
-			fileLog := log.WithField("file", tokenPath)
-			fileLog.Trace("reading token from specified file")
+			log.Log(ctx, logging.LevelTrace, "reading token from specified file", "file", tokenPath)
 			data, err := os.ReadFile(tokenPath)
 			if err != nil {
-				fileLog.WithError(err).Error("failed to read token from specified file")
+				log.ErrorContext(ctx, "failed to read token from specified file", "file", tokenPath, "err", err)
 				return errors.Wrap(err, "failed to read token from specified file")
 			}
 			token = string(data)
 		}
 
-		log.Trace("authenticating to vault")
+		log.Log(ctx, logging.LevelTrace, "authenticating to vault")
 		result, err := v.client.Logical().WriteWithContext(
 			ctx,
 			"auth/kubernetes/login",
@@ -437,7 +435,7 @@ func (v *VaultTransit) authenticate(ctx context.Context) error {
 			},
 		)
 		if err != nil {
-			log.WithError(err).Error("failed to authenticate to vault")
+			log.ErrorContext(ctx, "failed to authenticate to vault", "err", err)
 			return errors.Wrap(err, "failed to authenticate to vault")
 		}
 		auth = result.Auth
@@ -446,7 +444,7 @@ func (v *VaultTransit) authenticate(ctx context.Context) error {
 	}
 
 	if auth == nil {
-		log.Fatalf("no authentication returned from vault")
+		log.ErrorContext(ctx, "no authentication returned from vault")
 		return errors.Errorf("no authentication returned from vault")
 	}
 
@@ -457,13 +455,13 @@ func (v *VaultTransit) authenticate(ctx context.Context) error {
 	} else {
 		// If the token does expire, store the expiration time (minus 1 minute) to have a safe buffer.
 		nextExpiration = time.Now().Add(time.Duration(auth.LeaseDuration)*time.Second - 1*time.Minute).Unix()
-		log.Debugf("vault authentication will refresh by %s", time.Unix(nextExpiration, 0))
+		log.DebugContext(ctx, fmt.Sprintf("vault authentication will refresh by %s", time.Unix(nextExpiration, 0)))
 	}
 
 	atomic.StoreInt64(&v.tokenExpiration, nextExpiration)
 
 	v.client.SetToken(auth.ClientToken)
-	log.Trace("successfully authenticated to vault")
+	log.Log(ctx, logging.LevelTrace, "successfully authenticated to vault")
 
 	return nil
 }
@@ -479,18 +477,15 @@ func (v *VaultTransit) Write(
 		"key": key,
 	}
 
-	log := v.log.WithFields(logrus.Fields{
-		"key":    key,
-		"action": "write",
-	}).WithContext(span.Context())
-	log.Trace("handling secret with vault")
+	log := v.log.With("key", key, "action", "write")
+	log.Log(span.Context(), logging.LevelTrace, "handling secret with vault")
 	secret, err := v.client.Logical().WriteWithContext(
 		span.Context(),
 		key,
 		value,
 	)
 	if err != nil {
-		log.WithError(err).Errorf("failed to write secret to vault")
+		log.ErrorContext(span.Context(), "failed to write secret to vault", "err", err)
 		return nil, errors.Wrap(err, "failed to write secret")
 	}
 
@@ -507,10 +502,10 @@ func (v *VaultTransit) Read(
 		"key": key,
 	}
 
-	log := v.log.WithField("key", key).WithContext(span.Context())
+	log := v.log.With("key", key)
 	secret, err := v.client.Logical().ReadWithContext(span.Context(), key)
 	if err != nil {
-		log.WithError(err).Errorf("failed to read secret from vault")
+		log.ErrorContext(span.Context(), "failed to read secret from vault", "err", err)
 		return nil, errors.Wrap(err, "failed to read secret")
 	}
 
@@ -524,13 +519,13 @@ func (v *VaultTransit) Delete(ctx context.Context, key string) error {
 		"key": key,
 	}
 
-	log := v.log.WithField("key", key).WithContext(span.Context())
+	log := v.log.With("key", key)
 
-	log.Trace("deleting secret")
+	log.Log(span.Context(), logging.LevelTrace, "deleting secret")
 
 	_, err := v.client.Logical().DeleteWithContext(span.Context(), key)
 	if err != nil {
-		log.WithError(err).Errorf("failed to delete secret from vault")
+		log.ErrorContext(span.Context(), "failed to delete secret from vault", "err", err)
 		return errors.Wrap(err, "failed to delete secret")
 	}
 
@@ -597,7 +592,7 @@ func (v *VaultTransit) Close() error {
 
 		err = <-promise
 		if err != nil {
-			v.log.WithError(err).Errorf("failed to close TLS worker")
+			v.log.ErrorContext(context.Background(), "failed to close TLS worker", "err", err)
 		}
 	}
 
@@ -607,7 +602,7 @@ func (v *VaultTransit) Close() error {
 
 		err = <-promise
 		if err != nil {
-			v.log.WithError(err).Errorf("failed to close token refresh worker")
+			v.log.ErrorContext(context.Background(), "failed to close token refresh worker", "err", err)
 		}
 	}
 

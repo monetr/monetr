@@ -11,7 +11,6 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func (c *Controller) getFundingSchedules(ctx echo.Context) error {
@@ -186,14 +185,11 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		recalculateSpending = true
 	}
 
-	log = log.WithFields(logrus.Fields{
-		"bankAccountId":     bankAccountId,
-		"fundingScheduleId": fundingScheduleId,
-	})
+	log = log.With("bankAccountId", bankAccountId, "fundingScheduleId", fundingScheduleId)
 
 	updatedSpending := make([]Spending, 0)
 	if recalculateSpending {
-		log.Debug("spending will be recalculated as part of this funding schedule update")
+		log.DebugContext(c.getContext(ctx), "spending will be recalculated as part of this funding schedule update")
 		crumbs.Debug(c.getContext(ctx), "Spending will be recalculated as part of this funding schedule update", map[string]any{
 			"bankAccountId":     bankAccountId,
 			"fundingScheduleId": fundingScheduleId,
@@ -207,9 +203,8 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 			now := c.Clock.Now()
 			timezone := c.mustGetTimezone(ctx)
 			for _, spend := range spending {
-				log.
-					WithField("spendingId", spend.SpendingId).
-					Debug("recalculating next contribution for spending due to updated funding schedule")
+				log.With("spendingId", spend.SpendingId).
+					DebugContext(c.getContext(ctx), "recalculating next contribution for spending due to updated funding schedule")
 				spend.CalculateNextContribution(
 					c.getContext(ctx),
 					timezone,
@@ -301,14 +296,11 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		recalculateSpending = true
 	}
 
-	log = log.WithFields(logrus.Fields{
-		"bankAccountId":     bankAccountId,
-		"fundingScheduleId": fundingScheduleId,
-	})
+	log = log.With("bankAccountId", bankAccountId, "fundingScheduleId", fundingScheduleId)
 
 	updatedSpending := make([]Spending, 0)
 	if recalculateSpending {
-		log.Debug("spending will be recalculated as part of this funding schedule update")
+		log.DebugContext(c.getContext(ctx), "spending will be recalculated as part of this funding schedule update")
 		crumbs.Debug(c.getContext(ctx), "Spending will be recalculated as part of this funding schedule update", map[string]any{
 			"bankAccountId":     bankAccountId,
 			"fundingScheduleId": fundingScheduleId,
@@ -326,9 +318,8 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 			now := c.Clock.Now()
 			timezone := c.mustGetTimezone(ctx)
 			for _, spend := range spending {
-				log.
-					WithField("spendingId", spend.SpendingId).
-					Debug("recalculating next contribution for spending due to updated funding schedule")
+				log.With("spendingId", spend.SpendingId).
+					DebugContext(c.getContext(ctx), "recalculating next contribution for spending due to updated funding schedule")
 				spend.CalculateNextContribution(
 					c.getContext(ctx),
 					timezone,

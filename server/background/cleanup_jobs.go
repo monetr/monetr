@@ -2,13 +2,14 @@ package background
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -21,7 +22,7 @@ var (
 )
 
 type CleanupJobsHandler struct {
-	log *logrus.Entry
+	log *slog.Logger
 	db  pg.DBI
 }
 
@@ -29,7 +30,7 @@ func TriggerCleanupJobs(ctx context.Context, backgroundJobs JobController) error
 	return backgroundJobs.EnqueueJob(ctx, CleanupJobs, nil)
 }
 
-func NewCleanupJobsHandler(log *logrus.Entry, db pg.DBI) *CleanupJobsHandler {
+func NewCleanupJobsHandler(log *slog.Logger, db pg.DBI) *CleanupJobsHandler {
 	return &CleanupJobsHandler{
 		log: log,
 		db:  db,
@@ -50,22 +51,22 @@ func (c CleanupJobsHandler) QueueName() string {
 
 func (c *CleanupJobsHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	span := sentry.StartSpan(ctx, "db.transaction")
 	defer span.Finish()
 
-	job := NewCleanupJobsJob(log.WithContext(span.Context()), c.db)
+	job := NewCleanupJobsJob(log, c.db)
 	return job.Run(span.Context())
 }
 
 type CleanupJobsJob struct {
-	log *logrus.Entry
+	log *slog.Logger
 	db  pg.DBI
 }
 
-func NewCleanupJobsJob(log *logrus.Entry, db pg.DBI) JobImplementation {
+func NewCleanupJobsJob(log *slog.Logger, db pg.DBI) JobImplementation {
 	return &CleanupJobsJob{
 		log: log,
 		db:  db,
@@ -76,31 +77,29 @@ func (c *CleanupJobsJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
-	log := c.log.WithContext(span.Context())
-	log.Info("getting ready to clean up the jobs table")
+	log := c.log
+	log.InfoContext(span.Context(), "getting ready to clean up the jobs table")
 
 	result, err := c.db.ModelContext(span.Context(), &models.Job{}).
 		Where(`"job"."created_at" < ?`, time.Now().Add(-15*24*time.Hour)).
 		Delete()
 	if err = errors.Wrap(err, "failed to cleanup old jobs from the jobs table"); err != nil {
-		log.WithError(err).Errorf("failed to cleanup")
+		log.ErrorContext(span.Context(), "failed to cleanup", "err", err)
 		return err
 	}
 
 	if affected := result.RowsAffected(); affected > 0 {
-		log.WithFields(logrus.Fields{
-			"deleted": affected,
-		}).Info("deleted old jobs from the jobs table")
+		log.InfoContext(span.Context(), fmt.Sprintf("deleted %d old jobs from the jobs table", affected))
 
 		if _, err := c.db.ExecContext(span.Context(), `VACUUM jobs;`); err != nil {
-			log.WithError(err).Error("failed to vacuum jobs table")
+			log.ErrorContext(span.Context(), "failed to vacuum jobs table", "err", err)
 		}
 
 		if _, err := c.db.ExecContext(span.Context(), `VACUUM cron_jobs;`); err != nil {
-			log.WithError(err).Error("failed to vacuum cron jobs table")
+			log.ErrorContext(span.Context(), "failed to vacuum cron jobs table", "err", err)
 		}
 	} else {
-		log.Info("no jobs were cleaned up from the jobs table")
+		log.InfoContext(span.Context(), "no jobs were cleaned up from the jobs table")
 	}
 
 	return nil

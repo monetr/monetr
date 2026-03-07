@@ -2,13 +2,13 @@ package background
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/storage"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -22,7 +22,7 @@ var (
 
 type (
 	CleanupFilesHandler struct {
-		log         *logrus.Entry
+		log         *slog.Logger
 		db          pg.DBI
 		clock       clock.Clock
 		fileStorage storage.Storage
@@ -30,7 +30,7 @@ type (
 	}
 
 	CleanupFilesJob struct {
-		log         *logrus.Entry
+		log         *slog.Logger
 		db          pg.DBI
 		clock       clock.Clock
 		fileStorage storage.Storage
@@ -39,7 +39,7 @@ type (
 )
 
 func NewCleanupFilesHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 	files storage.Storage,
@@ -65,14 +65,14 @@ func (h *CleanupFilesHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer 
 
 func (h *CleanupFilesHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	span := sentry.StartSpan(ctx, "db.transaction")
 	defer span.Finish()
 
 	job := NewCleanupFilesJob(
-		log.WithContext(span.Context()),
+		log,
 		h.db,
 		h.clock,
 		h.fileStorage,
@@ -86,7 +86,7 @@ func (CleanupFilesHandler) QueueName() string {
 }
 
 func NewCleanupFilesJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db pg.DBI,
 	clock clock.Clock,
 	fileStorage storage.Storage,
@@ -105,39 +105,38 @@ func (j *CleanupFilesJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
-	log := j.log.WithContext(span.Context())
+	log := j.log
 
-	log.Debug("looking for expired files that need to be removed")
+	log.DebugContext(span.Context(), "looking for expired files that need to be removed")
 
 	var expiredFiles []models.File
 	if err := j.db.ModelContext(span.Context(), &expiredFiles).
 		Where(`"expires_at" < ?`, j.clock.Now()).
 		Where(`"reconciled_at" IS NULL`).
 		Select(&expiredFiles); err != nil {
-		log.WithError(err).Error("failed to retrieve expired filed")
+		log.ErrorContext(span.Context(), "failed to retrieve expired filed", "err", err)
 		return err
 	}
 
 	if len(expiredFiles) == 0 {
-		log.Debug("no expired files to remove at this time")
+		log.DebugContext(span.Context(), "no expired files to remove at this time")
 		return nil
 	}
 
-	log.WithField("expiredFilesCount", len(expiredFiles)).
-		Info("queueing expired files to be removed")
+	log.InfoContext(span.Context(), "queueing expired files to be removed", "expiredFilesCount", len(expiredFiles))
 
 	for i := range expiredFiles {
 		expiredFile := expiredFiles[i]
-		fileLog := log.WithFields(logrus.Fields{
-			"accountId": expiredFile.AccountId,
-			"fileId":    expiredFile.FileId,
-		})
-		fileLog.Debug("queueing file to be removed")
+		fileLog := log.With(
+			"accountId", expiredFile.AccountId,
+			"fileId", expiredFile.FileId,
+		)
+		fileLog.DebugContext(span.Context(), "queueing file to be removed")
 		if err := j.enqueuer.EnqueueJob(span.Context(), RemoveFile, RemoveFileArguments{
 			AccountId: expiredFile.AccountId,
 			FileId:    expiredFile.FileId,
 		}); err != nil {
-			fileLog.WithError(err).Warn("failed to queue file to be removed")
+			fileLog.WarnContext(span.Context(), "failed to queue file to be removed", "err", err)
 			continue
 		}
 	}

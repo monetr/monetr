@@ -3,6 +3,8 @@ package background
 import (
 	"context"
 
+	"log/slog"
+
 	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
@@ -12,7 +14,6 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/storage"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -49,7 +50,7 @@ type (
 
 func NewBackgroundJobs(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	clock clock.Clock,
 	configuration config.Configuration,
 	db *pg.DB,

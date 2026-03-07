@@ -15,8 +15,8 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type PlaidWebhook struct {
@@ -85,8 +85,8 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 				return nil, errors.Errorf("malformed JWT token, empty data")
 			}
 
-			log := c.Log.WithField("kid", kid)
-			log.Trace("exchanging key Id for public key")
+			log := c.Log.With("kid", kid)
+			log.Log(c.getContext(ctx), logging.LevelTrace, "exchanging key Id for public key")
 
 			keyFunction, err := c.PlaidWebhookVerification.GetVerificationKey(c.getContext(ctx), kid)
 			if err != nil {
@@ -110,10 +110,7 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 	}
 
 	if !strings.EqualFold(signature, claims.RequestBodySHA256) {
-		c.getLog(ctx).WithFields(logrus.Fields{
-			"expected": signature,
-			"received": claims.RequestBodySHA256,
-		}).Error("received plaid request with valid token but invalid signature!")
+		c.getLog(ctx).ErrorContext(c.getContext(ctx), "received plaid request with valid token but invalid signature!", "expected", signature, "received", claims.RequestBodySHA256)
 		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 	}
 
@@ -130,11 +127,7 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 }
 
 func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
-	log := c.getLog(ctx).WithFields(logrus.Fields{
-		"webhookType": hook.WebhookType,
-		"webhookCode": hook.WebhookCode,
-		"itemId":      hook.ItemId,
-	})
+	log := c.getLog(ctx).With("webhookType", hook.WebhookType, "webhookCode", hook.WebhookCode, "itemId", hook.ItemId)
 
 	crumbs.Debug(c.getContext(ctx), "Handling webhook from Plaid.", map[string]any{
 		"webhook": hook,
@@ -147,7 +140,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 
 	repo := c.mustGetUnauthenticatedRepository(ctx)
 
-	log.Trace("retrieving link for webhook")
+	log.Log(c.getContext(ctx), logging.LevelTrace, "retrieving link for webhook")
 	link, err := repo.GetLinksForItem(c.getContext(ctx), hook.ItemId)
 	if err != nil {
 		crumbs.Error(c.getContext(ctx),
@@ -160,11 +153,11 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 
 		// If the link is not even in the database then there is nothing to be done.
 		if errors.Is(err, pg.ErrNoRows) {
-			log.WithError(err).Warn("link is not in database, webhook cannot be handled")
+			log.WarnContext(c.getContext(ctx), "link is not in database, webhook cannot be handled", "err", err)
 			return nil
 		}
 
-		log.WithError(err).Errorf("failed to retrieve link for item Id in webhook")
+		log.ErrorContext(c.getContext(ctx), "failed to retrieve link for item Id in webhook", "err", err)
 		return err
 	}
 
@@ -183,16 +176,13 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 			"itemId": hook.ItemId,
 			"link":   link,
 		})
-		log.Warn("Plaid link should be in scope when retrieved by Plaid item ID")
+		log.WarnContext(c.getContext(ctx), "Plaid link should be in scope when retrieved by Plaid item ID")
 		return c.returnError(ctx, http.StatusFailedDependency, "failed to find record for plaid link")
 	}
 
-	log = log.WithFields(logrus.Fields{
-		"accountId": link.AccountId,
-		"linkId":    link.LinkId,
-	})
+	log = log.With("accountId", link.AccountId, "linkId", link.LinkId)
 
-	log.Info("processing Plaid webhook")
+	log.InfoContext(c.getContext(ctx), "processing Plaid webhook")
 
 	authenticatedRepo := repository.NewRepositoryFromSession(
 		c.Clock,
@@ -222,9 +212,9 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 				},
 			)
 		case "RECURRING_TRANSACTIONS_UPDATE":
-			log.Warn("received a recurring transaction update webhook, monetr does nothing with these events at this time")
+			log.WarnContext(c.getContext(ctx), "received a recurring transaction update webhook, monetr does nothing with these events at this time")
 		default:
-			log.Debug("ignoring Plaid webhook to avoid double syncing")
+			log.DebugContext(c.getContext(ctx), "ignoring Plaid webhook to avoid double syncing")
 		}
 	case "ITEM":
 		switch hook.WebhookCode {
@@ -232,18 +222,18 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 			plaidLink.Status = models.PlaidLinkStatusSetup
 			plaidLink.ErrorCode = nil
 			plaidLink.ExpirationDate = nil
-			log.Info("plaid link has been repaired")
+			log.InfoContext(c.getContext(ctx), "plaid link has been repaired")
 			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
 		case "ERROR":
 			code := hook.Error["error_code"]
 			plaidLink.Status = models.PlaidLinkStatusError
 			plaidLink.ErrorCode = myownsanity.StringP(code.(string))
-			log.Warn("plaid link is in an error state, updating")
+			log.WarnContext(c.getContext(ctx), "plaid link is in an error state, updating")
 			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
 		case "PENDING_EXPIRATION":
 			plaidLink.Status = models.PlaidLinkStatusPendingExpiration
 			plaidLink.ExpirationDate = hook.ConsentExpirationTime
-			log.Warn("plaid link is pending expiration")
+			log.WarnContext(c.getContext(ctx), "plaid link is pending expiration")
 			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
 		case "USER_PERMISSION_REVOKED", "USER_ACCOUNT_REVOKED":
 			code := hook.Error["error_code"]
@@ -264,11 +254,11 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 			plaidLink.NewAccountsAvailable = true
 			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
 		default:
-			log.Warn("plaid webhook will not be handled, it is not implemented")
+			log.WarnContext(c.getContext(ctx), "plaid webhook will not be handled, it is not implemented")
 			crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
 		}
 	default:
-		log.Warn("plaid webhook will not be handled, it is not implemented")
+		log.WarnContext(c.getContext(ctx), "plaid webhook will not be handled, it is not implemented")
 		crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
 	}
 

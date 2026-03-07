@@ -12,11 +12,12 @@ import (
 	"time"
 	"unicode"
 
+	"log/slog"
+
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/calc"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
-	"github.com/sirupsen/logrus"
 )
 
 type SimilarTransactionDetection interface {
@@ -25,14 +26,14 @@ type SimilarTransactionDetection interface {
 }
 
 type SimilarTransactions_TFIDF_DBSCAN struct {
-	log      *logrus.Entry
+	log      *slog.Logger
 	tfidf    *TFIDF
 	dbscan   *DBSCAN
 	datums   []Document
 	clusters []Cluster
 }
 
-func NewSimilarTransactions_TFIDF_DBSCAN(log *logrus.Entry) SimilarTransactionDetection {
+func NewSimilarTransactions_TFIDF_DBSCAN(log *slog.Logger) SimilarTransactionDetection {
 	return &SimilarTransactions_TFIDF_DBSCAN{
 		log:   log,
 		tfidf: NewTransactionTFIDF(),
@@ -237,12 +238,10 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 		// Don't return a transaction cluster with no name, this can happen somehow
 		// but I'm still debugging exactly how.
 		if group.Name == "" {
-			s.log.
-				WithFields(logrus.Fields{
-					"bug":     true,
-					"members": group.Members,
-				}).
-				Warn("transaction cluster was calculated to not have a name, investigate!")
+			s.log.WarnContext(ctx, "transaction cluster was calculated to not have a name, investigate!",
+				"bug", true,
+				"members", group.Members,
+			)
 			continue
 		}
 

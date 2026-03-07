@@ -2,6 +2,7 @@ package logging
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/go-pg/pg/v10/orm"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -18,11 +18,11 @@ var (
 )
 
 type PostgresHooks struct {
-	log   *logrus.Entry
+	log   *slog.Logger
 	stats *metrics.Stats
 }
 
-func NewPostgresHooks(log *logrus.Entry, stats *metrics.Stats) pg.QueryHook {
+func NewPostgresHooks(log *slog.Logger, stats *metrics.Stats) pg.QueryHook {
 	return &PostgresHooks{
 		log:   log,
 		stats: stats,
@@ -36,7 +36,7 @@ func (h *PostgresHooks) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (
 	}
 	cleanedQuery := strings.TrimSpace(strings.ToLower(string(query)))
 	if cleanedQuery != "select 1" && !strings.HasSuffix(cleanedQuery, "/* no log */") {
-		h.log.WithContext(ctx).Trace(strings.TrimSpace(string(query)))
+		h.log.Log(ctx, LevelTrace, strings.TrimSpace(string(query)))
 	}
 
 	return ctx, nil
