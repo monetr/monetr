@@ -20,7 +20,7 @@ type TransactionCluster struct {
 	tableName string `pg:"transaction_clusters"`
 
 	TransactionClusterId ID[TransactionCluster]        `json:"transactionClusterId" pg:"transaction_cluster_id,notnull,pk"`
-	AccountId            ID[Account]                   `json:"-" pg:"account_id,notnull"`
+	AccountId            ID[Account]                   `json:"-" pg:"account_id,notnull,pk"`
 	Account              *Account                      `json:"-" pg:"rel:has-one"`
 	BankAccountId        ID[BankAccount]               `json:"bankAccountId" pg:"bank_account_id,notnull"`
 	BankAccount          *BankAccount                  `json:"-" pg:"rel:has-one"`
@@ -33,6 +33,8 @@ type TransactionCluster struct {
 	Merchant             []TransactionClusterDebugItem `json:"merchant" pg:"merchant,type:'jsonb'"`
 	CreatedAt            time.Time                     `json:"createdAt" pg:"created_at,notnull,default:now()"`
 	UpdatedAt            time.Time                     `json:"updatedAt" pg:"updated_at,notnull,default:now()"`
+
+	TransactionRules []TransactionRule `json:"rules,omitempty" pg:"rel:has-many"`
 }
 
 func (TransactionCluster) IdentityPrefix() string {
