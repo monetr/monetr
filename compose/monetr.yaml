@@ -34,8 +34,6 @@ email:
 logging:
   format: text
   level: trace
-  stackdriver:
-    enabled: false
 postgresql:
   address: postgres
   database: postgres

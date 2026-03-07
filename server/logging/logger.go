@@ -19,22 +19,9 @@ func NewLoggerWithConfig(configuration config.Logging) *slog.Logger {
 	var inner slog.Handler
 	switch strings.ToLower(configuration.Format) {
 	case "json":
-		if configuration.StackDriver.Enabled {
-			opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
-				// Stackdriver expects the message field to be named "message".
-				if len(groups) == 0 && a.Key == slog.MessageKey {
-					a.Key = "message"
-				}
-				return a
-			}
-		}
 		inner = slog.NewJSONHandler(os.Stderr, opts)
 	default: // "text"
 		inner = slog.NewTextHandler(os.Stderr, opts)
-	}
-
-	if configuration.StackDriver.Enabled {
-		inner = NewStackDriverHandler(inner)
 	}
 
 	inner = NewContextHandler(inner)
