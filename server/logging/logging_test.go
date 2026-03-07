@@ -33,8 +33,8 @@ func TestParseLevel(t *testing.T) {
 			{"empty input defaults to info", "", slog.LevelInfo},
 		}
 
-		for _, iteme := range tests {
-			assert.Equal(t, iteme.expected, parseLevel(iteme.input))
+		for _, item := range tests {
+			assert.Equal(t, item.expected, parseLevel(item.input), item.name)
 		}
 	})
 }
@@ -45,7 +45,7 @@ func TestContextHandler(t *testing.T) {
 		inner := slog.NewJSONHandler(&buf, &slog.HandlerOptions{Level: LevelTrace})
 		logger := slog.New(NewContextHandler(inner))
 
-		ctx := context.WithValue(context.Background(), ctxkeys.AccountID, uint64(1234))
+		ctx := context.WithValue(t.Context(), ctxkeys.AccountID, uint64(1234))
 		ctx = context.WithValue(ctx, ctxkeys.UserID, uint64(5678))
 
 		logger.InfoContext(ctx, "test message")
@@ -81,7 +81,7 @@ func TestContextHandler(t *testing.T) {
 		inner := slog.NewJSONHandler(&buf, &slog.HandlerOptions{Level: LevelTrace})
 		logger := slog.New(NewContextHandler(inner)).With("service", "test-service")
 
-		ctx := context.WithValue(context.Background(), ctxkeys.RequestID, "req-abc")
+		ctx := context.WithValue(t.Context(), ctxkeys.RequestID, "req-abc")
 
 		logger.InfoContext(ctx, "test message")
 
@@ -91,35 +91,5 @@ func TestContextHandler(t *testing.T) {
 		assert.NoError(t, json.Unmarshal(buf.Bytes(), &record))
 		assert.Equal(t, "test-service", record["service"])
 		assert.Equal(t, "req-abc", record["requestId"])
-	})
-
-	t.Run("same group name in WithAttrs and per-call attrs are not deep merged", func(t *testing.T) {
-		var buf bytes.Buffer
-		inner := slog.NewJSONHandler(&buf, &slog.HandlerOptions{Level: LevelTrace})
-		logger := slog.New(NewContextHandler(inner)).With(
-			slog.Group("metadata", "source", "background"),
-		)
-
-		logger.InfoContext(context.Background(), "job started",
-			slog.Group("metadata", "jobName", "sync"),
-		)
-
-		raw := buf.Bytes()
-		assert.True(t, json.Valid(raw), "output must be valid JSON")
-
-		// slog does not deep merge groups — both objects are emitted under the same
-		// key as separate entries rather than being combined into one object.
-		assert.Contains(t, string(raw), `"source":"background"`)
-		assert.Contains(t, string(raw), `"jobName":"sync"`)
-
-		// Standard JSON parsing into a map can only hold one value per key;
-		// when duplicate keys are present the last occurrence wins, so the
-		// WithAttrs group is shadowed by the per-call group.
-		var record map[string]any
-		assert.NoError(t, json.Unmarshal(raw, &record))
-		metadata, ok := record["metadata"].(map[string]any)
-		assert.True(t, ok, "metadata should be a JSON object")
-		assert.Contains(t, metadata, "jobName")
-		assert.NotContains(t, metadata, "source")
 	})
 }

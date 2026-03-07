@@ -4,6 +4,9 @@ import (
 	"context"
 	"strconv"
 
+	"fmt"
+	"log/slog"
+
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
@@ -24,8 +27,6 @@ import (
 	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/util"
-	"fmt"
-	"log/slog"
 
 	"github.com/pkg/errors"
 )

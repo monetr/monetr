@@ -14,11 +14,11 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
-	"github.com/monetr/monetr/server/logging"
 )
 
 func (c *Controller) storeLinkTokenInCache(
@@ -78,20 +78,38 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 	// plaid as part of the linking process.
 	me, err := repo.GetMe(c.getContext(ctx))
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get user details for link")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"failed to get user details for link",
+		)
 	}
 
 	if !c.Configuration.Plaid.Enabled {
-		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
+		return c.returnError(
+			ctx,
+			http.StatusNotAcceptable,
+			"Plaid is not enabled on this server, only manual links are allowed.",
+		)
 	}
 
 	userId := c.mustGetUserId(ctx)
 
-	log := c.getLog(ctx).With("accountId", me.AccountId, "userId", me.UserId, "loginId", me.LoginId)
+	log := c.getLog(ctx).With(
+		"accountId", me.AccountId,
+		"userId", me.UserId,
+		"loginId", me.LoginId,
+	)
 
 	numberOfLinks, err := repo.GetNumberOfPlaidLinks(c.getContext(ctx))
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine the number of existing plaid links")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"failed to determine the number of existing plaid links",
+		)
 	}
 
 	// If there is a configured limit on Plaid links then enforce that limit.
@@ -107,11 +125,21 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 			c.mustGetAccountId(ctx),
 		)
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine trial status")
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"failed to determine trial status",
+			)
 		}
 
 		if trialing && numberOfLinks > 0 {
-			log.WarnContext(c.getContext(ctx), "cannot add more Plaid links during trial", "numberOfLinks", numberOfLinks, "trialing", trialing)
+			log.WarnContext(
+				c.getContext(ctx),
+				"cannot add more Plaid links during trial",
+				"numberOfLinks", numberOfLinks,
+				"trialing", trialing,
+			)
 			return c.badRequest(ctx, "Cannot add additional Plaid links during trial")
 		}
 	}
