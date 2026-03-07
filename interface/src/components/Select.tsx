@@ -262,6 +262,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
           <button
             aria-disabled={props.disabled}
             className={mergeTailwind(inputStyles.input, selectStyles.select)}
+            disabled={props.disabled}
             type='button'
           >
             <span
