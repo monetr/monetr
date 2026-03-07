@@ -89,6 +89,7 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 		// clock drift between our servers and Plaid's.
 		jwt.WithIssuedAt(),
 		jwt.WithLeeway(5*time.Second),
+		jwt.WithTimeFunc(c.Clock.Now),
 	)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
