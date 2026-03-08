@@ -7,14 +7,19 @@ package queue
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"reflect"
 	"runtime"
+	"strings"
+	"time"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/communication"
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
@@ -37,6 +42,10 @@ type Context interface {
 // JobFunction is any function (even outside of this package) that takes the job
 // context interface and any generic arguments and returns an error.
 type JobFunction[A any] func(ctx Context, args A) error
+
+// CronFunction is similar to the [JobFunction] but this one cannot take any
+// dynamic arguments. Instead it is simply provided the job context.
+type CronFunction func(ctx Context) error
 
 // internalJobWrapper is the function that is actually passed to the processor.
 // This function has no generic types and always has the same signature. This
@@ -82,7 +91,9 @@ func Enqueue[T any](
 	job JobFunction[T],
 	args T,
 ) error {
-	return processor.enqueue(ctx, queueNameFromJobFunction(job), args)
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	return processor.enqueue(span.Context(), queueNameFromJobFunction[T](job), args)
 }
 
 func Register[T any](
@@ -90,11 +101,11 @@ func Register[T any](
 	processor Processor,
 	job JobFunction[T],
 ) error {
-	queue := queueNameFromJobFunction(job)
+	queue := queueNameFromJobFunction[T](job)
 
 	processor.register(ctx, queue, func(ctx Context, argBytes []byte) error {
 		var args T
-		if err := json.Unmarshal(argBytes, args); err != nil {
+		if err := decodeArguments(argBytes, &args); err != nil {
 			return errors.Wrapf(err, "failed to decode arguments for job: %s", queue)
 		}
 
@@ -105,26 +116,24 @@ func Register[T any](
 	return nil
 }
 
-func RegisterCron[T any](
+func RegisterCron(
 	ctx context.Context,
 	processor Processor,
 	schedule string,
-	job JobFunction[T],
+	job CronFunction,
 ) error {
-	queue := queueNameFromJobFunction(job)
+	queue := queueNameFromJobFunction[any](job)
 
 	processor.registerCron(
 		ctx,
 		queue,
 		schedule,
-		func(ctx Context, argBytes []byte) error {
-			var args T
-			if err := json.Unmarshal(argBytes, args); err != nil {
-				return errors.Wrapf(err, "failed to decode arguments for job: %s", queue)
-			}
-
+		// Cron jobs don't need their argument bytes, but are represented as the
+		// same signature internaly for simplicity.
+		func(ctx Context, _ []byte) error {
 			// TODO, transaction wrapping?
-			return job(ctx, args)
+			// TODO, add monitor check in with sentry here!
+			return job(ctx)
 		},
 	)
 
@@ -134,12 +143,46 @@ func RegisterCron[T any](
 // queueNameFromJobFunction takes the job function we want to enqueue or just
 // known the name of for processing and derives the job queue name from it which
 // is a string.
-func queueNameFromJobFunction[T any](job JobFunction[T]) string {
-	v := reflect.ValueOf(job)
-	if v.Kind() != reflect.Func {
-		panic(fmt.Sprintf("Enqueue expected a job function to be provided, instead got: %T", job))
+func queueNameFromJobFunction[T any](job any) string {
+	// Make sure that the provided job matches one of our expected types otherwise
+	// panic.
+	var args string
+	switch job.(type) {
+	case func(ctx Context, args T) error:
+		args = fmt.Sprintf("::%T", *new(T))
+	case JobFunction[T]:
+		args = fmt.Sprintf("::%T", *new(T))
+	case func(ctx Context) error:
+	case CronFunction:
+	default:
+		panic(fmt.Sprintf("Expected a job function to be provided, instead got: %T", job))
 	}
-	pc := v.Pointer()
+	pc := reflect.ValueOf(job).Pointer()
 	f := runtime.FuncForPC(pc)
-	return f.Name()
+	name := strings.TrimPrefix(f.Name(), "github.com/monetr/monetr/server/")
+	name = name + args
+	name = strings.ReplaceAll(name, "{}", "")
+	name = strings.TrimSpace(name)
+	return name
+}
+
+func encodeArguments(args any) ([]byte, error) {
+	result, err := json.Marshal(args)
+	return result, errors.WithStack(err)
+}
+
+func decodeArguments[T any](data []byte, result *T) error {
+	return errors.WithStack(json.Unmarshal(data, result))
+}
+
+// jobSignature takes the timestamp that the job is going to be enqueued at as
+// well as the arguments for the job (if there are any) and generates a hash
+// that is used to prevent an identical job from being enqueued at the same
+// time.
+func jobSignature(timestamp time.Time, arguments []byte) string {
+	truncatedTimestamp := timestamp.Truncate(time.Second)
+	signatureBuilder := fnv.New32()
+	signatureBuilder.Write(arguments)
+	signatureBuilder.Write([]byte(truncatedTimestamp.String()))
+	return hex.EncodeToString(signatureBuilder.Sum(nil))
 }
