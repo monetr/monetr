@@ -29,7 +29,7 @@ func (h *TestLogHook) Handle(_ context.Context, r slog.Record) error {
 }
 
 func (h *TestLogHook) WithAttrs(attrs []slog.Attr) slog.Handler { return h }
-func (h *TestLogHook) WithGroup(name string) slog.Handler        { return h }
+func (h *TestLogHook) WithGroup(name string) slog.Handler       { return h }
 
 func (h *TestLogHook) AllEntries() []slog.Record {
 	h.mu.Lock()

@@ -13,9 +13,9 @@ import (
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
 )
 

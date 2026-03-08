@@ -2,6 +2,7 @@ import type React from 'react';
 import { Fragment, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import Typography from '@monetr/interface/components/Typography';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import MSidebarToggle from './MSidebarToggle';
@@ -32,15 +33,9 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
     props.base && styles.titleClickable,
   );
 
-  const titleTextClass = mergeTailwind(
-    styles.titleText,
-    props.breadcrumb && styles.titleTextHidden,
-  );
+  const titleTextClass = mergeTailwind(styles.titleText, props.breadcrumb && styles.titleTextHidden);
 
-  const iconClass = mergeTailwind(
-    styles.icon,
-    props.breadcrumb && styles.iconBreadcrumb,
-  );
+  const iconClass = mergeTailwind(styles.icon, props.breadcrumb && styles.iconBreadcrumb);
 
   return (
     <Fragment>
@@ -49,10 +44,10 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
         <div className={styles.topNavLeft}>
           <MSidebarToggle backButton={props.base} className='mr-2' />
           <span className={styles.titleWrapper}>
-            <MSpan className={titleClass} ellipsis onClick={onInitialClick} size='2xl' weight='bold'>
+            <Typography className={titleClass} ellipsis onClick={onInitialClick} size='2xl' weight='bold'>
               <Icon className={iconClass} />
               <span className={titleTextClass}>{props.title}</span>
-            </MSpan>
+            </Typography>
             {Boolean(props.breadcrumb) && (
               <Fragment>
                 <MSpan className={styles.breadcrumbSeparator} color='subtle' size='2xl' weight='bold'>
