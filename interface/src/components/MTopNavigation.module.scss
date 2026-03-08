@@ -1,0 +1,138 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.spacer {
+  padding-bottom: 12 * variables.$size;
+}
+
+.topNav {
+  height: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+  column-gap: 2 * variables.$size;
+  justify-content: space-between;
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  backdrop-filter: blur(4px);
+  background: linear-gradient(to top, transparent, var(--background));
+
+  @media (min-width: variables.$mediumScreen) {
+    height: 12 * variables.$size;
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.topNavLeft {
+  display: flex;
+  gap: 2 * variables.$size;
+  min-width: 0;
+  height: 12 * variables.$size;
+  align-items: center;
+  flex-shrink: 1;
+}
+
+.titleWrapper {
+  display: flex;
+  gap: 2 * variables.$size;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.title {
+  width: auto;
+  order: 1;
+  flex-shrink: 0;
+  color: var(--content-emphasis);
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-shrink: 1;
+  }
+}
+
+.titleBreadcrumb {
+  color: var(--content-subtle);
+
+  &:hover {
+    color: var(--content-emphasis);
+  }
+}
+
+.titleClickable {
+  cursor: pointer;
+}
+
+.titleText {
+  width: auto;
+  text-align: center;
+  order: 1;
+}
+
+.titleTextHidden {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: inline;
+  }
+}
+
+.icon {
+  margin-bottom: 1 * variables.$size;
+  display: inline;
+  margin-right: 2 * variables.$size;
+}
+
+.iconBreadcrumb {
+  margin-right: 0;
+
+  @media (min-width: variables.$mediumScreen) {
+    margin-right: 2 * variables.$size;
+  }
+}
+
+.breadcrumbSeparator {
+  display: none;
+  order: 2;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: block;
+  }
+}
+
+.breadcrumbText {
+  order: 3;
+}
+
+.actionArea {
+  display: flex;
+  justify-content: flex-end;
+  // Hacky width and padding to make sure scrollbar renders properly
+  column-gap: 4 * variables.$size;
+  z-index: 30;
+  flex-shrink: 0;
+  position: fixed;
+  bottom: -1 * variables.$size;
+  top: unset;
+  left: 0;
+  padding-top: 2 * variables.$size;
+  padding-right: calc(6 * variables.$size - 16px);
+  padding-bottom: 8 * variables.$size;
+  padding-left: 6 * variables.$size;
+  width: calc(100vw - 16px);
+  backdrop-filter: blur(4px);
+  background-color: color-mix(in srgb, var(--background) 50%, transparent);
+
+  @media (min-width: variables.$mediumScreen) {
+    column-gap: 2 * variables.$size;
+    top: 2 * variables.$size;
+    bottom: unset;
+    left: unset;
+    right: 4 * variables.$size;
+    padding: 0;
+    width: auto;
+  }
+}

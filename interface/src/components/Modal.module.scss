@@ -13,7 +13,7 @@ $basePadding: 2 * variables.$size;
 .modalBackdrop {
   display: none;
   inset: 0px;
-  background-color: rgba(var(--background), 0.5);
+  background-color: color-mix(in srgb, var(--background) 50%, transparent);
 
   transition-property: opacity !important;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
