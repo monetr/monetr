@@ -6,6 +6,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/types"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
@@ -35,6 +36,7 @@ func (r *repositoryBase) WriteTransactionClusters(
 		clusters[i] = cluster
 	}
 
+	var deleted []TransactionCluster
 	// Because transaction clusters are calculated using the entire bank accounts
 	// transaction dataset. If any clusters exist right now that don't have the
 	// same signature/centroid pair then we can safely remove them. Either those
@@ -46,7 +48,8 @@ func (r *repositoryBase) WriteTransactionClusters(
 		Where(`"account_id" = ?`, r.AccountId()).
 		Where(`"bank_account_id" = ?`, bankAccountId).
 		WhereIn(`("signature", "centroid") NOT IN (?)`, keysToKeep).
-		Delete()
+		Returning("*").
+		Delete(&deleted)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to clean up outdated transaction clusters")
 	}
@@ -58,6 +61,7 @@ func (r *repositoryBase) WriteTransactionClusters(
 		OnConflict(`("account_id", "bank_account_id", "signature", "centroid") DO UPDATE`).
 		Set(`"members" = EXCLUDED.members`).
 		Set(`"debug" = EXCLUDED.debug`).
+		Set(`"merchant" = EXCLUDED.merchant`).
 		// TODO It is possible for a cluster to be recalculated with no changes
 		// whatsoever. When this happens it does not exactly make sense to update
 		// the updated_at timestamp here. But it would involve pulling that clusters
@@ -71,6 +75,16 @@ func (r *repositoryBase) WriteTransactionClusters(
 		Insert(&clusters)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to insert the new transaction clusters")
+	}
+
+	if len(deleted) > 0 {
+		r.log.Log(
+			span.Context(),
+			logging.LevelTrace,
+			"cleaned outdated transaction clusters",
+			"removed", deleted,
+			"upserted", clusters,
+		)
 	}
 
 	r.log.DebugContext(
