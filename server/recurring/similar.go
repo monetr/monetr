@@ -74,7 +74,16 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 		items := make([]memberItem, 0, len(cluster.Items))
 		centroid := make([]float32, len(s.datums[0].Vector))
 
+		// Floating point addition is not associative so in order to accurately
+		// calculate a centroid we need to preserve the order in which we calculate
+		// it. By sorting our indicies
+		clusterIndicies := make([]int, 0, len(cluster.Items))
 		for index := range cluster.Items {
+			clusterIndicies = append(clusterIndicies, index)
+		}
+		sort.Ints(clusterIndicies)
+
+		for _, index := range clusterIndicies {
 			datum, ok := s.dbscan.GetDocumentByIndex(index)
 			if !ok {
 				// I don't know what kind of information would be helpful to include
@@ -137,7 +146,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 		// If we have multiple documents that are considered "center" use the
 		// document with the lowest ID.
 		minId := "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-		for index := range cluster.Items {
+		for _, index := range clusterIndicies {
 			datum, ok := s.dbscan.GetDocumentByIndex(index)
 			if !ok {
 				panic("could not find a datum with an index in a resulting cluster")
@@ -195,6 +204,9 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) enrichClusters(
 
 		{ // Sort the members of the cluster by their transaction date.
 			sort.SliceStable(items, func(i, j int) bool {
+				if items[i].Date.Equal(items[j].Date) {
+					return items[i].ID > items[j].ID
+				}
 				return items[i].Date.After(items[j].Date)
 			})
 			for i := range items {

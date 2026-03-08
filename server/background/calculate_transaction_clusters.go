@@ -170,13 +170,24 @@ func (c *CalculateTransactionClustersJob) Run(ctx context.Context) error {
 	result := clustering.DetectSimilarTransactions(span.Context())
 
 	if len(result) == 0 {
-		log.InfoContext(span.Context(), "no similar transactions detected, nothing to persist")
+		log.InfoContext(
+			span.Context(),
+			"no similar transactions detected, nothing to persist",
+		)
 		return nil
 	}
 
-	log.InfoContext(span.Context(), "similar transaction clusters detected", "clusters", len(result))
+	log.InfoContext(
+		span.Context(),
+		"similar transaction clusters detected",
+		"clusters", len(result),
+	)
 
-	if err := repo.WriteTransactionClusters(span.Context(), bankAccountId, result); err != nil {
+	if _, err := repo.WriteTransactionClusters(
+		span.Context(),
+		bankAccountId,
+		result,
+	); err != nil {
 		return errors.Wrap(err, "failed to persist the calculated transaction clusters")
 	}
 

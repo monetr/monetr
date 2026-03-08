@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	Epsilon      = 0.4
+	Epsilon      = 0.5
 	MinNeighbors = 1
 )
 
@@ -122,7 +122,7 @@ func (d *DBSCAN) expandCluster(index int, neighbors []int, cluster *Cluster) {
 
 func (d *DBSCAN) getNeighbors(index int) []int {
 	// Pre-allocate an array of neighbors for us to work with.
-	neighbors := make([]int, 0, len(d.dataset)/2)
+	neighbors := make([]int, 0)
 	point := d.dataset[index]
 	for i, counterpoint := range d.dataset {
 		// Don't calculate against yourself

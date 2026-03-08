@@ -114,7 +114,11 @@ type BaseRepository interface {
 	// delete any existing transaction clusters for the bank account specified.
 	// This is because clusters are meant to be regenerated each time new
 	// transactions come in.
-	WriteTransactionClusters(ctx context.Context, bankAccountId ID[BankAccount], clusters []TransactionCluster) error
+	WriteTransactionClusters(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		clusters []TransactionCluster,
+	) (updated []TransactionCluster, err error)
 	// GetTransactionClusterByMember will return a transaction cluster that
 	// contains the specified transaction ID as a member for the specified bank.
 	// If no cluster can be found then nil and pg.NoRows will be returned
