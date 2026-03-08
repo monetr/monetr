@@ -324,6 +324,7 @@ func calculateSignature(group *models.TransactionCluster) {
 	sort.Strings(hashSlug)
 	consistentId.Write([]byte(strings.Join(hashSlug, "-")))
 	group.Name = strings.TrimSpace(strings.Join(slug, " "))
+	group.OriginalName = group.Name
 	group.Signature = hex.EncodeToString(consistentId.Sum(nil))
 }
 

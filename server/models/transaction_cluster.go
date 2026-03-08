@@ -20,17 +20,21 @@ type TransactionCluster struct {
 	tableName string `pg:"transaction_clusters"`
 
 	TransactionClusterId ID[TransactionCluster]        `json:"transactionClusterId" pg:"transaction_cluster_id,notnull,pk"`
-	AccountId            ID[Account]                   `json:"-" pg:"account_id,notnull"`
+	AccountId            ID[Account]                   `json:"-" pg:"account_id,notnull,pk"`
 	Account              *Account                      `json:"-" pg:"rel:has-one"`
 	BankAccountId        ID[BankAccount]               `json:"bankAccountId" pg:"bank_account_id,notnull"`
 	BankAccount          *BankAccount                  `json:"-" pg:"rel:has-one"`
 	Signature            string                        `json:"signature" pg:"signature"`
 	Centroid             *ID[Transaction]              `json:"centroid" pg:"centroid"`
 	Name                 string                        `json:"name" pg:"name,notnull"`
+	OriginalName         string                        `json:"originalName" pg:"original_name,notnull"`
 	Members              []ID[Transaction]             `json:"members" pg:"members,notnull,type:'varchar(32)[]'"`
 	Debug                []TransactionClusterDebugItem `json:"debug" pg:"debug,type:'jsonb'"`
 	Merchant             []TransactionClusterDebugItem `json:"merchant" pg:"merchant,type:'jsonb'"`
 	CreatedAt            time.Time                     `json:"createdAt" pg:"created_at,notnull,default:now()"`
+	UpdatedAt            time.Time                     `json:"updatedAt" pg:"updated_at,notnull,default:now()"`
+
+	TransactionRules []TransactionRule `json:"rules,omitempty" pg:"rel:has-many"`
 }
 
 func (TransactionCluster) IdentityPrefix() string {
@@ -50,6 +54,8 @@ func (o *TransactionCluster) BeforeInsert(ctx context.Context) (context.Context,
 	if o.CreatedAt.IsZero() {
 		o.CreatedAt = now
 	}
+
+	o.UpdatedAt = now
 
 	return ctx, nil
 }
