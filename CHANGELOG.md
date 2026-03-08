@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.11.0](https://github.com/monetr/monetr/compare/v1.10.4...v1.11.0) (2026-03-08)
+
+
+### Features
+
+* **api:** Persist similar transactions between calculations ([#3003](https://github.com/monetr/monetr/issues/3003)) ([3a4963c](https://github.com/monetr/monetr/commit/3a4963cff79eb82b65d0ad0a387ca508b3609618))
+
+
+### Bug Fixes
+
+* **api:** Fixing transaction cluster bug ([#3005](https://github.com/monetr/monetr/issues/3005)) ([b8e5786](https://github.com/monetr/monetr/commit/b8e5786c541642906ad483918d46224ea0132a70))
+
+
+### Miscellaneous
+
+* fixing weird unicode character? ([d4f7645](https://github.com/monetr/monetr/commit/d4f764509e1b65d7e1b53f3921f4d793cef52c16))
+
+
+### Refactor
+
+* **api:** Migrating from logrus to slog ([#3002](https://github.com/monetr/monetr/issues/3002)) ([97f9db8](https://github.com/monetr/monetr/commit/97f9db80036f0031a704bd5910be3d11c1482699))
+
 ## [1.10.4](https://github.com/monetr/monetr/compare/v1.10.3...v1.10.4) (2026-03-07)
 
 
