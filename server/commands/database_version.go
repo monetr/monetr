@@ -20,18 +20,19 @@ func databaseVersion(parent *cobra.Command) {
 			configuration.PostgreSQL.Migrate = false
 			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
-				log.WithError(err).Fatal("failed to setup database")
+				log.Error("failed to setup database", "err", err)
+				return err
 			}
 
 			migrator, err := migrations.NewMigrationsManager(log, db)
 			if err != nil {
-				log.WithError(err).Fatalf("failed to create migration manager")
+				log.Error("failed to create migration manager", "err", err)
 				return err
 			}
 
 			latestVersion, err := migrator.LatestVersion()
 			if err != nil {
-				log.WithError(err).Fatalf("failed to determine latest database version")
+				log.Error("failed to determine latest database version", "err", err)
 				return err
 			}
 
@@ -39,7 +40,7 @@ func databaseVersion(parent *cobra.Command) {
 
 			version, err := migrator.CurrentVersion()
 			if err != nil {
-				log.WithError(err).Fatalf("failed to determine current database version")
+				log.Error("failed to determine current database version", "err", err)
 				return err
 			}
 

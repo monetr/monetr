@@ -2,6 +2,8 @@ package stripe_helper
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -10,10 +12,30 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/round"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v81"
 	stripe_client "github.com/stripe/stripe-go/v81/client"
 )
+
+// stripeLeveledLogger adapts *slog.Logger to satisfy stripe's LeveledLoggerInterface.
+type stripeLeveledLogger struct {
+	log *slog.Logger
+}
+
+func (s *stripeLeveledLogger) Debugf(format string, v ...interface{}) {
+	s.log.Debug(fmt.Sprintf(format, v...))
+}
+
+func (s *stripeLeveledLogger) Errorf(format string, v ...interface{}) {
+	s.log.Error(fmt.Sprintf(format, v...))
+}
+
+func (s *stripeLeveledLogger) Infof(format string, v ...interface{}) {
+	s.log.Info(fmt.Sprintf(format, v...))
+}
+
+func (s *stripeLeveledLogger) Warnf(format string, v ...interface{}) {
+	s.log.Warn(fmt.Sprintf(format, v...))
+}
 
 type Stripe interface {
 	GetPriceById(ctx context.Context, id string) (*stripe.Price, error)
@@ -36,12 +58,12 @@ var (
 )
 
 type stripeBase struct {
-	log    *logrus.Entry
+	log    *slog.Logger
 	client *stripe_client.API
 	cache  StripeCache
 }
 
-func NewStripeHelper(log *logrus.Entry, apiKey string) Stripe {
+func NewStripeHelper(log *slog.Logger, apiKey string) Stripe {
 	base := &stripeBase{
 		log:    log,
 		client: nil,
@@ -56,7 +78,7 @@ func NewStripeHelper(log *logrus.Entry, apiKey string) Stripe {
 			),
 			Timeout: time.Second * 30,
 		},
-		LeveledLogger: log,
+		LeveledLogger: &stripeLeveledLogger{log: log},
 	}
 
 	base.client = stripe_client.New(apiKey, &stripe.Backends{
@@ -68,7 +90,7 @@ func NewStripeHelper(log *logrus.Entry, apiKey string) Stripe {
 	return base
 }
 
-func NewStripeHelperWithCache(log *logrus.Entry, apiKey string, cacheClient cache.Cache) Stripe {
+func NewStripeHelperWithCache(log *slog.Logger, apiKey string, cacheClient cache.Cache) Stripe {
 	base := &stripeBase{
 		log:    log,
 		client: nil,
@@ -83,7 +105,7 @@ func NewStripeHelperWithCache(log *logrus.Entry, apiKey string, cacheClient cach
 			),
 			Timeout: time.Second * 30,
 		},
-		LeveledLogger: log,
+		LeveledLogger: &stripeLeveledLogger{log: log},
 	}
 
 	base.client = stripe_client.New(apiKey, &stripe.Backends{
@@ -125,7 +147,7 @@ func (s *stripeBase) GetPriceById(ctx context.Context, id string) (*stripe.Price
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := s.log.WithContext(span.Context()).WithField("stripePriceId", id)
+	log := s.log.With("stripePriceId", id)
 
 	if price, ok := s.cache.GetPriceById(span.Context(), id); ok {
 		return price, nil
@@ -138,9 +160,9 @@ func (s *stripeBase) GetPriceById(ctx context.Context, id string) (*stripe.Price
 	})
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			log.WithError(err).Warn("failed to retrieve stripe price")
+			log.WarnContext(span.Context(), "failed to retrieve stripe price", "err", err)
 		} else {
-			log.WithError(err).Error("failed to retrieve stripe price")
+			log.ErrorContext(span.Context(), "failed to retrieve stripe price", "err", err)
 		}
 		return nil, errors.Wrap(err, "failed to retrieve stripe price")
 	}

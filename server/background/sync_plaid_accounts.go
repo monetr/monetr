@@ -2,18 +2,19 @@ package background
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -22,7 +23,7 @@ const (
 
 type (
 	SyncPlaidAccountsHandler struct {
-		log           *logrus.Entry
+		log           *slog.Logger
 		db            *pg.DB
 		kms           secrets.KeyManagement
 		plaidPlatypus platypus.Platypus
@@ -37,7 +38,7 @@ type (
 
 	SyncPlaidAccountsJob struct {
 		args          SyncPlaidAccountsArguments
-		log           *logrus.Entry
+		log           *slog.Logger
 		repo          repository.BaseRepository
 		secrets       repository.SecretsRepository
 		plaidPlatypus platypus.Platypus
@@ -57,7 +58,7 @@ func TriggerSyncPlaidAccounts(
 }
 
 func NewSyncPlaidAccountsHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 	kms secrets.KeyManagement,
@@ -79,7 +80,7 @@ func (s SyncPlaidAccountsHandler) QueueName() string {
 
 func (s *SyncPlaidAccountsHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	var args SyncPlaidAccountsArguments
@@ -96,10 +97,10 @@ func (s *SyncPlaidAccountsHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := log.WithContext(span.Context()).WithFields(logrus.Fields{
-			"accountId": args.AccountId,
-			"linkId":    args.LinkId,
-		})
+		log := log.With(
+			"accountId", args.AccountId,
+			"linkId", args.LinkId,
+		)
 
 		repo := repository.NewRepositoryFromSession(
 			s.clock,
@@ -136,9 +137,9 @@ func (s SyncPlaidAccountsHandler) DefaultSchedule() string {
 }
 
 func (s *SyncPlaidAccountsHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
-	log := s.log.WithContext(ctx)
+	log := s.log
 
-	log.Info("retrieving links to sync with Plaid for updated accounts")
+	log.InfoContext(ctx, "retrieving links to sync with Plaid for updated accounts")
 
 	links := make([]Link, 0)
 	cutoff := s.clock.Now().AddDate(0, 0, -7)
@@ -156,38 +157,38 @@ func (s *SyncPlaidAccountsHandler) EnqueueTriggeredJob(ctx context.Context, enqu
 	}
 
 	if len(links) == 0 {
-		log.Debug("no plaid links need to be synced at this time for updating accounts")
+		log.DebugContext(ctx, "no plaid links need to be synced at this time for updating accounts")
 		return nil
 	}
 
-	log.WithField("count", len(links)).Info("syncing plaid links for accounts")
+	log.InfoContext(ctx, "syncing plaid links for accounts", "count", len(links))
 
 	for _, item := range links {
-		itemLog := log.WithFields(logrus.Fields{
-			"accountId": item.AccountId,
-			"linkId":    item.LinkId,
-		})
-		itemLog.Trace("enqueuing link to be synced with plaid for accounts")
+		itemLog := log.With(
+			"accountId", item.AccountId,
+			"linkId", item.LinkId,
+		)
+		itemLog.Log(ctx, logging.LevelTrace, "enqueuing link to be synced with plaid for accounts")
 		err := enqueuer.EnqueueJob(ctx, s.QueueName(), SyncPlaidAccountsArguments{
 			AccountId: item.AccountId,
 			LinkId:    item.LinkId,
 		})
 		if err != nil {
-			itemLog.WithError(err).Warn("failed to enqueue job to sync with plaid accounts")
+			itemLog.WarnContext(ctx, "failed to enqueue job to sync with plaid accounts", "err", err)
 			crumbs.Warn(ctx, "Failed to enqueue job to sync with plaid accounts", "job", map[string]any{
 				"error": err,
 			})
 			continue
 		}
 
-		itemLog.Trace("successfully enqueued link to be synced with plaid accounts")
+		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued link to be synced with plaid accounts")
 	}
 
 	return nil
 }
 
 func NewSyncPlaidAccountsJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	repo repository.BaseRepository,
 	clock clock.Clock,
 	secrets repository.SecretsRepository,
@@ -212,19 +213,19 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 	crumbs.AddTag(span.Context(), "accountId", j.args.AccountId.String())
 	crumbs.AddTag(span.Context(), "linkId", j.args.LinkId.String())
 
-	log := j.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"accountId": j.args.AccountId,
-		"linkId":    j.args.LinkId,
-	})
+	log := j.log.With(
+		"accountId", j.args.AccountId,
+		"linkId", j.args.LinkId,
+	)
 
 	link, err := j.repo.GetLink(span.Context(), j.args.LinkId)
 	if err = errors.Wrap(err, "failed to retrieve link to sync with plaid"); err != nil {
-		log.WithError(err).Error("cannot sync without link")
+		log.ErrorContext(span.Context(), "cannot sync without link", "err", err)
 		return err
 	}
 
 	if link.PlaidLink == nil {
-		log.Warn("provided link does not have any plaid credentials")
+		log.WarnContext(span.Context(), "provided link does not have any plaid credentials")
 		crumbs.IndicateBug(
 			span.Context(),
 			"BUG: Link was queued to sync with plaid, but has no plaid details",
@@ -236,12 +237,12 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 		return nil
 	}
 
-	log = log.WithFields(logrus.Fields{
-		"plaidLinkId":           link.PlaidLink.PlaidLinkId,
-		"plaid_institutionId":   link.PlaidLink.InstitutionId,
-		"plaid_institutionName": link.PlaidLink.InstitutionName,
-		"plaid_itemId":          link.PlaidLink.PlaidId,
-	})
+	log = log.With(
+		"plaidLinkId", link.PlaidLink.PlaidLinkId,
+		"plaid_institutionId", link.PlaidLink.InstitutionId,
+		"plaid_institutionName", link.PlaidLink.InstitutionName,
+		"plaid_itemId", link.PlaidLink.PlaidId,
+	)
 
 	// This way other methods will have these log fields too.
 	j.log = log
@@ -253,7 +254,7 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 		link.LinkId,
 	)
 	if err = errors.Wrap(err, "failed to read bank accounts for plaid sync"); err != nil {
-		log.WithError(err).Error("cannot sync without bank accounts")
+		log.ErrorContext(span.Context(), "cannot sync without bank accounts", "err", err)
 		return err
 	}
 	crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.PlaidId)
@@ -261,14 +262,14 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 	crumbs.AddTag(span.Context(), "plaid.institution_name", link.PlaidLink.InstitutionName)
 
 	if len(j.bankAccounts) == 0 {
-		log.Warn("no bank accounts for plaid link")
+		log.WarnContext(span.Context(), "no bank accounts for plaid link")
 		crumbs.Debug(span.Context(), "No bank accounts setup for plaid link", nil)
 		return nil
 	}
 
 	secret, err := j.secrets.Read(span.Context(), plaidLink.SecretId)
 	if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
-		log.WithError(err).Error("could not retrieve API credentials for Plaid for link, this job will be retried")
+		log.ErrorContext(span.Context(), "could not retrieve API credentials for Plaid for link, this job will be retried", "err", err)
 		return err
 	}
 
@@ -279,62 +280,58 @@ func (j *SyncPlaidAccountsJob) Run(ctx context.Context) error {
 		plaidLink.PlaidId,
 	)
 	if err != nil {
-		log.WithError(err).Error("failed to create plaid client for link")
+		log.ErrorContext(span.Context(), "failed to create plaid client for link", "err", err)
 		return err
 	}
 
 	j.plaidBankAccounts, err = plaidClient.GetAccounts(span.Context())
 	if err != nil {
-		log.WithError(err).Error("failed to retrieve bank accounts from plaid")
+		log.ErrorContext(span.Context(), "failed to retrieve bank accounts from plaid", "err", err)
 		return err
 	}
 
 	missingAccounts := j.findMissingAccounts()
 	if len(missingAccounts) > 0 {
-		log.WithFields(logrus.Fields{
-			"count": len(missingAccounts),
-		}).Info("found newly inactive accounts, updating status")
+		log.InfoContext(span.Context(), "found newly inactive accounts, updating status", "count", len(missingAccounts))
 
 		for _, bankAccount := range missingAccounts {
 			bankAccount.Status = BankAccountStatusInactive
-			j.log.WithFields(logrus.Fields{
-				"bankAccountId":       bankAccount.BankAccountId,
-				"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
-			}).Debug("updating account to be inactive")
+			j.log.DebugContext(span.Context(), "updating account to be inactive",
+				"bankAccountId", bankAccount.BankAccountId,
+				"plaid_bankAccountId", bankAccount.PlaidBankAccount.PlaidId,
+			)
 			if err := j.repo.UpdateBankAccount(span.Context(), &bankAccount); err != nil {
-				log.WithError(err).Error("failed to mark account as inactive")
+				log.ErrorContext(span.Context(), "failed to mark account as inactive", "err", err)
 				continue
 			}
 		}
 	} else {
-		log.Info("no accounts to mark as inactive")
+		log.InfoContext(span.Context(), "no accounts to mark as inactive")
 	}
 
 	activeAccounts := j.findActiveAccounts()
 	if len(activeAccounts) > 0 {
-		log.WithFields(logrus.Fields{
-			"count": len(activeAccounts),
-		}).Info("found reactivated accounts, updating status")
+		log.InfoContext(span.Context(), "found reactivated accounts, updating status", "count", len(activeAccounts))
 
 		for _, bankAccount := range activeAccounts {
 			bankAccount.Status = BankAccountStatusActive
-			j.log.WithFields(logrus.Fields{
-				"bankAccountId":       bankAccount.BankAccountId,
-				"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
-			}).Debug("updating account to be reactivated")
+			j.log.DebugContext(span.Context(), "updating account to be reactivated",
+				"bankAccountId", bankAccount.BankAccountId,
+				"plaid_bankAccountId", bankAccount.PlaidBankAccount.PlaidId,
+			)
 			if err := j.repo.UpdateBankAccount(span.Context(), &bankAccount); err != nil {
-				log.WithError(err).Error("failed to mark account as active")
+				log.ErrorContext(span.Context(), "failed to mark account as active", "err", err)
 				continue
 			}
 		}
 	} else {
-		log.Info("no accounts to mark as reactivated")
+		log.InfoContext(span.Context(), "no accounts to mark as reactivated")
 	}
 
-	log.Trace("updating plaid link's last account sync timestamp")
+	log.Log(span.Context(), logging.LevelTrace, "updating plaid link's last account sync timestamp")
 	plaidLink.LastAccountSync = myownsanity.TimeP(j.clock.Now())
 	if err := j.repo.UpdatePlaidLink(span.Context(), plaidLink); err != nil {
-		log.WithError(err).Error("failed to update plaid link's last account sync timestamp")
+		log.ErrorContext(span.Context(), "failed to update plaid link's last account sync timestamp", "err", err)
 		return err
 	}
 
@@ -352,10 +349,10 @@ MissingAccounts:
 		for y := range j.plaidBankAccounts {
 			plaidBankAccount := j.plaidBankAccounts[y]
 			if plaidBankAccount.GetAccountId() == bankAccount.PlaidBankAccount.PlaidId {
-				j.log.WithFields(logrus.Fields{
-					"bankAccountId":       bankAccount.BankAccountId,
-					"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
-				}).Debug("bank account is still present in plaid and is considered active")
+				j.log.Debug("bank account is still present in plaid and is considered active",
+					"bankAccountId", bankAccount.BankAccountId,
+					"plaid_bankAccountId", bankAccount.PlaidBankAccount.PlaidId,
+				)
 				// TODO Check bank account status here too, if the status is inactive
 				// but we see the account again then that means it is active again.
 				continue MissingAccounts
@@ -364,17 +361,17 @@ MissingAccounts:
 
 		if bankAccount.Status == BankAccountStatusInactive {
 			// Bank account is already considered missing, skip it.
-			j.log.WithFields(logrus.Fields{
-				"bankAccountId":       bankAccount.BankAccountId,
-				"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
-			}).Trace("bank account is already inactive, it does not need to be updated")
+			j.log.Log(context.Background(), logging.LevelTrace, "bank account is already inactive, it does not need to be updated",
+				"bankAccountId", bankAccount.BankAccountId,
+				"plaid_bankAccountId", bankAccount.PlaidBankAccount.PlaidId,
+			)
 			continue
 		}
 
-		j.log.WithFields(logrus.Fields{
-			"bankAccountId":       bankAccount.BankAccountId,
-			"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
-		}).Info("bank account is no longer present in plaid and is considered inactive")
+		j.log.Info("bank account is no longer present in plaid and is considered inactive",
+			"bankAccountId", bankAccount.BankAccountId,
+			"plaid_bankAccountId", bankAccount.PlaidBankAccount.PlaidId,
+		)
 		missingAccounts[bankAccount.BankAccountId] = bankAccount
 	}
 
@@ -399,10 +396,10 @@ ActiveAccounts:
 			plaidBankAccount := j.plaidBankAccounts[y]
 			if plaidBankAccount.GetAccountId() == bankAccount.PlaidBankAccount.PlaidId {
 				activeAcounts[bankAccount.BankAccountId] = bankAccount
-				j.log.WithFields(logrus.Fields{
-					"bankAccountId":       bankAccount.BankAccountId,
-					"plaid_bankAccountId": bankAccount.PlaidBankAccount.PlaidId,
-				}).Info("found inactive account that is present in Plaid again, will be updated to show as active")
+				j.log.Info("found inactive account that is present in Plaid again, will be updated to show as active",
+					"bankAccountId", bankAccount.BankAccountId,
+					"plaid_bankAccountId", bankAccount.PlaidBankAccount.PlaidId,
+				)
 				continue ActiveAccounts
 			}
 		}

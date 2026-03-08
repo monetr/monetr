@@ -2,18 +2,19 @@ package background
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -22,7 +23,7 @@ const (
 
 type (
 	DeactivateLinksHandler struct {
-		log           *logrus.Entry
+		log           *slog.Logger
 		db            *pg.DB
 		configuration config.Configuration
 		repo          repository.JobRepository
@@ -39,7 +40,7 @@ type (
 
 	DeactivateLinksJob struct {
 		args          DeactivateLinksArguments
-		log           *logrus.Entry
+		log           *slog.Logger
 		repo          repository.BaseRepository
 		secrets       repository.SecretsRepository
 		plaidPlatypus platypus.Platypus
@@ -48,7 +49,7 @@ type (
 )
 
 func NewDeactivateLinksHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 	configuration config.Configuration,
@@ -73,7 +74,7 @@ func (d DeactivateLinksHandler) QueueName() string {
 
 func (d *DeactivateLinksHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	var args DeactivateLinksArguments
@@ -90,10 +91,10 @@ func (d *DeactivateLinksHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log = log.WithContext(span.Context()).WithFields(logrus.Fields{
-			"accountId": args.AccountId,
-			"linkId":    args.LinkId,
-		})
+		log = log.With(
+			"accountId", args.AccountId,
+			"linkId", args.LinkId,
+		)
 		repo := repository.NewRepositoryFromSession(
 			d.clock,
 			"user_system",
@@ -129,15 +130,15 @@ func (d DeactivateLinksHandler) DefaultSchedule() string {
 }
 
 func (d *DeactivateLinksHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
-	log := d.log.WithContext(ctx)
+	log := d.log
 
 	if !d.configuration.Stripe.IsBillingEnabled() {
-		log.Debug("billing is not enabled, plaid links will not automatically be deactivated")
+		log.DebugContext(ctx, "billing is not enabled, plaid links will not automatically be deactivated")
 		crumbs.Debug(ctx, "Billing is not enabled, plaid links will not automatically be deactivated", nil)
 		return nil
 	}
 
-	log.Info("retrieving links for expired accounts")
+	log.InfoContext(ctx, "retrieving links for expired accounts")
 	expiredLinks, err := d.repo.GetLinksForExpiredAccounts(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve funding schedules to process")
@@ -145,38 +146,38 @@ func (d *DeactivateLinksHandler) EnqueueTriggeredJob(ctx context.Context, enqueu
 
 	if len(expiredLinks) == 0 {
 		crumbs.Debug(ctx, "No expired links were found at this time, no work to be done.", nil)
-		log.Info("no expired links were found at this time, no work to be done")
+		log.InfoContext(ctx, "no expired links were found at this time, no work to be done")
 		return nil
 	}
 
-	log.WithField("count", len(expiredLinks)).Info("preparing to enqueue jobs to remove expired links")
+	log.InfoContext(ctx, "preparing to enqueue jobs to remove expired links", "count", len(expiredLinks))
 
 	for _, item := range expiredLinks {
-		itemLog := log.WithFields(logrus.Fields{
-			"accountId": item.AccountId,
-			"linkId":    item.LinkId,
-		})
-		itemLog.Trace("enqueuing job to remove expired link for account")
+		itemLog := log.With(
+			"accountId", item.AccountId,
+			"linkId", item.LinkId,
+		)
+		itemLog.Log(ctx, logging.LevelTrace, "enqueuing job to remove expired link for account")
 		err = enqueuer.EnqueueJob(ctx, d.QueueName(), DeactivateLinksArguments{
 			AccountId: item.AccountId,
 			LinkId:    item.LinkId,
 		})
 		if err != nil {
-			log.WithError(err).Warn("failed to enqueue job to remove expired link")
+			log.WarnContext(ctx, "failed to enqueue job to remove expired link", "err", err)
 			crumbs.Warn(ctx, "Failed to enqueue job to remove expired link", "job", map[string]any{
 				"error": err,
 			})
 			continue
 		}
 
-		itemLog.Trace("successfully enqueued removal of expired link")
+		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued removal of expired link")
 	}
 
 	return nil
 }
 
 func NewDeactivateLinksJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	repo repository.BaseRepository,
 	clock clock.Clock,
 	secrets repository.SecretsRepository,
@@ -197,18 +198,18 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
-	log := d.log.WithContext(span.Context())
+	log := d.log
 
 	link, err := d.repo.GetLink(span.Context(), d.args.LinkId)
 	if err != nil {
-		log.WithError(err).Error("failed to retrieve link for deactivation")
+		log.ErrorContext(span.Context(), "failed to retrieve link for deactivation", "err", err)
 		return err
 	}
 
 	crumbs.IncludeUserInScope(span.Context(), link.AccountId)
 
 	if link.PlaidLink == nil {
-		log.Warn("provided link does not have any plaid credentials")
+		log.WarnContext(span.Context(), "provided link does not have any plaid credentials")
 		crumbs.Warn(span.Context(), "BUG: Link was queued to be deactivated, but has no plaid details", "jobs", map[string]any{
 			"link": link,
 		})
@@ -218,42 +219,42 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 
 	crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.PlaidId)
 
-	log = log.WithFields(logrus.Fields{
-		"accountId":       d.args.AccountId,
-		"linkId":          d.args.LinkId,
-		"plaidLinkId":     link.PlaidLinkId,
-		"itemId":          link.PlaidLink.PlaidId,
-		"institutionId":   link.PlaidLink.InstitutionId,
-		"institutionName": link.PlaidLink.InstitutionName,
-		"plaidLinkStatus": link.PlaidLink.Status.String(),
-	})
+	log = log.With(
+		"accountId", d.args.AccountId,
+		"linkId", d.args.LinkId,
+		"plaidLinkId", link.PlaidLinkId,
+		"itemId", link.PlaidLink.PlaidId,
+		"institutionId", link.PlaidLink.InstitutionId,
+		"institutionName", link.PlaidLink.InstitutionName,
+		"plaidLinkStatus", link.PlaidLink.Status.String(),
+	)
 
-	log.Info("removing plaid link")
+	log.InfoContext(span.Context(), "removing plaid link")
 
 	secret, err := d.secrets.Read(span.Context(), link.PlaidLink.SecretId)
 	if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
-		log.WithError(err).Error("could not retrieve API credentials for Plaid for link, this job will be retried")
+		log.ErrorContext(span.Context(), "could not retrieve API credentials for Plaid for link, this job will be retried", "err", err)
 		return err
 	}
 
 	client, err := d.plaidPlatypus.NewClient(span.Context(), link, secret.Value, link.PlaidLink.PlaidId)
 	if err != nil {
-		log.WithError(err).Error("failed to create client for link deactivation")
+		log.ErrorContext(span.Context(), "failed to create client for link deactivation", "err", err)
 		return err
 	}
 
 	if err = d.repo.DeletePlaidLink(span.Context(), *link.PlaidLinkId); err != nil {
-		log.WithError(err).Warn("failed to remove Plaid details, link cannot be removed at this time")
+		log.WarnContext(span.Context(), "failed to remove Plaid details, link cannot be removed at this time", "err", err)
 		return err
 	}
 
-	log.Info("deactivating Plaid link now")
+	log.InfoContext(span.Context(), "deactivating Plaid link now")
 	if err = client.RemoveItem(span.Context()); err != nil {
-		log.WithError(err).Error("failed to deactivate Plaid link, the job will not be retried")
+		log.ErrorContext(span.Context(), "failed to deactivate Plaid link, the job will not be retried", "err", err)
 		return nil
 	}
 
-	log.Info("Plaid link was successfully deactivated")
+	log.InfoContext(span.Context(), "Plaid link was successfully deactivated")
 
 	return nil
 }

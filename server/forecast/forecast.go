@@ -8,7 +8,7 @@ import (
 	"github.com/ahmetb/go-linq/v3"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/sirupsen/logrus"
+	"log/slog"
 )
 
 type Event struct {
@@ -49,13 +49,13 @@ type Forecaster interface {
 }
 
 type forecasterBase struct {
-	log            *logrus.Entry
+	log            *slog.Logger
 	currentBalance int64
 	funding        map[ID[FundingSchedule]]FundingInstructions
 	spending       map[ID[Spending]]SpendingInstructions
 }
 
-func NewForecaster(log *logrus.Entry, spending []Spending, funding []FundingSchedule) Forecaster {
+func NewForecaster(log *slog.Logger, spending []Spending, funding []FundingSchedule) Forecaster {
 	forecaster := &forecasterBase{
 		log:      log,
 		funding:  map[ID[FundingSchedule]]FundingInstructions{},
@@ -66,8 +66,7 @@ func NewForecaster(log *logrus.Entry, spending []Spending, funding []FundingSche
 	}
 	for _, spendingItem := range spending {
 		if spendingItem.GetIsPaused() {
-			log.WithField("spendingId", spendingItem.SpendingId).
-				Debug("spending item will be excluded from forecast because it is paused")
+			log.DebugContext(context.Background(), "spending item will be excluded from forecast because it is paused", "spendingId", spendingItem.SpendingId)
 			continue
 		}
 

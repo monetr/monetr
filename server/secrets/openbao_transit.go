@@ -16,16 +16,18 @@ import (
 	"sync/atomic"
 	"time"
 
+	"log/slog"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/round"
 	openbao "github.com/openbao/openbao/api/v2"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type OpenBaoTransitConfig struct {
-	Log                *logrus.Entry
+	Log                *slog.Logger
 	KeyID              string
 	Address            string
 	Role               string
@@ -48,7 +50,7 @@ type OpenBaoTransit struct {
 	tokenCloser     chan chan error
 	host            string
 	config          OpenBaoTransitConfig
-	log             *logrus.Entry
+	log             *slog.Logger
 	client          *openbao.Client
 	usingCustomTLS  bool
 	tlsWatch        sync.Once
@@ -64,7 +66,7 @@ func NewOpenBaoTransit(
 	log := config.Log
 	host, err := url.Parse(config.Address)
 	if err != nil {
-		log.WithField("url", config.Address).WithError(err).Errorf("failed to parse openbao URL")
+		log.ErrorContext(ctx, "failed to parse openbao URL", "url", config.Address, "err", err)
 		return nil, errors.Wrap(err, "failed to parse openbao URL")
 	}
 
@@ -88,17 +90,14 @@ func NewOpenBaoTransit(
 			response *http.Response,
 			err error,
 		) {
-			logEntry := log.WithContext(ctx).WithFields(logrus.Fields{
-				"openbao": logrus.Fields{
-					"method": request.Method,
-					"url":    request.URL.String(),
-				},
-			})
-
+			logEntry := log.With(slog.Group("openbao",
+				"method", request.Method,
+				"url", request.URL.String(),
+			))
 			if err != nil {
-				logEntry = logEntry.WithError(err)
+				logEntry = logEntry.With("err", err)
 			}
-			logEntry.Trace("making request to openbao API")
+			logEntry.Log(ctx, logging.LevelTrace, "making request to openbao API")
 		},
 	)
 
@@ -123,7 +122,7 @@ func NewOpenBaoTransit(
 	// if they change at all.
 	if helper.usingCustomTLS {
 		if err = helper.reloadTLS(); err != nil {
-			log.WithError(err).Errorf("failed to configure TLS")
+			log.ErrorContext(ctx, "failed to configure TLS", "err", err)
 			return nil, err
 		}
 		helper.watchCertificates()
@@ -135,7 +134,7 @@ func NewOpenBaoTransit(
 
 	helper.client, err = openbao.NewClient(openbaoConfig)
 	if err != nil {
-		log.WithError(err).Errorf("failed to create openbao client")
+		log.ErrorContext(ctx, "failed to create openbao client", "err", err)
 		return nil, errors.Wrap(err, "failed to create openbao client")
 	}
 
@@ -191,7 +190,7 @@ func (o *OpenBaoTransit) watchCertificates() {
 			log := o.log
 			watcher, err := fsnotify.NewWatcher()
 			if err != nil {
-				log.WithError(err).Errorf("failed to create file system watcher, openbao TLS certificates cannot be auto rotated")
+				log.ErrorContext(context.Background(), "failed to create file system watcher, openbao TLS certificates cannot be auto rotated", "err", err)
 				return
 			}
 
@@ -203,24 +202,23 @@ func (o *OpenBaoTransit) watchCertificates() {
 				o.config.TLSCAPath,
 			}
 			for _, path := range paths {
-				fileLog := log.WithField("file", path)
-				fileLog.Trace("watching file for changes for openbao TLS")
+				log.Log(context.Background(), logging.LevelTrace, "watching file for changes for openbao TLS", "file", path)
 				if err = watcher.Add(o.config.TLSCertificatePath); err != nil {
-					fileLog.WithError(err).Errorf("failed to watch file for openbao TLS")
+					log.ErrorContext(context.Background(), "failed to watch file for openbao TLS", "file", path, "err", err)
 				}
 			}
 
 			for {
 				select {
 				case err = <-watcher.Errors:
-					log.WithError(err).Warn("error watching file for openbao TLS")
+					log.WarnContext(context.Background(), "error watching file for openbao TLS", "err", err)
 				case event := <-watcher.Events:
-					log.WithField("file", event.Name).Trace("observed changed in openbao TLS file")
+					log.Log(context.Background(), logging.LevelTrace, "observed changed in openbao TLS file", "file", event.Name)
 					if err = o.reloadTLS(); err != nil {
-						log.WithError(err).Errorf("failed to reload openbao TLS")
+						log.ErrorContext(context.Background(), "failed to reload openbao TLS", "err", err)
 					}
 				case promise := <-o.closer:
-					log.Info("closing openbao helper TLS watcher")
+					log.InfoContext(context.Background(), "closing openbao helper TLS watcher")
 					promise <- watcher.Close()
 					return
 				}
@@ -251,11 +249,11 @@ func (o *OpenBaoTransit) watchCertificates() {
 // a certificate change is detected.
 func (o *OpenBaoTransit) reloadTLS() error {
 	log := o.log
-	log.Debugf("reloading openbao TLS config")
+	log.DebugContext(context.Background(), "reloading openbao TLS config")
 
 	caCert, err := os.ReadFile(o.config.TLSCAPath)
 	if err != nil {
-		log.WithField("file", o.config.TLSCAPath).Errorf("failed to read CA for openbao TLS")
+		log.ErrorContext(context.Background(), "failed to read CA for openbao TLS", "file", o.config.TLSCAPath)
 		return errors.Wrap(err, "failed to read CA for openbao TLS")
 	}
 
@@ -276,10 +274,11 @@ func (o *OpenBaoTransit) reloadTLS() error {
 			o.config.TLSKeyPath,
 		)
 		if err != nil {
-			log.WithFields(logrus.Fields{
-				"certPath": o.config.TLSCertificatePath,
-				"keyPath":  o.config.TLSKeyPath,
-			}).WithError(err).Errorf("failed to load TLS key pair for openbao")
+			log.ErrorContext(context.Background(), "failed to load TLS key pair for openbao",
+				"certPath", o.config.TLSCertificatePath,
+				"keyPath", o.config.TLSKeyPath,
+				"err", err,
+			)
 			return errors.Wrap(err, "failed to load TLS key pair for openbao")
 		}
 
@@ -320,12 +319,12 @@ func (o *OpenBaoTransit) authenticationWorker() {
 	o.tokenTTL.Do(func() {
 		log := o.log
 		if atomic.LoadInt64(&o.tokenExpiration) == math.MaxInt64 {
-			log.Info("openbao token will never expire, background token refresher will not be started")
+			log.InfoContext(context.Background(), "openbao token will never expire, background token refresher will not be started")
 			return
 		}
 
 		go func() {
-			log.Debug("openbao token refresh worker has started, tokens will be refreshed before they expire")
+			log.DebugContext(context.Background(), "openbao token refresh worker has started, tokens will be refreshed before they expire")
 			o.tokenCloser = make(chan chan error, 1)
 
 			// Check to see if the token is going to expire every minute
@@ -336,18 +335,18 @@ func (o *OpenBaoTransit) authenticationWorker() {
 				case <-ticker.C:
 					// If the token will expire before we check it next, then refresh the token.
 					if atomic.LoadInt64(&o.tokenExpiration) < time.Now().Add(frequency).Unix() {
-						log.Debug("token will expire before the next check, refreshing token")
+						log.DebugContext(context.Background(), "token will expire before the next check, refreshing token")
 						err := func() error {
 							ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 							defer cancel()
 							return o.authenticate(ctx)
 						}()
 						if err != nil {
-							log.WithError(err).Error("failed to refresh openbao token")
+							log.ErrorContext(context.Background(), "failed to refresh openbao token", "err", err)
 						}
 					}
 				case promise := <-o.tokenCloser:
-					log.Info("stopping refresh token worker")
+					log.InfoContext(context.Background(), "stopping refresh token worker")
 					promise <- nil
 					return
 				}
@@ -388,7 +387,7 @@ func (o *OpenBaoTransit) authenticationWorker() {
 func (o *OpenBaoTransit) authenticate(ctx context.Context) error {
 	o.tokenSync.Lock()
 	defer o.tokenSync.Unlock()
-	log := o.log.WithField("method", o.config.AuthMethod)
+	log := o.log.With("method", o.config.AuthMethod)
 
 	var auth *openbao.SecretAuth
 	switch o.config.AuthMethod {
@@ -396,7 +395,7 @@ func (o *OpenBaoTransit) authenticate(ctx context.Context) error {
 	// https://openbao.org/docs/auth/approle/
 	case "userpass":
 		// https://openbao.org/docs/auth/userpass/
-		log.Trace("authenticating to openbao")
+		log.Log(ctx, logging.LevelTrace, "authenticating to openbao")
 		result, err := o.client.Logical().WriteWithContext(
 			ctx,
 			"auth/userpass/login/"+o.config.Username,
@@ -406,7 +405,7 @@ func (o *OpenBaoTransit) authenticate(ctx context.Context) error {
 			},
 		)
 		if err != nil {
-			log.WithError(err).Errorf("failed to authenticate to openbao")
+			log.ErrorContext(ctx, "failed to authenticate to openbao", "err", err)
 			return errors.Wrap(err, "failed to authenticate to openbao")
 		}
 		auth = result.Auth
@@ -415,7 +414,7 @@ func (o *OpenBaoTransit) authenticate(ctx context.Context) error {
 		o.client.SetToken(o.config.Token)
 		_, err := o.client.Auth().Token().LookupSelfWithContext(ctx)
 		if err != nil {
-			log.WithError(err).Error("failed to authenticate to openbao")
+			log.ErrorContext(ctx, "failed to authenticate to openbao", "err", err)
 			return errors.Wrap(err, "failed to authenticate to openbao")
 		}
 		auth = &openbao.SecretAuth{
@@ -424,29 +423,28 @@ func (o *OpenBaoTransit) authenticate(ctx context.Context) error {
 		}
 	case "kubernetes":
 		// https://openbao.org/docs/auth/kubernetes/
-		log.Trace("authenticating to openbao")
+		log.Log(ctx, logging.LevelTrace, "authenticating to openbao")
 		var token string
 		tokenPath := "/var/run/secrets/kubernetes.io/serviceaccount/token"
 
 		switch {
 		case o.config.Token != "":
-			log.Trace("using included token")
+			log.Log(ctx, logging.LevelTrace, "using included token")
 			token = o.config.Token
 		case o.config.TokenFile != "":
 			tokenPath = o.config.TokenFile
 			fallthrough
 		default:
-			fileLog := log.WithField("file", tokenPath)
-			fileLog.Trace("reading token from specified file")
+			log.Log(ctx, logging.LevelTrace, "reading token from specified file", "file", tokenPath)
 			data, err := os.ReadFile(tokenPath)
 			if err != nil {
-				fileLog.WithError(err).Error("failed to read token from specified file")
+				log.ErrorContext(ctx, "failed to read token from specified file", "file", tokenPath, "err", err)
 				return errors.Wrap(err, "failed to read token from specified file")
 			}
 			token = string(data)
 		}
 
-		log.Trace("authenticating to openbao")
+		log.Log(ctx, logging.LevelTrace, "authenticating to openbao")
 		result, err := o.client.Logical().WriteWithContext(
 			ctx,
 			"auth/kubernetes/login",
@@ -456,7 +454,7 @@ func (o *OpenBaoTransit) authenticate(ctx context.Context) error {
 			},
 		)
 		if err != nil {
-			log.WithError(err).Error("failed to authenticate to openbao")
+			log.ErrorContext(ctx, "failed to authenticate to openbao", "err", err)
 			return errors.Wrap(err, "failed to authenticate to openbao")
 		}
 		auth = result.Auth
@@ -465,7 +463,7 @@ func (o *OpenBaoTransit) authenticate(ctx context.Context) error {
 	}
 
 	if auth == nil {
-		log.Fatalf("no authentication returned from openbao")
+		log.ErrorContext(ctx, "no authentication returned from openbao")
 		return errors.Errorf("no authentication returned from openbao")
 	}
 
@@ -476,13 +474,13 @@ func (o *OpenBaoTransit) authenticate(ctx context.Context) error {
 	} else {
 		// If the token does expire, store the expiration time (minus 1 minute) to have a safe buffer.
 		nextExpiration = time.Now().Add(time.Duration(auth.LeaseDuration)*time.Second - 1*time.Minute).Unix()
-		log.Debugf("openbao authentication will refresh by %s", time.Unix(nextExpiration, 0))
+		log.DebugContext(ctx, fmt.Sprintf("openbao authentication will refresh by %s", time.Unix(nextExpiration, 0)))
 	}
 
 	atomic.StoreInt64(&o.tokenExpiration, nextExpiration)
 
 	o.client.SetToken(auth.ClientToken)
-	log.Trace("successfully authenticated to openbao")
+	log.Log(ctx, logging.LevelTrace, "successfully authenticated to openbao")
 
 	return nil
 }
@@ -498,18 +496,15 @@ func (o *OpenBaoTransit) Write(
 		"key": key,
 	}
 
-	log := o.log.WithFields(logrus.Fields{
-		"key":    key,
-		"action": "write",
-	}).WithContext(span.Context())
-	log.Trace("handling secret with openbao")
+	log := o.log.With("key", key, "action", "write")
+	log.Log(span.Context(), logging.LevelTrace, "handling secret with openbao")
 	secret, err := o.client.Logical().WriteWithContext(
 		span.Context(),
 		key,
 		value,
 	)
 	if err != nil {
-		log.WithError(err).Errorf("failed to write secret to openbao")
+		log.ErrorContext(span.Context(), "failed to write secret to openbao", "err", err)
 		return nil, errors.Wrap(err, "failed to write secret")
 	}
 
@@ -526,10 +521,10 @@ func (o *OpenBaoTransit) Read(
 		"key": key,
 	}
 
-	log := o.log.WithField("key", key).WithContext(span.Context())
+	log := o.log.With("key", key)
 	secret, err := o.client.Logical().ReadWithContext(span.Context(), key)
 	if err != nil {
-		log.WithError(err).Errorf("failed to read secret from openbao")
+		log.ErrorContext(span.Context(), "failed to read secret from openbao", "err", err)
 		return nil, errors.Wrap(err, "failed to read secret")
 	}
 
@@ -543,13 +538,13 @@ func (o *OpenBaoTransit) Delete(ctx context.Context, key string) error {
 		"key": key,
 	}
 
-	log := o.log.WithField("key", key).WithContext(span.Context())
+	log := o.log.With("key", key)
 
-	log.Trace("deleting secret")
+	log.Log(span.Context(), logging.LevelTrace, "deleting secret")
 
 	_, err := o.client.Logical().DeleteWithContext(span.Context(), key)
 	if err != nil {
-		log.WithError(err).Errorf("failed to delete secret from openbao")
+		log.ErrorContext(span.Context(), "failed to delete secret from openbao", "err", err)
 		return errors.Wrap(err, "failed to delete secret")
 	}
 
@@ -616,7 +611,7 @@ func (o *OpenBaoTransit) Close() error {
 
 		err = <-promise
 		if err != nil {
-			o.log.WithError(err).Errorf("failed to close TLS worker")
+			o.log.ErrorContext(context.Background(), "failed to close TLS worker", "err", err)
 		}
 	}
 
@@ -626,7 +621,7 @@ func (o *OpenBaoTransit) Close() error {
 
 		err = <-promise
 		if err != nil {
-			o.log.WithError(err).Errorf("failed to close token refresh worker")
+			o.log.ErrorContext(context.Background(), "failed to close token refresh worker", "err", err)
 		}
 	}
 

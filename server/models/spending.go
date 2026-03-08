@@ -2,13 +2,13 @@ package models
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/util"
-	"github.com/sirupsen/logrus"
 )
 
 type SpendingType uint8
@@ -107,31 +107,31 @@ func (e *Spending) CalculateNextContribution(
 	timezone *time.Location,
 	fundingSchedule *FundingSchedule,
 	now time.Time,
-	log *logrus.Entry,
+	log *slog.Logger,
 ) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	spndLog := log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"spendingId": e.SpendingId,
-		"timezone":   timezone.String(),
-		"spending": logrus.Fields{
-			"ruleset":       e.RuleSet,
-			"targetAmount":  e.TargetAmount,
-			"currentAmount": e.CurrentAmount,
-		},
-		"funding": logrus.Fields{
-			"ruleset":         fundingSchedule.RuleSet,
-			"nextRecurrence":  fundingSchedule.NextRecurrence,
-			"excludeWeekends": fundingSchedule.ExcludeWeekends,
-		},
-		"before": logrus.Fields{
-			"isBehind":               e.IsBehind,
-			"nextContributionAmount": e.NextContributionAmount,
-			"lastRecurrence":         e.LastRecurrence,
-			"nextRecurrence":         e.NextRecurrence,
-		},
-	})
+	spndLog := log.With(
+		"spendingId", e.SpendingId,
+		"timezone", timezone.String(),
+		slog.Group("spending",
+			"ruleset", e.RuleSet,
+			"targetAmount", e.TargetAmount,
+			"currentAmount", e.CurrentAmount,
+		),
+		slog.Group("funding",
+			"ruleset", fundingSchedule.RuleSet,
+			"nextRecurrence", fundingSchedule.NextRecurrence,
+			"excludeWeekends", fundingSchedule.ExcludeWeekends,
+		),
+		slog.Group("before",
+			"isBehind", e.IsBehind,
+			"nextContributionAmount", e.NextContributionAmount,
+			"lastRecurrence", e.LastRecurrence,
+			"nextRecurrence", e.NextRecurrence,
+		),
+	)
 
 	result := calculateNextContribution(
 		span.Context(),
@@ -145,14 +145,14 @@ func (e *Spending) CalculateNextContribution(
 	e.LastRecurrence = result.LastRecurrence
 	e.NextRecurrence = result.NextRecurrence
 
-	spndLog.WithFields(logrus.Fields{
-		"after": logrus.Fields{
-			"isBehind":               e.IsBehind,
-			"nextContributionAmount": e.NextContributionAmount,
-			"lastRecurrence":         e.LastRecurrence,
-			"nextRecurrence":         e.NextRecurrence,
-		},
-	}).Debug("calculated next spending contribution")
+	spndLog.DebugContext(span.Context(), "calculated next spending contribution",
+		slog.Group("after",
+			"isBehind", e.IsBehind,
+			"nextContributionAmount", e.NextContributionAmount,
+			"lastRecurrence", e.LastRecurrence,
+			"nextRecurrence", e.NextRecurrence,
+		),
+	)
 }
 
 // calculateNextContribution takes a spending object and its funding schedule, a

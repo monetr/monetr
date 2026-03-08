@@ -1,22 +1,22 @@
 package testutils
 
 import (
+	"fmt"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"strings"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 type DebugPrinter struct {
-	logger *logrus.Entry
+	logger *slog.Logger
 	body   bool
 }
 
 // NewDebugPrinter returns a new DebugPrinter given a logger and body
 // flag. If body is true, request and response body is also printed.
-func NewDebugPrinter(logger *logrus.Entry, body bool) DebugPrinter {
+func NewDebugPrinter(logger *slog.Logger, body bool) DebugPrinter {
 	return DebugPrinter{logger, body}
 }
 
@@ -47,5 +47,5 @@ func (p DebugPrinter) Response(resp *http.Response, duration time.Duration) {
 	text := strings.ReplaceAll(string(dump), "\r\n", "\n")
 	lines := strings.SplitN(text, "\n", 2)
 
-	p.logger.Debugf("Logging Response\n%s %s\n%s\t", lines[0], duration, lines[1])
+	p.logger.Debug(fmt.Sprintf("Logging Response\n%s %s\n%s\t", lines[0], duration, lines[1]))
 }

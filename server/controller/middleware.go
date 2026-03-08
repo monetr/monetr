@@ -42,7 +42,7 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 		case "PATCH", "PUT", "DELETE":
 			txn, err := c.DB.BeginContext(c.getContext(ctx))
 			if err != nil {
-				c.Log.WithError(err).Errorf("failed to begin transaction")
+				c.Log.ErrorContext(c.getContext(ctx), "failed to begin transaction", "err", err)
 				return c.wrapAndReturnError(
 					ctx,
 					err,
@@ -57,7 +57,7 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 				if handlerError != nil {
 					if err := txn.RollbackContext(c.getContext(ctx)); err != nil {
 						// Rollback
-						c.Log.WithError(err).Errorf("failed to rollback request")
+						c.Log.ErrorContext(c.getContext(ctx), "failed to rollback request", "err", err)
 					}
 				} else {
 					if err = txn.CommitContext(c.getContext(ctx)); err != nil {
@@ -158,7 +158,7 @@ func (c *Controller) maybeTokenMiddleware(next echo.HandlerFunc) echo.HandlerFun
 				crumbs.Error(c.getContext(ctx), "failed to parse token", "authentication", map[string]any{
 					"error": err,
 				})
-				log.WithError(err).Warn("invalid token provided")
+				log.WarnContext(c.getContext(ctx), "invalid token provided", "err", err)
 				return nil
 			}
 

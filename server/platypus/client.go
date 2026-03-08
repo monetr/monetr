@@ -3,6 +3,7 @@ package platypus
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -10,9 +11,9 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/plaid/plaid-go/v41/plaid"
-	"github.com/sirupsen/logrus"
 )
 
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=client.go -package=mockgen -destination=../internal/mockgen/platypus_client.go Client
@@ -44,20 +45,20 @@ type PlaidClient struct {
 	linkId      models.ID[models.Link]
 	accessToken string
 	itemId      string
-	log         *logrus.Entry
+	log         *slog.Logger
 	client      *plaid.APIClient
 	config      config.Plaid
 }
 
-func (p *PlaidClient) getLog(span *sentry.Span) *logrus.Entry {
-	return p.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"operation": span.Op,
-		"plaid": logrus.Fields{
-			"itemId": p.itemId,
-		},
+func (p *PlaidClient) getLog(span *sentry.Span) *slog.Logger {
+	return p.log.With(
+		"operation", span.Op,
+		slog.Group("plaid",
+			"itemId", p.itemId,
+		),
 		// TODO Eventually remove this from the log structure.
-		"itemId": p.itemId,
-	})
+		"itemId", p.itemId,
+	)
 }
 
 func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error) {
@@ -74,7 +75,7 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 		"accountIds": "ALL_BANK_ACCOUNTS",
 	}
 
-	log.Trace("retrieving bank accounts from plaid")
+	log.Log(span.Context(), logging.LevelTrace, "retrieving bank accounts from plaid")
 
 	var options *plaid.AccountsGetRequestOptions
 	// If however we are requesting specific accounts, overwrite the value.
@@ -103,7 +104,7 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 		"Retrieving bank accounts from Plaid",
 		"failed to retrieve bank accounts from plaid",
 	); err != nil {
-		log.WithError(err).Errorf("failed to retrieve bank accounts from plaid")
+		log.ErrorContext(span.Context(), "failed to retrieve bank accounts from plaid", "err", err)
 		return nil, err
 	}
 
@@ -114,9 +115,10 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 	for i, plaidAccount := range plaidAccounts {
 		accounts[i], err = NewPlaidBankAccount(plaidAccount)
 		if err != nil {
-			log.WithError(err).
-				WithField("bankAccountId", plaidAccount.GetAccountId()).
-				Errorf("failed to convert bank account")
+			log.ErrorContext(span.Context(), "failed to convert bank account",
+				"err", err,
+				"bankAccountId", plaidAccount.GetAccountId(),
+			)
 			crumbs.Error(span.Context(), "failed to convert bank account", "debug", map[string]any{
 				// Maybe we don't want to report the entire account object here, but it'll sure save us a ton of time
 				// if there is ever a problem with actually converting the account. This way we can actually see the
@@ -186,7 +188,7 @@ func (p *PlaidClient) GetTransactions(
 
 	log := p.getLog(span)
 
-	log.Trace("retrieving transactions")
+	log.Log(span.Context(), logging.LevelTrace, "retrieving transactions")
 
 	request := p.client.PlaidApi.
 		TransactionsGet(span.Context()).
@@ -212,7 +214,7 @@ func (p *PlaidClient) GetTransactions(
 		"Retrieving transactions from Plaid",
 		"failed to retrieve transactions from plaid",
 	); err != nil {
-		log.WithError(err).Errorf("failed to retrieve transactions from plaid")
+		log.ErrorContext(span.Context(), "failed to retrieve transactions from plaid", "err", err)
 		return nil, err
 	}
 
@@ -246,7 +248,7 @@ func (p *PlaidClient) UpdateItem(
 		redirectUri = myownsanity.Pointer(fmt.Sprintf(
 			"https://%s/plaid/oauth-return", p.config.OAuthDomain,
 		))
-		log = log.WithField("redirectUri", *redirectUri)
+		log = log.With("redirectUri", *redirectUri)
 	}
 
 	var webhooksUrl *string
@@ -255,11 +257,11 @@ func (p *PlaidClient) UpdateItem(
 			crumbs.Warn(span.Context(), "BUG: Plaid webhook domain is not present but webhooks are enabled.", "bug", nil)
 		} else {
 			webhooksUrl = myownsanity.Pointer(p.config.GetWebhooksURL())
-			log = log.WithField("webhooksUrl", *webhooksUrl)
+			log = log.With("webhooksUrl", *webhooksUrl)
 		}
 	}
 
-	log.Trace("creating link token for update")
+	log.Log(span.Context(), logging.LevelTrace, "creating link token for update")
 
 	request := p.client.PlaidApi.
 		LinkTokenCreate(span.Context()).
@@ -288,7 +290,7 @@ func (p *PlaidClient) UpdateItem(
 		"Updating Plaid link token",
 		"failed to update Plaid link token",
 	); err != nil {
-		log.WithError(err).Errorf("failed to create link token")
+		log.ErrorContext(span.Context(), "failed to create link token", "err", err)
 		return nil, err
 	}
 
@@ -304,11 +306,9 @@ func (p *PlaidClient) RemoveItem(ctx context.Context) error {
 
 	span.SetTag("itemId", p.itemId)
 
-	log := p.getLog(span).WithFields(logrus.Fields{
-		"itemId": p.itemId,
-	})
+	log := p.getLog(span).With("itemId", p.itemId)
 
-	log.Debug("removing item from Plaid")
+	log.DebugContext(span.Context(), "removing item from Plaid")
 
 	// Build the get accounts request.
 	request := p.client.PlaidApi.
@@ -327,7 +327,7 @@ func (p *PlaidClient) RemoveItem(ctx context.Context) error {
 		"Removing Plaid item",
 		"failed to remove Plaid item",
 	); err != nil {
-		log.WithError(err).Errorf("failed to remove Plaid item")
+		log.ErrorContext(span.Context(), "failed to remove Plaid item", "err", err)
 		return err
 	}
 
@@ -343,7 +343,7 @@ func (p *PlaidClient) RefeshTransactions(ctx context.Context) error {
 
 	log := p.getLog(span)
 
-	log.Trace("force refreshing transactions for item")
+	log.Log(span.Context(), logging.LevelTrace, "force refreshing transactions for item")
 
 	request := p.client.PlaidApi.
 		TransactionsRefresh(span.Context()).
@@ -361,7 +361,7 @@ func (p *PlaidClient) RefeshTransactions(ctx context.Context) error {
 		"Triggering transaction refresh for Plaid item",
 		"failed to trigger transaction refresh for Plaid item",
 	); err != nil {
-		log.WithError(err).Errorf("failed to trigger transaction refresh for Plaid item")
+		log.ErrorContext(span.Context(), "failed to trigger transaction refresh for Plaid item", "err", err)
 		return err
 	}
 
@@ -377,14 +377,14 @@ func (p *PlaidClient) UpdateWebhook(ctx context.Context) error {
 		webhookUrl = myownsanity.Pointer(p.config.GetWebhooksURL())
 	}
 
-	log := p.getLog(span).WithFields(logrus.Fields{
-		"plaid": logrus.Fields{
-			"itemId":     p.itemId,
-			"webhookUrl": webhookUrl,
-		},
-	})
+	log := p.getLog(span).With(
+		slog.Group("plaid",
+			"itemId", p.itemId,
+			"webhookUrl", webhookUrl,
+		),
+	)
 
-	log.Info("updating webhook URL for plaid link")
+	log.InfoContext(span.Context(), "updating webhook URL for plaid link")
 
 	request := p.client.PlaidApi.
 		ItemWebhookUpdate(span.Context()).
@@ -401,7 +401,7 @@ func (p *PlaidClient) UpdateWebhook(ctx context.Context) error {
 		"Updating webhook URL for Plaid link",
 		"failed to update webhook url for plaid link",
 	); err != nil {
-		log.WithError(err).Errorf("failed to update webhook url for plaid link")
+		log.ErrorContext(span.Context(), "failed to update webhook url for plaid link", "err", err)
 		return err
 	}
 

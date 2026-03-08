@@ -4,6 +4,9 @@ import (
 	"context"
 	"strconv"
 
+	"fmt"
+	"log/slog"
+
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
@@ -24,8 +27,8 @@ import (
 	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/util"
+
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type Controller struct {
@@ -41,7 +44,7 @@ type Controller struct {
 	FileStorage              storage.Storage
 	JobRunner                background.JobController
 	KMS                      secrets.KeyManagement
-	Log                      *logrus.Entry
+	Log                      *slog.Logger
 	Plaid                    platypus.Platypus
 	PlaidInstitutions        platypus.PlaidInstitutions
 	PlaidWebhookVerification platypus.WebhookVerification
@@ -52,7 +55,7 @@ type Controller struct {
 
 func (c *Controller) Close() error {
 	if err := c.PlaidWebhookVerification.Close(); err != nil {
-		c.Log.WithError(err).Error("failed to dispose of plaid webhook verification gracefully")
+		c.Log.ErrorContext(context.Background(), "failed to dispose of plaid webhook verification gracefully", "err", err)
 		return err
 	}
 
@@ -71,10 +74,8 @@ func (c *Controller) getSpan(ctx echo.Context) *sentry.Span {
 	return ctx.Get(spanKey).(*sentry.Span)
 }
 
-func (c *Controller) getLog(ctx echo.Context) *logrus.Entry {
-	log := c.Log.WithContext(c.getContext(ctx)).WithFields(logrus.Fields{
-		"requestId": util.GetRequestID(ctx),
-	})
+func (c *Controller) getLog(ctx echo.Context) *slog.Logger {
+	log := c.Log.With("requestId", util.GetRequestID(ctx))
 
 	claims, ok := ctx.Get(authenticationKey).(security.Claims)
 	if !ok {
@@ -82,15 +83,15 @@ func (c *Controller) getLog(ctx echo.Context) *logrus.Entry {
 	}
 
 	if claims.AccountId != "" {
-		log = log.WithField("accountId", claims.AccountId)
+		log = log.With("accountId", claims.AccountId)
 	}
 
 	if claims.UserId != "" {
-		log = log.WithField("userId", claims.UserId)
+		log = log.With("userId", claims.UserId)
 	}
 
 	if claims.LoginId != "" {
-		log = log.WithField("loginId", claims.LoginId)
+		log = log.With("loginId", claims.LoginId)
 	}
 
 	return log
@@ -132,13 +133,14 @@ func (c *Controller) reportError(ctx echo.Context, err error) {
 		sentry.CaptureException(err)
 	}
 
+	reqCtx := c.getContext(ctx)
 	switch level {
 	case sentry.LevelError:
-		c.getLog(ctx).WithError(err).Errorf("error in request: %s", err)
+		c.getLog(ctx).ErrorContext(reqCtx, fmt.Sprintf("error in request: %s", err), "err", err)
 	case sentry.LevelWarning:
-		c.getLog(ctx).WithError(err).Warnf("error in request: %s", err)
+		c.getLog(ctx).WarnContext(reqCtx, fmt.Sprintf("error in request: %s", err), "err", err)
 	default:
-		c.getLog(ctx).WithError(err).Debugf("error in request: %s", err)
+		c.getLog(ctx).DebugContext(reqCtx, fmt.Sprintf("error in request: %s", err), "err", err)
 	}
 }
 

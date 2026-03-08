@@ -3,8 +3,7 @@ package background
 import (
 	"context"
 	"encoding/json"
-
-	"github.com/sirupsen/logrus"
+	"log/slog"
 )
 
 type JobMarshaller func(v any) ([]byte, error)
@@ -17,7 +16,7 @@ var (
 
 type JobHandler interface {
 	QueueName() string
-	HandleConsumeJob(ctx context.Context, log *logrus.Entry, data []byte) error
+	HandleConsumeJob(ctx context.Context, log *slog.Logger, data []byte) error
 }
 
 type ScheduledJobHandler interface {

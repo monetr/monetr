@@ -7,11 +7,11 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"log/slog"
 	"os"
 	"sync"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -23,14 +23,11 @@ var (
 	loadAliasesOnce = sync.Once{}
 )
 
-func LoadAliasesFromHost(ctx context.Context, logEntry *logrus.Entry) {
+func LoadAliasesFromHost(ctx context.Context, log *slog.Logger) {
 	loadAliasesOnce.Do(func() {
-		log := logEntry.WithContext(ctx)
 		for _, zoneInfoLocation := range zoneInfoLocations {
 			if err := ParseAliasesFromFile(zoneInfoLocation, aliases); err != nil {
-				log.WithField("filename", zoneInfoLocation).
-					WithError(err).
-					Warn("failed to parse zone info from file")
+				log.WarnContext(ctx, "failed to parse zone info from file", "filename", zoneInfoLocation, "err", err)
 			}
 		}
 	})

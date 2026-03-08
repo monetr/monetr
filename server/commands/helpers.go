@@ -9,20 +9,21 @@ import (
 	"path"
 	"path/filepath"
 
+	"log/slog"
+
 	"github.com/monetr/monetr/server/config"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func loadCertificates(
 	configuration config.Configuration,
-	log *logrus.Entry,
+	log *slog.Logger,
 	generateCertificates bool,
 ) (ed25519.PublicKey, ed25519.PrivateKey, error) {
-	log.WithFields(logrus.Fields{
-		"privateKeyPath":       configuration.Security.PrivateKey,
-		"generateCertificates": generateCertificates,
-	}).Debug("loading certificates")
+	log.Debug("loading certificates",
+		"privateKeyPath", configuration.Security.PrivateKey,
+		"generateCertificates", generateCertificates,
+	)
 
 	var publicKey ed25519.PublicKey
 	var privateKey ed25519.PrivateKey

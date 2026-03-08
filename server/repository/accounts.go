@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -11,7 +12,6 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func buildAccountCacheKey(accountId ID[Account]) string {
@@ -34,13 +34,13 @@ var (
 )
 
 type accountsRepositoryBase struct {
-	log   *logrus.Entry
+	log   *slog.Logger
 	cache cache.Cache
 	db    pg.DBI
 }
 
 func NewAccountRepository(
-	log *logrus.Entry,
+	log *slog.Logger,
 	cacheClient cache.Cache,
 	db pg.DBI,
 ) AccountsRepository {
@@ -60,7 +60,7 @@ func (p *accountsRepositoryBase) GetAccount(
 
 	span.Status = sentry.SpanStatusOK
 
-	log := p.log.WithContext(span.Context()).WithField("accountId", accountId)
+	log := p.log.With("accountId", accountId)
 
 	var account Account
 	if err := p.cache.GetEz(
@@ -68,11 +68,11 @@ func (p *accountsRepositoryBase) GetAccount(
 		buildAccountCacheKey(accountId),
 		&account,
 	); err != nil {
-		log.WithError(err).Errorf("failed to retrieve account data from cache")
+		log.ErrorContext(span.Context(), "failed to retrieve account data from cache", "err", err)
 	}
 
 	if !account.AccountId.IsZero() {
-		log.Trace("returning account from cache")
+		log.Log(span.Context(), slog.LevelDebug-4, "returning account from cache")
 		return &account, nil
 	}
 
@@ -90,7 +90,7 @@ func (p *accountsRepositoryBase) GetAccount(
 		account,
 		30*time.Minute,
 	); err != nil {
-		log.WithError(err).Warn("failed to store account in cache")
+		log.WarnContext(span.Context(), "failed to store account in cache", "err", err)
 	}
 
 	return &account, nil
@@ -122,17 +122,15 @@ func (p *accountsRepositoryBase) UpdateAccount(ctx context.Context, account *Acc
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := p.log.
-		WithContext(span.Context()).
-		WithField("accountId", account.AccountId)
+	log := p.log.With("accountId", account.AccountId)
 
-	log.Debug("updating account")
+	log.DebugContext(span.Context(), "updating account")
 
 	_, err := p.db.ModelContext(span.Context(), account).
 		Where(`"account"."account_id" = ?`, account.AccountId).
 		Update(account)
 	if err != nil {
-		log.WithError(err).Errorf("failed to update account")
+		log.ErrorContext(span.Context(), "failed to update account", "err", err)
 		return errors.Wrap(err, "failed to update account")
 	}
 
@@ -142,7 +140,7 @@ func (p *accountsRepositoryBase) UpdateAccount(ctx context.Context, account *Acc
 		account,
 		30*time.Minute,
 	); err != nil {
-		log.WithError(err).Warn("failed to store account in cache")
+		log.WarnContext(span.Context(), "failed to store account in cache", "err", err)
 	}
 
 	return nil

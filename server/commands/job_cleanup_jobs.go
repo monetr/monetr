@@ -34,13 +34,13 @@ func jobCleanupJobs(parent *cobra.Command) {
 
 				txn, err := db.BeginContext(cmd.Context())
 				if err != nil {
-					log.WithError(err).Fatalf("failed to begin transaction to cleanup jobs")
+					log.Error("failed to begin transaction to cleanup jobs", "err", err)
 					return err
 				}
 
 				job := background.NewCleanupJobsJob(log, txn)
 				if err := job.Run(cmd.Context()); err != nil {
-					log.WithError(err).Fatalf("failed to run cleanup jobs")
+					log.Error("failed to run cleanup jobs", "err", err)
 					_ = txn.RollbackContext(cmd.Context())
 					return err
 				}
@@ -55,7 +55,7 @@ func jobCleanupJobs(parent *cobra.Command) {
 
 			redisController, err := cache.NewRedisCache(log, configuration.Redis)
 			if err != nil {
-				log.WithError(err).Fatalf("failed to create redis cache: %+v", err)
+				log.Error("failed to create redis cache", "err", err)
 				return err
 			}
 			defer redisController.Close()

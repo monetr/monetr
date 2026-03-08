@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"time"
 
+	"log/slog"
+
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v81"
 )
 
@@ -16,12 +17,12 @@ func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Even
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := b.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"eventType": event.Type,
-		"eventId":   event.ID,
-	})
+	log := b.log.With(
+		"eventType", event.Type,
+		"eventId", event.ID,
+	)
 
-	log.Debug("handling webhook from stripe")
+	log.DebugContext(span.Context(), "handling webhook from stripe")
 
 	crumbs.Debug(span.Context(), "Handling Stripe webhook.", map[string]any{
 		"eventId":  event.ID,
@@ -33,12 +34,12 @@ func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Even
 
 	switch event.Type {
 	case "checkout.session.completed":
-		log.Debugf("checkout session completed")
+		log.DebugContext(span.Context(), "checkout session completed")
 	case "customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted":
-		log.Info("handling subscription webhook")
+		log.InfoContext(span.Context(), "handling subscription webhook")
 		var subscription stripe.Subscription
 		if err := json.Unmarshal(event.Data.Raw, &subscription); err != nil {
-			log.WithError(err).Errorf("failed to extract subscription from json")
+			log.ErrorContext(span.Context(), "failed to extract subscription from json", "err", err)
 			return errors.Wrap(err, "failed to extract subscription from json")
 		}
 
@@ -51,27 +52,25 @@ func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Even
 			validUntil,
 			timestamp,
 		); err != nil {
-			log.WithError(err).Errorf("failed to update subscription")
+			log.ErrorContext(span.Context(), "failed to update subscription", "err", err)
 			return errors.Wrap(err, "failed to update subscription")
 		}
 
 		return nil
 	case "customer.deleted":
-		log.Info("handling customer deleted webhook")
+		log.InfoContext(span.Context(), "handling customer deleted webhook")
 		var customer stripe.Customer
 		if err := json.Unmarshal(event.Data.Raw, &customer); err != nil {
-			log.WithError(err).Errorf("failed to extract customer from json")
+			log.ErrorContext(span.Context(), "failed to extract customer from json", "err", err)
 			return errors.Wrap(err, "failed to extract customer from json")
 		}
-		log = log.WithFields(logrus.Fields{
-			"stripe": logrus.Fields{
-				"customerId": customer.ID,
-			},
-		})
+		log = log.With(
+			slog.Group("stripe", "customerId", customer.ID),
+		)
 
 		account, err := b.accounts.GetAccountByCustomerId(span.Context(), customer.ID)
 		if err != nil {
-			log.WithError(err).Warn("failed to retrieve account by customer Id")
+			log.WarnContext(span.Context(), "failed to retrieve account by customer Id", "err", err)
 			crumbs.Warn(span.Context(), "Failed to retrieve an account for this provided customer Id", "stripe", map[string]any{
 				"customerId": customer.ID,
 			})
@@ -80,9 +79,7 @@ func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Even
 			return nil
 		}
 
-		log = log.WithFields(logrus.Fields{
-			"accountId": account.AccountId,
-		})
+		log = log.With("accountId", account.AccountId)
 
 		crumbs.IncludeUserInScope(span.Context(), account.AccountId)
 
@@ -96,15 +93,15 @@ func (b *baseBilling) HandleStripeWebhook(ctx context.Context, event stripe.Even
 		account.StripeWebhookLatestTimestamp = &timestamp
 
 		if err = b.accounts.UpdateAccount(span.Context(), account); err != nil {
-			log.WithError(err).Errorf("failed to remove customer Id from account")
+			log.ErrorContext(span.Context(), "failed to remove customer Id from account", "err", err)
 			return errors.Wrap(err, "failed to remove customer Id from account")
 		}
 
-		log.Info("removed stripe customer details from account")
+		log.InfoContext(span.Context(), "removed stripe customer details from account")
 
 		return nil
 	default:
-		log.Warn("cannot handle stripe webhook event type")
+		log.WarnContext(span.Context(), "cannot handle stripe webhook event type")
 	}
 
 	return nil

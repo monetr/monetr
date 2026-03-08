@@ -10,7 +10,6 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/validation"
-	"github.com/sirupsen/logrus"
 )
 
 func (c *Controller) getBankAccounts(ctx echo.Context) error {
@@ -87,12 +86,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	// operating system.
 	lconv, err := locale.GetLConv(account.Locale)
 	if err != nil || lconv == nil {
-		log.
-			WithFields(logrus.Fields{
-				"locale": account.Locale,
-			}).
-			WithError(err).
-			Warn("failed to get currency information for account's locale, application default currency will be used")
+		log.WarnContext(c.getContext(ctx), "failed to get currency information for account's locale, application default currency will be used", "locale", account.Locale, "err", err)
 	} else {
 		// If it worked then clean up the code from the OS and use it.
 		currencyCode = string(bytes.TrimSpace(lconv.IntCurrSymbol))

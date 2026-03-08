@@ -10,7 +10,6 @@ import (
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/stripe_helper"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -23,12 +22,12 @@ func developmentCleanStripe(parent *cobra.Command) {
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
-				log.WithField("config", configFileName).Info("config file loaded")
+				log.Info("config file loaded", "config", configFileName)
 			}
 
 			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
-				log.WithError(err).Fatal("failed to setup database")
+				log.Error("failed to setup database", "err", err)
 				return err
 			}
 
@@ -44,7 +43,7 @@ func developmentCleanStripe(parent *cobra.Command) {
 				return nil
 			}
 
-			log.WithField("count", len(stripeItems)).Info("found Stripe item(s)")
+			log.Info("found Stripe item(s)", "count", len(stripeItems))
 
 			// TODO Remove the items from stripe!
 			stripe := stripe_helper.NewStripeHelper(
@@ -53,15 +52,13 @@ func developmentCleanStripe(parent *cobra.Command) {
 			)
 
 			for _, item := range stripeItems {
-				itemLog := log.WithFields(logrus.Fields{
-					"stripeCustomerId": item.StripeCustomerId,
-				})
+				itemLog := log.With("stripeCustomerId", item.StripeCustomerId)
 				if item.StripeSubscriptionId != nil {
-					itemLog = itemLog.WithField("stripeSubscriptionId", item.StripeSubscriptionId)
+					itemLog = itemLog.With("stripeSubscriptionId", item.StripeSubscriptionId)
 					itemLog.Info("removing subscription")
 
 					if err := stripe.CancelSubscription(context.Background(), *item.StripeSubscriptionId); err != nil {
-						itemLog.WithError(err).Warn("failed to cancel subscription")
+						itemLog.Warn("failed to cancel subscription", "err", err)
 					}
 				}
 
@@ -69,7 +66,7 @@ func developmentCleanStripe(parent *cobra.Command) {
 					itemLog.Info("removing customer")
 
 					if err := stripe.RemoveCustomer(context.Background(), *item.StripeCustomerId); err != nil {
-						itemLog.WithError(err).Warn("failed to remove stripe customer")
+						itemLog.Warn("failed to remove stripe customer", "err", err)
 					}
 				}
 			}

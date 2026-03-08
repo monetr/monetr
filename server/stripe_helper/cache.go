@@ -3,11 +3,12 @@ package stripe_helper
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/sirupsen/logrus"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/stripe/stripe-go/v81"
 )
 
@@ -36,11 +37,11 @@ func (n *noopStripeCache) Close() error {
 }
 
 type redisStripeCache struct {
-	log   *logrus.Entry
+	log   *slog.Logger
 	cache cache.Cache
 }
 
-func NewRedisStripeCache(log *logrus.Entry, cacheClient cache.Cache) StripeCache {
+func NewRedisStripeCache(log *slog.Logger, cacheClient cache.Cache) StripeCache {
 	return &redisStripeCache{
 		log:   log,
 		cache: cacheClient,
@@ -51,12 +52,12 @@ func (r *redisStripeCache) GetPriceById(ctx context.Context, id string) (*stripe
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := r.log.WithContext(span.Context()).WithField("stripePriceId", id)
+	log := r.log.With("stripePriceId", id)
 
-	log.Trace("checking cache for stripe price")
+	log.Log(span.Context(), logging.LevelTrace, "checking cache for stripe price")
 	var result stripe.Price
 	if err := r.cache.GetEz(span.Context(), r.cacheKey(id), &result); err != nil {
-		log.WithError(err).Warn("failed to retrieve stripe price from cache")
+		log.WarnContext(span.Context(), "failed to retrieve stripe price from cache", "err", err)
 		return nil, false
 	}
 
@@ -64,7 +65,7 @@ func (r *redisStripeCache) GetPriceById(ctx context.Context, id string) (*stripe
 		return nil, false
 	}
 
-	log.Trace("cache hit for stripe price")
+	log.Log(span.Context(), logging.LevelTrace, "cache hit for stripe price")
 
 	return &result, true
 }
@@ -73,11 +74,11 @@ func (r *redisStripeCache) CachePrice(ctx context.Context, price stripe.Price) b
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := r.log.WithContext(span.Context()).WithField("stripePriceId", price.ID)
+	log := r.log.With("stripePriceId", price.ID)
 
-	log.Trace("storing stripe price in cache")
+	log.Log(span.Context(), logging.LevelTrace, "storing stripe price in cache")
 	if err := r.cache.SetEzTTL(span.Context(), r.cacheKey(price.ID), price, 1*time.Hour); err != nil {
-		log.WithError(err).Warn("failed to store stripe price in cache")
+		log.WarnContext(span.Context(), "failed to store stripe price in cache", "err", err)
 		return false
 	}
 

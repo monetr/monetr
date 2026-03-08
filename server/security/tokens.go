@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"log/slog"
+
 	"aidanwoods.dev/go-paseto"
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/build"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type Scope string
@@ -95,7 +96,7 @@ type ClientTokens interface {
 //
 // These can then be loaded into the app.
 type pasetoClientTokens struct {
-	log        *logrus.Entry
+	log        *slog.Logger
 	clock      clock.Clock
 	issuer     string
 	publicKey  ed25519.PublicKey
@@ -105,7 +106,7 @@ type pasetoClientTokens struct {
 }
 
 func NewPasetoClientTokens(
-	log *logrus.Entry,
+	log *slog.Logger,
 	clock clock.Clock,
 	issuer string,
 	public ed25519.PublicKey,

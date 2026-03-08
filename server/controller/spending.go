@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/sirupsen/logrus"
+	"log/slog"
 )
 
 func (c *Controller) getSpending(ctx echo.Context) error {
@@ -155,15 +155,11 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 		return c.invalidJson(ctx)
 	}
 
-	log := c.getLog(ctx).WithFields(logrus.Fields{
-		"from": logrus.Fields{
-			"spendingId": transfer.FromSpendingId,
-		},
-		"to": logrus.Fields{
-			"spendingId": transfer.FromSpendingId,
-		},
-		"amount": transfer.Amount,
-	})
+	log := c.getLog(ctx).With(
+		slog.Group("from", "spendingId", transfer.FromSpendingId),
+		slog.Group("to", "spendingId", transfer.ToSpendingId),
+		"amount", transfer.Amount,
+	)
 
 	if transfer.Amount <= 0 {
 		return c.badRequest(ctx, "Transfer amount must be greater than 0")

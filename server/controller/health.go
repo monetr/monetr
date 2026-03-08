@@ -11,7 +11,7 @@ func (c *Controller) handleHealth(ctx echo.Context) error {
 	status := http.StatusOK
 	err := c.DB.Ping(ctx.Request().Context())
 	if err != nil {
-		c.getLog(ctx).WithError(err).Warn("failed to ping database")
+		c.getLog(ctx).WarnContext(c.getContext(ctx), "failed to ping database", "err", err)
 		status = http.StatusInternalServerError
 	}
 

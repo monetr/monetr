@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"hash/fnv"
+	"log/slog"
 	"runtime/debug"
 	"sort"
 	"strings"
@@ -15,10 +16,10 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -37,14 +38,14 @@ const (
 )
 
 type postgresJobEnqueuer struct {
-	log     *logrus.Entry
+	log     *slog.Logger
 	db      pg.DBI
 	clock   clock.Clock
 	marshal JobMarshaller
 }
 
 func NewPostgresJobEnqueuer(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db pg.DBI,
 	clock clock.Clock,
 ) *postgresJobEnqueuer {
@@ -82,10 +83,9 @@ func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, que
 		},
 	)
 
-	log := p.log.WithContext(span.Context()).
-		WithField("queue", queue)
+	log := p.log.With("queue", queue)
 
-	log.Debug("enqueuing job to be run")
+	log.DebugContext(span.Context(), "enqueuing job to be run")
 
 	encodedArguments, err := p.marshal(arguments)
 	if err = errors.Wrap(err, "failed to marshal arguments"); err != nil {
@@ -123,7 +123,7 @@ func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, que
 	if err != nil {
 		if pgErr, ok := err.(pg.Error); ok && pgErr.Field(67) == "23505" {
 			// Do nothing. It is a duplicate enqueue.
-			log.WithField("signature", signature).Trace("job has already been enqueued, it will not be enqueued again")
+			log.Log(span.Context(), logging.LevelTrace, "job has already been enqueued, it will not be enqueued again", "signature", signature)
 			return nil
 		}
 		return errors.Wrap(err, "failed to enqueue job for postgres")
@@ -131,10 +131,10 @@ func (p *postgresJobEnqueuer) EnqueueJobTxn(ctx context.Context, txn pg.DBI, que
 	span.SetData("messaging.message.id", string(job.JobId))
 	span.SetData("messaging.message.body.size", len(job.Input))
 
-	log.WithFields(logrus.Fields{
-		"jobId":     job.JobId,
-		"signature": signature,
-	}).Debug("successfully enqueued job")
+	log.DebugContext(span.Context(), "successfully enqueued job",
+		"jobId", job.JobId,
+		"signature", signature,
+	)
 
 	return nil
 }
@@ -153,14 +153,14 @@ type postgresJobProcessor struct {
 	registeredJobs          map[string]postgresJobFunction
 	jobQuery                *pg.Query
 	clock                   clock.Clock
-	log                     *logrus.Entry
+	log                     *slog.Logger
 	db                      pg.DBI
 	enqueuer                JobEnqueuer
 	marshal                 JobMarshaller
 }
 
 func NewPostgresJobProcessor(
-	log *logrus.Entry,
+	log *slog.Logger,
 	clock clock.Clock,
 	db pg.DBI,
 	enqueuer JobEnqueuer,
@@ -188,8 +188,8 @@ func (p *postgresJobProcessor) RegisterJob(
 		return errors.New("jobs cannot be added to the postgres job processor after it has been started or closed")
 	}
 
-	log := p.log.WithContext(ctx).WithField("job", handler.QueueName())
-	log.Trace("registering job handler")
+	log := p.log.With("job", handler.QueueName())
+	log.Log(ctx, logging.LevelTrace, "registering job handler")
 
 	if _, ok := p.registeredJobs[handler.QueueName()]; ok {
 		return errors.Errorf(
@@ -203,8 +203,7 @@ func (p *postgresJobProcessor) RegisterJob(
 
 	if scheduledJob, ok := handler.(ScheduledJobHandler); ok {
 		schedule := scheduledJob.DefaultSchedule()
-		log.WithField("schedule", schedule).
-			Trace("job will be run on a schedule automatically")
+		log.Log(ctx, logging.LevelTrace, "job will be run on a schedule automatically", "schedule", schedule)
 		p.cronJobQueues = append(p.cronJobQueues, scheduledJob)
 	}
 
@@ -305,11 +304,9 @@ func (p *postgresJobProcessor) prepareCronJobTable() error {
 			if err != nil {
 				return errors.Wrap(err, "failed to clean up old cron jobs from postgres")
 			} else if affected := result.RowsAffected(); affected > 0 {
-				p.log.
-					Infof("removed %d outdated cron job(s) from postgres", affected)
+				p.log.InfoContext(ctx, fmt.Sprintf("removed %d outdated cron job(s) from postgres", affected))
 			} else {
-				p.log.
-					Debug("no outdated cron jobs were removed")
+				p.log.DebugContext(ctx, "no outdated cron jobs were removed")
 			}
 		}
 
@@ -323,12 +320,12 @@ func (p *postgresJobProcessor) prepareCronJobTable() error {
 			}
 			nextRunAt := cronSchedule.Next(p.clock.Now().UTC())
 
-			log := p.log.WithFields(logrus.Fields{
-				"queue":    queue,
-				"schedule": schedule,
-				"next":     nextRunAt,
-			})
-			log.Debug("upserting cron job into postgres")
+			log := p.log.With(
+				"queue", queue,
+				"schedule", schedule,
+				"next", nextRunAt,
+			)
+			log.DebugContext(ctx, "upserting cron job into postgres")
 			result, err := tx.ModelContext(ctx, &models.CronJob{
 				Queue:        queue,
 				CronSchedule: schedule,
@@ -352,9 +349,9 @@ func (p *postgresJobProcessor) prepareCronJobTable() error {
 			}
 
 			if result.RowsAffected() == 0 {
-				log.Debug("cron job already exists and did not need updating")
+				log.DebugContext(ctx, "cron job already exists and did not need updating")
 			} else {
-				log.Info("cron job was updated")
+				log.InfoContext(ctx, "cron job was updated")
 			}
 		}
 
@@ -379,7 +376,7 @@ func (p *postgresJobProcessor) Close() error {
 		// Create a channel buffer with the number of messages we need to send to
 		// all the consumer threads.
 		consumerShutdownChannel := make(chan struct{}, len(p.shutdownConsumerThreads))
-		p.log.Debugf("shutting down %d postgresql job consumers", len(p.shutdownConsumerThreads))
+		p.log.Debug(fmt.Sprintf("shutting down %d postgresql job consumers", len(p.shutdownConsumerThreads)))
 
 		// Then send the shutdown channel to each consumer thread as a "promise".
 		for i := range p.shutdownConsumerThreads {
@@ -395,7 +392,7 @@ func (p *postgresJobProcessor) Close() error {
 		for i := 0; i < len(p.shutdownConsumerThreads); i++ {
 			select {
 			case <-consumerShutdownChannel:
-				p.log.Trace("consumer successfully drained")
+				p.log.Log(context.Background(), logging.LevelTrace, "consumer successfully drained")
 				continue
 			case <-timer.C:
 				return errors.New("timed out waiting for consumers to drain")
@@ -408,7 +405,7 @@ func (p *postgresJobProcessor) Close() error {
 		// Create a channel buffer with the number of messages we need to send to
 		// all the worker threads.
 		workerShutdownChannel := make(chan struct{}, len(p.shutdownWorkerThreads))
-		p.log.Debugf("shutting down %d postgresql job workers", len(p.shutdownWorkerThreads))
+		p.log.Debug(fmt.Sprintf("shutting down %d postgresql job workers", len(p.shutdownWorkerThreads)))
 
 		// Then send the shutdown channel to each consumer thread as a "promise".
 		for i := range p.shutdownWorkerThreads {
@@ -424,7 +421,7 @@ func (p *postgresJobProcessor) Close() error {
 		for i := 0; i < len(p.shutdownWorkerThreads); i++ {
 			select {
 			case <-workerShutdownChannel:
-				p.log.Trace("worker successfully drained")
+				p.log.Log(context.Background(), logging.LevelTrace, "worker successfully drained")
 				continue
 			case <-timer.C:
 				return errors.New("timed out waiting for workers to drain")
@@ -462,10 +459,10 @@ func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 			ticker.Stop()
 			return
 		case <-ticker.C:
-			p.log.Trace("background consumer currently has no available worker threads")
+			p.log.Log(context.Background(), logging.LevelTrace, "background consumer currently has no available worker threads")
 			continue
 		case <-p.trigger:
-			p.log.Trace("received trigger notification, but background consumer has no available worker threads")
+			p.log.Log(context.Background(), logging.LevelTrace, "received trigger notification, but background consumer has no available worker threads")
 			continue
 		case <-p.availableThreads:
 			// This receive blocks if there are no available threads.
@@ -479,12 +476,12 @@ func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 			// database server is failing for just a moment we don't exhaust our
 			// available threads.
 			p.availableThreads <- consumerSignal
-			p.log.WithError(err).Error("failed to consume job")
+			p.log.Error("failed to consume job", "err", err)
 		} else if job != nil {
-			p.log.WithFields(logrus.Fields{
-				"jobId": job.JobId,
-				"queue": job.Queue,
-			}).Debug("successfully consumed job, dispatching to worker thread")
+			p.log.Debug("successfully consumed job, dispatching to worker thread",
+				"jobId", job.JobId,
+				"queue", job.Queue,
+			)
 			p.dispatch <- job
 		} else {
 			// If we did not retrieve a job at all then we need to put our "hold" on
@@ -530,10 +527,10 @@ func (p *postgresJobProcessor) consumeJobMaybe() (*models.Job, error) {
 		return nil, nil
 	}
 
-	p.log.WithFields(logrus.Fields{
-		"jobId": job.JobId,
-		"queue": job.Queue,
-	}).Trace("found job")
+	p.log.Log(ctx, logging.LevelTrace, "found job",
+		"jobId", job.JobId,
+		"queue", job.Queue,
+	)
 
 	return &job, nil
 }
@@ -570,11 +567,11 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 		// Grab the next cron that will happen, we are going to watch for this one.
 		nextJob := crons[0]
 
-		p.log.WithFields(logrus.Fields{
-			"queue": nextJob.queueName,
-			"next":  nextJob.next,
-			"now":   p.clock.Now(),
-		}).Trace("staged next cron job to be run")
+		p.log.Log(context.Background(), logging.LevelTrace, "staged next cron job to be run",
+			"queue", nextJob.queueName,
+			"next", nextJob.next,
+			"now", p.clock.Now(),
+		)
 
 		// TODO What happens if sleep is negative or 0
 		// How long do we need to wait for this cron job?
@@ -595,22 +592,20 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 			// past.
 			nextTimestamp := nextJob.schedule.Next(p.clock.Now().Add(900 * time.Millisecond))
 			crons[0].next = nextTimestamp
-			log := p.log.WithFields(logrus.Fields{
-				"queue": nextJob.queueName,
-			})
+			log := p.log.With("queue", nextJob.queueName)
 
 			consumedCronJob, err := p.consumeCronMaybe(nextJob.queueName, nextTimestamp)
 			if err != nil {
-				log.WithError(err).Error("failed to consume cron job")
+				log.Error("failed to consume cron job", "err", err)
 				continue
 			}
 
 			if consumedCronJob == nil {
-				log.Trace("did not consume cron job")
+				log.Log(context.Background(), logging.LevelTrace, "did not consume cron job")
 				continue
 			}
 
-			log.Trace("consumed cron job")
+			log.Log(context.Background(), logging.LevelTrace, "consumed cron job")
 
 			// Wrap the execution of the cron
 			// This entire block of code is an absolute fucking mess. All it is really
@@ -618,7 +613,7 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 			// a sentry span/hub. This way we can attach a ton of useful data to the
 			// event when we send it to sentry if it succeeds or fails.
 			// TODO Clean it up at some point?
-			func(inLog *logrus.Entry, nextJob cronJobTracker) {
+			func(inLog *slog.Logger, nextJob cronJobTracker) {
 				ctx, cancel := context.WithTimeout(
 					context.Background(),
 					jobTimeoutSeconds*time.Second,
@@ -636,8 +631,7 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 				// For now, sample all cron jobs
 				span.Sampled = sentry.SampledTrue
 
-				// Make sure we are logging with the correct context here
-				log := inLog.WithContext(span.Context())
+				log := inLog
 
 				slug := strings.ToLower(nextJob.queueName)
 				slug = strings.ReplaceAll(slug, "::", "-")
@@ -668,9 +662,9 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 						status = sentry.CheckInStatusError
 						span.Status = sentry.SpanStatusInternalError
 						hub.CaptureException(err)
-						log.WithError(err).Warn("cron job finished with an error")
+						log.WarnContext(span.Context(), "cron job finished with an error", "err", err)
 					} else {
-						log.Debug("cron job finished")
+						log.DebugContext(span.Context(), "cron job finished")
 					}
 					span.Finish()
 					hub.CaptureCheckIn(&sentry.CheckIn{
@@ -685,7 +679,7 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 					span.Context(),
 					p.enqueuer,
 				); err != nil {
-					log.WithError(err).Error("failed to enqueue cron job to be executed")
+					log.ErrorContext(span.Context(), "failed to enqueue cron job to be executed", "err", err)
 					return
 				}
 			}(log, nextJob)
@@ -693,9 +687,9 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 			// If possible, try to trigger the consumption of the cron job locally.
 			select {
 			case p.trigger <- consumerSignal:
-				log.Trace("successfully triggered immediate job consumption")
+				log.Log(context.Background(), logging.LevelTrace, "successfully triggered immediate job consumption")
 			default:
-				log.Trace("trigger queue was full, cron job processing may be slightly delayed")
+				log.Log(context.Background(), logging.LevelTrace, "trigger queue was full, cron job processing may be slightly delayed")
 			}
 		}
 	}
@@ -739,10 +733,10 @@ func (p *postgresJobProcessor) worker(shutdown chan chan struct{}) {
 			promise <- consumerSignal
 			return
 		case job := <-p.dispatch:
-			log := p.log.WithFields(logrus.Fields{
-				"jobId": job.JobId,
-				"queue": job.Queue,
-			})
+			log := p.log.With(
+				"jobId", job.JobId,
+				"queue", job.Queue,
+			)
 			log.Info("processing job")
 
 			executor, ok := p.registeredJobs[job.Queue]
@@ -759,7 +753,7 @@ func (p *postgresJobProcessor) worker(shutdown chan chan struct{}) {
 				jobTimeoutSeconds*time.Second,
 			)
 			if err := executor(ctx, job); err != nil {
-				log.WithError(err).Error("failed to execute job")
+				log.Error("failed to execute job", "err", err)
 			}
 			cancel()
 
@@ -774,35 +768,33 @@ func (p *postgresJobProcessor) markJobStatus(
 	job *models.Job,
 	jobError error,
 ) {
-	log := p.log.
-		WithContext(ctx).
-		WithFields(logrus.Fields{
-			"jobId": job.JobId,
-			"queue": job.Queue,
-		})
+	log := p.log.With(
+		"jobId", job.JobId,
+		"queue", job.Queue,
+	)
 
 	if jobError != nil {
-		log.Debug("marking job as failed")
+		log.DebugContext(ctx, "marking job as failed")
 		_, err := p.db.ModelContext(ctx, job).
 			Set(`"completed_at" = ?`, p.clock.Now().UTC()).
 			Set(`"status" = ?`, models.FailedJobStatus).
 			WherePK().
 			Update(&job)
 		if err != nil {
-			log.WithError(err).Error("failed to update job status")
+			log.ErrorContext(ctx, "failed to update job status", "err", err)
 		}
 
 		return
 	}
 
-	log.Debug("marking job as complete")
+	log.DebugContext(ctx, "marking job as complete")
 	_, err := p.db.ModelContext(ctx, job).
 		Set(`"completed_at" = ?`, p.clock.Now().UTC()).
 		Set(`"status" = ?`, models.CompletedJobStatus).
 		WherePK().
 		Update(&job)
 	if err != nil {
-		log.WithError(err).Error("failed to update job status")
+		log.ErrorContext(ctx, "failed to update job status", "err", err)
 	}
 }
 
@@ -837,10 +829,10 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		span.SetData("messaging.system", "postgresql")
 		// For now, sample all background jobs
 		span.Sampled = sentry.SampledTrue
-		jobLog := p.log.WithContext(span.Context()).WithFields(logrus.Fields{
-			"jobId": job.JobId,
-			"queue": job.Queue,
-		})
+		jobLog := p.log.With(
+			"jobId", job.JobId,
+			"queue", job.Queue,
+		)
 		hub := sentry.GetHubFromContext(span.Context())
 		hub.ConfigureScope(func(scope *sentry.Scope) {
 			scope.SetTag("queue", handler.QueueName())
@@ -848,7 +840,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 
 		defer func() {
 			if panicErr := recover(); panicErr != nil {
-				jobLog.Errorf("panic while processing job\n%+v\n%s", panicErr, string(debug.Stack()))
+				jobLog.ErrorContext(span.Context(), fmt.Sprintf("panic while processing job\n%+v\n%s", panicErr, string(debug.Stack())))
 				if hub != nil {
 					hub.RecoverWithContext(span.Context(), panicErr)
 					hub.ConfigureScope(func(scope *sentry.Scope) {
@@ -861,7 +853,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 				}
 				span.Status = sentry.SpanStatusInternalError
 			} else if err != nil {
-				jobLog.WithError(err).Error("error while processing job")
+				jobLog.ErrorContext(span.Context(), "error while processing job", "err", err)
 				if hub != nil {
 					hub.ConfigureScope(func(scope *sentry.Scope) {
 						scope.SetLevel(sentry.LevelError)
@@ -879,7 +871,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 			span.Finish()
 		}()
 
-		jobLog.Trace("handling job")
+		jobLog.Log(span.Context(), logging.LevelTrace, "handling job")
 
 		// Set err outright to make sentry reporting easier.
 		err = handler.HandleConsumeJob(

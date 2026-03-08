@@ -18,24 +18,24 @@ func developmentCacheFlush(parent *cobra.Command) {
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
-				log.WithField("config", configFileName).Info("config file loaded")
+				log.Info("config file loaded", "config", configFileName)
 			}
 
 			redisController, err := cache.NewRedisCache(log, configuration.Redis)
 			if err != nil {
-				log.WithError(err).Fatalf("failed to create redis cache: %+v", err)
+				log.Error("failed to create redis cache", "err", err)
 				return err
 			}
 			defer redisController.Close()
 
 			conn, err := redisController.Pool().Dial()
 			if err != nil {
-				log.WithError(err).Fatalf("failed to retrieve connection from redis pool: %+v", err)
+				log.Error("failed to retrieve connection from redis pool", "err", err)
 				return err
 			}
 
 			if err := conn.Send("FLUSHALL"); err != nil {
-				log.WithError(err).Fatalf("failed to flush redis cache: %+v", err)
+				log.Error("failed to flush redis cache", "err", err)
 				return err
 			}
 

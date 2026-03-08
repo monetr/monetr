@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"slices"
 	"strings"
 	"time"
@@ -16,12 +17,12 @@ import (
 	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/formats/ofx"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -35,7 +36,7 @@ var (
 
 type (
 	ProcessOFXUploadHandler struct {
-		log          *logrus.Entry
+		log          *slog.Logger
 		db           *pg.DB
 		publisher    pubsub.Publisher
 		files        storage.Storage
@@ -52,7 +53,7 @@ type (
 
 	ProcessOFXUploadJob struct {
 		args      ProcessOFXUploadArguments
-		log       *logrus.Entry
+		log       *slog.Logger
 		repo      repository.BaseRepository
 		files     storage.Storage
 		publisher pubsub.Publisher
@@ -71,7 +72,7 @@ type (
 )
 
 func NewProcessOFXUploadHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 	files storage.Storage,
@@ -95,11 +96,11 @@ func (h *ProcessOFXUploadHandler) updateStatus(
 	status TransactionUploadStatus,
 	errorMessage *string,
 ) error {
-	log := h.log.WithContext(ctx).WithFields(logrus.Fields{
-		"accountId":           args.AccountId,
-		"bankAccountId":       args.BankAccountId,
-		"transactionUploadId": args.TransactionUploadId,
-	})
+	log := h.log.With(
+		"accountId", args.AccountId,
+		"bankAccountId", args.BankAccountId,
+		"transactionUploadId", args.TransactionUploadId,
+	)
 
 	query := h.db.ModelContext(ctx, &TransactionUpload{}).
 		Where(`"account_id" = ?`, args.AccountId).
@@ -121,7 +122,7 @@ func (h *ProcessOFXUploadHandler) updateStatus(
 		}
 	}
 
-	log.WithField("status", status).Trace("updated transaction upload status")
+	log.Log(ctx, logging.LevelTrace, "updated transaction upload status", "status", status)
 
 	_, err := query.Update()
 	if err != nil {
@@ -141,10 +142,7 @@ func (h *ProcessOFXUploadHandler) updateStatus(
 	); err != nil {
 		return errors.Wrap(err, "failed to send progress notification for job")
 	}
-	log.WithFields(logrus.Fields{
-		"channel": channel,
-		"payload": payload,
-	}).Trace("sent progress notification for file upload")
+	log.Log(ctx, logging.LevelTrace, "sent progress notification for file upload", "channel", channel, "payload", payload)
 
 	return nil
 }
@@ -155,7 +153,7 @@ func (h *ProcessOFXUploadHandler) QueueName() string {
 
 func (h *ProcessOFXUploadHandler) HandleConsumeJob(
 	ctx context.Context,
-	inLog *logrus.Entry,
+	inLog *slog.Logger,
 	data []byte,
 ) error {
 	var args ProcessOFXUploadArguments
@@ -168,11 +166,11 @@ func (h *ProcessOFXUploadHandler) HandleConsumeJob(
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
 
-	log := inLog.WithFields(logrus.Fields{
-		"accountId":           args.AccountId,
-		"transactionUploadId": args.TransactionUploadId,
-		"bankAccountId":       args.BankAccountId,
-	})
+	log := inLog.With(
+		"accountId", args.AccountId,
+		"transactionUploadId", args.TransactionUploadId,
+		"bankAccountId", args.BankAccountId,
+	)
 
 	if err := h.updateStatus(ctx, args, TransactionUploadStatusProcessing, nil); err != nil {
 		return err
@@ -182,13 +180,13 @@ func (h *ProcessOFXUploadHandler) HandleConsumeJob(
 	var err error
 	defer func() {
 		if recovery := recover(); recovery != nil {
-			log.WithError(err).Error("panic processing OFX file upload")
+			log.ErrorContext(ctx, "panic processing OFX file upload", "err", err)
 			_ = h.updateStatus(ctx, args, TransactionUploadStatusFailed, nil)
 
 			panic(recovery)
 		}
 		if err != nil {
-			log.WithError(err).Error("error processing OFX file upload")
+			log.ErrorContext(ctx, "error processing OFX file upload", "err", err)
 			errorString := fmt.Sprintf("%s", err)
 			_ = h.updateStatus(ctx, args, TransactionUploadStatusFailed, &errorString)
 		} else {
@@ -199,7 +197,6 @@ func (h *ProcessOFXUploadHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := log.WithContext(span.Context())
 		repo := repository.NewRepositoryFromSession(
 			h.clock,
 			"user_system",
@@ -223,7 +220,7 @@ func (h *ProcessOFXUploadHandler) HandleConsumeJob(
 }
 
 func NewProcessOFXUploadJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	repo repository.BaseRepository,
 	clock clock.Clock,
 	files storage.Storage,
@@ -249,18 +246,16 @@ func (j *ProcessOFXUploadJob) Run(ctx context.Context) error {
 	crumbs.AddTag(span.Context(), "transactionUploadId", j.args.TransactionUploadId.String())
 	crumbs.IncludeUserInScope(span.Context(), j.args.AccountId)
 
-	log := j.log.WithContext(span.Context())
-
 	// No matter what, when we are finished clean up the file.
 	defer func() {
 		now := j.clock.Now()
 		j.file.DeletedAt = &now
-		log.Debug("processing complete, marking file as deleted and queueing removal")
+		j.log.DebugContext(span.Context(), "processing complete, marking file as deleted and queueing removal")
 		if err := j.repo.UpdateFile(span.Context(), j.file); err != nil {
-			log.
-				WithField("fileId", j.file.FileId).
-				WithError(err).
-				Warn("failed to update file with deleted at")
+			j.log.WarnContext(span.Context(), "failed to update file with deleted at",
+				"fileId", j.file.FileId,
+				"err", err,
+			)
 		}
 
 		j.enqueuer.EnqueueJob(span.Context(), RemoveFile, RemoveFileArguments{
@@ -271,13 +266,13 @@ func (j *ProcessOFXUploadJob) Run(ctx context.Context) error {
 
 	account, err := j.repo.GetAccount(span.Context())
 	if err != nil {
-		log.WithError(err).Error("failed to retrieve account for job")
+		j.log.ErrorContext(span.Context(), "failed to retrieve account for job", "err", err)
 		return err
 	}
 
 	j.timezone, err = account.GetTimezone()
 	if err != nil {
-		log.WithError(err).Warn("failed to get account's time zone, defaulting to UTC")
+		j.log.WarnContext(span.Context(), "failed to get account's time zone, defaulting to UTC", "err", err)
 		j.timezone = time.UTC
 	}
 
@@ -411,14 +406,13 @@ func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
 	// verify the currency from the file but it doesn't match the currency of the
 	// account we still throw an error later.
 	if j.currency == "" {
-		j.log.
-			WithField("currency", j.bankAccount.Currency).
-			Debug("could not detect currency from OFX file, defaulting to bank account's currency instead")
+		j.log.DebugContext(span.Context(),
+			"could not detect currency from OFX file, defaulting to bank account's currency instead",
+			"currency", j.bankAccount.Currency,
+		)
 		j.currency = j.bankAccount.Currency
 	} else {
-		j.log.
-			WithField("currency", j.currency).
-			Debug("detected currency from OFX file")
+		j.log.DebugContext(span.Context(), "detected currency from OFX file", "currency", j.currency)
 	}
 
 	// Reverse the order of the arrray we store such that the order we insert the
@@ -430,7 +424,7 @@ func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
 	// over time.
 
 	if len(externalTransactionIds) == 0 {
-		j.log.WithContext(span.Context()).Warn("no external transaction IDs were found in the file, account type may not be supported")
+		j.log.WarnContext(span.Context(), "no external transaction IDs were found in the file, account type may not be supported")
 		return nil
 	}
 
@@ -445,9 +439,7 @@ func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
 	}
 
 	if count := len(j.existingTransactions); count > 0 {
-		j.log.WithContext(span.Context()).WithFields(logrus.Fields{
-			"existingTransactions": count,
-		}).Debug("found existing transactions for upload")
+		j.log.DebugContext(span.Context(), "found existing transactions for upload", "existingTransactions", count)
 	}
 
 	return nil
@@ -457,16 +449,12 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := j.log.WithContext(span.Context())
-
 	transactionsToUpdate := make([]*Transaction, 0)
 	transactionsToCreate := make([]Transaction, 0)
 	for y := range j.statementTransactions {
 		externalTransaction := j.statementTransactions[y]
 		uploadIdentifier := externalTransaction.FITID
-		tlog := log.WithFields(logrus.Fields{
-			"uploadIdentifier": uploadIdentifier,
-		})
+		tlog := j.log.With("uploadIdentifier", uploadIdentifier)
 
 		// Parse the amount in the specified currency.
 		amount, err := ofx.ParseTransactionAmount(
@@ -474,12 +462,11 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 			j.currency,
 		)
 		if err != nil {
-			tlog.WithError(err).
-				WithFields(logrus.Fields{
-					"trntype": externalTransaction.TRNTYPE,
-					"trnamt":  externalTransaction.TRNAMT,
-				}).
-				Error("failed to parse transaction amount")
+			tlog.ErrorContext(span.Context(), "failed to parse transaction amount",
+				"err", err,
+				"trntype", externalTransaction.TRNTYPE,
+				"trnamt", externalTransaction.TRNAMT,
+			)
 			continue
 		}
 
@@ -501,9 +488,10 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 		// TODO Also parse DTAVAIL at some point
 		date, err := ofx.ParseDate(externalTransaction.DTPOSTED, j.timezone)
 		if err != nil {
-			tlog.WithError(err).
-				WithField("dtposted", externalTransaction.DTPOSTED).
-				Error("failed to parse transaction date posted")
+			tlog.ErrorContext(span.Context(), "failed to parse transaction date posted",
+				"err", err,
+				"dtposted", externalTransaction.DTPOSTED,
+			)
 			continue
 		}
 
@@ -527,11 +515,12 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 		}
 
 		// TODO Process changes to an existing transaction.
+		_ = transaction
 	}
 
 	// Persist any new transactions.
 	if count := len(transactionsToCreate); count > 0 {
-		log.WithField("new", count).Info("creating new transactions from import")
+		j.log.InfoContext(span.Context(), "creating new transactions from import", "new", count)
 		if err := j.repo.InsertTransactions(span.Context(), transactionsToCreate); err != nil {
 			return errors.Wrap(err, "failed to persist new transactions")
 		}
@@ -539,7 +528,7 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 
 	// If there are any updated transactions persist those as well.
 	if count := len(transactionsToUpdate); count > 0 {
-		log.WithField("updated", count).Info("updating transactions from import")
+		j.log.InfoContext(span.Context(), "updating transactions from import", "updated", count)
 		if err := j.repo.UpdateTransactions(span.Context(), transactionsToUpdate); err != nil {
 			return errors.Wrap(err, "failed to update transactions")
 		}

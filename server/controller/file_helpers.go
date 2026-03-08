@@ -9,7 +9,6 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/sirupsen/logrus"
 )
 
 func (c *Controller) consumeFileUpload(
@@ -32,21 +31,17 @@ func (c *Controller) consumeFileUpload(
 
 	contentType := header.Header.Get("Content-Type")
 	extension := strings.ToLower(path.Ext(header.Filename))
-	log = log.WithFields(logrus.Fields{
-		"contentType": contentType,
-		"fileName":    header.Filename,
-		"extension":   extension,
-	})
+	log = log.With("contentType", contentType, "fileName", header.Filename, "extension", extension)
 	// If we only received an octet-stream then we need to try to interpret the
 	// file format using the extension. We can validate the file more later.
 	if contentType == "application/octet-stream" {
-		log.Debug("upload content type is an octet stream, detecting file type by extension")
+		log.DebugContext(c.getContext(ctx), "upload content type is an octet stream, detecting file type by extension")
 		switch extension {
 		case ".qfx", ".ofx":
-			log.Debug("detected OFX file format")
+			log.DebugContext(c.getContext(ctx), "detected OFX file format")
 			contentType = string(models.IntuitQFXContentType)
 		default:
-			log.Warn("could not determine file format by file extension")
+			log.WarnContext(c.getContext(ctx), "could not determine file format by file extension")
 		}
 	}
 	valid := models.GetContentTypeIsValid(contentType)

@@ -1,6 +1,9 @@
 package cache
 
 import (
+	"context"
+	"fmt"
+	"log/slog"
 	"net"
 	"strconv"
 	"time"
@@ -8,8 +11,8 @@ import (
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type RedisController struct {
@@ -18,7 +21,7 @@ type RedisController struct {
 }
 
 func NewRedisCache(
-	log *logrus.Entry,
+	log *slog.Logger,
 	conf config.Redis,
 ) (*RedisController, error) {
 	controller := &RedisController{}
@@ -26,7 +29,7 @@ func NewRedisCache(
 	var err error
 	if conf.Enabled {
 		redisAddress = net.JoinHostPort(conf.Address, strconv.Itoa(conf.Port))
-		log.Debugf("connecting to redis at: %s", redisAddress)
+		log.DebugContext(context.Background(), fmt.Sprintf("connecting to redis at: %s", redisAddress))
 	} else {
 		controller.mini, err = miniredis.Run()
 		if err != nil {
@@ -41,7 +44,7 @@ func NewRedisCache(
 
 		// Store our "embedded" redis address for use below.
 		redisAddress = controller.mini.Server().Addr().String()
-		log.Info("no redis config was provided, using miniredis!")
+		log.InfoContext(context.Background(), "no redis config was provided, using miniredis!")
 	}
 
 	// Setup the redis pool for running jobs.
@@ -63,26 +66,26 @@ func NewRedisCache(
 
 	// This will try to ping redis to make sure its up and running.
 	if err = waitForRedis(log, 10, controller.pool); err != nil {
-		log.WithError(err).Errorf("failed to wait for redis to be available")
+		log.ErrorContext(context.Background(), "failed to wait for redis to be available", "err", err)
 		return nil, err
 	}
 
-	log.Debug("successfully setup redis pool")
+	log.DebugContext(context.Background(), "successfully setup redis pool")
 
 	return controller, nil
 }
 
-func waitForRedis(log *logrus.Entry, maxAttempts int, pool *redis.Pool) error {
+func waitForRedis(log *slog.Logger, maxAttempts int, pool *redis.Pool) error {
 	for i := range maxAttempts {
-		log.Trace("pinging redis")
+		log.Log(context.Background(), logging.LevelTrace, "pinging redis")
 		result, err := pool.Get().Do("PING")
 		if err != nil {
-			log.WithError(err).Errorf("failed to ping redis, attempt: %d", i+1)
+			log.ErrorContext(context.Background(), fmt.Sprintf("failed to ping redis, attempt: %d", i+1), "err", err)
 			time.Sleep(time.Duration(i+1) * time.Second)
 			continue
 		}
 
-		log.Debugf("response from redis: %v", result)
+		log.DebugContext(context.Background(), fmt.Sprintf("response from redis: %v", result))
 		return nil
 	}
 

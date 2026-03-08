@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/background"
@@ -57,7 +58,7 @@ func jobSyncPlaid(parent *cobra.Command) {
 
 			redisController, err := cache.NewRedisCache(log, configuration.Redis)
 			if err != nil {
-				log.WithError(err).Fatalf("failed to create redis cache: %+v", err)
+				log.Error("failed to create redis cache", "err", err)
 				return err
 			}
 			defer redisController.Close()
@@ -102,13 +103,13 @@ func jobSyncPlaid(parent *cobra.Command) {
 				}
 			}
 
-			log.Infof("syncing %d link(s)", len(jobs))
+			log.Info(fmt.Sprintf("syncing %d link(s)", len(jobs)))
 
 			for _, jobArgs := range jobs {
 				if arguments.Local || arguments.DryRun {
 					txn, err := db.BeginContext(ctx)
 					if err != nil {
-						log.WithError(err).Fatalf("failed to begin transaction to cleanup jobs")
+						log.Error("failed to begin transaction to cleanup jobs", "err", err)
 						return err
 					}
 
@@ -122,7 +123,7 @@ func jobSyncPlaid(parent *cobra.Command) {
 
 					kms, err := secrets.GetKMS(log, configuration)
 					if err != nil {
-						log.WithError(err).Fatal("failed to initialize KMS")
+						log.Error("failed to initialize KMS", "err", err)
 						return err
 					}
 
@@ -149,7 +150,7 @@ func jobSyncPlaid(parent *cobra.Command) {
 					}
 
 					if err := job.Run(ctx); err != nil {
-						log.WithError(err).Fatalf("failed to run sync latest transactions")
+						log.Error("failed to run sync latest transactions", "err", err)
 						_ = txn.RollbackContext(ctx)
 						continue
 					}

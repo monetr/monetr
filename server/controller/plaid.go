@@ -14,11 +14,11 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func (c *Controller) storeLinkTokenInCache(
@@ -78,24 +78,38 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 	// plaid as part of the linking process.
 	me, err := repo.GetMe(c.getContext(ctx))
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get user details for link")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"failed to get user details for link",
+		)
 	}
 
 	if !c.Configuration.Plaid.Enabled {
-		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
+		return c.returnError(
+			ctx,
+			http.StatusNotAcceptable,
+			"Plaid is not enabled on this server, only manual links are allowed.",
+		)
 	}
 
 	userId := c.mustGetUserId(ctx)
 
-	log := c.getLog(ctx).WithFields(logrus.Fields{
-		"accountId": me.AccountId,
-		"userId":    me.UserId,
-		"loginId":   me.LoginId,
-	})
+	log := c.getLog(ctx).With(
+		"accountId", me.AccountId,
+		"userId", me.UserId,
+		"loginId", me.LoginId,
+	)
 
 	numberOfLinks, err := repo.GetNumberOfPlaidLinks(c.getContext(ctx))
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine the number of existing plaid links")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"failed to determine the number of existing plaid links",
+		)
 	}
 
 	// If there is a configured limit on Plaid links then enforce that limit.
@@ -111,14 +125,21 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 			c.mustGetAccountId(ctx),
 		)
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine trial status")
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"failed to determine trial status",
+			)
 		}
 
 		if trialing && numberOfLinks > 0 {
-			log.WithFields(logrus.Fields{
-				"numberOfLinks": numberOfLinks,
-				"trialing":      trialing,
-			}).Warn("cannot add more Plaid links during trial")
+			log.WarnContext(
+				c.getContext(ctx),
+				"cannot add more Plaid links during trial",
+				"numberOfLinks", numberOfLinks,
+				"trialing", trialing,
+			)
 			return c.badRequest(ctx, "Cannot add additional Plaid links during trial")
 		}
 	}
@@ -131,12 +152,12 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 			userId,
 			"",
 		); err == nil && len(linkToken) > 0 {
-			log.Info("successfully found existing link token in cache")
+			log.InfoContext(c.getContext(ctx), "successfully found existing link token in cache")
 			return ctx.JSON(http.StatusOK, map[string]any{
 				"linkToken": linkToken,
 			})
 		}
-		log.Info("no link token was found in the cache")
+		log.InfoContext(c.getContext(ctx), "no link token was found in the cache")
 	}
 
 	legalName := ""
@@ -144,7 +165,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 		legalName = fmt.Sprintf("%s %s", me.Login.FirstName, me.Login.LastName)
 	}
 
-	log.Trace("creating Plaid link token")
+	log.Log(c.getContext(ctx), logging.LevelTrace, "creating Plaid link token")
 	token, err := c.Plaid.CreateLinkToken(c.getContext(ctx), platypus.LinkTokenOptions{
 		ClientUserID:             userId.String(),
 		LegalName:                legalName,
@@ -162,7 +183,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 		token.Token(),
 		token.Expiration(),
 	); err != nil {
-		log.WithError(err).Warn("failed to cache link token")
+		log.WarnContext(c.getContext(ctx), "failed to cache link token", "err", err)
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
@@ -182,7 +203,7 @@ func (c *Controller) putUpdatePlaidLink(ctx echo.Context) error {
 
 	updateAccountSelection := urlParamBoolDefault(ctx, "update_account_selection", false)
 
-	log := c.getLog(ctx).WithField("linkId", linkId)
+	log := c.getLog(ctx).With("linkId", linkId)
 
 	// Retrieve the user's details. We need to pass some of these along to plaid as part of the linking process.
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -222,7 +243,7 @@ func (c *Controller) putUpdatePlaidLink(ctx echo.Context) error {
 		token.Token(),
 		token.Expiration(),
 	); err != nil {
-		log.WithError(err).Warn("failed to cache link token")
+		log.WarnContext(c.getContext(ctx), "failed to cache link token", "err", err)
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
@@ -257,7 +278,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		c.mustGetUserId(ctx),
 		link.LinkId,
 	); err != nil {
-		log.WithError(err).Warn("failed to remove link token from cache")
+		log.WarnContext(c.getContext(ctx), "failed to remove link token from cache", "err", err)
 	}
 
 	result, err := c.Plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
@@ -268,18 +289,18 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 	secrets := c.mustGetSecretsRepository(ctx)
 	secret, err := secrets.Read(c.getContext(ctx), link.PlaidLink.SecretId)
 	if err != nil {
-		log.WithError(err).Warn("failed to retrieve access token for existing plaid link")
+		log.WarnContext(c.getContext(ctx), "failed to retrieve access token for existing plaid link", "err", err)
 	}
 
 	if secret.Value != result.AccessToken {
-		log.Info("access token for link has been updated")
+		log.InfoContext(c.getContext(ctx), "access token for link has been updated")
 		secret.Value = result.AccessToken
 		if err = secrets.Store(c.getContext(ctx), secret); err != nil {
-			log.WithError(err).Warn("failed to store updated access token")
+			log.WarnContext(c.getContext(ctx), "failed to store updated access token", "err", err)
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store updated access token")
 		}
 	} else {
-		log.Info("access token for link has not changed")
+		log.InfoContext(c.getContext(ctx), "access token for link has not changed")
 	}
 
 	link.PlaidLink.Status = PlaidLinkStatusSetup
@@ -367,7 +388,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		LinkId:    link.LinkId,
 	})
 	if err != nil {
-		log.WithError(err).Warn("failed to trigger pulling latest transactions after updating plaid link")
+		log.WarnContext(c.getContext(ctx), "failed to trigger pulling latest transactions after updating plaid link", "err", err)
 	}
 
 	return ctx.JSON(http.StatusOK, link)
@@ -395,7 +416,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		c.mustGetUserId(ctx),
 		"",
 	); err != nil {
-		log.WithError(err).Warn("failed to remove link token from cache")
+		log.WarnContext(c.getContext(ctx), "failed to remove link token from cache", "err", err)
 	}
 
 	if len(callbackRequest.AccountIds) == 0 {
@@ -407,7 +428,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		return c.badRequest(ctx, "must provide a public token")
 	}
 
-	log.Debug("exchanging public token for plaid access token")
+	log.DebugContext(c.getContext(ctx), "exchanging public token for plaid access token")
 	result, err := c.Plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
@@ -419,7 +440,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	if c.Configuration.Plaid.WebhooksEnabled {
 		webhook = c.Configuration.Plaid.GetWebhooksURL()
 		if webhook == "" {
-			log.Errorf("plaid webhooks are enabled, but they cannot be registered with without a domain")
+			log.ErrorContext(c.getContext(ctx), "plaid webhooks are enabled, but they cannot be registered with without a domain")
 		}
 	}
 
@@ -429,7 +450,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		Value: result.AccessToken,
 	}
 	if err = secrets.Store(c.getContext(ctx), &secret); err != nil {
-		log.WithError(err).Errorf("failed to store access token")
+		log.ErrorContext(c.getContext(ctx), "failed to store access token", "err", err)
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store access token")
 	}
 
@@ -538,10 +559,7 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 		return c.badRequest(ctx, "must specify a valid link Id")
 	}
 
-	log := c.Log.WithFields(logrus.Fields{
-		"accountId": c.mustGetAccountId(ctx),
-		"linkId":    linkId,
-	})
+	log := c.Log.With("accountId", c.mustGetAccountId(ctx), "linkId", linkId)
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
@@ -571,10 +589,7 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 	}
 	defer func() {
 		if err = listener.Close(); err != nil {
-			log.WithFields(logrus.Fields{
-				"accountId": c.mustGetAccountId(ctx),
-				"linkId":    linkId,
-			}).WithError(err).Error("failed to gracefully close listener")
+			log.ErrorContext(c.getContext(ctx), "failed to gracefully close listener", "accountId", c.mustGetAccountId(ctx), "linkId", linkId, "err", err)
 		}
 	}()
 
@@ -582,7 +597,7 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 		"channel": channelName,
 	})
 
-	log.Debugf("waiting for link to be setup on channel: %s", channelName)
+	log.DebugContext(c.getContext(ctx), fmt.Sprintf("waiting for link to be setup on channel: %s", channelName))
 
 	span := sentry.StartSpan(c.getContext(ctx), "Wait For Notification")
 	defer span.Finish()
@@ -592,11 +607,11 @@ func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 
 	select {
 	case <-deadLine.C:
-		log.Trace("timed out waiting for link to be setup")
+		log.Log(c.getContext(ctx), logging.LevelTrace, "timed out waiting for link to be setup")
 		return ctx.NoContent(http.StatusRequestTimeout)
 	case <-listener.Channel():
 		// Just exit successfully, any message on this channel is considered a success.
-		log.Trace("link setup successfully")
+		log.Log(c.getContext(ctx), logging.LevelTrace, "link setup successfully")
 		return ctx.NoContent(http.StatusOK)
 	}
 }
@@ -613,9 +628,7 @@ func (c *Controller) postPlaidLinkSync(ctx echo.Context) error {
 		return c.invalidJson(ctx)
 	}
 
-	log := c.getLog(ctx).WithFields(logrus.Fields{
-		"linkId": request.LinkId,
-	})
+	log := c.getLog(ctx).With("linkId", request.LinkId)
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	link, err := repo.GetLink(c.getContext(ctx), request.LinkId)
@@ -629,9 +642,9 @@ func (c *Controller) postPlaidLinkSync(ctx echo.Context) error {
 
 	switch link.PlaidLink.Status {
 	case PlaidLinkStatusSetup, PlaidLinkStatusError:
-		log.Debug("link is not revoked, triggering manual sync")
+		log.DebugContext(c.getContext(ctx), "link is not revoked, triggering manual sync")
 	default:
-		log.WithField("status", link.PlaidLink.Status).Warn("link is not in a valid status, it cannot be manually synced")
+		log.With("status", link.PlaidLink.Status).WarnContext(c.getContext(ctx), "link is not in a valid status, it cannot be manually synced")
 		return c.badRequest(ctx, "link is not in a valid status, it cannot be manually synced")
 	}
 

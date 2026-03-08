@@ -231,13 +231,8 @@ type CORS struct {
 }
 
 type Logging struct {
-	Level       string             `yaml:"level"`
-	Format      string             `yaml:"format"`
-	StackDriver StackDriverLogging `yaml:"stackDriver"`
-}
-
-type StackDriverLogging struct {
-	Enabled bool `yaml:"enabled"`
+	Level  string `yaml:"level"`
+	Format string `yaml:"format"`
 }
 
 type Sentry struct {
@@ -343,7 +338,6 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("Logging.Level", LogLevel) // Info
-	v.SetDefault("Logging.StackDriver.Enabled", false)
 	// Lunch Flow is enabled by default for self-hosted deployments!
 	v.SetDefault("LunchFlow.Enabled", true)
 	v.SetDefault("KeyManagement.Provider", "plaintext")
@@ -393,7 +387,6 @@ func setupEnv(v *viper.Viper) {
 	v.MustBindEnv("Email.SMTP.Port", "MONETR_EMAIL_SMTP_PORT")
 	v.MustBindEnv("Logging.Level", "MONETR_LOG_LEVEL")
 	v.MustBindEnv("Logging.Format", "MONETR_LOG_FORMAT")
-	v.MustBindEnv("Logging.StackDriver.Enabled", "MONETR_LOG_STACKDRIVER_ENABLED")
 	v.MustBindEnv("KeyManagement.Provider", "MONETR_KMS_PROVIDER")
 	v.MustBindEnv("KeyManagement.AWS.AccessKey", "AWS_ACCESS_KEY_ID")
 	v.MustBindEnv("KeyManagement.AWS.SecretKey", "AWS_ACCESS_KEY")

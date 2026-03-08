@@ -3,15 +3,16 @@ package storage
 import (
 	"context"
 	"io"
+	"log/slog"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	monetrConfig "github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 // Storage is the interface for reading and writing files presented to monetr by
@@ -46,17 +47,17 @@ type Storage interface {
 // invalid configuration is provided then this will return an error. If storage
 // is not configured then this will return nil.
 func GetStorage(
-	log *logrus.Entry,
+	log *slog.Logger,
 	configuration monetrConfig.Configuration,
 ) (fileStorage Storage, err error) {
 	if !configuration.Storage.Enabled {
-		log.Trace("file storage is not enabled")
+		log.Log(context.Background(), logging.LevelTrace, "file storage is not enabled")
 		return nil, nil
 	}
 
 	switch configuration.Storage.Provider {
 	case "s3":
-		log.Trace("setting up file storage interface using S3 protocol")
+		log.Log(context.Background(), logging.LevelTrace, "setting up file storage interface using S3 protocol")
 		s3Config := configuration.Storage.S3
 
 		var configOptions []func(*config.LoadOptions) error
@@ -91,7 +92,7 @@ func GetStorage(
 		})
 		fileStorage = NewS3StorageBackend(log, s3Config.Bucket, client)
 	case "filesystem":
-		log.Trace("setting up file storage interface using local filesystem")
+		log.Log(context.Background(), logging.LevelTrace, "setting up file storage interface using local filesystem")
 		fileStorage, err = NewFilesystemStorage(
 			log,
 			configuration.Storage.Filesystem.BasePath,

@@ -4,12 +4,13 @@ import (
 	"context"
 	"time"
 
+	"log/slog"
+
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
-	"github.com/sirupsen/logrus"
 )
 
 type TransactionSource string
@@ -90,7 +91,7 @@ func (t *Transaction) AddSpendingToTransaction(
 	spending *Spending,
 	timezone *time.Location,
 	now time.Time,
-	log *logrus.Entry,
+	log *slog.Logger,
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -144,7 +145,7 @@ func AddSpendingToTransaction(
 	spending Spending,
 	timezone *time.Location,
 	now time.Time,
-	log *logrus.Entry,
+	log *slog.Logger,
 ) (amount int64, result Spending) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -194,7 +195,7 @@ func ProcessSpentFrom(
 	inputSpend, currentSpend *Spending,
 	now time.Time,
 	timezone *time.Location,
-	log *logrus.Entry,
+	log *slog.Logger,
 ) (updatedTransaction Transaction, updatedSpending []Spending) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()

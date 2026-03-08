@@ -3,6 +3,7 @@ package background
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"sort"
 	"time"
 
@@ -11,13 +12,13 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -31,7 +32,7 @@ var (
 
 type (
 	SyncPlaidHandler struct {
-		log           *logrus.Entry
+		log           *slog.Logger
 		db            *pg.DB
 		kms           secrets.KeyManagement
 		plaidPlatypus platypus.Platypus
@@ -50,7 +51,7 @@ type (
 
 	SyncPlaidJob struct {
 		args          SyncPlaidArguments
-		log           *logrus.Entry
+		log           *slog.Logger
 		repo          repository.BaseRepository
 		secrets       repository.SecretsRepository
 		plaidPlatypus platypus.Platypus
@@ -92,7 +93,7 @@ func TriggerSyncPlaid(
 }
 
 func NewSyncPlaidHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 	kms secrets.KeyManagement,
@@ -118,7 +119,7 @@ func (s SyncPlaidHandler) QueueName() string {
 
 func (s *SyncPlaidHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	var args SyncPlaidArguments
@@ -130,24 +131,23 @@ func (s *SyncPlaidHandler) HandleConsumeJob(
 	}
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
-	log = log.WithFields(logrus.Fields{
-		"accountId": args.AccountId,
-		"linkId":    args.LinkId,
-	})
+	log = log.With(
+		"accountId", args.AccountId,
+		"linkId", args.LinkId,
+	)
 
 	attempts := 0
 	maxAttempts := 3
 RetrySync:
 
 	if attempts > 0 {
-		log = log.WithField("attempt", attempts)
+		log = log.With("attempt", attempts)
 	}
 
 	err := s.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log := log.WithContext(span.Context())
 		repo := repository.NewRepositoryFromSession(
 			s.clock,
 			"user_plaid",
@@ -185,13 +185,13 @@ RetrySync:
 				// So we don't report this error to sentry when its not necessary.
 				err = nil
 				if attempts < maxAttempts {
-					log.WithError(err).Warn("plaid sync failed with mutation error, job will be retried in a few seconds")
+					log.WarnContext(ctx, "plaid sync failed with mutation error, job will be retried in a few seconds", "err", err)
 					// TODO Very evil, would be better to just build in an actual backoff
 					// with the job system. But this will do something at least.
 					time.Sleep(time.Duration(attempts) * 2 * time.Second)
 					goto RetrySync
 				} else {
-					log.WithError(err).Warn("plaid sync failed with mutation error, job will no longer be retried")
+					log.WarnContext(ctx, "plaid sync failed with mutation error, job will no longer be retried", "err", err)
 				}
 			}
 		}
@@ -208,9 +208,9 @@ func (s SyncPlaidHandler) DefaultSchedule() string {
 }
 
 func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
-	log := s.log.WithContext(ctx)
+	log := s.log
 
-	log.Info("retrieving links to sync with Plaid")
+	log.InfoContext(ctx, "retrieving links to sync with Plaid")
 
 	links := make([]Link, 0)
 	cutoff := s.clock.Now().Add(-48 * time.Hour)
@@ -228,39 +228,39 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 	}
 
 	if len(links) == 0 {
-		log.Debug("no plaid links need to be synced at this time")
+		log.DebugContext(ctx, "no plaid links need to be synced at this time")
 		return nil
 	}
 
-	log.WithField("count", len(links)).Info("syncing plaid links")
+	log.InfoContext(ctx, "syncing plaid links", "count", len(links))
 
 	for _, item := range links {
-		itemLog := log.WithFields(logrus.Fields{
-			"accountId": item.AccountId,
-			"linkId":    item.LinkId,
-		})
-		itemLog.Trace("enqueuing link to be synced with plaid")
+		itemLog := log.With(
+			"accountId", item.AccountId,
+			"linkId", item.LinkId,
+		)
+		itemLog.Log(ctx, logging.LevelTrace, "enqueuing link to be synced with plaid")
 		err := enqueuer.EnqueueJob(ctx, s.QueueName(), SyncPlaidArguments{
 			AccountId: item.AccountId,
 			LinkId:    item.LinkId,
 			Trigger:   "cron",
 		})
 		if err != nil {
-			itemLog.WithError(err).Warn("failed to enqueue job to sync with plaid")
+			itemLog.WarnContext(ctx, "failed to enqueue job to sync with plaid", "err", err)
 			crumbs.Warn(ctx, "Failed to enqueue job to sync with plaid", "job", map[string]any{
 				"error": err,
 			})
 			continue
 		}
 
-		itemLog.Trace("successfully enqueued link to be synced with plaid")
+		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued link to be synced with plaid")
 	}
 
 	return nil
 }
 
 func NewSyncPlaidJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	repo repository.BaseRepository,
 	clock clock.Clock,
 	secrets repository.SecretsRepository,
@@ -292,19 +292,19 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	defer span.Finish()
 	crumbs.AddTag(span.Context(), "linkId", s.args.LinkId.String())
 
-	log := s.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"accountId": s.args.AccountId,
-		"linkId":    s.args.LinkId,
-	})
+	log := s.log.With(
+		"accountId", s.args.AccountId,
+		"linkId", s.args.LinkId,
+	)
 
 	link, err := s.repo.GetLink(span.Context(), s.args.LinkId)
 	if err = errors.Wrap(err, "failed to retrieve link to sync with plaid"); err != nil {
-		log.WithError(err).Error("cannot sync without link")
+		log.ErrorContext(span.Context(), "cannot sync without link", "err", err)
 		return err
 	}
 
 	if link.PlaidLink == nil {
-		log.Warn("provided link does not have any plaid credentials")
+		log.WarnContext(span.Context(), "provided link does not have any plaid credentials")
 		crumbs.IndicateBug(
 			span.Context(),
 			"BUG: Link was queued to sync with plaid, but has no plaid details",
@@ -316,27 +316,27 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		return nil
 	}
 
-	log = log.WithFields(logrus.Fields{
-		"plaidLinkId": link.PlaidLink.PlaidLinkId,
-		"plaid": logrus.Fields{
-			"institutionId":   link.PlaidLink.InstitutionId,
-			"institutionName": link.PlaidLink.InstitutionName,
-			"itemId":          link.PlaidLink.PlaidId,
-		},
-	})
+	log = log.With(
+		"plaidLinkId", link.PlaidLink.PlaidLinkId,
+		slog.Group("plaid",
+			"institutionId", link.PlaidLink.InstitutionId,
+			"institutionName", link.PlaidLink.InstitutionName,
+			"itemId", link.PlaidLink.PlaidId,
+		),
+	)
 
 	// This way other methods will have these log fields too.
 	s.log = log
 
 	account, err := s.repo.GetAccount(span.Context())
 	if err != nil {
-		log.WithError(err).Error("failed to retrieve account for job")
+		log.ErrorContext(span.Context(), "failed to retrieve account for job", "err", err)
 		return err
 	}
 
 	s.timezone, err = account.GetTimezone()
 	if err != nil {
-		log.WithError(err).Warn("failed to get account's time zone, defaulting to UTC")
+		log.WarnContext(span.Context(), "failed to get account's time zone, defaulting to UTC", "err", err)
 		s.timezone = time.UTC
 	}
 
@@ -347,7 +347,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		link.LinkId,
 	)
 	if err = errors.Wrap(err, "failed to read bank accounts for plaid sync"); err != nil {
-		log.WithError(err).Error("cannot sync without bank accounts")
+		log.ErrorContext(span.Context(), "cannot sync without bank accounts", "err", err)
 		return err
 	}
 
@@ -356,14 +356,14 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	crumbs.AddTag(span.Context(), "plaid.institution_name", link.PlaidLink.InstitutionName)
 
 	if len(bankAccounts) == 0 {
-		log.Warn("no bank accounts for plaid link")
+		log.WarnContext(span.Context(), "no bank accounts for plaid link")
 		crumbs.Debug(span.Context(), "No bank accounts setup for plaid link", nil)
 		return nil
 	}
 
 	secret, err := s.secrets.Read(span.Context(), plaidLink.SecretId)
 	if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
-		log.WithError(err).Error("could not retrieve API credentials for Plaid for link, this job will be retried")
+		log.ErrorContext(span.Context(), "could not retrieve API credentials for Plaid for link, this job will be retried", "err", err)
 		return err
 	}
 
@@ -374,7 +374,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		plaidLink.PlaidId,
 	)
 	if err != nil {
-		log.WithError(err).Error("failed to create plaid client for link")
+		log.ErrorContext(span.Context(), "failed to create plaid client for link", "err", err)
 		return err
 	}
 
@@ -413,11 +413,11 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		if len(syncData.New)+len(syncData.Updated)+len(syncData.Deleted) == 0 {
 			plaidLink.LastAttemptedUpdate = myownsanity.Pointer(s.clock.Now().UTC())
 			if err = s.repo.UpdatePlaidLink(span.Context(), plaidLink); err != nil {
-				log.WithError(err).Error("failed to update link with last attempt timestamp")
+				log.ErrorContext(span.Context(), "failed to update link with last attempt timestamp", "err", err)
 				return err
 			}
 
-			log.Info("no new data from plaid, nothing to be done")
+			log.InfoContext(span.Context(), "no new data from plaid, nothing to be done")
 			return nil
 		}
 
@@ -439,7 +439,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 		plaidTransactions := append(syncData.New, syncData.Updated...)
 
-		log.WithField("count", len(plaidTransactions)).Debugf("retrieved transactions from plaid")
+		log.DebugContext(span.Context(), fmt.Sprintf("retrieved transactions from plaid"), "count", len(plaidTransactions))
 		crumbs.Debug(span.Context(), "Retrieved transactions from plaid.", map[string]any{
 			"count": len(plaidTransactions),
 		})
@@ -448,7 +448,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 			return errors.Wrap(err, "failed to hydrate existing transaction data")
 		}
 
-		log.Debugf("found %d existing transactions", len(s.transactions))
+		log.DebugContext(span.Context(), fmt.Sprintf("found %d existing transactions", len(s.transactions)))
 
 		transactionsToUpdate := make([]*Transaction, 0)
 		transactionsToInsert := make([]Transaction, 0)
@@ -457,11 +457,11 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 			plaidTransaction := plaidTransactions[i]
 			bankAccount, ok := s.bankAccounts[plaidTransaction.GetBankAccountId()]
 			if !ok {
-				log.WithFields(logrus.Fields{
-					"plaidTransactionId": plaidTransaction.GetTransactionId(),
-					"plaidBankAccountId": plaidTransaction.GetBankAccountId(),
-					"bug":                true,
-				}).Error("bank account for plaid transaction was not in the bank accounts map! there is a bug!")
+				log.ErrorContext(span.Context(), "bank account for plaid transaction was not in the bank accounts map! there is a bug!",
+					"plaidTransactionId", plaidTransaction.GetTransactionId(),
+					"plaidBankAccountId", plaidTransaction.GetBankAccountId(),
+					"bug", true,
+				)
 				crumbs.IndicateBug(
 					span.Context(),
 					"bank account for plaid transaction was not in the bank accounts map! there is a bug!",
@@ -502,20 +502,20 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		}
 
 		if len(plaidTransactionsToInsert) > 0 {
-			log.Infof("creating %d plaid transactions", len(plaidTransactionsToInsert))
+			log.InfoContext(span.Context(), fmt.Sprintf("creating %d plaid transactions", len(plaidTransactionsToInsert)))
 			if err := s.repo.CreatePlaidTransactions(span.Context(), plaidTransactionsToInsert...); err != nil {
-				log.WithError(err).Errorf("failed to create plaid transactions for job")
+				log.ErrorContext(span.Context(), fmt.Sprintf("failed to create plaid transactions for job"), "err", err)
 				return err
 			}
 		}
 
 		if len(transactionsToUpdate) > 0 {
-			log.Infof("updating %d transactions", len(transactionsToUpdate))
+			log.InfoContext(span.Context(), fmt.Sprintf("updating %d transactions", len(transactionsToUpdate)))
 			crumbs.Debug(span.Context(), "Updating transactions.", map[string]any{
 				"count": len(transactionsToUpdate),
 			})
 			if err = s.repo.UpdateTransactions(span.Context(), transactionsToUpdate); err != nil {
-				log.WithError(err).Errorf("failed to update transactions for job")
+				log.ErrorContext(span.Context(), fmt.Sprintf("failed to update transactions for job"), "err", err)
 				return err
 			}
 			for i := range transactionsToUpdate {
@@ -529,12 +529,12 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 				return transactionsToInsert[i].Date.Before(transactionsToInsert[j].Date)
 			})
 
-			log.Infof("creating %d transactions", len(transactionsToInsert))
+			log.InfoContext(span.Context(), fmt.Sprintf("creating %d transactions", len(transactionsToInsert)))
 			crumbs.Debug(span.Context(), "Creating transactions.", map[string]any{
 				"count": len(transactionsToInsert),
 			})
 			if err = s.repo.InsertTransactions(span.Context(), transactionsToInsert); err != nil {
-				log.WithError(err).Error("failed to insert new transactions")
+				log.ErrorContext(span.Context(), "failed to insert new transactions", "err", err)
 				return err
 			}
 			for i := range transactionsToInsert {
@@ -545,7 +545,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		for _, item := range plaidBankAccounts {
 			bankAccount, ok := s.bankAccounts[item.GetAccountId()]
 			if !ok {
-				log.WithField("plaidBankAccountId", item.GetAccountId()).Warn("bank was not found in map")
+				log.WarnContext(span.Context(), "bank was not found in map", "plaidBankAccountId", item.GetAccountId())
 				continue
 			}
 
@@ -557,7 +557,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 				bankAccount.PlaidBankAccount,
 				item,
 			); err != nil {
-				log.WithError(err).Error("failed to update bank account")
+				log.ErrorContext(span.Context(), "failed to update bank account", "err", err)
 				crumbs.ReportError(span.Context(), err, "Failed to update bank account", "job", nil)
 			}
 		}
@@ -578,7 +578,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 			break
 		}
 
-		log.WithField("iter", iter).Info("there is more data to sync from plaid, continuing")
+		log.InfoContext(span.Context(), "there is more data to sync from plaid, continuing", "iter", iter)
 	}
 
 	// Then enqueue all of the bank accounts we touched to have their similar
@@ -613,7 +613,7 @@ func (s *SyncPlaidJob) maintainLinkStatus(ctx context.Context, plaidLink *PlaidL
 	plaidLink.LastSuccessfulUpdate = myownsanity.Pointer(s.clock.Now().UTC())
 	plaidLink.LastAttemptedUpdate = myownsanity.Pointer(s.clock.Now().UTC())
 	if err := s.repo.UpdatePlaidLink(ctx, plaidLink); err != nil {
-		s.log.WithError(err).Error("failed to update link after transaction sync")
+		s.log.ErrorContext(ctx, "failed to update link after transaction sync", "err", err)
 		return err
 	}
 
@@ -625,7 +625,7 @@ func (s *SyncPlaidJob) maintainLinkStatus(ctx context.Context, plaidLink *PlaidL
 			channelName,
 			"success",
 		); notifyErr != nil {
-			s.log.WithError(notifyErr).Error("failed to publish link status to pubsub")
+			s.log.ErrorContext(ctx, "failed to publish link status to pubsub", "err", notifyErr)
 		}
 	}
 
@@ -650,9 +650,7 @@ func (s *SyncPlaidJob) hydrateTransactions(
 	}
 	plaidTransactionIds = append(plaidTransactionIds, sync.Deleted...)
 
-	s.log.
-		WithContext(ctx).
-		Tracef("checking database for %d plaid transaction(s)", len(plaidTransactionIds))
+	s.log.Log(ctx, logging.LevelTrace, fmt.Sprintf("checking database for %d plaid transaction(s)", len(plaidTransactionIds)))
 
 	var err error
 	s.transactions, err = s.repo.GetTransactionsByPlaidId(
@@ -661,10 +659,7 @@ func (s *SyncPlaidJob) hydrateTransactions(
 		plaidTransactionIds,
 	)
 	if err != nil {
-		s.log.
-			WithContext(ctx).
-			WithError(err).
-			Error("failed to retrieve transaction ids for updating plaid transactions")
+		s.log.ErrorContext(ctx, "failed to retrieve transaction ids for updating plaid transactions", "err", err)
 		return err
 	}
 
@@ -900,11 +895,11 @@ func (s *SyncPlaidJob) syncPlaidTransaction(
 	// If any of the fields did change, log the changes and return the updated
 	// transaction object.
 	if len(changes) > 0 {
-		s.log.WithContext(ctx).WithFields(logrus.Fields{
-			"plaidId": input.GetTransactionId(),
-			"kind":    "transaction",
-			"changes": changes,
-		}).Debug("detected transaction updates from plaid")
+		s.log.DebugContext(ctx, "detected transaction updates from plaid",
+			"plaidId", input.GetTransactionId(),
+			"kind", "transaction",
+			"changes", changes,
+		)
 		if create {
 			return nil, &existingTransaction, existingPlaidTransaction, nil
 		} else {
@@ -926,23 +921,23 @@ func (s *SyncPlaidJob) syncRemovedTransaction(
 	plaidLink *PlaidLink,
 	id string,
 ) error {
-	log := s.log.WithFields(logrus.Fields{
-		"itemId":  plaidLink.PlaidId,
-		"linkId":  link.LinkId,
-		"kind":    "transaction",
-		"plaidId": id,
-	})
+	log := s.log.With(
+		"itemId", plaidLink.PlaidId,
+		"linkId", link.LinkId,
+		"kind", "transaction",
+		"plaidId", id,
+	)
 	existingTransaction, exists := s.lookupTransaction(id, &id)
 	if !exists {
-		log.Warn("plaid wants to remove a transaction that does not exist")
+		log.WarnContext(ctx, "plaid wants to remove a transaction that does not exist")
 		return nil
 	}
-	log = log.WithFields(logrus.Fields{
-		"bankAccountId":             existingTransaction.BankAccountId,
-		"transactionId":             existingTransaction.TransactionId,
-		"plaidTransactionId":        existingTransaction.PlaidTransactionId,
-		"pendingPlaidTransactionId": existingTransaction.PendingPlaidTransactionId,
-	})
+	log = log.With(
+		"bankAccountId", existingTransaction.BankAccountId,
+		"transactionId", existingTransaction.TransactionId,
+		"plaidTransactionId", existingTransaction.PlaidTransactionId,
+		"pendingPlaidTransactionId", existingTransaction.PendingPlaidTransactionId,
+	)
 
 	action := s.actions[existingTransaction.TransactionId]
 	switch action {
@@ -954,15 +949,14 @@ func (s *SyncPlaidJob) syncRemovedTransaction(
 		// associated with the pending transaction in Plaid. As such we should not
 		// remove the transaction since it should have the correct status now.
 		// TODO Keep an eye on this, the logic is new and might be wrong.
-		log.WithField("action", action).Debug("transaction to be removed has also been created or updated in this sync, it will not be removed")
+		log.DebugContext(ctx, "transaction to be removed has also been created or updated in this sync, it will not be removed", "action", action)
 	default:
 		s.tagBankAccountForSimilarityRecalc(existingTransaction.BankAccountId)
 
-		log.Debug("removing transaction")
+		log.DebugContext(ctx, "removing transaction")
 
 		if existingTransaction.SpendingId != nil {
-			log.WithField("spendingId", existingTransaction.SpendingId).
-				Debug("transaction has spending, it will be removed")
+			log.DebugContext(ctx, "transaction has spending, it will be removed", "spendingId", existingTransaction.SpendingId)
 			updatedTransaction := existingTransaction
 			updatedTransaction.SpendingId = nil
 			_, err := s.repo.ProcessTransactionSpentFrom(
@@ -1062,11 +1056,11 @@ func (s *SyncPlaidJob) syncPlaidBankAccount(
 
 	if len(changes) > 0 {
 		bankAccount.LastUpdated = s.clock.Now().UTC()
-		s.log.WithContext(ctx).WithFields(logrus.Fields{
-			"plaidId": input.GetAccountId(),
-			"kind":    "bankAccount",
-			"changes": changes,
-		}).Debug("detected bank account updates from plaid")
+		s.log.DebugContext(ctx, "detected bank account updates from plaid",
+			"plaidId", input.GetAccountId(),
+			"kind", "bankAccount",
+			"changes", changes,
+		)
 
 		if err := s.repo.UpdateBankAccount(ctx, bankAccount); err != nil {
 			return errors.Wrap(err, "failed to persists bank account changes from plaid sync")

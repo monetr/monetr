@@ -6,13 +6,14 @@ import (
 	"net/url"
 	"time"
 
+	"log/slog"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v81"
 )
 
@@ -42,10 +43,10 @@ func (b *baseBilling) CreateCheckout(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := b.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"loginId":   owner.LoginId,
-		"accountId": accountId,
-	})
+	log := b.log.With(
+		"loginId", owner.LoginId,
+		"accountId", accountId,
+	)
 
 	// Gather the account details from the repo. This data might be cached but
 	// should be considered accurate as all writes for subscription data go
@@ -69,7 +70,7 @@ func (b *baseBilling) CreateCheckout(
 	// If the account does not already have a customer ID associated with it, then
 	// we need to create one.
 	if account.StripeCustomerId == nil {
-		log.Debug("account is missing a stripe customer ID, one will be created")
+		log.DebugContext(span.Context(), "account is missing a stripe customer ID, one will be created")
 		if err := b.CreateCustomer(span.Context(), owner, account); err != nil {
 			return nil, err
 		}
@@ -98,13 +99,13 @@ func (b *baseBilling) CreateCheckout(
 		"cancelUrl":    cancelUrl,
 		"collectTaxes": taxesEnabled,
 	})
-	log.WithFields(logrus.Fields{
-		"stripe": logrus.Fields{
-			"successUrl":   successUrl,
-			"cancelUrl":    cancelUrl,
-			"collectTaxes": taxesEnabled,
-		},
-	}).Debug("creating stripe checkout session")
+	log.DebugContext(span.Context(), "creating stripe checkout session",
+		slog.Group("stripe",
+			"successUrl", successUrl,
+			"cancelUrl", cancelUrl,
+			"collectTaxes", taxesEnabled,
+		),
+	)
 
 	var params stripe.Params
 
@@ -153,11 +154,9 @@ func (b *baseBilling) CreateCheckout(
 		return nil, errors.Wrap(err, "failed to create checkout session")
 	}
 
-	log.WithFields(logrus.Fields{
-		"stripe": logrus.Fields{
-			"sessionId": result.ID,
-		},
-	}).Debug("created stripe checkout session")
+	log.DebugContext(span.Context(), "created stripe checkout session",
+		slog.Group("stripe", "sessionId", result.ID),
+	)
 
 	return result, nil
 }
@@ -177,14 +176,12 @@ func (b *baseBilling) AfterCheckout(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := b.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"accountId": accountId,
-		"stripe": logrus.Fields{
-			"checkoutSessionId": checkoutSessionId,
-		},
-	})
+	log := b.log.With(
+		"accountId", accountId,
+		slog.Group("stripe", "checkoutSessionId", checkoutSessionId),
+	)
 
-	log.Debug("retrieving checkout session details")
+	log.DebugContext(span.Context(), "retrieving checkout session details")
 	checkoutSession, err := b.stripe.GetCheckoutSession(
 		span.Context(),
 		checkoutSessionId,
@@ -212,16 +209,16 @@ func (b *baseBilling) AfterCheckout(
 	}
 
 	if checkoutSession.Customer.ID != stripeCustomerId {
-		log.WithFields(logrus.Fields{
-			"bug": true,
-			"stripe": logrus.Fields{
-				"checkoutSessionId": checkoutSessionId,
-				"customerId": logrus.Fields{
-					"account":  stripeCustomerId,
-					"checkout": checkoutSession.Customer.ID,
-				},
-			},
-		}).Warn("stripe customer ID from checkout session does not match the stripe customer ID on the account")
+		log.WarnContext(span.Context(), "stripe customer ID from checkout session does not match the stripe customer ID on the account",
+			"bug", true,
+			slog.Group("stripe",
+				"checkoutSessionId", checkoutSessionId,
+				slog.Group("customerId",
+					"account", stripeCustomerId,
+					"checkout", checkoutSession.Customer.ID,
+				),
+			),
+		)
 		crumbs.IndicateBug(span.Context(), "BUG: The Stripe customer Id for this account does not match the one from the checkout session", map[string]any{
 			"accountCustomerId":         account.StripeCustomerId,
 			"checkoutSessionCustomerId": checkoutSession.Customer.ID,
@@ -229,15 +226,15 @@ func (b *baseBilling) AfterCheckout(
 		return false, errors.New("stripe customer ID mismatch")
 	}
 
-	log = log.WithFields(logrus.Fields{
-		"stripe": logrus.Fields{
-			"checkoutSessionId": checkoutSessionId,
-			"customerId":        stripeCustomerId,
-			"subscriptionId":    checkoutSession.Subscription.ID,
-		},
-	})
+	log = log.With(
+		slog.Group("stripe",
+			"checkoutSessionId", checkoutSessionId,
+			"customerId", stripeCustomerId,
+			"subscriptionId", checkoutSession.Subscription.ID,
+		),
+	)
 
-	log.Debug("retreiving subscription details from checkout session")
+	log.DebugContext(span.Context(), "retreiving subscription details from checkout session")
 	subscription, err := b.stripe.GetSubscription(
 		span.Context(),
 		checkoutSession.Subscription.ID,

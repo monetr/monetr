@@ -3,12 +3,12 @@ package platypus
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/plaid/plaid-go/v41/plaid"
-	"github.com/sirupsen/logrus"
 )
 
 type PlaidInstitutions interface {
@@ -64,12 +64,12 @@ func NewPlaidInstitution(input plaid.Institution) PlaidInstitution {
 }
 
 type plaidInstitutionsBase struct {
-	log      *logrus.Entry
+	log      *slog.Logger
 	platypus Platypus
 	caching  cache.Cache
 }
 
-func NewPlaidInstitutionWrapper(log *logrus.Entry, platypus Platypus, caching cache.Cache) PlaidInstitutions {
+func NewPlaidInstitutionWrapper(log *slog.Logger, platypus Platypus, caching cache.Cache) PlaidInstitutions {
 	return &plaidInstitutionsBase{
 		log:      log,
 		platypus: platypus,
@@ -100,7 +100,7 @@ func (p *plaidInstitutionsBase) GetInstitution(ctx context.Context, institutionI
 	institution = NewPlaidInstitution(*result)
 
 	if err = p.caching.SetEzTTL(span.Context(), p.cacheKey(institutionId), institution, 30*time.Minute); err != nil {
-		p.log.WithField("institutionId", institutionId).WithError(err).Warn("failed to cache institution details")
+		p.log.WarnContext(span.Context(), "failed to cache institution details", "institutionId", institutionId, "err", err)
 	}
 
 	return institution, nil

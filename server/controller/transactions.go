@@ -7,7 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/sirupsen/logrus"
+	"log/slog"
 )
 
 func (c *Controller) getTransactions(ctx echo.Context) error {
@@ -307,10 +307,7 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 		}
 
 		if !existingTransaction.Date.Equal(transaction.Date) {
-			c.getLog(ctx).WithFields(logrus.Fields{
-				"existingDate": existingTransaction.Date,
-				"newDate":      transaction.Date,
-			}).Warn("cannot change transaction date on non-manual links")
+			c.getLog(ctx).WarnContext(c.getContext(ctx), "cannot change transaction date on non-manual links", "existingDate", existingTransaction.Date, "newDate", transaction.Date)
 			return c.badRequest(ctx, "Cannot change transaction date on non-manual links")
 		}
 	}
@@ -345,7 +342,7 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "could not get updated balances")
 	}
 
-	c.getLog(ctx).Debugf("successfully updated transaction")
+	c.getLog(ctx).DebugContext(c.getContext(ctx), "successfully updated transaction")
 
 	result := map[string]any{
 		"transaction": transaction,
@@ -375,14 +372,11 @@ func (c *Controller) deleteTransactions(ctx echo.Context) error {
 	adjustsBalance := urlParamBoolDefault(ctx, "adjusts_balance", false)
 	softDelete := urlParamBoolDefault(ctx, "soft", true)
 
-	log = log.WithFields(logrus.Fields{
-		"params": logrus.Fields{
-			"adjustsBalance": adjustsBalance,
-			"softDelete":     softDelete,
-		},
-		"transactionId": transactionId,
-		"bankAccountId": bankAccountId,
-	})
+	log = log.With(
+		slog.Group("params", "adjustsBalance", adjustsBalance, "softDelete", softDelete),
+		"transactionId", transactionId,
+		"bankAccountId", bankAccountId,
+	)
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
@@ -398,7 +392,7 @@ func (c *Controller) deleteTransactions(ctx echo.Context) error {
 		return c.badRequest(ctx, "Cannot delete transactions for non-manual links")
 	}
 
-	log.Debug("transaction will be removed from account")
+	log.DebugContext(c.getContext(ctx), "transaction will be removed from account")
 
 	// Retrieve the transaction from the database first, we need it if we are
 	// adjusting balance. Even if we aren't this way the API call fails nicely

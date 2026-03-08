@@ -22,7 +22,6 @@ import (
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/net/websocket"
 )
 
@@ -250,15 +249,15 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 		},
 	) {
 		if len(joined.Join) == 0 {
-			log.Info("Found Lunch Flow account with no record in monetr, creating")
+			log.InfoContext(c.getContext(ctx), "Found Lunch Flow account with no record in monetr, creating")
 
-			log.Debug("requesting balance information first!")
+			log.DebugContext(c.getContext(ctx), "requesting balance information first!")
 
 			var currentBalance int64
 			var currencyCode string
 			balance, err := client.GetBalance(c.getContext(ctx), joined.From.Id)
 			if err != nil {
-				log.WithError(err).Warn("failed to retrieve balance information for Lunch Flow account")
+				log.WarnContext(c.getContext(ctx), "failed to retrieve balance information for Lunch Flow account", "err", err)
 			} else {
 				currencyCode = myownsanity.CoalesceStrings(
 					balance.Currency,
@@ -270,7 +269,7 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 					currencyCode,
 				)
 				if err != nil {
-					log.WithError(err).Warn("failed to parse account balance, will default to 0")
+					log.WarnContext(c.getContext(ctx), "failed to parse account balance, will default to 0", "err", err)
 				}
 			}
 
@@ -300,11 +299,7 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 			// that there is a bug and you should report it via github issues on
 			// monetr. You may be asked to provide additional information upon
 			// reporting this bug!
-			log.WithFields(logrus.Fields{
-				"bug":         true,
-				"lunchFlowId": joined.From.Id,
-				"count":       len(joined.Join),
-			}).Error("multiple Lunch Flow bank accounts found for the same external ID, this should not be possible!")
+			log.ErrorContext(c.getContext(ctx), "multiple Lunch Flow bank accounts found for the same external ID, this should not be possible!", "bug", true, "lunchFlowId", joined.From.Id, "count", len(joined.Join))
 			crumbs.IndicateBug(
 				c.getContext(ctx),
 				"Multiple Lunch Flow Bank Accounts found for the same external ID, this should not be possible!",
@@ -353,9 +348,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 		return c.invalidJson(ctx)
 	}
 
-	log := c.getLog(ctx).WithFields(logrus.Fields{
-		"linkId": request.LinkId,
-	})
+	log := c.getLog(ctx).With("linkId", request.LinkId)
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	link, err := repo.GetLink(c.getContext(ctx), request.LinkId)
@@ -369,7 +362,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 
 	switch link.LunchFlowLink.Status {
 	case LunchFlowLinkStatusActive, LunchFlowLinkStatusError:
-		log.WithField("status", link.LunchFlowLink.Status).Debug("link is not deactivated, triggering manual sync")
+		log.With("status", link.LunchFlowLink.Status).DebugContext(c.getContext(ctx), "link is not deactivated, triggering manual sync")
 	case LunchFlowLinkStatusDeactivated:
 		return c.badRequest(ctx, "Link is not active and will not be synced")
 	}
@@ -396,9 +389,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 	// database transaction for this endpoint.
 	db := c.mustGetDatabase(ctx)
 	for _, bankAccount := range bankAccounts {
-		log.WithFields(logrus.Fields{
-			"bankAccountId": bankAccount.BankAccountId,
-		}).Debug("triggering Lunch Flow sync for bank account")
+		log.With("bankAccountId", bankAccount.BankAccountId).DebugContext(c.getContext(ctx), "triggering Lunch Flow sync for bank account")
 		if err := background.TriggerSyncLunchFlowTxn(
 			c.getContext(ctx),
 			c.JobRunner,
@@ -409,9 +400,7 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 				LinkId:        bankAccount.LinkId,
 			},
 		); err != nil {
-			log.WithFields(logrus.Fields{
-				"bankAccountId": bankAccount.BankAccountId,
-			}).WithError(err).Warn("failed to enqueue Lunch Flow sync")
+			log.WarnContext(c.getContext(ctx), "failed to enqueue Lunch Flow sync", "bankAccountId", bankAccount.BankAccountId, "err", err)
 		}
 	}
 
@@ -466,12 +455,12 @@ func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
 
 	websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()
-		log.Debug("started Lunch Flow sync websocket!")
+		log.DebugContext(c.getContext(ctx), "started Lunch Flow sync websocket!")
 	ListenerLoop:
 		for {
 			select {
 			case <-timeout.C:
-				log.Warn("exiting Lunch Flow sync progress due to timeout")
+				log.WarnContext(c.getContext(ctx), "exiting Lunch Flow sync progress due to timeout")
 				break ListenerLoop
 			case notification := <-listener.Channel():
 				var status struct {
@@ -479,28 +468,28 @@ func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
 					Status        background.LunchFlowSyncStatus `json:"status"`
 				}
 				if err := json.Unmarshal([]byte(notification.Payload()), &status); err != nil {
-					log.WithError(err).Warn("failed to unmarshal notification for websocket!")
+					log.WarnContext(c.getContext(ctx), "failed to unmarshal notification for websocket!", "err", err)
 					continue
 				}
-				log.WithField("notification", notification).Debug("received Lunch Flow sync progress notification")
+				log.DebugContext(c.getContext(ctx), "received Lunch Flow sync progress notification", "notification", notification)
 				if err := c.sendWebsocketMessage(
 					ctx,
 					ws,
 					status,
 				); err != nil {
-					log.WithError(err).Warn("failed to send websocket message")
+					log.WarnContext(c.getContext(ctx), "failed to send websocket message", "err", err)
 					return
 				}
 
 				if status.Status == background.LunchFlowSyncStatusComplete ||
 					status.Status == background.LunchFlowSyncStatusError {
-					log.Info("received terminal status for Lunch Flow sync, exiting socket")
+					log.InfoContext(c.getContext(ctx), "received terminal status for Lunch Flow sync, exiting socket")
 					break ListenerLoop
 				}
 			}
 		}
 
-		log.Debug("finished listening for Lunch Flow sync updates")
+		log.DebugContext(c.getContext(ctx), "finished listening for Lunch Flow sync updates")
 	}).ServeHTTP(ctx.Response(), ctx.Request())
 
 	return nil

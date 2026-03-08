@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -22,7 +23,6 @@ import (
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/v41/plaid"
-	"github.com/sirupsen/logrus"
 )
 
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=platypus.go -package=mockgen -destination=../internal/mockgen/platypus.go Platypus
@@ -43,61 +43,6 @@ type (
 // want to keep track of things like the request Id and some information about the request itself. It also handles error
 // wrapping.
 func after(span *sentry.Span, response *http.Response, err error, message, errorMessage string) error {
-	// if response != nil {
-	// 	requestId := response.Header.Get("X-Request-Id")
-	// 	if span.Data == nil {
-	// 		span.Data = map[string]any{}
-	// 	}
-	// 	span.Description = fmt.Sprintf(
-	// 		"%s %s",
-	// 		response.Request.Method,
-	// 		response.Request.URL.String(),
-	// 	)
-	//
-	// 	data := map[string]any{}
-	//
-	// 	// With plaid responses we can actually still use the body of the response :tada:. The request Id is also stored on
-	// 	// the response body itself in most of my testing. I could have sworn the documentation cited X-Request-Id as being
-	// 	// a possible source for it, but I have not seen that yet. This bit of code extracts the body into a map. I know to
-	// 	// some degree of certainty that the response will always be an object and not an array. So a map with a string key
-	// 	// is safe. I can then extract the request Id and store that with my logging and diagnostic data.
-	// 	{
-	// 		var extractedResponseBody map[string]any
-	// 		if e := json.NewDecoder(response.Body).Decode(&extractedResponseBody); e == nil {
-	// 			if requestId == "" {
-	// 				requestId = extractedResponseBody["request_id"].(string)
-	// 			}
-	//
-	// 			// But if our request was not successful, then I also want to yoink that body and throw it into my diagnostic
-	// 			// data as well. This will help me if I ever need to track down bugs with Plaid's API or problems with requests
-	// 			// that I am making incorrectly.
-	// 			if response.StatusCode != http.StatusOK {
-	// 				data["body"] = extractedResponseBody
-	// 			}
-	// 		}
-	// 	}
-	//
-	// 	{ // Make sure we put the request ID everywhere, this is easily the most important diagnostic data we need.
-	// 		data["X-RequestId"] = requestId
-	// 		span.Data["plaidRequestId"] = requestId
-	// 		span.SetTag("plaidRequestId", requestId)
-	// 		span.SetTag("http.request.method", response.Request.Method)
-	// 		span.SetTag("server.address", response.Request.URL.Hostname())
-	// 		span.SetTag("url.full", response.Request.URL.String())
-	// 		span.SetTag("http.response.status_code", fmt.Sprint(response.StatusCode))
-	// 	}
-	//
-	// 	crumbs.HTTP(
-	// 		span.Context(),
-	// 		message,
-	// 		"plaid",
-	// 		response.Request.URL.String(),
-	// 		response.Request.Method,
-	// 		response.StatusCode,
-	// 		data,
-	// 	)
-	// }
-
 	switch e := err.(type) {
 	case nil:
 		span.Status = sentry.SpanStatusOK
@@ -125,7 +70,7 @@ var (
 )
 
 func NewPlaid(
-	log *logrus.Entry,
+	log *slog.Logger,
 	clock clock.Clock,
 	kms secrets.KeyManagement,
 	db pg.DBI,
@@ -140,24 +85,24 @@ func NewPlaid(
 				response *http.Response,
 				err error,
 			) {
-				requestLog := log.WithContext(ctx).WithFields(logrus.Fields{
-					"plaid_method": request.Method,
-					"plaid_url":    request.URL.String(),
-				})
+				requestLog := log.With(
+					"plaid_method", request.Method,
+					"plaid_url", request.URL.String(),
+				)
 				var statusCode int
 				var requestId string
 				if response != nil {
 					statusCode = response.StatusCode
-					requestLog = requestLog.WithField("plaid_statusCode", statusCode)
+					requestLog = requestLog.With("plaid_statusCode", statusCode)
 
 					var responseData map[string]any
 					buffer := bytes.NewBuffer(nil)
 					tee := io.TeeReader(response.Body, buffer)
 					if err := json.NewDecoder(tee).Decode(&responseData); err != nil {
-						log.WithError(err).Warn("failed to decode plaid response as json for logging")
+						log.WarnContext(ctx, "failed to decode plaid response as json for logging", "err", err)
 					} else if id, ok := responseData["request_id"].(string); ok {
 						requestId = id
-						requestLog = requestLog.WithField("plaid_requestId", requestId)
+						requestLog = requestLog.With("plaid_requestId", requestId)
 					}
 
 					// Close the existing body before we replace it.
@@ -178,7 +123,7 @@ func NewPlaid(
 						"Request-Id": requestId,
 					},
 				)
-				requestLog.Debug("Plaid API call")
+				requestLog.DebugContext(ctx, "Plaid API call")
 			}),
 	}
 
@@ -205,7 +150,7 @@ type Plaid struct {
 	clock  clock.Clock
 	client *plaid.APIClient
 	db     pg.DBI
-	log    *logrus.Entry
+	log    *slog.Logger
 	kms    secrets.KeyManagement
 	repo   repository.PlaidRepository
 	config config.Plaid
@@ -215,7 +160,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := p.log.WithContext(span.Context())
+	log := p.log
 
 	var redirectUri *string
 	if p.config.OAuthDomain != "" {
@@ -272,7 +217,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 		"Creating link token with Plaid",
 		"failed to create link token",
 	); err != nil {
-		log.WithError(err).Errorf("failed to create link token")
+		log.ErrorContext(span.Context(), "failed to create link token", "err", err)
 		return nil, err
 	}
 
@@ -286,7 +231,7 @@ func (p *Plaid) ExchangePublicToken(ctx context.Context, publicToken string) (*I
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := p.log.WithContext(span.Context())
+	log := p.log
 
 	request := p.client.PlaidApi.
 		ItemPublicTokenExchange(span.Context()).
@@ -302,7 +247,7 @@ func (p *Plaid) ExchangePublicToken(ctx context.Context, publicToken string) (*I
 		"Exchanging public token with Plaid",
 		"failed to exchange public token with Plaid",
 	); err != nil {
-		log.WithError(err).Errorf("failed to exchange public token with Plaid")
+		log.ErrorContext(span.Context(), "failed to exchange public token with Plaid", "err", err)
 		return nil, err
 	}
 
@@ -318,7 +263,7 @@ func (p *Plaid) GetWebhookVerificationKey(ctx context.Context, keyId string) (*W
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := p.log.WithContext(span.Context())
+	log := p.log
 
 	request := p.client.PlaidApi.
 		WebhookVerificationKeyGet(span.Context()).
@@ -334,7 +279,7 @@ func (p *Plaid) GetWebhookVerificationKey(ctx context.Context, keyId string) (*W
 		"Retrieving webhook verification key",
 		"failed to retrieve webhook verification key from Plaid",
 	); err != nil {
-		log.WithError(err).Errorf("failed to retrieve webhook verification key from Plaid")
+		log.ErrorContext(span.Context(), "failed to retrieve webhook verification key from Plaid", "err", err)
 		return nil, err
 	}
 
@@ -350,7 +295,7 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := p.log.WithContext(span.Context())
+	log := p.log
 
 	request := p.client.PlaidApi.
 		InstitutionsGetById(span.Context()).
@@ -373,7 +318,7 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 		"Retrieving Plaid institution status",
 		"failed to retrieve Plaid institution status",
 	); err != nil {
-		log.WithError(err).Errorf("failed to retrieve Plaid institution status")
+		log.ErrorContext(span.Context(), "failed to retrieve Plaid institution status", "err", err)
 		return nil, err
 	}
 
@@ -418,11 +363,11 @@ func (p *Plaid) NewClient(ctx context.Context, link *models.Link, accessToken, i
 		linkId:      link.LinkId,
 		accessToken: accessToken,
 		itemId:      itemId,
-		log: p.log.WithFields(logrus.Fields{
-			"accountId": link.AccountId,
-			"linkId":    link.LinkId,
-			"itemId":    itemId,
-		}),
+		log: p.log.With(
+			"accountId", link.AccountId,
+			"linkId", link.LinkId,
+			"itemId", itemId,
+		),
 		client: p.client,
 		config: p.config,
 	}, nil

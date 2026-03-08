@@ -4,21 +4,22 @@ import (
 	"context"
 	"io"
 
+	"log/slog"
+
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type s3Storage struct {
-	log    *logrus.Entry
+	log    *slog.Logger
 	bucket string
 	client *s3.Client
 }
 
 func NewS3StorageBackend(
-	log *logrus.Entry,
+	log *slog.Logger,
 	bucket string,
 	s3client *s3.Client,
 ) Storage {
@@ -42,15 +43,9 @@ func (s *s3Storage) Store(
 		return err
 	}
 
-	log := s.log.
-		WithContext(span.Context()).
-		WithFields(logrus.Fields{
-			"uri": key,
-		})
-
 	span.SetData("destination", key)
 
-	log.Debug("uploading file to S3")
+	s.log.DebugContext(span.Context(), "uploading file to S3", "uri", key)
 
 	contentType := string(file.ContentType)
 	_, err = s.client.PutObject(
@@ -145,14 +140,14 @@ func (s *s3Storage) Remove(
 		return errors.Wrap(err, "failed to delete file from s3")
 	}
 
-	s.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"uri": key,
-		"s3DeleteResult": logrus.Fields{
-			"deleteMarker":   result.DeleteMarker,
-			"versionId":      result.VersionId,
-			"requestCharged": string(result.RequestCharged),
-		},
-	}).Debug("file was removed from storage")
+	s.log.DebugContext(span.Context(), "file was removed from storage",
+		"uri", key,
+		slog.Group("s3DeleteResult",
+			"deleteMarker", result.DeleteMarker,
+			"versionId", result.VersionId,
+			"requestCharged", string(result.RequestCharged),
+		),
+	)
 
 	return nil
 }

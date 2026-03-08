@@ -2,15 +2,16 @@ package background
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -19,7 +20,7 @@ const (
 
 type (
 	ProcessSpendingHandler struct {
-		log          *logrus.Entry
+		log          *slog.Logger
 		db           *pg.DB
 		repo         repository.JobRepository
 		unmarshaller JobUnmarshaller
@@ -33,14 +34,14 @@ type (
 
 	ProcessSpendingJob struct {
 		args  ProcessSpendingArguments
-		log   *logrus.Entry
+		log   *slog.Logger
 		repo  repository.BaseRepository
 		clock clock.Clock
 	}
 )
 
 func NewProcessSpendingHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 ) *ProcessSpendingHandler {
@@ -59,7 +60,7 @@ func (p ProcessSpendingHandler) QueueName() string {
 
 func (p *ProcessSpendingHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	var args ProcessSpendingArguments
@@ -76,10 +77,10 @@ func (p *ProcessSpendingHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log = log.WithContext(span.Context()).WithFields(logrus.Fields{
-			"accountId":     args.AccountId,
-			"bankAccountId": args.BankAccountId,
-		})
+		log = log.With(
+			"accountId", args.AccountId,
+			"bankAccountId", args.BankAccountId,
+		)
 
 		repo := repository.NewRepositoryFromSession(
 			p.clock,
@@ -107,9 +108,9 @@ func (p ProcessSpendingHandler) DefaultSchedule() string {
 }
 
 func (p *ProcessSpendingHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
-	log := p.log.WithContext(ctx)
+	log := p.log
 
-	log.Info("retrieving bank accounts with stale spending")
+	log.InfoContext(ctx, "retrieving bank accounts with stale spending")
 	bankAccountsWithStaleSpending, err := p.repo.GetBankAccountsWithStaleSpending(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve bank accounts with stale spending")
@@ -117,11 +118,11 @@ func (p *ProcessSpendingHandler) EnqueueTriggeredJob(ctx context.Context, enqueu
 
 	if len(bankAccountsWithStaleSpending) == 0 {
 		crumbs.Debug(ctx, "No bank accounts had stale spending objects.", nil)
-		log.Info("no bank accounts have stale spending objects")
+		log.InfoContext(ctx, "no bank accounts have stale spending objects")
 		return nil
 	}
 
-	log.WithField("count", len(bankAccountsWithStaleSpending)).Info("found bank accounts with stale spending")
+	log.InfoContext(ctx, "found bank accounts with stale spending", "count", len(bankAccountsWithStaleSpending))
 	crumbs.Debug(ctx, "Found bank accounts with stale spending.", map[string]any{
 		"count": len(bankAccountsWithStaleSpending),
 	})
@@ -129,17 +130,17 @@ func (p *ProcessSpendingHandler) EnqueueTriggeredJob(ctx context.Context, enqueu
 	jobErrors := make([]error, 0)
 
 	for _, item := range bankAccountsWithStaleSpending {
-		itemLog := log.WithFields(logrus.Fields{
-			"accountId":     item.AccountId,
-			"bankAccountId": item.BankAccountId,
-		})
-		itemLog.Trace("enqueuing bank account to process stale spending")
+		itemLog := log.With(
+			"accountId", item.AccountId,
+			"bankAccountId", item.BankAccountId,
+		)
+		itemLog.Log(ctx, logging.LevelTrace, "enqueuing bank account to process stale spending")
 		err = enqueuer.EnqueueJob(ctx, p.QueueName(), ProcessSpendingArguments{
 			AccountId:     item.AccountId,
 			BankAccountId: item.BankAccountId,
 		})
 		if err != nil {
-			log.WithError(err).Warn("failed to enqueue job to process stale spending")
+			log.WarnContext(ctx, "failed to enqueue job to process stale spending", "err", err)
 			crumbs.Warn(ctx, "Failed to enqueue job to process stale spending", "job", map[string]any{
 				"error": err,
 			})
@@ -147,14 +148,14 @@ func (p *ProcessSpendingHandler) EnqueueTriggeredJob(ctx context.Context, enqueu
 			continue
 		}
 
-		itemLog.Trace("successfully enqueued bank accounts for stale spending processing")
+		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued bank accounts for stale spending processing")
 	}
 
 	return nil
 }
 
 func NewProcessSpendingJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	repo repository.BaseRepository,
 	args ProcessSpendingArguments,
 	clock clock.Clock,
@@ -171,24 +172,24 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
-	log := p.log.WithContext(span.Context())
+	log := p.log
 
 	account, err := p.repo.GetAccount(span.Context())
 	if err != nil {
-		log.WithError(err).Error("failed to retrieve account to process stale spending")
+		log.ErrorContext(span.Context(), "failed to retrieve account to process stale spending", "err", err)
 		return err
 	}
 
 	timezone, err := account.GetTimezone()
 	if err != nil {
-		log.WithError(err).Error("failed to parse account timezone")
+		log.ErrorContext(span.Context(), "failed to parse account timezone", "err", err)
 		return err
 	}
 
 	now := p.clock.Now()
 	allSpending, err := p.repo.GetSpending(span.Context(), p.args.BankAccountId)
 	if err != nil {
-		log.WithError(err).Error("failed to retrieve spending for bank account")
+		log.ErrorContext(span.Context(), "failed to retrieve spending for bank account", "err", err)
 		return err
 	}
 
@@ -212,7 +213,7 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 				spending.FundingScheduleId,
 			)
 			if err != nil {
-				log.WithError(err).Warn("failed to retrieve funding schedule for spending object, it will not be processed")
+				log.WarnContext(span.Context(), "failed to retrieve funding schedule for spending object, it will not be processed", "err", err)
 				continue
 			}
 
@@ -231,11 +232,11 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 	}
 
 	if len(spendingToUpdate) == 0 {
-		log.Info("no stale spending object were updated")
+		log.InfoContext(span.Context(), "no stale spending object were updated")
 		return nil
 	}
 
-	log.WithField("count", len(spendingToUpdate)).Info("updating stale spending objects")
+	log.InfoContext(span.Context(), "updating stale spending objects", "count", len(spendingToUpdate))
 
 	return errors.Wrap(p.repo.UpdateSpending(
 		span.Context(),

@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"hash/crc32"
 
+	"log/slog"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type (
@@ -61,7 +63,7 @@ type (
 	}
 
 	postgresPubSub struct {
-		log *logrus.Entry
+		log *slog.Logger
 		db  *pg.DB
 	}
 
@@ -69,14 +71,14 @@ type (
 		accountId     models.ID[models.Account]
 		channel       string
 		hashedChannel string
-		log           *logrus.Entry
+		log           *slog.Logger
 		listener      *pg.Listener
 		closeChannel  chan struct{}
 		dataChannel   chan Notification
 	}
 )
 
-func NewPostgresPubSub(log *logrus.Entry, db *pg.DB) PublishSubscribe {
+func NewPostgresPubSub(log *slog.Logger, db *pg.DB) PublishSubscribe {
 	return &postgresPubSub{
 		log: log,
 		db:  db,
@@ -103,7 +105,7 @@ func (p *postgresPubSub) Subscribe(
 		accountId:     accountId,
 		channel:       channel,
 		hashedChannel: hashedChannel,
-		log:           p.log.WithContext(ctx).WithField("channel", channel),
+		log:           p.log.With("channel", channel),
 		listener:      listener,
 		dataChannel:   make(chan Notification, 0),
 		closeChannel:  make(chan struct{}, 1),
@@ -138,13 +140,10 @@ func (p *postgresPubSub) Notify(
 
 	hashedChannel := p.hashChannel(accountId, channel)
 
-	p.log.
-		WithContext(span.Context()).
-		WithFields(logrus.Fields{
-			"channel":       channel,
-			"hashedChannel": hashedChannel,
-		}).
-		Debug("sending notification on channel")
+	p.log.DebugContext(span.Context(), "sending notification on channel",
+		"channel", channel,
+		"hashedChannel", hashedChannel,
+	)
 
 	_, err := p.db.ExecContext(
 		span.Context(),
@@ -160,11 +159,11 @@ func (p *postgresListener) backgroundListener() {
 		select {
 		case message := <-p.listener.Channel():
 			if message.Channel != p.hashedChannel {
-				p.log.WithFields(logrus.Fields{
-					"channel":       p.channel,
-					"hashedChannel": p.hashedChannel,
-					"received":      message.Channel,
-				}).Warn("ignoring message on channel")
+				p.log.WarnContext(context.Background(), "ignoring message on channel",
+					"channel", p.channel,
+					"hashedChannel", p.hashedChannel,
+					"received", message.Channel,
+				)
 				continue
 			}
 			transformedMessage := &postgresNotification{
@@ -173,12 +172,12 @@ func (p *postgresListener) backgroundListener() {
 
 			select {
 			case p.dataChannel <- transformedMessage:
-				p.log.Trace("successfully dispatched notification")
+				p.log.Log(context.Background(), logging.LevelTrace, "successfully dispatched notification")
 			default:
-				p.log.Trace("message on channel dropped because data channel is full")
+				p.log.Log(context.Background(), logging.LevelTrace, "message on channel dropped because data channel is full")
 			}
 		case <-p.closeChannel:
-			p.log.Trace("received close message, exiting loop")
+			p.log.Log(context.Background(), logging.LevelTrace, "received close message, exiting loop")
 			close(p.closeChannel)
 			close(p.dataChannel)
 			// Release the listener connection

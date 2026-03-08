@@ -3,6 +3,7 @@ package background
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -12,11 +13,11 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -25,7 +26,7 @@ const (
 
 type (
 	NotificationTrialExpiryHandler struct {
-		log          *logrus.Entry
+		log          *slog.Logger
 		db           *pg.DB
 		clock        clock.Clock
 		config       config.Configuration
@@ -39,7 +40,7 @@ type (
 
 	NotificationTrialExpiryJob struct {
 		args   NotificationTrialExpiryArguments
-		log    *logrus.Entry
+		log    *slog.Logger
 		repo   repository.BaseRepository
 		db     pg.DBI
 		email  communication.EmailCommunication
@@ -49,7 +50,7 @@ type (
 )
 
 func NewNotificationTrialExpiryHandler(
-	log *logrus.Entry,
+	log *slog.Logger,
 	db *pg.DB,
 	clock clock.Clock,
 	config config.Configuration,
@@ -78,7 +79,7 @@ func (h *NotificationTrialExpiryHandler) EnqueueTriggeredJob(
 	ctx context.Context,
 	enqueuer JobEnqueuer,
 ) error {
-	log := h.log.WithContext(ctx)
+	log := h.log
 
 	var accounts []Account
 	cutoff := h.clock.Now().AddDate(0, 0, 5)
@@ -102,30 +103,28 @@ func (h *NotificationTrialExpiryHandler) EnqueueTriggeredJob(
 	}
 
 	if len(accounts) == 0 {
-		log.Info("no accounts need a trial expiry notification at this time")
+		log.InfoContext(ctx, "no accounts need a trial expiry notification at this time")
 		return nil
 	}
 
-	log.WithField("count", len(accounts)).Info("accounts need a trial expiry notification")
+	log.InfoContext(ctx, "accounts need a trial expiry notification", "count", len(accounts))
 
 	for _, item := range accounts {
-		itemLog := log.WithFields(logrus.Fields{
-			"accountId": item.AccountId,
-		})
+		itemLog := log.With("accountId", item.AccountId)
 
-		itemLog.Trace("enqueuing account for trial expiry notification")
+		itemLog.Log(ctx, logging.LevelTrace, "enqueuing account for trial expiry notification")
 		err := enqueuer.EnqueueJob(ctx, h.QueueName(), NotificationTrialExpiryArguments{
 			AccountId: item.AccountId,
 		})
 		if err != nil {
-			itemLog.WithError(err).Warn("failed to enqueue job for trial expiry notification")
+			itemLog.WarnContext(ctx, "failed to enqueue job for trial expiry notification", "err", err)
 			crumbs.Warn(ctx, "Failed to enqueue job for trial expiry notification", "job", map[string]any{
 				"error": err,
 			})
 			continue
 		}
 
-		itemLog.Trace("successfully enqueued account for trial expiry notification")
+		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued account for trial expiry notification")
 	}
 
 	return nil
@@ -133,7 +132,7 @@ func (h *NotificationTrialExpiryHandler) EnqueueTriggeredJob(
 
 func (h *NotificationTrialExpiryHandler) HandleConsumeJob(
 	ctx context.Context,
-	log *logrus.Entry,
+	log *slog.Logger,
 	data []byte,
 ) error {
 	var args NotificationTrialExpiryArguments
@@ -150,9 +149,7 @@ func (h *NotificationTrialExpiryHandler) HandleConsumeJob(
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		log = log.WithContext(span.Context()).WithFields(logrus.Fields{
-			"accountId": args.AccountId,
-		})
+		log = log.With("accountId", args.AccountId)
 
 		repo := repository.NewRepositoryFromSession(
 			h.clock,
@@ -178,7 +175,7 @@ func (h *NotificationTrialExpiryHandler) HandleConsumeJob(
 }
 
 func NewNotificationTrialExpiryJob(
-	log *logrus.Entry,
+	log *slog.Logger,
 	repo repository.BaseRepository,
 	db pg.DBI,
 	clock clock.Clock,
@@ -201,28 +198,26 @@ func (j *NotificationTrialExpiryJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
-	log := j.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"accountId": j.args.AccountId,
-	})
+	log := j.log.With("accountId", j.args.AccountId)
 
-	log.Trace("looking up account owner")
+	log.Log(span.Context(), logging.LevelTrace, "looking up account owner")
 	owner, err := j.repo.GetAccountOwner(span.Context())
 	if err != nil {
 		return err
 	}
 
-	log = log.WithFields(logrus.Fields{
-		"loginId": owner.LoginId,
-		"userId":  owner.UserId,
-	})
+	log = log.With(
+		"loginId", owner.LoginId,
+		"userId", owner.UserId,
+	)
 
 	if owner.Account.TrialExpiryNotificationSentAt != nil {
-		log.Debug("notification has already been sent for account")
+		log.DebugContext(span.Context(), "notification has already been sent for account")
 		return nil
 	}
 
 	if j.config.Email.Verification.Enabled && owner.Login.EmailVerifiedAt == nil {
-		log.Info("skipping trial expiry notification, owner has not verified their email address")
+		log.InfoContext(span.Context(), "skipping trial expiry notification, owner has not verified their email address")
 		return nil
 	}
 
@@ -247,7 +242,7 @@ func (j *NotificationTrialExpiryJob) Run(ctx context.Context) error {
 
 	timezone, err := owner.Account.GetTimezone()
 	if err != nil {
-		log.WithError(err).Warn("failed to get timezone for account trial notification")
+		log.WarnContext(span.Context(), "failed to get timezone for account trial notification", "err", err)
 		timezone = time.UTC
 	}
 
@@ -265,7 +260,7 @@ func (j *NotificationTrialExpiryJob) Run(ctx context.Context) error {
 		SupportEmail:          "support@monetr.app",
 	}
 
-	log.Info("sending trial expiry notification")
+	log.InfoContext(span.Context(), "sending trial expiry notification")
 
 	if err = j.email.SendEmail(span.Context(), email); err != nil {
 		return errors.Wrap(err, "failed to send trial expiry notification email")

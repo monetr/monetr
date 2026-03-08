@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"time"
 
+	"log/slog"
+
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/certhelper"
 	"github.com/monetr/monetr/server/config"
@@ -19,11 +21,10 @@ import (
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/migrations"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func GetDatabase(
-	log *logrus.Entry,
+	log *slog.Logger,
 	configuration config.Configuration,
 	stats *metrics.Stats,
 ) (*pg.DB, error) {
@@ -48,7 +49,7 @@ func GetDatabase(
 	if configuration.PostgreSQL.CACertificatePath != "" {
 		caCert, err := os.ReadFile(configuration.PostgreSQL.CACertificatePath)
 		if err != nil {
-			log.WithError(err).Errorf("failed to load ca certificate")
+			log.ErrorContext(context.Background(), "failed to load ca certificate", "err", err)
 			return nil, errors.Wrap(err, "failed to load ca certificate")
 		}
 
@@ -69,7 +70,7 @@ func GetDatabase(
 				configuration.PostgreSQL.KeyPath,
 			)
 			if err != nil {
-				log.WithError(err).Errorf("failed to load client certificate")
+				log.ErrorContext(context.Background(), "failed to load client certificate", "err", err)
 				return nil, errors.Wrap(err, "failed to load client certificate")
 			}
 			tlsConfiguration.Certificates = []tls.Certificate{
@@ -80,7 +81,7 @@ func GetDatabase(
 		pgOptions.TLSConfig = tlsConfiguration
 		pgOptions.OnConnect = func(ctx context.Context, cn *pg.Conn) error {
 			if tlsConfiguration != nil {
-				log.Trace("new connection with cert")
+				log.Log(ctx, logging.LevelTrace, "new connection with cert")
 			}
 
 			return nil
@@ -106,7 +107,7 @@ func GetDatabase(
 			log,
 			paths,
 			func(path string) error {
-				log.Info("reloading TLS certificates")
+				log.InfoContext(context.Background(), "reloading TLS certificates")
 
 				tlsConfig := &tls.Config{
 					Rand:               rand.Reader,
@@ -119,14 +120,14 @@ func GetDatabase(
 				{
 					caCert, err := os.ReadFile(configuration.PostgreSQL.CACertificatePath)
 					if err != nil {
-						log.WithError(err).Errorf("failed to load updated ca certificate")
+						log.ErrorContext(context.Background(), "failed to load updated ca certificate", "err", err)
 						return errors.Wrap(err, "failed to load updated ca certificate")
 					}
 
 					caCertPool := x509.NewCertPool()
 					caCertPool.AppendCertsFromPEM(caCert)
 
-					log.Debugf("new ca certificate loaded, swapping")
+					log.DebugContext(context.Background(), "new ca certificate loaded, swapping")
 
 					tlsConfig.RootCAs = caCertPool
 				}
@@ -138,7 +139,7 @@ func GetDatabase(
 							configuration.PostgreSQL.KeyPath,
 						)
 						if err != nil {
-							log.WithError(err).Errorf("failed to load client certificate")
+							log.ErrorContext(context.Background(), "failed to load client certificate", "err", err)
 							return errors.Wrap(err, "failed to load client certificate")
 						}
 
@@ -150,13 +151,13 @@ func GetDatabase(
 
 				db.Options().TLSConfig = tlsConfig
 
-				log.Debugf("successfully swapped ca certificate")
+				log.DebugContext(context.Background(), "successfully swapped ca certificate")
 
 				return nil
 			},
 		)
 		if err != nil {
-			log.WithError(err).Errorf("failed to setup certificate watcher")
+			log.ErrorContext(context.Background(), "failed to setup certificate watcher", "err", err)
 			return nil, errors.Wrap(err, "failed to setup certificate watcher")
 		}
 		watchCertificate.Start()
@@ -169,7 +170,7 @@ func GetDatabase(
 	}
 
 	if configuration.PostgreSQL.Migrate {
-		log.Info("automatic migrations are enabled")
+		log.InfoContext(context.Background(), "automatic migrations are enabled")
 		migrations.RunMigrations(log, db)
 	}
 

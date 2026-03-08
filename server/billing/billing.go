@@ -6,15 +6,17 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
+	"log/slog"
+
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v81"
 )
 
@@ -149,7 +151,7 @@ var (
 )
 
 type baseBilling struct {
-	log      *logrus.Entry
+	log      *slog.Logger
 	clock    clock.Clock
 	config   config.Configuration
 	accounts repository.AccountsRepository
@@ -158,7 +160,7 @@ type baseBilling struct {
 }
 
 func NewBilling(
-	log *logrus.Entry,
+	log *slog.Logger,
 	clock clock.Clock,
 	config config.Configuration,
 	repo repository.AccountsRepository,
@@ -185,16 +187,16 @@ func (b *baseBilling) UpdateSubscription(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := b.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"customerId":     customerId,
-		"subscriptionId": subscriptionId,
-	})
+	log := b.log.With(
+		"customerId", customerId,
+		"subscriptionId", subscriptionId,
+	)
 
-	log.Trace("retrieving account by customer Id")
+	log.Log(span.Context(), logging.LevelTrace, "retrieving account by customer Id")
 
 	account, err := b.accounts.GetAccountByCustomerId(span.Context(), customerId)
 	if err != nil {
-		log.WithError(err).Errorf("failed to retrieve account by stripe customer Id")
+		log.ErrorContext(span.Context(), "failed to retrieve account by stripe customer Id", "err", err)
 		return errors.Wrap(err, "failed to retrieve account by stripe customer Id")
 	}
 
@@ -219,11 +221,11 @@ func (b *baseBilling) UpdateCustomerSubscription(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := b.log.WithContext(span.Context()).WithFields(logrus.Fields{
-		"customerId":     customerId,
-		"subscriptionId": subscriptionId,
-		"accountId":      account.AccountId,
-	})
+	log := b.log.With(
+		"customerId", customerId,
+		"subscriptionId", subscriptionId,
+		"accountId", account.AccountId,
+	)
 
 	// Set the user for this event, this way webhooks are properly associated with
 	// the destination user in our application.
@@ -288,16 +290,16 @@ func (b *baseBilling) UpdateCustomerSubscription(
 	account.SubscriptionStatus = &status
 
 	if err := b.accounts.UpdateAccount(span.Context(), account); err != nil {
-		log.WithError(err).Errorf("failed to update account subscription status")
+		log.ErrorContext(span.Context(), "failed to update account subscription status", "err", err)
 		return errors.Wrap(err, "failed to update account subscription status")
 	}
 
 	// Check to see if the subscription status of the account has changed with this update to be.
 	if account.IsSubscriptionActive(b.clock.Now()) != currentlyActive {
 		if currentlyActive {
-			log.Info("account subscription is no longer active")
+			log.InfoContext(span.Context(), "account subscription is no longer active")
 		} else {
-			log.Info("account subscription is now active")
+			log.InfoContext(span.Context(), "account subscription is now active")
 		}
 	}
 
@@ -308,8 +310,8 @@ func (b *baseBilling) GetHasSubscription(ctx context.Context, accountId ID[Accou
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := b.log.WithContext(span.Context()).WithField("accountId", accountId)
-	log.Trace("checking whether or not subscription is present")
+	log := b.log.With("accountId", accountId)
+	log.Log(span.Context(), logging.LevelTrace, "checking whether or not subscription is present")
 
 	account, err := b.accounts.GetAccount(span.Context(), accountId)
 	if err != nil {
@@ -361,9 +363,9 @@ func (b *baseBilling) GetSubscriptionIsActive(
 		}
 	}()
 
-	log := b.log.WithContext(span.Context()).WithField("accountId", accountId)
+	log := b.log.With("accountId", accountId)
 
-	log.Trace("checking if account subscription is active")
+	log.Log(span.Context(), logging.LevelTrace, "checking if account subscription is active")
 
 	account, err := b.accounts.GetAccount(span.Context(), accountId)
 	if err != nil {
@@ -383,9 +385,9 @@ func (b *baseBilling) GetSubscriptionIsTrialing(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	log := b.log.WithContext(span.Context()).WithField("accountId", accountId)
+	log := b.log.With("accountId", accountId)
 
-	log.Debug("checking if account subscription is trial")
+	log.DebugContext(span.Context(), "checking if account subscription is trial")
 
 	account, err := b.accounts.GetAccount(span.Context(), accountId)
 	if err != nil {

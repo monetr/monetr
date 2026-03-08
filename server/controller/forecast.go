@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/forecast"
+	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 )
 
@@ -17,7 +18,7 @@ func (c *Controller) getForecast(ctx echo.Context) error {
 	var endDate time.Time
 	end := ctx.QueryParam("end")
 	if strings.TrimSpace(end) == "" {
-		log.Trace("no end date specified for forecast, will default to 31 days")
+		log.Log(c.getContext(ctx), logging.LevelTrace, "no end date specified for forecast, will default to 31 days")
 		endDate = now.AddDate(0, 0, 90).UTC()
 	} else {
 		var err error

@@ -25,11 +25,11 @@ func adminRegisterCode(parent *cobra.Command) {
 			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
-				log.WithField("config", configFileName).Info("config file loaded")
+				log.Info("config file loaded", "config", configFileName)
 			}
 			db, err := database.GetDatabase(log, configuration, nil)
 			if err != nil {
-				log.WithError(err).Fatalf("failed to establish database connection")
+				log.Error("failed to establish database connection", "err", err)
 				return err
 			}
 			defer db.Close()
@@ -37,7 +37,7 @@ func adminRegisterCode(parent *cobra.Command) {
 			random := make([]byte, 8)
 			_, err = rand.Read(random)
 			if err != nil {
-				log.WithError(err).Error("failed to read random data")
+				log.Error("failed to read random data", "err", err)
 				return errors.Wrap(err, "failed to read random data")
 			}
 
@@ -55,7 +55,7 @@ func adminRegisterCode(parent *cobra.Command) {
 			}
 
 			if _, err := db.Model(&beta).Insert(&beta); err != nil {
-				log.WithError(err).Error("failed to generate beta code")
+				log.Error("failed to generate beta code", "err", err)
 				return errors.Wrap(err, "failed to generate beta code")
 			}
 
