@@ -281,6 +281,10 @@ func ServeCommand(parent *cobra.Command) {
 				}
 				cancel()
 			}
+			// var queue queue.Processor
+			{ // Setup the new job queue
+
+			}
 
 			if err = backgroundJobs.Start(); err != nil {
 				log.Error("failed to start background job worker", "err", err)

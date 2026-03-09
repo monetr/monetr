@@ -91,6 +91,22 @@ type postgresProcessor struct {
 	dispatch         chan *models.Job
 }
 
+func NewPostgresQueue(
+	ctx context.Context,
+	log *slog.Logger,
+	clock clock.Clock,
+	configuration config.Configuration,
+	db *pg.DB,
+	publisher pubsub.Publisher,
+	plaidPlatypus platypus.Platypus,
+	kms secrets.KeyManagement,
+	fileStorage storage.Storage,
+	billing billing.Billing,
+	email communication.EmailCommunication,
+) Processor {
+	return &postgresProcessor{}
+}
+
 // enqueue implements [Processor].
 func (p *postgresProcessor) enqueue(
 	ctx context.Context,
@@ -384,8 +400,61 @@ func (p *postgresProcessor) Start() error {
 	p.shutdownThreads[numberOfWorkers] = make(chan chan struct{})
 	go p.cronConsumer(p.shutdownThreads[numberOfWorkers])
 	p.shutdownThreads[numberOfWorkers+1] = make(chan chan struct{})
-	go p.cronConsumer(p.shutdownThreads[numberOfWorkers+1])
+	go p.jobConsumer(p.shutdownThreads[numberOfWorkers+1])
 
+	return nil
+}
+
+func (p *postgresProcessor) Close() error {
+	if !atomic.CompareAndSwapUint32(
+		&p.state,
+		postgresProcessorRunning,
+		postgresProcessorStopped,
+	) {
+		return errors.New("job processor is either already closed, or is in an invalid state")
+	}
+
+	timer := time.NewTimer(15 * time.Second)
+
+	{ // Shutdown all the background threads
+		// We create a channel that is the exact size of the number of threads in
+		// the background. This way as each thread drains this channel should fill
+		// up.
+		promises := make(chan struct{}, len(p.shutdownThreads))
+		for i := range p.shutdownThreads {
+			select {
+			case p.shutdownThreads[i] <- promises:
+				continue
+			case <-timer.C:
+				return errors.New("timed out sending shutdown signal")
+			}
+		}
+
+		for i := 0; i < len(promises); i++ {
+			select {
+			case <-promises:
+				p.log.Log(
+					context.Background(),
+					logging.LevelTrace,
+					"thread successfully drained",
+				)
+				continue
+			case <-timer.C:
+				return errors.New("timed out waiting for threads to drain")
+			}
+		}
+		close(promises)
+	}
+
+	p.log.Info("job processor threads shutdown, cleaning up")
+
+	for _, channel := range p.shutdownThreads {
+		close(channel)
+	}
+	close(p.dispatch)
+	close(p.availableThreads)
+
+	p.log.Info("job processor shut down complete")
 	return nil
 }
 
@@ -491,10 +560,6 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 			// This is to fix a bug where sometimes the cron library seems to be
 			// rounding down? Resulting in a `nextTimestamp` that is slightly in the
 			// past.
-			// TODO Should this be relative to the next timestamp that we already
-			// calculated above? If the cron scheduling is inclusive then it will be
-			// wrong.
-			// nextTimestamp := nextJob.cron.Next(p.clock.Now().Add(1 * time.Second))
 			log := p.log.With("queue", nextJob.queue)
 			consumedCronJob, err := p.consumeCronMaybe(nextJob.queue, next)
 			if err != nil {
@@ -572,7 +637,6 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 		case <-ticker.C:
 			continue
 		}
-
 	}
 }
 
@@ -691,6 +755,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 	}()
 
 	if err := executor(nil, []byte(job.Input)); err != nil {
+		// TODO Implement retry logic here?
 		log.Error("failed to execute job", "err", err)
 	}
 }
