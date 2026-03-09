@@ -55,34 +55,28 @@ type CronFunction func(ctx Context) error
 // in the processor layer.
 type internalJobWrapper func(ctx Context, args []byte) error
 
-// RetryableError is an error interface that can be returned by a job function.
-// If this error interface is returned then the [Retryable] function is called
-// with the number of attempts performed already, including the attempt that was
-// just performed. If this method returns true, then the job is inserted back
-// into the queue with the attempt counter incremented. If the method returns
-// false then the job is not re-attempted.
-type RetryableError interface {
-	error
-	Retryable(attempts int) bool
-}
-
-// Notifier is an interface that surfaces how the queue will know when to
-// consume jobs from the queue. Notifications from this interface do not promise
-// that a job can or will be consumed. Just that when a notification is sent on
-// this interface, the consumer of the notification should attempt to consume a
-// job from the queue. This interface will be implemented differently depending
-// on the datastore that is backing the queue. For example, PostgreSQL will
-// likely have a timer as well as a LISTEN/NOTIFY flow for job notifications.
-// Where as SQLite will likely just use an in memory channel to notify since it
-// is always a single process and polling the database won't make sense.
-type Notifier interface {
-	Channel() chan struct{}
-}
-
+// Processor does not expose any public methods. Instead it is meant to be
+// interacted with via the [Enqueue], [EnqueueAt], and [Register] functions so
+// that way the jobs can take advantage of generics in order to maintain type
+// safety and simplicity.
 type Processor interface {
-	enqueue(ctx context.Context, queue string, args any) error
-	register(ctx context.Context, queue string, job internalJobWrapper) error
-	registerCron(ctx context.Context, queue string, schedule string, job internalJobWrapper) error
+	enqueueAt(
+		ctx context.Context,
+		queue string,
+		at time.Time,
+		args any,
+	) error
+	register(
+		ctx context.Context,
+		queue string,
+		job internalJobWrapper,
+	) error
+	registerCron(
+		ctx context.Context,
+		queue string,
+		schedule string,
+		job internalJobWrapper,
+	) error
 }
 
 func Enqueue[T any](
@@ -93,7 +87,29 @@ func Enqueue[T any](
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	return processor.enqueue(span.Context(), queueNameFromJobFunction[T](job), args)
+	return processor.enqueueAt(
+		span.Context(),
+		queueNameFromJobFunction[T](job),
+		time.Now(),
+		args,
+	)
+}
+
+func EnqueueAt[T any](
+	ctx context.Context,
+	processor Processor,
+	at time.Time,
+	job JobFunction[T],
+	args T,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	return processor.enqueueAt(
+		span.Context(),
+		queueNameFromJobFunction[T](job),
+		at,
+		args,
+	)
 }
 
 func Register[T any](
@@ -166,11 +182,20 @@ func queueNameFromJobFunction[T any](job any) string {
 	return name
 }
 
+// encodeArguments is the common function used for marshaling any arguments into
+// the actual data that is stored in the queue. At the moment this just wraps
+// the JSON library. But in the future if we ever want to replace this with
+// something else such as msgpack; then this is how we can do that. This
+// function also makes sure that any errors have a proper stack trace.
 func encodeArguments(args any) ([]byte, error) {
 	result, err := json.Marshal(args)
 	return result, errors.WithStack(err)
 }
 
+// decodeArguments is the same as [encodeArguments] but will unmarshal the data.
+// This currently is implemented as json but can be changed in the future. Must
+// match the data type for [encodeArguments]. This function also makes sure that
+// errors have stack traces.
 func decodeArguments[T any](data []byte, result *T) error {
 	return errors.WithStack(json.Unmarshal(data, result))
 }

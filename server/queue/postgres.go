@@ -9,7 +9,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
@@ -53,8 +52,10 @@ type postgresProcessor struct {
 	// can only happen when the processor is in a certain state.
 	state uint32
 
+	// These values are provided in the [NewPostgresQueue] constructor, all other
+	// fields are constructed as part of the [*postgresProcessor.Start] function.
+	notifier      Notifier
 	log           *slog.Logger
-	clock         clock.Clock
 	configuration config.Configuration
 	db            pg.DBI
 	publisher     pubsub.Publisher
@@ -93,8 +94,8 @@ type postgresProcessor struct {
 
 func NewPostgresQueue(
 	ctx context.Context,
+	notifier Notifier,
 	log *slog.Logger,
-	clock clock.Clock,
 	configuration config.Configuration,
 	db *pg.DB,
 	publisher pubsub.Publisher,
@@ -104,13 +105,25 @@ func NewPostgresQueue(
 	billing billing.Billing,
 	email communication.EmailCommunication,
 ) Processor {
-	return &postgresProcessor{}
+	return &postgresProcessor{
+		notifier:      notifier,
+		log:           log,
+		configuration: configuration,
+		db:            db,
+		publisher:     publisher,
+		plaidPlatypus: plaidPlatypus,
+		kms:           kms,
+		fileStorage:   fileStorage,
+		billing:       billing,
+		email:         email,
+	}
 }
 
-// enqueue implements [Processor].
-func (p *postgresProcessor) enqueue(
+// enqueueAt implements [Processor].
+func (p *postgresProcessor) enqueueAt(
 	ctx context.Context,
 	queue string,
+	at time.Time,
 	args any,
 ) error {
 	span := sentry.StartSpan(ctx, "queue.publish")
@@ -144,7 +157,7 @@ func (p *postgresProcessor) enqueue(
 
 	// TODO Make sure this truncation works how I think it does. Reasonably there
 	// should be no duplicate jobs within 1 second of this job.
-	timestamp := p.clock.Now().UTC().Truncate(time.Second)
+	timestamp := at.Truncate(time.Second)
 	signature := jobSignature(timestamp, encodedArgs)
 	traceId := span.ToSentryTrace()
 	baggage := span.ToBaggage()
@@ -182,17 +195,26 @@ func (p *postgresProcessor) enqueue(
 		return errors.Wrap(err, "failed to enqueue job")
 	}
 
-	span.SetData("messaging.message.id", string(job.JobId))
-	span.SetData("messaging.message.body.size", len(job.Input))
-
-	log.DebugContext(span.Context(), "successfully enqueued job",
+	log = p.log.With(
 		"jobId", job.JobId,
 		"signature", signature,
 	)
 
-	// TODO Send notification for the job?
+	span.SetData("messaging.message.id", string(job.JobId))
+	span.SetData("messaging.message.body.size", len(job.Input))
 
-	panic("unimplemented")
+	log.DebugContext(span.Context(), "successfully enqueued job")
+
+	// Notify the workers that there is a job available for consumption. This is
+	// non-blocking in the sense that this wont block if there are no workers
+	// available to consume the job right now.
+	if err := p.notifier.notify(span.Context()); err != nil {
+		log.DebugContext(span.Context(), "failed to notify workers of new jobs",
+			"err", err,
+		)
+	}
+
+	return nil
 }
 
 // register implements [Processor].
@@ -296,7 +318,7 @@ func (p *postgresProcessor) hydrateCronJobTable() error {
 			}
 		}
 
-		now := p.clock.Now().UTC()
+		now := time.Now().UTC()
 		var crons []models.CronJob
 		{ // Predetermine what all the cron rows should look like!
 			for _, cronJob := range p.cronSchedules {
@@ -465,7 +487,7 @@ func (p *postgresProcessor) consumeJobMaybe() (*models.Job, error) {
 	var job models.Job
 	result, err := p.db.ModelContext(ctx, &job).
 		Set(`"status" = ?`, models.ProcessingJobStatus).
-		Set(`"started_at" = ?`, p.clock.Now()).
+		Set(`"started_at" = ?`, time.Now()).
 		Where(`"job_id" = (?)`, p.jobQuery).
 		Returning("*; /* NO LOG */").
 		Update(&job)
@@ -527,7 +549,7 @@ func (p *postgresProcessor) consumeCronMaybe(
 
 func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 	for {
-		now := p.clock.Now().UTC()
+		now := time.Now().UTC()
 		// Sort the crons by their next time a cron job happens.
 		sort.Slice(p.cronSchedules, func(i, j int) bool {
 			return p.cronSchedules[i].cron.Next(now).Before(p.cronSchedules[j].cron.Next(now))
@@ -540,7 +562,7 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 			"staged next cron job to be run",
 			"queue", nextJob.queue,
 			"next", next,
-			"now", p.clock.Now(),
+			"now", now,
 		)
 
 		// TODO What happens if sleep is negative or 0
@@ -574,7 +596,15 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 			// If we actually did consume the cron job then log it
 			log.Log(context.Background(), logging.LevelTrace, "consumed cron job")
 
-			if err := p.enqueue(context.Background(), nextJob.queue, nil); err != nil {
+			if err := p.enqueueAt(
+				context.Background(),
+				nextJob.queue,
+				// An accidental other form of deduplication. Cron jobs are always added
+				// to the processing queue with their "next timestamp". This way the
+				// timestamp is deterministic for them.
+				next,
+				nil,
+			); err != nil {
 				log.Error("failed to enqueue cron for execution", "err", err)
 			}
 		}
@@ -582,7 +612,11 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 }
 
 func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
-	ticker := time.NewTicker(5 * time.Second)
+	// maxBackoff is 30 seconds
+	var maxBackoff time.Duration = 6
+	var backoff time.Duration = 1
+	baseInterval := 5 * time.Second
+	ticker := time.NewTicker(baseInterval)
 	for {
 		// Because this is at the beginning of the loop, the only time this blocks
 		// is when there are no available threads. The ticker will only fire here if
@@ -596,6 +630,9 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 			return
 		case <-ticker.C:
 			p.log.Debug("job processor currently has no available worker threads")
+			continue
+		case <-p.notifier.channel():
+			p.log.Debug("received job notification, but job processor currently has no available worker threads")
 			continue
 		case <-p.availableThreads:
 			// This receive blocks if there are no available threads.
@@ -616,11 +653,25 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 				"queue", job.Queue,
 			)
 			p.dispatch <- job
+			// If we successfully consume a job then reset the backoff
+			backoff = 1
+			ticker.Reset(baseInterval)
 		} else {
 			// If we did not retrieve a job at all then we need to put our "hold" on
 			// an available thread back in the channel this way a thread can still be
 			// consumed on the next loop.
 			p.availableThreads <- workerSignal
+			// If we haven't consumed a job in a while then backoff how often we poll
+			// the database. We get notifications when we know a job is immediately
+			// available so this should be fine.
+			if backoff+1 < maxBackoff {
+				backoff++
+				interval := backoff * baseInterval
+				ticker.Reset(interval)
+				p.log.Debug("no jobs consumed in a while, backing off",
+					"interval", interval.String(),
+				)
+			}
 		}
 
 		// This is the main area that blocks. After we have consumed a job there
@@ -634,6 +685,9 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 			promise <- workerSignal
 			ticker.Stop()
 			return
+		case <-p.notifier.channel():
+			p.log.Debug("received job notification")
+			continue
 		case <-ticker.C:
 			continue
 		}
@@ -711,7 +765,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 	span.SetData("messaging.message.id", string(job.JobId))
 	span.SetData("messaging.destination.name", string(job.Queue))
 	span.SetData("messaging.message.body.size", len(job.Input))
-	span.SetData("messaging.message.receive.latency", p.clock.Now().Sub(job.CreatedAt).Milliseconds())
+	span.SetData("messaging.message.receive.latency", time.Now().Sub(job.CreatedAt).Milliseconds())
 	span.SetData("messaging.system", "postgresql")
 	// For now, sample all background jobs
 	span.Sampled = sentry.SampledTrue
