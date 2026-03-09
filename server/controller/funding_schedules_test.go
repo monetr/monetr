@@ -820,6 +820,36 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		response.Status(http.StatusNotFound)
 		response.JSON().Path("$.error").String().IsEqual("cannot remove funding schedule, it does not exist")
 	})
+
+	t.Run("cant delete someone elses funding schedule", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank models.BankAccount
+		var fundingSchedule *models.FundingSchedule
+
+		{ // Create a funding schedule under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			fundingSchedule = fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to delete the funding schedule
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("cannot remove funding schedule, it does not exist")
+		}
+	})
 }
 
 func TestGetFundingSchedulesByID(t *testing.T) {
