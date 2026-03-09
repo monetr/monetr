@@ -374,6 +374,32 @@ func TestGetLink(t *testing.T) {
 		// When we have a real plaid link, there will be a plaid link sub object.
 		response.JSON().Path("$.plaidLink.institutionId").String().NotEmpty()
 	})
+
+	t.Run("cant get someone elses link", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var link models.Link
+
+		{ // Create a link under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link = fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to retrieve the link
+			response := e.GET("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("failed to retrieve link: record does not exist")
+		}
+	})
 }
 
 func TestPutLink(t *testing.T) {
@@ -619,6 +645,35 @@ func TestPatchLink(t *testing.T) {
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").IsEqual("Invalid request")
 			response.JSON().Path("$.problems.linkType").String().IsEqual("key not expected")
+		}
+	})
+
+	t.Run("cant patch someone elses link", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var link models.Link
+
+		{ // Create a link under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link = fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to patch the link
+			response := e.PATCH("/api/links/{linkId}").
+				WithPath("linkId", link.LinkId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"description": "my updated description",
+				}).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("failed to retrieve link: record does not exist")
 		}
 	})
 }

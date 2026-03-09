@@ -697,6 +697,33 @@ func TestGetSpending(t *testing.T) {
 			response.JSON().Path("$.error").String().IsEqual("must specify a valid bank account Id")
 		}
 	})
+
+	t.Run("cant get spending for someone elses bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Create a bank account with spending under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to list spending under the other user's bank account
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().IsEmpty()
+		}
+	})
 }
 
 func TestGetSpendingByID(t *testing.T) {
@@ -819,6 +846,62 @@ func TestGetSpendingByID(t *testing.T) {
 			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("spendingId", "spnd_bogus").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("could not retrieve spending: record does not exist")
+		}
+	})
+
+	t.Run("cant get someone elses spending by ID", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var spendingId ID[Spending]
+
+		{ // Create a bank account and spending under one user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			tok := GivenILogin(t, e, user.Login.Email, password)
+
+			fundingScheduleId := ID[FundingSchedule](e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, tok).
+				WithJSON(map[string]any{
+					"name":    "Payday",
+					"ruleset": FifthteenthAndLastDayOfEveryMonth,
+				}).
+				Expect().
+				Status(http.StatusOK).
+				JSON().Path("$.fundingScheduleId").String().Raw())
+
+			spendingId = ID[Spending](e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, tok).
+				WithJSON(map[string]any{
+					"name":              "Groceries",
+					"ruleset":           FirstDayOfEveryMonth,
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      5000,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+				}).
+				Expect().
+				Status(http.StatusOK).
+				JSON().Path("$.spendingId").String().Raw())
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to get the spending by ID using the other user's bank account and spending IDs
+			response := e.GET("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
 				WithCookie(TestCookieName, token).
 				Expect()
 
