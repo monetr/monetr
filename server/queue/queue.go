@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/communication"
@@ -137,7 +138,6 @@ func Register[T any](
 			return errors.Wrapf(err, "failed to decode arguments for job: %s", queue)
 		}
 
-		// TODO, transaction wrapping?
 		return job(ctx, args)
 	})
 
@@ -158,10 +158,46 @@ func RegisterCron(
 		schedule,
 		// Cron jobs don't need their argument bytes, but are represented as the
 		// same signature internaly for simplicity.
-		func(ctx Context, _ []byte) error {
-			// TODO, transaction wrapping?
-			// TODO, add monitor check in with sentry here!
-			return job(ctx)
+		func(ctx Context, _ []byte) (err error) {
+			span := sentry.SpanFromContext(ctx)
+			hub := sentry.GetHubFromContext(ctx)
+			hub.ConfigureScope(func(scope *sentry.Scope) {
+				scope.SetContext("monitor", sentry.Context{"slug": queue})
+			})
+			defer hub.RecoverWithContext(ctx, nil)
+			crontab := strings.SplitN(schedule, " ", 2)[1]
+			monitorSchedule := sentry.CrontabSchedule(crontab)
+			monitorConfig := &sentry.MonitorConfig{
+				Schedule:      monitorSchedule,
+				MaxRuntime:    2,
+				CheckInMargin: 1,
+			}
+			checkInId := hub.CaptureCheckIn(&sentry.CheckIn{
+				MonitorSlug: queue,
+				Status:      sentry.CheckInStatusInProgress,
+			}, monitorConfig)
+			defer func() {
+				status := sentry.CheckInStatusOK
+				span.Status = sentry.SpanStatusOK
+				if err != nil {
+					status = sentry.CheckInStatusError
+					span.Status = sentry.SpanStatusInternalError
+					hub.CaptureException(err)
+					ctx.Log().WarnContext(span.Context(), "cron job finished with an error", "err", err)
+				} else {
+					ctx.Log().DebugContext(span.Context(), "cron job finished")
+				}
+				span.Finish()
+				hub.CaptureCheckIn(&sentry.CheckIn{
+					ID:          *checkInId,
+					MonitorSlug: queue,
+					Status:      status,
+					Duration:    span.EndTime.Sub(span.StartTime),
+				}, monitorConfig)
+			}()
+
+			err = job(ctx)
+			return err
 		},
 	)
 

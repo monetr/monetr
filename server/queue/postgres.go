@@ -35,6 +35,8 @@ var (
 
 const (
 	numberOfWorkers = 4
+	maxAttempts     = 5
+	attemptBackoff  = 10 * time.Second
 )
 
 const (
@@ -847,6 +849,20 @@ func (p *postgresProcessor) worker(shutdown chan chan struct{}) {
 			// way we can notify if a job isn't terminating properly on timeout.
 			p.executeJob(job)
 		}
+
+		// After we have executed the job then we want to check the shutdown signal
+		// again. Because if we have shutdown then sending on the availableThreads
+		// channel will block or fail depending on timing. So we need to do this
+		// first.
+		select {
+		case promise := <-shutdown:
+			p.log.Debug("shutting down worker thread")
+			promise <- workerSignal
+			return
+		default:
+			// If we aren't shutting down then proceed!
+			continue
+		}
 	}
 }
 
@@ -940,7 +956,9 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 			}
 			span.Status = sentry.SpanStatusInternalError
 
-			if job.Attempt < 5 {
+			// If we get a regular error back and we have not exhausted our retries
+			// then we can bump the job again.
+			if job.Attempt < maxAttempts {
 				log.WarnContext(span.Context(), "job has attempts left and will be retried",
 					"err", err,
 					"attempt", job.Attempt,
@@ -948,7 +966,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 				now := p.clock.Now()
 				if _, err := p.db.Model(job).
 					Set(`"attempt" = ?`, job.Attempt+1).
-					Set(`"priority" = ?`, now.Add(10*time.Second*time.Duration(job.Attempt)).Unix()).
+					Set(`"priority" = ?`, now.Add(attemptBackoff*time.Duration(job.Attempt)).Unix()).
 					Set(`"status" = ?`, models.PendingJobStatus).
 					Set(`"started_at" = NULL`).
 					Set(`"updated_at" = ?`, now).
@@ -957,6 +975,8 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 					log.ErrorContext(span.Context(), "failed to bump job for retry", "err", err)
 				}
 			} else {
+				// If we have exhausted our retries though then move the job to a failed
+				// status.
 				log.WarnContext(span.Context(), "job has no remaining attempts, marking as failed",
 					"err", err,
 					"attempt", job.Attempt,
@@ -972,6 +992,8 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 				}
 			}
 		} else {
+			// If the job succeeded then mark the job as completed and we don't need
+			// to do anything else.
 			now := p.clock.Now()
 			if _, err := p.db.Model(job).
 				Set(`"status" = ?`, models.CompletedJobStatus).
@@ -988,7 +1010,6 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 			span.Status = sentry.SpanStatusOK
 		}
 
-		// TODO Mark the job status as failed? Retry logic?
 		span.Finish()
 	}()
 
