@@ -146,28 +146,25 @@ func (j *CleanupFilesJob) Run(ctx context.Context) error {
 }
 
 func CleanupFilesCron(ctx queue.Context) error {
-	span := sentry.StartSpan(ctx, "job.exec")
-	defer span.Finish()
-
 	log := ctx.Log()
 
-	log.DebugContext(span.Context(), "looking for expired files that need to be removed")
+	log.DebugContext(ctx, "looking for expired files that need to be removed")
 
 	var expiredFiles []models.File
-	if err := ctx.DB().ModelContext(span.Context(), &expiredFiles).
+	if err := ctx.DB().ModelContext(ctx, &expiredFiles).
 		Where(`"expires_at" < ?`, ctx.Clock().Now()).
 		Where(`"reconciled_at" IS NULL`).
 		Select(&expiredFiles); err != nil {
-		log.ErrorContext(span.Context(), "failed to retrieve expired filed", "err", err)
+		log.ErrorContext(ctx, "failed to retrieve expired filed", "err", err)
 		return err
 	}
 
 	if len(expiredFiles) == 0 {
-		log.DebugContext(span.Context(), "no expired files to remove at this time")
+		log.DebugContext(ctx, "no expired files to remove at this time")
 		return nil
 	}
 
-	log.InfoContext(span.Context(), "queueing expired files to be removed", "expiredFilesCount", len(expiredFiles))
+	log.InfoContext(ctx, "queueing expired files to be removed", "expiredFilesCount", len(expiredFiles))
 
 	for i := range expiredFiles {
 		expiredFile := expiredFiles[i]
@@ -175,12 +172,12 @@ func CleanupFilesCron(ctx queue.Context) error {
 			"accountId", expiredFile.AccountId,
 			"fileId", expiredFile.FileId,
 		)
-		fileLog.DebugContext(span.Context(), "queueing file to be removed")
+		fileLog.DebugContext(ctx, "queueing file to be removed")
 		if err := queue.Enqueue(ctx, ctx.Processor(), RemoveFile, RemoveFileArguments{
 			AccountId: expiredFile.AccountId,
 			FileId:    expiredFile.FileId,
 		}); err != nil {
-			fileLog.WarnContext(span.Context(), "failed to queue file to be removed", "err", err)
+			fileLog.WarnContext(ctx, "failed to queue file to be removed", "err", err)
 			continue
 		}
 	}

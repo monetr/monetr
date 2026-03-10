@@ -41,6 +41,11 @@ type Context interface {
 	Billing() billing.Billing
 	Email() communication.EmailCommunication
 	Processor() Processor
+
+	// RunInTransaction wraps the current context in a transaction, notably the
+	// [Context.DB] function here will be an actual postgresql transaction now and
+	// any errors or panics in this block will result in a full rollback.
+	RunInTransaction(ctx context.Context, callback func(ctx Context) error) error
 }
 
 // JobFunction is any function (even outside of this package) that takes the job

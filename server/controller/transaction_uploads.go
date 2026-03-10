@@ -53,7 +53,7 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 
 	if err := c.JobRunner.EnqueueJob(
 		c.getContext(ctx),
-		background.ProcessOFXUpload,
+		background.ProcessOFXUploadName,
 		background.ProcessOFXUploadArguments{
 			AccountId:           c.mustGetAccountId(ctx),
 			BankAccountId:       bankAccountId,

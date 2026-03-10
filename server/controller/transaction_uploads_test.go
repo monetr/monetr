@@ -49,7 +49,7 @@ func TestPostTransaactionUpload(t *testing.T) {
 		app.Jobs.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				background.ProcessOFXUpload,
+				background.ProcessOFXUploadName,
 				testutils.NewGenericMatcher(func(args background.ProcessOFXUploadArguments) bool {
 					return myownsanity.Every(
 						assert.EqualValues(t, bank.AccountId, args.AccountId, "Account ID should match"),
@@ -97,7 +97,7 @@ func TestPostTransaactionUpload(t *testing.T) {
 		app.Jobs.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				background.ProcessOFXUpload,
+				background.ProcessOFXUploadName,
 				testutils.NewGenericMatcher(func(args background.ProcessOFXUploadArguments) bool {
 					return myownsanity.Every(
 						assert.EqualValues(t, bank.AccountId, args.AccountId, "Account ID should match"),
@@ -144,7 +144,7 @@ func TestPostTransaactionUpload(t *testing.T) {
 		app.Jobs.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				background.ProcessOFXUpload,
+				background.ProcessOFXUploadName,
 				gomock.Any(),
 			).
 			Times(0).
@@ -189,7 +189,7 @@ func TestPostTransaactionUpload(t *testing.T) {
 		app.Jobs.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				background.ProcessOFXUpload,
+				background.ProcessOFXUploadName,
 				gomock.Any(),
 			).
 			Times(0).
@@ -239,7 +239,7 @@ func TestPostTransaactionUpload(t *testing.T) {
 		app.Jobs.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				background.ProcessOFXUpload,
+				background.ProcessOFXUploadName,
 				gomock.Any(),
 			).
 			Times(0)

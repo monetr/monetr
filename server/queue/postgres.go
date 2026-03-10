@@ -53,6 +53,30 @@ type postgresContext struct {
 	*postgresProcessor
 }
 
+// RunInTransaction implements [Context].
+// This function calls the provided callback with a modified version of the
+// current context. The [Context.DB] function is now transactional within the
+// callback. This way the changes made to data in the datastore within the
+// callback is atomic. Other parts of the context however are not transactional.
+// Such as email or billing. But [Enqueue] or [EnqueueAt] within the callback is
+// transactional.
+func (p *postgresContext) RunInTransaction(ctx context.Context, callback func(ctx Context) error) error {
+	return p.DB().RunInTransaction(ctx, func(tx *pg.Tx) error {
+		span := sentry.StartSpan(ctx, "db.transaction")
+		defer span.Finish()
+
+		// Clone the existing context object, but replace the DB with the
+		// transaction now.
+		clone := *p
+		// Propagate tracing
+		clone.ctx = span.Context()
+		clone.db = tx
+
+		// Then call the callback using the cloned context
+		return callback(&clone)
+	})
+}
+
 // Clock implements [Context].
 func (p *postgresContext) Clock() clock.Clock {
 	return p.clock
@@ -897,7 +921,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 
 			// If we panic during the job then just mark the job as failed and don't
 			// retry.
-			now := time.Now()
+			now := p.clock.Now()
 			if _, err := p.db.Model(job).
 				Set(`"status" = ?`, models.FailedJobStatus).
 				Set(`"completed_at" = ?`, now).
@@ -921,12 +945,13 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 					"err", err,
 					"attempt", job.Attempt,
 				)
+				now := p.clock.Now()
 				if _, err := p.db.Model(job).
 					Set(`"attempt" = ?`, job.Attempt+1).
-					Set(`"priority" = ?`, time.Now().Add(10*time.Second*time.Duration(job.Attempt)).Unix()).
+					Set(`"priority" = ?`, now.Add(10*time.Second*time.Duration(job.Attempt)).Unix()).
 					Set(`"status" = ?`, models.PendingJobStatus).
 					Set(`"started_at" = NULL`).
-					Set(`"updated_at" = ?`, time.Now()).
+					Set(`"updated_at" = ?`, now).
 					WherePK().
 					Update(); err != nil {
 					log.ErrorContext(span.Context(), "failed to bump job for retry", "err", err)
@@ -936,7 +961,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 					"err", err,
 					"attempt", job.Attempt,
 				)
-				now := time.Now()
+				now := p.clock.Now()
 				if _, err := p.db.Model(job).
 					Set(`"status" = ?`, models.FailedJobStatus).
 					Set(`"completed_at" = ?`, now).
@@ -947,7 +972,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 				}
 			}
 		} else {
-			now := time.Now()
+			now := p.clock.Now()
 			if _, err := p.db.Model(job).
 				Set(`"status" = ?`, models.CompletedJobStatus).
 				Set(`"completed_at" = ?`, now).
@@ -967,8 +992,11 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 		span.Finish()
 	}()
 
+	innerSpan := sentry.StartSpan(span.Context(), "job.exec")
+	defer innerSpan.Finish()
+
 	if err = executor(
-		p.jobContext(span.Context(), job),
+		p.jobContext(innerSpan.Context(), job),
 		[]byte(job.Input),
 	); err != nil {
 		log.Error("failed to execute job", "err", err)

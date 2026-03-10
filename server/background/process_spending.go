@@ -247,8 +247,6 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 }
 
 func ProcessSpendingCron(ctx queue.Context) error {
-	span := sentry.StartSpan(ctx, "job.exec")
-	defer span.Finish()
 	log := ctx.Log()
 
 	jobRepo := repository.NewJobRepository(ctx.DB(), ctx.Clock())
@@ -258,13 +256,13 @@ func ProcessSpendingCron(ctx queue.Context) error {
 	}
 
 	if len(bankAccountsWithStaleSpending) == 0 {
-		crumbs.Debug(span.Context(), "No bank accounts had stale spending objects.", nil)
-		log.InfoContext(span.Context(), "no bank accounts have stale spending objects")
+		crumbs.Debug(ctx, "No bank accounts had stale spending objects.", nil)
+		log.InfoContext(ctx, "no bank accounts have stale spending objects")
 		return nil
 	}
 
-	log.InfoContext(span.Context(), "found bank accounts with stale spending", "count", len(bankAccountsWithStaleSpending))
-	crumbs.Debug(span.Context(), "Found bank accounts with stale spending.", map[string]any{
+	log.InfoContext(ctx, "found bank accounts with stale spending", "count", len(bankAccountsWithStaleSpending))
+	crumbs.Debug(ctx, "Found bank accounts with stale spending.", map[string]any{
 		"count": len(bankAccountsWithStaleSpending),
 	})
 
@@ -275,7 +273,7 @@ func ProcessSpendingCron(ctx queue.Context) error {
 			"accountId", item.AccountId,
 			"bankAccountId", item.BankAccountId,
 		)
-		itemLog.Log(span.Context(), logging.LevelTrace, "enqueuing bank account to process stale spending")
+		itemLog.Log(ctx, logging.LevelTrace, "enqueuing bank account to process stale spending")
 
 		err = queue.Enqueue(
 			ctx,
@@ -287,31 +285,24 @@ func ProcessSpendingCron(ctx queue.Context) error {
 			},
 		)
 		if err != nil {
-			log.WarnContext(span.Context(), "failed to enqueue job to process stale spending", "err", err)
-			crumbs.Warn(span.Context(), "Failed to enqueue job to process stale spending", "job", map[string]any{
+			log.WarnContext(ctx, "failed to enqueue job to process stale spending", "err", err)
+			crumbs.Warn(ctx, "Failed to enqueue job to process stale spending", "job", map[string]any{
 				"error": err,
 			})
 			jobErrors = append(jobErrors, err)
 			continue
 		}
 
-		itemLog.Log(span.Context(), logging.LevelTrace, "successfully enqueued bank accounts for stale spending processing")
+		itemLog.Log(ctx, logging.LevelTrace, "successfully enqueued bank accounts for stale spending processing")
 	}
 
 	return nil
 }
 
 func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
-	span := sentry.StartSpan(ctx, "job.exec")
-	defer span.Finish()
-
-	log := ctx.Log()
-
-	return ctx.DB().RunInTransaction(ctx, func(txn *pg.Tx) error {
-		span := sentry.StartSpan(ctx, "db.transaction")
-		defer span.Finish()
-
-		log = log.With(
+	return ctx.RunInTransaction(ctx, func(ctx queue.Context) error {
+		crumbs.IncludeUserInScope(ctx, args.AccountId)
+		log := ctx.Log().With(
 			"accountId", args.AccountId,
 			"bankAccountId", args.BankAccountId,
 		)
@@ -320,26 +311,26 @@ func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
 			ctx.Clock(),
 			"user_system",
 			args.AccountId,
-			txn,
+			ctx.DB(),
 			log,
 		)
 
-		account, err := repo.GetAccount(span.Context())
+		account, err := repo.GetAccount(ctx)
 		if err != nil {
-			log.ErrorContext(span.Context(), "failed to retrieve account to process stale spending", "err", err)
+			log.ErrorContext(ctx, "failed to retrieve account to process stale spending", "err", err)
 			return err
 		}
 
 		timezone, err := account.GetTimezone()
 		if err != nil {
-			log.ErrorContext(span.Context(), "failed to parse account timezone", "err", err)
+			log.ErrorContext(ctx, "failed to parse account timezone", "err", err)
 			return err
 		}
 
 		now := ctx.Clock().Now()
-		allSpending, err := repo.GetSpending(span.Context(), args.BankAccountId)
+		allSpending, err := repo.GetSpending(ctx, args.BankAccountId)
 		if err != nil {
-			log.ErrorContext(span.Context(), "failed to retrieve spending for bank account", "err", err)
+			log.ErrorContext(ctx, "failed to retrieve spending for bank account", "err", err)
 			return err
 		}
 
@@ -358,12 +349,12 @@ func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
 			fundingSchedule, ok := fundingSchedules[spending.FundingScheduleId]
 			if !ok {
 				fundingSchedule, err = repo.GetFundingSchedule(
-					span.Context(),
+					ctx,
 					spending.BankAccountId,
 					spending.FundingScheduleId,
 				)
 				if err != nil {
-					log.WarnContext(span.Context(), "failed to retrieve funding schedule for spending object, it will not be processed", "err", err)
+					log.WarnContext(ctx, "failed to retrieve funding schedule for spending object, it will not be processed", "err", err)
 					continue
 				}
 
@@ -371,7 +362,7 @@ func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
 			}
 
 			spending.CalculateNextContribution(
-				span.Context(),
+				ctx,
 				timezone,
 				fundingSchedule,
 				now,
@@ -382,14 +373,14 @@ func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
 		}
 
 		if len(spendingToUpdate) == 0 {
-			log.InfoContext(span.Context(), "no stale spending object were updated")
+			log.InfoContext(ctx, "no stale spending object were updated")
 			return nil
 		}
 
-		log.InfoContext(span.Context(), "updating stale spending objects", "count", len(spendingToUpdate))
+		log.InfoContext(ctx, "updating stale spending objects", "count", len(spendingToUpdate))
 
 		return errors.Wrap(repo.UpdateSpending(
-			span.Context(),
+			ctx,
 			args.BankAccountId,
 			spendingToUpdate,
 		), "failed to update stale spending")

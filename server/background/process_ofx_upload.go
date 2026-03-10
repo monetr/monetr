@@ -20,13 +20,14 @@ import (
 	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
+	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/pkg/errors"
 )
 
 const (
-	ProcessOFXUpload = "ProcessOFXUpload"
+	ProcessOFXUploadName = "ProcessOFXUpload"
 )
 
 var (
@@ -148,7 +149,7 @@ func (h *ProcessOFXUploadHandler) updateStatus(
 }
 
 func (h *ProcessOFXUploadHandler) QueueName() string {
-	return ProcessOFXUpload
+	return ProcessOFXUploadName
 }
 
 func (h *ProcessOFXUploadHandler) HandleConsumeJob(
@@ -630,6 +631,120 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 	if err := j.repo.UpdateBankAccount(span.Context(), j.bankAccount); err != nil {
 		return errors.Wrap(err, "failed to update bank account balances")
 	}
+
+	return nil
+}
+
+func ProcessOFXUpload(ctx queue.Context, args ProcessOFXUploadArguments) error {
+	crumbs.IncludeUserInScope(ctx, args.AccountId)
+
+	log := ctx.Log().With(
+		"accountId", args.AccountId,
+		"transactionUploadId", args.TransactionUploadId,
+		"bankAccountId", args.BankAccountId,
+	)
+
+	if err := updateStatus(ctx, args, TransactionUploadStatusProcessing, nil); err != nil {
+		return err
+	}
+
+	// error here then we will catch it and update the upload status accordingly.
+	var err error
+	defer func() {
+		if recovery := recover(); recovery != nil {
+			log.ErrorContext(ctx, "panic processing OFX file upload", "err", err)
+			_ = updateStatus(ctx, args, TransactionUploadStatusFailed, nil)
+
+			panic(recovery)
+		}
+		if err != nil {
+			log.ErrorContext(ctx, "error processing OFX file upload", "err", err)
+			errorString := fmt.Sprintf("%s", err)
+			_ = updateStatus(ctx, args, TransactionUploadStatusFailed, &errorString)
+		} else {
+			_ = updateStatus(ctx, args, TransactionUploadStatusComplete, nil)
+		}
+	}()
+	err = ctx.RunInTransaction(ctx, func(ctx queue.Context) error {
+		span := sentry.StartSpan(ctx, "db.transaction")
+		defer span.Finish()
+
+		repo := repository.NewRepositoryFromSession(
+			ctx.Clock(),
+			"user_system",
+			args.AccountId,
+			ctx.DB(),
+			log,
+		)
+
+		job, err := NewProcessOFXUploadJob(
+			// TODO This doesn't pass a proper enqueuer here!
+			log, repo, ctx.Clock(), ctx.Storage(), ctx.Publisher(), nil, args,
+		)
+		if err != nil {
+			return err
+		}
+
+		return job.Run(span.Context())
+	})
+
+	// Return the error anyway so we can see failed uploads in sentry.
+	return err
+}
+
+func updateStatus(
+	ctx queue.Context,
+	args ProcessOFXUploadArguments,
+	status TransactionUploadStatus,
+	errorMessage *string,
+) error {
+	log := ctx.Log().With(
+		"accountId", args.AccountId,
+		"bankAccountId", args.BankAccountId,
+		"transactionUploadId", args.TransactionUploadId,
+	)
+
+	query := ctx.DB().ModelContext(ctx, &TransactionUpload{}).
+		Where(`"account_id" = ?`, args.AccountId).
+		Where(`"bank_account_id" = ?`, args.BankAccountId).
+		Where(`"transaction_upload_id" = ?`, args.TransactionUploadId).
+		Set(`"status" = ?`, status)
+
+	switch status {
+	case TransactionUploadStatusProcessing:
+		query = query.Set(`"processed_at" = ?`, ctx.Clock().Now())
+	case TransactionUploadStatusComplete:
+		query = query.Set(`"completed_at" = ?`, ctx.Clock().Now())
+	case TransactionUploadStatusFailed:
+		query = query.Set(`"completed_at" = ?`, ctx.Clock().Now())
+		if errorMessage != nil {
+			query = query.Set(`"error" = ?`, *errorMessage)
+		} else {
+			query = query.Set(`"error" = ?`, "Unknown failure")
+		}
+	}
+
+	log.Log(ctx, logging.LevelTrace, "updated transaction upload status", "status", status)
+
+	_, err := query.Update()
+	if err != nil {
+		return errors.Wrap(err, "failed to update upload status")
+	}
+
+	channel := fmt.Sprintf(
+		"account:%s:transaction_upload:%s:progress",
+		args.AccountId, args.TransactionUploadId,
+	)
+	payload := string(status)
+	if err := ctx.Publisher().Notify(
+		ctx,
+		args.AccountId,
+		channel,
+		payload,
+	); err != nil {
+		return errors.Wrap(err, "failed to send progress notification for job")
+	}
+	log.Log(ctx, logging.LevelTrace, "sent progress notification for file upload", "channel", channel, "payload", payload)
 
 	return nil
 }

@@ -107,32 +107,29 @@ func (c *CleanupJobsJob) Run(ctx context.Context) error {
 }
 
 func CleanupJobsCron(ctx queue.Context) error {
-	span := sentry.StartSpan(ctx, "job.exec")
-	defer span.Finish()
-
 	log := ctx.Log()
-	log.InfoContext(span.Context(), "getting ready to clean up the jobs table")
+	log.InfoContext(ctx, "getting ready to clean up the jobs table")
 
-	result, err := ctx.DB().ModelContext(span.Context(), &models.Job{}).
-		Where(`"job"."created_at" < ?`, time.Now().Add(-15*24*time.Hour)).
+	result, err := ctx.DB().ModelContext(ctx, &models.Job{}).
+		Where(`"job"."created_at" < ?`, ctx.Clock().Now().Add(-15*24*time.Hour)).
 		Delete()
 	if err = errors.Wrap(err, "failed to cleanup old jobs from the jobs table"); err != nil {
-		log.ErrorContext(span.Context(), "failed to cleanup", "err", err)
+		log.ErrorContext(ctx, "failed to cleanup", "err", err)
 		return err
 	}
 
 	if affected := result.RowsAffected(); affected > 0 {
-		log.InfoContext(span.Context(), fmt.Sprintf("deleted %d old jobs from the jobs table", affected))
+		log.InfoContext(ctx, fmt.Sprintf("deleted %d old jobs from the jobs table", affected))
 
-		if _, err := ctx.DB().ExecContext(span.Context(), `VACUUM jobs;`); err != nil {
-			log.ErrorContext(span.Context(), "failed to vacuum jobs table", "err", err)
+		if _, err := ctx.DB().ExecContext(ctx, `VACUUM jobs;`); err != nil {
+			log.ErrorContext(ctx, "failed to vacuum jobs table", "err", err)
 		}
 
-		if _, err := ctx.DB().ExecContext(span.Context(), `VACUUM cron_jobs;`); err != nil {
-			log.ErrorContext(span.Context(), "failed to vacuum cron jobs table", "err", err)
+		if _, err := ctx.DB().ExecContext(ctx, `VACUUM cron_jobs;`); err != nil {
+			log.ErrorContext(ctx, "failed to vacuum cron jobs table", "err", err)
 		}
 	} else {
-		log.InfoContext(span.Context(), "no jobs were cleaned up from the jobs table")
+		log.InfoContext(ctx, "no jobs were cleaned up from the jobs table")
 	}
 
 	return nil
