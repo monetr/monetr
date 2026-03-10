@@ -710,9 +710,9 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 
 func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 	// maxBackoff is 60 seconds
-	var maxBackoff time.Duration = 12
+	var maxBackoff time.Duration = 6
 	var backoff time.Duration = 1
-	baseInterval := 5 * time.Second
+	baseInterval := 10 * time.Second
 	ticker := time.NewTicker(baseInterval)
 	for {
 		// Because this is at the beginning of the loop, the only time this blocks
@@ -909,14 +909,33 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 			span.Status = sentry.SpanStatusInternalError
 
 			if job.Attempt < 5 {
+				log.WarnContext(span.Context(), "job has attempts left and will be retried",
+					"err", err,
+					"attempt", job.Attempt,
+				)
 				if _, err := p.db.Model(job).
-					Set(`"priority" = ?`, time.Now().Add(10*time.Second*time.Duration(job.Attempt))).
+					Set(`"attempt" = ?`, job.Attempt+1).
+					Set(`"priority" = ?`, time.Now().Add(10*time.Second*time.Duration(job.Attempt)).Unix()).
 					Set(`"status" = ?`, models.PendingJobStatus).
 					Set(`"started_at" = NULL`).
 					Set(`"updated_at" = ?`, time.Now()).
 					WherePK().
 					Update(); err != nil {
 					log.ErrorContext(span.Context(), "failed to bump job for retry", "err", err)
+				}
+			} else {
+				log.WarnContext(span.Context(), "job has no remaining attempts, marking as failed",
+					"err", err,
+					"attempt", job.Attempt,
+				)
+				now := time.Now()
+				if _, err := p.db.Model(job).
+					Set(`"status" = ?`, models.FailedJobStatus).
+					Set(`"completed_at" = ?`, now).
+					Set(`"updated_at" = ?`, now).
+					WherePK().
+					Update(); err != nil {
+					log.ErrorContext(span.Context(), "failed to mark job as failed", "err", err)
 				}
 			}
 		} else {

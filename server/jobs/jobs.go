@@ -11,6 +11,6 @@ import (
 func RegisterJobs(ctx context.Context, processor queue.Processor) error {
 	return myownsanity.FirstError(
 		queue.Register(ctx, processor, background.RemoveFile),
-		queue.RegisterCron(ctx, processor, "0 */1 * * * *", background.CronCleanupJobs),
+		queue.RegisterCron(ctx, processor, "0 0 8 * * *", background.CronCleanupJobs),
 	)
 }
