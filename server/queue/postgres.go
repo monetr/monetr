@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
@@ -50,6 +51,11 @@ var (
 type postgresContext struct {
 	ctx context.Context
 	*postgresProcessor
+}
+
+// Clock implements [Context].
+func (p *postgresContext) Clock() clock.Clock {
+	return p.clock
 }
 
 // Billing implements [Context].
@@ -131,6 +137,7 @@ type postgresProcessor struct {
 	// fields are constructed as part of the [*postgresProcessor.Start] function.
 	notifier      Notifier
 	log           *slog.Logger
+	clock         clock.Clock
 	configuration config.Configuration
 	db            pg.DBI
 	publisher     pubsub.Publisher
@@ -170,6 +177,7 @@ type postgresProcessor struct {
 func NewPostgresQueue(
 	ctx context.Context,
 	notifier Notifier,
+	clock clock.Clock,
 	log *slog.Logger,
 	configuration config.Configuration,
 	db *pg.DB,

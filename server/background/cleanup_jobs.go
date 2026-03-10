@@ -106,7 +106,7 @@ func (c *CleanupJobsJob) Run(ctx context.Context) error {
 	return nil
 }
 
-func CronCleanupJobs(ctx queue.Context) error {
+func CleanupJobsCron(ctx queue.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 

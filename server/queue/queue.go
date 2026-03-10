@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/communication"
@@ -30,6 +31,7 @@ import (
 
 type Context interface {
 	context.Context
+	Clock() clock.Clock
 	Log() *slog.Logger
 	DB() pg.DBI
 	Publisher() pubsub.Publisher
