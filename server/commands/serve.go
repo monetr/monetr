@@ -25,10 +25,12 @@ import (
 	"github.com/monetr/monetr/server/controller"
 	"github.com/monetr/monetr/server/database"
 	"github.com/monetr/monetr/server/internal/source"
+	"github.com/monetr/monetr/server/jobs"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
+	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
@@ -280,21 +282,47 @@ func ServeCommand(parent *cobra.Command) {
 					return err
 				}
 				cancel()
+
+				// if err = backgroundJobs.Start(); err != nil {
+				// 	log.Error("failed to start background job worker", "err", err)
+				// 	return err
+				// }
+				// defer func() {
+				// 	if err := backgroundJobs.Close(); err != nil {
+				// 		log.Error("failed to close background jobs processor gracefully", "err", err)
+				// 	}
+				// }()
 			}
-			// var queue queue.Processor
+
+			var jobQueue queue.Processor
 			{ // Setup the new job queue
-
-			}
-
-			if err = backgroundJobs.Start(); err != nil {
-				log.Error("failed to start background job worker", "err", err)
-				return err
-			}
-			defer func() {
-				if err := backgroundJobs.Close(); err != nil {
-					log.Error("failed to close background jobs processor gracefully", "err", err)
+				jobQueue = queue.NewPostgresQueue(
+					context.Background(),
+					queue.NewMemoryNotifier(4),
+					log,
+					configuration,
+					db,
+					pubSub,
+					plaidClient,
+					kms,
+					fileStorage,
+					bill,
+					email,
+				)
+				if err := jobs.RegisterJobs(context.Background(), jobQueue); err != nil {
+					log.Error("failed to register jobs", "err", err)
+					return err
 				}
-			}()
+				if err = jobQueue.Start(); err != nil {
+					log.Error("failed to start job queue processor", "err", err)
+					return err
+				}
+				defer func() {
+					if err := jobQueue.Close(); err != nil {
+						log.Error("failed to close job queue processor gracefully", "err", err)
+					}
+				}()
+			}
 
 			applicationControllers := []application.Controller{
 				&controller.Controller{

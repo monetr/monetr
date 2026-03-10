@@ -3,19 +3,21 @@ package background
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/pkg/errors"
 )
 
 const (
-	RemoveFile = "RemoveFile"
+	RemoveFileName = "RemoveFile"
 )
 
 var (
@@ -61,7 +63,7 @@ func NewRemoveFileHandler(
 }
 
 func (h *RemoveFileHandler) QueueName() string {
-	return RemoveFile
+	return RemoveFileName
 }
 
 func (h *RemoveFileHandler) HandleConsumeJob(
@@ -165,4 +167,59 @@ func (j *RemoveFileJob) Run(ctx context.Context) error {
 
 	log.DebugContext(span.Context(), "file successfully removed")
 	return nil
+}
+
+func RemoveFile(ctx queue.Context, args RemoveFileArguments) error {
+	span := sentry.StartSpan(ctx, "job.exec")
+	defer span.Finish()
+
+	log := ctx.Log().With(
+		"accountId", args.AccountId,
+		"fileId", args.FileId,
+	)
+
+	return ctx.DB().RunInTransaction(ctx, func(txn *pg.Tx) error {
+		span := sentry.StartSpan(ctx, "db.transaction")
+		defer span.Finish()
+
+		repo := repository.NewRepositoryFromSession(
+			clock.New(), // TODO!
+			"user_system",
+			args.AccountId,
+			txn,
+			log,
+		)
+
+		file, err := repo.GetFile(span.Context(), args.FileId)
+		if err != nil {
+			log.ErrorContext(span.Context(), "failed to retrieve file from database", "err", err)
+			return err
+		}
+
+		if file.ReconciledAt != nil {
+			log.InfoContext(span.Context(), "file is already deleted")
+			return nil
+		}
+
+		log.DebugContext(span.Context(), "removing file")
+		if err = ctx.Storage().Remove(span.Context(), *file); err != nil {
+			log.ErrorContext(span.Context(), "failed to remove file", "err", err)
+		}
+
+		now := time.Now()
+		file.ReconciledAt = &now
+
+		if file.DeletedAt == nil {
+			file.DeletedAt = &now
+		}
+
+		if err := repo.UpdateFile(span.Context(), file); err != nil {
+			log.ErrorContext(span.Context(), "failed to update file's reconciled at", "err", err)
+			return err
+		}
+
+		log.DebugContext(span.Context(), "file successfully removed")
+		return nil
+	})
+
 }

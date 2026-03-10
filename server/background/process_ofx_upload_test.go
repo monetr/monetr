@@ -111,7 +111,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueJob(
 						gomock.Any(),
-						background.RemoveFile,
+						background.RemoveFileName,
 						gomock.Eq(background.RemoveFileArguments{
 							AccountId: file.AccountId,
 							FileId:    file.FileId,
@@ -183,7 +183,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueJob(
 						gomock.Any(),
-						background.RemoveFile,
+						background.RemoveFileName,
 						gomock.Eq(background.RemoveFileArguments{
 							AccountId: file.AccountId,
 							FileId:    file.FileId,
@@ -277,7 +277,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueJob(
 						gomock.Any(),
-						background.RemoveFile,
+						background.RemoveFileName,
 						gomock.Eq(background.RemoveFileArguments{
 							AccountId: file.AccountId,
 							FileId:    file.FileId,
@@ -368,7 +368,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueJob(
 						gomock.Any(),
-						background.RemoveFile,
+						background.RemoveFileName,
 						gomock.Eq(background.RemoveFileArguments{
 							AccountId: file.AccountId,
 							FileId:    file.FileId,
@@ -475,7 +475,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueJob(
 						gomock.Any(),
-						background.RemoveFile,
+						background.RemoveFileName,
 						gomock.Eq(background.RemoveFileArguments{
 							AccountId: file.AccountId,
 							FileId:    file.FileId,

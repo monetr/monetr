@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash/fnv"
+	"log/slog"
 	"reflect"
 	"runtime"
 	"strings"
@@ -29,6 +30,7 @@ import (
 
 type Context interface {
 	context.Context
+	Log() *slog.Logger
 	DB() pg.DBI
 	Publisher() pubsub.Publisher
 	Platypus() platypus.Platypus
@@ -77,6 +79,9 @@ type Processor interface {
 		schedule string,
 		job internalJobWrapper,
 	) error
+
+	Start() error
+	Close() error
 }
 
 func Enqueue[T any](

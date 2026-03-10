@@ -44,7 +44,82 @@ const (
 
 var (
 	_ Processor = &postgresProcessor{}
+	_ Context   = &postgresContext{}
 )
+
+type postgresContext struct {
+	ctx context.Context
+	*postgresProcessor
+}
+
+// Billing implements [Context].
+func (p *postgresContext) Billing() billing.Billing {
+	return p.billing
+}
+
+// DB implements [Context].
+func (p *postgresContext) DB() pg.DBI {
+	return p.db
+}
+
+// Deadline implements [Context].
+// Subtle: this method shadows the method (Context).Deadline of postgresContext.Context.
+func (p *postgresContext) Deadline() (deadline time.Time, ok bool) {
+	return p.ctx.Deadline()
+}
+
+// Done implements [Context].
+// Subtle: this method shadows the method (Context).Done of postgresContext.Context.
+func (p *postgresContext) Done() <-chan struct{} {
+	return p.ctx.Done()
+}
+
+// Email implements [Context].
+func (p *postgresContext) Email() communication.EmailCommunication {
+	return p.email
+}
+
+// Err implements [Context].
+// Subtle: this method shadows the method (Context).Err of postgresContext.Context.
+func (p *postgresContext) Err() error {
+	return p.ctx.Err()
+}
+
+// KMS implements [Context].
+func (p *postgresContext) KMS() secrets.KeyManagement {
+	return p.kms
+}
+
+// Log implements [Context].
+func (p *postgresContext) Log() *slog.Logger {
+	return p.log
+}
+
+// Platypus implements [Context].
+func (p *postgresContext) Platypus() platypus.Platypus {
+	return p.plaidPlatypus
+}
+
+// Processor implements [Context].
+func (p *postgresContext) Processor() Processor {
+	return p.postgresProcessor
+}
+
+// Publisher implements [Context].
+func (p *postgresContext) Publisher() pubsub.Publisher {
+	return p.publisher
+}
+
+// Storage implements [Context].
+func (p *postgresContext) Storage() storage.Storage {
+	return p.fileStorage
+}
+
+// Value implements [Context].
+// Subtle: this method shadows the method (Context).Value of postgresContext.Context.
+func (p *postgresContext) Value(key any) any {
+	return p.ctx.Value(key)
+}
 
 type postgresProcessor struct {
 	// state keeps track of what state the postgresProcessor is in. It is tracked
@@ -106,16 +181,17 @@ func NewPostgresQueue(
 	email communication.EmailCommunication,
 ) Processor {
 	return &postgresProcessor{
-		notifier:      notifier,
-		log:           log,
-		configuration: configuration,
-		db:            db,
-		publisher:     publisher,
-		plaidPlatypus: plaidPlatypus,
-		kms:           kms,
-		fileStorage:   fileStorage,
-		billing:       billing,
-		email:         email,
+		notifier:       notifier,
+		log:            log,
+		configuration:  configuration,
+		db:             db,
+		publisher:      publisher,
+		plaidPlatypus:  plaidPlatypus,
+		kms:            kms,
+		fileStorage:    fileStorage,
+		billing:        billing,
+		email:          email,
+		registeredJobs: map[string]internalJobWrapper{},
 	}
 }
 
@@ -331,7 +407,7 @@ func (p *postgresProcessor) hydrateCronJobTable() error {
 		}
 
 		{ // Upsert/merge the cron rows with the table
-			result, err := txn.ModelContext(ctx, crons).
+			result, err := txn.ModelContext(ctx, &crons).
 				OnConflict(`("queue") DO UPDATE`).
 				Set(`"cron_schedule" = EXCLUDED.cron_schedule`).
 				// If a cron schedule is updated such that it should execute sooner,
@@ -357,6 +433,19 @@ func (p *postgresProcessor) hydrateCronJobTable() error {
 
 		return nil
 	})
+}
+
+func (p *postgresProcessor) jobContext(ctx context.Context, job *models.Job) Context {
+	// Clone the postgresProcessor in memory
+	clone := *p
+	clone.log = clone.log.With(
+		"queue", job.Queue,
+		"jobId", job.JobId,
+	)
+	return &postgresContext{
+		ctx:               ctx,
+		postgresProcessor: &clone,
+	}
 }
 
 func (p *postgresProcessor) beginTransaction() (Processor, error) {
@@ -408,6 +497,9 @@ func (p *postgresProcessor) Start() error {
 			Limit(1)
 	}
 
+	// Unbuffered channel so that way jobs must be consumed!
+	p.dispatch = make(chan *models.Job)
+
 	// Channel should have exactly as many items as we have available threads.
 	// When threads become available they will put the [availableThread] struct
 	// into this channel.
@@ -436,6 +528,8 @@ func (p *postgresProcessor) Close() error {
 		return errors.New("job processor is either already closed, or is in an invalid state")
 	}
 
+	p.log.Info("shutting down job queue")
+
 	timer := time.NewTimer(15 * time.Second)
 
 	{ // Shutdown all the background threads
@@ -446,20 +540,23 @@ func (p *postgresProcessor) Close() error {
 		for i := range p.shutdownThreads {
 			select {
 			case p.shutdownThreads[i] <- promises:
+				p.log.Debug(fmt.Sprintf(
+					"sent shutdown signal to thread %d of %d",
+					i+1, len(p.shutdownThreads),
+				))
 				continue
 			case <-timer.C:
 				return errors.New("timed out sending shutdown signal")
 			}
 		}
 
-		for i := 0; i < len(promises); i++ {
+		for i := range p.shutdownThreads {
 			select {
 			case <-promises:
-				p.log.Log(
-					context.Background(),
-					logging.LevelTrace,
-					"thread successfully drained",
-				)
+				p.log.Debug(fmt.Sprintf(
+					"successfully shutdown thread %d of %d",
+					i+1, len(p.shutdownThreads),
+				))
 				continue
 			case <-timer.C:
 				return errors.New("timed out waiting for threads to drain")
@@ -558,7 +655,7 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 		next := nextJob.cron.Next(now)
 		p.log.Log(
 			context.Background(),
-			logging.LevelTrace,
+			slog.LevelDebug,
 			"staged next cron job to be run",
 			"queue", nextJob.queue,
 			"next", next,
@@ -612,8 +709,8 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 }
 
 func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
-	// maxBackoff is 30 seconds
-	var maxBackoff time.Duration = 6
+	// maxBackoff is 60 seconds
+	var maxBackoff time.Duration = 12
 	var backoff time.Duration = 1
 	baseInterval := 5 * time.Second
 	ticker := time.NewTicker(baseInterval)
@@ -789,6 +886,18 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 				err = errors.Errorf("panic in job: %v", panicErr)
 			}
 			span.Status = sentry.SpanStatusInternalError
+
+			// If we panic during the job then just mark the job as failed and don't
+			// retry.
+			now := time.Now()
+			if _, err := p.db.Model(job).
+				Set(`"status" = ?`, models.FailedJobStatus).
+				Set(`"completed_at" = ?`, now).
+				Set(`"updated_at" = ?`, now).
+				WherePK().
+				Update(); err != nil {
+				log.ErrorContext(span.Context(), "failed to mark job as failed", "err", err)
+			}
 		} else if err != nil {
 			log.ErrorContext(span.Context(), "error while processing job", "err", err)
 			if hub != nil {
@@ -798,18 +907,43 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 				hub.CaptureException(err)
 			}
 			span.Status = sentry.SpanStatusInternalError
+
+			if job.Attempt < 5 {
+				if _, err := p.db.Model(job).
+					Set(`"priority" = ?`, time.Now().Add(10*time.Second*time.Duration(job.Attempt))).
+					Set(`"status" = ?`, models.PendingJobStatus).
+					Set(`"started_at" = NULL`).
+					Set(`"updated_at" = ?`, time.Now()).
+					WherePK().
+					Update(); err != nil {
+					log.ErrorContext(span.Context(), "failed to bump job for retry", "err", err)
+				}
+			}
 		} else {
+			now := time.Now()
+			if _, err := p.db.Model(job).
+				Set(`"status" = ?`, models.CompletedJobStatus).
+				Set(`"completed_at" = ?`, now).
+				Set(`"updated_at" = ?`, now).
+				WherePK().
+				Update(); err != nil {
+				log.ErrorContext(span.Context(), "failed to mark job as complete", "err", err)
+			}
+
 			hub.ConfigureScope(func(scope *sentry.Scope) {
 				scope.SetLevel(sentry.LevelInfo)
 			})
 			span.Status = sentry.SpanStatusOK
 		}
+
 		// TODO Mark the job status as failed? Retry logic?
 		span.Finish()
 	}()
 
-	if err := executor(nil, []byte(job.Input)); err != nil {
-		// TODO Implement retry logic here?
+	if err = executor(
+		p.jobContext(span.Context(), job),
+		[]byte(job.Input),
+	); err != nil {
 		log.Error("failed to execute job", "err", err)
 	}
 }

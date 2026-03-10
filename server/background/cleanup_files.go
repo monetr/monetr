@@ -132,7 +132,7 @@ func (j *CleanupFilesJob) Run(ctx context.Context) error {
 			"fileId", expiredFile.FileId,
 		)
 		fileLog.DebugContext(span.Context(), "queueing file to be removed")
-		if err := j.enqueuer.EnqueueJob(span.Context(), RemoveFile, RemoveFileArguments{
+		if err := j.enqueuer.EnqueueJob(span.Context(), RemoveFileName, RemoveFileArguments{
 			AccountId: expiredFile.AccountId,
 			FileId:    expiredFile.FileId,
 		}); err != nil {

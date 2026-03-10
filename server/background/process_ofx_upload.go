@@ -258,7 +258,7 @@ func (j *ProcessOFXUploadJob) Run(ctx context.Context) error {
 			)
 		}
 
-		j.enqueuer.EnqueueJob(span.Context(), RemoveFile, RemoveFileArguments{
+		j.enqueuer.EnqueueJob(span.Context(), RemoveFileName, RemoveFileArguments{
 			AccountId: j.args.AccountId,
 			FileId:    j.file.FileId,
 		})

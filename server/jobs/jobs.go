@@ -1,0 +1,16 @@
+package jobs
+
+import (
+	"context"
+
+	"github.com/monetr/monetr/server/background"
+	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/queue"
+)
+
+func RegisterJobs(ctx context.Context, processor queue.Processor) error {
+	return myownsanity.FirstError(
+		queue.Register(ctx, processor, background.RemoveFile),
+		queue.RegisterCron(ctx, processor, "0 */1 * * * *", background.CronCleanupJobs),
+	)
+}
