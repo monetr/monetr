@@ -1,3 +1,31 @@
+// Outline of how the postgres queue works:
+//
+//	           DATA FLOW — enqueue to execution
+//
+//	            queue.Enqueue()
+//	                 │
+//	           INSERT INTO jobs
+//	           (status=pending, priority=unix_ts,
+//	            signature=fnv32(args+ts))  ◄── ON CONFLICT: skip
+//	                 │
+//	           notifier.notify()  ──► notifier.channel ─────────────┐
+//	                                                                │
+//	┌────────────────────────────────────────────────────────────┐  │
+//	│  jobConsumer wakes via notifier or ticker                  │ ◄┘
+//	│       │                                                    │
+//	│  SELECT job FOR UPDATE SKIP LOCKED                         │
+//	│  WHERE status=pending AND priority<=now AND queue IN (...) │
+//	│  UPDATE SET status=processing, started_at=now              │
+//	│       │                                                    │
+//	│  dispatch ──────────────────────────────────────────────►  │
+//	└────────────────────────────────────────────────────────────┘
+//	                                     │
+//	                                worker receives
+//	                                     │
+//	                               executeJob()
+//	                                     │
+//	                           UPDATE job SET status=?
+//	                           (completed / pending+retry / failed)
 package queue
 
 import (
@@ -208,6 +236,32 @@ type postgresProcessor struct {
 	dispatch          chan *models.Job
 }
 
+// NewPostgresQueue creates a processor that is backed by a PostgreSQL database.
+//
+//	                  SYSTEM OVERVIEW — postgresProcessor
+//
+//	External callers
+//	──────────────────────────────────────────────────────────────────
+//	Enqueue() / EnqueueAt()
+//	  │  INSERT job row (status=pending, priority=unix_ts)
+//	  │  ON CONFLICT (signature) DO NOTHING  ← deduplication
+//	  └─► notifier.notify()  ───────────────────────────────────────────────┐
+//	                                                                        │
+//	Channels (created in Start())                                           │
+//	──────────────────────────────────────────────────────────────────      │
+//	                                                                        │
+//	  availableWorkers  chan struct{}  cap=4   (worker tokens)              │
+//	  dispatch          chan *Job      cap=0   (unbuffered — must handoff)  │
+//	  notifier.channel  chan struct{}  cap=N   ◄────────────────────────────┘
+//	  shutdownConsumers []chan chan struct{}    (one per consumer goroutine)
+//	  shutdownWorkers   []chan chan struct{}    (one per worker goroutine)
+//
+//	Goroutines (started in Start())
+//	──────────────────────────────────────────────────────────────────
+//
+//	  jobConsumer  ×1  ──── reads availableWorkers, dispatch, notifier.channel
+//	  cronConsumer ×1  ──── only if cron jobs are registered
+//	  worker       ×4  ──── reads dispatch, writes availableWorkers
 func NewPostgresQueue(
 	ctx context.Context,
 	notifier Notifier,
@@ -581,6 +635,41 @@ func (p *postgresProcessor) Start() error {
 	return nil
 }
 
+// Close will shutdown the queue processor. It will return nil if all of the
+// threads for the processor are shut down gracefully. It will return an error
+// if it times out shutting down. This also drains the workers gracefully and if
+// there are any jobs in progress it will wait until they are complete before
+// returning (within the timeout).
+//
+//	                  Close() — SHUTDOWN SEQUENCE
+//
+//	Consumers must stop BEFORE workers.
+//	If workers stopped first, jobConsumer could block forever on
+//	dispatch ← job with nobody on the other end.
+//
+//	STEP 1 — signal each consumer (jobConsumer, cronConsumer)
+//
+//	  for each shutdownConsumers[i]:
+//	    shutdownConsumers[i] ◄── promises  (send the ack channel)
+//
+//	  for each shutdownConsumers[i]:
+//	    <── promises  (wait for ack)
+//
+//	STEP 2 — signal each worker (×4)
+//
+//	  for each shutdownWorkers[i]:
+//	    shutdownWorkers[i] ◄── promises
+//
+//	  for each shutdownWorkers[i]:
+//	    <── promises
+//
+//	STEP 3 — close all channels
+//	  close(shutdownConsumers[i]...)
+//	  close(shutdownWorkers[i]...)
+//	  close(dispatch)
+//	  close(availableWorkers)
+//
+//	timeout: 15s for the entire sequence
 func (p *postgresProcessor) Close() error {
 	if !atomic.CompareAndSwapUint32(
 		&p.state,
@@ -739,6 +828,48 @@ func (p *postgresProcessor) consumeCronMaybe(
 	return &cronJob, nil
 }
 
+// cronConsumer is the loop that maintains cron jobs. This loop runs on all
+// servers, however the PostgreSQL database is used to ensure that the cron job
+// is only consumed a single time.
+//
+//	                     cronConsumer LOOP
+//
+//	BOOTSTRAP (once):
+//	  for each cronSchedule:
+//	    schedule.next = cron.Next(now)
+//
+//	┌──────────────────────────────────────────────────────────────────────┐
+//	│                                                                      │
+//	│  sort cronSchedules by .next  (soonest first)                        │
+//	│  nextJob = cronSchedules[0]                                          │
+//	│  next    = nextJob.next                                              │
+//	│  advance: cronSchedules[0].next = nextJob.cron.Next(next)            │
+//	│                                                                      │
+//	│  sleep = next.Sub(now)                                               │
+//	│  timer = time.NewTimer(sleep)                                        │
+//	│                                                                      │
+//	│         ┌──────────────┐                                             │
+//	│         │    select    │                                             │
+//	│         └──────────────┘                                             │
+//	│              /        \                                              │
+//	│        shutdown       timer.C                                        │
+//	│           │              │                                           │
+//	│         return     consumeCronMaybe(queue, cron.Next(next))          │
+//	│                          │                                           │
+//	│                    ┌─────┴──────┐                                    │
+//	│                  nil        consumed                                 │
+//	│                    │              │                                  │
+//	│                 continue    enqueueAt(queue, next, nil)              │
+//	│                             (regular job row, deduped by sig)        │
+//	│                             continue ────────────────────────────────┘
+//	└──────────────────────────────────────────────────────────────────────┘
+//
+//	consumeCronMaybe:
+//	  SELECT queue FOR UPDATE SKIP LOCKED
+//	    WHERE queue = ? AND next_run_at < next
+//	  UPDATE cron_job
+//	    SET last_run_at = next_run_at, next_run_at = next
+//	  → only one server in a cluster wins the race
 func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 	{ // Bootstrap the next timestamp before we do anything. We'll maintain this
 		now := p.clock.Now().UTC()
@@ -818,6 +949,43 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 	}
 }
 
+// jobConsumer is the loop that takes jobs from the queue and if there are
+// threads available, will dispatch the jobs to the worker threads.
+//
+//	                      jobConsumer LOOP
+//
+//	ticker := time.NewTicker(10s)    backoff: 1..6  (×10s = 10s..60s)
+//
+//	┌──────────────────────────────────────────────────────────────────────┐
+//	│  PHASE 1 — wait for an available worker token                        │
+//	│                                                                      │
+//	│         ┌──────────────┐                                             │
+//	│         │    select    │                                             │
+//	│         └──────────────┘                                             │
+//	│          /      |       \          \                                 │
+//	│  shutdown  ticker.C  notifier   availableWorkers                     │
+//	│     │        │           │          │                                │
+//	│   return   log +       log +       claim token                       │
+//	│            continue    continue    ──────────────────────────────►   │
+//	│                                                                      │
+//	│  CONSUME — consumeJobMaybe()  (SELECT ... FOR UPDATE SKIP LOCKED)    │
+//	│                                                                      │
+//	│   err != nil ──► return token to availableWorkers, log error         │
+//	│   job == nil ──► return token to availableWorkers                    │
+//	│                  backoff++ (if < max), reset ticker                  │
+//	│   job != nil ──► dispatch ◄──── send *Job to worker                  │
+//	│                  reset backoff=1, reset ticker                       │
+//	│                                                                      │
+//	│  PHASE 2 — wait for next trigger                                     │
+//	│                                                                      │
+//	│         ┌──────────────┐                                             │
+//	│         │    select    │                                             │
+//	│         └──────────────┘                                             │
+//	│          /      |       \                                            │
+//	│  shutdown  ticker.C  notifier                                        │
+//	│     │        │           │                                           │
+//	│   return  continue    continue ──────────────────────────────────────┘
+//	└──────────────────────────────────────────────────────────────────────┘
 func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 	// maxBackoff is 60 seconds
 	var maxBackoff time.Duration = 6
@@ -901,6 +1069,30 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 	}
 }
 
+// worker is the loop that runs based on the number of threads we want to have
+// on each server. Each worker can execute one job at a time. When a worker is
+// available to execute jobs it will send a signal on
+// [*postgresProcessor.availableWorkers].
+//
+//	                        worker LOOP  (×4)
+//
+//	┌──────────────────────────────────────────────────────────────────────┐
+//	│                                                                      │
+//	│  availableWorkers ◄── send workerSignal  (token: "I am free")        │
+//	│                                                                      │
+//	│         ┌──────────────┐                                             │
+//	│         │    select    │                                             │
+//	│         └──────────────┘                                             │
+//	│              /        \                                              │
+//	│        shutdown      dispatch                                        │
+//	│           │              │                                           │
+//	│         return      executeJob(job)                                  │
+//	│                          │                                           │
+//	│              ┌───────────┴───────────┐                               │
+//	│         shutdown check (select/default)                              │
+//	│              │                   │                                   │
+//	│           return              continue ──────────────────────────────┘
+//	└──────────────────────────────────────────────────────────────────────┘
 func (p *postgresProcessor) worker(shutdown chan chan struct{}) {
 	for {
 		// By adding an available thread to this channel, we tell the processor that
@@ -944,6 +1136,24 @@ func (p *postgresProcessor) worker(shutdown chan chan struct{}) {
 
 // executeJob is a wrapper around the actual execution. The error handling and
 // retry logic for every job is implemented here, as well as tracing and more.
+//
+//	                     executeJob — JOB OUTCOMES
+//
+//	 executor(jobContext, args)
+//	       │
+//	  ┌────┴────────────────────────────────────────┐
+//	  │                                             │
+//	 panic                                        return
+//	  │                                       /         \
+//	mark FAILED                            err            nil
+//	(no retry)                              │               │
+//	                               attempt < maxAttempts   mark COMPLETED
+//	                                    /        \
+//	                                retry       exhausted
+//	                                  │              │
+//	                            mark PENDING     mark FAILED
+//	                            priority += backoff×attempt
+//	                            (10s, 20s, 30s, 40s, 50s)
 func (p *postgresProcessor) executeJob(job *models.Job) {
 	executor, ok := p.registeredJobs[job.Queue]
 	if !ok {
