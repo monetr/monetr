@@ -68,7 +68,7 @@
     "@rsbuild/core": "1.7.3",
     "@rsbuild/plugin-babel": "1.1.2",
     "@rsbuild/plugin-react": "1.4.6",
-    "@rsbuild/plugin-sass": "1.5.0",
+    "@rsbuild/plugin-sass": "1.5.1",
     "@rspack/binding-linux-arm64-gnu": "1.7.8",
     "@rspack/binding-linux-x64-gnu": "1.7.8",
     "@swc/core": "1.15.18",
@@ -90,9 +90,9 @@
     "postcss": "8.5.6",
     "react-compiler-runtime": "1.0.0",
     "react-test-renderer": "18.3.1",
-    "sass": "1.97.3",
-    "sass-embedded-linux-arm64": "1.97.3",
-    "sass-embedded-linux-x64": "1.97.3",
+    "sass": "1.98.0",
+    "sass-embedded-linux-arm64": "1.98.0",
+    "sass-embedded-linux-x64": "1.98.0",
     "typescript": "5.9.3"
   }
 }
