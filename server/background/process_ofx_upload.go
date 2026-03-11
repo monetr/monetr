@@ -307,7 +307,7 @@ func (j *ProcessOFXUploadJob) Run(ctx context.Context) error {
 	// Also kick off the transaction similarity job.
 	j.enqueuer.EnqueueJob(
 		span.Context(),
-		CalculateTransactionClusters,
+		CalculateTransactionClustersName,
 		CalculateTransactionClustersArguments{
 			AccountId:     j.args.AccountId,
 			BankAccountId: j.args.BankAccountId,

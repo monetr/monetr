@@ -584,7 +584,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	// Then enqueue all of the bank accounts we touched to have their similar
 	// transactions recalculated.
 	for key := range s.similarity {
-		s.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, s.similarity[key])
+		s.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClustersName, s.similarity[key])
 	}
 
 	return s.maintainLinkStatus(ctx, plaidLink)

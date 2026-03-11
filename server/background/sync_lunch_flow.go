@@ -299,7 +299,7 @@ func (s *SyncLunchFlowJob) Run(ctx context.Context) error {
 	// Also kick off the transaction similarity job.
 	s.enqueuer.EnqueueJob(
 		span.Context(),
-		CalculateTransactionClusters,
+		CalculateTransactionClustersName,
 		CalculateTransactionClustersArguments{
 			AccountId:     s.args.AccountId,
 			BankAccountId: s.args.BankAccountId,
