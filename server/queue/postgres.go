@@ -343,7 +343,7 @@ func (p *postgresProcessor) enqueueAt(
 		Status:        models.PendingJobStatus,
 		SentryTraceId: &traceId,
 		SentryBaggage: &baggage,
-		Attempt:       0,
+		Attempt:       1,
 		CreatedAt:     timestamp,
 		UpdatedAt:     timestamp,
 		StartedAt:     nil,
