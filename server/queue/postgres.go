@@ -67,12 +67,18 @@ func (p *postgresContext) RunInTransaction(ctx context.Context, callback func(ct
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		// Clone the existing context object, but replace the DB with the
-		// transaction now.
-		clone := *p
-		// Propagate tracing
-		clone.ctx = span.Context()
-		clone.db = tx
+		// Clone the postgresProcessor and replace the DB with the transaction.
+		// This must be a deep clone of the processor (not just the context) so
+		// that replacing db does not mutate the original processor's db field
+		// through the shared pointer.
+		processorClone := *p.postgresProcessor
+		processorClone.db = tx
+
+		// Build a new context pointing at the cloned processor.
+		clone := postgresContext{
+			ctx:               span.Context(),
+			postgresProcessor: &processorClone,
+		}
 
 		// Then call the callback using the cloned context
 		return callback(&clone)
@@ -190,14 +196,16 @@ type postgresProcessor struct {
 		queue    string
 		schedule string
 		cron     cron.Schedule
+		next     time.Time
 	}
 	// registeredJobs keeps track of the callback function for the actual job to
 	// be executed per queue. A queue can only have a single job registered.
 	registeredJobs map[string]internalJobWrapper
 
-	availableThreads chan struct{}
-	shutdownThreads  []chan chan struct{}
-	dispatch         chan *models.Job
+	availableWorkers  chan struct{}
+	shutdownConsumers []chan chan struct{}
+	shutdownWorkers   []chan chan struct{}
+	dispatch          chan *models.Job
 }
 
 func NewPostgresQueue(
@@ -216,6 +224,7 @@ func NewPostgresQueue(
 ) Processor {
 	return &postgresProcessor{
 		notifier:       notifier,
+		clock:          clock,
 		log:            log,
 		configuration:  configuration,
 		db:             db,
@@ -392,6 +401,7 @@ func (p *postgresProcessor) registerCron(
 		queue    string
 		schedule string
 		cron     cron.Schedule
+		next     time.Time
 	}{
 		queue:    queue,
 		schedule: schedule,
@@ -407,11 +417,20 @@ func (p *postgresProcessor) registerCron(
 // of that list, as well as add new cron jobs if necessary, and update existing
 // cron jobs with new timings and schedules if they have changed.
 func (p *postgresProcessor) hydrateCronJobTable() error {
+	// If there are no cron jobs to hydrate then do nothing. We don't care if
+	// there are some still in the table because we aren't going to do anything
+	// with them.
+	if len(p.cronJobQueues) == 0 {
+		return nil
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	return p.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		{ // Clean up cron jobs that are no longer registered.
+			// TODO If there are no cron job queues registered then this breaks, but
+			// should it instead just remove all of the cron jobs?
 			result, err := txn.ModelContext(ctx, new(models.CronJob)).
 				WhereIn(`"queue" NOT IN (?)`, p.cronJobQueues).
 				Delete()
@@ -428,7 +447,7 @@ func (p *postgresProcessor) hydrateCronJobTable() error {
 			}
 		}
 
-		now := time.Now().UTC()
+		now := p.clock.Now().UTC()
 		var crons []models.CronJob
 		{ // Predetermine what all the cron rows should look like!
 			for _, cronJob := range p.cronSchedules {
@@ -534,21 +553,30 @@ func (p *postgresProcessor) Start() error {
 	// Unbuffered channel so that way jobs must be consumed!
 	p.dispatch = make(chan *models.Job)
 
-	// Channel should have exactly as many items as we have available threads.
-	// When threads become available they will put the [availableThread] struct
-	// into this channel.
-	p.availableThreads = make(chan struct{}, numberOfWorkers)
-	p.shutdownThreads = make([]chan chan struct{}, numberOfWorkers+2)
-	for i := 0; i < numberOfWorkers; i++ {
-		// TODO I don't think this channel should be buffered?
-		p.shutdownThreads[i] = make(chan chan struct{})
-		go p.worker(p.shutdownThreads[i])
+	{
+		// Channel should have exactly as many items as we have available threads.
+		// When threads become available they will put the [p.availableWorkers] struct
+		// into this channel.
+		p.availableWorkers = make(chan struct{}, numberOfWorkers)
+		p.shutdownWorkers = make([]chan chan struct{}, numberOfWorkers)
+		for i := 0; i < numberOfWorkers; i++ {
+			// TODO I don't think this channel should be buffered?
+			p.shutdownWorkers[i] = make(chan chan struct{})
+			go p.worker(p.shutdownWorkers[i])
+		}
 	}
-	// use the last item as a way to shutdown the consumer
-	p.shutdownThreads[numberOfWorkers] = make(chan chan struct{})
-	go p.cronConsumer(p.shutdownThreads[numberOfWorkers])
-	p.shutdownThreads[numberOfWorkers+1] = make(chan chan struct{})
-	go p.jobConsumer(p.shutdownThreads[numberOfWorkers+1])
+
+	p.shutdownConsumers = make([]chan chan struct{}, 0, 2)
+	{ // Always start the job consumer
+		p.shutdownConsumers = append(p.shutdownConsumers, make(chan chan struct{}))
+		go p.jobConsumer(p.shutdownConsumers[len(p.shutdownConsumers)-1])
+	}
+
+	// Only start the cron job consumer if we have cron jobs to consume
+	if len(p.cronJobQueues) > 0 {
+		p.shutdownConsumers = append(p.shutdownConsumers, make(chan chan struct{}))
+		go p.cronConsumer(p.shutdownConsumers[len(p.shutdownConsumers)-1])
+	}
 
 	return nil
 }
@@ -566,17 +594,47 @@ func (p *postgresProcessor) Close() error {
 
 	timer := time.NewTimer(15 * time.Second)
 
+	{ // Shutdown all of the consumer threads
+		promises := make(chan struct{}, len(p.shutdownConsumers))
+		for i := range p.shutdownConsumers {
+			select {
+			case p.shutdownConsumers[i] <- promises:
+				p.log.Debug(fmt.Sprintf(
+					"sent shutdown signal to consumer %d of %d",
+					i+1, len(p.shutdownConsumers),
+				))
+				continue
+			case <-timer.C:
+				return errors.New("timed out sending shutdown signal to consumer")
+			}
+		}
+
+		for i := range p.shutdownConsumers {
+			select {
+			case <-promises:
+				p.log.Debug(fmt.Sprintf(
+					"successfully shutdown consumer %d of %d",
+					i+1, len(p.shutdownConsumers),
+				))
+				continue
+			case <-timer.C:
+				return errors.New("timed out waiting for consumers to drain")
+			}
+		}
+		close(promises)
+	}
+
 	{ // Shutdown all the background threads
 		// We create a channel that is the exact size of the number of threads in
 		// the background. This way as each thread drains this channel should fill
 		// up.
-		promises := make(chan struct{}, len(p.shutdownThreads))
-		for i := range p.shutdownThreads {
+		promises := make(chan struct{}, len(p.shutdownWorkers))
+		for i := range p.shutdownWorkers {
 			select {
-			case p.shutdownThreads[i] <- promises:
+			case p.shutdownWorkers[i] <- promises:
 				p.log.Debug(fmt.Sprintf(
-					"sent shutdown signal to thread %d of %d",
-					i+1, len(p.shutdownThreads),
+					"sent shutdown signal to worker %d of %d",
+					i+1, len(p.shutdownWorkers),
 				))
 				continue
 			case <-timer.C:
@@ -584,16 +642,16 @@ func (p *postgresProcessor) Close() error {
 			}
 		}
 
-		for i := range p.shutdownThreads {
+		for i := range p.shutdownWorkers {
 			select {
 			case <-promises:
 				p.log.Debug(fmt.Sprintf(
-					"successfully shutdown thread %d of %d",
-					i+1, len(p.shutdownThreads),
+					"successfully shutdown worker %d of %d",
+					i+1, len(p.shutdownWorkers),
 				))
 				continue
 			case <-timer.C:
-				return errors.New("timed out waiting for threads to drain")
+				return errors.New("timed out waiting for workers to drain")
 			}
 		}
 		close(promises)
@@ -601,11 +659,14 @@ func (p *postgresProcessor) Close() error {
 
 	p.log.Info("job processor threads shutdown, cleaning up")
 
-	for _, channel := range p.shutdownThreads {
+	for _, channel := range p.shutdownConsumers {
+		close(channel)
+	}
+	for _, channel := range p.shutdownWorkers {
 		close(channel)
 	}
 	close(p.dispatch)
-	close(p.availableThreads)
+	close(p.availableWorkers)
 
 	p.log.Info("job processor shut down complete")
 	return nil
@@ -618,7 +679,7 @@ func (p *postgresProcessor) consumeJobMaybe() (*models.Job, error) {
 	var job models.Job
 	result, err := p.db.ModelContext(ctx, &job).
 		Set(`"status" = ?`, models.ProcessingJobStatus).
-		Set(`"started_at" = ?`, time.Now()).
+		Set(`"started_at" = ?`, p.clock.Now()).
 		Where(`"job_id" = (?)`, p.jobQuery).
 		Returning("*; /* NO LOG */").
 		Update(&job)
@@ -679,14 +740,25 @@ func (p *postgresProcessor) consumeCronMaybe(
 }
 
 func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
+	{ // Bootstrap the next timestamp before we do anything. We'll maintain this
+		now := p.clock.Now().UTC()
+		for i := range p.cronSchedules {
+			p.cronSchedules[i].next = p.cronSchedules[i].cron.Next(now)
+		}
+	}
+
 	for {
-		now := time.Now().UTC()
+		now := p.clock.Now().UTC()
 		// Sort the crons by their next time a cron job happens.
 		sort.Slice(p.cronSchedules, func(i, j int) bool {
-			return p.cronSchedules[i].cron.Next(now).Before(p.cronSchedules[j].cron.Next(now))
+			return p.cronSchedules[i].next.Before(p.cronSchedules[j].next)
 		})
 		nextJob := p.cronSchedules[0]
-		next := nextJob.cron.Next(now)
+		next := nextJob.next
+		// Move the next timestamp forward, this way the next loop we are no loger
+		// looking at this specific cron job. Instead we'll sort and get the next
+		// most recent cron job.
+		p.cronSchedules[0].next = nextJob.cron.Next(next)
 		p.log.Log(
 			context.Background(),
 			slog.LevelDebug,
@@ -714,7 +786,11 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 			// rounding down? Resulting in a `nextTimestamp` that is slightly in the
 			// past.
 			log := p.log.With("queue", nextJob.queue)
-			consumedCronJob, err := p.consumeCronMaybe(nextJob.queue, next)
+			consumedCronJob, err := p.consumeCronMaybe(
+				nextJob.queue,
+				// Bump the cron to the next time it would be consumed
+				nextJob.cron.Next(next),
+			)
 			if err != nil {
 				log.Error("failed to consume cron job", "err", err)
 				continue
@@ -765,7 +841,7 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 		case <-p.notifier.channel():
 			p.log.Debug("received job notification, but job processor currently has no available worker threads")
 			continue
-		case <-p.availableThreads:
+		case <-p.availableWorkers:
 			// This receive blocks if there are no available threads.
 		}
 
@@ -776,7 +852,7 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 			// need to return an available thread to the channel. This way if the
 			// database server is failing for just a moment we don't exhaust our
 			// available threads.
-			p.availableThreads <- workerSignal
+			p.availableWorkers <- workerSignal
 			p.log.Error("failed to consume job", "err", err)
 		} else if job != nil {
 			p.log.Debug("successfully consumed job, dispatching to worker thread",
@@ -791,11 +867,11 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 			// If we did not retrieve a job at all then we need to put our "hold" on
 			// an available thread back in the channel this way a thread can still be
 			// consumed on the next loop.
-			p.availableThreads <- workerSignal
+			p.availableWorkers <- workerSignal
 			// If we haven't consumed a job in a while then backoff how often we poll
 			// the database. We get notifications when we know a job is immediately
 			// available so this should be fine.
-			if backoff+1 < maxBackoff {
+			if backoff+1 <= maxBackoff {
 				backoff++
 				interval := backoff * baseInterval
 				ticker.Reset(interval)
@@ -831,7 +907,7 @@ func (p *postgresProcessor) worker(shutdown chan chan struct{}) {
 		// there are threads that can perform work. We do this at the beginning of
 		// the loop so that way we always return to a state where we can perform
 		// work instead of getting deadlocked.
-		p.availableThreads <- workerSignal
+		p.availableWorkers <- workerSignal
 
 		// We block on channel reads for both the shutdown channel and the dispatch
 		// channel. This way the thread for this worker is essentially dead until we
@@ -851,7 +927,7 @@ func (p *postgresProcessor) worker(shutdown chan chan struct{}) {
 		}
 
 		// After we have executed the job then we want to check the shutdown signal
-		// again. Because if we have shutdown then sending on the availableThreads
+		// again. Because if we have shutdown then sending on the availableWorkers
 		// channel will block or fail depending on timing. So we need to do this
 		// first.
 		select {

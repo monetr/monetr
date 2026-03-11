@@ -132,7 +132,7 @@ func Register[T any](
 ) error {
 	queue := queueNameFromJobFunction[T](job)
 
-	processor.register(ctx, queue, func(ctx Context, argBytes []byte) error {
+	return processor.register(ctx, queue, func(ctx Context, argBytes []byte) error {
 		var args T
 		if err := decodeArguments(argBytes, &args); err != nil {
 			return errors.Wrapf(err, "failed to decode arguments for job: %s", queue)
@@ -140,8 +140,6 @@ func Register[T any](
 
 		return job(ctx, args)
 	})
-
-	return nil
 }
 
 func RegisterCron(
@@ -152,7 +150,7 @@ func RegisterCron(
 ) error {
 	queue := queueNameFromJobFunction[any](job)
 
-	processor.registerCron(
+	return processor.registerCron(
 		ctx,
 		queue,
 		schedule,
@@ -188,20 +186,20 @@ func RegisterCron(
 					ctx.Log().DebugContext(span.Context(), "cron job finished")
 				}
 				span.Finish()
-				hub.CaptureCheckIn(&sentry.CheckIn{
-					ID:          *checkInId,
-					MonitorSlug: queue,
-					Status:      status,
-					Duration:    span.EndTime.Sub(span.StartTime),
-				}, monitorConfig)
+				if checkInId != nil {
+					hub.CaptureCheckIn(&sentry.CheckIn{
+						ID:          *checkInId,
+						MonitorSlug: queue,
+						Status:      status,
+						Duration:    span.EndTime.Sub(span.StartTime),
+					}, monitorConfig)
+				}
 			}()
 
 			err = job(ctx)
 			return err
 		},
 	)
-
-	return nil
 }
 
 // queueNameFromJobFunction takes the job function we want to enqueue or just
@@ -227,7 +225,7 @@ func queueNameFromJobFunction[T any](job any) string {
 	name = name + args
 	name = strings.ReplaceAll(name, "{}", "")
 	name = strings.TrimSpace(name)
-	return name
+	return sentryMonitorSlug(name)
 }
 
 // encodeArguments is the common function used for marshaling any arguments into
@@ -246,6 +244,29 @@ func encodeArguments(args any) ([]byte, error) {
 // errors have stack traces.
 func decodeArguments[T any](data []byte, result *T) error {
 	return errors.WithStack(json.Unmarshal(data, result))
+}
+
+// sentryMonitorSlug converts a queue name into a valid Sentry monitor slug.
+// Queue names contain dots, slashes, colons, and other punctuation, so this
+// function normalises them: any character that is not alphanumeric is replaced
+// with a hyphen, consecutive hyphens are collapsed, and leading/trailing
+// hyphens are trimmed.
+//
+// Examples:
+//
+//	"background.CleanupFilesCron"          → "background-CleanupFilesCron"
+//	"background.ProcessSpending::struct{}" → "background-ProcessSpending-struct"
+func sentryMonitorSlug(queue string) string {
+	slug := strings.Map(func(r rune) rune {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
+			return r
+		}
+		return '-'
+	}, queue)
+	for strings.Contains(slug, "--") {
+		slug = strings.ReplaceAll(slug, "--", "-")
+	}
+	return strings.Trim(slug, "-")
 }
 
 // jobSignature takes the timestamp that the job is going to be enqueued at as

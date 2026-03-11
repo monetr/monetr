@@ -26,7 +26,7 @@ func TestQueueNameFromJobFunction(t *testing.T) {
 				return nil
 			}),
 		)
-		assert.Equal(t, "queue.TestQueueNameFromJobFunction.func1.1::queue.Args", queueName)
+		assert.Equal(t, "queue-TestQueueNameFromJobFunction-func1-1-queue-Args", queueName)
 	})
 
 	t.Run("variable function", func(t *testing.T) {
@@ -36,16 +36,16 @@ func TestQueueNameFromJobFunction(t *testing.T) {
 			return nil
 		})
 		queueName := queueNameFromJobFunction[Args](jobFunction)
-		assert.Equal(t, "queue.TestQueueNameFromJobFunction.func2.1::queue.Args", queueName)
+		assert.Equal(t, "queue-TestQueueNameFromJobFunction-func2-1-queue-Args", queueName)
 	})
 
 	t.Run("regular function", func(t *testing.T) {
 		queueName := queueNameFromJobFunction[map[string]any](helloWorld)
-		assert.Equal(t, "queue.helloWorld::map[string]interface", queueName)
+		assert.Equal(t, "queue-helloWorld-map-string-interface", queueName)
 	})
 
 	t.Run("regular cron function", func(t *testing.T) {
 		queueName := queueNameFromJobFunction[any](cronHello)
-		assert.Equal(t, "queue.cronHello", queueName)
+		assert.Equal(t, "queue-cronHello", queueName)
 	})
 }
