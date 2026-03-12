@@ -1,11 +1,10 @@
 package controller
 
 import (
+	"log/slog"
 	"math"
 	"net/http"
 	"strings"
-
-	"log/slog"
 
 	"github.com/labstack/echo/v4"
 	. "github.com/monetr/monetr/server/models"
