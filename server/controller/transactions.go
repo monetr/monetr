@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"strings"
 
+	"log/slog"
+
 	"github.com/labstack/echo/v4"
 	. "github.com/monetr/monetr/server/models"
-	"log/slog"
 )
 
 func (c *Controller) getTransactions(ctx echo.Context) error {
@@ -295,6 +296,7 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 	transaction.PendingPlaidTransactionId = existingTransaction.PendingPlaidTransactionId
 	transaction.OriginalName = existingTransaction.OriginalName
 	transaction.OriginalMerchantName = existingTransaction.OriginalMerchantName
+	transaction.LunchFlowTransactionId = existingTransaction.LunchFlowTransactionId
 
 	if !isManual {
 		// Prevent the user from attempting to change a transaction's amount if we are on a plaid link.
