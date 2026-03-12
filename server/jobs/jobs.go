@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/monetr/monetr/server/background"
+	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/queue"
 )
@@ -15,10 +16,12 @@ func RegisterJobs(ctx context.Context, processor queue.Processor) error {
 		queue.Register(ctx, processor, background.DeactivateLink),
 		queue.Register(ctx, processor, background.ProcessOFXUpload),
 		queue.Register(ctx, processor, background.RemoveFile),
+		queue.Register(ctx, processor, lunch_flow.SyncLunchFlow),
 		queue.RegisterCron(ctx, processor, "0 0 0 * * *", background.DeactivateLinksCron),
 		queue.RegisterCron(ctx, processor, "0 0 8 * * *", background.CleanupJobsCron),
 		queue.RegisterCron(ctx, processor, "0 15 1 * * *", background.CleanupLunchFlowCron),
 		queue.RegisterCron(ctx, processor, "0 28 * * * *", background.CleanupFilesCron),
 		queue.RegisterCron(ctx, processor, "0 30 * * * *", background.ProcessSpendingCron),
+		queue.RegisterCron(ctx, processor, "0 20 */6 * * *", lunch_flow.SyncLunchFlowCron),
 	)
 }
