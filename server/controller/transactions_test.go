@@ -727,6 +727,66 @@ func TestPutTransactions(t *testing.T) {
 		// Make sure the next contribution gets recalculated.
 		response.JSON().Path("$.spending[0].nextContributionAmount").Number().Lt(spending.NextContributionAmount)
 	})
+
+	t.Run("update preserves lunch flow transaction id", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction, transaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveALunchFlowBankAccount(t, app.Clock, &link)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+			transaction = originalTransaction
+
+			// Create a lunch flow transaction record and associate it with the
+			// transaction to simulate a transaction that was synced from Lunch Flow.
+			lunchFlowTransaction := testutils.MustInsert(t, LunchFlowTransaction{
+				AccountId:              user.AccountId,
+				LunchFlowBankAccountId: *bank.LunchFlowBankAccountId,
+				LunchFlowId:            "lf_test_1234",
+				Merchant:               originalTransaction.MerchantName,
+				Description:            originalTransaction.Name,
+				Date:                   originalTransaction.Date,
+				Currency:               "USD",
+				Amount:                 originalTransaction.Amount,
+				IsPending:              false,
+			})
+			originalTransaction.LunchFlowTransactionId = &lunchFlowTransaction.LunchFlowTransactionId
+			testutils.MustDBUpdate(t, &originalTransaction)
+			transaction = originalTransaction
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		transaction.Name = "A More Friendly Name"
+		assert.NotEqual(t, originalTransaction.Name, transaction.Name, "make sure the names dont somehow match")
+
+		response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", transaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(transaction).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(transaction.TransactionId)
+		response.JSON().Path("$.transaction.name").String().IsEqual(transaction.Name)
+		response.JSON().Path("$.transaction.name").String().NotEqual(originalTransaction.Name)
+		response.JSON().Path("$.transaction.originalName").String().IsEqual(originalTransaction.Name)
+
+		// Verify the lunch flow transaction ID is preserved by reading directly
+		// from the database, since it is not included in the JSON response.
+		updatedTransaction := testutils.MustRetrieve(t, Transaction{
+			TransactionId: transaction.TransactionId,
+			AccountId:     bank.AccountId,
+			BankAccountId: bank.BankAccountId,
+		})
+		assert.NotNil(t, updatedTransaction.LunchFlowTransactionId, "lunch flow transaction ID must be preserved after update")
+		assert.Equal(t, originalTransaction.LunchFlowTransactionId, updatedTransaction.LunchFlowTransactionId, "lunch flow transaction ID must not change")
+	})
 }
 
 func TestDeleteTransactions(t *testing.T) {
