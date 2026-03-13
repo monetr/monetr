@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.11.0](https://github.com/monetr/monetr/compare/v1.10.4...v1.11.0) (2026-03-13)
+
+
+### Features
+
+* **api:** Persist similar transactions between calculations ([#3003](https://github.com/monetr/monetr/issues/3003)) ([3a4963c](https://github.com/monetr/monetr/commit/3a4963cff79eb82b65d0ad0a387ca508b3609618))
+
+
+### Dependencies
+
+* **ui:** update dependency @react-email/components to v1.0.9 ([#3009](https://github.com/monetr/monetr/issues/3009)) ([9cb089c](https://github.com/monetr/monetr/commit/9cb089c96c1eb7be775795a81bf035f85fe45ce2))
+* **ui:** update rsbuild ([#3008](https://github.com/monetr/monetr/issues/3008)) ([082070b](https://github.com/monetr/monetr/commit/082070b5ea14bb05fcca90d0b9bda03bd89f26ad))
+* **ui:** update sass ([#3010](https://github.com/monetr/monetr/issues/3010)) ([1a3769e](https://github.com/monetr/monetr/commit/1a3769ecf0c9dd84121b26fdb2aed64aa13ecebd))
+
+
+### Bug Fixes
+
+* **api:** Fixed Lunch Flow syncing + transaction bug ([#3012](https://github.com/monetr/monetr/issues/3012)) ([ae7c7ab](https://github.com/monetr/monetr/commit/ae7c7ab7dea81ba6938c08a953ca3c39771fe4c8))
+* **api:** Fixing transaction cluster bug ([#3005](https://github.com/monetr/monetr/issues/3005)) ([b8e5786](https://github.com/monetr/monetr/commit/b8e5786c541642906ad483918d46224ea0132a70))
+* **ui:** Fixed top navigation text color ([8ab2b1a](https://github.com/monetr/monetr/commit/8ab2b1a05ee56a03dc80a3d978facbd8c918b170))
+
+
+### Miscellaneous
+
+* fixing weird unicode character? ([d4f7645](https://github.com/monetr/monetr/commit/d4f764509e1b65d7e1b53f3921f4d793cef52c16))
+
+
+### Refactor
+
+* **api:** Migrating from logrus to slog ([#3002](https://github.com/monetr/monetr/issues/3002)) ([97f9db8](https://github.com/monetr/monetr/commit/97f9db80036f0031a704bd5910be3d11c1482699))
+* **ui:** More migrations away from tailwind ([c1647a9](https://github.com/monetr/monetr/commit/c1647a93b53a7ec3014a878792655baf406247f2))
+
 ## [1.10.4](https://github.com/monetr/monetr/compare/v1.10.3...v1.10.4) (2026-03-07)
 
 
