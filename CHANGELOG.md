@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.11.1](https://github.com/monetr/monetr/compare/v1.11.0...v1.11.1) (2026-03-13)
+
+
+### Dependencies
+
+* **api:** update module github.com/aws/aws-sdk-go-v2/service/s3 to v1.97.0 ([#3013](https://github.com/monetr/monetr/issues/3013)) ([5bf6ee1](https://github.com/monetr/monetr/commit/5bf6ee1685582090a7fbd73ca6f8bc9bf280ebb9))
+* **api:** update module golang.org/x/crypto to v0.49.0 ([#3014](https://github.com/monetr/monetr/issues/3014)) ([3d22cea](https://github.com/monetr/monetr/commit/3d22cea4a927eef7714e7cb58c8993f9594a3fcc))
+* **api:** update module golang.org/x/net to v0.52.0 ([#3015](https://github.com/monetr/monetr/issues/3015)) ([2bfafb3](https://github.com/monetr/monetr/commit/2bfafb3fd03ea09d5efad599e3b80fc9e96e3841))
+* **renovate:** update docker/setup-buildx-action action to v4 ([#3022](https://github.com/monetr/monetr/issues/3022)) ([f0d4279](https://github.com/monetr/monetr/commit/f0d42792a5c16540734f60c34dc327676ed85d11))
+* **renovate:** update docker/setup-qemu-action action to v4 ([#3023](https://github.com/monetr/monetr/issues/3023)) ([83f0c7a](https://github.com/monetr/monetr/commit/83f0c7a11f15433b192d786c749493fec3881e2b))
+* **ui:** update sentry-javascript monorepo to v10.43.0 ([#3020](https://github.com/monetr/monetr/issues/3020)) ([911175d](https://github.com/monetr/monetr/commit/911175d02531c419138f6605394356adaef06688))
+
 ## [1.11.0](https://github.com/monetr/monetr/compare/v1.10.4...v1.11.0) (2026-03-13)
 
 
