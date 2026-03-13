@@ -33,7 +33,7 @@
     "autoprefixer": "10.4.27",
     "cheerio": "1.2.0",
     "cssnano": "7.1.2",
-    "postcss": "8.5.6",
+    "postcss": "8.5.8",
     "sass": "1.98.0",
     "satori": "0.19.2",
     "spellchecker-cli": "7.0.3",
