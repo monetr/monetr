@@ -1,4 +1,4 @@
-package background_test
+package billing_jobs_test
 
 import (
 	"context"
@@ -7,10 +7,11 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/billing"
+	"github.com/monetr/monetr/server/billing/billing_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
+	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
@@ -44,26 +45,33 @@ func TestReconcileSubscriptionHandler_EnqueueTriggeredJob(t *testing.T) {
 		// Move the clock forward 30 days, all subscriptions should be stale now.
 		clock.Add(30 * 24 * time.Hour)
 
-		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
-		handler := background.NewReconcileSubscriptionHandler(
-			log, db, clock, pubSub, bill,
-		)
+		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		// Now we want to actually trigger the handler, and see if it enqueus the
 		// job we want.
 		enqueuer.EXPECT().
-			EnqueueJob(
+			EnqueueAt(
 				gomock.Any(),
-				gomock.Eq(background.ReconcileSubscription),
-				testutils.NewGenericMatcher(func(args background.ReconcileSubscriptionArguments) bool {
-					return assert.EqualValues(t, user.AccountId, args.AccountId, "account ID for reconcile should match the account we setup")
+				mockqueue.EqQueue(billing_jobs.ReconcileSubscription),
+				gomock.Any(),
+				gomock.Eq(billing_jobs.ReconcileSubscriptionArguments{
+					AccountId: user.AccountId,
 				}),
 			).
-			Times(1).
-			Return(nil)
+			Return(nil).
+			Times(1)
 
-		err = handler.EnqueueTriggeredJob(context.Background(), enqueuer)
-		assert.NoError(t, err)
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).MinTimes(1)
+			context.EXPECT().DB().Return(db).MinTimes(1)
+			context.EXPECT().Log().Return(log).MinTimes(1)
+			context.EXPECT().Enqueuer().Return(enqueuer).MinTimes(1)
+			err := billing_jobs.ReconcileSubscriptionCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.NoError(t, err)
+		}
 	})
 
 	t.Run("no stale subscriptions", func(t *testing.T) {
@@ -74,6 +82,7 @@ func TestReconcileSubscriptionHandler_EnqueueTriggeredJob(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		memoryCache := testutils.GetCache(t)
+		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		accountRepo := repository.NewAccountRepository(log, memoryCache, db)
 		stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
@@ -87,25 +96,30 @@ func TestReconcileSubscriptionHandler_EnqueueTriggeredJob(t *testing.T) {
 		assert.NoError(t, err, "must not return an error checking for subscription")
 		assert.True(t, hasSubscription, "fixture account should have a subscription by default")
 
-		// Same thing this time but do not move the clock forward. This way the
-		// subscription should still be viewed as active.
-		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
-		handler := background.NewReconcileSubscriptionHandler(
-			log, db, clock, pubSub, bill,
-		)
-
 		// Now we want to trigger the handler and make sure that it does not enqueue any
 		// jobs since there are no stale subscriptions.
 		enqueuer.EXPECT().
-			EnqueueJob(
+			EnqueueAt(
 				gomock.Any(),
+				mockqueue.EqQueue(billing_jobs.ReconcileSubscription),
 				gomock.Any(),
 				gomock.Any(),
 			).
-			Times(0).
-			Return(nil)
+			Return(nil).
+			Times(0)
 
-		err = handler.EnqueueTriggeredJob(context.Background(), enqueuer)
-		assert.NoError(t, err)
+		// Same thing this time but do not move the clock forward. This way the
+		// subscription should still be viewed as active.
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).MinTimes(1)
+			context.EXPECT().DB().Return(db).MinTimes(1)
+			context.EXPECT().Log().Return(log).MinTimes(1)
+			context.EXPECT().Enqueuer().Return(enqueuer).Times(0)
+			err := billing_jobs.ReconcileSubscriptionCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.NoError(t, err)
+		}
 	})
 }

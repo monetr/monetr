@@ -90,21 +90,19 @@ func NewBackgroundJobs(
 
 	// When billing is enabled, periodically perform billing upkeep tasks.
 	if configuration.Stripe.IsBillingEnabled() {
-		jobs = append(jobs,
-			NewDeactivateLinksHandler(log, db, clock, configuration, kms, plaidPlatypus),
-			// NewNotificationTrialExpiryHandler(log, db, clock, configuration, email),
-			NewReconcileSubscriptionHandler(log, db, clock, publisher, billing),
-		)
+		jobs = append(jobs) // NewDeactivateLinksHandler(log, db, clock, configuration, kms, plaidPlatypus),
+		// NewNotificationTrialExpiryHandler(log, db, clock, configuration, email),
+		// NewReconcileSubscriptionHandler(log, db, clock, publisher, billing),
+
 	}
 
 	// Only enable the Lunch Flow background job if we have it enabled in the
 	// config. This runs a cron job that shouldn't be used if we aren't actually
 	// using Lunch Flow.
 	if configuration.LunchFlow.Enabled {
-		jobs = append(jobs,
-			// NewSyncLunchFlowHandler(log, db, clock, kms, publisher, enqueuer),
-			NewCleanupLunchFlowHandler(log, db, clock, kms),
-		)
+		jobs = append(jobs) // NewSyncLunchFlowHandler(log, db, clock, kms, publisher, enqueuer),
+		// NewCleanupLunchFlowHandler(log, db, clock, kms),
+
 	}
 
 	// Setup jobs
