@@ -23,6 +23,7 @@ import (
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
@@ -32,6 +33,7 @@ import (
 
 type Context interface {
 	context.Context
+	Job() models.Job
 	Clock() clock.Clock
 	Log() *slog.Logger
 	DB() pg.DBI
@@ -41,7 +43,7 @@ type Context interface {
 	Storage() storage.Storage
 	Billing() billing.Billing
 	Email() communication.EmailCommunication
-	Processor() Processor
+	Enqueuer() Enqueuer
 
 	// RunInTransaction wraps the current context in a transaction, notably the
 	// [Context.DB] function here will be an actual postgresql transaction now and
@@ -65,6 +67,25 @@ type CronFunction func(ctx Context) error
 // in the processor layer.
 type InternalJobWrapper func(ctx Context, args []byte) error
 
+type Enqueuer interface {
+	// EnqueueAt is meant to be an internal function that is called by helper
+	// wrappers. While this function can be called directly, doing so without
+	// first sanitizing the inputs properly can result in jobs not being enqueued
+	// properly or consumed properly. Call this via [Enqueue] or [EnqueueAt]
+	// instead.
+	EnqueueAt(
+		ctx context.Context,
+		queue string,
+		at time.Time,
+		args any,
+	) error
+
+	// WithTransaction take the current enqueuer, and returns a copy of it but
+	// with the database scoped to the provided interface. This way if a job must
+	// be enqueued within a transaction, this is the safe way to do it.
+	WithTransaction(db pg.DBI) Enqueuer
+}
+
 // Processor is the interface above the implementation of a job processor, it is
 // not meant to be interacted with directly. Instead it is meant to be
 // interacted with via the [Enqueue], [EnqueueAt], and [Register] functions so
@@ -73,23 +94,14 @@ type InternalJobWrapper func(ctx Context, args []byte) error
 //
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=queue.go -package=mockgen -destination=../internal/mockgen/queue.go Processor
 type Processor interface {
-	// __EnqueueAt is meant to be an internal function that is called by helper
-	// wrappers. While this function can be called directly, doing so without
-	// first sanitizing the inputs properly can result in jobs not being enqueued
-	// properly or consumed properly. Call this via [Enqueue] or [EnqueueAt]
-	// instead.
-	__EnqueueAt(
-		ctx context.Context,
-		queue string,
-		at time.Time,
-		args any,
-	) error
-	__Register(
+	Enqueuer
+
+	Register(
 		ctx context.Context,
 		queue string,
 		job InternalJobWrapper,
 	) error
-	__RegisterCron(
+	RegisterCron(
 		ctx context.Context,
 		queue string,
 		schedule string,
@@ -102,15 +114,15 @@ type Processor interface {
 
 func Enqueue[T any](
 	ctx context.Context,
-	processor Processor,
+	enqueuer Enqueuer,
 	job JobFunction[T],
 	args T,
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	return processor.__EnqueueAt(
+	return enqueuer.EnqueueAt(
 		span.Context(),
-		queueNameFromJobFunction[T](job),
+		QueueNameFromJobFunction[T](job),
 		time.Now(),
 		args,
 	)
@@ -118,16 +130,16 @@ func Enqueue[T any](
 
 func EnqueueAt[T any](
 	ctx context.Context,
-	processor Processor,
+	enqueuer Enqueuer,
 	at time.Time,
 	job JobFunction[T],
 	args T,
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	return processor.__EnqueueAt(
+	return enqueuer.EnqueueAt(
 		span.Context(),
-		queueNameFromJobFunction[T](job),
+		QueueNameFromJobFunction[T](job),
 		at,
 		args,
 	)
@@ -138,9 +150,9 @@ func Register[T any](
 	processor Processor,
 	job JobFunction[T],
 ) error {
-	queue := queueNameFromJobFunction[T](job)
+	queue := QueueNameFromJobFunction[T](job)
 
-	return processor.__Register(ctx, queue, func(ctx Context, argBytes []byte) error {
+	return processor.Register(ctx, queue, func(ctx Context, argBytes []byte) error {
 		var args T
 		if err := decodeArguments(argBytes, &args); err != nil {
 			return errors.Wrapf(err, "failed to decode arguments for job: %s", queue)
@@ -156,9 +168,9 @@ func RegisterCron(
 	job CronFunction,
 	schedule string,
 ) error {
-	queue := queueNameFromJobFunction[any](job)
+	queue := QueueNameFromJobFunction[any](job)
 
-	return processor.__RegisterCron(
+	return processor.RegisterCron(
 		ctx,
 		queue,
 		schedule,
@@ -210,10 +222,10 @@ func RegisterCron(
 	)
 }
 
-// queueNameFromJobFunction takes the job function we want to enqueue or just
+// QueueNameFromJobFunction takes the job function we want to enqueue or just
 // known the name of for processing and derives the job queue name from it which
 // is a string.
-func queueNameFromJobFunction[T any](job any) string {
+func QueueNameFromJobFunction[T any](job any) string {
 	// Make sure that the provided job matches one of our expected types otherwise
 	// panic.
 	var args string
@@ -273,4 +285,11 @@ func jobSignature(timestamp time.Time, arguments []byte) string {
 	signatureBuilder.Write(arguments)
 	signatureBuilder.Write([]byte(truncatedTimestamp.String()))
 	return hex.EncodeToString(signatureBuilder.Sum(nil))
+}
+
+// FailWithoutRetry will take the current job cotext and an error and will
+// panic.
+func FailWithoutRetry(ctx Context, err error) error {
+	ctx.Log().Warn("job failed in a non-retryable way", "err", err)
+	panic(err)
 }

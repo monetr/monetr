@@ -153,7 +153,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 			nil, nil, nil, nil, nil, nil,
 		).(*postgresProcessor)
 
-		err := p.__Register(t.Context(), "test-noop", func(_ Context, _ []byte) error {
+		err := p.Register(t.Context(), "test-noop", func(_ Context, _ []byte) error {
 			return nil
 		})
 		assert.NoError(t, err)
@@ -192,7 +192,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 			nil, nil, nil, nil, nil, nil,
 		).(*postgresProcessor)
 
-		err := p.__Register(t.Context(), "test-failing", func(_ Context, _ []byte) error {
+		err := p.Register(t.Context(), "test-failing", func(_ Context, _ []byte) error {
 			return errors.New("always fails")
 		})
 		assert.NoError(t, err)
@@ -232,7 +232,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 			nil, nil, nil, nil, nil, nil,
 		).(*postgresProcessor)
 
-		err := p.__Register(t.Context(), "test-exhausted", func(_ Context, _ []byte) error {
+		err := p.Register(t.Context(), "test-exhausted", func(_ Context, _ []byte) error {
 			return errors.New("always fails")
 		})
 		assert.NoError(t, err)

@@ -5,7 +5,6 @@ import (
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
-	"github.com/monetr/monetr/server/recurring"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
 )
@@ -31,7 +30,7 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 			log,
 		)
 
-		clustering := recurring.NewSimilarTransactions_TFIDF_DBSCAN(log)
+		clustering := NewSimilarTransactions_TFIDF_DBSCAN(log)
 
 		limit := 2000
 		offset := 0

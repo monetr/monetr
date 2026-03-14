@@ -1,4 +1,4 @@
-package background_test
+package ofx_jobs_test
 
 import (
 	"bytes"
@@ -6,14 +6,16 @@ import (
 	"testing"
 
 	"github.com/benbjohnson/clock"
-	"github.com/monetr/monetr/server/background"
+	"github.com/monetr/monetr/server/datasources/ofx/ofx_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
+	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
-	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/similar"
+	"github.com/monetr/monetr/server/storage/storage_jobs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -49,9 +51,10 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 		link := fixtures.GivenIHaveAManualLink(t, clock, user)
 		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 
-		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db, log)
+		fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
+
 		store := mockgen.NewMockStorage(ctrl)
-		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		{ // Import our sample data into monetr
 			// Read the transaction OFX file
@@ -80,14 +83,6 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				CompletedAt:   nil,
 			})
 
-			// Create the job executor
-			job, err := background.NewProcessOFXUploadJob(log, repo, clock, store, ps, enqueuer, background.ProcessOFXUploadArguments{
-				AccountId:           upload.AccountId,
-				BankAccountId:       upload.BankAccountId,
-				TransactionUploadId: upload.TransactionUploadId,
-			})
-			assert.NoError(t, err, "must be able to create an OFX upload job")
-
 			{ // Mock out our expected calls from within the job
 				store.EXPECT().
 					Read(
@@ -98,29 +93,50 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 						io.NopCloser(bytes.NewReader(sampleFileData)),
 						nil,
 					)
-
 				enqueuer.EXPECT().
-					EnqueueJob(
+					EnqueueAt(
 						gomock.Any(),
-						background.CalculateTransactionClustersName,
-						gomock.Eq(background.CalculateTransactionClustersArguments{
+						mockqueue.EqQueue(similar.CalculateTransactionClusters),
+						gomock.Any(),
+						gomock.Eq(similar.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
 						}),
-					)
+					).
+					Return(nil).
+					Times(1)
 				enqueuer.EXPECT().
-					EnqueueJob(
+					EnqueueAt(
 						gomock.Any(),
-						background.RemoveFileName,
-						gomock.Eq(background.RemoveFileArguments{
+						mockqueue.EqQueue(storage_jobs.RemoveFile),
+						gomock.Any(),
+						gomock.Eq(storage_jobs.RemoveFileArguments{
 							AccountId: file.AccountId,
 							FileId:    file.FileId,
 						}),
-					)
+					).
+					Return(nil).
+					Times(1)
 			}
 
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+			context.EXPECT().Publisher().Return(ps).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+			context.EXPECT().Storage().Return(store).AnyTimes()
+
 			// Run our import job
-			err = job.Run(t.Context())
+			err := ofx_jobs.ProcessOFXUpload(
+				mockqueue.NewMockContext(context),
+				ofx_jobs.ProcessOFXUploadArguments{
+					AccountId:           upload.AccountId,
+					BankAccountId:       upload.BankAccountId,
+					TransactionUploadId: upload.TransactionUploadId,
+				},
+			)
 			assert.NoError(t, err, "must be able to import ofx transactions for sample")
 			assert.NotNil(t, GetTxnByUploadIdentifier(t, bankAccount, "8a34b9c89506be8c0195711720250751"))
 		}
@@ -152,14 +168,6 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				CompletedAt:   nil,
 			})
 
-			// Create the job executor
-			job, err := background.NewProcessOFXUploadJob(log, repo, clock, store, ps, enqueuer, background.ProcessOFXUploadArguments{
-				AccountId:           upload.AccountId,
-				BankAccountId:       upload.BankAccountId,
-				TransactionUploadId: upload.TransactionUploadId,
-			})
-			assert.NoError(t, err, "must be able to create an OFX upload job")
-
 			{ // Mock out our expected calls from within the job
 				store.EXPECT().
 					Read(
@@ -170,29 +178,50 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 						io.NopCloser(bytes.NewReader(sampleFileData)),
 						nil,
 					)
-
 				enqueuer.EXPECT().
-					EnqueueJob(
+					EnqueueAt(
 						gomock.Any(),
-						background.CalculateTransactionClustersName,
-						gomock.Eq(background.CalculateTransactionClustersArguments{
+						mockqueue.EqQueue(similar.CalculateTransactionClusters),
+						gomock.Any(),
+						gomock.Eq(similar.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
 						}),
-					)
+					).
+					Return(nil).
+					Times(1)
 				enqueuer.EXPECT().
-					EnqueueJob(
+					EnqueueAt(
 						gomock.Any(),
-						background.RemoveFileName,
-						gomock.Eq(background.RemoveFileArguments{
+						mockqueue.EqQueue(storage_jobs.RemoveFile),
+						gomock.Any(),
+						gomock.Eq(storage_jobs.RemoveFileArguments{
 							AccountId: file.AccountId,
 							FileId:    file.FileId,
 						}),
-					)
+					).
+					Return(nil).
+					Times(1)
 			}
 
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+			context.EXPECT().Publisher().Return(ps).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+			context.EXPECT().Storage().Return(store).AnyTimes()
+
 			// Run our import job
-			err = job.Run(t.Context())
+			err := ofx_jobs.ProcessOFXUpload(
+				mockqueue.NewMockContext(context),
+				ofx_jobs.ProcessOFXUploadArguments{
+					AccountId:           upload.AccountId,
+					BankAccountId:       upload.BankAccountId,
+					TransactionUploadId: upload.TransactionUploadId,
+				},
+			)
 			assert.NoError(t, err, "must be able to import ofx transactions for sample")
 			assert.NotNil(t, GetTxnByUploadIdentifier(t, bankAccount, "8a34b9c89506be8c0195711720250751"))
 			// Find the new transaction from the second file
@@ -215,9 +244,8 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 		link := fixtures.GivenIHaveAManualLink(t, clock, user)
 		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 
-		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db, log)
 		store := mockgen.NewMockStorage(ctrl)
-		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+		processor := mockgen.NewMockProcessor(ctrl)
 
 		{ // Import our sample data into monetr
 			// Read the transaction OFX file
@@ -246,14 +274,6 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				CompletedAt:   nil,
 			})
 
-			// Create the job executor
-			job, err := background.NewProcessOFXUploadJob(log, repo, clock, store, ps, enqueuer, background.ProcessOFXUploadArguments{
-				AccountId:           upload.AccountId,
-				BankAccountId:       upload.BankAccountId,
-				TransactionUploadId: upload.TransactionUploadId,
-			})
-			assert.NoError(t, err, "must be able to create an OFX upload job")
-
 			{ // Mock out our expected calls from within the job
 				store.EXPECT().
 					Read(
@@ -265,29 +285,51 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 						nil,
 					)
 
-				enqueuer.EXPECT().
-					EnqueueJob(
+				processor.EXPECT().
+					EnqueueAt(
 						gomock.Any(),
-						gomock.Eq(background.CalculateTransactionClustersName),
-						gomock.Eq(background.CalculateTransactionClustersArguments{
+						mockqueue.EqQueue(similar.CalculateTransactionClusters),
+						gomock.Any(),
+						gomock.Eq(similar.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
 						}),
-					)
-				enqueuer.EXPECT().
-					EnqueueJob(
+					).
+					Return(nil).
+					Times(1)
+				processor.EXPECT().
+					EnqueueAt(
 						gomock.Any(),
-						background.RemoveFileName,
-						gomock.Eq(background.RemoveFileArguments{
+						mockqueue.EqQueue(storage_jobs.RemoveFile),
+						gomock.Any(),
+						gomock.Eq(storage_jobs.RemoveFileArguments{
 							AccountId: file.AccountId,
 							FileId:    file.FileId,
 						}),
-					)
+					).
+					Return(nil).
+					Times(1)
 			}
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().Enqueuer().Return(processor).AnyTimes()
+			context.EXPECT().Publisher().Return(ps).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+			context.EXPECT().Storage().Return(store).AnyTimes()
 
 			// Run our import job
-			err = job.Run(t.Context())
+			err := ofx_jobs.ProcessOFXUpload(
+				mockqueue.NewMockContext(context),
+				ofx_jobs.ProcessOFXUploadArguments{
+					AccountId:           upload.AccountId,
+					BankAccountId:       upload.BankAccountId,
+					TransactionUploadId: upload.TransactionUploadId,
+				},
+			)
 			assert.NoError(t, err, "must be able to import ofx transactions for sample")
+			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
 		}
 	})
 
@@ -306,9 +348,8 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 		link := fixtures.GivenIHaveAManualLink(t, clock, user)
 		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 
-		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db, log)
 		store := mockgen.NewMockStorage(ctrl)
-		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+		processor := mockgen.NewMockProcessor(ctrl)
 
 		{ // Import our sample data into monetr
 			// Read the transaction OFX file
@@ -337,14 +378,6 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				CompletedAt:   nil,
 			})
 
-			// Create the job executor
-			job, err := background.NewProcessOFXUploadJob(log, repo, clock, store, ps, enqueuer, background.ProcessOFXUploadArguments{
-				AccountId:           upload.AccountId,
-				BankAccountId:       upload.BankAccountId,
-				TransactionUploadId: upload.TransactionUploadId,
-			})
-			assert.NoError(t, err, "must be able to create an OFX upload job")
-
 			{ // Mock out our expected calls from within the job
 				store.EXPECT().
 					Read(
@@ -355,29 +388,50 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 						io.NopCloser(bytes.NewReader(sampleFileData)),
 						nil,
 					)
-
-				enqueuer.EXPECT().
-					EnqueueJob(
+				processor.EXPECT().
+					EnqueueAt(
 						gomock.Any(),
-						background.CalculateTransactionClustersName,
-						gomock.Eq(background.CalculateTransactionClustersArguments{
+						mockqueue.EqQueue(similar.CalculateTransactionClusters),
+						gomock.Any(),
+						gomock.Eq(similar.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
 						}),
-					)
-				enqueuer.EXPECT().
-					EnqueueJob(
+					).
+					Return(nil).
+					Times(1)
+				processor.EXPECT().
+					EnqueueAt(
 						gomock.Any(),
-						background.RemoveFileName,
-						gomock.Eq(background.RemoveFileArguments{
+						mockqueue.EqQueue(storage_jobs.RemoveFile),
+						gomock.Any(),
+						gomock.Eq(storage_jobs.RemoveFileArguments{
 							AccountId: file.AccountId,
 							FileId:    file.FileId,
 						}),
-					)
+					).
+					Return(nil).
+					Times(1)
 			}
 
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().Enqueuer().Return(processor).AnyTimes()
+			context.EXPECT().Publisher().Return(ps).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+			context.EXPECT().Storage().Return(store).AnyTimes()
+
 			// Run our import job
-			err = job.Run(t.Context())
+			err := ofx_jobs.ProcessOFXUpload(
+				mockqueue.NewMockContext(context),
+				ofx_jobs.ProcessOFXUploadArguments{
+					AccountId:           upload.AccountId,
+					BankAccountId:       upload.BankAccountId,
+					TransactionUploadId: upload.TransactionUploadId,
+				},
+			)
 			assert.NoError(t, err, "must be able to import ofx transactions for sample")
 
 			{ // Check on our "blank" transaction
@@ -413,9 +467,8 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 			testutils.MustDBUpdate(t, &bankAccount)
 		}
 
-		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db, log)
 		store := mockgen.NewMockStorage(ctrl)
-		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+		processor := mockgen.NewMockProcessor(ctrl)
 
 		{ // Import our sample data into monetr
 			// Read the transaction OFX file
@@ -444,14 +497,6 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				CompletedAt:   nil,
 			})
 
-			// Create the job executor
-			job, err := background.NewProcessOFXUploadJob(log, repo, clock, store, ps, enqueuer, background.ProcessOFXUploadArguments{
-				AccountId:           upload.AccountId,
-				BankAccountId:       upload.BankAccountId,
-				TransactionUploadId: upload.TransactionUploadId,
-			})
-			assert.NoError(t, err, "must be able to create an OFX upload job")
-
 			{ // Mock out our expected calls from within the job
 				store.EXPECT().
 					Read(
@@ -462,29 +507,50 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 						io.NopCloser(bytes.NewReader(sampleFileData)),
 						nil,
 					)
-
-				enqueuer.EXPECT().
-					EnqueueJob(
+				processor.EXPECT().
+					EnqueueAt(
 						gomock.Any(),
-						background.CalculateTransactionClustersName,
-						gomock.Eq(background.CalculateTransactionClustersArguments{
+						mockqueue.EqQueue(similar.CalculateTransactionClusters),
+						gomock.Any(),
+						gomock.Eq(similar.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
 						}),
-					)
-				enqueuer.EXPECT().
-					EnqueueJob(
+					).
+					Return(nil).
+					Times(1)
+				processor.EXPECT().
+					EnqueueAt(
 						gomock.Any(),
-						background.RemoveFileName,
-						gomock.Eq(background.RemoveFileArguments{
+						mockqueue.EqQueue(storage_jobs.RemoveFile),
+						gomock.Any(),
+						gomock.Eq(storage_jobs.RemoveFileArguments{
 							AccountId: file.AccountId,
 							FileId:    file.FileId,
 						}),
-					)
+					).
+					Return(nil).
+					Times(1)
 			}
 
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().Enqueuer().Return(processor).AnyTimes()
+			context.EXPECT().Publisher().Return(ps).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+			context.EXPECT().Storage().Return(store).AnyTimes()
+
 			// Run our import job
-			err = job.Run(t.Context())
+			err := ofx_jobs.ProcessOFXUpload(
+				mockqueue.NewMockContext(context),
+				ofx_jobs.ProcessOFXUploadArguments{
+					AccountId:           upload.AccountId,
+					BankAccountId:       upload.BankAccountId,
+					TransactionUploadId: upload.TransactionUploadId,
+				},
+			)
 			assert.NoError(t, err, "must be able to import ofx transactions for sample")
 			assert.NotNil(t, GetTxnByUploadIdentifier(t, bankAccount, "db0676765969665a5a920576638051aee50fd0ca"))
 		}

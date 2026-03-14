@@ -1,4 +1,4 @@
-package recurring
+package similar
 
 import (
 	"context"
@@ -6,13 +6,18 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
 	t.Run("monetr mercury dataset", func(t *testing.T) {
-		data := GetFixtures(t, "monetr_sample_data_1.json")
+		fixtureJson := fixtures.LoadFile(t, "monetr_sample_data_1.json")
+		var data []models.Transaction
+		require.NoError(t, json.Unmarshal(fixtureJson, &data), "must be able to decode fixture data")
 		log := testutils.GetLog(t)
 		detector := NewSimilarTransactions_TFIDF_DBSCAN(log)
 
@@ -33,7 +38,9 @@ func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
 	})
 
 	t.Run("amazon dataset", func(t *testing.T) {
-		data := GetFixtures(t, "amazon_sample_data_1.json")
+		fixtureJson := fixtures.LoadFile(t, "amazon_sample_data_1.json")
+		var data []models.Transaction
+		require.NoError(t, json.Unmarshal(fixtureJson, &data), "must be able to decode fixture data")
 		log := testutils.GetLog(t)
 		detector := NewSimilarTransactions_TFIDF_DBSCAN(log)
 

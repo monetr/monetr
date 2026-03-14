@@ -1,4 +1,4 @@
-package recurring
+package similar
 
 import (
 	"context"
@@ -51,7 +51,8 @@ func (d *DBSCAN) Calculate(ctx context.Context) []Cluster {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	// Initialize or reinitialize the clusters. We want to start with a clean slate.
+	// Initialize or reinitialize the clusters. We want to start with a clean
+	// slate.
 	d.clusters = make([]Cluster, 0)
 	// From the top, take one point at a time.
 	for index, point := range d.dataset {
@@ -90,7 +91,8 @@ func (d *DBSCAN) expandCluster(index int, neighbors []int, cluster *Cluster) {
 	for _, neighborIndex := range neighbors {
 		// Retrieve the item from the dataset.
 		neighbor := d.dataset[neighborIndex]
-		// If Q (neighbor) is not visited then mark it as visited and check for more neighbors.
+		// If Q (neighbor) is not visited then mark it as visited and check for more
+		// neighbors.
 		if _, visited := d.labels[neighbor.ID]; !visited {
 			// Mark Q as visited but not as noise.
 			d.labels[neighbor.ID] = false
@@ -98,8 +100,8 @@ func (d *DBSCAN) expandCluster(index int, neighbors []int, cluster *Cluster) {
 			newNeighbors := d.getNeighbors(neighborIndex)
 			// If we have enough neighbors then we can expand the cluster even more.
 			if len(newNeighbors) >= d.minPoints {
-				// Merge new neighbors with neighbors
-				// Recursively descend and then add the data we get into the one we currently have.
+				// Merge new neighbors with neighbors. Recursively descend and then add
+				// the data we get into the one we currently have.
 				d.expandCluster(neighborIndex, newNeighbors, cluster)
 			}
 		}
@@ -138,7 +140,8 @@ func (d *DBSCAN) getNeighbors(index int) []int {
 
 		// Calculate the distance from our Q point to our P point.
 		distance := calc.EuclideanDistance32(point.Vector, counterpoint.Vector)
-		// If we are close enough then we could be part of a core cluster point. Add it to the list.
+		// If we are close enough then we could be part of a core cluster point. Add
+		// it to the list.
 		if distance <= d.epsilon {
 			neighbors = append(neighbors, i)
 		}

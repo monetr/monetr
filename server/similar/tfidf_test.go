@@ -1,4 +1,4 @@
-package recurring
+package similar
 
 import (
 	"testing"

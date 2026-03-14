@@ -11,8 +11,8 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/platypus"
+	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
@@ -284,7 +284,7 @@ func DeactivateLinksCron(ctx queue.Context) error {
 			"linkId", item.LinkId,
 		)
 		itemLog.Log(ctx, logging.LevelTrace, "enqueuing job to remove expired link for account")
-		if err = queue.Enqueue(ctx, ctx.Processor(), DeactivateLink, DeactivateLinksArguments{
+		if err = queue.Enqueue(ctx, ctx.Enqueuer(), DeactivateLink, DeactivateLinksArguments{
 			AccountId: item.AccountId,
 			LinkId:    item.LinkId,
 		}); err != nil {

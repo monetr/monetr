@@ -1,4 +1,4 @@
-package background
+package ofx_jobs
 
 import (
 	"context"
@@ -9,113 +9,58 @@ import (
 	"strings"
 	"time"
 
-	"github.com/benbjohnson/clock"
 	"github.com/elliotcourant/gofx"
-	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/currency"
-	"github.com/monetr/monetr/server/formats/ofx"
+	"github.com/monetr/monetr/server/datasources/ofx"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
-	. "github.com/monetr/monetr/server/models"
-	"github.com/monetr/monetr/server/pubsub"
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/storage"
+	"github.com/monetr/monetr/server/similar"
+	"github.com/monetr/monetr/server/storage/storage_jobs"
 	"github.com/pkg/errors"
 )
 
-const (
-	ProcessOFXUploadName = "ProcessOFXUpload"
-)
-
-var (
-	_ JobHandler        = &ProcessOFXUploadHandler{}
-	_ JobImplementation = &ProcessOFXUploadJob{}
-)
-
-type (
-	ProcessOFXUploadHandler struct {
-		log          *slog.Logger
-		db           *pg.DB
-		publisher    pubsub.Publisher
-		files        storage.Storage
-		enqueuer     JobEnqueuer
-		unmarshaller JobUnmarshaller
-		clock        clock.Clock
-	}
-
-	ProcessOFXUploadArguments struct {
-		AccountId           ID[Account]           `json:"accountId"`
-		BankAccountId       ID[BankAccount]       `json:"bankAccountId"`
-		TransactionUploadId ID[TransactionUpload] `json:"transactionUploadId"`
-	}
-
-	ProcessOFXUploadJob struct {
-		args      ProcessOFXUploadArguments
-		log       *slog.Logger
-		repo      repository.BaseRepository
-		files     storage.Storage
-		publisher pubsub.Publisher
-		enqueuer  JobEnqueuer
-		clock     clock.Clock
-		timezone  *time.Location
-
-		bankAccount           *BankAccount
-		upload                *TransactionUpload
-		file                  *File
-		data                  *gofx.OFX
-		currency              string
-		statementTransactions []gofx.StatementTransaction
-		existingTransactions  map[string]Transaction
-	}
-)
-
-func NewProcessOFXUploadHandler(
-	log *slog.Logger,
-	db *pg.DB,
-	clock clock.Clock,
-	files storage.Storage,
-	publisher pubsub.Publisher,
-	enqueuer JobEnqueuer,
-) *ProcessOFXUploadHandler {
-	return &ProcessOFXUploadHandler{
-		log:          log,
-		db:           db,
-		publisher:    publisher,
-		files:        files,
-		enqueuer:     enqueuer,
-		unmarshaller: DefaultJobUnmarshaller,
-		clock:        clock,
-	}
+type ProcessOFXUploadArguments struct {
+	AccountId           models.ID[models.Account]           `json:"accountId"`
+	BankAccountId       models.ID[models.BankAccount]       `json:"bankAccountId"`
+	TransactionUploadId models.ID[models.TransactionUpload] `json:"transactionUploadId"`
 }
 
-func (h *ProcessOFXUploadHandler) updateStatus(
-	ctx context.Context,
+// updateUploadStatus will update the record of the transaction upload in the
+// database to have the most up to date status. It will also send out a pubsub
+// message for that transaction upload. Keep in mind that the pub sub message is
+// not transactional, but the update can be depending on where this function is
+// called. If this is called inside of a DB transaction; then the changes that
+// this update has will only take effect if the transaction is committed. Where
+// as the notification will go out no matter what.
+func updateUploadStatus(
+	ctx queue.Context,
 	args ProcessOFXUploadArguments,
-	status TransactionUploadStatus,
+	status models.TransactionUploadStatus,
 	errorMessage *string,
 ) error {
-	log := h.log.With(
+	log := ctx.Log().With(
 		"accountId", args.AccountId,
 		"bankAccountId", args.BankAccountId,
 		"transactionUploadId", args.TransactionUploadId,
 	)
 
-	query := h.db.ModelContext(ctx, &TransactionUpload{}).
+	query := ctx.DB().ModelContext(ctx, &models.TransactionUpload{}).
 		Where(`"account_id" = ?`, args.AccountId).
 		Where(`"bank_account_id" = ?`, args.BankAccountId).
 		Where(`"transaction_upload_id" = ?`, args.TransactionUploadId).
 		Set(`"status" = ?`, status)
 
 	switch status {
-	case TransactionUploadStatusProcessing:
-		query = query.Set(`"processed_at" = ?`, h.clock.Now())
-	case TransactionUploadStatusComplete:
-		query = query.Set(`"completed_at" = ?`, h.clock.Now())
-	case TransactionUploadStatusFailed:
-		query = query.Set(`"completed_at" = ?`, h.clock.Now())
+	case models.TransactionUploadStatusProcessing:
+		query = query.Set(`"processed_at" = ?`, ctx.Clock().Now())
+	case models.TransactionUploadStatusComplete:
+		query = query.Set(`"completed_at" = ?`, ctx.Clock().Now())
+	case models.TransactionUploadStatusFailed:
+		query = query.Set(`"completed_at" = ?`, ctx.Clock().Now())
 		if errorMessage != nil {
 			query = query.Set(`"error" = ?`, *errorMessage)
 		} else {
@@ -123,7 +68,12 @@ func (h *ProcessOFXUploadHandler) updateStatus(
 		}
 	}
 
-	log.Log(ctx, logging.LevelTrace, "updated transaction upload status", "status", status)
+	log.Log(
+		ctx,
+		logging.LevelTrace,
+		"updated transaction upload status",
+		"status", status,
+	)
 
 	_, err := query.Update()
 	if err != nil {
@@ -135,7 +85,7 @@ func (h *ProcessOFXUploadHandler) updateStatus(
 		args.AccountId, args.TransactionUploadId,
 	)
 	payload := string(status)
-	if err := h.publisher.Notify(
+	if err := ctx.Publisher().Notify(
 		ctx,
 		args.AccountId,
 		channel,
@@ -143,183 +93,39 @@ func (h *ProcessOFXUploadHandler) updateStatus(
 	); err != nil {
 		return errors.Wrap(err, "failed to send progress notification for job")
 	}
-	log.Log(ctx, logging.LevelTrace, "sent progress notification for file upload", "channel", channel, "payload", payload)
+	log.Log(
+		ctx,
+		logging.LevelTrace,
+		"sent progress notification for file upload",
+		"channel", channel,
+		"payload", payload,
+	)
 
 	return nil
 }
 
-func (h *ProcessOFXUploadHandler) QueueName() string {
-	return ProcessOFXUploadName
+type processOfxUpload struct {
+	args     ProcessOFXUploadArguments
+	log      *slog.Logger
+	repo     repository.BaseRepository
+	timezone *time.Location
+
+	bankAccount           *models.BankAccount
+	upload                *models.TransactionUpload
+	file                  *models.File
+	data                  *gofx.OFX
+	currency              string
+	statementTransactions []gofx.StatementTransaction
+	existingTransactions  map[string]models.Transaction
 }
 
-func (h *ProcessOFXUploadHandler) HandleConsumeJob(
-	ctx context.Context,
-	inLog *slog.Logger,
-	data []byte,
+// loadFile takes the ID of the [models.TrasactionUpload] and reads the file
+// from the storage system. If this fails due to a retryable issue then an error
+// is returned so the job can be re-attempted. If this fails due to a bad file,
+// then this function panics so that the job is not retried.
+func (j *processOfxUpload) loadFile(
+	ctx queue.Context,
 ) error {
-	var args ProcessOFXUploadArguments
-	if err := errors.Wrap(h.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Processing OFX Upload job.", "job", map[string]any{
-			"data": data,
-		})
-		return err
-	}
-
-	crumbs.IncludeUserInScope(ctx, args.AccountId)
-
-	log := inLog.With(
-		"accountId", args.AccountId,
-		"transactionUploadId", args.TransactionUploadId,
-		"bankAccountId", args.BankAccountId,
-	)
-
-	if err := h.updateStatus(ctx, args, TransactionUploadStatusProcessing, nil); err != nil {
-		return err
-	}
-
-	// error here then we will catch it and update the upload status accordingly.
-	var err error
-	defer func() {
-		if recovery := recover(); recovery != nil {
-			log.ErrorContext(ctx, "panic processing OFX file upload", "err", err)
-			_ = h.updateStatus(ctx, args, TransactionUploadStatusFailed, nil)
-
-			panic(recovery)
-		}
-		if err != nil {
-			log.ErrorContext(ctx, "error processing OFX file upload", "err", err)
-			errorString := fmt.Sprintf("%s", err)
-			_ = h.updateStatus(ctx, args, TransactionUploadStatusFailed, &errorString)
-		} else {
-			_ = h.updateStatus(ctx, args, TransactionUploadStatusComplete, nil)
-		}
-	}()
-	err = h.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
-		span := sentry.StartSpan(ctx, "db.transaction")
-		defer span.Finish()
-
-		repo := repository.NewRepositoryFromSession(
-			h.clock,
-			"user_system",
-			args.AccountId,
-			txn,
-			log,
-		)
-
-		job, err := NewProcessOFXUploadJob(
-			log, repo, h.clock, h.files, h.publisher, h.enqueuer, args,
-		)
-		if err != nil {
-			return err
-		}
-
-		return job.Run(span.Context())
-	})
-
-	// Return the error anyway so we can see failed uploads in sentry.
-	return err
-}
-
-func NewProcessOFXUploadJob(
-	log *slog.Logger,
-	repo repository.BaseRepository,
-	clock clock.Clock,
-	files storage.Storage,
-	publisher pubsub.Publisher,
-	enqueuer JobEnqueuer,
-	args ProcessOFXUploadArguments,
-) (*ProcessOFXUploadJob, error) {
-	return &ProcessOFXUploadJob{
-		args:      args,
-		log:       log,
-		repo:      repo,
-		files:     files,
-		publisher: publisher,
-		enqueuer:  enqueuer,
-		clock:     clock,
-	}, nil
-}
-
-func (j *ProcessOFXUploadJob) Run(ctx context.Context) error {
-	span := sentry.StartSpan(ctx, "job.exec")
-	defer span.Finish()
-	crumbs.AddTag(span.Context(), "bankAccountId", j.args.BankAccountId.String())
-	crumbs.AddTag(span.Context(), "transactionUploadId", j.args.TransactionUploadId.String())
-	crumbs.IncludeUserInScope(span.Context(), j.args.AccountId)
-
-	// No matter what, when we are finished clean up the file.
-	defer func() {
-		now := j.clock.Now()
-		j.file.DeletedAt = &now
-		j.log.DebugContext(span.Context(), "processing complete, marking file as deleted and queueing removal")
-		if err := j.repo.UpdateFile(span.Context(), j.file); err != nil {
-			j.log.WarnContext(span.Context(), "failed to update file with deleted at",
-				"fileId", j.file.FileId,
-				"err", err,
-			)
-		}
-
-		j.enqueuer.EnqueueJob(span.Context(), RemoveFileName, RemoveFileArguments{
-			AccountId: j.args.AccountId,
-			FileId:    j.file.FileId,
-		})
-	}()
-
-	account, err := j.repo.GetAccount(span.Context())
-	if err != nil {
-		j.log.ErrorContext(span.Context(), "failed to retrieve account for job", "err", err)
-		return err
-	}
-
-	j.timezone, err = account.GetTimezone()
-	if err != nil {
-		j.log.WarnContext(span.Context(), "failed to get account's time zone, defaulting to UTC", "err", err)
-		j.timezone = time.UTC
-	}
-
-	// Load the bank account ahead of processing the file, we need this for
-	// currency data and will use it for balance updates later.
-	j.bankAccount, err = j.repo.GetBankAccount(span.Context(), j.args.BankAccountId)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve bank account for file import sync")
-	}
-
-	// Load the file and its data into memory.
-	if err := j.loadFile(span.Context()); err != nil {
-		return err
-	}
-
-	// Pull all of the transactions that already exist in our system from the file
-	// so we can compare.
-	if err := j.hydrateTransactions(span.Context()); err != nil {
-		return err
-	}
-
-	// Push new and updated transactions to the database.
-	if err := j.syncTransactions(span.Context()); err != nil {
-		return err
-	}
-
-	if err := j.syncBalances(span.Context()); err != nil {
-		return err
-	}
-
-	// Also kick off the transaction similarity job.
-	j.enqueuer.EnqueueJob(
-		span.Context(),
-		CalculateTransactionClustersName,
-		CalculateTransactionClustersArguments{
-			AccountId:     j.args.AccountId,
-			BankAccountId: j.args.BankAccountId,
-		},
-	)
-
-	return nil
-}
-
-// loadFile will take the current arguments and load the data from the file
-// upload itself into memory for processing.
-func (j *ProcessOFXUploadJob) loadFile(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -343,15 +149,15 @@ func (j *ProcessOFXUploadJob) loadFile(ctx context.Context) error {
 		return errors.New("cannot import transactions from a deleted file")
 	}
 
-	fileReader, err := j.files.Read(span.Context(), *file)
+	fileReader, err := ctx.Storage().Read(span.Context(), *file)
 	if err != nil {
 		return errors.Wrap(err, "failed to access file from storage")
 	}
 	defer fileReader.Close()
 
-	ofxData, err := ofx.Parse(fileReader)
+	ofxData, err := ofx.ParseFile(fileReader)
 	if err != nil {
-		return err
+		return queue.FailWithoutRetry(ctx, err)
 	}
 
 	j.data = ofxData
@@ -362,7 +168,7 @@ func (j *ProcessOFXUploadJob) loadFile(ctx context.Context) error {
 // OFX file and tries to cross reference them with transactions that already
 // exist in the database. It relies on the OFX file having a unique identifier
 // for each transaction that is consistent between each download from the FI.
-func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
+func (j *processOfxUpload) hydrateTransactions(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -446,12 +252,12 @@ func (j *ProcessOFXUploadJob) hydrateTransactions(ctx context.Context) error {
 	return nil
 }
 
-func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
+func (j *processOfxUpload) syncTransactions(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	transactionsToUpdate := make([]*Transaction, 0)
-	transactionsToCreate := make([]Transaction, 0)
+	transactionsToUpdate := make([]*models.Transaction, 0)
+	transactionsToCreate := make([]models.Transaction, 0)
 	for y := range j.statementTransactions {
 		externalTransaction := j.statementTransactions[y]
 		uploadIdentifier := externalTransaction.FITID
@@ -498,8 +304,8 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 
 		transaction, ok := j.existingTransactions[uploadIdentifier]
 		if !ok {
-			transaction = Transaction{
-				TransactionId:        NewID[Transaction](),
+			transaction = models.Transaction{
+				TransactionId:        models.NewID[models.Transaction](),
 				AccountId:            j.args.AccountId,
 				BankAccountId:        j.args.BankAccountId,
 				Amount:               amount,
@@ -509,7 +315,7 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 				OriginalMerchantName: name,
 				IsPending:            false, // OFX files don't show pending?
 				UploadIdentifier:     &uploadIdentifier,
-				Source:               TransactionSourceUpload,
+				Source:               models.TransactionSourceUpload,
 			}
 			transactionsToCreate = append(transactionsToCreate, transaction)
 			continue
@@ -538,7 +344,7 @@ func (j *ProcessOFXUploadJob) syncTransactions(ctx context.Context) error {
 	return nil
 }
 
-func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
+func (j *processOfxUpload) syncBalances(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -635,116 +441,105 @@ func (j *ProcessOFXUploadJob) syncBalances(ctx context.Context) error {
 	return nil
 }
 
-func ProcessOFXUpload(ctx queue.Context, args ProcessOFXUploadArguments) error {
+func ProcessOFXUpload(
+	ctx queue.Context,
+	args ProcessOFXUploadArguments,
+) error {
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
-
-	log := ctx.Log().With(
-		"accountId", args.AccountId,
-		"transactionUploadId", args.TransactionUploadId,
-		"bankAccountId", args.BankAccountId,
-	)
-
-	if err := updateStatus(ctx, args, TransactionUploadStatusProcessing, nil); err != nil {
-		return err
-	}
-
-	// error here then we will catch it and update the upload status accordingly.
-	var err error
 	defer func() {
+		// Only mark the file as failed if we panic. This means the job won't be
+		// retried.
 		if recovery := recover(); recovery != nil {
-			log.ErrorContext(ctx, "panic processing OFX file upload", "err", err)
-			_ = updateStatus(ctx, args, TransactionUploadStatusFailed, nil)
-
+			ctx.Log().ErrorContext(
+				ctx,
+				"panic processing OFX file upload",
+				"err", recovery,
+			)
+			updateUploadStatus(ctx, args, models.TransactionUploadStatusFailed, nil)
 			panic(recovery)
 		}
-		if err != nil {
-			log.ErrorContext(ctx, "error processing OFX file upload", "err", err)
-			errorString := fmt.Sprintf("%s", err)
-			_ = updateStatus(ctx, args, TransactionUploadStatusFailed, &errorString)
-		} else {
-			_ = updateStatus(ctx, args, TransactionUploadStatusComplete, nil)
-		}
 	}()
-	err = ctx.RunInTransaction(ctx, func(ctx queue.Context) error {
-		span := sentry.StartSpan(ctx, "db.transaction")
-		defer span.Finish()
 
-		repo := repository.NewRepositoryFromSession(
-			ctx.Clock(),
-			"user_system",
-			args.AccountId,
-			ctx.DB(),
-			log,
+	return ctx.RunInTransaction(ctx, func(ctx queue.Context) error {
+		updateUploadStatus(ctx, args, models.TransactionUploadStatusProcessing, nil)
+		log := ctx.Log().With(
+			"accountId", args.AccountId,
+			"transactionUploadId", args.TransactionUploadId,
+			"bankAccountId", args.BankAccountId,
 		)
+		j := &processOfxUpload{
+			args: args,
+			log:  log,
+			repo: repository.NewRepositoryFromSession(
+				ctx.Clock(),
+				"user_system",
+				args.AccountId,
+				ctx.DB(),
+				log,
+			),
+			statementTransactions: []gofx.StatementTransaction{},
+			existingTransactions:  map[string]models.Transaction{},
+		}
 
-		job, err := NewProcessOFXUploadJob(
-			// TODO This doesn't pass a proper enqueuer here!
-			log, repo, ctx.Clock(), ctx.Storage(), ctx.Publisher(), nil, args,
-		)
+		account, err := j.repo.GetAccount(ctx)
 		if err != nil {
+			j.log.ErrorContext(ctx, "failed to retrieve account for job", "err", err)
 			return err
 		}
 
-		return job.Run(span.Context())
-	})
-
-	// Return the error anyway so we can see failed uploads in sentry.
-	return err
-}
-
-func updateStatus(
-	ctx queue.Context,
-	args ProcessOFXUploadArguments,
-	status TransactionUploadStatus,
-	errorMessage *string,
-) error {
-	log := ctx.Log().With(
-		"accountId", args.AccountId,
-		"bankAccountId", args.BankAccountId,
-		"transactionUploadId", args.TransactionUploadId,
-	)
-
-	query := ctx.DB().ModelContext(ctx, &TransactionUpload{}).
-		Where(`"account_id" = ?`, args.AccountId).
-		Where(`"bank_account_id" = ?`, args.BankAccountId).
-		Where(`"transaction_upload_id" = ?`, args.TransactionUploadId).
-		Set(`"status" = ?`, status)
-
-	switch status {
-	case TransactionUploadStatusProcessing:
-		query = query.Set(`"processed_at" = ?`, ctx.Clock().Now())
-	case TransactionUploadStatusComplete:
-		query = query.Set(`"completed_at" = ?`, ctx.Clock().Now())
-	case TransactionUploadStatusFailed:
-		query = query.Set(`"completed_at" = ?`, ctx.Clock().Now())
-		if errorMessage != nil {
-			query = query.Set(`"error" = ?`, *errorMessage)
-		} else {
-			query = query.Set(`"error" = ?`, "Unknown failure")
+		j.timezone, err = account.GetTimezone()
+		if err != nil {
+			j.log.WarnContext(ctx, "failed to get account's time zone, defaulting to UTC", "err", err)
+			j.timezone = time.UTC
 		}
-	}
 
-	log.Log(ctx, logging.LevelTrace, "updated transaction upload status", "status", status)
+		// Load the bank account ahead of processing the file, we need this for
+		// currency data and will use it for balance updates later.
+		j.bankAccount, err = j.repo.GetBankAccount(ctx, args.BankAccountId)
+		if err != nil {
+			return errors.Wrap(err, "failed to retrieve bank account for file import sync")
+		}
 
-	_, err := query.Update()
-	if err != nil {
-		return errors.Wrap(err, "failed to update upload status")
-	}
+		// Load the file and its data into memory.
+		if err := j.loadFile(ctx); err != nil {
+			return err
+		}
 
-	channel := fmt.Sprintf(
-		"account:%s:transaction_upload:%s:progress",
-		args.AccountId, args.TransactionUploadId,
-	)
-	payload := string(status)
-	if err := ctx.Publisher().Notify(
-		ctx,
-		args.AccountId,
-		channel,
-		payload,
-	); err != nil {
-		return errors.Wrap(err, "failed to send progress notification for job")
-	}
-	log.Log(ctx, logging.LevelTrace, "sent progress notification for file upload", "channel", channel, "payload", payload)
+		// Pull all of the transactions that already exist in our system from the file
+		// so we can compare.
+		if err := j.hydrateTransactions(ctx); err != nil {
+			return err
+		}
 
-	return nil
+		// Push new and updated transactions to the database.
+		if err := j.syncTransactions(ctx); err != nil {
+			return err
+		}
+
+		if err := j.syncBalances(ctx); err != nil {
+			return err
+		}
+
+		// Queue up the other jobs that we want after this one.
+		return myownsanity.FirstError(
+			queue.Enqueue(
+				ctx,
+				ctx.Enqueuer(),
+				similar.CalculateTransactionClusters,
+				similar.CalculateTransactionClustersArguments{
+					AccountId:     args.AccountId,
+					BankAccountId: args.BankAccountId,
+				},
+			),
+			queue.Enqueue(
+				ctx,
+				ctx.Enqueuer(),
+				storage_jobs.RemoveFile,
+				storage_jobs.RemoveFileArguments{
+					AccountId: j.file.AccountId,
+					FileId:    j.file.FileId,
+				},
+			),
+		)
+	})
 }

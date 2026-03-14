@@ -21,6 +21,7 @@ import (
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
+	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
@@ -32,17 +33,19 @@ import (
 )
 
 type Controller struct {
-	Accounts                 repository.AccountsRepository
-	Billing                  billing.Billing
-	Cache                    cache.Cache
-	Captcha                  captcha.Verification
-	ClientTokens             security.ClientTokens
-	Clock                    clock.Clock
-	Configuration            config.Configuration
-	DB                       *pg.DB
-	Email                    communication.EmailCommunication
-	FileStorage              storage.Storage
+	Accounts      repository.AccountsRepository
+	Billing       billing.Billing
+	Cache         cache.Cache
+	Captcha       captcha.Verification
+	ClientTokens  security.ClientTokens
+	Clock         clock.Clock
+	Configuration config.Configuration
+	DB            *pg.DB
+	Email         communication.EmailCommunication
+	FileStorage   storage.Storage
+	// Deprecated: Use [Controller.Queue] instead!
 	JobRunner                background.JobController
+	Queue                    queue.Enqueuer
 	KMS                      secrets.KeyManagement
 	Log                      *slog.Logger
 	Plaid                    platypus.Platypus

@@ -19,6 +19,7 @@ import (
 	pg "github.com/go-pg/pg/v10"
 	billing "github.com/monetr/monetr/server/billing"
 	communication "github.com/monetr/monetr/server/communication"
+	models "github.com/monetr/monetr/server/models"
 	platypus "github.com/monetr/monetr/server/platypus"
 	pubsub "github.com/monetr/monetr/server/pubsub"
 	queue "github.com/monetr/monetr/server/queue"
@@ -136,6 +137,20 @@ func (mr *MockContextMockRecorder) Email() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Email", reflect.TypeOf((*MockContext)(nil).Email))
 }
 
+// Enqueuer mocks base method.
+func (m *MockContext) Enqueuer() queue.Enqueuer {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Enqueuer")
+	ret0, _ := ret[0].(queue.Enqueuer)
+	return ret0
+}
+
+// Enqueuer indicates an expected call of Enqueuer.
+func (mr *MockContextMockRecorder) Enqueuer() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Enqueuer", reflect.TypeOf((*MockContext)(nil).Enqueuer))
+}
+
 // Err mocks base method.
 func (m *MockContext) Err() error {
 	m.ctrl.T.Helper()
@@ -148,6 +163,20 @@ func (m *MockContext) Err() error {
 func (mr *MockContextMockRecorder) Err() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Err", reflect.TypeOf((*MockContext)(nil).Err))
+}
+
+// Job mocks base method.
+func (m *MockContext) Job() models.Job {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Job")
+	ret0, _ := ret[0].(models.Job)
+	return ret0
+}
+
+// Job indicates an expected call of Job.
+func (mr *MockContextMockRecorder) Job() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Job", reflect.TypeOf((*MockContext)(nil).Job))
 }
 
 // KMS mocks base method.
@@ -190,20 +219,6 @@ func (m *MockContext) Platypus() platypus.Platypus {
 func (mr *MockContextMockRecorder) Platypus() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Platypus", reflect.TypeOf((*MockContext)(nil).Platypus))
-}
-
-// Processor mocks base method.
-func (m *MockContext) Processor() queue.Processor {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Processor")
-	ret0, _ := ret[0].(queue.Processor)
-	return ret0
-}
-
-// Processor indicates an expected call of Processor.
-func (mr *MockContextMockRecorder) Processor() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Processor", reflect.TypeOf((*MockContext)(nil).Processor))
 }
 
 // Publisher mocks base method.
@@ -262,6 +277,58 @@ func (mr *MockContextMockRecorder) Value(key any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Value", reflect.TypeOf((*MockContext)(nil).Value), key)
 }
 
+// MockEnqueuer is a mock of Enqueuer interface.
+type MockEnqueuer struct {
+	ctrl     *gomock.Controller
+	recorder *MockEnqueuerMockRecorder
+	isgomock struct{}
+}
+
+// MockEnqueuerMockRecorder is the mock recorder for MockEnqueuer.
+type MockEnqueuerMockRecorder struct {
+	mock *MockEnqueuer
+}
+
+// NewMockEnqueuer creates a new mock instance.
+func NewMockEnqueuer(ctrl *gomock.Controller) *MockEnqueuer {
+	mock := &MockEnqueuer{ctrl: ctrl}
+	mock.recorder = &MockEnqueuerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockEnqueuer) EXPECT() *MockEnqueuerMockRecorder {
+	return m.recorder
+}
+
+// EnqueueAt mocks base method.
+func (m *MockEnqueuer) EnqueueAt(ctx context.Context, arg1 string, at time.Time, args any) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnqueueAt", ctx, arg1, at, args)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// EnqueueAt indicates an expected call of EnqueueAt.
+func (mr *MockEnqueuerMockRecorder) EnqueueAt(ctx, arg1, at, args any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnqueueAt", reflect.TypeOf((*MockEnqueuer)(nil).EnqueueAt), ctx, arg1, at, args)
+}
+
+// WithTransaction mocks base method.
+func (m *MockEnqueuer) WithTransaction(db pg.DBI) queue.Enqueuer {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithTransaction", db)
+	ret0, _ := ret[0].(queue.Enqueuer)
+	return ret0
+}
+
+// WithTransaction indicates an expected call of WithTransaction.
+func (mr *MockEnqueuerMockRecorder) WithTransaction(db any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithTransaction", reflect.TypeOf((*MockEnqueuer)(nil).WithTransaction), db)
+}
+
 // MockProcessor is a mock of Processor interface.
 type MockProcessor struct {
 	ctrl     *gomock.Controller
@@ -300,6 +367,48 @@ func (mr *MockProcessorMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockProcessor)(nil).Close))
 }
 
+// EnqueueAt mocks base method.
+func (m *MockProcessor) EnqueueAt(ctx context.Context, arg1 string, at time.Time, args any) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnqueueAt", ctx, arg1, at, args)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// EnqueueAt indicates an expected call of EnqueueAt.
+func (mr *MockProcessorMockRecorder) EnqueueAt(ctx, arg1, at, args any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnqueueAt", reflect.TypeOf((*MockProcessor)(nil).EnqueueAt), ctx, arg1, at, args)
+}
+
+// Register mocks base method.
+func (m *MockProcessor) Register(ctx context.Context, arg1 string, job queue.InternalJobWrapper) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Register", ctx, arg1, job)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Register indicates an expected call of Register.
+func (mr *MockProcessorMockRecorder) Register(ctx, arg1, job any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockProcessor)(nil).Register), ctx, arg1, job)
+}
+
+// RegisterCron mocks base method.
+func (m *MockProcessor) RegisterCron(ctx context.Context, arg1, schedule string, job queue.InternalJobWrapper) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RegisterCron", ctx, arg1, schedule, job)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RegisterCron indicates an expected call of RegisterCron.
+func (mr *MockProcessorMockRecorder) RegisterCron(ctx, arg1, schedule, job any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterCron", reflect.TypeOf((*MockProcessor)(nil).RegisterCron), ctx, arg1, schedule, job)
+}
+
 // Start mocks base method.
 func (m *MockProcessor) Start() error {
 	m.ctrl.T.Helper()
@@ -314,44 +423,16 @@ func (mr *MockProcessorMockRecorder) Start() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockProcessor)(nil).Start))
 }
 
-// __EnqueueAt mocks base method.
-func (m *MockProcessor) __EnqueueAt(ctx context.Context, arg1 string, at time.Time, args any) error {
+// WithTransaction mocks base method.
+func (m *MockProcessor) WithTransaction(db pg.DBI) queue.Enqueuer {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "__EnqueueAt", ctx, arg1, at, args)
-	ret0, _ := ret[0].(error)
+	ret := m.ctrl.Call(m, "WithTransaction", db)
+	ret0, _ := ret[0].(queue.Enqueuer)
 	return ret0
 }
 
-// __EnqueueAt indicates an expected call of __EnqueueAt.
-func (mr *MockProcessorMockRecorder) __EnqueueAt(ctx, arg1, at, args any) *gomock.Call {
+// WithTransaction indicates an expected call of WithTransaction.
+func (mr *MockProcessorMockRecorder) WithTransaction(db any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "__EnqueueAt", reflect.TypeOf((*MockProcessor)(nil).__EnqueueAt), ctx, arg1, at, args)
-}
-
-// __Register mocks base method.
-func (m *MockProcessor) __Register(ctx context.Context, arg1 string, job queue.InternalJobWrapper) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "__Register", ctx, arg1, job)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// __Register indicates an expected call of __Register.
-func (mr *MockProcessorMockRecorder) __Register(ctx, arg1, job any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "__Register", reflect.TypeOf((*MockProcessor)(nil).__Register), ctx, arg1, job)
-}
-
-// __RegisterCron mocks base method.
-func (m *MockProcessor) __RegisterCron(ctx context.Context, arg1, schedule string, job queue.InternalJobWrapper) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "__RegisterCron", ctx, arg1, schedule, job)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// __RegisterCron indicates an expected call of __RegisterCron.
-func (mr *MockProcessorMockRecorder) __RegisterCron(ctx, arg1, schedule, job any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "__RegisterCron", reflect.TypeOf((*MockProcessor)(nil).__RegisterCron), ctx, arg1, schedule, job)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithTransaction", reflect.TypeOf((*MockProcessor)(nil).WithTransaction), db)
 }

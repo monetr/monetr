@@ -8,9 +8,10 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/server/background"
+	"github.com/monetr/monetr/server/datasources/ofx/ofx_jobs"
 	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/queue"
 	"golang.org/x/net/websocket"
 )
 
@@ -51,16 +52,22 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to create transaction upload")
 	}
 
-	if err := c.JobRunner.EnqueueJob(
+	if err := queue.Enqueue(
 		c.getContext(ctx),
-		background.ProcessOFXUploadName,
-		background.ProcessOFXUploadArguments{
+		c.Queue,
+		ofx_jobs.ProcessOFXUpload,
+		ofx_jobs.ProcessOFXUploadArguments{
 			AccountId:           c.mustGetAccountId(ctx),
 			BankAccountId:       bankAccountId,
 			TransactionUploadId: upload.TransactionUploadId,
 		},
 	); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to enqueue upload for processing")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"Failed to enqueue upload for processing",
+		)
 	}
 
 	return ctx.JSON(http.StatusOK, upload)

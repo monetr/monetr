@@ -57,7 +57,7 @@ func SyncLunchFlowCron(ctx queue.Context) error {
 
 		err := queue.Enqueue(
 			ctx,
-			ctx.Processor(),
+			ctx.Enqueuer(),
 			SyncLunchFlow,
 			SyncLunchFlowArguments{
 				AccountId:     item.AccountId,
@@ -561,7 +561,7 @@ func SyncLunchFlow(ctx queue.Context, args SyncLunchFlowArguments) error {
 		// Also kick off the transaction similarity job.
 		if err := queue.Enqueue(
 			ctx,
-			ctx.Processor(),
+			ctx.Enqueuer(),
 			similar.CalculateTransactionClusters,
 			similar.CalculateTransactionClustersArguments{
 				AccountId:     s.args.AccountId,

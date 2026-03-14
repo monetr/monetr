@@ -54,7 +54,7 @@ func TestParse(t *testing.T) {
 	t.Run("nfcu", func(t *testing.T) {
 		reader := bytes.NewReader(GetFixtures(t, "sample-nfcu.qfx"))
 
-		result, err := Parse(reader)
+		result, err := ParseFile(reader)
 		assert.NoError(t, err, "must not return an error parsing known valid file")
 		assert.NotNil(t, result, "resulting OFX object should not be nil")
 		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
@@ -64,7 +64,7 @@ func TestParse(t *testing.T) {
 	t.Run("nfcu wrapped", func(t *testing.T) {
 		reader := bytes.NewReader(GetFixtures(t, "sample-nfcu-wrapped.qfx"))
 
-		result, err := Parse(reader)
+		result, err := ParseFile(reader)
 		assert.NoError(t, err, "must not return an error parsing known valid file")
 		assert.NotNil(t, result, "resulting OFX object should not be nil")
 		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
@@ -74,7 +74,7 @@ func TestParse(t *testing.T) {
 	t.Run("nfcu 2", func(t *testing.T) {
 		reader := bytes.NewReader(GetFixtures(t, "sample-nfcu-2.qfx"))
 
-		result, err := Parse(reader)
+		result, err := ParseFile(reader)
 		assert.NoError(t, err, "must not return an error parsing known valid file")
 		assert.NotNil(t, result, "resulting OFX object should not be nil")
 		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
@@ -84,7 +84,7 @@ func TestParse(t *testing.T) {
 	t.Run("us bank", func(t *testing.T) {
 		reader := bytes.NewReader(GetFixtures(t, "sample-usbank.qfx"))
 
-		result, err := Parse(reader)
+		result, err := ParseFile(reader)
 		assert.NoError(t, err, "must not return an error parsing known valid file")
 		assert.NotNil(t, result, "resulting OFX object should not be nil")
 		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
@@ -94,7 +94,7 @@ func TestParse(t *testing.T) {
 	t.Run("no curdef MXN", func(t *testing.T) {
 		reader := bytes.NewReader(fixtures.LoadFile(t, "no-curdef-mxn.ofx"))
 
-		result, err := Parse(reader)
+		result, err := ParseFile(reader)
 		assert.NoError(t, err, "must not return an error parsing known valid file")
 		assert.NotNil(t, result, "resulting OFX object should not be nil")
 		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
@@ -104,7 +104,7 @@ func TestParse(t *testing.T) {
 	t.Run("non-utf8 OFX", func(t *testing.T) {
 		reader := bytes.NewReader(GetFixtures(t, "sample-non-utf8.qfx"))
 
-		result, err := Parse(reader)
+		result, err := ParseFile(reader)
 		assert.NoError(t, err, "must not return an error parsing known valid file")
 		assert.NotNil(t, result, "resulting OFX object should not be nil")
 		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")
@@ -114,7 +114,7 @@ func TestParse(t *testing.T) {
 	t.Run("non-utf8 XML", func(t *testing.T) {
 		reader := bytes.NewReader(GetFixtures(t, "sample-non-utf8-xml.qfx"))
 
-		result, err := Parse(reader)
+		result, err := ParseFile(reader)
 		assert.NoError(t, err, "must not return an error parsing known valid file")
 		assert.NotNil(t, result, "resulting OFX object should not be nil")
 		assert.NotNil(t, result.SIGNONMSGSRSV1, "sign on message response must not be nil")

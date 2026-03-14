@@ -24,7 +24,7 @@ var (
 	}
 )
 
-func Parse(reader io.Reader) (*gofx.OFX, error) {
+func ParseFile(reader io.Reader) (*gofx.OFX, error) {
 	xmlBytes, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read all of the OFX data from the reader")

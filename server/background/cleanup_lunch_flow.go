@@ -265,7 +265,7 @@ func CleanupLunchFlowCron(ctx queue.Context) error {
 			"lunchFlowLinkId", item.LunchFlowLinkId,
 		)
 		itemLog.Log(ctx, logging.LevelTrace, "enqueuing Lunch Flow link to be cleaned up")
-		if err := queue.Enqueue(ctx, ctx.Processor(), CleanupLunchFlow, CleanupLunchFlowArguments{
+		if err := queue.Enqueue(ctx, ctx.Enqueuer(), CleanupLunchFlow, CleanupLunchFlowArguments{
 			AccountId:       item.AccountId,
 			LunchFlowLinkId: item.LunchFlowLinkId,
 		}); err != nil {

@@ -1,4 +1,4 @@
-package recurring
+package similar
 
 import (
 	"strings"
@@ -132,4 +132,37 @@ func Tokenize(transaction *models.Transaction) []Token {
 	}
 
 	return tokens
+}
+
+func CleanNameRegex(transaction *models.Transaction) (lower []string, normal []string) {
+	words := clusterCleanStringRegex.FindAllString(
+		transaction.OriginalName,
+		len(transaction.OriginalName),
+	)
+	if transaction.OriginalMerchantName != "" {
+		words = append(words, clusterCleanStringRegex.FindAllString(
+			transaction.OriginalMerchantName,
+			len(transaction.OriginalMerchantName),
+		)...)
+	}
+	lower = make([]string, 0, len(words))
+	normal = make([]string, 0, len(words))
+	for i := range words {
+		word := words[i]
+		word = strings.ReplaceAll(word, "'", "")
+		word = strings.ReplaceAll(word, ".", "")
+		numbers := numberOnly.FindAllString(word, len(word))
+		if len(numbers) > 0 {
+			continue
+		}
+		// Throw out words with no vowels
+		vowels := vowelsOnly.FindAllString(strings.ToLower(word), len(word))
+		if len(vowels) == 0 {
+			continue
+		}
+		lower = append(lower, strings.ToLower(word))
+		normal = append(normal, word)
+	}
+
+	return lower, normal
 }

@@ -80,6 +80,7 @@ var (
 
 type postgresContext struct {
 	ctx context.Context
+	job models.Job
 	*postgresProcessor
 }
 
@@ -111,6 +112,10 @@ func (p *postgresContext) RunInTransaction(ctx context.Context, callback func(ct
 		// Then call the callback using the cloned context
 		return callback(&clone)
 	})
+}
+
+func (p *postgresContext) Job() models.Job {
+	return p.job
 }
 
 // Clock implements [Context].
@@ -166,8 +171,8 @@ func (p *postgresContext) Platypus() platypus.Platypus {
 	return p.plaidPlatypus
 }
 
-// Processor implements [Context].
-func (p *postgresContext) Processor() Processor {
+// Enqueuer implements [Context].
+func (p *postgresContext) Enqueuer() Enqueuer {
 	return p.postgresProcessor
 }
 
@@ -292,8 +297,8 @@ func NewPostgresQueue(
 	}
 }
 
-// __EnqueueAt implements [Processor].
-func (p *postgresProcessor) __EnqueueAt(
+// EnqueueAt implements [Processor].
+func (p *postgresProcessor) EnqueueAt(
 	ctx context.Context,
 	queue string,
 	at time.Time,
@@ -390,8 +395,8 @@ func (p *postgresProcessor) __EnqueueAt(
 	return nil
 }
 
-// __Register implements [Processor].
-func (p *postgresProcessor) __Register(
+// Register implements [Processor].
+func (p *postgresProcessor) Register(
 	ctx context.Context,
 	queue string,
 	job InternalJobWrapper,
@@ -419,8 +424,8 @@ func (p *postgresProcessor) __Register(
 	return nil
 }
 
-// __RegisterCron implements [Processor].
-func (p *postgresProcessor) __RegisterCron(
+// RegisterCron implements [Processor].
+func (p *postgresProcessor) RegisterCron(
 	ctx context.Context,
 	queue string,
 	schedule string,
@@ -551,20 +556,15 @@ func (p *postgresProcessor) jobContext(ctx context.Context, job *models.Job) Con
 	)
 	return &postgresContext{
 		ctx:               ctx,
+		job:               *job,
 		postgresProcessor: &clone,
 	}
 }
 
-func (p *postgresProcessor) beginTransaction() (Processor, error) {
-	txn, err := p.db.Begin()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	// Clone the postgresProcessor in memory
+func (p *postgresProcessor) WithTransaction(db pg.DBI) Enqueuer {
 	clone := *p
-	// Overwrite the database item on the COPY of the processor.
-	clone.db = txn
-	return &clone, nil
+	clone.db = db
+	return &clone
 }
 
 func (p *postgresProcessor) Start() error {
@@ -934,7 +934,7 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 			// If we actually did consume the cron job then log it
 			log.Log(context.Background(), logging.LevelTrace, "consumed cron job")
 
-			if err := p.__EnqueueAt(
+			if err := p.EnqueueAt(
 				context.Background(),
 				nextJob.queue,
 				// An accidental other form of deduplication. Cron jobs are always added
@@ -1208,7 +1208,12 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 	var err error
 	defer func() {
 		if panicErr := recover(); panicErr != nil {
-			log.ErrorContext(span.Context(), fmt.Sprintf("panic while processing job\n%+v\n%s", panicErr, string(debug.Stack())))
+			log.ErrorContext(
+				span.Context(),
+				"panic while processing job",
+				"err", panicErr,
+				"stackTrace", string(debug.Stack()),
+			)
 			if hub != nil {
 				hub.RecoverWithContext(span.Context(), panicErr)
 				hub.ConfigureScope(func(scope *sentry.Scope) {

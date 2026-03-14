@@ -277,7 +277,7 @@ func ProcessSpendingCron(ctx queue.Context) error {
 
 		err = queue.Enqueue(
 			ctx,
-			ctx.Processor(),
+			ctx.Enqueuer(),
 			ProcessSpending,
 			ProcessSpendingArguments{
 				AccountId:     item.AccountId,
