@@ -101,7 +101,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		firstCalculateCall := enqueuer.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				gomock.Eq(CalculateTransactionClusters),
+				gomock.Eq(CalculateTransactionClustersName),
 				testutils.NewGenericMatcher(func(args CalculateTransactionClustersArguments) bool {
 					return assert.Equal(t, plaidBankAccount.BankAccountId, args.BankAccountId) &&
 						assert.Equal(t, plaidBankAccount.AccountId, args.AccountId)
@@ -193,7 +193,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		enqueuer.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				gomock.Eq(CalculateTransactionClusters),
+				gomock.Eq(CalculateTransactionClustersName),
 				testutils.NewGenericMatcher(func(args CalculateTransactionClustersArguments) bool {
 					return assert.Equal(t, plaidBankAccount.BankAccountId, args.BankAccountId) &&
 						assert.Equal(t, plaidBankAccount.AccountId, args.AccountId)
