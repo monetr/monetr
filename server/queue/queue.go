@@ -230,12 +230,9 @@ func RegisterCron(
 func QueueNameFromJobFunction[T any](job any) string {
 	// Make sure that the provided job matches one of our expected types otherwise
 	// panic.
-	var args string
 	switch job.(type) {
 	case func(ctx Context, args T) error:
-		args = fmt.Sprintf("::%T", *new(T))
 	case JobFunction[T]:
-		args = fmt.Sprintf("::%T", *new(T))
 	case func(ctx Context) error:
 	case CronFunction:
 	default:
@@ -244,8 +241,6 @@ func QueueNameFromJobFunction[T any](job any) string {
 	pc := reflect.ValueOf(job).Pointer()
 	f := runtime.FuncForPC(pc)
 	name := strings.TrimPrefix(f.Name(), "github.com/monetr/monetr/server/")
-	name = name + args
-	name = strings.ReplaceAll(name, "{}", "")
 	name = strings.TrimSpace(name)
 	slug := strings.Map(func(r rune) rune {
 		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
