@@ -33,6 +33,11 @@ func LunchFlowSyncNotifcationChannel(
 func SyncLunchFlowCron(ctx queue.Context) error {
 	log := ctx.Log()
 
+	if !ctx.Configuration().LunchFlow.Enabled {
+		log.InfoContext(ctx, "lunch flow is not enabled")
+		return nil
+	}
+
 	log.InfoContext(ctx, "retrieving bank accounts to sync with Lunch Flow")
 
 	jobRepo := repository.NewJobRepository(ctx.DB(), ctx.Clock())
@@ -486,6 +491,11 @@ func (s *syncLunchFlowContext) syncBalances(ctx queue.Context) error {
 }
 
 func SyncLunchFlow(ctx queue.Context, args SyncLunchFlowArguments) error {
+	if !ctx.Configuration().LunchFlow.Enabled {
+		ctx.Log().InfoContext(ctx, "lunch flow is not enabled")
+		return nil
+	}
+
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
 	return ctx.RunInTransaction(ctx, func(ctx queue.Context) error {
 		span := sentry.SpanFromContext(ctx)

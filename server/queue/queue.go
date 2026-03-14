@@ -22,6 +22,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/communication"
+	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -33,17 +34,18 @@ import (
 
 type Context interface {
 	context.Context
-	Job() models.Job
-	Clock() clock.Clock
-	Log() *slog.Logger
-	DB() pg.DBI
-	Publisher() pubsub.Publisher
-	Platypus() platypus.Platypus
-	KMS() secrets.KeyManagement
-	Storage() storage.Storage
 	Billing() billing.Billing
+	Clock() clock.Clock
+	Configuration() config.Configuration
+	DB() pg.DBI
 	Email() communication.EmailCommunication
 	Enqueuer() Enqueuer
+	Job() models.Job
+	KMS() secrets.KeyManagement
+	Log() *slog.Logger
+	Platypus() platypus.Platypus
+	Publisher() pubsub.Publisher
+	Storage() storage.Storage
 
 	// RunInTransaction wraps the current context in a transaction, notably the
 	// [Context.DB] function here will be an actual postgresql transaction now and

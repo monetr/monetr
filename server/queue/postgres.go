@@ -123,6 +123,11 @@ func (p *postgresContext) Clock() clock.Clock {
 	return p.clock
 }
 
+// Configuration implements [Context].
+func (p *postgresContext) Configuration() config.Configuration {
+	return p.configuration
+}
+
 // Billing implements [Context].
 func (p *postgresContext) Billing() billing.Billing {
 	return p.billing

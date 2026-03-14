@@ -19,6 +19,7 @@ import (
 	pg "github.com/go-pg/pg/v10"
 	billing "github.com/monetr/monetr/server/billing"
 	communication "github.com/monetr/monetr/server/communication"
+	config "github.com/monetr/monetr/server/config"
 	models "github.com/monetr/monetr/server/models"
 	platypus "github.com/monetr/monetr/server/platypus"
 	pubsub "github.com/monetr/monetr/server/pubsub"
@@ -78,6 +79,20 @@ func (m *MockContext) Clock() clock.Clock {
 func (mr *MockContextMockRecorder) Clock() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Clock", reflect.TypeOf((*MockContext)(nil).Clock))
+}
+
+// Configuration mocks base method.
+func (m *MockContext) Configuration() config.Configuration {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Configuration")
+	ret0, _ := ret[0].(config.Configuration)
+	return ret0
+}
+
+// Configuration indicates an expected call of Configuration.
+func (mr *MockContextMockRecorder) Configuration() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Configuration", reflect.TypeOf((*MockContext)(nil).Configuration))
 }
 
 // DB mocks base method.

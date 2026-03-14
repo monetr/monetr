@@ -1,22 +1,28 @@
-package background
+package spending_jobs_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/mockgen"
+	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/spending/spending_jobs"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
-func TestProcessSpendingJob_Run(t *testing.T) {
+func TestProcessSpending(t *testing.T) {
 	t.Run("fix stale spending", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
 		clock := clock.NewMock()
 		log, hook := testutils.GetTestLog(t)
-		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		db := testutils.GetPgDatabase(t)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
@@ -50,17 +56,25 @@ func TestProcessSpendingJob_Run(t *testing.T) {
 			CreatedAt:         clock.Now(),
 		})
 
-		handler := NewProcessSpendingHandler(log, db, clock)
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
 
-		args := ProcessSpendingArguments{
-			AccountId:     spending.AccountId,
-			BankAccountId: spending.BankAccountId,
+			// First time, no notifications should be enqueued and we should not have
+			// an error.
+			err := spending_jobs.ProcessSpending(
+				mockqueue.NewMockContext(context),
+				spending_jobs.ProcessSpendingArguments{
+					AccountId:     spending.AccountId,
+					BankAccountId: spending.BankAccountId,
+				},
+			)
+			assert.NoError(t, err, "should run job successfully")
 		}
-		argsEncoded, err := DefaultJobMarshaller(args)
-		assert.NoError(t, err, "must be able to marshal arguments")
 
-		err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
-		assert.NoError(t, err, "should run job successfully")
 		testutils.MustHaveLogMessage(t, hook, "updating stale spending objects")
 
 		updatedSpending := testutils.MustRetrieve(t, spending)

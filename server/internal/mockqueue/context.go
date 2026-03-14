@@ -10,6 +10,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/communication"
+	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -31,12 +32,17 @@ type mockContext struct {
 
 func NewMockContext(ctx *mockgen.MockContext) queue.Context {
 	// Makes it so we don't need stupid shit for tracing
-	ctx.EXPECT().Value(gomock.Any()).MinTimes(1)
-	ctx.EXPECT().Done().MinTimes(1)
-	ctx.EXPECT().Deadline().MinTimes(1)
+	ctx.EXPECT().Value(gomock.Any()).AnyTimes()
+	ctx.EXPECT().Done().AnyTimes()
+	ctx.EXPECT().Deadline().AnyTimes()
 	return &mockContext{
 		context: ctx,
 	}
+}
+
+// Configuration implements [queue.Context].
+func (m *mockContext) Configuration() config.Configuration {
+	return m.context.Configuration()
 }
 
 // Enqueuer implements [queue.Context].

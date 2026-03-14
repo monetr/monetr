@@ -76,23 +76,23 @@ func NewBackgroundJobs(
 	)
 
 	jobs := []JobHandler{
-		NewCalculateTransactionClustersHandler(log, db, clock),
-		NewCleanupFilesHandler(log, db, clock, fileStorage, enqueuer),
-		NewCleanupJobsHandler(log, db),
-		NewProcessFundingScheduleHandler(log, db, clock),
-		NewProcessOFXUploadHandler(log, db, clock, fileStorage, publisher, enqueuer),
-		NewProcessSpendingHandler(log, db, clock),
-		NewRemoveFileHandler(log, db, clock, fileStorage),
-		NewRemoveLinkHandler(log, db, clock, publisher),
-		NewSyncPlaidAccountsHandler(log, db, clock, kms, plaidPlatypus),
-		NewSyncPlaidHandler(log, db, clock, kms, plaidPlatypus, publisher, enqueuer),
+		// NewCalculateTransactionClustersHandler(log, db, clock),
+		// NewCleanupFilesHandler(log, db, clock, fileStorage, enqueuer),
+		// NewCleanupJobsHandler(log, db),
+		// NewProcessFundingScheduleHandler(log, db, clock),
+		// NewProcessOFXUploadHandler(log, db, clock, fileStorage, publisher, enqueuer),
+		// NewProcessSpendingHandler(log, db, clock),
+		// NewRemoveFileHandler(log, db, clock, fileStorage),
+		// NewRemoveLinkHandler(log, db, clock, publisher),
+		// NewSyncPlaidAccountsHandler(log, db, clock, kms, plaidPlatypus),
+		// NewSyncPlaidHandler(log, db, clock, kms, plaidPlatypus, publisher, enqueuer),
 	}
 
 	// When billing is enabled, periodically perform billing upkeep tasks.
 	if configuration.Stripe.IsBillingEnabled() {
 		jobs = append(jobs,
 			NewDeactivateLinksHandler(log, db, clock, configuration, kms, plaidPlatypus),
-			NewNotificationTrialExpiryHandler(log, db, clock, configuration, email),
+			// NewNotificationTrialExpiryHandler(log, db, clock, configuration, email),
 			NewReconcileSubscriptionHandler(log, db, clock, publisher, billing),
 		)
 	}
@@ -102,7 +102,7 @@ func NewBackgroundJobs(
 	// using Lunch Flow.
 	if configuration.LunchFlow.Enabled {
 		jobs = append(jobs,
-			NewSyncLunchFlowHandler(log, db, clock, kms, publisher, enqueuer),
+			// NewSyncLunchFlowHandler(log, db, clock, kms, publisher, enqueuer),
 			NewCleanupLunchFlowHandler(log, db, clock, kms),
 		)
 	}

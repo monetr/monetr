@@ -16,6 +16,11 @@ type CleanupLunchFlowArguments struct {
 func CleanupLunchFlowCron(ctx queue.Context) error {
 	log := ctx.Log()
 
+	if !ctx.Configuration().LunchFlow.Enabled {
+		log.InfoContext(ctx, "lunch flow is not enabled")
+		return nil
+	}
+
 	log.InfoContext(ctx, "retrieving bank accounts to sync with Lunch Flow")
 
 	jobRepo := repository.NewJobRepository(ctx.DB(), ctx.Clock())
@@ -52,6 +57,11 @@ func CleanupLunchFlowCron(ctx queue.Context) error {
 }
 
 func CleanupLunchFlow(ctx queue.Context, args CleanupLunchFlowArguments) error {
+	if !ctx.Configuration().LunchFlow.Enabled {
+		ctx.Log().InfoContext(ctx, "lunch flow is not enabled")
+		return nil
+	}
+
 	return ctx.RunInTransaction(ctx, func(ctx queue.Context) error {
 		crumbs.IncludeUserInScope(ctx, args.AccountId)
 		log := ctx.Log().With(

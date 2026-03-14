@@ -9,5 +9,7 @@ const (
 )
 
 func IncludePlaidItemIDTag(span *sentry.Span, itemId string) {
-	span.SetTag(PlaidItemIDTag, itemId)
+	if span != nil {
+		span.SetTag(PlaidItemIDTag, itemId)
+	}
 }

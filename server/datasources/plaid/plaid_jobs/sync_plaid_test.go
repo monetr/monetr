@@ -1,19 +1,21 @@
-package background
+package plaid_jobs_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
+	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/monetr/monetr/server/similar"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -42,7 +44,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 
 		plaidPlatypus := mockgen.NewMockPlatypus(ctrl)
 		plaidClient := mockgen.NewMockClient(ctrl)
-		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		plaidPlatypus.EXPECT().
 			NewClient(
@@ -99,40 +101,40 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			}, nil)
 
 		firstCalculateCall := enqueuer.EXPECT().
-			EnqueueJob(
+			EnqueueAt(
 				gomock.Any(),
-				gomock.Eq(CalculateTransactionClustersName),
-				testutils.NewGenericMatcher(func(args CalculateTransactionClustersArguments) bool {
-					return assert.Equal(t, plaidBankAccount.BankAccountId, args.BankAccountId) &&
-						assert.Equal(t, plaidBankAccount.AccountId, args.AccountId)
+				mockqueue.EqQueue(similar.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Eq(similar.CalculateTransactionClustersArguments{
+					AccountId:     plaidBankAccount.AccountId,
+					BankAccountId: plaidBankAccount.BankAccountId,
 				}),
 			).
-			Times(1).
-			Return(nil)
-
-		handler := NewSyncPlaidHandler(
-			log,
-			db,
-			clock,
-			kms,
-			plaidPlatypus,
-			publisher,
-			enqueuer,
-		)
+			Return(nil).
+			Times(1)
 
 		{ // Do our first plaid sync.
-			args := SyncPlaidArguments{
-				AccountId: user.AccountId,
-				LinkId:    plaidLink.LinkId,
-				Trigger:   "webhook",
-			}
-			argsEncoded, err := DefaultJobMarshaller(args)
-			assert.NoError(t, err, "must be able to marshal arguments")
-
 			// Make sure that before we start there isn't anything in the database.
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
 
-			err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).MinTimes(1)
+			context.EXPECT().DB().Return(db).MinTimes(1)
+			context.EXPECT().Enqueuer().Return(enqueuer).MinTimes(1)
+			context.EXPECT().KMS().Return(kms).MinTimes(1)
+			context.EXPECT().Log().Return(log).MinTimes(1)
+			context.EXPECT().Platypus().Return(plaidPlatypus).MinTimes(1)
+			context.EXPECT().Publisher().Return(publisher).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+
+			err := plaid_jobs.SyncPlaid(
+				mockqueue.NewMockContext(context),
+				plaid_jobs.SyncPlaidArguments{
+					AccountId: user.AccountId,
+					LinkId:    plaidLink.LinkId,
+					Trigger:   "webhook",
+				},
+			)
 			assert.NoError(t, err, "must process job successfully")
 		}
 
@@ -191,12 +193,13 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			}, nil)
 
 		enqueuer.EXPECT().
-			EnqueueJob(
+			EnqueueAt(
 				gomock.Any(),
-				gomock.Eq(CalculateTransactionClustersName),
-				testutils.NewGenericMatcher(func(args CalculateTransactionClustersArguments) bool {
-					return assert.Equal(t, plaidBankAccount.BankAccountId, args.BankAccountId) &&
-						assert.Equal(t, plaidBankAccount.AccountId, args.AccountId)
+				mockqueue.EqQueue(similar.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Eq(similar.CalculateTransactionClustersArguments{
+					AccountId:     plaidBankAccount.AccountId,
+					BankAccountId: plaidBankAccount.BankAccountId,
 				}),
 			).
 			MinTimes(1).
@@ -204,15 +207,24 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			Return(nil)
 
 		{ // Do our second plaid sync.
-			args := SyncPlaidArguments{
-				AccountId: user.AccountId,
-				LinkId:    plaidLink.LinkId,
-				Trigger:   "webhook",
-			}
-			argsEncoded, err := DefaultJobMarshaller(args)
-			assert.NoError(t, err, "must be able to marshal arguments")
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).MinTimes(1)
+			context.EXPECT().DB().Return(db).MinTimes(1)
+			context.EXPECT().Enqueuer().Return(enqueuer).MinTimes(1)
+			context.EXPECT().KMS().Return(kms).MinTimes(1)
+			context.EXPECT().Log().Return(log).MinTimes(1)
+			context.EXPECT().Platypus().Return(plaidPlatypus).MinTimes(1)
+			context.EXPECT().Publisher().Return(publisher).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
 
-			err = handler.HandleConsumeJob(context.Background(), log, argsEncoded)
+			err := plaid_jobs.SyncPlaid(
+				mockqueue.NewMockContext(context),
+				plaid_jobs.SyncPlaidArguments{
+					AccountId: user.AccountId,
+					LinkId:    plaidLink.LinkId,
+					Trigger:   "webhook",
+				},
+			)
 			assert.NoError(t, err, "must process job successfully")
 		}
 
