@@ -102,7 +102,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueJob(
 						gomock.Any(),
-						background.CalculateTransactionClusters,
+						background.CalculateTransactionClustersName,
 						gomock.Eq(background.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
@@ -174,7 +174,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueJob(
 						gomock.Any(),
-						background.CalculateTransactionClusters,
+						background.CalculateTransactionClustersName,
 						gomock.Eq(background.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
@@ -268,7 +268,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueJob(
 						gomock.Any(),
-						background.CalculateTransactionClusters,
+						gomock.Eq(background.CalculateTransactionClustersName),
 						gomock.Eq(background.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
@@ -359,7 +359,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueJob(
 						gomock.Any(),
-						background.CalculateTransactionClusters,
+						background.CalculateTransactionClustersName,
 						gomock.Eq(background.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
@@ -466,7 +466,7 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueJob(
 						gomock.Any(),
-						background.CalculateTransactionClusters,
+						background.CalculateTransactionClustersName,
 						gomock.Eq(background.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,

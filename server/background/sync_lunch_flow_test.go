@@ -82,7 +82,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		firstCalculateCall := enqueuer.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				gomock.Eq(background.CalculateTransactionClusters),
+				gomock.Eq(background.CalculateTransactionClustersName),
 				testutils.NewGenericMatcher(func(args background.CalculateTransactionClustersArguments) bool {
 					return myownsanity.Every(
 						assert.Equal(t, bankAccount.BankAccountId, args.BankAccountId),
@@ -143,7 +143,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		enqueuer.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				gomock.Eq(background.CalculateTransactionClusters),
+				gomock.Eq(background.CalculateTransactionClustersName),
 				testutils.NewGenericMatcher(func(args background.CalculateTransactionClustersArguments) bool {
 					return myownsanity.Every(
 						assert.Equal(t, bankAccount.BankAccountId, args.BankAccountId),
@@ -254,7 +254,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		enqueuer.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				gomock.Eq(background.CalculateTransactionClusters),
+				gomock.Eq(background.CalculateTransactionClustersName),
 				testutils.NewGenericMatcher(func(args background.CalculateTransactionClustersArguments) bool {
 					return myownsanity.Every(
 						assert.Equal(t, bankAccount.BankAccountId, args.BankAccountId),
@@ -346,7 +346,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		enqueuer.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				gomock.Eq(background.CalculateTransactionClusters),
+				gomock.Eq(background.CalculateTransactionClustersName),
 				gomock.Any(),
 			).
 			Times(0)
@@ -415,7 +415,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		enqueuer.EXPECT().
 			EnqueueJob(
 				gomock.Any(),
-				gomock.Eq(background.CalculateTransactionClusters),
+				gomock.Eq(background.CalculateTransactionClustersName),
 				gomock.Any(),
 			).
 			Times(0)
