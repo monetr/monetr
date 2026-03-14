@@ -412,7 +412,7 @@ func (s *SyncLunchFlowJob) hydrateTransactions(ctx context.Context) error {
 	var err error
 	s.lunchFlowTransactions, err = s.client.GetTransactions(
 		span.Context(),
-		lunch_flow.AccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
+		lunch_flow.LunchFlowAccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve transactions from Lunch Flow for sync")
@@ -589,7 +589,7 @@ func (s *SyncLunchFlowJob) syncBalances(ctx context.Context) error {
 	s.log.DebugContext(span.Context(), "fetching balance from Lunch Flow")
 	balance, err := s.client.GetBalance(
 		span.Context(),
-		lunch_flow.AccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
+		lunch_flow.LunchFlowAccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve balance for Lunch Flow sync")

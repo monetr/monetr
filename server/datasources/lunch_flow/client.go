@@ -20,16 +20,16 @@ const DefaultAPIURL = "https://lunchflow.app/api/v1"
 
 const DateFormat = "2006-01-02"
 
-type AccountId = json.Number
+type LunchFlowAccountId = json.Number
 
 type Account struct {
-	Id              AccountId `json:"id"`
-	Name            string    `json:"name"`
-	InstitutionName string    `json:"institution_name"`
-	InstitutionLogo *string   `json:"institution_logo"`
-	Provider        string    `json:"provider"`
-	Currency        string    `json:"currency"`
-	Status          string    `json:"status"`
+	Id              LunchFlowAccountId `json:"id"`
+	Name            string             `json:"name"`
+	InstitutionName string             `json:"institution_name"`
+	InstitutionLogo *string            `json:"institution_logo"`
+	Provider        string             `json:"provider"`
+	Currency        string             `json:"currency"`
+	Status          string             `json:"status"`
 }
 
 type Balance struct {
@@ -38,19 +38,19 @@ type Balance struct {
 }
 
 type Transaction struct {
-	Id          string      `json:"id"`
-	AccountId   AccountId   `json:"accountId"`
-	Amount      json.Number `json:"amount"`
-	Currency    string      `json:"currency"`
-	Date        string      `json:"date"`
-	Merchant    string      `json:"merchant"`
-	Description string      `json:"description"`
+	Id          string             `json:"id"`
+	AccountId   LunchFlowAccountId `json:"accountId"`
+	Amount      json.Number        `json:"amount"`
+	Currency    string             `json:"currency"`
+	Date        string             `json:"date"`
+	Merchant    string             `json:"merchant"`
+	Description string             `json:"description"`
 }
 
 type LunchFlowClient interface {
 	GetAccounts(ctx context.Context) ([]Account, error)
-	GetBalance(ctx context.Context, accountId AccountId) (*Balance, error)
-	GetTransactions(ctx context.Context, accountId AccountId) ([]Transaction, error)
+	GetBalance(ctx context.Context, accountId LunchFlowAccountId) (*Balance, error)
+	GetTransactions(ctx context.Context, accountId LunchFlowAccountId) ([]Transaction, error)
 }
 
 type lunchFlowClient struct {
@@ -162,7 +162,7 @@ func (l *lunchFlowClient) GetAccounts(ctx context.Context) ([]Account, error) {
 	return result.Accounts, nil
 }
 
-func (l *lunchFlowClient) GetBalance(ctx context.Context, accountId AccountId) (*Balance, error) {
+func (l *lunchFlowClient) GetBalance(ctx context.Context, accountId LunchFlowAccountId) (*Balance, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -180,7 +180,7 @@ func (l *lunchFlowClient) GetBalance(ctx context.Context, accountId AccountId) (
 	return &result.Balance, nil
 }
 
-func (l *lunchFlowClient) GetTransactions(ctx context.Context, accountId AccountId) ([]Transaction, error) {
+func (l *lunchFlowClient) GetTransactions(ctx context.Context, accountId LunchFlowAccountId) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

@@ -18,40 +18,6 @@ func cronHello(ctx Context) error {
 	return nil
 }
 
-func TestSentryMonitorSlug(t *testing.T) {
-	t.Run("replaces dots with hyphens", func(t *testing.T) {
-		assert.Equal(t, "background-CleanupFilesCron", sentryMonitorSlug("background.CleanupFilesCron"))
-	})
-
-	t.Run("replaces slashes", func(t *testing.T) {
-		assert.Equal(t, "background-remove-file", sentryMonitorSlug("background/remove/file"))
-	})
-
-	t.Run("replaces double colons and braces", func(t *testing.T) {
-		assert.Equal(t, "background-ProcessSpending-struct", sentryMonitorSlug("background.ProcessSpending::struct{}"))
-	})
-
-	t.Run("collapses consecutive hyphens", func(t *testing.T) {
-		assert.Equal(t, "background-foo-bar", sentryMonitorSlug("background...foo...bar"))
-	})
-
-	t.Run("trims leading and trailing hyphens", func(t *testing.T) {
-		assert.Equal(t, "foo", sentryMonitorSlug("...foo..."))
-	})
-
-	t.Run("preserves uppercase letters", func(t *testing.T) {
-		assert.Equal(t, "CleanupFilesCron", sentryMonitorSlug("CleanupFilesCron"))
-	})
-
-	t.Run("already valid slug is unchanged", func(t *testing.T) {
-		assert.Equal(t, "background-CleanupJobs", sentryMonitorSlug("background-CleanupJobs"))
-	})
-
-	t.Run("all special characters collapses to empty string", func(t *testing.T) {
-		assert.Equal(t, "", sentryMonitorSlug("...---..."))
-	})
-}
-
 func TestJobSignature(t *testing.T) {
 	t.Run("same args and timestamp produce same signature", func(t *testing.T) {
 		ts := time.Now()

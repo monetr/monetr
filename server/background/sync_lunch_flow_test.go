@@ -49,7 +49,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		firstTransactions := []lunch_flow.Transaction{
 			{
 				Id:          gofakeit.UUID(),
-				AccountId:   lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				AccountId:   lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				Amount:      "19.99",
 				Currency:    "USD",
 				Date:        clock.Now().Format(lunch_flow.DateFormat),
@@ -58,7 +58,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 			},
 			{
 				Id:          gofakeit.UUID(),
-				AccountId:   lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				AccountId:   lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				Amount:      "2000.00",
 				Currency:    "USD",
 				Date:        clock.Now().Format(lunch_flow.DateFormat),
@@ -70,7 +70,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		secondTransactions := []lunch_flow.Transaction{
 			{
 				Id:          gofakeit.UUID(),
-				AccountId:   lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				AccountId:   lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				Amount:      "500.00",
 				Currency:    "USD",
 				Date:        clock.Now().Format(lunch_flow.DateFormat),
@@ -114,13 +114,13 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 
 			mock_lunch_flow.MockFetchTransactions(
 				t,
-				lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				firstTransactions,
 			)
 
 			mock_lunch_flow.MockFetchBalance(
 				t,
-				lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				lunch_flow.Balance{
 					Amount:   "1234.56",
 					Currency: "USD",
@@ -170,7 +170,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 
 			mock_lunch_flow.MockFetchTransactions(
 				t,
-				lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				// Now build a new array that is the first transactions appended to the
 				// end of the second transactions.
 				append(secondTransactions, firstTransactions...),
@@ -178,7 +178,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 
 			mock_lunch_flow.MockFetchBalance(
 				t,
-				lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				lunch_flow.Balance{
 					Amount:   "5000.12",
 					Currency: "USD",
@@ -233,7 +233,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		firstTransactions := []lunch_flow.Transaction{
 			{
 				Id:          gofakeit.UUID(),
-				AccountId:   lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				AccountId:   lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				Amount:      "1900.00",
 				Currency:    "JPY",
 				Date:        clock.Now().Format(lunch_flow.DateFormat),
@@ -242,7 +242,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 			},
 			{
 				Id:          gofakeit.UUID(),
-				AccountId:   lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				AccountId:   lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				Amount:      "200000.00",
 				Currency:    "JPY",
 				Date:        clock.Now().Format(lunch_flow.DateFormat),
@@ -286,13 +286,13 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 
 			mock_lunch_flow.MockFetchTransactions(
 				t,
-				lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				firstTransactions,
 			)
 
 			mock_lunch_flow.MockFetchBalance(
 				t,
-				lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				lunch_flow.Balance{
 					Amount:   "1234.00",
 					Currency: "JPY",
@@ -372,7 +372,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 
 			mock_lunch_flow.MockFetchTransactionsError(
 				t,
-				lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 			)
 
 			err = handler.HandleConsumeJob(t.Context(), log, argsEncoded)
@@ -441,11 +441,11 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 
 			mock_lunch_flow.MockFetchTransactions(
 				t,
-				lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 				[]lunch_flow.Transaction{
 					{
 						Id:          gofakeit.UUID(),
-						AccountId:   lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+						AccountId:   lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 						Amount:      "19.99",
 						Currency:    "USD",
 						Date:        clock.Now().Format(lunch_flow.DateFormat),
@@ -454,7 +454,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 					},
 					{
 						Id:          gofakeit.UUID(),
-						AccountId:   lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+						AccountId:   lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 						Amount:      "2000.00",
 						Currency:    "USD",
 						Date:        clock.Now().Format(lunch_flow.DateFormat),
@@ -466,7 +466,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 
 			mock_lunch_flow.MockFetchBalanceError(
 				t,
-				lunch_flow.AccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
+				lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 			)
 
 			err = handler.HandleConsumeJob(t.Context(), log, argsEncoded)

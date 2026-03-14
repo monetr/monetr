@@ -228,7 +228,7 @@ type postgresProcessor struct {
 	}
 	// registeredJobs keeps track of the callback function for the actual job to
 	// be executed per queue. A queue can only have a single job registered.
-	registeredJobs map[string]internalJobWrapper
+	registeredJobs map[string]InternalJobWrapper
 
 	availableWorkers  chan struct{}
 	shutdownConsumers []chan chan struct{}
@@ -288,12 +288,12 @@ func NewPostgresQueue(
 		fileStorage:    fileStorage,
 		billing:        billing,
 		email:          email,
-		registeredJobs: map[string]internalJobWrapper{},
+		registeredJobs: map[string]InternalJobWrapper{},
 	}
 }
 
-// enqueueAt implements [Processor].
-func (p *postgresProcessor) enqueueAt(
+// __EnqueueAt implements [Processor].
+func (p *postgresProcessor) __EnqueueAt(
 	ctx context.Context,
 	queue string,
 	at time.Time,
@@ -390,11 +390,11 @@ func (p *postgresProcessor) enqueueAt(
 	return nil
 }
 
-// register implements [Processor].
-func (p *postgresProcessor) register(
+// __Register implements [Processor].
+func (p *postgresProcessor) __Register(
 	ctx context.Context,
 	queue string,
-	job internalJobWrapper,
+	job InternalJobWrapper,
 ) error {
 	if atomic.LoadUint32(&p.state) != postgresProcessorUninitialized {
 		return errors.New("jobs cannot be added to the processor after it has been started or closed")
@@ -419,12 +419,12 @@ func (p *postgresProcessor) register(
 	return nil
 }
 
-// registerCron implements [Processor].
-func (p *postgresProcessor) registerCron(
+// __RegisterCron implements [Processor].
+func (p *postgresProcessor) __RegisterCron(
 	ctx context.Context,
 	queue string,
 	schedule string,
-	job internalJobWrapper,
+	job InternalJobWrapper,
 ) error {
 	if atomic.LoadUint32(&p.state) != postgresProcessorUninitialized {
 		return errors.New("jobs cannot be added to the processor after it has been started or closed")
@@ -934,7 +934,7 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 			// If we actually did consume the cron job then log it
 			log.Log(context.Background(), logging.LevelTrace, "consumed cron job")
 
-			if err := p.enqueueAt(
+			if err := p.__EnqueueAt(
 				context.Background(),
 				nextJob.queue,
 				// An accidental other form of deduplication. Cron jobs are always added

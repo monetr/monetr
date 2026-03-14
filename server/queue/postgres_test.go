@@ -73,7 +73,7 @@ func TestPostgresProcessor_Register(t *testing.T) {
 		clock := clock.NewMock()
 		processor := newTestProcessor(t, clock, NewMemoryNotifier(4))
 
-		err := RegisterCron(t.Context(), processor, "0 0 * * * *", testNoopCron)
+		err := RegisterCron(t.Context(), processor, testNoopCron, "0 0 * * * *")
 		assert.NoError(t, err, "must be able to register a cron job handler")
 	})
 
@@ -81,10 +81,10 @@ func TestPostgresProcessor_Register(t *testing.T) {
 		clock := clock.NewMock()
 		processor := newTestProcessor(t, clock, NewMemoryNotifier(4))
 
-		err := RegisterCron(t.Context(), processor, "0 0 * * * *", testNoopCron)
+		err := RegisterCron(t.Context(), processor, testNoopCron, "0 0 * * * *")
 		assert.NoError(t, err, "first registration must succeed")
 
-		err = RegisterCron(t.Context(), processor, "0 0 * * * *", testNoopCron)
+		err = RegisterCron(t.Context(), processor, testNoopCron, "0 0 * * * *")
 		assert.Error(t, err, "second registration of the same cron must return an error")
 	})
 
@@ -153,7 +153,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 			nil, nil, nil, nil, nil, nil,
 		).(*postgresProcessor)
 
-		err := p.register(t.Context(), "test-noop", func(_ Context, _ []byte) error {
+		err := p.__Register(t.Context(), "test-noop", func(_ Context, _ []byte) error {
 			return nil
 		})
 		assert.NoError(t, err)
@@ -192,7 +192,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 			nil, nil, nil, nil, nil, nil,
 		).(*postgresProcessor)
 
-		err := p.register(t.Context(), "test-failing", func(_ Context, _ []byte) error {
+		err := p.__Register(t.Context(), "test-failing", func(_ Context, _ []byte) error {
 			return errors.New("always fails")
 		})
 		assert.NoError(t, err)
@@ -232,7 +232,7 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 			nil, nil, nil, nil, nil, nil,
 		).(*postgresProcessor)
 
-		err := p.register(t.Context(), "test-exhausted", func(_ Context, _ []byte) error {
+		err := p.__Register(t.Context(), "test-exhausted", func(_ Context, _ []byte) error {
 			return errors.New("always fails")
 		})
 		assert.NoError(t, err)
@@ -340,7 +340,7 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 		)
 
 		// Every second so the test doesn't wait long.
-		err := RegisterCron(t.Context(), processor, "* * * * * *", testNoopCron)
+		err := RegisterCron(t.Context(), processor, testNoopCron, "* * * * * *")
 		assert.NoError(t, err)
 
 		err = processor.Start()

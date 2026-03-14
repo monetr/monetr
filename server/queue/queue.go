@@ -57,35 +57,43 @@ type JobFunction[A any] func(ctx Context, args A) error
 // dynamic arguments. Instead it is simply provided the job context.
 type CronFunction func(ctx Context) error
 
-// internalJobWrapper is the function that is actually passed to the processor.
+// InternalJobWrapper is the function that is actually passed to the processor.
 // This function has no generic types and always has the same signature. This
 // way the job processer can be agnostic of the actual implementation of the job
 // functions. This wrapper function is responsible for tracing, error handling.
 // Retry logic should not be implemented here! Retry logic should be implemented
 // in the processor layer.
-type internalJobWrapper func(ctx Context, args []byte) error
+type InternalJobWrapper func(ctx Context, args []byte) error
 
-// Processor does not expose any public methods. Instead it is meant to be
+// Processor is the interface above the implementation of a job processor, it is
+// not meant to be interacted with directly. Instead it is meant to be
 // interacted with via the [Enqueue], [EnqueueAt], and [Register] functions so
 // that way the jobs can take advantage of generics in order to maintain type
 // safety and simplicity.
+//
+//go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=queue.go -package=mockgen -destination=../internal/mockgen/queue.go Processor
 type Processor interface {
-	enqueueAt(
+	// __EnqueueAt is meant to be an internal function that is called by helper
+	// wrappers. While this function can be called directly, doing so without
+	// first sanitizing the inputs properly can result in jobs not being enqueued
+	// properly or consumed properly. Call this via [Enqueue] or [EnqueueAt]
+	// instead.
+	__EnqueueAt(
 		ctx context.Context,
 		queue string,
 		at time.Time,
 		args any,
 	) error
-	register(
+	__Register(
 		ctx context.Context,
 		queue string,
-		job internalJobWrapper,
+		job InternalJobWrapper,
 	) error
-	registerCron(
+	__RegisterCron(
 		ctx context.Context,
 		queue string,
 		schedule string,
-		job internalJobWrapper,
+		job InternalJobWrapper,
 	) error
 
 	Start() error
@@ -100,7 +108,7 @@ func Enqueue[T any](
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	return processor.enqueueAt(
+	return processor.__EnqueueAt(
 		span.Context(),
 		queueNameFromJobFunction[T](job),
 		time.Now(),
@@ -117,7 +125,7 @@ func EnqueueAt[T any](
 ) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	return processor.enqueueAt(
+	return processor.__EnqueueAt(
 		span.Context(),
 		queueNameFromJobFunction[T](job),
 		at,
@@ -132,7 +140,7 @@ func Register[T any](
 ) error {
 	queue := queueNameFromJobFunction[T](job)
 
-	return processor.register(ctx, queue, func(ctx Context, argBytes []byte) error {
+	return processor.__Register(ctx, queue, func(ctx Context, argBytes []byte) error {
 		var args T
 		if err := decodeArguments(argBytes, &args); err != nil {
 			return errors.Wrapf(err, "failed to decode arguments for job: %s", queue)
@@ -145,12 +153,12 @@ func Register[T any](
 func RegisterCron(
 	ctx context.Context,
 	processor Processor,
-	schedule string,
 	job CronFunction,
+	schedule string,
 ) error {
 	queue := queueNameFromJobFunction[any](job)
 
-	return processor.registerCron(
+	return processor.__RegisterCron(
 		ctx,
 		queue,
 		schedule,
@@ -225,7 +233,16 @@ func queueNameFromJobFunction[T any](job any) string {
 	name = name + args
 	name = strings.ReplaceAll(name, "{}", "")
 	name = strings.TrimSpace(name)
-	return sentryMonitorSlug(name)
+	slug := strings.Map(func(r rune) rune {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
+			return r
+		}
+		return '-'
+	}, name)
+	for strings.Contains(slug, "--") {
+		slug = strings.ReplaceAll(slug, "--", "-")
+	}
+	return strings.Trim(slug, "-")
 }
 
 // encodeArguments is the common function used for marshaling any arguments into
@@ -244,29 +261,6 @@ func encodeArguments(args any) ([]byte, error) {
 // errors have stack traces.
 func decodeArguments[T any](data []byte, result *T) error {
 	return errors.WithStack(json.Unmarshal(data, result))
-}
-
-// sentryMonitorSlug converts a queue name into a valid Sentry monitor slug.
-// Queue names contain dots, slashes, colons, and other punctuation, so this
-// function normalises them: any character that is not alphanumeric is replaced
-// with a hyphen, consecutive hyphens are collapsed, and leading/trailing
-// hyphens are trimmed.
-//
-// Examples:
-//
-//	"background.CleanupFilesCron"          -> "background-CleanupFilesCron"
-//	"background.ProcessSpending::struct{}" -> "background-ProcessSpending-struct"
-func sentryMonitorSlug(queue string) string {
-	slug := strings.Map(func(r rune) rune {
-		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
-			return r
-		}
-		return '-'
-	}, queue)
-	for strings.Contains(slug, "--") {
-		slug = strings.ReplaceAll(slug, "--", "-")
-	}
-	return strings.Trim(slug, "-")
 }
 
 // jobSignature takes the timestamp that the job is going to be enqueued at as

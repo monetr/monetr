@@ -11,7 +11,7 @@ import (
 
 func MockFetchTransactions(
 	t *testing.T,
-	accountId lunch_flow.AccountId,
+	accountId lunch_flow.LunchFlowAccountId,
 	transactions []lunch_flow.Transaction,
 ) {
 	mock_http_helper.NewHttpMockJsonResponder(
@@ -40,7 +40,7 @@ func MockFetchTransactions(
 
 func MockFetchTransactionsError(
 	t *testing.T,
-	accountId lunch_flow.AccountId,
+	accountId lunch_flow.LunchFlowAccountId,
 ) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,

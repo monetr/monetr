@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -245,7 +244,7 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 		externalAccounts,
 		lunchFlowAccounts,
 		func(external lunch_flow.Account, internal LunchFlowBankAccount) bool {
-			return external.Id == lunch_flow.AccountId(internal.LunchFlowId)
+			return external.Id == lunch_flow.LunchFlowAccountId(internal.LunchFlowId)
 		},
 	) {
 		if len(joined.Join) == 0 {
@@ -431,8 +430,7 @@ func (c *Controller) getLunchFlowLinkSyncProgress(ctx echo.Context) error {
 		return c.badRequest(ctx, "Link must be a Lunch Flow link type")
 	}
 
-	channel := fmt.Sprintf(
-		"account:%s:link:%s:bank_account:%s:lunch_flow_sync_progress",
+	channel := lunch_flow.LunchFlowSyncNotifcationChannel(
 		c.mustGetAccountId(ctx), linkId, bankAccountId,
 	)
 	listener, err := c.PubSub.Subscribe(
