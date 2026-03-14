@@ -7,15 +7,15 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
+	"github.com/monetr/monetr/server/datasources/lunch_flow/lunch_flow_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_lunch_flow"
 	"github.com/monetr/monetr/server/internal/mockgen"
-	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/pubsub"
-	"github.com/monetr/monetr/server/secrets"
+	"github.com/monetr/monetr/server/similar"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -29,9 +29,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		kms := secrets.NewPlaintextKMS()
-
-		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
@@ -71,18 +69,17 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		}
 
 		firstCalculateCall := enqueuer.EXPECT().
-			EnqueueJob(
+			EnqueueAt(
 				gomock.Any(),
-				gomock.Eq(background.CalculateTransactionClustersName),
-				testutils.NewGenericMatcher(func(args background.CalculateTransactionClustersArguments) bool {
-					return myownsanity.Every(
-						assert.Equal(t, bankAccount.BankAccountId, args.BankAccountId),
-						assert.Equal(t, bankAccount.AccountId, args.AccountId),
-					)
+				mockqueue.EqQueue(similar.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Eq(similar.CalculateTransactionClustersArguments{
+					AccountId:     bankAccount.AccountId,
+					BankAccountId: bankAccount.BankAccountId,
 				}),
 			).
-			Times(1).
-			Return(nil)
+			Return(nil).
+			Times(1)
 
 		// Do the first sync in an anonymous function so the http mocks reset
 		// properly. I'm not doing this in a t.Run because I don't want the sub
@@ -90,15 +87,6 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		func() {
 			httpmock.Activate()
 			defer httpmock.DeactivateAndReset()
-
-			args := background.SyncLunchFlowArguments{
-				AccountId:     bankAccount.AccountId,
-				BankAccountId: bankAccount.BankAccountId,
-				LinkId:        bankAccount.LinkId,
-			}
-
-			argsEncoded, err := background.DefaultJobMarshaller(args)
-			assert.NoError(t, err, "must be able to marshal arguments")
 
 			// Make sure that before we start there isn't anything in the database.
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
@@ -118,8 +106,24 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 				},
 			)
 
-			err = handler.HandleConsumeJob(t.Context(), log, argsEncoded)
-			assert.NoError(t, err, "must process job successfully")
+			{
+				context := mockgen.NewMockContext(ctrl)
+				context.EXPECT().Clock().Return(clock).AnyTimes()
+				context.EXPECT().DB().Return(db).AnyTimes()
+				context.EXPECT().Log().Return(log).AnyTimes()
+				context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+				context.EXPECT().Publisher().Return(publisher).AnyTimes()
+				context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+				err := lunch_flow_jobs.SyncLunchFlow(
+					mockqueue.NewMockContext(context),
+					lunch_flow_jobs.SyncLunchFlowArguments{
+						AccountId:     bankAccount.AccountId,
+						BankAccountId: bankAccount.BankAccountId,
+						LinkId:        bankAccount.LinkId,
+					},
+				)
+				assert.NoError(t, err, "must sync lunch flow successfully")
+			}
 
 			// We should have a few transactions now.
 			count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
@@ -132,14 +136,13 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		}()
 
 		enqueuer.EXPECT().
-			EnqueueJob(
+			EnqueueAt(
 				gomock.Any(),
-				gomock.Eq(background.CalculateTransactionClustersName),
-				testutils.NewGenericMatcher(func(args background.CalculateTransactionClustersArguments) bool {
-					return myownsanity.Every(
-						assert.Equal(t, bankAccount.BankAccountId, args.BankAccountId),
-						assert.Equal(t, bankAccount.AccountId, args.AccountId),
-					)
+				mockqueue.EqQueue(similar.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Eq(similar.CalculateTransactionClustersArguments{
+					AccountId:     bankAccount.AccountId,
+					BankAccountId: bankAccount.BankAccountId,
 				}),
 			).
 			Times(1).
@@ -149,15 +152,6 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		func() {
 			httpmock.Activate()
 			defer httpmock.DeactivateAndReset()
-
-			args := background.SyncLunchFlowArguments{
-				AccountId:     bankAccount.AccountId,
-				BankAccountId: bankAccount.BankAccountId,
-				LinkId:        bankAccount.LinkId,
-			}
-
-			argsEncoded, err := background.DefaultJobMarshaller(args)
-			assert.NoError(t, err, "must be able to marshal arguments")
 
 			mock_lunch_flow.MockFetchTransactions(
 				t,
@@ -176,8 +170,24 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 				},
 			)
 
-			err = handler.HandleConsumeJob(t.Context(), log, argsEncoded)
-			assert.NoError(t, err, "must process job successfully")
+			{
+				context := mockgen.NewMockContext(ctrl)
+				context.EXPECT().Clock().Return(clock).AnyTimes()
+				context.EXPECT().DB().Return(db).AnyTimes()
+				context.EXPECT().Log().Return(log).AnyTimes()
+				context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+				context.EXPECT().Publisher().Return(publisher).AnyTimes()
+				context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+				err := lunch_flow_jobs.SyncLunchFlow(
+					mockqueue.NewMockContext(context),
+					lunch_flow_jobs.SyncLunchFlowArguments{
+						AccountId:     bankAccount.AccountId,
+						BankAccountId: bankAccount.BankAccountId,
+						LinkId:        bankAccount.LinkId,
+					},
+				)
+				assert.NoError(t, err, "must sync lunch flow successfully")
+			}
 
 			// We should have a few transactions now.
 			count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
@@ -198,9 +208,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		kms := secrets.NewPlaintextKMS()
-
-		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		// Make sure we are in a japanese locale for this test
@@ -211,15 +219,6 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		bankAccount := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &link)
 		bankAccount.Currency = "JPY"
 		testutils.MustDBUpdate(t, &bankAccount)
-
-		handler := background.NewSyncLunchFlowHandler(
-			log,
-			db,
-			clock,
-			kms,
-			publisher,
-			enqueuer,
-		)
 
 		firstTransactions := []lunch_flow.Transaction{
 			{
@@ -243,18 +242,17 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		}
 
 		enqueuer.EXPECT().
-			EnqueueJob(
+			EnqueueAt(
 				gomock.Any(),
-				gomock.Eq(background.CalculateTransactionClustersName),
-				testutils.NewGenericMatcher(func(args background.CalculateTransactionClustersArguments) bool {
-					return myownsanity.Every(
-						assert.Equal(t, bankAccount.BankAccountId, args.BankAccountId),
-						assert.Equal(t, bankAccount.AccountId, args.AccountId),
-					)
+				mockqueue.EqQueue(similar.CalculateTransactionClusters),
+				gomock.Any(),
+				gomock.Eq(similar.CalculateTransactionClustersArguments{
+					AccountId:     bankAccount.AccountId,
+					BankAccountId: bankAccount.BankAccountId,
 				}),
 			).
-			Times(1).
-			Return(nil)
+			Return(nil).
+			Times(1)
 
 		// Do the first sync in an anonymous function so the http mocks reset
 		// properly. I'm not doing this in a t.Run because I don't want the sub
@@ -262,15 +260,6 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		func() {
 			httpmock.Activate()
 			defer httpmock.DeactivateAndReset()
-
-			args := background.SyncLunchFlowArguments{
-				AccountId:     bankAccount.AccountId,
-				BankAccountId: bankAccount.BankAccountId,
-				LinkId:        bankAccount.LinkId,
-			}
-
-			argsEncoded, err := background.DefaultJobMarshaller(args)
-			assert.NoError(t, err, "must be able to marshal arguments")
 
 			// Make sure that before we start there isn't anything in the database.
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
@@ -290,8 +279,24 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 				},
 			)
 
-			err = handler.HandleConsumeJob(t.Context(), log, argsEncoded)
-			assert.NoError(t, err, "must process job successfully")
+			{
+				context := mockgen.NewMockContext(ctrl)
+				context.EXPECT().Clock().Return(clock).AnyTimes()
+				context.EXPECT().DB().Return(db).AnyTimes()
+				context.EXPECT().Log().Return(log).AnyTimes()
+				context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+				context.EXPECT().Publisher().Return(publisher).AnyTimes()
+				context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+				err := lunch_flow_jobs.SyncLunchFlow(
+					mockqueue.NewMockContext(context),
+					lunch_flow_jobs.SyncLunchFlowArguments{
+						AccountId:     bankAccount.AccountId,
+						BankAccountId: bankAccount.BankAccountId,
+						LinkId:        bankAccount.LinkId,
+					},
+				)
+				assert.NoError(t, err, "must sync lunch flow successfully")
+			}
 
 			// We should have a few transactions now.
 			count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
@@ -317,29 +322,20 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		kms := secrets.NewPlaintextKMS()
-
-		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
 		bankAccount := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &link)
 
-		handler := background.NewSyncLunchFlowHandler(
-			log,
-			db,
-			clock,
-			kms,
-			publisher,
-			enqueuer,
-		)
-
 		enqueuer.EXPECT().
-			EnqueueJob(
+			EnqueueAt(
 				gomock.Any(),
-				gomock.Eq(background.CalculateTransactionClustersName),
+				mockqueue.EqQueue(similar.CalculateTransactionClusters),
+				gomock.Any(),
 				gomock.Any(),
 			).
+			Return(nil).
 			Times(0)
 
 		// Do the first sync in an anonymous function so the http mocks reset
@@ -349,15 +345,6 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 			httpmock.Activate()
 			defer httpmock.DeactivateAndReset()
 
-			args := background.SyncLunchFlowArguments{
-				AccountId:     bankAccount.AccountId,
-				BankAccountId: bankAccount.BankAccountId,
-				LinkId:        bankAccount.LinkId,
-			}
-
-			argsEncoded, err := background.DefaultJobMarshaller(args)
-			assert.NoError(t, err, "must be able to marshal arguments")
-
 			// Make sure that before we start there isn't anything in the database.
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
 
@@ -366,8 +353,24 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 				lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 			)
 
-			err = handler.HandleConsumeJob(t.Context(), log, argsEncoded)
-			assert.Error(t, err, "job will fail if an API call fails")
+			{
+				context := mockgen.NewMockContext(ctrl)
+				context.EXPECT().Clock().Return(clock).AnyTimes()
+				context.EXPECT().DB().Return(db).AnyTimes()
+				context.EXPECT().Log().Return(log).AnyTimes()
+				context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+				context.EXPECT().Publisher().Return(publisher).AnyTimes()
+				context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+				err := lunch_flow_jobs.SyncLunchFlow(
+					mockqueue.NewMockContext(context),
+					lunch_flow_jobs.SyncLunchFlowArguments{
+						AccountId:     bankAccount.AccountId,
+						BankAccountId: bankAccount.BankAccountId,
+						LinkId:        bankAccount.LinkId,
+					},
+				)
+				assert.NoError(t, err, "must sync lunch flow successfully")
+			}
 
 			// If it fails we should not create any transactions
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
@@ -386,29 +389,21 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		kms := secrets.NewPlaintextKMS()
 
-		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
 		bankAccount := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &link)
 
-		handler := background.NewSyncLunchFlowHandler(
-			log,
-			db,
-			clock,
-			kms,
-			publisher,
-			enqueuer,
-		)
-
 		enqueuer.EXPECT().
-			EnqueueJob(
+			EnqueueAt(
 				gomock.Any(),
-				gomock.Eq(background.CalculateTransactionClustersName),
+				mockqueue.EqQueue(similar.CalculateTransactionClusters),
+				gomock.Any(),
 				gomock.Any(),
 			).
+			Return(nil).
 			Times(0)
 
 		// Do the first sync in an anonymous function so the http mocks reset
@@ -417,15 +412,6 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		func() {
 			httpmock.Activate()
 			defer httpmock.DeactivateAndReset()
-
-			args := background.SyncLunchFlowArguments{
-				AccountId:     bankAccount.AccountId,
-				BankAccountId: bankAccount.BankAccountId,
-				LinkId:        bankAccount.LinkId,
-			}
-
-			argsEncoded, err := background.DefaultJobMarshaller(args)
-			assert.NoError(t, err, "must be able to marshal arguments")
 
 			// Make sure that before we start there isn't anything in the database.
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
@@ -460,8 +446,24 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 				lunch_flow.LunchFlowAccountId(bankAccount.LunchFlowBankAccount.LunchFlowId),
 			)
 
-			err = handler.HandleConsumeJob(t.Context(), log, argsEncoded)
-			assert.Error(t, err, "job will fail if an API call fails")
+			{
+				context := mockgen.NewMockContext(ctrl)
+				context.EXPECT().Clock().Return(clock).AnyTimes()
+				context.EXPECT().DB().Return(db).AnyTimes()
+				context.EXPECT().Log().Return(log).AnyTimes()
+				context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
+				context.EXPECT().Publisher().Return(publisher).AnyTimes()
+				context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+				err := lunch_flow_jobs.SyncLunchFlow(
+					mockqueue.NewMockContext(context),
+					lunch_flow_jobs.SyncLunchFlowArguments{
+						AccountId:     bankAccount.AccountId,
+						BankAccountId: bankAccount.BankAccountId,
+						LinkId:        bankAccount.LinkId,
+					},
+				)
+				assert.NoError(t, err, "must sync lunch flow successfully")
+			}
 
 			// If it fails we should not create any transactions
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
