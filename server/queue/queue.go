@@ -254,8 +254,8 @@ func decodeArguments[T any](data []byte, result *T) error {
 //
 // Examples:
 //
-//	"background.CleanupFilesCron"          → "background-CleanupFilesCron"
-//	"background.ProcessSpending::struct{}" → "background-ProcessSpending-struct"
+//	"background.CleanupFilesCron"          -> "background-CleanupFilesCron"
+//	"background.ProcessSpending::struct{}" -> "background-ProcessSpending-struct"
 func sentryMonitorSlug(queue string) string {
 	slug := strings.Map(func(r rune) rune {
 		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
