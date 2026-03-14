@@ -1,4 +1,4 @@
-package lunch_flow
+package lunch_flow_jobs
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/currency"
+	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
@@ -101,9 +102,9 @@ type syncLunchFlowContext struct {
 	repo                  repository.BaseRepository
 	secrets               repository.SecretsRepository
 	timezone              *time.Location
-	client                LunchFlowClient
+	client                lunch_flow.LunchFlowClient
 	bankAccount           *models.BankAccount
-	lunchFlowTransactions []Transaction
+	lunchFlowTransactions []lunch_flow.Transaction
 	existingTransactions  map[string]models.Transaction
 }
 
@@ -203,7 +204,7 @@ func (s *syncLunchFlowContext) setupClient(ctx queue.Context) error {
 			return err
 		}
 
-		client, err := NewLunchFlowClient(
+		client, err := lunch_flow.NewLunchFlowClient(
 			s.log,
 			link.LunchFlowLink.ApiUrl,
 			secret.Value,
@@ -227,7 +228,7 @@ func (s *syncLunchFlowContext) hydrateTransactions(ctx queue.Context) error {
 	var err error
 	s.lunchFlowTransactions, err = s.client.GetTransactions(
 		span.Context(),
-		LunchFlowAccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
+		lunch_flow.LunchFlowAccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve transactions from Lunch Flow for sync")
@@ -328,7 +329,7 @@ func (s *syncLunchFlowContext) syncTransactions(ctx queue.Context) error {
 			fallbackName,
 		)
 
-		date, err := ParseDate(externalTransaction.Date, s.timezone)
+		date, err := lunch_flow.ParseDate(externalTransaction.Date, s.timezone)
 		if err != nil {
 			s.log.ErrorContext(span.Context(),
 				"failed to parse transaction date from Lunch Flow",
@@ -416,7 +417,7 @@ func (s *syncLunchFlowContext) syncBalances(ctx queue.Context) error {
 	s.log.DebugContext(span.Context(), "fetching balance from Lunch Flow")
 	balance, err := s.client.GetBalance(
 		span.Context(),
-		LunchFlowAccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
+		lunch_flow.LunchFlowAccountId(s.bankAccount.LunchFlowBankAccount.LunchFlowId),
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve balance for Lunch Flow sync")
@@ -494,7 +495,7 @@ func SyncLunchFlow(ctx queue.Context, args SyncLunchFlowArguments) error {
 				"bankAccountId", args.BankAccountId,
 			),
 			args:                  args,
-			lunchFlowTransactions: []Transaction{},
+			lunchFlowTransactions: []lunch_flow.Transaction{},
 			existingTransactions:  map[string]models.Transaction{},
 		}
 		s.repo = repository.NewRepositoryFromSession(

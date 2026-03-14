@@ -1,21 +1,26 @@
-package background_test
+package lunch_flow_jobs_test
 
 import (
 	"testing"
 
 	"github.com/benbjohnson/clock"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
+	"github.com/monetr/monetr/server/datasources/lunch_flow/lunch_flow_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/mockgen"
+	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestCleanupLunchFlowJob_Run(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
@@ -99,19 +104,20 @@ func TestCleanupLunchFlowJob_Run(t *testing.T) {
 			"must be able to create second lunch flow bank account",
 		)
 
-		job, err := background.NewCleanupLunchFlowJob(
-			log,
-			repo,
-			secretsRepo,
-			clock,
-			background.CleanupLunchFlowArguments{
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).MinTimes(1)
+		context.EXPECT().DB().Return(db).MinTimes(1)
+		context.EXPECT().Log().Return(log).MinTimes(1)
+
+		err := lunch_flow_jobs.CleanupLunchFlow(
+			mockqueue.NewMockContext(context),
+			lunch_flow_jobs.CleanupLunchFlowArguments{
 				AccountId:       user.AccountId,
 				LunchFlowLinkId: lunchFlowLink.LunchFlowLinkId,
 			},
 		)
-		assert.NoError(t, err, "must create cleanup lunch flow job")
-
-		assert.NoError(t, job.Run(t.Context()), "cleanup lunch flow job should succeed")
+		assert.NoError(t, err, "cleanup lunch flow job should succeed")
 		// Make sure that wee have fully deleted all of our objects that are related
 		// to the lunch flow link.
 		testutils.MustDBNotExist(t, firstLunchFlowBankAccount)
@@ -124,6 +130,8 @@ func TestCleanupLunchFlowJob_Run(t *testing.T) {
 	})
 
 	t.Run("won't delete a non-pending lunch flow link", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
@@ -169,19 +177,21 @@ func TestCleanupLunchFlowJob_Run(t *testing.T) {
 			"must be able to create lunch flow link in the active status",
 		)
 
-		job, err := background.NewCleanupLunchFlowJob(
-			log,
-			repo,
-			secretsRepo,
-			clock,
-			background.CleanupLunchFlowArguments{
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).MinTimes(1)
+		context.EXPECT().DB().Return(db).MinTimes(1)
+		context.EXPECT().Log().Return(log).MinTimes(1)
+
+		err := lunch_flow_jobs.CleanupLunchFlow(
+			mockqueue.NewMockContext(context),
+			lunch_flow_jobs.CleanupLunchFlowArguments{
 				AccountId:       user.AccountId,
 				LunchFlowLinkId: lunchFlowLink.LunchFlowLinkId,
 			},
 		)
-		assert.NoError(t, err, "must create cleanup lunch flow job")
+		assert.NoError(t, err, "cleanup lunch flow job should succeed")
 
-		assert.NoError(t, job.Run(t.Context()), "cleanup lunch flow job should succeed")
 		// Make sure that we have not deleted anything, even though we did not
 		// return an error.
 		testutils.MustDBExist(t, models.Secret{

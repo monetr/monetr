@@ -31,6 +31,7 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 	}
 
 	// Take the body and upload it as a file
+	// TODO Add ClamAV anti-virus here
 	file, err := c.consumeFileUpload(ctx, upload)
 	if err != nil {
 		return err
@@ -54,7 +55,8 @@ func (c *Controller) postTransactionUpload(ctx echo.Context) error {
 
 	if err := queue.Enqueue(
 		c.getContext(ctx),
-		c.Queue,
+		// Make sure to enqueue as part of this controller's database transaction!
+		c.Queue.WithTransaction(c.mustGetDatabase(ctx)),
 		ofx_jobs.ProcessOFXUpload,
 		ofx_jobs.ProcessOFXUploadArguments{
 			AccountId:           c.mustGetAccountId(ctx),

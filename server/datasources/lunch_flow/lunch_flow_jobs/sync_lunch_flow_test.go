@@ -1,4 +1,4 @@
-package lunch_flow_test
+package lunch_flow_jobs_test
 
 import (
 	"fmt"
@@ -36,15 +36,6 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
 		bankAccount := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &link)
-
-		handler := background.NewSyncLunchFlowHandler(
-			log,
-			db,
-			clock,
-			kms,
-			publisher,
-			enqueuer,
-		)
 
 		firstTransactions := []lunch_flow.Transaction{
 			{
