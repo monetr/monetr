@@ -16,6 +16,12 @@ type ReconcileSubscriptionArguments struct {
 }
 
 func ReconcileSubscriptionCron(ctx queue.Context) error {
+	if !ctx.Configuration().Stripe.IsBillingEnabled() {
+		ctx.Log().DebugContext(ctx, "billing is not enabled, no reconcile necesssary")
+		crumbs.Debug(ctx, "Billing is not enabled, no recocile necessary", nil)
+		return nil
+	}
+
 	log := ctx.Log()
 
 	var accounts []models.Account
@@ -66,5 +72,10 @@ func ReconcileSubscriptionCron(ctx queue.Context) error {
 }
 
 func ReconcileSubscription(ctx queue.Context, args ReconcileSubscriptionArguments) error {
+	if !ctx.Configuration().Stripe.IsBillingEnabled() {
+		ctx.Log().DebugContext(ctx, "billing is not enabled, no reconcile necesssary")
+		crumbs.Debug(ctx, "Billing is not enabled, no recocile necessary", nil)
+		return nil
+	}
 	return ctx.Billing().ReconcileSubscription(ctx, args.AccountId)
 }
