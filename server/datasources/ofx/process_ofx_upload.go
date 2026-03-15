@@ -17,7 +17,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/similar"
+	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/monetr/monetr/server/storage/storage_jobs"
 	"github.com/pkg/errors"
 )
@@ -524,8 +524,8 @@ func ProcessOFXUpload(
 			queue.Enqueue(
 				ctx,
 				ctx.Enqueuer(),
-				similar.CalculateTransactionClusters,
-				similar.CalculateTransactionClustersArguments{
+				similar_jobs.CalculateTransactionClusters,
+				similar_jobs.CalculateTransactionClustersArguments{
 					AccountId:     args.AccountId,
 					BankAccountId: args.BankAccountId,
 				},

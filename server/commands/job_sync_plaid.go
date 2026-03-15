@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/database"
+	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -80,9 +81,9 @@ func jobSyncPlaid(parent *cobra.Command) {
 				return err
 			}
 
-			jobs := make([]background.SyncPlaidArguments, 0)
+			jobs := make([]plaid_jobs.SyncPlaidArguments, 0)
 			if !arguments.All {
-				jobArgs := background.SyncPlaidArguments{
+				jobArgs := plaid_jobs.SyncPlaidArguments{
 					AccountId: models.ID[models.Account](arguments.AccountID),
 					LinkId:    models.ID[models.Link](arguments.LinkID),
 					Trigger:   "command",
@@ -95,7 +96,7 @@ func jobSyncPlaid(parent *cobra.Command) {
 					Where(`"link"."plaid_link_id" IS NOT NULL`).
 					Select(&links)
 				for _, link := range links {
-					jobs = append(jobs, background.SyncPlaidArguments{
+					jobs = append(jobs, plaid_jobs.SyncPlaidArguments{
 						AccountId: link.AccountId,
 						LinkId:    link.LinkId,
 						Trigger:   "command",

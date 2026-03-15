@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/similar"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -51,9 +51,9 @@ func TestRecurringDetection(t *testing.T) {
 		clock := clock.NewMock()
 		clock.Set(time.Date(2023, 12, 1, 9, 0, 0, 0, time.UTC))
 		// First build out several transaction clusters
-		data := fixtures.LoadFile(t, "monetr_sample_data_1.json")
+		data := GetFixtures(t, "monetr_sample_data_1.json")
 		log := testutils.GetLog(t)
-		detector := NewSimilarTransactions_TFIDF_DBSCAN(log)
+		detector := similar.NewSimilarTransactions_TFIDF_DBSCAN(log)
 
 		for i := range data {
 			detector.AddTransaction(&data[i])

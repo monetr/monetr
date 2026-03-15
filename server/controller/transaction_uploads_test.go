@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/monetr/monetr/server/background"
+	"github.com/monetr/monetr/server/datasources/ofx/ofx_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -42,15 +43,14 @@ func TestPostTransaactionUpload(t *testing.T) {
 				}),
 			).
 			Times(1).
-			Return(
-				nil,
-			)
+			Return(nil)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(
+		app.Queue.EXPECT().
+			EnqueueAt(
 				gomock.Any(),
-				background.ProcessOFXUploadName,
-				testutils.NewGenericMatcher(func(args background.ProcessOFXUploadArguments) bool {
+				mockqueue.EqQueue(ofx_jobs.ProcessOFXUpload),
+				gomock.Any(),
+				testutils.NewGenericMatcher(func(args ofx_jobs.ProcessOFXUploadArguments) bool {
 					return myownsanity.Every(
 						assert.EqualValues(t, bank.AccountId, args.AccountId, "Account ID should match"),
 						assert.EqualValues(t, bank.BankAccountId, args.BankAccountId, "Bank Account ID should match"),
@@ -94,16 +94,12 @@ func TestPostTransaactionUpload(t *testing.T) {
 			).
 			Times(0)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(
+		app.Queue.EXPECT().
+			EnqueueAt(
 				gomock.Any(),
-				background.ProcessOFXUploadName,
-				testutils.NewGenericMatcher(func(args background.ProcessOFXUploadArguments) bool {
-					return myownsanity.Every(
-						assert.EqualValues(t, bank.AccountId, args.AccountId, "Account ID should match"),
-						assert.EqualValues(t, bank.BankAccountId, args.BankAccountId, "Bank Account ID should match"),
-					)
-				}),
+				mockqueue.EqQueue(ofx_jobs.ProcessOFXUpload),
+				gomock.Any(),
+				gomock.Any(),
 			).
 			Times(0)
 
@@ -141,14 +137,14 @@ func TestPostTransaactionUpload(t *testing.T) {
 				nil,
 			)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(
+		app.Queue.EXPECT().
+			EnqueueAt(
 				gomock.Any(),
-				background.ProcessOFXUploadName,
+				mockqueue.EqQueue(ofx_jobs.ProcessOFXUpload),
+				gomock.Any(),
 				gomock.Any(),
 			).
-			Times(0).
-			Return(nil)
+			Times(0)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions/upload").
 			WithPath("bankAccountId", bank.BankAccountId).
@@ -186,14 +182,14 @@ func TestPostTransaactionUpload(t *testing.T) {
 				nil,
 			)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(
+		app.Queue.EXPECT().
+			EnqueueAt(
 				gomock.Any(),
-				background.ProcessOFXUploadName,
+				mockqueue.EqQueue(ofx_jobs.ProcessOFXUpload),
+				gomock.Any(),
 				gomock.Any(),
 			).
-			Times(0).
-			Return(nil)
+			Times(0)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/transactions/upload").
 			WithPath("bankAccountId", bank.BankAccountId).
@@ -236,10 +232,11 @@ func TestPostTransaactionUpload(t *testing.T) {
 				errors.New("no space available"),
 			)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(
+		app.Queue.EXPECT().
+			EnqueueAt(
 				gomock.Any(),
-				background.ProcessOFXUploadName,
+				mockqueue.EqQueue(ofx_jobs.ProcessOFXUpload),
+				gomock.Any(),
 				gomock.Any(),
 			).
 			Times(0)

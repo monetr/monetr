@@ -15,7 +15,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/similar"
+	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/pkg/errors"
 )
 
@@ -573,8 +573,8 @@ func SyncLunchFlow(ctx queue.Context, args SyncLunchFlowArguments) error {
 		if err := queue.Enqueue(
 			ctx,
 			ctx.Enqueuer(),
-			similar.CalculateTransactionClusters,
-			similar.CalculateTransactionClustersArguments{
+			similar_jobs.CalculateTransactionClusters,
+			similar_jobs.CalculateTransactionClustersArguments{
 				AccountId:     s.args.AccountId,
 				BankAccountId: s.args.BankAccountId,
 			},

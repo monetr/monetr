@@ -14,7 +14,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
-	"github.com/monetr/monetr/server/similar"
+	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/monetr/monetr/server/storage/storage_jobs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -96,9 +96,9 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueAt(
 						gomock.Any(),
-						mockqueue.EqQueue(similar.CalculateTransactionClusters),
+						mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 						gomock.Any(),
-						gomock.Eq(similar.CalculateTransactionClustersArguments{
+						gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
 						}),
@@ -181,9 +181,9 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				enqueuer.EXPECT().
 					EnqueueAt(
 						gomock.Any(),
-						mockqueue.EqQueue(similar.CalculateTransactionClusters),
+						mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 						gomock.Any(),
-						gomock.Eq(similar.CalculateTransactionClustersArguments{
+						gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
 						}),
@@ -288,9 +288,9 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				processor.EXPECT().
 					EnqueueAt(
 						gomock.Any(),
-						mockqueue.EqQueue(similar.CalculateTransactionClusters),
+						mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 						gomock.Any(),
-						gomock.Eq(similar.CalculateTransactionClustersArguments{
+						gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
 						}),
@@ -391,9 +391,9 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				processor.EXPECT().
 					EnqueueAt(
 						gomock.Any(),
-						mockqueue.EqQueue(similar.CalculateTransactionClusters),
+						mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 						gomock.Any(),
-						gomock.Eq(similar.CalculateTransactionClustersArguments{
+						gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
 						}),
@@ -510,9 +510,9 @@ func TestProcessOFXUploadJob_Run(t *testing.T) {
 				processor.EXPECT().
 					EnqueueAt(
 						gomock.Any(),
-						mockqueue.EqQueue(similar.CalculateTransactionClusters),
+						mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 						gomock.Any(),
-						gomock.Eq(similar.CalculateTransactionClustersArguments{
+						gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
 							AccountId:     bankAccount.AccountId,
 							BankAccountId: bankAccount.BankAccountId,
 						}),

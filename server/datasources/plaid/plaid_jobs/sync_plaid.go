@@ -15,7 +15,7 @@ import (
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/similar"
+	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/pkg/errors"
 )
 
@@ -49,7 +49,7 @@ type syncPlaidJob struct {
 	timezone     *time.Location
 	bankAccounts map[string]models.BankAccount
 	transactions map[string]models.Transaction
-	similarity   map[models.ID[models.BankAccount]]similar.CalculateTransactionClustersArguments
+	similarity   map[models.ID[models.BankAccount]]similar_jobs.CalculateTransactionClustersArguments
 	actions      map[models.ID[models.Transaction]]SyncAction
 }
 
@@ -72,7 +72,7 @@ func (s *syncPlaidJob) lookupTransaction(
 func (s *syncPlaidJob) tagBankAccountForSimilarityRecalc(
 	bankAccountId models.ID[models.BankAccount],
 ) {
-	s.similarity[bankAccountId] = similar.CalculateTransactionClustersArguments{
+	s.similarity[bankAccountId] = similar_jobs.CalculateTransactionClustersArguments{
 		AccountId:     s.args.AccountId,
 		BankAccountId: bankAccountId,
 	}
@@ -641,7 +641,7 @@ func SyncPlaid(ctx queue.Context, args SyncPlaidArguments) error {
 			),
 			bankAccounts: map[string]models.BankAccount{},
 			transactions: map[string]models.Transaction{},
-			similarity:   map[models.ID[models.BankAccount]]similar.CalculateTransactionClustersArguments{},
+			similarity:   map[models.ID[models.BankAccount]]similar_jobs.CalculateTransactionClustersArguments{},
 			actions:      map[models.ID[models.Transaction]]SyncAction{},
 		}
 
@@ -931,7 +931,7 @@ func SyncPlaid(ctx queue.Context, args SyncPlaidArguments) error {
 			if err := queue.Enqueue(
 				ctx,
 				ctx.Enqueuer(),
-				similar.CalculateTransactionClusters,
+				similar_jobs.CalculateTransactionClusters,
 				s.similarity[key],
 			); err != nil {
 				return err
