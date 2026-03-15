@@ -1,22 +1,25 @@
 package link_jobs_test
 
 import (
-	"context"
 	"testing"
-	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/mockgen"
+	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/links/link_jobs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestRemoveLink(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		clock := clock.New()
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
@@ -32,23 +35,22 @@ func TestRemoveLink(t *testing.T) {
 		)
 		transactions := fixtures.GivenIHaveNTransactions(t, clock, bankAccount, 100)
 
-		job, err := background.NewRemoveLinkJob(
-			log,
-			db,
-			clock,
-			publisher,
-			background.RemoveLinkArguments{
-				AccountId: user.AccountId,
-				LinkId:    bankAccount.LinkId,
-			},
-		)
-		assert.NoError(t, err, "should not return an error creating the job")
-
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+		context.EXPECT().Publisher().Return(publisher).AnyTimes()
 
 		assert.NotPanics(t, func() {
-			assert.NoError(t, job.Run(ctx), "remove link job should succeed")
+			err := link_jobs.RemoveLink(
+				mockqueue.NewMockContext(context),
+				link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    bankAccount.LinkId,
+				},
+			)
+			assert.NoError(t, err, "remove link job should succeed")
 		})
 
 		{ // Make sure all data has been removed
@@ -70,7 +72,9 @@ func TestRemoveLink(t *testing.T) {
 	})
 
 	t.Run("no transactions", func(t *testing.T) {
-		clock := clock.New()
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
@@ -86,23 +90,22 @@ func TestRemoveLink(t *testing.T) {
 			models.CheckingBankAccountSubType,
 		)
 
-		job, err := background.NewRemoveLinkJob(
-			log,
-			db,
-			clock,
-			publisher,
-			background.RemoveLinkArguments{
-				AccountId: user.AccountId,
-				LinkId:    bankAccount.LinkId,
-			},
-		)
-		assert.NoError(t, err, "should not return an error creating the job")
-
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+		context.EXPECT().Publisher().Return(publisher).AnyTimes()
 
 		assert.NotPanics(t, func() {
-			assert.NoError(t, job.Run(ctx), "remove link job should succeed")
+			err := link_jobs.RemoveLink(
+				mockqueue.NewMockContext(context),
+				link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    bankAccount.LinkId,
+				},
+			)
+			assert.NoError(t, err, "remove link job should succeed")
 		})
 
 		{ // Make sure all data has been removed

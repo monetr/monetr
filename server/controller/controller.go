@@ -2,16 +2,14 @@ package controller
 
 import (
 	"context"
-	"strconv"
-
 	"fmt"
 	"log/slog"
+	"strconv"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/captcha"
@@ -33,18 +31,16 @@ import (
 )
 
 type Controller struct {
-	Accounts      repository.AccountsRepository
-	Billing       billing.Billing
-	Cache         cache.Cache
-	Captcha       captcha.Verification
-	ClientTokens  security.ClientTokens
-	Clock         clock.Clock
-	Configuration config.Configuration
-	DB            *pg.DB
-	Email         communication.EmailCommunication
-	FileStorage   storage.Storage
-	// Deprecated: Use [Controller.Queue] instead!
-	JobRunner                background.JobController
+	Accounts                 repository.AccountsRepository
+	Billing                  billing.Billing
+	Cache                    cache.Cache
+	Captcha                  captcha.Verification
+	ClientTokens             security.ClientTokens
+	Clock                    clock.Clock
+	Configuration            config.Configuration
+	DB                       *pg.DB
+	Email                    communication.EmailCommunication
+	FileStorage              storage.Storage
 	Queue                    queue.Enqueuer
 	KMS                      secrets.KeyManagement
 	Log                      *slog.Logger
