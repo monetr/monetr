@@ -109,7 +109,7 @@ type Processor interface {
 		schedule string,
 		job InternalJobWrapper,
 	) error
-
+	JobContext(ctx context.Context, job *models.Job) Context
 	Start() error
 	Close() error
 }

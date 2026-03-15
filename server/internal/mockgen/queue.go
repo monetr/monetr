@@ -396,6 +396,20 @@ func (mr *MockProcessorMockRecorder) EnqueueAt(ctx, arg1, at, args any) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnqueueAt", reflect.TypeOf((*MockProcessor)(nil).EnqueueAt), ctx, arg1, at, args)
 }
 
+// JobContext mocks base method.
+func (m *MockProcessor) JobContext(ctx context.Context, job *models.Job) queue.Context {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "JobContext", ctx, job)
+	ret0, _ := ret[0].(queue.Context)
+	return ret0
+}
+
+// JobContext indicates an expected call of JobContext.
+func (mr *MockProcessorMockRecorder) JobContext(ctx, job any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "JobContext", reflect.TypeOf((*MockProcessor)(nil).JobContext), ctx, job)
+}
+
 // Register mocks base method.
 func (m *MockProcessor) Register(ctx context.Context, arg1 string, job queue.InternalJobWrapper) error {
 	m.ctrl.T.Helper()

@@ -278,7 +278,7 @@ func NewPostgresQueue(
 	clock clock.Clock,
 	log *slog.Logger,
 	configuration config.Configuration,
-	db *pg.DB,
+	db pg.DBI,
 	publisher pubsub.Publisher,
 	plaidPlatypus platypus.Platypus,
 	kms secrets.KeyManagement,
@@ -552,7 +552,7 @@ func (p *postgresProcessor) hydrateCronJobTable() error {
 	})
 }
 
-func (p *postgresProcessor) jobContext(ctx context.Context, job *models.Job) Context {
+func (p *postgresProcessor) JobContext(ctx context.Context, job *models.Job) Context {
 	// Clone the postgresProcessor in memory
 	clone := *p
 	clone.log = clone.log.With(
@@ -1313,7 +1313,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 	defer innerSpan.Finish()
 
 	if err = executor(
-		p.jobContext(innerSpan.Context(), job),
+		p.JobContext(innerSpan.Context(), job),
 		[]byte(job.Input),
 	); err != nil {
 		log.Error("failed to execute job", "err", err)

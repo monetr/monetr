@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/benbjohnson/clock"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/database"
@@ -14,7 +13,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
-	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -64,20 +63,9 @@ func jobSyncPlaid(parent *cobra.Command) {
 			}
 			defer redisController.Close()
 
-			backgroundJobs, err := background.NewBackgroundJobs(
-				cmd.Context(),
-				log,
-				clock,
-				configuration,
-				db,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-			)
+			kms, err := secrets.GetKMS(log, configuration)
 			if err != nil {
+				log.Error("failed to initialize KMS", "err", err)
 				return err
 			}
 
@@ -114,43 +102,27 @@ func jobSyncPlaid(parent *cobra.Command) {
 						return err
 					}
 
-					repo := repository.NewRepositoryFromSession(
+					// This needs to be done inside the transaction, otherwise it won't
+					// support true dry run.
+					jobQueue := queue.NewPostgresQueue(
+						cmd.Context(),
+						queue.NewMemoryNotifier(1),
 						clock,
-						"user_admin",
-						jobArgs.AccountId,
+						log,
+						configuration,
 						txn,
-						log,
-					)
-
-					kms, err := secrets.GetKMS(log, configuration)
-					if err != nil {
-						log.Error("failed to initialize KMS", "err", err)
-						return err
-					}
-
-					secretsRepo := repository.NewSecretsRepository(
-						log,
-						clock,
-						txn,
-						kms,
-						jobArgs.AccountId,
-					)
-
-					job, err := background.NewSyncPlaidJob(
-						log,
-						repo,
-						clock,
-						secretsRepo,
-						platypus.NewPlaid(log, clock, kms, txn, configuration.Plaid),
 						pubsub.NewPostgresPubSub(log, db),
-						backgroundJobs,
-						jobArgs,
+						platypus.NewPlaid(log, clock, kms, txn, configuration.Plaid),
+						kms,
+						nil,
+						nil,
+						nil,
 					)
-					if err != nil {
-						return errors.Wrap(err, "failed to create sync job")
-					}
 
-					if err := job.Run(ctx); err != nil {
+					if err := plaid_jobs.SyncPlaid(
+						jobQueue.JobContext(cmd.Context(), nil),
+						jobArgs,
+					); err != nil {
 						log.Error("failed to run sync latest transactions", "err", err)
 						_ = txn.RollbackContext(ctx)
 						continue
@@ -163,7 +135,27 @@ func jobSyncPlaid(parent *cobra.Command) {
 						return txn.CommitContext(ctx)
 					}
 				} else {
-					return background.TriggerSyncPlaid(ctx, backgroundJobs, jobArgs)
+					jobQueue := queue.NewPostgresQueue(
+						cmd.Context(),
+						queue.NewMemoryNotifier(1),
+						clock,
+						log,
+						configuration,
+						db,
+						nil,
+						nil,
+						nil,
+						nil,
+						nil,
+						nil,
+					)
+
+					return queue.Enqueue(
+						cmd.Context(),
+						jobQueue,
+						plaid_jobs.SyncPlaid,
+						jobArgs,
+					)
 				}
 			}
 
