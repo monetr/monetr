@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
 	"github.com/monetr/monetr/server/funding/funding_jobs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/links/link_jobs"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/similar"
 	"github.com/monetr/monetr/server/spending/spending_jobs"
@@ -20,6 +21,7 @@ func RegisterJobs(ctx context.Context, processor queue.Processor) error {
 		queue.Register(ctx, processor, billing_jobs.NotificationTrialExpiry),
 		queue.Register(ctx, processor, billing_jobs.ReconcileSubscription),
 		queue.Register(ctx, processor, funding_jobs.ProcessFundingSchedule),
+		queue.Register(ctx, processor, link_jobs.RemoveLink),
 		queue.Register(ctx, processor, lunch_flow_jobs.CleanupLunchFlow),
 		queue.Register(ctx, processor, lunch_flow_jobs.SyncLunchFlow),
 		queue.Register(ctx, processor, ofx_jobs.ProcessOFXUpload),
