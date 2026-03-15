@@ -162,6 +162,11 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue)
+		app.Queue.EXPECT().
 			EnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(plaid_jobs.SyncPlaid),
@@ -191,6 +196,11 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
+		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue)
 		app.Queue.EXPECT().
 			EnqueueAt(
 				gomock.Any(),
@@ -235,6 +245,11 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
+		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue)
 		app.Queue.EXPECT().
 			EnqueueAt(
 				gomock.Any(),
@@ -282,6 +297,16 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
+
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(plaid_jobs.SyncPlaid),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(0).
+			Return(nil)
 
 		response := e.POST("/api/plaid/link/sync").
 			WithJSON(map[string]any{

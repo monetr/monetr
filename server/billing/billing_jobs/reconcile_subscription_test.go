@@ -20,7 +20,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func TestReconcileSubscriptionHandler_EnqueueTriggeredJob(t *testing.T) {
+func TestReconcileSubscriptionCron(t *testing.T) {
 	t.Run("detect stale subscription", func(t *testing.T) {
 		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
@@ -34,6 +34,7 @@ func TestReconcileSubscriptionHandler_EnqueueTriggeredJob(t *testing.T) {
 		stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
 		pubSub := pubsub.NewPostgresPubSub(log, db)
 		conf := testutils.GetConfig(t)
+		conf.Stripe.Enabled = true
 		bill := billing.NewBilling(log, clock, conf, accountRepo, stripeHelper, pubSub)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -63,10 +64,42 @@ func TestReconcileSubscriptionHandler_EnqueueTriggeredJob(t *testing.T) {
 
 		{
 			context := mockgen.NewMockContext(ctrl)
-			context.EXPECT().Clock().Return(clock).MinTimes(1)
-			context.EXPECT().DB().Return(db).MinTimes(1)
-			context.EXPECT().Log().Return(log).MinTimes(1)
-			context.EXPECT().Enqueuer().Return(enqueuer).MinTimes(1)
+			context.EXPECT().Clock().Return(clock).Times(1)
+			context.EXPECT().Configuration().Return(conf).Times(1)
+			context.EXPECT().DB().Return(db).Times(1)
+			context.EXPECT().Enqueuer().Return(enqueuer).Times(1)
+			context.EXPECT().Log().Return(log).AnyTimes()
+			err := billing_jobs.ReconcileSubscriptionCron(
+				mockqueue.NewMockContext(context),
+			)
+			assert.NoError(t, err)
+		}
+	})
+
+	t.Run("billing not enabled", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		enqueuer := mockgen.NewMockProcessor(ctrl)
+		conf := testutils.GetConfig(t)
+		conf.Stripe.Enabled = false
+
+		enqueuer.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Return(nil).
+			Times(0)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Configuration().Return(conf).Times(1)
+			context.EXPECT().Enqueuer().Return(enqueuer).Times(0)
+			context.EXPECT().Log().Return(log).AnyTimes()
 			err := billing_jobs.ReconcileSubscriptionCron(
 				mockqueue.NewMockContext(context),
 			)
@@ -88,6 +121,7 @@ func TestReconcileSubscriptionHandler_EnqueueTriggeredJob(t *testing.T) {
 		stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
 		pubSub := pubsub.NewPostgresPubSub(log, db)
 		conf := testutils.GetConfig(t)
+		conf.Stripe.Enabled = true
 		bill := billing.NewBilling(log, clock, conf, accountRepo, stripeHelper, pubSub)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -113,6 +147,7 @@ func TestReconcileSubscriptionHandler_EnqueueTriggeredJob(t *testing.T) {
 		{
 			context := mockgen.NewMockContext(ctrl)
 			context.EXPECT().Clock().Return(clock).MinTimes(1)
+			context.EXPECT().Configuration().Return(conf).Times(1)
 			context.EXPECT().DB().Return(db).MinTimes(1)
 			context.EXPECT().Log().Return(log).MinTimes(1)
 			context.EXPECT().Enqueuer().Return(enqueuer).Times(0)

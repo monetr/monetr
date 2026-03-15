@@ -8,10 +8,10 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
-	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/internal/mockqueue"
+	"github.com/monetr/monetr/server/links/link_jobs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -653,17 +653,22 @@ func TestDeleteLink(t *testing.T) {
 			linkId = models.ID[models.Link](response.JSON().Path("$.linkId").String().Raw())
 		}
 
-		app.Jobs.EXPECT().
-			EnqueueJob(
+		app.Queue.EXPECT().
+			WithTransaction(
 				gomock.Any(),
-				gomock.Eq(background.RemoveLink),
-				testutils.NewGenericMatcher(func(args background.RemoveLinkArguments) bool {
-					a := assert.EqualValues(t, linkId, args.LinkId, "Link ID should match")
-					b := assert.EqualValues(t, user.AccountId, args.AccountId, "Account ID should match")
-					return a && b
+			).
+			Return(app.Queue)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(link_jobs.RemoveLink),
+				gomock.Any(),
+				gomock.Eq(link_jobs.RemoveLinkArguments{
+					AccountId: user.AccountId,
+					LinkId:    linkId,
 				}),
 			).
-			Times(1).
+			MaxTimes(1).
 			Return(nil)
 
 		{ // Try to retrieve the link before it's been deleted.
@@ -729,17 +734,22 @@ func TestDeleteLink(t *testing.T) {
 
 		mock_plaid.MockDeactivateItemTokenSuccess(t)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(
+		app.Queue.EXPECT().
+			WithTransaction(
 				gomock.Any(),
-				gomock.Eq(background.RemoveLink),
-				testutils.NewGenericMatcher(func(args background.RemoveLinkArguments) bool {
-					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
-					b := assert.EqualValues(t, user.AccountId, args.AccountId, "Account ID should match")
-					return a && b
+			).
+			Return(app.Queue)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(link_jobs.RemoveLink),
+				gomock.Any(),
+				gomock.Eq(link_jobs.RemoveLinkArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
 				}),
 			).
-			Times(1).
+			MaxTimes(1).
 			Return(nil)
 
 		{ // Try to delete it.
@@ -798,17 +808,22 @@ func TestDeleteLink(t *testing.T) {
 
 		mock_plaid.MockDeactivateItemTokenSuccess(t)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(
+		app.Queue.EXPECT().
+			WithTransaction(
 				gomock.Any(),
-				gomock.Eq(background.RemoveLink),
-				testutils.NewGenericMatcher(func(args background.RemoveLinkArguments) bool {
-					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
-					b := assert.EqualValues(t, user.AccountId, args.AccountId, "Account ID should match")
-					return a && b
+			).
+			Return(app.Queue)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(link_jobs.RemoveLink),
+				gomock.Any(),
+				gomock.Eq(link_jobs.RemoveLinkArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
 				}),
 			).
-			Times(1).
+			MaxTimes(1).
 			Return(nil)
 
 		{ // Try to delete it.

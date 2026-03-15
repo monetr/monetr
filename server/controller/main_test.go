@@ -94,7 +94,6 @@ type TestApp struct {
 	Configuration config.Configuration
 	Clock         *clock.Mock
 	Email         *mockgen.MockEmailCommunication
-	Jobs          *mockgen.MockJobController
 	Queue         *mockgen.MockEnqueuer
 	Storage       *mockgen.MockStorage
 	Tokens        security.ClientTokens

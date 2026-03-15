@@ -7,6 +7,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
+	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/datasources/lunch_flow/lunch_flow_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -15,12 +16,44 @@ import (
 	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/pubsub"
+	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
 
-func TestSyncLunchFlowJob_Run(t *testing.T) {
+func TestSyncLunchFlow(t *testing.T) {
+	t.Run("lunch flow not enabled", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		log := testutils.GetLog(t)
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().Log().Return(log).MinTimes(1)
+		context.EXPECT().Configuration().Return(config.Configuration{
+			LunchFlow: config.LunchFlow{
+				Enabled: false,
+			},
+		}).MinTimes(1)
+
+		func() {
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
+
+			err := lunch_flow_jobs.SyncLunchFlow(
+				mockqueue.NewMockContext(context),
+				lunch_flow_jobs.SyncLunchFlowArguments{
+					AccountId:     "acct_bogus",
+					BankAccountId: "bac_bogus",
+					LinkId:        "link_bogus",
+				},
+			)
+			assert.NoError(t, err, "should return without error when lunch flow is disabled")
+			assert.Empty(t, httpmock.GetCallCountInfo(), "must not make any lunch flow API calls when disabled")
+		}()
+
+	})
+
 	t.Run("happy path", func(t *testing.T) {
 		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
@@ -30,6 +63,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		enqueuer := mockgen.NewMockProcessor(ctrl)
+		kms := secrets.NewPlaintextKMS()
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
@@ -109,6 +143,12 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 			{
 				context := mockgen.NewMockContext(ctrl)
 				context.EXPECT().Clock().Return(clock).AnyTimes()
+				context.EXPECT().Configuration().Return(config.Configuration{
+					LunchFlow: config.LunchFlow{
+						Enabled: true,
+					},
+				}).AnyTimes()
+				context.EXPECT().KMS().Return(kms).AnyTimes()
 				context.EXPECT().DB().Return(db).AnyTimes()
 				context.EXPECT().Log().Return(log).AnyTimes()
 				context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
@@ -173,6 +213,12 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 			{
 				context := mockgen.NewMockContext(ctrl)
 				context.EXPECT().Clock().Return(clock).AnyTimes()
+				context.EXPECT().Configuration().Return(config.Configuration{
+					LunchFlow: config.LunchFlow{
+						Enabled: true,
+					},
+				}).AnyTimes()
+				context.EXPECT().KMS().Return(kms).AnyTimes()
 				context.EXPECT().DB().Return(db).AnyTimes()
 				context.EXPECT().Log().Return(log).AnyTimes()
 				context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
@@ -209,6 +255,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		enqueuer := mockgen.NewMockProcessor(ctrl)
+		kms := secrets.NewPlaintextKMS()
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		// Make sure we are in a japanese locale for this test
@@ -282,6 +329,12 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 			{
 				context := mockgen.NewMockContext(ctrl)
 				context.EXPECT().Clock().Return(clock).AnyTimes()
+				context.EXPECT().Configuration().Return(config.Configuration{
+					LunchFlow: config.LunchFlow{
+						Enabled: true,
+					},
+				}).AnyTimes()
+				context.EXPECT().KMS().Return(kms).AnyTimes()
 				context.EXPECT().DB().Return(db).AnyTimes()
 				context.EXPECT().Log().Return(log).AnyTimes()
 				context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
@@ -323,6 +376,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		enqueuer := mockgen.NewMockProcessor(ctrl)
+		kms := secrets.NewPlaintextKMS()
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
@@ -356,6 +410,12 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 			{
 				context := mockgen.NewMockContext(ctrl)
 				context.EXPECT().Clock().Return(clock).AnyTimes()
+				context.EXPECT().Configuration().Return(config.Configuration{
+					LunchFlow: config.LunchFlow{
+						Enabled: true,
+					},
+				}).AnyTimes()
+				context.EXPECT().KMS().Return(kms).AnyTimes()
 				context.EXPECT().DB().Return(db).AnyTimes()
 				context.EXPECT().Log().Return(log).AnyTimes()
 				context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
@@ -369,7 +429,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 						LinkId:        bankAccount.LinkId,
 					},
 				)
-				assert.NoError(t, err, "must sync lunch flow successfully")
+				assert.Error(t, err, "must return an error if the API call fails")
 			}
 
 			// If it fails we should not create any transactions
@@ -389,7 +449,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-
+		kms := secrets.NewPlaintextKMS()
 		enqueuer := mockgen.NewMockProcessor(ctrl)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
@@ -449,6 +509,12 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 			{
 				context := mockgen.NewMockContext(ctrl)
 				context.EXPECT().Clock().Return(clock).AnyTimes()
+				context.EXPECT().Configuration().Return(config.Configuration{
+					LunchFlow: config.LunchFlow{
+						Enabled: true,
+					},
+				}).AnyTimes()
+				context.EXPECT().KMS().Return(kms).AnyTimes()
 				context.EXPECT().DB().Return(db).AnyTimes()
 				context.EXPECT().Log().Return(log).AnyTimes()
 				context.EXPECT().Enqueuer().Return(enqueuer).AnyTimes()
@@ -462,7 +528,7 @@ func TestSyncLunchFlowJob_Run(t *testing.T) {
 						LinkId:        bankAccount.LinkId,
 					},
 				)
-				assert.NoError(t, err, "must sync lunch flow successfully")
+				assert.Error(t, err, "must return an error if the balance API call fails")
 			}
 
 			// If it fails we should not create any transactions

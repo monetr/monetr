@@ -16,7 +16,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func TestPostTransaactionUpload(t *testing.T) {
+func TestPostTransactionUpload(t *testing.T) {
 	t.Run("upload OFX file success", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string
@@ -45,6 +45,11 @@ func TestPostTransaactionUpload(t *testing.T) {
 			Times(1).
 			Return(nil)
 
+		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue)
 		app.Queue.EXPECT().
 			EnqueueAt(
 				gomock.Any(),

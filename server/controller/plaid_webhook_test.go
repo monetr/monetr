@@ -92,6 +92,11 @@ func TestPlaidWebhook(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 
 		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue)
+		app.Queue.EXPECT().
 			EnqueueAt(
 				gomock.Any(),
 				mockqueue.EqQueue(plaid_jobs.SyncPlaid),
@@ -165,6 +170,12 @@ func TestPlaidWebhook(t *testing.T) {
 			&privateKey.PublicKey,
 		)
 
+		app.Queue.EXPECT().
+			WithTransaction(
+				gomock.Any(),
+			).
+			Return(app.Queue).
+			Times(2)
 		app.Queue.EXPECT().
 			EnqueueAt(
 				gomock.Any(),
