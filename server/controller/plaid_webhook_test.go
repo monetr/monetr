@@ -11,10 +11,11 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jarcoal/httpmock"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/controller"
+	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
+	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -90,6 +91,20 @@ func TestPlaidWebhook(t *testing.T) {
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(plaid_jobs.SyncPlaid),
+				gomock.Any(),
+				gomock.Eq(plaid_jobs.SyncPlaidArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
+					Trigger:   "webhook",
+				}),
+			).
+			Times(1).
+			Return(nil)
+
 		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		require.NoError(t, err, "must generate EC key")
 
@@ -113,11 +128,6 @@ func TestPlaidWebhook(t *testing.T) {
 			kid,
 			body,
 		)
-
-		app.Jobs.EXPECT().
-			EnqueueJob(gomock.Any(), background.SyncPlaid, gomock.Any()).
-			Return(nil).
-			Times(1)
 
 		response := e.POST(`/api/plaid/webhook`).
 			WithHeader("Plaid-Verification", verificationToken).
@@ -155,14 +165,19 @@ func TestPlaidWebhook(t *testing.T) {
 			&privateKey.PublicKey,
 		)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(gomock.Any(), background.SyncPlaid, background.SyncPlaidArguments{
-				AccountId: link.AccountId,
-				LinkId:    link.LinkId,
-				Trigger:   "webhook",
-			}).
-			Return(nil).
-			Times(2)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(plaid_jobs.SyncPlaid),
+				gomock.Any(),
+				gomock.Eq(plaid_jobs.SyncPlaidArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
+					Trigger:   "webhook",
+				}),
+			).
+			Times(2).
+			Return(nil)
 
 		{ // First request goes through and should succeed
 			// Generate a verification token right now, using the key ID that we have
@@ -446,10 +461,15 @@ func TestPlaidWebhook(t *testing.T) {
 			},
 		)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(gomock.Any(), background.SyncPlaid, gomock.Any()).
-			Return(nil).
-			Times(0)
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(plaid_jobs.SyncPlaid),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(0).
+			Return(nil)
 
 		response := e.POST(`/api/plaid/webhook`).
 			WithHeader("Plaid-Verification", verificationToken).

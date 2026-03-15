@@ -7,10 +7,10 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
-	"github.com/monetr/monetr/server/background"
+	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
-	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/plaid/plaid-go/v41/plaid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -161,14 +161,14 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(
+		app.Queue.EXPECT().
+			EnqueueAt(
 				gomock.Any(),
-				gomock.Eq(background.SyncPlaid),
-				testutils.NewGenericMatcher(func(args background.SyncPlaidArguments) bool {
-					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
-					b := assert.EqualValues(t, link.AccountId, args.AccountId, "Account ID should match")
-					return a && b
+				mockqueue.EqQueue(plaid_jobs.SyncPlaid),
+				gomock.Any(),
+				gomock.Eq(plaid_jobs.SyncPlaidArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
 				}),
 			).
 			MaxTimes(1).
@@ -191,17 +191,17 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(
+		app.Queue.EXPECT().
+			EnqueueAt(
 				gomock.Any(),
-				gomock.Eq(background.SyncPlaid),
-				testutils.NewGenericMatcher(func(args background.SyncPlaidArguments) bool {
-					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
-					b := assert.EqualValues(t, link.AccountId, args.AccountId, "Account ID should match")
-					return a && b
+				mockqueue.EqQueue(plaid_jobs.SyncPlaid),
+				gomock.Any(),
+				gomock.Eq(plaid_jobs.SyncPlaidArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
 				}),
 			).
-			MaxTimes(1).
+			Times(1).
 			Return(nil)
 
 		{ // First request should succeed.
@@ -235,17 +235,17 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		app.Jobs.EXPECT().
-			EnqueueJob(
+		app.Queue.EXPECT().
+			EnqueueAt(
 				gomock.Any(),
-				gomock.Eq(background.SyncPlaid),
-				testutils.NewGenericMatcher(func(args background.SyncPlaidArguments) bool {
-					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
-					b := assert.EqualValues(t, link.AccountId, args.AccountId, "Account ID should match")
-					return a && b
+				mockqueue.EqQueue(plaid_jobs.SyncPlaid),
+				gomock.Any(),
+				gomock.Eq(plaid_jobs.SyncPlaidArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
 				}),
 			).
-			MaxTimes(1).
+			Times(1).
 			Return(errors.New("queue is offline"))
 
 		response := e.POST("/api/plaid/link/sync").

@@ -16,6 +16,7 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/similar"
+	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -195,9 +196,9 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		enqueuer.EXPECT().
 			EnqueueAt(
 				gomock.Any(),
-				mockqueue.EqQueue(similar.CalculateTransactionClusters),
+				mockqueue.EqQueue(similar_jobs.CalculateTransactionClusters),
 				gomock.Any(),
-				gomock.Eq(similar.CalculateTransactionClustersArguments{
+				gomock.Eq(similar_jobs.CalculateTransactionClustersArguments{
 					AccountId:     plaidBankAccount.AccountId,
 					BankAccountId: plaidBankAccount.BankAccountId,
 				}),
