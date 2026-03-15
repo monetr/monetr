@@ -13,6 +13,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/currency"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
+	"github.com/monetr/monetr/server/datasources/lunch_flow/lunch_flow_jobs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/merge"
 	. "github.com/monetr/monetr/server/models"
@@ -386,14 +387,17 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 
 	// Get the database instance from the request context, this should be a
 	// database transaction for this endpoint.
-	db := c.mustGetDatabase(ctx)
 	for _, bankAccount := range bankAccounts {
-		log.With("bankAccountId", bankAccount.BankAccountId).DebugContext(c.getContext(ctx), "triggering Lunch Flow sync for bank account")
-		if err := background.TriggerSyncLunchFlowTxn(
+		log.DebugContext(
 			c.getContext(ctx),
-			c.JobRunner,
-			db,
-			background.SyncLunchFlowArguments{
+			"triggering Lunch Flow sync for bank account",
+			"bankAccountId", bankAccount.BankAccountId,
+		)
+		if err := enqueueJob(
+			c,
+			ctx,
+			lunch_flow_jobs.SyncLunchFlow,
+			lunch_flow_jobs.SyncLunchFlowArguments{
 				AccountId:     bankAccount.AccountId,
 				BankAccountId: bankAccount.BankAccountId,
 				LinkId:        bankAccount.LinkId,

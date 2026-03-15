@@ -15,7 +15,6 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/application"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/cache"
@@ -260,40 +259,6 @@ func ServeCommand(parent *cobra.Command) {
 				email = communication.NewEmailCommunication(log, configuration)
 			}
 
-			var backgroundJobs *background.BackgroundJobs
-			{ // Setup the background job processor with a 30 second timeout.
-				withTimeout, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-				backgroundJobs, err = background.NewBackgroundJobs(
-					withTimeout,
-					log,
-					clock,
-					configuration,
-					db,
-					pubSub,
-					plaidClient,
-					kms,
-					fileStorage,
-					bill,
-					email,
-				)
-				if err != nil {
-					cancel()
-					log.Error("failed to setup background job proceessor", "err", err)
-					return err
-				}
-				cancel()
-
-				// if err = backgroundJobs.Start(); err != nil {
-				// 	log.Error("failed to start background job worker", "err", err)
-				// 	return err
-				// }
-				// defer func() {
-				// 	if err := backgroundJobs.Close(); err != nil {
-				// 		log.Error("failed to close background jobs processor gracefully", "err", err)
-				// 	}
-				// }()
-			}
-
 			var jobQueue queue.Processor
 			{ // Setup the new job queue
 				jobQueue = queue.NewPostgresQueue(
@@ -337,13 +302,13 @@ func ServeCommand(parent *cobra.Command) {
 					DB:                       db,
 					Email:                    email,
 					FileStorage:              fileStorage,
-					JobRunner:                backgroundJobs,
 					KMS:                      kms,
 					Log:                      log,
 					Plaid:                    plaidClient,
 					PlaidInstitutions:        plaidInstitutions,
 					PlaidWebhookVerification: plaidWebhooks,
 					PubSub:                   pubSub,
+					Queue:                    jobQueue,
 					Stats:                    stats,
 					Stripe:                   stripe,
 				},

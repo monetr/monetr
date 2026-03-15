@@ -9,6 +9,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
@@ -288,4 +289,23 @@ func (c *Controller) scrubSentryBody(ctx echo.Context) {
 			scope.SetRequestBody(nil)
 		}
 	}
+}
+
+// enqueueJob is a helpful wrapper around the [queue.Enqueue] function, however
+// this function is meant to be called from a cotroller. This function will take
+// the controller context and make sure that the job is only enqueued if the API
+// request succeeds by wrapping the enqueue in the same database transaction as
+// the API request itself. This cannot be done on [echo.GET] endpoints!
+func enqueueJob[T any](
+	c *Controller,
+	ctx echo.Context,
+	job func(ctx queue.Context, args T) error,
+	args T,
+) error {
+	return queue.Enqueue(
+		c.getContext(ctx),
+		c.Queue.WithTransaction(c.mustGetDatabase(ctx)),
+		job,
+		args,
+	)
 }

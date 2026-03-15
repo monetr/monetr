@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/links/link_jobs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/validation"
 )
@@ -272,10 +272,11 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		}
 	}
 
-	if err = background.TriggerRemoveLink(
-		c.getContext(ctx),
-		c.JobRunner,
-		background.RemoveLinkArguments{
+	if err = enqueueJob(
+		c,
+		ctx,
+		link_jobs.RemoveLink,
+		link_jobs.RemoveLinkArguments{
 			AccountId: link.AccountId,
 			LinkId:    link.LinkId,
 		},
