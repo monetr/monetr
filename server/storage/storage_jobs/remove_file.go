@@ -57,6 +57,7 @@ func RemoveFile(ctx queue.Context, args RemoveFileArguments) error {
 		log.DebugContext(ctx, "removing file")
 		if err = ctx.Storage().Remove(ctx, *file); err != nil {
 			log.ErrorContext(ctx, "failed to remove file", "err", err)
+			return err
 		}
 
 		log.DebugContext(ctx, "file successfully removed")

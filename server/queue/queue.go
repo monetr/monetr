@@ -278,7 +278,7 @@ func decodeArguments[T any](data []byte, result *T) error {
 // time.
 func jobSignature(timestamp time.Time, arguments []byte) string {
 	truncatedTimestamp := timestamp.Truncate(time.Second)
-	signatureBuilder := fnv.New32()
+	signatureBuilder := fnv.New64()
 	signatureBuilder.Write(arguments)
 	signatureBuilder.Write([]byte(truncatedTimestamp.String()))
 	return hex.EncodeToString(signatureBuilder.Sum(nil))

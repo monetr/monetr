@@ -68,6 +68,10 @@ const (
 )
 
 const (
+	jobTimeout = 2 * time.Minute
+)
+
+const (
 	postgresProcessorUninitialized = 0
 	postgresProcessorRunning       = 1
 	postgresProcessorStopped       = 2
@@ -1177,7 +1181,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 	// Execute the job with a timeout.
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
-		30*time.Second,
+		jobTimeout,
 	)
 	defer cancel()
 
@@ -1234,7 +1238,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 			// If we panic during the job then just mark the job as failed and don't
 			// retry.
 			now := p.clock.Now()
-			if _, err := p.db.Model(job).
+			if _, err := p.db.ModelContext(span.Context(), job).
 				Set(`"status" = ?`, models.FailedJobStatus).
 				Set(`"completed_at" = ?`, now).
 				Set(`"updated_at" = ?`, now).
@@ -1260,7 +1264,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 					"attempt", job.Attempt,
 				)
 				now := p.clock.Now()
-				if _, err := p.db.Model(job).
+				if _, err := p.db.ModelContext(span.Context(), job).
 					Set(`"attempt" = ?`, job.Attempt+1).
 					Set(`"priority" = ?`, now.Add(attemptBackoff*time.Duration(job.Attempt)).Unix()).
 					Set(`"status" = ?`, models.PendingJobStatus).
@@ -1278,7 +1282,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 					"attempt", job.Attempt,
 				)
 				now := p.clock.Now()
-				if _, err := p.db.Model(job).
+				if _, err := p.db.ModelContext(span.Context(), job).
 					Set(`"status" = ?`, models.FailedJobStatus).
 					Set(`"completed_at" = ?`, now).
 					Set(`"updated_at" = ?`, now).
@@ -1291,7 +1295,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 			// If the job succeeded then mark the job as completed and we don't need
 			// to do anything else.
 			now := p.clock.Now()
-			if _, err := p.db.Model(job).
+			if _, err := p.db.ModelContext(span.Context(), job).
 				Set(`"status" = ?`, models.CompletedJobStatus).
 				Set(`"completed_at" = ?`, now).
 				Set(`"updated_at" = ?`, now).

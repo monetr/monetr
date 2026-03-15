@@ -133,8 +133,8 @@ func DeactivatePlaidLink(ctx queue.Context, args DeactivateLinksArguments) error
 
 		log.InfoContext(ctx, "deactivating Plaid link now")
 		if err = client.RemoveItem(ctx); err != nil {
-			log.ErrorContext(ctx, "failed to deactivate Plaid link, the job will not be retried", "err", err)
-			return nil
+			log.ErrorContext(ctx, "failed to deactivate Plaid link", "err", err)
+			return err
 		}
 
 		log.InfoContext(ctx, "Plaid link was successfully deactivated")
