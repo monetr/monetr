@@ -68,5 +68,76 @@ func DeactivatePlaidLinkCron(ctx queue.Context) error {
 }
 
 func DeactivatePlaidLink(ctx queue.Context, args DeactivateLinksArguments) error {
-	return nil
+	return ctx.RunInTransaction(ctx, func(ctx queue.Context) error {
+		crumbs.IncludeUserInScope(ctx, args.AccountId)
+		log := ctx.Log().With(
+			"accountId", args.AccountId,
+			"linkId", args.LinkId,
+		)
+
+		repo := repository.NewRepositoryFromSession(
+			ctx.Clock(),
+			"user_system",
+			args.AccountId,
+			ctx.DB(),
+			log,
+		)
+		secretsRepo := repository.NewSecretsRepository(
+			log,
+			ctx.Clock(),
+			ctx.DB(),
+			ctx.KMS(),
+			args.AccountId,
+		)
+
+		link, err := repo.GetLink(ctx, args.LinkId)
+		if err != nil {
+			log.ErrorContext(ctx, "failed to retrieve link for deactivation", "err", err)
+			return err
+		}
+
+		if link.PlaidLink == nil {
+			log.WarnContext(ctx, "provided link does not have any plaid credentials")
+			crumbs.Warn(ctx, "BUG: Link was queued to be deactivated, but has no plaid details", "jobs", map[string]any{
+				"link": link,
+			})
+			return nil
+		}
+
+		log = log.With(
+			"plaidLinkId", link.PlaidLinkId,
+			"itemId", link.PlaidLink.PlaidId,
+			"institutionId", link.PlaidLink.InstitutionId,
+			"institutionName", link.PlaidLink.InstitutionName,
+			"plaidLinkStatus", link.PlaidLink.Status.String(),
+		)
+
+		log.InfoContext(ctx, "removing plaid link")
+
+		secret, err := secretsRepo.Read(ctx, link.PlaidLink.SecretId)
+		if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
+			log.ErrorContext(ctx, "could not retrieve API credentials for Plaid for link, this job will be retried", "err", err)
+			return err
+		}
+
+		client, err := ctx.Platypus().NewClient(ctx, link, secret.Value, link.PlaidLink.PlaidId)
+		if err != nil {
+			log.ErrorContext(ctx, "failed to create client for link deactivation", "err", err)
+			return err
+		}
+
+		if err = repo.DeletePlaidLink(ctx, *link.PlaidLinkId); err != nil {
+			log.WarnContext(ctx, "failed to remove Plaid details, link cannot be removed at this time", "err", err)
+			return err
+		}
+
+		log.InfoContext(ctx, "deactivating Plaid link now")
+		if err = client.RemoveItem(ctx); err != nil {
+			log.ErrorContext(ctx, "failed to deactivate Plaid link, the job will not be retried", "err", err)
+			return nil
+		}
+
+		log.InfoContext(ctx, "Plaid link was successfully deactivated")
+		return nil
+	})
 }

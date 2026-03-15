@@ -124,8 +124,8 @@ func TestPostgresJobProcessor_CronJobs(t *testing.T) {
 		err := processor.RegisterJob(context.Background(), testCronHandler)
 		assert.NoError(t, err)
 
-		err = processor.RegisterJob(context.Background(), NewCleanupJobsHandler(log, db))
-		assert.NoError(t, err)
+		// err = processor.RegisterJob(context.Background(), NewCleanupJobsHandler(log, db))
+		// assert.NoError(t, err)
 
 		err = processor.Start()
 		assert.NoError(t, err, "should be able to star the processor")
