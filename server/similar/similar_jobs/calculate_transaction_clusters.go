@@ -1,4 +1,4 @@
-package similar
+package similar_jobs
 
 import (
 	"github.com/monetr/monetr/server/crumbs"
@@ -6,6 +6,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/similar"
 	"github.com/pkg/errors"
 )
 
@@ -30,7 +31,7 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 			log,
 		)
 
-		clustering := NewSimilarTransactions_TFIDF_DBSCAN(log)
+		clustering := similar.NewSimilarTransactions_TFIDF_DBSCAN(log)
 
 		limit := 2000
 		offset := 0

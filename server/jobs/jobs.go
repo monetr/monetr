@@ -11,7 +11,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/links/link_jobs"
 	"github.com/monetr/monetr/server/queue"
-	"github.com/monetr/monetr/server/similar"
+	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/monetr/monetr/server/spending/spending_jobs"
 	"github.com/monetr/monetr/server/storage/storage_jobs"
 )
@@ -27,7 +27,7 @@ func RegisterJobs(ctx context.Context, processor queue.Processor) error {
 		queue.Register(ctx, processor, ofx_jobs.ProcessOFXUpload),
 		queue.Register(ctx, processor, plaid_jobs.DeactivatePlaidLink),
 		queue.Register(ctx, processor, plaid_jobs.SyncPlaid),
-		queue.Register(ctx, processor, similar.CalculateTransactionClusters),
+		queue.Register(ctx, processor, similar_jobs.CalculateTransactionClusters),
 		queue.Register(ctx, processor, spending_jobs.ProcessSpending),
 		queue.Register(ctx, processor, storage_jobs.RemoveFile),
 		queue.RegisterCron(ctx, processor, CleanupJobsCron, "0 0 8 * * *"),
