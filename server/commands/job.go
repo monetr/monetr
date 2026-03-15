@@ -12,8 +12,6 @@ func JobCommand(parent *cobra.Command) {
 	}
 
 	jobSyncPlaid(jobCommand)
-	jobCleanupJobs(jobCommand)
-	jobRemoveLink(jobCommand)
 
 	parent.AddCommand(jobCommand)
 }

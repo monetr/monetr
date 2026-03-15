@@ -2,16 +2,14 @@ package controller
 
 import (
 	"context"
-	"strconv"
-
 	"fmt"
 	"log/slog"
+	"strconv"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/captcha"
@@ -21,6 +19,7 @@ import (
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
+	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
@@ -42,7 +41,7 @@ type Controller struct {
 	DB                       *pg.DB
 	Email                    communication.EmailCommunication
 	FileStorage              storage.Storage
-	JobRunner                background.JobController
+	Queue                    queue.Enqueuer
 	KMS                      secrets.KeyManagement
 	Log                      *slog.Logger
 	Plaid                    platypus.Platypus

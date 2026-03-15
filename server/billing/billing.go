@@ -2,12 +2,11 @@ package billing
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
-	"log/slog"
-
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"

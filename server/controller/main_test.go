@@ -92,10 +92,10 @@ func NewTestApplication(t *testing.T) (*TestApp, *httpexpect.Expect) {
 
 type TestApp struct {
 	Configuration config.Configuration
-	Email         *mockgen.MockEmailCommunication
-	Storage       *mockgen.MockStorage
-	Jobs          *mockgen.MockJobController
 	Clock         *clock.Mock
+	Email         *mockgen.MockEmailCommunication
+	Queue         *mockgen.MockEnqueuer
+	Storage       *mockgen.MockStorage
 	Tokens        security.ClientTokens
 }
 
@@ -171,7 +171,7 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 	log.Debug("[TEST] created temporary directory for uploads", "tempDirectory", tempDirectory)
 
 	fileStorage := mockgen.NewMockStorage(mockController)
-	jobRunner := mockgen.NewMockJobController(mockController)
+	queue := mockgen.NewMockEnqueuer(mockController)
 	email := mockgen.NewMockEmailCommunication(mockController)
 
 	var recaptcha captcha.Verification
@@ -214,13 +214,13 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		DB:                       db,
 		Email:                    email,
 		FileStorage:              fileStorage,
-		JobRunner:                jobRunner,
 		KMS:                      kms,
 		Log:                      log,
 		Plaid:                    plaidClient,
 		PlaidInstitutions:        plaidInstitutions,
 		PlaidWebhookVerification: plaidWebhooks,
 		PubSub:                   pubSub,
+		Queue:                    queue,
 		Stats:                    nil,
 		Stripe:                   stripeHelper,
 	}
@@ -264,7 +264,7 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		Configuration: configuration,
 		Email:         email,
 		Storage:       fileStorage,
-		Jobs:          jobRunner,
+		Queue:         queue,
 		Clock:         clock,
 		Tokens:        clientTokens,
 	}, expect

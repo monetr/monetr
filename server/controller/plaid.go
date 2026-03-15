@@ -10,9 +10,9 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
@@ -383,12 +383,20 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		}
 	}
 
-	err = background.TriggerSyncPlaid(c.getContext(ctx), c.JobRunner, background.SyncPlaidArguments{
-		AccountId: link.AccountId,
-		LinkId:    link.LinkId,
-	})
-	if err != nil {
-		log.WarnContext(c.getContext(ctx), "failed to trigger pulling latest transactions after updating plaid link", "err", err)
+	if err = enqueueJob(
+		c,
+		ctx,
+		plaid_jobs.SyncPlaid,
+		plaid_jobs.SyncPlaidArguments{
+			AccountId: link.AccountId,
+			LinkId:    link.LinkId,
+		},
+	); err != nil {
+		log.WarnContext(
+			c.getContext(ctx),
+			"failed to trigger pulling latest transactions after updating plaid link",
+			"err", err,
+		)
 	}
 
 	return ctx.JSON(http.StatusOK, link)
@@ -536,12 +544,21 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	}
 
 	if !c.Configuration.Plaid.WebhooksEnabled {
-		err = background.TriggerSyncPlaid(c.getContext(ctx), c.JobRunner, background.SyncPlaidArguments{
-			AccountId: link.AccountId,
-			LinkId:    link.LinkId,
-		})
-		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to pull initial transactions")
+		if err = enqueueJob(
+			c,
+			ctx,
+			plaid_jobs.SyncPlaid,
+			plaid_jobs.SyncPlaidArguments{
+				AccountId: link.AccountId,
+				LinkId:    link.LinkId,
+			},
+		); err != nil {
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"failed to pull initial transactions",
+			)
 		}
 	}
 
@@ -658,12 +675,21 @@ func (c *Controller) postPlaidLinkSync(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "could not manually sync link")
 	}
 
-	err = background.TriggerSyncPlaid(c.getContext(ctx), c.JobRunner, background.SyncPlaidArguments{
-		AccountId: link.AccountId,
-		LinkId:    link.LinkId,
-	})
-	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to trigger manual sync")
+	if err = enqueueJob(
+		c,
+		ctx,
+		plaid_jobs.SyncPlaid,
+		plaid_jobs.SyncPlaidArguments{
+			AccountId: link.AccountId,
+			LinkId:    link.LinkId,
+		},
+	); err != nil {
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"failed to trigger manual sync",
+		)
 	}
 
 	return ctx.NoContent(http.StatusAccepted)
