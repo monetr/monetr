@@ -9,7 +9,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/datasources/ofx/ofx_jobs"
-	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"golang.org/x/net/websocket"
@@ -178,21 +177,6 @@ func (c *Controller) getTransactionUploadProgress(ctx echo.Context) error {
 					break ListenerLoop
 				}
 			}
-
-		}
-
-		log.Log(c.getContext(ctx), logging.LevelTrace, "final status detected, re-reading transaction upload object")
-		upload, err := repo.GetTransactionUpload(
-			c.getContext(ctx),
-			bankAccountId,
-			transactionUploadId,
-		)
-		if err != nil {
-			return
-		}
-
-		if err := c.sendWebsocketMessage(ctx, ws, upload); err != nil {
-			return
 		}
 	}).ServeHTTP(ctx.Response(), ctx.Request())
 
