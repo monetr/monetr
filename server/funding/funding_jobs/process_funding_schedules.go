@@ -152,7 +152,9 @@ func ProcessFundingSchedule(ctx queue.Context, args ProcessFundingScheduleArgume
 				crumbs.IndicateBug(ctx, "bug: funding schedule for processing occurs in the future", map[string]any{
 					"nextOccurrence": fundingSchedule.NextRecurrence,
 				})
-				span.Status = sentry.SpanStatusInvalidArgument
+				if span != nil {
+					span.Status = sentry.SpanStatusInvalidArgument
+				}
 				fundingLog.WarnContext(ctx, "skipping processing funding schedule, it does not occur yet")
 				continue
 			}
