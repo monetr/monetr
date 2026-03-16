@@ -390,10 +390,14 @@ func (p *postgresProcessor) EnqueueAt(
 
 	log.DebugContext(span.Context(), "successfully enqueued job")
 
-	// Notify the workers that there is a job available for consumption. This is
-	// non-blocking in the sense that this wont block if there are no workers
-	// available to consume the job right now.
-	if err := p.notifier.notify(span.Context()); err != nil {
+	// Send a notification in the same database context as the job was enqueued
+	// on. This way if a job is enqueued in a transaction then we would only wake
+	// the workers once the transaction is committed!
+	if _, err := p.db.ExecContext(
+		span.Context(),
+		`NOTIFY "queue:wake", ?`,
+		job.JobId,
+	); err != nil {
 		log.DebugContext(span.Context(), "failed to notify workers of new jobs",
 			"err", err,
 		)
@@ -1000,6 +1004,10 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 	var backoff time.Duration = 1
 	baseInterval := 10 * time.Second
 	ticker := time.NewTicker(baseInterval)
+	// Unsafe cast here, if this breaks then someone is doing something REALLY
+	// wrong.
+	listener := p.db.(*pg.DB).Listen(context.Background(), "queue:wake")
+	defer listener.Unlisten(context.Background(), "queue:wake")
 	for {
 		// Because this is at the beginning of the loop, the only time this blocks
 		// is when there are no available threads. The ticker will only fire here if
@@ -1014,7 +1022,7 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 		case <-ticker.C:
 			p.log.Debug("job processor currently has no available worker threads")
 			continue
-		case <-p.notifier.channel():
+		case <-listener.Channel():
 			p.log.Debug("received job notification, but job processor currently has no available worker threads")
 			continue
 		case <-p.availableWorkers:
@@ -1068,7 +1076,7 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 			promise <- workerSignal
 			ticker.Stop()
 			return
-		case <-p.notifier.channel():
+		case <-listener.Channel():
 			p.log.Debug("received job notification")
 			continue
 		case <-ticker.C:
