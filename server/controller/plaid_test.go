@@ -174,6 +174,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 				gomock.Eq(plaid_jobs.SyncPlaidArguments{
 					AccountId: link.AccountId,
 					LinkId:    link.LinkId,
+					Trigger:   "manual",
 				}),
 			).
 			MaxTimes(1).
@@ -209,6 +210,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 				gomock.Eq(plaid_jobs.SyncPlaidArguments{
 					AccountId: link.AccountId,
 					LinkId:    link.LinkId,
+					Trigger:   "manual",
 				}),
 			).
 			Times(1).
@@ -238,7 +240,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		}
 	})
 
-	t.Run("failed to enque job", func(t *testing.T) {
+	t.Run("failed to enqueue job", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
@@ -258,6 +260,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 				gomock.Eq(plaid_jobs.SyncPlaidArguments{
 					AccountId: link.AccountId,
 					LinkId:    link.LinkId,
+					Trigger:   "manual",
 				}),
 			).
 			Times(1).
