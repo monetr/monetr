@@ -378,6 +378,7 @@ func (r *removeLinkJob) getLunchFlowBankAccountsToRemove(
 		JoinOn(`"link"."account_id" = "lunch_flow_bank_account"."account_id"`).
 		Where(`"lunch_flow_bank_account"."account_id" = ?`, r.args.AccountId).
 		Where(`"link"."account_id" = ?`, r.args.AccountId).
+		Where(`"link"."link_id" = ?`, r.args.LinkId).
 		Column("lunch_flow_bank_account.lunch_flow_bank_account_id").
 		Select(&ids)
 	if err != nil {

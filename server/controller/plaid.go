@@ -390,6 +390,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		plaid_jobs.SyncPlaidArguments{
 			AccountId: link.AccountId,
 			LinkId:    link.LinkId,
+			Trigger:   "other",
 		},
 	); err != nil {
 		log.WarnContext(
@@ -551,6 +552,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 			plaid_jobs.SyncPlaidArguments{
 				AccountId: link.AccountId,
 				LinkId:    link.LinkId,
+				Trigger:   "other",
 			},
 		); err != nil {
 			return c.wrapAndReturnError(
@@ -682,6 +684,7 @@ func (c *Controller) postPlaidLinkSync(ctx echo.Context) error {
 		plaid_jobs.SyncPlaidArguments{
 			AccountId: link.AccountId,
 			LinkId:    link.LinkId,
+			Trigger:   "manual",
 		},
 	); err != nil {
 		return c.wrapAndReturnError(

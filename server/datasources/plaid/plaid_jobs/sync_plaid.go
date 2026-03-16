@@ -36,7 +36,7 @@ type SyncChange struct {
 type SyncPlaidArguments struct {
 	AccountId models.ID[models.Account] `json:"accountId"`
 	LinkId    models.ID[models.Link]    `json:"linkId"`
-	// Trigger will be "webhook" or "manual" or "command"
+	// Trigger will be "webhook" or "manual" or "command" or "other"
 	Trigger string `json:"trigger"`
 }
 

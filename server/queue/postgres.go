@@ -319,10 +319,8 @@ func (p *postgresProcessor) EnqueueAt(
 	span.SetTag("queue", queue)
 	span.SetData("messaging.destination.name", queue)
 	span.SetData("messaging.system", "postgresql")
-	span.Data = map[string]any{
-		"queue":     queue,
-		"arguments": args,
-	}
+	span.SetData("queue", queue)
+	span.SetData("arguments", args)
 
 	crumbs.Debug(
 		span.Context(),
@@ -898,7 +896,7 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 		// Move the next timestamp forward, this way the next loop we are no loger
 		// looking at this specific cron job. Instead we'll sort and get the next
 		// most recent cron job.
-		p.cronSchedules[0].next = nextJob.cron.Next(next)
+		p.cronSchedules[0].next = nextJob.cron.Next(next.Add(1 * time.Second))
 		p.log.Log(
 			context.Background(),
 			slog.LevelDebug,
@@ -908,8 +906,9 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 			"now", now,
 		)
 
-		// TODO What happens if sleep is negative or 0
-		// How long do we need to wait for this cron job?
+		// If the job is in the past then this will cause the timer below to trigger
+		// instantly. Otherwise this will be how long we park this thread before
+		// trying to consume the cron.
 		sleep := next.Sub(now)
 
 		// Create a timer.
@@ -1178,14 +1177,10 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 	)
 	log.Info("processing job")
 
-	// Execute the job with a timeout.
-	ctx, cancel := context.WithTimeout(
+	highContext := sentry.SetHubOnContext(
 		context.Background(),
-		jobTimeout,
+		sentry.CurrentHub().Clone(),
 	)
-	defer cancel()
-
-	highContext := sentry.SetHubOnContext(ctx, sentry.CurrentHub().Clone())
 	options := []sentry.SpanOption{
 		sentry.WithTransactionName(job.Queue),
 	}
@@ -1316,8 +1311,15 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 	innerSpan := sentry.StartSpan(span.Context(), "job.exec")
 	defer innerSpan.Finish()
 
+	// Execute the job with a timeout.
+	ctx, cancel := context.WithTimeout(
+		innerSpan.Context(),
+		jobTimeout,
+	)
+	defer cancel()
+
 	if err = executor(
-		p.JobContext(innerSpan.Context(), job),
+		p.JobContext(ctx, job),
 		[]byte(job.Input),
 	); err != nil {
 		log.Error("failed to execute job", "err", err)

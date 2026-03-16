@@ -522,6 +522,7 @@ func ProcessOFXUpload(
 
 		// Queue up the other jobs that we want after this one.
 		return myownsanity.FirstError(
+			updateUploadStatus(ctx, args, models.TransactionUploadStatusComplete, nil),
 			queue.Enqueue(
 				ctx,
 				ctx.Enqueuer(),
