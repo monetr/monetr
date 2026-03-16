@@ -11,6 +11,7 @@ import (
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/storage/storage_jobs"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -121,5 +122,69 @@ func TestRemoveFileJob_Run(t *testing.T) {
 			},
 		)
 		assert.EqualError(t, err, "failed to retrieve file record: pg: no rows in result set")
+	})
+
+	t.Run("storage error rolls back so file can be retried", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		file := testutils.MustInsert(t, models.File{
+			AccountId:   bankAccount.AccountId,
+			Name:        "will-fail-storage.ofx",
+			Kind:        "transactions/uploads",
+			ContentType: models.IntuitQFXContentType,
+			Size:        uint64(10),
+			CreatedBy:   user.UserId,
+			CreatedAt:   clock.Now().UTC(),
+		})
+
+		store := mockgen.NewMockStorage(ctrl)
+		store.EXPECT().
+			Remove(
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(1).
+			Return(
+				errors.New("storage backend unavailable"),
+			)
+
+		context := mockgen.NewMockContext(ctrl)
+		context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+		context.EXPECT().Clock().Return(clock).AnyTimes()
+		context.EXPECT().DB().Return(db).AnyTimes()
+		context.EXPECT().Log().Return(log).AnyTimes()
+		context.EXPECT().Storage().Return(store).AnyTimes()
+
+		err := storage_jobs.RemoveFile(
+			mockqueue.NewMockContext(context),
+			storage_jobs.RemoveFileArguments{
+				AccountId: file.AccountId,
+				FileId:    file.FileId,
+			},
+		)
+		assert.Error(t, err, "should return an error when storage fails")
+
+		// The transaction should have been rolled back, so the file record in
+		// the database should still have ReconciledAt and DeletedAt as nil.
+		// This means the cleanup cron can pick it up again on a subsequent run.
+		updatedFile := testutils.MustDBRead(t, file)
+		assert.Nil(t, updatedFile.ReconciledAt,
+			"reconciled at should still be nil after rollback")
+		assert.Nil(t, updatedFile.DeletedAt,
+			"deleted at should still be nil after rollback")
 	})
 }

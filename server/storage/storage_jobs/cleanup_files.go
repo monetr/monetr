@@ -10,7 +10,6 @@ func CleanupFilesCron(ctx queue.Context) error {
 
 	log.DebugContext(ctx, "looking for expired files that need to be removed")
 
-	// TODO Write a test for this cron job
 	var expiredFiles []models.File
 	if err := ctx.DB().ModelContext(ctx, &expiredFiles).
 		Where(`"expires_at" < ?`, ctx.Clock().Now()).
