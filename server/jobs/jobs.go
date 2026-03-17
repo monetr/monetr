@@ -32,6 +32,7 @@ func RegisterJobs(ctx context.Context, processor queue.Processor) error {
 		queue.Register(ctx, processor, spending_jobs.ProcessSpending),
 		queue.Register(ctx, processor, storage_jobs.RemoveFile),
 		queue.RegisterCron(ctx, processor, CleanupJobsCron, "0 0 8 * * *"),
+		queue.RegisterCron(ctx, processor, RecoverStalledJobsCron, "0 */15 * * * *"),
 		queue.RegisterCron(ctx, processor, billing_jobs.NotificationTrialExpiryCron, "0 30 */6 * * *"),
 		queue.RegisterCron(ctx, processor, billing_jobs.ReconcileSubscriptionCron, "0 15 */12 * * *"),
 		queue.RegisterCron(ctx, processor, funding_jobs.ProcessFundingSchedulesCron, "0 0 * * * *"),
