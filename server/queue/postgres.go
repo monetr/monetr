@@ -221,12 +221,6 @@ type postgresProcessor struct {
 	billing       billing.Billing
 	email         communication.EmailCommunication
 
-	// jobQuery is a predetermined query that the postgresProcessor used in order
-	// to retrieve jobs from the queue to be processed. This query is built when
-	// the queue starts and is based on all of the registered jobs in the
-	// processor. Jobs can't be registered after the processor starts so this
-	// query is calculated right then so it can be re-used over and over again.
-	jobQuery *pg.Query
 	// queues represents an array of queue names used to build the jobQuery. This
 	// array is appended as handlers are registered.
 	queues []string
@@ -597,24 +591,6 @@ func (p *postgresProcessor) Start() error {
 		return err
 	}
 
-	{ // Setup query used to consume jobs in the actual loop
-		// This query is precalculated here to make it more efficient, it will only
-		// ever consume jobs that we are aware of. If new job queues are added in
-		// the future while this process is running, this server will never consume
-		// those jobs.
-		p.jobQuery = p.db.Model(new(models.Job)).
-			Column("job_id").
-			// Only get jobs that are pending.
-			Where(`"status" = ?`, models.PendingJobStatus).
-			// Only get jobs that have a priority that is now or in the past.
-			Where(`"priority" <= extract(epoch from now() at time zone 'utc')::integer`).
-			// Only consume jobs we recognize.
-			WhereIn(`"queue" IN (?)`, p.queues).
-			Order(`job_id ASC`).
-			For(`UPDATE SKIP LOCKED`).
-			Limit(1)
-	}
-
 	// Unbuffered channel so that way jobs must be consumed!
 	p.dispatch = make(chan *models.Job)
 
@@ -780,7 +756,19 @@ func (p *postgresProcessor) consumeJobMaybe() (*models.Job, error) {
 	result, err := p.db.ModelContext(ctx, &job).
 		Set(`"status" = ?`, models.ProcessingJobStatus).
 		Set(`"started_at" = ?`, p.clock.Now()).
-		Where(`"job_id" = (?)`, p.jobQuery).
+		Where(`"job_id" = (?)`,
+			p.db.Model(new(models.Job)).
+				Column("job_id").
+				// Only get jobs that are pending.
+				Where(`"status" = ?`, models.PendingJobStatus).
+				// Only get jobs that have a priority that is now or in the past.
+				Where(`"priority" <= ?`, p.clock.Now().Unix()).
+				// Only consume jobs we recognize.
+				WhereIn(`"queue" IN (?)`, p.queues).
+				Order(`job_id ASC`).
+				For(`UPDATE SKIP LOCKED`).
+				Limit(1),
+		).
 		Returning("*; /* NO LOG */").
 		Update(&job)
 	if err != nil {

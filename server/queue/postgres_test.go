@@ -439,7 +439,7 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Use a fixed timestamp so both enqueues have the same signature.
-		at := time.Now().Truncate(time.Second)
+		at := clock.Now().Truncate(time.Second)
 		args := testJobArgs{Value: "deduplicated"}
 
 		err = EnqueueAt(t.Context(), processor, at, testNoopJob, args)
@@ -506,7 +506,7 @@ func TestPostgresProcessor_EnqueueAt(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		at := time.Now().Truncate(time.Second)
+		at := clock.Now().Truncate(time.Second)
 		err = p.EnqueueAt(t.Context(), "test-enqueue", at, testJobArgs{Value: "test"})
 		assert.NoError(t, err, "must be able to enqueue a job")
 
@@ -569,16 +569,7 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		p.jobQuery = p.db.Model(new(models.Job)).
-			Column("job_id").
-			Where(`"status" = ?`, models.PendingJobStatus).
-			Where(`"priority" <= extract(epoch from now() at time zone 'utc')::integer`).
-			WhereIn(`"queue" IN (?)`, p.queues).
-			Order(`job_id ASC`).
-			For(`UPDATE SKIP LOCKED`).
-			Limit(1)
-
-		now := time.Now()
+		now := clock.Now()
 		testutils.MustInsert(t, models.Job{
 			Queue:     "test-consume",
 			Signature: "test-sig-consume",
@@ -617,16 +608,7 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		p.jobQuery = p.db.Model(new(models.Job)).
-			Column("job_id").
-			Where(`"status" = ?`, models.PendingJobStatus).
-			Where(`"priority" <= extract(epoch from now() at time zone 'utc')::integer`).
-			WhereIn(`"queue" IN (?)`, p.queues).
-			Order(`job_id ASC`).
-			For(`UPDATE SKIP LOCKED`).
-			Limit(1)
-
-		now := time.Now()
+		now := clock.Now()
 		startedAt := now.Add(-5 * time.Minute)
 		testutils.MustInsert(t, models.Job{
 			Queue:     "test-no-consume",
@@ -665,20 +647,11 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		p.jobQuery = p.db.Model(new(models.Job)).
-			Column("job_id").
-			Where(`"status" = ?`, models.PendingJobStatus).
-			Where(`"priority" <= extract(epoch from now() at time zone 'utc')::integer`).
-			WhereIn(`"queue" IN (?)`, p.queues).
-			Order(`job_id ASC`).
-			For(`UPDATE SKIP LOCKED`).
-			Limit(1)
-
-		now := time.Now()
+		now := clock.Now()
 		testutils.MustInsert(t, models.Job{
 			Queue:     "test-unregistered",
 			Signature: "test-sig-unregistered",
-			Priority:  uint64(now.Add(-1 * time.Hour).Unix()),
+			Priority:  uint64(clock.Now().Add(-1 * time.Hour).Unix()),
 			Input:     `{}`,
 			Status:    models.PendingJobStatus,
 			Attempt:   1,
@@ -711,15 +684,6 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		p.jobQuery = p.db.Model(new(models.Job)).
-			Column("job_id").
-			Where(`"status" = ?`, models.PendingJobStatus).
-			Where(`"priority" <= extract(epoch from now() at time zone 'utc')::integer`).
-			WhereIn(`"queue" IN (?)`, p.queues).
-			Order(`job_id ASC`).
-			For(`UPDATE SKIP LOCKED`).
-			Limit(1)
-
 		job, err := p.consumeJobMaybe()
 		assert.NoError(t, err)
 		assert.Nil(t, job, "must return nil when no jobs exist")
@@ -745,25 +709,15 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		p.jobQuery = p.db.Model(new(models.Job)).
-			Column("job_id").
-			Where(`"status" = ?`, models.PendingJobStatus).
-			Where(`"priority" <= extract(epoch from now() at time zone 'utc')::integer`).
-			WhereIn(`"queue" IN (?)`, p.queues).
-			Order(`job_id ASC`).
-			For(`UPDATE SKIP LOCKED`).
-			Limit(1)
-
-		now := time.Now()
 		testutils.MustInsert(t, models.Job{
 			Queue:     "test-future",
 			Signature: "test-sig-future",
-			Priority:  uint64(now.Add(1 * time.Hour).Unix()),
+			Priority:  uint64(clock.Now().Add(1 * time.Hour).Unix()),
 			Input:     `{}`,
 			Status:    models.PendingJobStatus,
 			Attempt:   1,
-			CreatedAt: now,
-			UpdatedAt: now,
+			CreatedAt: clock.Now(),
+			UpdatedAt: clock.Now(),
 		})
 
 		job, err := p.consumeJobMaybe()
@@ -788,14 +742,13 @@ func TestPostgresProcessor_ConsumeCronMaybe(t *testing.T) {
 			nil, nil, nil, nil, nil, nil,
 		).(*postgresProcessor)
 
-		now := time.Now()
 		testutils.MustInsert(t, models.CronJob{
 			Queue:        "test-cron-consume",
 			CronSchedule: "0 0 * * * *",
-			NextRunAt:    now.Add(-1 * time.Hour),
+			NextRunAt:    clock.Now().Add(-1 * time.Hour),
 		})
 
-		nextRun := now.Add(1 * time.Hour)
+		nextRun := clock.Now().Add(1 * time.Hour)
 		cronJob, err := p.consumeCronMaybe("test-cron-consume", nextRun)
 		assert.NoError(t, err)
 		require.NotNil(t, cronJob, "must consume a cron job with past next_run_at")
@@ -819,7 +772,7 @@ func TestPostgresProcessor_ConsumeCronMaybe(t *testing.T) {
 			nil, nil, nil, nil, nil, nil,
 		).(*postgresProcessor)
 
-		now := time.Now()
+		now := clock.Now()
 		testutils.MustInsert(t, models.CronJob{
 			Queue:        "test-cron-future",
 			CronSchedule: "0 0 * * * *",
@@ -858,7 +811,7 @@ func TestPostgresProcessor_HydrateCronJobTable(t *testing.T) {
 		testutils.MustInsert(t, models.CronJob{
 			Queue:        "test-stale",
 			CronSchedule: "0 0 * * * *",
-			NextRunAt:    time.Now(),
+			NextRunAt:    clock.Now(),
 		})
 
 		err = p.hydrateCronJobTable()
@@ -975,7 +928,7 @@ func TestPostgresProcessor_Close(t *testing.T) {
 		err = p.Start()
 		assert.NoError(t, err, "must be able to start the processor")
 
-		err = p.EnqueueAt(t.Context(), "test-slow", time.Now(), nil)
+		err = p.EnqueueAt(t.Context(), "test-slow", clock.Now(), nil)
 		assert.NoError(t, err, "must be able to enqueue a job")
 
 		// Wait for the job to start executing.
