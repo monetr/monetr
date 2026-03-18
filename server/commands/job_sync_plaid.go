@@ -106,7 +106,6 @@ func jobSyncPlaid(parent *cobra.Command) {
 					// support true dry run.
 					jobQueue := queue.NewPostgresQueue(
 						cmd.Context(),
-						queue.NewMemoryNotifier(1),
 						clock,
 						log,
 						configuration,
@@ -137,7 +136,6 @@ func jobSyncPlaid(parent *cobra.Command) {
 				} else {
 					jobQueue := queue.NewPostgresQueue(
 						cmd.Context(),
-						queue.NewMemoryNotifier(1),
 						clock,
 						log,
 						configuration,

@@ -29,13 +29,12 @@ func testNoopCron(ctx Context) error {
 	return nil
 }
 
-func newTestProcessor(t *testing.T, clock clock.Clock, notifier Notifier, databaseOptions ...testutils.DatabaseOption) Processor {
+func newTestProcessor(t *testing.T, clock clock.Clock, databaseOptions ...testutils.DatabaseOption) Processor {
 	t.Helper()
 	db := testutils.GetPgDatabase(t, databaseOptions...)
 	log := testutils.GetLog(t)
 	return NewPostgresQueue(
 		t.Context(),
-		notifier,
 		clock,
 		log,
 		config.Configuration{},
@@ -52,7 +51,7 @@ func newTestProcessor(t *testing.T, clock clock.Clock, notifier Notifier, databa
 func TestPostgresProcessor_Register(t *testing.T) {
 	t.Run("can register a job", func(t *testing.T) {
 		clock := clock.NewMock()
-		processor := newTestProcessor(t, clock, NewMemoryNotifier(4))
+		processor := newTestProcessor(t, clock)
 
 		err := Register(t.Context(), processor, testNoopJob)
 		assert.NoError(t, err, "must be able to register a job handler")
@@ -60,7 +59,7 @@ func TestPostgresProcessor_Register(t *testing.T) {
 
 	t.Run("cannot register the same job twice", func(t *testing.T) {
 		clock := clock.NewMock()
-		processor := newTestProcessor(t, clock, NewMemoryNotifier(4))
+		processor := newTestProcessor(t, clock)
 
 		err := Register(t.Context(), processor, testNoopJob)
 		assert.NoError(t, err, "first registration must succeed")
@@ -71,7 +70,7 @@ func TestPostgresProcessor_Register(t *testing.T) {
 
 	t.Run("can register a cron job", func(t *testing.T) {
 		clock := clock.NewMock()
-		processor := newTestProcessor(t, clock, NewMemoryNotifier(4))
+		processor := newTestProcessor(t, clock)
 
 		err := RegisterCron(t.Context(), processor, testNoopCron, "0 0 * * * *")
 		assert.NoError(t, err, "must be able to register a cron job handler")
@@ -79,7 +78,7 @@ func TestPostgresProcessor_Register(t *testing.T) {
 
 	t.Run("cannot register the same cron job twice", func(t *testing.T) {
 		clock := clock.NewMock()
-		processor := newTestProcessor(t, clock, NewMemoryNotifier(4))
+		processor := newTestProcessor(t, clock)
 
 		err := RegisterCron(t.Context(), processor, testNoopCron, "0 0 * * * *")
 		assert.NoError(t, err, "first registration must succeed")
@@ -90,7 +89,7 @@ func TestPostgresProcessor_Register(t *testing.T) {
 
 	t.Run("cannot register a job after the processor has started", func(t *testing.T) {
 		clock := clock.NewMock()
-		processor := newTestProcessor(t, clock, NewMemoryNotifier(4), testutils.IsolatedDatabase)
+		processor := newTestProcessor(t, clock, testutils.IsolatedDatabase)
 
 		err := Register(t.Context(), processor, testNoopJob)
 		assert.NoError(t, err)
@@ -107,7 +106,7 @@ func TestPostgresProcessor_Register(t *testing.T) {
 func TestPostgresProcessor_Start(t *testing.T) {
 	t.Run("cannot start with no jobs registered", func(t *testing.T) {
 		clock := clock.NewMock()
-		processor := newTestProcessor(t, clock, NewMemoryNotifier(4))
+		processor := newTestProcessor(t, clock)
 
 		err := processor.Start()
 		assert.Error(t, err, "must not be able to start a processor with no jobs registered")
@@ -115,7 +114,7 @@ func TestPostgresProcessor_Start(t *testing.T) {
 
 	t.Run("cannot start a processor that is already running", func(t *testing.T) {
 		clock := clock.NewMock()
-		processor := newTestProcessor(t, clock, NewMemoryNotifier(4), testutils.IsolatedDatabase)
+		processor := newTestProcessor(t, clock, testutils.IsolatedDatabase)
 
 		err := Register(t.Context(), processor, testNoopJob)
 		assert.NoError(t, err)
@@ -130,7 +129,7 @@ func TestPostgresProcessor_Start(t *testing.T) {
 
 	t.Run("cannot close a processor that has not been started", func(t *testing.T) {
 		clock := clock.NewMock()
-		processor := newTestProcessor(t, clock, NewMemoryNotifier(4))
+		processor := newTestProcessor(t, clock)
 
 		err := processor.Close()
 		assert.Error(t, err, "closing a processor that has not been started must return an error")
@@ -145,7 +144,6 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -184,7 +182,6 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -224,7 +221,6 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -263,7 +259,6 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -303,7 +298,6 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -343,7 +337,6 @@ func TestPostgresProcessor_ExecuteJob(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -394,7 +387,6 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 
 		processor := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -427,7 +419,6 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 
 		processor := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -460,7 +451,6 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 
 		processor := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -493,7 +483,6 @@ func TestPostgresProcessor_EnqueueAt(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -524,7 +513,6 @@ func TestPostgresProcessor_EnqueueAt(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -556,7 +544,6 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -595,7 +582,6 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -634,7 +620,6 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -671,7 +656,6 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -696,7 +680,6 @@ func TestPostgresProcessor_ConsumeJobMaybe(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -734,7 +717,6 @@ func TestPostgresProcessor_ConsumeCronMaybe(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -764,7 +746,6 @@ func TestPostgresProcessor_ConsumeCronMaybe(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -794,7 +775,6 @@ func TestPostgresProcessor_HydrateCronJobTable(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -839,7 +819,6 @@ func TestPostgresProcessor_HydrateCronJobTable(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -869,7 +848,6 @@ func TestPostgresProcessor_HydrateCronJobTable(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},
@@ -910,7 +888,6 @@ func TestPostgresProcessor_Close(t *testing.T) {
 
 		p := NewPostgresQueue(
 			t.Context(),
-			NewMemoryNotifier(4),
 			clock,
 			log,
 			config.Configuration{},

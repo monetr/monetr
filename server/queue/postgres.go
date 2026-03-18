@@ -209,7 +209,6 @@ type postgresProcessor struct {
 
 	// These values are provided in the [NewPostgresQueue] constructor, all other
 	// fields are constructed as part of the [*postgresProcessor.Start] function.
-	notifier      Notifier
 	log           *slog.Logger
 	clock         clock.Clock
 	configuration config.Configuration
@@ -272,7 +271,6 @@ type postgresProcessor struct {
 //	  worker       ×4  ──── reads dispatch, writes availableWorkers
 func NewPostgresQueue(
 	ctx context.Context,
-	notifier Notifier,
 	clock clock.Clock,
 	log *slog.Logger,
 	configuration config.Configuration,
@@ -285,7 +283,6 @@ func NewPostgresQueue(
 	email communication.EmailCommunication,
 ) Processor {
 	return &postgresProcessor{
-		notifier:       notifier,
 		clock:          clock,
 		log:            log,
 		configuration:  configuration,

@@ -263,7 +263,6 @@ func ServeCommand(parent *cobra.Command) {
 			{ // Setup the new job queue
 				jobQueue = queue.NewPostgresQueue(
 					context.Background(),
-					queue.NewMemoryNotifier(4),
 					clock,
 					log,
 					configuration,
