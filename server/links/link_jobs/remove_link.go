@@ -246,6 +246,9 @@ func (r *removeLinkJob) getPlaidTransactionsToRemove(
 	ctx context.Context,
 	bankAccountIds []models.ID[models.BankAccount],
 ) []models.ID[models.PlaidTransaction] {
+	if len(bankAccountIds) == 0 {
+		return nil
+	}
 	plaidTransactionIds := make([]models.ID[models.PlaidTransaction], 0)
 	err := r.db.ModelContext(ctx, &models.PlaidTransaction{}).
 		Join(`INNER JOIN "plaid_bank_accounts" AS "plaid_bank_account"`).
@@ -329,6 +332,9 @@ func (r *removeLinkJob) getPlaidSyncsToRemove(
 	ctx context.Context,
 	bankAccountIds []models.ID[models.BankAccount],
 ) []models.ID[models.PlaidSync] {
+	if len(bankAccountIds) == 0 {
+		return nil
+	}
 	ids := make([]models.ID[models.PlaidSync], 0)
 	err := r.db.ModelContext(ctx, &models.PlaidSync{}).
 		Join(`INNER JOIN "links" AS "link"`).
@@ -412,6 +418,9 @@ func (r *removeLinkJob) getPlaidBankAccountsToRemove(
 	ctx context.Context,
 	bankAccountIds []models.ID[models.BankAccount],
 ) []models.ID[models.PlaidBankAccount] {
+	if len(bankAccountIds) == 0 {
+		return nil
+	}
 	ids := make([]models.ID[models.PlaidBankAccount], 0)
 	err := r.db.ModelContext(ctx, &models.PlaidBankAccount{}).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
