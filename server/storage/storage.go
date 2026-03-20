@@ -62,6 +62,11 @@ func GetStorage(
 
 		var configOptions []func(*config.LoadOptions) error
 
+		configOptions = append(configOptions,
+			config.WithLogger(logging.NewAWSLogger(log)),
+			config.WithClientLogMode(aws.LogRetries|aws.LogDeprecatedUsage|aws.LogSigning),
+		)
+
 		if s3Config.Region != "" {
 			configOptions = append(configOptions, config.WithRegion(s3Config.Region))
 		}

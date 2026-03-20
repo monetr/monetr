@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/server/logging"
 	"github.com/pkg/errors"
 )
 
@@ -31,6 +32,11 @@ type AWSKMS struct {
 
 func NewAWSKMS(ctx context.Context, config AWSKMSConfig) (KeyManagement, error) {
 	var configOptions []func(*awsconfig.LoadOptions) error
+
+	configOptions = append(configOptions,
+		awsconfig.WithLogger(logging.NewAWSLogger(config.Log)),
+		awsconfig.WithClientLogMode(aws.LogRetries|aws.LogDeprecatedUsage|aws.LogSigning),
+	)
 
 	if config.Region != "" {
 		configOptions = append(configOptions, awsconfig.WithRegion(config.Region))
