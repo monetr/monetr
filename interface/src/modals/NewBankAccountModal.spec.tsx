@@ -166,7 +166,7 @@ describe('new bank account modal', () => {
     await act(() => userEvent.click(world.getByTestId('bank-account-submit')));
 
     // When we submit it we should get redirected to our new bank account.
-    await waitFor(() => expect(mockUseNavigate).toBeCalledWith('/bank/bac_created/transactions'));
+    await waitFor(() => expect(mockUseNavigate).toHaveBeenCalledWith('/bank/bac_created/transactions'));
 
     // Make sure the modal was also closed.
     await waitFor(() => expect(world.queryByTestId('new-bank-account-modal')).not.toBeInTheDocument());
@@ -249,7 +249,7 @@ describe('new bank account modal', () => {
     await act(() => userEvent.click(world.getByTestId('bank-account-submit')));
 
     // When we submit it we should get redirected to our new bank account.
-    await waitFor(() => expect(mockUseNavigate).toBeCalledWith('/bank/bac_created/transactions'));
+    await waitFor(() => expect(mockUseNavigate).toHaveBeenCalledWith('/bank/bac_created/transactions'));
 
     // Make sure the modal was also closed.
     await waitFor(() => expect(world.queryByTestId('new-bank-account-modal')).not.toBeInTheDocument());

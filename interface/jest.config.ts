@@ -1,5 +1,8 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Config } from 'jest';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const config: Config = {
   rootDir: path.resolve(__dirname),

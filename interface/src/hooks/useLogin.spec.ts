@@ -43,7 +43,7 @@ describe('login', () => {
     });
 
     // Make sure we end up navigating to the url returned by the login endpoint.
-    expect(mockUseNavigate).toBeCalledWith('/account/subscribe');
+    expect(mockUseNavigate).toHaveBeenCalledWith('/account/subscribe');
   });
 
   it('will navigate without a next url', async () => {
@@ -63,7 +63,7 @@ describe('login', () => {
     });
 
     // When the login endpoint does not return a next url, navigate to an index route.
-    expect(mockUseNavigate).toBeCalledWith('/');
+    expect(mockUseNavigate).toHaveBeenCalledWith('/');
   });
 
   it('will require a password reset', async () => {
@@ -85,7 +85,7 @@ describe('login', () => {
 
     // When the login endpoint returns a password change required error; then make sure we navigate to the password
     // reset page.
-    expect(mockUseNavigate).toBeCalledWith('/password/reset', {
+    expect(mockUseNavigate).toHaveBeenCalledWith('/password/reset', {
       state: {
         message: 'You are required to change your password before authenticating.',
         token: 'abc123',
@@ -110,7 +110,7 @@ describe('login', () => {
     });
 
     // When our email is not verified, make sure we navigate to the resend page.
-    expect(mockUseNavigate).toBeCalledWith('/verify/email/resend', {
+    expect(mockUseNavigate).toHaveBeenCalledWith('/verify/email/resend', {
       state: {
         emailAddress: 'test@test.com',
       },

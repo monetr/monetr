@@ -9,25 +9,18 @@ import monetrClient from '@monetr/interface/api/api';
 import SettingsBilling from '@monetr/interface/pages/settings/billing';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-const oldWindowLocation: typeof window.location = window.location;
 const locationAssignMock = jest.fn();
+
+// jsdom 26 makes window.location non-configurable. To mock location.assign,
+// we spy on jsdom's internal implementation via its symbol property.
+const implSymbol = Reflect.ownKeys(window.location).find(i => typeof i === 'symbol')!;
 
 describe('billing settings page', () => {
   let mockAxios: MockAdapter;
+  let assignSpy: jest.SpyInstance;
 
   beforeAll(() => {
-    delete window.location;
-    // @ts-expect-error
-    window.location = Object.defineProperties(
-      {},
-      {
-        ...Object.getOwnPropertyDescriptors(oldWindowLocation),
-        assign: {
-          configurable: true,
-          value: locationAssignMock,
-        },
-      },
-    );
+    assignSpy = jest.spyOn((window.location as any)[implSymbol], 'assign').mockImplementation(locationAssignMock);
   });
 
   beforeEach(() => {
@@ -40,7 +33,7 @@ describe('billing settings page', () => {
 
   afterAll(() => {
     mockAxios.restore();
-    Object.defineProperty(window, 'location', oldWindowLocation);
+    assignSpy.mockRestore();
   });
 
   it('will show a trial subscription', async () => {

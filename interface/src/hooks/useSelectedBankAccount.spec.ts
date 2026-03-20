@@ -1,5 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
 
+import { waitFor } from '@testing-library/react';
+
 import monetrClient from '@monetr/interface/api/api';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import testRenderHook from '@monetr/interface/testutils/hooks';
@@ -38,7 +40,7 @@ describe('useSelectedBankAccount', () => {
       });
       expect(world.result.current.data).not.toBeDefined();
       expect(world.result.current.isLoading).toBeTruthy();
-      await world.waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
+      await waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
       expect(world.result.current.data.bankAccountId).toBe('bac_01hy4rcmadc01d2kzv7vynbxxx');
     }
   });
@@ -47,7 +49,6 @@ describe('useSelectedBankAccount', () => {
     const { result } = testRenderHook(useSelectedBankAccount, {
       initialRoute: '/settings',
     });
-    expect(result.error).toBeUndefined();
     expect(result.current.isLoading).toBeFalsy();
     expect(result.current.isFetching).toBeFalsy();
     // Because of the URL, the current bank account should be null.

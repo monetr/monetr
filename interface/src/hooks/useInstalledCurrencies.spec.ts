@@ -1,5 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
 
+import { waitFor } from '@testing-library/react';
+
 import monetrClient from '@monetr/interface/api/api';
 import { useInstalledCurrencies } from '@monetr/interface/hooks/useInstalledCurrencies';
 import testRenderHook from '@monetr/interface/testutils/hooks';
@@ -59,9 +61,8 @@ describe('use installed currencies', () => {
       initialRoute: '/settings',
     });
     expect(world.result.current.data).not.toBeDefined();
-    await world.waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
-    await world.waitFor(() => expect(world.result.current.isLoading).toBeFalsy());
-    await world.waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
+    await waitFor(() => expect(world.result.current.isLoading).toBeFalsy());
+    await waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
     expect(world.result.current.data).toStrictEqual(['EUR', 'USD']);
   });
 
