@@ -1,6 +1,5 @@
-import MockAdapter from 'axios-mock-adapter';
-
 import { waitFor } from '@testing-library/react';
+import MockAdapter from 'axios-mock-adapter';
 
 import monetrClient from '@monetr/interface/api/api';
 import { useInstalledCurrencies } from '@monetr/interface/hooks/useInstalledCurrencies';
