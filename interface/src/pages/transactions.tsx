@@ -1,7 +1,6 @@
 import { Fragment, useMemo, useRef } from 'react';
 import { format, parse } from 'date-fns';
 import { HeartCrack, Plus, ShoppingCart, Upload } from 'lucide-react';
-import useInfiniteScroll from 'react-infinite-scroll-hook';
 
 import { Button } from '@monetr/interface/components/Button';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
@@ -11,6 +10,7 @@ import TransactionDateItem from '@monetr/interface/components/transactions/Trans
 import TransactionItem from '@monetr/interface/components/transactions/TransactionItem';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
+import { useInfiniteScroll } from '@monetr/interface/hooks/useInfiniteScroll';
 import { useTransactions } from '@monetr/interface/hooks/useTransactions';
 import { showNewTransactionModal } from '@monetr/interface/modals/NewTransactionModal';
 import type Transaction from '@monetr/interface/models/Transaction';
