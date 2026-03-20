@@ -1,3 +1,4 @@
+import { waitFor } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
 
 import monetrClient from '@monetr/interface/api/api';
@@ -52,13 +53,9 @@ describe('read individual funding schedules', () => {
     const world = testRenderHook(() => useFundingSchedule('fund_01hy4re7c1xc2v44cf6kx302jx'), {
       initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding',
     });
-    await world.waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
-    // await world.waitForNextUpdate();
-    await world.waitFor(() => expect(world.result.current.isFetching).toBeTruthy());
-    // await world.waitForNextUpdate();
-    await world.waitFor(() => expect(world.result.current.data).toBeDefined());
-    await world.waitFor(() =>
-      expect(world.result.current.data?.fundingScheduleId).toBe('fund_01hy4re7c1xc2v44cf6kx302jx'),
-    );
+    await waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
+    await waitFor(() => expect(world.result.current.isFetching).toBeTruthy());
+    await waitFor(() => expect(world.result.current.data).toBeDefined());
+    await waitFor(() => expect(world.result.current.data?.fundingScheduleId).toBe('fund_01hy4re7c1xc2v44cf6kx302jx'));
   });
 });

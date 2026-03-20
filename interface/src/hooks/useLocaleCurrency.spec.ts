@@ -1,3 +1,4 @@
+import { waitFor } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
 
 import monetrClient from '@monetr/interface/api/api';
@@ -20,7 +21,7 @@ describe('use locale currency', () => {
       error: 'unauthenticated',
     });
 
-    const { result, waitFor } = testRenderHook(useLocaleCurrency, { initialRoute: '/login' });
+    const { result } = testRenderHook(useLocaleCurrency, { initialRoute: '/login' });
     expect(result.current.isLoading).toBeTruthy();
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     await waitFor(() => expect(result.current.data.locale).toBe('en_US'));
@@ -62,7 +63,7 @@ describe('use locale currency', () => {
       },
     });
 
-    const { result, waitFor } = testRenderHook(useLocaleCurrency, { initialRoute: '/setup' });
+    const { result } = testRenderHook(useLocaleCurrency, { initialRoute: '/setup' });
     expect(result.current.isLoading).toBeTruthy();
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     await waitFor(() => expect(result.current.data.locale).toBe('ja_JP'));
@@ -120,7 +121,7 @@ describe('use locale currency', () => {
       updatedAt: '2024-03-19T06:17:32.335106Z',
     });
 
-    const { result, waitFor } = testRenderHook(useLocaleCurrency, {
+    const { result } = testRenderHook(useLocaleCurrency, {
       initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions',
     });
     expect(result.current.isLoading).toBeTruthy();
@@ -169,7 +170,7 @@ describe('use locale currency', () => {
       error: 'Not found',
     });
 
-    const { result, waitFor } = testRenderHook(useLocaleCurrency, { initialRoute: '/bank/undefined/transactions' });
+    const { result } = testRenderHook(useLocaleCurrency, { initialRoute: '/bank/undefined/transactions' });
     expect(result.current.isLoading).toBeTruthy();
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     // Still use the user's locale
@@ -229,7 +230,7 @@ describe('use locale currency', () => {
       updatedAt: '2024-03-19T06:17:32.335106Z',
     });
 
-    const { result, waitFor } = testRenderHook(useLocaleCurrency, {
+    const { result } = testRenderHook(useLocaleCurrency, {
       initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions',
       initialProps: 'EUR',
     });

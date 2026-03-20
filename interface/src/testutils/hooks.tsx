@@ -2,7 +2,7 @@ import type React from 'react';
 import NiceModal from '@ebay/nice-modal-react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { type RenderHookResult, renderHook, type WrapperComponent } from '@testing-library/react-hooks';
+import { type RenderHookResult, renderHook } from '@testing-library/react';
 
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
@@ -15,8 +15,8 @@ export interface HooksOptions<TProps> {
 function testRenderHook<TProps, TResult>(
   callback: (props: TProps) => TResult,
   options?: HooksOptions<TProps>,
-): RenderHookResult<TProps, TResult> {
-  const Wrapper: WrapperComponent<TProps> = (props: React.PropsWithChildren<unknown>) => {
+): RenderHookResult<TResult, TProps> {
+  const Wrapper: React.FC<React.PropsWithChildren> = props => {
     return (
       <MemoryRouter
         future={{ v7_startTransition: false, v7_relativeSplatPath: false }}
@@ -31,7 +31,7 @@ function testRenderHook<TProps, TResult>(
     );
   };
 
-  return renderHook<TProps, TResult>(callback, {
+  return renderHook<TResult, TProps>(callback, {
     wrapper: Wrapper,
     initialProps: options?.initialProps,
   });

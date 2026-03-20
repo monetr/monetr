@@ -101,7 +101,7 @@ describe('login page', () => {
     await user.click(world.getByTestId('login-submit'));
 
     // When we login we should be redirected to this route.
-    await waitFor(() => expect(mockUseNavigate).toBeCalledWith('/'));
+    await waitFor(() => expect(mockUseNavigate).toHaveBeenCalledWith('/'));
   });
 
   test('will submit login and require subscription', async () => {
@@ -131,6 +131,6 @@ describe('login page', () => {
     await user.click(world.getByTestId('login-submit'));
 
     // When we login we should be redirected to this route.
-    await waitFor(() => expect(mockUseNavigate).toBeCalledWith('/account/subscribe'));
+    await waitFor(() => expect(mockUseNavigate).toHaveBeenCalledWith('/account/subscribe'));
   });
 });

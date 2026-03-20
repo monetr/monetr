@@ -1,3 +1,4 @@
+import { waitFor } from '@testing-library/react';
 import MockAdapter from 'axios-mock-adapter';
 
 import monetrClient from '@monetr/interface/api/api';
@@ -52,11 +53,9 @@ describe('will list all funding schedules', () => {
     const world = testRenderHook(useFundingSchedules, {
       initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding',
     });
-    await world.waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
-    // await world.waitForNextUpdate();
-    await world.waitFor(() => expect(world.result.current.isFetching).toBeTruthy());
-    // await world.waitForNextUpdate();
-    await world.waitFor(() => expect(world.result.current.data).toBeDefined());
-    await world.waitFor(() => expect(world.result.current.data).toHaveLength(1));
+    await waitFor(() => expect(world.result.current.isLoading).toBeTruthy());
+    await waitFor(() => expect(world.result.current.isFetching).toBeTruthy());
+    await waitFor(() => expect(world.result.current.data).toBeDefined());
+    await waitFor(() => expect(world.result.current.data).toHaveLength(1));
   });
 });
