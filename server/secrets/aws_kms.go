@@ -3,13 +3,13 @@ package secrets
 import (
 	"context"
 	"encoding/hex"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/kms"
 	"log/slog"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/getsentry/sentry-go"
 	"github.com/pkg/errors"
 )
@@ -26,36 +26,33 @@ type AWSKMSConfig struct {
 type AWSKMS struct {
 	log    *slog.Logger
 	config AWSKMSConfig
-	client *kms.KMS
+	client *kms.Client
 }
 
 func NewAWSKMS(ctx context.Context, config AWSKMSConfig) (KeyManagement, error) {
-	options := session.Options{
-		Config: aws.Config{
-			Credentials: credentials.NewStaticCredentialsFromCreds(credentials.Value{
-				AccessKeyID:     config.AccessKey,
-				SecretAccessKey: config.SecretKey,
-			}),
-			Region:     aws.String(config.Region),
-			DisableSSL: nil,
-			HTTPClient: nil,
-			LogLevel:   nil,
-			Logger:     nil,
-			MaxRetries: nil,
-			Retryer:    nil,
-		},
+	var configOptions []func(*awsconfig.LoadOptions) error
+
+	if config.Region != "" {
+		configOptions = append(configOptions, awsconfig.WithRegion(config.Region))
 	}
 
-	if config.Endpoint != nil && *config.Endpoint != "" {
-		options.Config.Endpoint = config.Endpoint
+	if config.AccessKey != "" {
+		configOptions = append(configOptions, awsconfig.WithCredentialsProvider(
+			credentials.NewStaticCredentialsProvider(config.AccessKey, config.SecretKey, ""),
+		))
 	}
 
-	awsSession, err := session.NewSessionWithOptions(options)
+	cfg, err := awsconfig.LoadDefaultConfig(ctx, configOptions...)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create aws session")
+		return nil, errors.Wrap(err, "failed to create aws kms session")
 	}
 
-	client := kms.New(awsSession)
+	client := kms.NewFromConfig(cfg, func(o *kms.Options) {
+		if config.Endpoint != nil && *config.Endpoint != "" {
+			o.BaseEndpoint = aws.String(*config.Endpoint)
+		}
+	})
+
 	return &AWSKMS{
 		log:    config.Log,
 		config: config,
@@ -73,14 +70,14 @@ func (a *AWSKMS) Encrypt(ctx context.Context, input string) (keyId, version *str
 	}
 
 	request := &kms.EncryptInput{
-		EncryptionAlgorithm: aws.String("SYMMETRIC_DEFAULT"),
+		EncryptionAlgorithm: types.EncryptionAlgorithmSpecSymmetricDefault,
 		EncryptionContext:   nil,
-		GrantTokens:         []*string{},
+		GrantTokens:         []string{},
 		KeyId:               aws.String(a.config.KeyID),
 		Plaintext:           []byte(input),
 	}
 
-	response, err := a.client.EncryptWithContext(span.Context(), request)
+	response, err := a.client.Encrypt(span.Context(), request)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, nil, "", errors.Wrap(err, "failed to encrypt data using AWS KMS")
@@ -108,13 +105,13 @@ func (a *AWSKMS) Decrypt(ctx context.Context, keyId, version *string, encrypted 
 
 	request := &kms.DecryptInput{
 		CiphertextBlob:      input,
-		EncryptionAlgorithm: aws.String("SYMMETRIC_DEFAULT"), // TODO Maybe make this a config thing?
+		EncryptionAlgorithm: types.EncryptionAlgorithmSpecSymmetricDefault, // TODO Maybe make this a config thing?
 		EncryptionContext:   nil,
-		GrantTokens:         []*string{},
+		GrantTokens:         []string{},
 		KeyId:               keyId,
 	}
 
-	response, err := a.client.DecryptWithContext(span.Context(), request)
+	response, err := a.client.Decrypt(span.Context(), request)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return "", errors.Wrap(err, "failed to decrypt data using AWS KMS")
