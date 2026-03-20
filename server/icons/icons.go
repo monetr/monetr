@@ -4,7 +4,7 @@ import (
 	"regexp"
 
 	"github.com/monetr/monetr/server/models"
-	"github.com/monetr/monetr/server/recurring"
+	"github.com/monetr/monetr/server/similar"
 )
 
 type IconRepository struct {
@@ -25,7 +25,7 @@ var (
 func SearchIcon(input string) (*Icon, error) {
 	// Search for icon using the parts of the input string as well as the string with no spaces. This helps account for
 	// some minor mismatches in naming between our icon slugs and transaction/merchant names.
-	parts, _ := recurring.CleanNameRegex(&models.Transaction{
+	parts, _ := similar.CleanNameRegex(&models.Transaction{
 		OriginalName: input,
 	})
 	for _, part := range parts {

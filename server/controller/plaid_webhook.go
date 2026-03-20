@@ -10,8 +10,8 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
@@ -202,10 +202,11 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 	case "TRANSACTIONS":
 		switch hook.WebhookCode {
 		case "SYNC_UPDATES_AVAILABLE", "INITIAL_UPDATE", "HISTORICAL_UPDATE":
-			err = background.TriggerSyncPlaid(
-				c.getContext(ctx),
-				c.JobRunner,
-				background.SyncPlaidArguments{
+			err = enqueueJob(
+				c,
+				ctx,
+				plaid_jobs.SyncPlaid,
+				plaid_jobs.SyncPlaidArguments{
 					AccountId: link.AccountId,
 					LinkId:    link.LinkId,
 					Trigger:   "webhook",
@@ -227,7 +228,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 		case "ERROR":
 			code := hook.Error["error_code"]
 			plaidLink.Status = models.PlaidLinkStatusError
-			plaidLink.ErrorCode = myownsanity.StringP(code.(string))
+			plaidLink.ErrorCode = myownsanity.Pointer(code.(string))
 			log.WarnContext(c.getContext(ctx), "plaid link is in an error state, updating")
 			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
 		case "PENDING_EXPIRATION":
@@ -238,13 +239,14 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 		case "USER_PERMISSION_REVOKED", "USER_ACCOUNT_REVOKED":
 			code := hook.Error["error_code"]
 			plaidLink.Status = models.PlaidLinkStatusRevoked
-			plaidLink.ErrorCode = myownsanity.StringP(code.(string))
+			plaidLink.ErrorCode = myownsanity.Pointer(code.(string))
 			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
 		case "WEBHOOK_UPDATE_ACKNOWLEDGED":
-			err = background.TriggerSyncPlaid(
-				c.getContext(ctx),
-				c.JobRunner,
-				background.SyncPlaidArguments{
+			err = enqueueJob(
+				c,
+				ctx,
+				plaid_jobs.SyncPlaid,
+				plaid_jobs.SyncPlaidArguments{
 					AccountId: link.AccountId,
 					LinkId:    link.LinkId,
 					Trigger:   "webhook",

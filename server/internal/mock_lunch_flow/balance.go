@@ -11,7 +11,7 @@ import (
 
 func MockFetchBalance(
 	t *testing.T,
-	accountId lunch_flow.AccountId,
+	accountId lunch_flow.LunchFlowAccountId,
 	balance lunch_flow.Balance,
 ) {
 	mock_http_helper.NewHttpMockJsonResponder(
@@ -39,7 +39,7 @@ func MockFetchBalance(
 
 func MockFetchBalanceError(
 	t *testing.T,
-	accountId lunch_flow.AccountId,
+	accountId lunch_flow.LunchFlowAccountId,
 ) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,

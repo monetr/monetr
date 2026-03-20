@@ -11,6 +11,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/similar"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -52,7 +53,7 @@ func TestRecurringDetection(t *testing.T) {
 		// First build out several transaction clusters
 		data := GetFixtures(t, "monetr_sample_data_1.json")
 		log := testutils.GetLog(t)
-		detector := NewSimilarTransactions_TFIDF_DBSCAN(log)
+		detector := similar.NewSimilarTransactions_TFIDF_DBSCAN(log)
 
 		for i := range data {
 			detector.AddTransaction(&data[i])

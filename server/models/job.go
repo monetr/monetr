@@ -28,6 +28,7 @@ type Job struct {
 	Status        JobStatus  `json:"-" pg:"status,notnull"`
 	SentryTraceId *string    `json:"-" pg:"sentry_trace_id"`
 	SentryBaggage *string    `json:"-" pg:"sentry_baggage"`
+	Attempt       int        `json:"-" pg:"attempt"`
 	CreatedAt     time.Time  `json:"-" pg:"created_at,notnull"`
 	UpdatedAt     time.Time  `json:"-" pg:"updated_at,notnull"`
 	StartedAt     *time.Time `json:"-" pg:"started_at"`

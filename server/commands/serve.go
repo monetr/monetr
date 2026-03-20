@@ -15,7 +15,6 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/application"
-	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/cache"
@@ -25,10 +24,12 @@ import (
 	"github.com/monetr/monetr/server/controller"
 	"github.com/monetr/monetr/server/database"
 	"github.com/monetr/monetr/server/internal/source"
+	"github.com/monetr/monetr/server/jobs"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
+	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
@@ -258,13 +259,12 @@ func ServeCommand(parent *cobra.Command) {
 				email = communication.NewEmailCommunication(log, configuration)
 			}
 
-			var backgroundJobs *background.BackgroundJobs
-			{ // Setup the background job processor with a 30 second timeout.
-				withTimeout, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-				backgroundJobs, err = background.NewBackgroundJobs(
-					withTimeout,
-					log,
+			var jobQueue queue.Processor
+			{ // Setup the new job queue
+				jobQueue = queue.NewPostgresQueue(
+					context.Background(),
 					clock,
+					log,
 					configuration,
 					db,
 					pubSub,
@@ -274,23 +274,20 @@ func ServeCommand(parent *cobra.Command) {
 					bill,
 					email,
 				)
-				if err != nil {
-					cancel()
-					log.Error("failed to setup background job proceessor", "err", err)
+				if err := jobs.RegisterJobs(context.Background(), jobQueue); err != nil {
+					log.Error("failed to register jobs", "err", err)
 					return err
 				}
-				cancel()
-			}
-
-			if err = backgroundJobs.Start(); err != nil {
-				log.Error("failed to start background job worker", "err", err)
-				return err
-			}
-			defer func() {
-				if err := backgroundJobs.Close(); err != nil {
-					log.Error("failed to close background jobs processor gracefully", "err", err)
+				if err = jobQueue.Start(); err != nil {
+					log.Error("failed to start job queue processor", "err", err)
+					return err
 				}
-			}()
+				defer func() {
+					if err := jobQueue.Close(); err != nil {
+						log.Error("failed to close job queue processor gracefully", "err", err)
+					}
+				}()
+			}
 
 			applicationControllers := []application.Controller{
 				&controller.Controller{
@@ -304,13 +301,13 @@ func ServeCommand(parent *cobra.Command) {
 					DB:                       db,
 					Email:                    email,
 					FileStorage:              fileStorage,
-					JobRunner:                backgroundJobs,
 					KMS:                      kms,
 					Log:                      log,
 					Plaid:                    plaidClient,
 					PlaidInstitutions:        plaidInstitutions,
 					PlaidWebhookVerification: plaidWebhooks,
 					PubSub:                   pubSub,
+					Queue:                    jobQueue,
 					Stats:                    stats,
 					Stripe:                   stripe,
 				},
