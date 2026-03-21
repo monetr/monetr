@@ -51,7 +51,6 @@
                 "react-plaid-link",
                 "react-qr-code",
                 "react-router-dom",
-                "react-select",
                 "rrule",
                 "storybook/**",
                 "tailwind-merge",
