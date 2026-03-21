@@ -81,6 +81,12 @@ export default defineConfig({
       minify: !isDevelopment,
     },
   },
+  performance: {
+    preload: {
+      type: 'all-assets',
+      include: [/inter-latin-.+-normal.*\.woff2$/],
+    },
+  },
   output: {
     target: 'web',
     distPath: {
@@ -96,7 +102,7 @@ export default defineConfig({
           js: `${filename}.js`,
           css: `${filename}.css`,
           image: `[name].${filename}[ext]`,
-          font: `${filename}[ext]`,
+          font: `[name].${filename}[ext]`,
         },
     cleanDistPath: false, // Handled by cmake
     charset: 'utf8',
