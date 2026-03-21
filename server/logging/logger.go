@@ -29,10 +29,6 @@ func NewLoggerWithConfig(configuration config.Logging) *slog.Logger {
 	return slog.New(inner)
 }
 
-func NewLogger() *slog.Logger {
-	return NewLoggerWithLevel("info")
-}
-
 func NewLoggerWithLevel(levelString string) *slog.Logger {
 	return NewLoggerWithConfig(config.Logging{
 		Level: levelString,

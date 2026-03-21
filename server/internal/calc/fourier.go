@@ -92,7 +92,3 @@ func InverseFastFourierTransform(a []complex128) []complex128 {
 func complexExponential(theta float64) complex128 {
 	return complex(math.Cos(theta), math.Sin(theta))
 }
-
-func complexAbsolute(c complex128) float64 {
-	return cmplx.Abs(c)
-}
