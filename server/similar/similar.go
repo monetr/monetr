@@ -281,7 +281,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions(
 // transaction cluster and creates a ranking value that is more normalized in
 // order to better select values.
 func calculateRankings(group *models.TransactionCluster) {
-	vectorSize := len(group.Debug) + (16 - (len(group.Debug) % 16))
+	vectorSize := len(group.Debug) + (calc.VectorWidthAlignment - (len(group.Debug) % calc.VectorWidthAlignment))
 	rankings := make([]float32, vectorSize)
 	for i := range group.Debug {
 		rankings[i] = (group.Debug[i].Value / group.Debug[i].Count) * (group.Debug[i].Value / group.Debug[i].Count)
