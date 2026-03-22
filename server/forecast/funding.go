@@ -4,11 +4,12 @@ import (
 	"context"
 	"time"
 
+	"log/slog"
+
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
-	"log/slog"
 )
 
 type FundingEvent struct {

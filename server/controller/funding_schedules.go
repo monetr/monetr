@@ -5,10 +5,12 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/Oudwins/zog"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/schema"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 )
@@ -259,44 +261,36 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to verify funding schedule exists")
 	}
 
-	// Make a copy of the original so we can compare some things.
-	originalFundingSchedule := *fundingSchedule
-
-	switch err := fundingSchedule.UnmarshalRequest(
-		c.getContext(ctx),
+	updatedFundingSchedule, errs := schema.Parse(
+		schema.PatchFundingScheduleSchema,
 		ctx.Request().Body,
-		fundingSchedule.UpdateValidators()...,
-	).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case *json.SyntaxError:
-		return c.invalidJsonError(ctx, err)
-	case nil:
-		break
-	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
+		*fundingSchedule,
+		schema.WithClock(c.Clock),
+	)
+	if len(errs) > 0 {
+		return ctx.JSON(http.StatusBadRequest, zog.Issues.Treeify(errs))
 	}
 
 	// Check if the changes made to the funding schedule would require that we
 	// recalculate the contributions made to the spending objects that use the
 	// funding schedule.
 	var recalculateSpending bool
-	if !originalFundingSchedule.NextRecurrence.Equal(fundingSchedule.NextRecurrence) {
+	if !updatedFundingSchedule.NextRecurrence.Equal(fundingSchedule.NextRecurrence) {
 		recalculateSpending = true
 	}
 
-	if originalFundingSchedule.RuleSet.String() != fundingSchedule.RuleSet.String() {
+	if updatedFundingSchedule.RuleSet.String() != fundingSchedule.RuleSet.String() {
 		recalculateSpending = true
 	}
 
-	if originalFundingSchedule.ExcludeWeekends != fundingSchedule.ExcludeWeekends {
+	if updatedFundingSchedule.ExcludeWeekends != fundingSchedule.ExcludeWeekends {
 		recalculateSpending = true
 	}
 
-	log = log.With("bankAccountId", bankAccountId, "fundingScheduleId", fundingScheduleId)
+	log = log.With(
+		"bankAccountId", bankAccountId,
+		"fundingScheduleId", fundingScheduleId,
+	)
 
 	updatedSpending := make([]Spending, 0)
 	if recalculateSpending {

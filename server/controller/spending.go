@@ -3,10 +3,11 @@ package controller
 import (
 	"net/http"
 
+	"log/slog"
+
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
-	"log/slog"
 )
 
 func (c *Controller) getSpending(ctx echo.Context) error {
