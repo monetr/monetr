@@ -2,13 +2,15 @@ package forecast
 
 import (
 	"context"
+	"slices"
 	"sort"
 	"time"
 
-	"github.com/ahmetb/go-linq/v3"
-	"github.com/monetr/monetr/server/crumbs"
-	. "github.com/monetr/monetr/server/models"
 	"log/slog"
+
+	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/myownsanity"
+	. "github.com/monetr/monetr/server/models"
 )
 
 type Event struct {
@@ -125,24 +127,23 @@ func (f *forecasterBase) GetForecast(
 		events = append(events, result...)
 	}
 
-	linq.From(events).
-		GroupByT(
-			func(item SpendingEvent) int64 {
-				return item.Date.Unix()
-			},
-			func(item SpendingEvent) SpendingEvent {
-				return item
-			},
-		).
-		SelectT(func(group linq.Group) Event {
-			date := time.Unix(group.Key.(int64), 0)
-			spendingItems := make([]SpendingEvent, len(group.Group))
+	groups := myownsanity.GroupBy(
+		events,
+		func(event SpendingEvent) time.Time {
+			return event.Date
+		},
+	)
+	forecast.Events = myownsanity.Map(
+		groups,
+		func(group myownsanity.Group[time.Time, SpendingEvent]) Event {
+			date := group.Key
+			spendingItems := make([]SpendingEvent, len(group.Items))
 			fundingMap := map[ID[FundingSchedule]]FundingEvent{}
 			var delta int64 = 0
 			var transaction int64
 			var contribution int64
-			for i, item := range group.Group {
-				spendingEvent := item.(SpendingEvent)
+			for i, item := range group.Items {
+				spendingEvent := item
 				delta += spendingEvent.ContributionAmount
 				contribution += spendingEvent.ContributionAmount
 				delta -= spendingEvent.TransactionAmount
@@ -184,11 +185,11 @@ func (f *forecasterBase) GetForecast(
 				Spending:     spendingItems,
 				Funding:      fundingItems,
 			}
-		}).
-		OrderByT(func(event Event) int64 {
-			return event.Date.Unix()
-		}).
-		ToSlice(&forecast.Events)
+		},
+	)
+	slices.SortStableFunc(forecast.Events, func(a Event, b Event) int {
+		return a.Date.Compare(b.Date)
+	})
 
 	for i, event := range forecast.Events {
 		var previousBalance int64 = 0
