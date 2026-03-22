@@ -1,5 +1,13 @@
 #include "textflag.h"
 
+// Constant for 1.0 as float64, used to compute the reciprocal of the norm.
+DATA const_one_f64<>+0(SB)/8, $1.0
+GLOBL const_one_f64<>(SB), (RODATA+NOPTR), $8
+
+// Constant for 1.0 as float32, used to compute the reciprocal of the norm.
+DATA const_one_f32<>+0(SB)/4, $1.0
+GLOBL const_one_f32<>(SB), (RODATA+NOPTR), $4
+
 // func __normalizeVector64_AVX(input []float64)
 TEXT ·__normalizeVector64_AVX(SB), NOSPLIT, $24-0
   MOVQ input_base+0(FP), AX // Load the pointer of the first item in the input vector array.
@@ -22,11 +30,15 @@ TEXT ·__normalizeVector64_AVX(SB), NOSPLIT, $24-0
   VPERM2F128  $1, Y0, Y0, Y1 // Take the high 128 bits of YMM0 and stash them in the low 128 of YMM1.
   ADDPD       X1, X0         // Add the low 128 bits of each as XMM0 and XMM1.
   SQRTPD      X0, X0         // Calculate the square root of the low 128.
-  VINSERTF128 $1, X0, Y0, Y0 // Copy the result in the low 128 of YMM0 into the high of YMM0 so the register is 4 equal values.
+  // Compute the reciprocal of the norm (1.0 / norm) so we can multiply instead of divide.
+  MOVSD        const_one_f64<>(SB), X1 // Load 1.0 into XMM1.
+  VDIVSD       X0, X1, X1              // Compute 1.0 / norm as a single scalar division.
+  MOVSD        X1, 0(SP)               // Store the reciprocal to the stack.
+  VBROADCASTSD 0(SP), Y0               // Broadcast the reciprocal to all 4 lanes of YMM0.
 
   LOOP2:
     VMOVUPD (BX), Y1   // Load the current 4 float64s into the YMM1 register again.
-    VDIVPD  Y0, Y1, Y1 // Divide them by the normalization weight we calculated above.
+    VMULPD  Y0, Y1, Y1 // Multiply by the reciprocal of the norm we calculated above.
     VMOVUPD Y1, (BX)   // Store the values back in the array.
     ADDQ    $32, BX    // Add 32 (4 * 8) to the BX register. This moves the pointer forward.
     SUBQ    $4, DX     // Subtract 4 from the CX length register since we are going 4 at a time.
@@ -55,11 +67,15 @@ TEXT ·__normalizeVector64_AVX_FMA(SB), NOSPLIT, $24-0
   VPERM2F128  $1, Y0, Y0, Y1 // Take the high 128 bits of YMM0 and stash them in the low 128 of YMM1.
   ADDPD       X1, X0         // Add the low 128 bits of each as XMM0 and XMM1.
   SQRTPD      X0, X0         // Calculate the square root of the low 128.
-  VINSERTF128 $1, X0, Y0, Y0 // Copy the result in the low 128 of YMM0 into the high of YMM0 so the register is 4 equal values.
+  // Compute the reciprocal of the norm (1.0 / norm) so we can multiply instead of divide.
+  MOVSD        const_one_f64<>(SB), X1 // Load 1.0 into XMM1.
+  VDIVSD       X0, X1, X1              // Compute 1.0 / norm as a single scalar division.
+  MOVSD        X1, 0(SP)               // Store the reciprocal to the stack.
+  VBROADCASTSD 0(SP), Y0               // Broadcast the reciprocal to all 4 lanes of YMM0.
 
   LOOP2:
     VMOVUPD (BX), Y1   // Load the current 4 float64s into the YMM1 register again.
-    VDIVPD  Y0, Y1, Y1 // Divide them by the normalization weight we calculated above.
+    VMULPD  Y0, Y1, Y1 // Multiply by the reciprocal of the norm we calculated above.
     VMOVUPD Y1, (BX)   // Store the values back in the array.
     ADDQ    $32, BX    // Add 32 (4 * 8) to the BX register. This moves the pointer forward.
     SUBQ    $4, DX     // Subtract 4 from the CX length register since we are going 4 at a time.
@@ -89,11 +105,15 @@ TEXT ·__normalizeVector32_AVX(SB), NOSPLIT, $24-0
   VADDPS      X0, X1, X0     // Add the high 128 bits that we took from YMM0 with the low 128 bits of YMM0.
   HADDPS      X0, X0         // Do a horizontal add of the 4 32 bit values. They should now be 4 equal values.
   SQRTPS      X0, X0         // Calculate the square root of the low 128.
-  VINSERTF128 $1, X0, Y0, Y0 // Copy the result in the low 128 of YMM0 into the high of YMM0 so the register is 8 equal values.
+  // Compute the reciprocal of the norm (1.0 / norm) so we can multiply instead of divide.
+  MOVSS        const_one_f32<>(SB), X1 // Load 1.0 into XMM1.
+  VDIVSS       X0, X1, X1              // Compute 1.0 / norm as a single scalar division.
+  MOVSS        X1, 0(SP)               // Store the reciprocal to the stack.
+  VBROADCASTSS 0(SP), Y0               // Broadcast the reciprocal to all 8 lanes of YMM0.
 
   LOOP2:
     VMOVUPS (BX), Y1   // Load the current 8 float32s into the YMM1 register again.
-    VDIVPS  Y0, Y1, Y1 // Divide them by the normalization weight we calculated above.
+    VMULPS  Y0, Y1, Y1 // Multiply by the reciprocal of the norm we calculated above.
     VMOVUPS Y1, (BX)   // Store the values back in the array.
     ADDQ    $32, BX    // Add 32 (4 * 8) to the BX register. This moves the pointer forward.
     SUBQ    $8, DX     // Subtract 8 from the DX length register since we are going 8 at a time.
@@ -122,11 +142,15 @@ TEXT ·__normalizeVector32_AVX_FMA(SB), NOSPLIT, $24-0
   VADDPS      X0, X1, X0     // Add the high 128 bits that we took from YMM0 with the low 128 bits of YMM0.
   HADDPS      X0, X0         // Do a horizontal add of the 4 32 bit values. They should now be 4 equal values.
   SQRTPS      X0, X0         // Calculate the square root of the low 128.
-  VINSERTF128 $1, X0, Y0, Y0 // Copy the result in the low 128 of YMM0 into the high of YMM0 so the register is 8 equal values.
+  // Compute the reciprocal of the norm (1.0 / norm) so we can multiply instead of divide.
+  MOVSS        const_one_f32<>(SB), X1 // Load 1.0 into XMM1.
+  VDIVSS       X0, X1, X1              // Compute 1.0 / norm as a single scalar division.
+  MOVSS        X1, 0(SP)               // Store the reciprocal to the stack.
+  VBROADCASTSS 0(SP), Y0               // Broadcast the reciprocal to all 8 lanes of YMM0.
 
   LOOP2:
     VMOVUPS (BX), Y1   // Load the current 8 float32s into the YMM1 register again.
-    VDIVPS  Y0, Y1, Y1 // Divide them by the normalization weight we calculated above.
+    VMULPS  Y0, Y1, Y1 // Multiply by the reciprocal of the norm we calculated above.
     VMOVUPS Y1, (BX)   // Store the values back in the array.
     ADDQ    $32, BX    // Add 32 (4 * 8) to the BX register. This moves the pointer forward.
     SUBQ    $8, DX     // Subtract 8 from the DX length register since we are going 8 at a time.
@@ -160,11 +184,15 @@ TEXT ·__normalizeVector64_AVX512(SB), NOSPLIT, $24-0
   VADDPD        Y0, Y2, Y0     // YMM0 += YMM2
   VADDPD        Y0, Y3, Y0     // YMM0 += YMM3
   VSQRTPD       Y0, Y0         // Get the square root of the YMM0 register.
-  VINSERTF64X4  $1, Y0, Z0, Z0 // Copy the 256-bits of YMM0 into the high 256 of ZMM0.
+  // Compute the reciprocal of the norm (1.0 / norm) so we can multiply instead of divide.
+  MOVSD        const_one_f64<>(SB), X1 // Load 1.0 into XMM1.
+  VDIVSD       X0, X1, X1              // Compute 1.0 / norm as a single scalar division.
+  MOVSD        X1, 0(SP)               // Store the reciprocal to the stack.
+  VBROADCASTSD 0(SP), Z0               // Broadcast the reciprocal to all 8 lanes of ZMM0.
 
   LOOP2:
     VMOVUPD (BX), Z1   // Load the current 8 float64s into the ZMM1 register again.
-    VDIVPD  Z0, Z1, Z1 // Divide them by the normalization weight we calculated above.
+    VMULPD  Z0, Z1, Z1 // Multiply by the reciprocal of the norm we calculated above.
     VMOVUPD Z1, (BX)   // Store the values back in the array.
     ADDQ    $64, BX    // Add 64 (8 * 8) to the BX register. This moves the pointer forward.
     SUBQ    $8, DX     // Subtract 8 from the DX length register since we are going 8 at a time.
@@ -197,11 +225,15 @@ TEXT ·__normalizeVector64_AVX512_FMA(SB), NOSPLIT, $24-0
   VADDPD        Y0, Y2, Y0     // YMM0 += YMM2
   VADDPD        Y0, Y3, Y0     // YMM0 += YMM3
   VSQRTPD       Y0, Y0         // Get the square root of the YMM0 register.
-  VINSERTF64X4  $1, Y0, Z0, Z0 // Copy the 256-bits of YMM0 into the high 256 of ZMM0.
+  // Compute the reciprocal of the norm (1.0 / norm) so we can multiply instead of divide.
+  MOVSD        const_one_f64<>(SB), X1 // Load 1.0 into XMM1.
+  VDIVSD       X0, X1, X1              // Compute 1.0 / norm as a single scalar division.
+  MOVSD        X1, 0(SP)               // Store the reciprocal to the stack.
+  VBROADCASTSD 0(SP), Z0               // Broadcast the reciprocal to all 8 lanes of ZMM0.
 
   LOOP2:
     VMOVUPD (BX), Z1   // Load the current 8 float64s into the ZMM1 register again.
-    VDIVPD  Z0, Z1, Z1 // Divide them by the normalization weight we calculated above.
+    VMULPD  Z0, Z1, Z1 // Multiply by the reciprocal of the norm we calculated above.
     VMOVUPD Z1, (BX)   // Store the values back in the array.
     ADDQ    $64, BX    // Add 64 (8 * 8) to the BX register. This moves the pointer forward.
     SUBQ    $8, DX     // Subtract 8 from the DX length register since we are going 8 at a time.
@@ -233,12 +265,15 @@ TEXT ·__normalizeVector32_AVX512(SB), NOSPLIT, $24-0
   VADDPS        X0, X1, X0     // Do an add between XMM0 and XMM1
   VHADDPS       X0, X0, X0     // Do a pairwise add between XMM0 and itself.
   VSQRTPS       X0, X0         // Squre our register.
-  VINSERTF128   $1, X0, Y0, Y0 // Copy the 4 float32s in our low 128 into the high 128 of YMM0
-  VINSERTF32X8  $1, Y0, Z0, Z0 // Now we have 8 equal values in the low 256, copy them into the high 256.
+  // Compute the reciprocal of the norm (1.0 / norm) so we can multiply instead of divide.
+  MOVSS        const_one_f32<>(SB), X1 // Load 1.0 into XMM1.
+  VDIVSS       X0, X1, X1              // Compute 1.0 / norm as a single scalar division.
+  MOVSS        X1, 0(SP)               // Store the reciprocal to the stack.
+  VBROADCASTSS 0(SP), Z0               // Broadcast the reciprocal to all 16 lanes of ZMM0.
 
   LOOP2:
     VMOVUPS (BX), Z1   // Load the current 16 float32s into the ZMM1 register again.
-    VDIVPS  Z0, Z1, Z1 // Divide them by the normalization weight we calculated above.
+    VMULPS  Z0, Z1, Z1 // Multiply by the reciprocal of the norm we calculated above.
     VMOVUPS Z1, (BX)   // Store the values back in the array.
     ADDQ    $64, BX    // Add 64 (4 * 16) to the BX register. This moves the pointer forward.
     SUBQ    $16, DX    // Subtract 16 from the DX length register since we are going 16 at a time.
@@ -269,12 +304,15 @@ TEXT ·__normalizeVector32_AVX512_FMA(SB), NOSPLIT, $24-0
   VADDPS        X0, X1, X0     // Do an add between XMM0 and XMM1
   VHADDPS       X0, X0, X0     // Do a pairwise add between XMM0 and itself.
   VSQRTPS       X0, X0         // Squre our register.
-  VINSERTF128   $1, X0, Y0, Y0 // Copy the 4 float32s in our low 128 into the high 128 of YMM0
-  VINSERTF32X8  $1, Y0, Z0, Z0 // Now we have 8 equal values in the low 256, copy them into the high 256.
+  // Compute the reciprocal of the norm (1.0 / norm) so we can multiply instead of divide.
+  MOVSS        const_one_f32<>(SB), X1 // Load 1.0 into XMM1.
+  VDIVSS       X0, X1, X1              // Compute 1.0 / norm as a single scalar division.
+  MOVSS        X1, 0(SP)               // Store the reciprocal to the stack.
+  VBROADCASTSS 0(SP), Z0               // Broadcast the reciprocal to all 16 lanes of ZMM0.
 
   LOOP2:
     VMOVUPS (BX), Z1   // Load the current 16 float32s into the ZMM1 register again.
-    VDIVPS  Z0, Z1, Z1 // Divide them by the normalization weight we calculated above.
+    VMULPS  Z0, Z1, Z1 // Multiply by the reciprocal of the norm we calculated above.
     VMOVUPS Z1, (BX)   // Store the values back in the array.
     ADDQ    $64, BX    // Add 64 (4 * 16) to the BX register. This moves the pointer forward.
     SUBQ    $16, DX    // Subtract 16 from the DX length register since we are going 16 at a time.
