@@ -2,12 +2,16 @@ import { useCallback, useState } from 'react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
+import Flex from '@monetr/interface/components/Flex';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import MLogo from '@monetr/interface/components/MLogo';
 import TextLink from '@monetr/interface/components/TextLink';
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
+
+import styles from './subscribe.module.scss';
 
 export default function SubscribePage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
@@ -45,10 +49,11 @@ export default function SubscribePage(): JSX.Element {
 
   if (activeUntil) {
     return (
-      <div className='flex items-center justify-center w-full h-full max-h-full p-4'>
-        <div className='h-full flex flex-col max-w-md gap-4 items-center justify-between'>
-          <div className='h-full flex flex-col justify-center items-center gap-4'>
-            <MLogo className='max-h-24' />
+      <div className={styles.subscribePageRoot}>
+        <Flex align='center' flex='grow' justify='between' orientation='column'>
+          <div />
+          <Flex align='center' className={layoutVariants({ maxWidth: 'medium' })} orientation='column'>
+            <MLogo className='size-24' />
             <Typography align='center' size='2xl' weight='semibold'>
               Your subscription is no longer active
             </Typography>
@@ -59,27 +64,28 @@ export default function SubscribePage(): JSX.Element {
             <Button disabled={loading} onClick={handleContinue} variant='primary'>
               Continue
             </Button>
-          </div>
+          </Flex>
           {!loading && (
-            <div className='flex justify-center gap-1'>
+            <Flex align='center' gap='sm' justify='center'>
               <Typography color='subtle' size='sm'>
                 Not ready to continue?
               </Typography>
               <TextLink size='sm' to='/logout'>
                 Logout for now
               </TextLink>
-            </div>
+            </Flex>
           )}
-        </div>
+        </Flex>
       </div>
     );
   }
 
   return (
-    <div className='flex items-center justify-center w-full h-full max-h-full p-4'>
-      <div className='h-full flex flex-col max-w-md gap-4 items-center justify-between'>
-        <div className='h-full flex flex-col justify-center items-center gap-4'>
-          <MLogo className='max-h-24' />
+    <div className={styles.subscribePageRoot}>
+      <Flex align='center' flex='grow' justify='between' orientation='column'>
+        <div />
+        <Flex align='center' className={layoutVariants({ maxWidth: 'medium' })} orientation='column'>
+          <MLogo className='size-24' />
           <Typography align='center' size='2xl' weight='semibold'>
             Your free trial has ended
           </Typography>
@@ -90,18 +96,19 @@ export default function SubscribePage(): JSX.Element {
           <Button disabled={loading} onClick={handleContinue} variant='primary'>
             Continue
           </Button>
-        </div>
+        </Flex>
+        {loading && <div />}
         {!loading && (
-          <div className='flex justify-center gap-1'>
+          <Flex align='center' gap='sm' justify='center'>
             <Typography color='subtle' size='sm'>
               Not ready to continue?
             </Typography>
             <TextLink size='sm' to='/logout'>
               Logout for now
             </TextLink>
-          </div>
+          </Flex>
         )}
-      </div>
+      </Flex>
     </div>
   );
 }
