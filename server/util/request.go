@@ -3,8 +3,8 @@ package util
 import (
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/id"
 )
 
 func GetRequestID(ctx echo.Context) string {
@@ -27,7 +27,7 @@ func GetRequestID(ctx echo.Context) string {
 
 	// TODO Get rid of this and replace it with some kind of middleware or fall
 	// back to ULID generation.
-	id := uuid.New().String()
+	id := id.New()
 	ctx.Set("X-Request-Id", id)
 
 	return id

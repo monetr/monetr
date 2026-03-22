@@ -1,14 +1,11 @@
 package models
 
 import (
-	"crypto/rand"
 	"fmt"
-	"io"
 	"strings"
-	"sync"
 
+	"github.com/monetr/monetr/server/id"
 	"github.com/monetr/validation"
-	"github.com/oklog/ulid/v2"
 	"github.com/pkg/errors"
 )
 
@@ -64,27 +61,13 @@ func (i ID[T]) WithoutPrefix() string {
 	return strings.TrimPrefix(i.String(), inst.IdentityPrefix()+"_")
 }
 
-var (
-	entropy     io.Reader
-	entropyOnce sync.Once
-)
-
-func cryptoEntropy() io.Reader {
-	entropyOnce.Do(func() {
-		entropy = &ulid.LockedMonotonicReader{
-			MonotonicReader: ulid.Monotonic(rand.Reader, 0),
-		}
-	})
-	return entropy
-}
-
 func NewID[T Identifiable]() ID[T] {
 	inst := *new(T)
-	id := ulid.MustNew(ulid.Now(), cryptoEntropy())
+	id := id.New()
 	return ID[T](fmt.Sprintf(
 		"%s_%s",
 		inst.IdentityPrefix(),
-		strings.ToLower(id.String()),
+		id,
 	))
 }
 
