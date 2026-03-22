@@ -25,15 +25,22 @@ export const heights = {
   screen: styles.heightScreen,
 } as const;
 
+export const sizes = {
+  default: undefined,
+  logo: styles.sizeLogo,
+};
+
 export const layoutVariants = cva([], {
   variants: {
     width: widths,
     height: heights,
     maxWidth: maxWidths,
+    size: sizes,
   },
   defaultVariants: {
     width: 'default',
     height: 'default',
     maxWidth: 'default',
+    size: 'default',
   },
 });

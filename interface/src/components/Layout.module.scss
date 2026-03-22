@@ -45,3 +45,8 @@
 .maxWidthExtraLarge {
   max-width: 0.6 * variables.$extraLargeScreen;
 }
+
+.sizeLogo {
+  width: 24 * variables.$size;
+  height: 24 * variables.$size;
+}

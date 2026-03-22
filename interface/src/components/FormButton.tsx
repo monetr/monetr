@@ -9,7 +9,14 @@ export default function FormButton(props: FormButtonProps): JSX.Element {
   const formikContext = useFormikContext();
   props = {
     ...props,
-    disabled: formikContext?.isSubmitting || props?.disabled || !formikContext?.isValid,
+    // disabled is true when we are submitting, when the form is not valid, or when the form has not even been touched
+    // (but only when the initial values of the form are not valid). OR when the prop to disable the button is hard
+    // coded to true.
+    disabled:
+      formikContext?.isSubmitting ||
+      props?.disabled ||
+      !formikContext?.isValid ||
+      (!formikContext?.dirty && !formikContext?.isInitialValid),
     onSubmit: props?.onSubmit || (props.type === 'submit' ? formikContext?.submitForm : undefined),
   };
   return <Button {...props} />;

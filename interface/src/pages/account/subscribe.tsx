@@ -53,7 +53,7 @@ export default function SubscribePage(): JSX.Element {
         <Flex align='center' flex='grow' justify='between' orientation='column'>
           <div />
           <Flex align='center' className={layoutVariants({ maxWidth: 'medium' })} orientation='column'>
-            <MLogo className='size-24' />
+            <MLogo className={layoutVariants({ size: 'logo' })} />
             <Typography align='center' size='2xl' weight='semibold'>
               Your subscription is no longer active
             </Typography>
@@ -85,7 +85,7 @@ export default function SubscribePage(): JSX.Element {
       <Flex align='center' flex='grow' justify='between' orientation='column'>
         <div />
         <Flex align='center' className={layoutVariants({ maxWidth: 'medium' })} orientation='column'>
-          <MLogo className='size-24' />
+          <MLogo className={layoutVariants({ size: 'logo' })} />
           <Typography align='center' size='2xl' weight='semibold'>
             Your free trial has ended
           </Typography>

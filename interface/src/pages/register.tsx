@@ -22,6 +22,7 @@ import type { APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
 import styles from './register.module.scss';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 
 interface RegisterValues {
   firstName: string;
@@ -78,7 +79,7 @@ function validator(values: RegisterValues): FormikErrors<RegisterValues> {
 export function RegisterSuccessful(): JSX.Element {
   return (
     <div className={styles.registerPageRoot}>
-      <MLogo className='size-24' />
+      <MLogo className={layoutVariants({ size: 'logo' })} />
       <Typography align='center' className='max-w-md' size='xl' weight='medium'>
         A verification message has been sent to your email address, please verify your email.
       </Typography>

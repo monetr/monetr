@@ -28,7 +28,7 @@ export default function ManualLinkSetupLayout(props: ManualLinkSetupLayoutProps)
         <MStepper activeIndex={step} steps={['Intro', 'Account', 'Balances', 'Income']} />
       </div>
       <Flex align='center' className={layoutVariants({ maxWidth: 'small' })} justify='center' orientation='column'>
-        <MLogo className='size-24' />
+        <MLogo className={layoutVariants({ size: 'logo' })} />
         {props.children}
       </Flex>
       {viewContext.metadata.showLogoutFooter && <LogoutFooter />}
