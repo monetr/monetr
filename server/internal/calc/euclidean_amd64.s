@@ -6,12 +6,12 @@ TEXT ·__euclideanDistance64_AVX(SB), NOSPLIT, $48-56
   MOVQ a_base+0(FP),  AX // Load the pointer of the first array.
   MOVQ b_base+24(FP), BX // Load the pointer of the second array.
 
-	// We use two accumulator registers here because this loop now processes two
+  // We use two accumulator registers here because this loop now processes two
   // independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the multiply/add work before we
-	// combine the partial sums at the end.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the multiply/add work before we
+  // combine the partial sums at the end.
   VXORPD Y0, Y0, Y0 // Clear the first accumulator register so it can store the first running partial sum.
   VXORPD Y3, Y3, Y3 // Clear the second accumulator register so it can store the second running partial sum.
 
@@ -48,12 +48,12 @@ TEXT ·__euclideanDistance64_AVX_FMA(SB), NOSPLIT, $48-56
   MOVQ a_base+0(FP),  AX // Load the pointer of the first array.
   MOVQ b_base+24(FP), BX // Load the pointer of the second array.
 
-	// We use two accumulator registers here because this loop now processes two
+  // We use two accumulator registers here because this loop now processes two
   // independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the fused multiply-add work
-	// before we combine the partial sums at the end.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the fused multiply-add work
+  // before we combine the partial sums at the end.
   VXORPD Y0, Y0, Y0 // Clear the first accumulator register so it can store the first running partial sum.
   VXORPD Y3, Y3, Y3 // Clear the second accumulator register so it can store the second running partial sum.
 
@@ -89,12 +89,12 @@ TEXT ·__euclideanDistance32_AVX(SB), NOSPLIT, $48-52
   MOVQ a_base+0(FP),  AX // Load the pointer of the first array.
   MOVQ b_base+24(FP), BX // Load the pointer of the second array.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the multiply/add work before we
-	// combine the partial sums at the end.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the multiply/add work before we
+  // combine the partial sums at the end.
   VXORPS Y0, Y0, Y0 // Clear the first accumulator register so it can store the first running partial sum.
   VXORPS Y3, Y3, Y3 // Clear the second accumulator register so it can store the second running partial sum.
 
@@ -132,12 +132,12 @@ TEXT ·__euclideanDistance32_AVX_FMA(SB), NOSPLIT, $48-52
   MOVQ a_base+0(FP),  AX // Load the pointer of the first array.
   MOVQ b_base+24(FP), BX // Load the pointer of the second array.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the fused multiply-add work
-	// before we combine the partial sums at the end.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the fused multiply-add work
+  // before we combine the partial sums at the end.
   VXORPS Y0, Y0, Y0 // Clear the first accumulator register so it can store the first running partial sum.
   VXORPS Y3, Y3, Y3 // Clear the second accumulator register so it can store the second running partial sum.
 
@@ -173,12 +173,12 @@ TEXT ·__euclideanDistance64_AVX512(SB), NOSPLIT, $48-56
   MOVQ a_base+0(FP),  AX // Load the pointer of the first array.
   MOVQ b_base+24(FP), BX // Load the pointer of the second array.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the multiply/add work before we
-	// combine the partial sums at the end.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the multiply/add work before we
+  // combine the partial sums at the end.
   VXORPD Z0, Z0, Z0 // Clear the first accumulator register so it can store the first running partial sum.
   VXORPD Z3, Z3, Z3 // Clear the second accumulator register so it can store the second running partial sum.
 
@@ -219,12 +219,12 @@ TEXT ·__euclideanDistance64_AVX512_FMA(SB), NOSPLIT, $48-56
   MOVQ a_base+0(FP),  AX // Load the pointer of the first array.
   MOVQ b_base+24(FP), BX // Load the pointer of the second array.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the fused multiply-add work
-	// before we combine the partial sums at the end.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the fused multiply-add work
+  // before we combine the partial sums at the end.
   VXORPD Z0, Z0, Z0 // Clear the first accumulator register so it can store the first running partial sum.
   VXORPD Z3, Z3, Z3 // Clear the second accumulator register so it can store the second running partial sum.
 
@@ -263,12 +263,12 @@ TEXT ·__euclideanDistance32_AVX512(SB), NOSPLIT, $48-52
   MOVQ a_base+0(FP), AX  // Load the pointer of the first array.
   MOVQ b_base+24(FP), BX // Load the pointer of the second array.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the multiply/add work before we
-	// combine the partial sums at the end.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the multiply/add work before we
+  // combine the partial sums at the end.
   VXORPS Z0, Z0, Z0 // Clear the first accumulator register so it can store the first running partial sum.
   VXORPS Z3, Z3, Z3 // Clear the second accumulator register so it can store the second running partial sum.
 
@@ -310,12 +310,12 @@ TEXT ·__euclideanDistance32_AVX512_FMA(SB), NOSPLIT, $48-52
   MOVQ a_base+0(FP), AX  // Load the pointer of the first array.
   MOVQ b_base+24(FP), BX // Load the pointer of the second array.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the fused multiply-add work
-	// before we combine the partial sums at the end.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the fused multiply-add work
+  // before we combine the partial sums at the end.
   VXORPS Z0, Z0, Z0 // Clear the first accumulator register so it can store the first running partial sum.
   VXORPS Z3, Z3, Z3 // Clear the second accumulator register so it can store the second running partial sum.
 

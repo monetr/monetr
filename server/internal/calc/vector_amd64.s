@@ -15,12 +15,12 @@ TEXT ·__normalizeVector64_AVX(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the multiply/add work before we
-	// combine the partial sums into the final norm.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the multiply/add work before we
+  // combine the partial sums into the final norm.
   VXORPD Y0, Y0, Y0 // Clear the YMM0 register so it can store the first running partial sum for the normalization weight.
   VXORPD Y3, Y3, Y3 // Clear the YMM3 register so it can store the second running partial sum for the normalization weight.
 
@@ -65,12 +65,12 @@ TEXT ·__normalizeVector64_AVX_FMA(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-	// We use two accumulator registers here because this loop now processes two
+  // We use two accumulator registers here because this loop now processes two
   // independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the fused multiply-add work
-	// before we combine the partial sums into the final norm.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the fused multiply-add work
+  // before we combine the partial sums into the final norm.
   VXORPD Y0, Y0, Y0 // Clear the YMM0 register so it can store the first running partial sum for the normalization weight.
   VXORPD Y3, Y3, Y3 // Clear the YMM3 register so it can store the second running partial sum for the normalization weight.
 
@@ -113,12 +113,12 @@ TEXT ·__normalizeVector32_AVX(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the multiply/add work before we
-	// combine the partial sums into the final norm.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the multiply/add work before we
+  // combine the partial sums into the final norm.
   VXORPS Y0, Y0, Y0 // Clear the YMM0 register so it can store the first running partial sum for the normalization weight.
   VXORPS Y3, Y3, Y3 // Clear the YMM3 register so it can store the second running partial sum for the normalization weight.
 
@@ -163,12 +163,12 @@ TEXT ·__normalizeVector32_AVX_FMA(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the fused multiply-add work
-	// before we combine the partial sums into the final norm.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the fused multiply-add work
+  // before we combine the partial sums into the final norm.
   VXORPS Y0, Y0, Y0 // Clear the YMM0 register so it can store the first running partial sum for the normalization weight.
   VXORPS Y3, Y3, Y3 // Clear the YMM3 register so it can store the second running partial sum for the normalization weight.
 
@@ -211,12 +211,12 @@ TEXT ·__normalizeVector64_AVX512(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the multiply/add work before we
-	// combine the partial sums into the final norm.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the multiply/add work before we
+  // combine the partial sums into the final norm.
   VXORPD Z0, Z0, Z0 // Clear the ZMM0 register so it can store the first running partial sum for the normalization weight.
   VXORPD Z3, Z3, Z3 // Clear the ZMM3 register so it can store the second running partial sum for the normalization weight.
 
@@ -265,12 +265,12 @@ TEXT ·__normalizeVector64_AVX512_FMA(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the fused multiply-add work
-	// before we combine the partial sums into the final norm.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the fused multiply-add work
+  // before we combine the partial sums into the final norm.
   VXORPD Z0, Z0, Z0 // Clear the ZMM0 register so it can store the first running partial sum for the normalization weight.
   VXORPD Z3, Z3, Z3 // Clear the ZMM3 register so it can store the second running partial sum for the normalization weight.
 
@@ -317,12 +317,12 @@ TEXT ·__normalizeVector32_AVX512(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the multiply/add work before we
-	// combine the partial sums into the final norm.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the multiply/add work before we
+  // combine the partial sums into the final norm.
   VXORPS Z0, Z0, Z0 // Clear the ZMM0 register so it can store the first running partial sum for the normalization weight.
   VXORPS Z3, Z3, Z3 // Clear the ZMM3 register so it can store the second running partial sum for the normalization weight.
 
@@ -369,12 +369,12 @@ TEXT ·__normalizeVector32_AVX512_FMA(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-	// We use two accumulator registers here because this loop now processes two
-	// independent vector chunks per iteration.
-	// Keeping two running sums reduces the dependency chain on a single
-	// accumulator register, which gives the CPU more instruction-level
-	// parallelism and better hides the latency of the fused multiply-add work
-	// before we combine the partial sums into the final norm.
+  // We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+  // Keeping two running sums reduces the dependency chain on a single
+  // accumulator register, which gives the CPU more instruction-level
+  // parallelism and better hides the latency of the fused multiply-add work
+  // before we combine the partial sums into the final norm.
   VXORPS Z0, Z0, Z0 // Clear the ZMM0 register so it can store the first running partial sum for the normalization weight.
   VXORPS Z3, Z3, Z3 // Clear the ZMM3 register so it can store the second running partial sum for the normalization weight.
 
