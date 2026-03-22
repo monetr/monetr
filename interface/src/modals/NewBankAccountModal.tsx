@@ -5,6 +5,7 @@ import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
+import { Button } from '@monetr/interface/components/Button';
 import Flex from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
@@ -85,7 +86,7 @@ function NewBankAccountModal(): JSX.Element {
         initialValues={initialValues}
         onSubmit={submit}
       >
-        {({ values }) => (
+        {({ isSubmitting, values }) => (
           <Fragment>
             <Flex orientation='column'>
               <Typography className='mb-2' size='xl' weight='bold'>
@@ -117,9 +118,14 @@ function NewBankAccountModal(): JSX.Element {
               />
             </Flex>
             <Flex gap='md' justify='end'>
-              <FormButton data-testid='close-new-bank-account-modal' onClick={modal.remove} variant='secondary'>
+              <Button
+                data-testid='close-new-bank-account-modal'
+                disabled={isSubmitting}
+                onClick={modal.remove}
+                variant='secondary'
+              >
                 Cancel
-              </FormButton>
+              </Button>
               <FormButton data-testid='bank-account-submit' type='submit' variant='primary'>
                 Create
               </FormButton>

@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import Flex from '@monetr/interface/components/Flex';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLogo from '@monetr/interface/components/MLogo';
@@ -22,7 +23,6 @@ import type { APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
 import styles from './register.module.scss';
-import { layoutVariants } from '@monetr/interface/components/Layout';
 
 interface RegisterValues {
   firstName: string;
