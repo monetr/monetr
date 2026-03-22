@@ -21,8 +21,8 @@ func normalizeVector64Go(input []float64) {
 }
 
 func NormalizeVector64(input []float64) {
-	if len(input)%8 != 0 {
-		panic("length of the input vector must be divisible by 8 for compatability reasons")
+	if len(input)%(VectorWidthAlignment/2) != 0 {
+		panic("length of the input vector must be divisible by 16 for compatability reasons")
 	}
 	normalizeVectorImplementation64(input)
 }
@@ -39,8 +39,8 @@ func normalizeVector32Go(input []float32) {
 }
 
 func NormalizeVector32(input []float32) {
-	if len(input)%8 != 0 {
-		panic("length of the input vector must be divisible by 8 for compatability reasons")
+	if len(input)%VectorWidthAlignment != 0 {
+		panic("length of the input vector must be divisible by 32 for compatability reasons")
 	}
 	normalizeVectorImplementation32(input)
 }

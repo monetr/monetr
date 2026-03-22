@@ -30,8 +30,8 @@ func EuclideanDistance64(a, b []float64) float64 {
 	if len(a) != len(b) {
 		panic("invalid euclidean vectors provided, length must match!")
 	}
-	if len(a)%8 != 0 {
-		panic("length of a and b must be divisible by 8 for compatability reasons")
+	if len(a)%(VectorWidthAlignment/2) != 0 {
+		panic("length of a and b must be divisible by 16 for compatability reasons")
 	}
 	return euclideanImplementation64(a, b)
 }
@@ -49,8 +49,8 @@ func EuclideanDistance32(a, b []float32) float32 {
 	if len(a) != len(b) {
 		panic("invalid euclidean vectors provided, length must match!")
 	}
-	if len(a)%16 != 0 {
-		panic("length of a and b must be divisible by 16 for compatability reasons")
+	if len(a)%VectorWidthAlignment != 0 {
+		panic("length of a and b must be divisible by 32 for compatability reasons")
 	}
 	return euclideanImplementation32(a, b)
 }

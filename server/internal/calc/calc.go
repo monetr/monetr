@@ -2,6 +2,8 @@ package calc
 
 import "golang.org/x/sys/cpu"
 
+const VectorWidthAlignment = 32
+
 // HasAVX512FMA returns true if the current CPU on the host system has both the
 // AVX512F and the AVX512VL instruction sets available. To debug this you can
 // run the following command on unix systems: `lscpu | grep avx512`.

@@ -15,15 +15,27 @@ TEXT ·__normalizeVector64_AVX(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-  VXORPD Y0, Y0, Y0 // Clear the YMM0 register to store the normalization weight.
+	// We use two accumulator registers here because this loop now processes two
+	// independent vector chunks per iteration.
+	// Keeping two running sums reduces the dependency chain on a single
+	// accumulator register, which gives the CPU more instruction-level
+	// parallelism and better hides the latency of the multiply/add work before we
+	// combine the partial sums into the final norm.
+  VXORPD Y0, Y0, Y0 // Clear the YMM0 register so it can store the first running partial sum for the normalization weight.
+  VXORPD Y3, Y3, Y3 // Clear the YMM3 register so it can store the second running partial sum for the normalization weight.
 
   LOOP:
-    VMOVUPD (AX), Y1   // Load the current 4 float64s from the input vector into the YMM1 register.
+    VMOVUPD 0(AX), Y1  // Load the current 4 float64s from the input vector into the YMM1 register.
     VMULPD  Y1, Y1, Y1 // Square the current 4 float64s and overwrite the YMM1 register with the result.
-    VADDPD  Y1, Y0, Y0 // Add the values to the normalization weight register.
-    ADDQ    $32, AX    // Add 32 (4 * 8) to the AX register. This moves the pointer forward.
-    SUBQ    $4, CX     // Subtract 4 from the CX length register since we are going 4 at a time.
+    VADDPD  Y1, Y0, Y0 // Add the values to the first normalization weight accumulator register.
+    VMOVUPD 32(AX), Y2 // Load the next 4 float64s from the input vector into the YMM2 register.
+    VMULPD  Y2, Y2, Y2 // Square the next 4 float64s and overwrite the YMM2 register with the result.
+    VADDPD  Y2, Y3, Y3 // Add the values to the second normalization weight accumulator register.
+    ADDQ    $64, AX    // Add 64 (8 * 8) to the AX register. This moves the pointer forward by 8 items.
+    SUBQ    $8, CX     // Subtract 8 from the CX length register since we are now going 8 at a time.
     JNZ     LOOP       // If the CX register is not zero then jump to the beginning of the loop again.
+
+  VADDPD Y3, Y0, Y0   // Add the second accumulator register into the first so we have one final accumulated vector.
 
   // TODO: I think this bit could somehow be improved but I have no idea how.
   VHADDPD     Y0, Y0, Y0     // Do a horizontal sum of the two 128 bit pairs in YMM0.
@@ -53,14 +65,25 @@ TEXT ·__normalizeVector64_AVX_FMA(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-  VXORPD Y0, Y0, Y0 // Clear the YMM0 register to store the normalization weight.
+	// We use two accumulator registers here because this loop now processes two
+  // independent vector chunks per iteration.
+	// Keeping two running sums reduces the dependency chain on a single
+	// accumulator register, which gives the CPU more instruction-level
+	// parallelism and better hides the latency of the fused multiply-add work
+	// before we combine the partial sums into the final norm.
+  VXORPD Y0, Y0, Y0 // Clear the YMM0 register so it can store the first running partial sum for the normalization weight.
+  VXORPD Y3, Y3, Y3 // Clear the YMM3 register so it can store the second running partial sum for the normalization weight.
 
   LOOP:
-    VMOVUPD     (AX), Y1  // Load the current 4 float64s from the input vector into the YMM1 register.
-    VFMADD231PD Y1,   Y1, Y0 // Square the Y1 register and add the result to the Y0 accumulator register.
-    ADDQ        $32,  AX  // Add 32 (4 * 8) to the AX register. This moves the pointer forward.
-    SUBQ        $4,   CX  // Subtract 4 from the CX length register since we are going 4 at a time.
-    JNZ         LOOP  // If the CX register is not zero then jump to the beginning of the loop again.
+    VMOVUPD     0(AX), Y1    // Load the current 4 float64s from the input vector into the YMM1 register.
+    VFMADD231PD Y1, Y1, Y0   // Square Y1 and add the result to the first normalization weight accumulator register in a single fused instruction.
+    VMOVUPD     32(AX), Y2   // Load the next 4 float64s from the input vector into the YMM2 register.
+    VFMADD231PD Y2, Y2, Y3   // Square Y2 and add the result to the second normalization weight accumulator register in a single fused instruction.
+    ADDQ        $64, AX      // Add 64 (8 * 8) to the AX register. This moves the pointer forward by 8 items.
+    SUBQ        $8, CX       // Subtract 8 from the CX length register since we are now going 8 at a time.
+    JNZ         LOOP         // If the CX register is not zero then jump to the beginning of the loop again.
+
+  VADDPD Y3, Y0, Y0 // Add the second accumulator register into the first so we have one final accumulated vector.
 
   // TODO: I think this bit could somehow be improved but I have no idea how.
   VHADDPD     Y0, Y0, Y0     // Do a horizontal sum of the two 128 bit pairs in YMM0.
@@ -90,15 +113,27 @@ TEXT ·__normalizeVector32_AVX(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-  VXORPS Y0, Y0, Y0 // Clear the YMM0 register to store the normalization weight.
+	// We use two accumulator registers here because this loop now processes two
+	// independent vector chunks per iteration.
+	// Keeping two running sums reduces the dependency chain on a single
+	// accumulator register, which gives the CPU more instruction-level
+	// parallelism and better hides the latency of the multiply/add work before we
+	// combine the partial sums into the final norm.
+  VXORPS Y0, Y0, Y0 // Clear the YMM0 register so it can store the first running partial sum for the normalization weight.
+  VXORPS Y3, Y3, Y3 // Clear the YMM3 register so it can store the second running partial sum for the normalization weight.
 
   LOOP:
-    VMOVUPS (AX), Y1   // Load the current 8 float32s from the input vector into the YMM1 register.
+    VMOVUPS 0(AX), Y1  // Load the current 8 float32s from the input vector into the YMM1 register.
     VMULPS  Y1, Y1, Y1 // Square the current 8 float32s and overwrite the YMM1 register with the result.
-    VADDPS  Y1, Y0, Y0 // Add the values to the normalization weight register.
-    ADDQ    $32, AX    // Add 32 (4 * 8) to the AX register. This moves the pointer forward.
-    SUBQ    $8, CX     // Subtract 8 from the CX length register since we are going 8 at a time.
+    VADDPS  Y1, Y0, Y0 // Add the values to the first normalization weight accumulator register.
+    VMOVUPS 32(AX), Y2 // Load the next 8 float32s from the input vector into the YMM2 register.
+    VMULPS  Y2, Y2, Y2 // Square the next 8 float32s and overwrite the YMM2 register with the result.
+    VADDPS  Y2, Y3, Y3 // Add the values to the second normalization weight accumulator register.
+    ADDQ    $64, AX    // Add 64 (16 * 4) to the AX register. This moves the pointer forward by 16 items.
+    SUBQ    $16, CX    // Subtract 16 from the CX length register since we are now going 16 at a time.
     JNZ     LOOP       // If the CX register is not zero then jump to the beginning of the loop again.
+
+  VADDPS Y3, Y0, Y0   // Add the second accumulator register into the first so we have one final accumulated vector.
 
   VHADDPS     Y0, Y0, Y0     // Do a horizontal sum of the two 128 bit pairs in YMM0.
   VPERM2F128  $1, Y0, Y0, Y1 // Take the high 128 bits of YMM0 and stash them in the low 128 of YMM1.
@@ -128,14 +163,25 @@ TEXT ·__normalizeVector32_AVX_FMA(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-  VXORPS Y0, Y0, Y0 // Clear the YMM0 register to store the normalization weight.
+	// We use two accumulator registers here because this loop now processes two
+	// independent vector chunks per iteration.
+	// Keeping two running sums reduces the dependency chain on a single
+	// accumulator register, which gives the CPU more instruction-level
+	// parallelism and better hides the latency of the fused multiply-add work
+	// before we combine the partial sums into the final norm.
+  VXORPS Y0, Y0, Y0 // Clear the YMM0 register so it can store the first running partial sum for the normalization weight.
+  VXORPS Y3, Y3, Y3 // Clear the YMM3 register so it can store the second running partial sum for the normalization weight.
 
   LOOP:
-    VMOVUPS     (AX), Y1  // Load the current 8 float32s from the input vector into the YMM1 register.
-    VFMADD231PS Y1,   Y1, Y0 // Square the Y1 register and add the result to the Y0 accumulator register.
-    ADDQ        $32,  AX  // Add 32 (4 * 8) to the AX register. This moves the pointer forward.
-    SUBQ        $8,   CX  // Subtract 8 from the CX length register since we are going 8 at a time.
-    JNZ         LOOP  // If the CX register is not zero then jump to the beginning of the loop again.
+    VMOVUPS     0(AX), Y1    // Load the current 8 float32s from the input vector into the YMM1 register.
+    VFMADD231PS Y1, Y1, Y0   // Square Y1 and add the result to the first normalization weight accumulator register in a single fused instruction.
+    VMOVUPS     32(AX), Y2   // Load the next 8 float32s from the input vector into the YMM2 register.
+    VFMADD231PS Y2, Y2, Y3   // Square Y2 and add the result to the second normalization weight accumulator register in a single fused instruction.
+    ADDQ        $64, AX      // Add 64 (16 * 4) to the AX register. This moves the pointer forward by 16 items.
+    SUBQ        $16, CX      // Subtract 16 from the CX length register since we are now going 16 at a time.
+    JNZ         LOOP         // If the CX register is not zero then jump to the beginning of the loop again.
+
+  VADDPS Y3, Y0, Y0 // Add the second accumulator register into the first so we have one final accumulated vector.
 
   VHADDPS     Y0, Y0, Y0     // Do a horizontal sum of the two 128 bit pairs in YMM0.
   VPERM2F128  $1, Y0, Y0, Y1 // Take the high 128 bits of YMM0 and stash them in the low 128 of YMM1.
@@ -165,15 +211,27 @@ TEXT ·__normalizeVector64_AVX512(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-  VXORPD Z0, Z0, Z0 // Clear the ZMM0 register to store the normalization weight.
+	// We use two accumulator registers here because this loop now processes two
+	// independent vector chunks per iteration.
+	// Keeping two running sums reduces the dependency chain on a single
+	// accumulator register, which gives the CPU more instruction-level
+	// parallelism and better hides the latency of the multiply/add work before we
+	// combine the partial sums into the final norm.
+  VXORPD Z0, Z0, Z0 // Clear the ZMM0 register so it can store the first running partial sum for the normalization weight.
+  VXORPD Z3, Z3, Z3 // Clear the ZMM3 register so it can store the second running partial sum for the normalization weight.
 
   LOOP:
-    VMOVUPD (AX), Z1  // Load the current 8 float64s from the input vector into the ZMM1 register.
-    VMULPD Z1, Z1, Z1 // Square the current 8 float64s and overwrite the ZMM1 register with the result.
-    VADDPD Z1, Z0, Z0 // Add the values to the normalization weight register.
-    ADDQ $64, AX      // Add 64 (8 * 8) to the AX register. This moves the pointer forward.
-    SUBQ $8, CX       // Subtract 8 from the CX length register since we are going 8 at a time.
-    JNZ LOOP          // If the CX register is not zero then jump to the beginning of the loop again.
+    VMOVUPD 0(AX), Z1  // Load the current 8 float64s from the input vector into the ZMM1 register.
+    VMULPD  Z1, Z1, Z1 // Square the current 8 float64s and overwrite the ZMM1 register with the result.
+    VADDPD  Z1, Z0, Z0 // Add the values to the first normalization weight accumulator register.
+    VMOVUPD 64(AX), Z2 // Load the next 8 float64s from the input vector into the ZMM2 register.
+    VMULPD  Z2, Z2, Z2 // Square the next 8 float64s and overwrite the ZMM2 register with the result.
+    VADDPD  Z2, Z3, Z3 // Add the values to the second normalization weight accumulator register.
+    ADDQ    $128, AX   // Add 128 (16 * 8) to the AX register. This moves the pointer forward by 16 items.
+    SUBQ    $16, CX    // Subtract 16 from the CX length register since we are now going 16 at a time.
+    JNZ     LOOP       // If the CX register is not zero then jump to the beginning of the loop again.
+
+  VADDPD Z3, Z0, Z0   // Add the second accumulator register into the first so we have one final accumulated vector.
 
   VEXTRACTF64X4 $1, Z0, Y1     // Extract the high 256-bits of ZMM0 into YMM1
   VHADDPD       Y0, Y0, Y0     // Do horizontal add on YMM0 (the lower 256-bits of ZMM0)
@@ -207,14 +265,25 @@ TEXT ·__normalizeVector64_AVX512_FMA(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-  VXORPD Z0, Z0, Z0 // Clear the ZMM0 register to store the normalization weight.
+	// We use two accumulator registers here because this loop now processes two
+	// independent vector chunks per iteration.
+	// Keeping two running sums reduces the dependency chain on a single
+	// accumulator register, which gives the CPU more instruction-level
+	// parallelism and better hides the latency of the fused multiply-add work
+	// before we combine the partial sums into the final norm.
+  VXORPD Z0, Z0, Z0 // Clear the ZMM0 register so it can store the first running partial sum for the normalization weight.
+  VXORPD Z3, Z3, Z3 // Clear the ZMM3 register so it can store the second running partial sum for the normalization weight.
 
   LOOP:
-    VMOVUPD     (AX), Z1  // Load the current 8 float64s from the input vector into the ZMM1 register.
-    VFMADD231PD Z1,   Z1, Z0 // Square the ZMM1 register and add it to the ZMM0 accumulator register.
-    ADDQ        $64,  AX  // Add 64 (8 * 8) to the AX register. This moves the pointer forward.
-    SUBQ        $8,   CX  // Subtract 8 from the CX length register since we are going 8 at a time.
-    JNZ         LOOP  // If the CX register is not zero then jump to the beginning of the loop again.
+    VMOVUPD     0(AX), Z1    // Load the current 8 float64s from the input vector into the ZMM1 register.
+    VFMADD231PD Z1, Z1, Z0   // Square ZMM1 and add the result to the first normalization weight accumulator register in a single fused instruction.
+    VMOVUPD     64(AX), Z2   // Load the next 8 float64s from the input vector into the ZMM2 register.
+    VFMADD231PD Z2, Z2, Z3   // Square ZMM2 and add the result to the second normalization weight accumulator register in a single fused instruction.
+    ADDQ        $128, AX     // Add 128 (16 * 8) to the AX register. This moves the pointer forward by 16 items.
+    SUBQ        $16, CX      // Subtract 16 from the CX length register since we are now going 16 at a time.
+    JNZ         LOOP         // If the CX register is not zero then jump to the beginning of the loop again.
+
+  VADDPD Z3, Z0, Z0 // Add the second accumulator register into the first so we have one final accumulated vector.
 
   VEXTRACTF64X4 $1, Z0, Y1     // Extract the high 256-bits of ZMM0 into YMM1
   VHADDPD       Y0, Y0, Y0     // Do horizontal add on YMM0 (the lower 256-bits of ZMM0)
@@ -248,15 +317,27 @@ TEXT ·__normalizeVector32_AVX512(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-  VXORPS Z0, Z0, Z0 // Clear the ZMM0 register to store the normalization weight.
+	// We use two accumulator registers here because this loop now processes two
+	// independent vector chunks per iteration.
+	// Keeping two running sums reduces the dependency chain on a single
+	// accumulator register, which gives the CPU more instruction-level
+	// parallelism and better hides the latency of the multiply/add work before we
+	// combine the partial sums into the final norm.
+  VXORPS Z0, Z0, Z0 // Clear the ZMM0 register so it can store the first running partial sum for the normalization weight.
+  VXORPS Z3, Z3, Z3 // Clear the ZMM3 register so it can store the second running partial sum for the normalization weight.
 
   LOOP:
-    VMOVUPS (AX), Z1   // Load the current 16 float32s from the input vector into the ZMM1 register.
+    VMOVUPS 0(AX), Z1  // Load the current 16 float32s from the input vector into the ZMM1 register.
     VMULPS  Z1, Z1, Z1 // Square the current 16 float32s and overwrite the ZMM1 register with the result.
-    VADDPS  Z1, Z0, Z0 // Add the values to the normalization weight register.
-    ADDQ    $64, AX    // Add 64 (4 * 16) to the AX register. This moves the pointer forward.
-    SUBQ    $16, CX    // Subtract 16 from the CX length register since we are going 16 at a time.
+    VADDPS  Z1, Z0, Z0 // Add the values to the first normalization weight accumulator register.
+    VMOVUPS 64(AX), Z2 // Load the next 16 float32s from the input vector into the ZMM2 register.
+    VMULPS  Z2, Z2, Z2 // Square the next 16 float32s and overwrite the ZMM2 register with the result.
+    VADDPS  Z2, Z3, Z3 // Add the values to the second normalization weight accumulator register.
+    ADDQ    $128, AX   // Add 128 (32 * 4) to the AX register. This moves the pointer forward by 32 items.
+    SUBQ    $32, CX    // Subtract 32 from the CX length register since we are now going 32 at a time.
     JNZ     LOOP       // If the CX register is not zero then jump to the beginning of the loop again.
+
+  VADDPS Z3, Z0, Z0   // Add the second accumulator register into the first so we have one final accumulated vector.
 
   VEXTRACTF32X8 $1, Z0, Y1     // Extract the high 256-bits of ZMM0 into YMM1
   VHADDPS       Y0, Y1, Y0     // Pairwise add between YMM0 and YMM1
@@ -288,14 +369,25 @@ TEXT ·__normalizeVector32_AVX512_FMA(SB), NOSPLIT, $24-0
   MOVQ input_len+8(FP), CX  // Load the length of the input vector into the CX register.
   MOVQ input_len+8(FP), DX  // Load the length of the input vector into the DX register.
 
-  VXORPS Z0, Z0, Z0 // Clear the ZMM0 register to store the normalization weight.
+	// We use two accumulator registers here because this loop now processes two
+	// independent vector chunks per iteration.
+	// Keeping two running sums reduces the dependency chain on a single
+	// accumulator register, which gives the CPU more instruction-level
+	// parallelism and better hides the latency of the fused multiply-add work
+	// before we combine the partial sums into the final norm.
+  VXORPS Z0, Z0, Z0 // Clear the ZMM0 register so it can store the first running partial sum for the normalization weight.
+  VXORPS Z3, Z3, Z3 // Clear the ZMM3 register so it can store the second running partial sum for the normalization weight.
 
   LOOP:
-    VMOVUPS     (AX), Z1  // Load the current 16 float32s from the input vector into the ZMM1 register.
-    VFMADD231PS Z1,   Z1, Z0 // Square the ZMM1 register and add it to the ZMM0 accumulator register.
-    ADDQ        $64,  AX  // Add 64 (4 * 16) to the AX register. This moves the pointer forward.
-    SUBQ        $16,  CX  // Subtract 16 from the CX length register since we are going 16 at a time.
-    JNZ         LOOP  // If the CX register is not zero then jump to the beginning of the loop again.
+    VMOVUPS     0(AX), Z1    // Load the current 16 float32s from the input vector into the ZMM1 register.
+    VFMADD231PS Z1, Z1, Z0   // Square ZMM1 and add the result to the first normalization weight accumulator register in a single fused instruction.
+    VMOVUPS     64(AX), Z2   // Load the next 16 float32s from the input vector into the ZMM2 register.
+    VFMADD231PS Z2, Z2, Z3   // Square ZMM2 and add the result to the second normalization weight accumulator register in a single fused instruction.
+    ADDQ        $128, AX     // Add 128 (32 * 4) to the AX register. This moves the pointer forward by 32 items.
+    SUBQ        $32, CX      // Subtract 32 from the CX length register since we are now going 32 at a time.
+    JNZ         LOOP         // If the CX register is not zero then jump to the beginning of the loop again.
+
+  VADDPS Z3, Z0, Z0 // Add the second accumulator register into the first so we have one final accumulated vector.
 
   VEXTRACTF32X8 $1, Z0, Y1     // Extract the high 256-bits of ZMM0 into YMM1
   VHADDPS       Y0, Y1, Y0     // Pairwise add between YMM0 and YMM1

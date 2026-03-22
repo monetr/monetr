@@ -16,32 +16,6 @@ func TestNormalizeVector64_AVX(t *testing.T) {
 		t.Skip("host does not support AVX")
 	}
 
-	t.Run("simple-8", func(t *testing.T) {
-		base := []float64{
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7,
-			8,
-		}
-
-		goData := make([]float64, len(base))
-		copy(goData, base)
-		normalizeVector64Go(goData)
-		fmt.Println("Go: ", goData)
-
-		avxData := make([]float64, len(base))
-		copy(avxData, base)
-
-		__normalizeVector64_AVX(avxData)
-		fmt.Println("AVX:", avxData)
-
-		assert.InDeltaSlice(t, goData, avxData, 1e-16, "both resulting vectors should be equal-ish")
-	})
-
 	t.Run("random-128", func(t *testing.T) {
 		base := make([]float64, 128)
 		for i := range base {
@@ -87,32 +61,6 @@ func TestNormalizeVector64_AVX_FMA(t *testing.T) {
 	if !HasAVXFMA() {
 		t.Skip("host does not support AVX and FMA")
 	}
-
-	t.Run("simple-8", func(t *testing.T) {
-		base := []float64{
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7,
-			8,
-		}
-
-		goData := make([]float64, len(base))
-		copy(goData, base)
-		normalizeVector64Go(goData)
-		fmt.Println("Go: ", goData)
-
-		avxData := make([]float64, len(base))
-		copy(avxData, base)
-
-		__normalizeVector64_AVX_FMA(avxData)
-		fmt.Println("AVX:", avxData)
-
-		assert.InDeltaSlice(t, goData, avxData, 1e-16, "both resulting vectors should be equal-ish")
-	})
 
 	t.Run("random-128", func(t *testing.T) {
 		base := make([]float64, 128)
@@ -160,32 +108,6 @@ func TestNormalizeVector64_AVX512(t *testing.T) {
 		t.Skip("host does not support AVX512")
 	}
 
-	t.Run("simple-8", func(t *testing.T) {
-		base := []float64{
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7,
-			8,
-		}
-
-		goData := make([]float64, len(base))
-		copy(goData, base)
-		normalizeVector64Go(goData)
-		fmt.Println("Go: ", goData)
-
-		avxData := make([]float64, len(base))
-		copy(avxData, base)
-
-		__normalizeVector64_AVX512(avxData)
-		fmt.Println("AVX:", avxData)
-
-		assert.InDeltaSlice(t, goData, avxData, 1e-16, "both resulting vectors should be equal-ish")
-	})
-
 	t.Run("random-128", func(t *testing.T) {
 		base := make([]float64, 128)
 		for i := range base {
@@ -231,32 +153,6 @@ func TestNormalizeVector64_AVX512_FMA(t *testing.T) {
 	if !HasAVX512FMA() {
 		t.Skip("host does not support AVX512 and FMA")
 	}
-
-	t.Run("simple-8", func(t *testing.T) {
-		base := []float64{
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7,
-			8,
-		}
-
-		goData := make([]float64, len(base))
-		copy(goData, base)
-		normalizeVector64Go(goData)
-		fmt.Println("Go: ", goData)
-
-		avxData := make([]float64, len(base))
-		copy(avxData, base)
-
-		__normalizeVector64_AVX512_FMA(avxData)
-		fmt.Println("AVX:", avxData)
-
-		assert.InDeltaSlice(t, goData, avxData, 1e-16, "both resulting vectors should be equal-ish")
-	})
 
 	t.Run("random-128", func(t *testing.T) {
 		base := make([]float64, 128)
@@ -304,32 +200,6 @@ func TestNormalizeVector32_AVX(t *testing.T) {
 		t.Skip("host does not support AVX")
 	}
 
-	t.Run("simple-8", func(t *testing.T) {
-		base := []float32{
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7,
-			8,
-		}
-
-		goData := make([]float32, len(base))
-		copy(goData, base)
-		normalizeVector32Go(goData)
-		fmt.Println("Go: ", goData)
-
-		avxData := make([]float32, len(base))
-		copy(avxData, base)
-
-		__normalizeVector32_AVX(avxData)
-		fmt.Println("AVX:", avxData)
-
-		assert.InDeltaSlice(t, goData, avxData, 1e-7, "both resulting vectors should be equal-ish")
-	})
-
 	t.Run("random-128", func(t *testing.T) {
 		base := make([]float32, 128)
 		for i := range base {
@@ -375,32 +245,6 @@ func TestNormalizeVector32_AVX_FMA(t *testing.T) {
 	if !HasAVXFMA() {
 		t.Skip("host does not support AVX and FMA")
 	}
-
-	t.Run("simple-8", func(t *testing.T) {
-		base := []float32{
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7,
-			8,
-		}
-
-		goData := make([]float32, len(base))
-		copy(goData, base)
-		normalizeVector32Go(goData)
-		fmt.Println("Go: ", goData)
-
-		avxData := make([]float32, len(base))
-		copy(avxData, base)
-
-		__normalizeVector32_AVX_FMA(avxData)
-		fmt.Println("AVX:", avxData)
-
-		assert.InDeltaSlice(t, goData, avxData, 1e-7, "both resulting vectors should be equal-ish")
-	})
 
 	t.Run("random-128", func(t *testing.T) {
 		base := make([]float32, 128)
@@ -448,40 +292,6 @@ func TestNormalizeVector32_AVX512(t *testing.T) {
 		t.Skip("host does not support AVX512")
 	}
 
-	t.Run("simple-8", func(t *testing.T) {
-		base := []float32{
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7,
-			8,
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7,
-			10,
-		}
-
-		goData := make([]float32, len(base))
-		copy(goData, base)
-		normalizeVector32Go(goData)
-		fmt.Println("Go: ", goData)
-
-		avxData := make([]float32, len(base))
-		copy(avxData, base)
-
-		__normalizeVector32_AVX512(avxData)
-		fmt.Println("AVX:", avxData)
-
-		assert.InDeltaSlice(t, goData, avxData, 1e-7, "both resulting vectors should be equal-ish")
-	})
-
 	t.Run("random-128", func(t *testing.T) {
 		base := make([]float32, 128)
 		for i := range base {
@@ -527,40 +337,6 @@ func TestNormalizeVector32_AVX512_FMA(t *testing.T) {
 	if !HasAVX512FMA() {
 		t.Skip("host does not support AVX512 and FMA")
 	}
-
-	t.Run("simple-8", func(t *testing.T) {
-		base := []float32{
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7,
-			8,
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7,
-			10,
-		}
-
-		goData := make([]float32, len(base))
-		copy(goData, base)
-		normalizeVector32Go(goData)
-		fmt.Println("Go: ", goData)
-
-		avxData := make([]float32, len(base))
-		copy(avxData, base)
-
-		__normalizeVector32_AVX512_FMA(avxData)
-		fmt.Println("AVX:", avxData)
-
-		assert.InDeltaSlice(t, goData, avxData, 1e-7, "both resulting vectors should be equal-ish")
-	})
 
 	t.Run("random-128", func(t *testing.T) {
 		base := make([]float32, 128)
@@ -741,7 +517,6 @@ func BenchmarkNormalizeVector32_AVX(bench *testing.B) {
 	}
 
 	sizes := []int{
-		16,
 		32,
 		64,
 		128,
@@ -774,7 +549,6 @@ func BenchmarkNormalizeVector32_AVX_FMA(bench *testing.B) {
 	}
 
 	sizes := []int{
-		16,
 		32,
 		64,
 		128,
@@ -807,7 +581,6 @@ func BenchmarkNormalizeVector32_AVX512(bench *testing.B) {
 	}
 
 	sizes := []int{
-		16,
 		32,
 		64,
 		128,
@@ -840,7 +613,6 @@ func BenchmarkNormalizeVector32_AVX512_FMA(bench *testing.B) {
 	}
 
 	sizes := []int{
-		16,
 		32,
 		64,
 		128,
