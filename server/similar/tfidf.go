@@ -132,10 +132,10 @@ func (p *TFIDF) indexWords() (mapping map[string]int, vectorSize int) {
 			wordCount++
 		}
 
-		// Define the length of the vector and adjust it to be divisible by 16. This
-		// will enable us to leverage SIMD in the future. By using 16 we are
+		// Define the length of the vector and adjust it to be divisible by 32. This
+		// will enable us to leverage SIMD in the future. By using 32 we are
 		// compatible with both AVX and AVX512.
-		vectorLength := wordCount + (16 - (wordCount % 16))
+		vectorLength := wordCount + (calc.VectorWidthAlignment - (wordCount % calc.VectorWidthAlignment))
 		p.wordToIndex = make(map[string]int)
 		p.indexToWord = make([]string, vectorLength)
 		allWords := make([]string, 0, len(p.wc))
