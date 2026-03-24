@@ -86,6 +86,34 @@ func TestGetTransactions(t *testing.T) {
 			response.JSON().Array().Length().IsEqual(20)
 		}
 	})
+
+	t.Run("cant get transactions for someone elses bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Create a bank account with transactions under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 5)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to list transactions under the other user's bank account
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().IsEmpty()
+		}
+	})
 }
 
 func TestPostTransactions(t *testing.T) {
@@ -786,6 +814,39 @@ func TestPutTransactions(t *testing.T) {
 		})
 		assert.NotNil(t, updatedTransaction.LunchFlowTransactionId, "lunch flow transaction ID must be preserved after update")
 		assert.Equal(t, originalTransaction.LunchFlowTransactionId, updatedTransaction.LunchFlowTransactionId, "lunch flow transaction ID must not change")
+	})
+
+	t.Run("cant put someone elses transaction", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var transaction Transaction
+
+		{ // Create a bank account with a transaction under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			transaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to update the transaction
+			response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transaction.TransactionId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name": "Updated Name",
+				}).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("failed to retrieve existing transaction for update: record does not exist")
+		}
 	})
 }
 

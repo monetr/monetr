@@ -406,6 +406,17 @@ func (c *Controller) deleteSpending(ctx echo.Context) error {
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	// Verify the spending object belongs to the authenticated user before
+	// attempting to delete it.
+	ok, err := repo.GetSpendingExists(c.getContext(ctx), bankAccountId, spendingId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to verify spending exists")
+	}
+	if !ok {
+		return c.notFound(ctx, "spending object does not exist")
+	}
+
 	if err := repo.DeleteSpending(c.getContext(ctx), bankAccountId, spendingId); err != nil {
 		return c.wrapPgError(ctx, err, "failed to delete spending")
 	}

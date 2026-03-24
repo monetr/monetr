@@ -87,6 +87,12 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
+	// Make sure the bank account belongs to the authenticated user before
+	// creating a funding schedule for it.
+	if _, err = repo.GetBankAccount(c.getContext(ctx), bankAccountId); err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve bank account")
+	}
+
 	// Set the next occurrence based on the provided rule.
 
 	// If the next occurrence is not specified then assume that the rule is relative to now. If it is specified though

@@ -237,6 +237,37 @@ func TestPostFundingSchedules(t *testing.T) {
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").IsEqual("invalid JSON body")
 	})
+
+	t.Run("cant create funding schedule for someone elses bank account", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank models.BankAccount
+
+		{ // Create a bank account under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to create a funding schedule under the other user's bank account
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":    "Payday",
+					"ruleset": FifthteenthAndLastDayOfEveryMonth,
+				}).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("failed to retrieve bank account: record does not exist")
+		}
+	})
 }
 
 func TestPutFundingSchedules(t *testing.T) {
@@ -348,6 +379,41 @@ func TestPutFundingSchedules(t *testing.T) {
 			response.JSON().Path("$.spending").IsArray()
 			response.JSON().Path("$.spending").Array().Length().IsEqual(1)
 			response.JSON().Path("$.spending[0].spendingId").IsEqual(spendingId)
+		}
+	})
+
+	t.Run("cant put someone elses funding schedule", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank models.BankAccount
+		var fundingSchedule *models.FundingSchedule
+
+		{ // Create a funding schedule under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			fundingSchedule = fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to update the funding schedule
+			response := e.PUT("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":           "Payday",
+					"ruleset":        FifthteenthAndLastDayOfEveryMonth,
+					"nextRecurrence": fundingSchedule.NextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("failed to verify funding schedule exists: record does not exist")
 		}
 	})
 }
@@ -597,6 +663,39 @@ func TestPatchFundingSchedule(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
 		response.JSON().Path("$.problems.ruleset").String().IsEqual("Ruleset must be valid")
 	})
+
+	t.Run("cant patch someone elses funding schedule", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank models.BankAccount
+		var fundingSchedule *models.FundingSchedule
+
+		{ // Create a funding schedule under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			fundingSchedule = fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to patch the funding schedule
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name": "Updated Payday",
+				}).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("failed to verify funding schedule exists: record does not exist")
+		}
+	})
 }
 
 func TestDeleteFundingSchedules(t *testing.T) {
@@ -720,6 +819,36 @@ func TestDeleteFundingSchedules(t *testing.T) {
 
 		response.Status(http.StatusNotFound)
 		response.JSON().Path("$.error").String().IsEqual("cannot remove funding schedule, it does not exist")
+	})
+
+	t.Run("cant delete someone elses funding schedule", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank models.BankAccount
+		var fundingSchedule *models.FundingSchedule
+
+		{ // Create a funding schedule under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			fundingSchedule = fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to delete the funding schedule
+			response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("cannot remove funding schedule, it does not exist")
+		}
 	})
 }
 
