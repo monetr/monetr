@@ -265,7 +265,7 @@ func TestPostFundingSchedules(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusNotFound)
-			response.JSON().Path("$.error").String().IsEqual("failed to retrieve funding schedules: record does not exist")
+			response.JSON().Path("$.error").String().IsEqual("failed to retrieve bank account: record does not exist")
 		}
 	})
 }
