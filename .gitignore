@@ -33,6 +33,7 @@ server/build/NOTICE.md
 .eslintcache
 package-lock.json
 reports
+dist
 
 rest-api-junit.xml
 rest-api-tests.json
