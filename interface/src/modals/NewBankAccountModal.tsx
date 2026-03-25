@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useRef } from 'react';
+import { Fragment, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { AxiosError } from 'axios';
 import type { FormikHelpers } from 'formik';
@@ -37,46 +37,43 @@ function NewBankAccountModal(): JSX.Element {
   const navigate = useNavigate();
   const ref = useRef<MModalRef>(null);
 
-  const initialValues: NewBankAccountValues = {
-    name: '',
-    balance: 0,
-    currency: locale?.currency ?? DefaultCurrency,
-  };
-
-  const submit = useCallback(
-    async (values: NewBankAccountValues, helper: FormikHelpers<NewBankAccountValues>): Promise<void> => {
-      helper.setSubmitting(true);
-      return await createBankAccount({
-        linkId: selectedBankAccount.linkId,
-        name: values.name,
-        availableBalance: locale.friendlyToAmount(values.balance),
-        currentBalance: locale.friendlyToAmount(values.balance),
-        // TODO Make it so these can be customized
-        accountType: BankAccountType.Depository,
-        accountSubType: BankAccountSubType.Checking,
-        currency: values.currency,
-      })
-        .then(result => navigate(`/bank/${result.bankAccountId}/transactions`))
-        .then(() => modal.remove())
-        .catch(
-          (error: AxiosError<APIError>) =>
-            void enqueueSnackbar(error.response.data.error, {
-              variant: 'error',
-              disableWindowBlurListener: true,
-            }),
-        )
-        .finally(() => helper.setSubmitting(false));
-    },
-    [createBankAccount, selectedBankAccount, locale, navigate, modal, enqueueSnackbar],
-  );
-
-  if (isLoading) {
+  if (isLoading || !selectedBankAccount) {
     return (
       <MModal open={modal.visible} ref={ref}>
         One moment...
       </MModal>
     );
   }
+
+  const initialValues: NewBankAccountValues = {
+    name: '',
+    balance: 0,
+    currency: locale?.currency ?? DefaultCurrency,
+  };
+
+  const submit = async (values: NewBankAccountValues, helper: FormikHelpers<NewBankAccountValues>): Promise<void> => {
+    helper.setSubmitting(true);
+    return await createBankAccount({
+      linkId: selectedBankAccount.linkId,
+      name: values.name,
+      availableBalance: locale.friendlyToAmount(values.balance),
+      currentBalance: locale.friendlyToAmount(values.balance),
+      // TODO Make it so these can be customized
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Checking,
+      currency: values.currency,
+    })
+      .then(result => navigate(`/bank/${result.bankAccountId}/transactions`))
+      .then(() => modal.remove())
+      .catch(
+        (error: AxiosError<APIError>) =>
+          void enqueueSnackbar(error.response.data.error, {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          }),
+      )
+      .finally(() => helper.setSubmitting(false));
+  };
 
   return (
     <MModal open={modal.visible} ref={ref}>

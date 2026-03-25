@@ -1,3 +1,5 @@
+import { rs } from '@rstest/core';
+
 import { makeSneakyFetchTransport } from '@monetr/interface/relay/transport';
 
 describe('sentry relay transport', () => {
@@ -6,12 +8,12 @@ describe('sentry relay transport', () => {
       {
         fetchOptions: undefined,
         url: 'http://my.monetr.dev',
-        recordDroppedEvent: jest.fn(),
+        recordDroppedEvent: rs.fn(),
         headers: {
           Key: 'value',
         },
       },
-      jest.fn(),
+      rs.fn(),
     );
 
     // TODO This is fine for now but eventually I'd love to just mock the actual make transport function inside so we

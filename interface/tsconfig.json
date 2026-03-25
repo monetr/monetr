@@ -14,7 +14,7 @@
     "sourceMap": true,
     "strict": false,
     "target": "ES2022",
-    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "types": ["node", "@rstest/core/globals", "@testing-library/jest-dom"],
     "paths": {
       "@monetr/interface/*": ["./*"]
     }

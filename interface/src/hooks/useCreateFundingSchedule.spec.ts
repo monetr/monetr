@@ -96,7 +96,7 @@ describe('create funding schedule', () => {
       initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding',
     });
     await act(async () => {
-      expect(
+      await expect(
         world.result.current(
           new FundingSchedule({
             bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',

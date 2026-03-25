@@ -14,23 +14,17 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
     foreach(SPEC_FILE IN LISTS SPEC_FILES)
       string(REGEX REPLACE "([a-zA-Z0-9_]+)\\.spec.+" "\\1" SPEC_NAME "${SPEC_FILE}")
 
-      set(TEST_ARGS "--no-watchman" "--config=${CMAKE_SOURCE_DIR}/interface/jest.config.ts" "--runInBand" "--forceExit" "--detectOpenHandles")
+      set(TEST_ARGS "run" "--config=${CMAKE_SOURCE_DIR}/interface/rstest.config.ts")
       if(TEST_COVERAGE)
-        # If we are collecting code coverage then we want to add these flags to jest. Because we are running tests one
-        # file at a time we need to pass --watchAll=false in order for jest to properly collect coverage.
-        list(APPEND TEST_ARGS "--coverage" "--coverageDirectory=${PACKAGE_COVERAGE_DIRECTORY}/${SPEC_NAME}")
-      endif()
-
-      if(NOT DEFINED ENV{CI})
-        list(APPEND TEST_ARGS "--color")
+        list(APPEND TEST_ARGS "--coverage.enabled")
       endif()
 
       add_test(
         NAME ${PACKAGE}/${SPEC_NAME}
-        COMMAND ${JEST_EXECUTABLE} ${TEST_ARGS} --runTestsByPath ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
+        COMMAND ${RSTEST_EXECUTABLE} ${TEST_ARGS} ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/interface
       )
-      set_tests_properties(${PACKAGE}/${SPEC_NAME} PROPERTIES 
+      set_tests_properties(${PACKAGE}/${SPEC_NAME} PROPERTIES
         FIXTURES_REQUIRED node_modules
         # Node gets really picky about having multiple instances running at the
         # same time, this helps a bit by making sure that we are not putting
@@ -39,6 +33,15 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
         PROCESSOR_AFFINITY ON
         TIMEOUT 45
       )
+      if(TEST_COVERAGE)
+        set_property(
+          TEST ${PACKAGE}/${SPEC_NAME}
+          # Look inside rstest.config.ts, this env variable makes it so we
+          # write the code coverage to the right place. But we can provide it
+          # every time even if we aren't collecting code coverage.
+          PROPERTY ENVIRONMENT "RSTEST_COVERAGE_DIR=${PACKAGE_COVERAGE_DIRECTORY}/${SPEC_NAME}"
+        )
+      endif()
       set_property(
         TEST ${PACKAGE}/${SPEC_NAME}
         PROPERTY LABELS "interface"

@@ -1,4 +1,5 @@
 import { act } from 'react';
+import { rs } from '@rstest/core';
 import { endOfMonth, endOfToday, startOfToday } from 'date-fns';
 
 import { waitFor } from '@testing-library/react';
@@ -9,7 +10,7 @@ import monetrClient from '@monetr/interface/api/api';
 import SettingsBilling from '@monetr/interface/pages/settings/billing';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-const locationAssignMock = jest.fn();
+const locationAssignMock = rs.fn();
 
 // jsdom 26 makes window.location non-configurable. To mock location.assign,
 // we spy on jsdom's internal implementation via its symbol property.
@@ -17,10 +18,10 @@ const implSymbol = Reflect.ownKeys(window.location).find(i => typeof i === 'symb
 
 describe('billing settings page', () => {
   let mockAxios: MockAdapter;
-  let assignSpy: jest.SpyInstance;
+  let assignSpy: ReturnType<typeof rs.spyOn>;
 
   beforeAll(() => {
-    assignSpy = jest.spyOn((window.location as any)[implSymbol], 'assign').mockImplementation(locationAssignMock);
+    assignSpy = rs.spyOn((window.location as any)[implSymbol], 'assign').mockImplementation(locationAssignMock);
   });
 
   beforeEach(() => {
