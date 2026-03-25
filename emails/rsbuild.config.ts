@@ -16,58 +16,58 @@ const outDir = process.env.EMAIL_OUT_DIR
   ? resolve(process.env.EMAIL_OUT_DIR)
   : join(__dirname, 'dist', 'emails');
 
+const devEnvironments = {
+  web: {
+    source: {
+      entry: { index: './src/preview/index.tsx' },
+    },
+    html: {
+      template: './src/preview/index.html',
+    },
+    output: {
+      target: 'web' as const,
+    },
+  },
+};
+
+const buildEnvironments = {
+  node: {
+    source: {
+      entry: {
+        '__email_ssg__/email-bundle': './src/build/entry.ts',
+      },
+    },
+    output: {
+      target: 'node' as const,
+      distPath: { root: 'dist/server' },
+      filename: { js: '[name].cjs' },
+      minify: false,
+    },
+    // rspack needs these flags to preserve all named exports from the bundle.
+    // Without them, the template components get tree-shaken or lost during
+    // module concatenation since nothing inside the bundle consumes them.
+    tools: {
+      rspack: {
+        optimization: {
+          usedExports: false,
+          concatenateModules: false,
+        },
+        output: {
+          library: {
+            type: 'commonjs2',
+          },
+        },
+      },
+    },
+  },
+};
+
 export default defineConfig({
   plugins: [
     pluginReact(),
-    // Only include the email rendering plugin for production builds
     ...(!isDev ? [rsbuildPluginEmail({ outDir, tailwindConfig })] : []),
   ],
-  environments: {
-    // Dev: web preview server
-    ...(isDev ? {
-      web: {
-        source: {
-          entry: { index: './src/preview/index.tsx' },
-        },
-        html: {
-          template: './src/preview/index.html',
-        },
-        output: {
-          target: 'web',
-        },
-      },
-    } : {}),
-    // Build: node environment for server-side rendering of templates
-    ...(!isDev ? {
-      node: {
-        source: {
-          entry: {
-            '__email_ssg__/email-bundle': './src/build/entry.ts',
-          },
-        },
-        output: {
-          target: 'node',
-          distPath: { root: 'dist/server' },
-          filename: { js: '[name].cjs' },
-          minify: false,
-        },
-        // Preserve all exports (prevent tree-shaking of template components)
-        tools: {
-          rspack: {
-            optimization: {
-              usedExports: false,
-              concatenateModules: false,
-            },
-            output: {
-              library: {
-                type: 'commonjs2',
-              },
-            },
-          },
-        },
-      },
-    } : {}),
-  },
+  environments: isDev ? devEnvironments : buildEnvironments,
   server: {
     port: 3100,
   },

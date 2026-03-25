@@ -113,6 +113,12 @@ importers:
       '@types/html-to-text':
         specifier: ^9.0.4
         version: 9.0.4
+      '@types/react':
+        specifier: 18.3.26
+        version: 18.3.26
+      '@types/react-dom':
+        specifier: 18.3.7
+        version: 18.3.7(@types/react@18.3.26)
       autoprefixer:
         specifier: 10.4.21
         version: 10.4.21(postcss@8.5.6)

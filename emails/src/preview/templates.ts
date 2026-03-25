@@ -1,39 +1,17 @@
-import { VerifyEmailAddress } from '../emails/VerifyEmailAddress';
-import { ForgotPassword } from '../emails/ForgotPassword';
-import { PasswordChanged } from '../emails/PasswordChanged';
-import { PlaidDisconnected } from '../emails/PlaidDisconnected';
-import { TrialAboutToExpire } from '../emails/TrialAboutToExpire';
+import { templates } from '../templates';
+import type { EmailTemplate } from '../templates';
 
 export interface TemplateEntry {
   name: string;
-  component: React.ComponentType<any>;
+  component: EmailTemplate;
   previewProps: Record<string, any>;
 }
 
-export const templates: TemplateEntry[] = [
-  {
-    name: 'VerifyEmailAddress',
-    component: VerifyEmailAddress,
-    previewProps: VerifyEmailAddress.PreviewProps,
-  },
-  {
-    name: 'ForgotPassword',
-    component: ForgotPassword,
-    previewProps: ForgotPassword.PreviewProps,
-  },
-  {
-    name: 'PasswordChanged',
-    component: PasswordChanged,
-    previewProps: PasswordChanged.PreviewProps,
-  },
-  {
-    name: 'PlaidDisconnected',
-    component: PlaidDisconnected,
-    previewProps: PlaidDisconnected.PreviewProps,
-  },
-  {
-    name: 'TrialAboutToExpire',
-    component: TrialAboutToExpire,
-    previewProps: TrialAboutToExpire.PreviewProps,
-  },
-];
+// Derive the preview list from the shared template registry.
+export const templateList: TemplateEntry[] = Object.entries(templates).map(
+  ([name, component]) => ({
+    name,
+    component,
+    previewProps: component.PreviewProps,
+  }),
+);

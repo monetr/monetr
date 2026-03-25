@@ -126,23 +126,20 @@ export const rsbuildPluginEmail = ({
             }),
           );
 
-          // Import the bundle to get all exported template components.
+          // Import the bundle to get the template registry.
           // Node.js wraps CJS module.exports as the `default` export when using import().
           const rawModule = await import(pathToFileURL(bundleAbsolutePath).href);
-          const bundleModule = rawModule.default || rawModule;
+          const bundleExports = rawModule.default || rawModule;
+          const templates: Record<string, React.ComponentType> = bundleExports.templates;
 
           // Create output directory
           await mkdir(outDir, { recursive: true });
 
-          // Process each exported template
-          const templateNames = Object.keys(bundleModule).filter(
-            key => typeof bundleModule[key] === 'function'
-          );
-
+          const templateNames = Object.keys(templates);
           console.log(`[email] Found ${templateNames.length} templates: ${templateNames.join(', ')}`);
 
           for (const name of templateNames) {
-            const Component = bundleModule[name];
+            const Component = templates[name];
             console.log(`[email] Building ${name}...`);
 
             // 1. Render to HTML (uses default props which contain Go template placeholders)

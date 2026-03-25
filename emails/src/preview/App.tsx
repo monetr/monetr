@@ -1,6 +1,6 @@
 import { useState, useMemo, createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { templates } from './templates';
+import { templateList } from './templates';
 
 type ViewMode = 'preview' | 'html' | 'text';
 
@@ -41,7 +41,7 @@ function htmlToPlainText(html: string): string {
 export function App() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [viewMode, setViewMode] = useState<ViewMode>('preview');
-  const selected = templates[selectedIndex];
+  const selected = templateList[selectedIndex];
 
   const renderedHtml = useMemo(() => {
     return renderToStaticMarkup(createElement(selected.component, selected.previewProps));
@@ -68,7 +68,7 @@ export function App() {
         <h2 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
           Email Templates
         </h2>
-        {templates.map((template, i) => (
+        {templateList.map((template, i) => (
           <button
             key={template.name}
             onClick={() => setSelectedIndex(i)}
