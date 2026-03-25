@@ -1,0 +1,4 @@
+[
+  { "type": "file", "name": "docker", "label": "Docker Compose" },
+  { "type": "file", "name": "kubernetes", "label": "Kubernetes" }
+]

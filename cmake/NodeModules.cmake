@@ -15,13 +15,11 @@ else()
   set(JS_EXECUTABLE_SUFFIX "")
 endif()
 set(BIOME_EXECUTABLE ${NODE_MODULES_BIN}/biome${JS_EXECUTABLE_SUFFIX})
-set(HYPERLINK_EXECUTABLE ${NODE_MODULES_BIN}/hyperlink${JS_EXECUTABLE_SUFFIX})
 set(RSTEST_EXECUTABLE ${NODE_MODULES_BIN}/rstest${JS_EXECUTABLE_SUFFIX})
-set(NEXT_EXECUTABLE ${NODE_MODULES_BIN}/next${JS_EXECUTABLE_SUFFIX})
+set(RSPRESS_EXECUTABLE ${NODE_MODULES_BIN}/rspress${JS_EXECUTABLE_SUFFIX})
 set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES_BIN}/email${JS_EXECUTABLE_SUFFIX})
 set(RSBUILD_EXECUTABLE ${NODE_MODULES_BIN}/rsbuild${JS_EXECUTABLE_SUFFIX})
 set(RSPACK_EXECUTABLE ${NODE_MODULES_BIN}/rspack${JS_EXECUTABLE_SUFFIX})
-set(SITEMAP_EXECUTABLE ${NODE_MODULES_BIN}/next-sitemap${JS_EXECUTABLE_SUFFIX})
 set(SPELLCHECKER_EXECUTABLE ${NODE_MODULES_BIN}/spellchecker${JS_EXECUTABLE_SUFFIX})
 set(TSC_EXECUTABLE ${NODE_MODULES_BIN}/tsc${JS_EXECUTABLE_SUFFIX})
 
@@ -31,13 +29,11 @@ add_custom_command(
   OUTPUT ${NODE_MODULES}
          ${NODE_MODULES_MARKER}
          ${BIOME_EXECUTABLE}
-         ${HYPERLINK_EXECUTABLE}
          ${RSTEST_EXECUTABLE}
-         ${NEXT_EXECUTABLE}
+         ${RSPRESS_EXECUTABLE}
          ${REACT_EMAIL_EXECUTABLE}
          ${RSBUILD_EXECUTABLE}
          ${RSPACK_EXECUTABLE}
-         ${SITEMAP_EXECUTABLE}
          ${SPELLCHECKER_EXECUTABLE}
          ${TSC_EXECUTABLE}
          ${CMAKE_SOURCE_DIR}/docs/node_modules
@@ -47,13 +43,11 @@ add_custom_command(
   BYPRODUCTS ${NODE_MODULES}
              ${NODE_MODULES_MARKER}
              ${BIOME_EXECUTABLE}
-             ${HYPERLINK_EXECUTABLE}
              ${RSTEST_EXECUTABLE}
-             ${NEXT_EXECUTABLE}
+             ${RSPRESS_EXECUTABLE}
              ${REACT_EMAIL_EXECUTABLE}
              ${RSBUILD_EXECUTABLE}
              ${RSPACK_EXECUTABLE}
-             ${SITEMAP_EXECUTABLE}
              ${SPELLCHECKER_EXECUTABLE}
              ${TSC_EXECUTABLE}
              ${CMAKE_SOURCE_DIR}/docs/node_modules
@@ -107,17 +101,7 @@ add_custom_target(
 )
 
 add_custom_target(
-  tools.next
-  DEPENDS dependencies.node_modules
-)
-
-add_custom_target(
-  tools.next-sitemap
-  DEPENDS dependencies.node_modules
-)
-
-add_custom_target(
-  tools.hyperlink
+  tools.rspress
   DEPENDS dependencies.node_modules
 )
 

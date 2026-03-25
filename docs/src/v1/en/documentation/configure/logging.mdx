@@ -1,0 +1,13 @@
+# Logging Configuration
+
+monetr supports a text and JSON log formatter.
+
+```yaml title="config.yaml"
+logging:
+  level: "<error|warn|info|debug|trace>"
+  format: "<text|json>"
+```
+
+The default log level for monetr is `info`. Lower log levels can create a lot of noise, `debug` will log each HTTP
+request that the server handles, `trace` will log every SQL query that the application performs (except as part of
+background job processing).

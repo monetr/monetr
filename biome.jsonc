@@ -15,7 +15,7 @@
     "lineEnding": "lf",
     "lineWidth": 120,
     "attributePosition": "auto",
-    "includes": ["interface/**", "docs/src/**", "emails/src/**", "stories/**", "!**/*.html", "!**/*.svg", "!**/*.mdx"]
+    "includes": ["interface/**", "docs/**", "emails/src/**", "stories/**", "!**/*.html", "!**/*.svg", "!**/*.mdx"]
   },
   "assist": {
     "actions": {
@@ -152,7 +152,7 @@
     },
     "includes": [
       "interface/**",
-      "docs/src/**",
+      "docs/**",
       "emails/src/**",
       "stories/**",
       "!**/*.html",

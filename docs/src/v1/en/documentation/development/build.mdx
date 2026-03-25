@@ -1,0 +1,43 @@
+# Build
+
+Building monetr locally using CMake.
+
+## General Requirements
+
+- Node (`>= 20.12.0`)
+- Go (`>= 1.26.2`)
+- git (`>= 2.0.0`)
+- CMake (`>= 3.23.0`)
+- GNUMake (`>= 4.0`)
+- gcc (`>= 12`)
+
+monetr will also create some binaries within the CMake binary directory, these binaries may be created by `gem`, `npm`
+or `go install`. These will not be installed on the host system itself, and are automatically removed when the source
+directory is cleaned.
+
+## Building monetr
+
+To build monetr you can simply run the following make command. This will run the CMake configuration and build steps
+necessary to produce a binary at `$PWD/build/monetr` (`$PWD/build/monetr.exe` on Windows).
+
+```shell title="Shell"
+make monetr
+```
+
+### Release Build
+
+In order to produce a release build of monetr the following flag must be added.
+
+```shell title="Shell"
+# Specify the release preset manually
+make monetr CMAKE_PRESET=release
+
+# Or you can simply run
+make release
+```
+
+:::info
+In CI/CD, all builds are performed in release mode.
+:::
+
+

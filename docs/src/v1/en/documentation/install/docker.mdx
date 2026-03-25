@@ -1,0 +1,263 @@
+---
+title: Self-Host with Docker Compose
+description: Learn how to self-host monetr using Docker Compose. Follow step-by-step instructions to set up monetr, manage updates, and troubleshoot common issues for a seamless self-hosting experience.
+---
+
+import { Steps } from '@rspress/core/theme'
+
+# Docker Compose
+
+Self-hosting monetr via Docker Compose is the simplest and officially supported way to run monetr yourself. This guide
+assumes Docker is already installed on your system. If not, please refer to [Docker's Installation
+Guide](https://docs.docker.com/engine/install/) to set it up.
+
+monetr's container images are built with every tagged release and are available on both:
+- [DockerHub](https://hub.docker.com/r/monetr/monetr)
+- [GitHub Container Registry (GHCR)](https://github.com/monetr/monetr/pkgs/container/monetr)
+
+Images from both registries are identical for the same version tag, so feel free to use your preferred registry.
+
+## Image Tags
+
+Each monetr release provides two types of container image tags:
+
+### `latest` Tag
+
+The `latest` tag always points to the most recent version of monetr. For example:
+`ghcr.io/monetr/monetr:latest`
+
+:::warning
+**Note**  Using the `latest` tag is convenient but can lead to unexpected behavior if updates introduce breaking
+changes.
+:::
+
+### Versioned Tags
+
+Versioned tags, such as `0.18.31`, refer to specific releases. For example:
+`ghcr.io/monetr/monetr:0.18.31`
+
+Version tags are recommended for stability. By pinning a version, you can control updates and easily roll back if
+needed. monetr's version numbers use a `v` prefix (e.g., `v0.18.31`), but container tags omit this prefix.
+
+## Docker Compose
+
+The easiest way to start monetr is to use the provided
+[`docker-compose.yaml`](https://github.com/monetr/monetr/blob/main/docker-compose.yaml) located in the project's root
+directory.
+
+<Steps>
+
+### Clone The Repository
+
+To get the compose file, first clone the monetr repository:
+
+```shell title="Clone monetr" copy
+git clone https://github.com/monetr/monetr.git
+cd monetr
+```
+
+### Configure The Server
+
+The provided compose file includes some defaults that should be sufficient to get monetr started and to try out manual
+budgeting. But if you want to change anything; like adding Plaid credentials or setting up a proper domain name, you'll
+need to configure monetr. The recommended way to do this is to pass environment variables for the parameters you want to
+change. The easiest way to do this is to create a `.env` file somewhere outside the monetr repository folder and when
+running the Docker commands below, include the flag `--env-file=${YOUR FILE PATH}`. This will apply your customizations
+to the compose file without needing to modify the provided file.
+
+If you want to use a config file though you will need to modify the compose file to use one, or you will need to create
+a config file within the default volume mount that gets created. To use a config file adjust the `command` for the
+monetr service in the compose file to look like this:
+
+```yaml title="docker-compose.yaml"
+    command:
+      - -c                      # [!code highlight]
+      - /etc/monetr/config.yaml # [!code highlight]
+      - serve
+      # Setup the database and perform migrations.
+      - --migrate
+      # Since certificates will not have been created, make some.
+      - --generate-certificates
+```
+
+You can replace the path to the config file with any path you want as long as it is readable by monetr. You can specify
+multiple configuration file if you need to by passing `-c ${file}` multiple times _before_ the `serve` command.
+
+:::warning
+Environment variables can take priority over values in the configuration file. If you are not seeing the behavior you're
+expecting with your configuration changes, make sure that the environment variable for that configuration parameter is
+not specified with an incorrect or **blank** value. A blank value in the environment variable may cause unusual
+behaviors.
+:::
+
+### Start The Server
+
+To run monetr, execute the following command in your terminal from the root directory of monetr's repository.
+
+```shell title="Start monetr" copy
+docker compose up --wait
+```
+
+This will start the monetr server, as well as the database it needs and a Valkey server. It will wait for everything to
+be healthy before letting you continue.
+
+### Open monetr
+
+Once monetr is finished starting, you should be able to access it in your browser via `http://localhost:4000`.
+
+:::info
+monetr may be accessible from other URLs like the host's IP address, but it will only set the authentication cookie
+(as well as other things like email links) based on the external URL configuration. If you are having trouble logging
+in, make sure you are accessing monetr from the same URL that it logs as "externalUrl" when it starts.
+
+You can configure the external URL here: [Server Configuration](/documentation/configure/server)
+:::
+
+</Steps>
+
+:::warning
+Sign ups are enabled by default from the `docker-compose.yaml` provided. If you are exposing your monetr instance to the
+public internet; it is recommended you disable sign ups after you have created your own login.
+:::
+
+## Updating Via Docker Compose
+
+If you are already running monetr and want to upgrade to a more recent version you can perform the following steps.
+
+Please make sure to review the release notes for monetr before upgrading, as it will include any breaking changes you
+should be aware of.
+
+<Steps>
+
+### Update The Repository
+
+In your cloned monetr directory, run the following command to retrieve the latest changes.
+
+```shell title="Retrieve changes" copy
+git pull --rebase
+```
+
+If you encounter a conflict while performing the pull, this means that some changes you may have made locally might
+cause problems with the latest version of monetr. Make sure to resolve these conflicts before moving onto the next step.
+
+### Stop The Containers
+
+You'll need to stop the containers running before upgrading to make sure there are not conflicts.
+
+```shell title="Stop monetr" copy
+docker compose stop
+```
+
+### Pull New Images
+
+Once the containers have stopped you can run the following command to update the monetr image:
+
+```shell title="Docker pull" copy
+docker compose pull
+```
+
+### Start monetr Again
+
+Once the new images have been pulled onto your local machine you can restart the server via docker compose:
+
+```shell title="Docker start" copy
+docker compose up --wait
+```
+
+Things like database migrations are automatically run when using the provided compose file.
+
+</Steps>
+
+## Troubleshooting
+
+If you encounter issues while setting up or running monetr, here are some common problems and their solutions:
+
+### Containers Won’t Start
+
+If the containers fail to start or exit immediately:
+
+- Check the logs using:
+  ```shell copy
+  docker compose logs -f
+  ```
+
+#### Permission Error
+
+If you are getting a permission denied error in your logs similar to:
+
+```
+failed to write private key: open /etc/monetr/ed25519.key: permission denied
+```
+
+Then it is possible the permissions for your volume is not setup properly for the docker compose. This can happen if you
+are using host path volume mounts.
+
+On Linux or macOS run the `id` command in your terminal, you should get something like this:
+
+```shell
+id
+# uid=1000(elliotcourant) gid=1000(elliotcourant) ...
+```
+
+Those two numbers could be anything on your system, take those two numbers and add the following line to the `monetr`
+service in your docker compose file:
+
+```yaml title="docker-compose.yaml"
+services:
+  # ...
+  monetr:
+    # ...
+    user: 1000:1000 # [!code highlight]
+```
+
+Replacing the pairs of `1000` with the values of `uid` and `gid` respectively.
+
+Then try to start the compose file again. This should alleviate any permission issues with host path mounts as it will
+make the container match your own user's permissions.
+
+### Cannot Access monetr in the Browser
+
+If `http://localhost:4000` doesn’t load:
+
+Verify the containers are running using:
+
+```shell copy
+docker compose ps
+```
+
+Ensure no other services are using port 4000. Modify the `docker-compose.yaml` file to use a different port if needed.
+Check firewall or network settings on your machine.
+
+### Update Issues After Pulling New Images
+
+If monetr doesn't work correctly after an update:
+
+- Check for breaking changes in the [Release Notes](https://github.com/monetr/monetr/releases)
+- Run
+  ```shell copy
+  docker compose stop
+  docker compose up -d
+  ```
+  This should recreate the containers for monetr without deleting any data on the volumes.
+
+### Need More Help?
+
+If these solutions don't resolve your issue:
+
+- Check the [monetr GitHub Issues](https://github.com/monetr/monetr/issues) for similar problems.
+- Create a new issue with detailed logs and steps to reproduce the problem.
+- Reach out for assistance on [Discord](https://discord.gg/68wTCXrhuq).
+
+## Uninstalling
+
+:::warning
+This will remove all of your data stored for monetr, please be careful as this data cannot be recovered unless you have
+created a backup yourself somewhere.
+:::
+
+To uninstall monetr via Docker Compose you can run the following command:
+
+```shell copy
+docker compose down --remove-orphans -v
+```
+

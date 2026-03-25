@@ -1,0 +1,7 @@
+[
+  { "type": "file", "name": "documentation", "label": "Documentation" },
+  { "type": "file", "name": "code_of_conduct", "label": "Code of Conduct" },
+  { "type": "file", "name": "build", "label": "Build" },
+  { "type": "file", "name": "local_development", "label": "Local Development" },
+  { "type": "file", "name": "credentials", "label": "Credentials" }
+]

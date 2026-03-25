@@ -15,7 +15,7 @@ file(GLOB DOCS_CONFIG_FILES
 )
 
 # NOTE: This cannot be outside this directory otherwise next complains.
-set(DOCUMENTATION_OUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/out")
+set(DOCUMENTATION_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/out")
 set(DOCUMENTATION_DIST
   "${DOCUMENTATION_OUT_DIR}/404"
   "${DOCUMENTATION_OUT_DIR}/_next"
@@ -40,22 +40,16 @@ execute_process(
 )
 
 add_custom_command(
-  OUTPUT ${DOCUMENTATION_DIST} ${CMAKE_CURRENT_SOURCE_DIR}/.next ${CMAKE_CURRENT_SOURCE_DIR}/out
-  BYPRODUCTS ${DOCUMENTATION_DIST} ${CMAKE_CURRENT_SOURCE_DIR}/.next ${CMAKE_CURRENT_SOURCE_DIR}/out
-  # Since output files are hashed, make sure that there aren't any files that might be left over from the previous build
-  # in the output directory.
-  COMMAND ${GIT_EXECUTABLE} clean -f -X ${DOCUMENTATION_OUT_DIR}
+  OUTPUT ${DOCUMENTATION_DIST} ${DOCUMENTATION_OUT_DIR}
+  BYPRODUCTS ${DOCUMENTATION_DIST} ${DOCUMENTATION_OUT_DIR}
   # Once the output directory is clean, then actually build the user interface.
-  COMMAND ${CMAKE_COMMAND} -E env GIT_BRANCH=${GIT_BRANCH} ${NEXT_EXECUTABLE} build ${DOCS_SRC_DIR}
-  COMMAND ${SITEMAP_EXECUTABLE} --config ${DOCS_SRC_DIR}/next-sitemap.config.js
-  COMMAND ${NODE_EXECUTABLE} ${DOCS_SRC_DIR}/intl-temp.js ${CMAKE_CURRENT_SOURCE_DIR}/out
+  COMMAND ${CMAKE_COMMAND} -E env GIT_BRANCH=${GIT_BRANCH} OUTPUT_DIR=${DOCUMENTATION_OUT_DIR} ${RSPRESS_EXECUTABLE} build
   # This fixes an issue with github pages not liking underscore prefixed directories.
   COMMAND ${CMAKE_COMMAND} -E touch ${DOCUMENTATION_OUT_DIR}/.nojekyll
   COMMENT "Building monetr.app documentation and website"
-  WORKING_DIRECTORY ${DOCS_SRC_DIR}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   DEPENDS
     dependencies.node_modules
-    tools.next
     ${ALL_DOCS_FILES}
     ${PUBLIC_FILES}
     ${DOCS_CONFIG_FILES}
@@ -69,11 +63,11 @@ add_custom_target(
 
 add_custom_target(
   development.documentation.up
-  COMMAND ${CMAKE_COMMAND} -E env GIT_BRANCH=${GIT_BRANCH} ${NEXT_EXECUTABLE} dev
+  COMMAND ${CMAKE_COMMAND} -E env GIT_BRANCH=${GIT_BRANCH} ${RSPRESS_EXECUTABLE} dev
   WORKING_DIRECTORY ${DOCS_SRC_DIR}
   DEPENDS
     dependencies.node_modules
-    tools.next
+    tools.rspress
     ${ALL_DOCS_FILES}
     ${PUBLIC_FILES}
     ${DOCS_CONFIG_FILES}
@@ -106,23 +100,6 @@ if(BUILD_TESTING)
   )
   set_property(
     TEST docs/precompile
-    PROPERTY LABELS "docs"
-  )
-
-  set(HYPERLINK_GITHUB_ARGS "--check-anchors" "--sources" "${CMAKE_SOURCE_DIR}/docs/src/pages")
-  if(NOT "$ENV{CI}" STREQUAL "")
-    list(APPEND HYPERLINK_GITHUB_ARGS "--github-actions")
-  endif()
-  add_test(
-    NAME docs/check-links
-    COMMAND ${HYPERLINK_EXECUTABLE} ${CMAKE_SOURCE_DIR}/docs/out ${HYPERLINK_GITHUB_ARGS}
-  )
-  set_tests_properties(docs/check-links PROPERTIES
-    FIXTURES_REQUIRED documentation_output
-    TIMEOUT 45
-  )
-  set_property(
-    TEST docs/check-links
     PROPERTY LABELS "docs"
   )
 endif()

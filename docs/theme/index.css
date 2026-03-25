@@ -1,0 +1,171 @@
+@import 'katex/dist/katex.min.css';
+@import '@fontsource-variable/inter';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tailwind Preflight overrides KaTeX's screen-reader-only hiding */
+.katex .katex-mathml {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  height: 1px !important;
+  width: 1px !important;
+  overflow: hidden !important;
+}
+
+/* Force dark mode CSS variables on all selectors */
+:root,
+:where(html.rp-dark),
+:where(html:not(.rp-dark)) {
+  --rp-c-bg: #111111;
+  --rp-c-bg-soft: #27272a;
+  --rp-c-bg-mute: #3f3f46;
+  --rp-c-bg-alt: #0a0a0a;
+  --rp-c-divider: rgba(63, 63, 70, 0.65);
+  --rp-c-divider-light: rgba(63, 63, 70, 0.48);
+  --rp-c-text-0: #ffffff;
+  --rp-c-text-1: #d4d4d8;
+  --rp-c-text-2: #a1a1aa;
+  --rp-c-text-3: rgba(161, 161, 170, 0.38);
+  --rp-c-text-4: rgba(161, 161, 170, 0.18);
+  --rp-c-brand: #ebebeb;
+  --rp-c-brand-light: #ffffff;
+  --rp-c-brand-lighter: #ffffff;
+  --rp-c-brand-dark: #d4d4d8;
+  --rp-c-brand-darker: #a1a1aa;
+  --rp-c-brand-tint: rgba(255, 255, 255, 0.1);
+  --rp-c-link: #AC84EB;
+  --rp-home-background-bg: #111111;
+  --rp-font-family-base: 'Inter Variable', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
+}
+
+.rp-nav {
+  background: rgba(17, 17, 17, 0.7) !important;
+  backdrop-filter: saturate(150%) blur(12px);
+}
+
+.rp-nav__right {
+  min-width: 0;
+}
+
+.rp-search-button {
+  width: 160px;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* hide dark mode toggle since we force dark */
+.rp-switch-appearance {
+  display: none !important;
+}
+
+/* custom monetr view utilities */
+.m-view-height {
+  min-height: calc(100vh - var(--rp-nav-height, 64px));
+}
+
+.m-view-width {
+  max-width: 100rem;
+  padding-right: max(env(safe-area-inset-right), 1.5rem);
+  padding-left: max(env(safe-area-inset-left), 1.5rem);
+}
+
+::-webkit-scrollbar {
+  width: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: inherit;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #3f3f46;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #71717a;
+}
+
+/* feature card styling */
+/* TODO Make these SCSS modules... */
+.monetr {
+  border-radius: 1em !important;
+}
+
+img {
+  border-radius: 0.375rem;
+}
+
+.feature {
+  &.free-to-use {
+    border-radius: 0.75rem;
+    background-color: #111111;
+    box-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
+    position: relative;
+    grid-column: span 2 / span 2;
+  }
+}
+
+/* code highlighting support */
+mark {
+  color: var(--shiki-dark);
+}
+
+
+.rp-suggest-item--current .rp-suggest-item__link {
+  /* Fixes search colors for the current item */
+  background-color: var(--rp-c-bg-mute) !important;
+}
+
+/* These three selectors are hacks to make the appearance button not show but
+   also to make the divider that would separate it not show either. */
+.rp-nav-screen-divider:has( + .rp-nav-screen-appearance),
+.rp-nav-screen-appearance:has(+ .rp-nav-screen-divider) {
+  display: none !important;
+}
+
+.rp-nav-screen-divider + .rp-nav-screen-appearance,
+.rp-nav-screen-appearance + .rp-nav-screen-divider {
+  display: none !important;
+}
+
+/* When you are inside a stepper, move the anchor to the end of the header
+   instead */
+/* This might not be necessary if
+   https://github.com/web-infra-dev/rspress/pull/3276 gets merged */
+.rp-steps > .rp-toc-include:has(> .rp-header-anchor) {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.rp-steps > .rp-toc-include > .rp-header-anchor {
+  order: 2;
+  border-bottom: 1px solid transparent;
+}
+
+/* Make edit this page match the last updated text color */
+.rp-edit-link {
+  color: var(--rp-c-text-3) !important;
+}
+
+/* Fixes an issue where images that are also links are rendered oddly */
+.rp-link:has(> img) {
+  display: inline-flex;
+  /* fixes content shift on hover */
+  border-bottom: 1px solid transparent;
+}
+
+.rp-link > img {
+  height: min-content;
+  /* Fixes medium-zoom things on the image itself */
+  pointer-events: none;
+}

@@ -1,0 +1,16 @@
+# Links Configuration
+
+The links configuration is extremely simple, at the moment it only contains a single parameter.
+
+```yaml title="config.yaml"
+links:
+  maxNumberOfLinks: 3
+```
+
+The max number of links determines how many _Plaid_ links an account can have configured at any given time. monetr does
+not currently enforce a maximum number of manual links. If the value is set to `0` then no limit is enforced at all.
+
+:::warning
+It is likely that this configuration option will be removed in the future, and will be superseded by a feature flag
+configuration instead. Allowing more flexibility with enforcing limits.
+:::

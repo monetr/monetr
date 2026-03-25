@@ -9,6 +9,7 @@ Biometric
 Bitnami
 BlogHeader
 BlogIndex
+BlogMeme
 CLI
 CMake
 CORS
@@ -46,6 +47,7 @@ Link2
 MERCHANTABILITY
 MONETR
 Mastercard
+Nginx
 OAuth.*
 OFX
 OpenBao
@@ -96,6 +98,7 @@ YAML
 [pP]odman
 [pP]ostgres
 [rR]edis
+[rR]spress
 [wW]ebhook.*
 \d+.B
 anonymized?
@@ -117,6 +120,7 @@ filesystem[s]?
 financials
 forecasted
 formatter
+frac
 gcc
 hardcoded
 hostname
@@ -124,6 +128,7 @@ href
 identityless
 idf
 integrations
+issueNumber
 kms.*
 licensors
 local-kms
@@ -148,6 +153,7 @@ recaptcha
 self-hostable
 severable
 sexualized
+sqrt
 submodule.*
 templating
 tf-idf
@@ -155,6 +161,7 @@ tokenization
 tokenized
 unbudgeted
 uncomment
+v1.0
 valkey
 voiceprints
 yaml

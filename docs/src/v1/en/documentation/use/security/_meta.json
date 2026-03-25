@@ -1,0 +1,4 @@
+[
+  { "type": "file", "name": "user_password", "label": "User Password" },
+  { "type": "file", "name": "mfa", "label": "Multi-Factor" }
+]
