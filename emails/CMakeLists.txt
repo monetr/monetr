@@ -4,7 +4,6 @@ set(EMAIL_IN_TREE_OUTPUT "${CMAKE_SOURCE_DIR}/server/communication/email_templat
 # Collect all template input files for dependency tracking
 file(GLOB_RECURSE EMAIL_TEMPLATE_INPUTS "${EMAIL_TEMPLATE_INPUT_DIRECTORY}/*/index.tsx")
 file(GLOB_RECURSE EMAIL_COMPONENT_INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/src/components/*.tsx")
-set(EMAIL_BUILD_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/scripts/build.ts")
 
 # Determine expected output files from template names
 set(TEMPLATE_OUTPUTS)
@@ -18,15 +17,17 @@ endforeach()
 add_custom_command(
   OUTPUT ${TEMPLATE_OUTPUTS}
   BYPRODUCTS ${TEMPLATE_OUTPUTS}
-  COMMAND ${TSX_EXECUTABLE} ${EMAIL_BUILD_SCRIPT} --outDir ${EMAIL_IN_TREE_OUTPUT}
+  COMMAND ${CMAKE_COMMAND} -E env EMAIL_OUT_DIR=${EMAIL_IN_TREE_OUTPUT} ${RSBUILD_EXECUTABLE} build
   COMMENT "Building email templates"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   DEPENDS
-    tools.tsx
-    ${EMAIL_BUILD_SCRIPT}
+    tools.rsbuild
     ${EMAIL_TEMPLATE_INPUTS}
     ${EMAIL_COMPONENT_INPUTS}
     ${CMAKE_CURRENT_SOURCE_DIR}/tailwind.config.ts
+    ${CMAKE_CURRENT_SOURCE_DIR}/rsbuild.config.ts
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/build/entry.ts
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/build/rsbuildPluginEmail.ts
 )
 
 add_custom_target(
