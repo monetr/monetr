@@ -152,7 +152,6 @@ export default defineConfig({
       pluginPWA({
         logo: path.resolve(__dirname, '../images/logo.png'),
         background: '#19161f',
-        quality: 90,
       }),
   ].filter(item => Boolean(item)),
 });
