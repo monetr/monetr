@@ -261,6 +261,33 @@ if(BUILD_TESTING)
     TEST ui.dependencies
     PROPERTY LABELS "bootstrap"
   )
+  set(INTERFACE_TEST_DIRECTORY ${CMAKE_BINARY_DIR}/tests/interface)
+  set(INTERFACE_COVERAGE_DIRECTORY ${INTERFACE_TEST_DIRECTORY}/coverage)
+  file(MAKE_DIRECTORY ${INTERFACE_TEST_DIRECTORY})
+  file(MAKE_DIRECTORY ${INTERFACE_COVERAGE_DIRECTORY})
+
+  set(INTERFACE_TEST_ARGS "run" "--config=${CMAKE_SOURCE_DIR}/interface/rstest.config.ts")
+  if(TEST_COVERAGE)
+    list(APPEND INTERFACE_TEST_ARGS "--coverage.enabled")
+  endif()
+
+  add_test(
+    NAME interface
+    COMMAND ${RSTEST_EXECUTABLE} ${INTERFACE_TEST_ARGS}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/interface
+  )
+  set_tests_properties(interface PROPERTIES
+    FIXTURES_REQUIRED node_modules
+    TIMEOUT 120
+    LABELS "interface"
+  )
+  if(TEST_COVERAGE)
+    set_property(
+      TEST interface
+      PROPERTY ENVIRONMENT "RSTEST_COVERAGE_DIR=${INTERFACE_COVERAGE_DIRECTORY}"
+    )
+  endif()
+
   # add_test(
   #   NAME renovate.validate
   #   COMMAND ${RENOVATE_CONFIG_VALIDATOR_EXECUTABLE} --strict
@@ -284,16 +311,6 @@ foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
   add_subdirectory(${DIR})
 endforeach()
 
-# Recursively add all of the directories in the interface package that have CMakeLists of their own.
-file(
-  GLOB_RECURSE SUB_PACKAGES
-  RELATIVE ${CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/interface/src/*CMakeLists.txt"
-)
-# # Loop through the files and get their directories
-foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
-  get_filename_component(DIR ${SUB_PACKAGE} DIRECTORY)
-  add_subdirectory(${DIR})
-endforeach()
 
 # In order for documentation tests to work this has to be after the tests are setup.
 add_subdirectory("${CMAKE_SOURCE_DIR}/docs")
