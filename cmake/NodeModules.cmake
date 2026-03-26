@@ -16,7 +16,7 @@ else()
 endif()
 set(BIOME_EXECUTABLE ${NODE_MODULES_BIN}/biome${JS_EXECUTABLE_SUFFIX})
 set(HYPERLINK_EXECUTABLE ${NODE_MODULES_BIN}/hyperlink${JS_EXECUTABLE_SUFFIX})
-set(JEST_EXECUTABLE ${NODE_MODULES_BIN}/jest${JS_EXECUTABLE_SUFFIX})
+set(RSTEST_EXECUTABLE ${NODE_MODULES_BIN}/rstest${JS_EXECUTABLE_SUFFIX})
 set(NEXT_EXECUTABLE ${NODE_MODULES_BIN}/next${JS_EXECUTABLE_SUFFIX})
 set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES_BIN}/email${JS_EXECUTABLE_SUFFIX})
 set(RSBUILD_EXECUTABLE ${NODE_MODULES_BIN}/rsbuild${JS_EXECUTABLE_SUFFIX})
@@ -31,7 +31,7 @@ add_custom_command(
          ${NODE_MODULES_MARKER}
          ${BIOME_EXECUTABLE}
          ${HYPERLINK_EXECUTABLE}
-         ${JEST_EXECUTABLE}
+         ${RSTEST_EXECUTABLE}
          ${NEXT_EXECUTABLE}
          ${REACT_EMAIL_EXECUTABLE}
          ${RSBUILD_EXECUTABLE}
@@ -46,7 +46,7 @@ add_custom_command(
              ${NODE_MODULES_MARKER}
              ${BIOME_EXECUTABLE}
              ${HYPERLINK_EXECUTABLE}
-             ${JEST_EXECUTABLE}
+             ${RSTEST_EXECUTABLE}
              ${NEXT_EXECUTABLE}
              ${REACT_EMAIL_EXECUTABLE}
              ${RSBUILD_EXECUTABLE}
@@ -94,7 +94,7 @@ add_custom_target(
 )
 
 add_custom_target(
-  tools.jest
+  tools.rstest
   DEPENDS dependencies.node_modules
 )
 

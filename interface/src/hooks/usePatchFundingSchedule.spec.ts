@@ -103,7 +103,7 @@ describe('patch funding schedule', () => {
       initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding',
     });
     await act(async () => {
-      expect(
+      await expect(
         world.result.current({
           fundingScheduleId: 'fund_01hy4re7c1xc2v44cf6kx302jx', // 3,
           bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',

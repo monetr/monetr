@@ -32,6 +32,7 @@
                 "@mui/**",
                 "@radix-ui/**",
                 "@react-email/**",
+                "@rstest/**",
                 "@sentry/**",
                 "@storybook/**",
                 "@tanstack/react-query",

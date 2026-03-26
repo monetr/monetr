@@ -42,6 +42,14 @@ function NewExpenseModal(): JSX.Element {
 
   const ref = useRef<MModalRef>(null);
 
+  if (!selectedBankAccount) {
+    return (
+      <MModal className='sm:max-w-xl' open={modal.visible} ref={ref}>
+        One moment...
+      </MModal>
+    );
+  }
+
   const initialValues: NewExpenseValues = {
     name: '',
     amount: 0.0,
