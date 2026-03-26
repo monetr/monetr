@@ -1,6 +1,6 @@
-import { Button, Heading, Hr, Link, Section, Text } from '../../components/email';
 import EmailLayout from '../../components/EmailLayout';
 import EmailLogo from '../../components/EmailLogo';
+import { Button, Heading, Hr, Link, Section, Text } from '../../components/email';
 import styles from '../../styles/email.module.scss';
 
 interface ForgotPasswordProps {
@@ -27,9 +27,7 @@ export const ForgotPassword = ({
         Reset your password for <strong>monetr</strong>
       </Heading>
       <Text className={styles.bodyText}>Hello {firstName},</Text>
-      <Text className={styles.bodyText}>
-        Below is the link you requested in order to change your login password.
-      </Text>
+      <Text className={styles.bodyText}>Below is the link you requested in order to change your login password.</Text>
       <Section className={styles.buttonSection}>
         <Button className={styles.button} href={resetUrl}>
           <Text className={styles.buttonText}>Reset password</Text>

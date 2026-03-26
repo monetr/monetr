@@ -1,5 +1,5 @@
-import { Img, Section } from './email';
 import styles from './EmailLogo.module.scss';
+import { Img, Section } from './email';
 
 export interface EmailLogoProps {
   baseUrl: string;

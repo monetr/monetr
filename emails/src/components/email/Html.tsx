@@ -4,7 +4,7 @@ export type HtmlProps = React.ComponentPropsWithoutRef<'html'>;
 
 export function Html({ lang = 'en', dir = 'ltr', children, ...props }: HtmlProps) {
   return (
-    <html lang={lang} dir={dir} {...props}>
+    <html dir={dir} lang={lang} {...props}>
       {children}
     </html>
   );

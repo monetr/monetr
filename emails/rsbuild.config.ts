@@ -1,9 +1,10 @@
-import { resolve, join, dirname } from 'node:path';
+import { rsbuildPluginEmail } from './src/build/rsbuildPluginEmail';
+
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
-import { rsbuildPluginEmail } from './src/build/rsbuildPluginEmail';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

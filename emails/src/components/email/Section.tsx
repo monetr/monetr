@@ -6,18 +6,12 @@ export type SectionProps = React.ComponentPropsWithoutRef<'table'> & {
 
 export function Section({ children, style, className, ...props }: SectionProps) {
   return (
-    <table
-      align='center'
-      width='100%'
-      role='presentation'
-      cellPadding='0'
-      cellSpacing='0'
-      border={0}
-      {...props}
-    >
+    <table align='center' border={0} cellPadding='0' cellSpacing='0' role='presentation' width='100%' {...props}>
       <tbody>
         <tr>
-          <td className={className} style={style}>{children}</td>
+          <td className={className} style={style}>
+            {children}
+          </td>
         </tr>
       </tbody>
     </table>

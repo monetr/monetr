@@ -1,6 +1,7 @@
 import type React from 'react';
-import { Body, Container, Head, Html, Preview } from './email';
+
 import styles from './EmailLayout.module.scss';
+import { Body, Container, Head, Html, Preview } from './email';
 
 export interface EmailLayoutProps {
   previewText: string;
@@ -13,9 +14,7 @@ export default function EmailLayout(props: EmailLayoutProps): JSX.Element {
       <Head />
       <Preview>{props.previewText}</Preview>
       <Body className={styles.body}>
-        <Container className={styles.container}>
-          {props.children}
-        </Container>
+        <Container className={styles.container}>{props.children}</Container>
       </Body>
     </Html>
   );

@@ -11,17 +11,12 @@ export type BodyProps = React.HtmlHTMLAttributes<HTMLBodyElement>;
 export function Body({ children, style, className, ...props }: BodyProps) {
   return (
     <body {...props}>
-      <table
-        border={0}
-        width='100%'
-        cellPadding='0'
-        cellSpacing='0'
-        role='presentation'
-        align='center'
-      >
+      <table align='center' border={0} cellPadding='0' cellSpacing='0' role='presentation' width='100%'>
         <tbody>
           <tr>
-            <td className={className} style={style}>{children}</td>
+            <td className={className} style={style}>
+              {children}
+            </td>
           </tr>
         </tbody>
       </table>

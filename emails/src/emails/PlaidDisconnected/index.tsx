@@ -1,6 +1,6 @@
-import { Button, Heading, Hr, Link, Section, Text } from '../../components/email';
 import EmailLayout from '../../components/EmailLayout';
 import EmailLogo from '../../components/EmailLogo';
+import { Button, Heading, Hr, Link, Section, Text } from '../../components/email';
 import styles from '../../styles/email.module.scss';
 
 interface PlaidDisconnectedProps {
@@ -24,9 +24,7 @@ export const PlaidDisconnected = ({
   return (
     <EmailLayout previewText={previewText}>
       <EmailLogo baseUrl={baseUrl} />
-      <Heading className={styles.heading}>
-        One of your linked accounts has been disconnected
-      </Heading>
+      <Heading className={styles.heading}>One of your linked accounts has been disconnected</Heading>
       <Text className={styles.bodyText}>Hello {firstName},</Text>
       <Text className={styles.bodyText}>
         Your <strong>{linkName}</strong> account connected via Plaid needs to be reauthenticated. This account will not

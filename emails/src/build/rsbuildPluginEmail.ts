@@ -1,11 +1,12 @@
 import { createElement } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { mkdir, writeFile, rm } from 'node:fs/promises';
+
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import juice from 'juice';
-import { convert as htmlToText } from 'html-to-text';
 import type { RsbuildPlugin } from '@rsbuild/core';
+import { convert as htmlToText } from 'html-to-text';
+import juice from 'juice';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 const SSG_BUNDLE_FOLDER = '__email_ssg__';
 const SSG_BUNDLE_NAME = 'email-bundle.cjs';
@@ -61,9 +62,7 @@ function toPlainText(html: string): string {
  * 5. Post-process: juice CSS inlining → plaintext generation
  * 6. Write .html and .txt files to the output directory
  */
-export const rsbuildPluginEmail = ({
-  outDir,
-}: EmailPluginOptions): RsbuildPlugin => ({
+export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugin => ({
   name: 'monetr-rsbuild-plugin-email',
   async setup(api) {
     api.onBeforeBuild(() => {

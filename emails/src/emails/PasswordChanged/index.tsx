@@ -1,6 +1,6 @@
-import { Heading, Hr, Link, Text } from '../../components/email';
 import EmailLayout from '../../components/EmailLayout';
 import EmailLogo from '../../components/EmailLogo';
+import { Heading, Hr, Link, Text } from '../../components/email';
 import styles from '../../styles/email.module.scss';
 
 interface PasswordChangedProps {
