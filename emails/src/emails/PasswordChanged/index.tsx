@@ -1,7 +1,7 @@
 import { Heading, Hr, Link, Text } from '../../components/email';
-
 import EmailLayout from '../../components/EmailLayout';
 import EmailLogo from '../../components/EmailLogo';
+import styles from '../../styles/email.module.scss';
 
 interface PasswordChangedProps {
   baseUrl?: string;
@@ -20,25 +20,25 @@ export const PasswordChanged = ({
   return (
     <EmailLayout previewText={previewText}>
       <EmailLogo baseUrl={baseUrl} />
-      <Heading className='text-black text-2xl font-normal text-center p-0 my-8 mx-0'>
+      <Heading className={styles.heading}>
         Your password for <strong>monetr</strong> has been updated
       </Heading>
-      <Text className='text-black text-sm leading-6'>Hello {firstName},</Text>
-      <Text className='text-black text-sm leading-6'>
+      <Text className={styles.bodyText}>Hello {firstName},</Text>
+      <Text className={styles.bodyText}>
         If you did not initiate the change in your password please reach out to us immediately via our support email:{' '}
-        <Link className='text-blue-600 no-underline' href={`mailto:${supportEmail}`}>
+        <Link className={styles.footerLink} href={`mailto:${supportEmail}`}>
           {supportEmail}
         </Link>
       </Text>
-      <Hr className='border border-solid border-gray-200 my-6 mx-0 w-full' />
-      <Text className='text-gray-500 text-xs leading-6'>
+      <Hr className={styles.hr} />
+      <Text className={styles.footerText}>
         This message was intended for{' '}
-        <span className='text-black'>
+        <span className={styles.footerName}>
           {firstName} {lastName}
         </span>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
         communication please reach out to{' '}
-        <Link className='text-blue-600 no-underline' href={`mailto:${supportEmail}`}>
+        <Link className={styles.footerLink} href={`mailto:${supportEmail}`}>
           {supportEmail}
         </Link>
         .

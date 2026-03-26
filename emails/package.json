@@ -10,15 +10,14 @@
   "devDependencies": {
     "@rsbuild/core": "1.7.3",
     "@rsbuild/plugin-react": "1.4.6",
+    "@rsbuild/plugin-sass": "1.5.1",
     "@types/html-to-text": "^9.0.4",
     "@types/react": "18.3.26",
     "@types/react-dom": "18.3.7",
-    "autoprefixer": "10.4.21",
     "html-to-text": "9.0.5",
     "juice": "11.0.1",
-    "postcss": "8.5.6",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "tailwindcss": "3.4.19"
+    "sass": "1.98.0"
   }
 }

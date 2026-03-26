@@ -13,10 +13,14 @@ export function Container({ children, style, className, ...props }: ContainerPro
       cellPadding='0'
       cellSpacing='0'
       border={0}
+      // Inline styles on the table wrapper are structural — they control the
+      // table layout engine and must be present as inline attributes for email
+      // clients that strip <style> tags.
       style={{ maxWidth: '37.5em', borderCollapse: 'separate' }}
       {...props}
     >
       <tbody>
+        {/* width must be inline for table layout in email clients */}
         <tr style={{ width: '100%' }}>
           <td className={className} style={style}>{children}</td>
         </tr>

@@ -2,8 +2,8 @@ import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+import { pluginSass } from '@rsbuild/plugin-sass';
 import { rsbuildPluginEmail } from './src/build/rsbuildPluginEmail';
-import tailwindConfig from './tailwind.config';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -38,10 +38,14 @@ const buildEnvironments = {
       },
     },
     output: {
-      target: 'node' as const,
-      distPath: { root: 'dist/server' },
-      filename: { js: '[name].cjs' },
+      // Use web target so rspack extracts CSS to separate files instead of
+      // discarding it (node target only exports class name mappings). The
+      // email templates are pure React — no Node.js APIs — so web works fine.
+      target: 'web' as const,
+      distPath: { root: 'dist/server', js: '', css: '' },
+      filename: { js: '[name].cjs', css: '[name].css' },
       minify: false,
+      injectStyles: false,
     },
     // rspack needs these flags to preserve all named exports from the bundle.
     // Without them, the template components get tree-shaken or lost during
@@ -65,7 +69,8 @@ const buildEnvironments = {
 export default defineConfig({
   plugins: [
     pluginReact(),
-    ...(!isDev ? [rsbuildPluginEmail({ outDir, tailwindConfig })] : []),
+    pluginSass(),
+    ...(!isDev ? [rsbuildPluginEmail({ outDir })] : []),
   ],
   environments: isDev ? devEnvironments : buildEnvironments,
   server: {
