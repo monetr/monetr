@@ -1,21 +1,27 @@
 import type React from 'react';
+import { Section } from './Section';
+import styles from './Button.module.scss';
 
-export type ButtonProps = React.ComponentPropsWithoutRef<'a'>;
+export type ButtonProps = React.ComponentPropsWithoutRef<'a'> & {
+  children: React.ReactNode;
+};
 
-export function Button({ children, style, target = '_blank', ...props }: ButtonProps) {
+export function Button({ children, target = '_blank', ...props }: ButtonProps) {
   return (
-    <a
-      // Inline styles required for email client compatibility — some clients
-      // strip <style> tags entirely, so these must survive as inline attributes.
-      style={{
-        display: 'inline-block',
-        textDecoration: 'none',
-        ...style,
-      }}
-      target={target}
-      {...props}
-    >
-      {children}
-    </a>
+    <Section className={styles.section}>
+      <a
+        // Inline styles required for email client compatibility — some clients
+        // strip <style> tags entirely, so these must survive as inline attributes.
+        style={{
+          display: 'inline-block',
+          textDecoration: 'none',
+        }}
+        className={styles.button}
+        target={target}
+        {...props}
+      >
+        <p className={styles.text}>{children}</p>
+      </a>
+    </Section>
   );
 }

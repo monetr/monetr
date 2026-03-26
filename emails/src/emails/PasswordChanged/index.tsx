@@ -1,7 +1,6 @@
+import { Heading, Hr, Link, Text } from '../../components/email';
 import EmailLayout from '../../components/EmailLayout';
 import EmailLogo from '../../components/EmailLogo';
-import { Heading, Hr, Link, Text } from '../../components/email';
-import styles from '../../styles/email.module.scss';
 
 interface PasswordChangedProps {
   baseUrl?: string;
@@ -20,28 +19,23 @@ export const PasswordChanged = ({
   return (
     <EmailLayout previewText={previewText}>
       <EmailLogo baseUrl={baseUrl} />
-      <Heading className={styles.heading}>
+      <Heading>
         Your password for <strong>monetr</strong> has been updated
       </Heading>
-      <Text className={styles.bodyText}>Hello {firstName},</Text>
-      <Text className={styles.bodyText}>
+      <Text>Hello {firstName},</Text>
+      <Text>
         If you did not initiate the change in your password please reach out to us immediately via our support email:{' '}
-        <Link className={styles.footerLink} href={`mailto:${supportEmail}`}>
-          {supportEmail}
-        </Link>
+        <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>
       </Text>
-      <Hr className={styles.hr} />
-      <Text className={styles.footerText}>
+      <Hr />
+      <Text variant='footer'>
         This message was intended for{' '}
-        <span className={styles.footerName}>
+        <span style={{ color: '#000' }}>
           {firstName} {lastName}
         </span>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
         communication please reach out to{' '}
-        <Link className={styles.footerLink} href={`mailto:${supportEmail}`}>
-          {supportEmail}
-        </Link>
-        .
+        <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
       </Text>
     </EmailLayout>
   );

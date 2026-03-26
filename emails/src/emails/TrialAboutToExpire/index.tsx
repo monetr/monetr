@@ -1,7 +1,6 @@
+import { Heading, Hr, Link, Text } from '../../components/email';
 import EmailLayout from '../../components/EmailLayout';
 import EmailLogo from '../../components/EmailLogo';
-import { Heading, Hr, Link, Text } from '../../components/email';
-import styles from '../../styles/email.module.scss';
 
 interface TrialAboutToExpireProps {
   baseUrl?: string;
@@ -24,32 +23,29 @@ export const TrialAboutToExpire = ({
   return (
     <EmailLayout previewText={previewText}>
       <EmailLogo baseUrl={baseUrl} />
-      <Heading className={styles.heading}>
+      <Heading>
         Your trial for <strong>monetr</strong> is about to expire
       </Heading>
-      <Text className={styles.bodyText}>Hello {firstName},</Text>
-      <Text className={styles.bodyText}>
+      <Text>Hello {firstName},</Text>
+      <Text>
         We are just letting you know that your trial is about to expire. Don't worry, if you don't want to continue
         using monetr then no action is required on your part. If you would like to continue using monetr though, you
         will need to setup a subscription the next time you login.
       </Text>
-      <Text className={styles.bodyText}>
+      <Text>
         Your trial will expire in about <strong>{trialExpirationWindow}</strong> on{' '}
         <strong>{trialExpirationDate}</strong>.
       </Text>
-      <Text className={styles.bodyText}>Thank you for trying out monetr!</Text>
-      <Hr className={styles.hr} />
-      <Text className={styles.footerText}>
+      <Text>Thank you for trying out monetr!</Text>
+      <Hr />
+      <Text variant='footer'>
         This message was intended for{' '}
-        <span className={styles.footerName}>
+        <span style={{ color: '#000' }}>
           {firstName} {lastName}
         </span>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
         communication please reach out to{' '}
-        <Link className={styles.footerLink} href={`mailto:${supportEmail}`}>
-          {supportEmail}
-        </Link>
-        .
+        <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
       </Text>
     </EmailLayout>
   );

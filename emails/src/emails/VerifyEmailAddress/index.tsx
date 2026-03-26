@@ -1,7 +1,6 @@
+import { Button, Heading, Hr, Link, Text } from '../../components/email';
 import EmailLayout from '../../components/EmailLayout';
 import EmailLogo from '../../components/EmailLogo';
-import { Button, Heading, Hr, Link, Section, Text } from '../../components/email';
-import styles from '../../styles/email.module.scss';
 
 interface VerifyEmailProps {
   baseUrl?: string;
@@ -22,30 +21,23 @@ export const VerifyEmailAddress = ({
   return (
     <EmailLayout previewText={previewText}>
       <EmailLogo baseUrl={baseUrl} />
-      <Heading className={styles.heading}>
+      <Heading>
         Verify your email address for <strong>monetr</strong>
       </Heading>
-      <Text className={styles.bodyText}>Hello {firstName},</Text>
-      <Text className={styles.bodyText}>
+      <Text>Hello {firstName},</Text>
+      <Text>
         Thank you for signing up for monetr, in order to use your account we ask that you verify your email address.
       </Text>
-      <Section className={styles.buttonSection}>
-        <Button className={styles.button} href={inviteLink}>
-          <Text className={styles.buttonText}>Verify email address</Text>
-        </Button>
-      </Section>
-      <Hr className={styles.hr} />
-      <Text className={styles.footerText}>
+      <Button href={inviteLink}>Verify email address</Button>
+      <Hr />
+      <Text variant='footer'>
         This message was intended for{' '}
-        <span className={styles.footerName}>
+        <span style={{ color: '#000' }}>
           {firstName} {lastName}
         </span>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
         communication please reach out to{' '}
-        <Link className={styles.footerLink} href={`mailto:${supportEmail}`}>
-          {supportEmail}
-        </Link>
-        .
+        <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
       </Text>
     </EmailLayout>
   );

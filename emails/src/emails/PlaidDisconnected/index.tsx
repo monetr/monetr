@@ -1,7 +1,6 @@
+import { Button, Heading, Hr, Link, Text } from '../../components/email';
 import EmailLayout from '../../components/EmailLayout';
 import EmailLogo from '../../components/EmailLogo';
-import { Button, Heading, Hr, Link, Section, Text } from '../../components/email';
-import styles from '../../styles/email.module.scss';
 
 interface PlaidDisconnectedProps {
   baseUrl?: string;
@@ -24,29 +23,22 @@ export const PlaidDisconnected = ({
   return (
     <EmailLayout previewText={previewText}>
       <EmailLogo baseUrl={baseUrl} />
-      <Heading className={styles.heading}>One of your linked accounts has been disconnected</Heading>
-      <Text className={styles.bodyText}>Hello {firstName},</Text>
-      <Text className={styles.bodyText}>
+      <Heading>One of your linked accounts has been disconnected</Heading>
+      <Text>Hello {firstName},</Text>
+      <Text>
         Your <strong>{linkName}</strong> account connected via Plaid needs to be reauthenticated. This account will not
         receive automatic updates until the link has been updated.
       </Text>
-      <Section className={styles.buttonSection}>
-        <Button className={styles.button} href={linkURL}>
-          <Text className={styles.buttonText}>Reconnect {linkName}</Text>
-        </Button>
-      </Section>
-      <Hr className={styles.hr} />
-      <Text className={styles.footerText}>
+      <Button href={linkURL}>Reconnect {linkName}</Button>
+      <Hr />
+      <Text variant='footer'>
         This message was intended for{' '}
-        <span className={styles.footerName}>
+        <span style={{ color: '#000' }}>
           {firstName} {lastName}
         </span>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
         communication please reach out to{' '}
-        <Link className={styles.footerLink} href={`mailto:${supportEmail}`}>
-          {supportEmail}
-        </Link>
-        .
+        <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
       </Text>
     </EmailLayout>
   );
