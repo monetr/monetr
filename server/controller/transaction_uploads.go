@@ -135,8 +135,11 @@ func (c *Controller) getTransactionUploadProgress(ctx echo.Context) error {
 	}
 	defer listener.Close()
 
-	timeout := time.NewTimer(1 * time.Minute)
+	timeout := time.NewTimer(2 * time.Minute)
 	defer timeout.Stop()
+
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
 
 	websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()
@@ -163,6 +166,32 @@ func (c *Controller) getTransactionUploadProgress(ctx echo.Context) error {
 					"status": "timed out",
 				})
 				break ListenerLoop
+			case <-ticker.C:
+				log.DebugContext(c.getContext(ctx), "no updated to transaction upload in 5 seconds, checking status from DB manually")
+				upload, err := repo.GetTransactionUpload(
+					c.getContext(ctx),
+					bankAccountId,
+					transactionUploadId,
+				)
+				if err != nil {
+					log.WarnContext(c.getContext(ctx), "failed to retrieve status of transaction upload from DB manually", "err", err)
+					continue
+				}
+
+				// Send the status over the socket since we manually pulled it from the
+				// DB. This way if we somehow miss a notification, we still get the
+				// behavior we want.
+				if err := c.sendWebsocketMessage(ctx, ws, map[string]any{
+					"status": upload.Status,
+				}); err != nil {
+					return
+				}
+
+				switch TransactionUploadStatus(upload.Status) {
+				case TransactionUploadStatusComplete, TransactionUploadStatusFailed:
+					log.With("status", upload.Status).DebugContext(c.getContext(ctx), "observed final status, ending socket")
+					break ListenerLoop
+				}
 			case status := <-listener.Channel():
 				log.With("status", status).DebugContext(c.getContext(ctx), "sending status message for transaction upload")
 				if err := c.sendWebsocketMessage(ctx, ws, map[string]any{
