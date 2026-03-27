@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.12.0](https://github.com/monetr/monetr/compare/v1.11.0...v1.12.0) (2026-03-27)
+
+
+### Features
+
+* **api:** Improve SIMD performance ([#3034](https://github.com/monetr/monetr/issues/3034)) ([6067c29](https://github.com/monetr/monetr/commit/6067c296541dcbaede0e484d734b7b98848ee572))
+* **api:** New background processing queue system ([#3006](https://github.com/monetr/monetr/issues/3006)) ([1f6dac5](https://github.com/monetr/monetr/commit/1f6dac5f04befcde6aa5cd253e8f0fec2e66fc0b))
+
+
+### Dependencies
+
+* **api:** update aws-sdk-go-v2 monorepo ([#3031](https://github.com/monetr/monetr/issues/3031)) ([d830ba3](https://github.com/monetr/monetr/commit/d830ba34ae79c1940a173660f92bca6c5d9cbbd8))
+* **api:** update module github.com/aws/aws-sdk-go-v2/service/s3 to v1.97.0 ([#3013](https://github.com/monetr/monetr/issues/3013)) ([5bf6ee1](https://github.com/monetr/monetr/commit/5bf6ee1685582090a7fbd73ca6f8bc9bf280ebb9))
+* **api:** update module github.com/aws/aws-sdk-go-v2/service/s3 to v1.97.2 ([#3037](https://github.com/monetr/monetr/issues/3037)) ([062215c](https://github.com/monetr/monetr/commit/062215c761a9d6030e3a770aed1a47f63b4d1444))
+* **api:** update module golang.org/x/crypto to v0.49.0 ([#3014](https://github.com/monetr/monetr/issues/3014)) ([3d22cea](https://github.com/monetr/monetr/commit/3d22cea4a927eef7714e7cb58c8993f9594a3fcc))
+* **api:** update module golang.org/x/net to v0.52.0 ([#3015](https://github.com/monetr/monetr/issues/3015)) ([2bfafb3](https://github.com/monetr/monetr/commit/2bfafb3fd03ea09d5efad599e3b80fc9e96e3841))
+* **renovate:** update docker/setup-buildx-action action to v4 ([#3022](https://github.com/monetr/monetr/issues/3022)) ([f0d4279](https://github.com/monetr/monetr/commit/f0d42792a5c16540734f60c34dc327676ed85d11))
+* **renovate:** update docker/setup-qemu-action action to v4 ([#3023](https://github.com/monetr/monetr/issues/3023)) ([83f0c7a](https://github.com/monetr/monetr/commit/83f0c7a11f15433b192d786c749493fec3881e2b))
+* **renovate:** update module golang.org/x/tools/cmd/stringer to v0.43.0 ([#3019](https://github.com/monetr/monetr/issues/3019)) ([13a6e5f](https://github.com/monetr/monetr/commit/13a6e5f94634c663c345d4faa317ddd10ef1a169))
+* **ui:** update dependency @imagemagick/magick-wasm to v0.0.39 ([#3033](https://github.com/monetr/monetr/issues/3033)) ([9429e21](https://github.com/monetr/monetr/commit/9429e21b397df5a8704d33452f1da9d7f425c631))
+* **ui:** update dependency @rstest/core to v0.9.5 ([#3044](https://github.com/monetr/monetr/issues/3044)) ([e26b46c](https://github.com/monetr/monetr/commit/e26b46c17cff80ef3f18fc31ae85d44f6992be9b))
+* **ui:** update dependency @swc/core to v1.15.21 ([#3035](https://github.com/monetr/monetr/issues/3035)) ([ed8b6fa](https://github.com/monetr/monetr/commit/ed8b6faf240acc4c248690b29351286bf0c7b7ee))
+* **ui:** update dependency @tanstack/react-query to v5.95.2 ([#3046](https://github.com/monetr/monetr/issues/3046)) ([74c2539](https://github.com/monetr/monetr/commit/74c2539c10928c21c3d2e197204205636c24c49b))
+* **ui:** update dependency axios to v1.13.6 ([#2967](https://github.com/monetr/monetr/issues/2967)) ([dc0b835](https://github.com/monetr/monetr/commit/dc0b835465049d98c89200dbf5149a65baeb5b91))
+* **ui:** update dependency next to v15.5.14 [security] ([#3029](https://github.com/monetr/monetr/issues/3029)) ([a70363b](https://github.com/monetr/monetr/commit/a70363bb4a9b331322a606cc6a5c75c90e16ad92))
+* **ui:** update dependency react-number-format to v5.4.5 ([#3036](https://github.com/monetr/monetr/issues/3036)) ([1253a5a](https://github.com/monetr/monetr/commit/1253a5ab8aa34683a0623c004b5bf5a8fd6d838f))
+* **ui:** update rsbuild ([#3042](https://github.com/monetr/monetr/issues/3042)) ([96263a6](https://github.com/monetr/monetr/commit/96263a61c981a6432a7c63a9257c10e141f6900c))
+* **ui:** update sentry-javascript monorepo ([#3047](https://github.com/monetr/monetr/issues/3047)) ([50a5b76](https://github.com/monetr/monetr/commit/50a5b76368fd34ee60052fdbec47b9fc5f36cceb))
+* **ui:** update sentry-javascript monorepo to v10.43.0 ([#3020](https://github.com/monetr/monetr/issues/3020)) ([911175d](https://github.com/monetr/monetr/commit/911175d02531c419138f6605394356adaef06688))
+
+
+### Bug Fixes
+
+* **api:** AWS Logs are not properly formatted ([0f3f9d0](https://github.com/monetr/monetr/commit/0f3f9d044986e6d3e0a4c0a6bc8954ab7367d6fa)), closes [#3026](https://github.com/monetr/monetr/issues/3026)
+* **api:** Finish upgrading to aws sdk v2 ([#3027](https://github.com/monetr/monetr/issues/3027)) ([ae407c0](https://github.com/monetr/monetr/commit/ae407c019cc8a1e07c5f03e37adf1e188678413c))
+* **api:** Fixing OFX upload websocket ([513c5a6](https://github.com/monetr/monetr/commit/513c5a6aa47b73c0e29676a9afdac97e6d57170d))
+* **ui:** Fix new bank account modal test ([45310d9](https://github.com/monetr/monetr/commit/45310d91b0576496cbcd6543518b4a20e8cc4469))
+* **ui:** Fix over requesting the pre-load assets ([92f819b](https://github.com/monetr/monetr/commit/92f819bdf7894bf2d74d7fbdd6371316768a8316))
+* **ui:** Removing dead code + dependency ([7d86a5d](https://github.com/monetr/monetr/commit/7d86a5d1f447a55467fa3833e1972ee3fc66d1c0))
+* **ui:** Removing infinite scroll dependency ([463136e](https://github.com/monetr/monetr/commit/463136ef014aca74b12f354c86f006255011eb6e))
+* **ui:** Upgrading to the latest jest version ([#3030](https://github.com/monetr/monetr/issues/3030)) ([6217e0c](https://github.com/monetr/monetr/commit/6217e0c4dc6b54e5aac20bb30bfe0bd731692c25))
+
+
+### Refactor
+
+* **api:** Adding more tests to the controller ([#3007](https://github.com/monetr/monetr/issues/3007)) ([cd2a1e9](https://github.com/monetr/monetr/commit/cd2a1e9173b0af7d6a55c4f1b4c2346372a7926f))
+* **api:** Cleaning up dead code ([0514996](https://github.com/monetr/monetr/commit/051499612a5d31f2515d42ac67d68466d4f9849f))
+* **api:** Improved CSP header behavior ([b27723b](https://github.com/monetr/monetr/commit/b27723bd4d53dfa7f9e61985e7fa8fff2140952d))
+* **api:** Improving performance of vector normalization ([b7c20ca](https://github.com/monetr/monetr/commit/b7c20caaa924129826eb8b84ea9976d19575e2b7))
+* **api:** More dependency trimming, removing google/uuid ([2b90a3f](https://github.com/monetr/monetr/commit/2b90a3f38bd1e490e6bf183b6046152387bda056))
+* **api:** Removing go-linq as a dependency ([8e8bbb7](https://github.com/monetr/monetr/commit/8e8bbb752db1d2927c87c67c0878ebab2d6e4042))
+* **ui:** Fixing more page styles ([2603350](https://github.com/monetr/monetr/commit/26033500fce0d66eeeff9825aee1ca323d007022))
+* **ui:** Improve flash of missing font ([7474cf4](https://github.com/monetr/monetr/commit/7474cf449533514e12f75193649c0638e46b1505))
+* **ui:** Migrating frontend to use rstest ([#3043](https://github.com/monetr/monetr/issues/3043)) ([4f5da4c](https://github.com/monetr/monetr/commit/4f5da4ce4072f6697ffea29f39a1553bc6a74865))
+* **ui:** More progress on UI refactor ([821ab4d](https://github.com/monetr/monetr/commit/821ab4d876cbac163f859b618635446b42ccd1a6))
+
 ## [1.11.0](https://github.com/monetr/monetr/compare/v1.10.4...v1.11.0) (2026-03-13)
 
 
