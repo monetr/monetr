@@ -67,6 +67,15 @@ type BaseRepository interface {
 	GetSpendingExists(ctx context.Context, bankAccountId ID[BankAccount], spendingId ID[Spending]) (bool, error)
 	GetTransaction(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*Transaction, error)
 	GetTransactions(ctx context.Context, bankAccountId ID[BankAccount], limit, offset int) ([]Transaction, error)
+	// GetTransactionsForSimilarity will return all of the non-deleted
+	// transactions for an account in date ascending order. This is the opposite
+	// of what [BaseRepository.GetTransactions] does, and this function also does
+	// not take any pagination parameters and returns all of the data in a single
+	// chunk. This is intended only for use within similarity calculations.
+	GetTransactionsForSimilarity(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+	) ([]Transaction, error)
 	// GetPendingTransactions is the same as GetTransactions but will only return
 	// transactions that are currently in a pending state. It will not return
 	// transactions that have been deleted.
@@ -119,6 +128,10 @@ type BaseRepository interface {
 		bankAccountId ID[BankAccount],
 		clusters []TransactionCluster,
 	) (updated []TransactionCluster, err error)
+	GetTransactionClusterMembersByBankAccount(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+	) ([]TransactionClusterMember, error)
 	// GetTransactionClusterByMember will return a transaction cluster that
 	// contains the specified transaction ID as a member for the specified bank.
 	// If no cluster can be found then nil and pg.NoRows will be returned

@@ -122,15 +122,7 @@ func (p *TFIDF) indexWords() (mapping map[string]int, vectorSize int) {
 	// Only calculate the index once. This way we can use it elsewhere if we need
 	// to get information back out of the transform after we are done.
 	if len(p.wordToIndex) == 0 {
-		// Count the number of words that have more than one appearance, words that
-		// only have a single appearance are not important to include in the vector.
-		wordCount := 0
-		for _, count := range p.wc {
-			if count == 1 {
-				continue
-			}
-			wordCount++
-		}
+		wordCount := len(p.wc)
 
 		// Define the length of the vector and adjust it to be divisible by 32. This
 		// will enable us to leverage SIMD in the future. By using 32 we are
@@ -139,10 +131,7 @@ func (p *TFIDF) indexWords() (mapping map[string]int, vectorSize int) {
 		p.wordToIndex = make(map[string]int)
 		p.indexToWord = make([]string, vectorLength)
 		allWords := make([]string, 0, len(p.wc))
-		for word, count := range p.wc {
-			if count == 1 {
-				continue
-			}
+		for word := range p.wc {
 			allWords = append(allWords, word)
 		}
 		// Make the order of word indicies consistent between runs of the same data.
