@@ -11,6 +11,30 @@ import (
 	"github.com/pkg/errors"
 )
 
+func (r *repositoryBase) GetTransactionClusterMembersByBankAccount(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+) ([]TransactionClusterMember, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var result []TransactionClusterMember
+	if err := r.txn.ModelContext(
+		span.Context(),
+		&result,
+	).Where(`"transaction_cluster_member"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_cluster_member"."bank_account_id" = ?`, bankAccountId).
+		Select(&result); err != nil {
+		return nil, crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to retrieve all transaction cluster members",
+		)
+	}
+
+	return result, nil
+}
+
 func (r *repositoryBase) WriteTransactionClusters(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],

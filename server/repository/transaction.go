@@ -179,6 +179,40 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId ID[B
 	return items, nil
 }
 
+func (r *repositoryBase) GetTransactionsForSimilarity(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+) ([]Transaction, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]any{
+		"accountId":     r.AccountId(),
+		"bankAccountId": bankAccountId,
+	}
+
+	items := make([]Transaction, 0)
+	err := r.txn.ModelContext(span.Context(), &items).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."deleted_at" IS NULL`).
+		Order(`date ASC`).
+		Order(`transaction_id ASC`).
+		Select(&items)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, crumbs.WrapError(
+			span.Context(),
+			err,
+			"failed to retrieve transactions",
+		)
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return items, nil
+}
+
 func (r *repositoryBase) GetPendingTransactions(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],
