@@ -8,6 +8,8 @@ import (
 	"runtime/debug"
 	"time"
 
+	"log/slog"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
@@ -16,7 +18,6 @@ import (
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
-	"log/slog"
 
 	"github.com/pkg/errors"
 )
@@ -299,6 +300,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/bank_accounts/:bankAccountId/transactions", c.getTransactions)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/:transactionId", c.getTransactionById)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/:transactionId/similar", c.getSimilarTransactionsById)
+	billed.GET("/bank_accounts/:bankAccountId/transactions/similar/:transactionClusterId", c.getSimilarTransactionsByClusterId)
 	billed.POST("/bank_accounts/:bankAccountId/transactions", c.postTransactions)
 	billed.POST("/bank_accounts/:bankAccountId/transactions/upload", c.postTransactionUpload)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId", c.getTransactionUploadById)

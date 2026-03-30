@@ -10,7 +10,7 @@ import (
 type TransactionClusterMember struct {
 	tableName string `pg:"transaction_cluster_members"`
 
-	TransactionId        ID[Transaction]        `json:"transactionId" pg:"transaction_id"`
+	TransactionId        ID[Transaction]        `json:"transactionId" pg:"transaction_id,notnull,pk"`
 	Transaction          *Transaction           `json:"-" pg:"rel:has-one"`
 	AccountId            ID[Account]            `json:"-" pg:"account_id,notnull,pk"`
 	Account              *Account               `json:"-" pg:"rel:has-one"`

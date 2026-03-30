@@ -148,7 +148,11 @@ func (r *repositoryBase) GetTransactonsByUploadIdentifier(
 	return result, nil
 }
 
-func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId ID[BankAccount], limit, offset int) ([]Transaction, error) {
+func (r *repositoryBase) GetTransactions(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	limit, offset int,
+) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -161,6 +165,7 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId ID[B
 
 	items := make([]Transaction, 0)
 	err := r.txn.ModelContext(span.Context(), &items).
+		Relation("TransactionClusterMember").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."deleted_at" IS NULL`).
@@ -301,6 +306,7 @@ func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId ID[Ba
 		Relation("LunchFlowTransaction").
 		Relation("PlaidTransaction").
 		Relation("PendingPlaidTransaction").
+		Relation("TransactionClusterMember").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).

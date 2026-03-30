@@ -132,11 +132,46 @@ type BaseRepository interface {
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
 	) ([]TransactionClusterMember, error)
+	// UpsertTransactionClusters will insert or update the provided clusters by
+	// their primary key. Unlike WriteTransactionClusters this method does not
+	// delete any existing clusters, it only inserts or updates.
+	UpsertTransactionClusters(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		clusters []TransactionCluster,
+	) error
+	// DeleteTransactionClusters removes the specified clusters by their IDs.
+	// Member rows referencing these clusters will be cascade deleted.
+	DeleteTransactionClusters(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		clusterIds []ID[TransactionCluster],
+	) error
+	// UpsertTransactionClusterMembers will insert new member rows or update
+	// existing ones if the transaction is already a member of a different
+	// cluster.
+	UpsertTransactionClusterMembers(
+		ctx context.Context,
+		members []TransactionClusterMember,
+	) error
+	// DeleteTransactionClusterMembers removes member rows for the specified
+	// transaction IDs within the given bank account.
+	DeleteTransactionClusterMembers(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionIds []ID[Transaction],
+	) error
 	// GetTransactionClusterByMember will return a transaction cluster that
 	// contains the specified transaction ID as a member for the specified bank.
 	// If no cluster can be found then nil and pg.NoRows will be returned
 	// (wrapped).
 	GetTransactionClusterByMember(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*TransactionCluster, error)
+	GetTransactionsByCluster(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionClusterId ID[TransactionCluster],
+		limit, offset int,
+	) ([]Transaction, error)
 
 	GetTransactionUpload(
 		ctx context.Context,
