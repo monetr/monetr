@@ -21,9 +21,14 @@ ON "transaction_cluster_members" ("account_id", "bank_account_id", "transaction_
 
 INSERT INTO "transaction_cluster_members" ("transaction_id", "account_id", "bank_account_id", "transaction_cluster_id")
 SELECT
-  UNNEST("txc"."members") AS "transaction_id",
+  "m"."transaction_id",
   "txc"."account_id",
   "txc"."bank_account_id",
   "txc"."transaction_cluster_id"
-FROM "transaction_clusters" AS "txc";
+FROM "transaction_clusters" AS "txc"
+CROSS JOIN LATERAL UNNEST("txc"."members") AS "m"("transaction_id")
+INNER JOIN "transactions" AS "t"
+  ON "t"."transaction_id" = "m"."transaction_id"
+  AND "t"."account_id" = "txc"."account_id"
+  AND "t"."bank_account_id" = "txc"."bank_account_id";
 
