@@ -299,7 +299,11 @@ func (r *repositoryBase) GetTransactionsForSpending(
 	return items, nil
 }
 
-func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*Transaction, error) {
+func (r *repositoryBase) GetTransaction(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	transactionId ID[Transaction],
+) (*Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

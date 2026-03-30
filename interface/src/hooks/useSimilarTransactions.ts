@@ -14,7 +14,7 @@ export function useSimilarTransactions(
     [],
   );
   return useInfiniteQuery<Array<WithJsonValues<Transaction>>, unknown, Array<Transaction>>({
-    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/transactions/similar/${transactionClusterId}`],
+    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/similar/${transactionClusterId}/transactions`],
     initialPageParam: 0,
     getNextPageParam: (_, pages) => {
       // If there are no more pages then we should return null.
