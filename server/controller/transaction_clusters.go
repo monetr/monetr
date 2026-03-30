@@ -46,3 +46,28 @@ func (c *Controller) getSimilarTransactionsByClusterId(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, transactions)
 }
+
+func (c *Controller) getSimilarTransactionCluster(ctx echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	transactionClusterId, err := ParseID[TransactionCluster](ctx.Param("transactionClusterId"))
+	if err != nil || transactionClusterId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid transaction cluster Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	transactionCluster, err := repo.GetTransactionCluster(
+		c.getContext(ctx),
+		bankAccountId,
+		transactionClusterId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve transaction cluster")
+	}
+
+	return ctx.JSON(http.StatusOK, transactionCluster)
+}

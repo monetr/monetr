@@ -267,6 +267,36 @@ func (r *repositoryBase) GetTransactionClusterByMember(
 	return &cluster, nil
 }
 
+func (r *repositoryBase) GetTransactionCluster(
+	ctx context.Context,
+	bankAccountId ID[BankAccount],
+	transactionClusterId ID[TransactionCluster],
+) (*TransactionCluster, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]any{
+		"accountId":            r.AccountId(),
+		"bankAccountId":        bankAccountId,
+		"transactionClusterId": transactionClusterId,
+	}
+
+	var result TransactionCluster
+	err := r.txn.ModelContext(span.Context(), &result).
+		Where(`"transaction_cluster"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction_cluster"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction_cluster"."transaction_cluster_id" = ?`, transactionClusterId).
+		Select(&result)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve transaction cluster")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return &result, nil
+}
+
 func (r *repositoryBase) GetTransactionsByCluster(
 	ctx context.Context,
 	bankAccountId ID[BankAccount],
