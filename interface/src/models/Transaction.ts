@@ -1,6 +1,9 @@
+import TransactionClusterMember from '@monetr/interface/models/TransactionClusterMember';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export default class Transaction {
+  readonly identityPrefix = 'txn';
+
   transactionId: string;
   bankAccountId: string;
   amount: number;
@@ -14,12 +17,15 @@ export default class Transaction {
   merchantName?: string;
   originalMerchantName?: string;
   isPending: boolean;
+  transactionClusterMember?: TransactionClusterMember;
   createdAt: Date;
 
   constructor(data?: Partial<Transaction>) {
     if (data) {
       Object.assign(this, {
         ...data,
+        transactionClusterMember:
+          Boolean(data?.transactionClusterMember) && new TransactionClusterMember(data.transactionClusterMember),
         date: parseDate(data?.date),
         authorizedDate: parseDate(data?.authorizedDate),
         createdAt: parseDate(data?.createdAt),

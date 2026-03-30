@@ -15,14 +15,15 @@ CREATE TABLE "transaction_cluster_members" (
   CONSTRAINT "fk_transaction_cluster_members_transaction" FOREIGN KEY ("transaction_id", "account_id", "bank_account_id") REFERENCES "transactions" ("transaction_id", "account_id", "bank_account_id") ON DELETE CASCADE
 );
 
+-- Will make the similar transaction read very fast.
+CREATE INDEX "ix_transaction_cluster_members_bank_account"
+ON "transaction_cluster_members" ("account_id", "bank_account_id", "transaction_cluster_id");
+
 INSERT INTO "transaction_cluster_members" ("transaction_id", "account_id", "bank_account_id", "transaction_cluster_id")
 SELECT
-  array_agg("txc"."members") as "transaction_id",
+  UNNEST("txc"."members") AS "transaction_id",
   "txc"."account_id",
   "txc"."bank_account_id",
   "txc"."transaction_cluster_id"
-FROM "transaction_clusters" AS "txc"
-GROUP BY
-  "txc"."account_id",
-  "txc"."bank_account_id",
-  "txc"."transaction_cluster_id";
+FROM "transaction_clusters" AS "txc";
+
