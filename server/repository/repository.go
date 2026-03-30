@@ -166,6 +166,11 @@ type BaseRepository interface {
 	// If no cluster can be found then nil and pg.NoRows will be returned
 	// (wrapped).
 	GetTransactionClusterByMember(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*TransactionCluster, error)
+	GetTransactionCluster(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionClusterId ID[TransactionCluster],
+	) (*TransactionCluster, error)
 	GetTransactionsByCluster(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],

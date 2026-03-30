@@ -13,7 +13,7 @@ export function useSimilarTransactions(
     [],
   );
   return useInfiniteQuery<Array<Partial<Transaction>>, unknown, Array<Transaction>>({
-    queryKey: [`/bank_accounts/${selectedBankAccountId}/transactions/similar/${transactionClusterId}`],
+    queryKey: [`/bank_accounts/${selectedBankAccountId}/similar/${transactionClusterId}/transactions`],
     initialPageParam: 0,
     getNextPageParam: (_, pages) => {
       // If there are no more pages then we should return null.

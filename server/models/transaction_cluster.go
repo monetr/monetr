@@ -29,14 +29,14 @@ type TransactionCluster struct {
 	Centroid     *ID[Transaction]              `json:"centroid" pg:"centroid"`
 	Name         string                        `json:"name" pg:"name,notnull"`
 	OriginalName string                        `json:"originalName" pg:"original_name,notnull"`
-	Members      []ID[Transaction]             `json:"members" pg:"members,notnull,type:'varchar(32)[]'"`
+	Members      []ID[Transaction]             `json:"-" pg:"members,notnull,type:'varchar(32)[]'"`
 	Debug        []TransactionClusterDebugItem `json:"debug" pg:"debug,type:'jsonb'"`
 	Merchant     []TransactionClusterDebugItem `json:"merchant" pg:"merchant,type:'jsonb'"`
 	CreatedAt    time.Time                     `json:"createdAt" pg:"created_at,notnull,default:now()"`
 	UpdatedAt    time.Time                     `json:"updatedAt" pg:"updated_at,notnull,default:now()"`
 
 	TransactionRules          []TransactionRule          `json:"rules,omitempty" pg:"rel:has-many"`
-	TransactionClusterMembers []TransactionClusterMember `json:"transactionClusterMembers" pg:"rel:has-many"`
+	TransactionClusterMembers []TransactionClusterMember `json:"transactionClusterMembers,omitempty" pg:"rel:has-many"`
 }
 
 func (TransactionCluster) IdentityPrefix() string {
