@@ -4,11 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"runtime/debug"
 	"time"
-
-	"log/slog"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
@@ -18,7 +17,6 @@ import (
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
-
 	"github.com/pkg/errors"
 )
 
