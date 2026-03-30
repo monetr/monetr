@@ -2,34 +2,13 @@ package similar_jobs
 
 import (
 	"context"
+	"fmt"
 	"slices"
 	"testing"
 
 	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 )
-
-func memberHelper(
-	txn models.ID[models.Transaction],
-	cluster models.ID[models.TransactionCluster],
-) models.TransactionClusterMember {
-	return models.TransactionClusterMember{
-		TransactionId:        txn,
-		AccountId:            "acct_test",
-		BankAccountId:        "bac_test",
-		TransactionClusterId: cluster,
-	}
-}
-
-func clusterHelper(
-	id models.ID[models.TransactionCluster],
-	members ...models.ID[models.Transaction],
-) models.TransactionCluster {
-	return models.TransactionCluster{
-		TransactionClusterId: id,
-		Members:              members,
-	}
-}
 
 func TestDiffClusterMembers(t *testing.T) {
 	t.Run("both empty", func(t *testing.T) {
@@ -43,8 +22,14 @@ func TestDiffClusterMembers(t *testing.T) {
 
 	t.Run("no existing all new", func(t *testing.T) {
 		newClusters := []models.TransactionCluster{
-			clusterHelper("tcl_new1", "txn_1", "txn_2"),
-			clusterHelper("tcl_new2", "txn_3"),
+			{
+				TransactionClusterId: "tcl_new1",
+				Members:              []models.ID[models.Transaction]{"txn_1", "txn_2"},
+			},
+			{
+				TransactionClusterId: "tcl_new2",
+				Members:              []models.ID[models.Transaction]{"txn_3"},
+			},
 		}
 
 		diff := DiffClusterMembers(context.Background(), nil, newClusters, "acct_test", "bac_test")
@@ -58,9 +43,24 @@ func TestDiffClusterMembers(t *testing.T) {
 
 	t.Run("existing but no new clusters", func(t *testing.T) {
 		existing := []models.TransactionClusterMember{
-			memberHelper("txn_1", "tcl_old1"),
-			memberHelper("txn_2", "tcl_old1"),
-			memberHelper("txn_3", "tcl_old2"),
+			{
+				TransactionId:        "txn_1",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old1",
+			},
+			{
+				TransactionId:        "txn_2",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old1",
+			},
+			{
+				TransactionId:        "txn_3",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old2",
+			},
 		}
 
 		diff := DiffClusterMembers(context.Background(), existing, nil, "acct_test", "bac_test")
@@ -75,15 +75,36 @@ func TestDiffClusterMembers(t *testing.T) {
 
 	t.Run("perfect match same membership", func(t *testing.T) {
 		existing := []models.TransactionClusterMember{
-			memberHelper("txn_1", "tcl_old1"),
-			memberHelper("txn_2", "tcl_old1"),
-			memberHelper("txn_3", "tcl_old2"),
+			{
+				TransactionId:        "txn_1",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old1",
+			},
+			{
+				TransactionId:        "txn_2",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old1",
+			},
+			{
+				TransactionId:        "txn_3",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old2",
+			},
 		}
 		// Same members but the algorithm generates fresh IDs every time, so these
 		// should get matched back to the originals via jaccard.
 		newClusters := []models.TransactionCluster{
-			clusterHelper("tcl_fresh1", "txn_1", "txn_2"),
-			clusterHelper("tcl_fresh2", "txn_3"),
+			{
+				TransactionClusterId: "tcl_fresh1",
+				Members:              []models.ID[models.Transaction]{"txn_1", "txn_2"},
+			},
+			{
+				TransactionClusterId: "tcl_fresh2",
+				Members:              []models.ID[models.Transaction]{"txn_3"},
+			},
 		}
 
 		diff := DiffClusterMembers(context.Background(), existing, newClusters, "acct_test", "bac_test")
@@ -98,11 +119,24 @@ func TestDiffClusterMembers(t *testing.T) {
 
 	t.Run("cluster gains a new member", func(t *testing.T) {
 		existing := []models.TransactionClusterMember{
-			memberHelper("txn_1", "tcl_old1"),
-			memberHelper("txn_2", "tcl_old1"),
+			{
+				TransactionId:        "txn_1",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old1",
+			},
+			{
+				TransactionId:        "txn_2",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old1",
+			},
 		}
 		newClusters := []models.TransactionCluster{
-			clusterHelper("tcl_fresh1", "txn_1", "txn_2", "txn_3"),
+			{
+				TransactionClusterId: "tcl_fresh1",
+				Members:              []models.ID[models.Transaction]{"txn_1", "txn_2", "txn_3"},
+			},
 		}
 
 		diff := DiffClusterMembers(context.Background(), existing, newClusters, "acct_test", "bac_test")
@@ -118,12 +152,30 @@ func TestDiffClusterMembers(t *testing.T) {
 
 	t.Run("cluster loses a member", func(t *testing.T) {
 		existing := []models.TransactionClusterMember{
-			memberHelper("txn_1", "tcl_old1"),
-			memberHelper("txn_2", "tcl_old1"),
-			memberHelper("txn_3", "tcl_old1"),
+			{
+				TransactionId:        "txn_1",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old1",
+			},
+			{
+				TransactionId:        "txn_2",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old1",
+			},
+			{
+				TransactionId:        "txn_3",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old1",
+			},
 		}
 		newClusters := []models.TransactionCluster{
-			clusterHelper("tcl_fresh1", "txn_1", "txn_2"),
+			{
+				TransactionClusterId: "tcl_fresh1",
+				Members:              []models.ID[models.Transaction]{"txn_1", "txn_2"},
+			},
 		}
 
 		diff := DiffClusterMembers(context.Background(), existing, newClusters, "acct_test", "bac_test")
@@ -140,14 +192,42 @@ func TestDiffClusterMembers(t *testing.T) {
 
 	t.Run("two clusters merge into one", func(t *testing.T) {
 		existing := []models.TransactionClusterMember{
-			memberHelper("txn_1", "tcl_A"),
-			memberHelper("txn_2", "tcl_A"),
-			memberHelper("txn_3", "tcl_A"),
-			memberHelper("txn_4", "tcl_B"),
-			memberHelper("txn_5", "tcl_B"),
+			{
+				TransactionId:        "txn_1",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_A",
+			},
+			{
+				TransactionId:        "txn_2",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_A",
+			},
+			{
+				TransactionId:        "txn_3",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_A",
+			},
+			{
+				TransactionId:        "txn_4",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_B",
+			},
+			{
+				TransactionId:        "txn_5",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_B",
+			},
 		}
 		newClusters := []models.TransactionCluster{
-			clusterHelper("tcl_fresh", "txn_1", "txn_2", "txn_3", "txn_4", "txn_5"),
+			{
+				TransactionClusterId: "tcl_fresh",
+				Members:              []models.ID[models.Transaction]{"txn_1", "txn_2", "txn_3", "txn_4", "txn_5"},
+			},
 		}
 
 		diff := DiffClusterMembers(context.Background(), existing, newClusters, "acct_test", "bac_test")
@@ -171,14 +251,40 @@ func TestDiffClusterMembers(t *testing.T) {
 
 	t.Run("one cluster splits into two", func(t *testing.T) {
 		existing := []models.TransactionClusterMember{
-			memberHelper("txn_1", "tcl_old"),
-			memberHelper("txn_2", "tcl_old"),
-			memberHelper("txn_3", "tcl_old"),
-			memberHelper("txn_4", "tcl_old"),
+			{
+				TransactionId:        "txn_1",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old",
+			},
+			{
+				TransactionId:        "txn_2",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old",
+			},
+			{
+				TransactionId:        "txn_3",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old",
+			},
+			{
+				TransactionId:        "txn_4",
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old",
+			},
 		}
 		newClusters := []models.TransactionCluster{
-			clusterHelper("tcl_freshA", "txn_1", "txn_2"),
-			clusterHelper("tcl_freshB", "txn_3", "txn_4"),
+			{
+				TransactionClusterId: "tcl_freshA",
+				Members:              []models.ID[models.Transaction]{"txn_1", "txn_2"},
+			},
+			{
+				TransactionClusterId: "tcl_freshB",
+				Members:              []models.ID[models.Transaction]{"txn_3", "txn_4"},
+			},
 		}
 
 		diff := DiffClusterMembers(context.Background(), existing, newClusters, "acct_test", "bac_test")
@@ -205,15 +311,25 @@ func TestDiffClusterMembers(t *testing.T) {
 		// ~0.0099 which is way below the 0.1 threshold, so it shouldn't match.
 		existingTxns := make([]models.TransactionClusterMember, 100)
 		for i := range existingTxns {
-			existingTxns[i] = memberHelper(
-				models.ID[models.Transaction]("txn_old_"+string(rune('a'+i))),
-				"tcl_old",
-			)
+			existingTxns[i] = models.TransactionClusterMember{
+				TransactionId:        models.ID[models.Transaction](fmt.Sprintf("txn_old_%d", i)),
+				AccountId:            "acct_test",
+				BankAccountId:        "bac_test",
+				TransactionClusterId: "tcl_old",
+			}
 		}
-		existingTxns[0] = memberHelper("txn_shared", "tcl_old")
+		existingTxns[0] = models.TransactionClusterMember{
+			TransactionId:        "txn_shared",
+			AccountId:            "acct_test",
+			BankAccountId:        "bac_test",
+			TransactionClusterId: "tcl_old",
+		}
 
 		newClusters := []models.TransactionCluster{
-			clusterHelper("tcl_fresh", "txn_shared", "txn_brand_new"),
+			{
+				TransactionClusterId: "tcl_fresh",
+				Members:              []models.ID[models.Transaction]{"txn_shared", "txn_brand_new"},
+			},
 		}
 
 		diff := DiffClusterMembers(context.Background(), existingTxns, newClusters, "acct_test", "bac_test")
@@ -228,7 +344,10 @@ func TestDiffClusterMembers(t *testing.T) {
 
 	t.Run("member fields populated correctly", func(t *testing.T) {
 		newClusters := []models.TransactionCluster{
-			clusterHelper("tcl_new", "txn_1"),
+			{
+				TransactionClusterId: "tcl_new",
+				Members:              []models.ID[models.Transaction]{"txn_1"},
+			},
 		}
 
 		diff := DiffClusterMembers(context.Background(), nil, newClusters, "acct_test", "bac_test")
