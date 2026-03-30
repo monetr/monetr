@@ -115,6 +115,23 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 			"deleteMembers", len(diff.DeleteMemberIds),
 		)
 
+		for _, item := range diff.UpsertClusters {
+			log.DebugContext(
+				ctx,
+				"placeholder, triggering recurring transaction detection on transaction cluster",
+				"transactionClusterId", item.TransactionClusterId,
+			)
+		}
+
+		for _, item := range diff.InsertMembers {
+			log.DebugContext(
+				ctx,
+				"placeholder, triggering similar transaction rules for transaction",
+				"transactionId", item.TransactionId,
+				"transactionClusterId", item.TransactionClusterId,
+			)
+		}
+
 		return nil
 	})
 }
