@@ -2,6 +2,7 @@ import type BankAccount from '@monetr/interface/models/BankAccount';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID, idPrefix } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
+import TransactionClusterMember from '@monetr/interface/models/TransactionClusterMember';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -23,6 +24,7 @@ export default class Transaction {
   merchantName: string | null;
   readonly originalMerchantName: string | null;
   isPending: boolean;
+  readonly transactionClusterMember: TransactionClusterMember | null;
   readonly createdAt: Date;
 
   constructor(data: WithJsonValues<Transaction>) {
@@ -41,6 +43,9 @@ export default class Transaction {
     this.merchantName = data.merchantName ?? null;
     this.originalMerchantName = data.originalMerchantName ?? null;
     this.isPending = data.isPending;
+    this.transactionClusterMember = data.transactionClusterMember
+      ? new TransactionClusterMember(data.transactionClusterMember)
+      : null;
     this.createdAt = parseDate(data.createdAt);
   }
 

@@ -66,6 +66,8 @@ type Transaction struct {
 	Source                     TransactionSource    `json:"source" bun:"source,nullzero"`
 	CreatedAt                  time.Time            `json:"createdAt" bun:"created_at,notnull,default:now(),nullzero"`
 	DeletedAt                  *time.Time           `json:"deletedAt" bun:"deleted_at"`
+
+	TransactionClusterMember *TransactionClusterMember `json:"transactionClusterMember,omitempty" bun:"rel:has-one,join:transaction_id=transaction_id,join:account_id=account_id,join:bank_account_id=bank_account_id"`
 }
 
 func (Transaction) IdentityPrefix() string {

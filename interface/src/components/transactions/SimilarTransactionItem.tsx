@@ -8,13 +8,13 @@ import TransactionAmount from '@monetr/interface/components/transactions/Transac
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import { useTransaction } from '@monetr/interface/hooks/useTransaction';
+import type Transaction from '@monetr/interface/models/Transaction';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
 
 import styles from './SimilarTransactionItem.module.scss';
 
 export interface SimilarTransactionItemProps {
-  transactionId: string;
+  transaction: Transaction;
   /**
    * disableNavigate will remove the arrow link or the click-ability of the similar transaction item.
    */
@@ -22,11 +22,11 @@ export interface SimilarTransactionItemProps {
 }
 
 export default function SimilarTransactionItem(props: SimilarTransactionItemProps): React.JSX.Element | null {
+  const { transaction } = props;
   const { inTimezone } = useTimezone();
-  const { data: transaction, isLoading, isError } = useTransaction(props.transactionId);
   const { data: locale, isLoading: localeIsLoading } = useLocale();
 
-  if (isLoading || localeIsLoading) {
+  if (localeIsLoading) {
     return (
       <li className={styles.root}>
         <div className={styles.skeleton}>
@@ -45,7 +45,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
     );
   }
 
-  if (isError || !transaction || !locale) {
+  if (!locale) {
     return null;
   }
 
