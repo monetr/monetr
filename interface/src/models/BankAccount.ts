@@ -28,6 +28,8 @@ export enum BankAccountSubType {
 }
 
 export default class BankAccount {
+  readonly identityPrefix = 'bac';
+
   bankAccountId: string;
   linkId: string;
   lunchFlowBankAccountId?: string;

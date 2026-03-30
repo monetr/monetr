@@ -2,7 +2,6 @@ package similar_jobs
 
 import (
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
@@ -33,43 +32,104 @@ func CalculateTransactionClusters(ctx queue.Context, args CalculateTransactionCl
 
 		clustering := similar.NewSimilarTransactions_TFIDF_DBSCAN(log)
 
-		limit := 2000
-		offset := 0
-		for {
-			log.Log(ctx, logging.LevelTrace, "requesting next batch of transactions",
-				"limit", limit,
-				"offset", offset,
+		{ // Read the entire bank accounts transaction data into the dataset.
+			transactions, err := repo.GetTransactionsForSimilarity(
+				ctx,
+				args.BankAccountId,
 			)
-			transactions, err := repo.GetTransactions(ctx, args.BankAccountId, limit, offset)
 			if err != nil {
 				return errors.Wrap(err, "failed to read transactions for clustering")
 			}
-
 			for i := range transactions {
 				clustering.AddTransaction(&transactions[i])
 			}
-
-			if len(transactions) < limit {
-				log.Log(ctx, logging.LevelTrace, "reached end of transactions",
-					"count", len(transactions),
-				)
-				break
-			}
-
-			offset += len(transactions)
 		}
 
 		result := clustering.DetectSimilarTransactions(ctx)
 
-		if len(result) == 0 {
-			log.InfoContext(ctx, "no similar transactions detected, nothing to persist")
-			return nil
-		}
-
 		log.InfoContext(ctx, "similar transaction clusters detected", "clusters", len(result))
 
-		if _, err := repo.WriteTransactionClusters(ctx, args.BankAccountId, result); err != nil {
-			return errors.Wrap(err, "failed to persist the calculated transaction clusters")
+		existingMembers, err := repo.GetTransactionClusterMembersByBankAccount(
+			ctx,
+			args.BankAccountId,
+		)
+		if err != nil {
+			return err
+		}
+
+		diff := DiffClusterMembers(
+			ctx,
+			existingMembers,
+			result,
+			args.AccountId,
+			args.BankAccountId,
+		)
+
+		log.InfoContext(ctx, "cluster membership diff calculated",
+			"upsertClusters", len(diff.UpsertClusters),
+			"deleteClusters", len(diff.DeleteClusterIds),
+			"insertMembers", len(diff.InsertMembers),
+			"updateMembers", len(diff.UpdateMembers),
+			"deleteMembers", len(diff.DeleteMemberIds),
+		)
+
+		// Execute the diff in FK-safe order. Clusters must exist before members
+		// can reference them, and members must be moved away from obsolete
+		// clusters before those clusters can be deleted.
+		if err := repo.UpsertTransactionClusters(
+			ctx,
+			args.BankAccountId,
+			diff.UpsertClusters,
+		); err != nil {
+			return errors.Wrap(err, "failed to upsert transaction clusters")
+		}
+
+		if err := repo.UpsertTransactionClusterMembers(
+			ctx,
+			append(diff.InsertMembers, diff.UpdateMembers...),
+		); err != nil {
+			return errors.Wrap(err, "failed to upsert transaction cluster members")
+		}
+
+		if err := repo.DeleteTransactionClusterMembers(
+			ctx,
+			args.BankAccountId,
+			diff.DeleteMemberIds,
+		); err != nil {
+			return errors.Wrap(err, "failed to delete removed cluster members")
+		}
+
+		if err := repo.DeleteTransactionClusters(
+			ctx,
+			args.BankAccountId,
+			diff.DeleteClusterIds,
+		); err != nil {
+			return errors.Wrap(err, "failed to delete obsolete transaction clusters")
+		}
+
+		log.InfoContext(ctx, "finished updating transaction clusters",
+			"upsertClusters", len(diff.UpsertClusters),
+			"deleteClusters", len(diff.DeleteClusterIds),
+			"insertMembers", len(diff.InsertMembers),
+			"updateMembers", len(diff.UpdateMembers),
+			"deleteMembers", len(diff.DeleteMemberIds),
+		)
+
+		for _, item := range diff.UpsertClusters {
+			log.DebugContext(
+				ctx,
+				"placeholder, triggering recurring transaction detection on transaction cluster",
+				"transactionClusterId", item.TransactionClusterId,
+			)
+		}
+
+		for _, item := range diff.InsertMembers {
+			log.DebugContext(
+				ctx,
+				"placeholder, triggering similar transaction rules for transaction",
+				"transactionId", item.TransactionId,
+				"transactionClusterId", item.TransactionClusterId,
+			)
 		}
 
 		return nil

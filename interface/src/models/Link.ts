@@ -20,6 +20,8 @@ export const errorMessages = {
  * an institution. A group of bank accounts within a single "login" for that institution.
  */
 export default class Link {
+  readonly identityPrefix = 'link';
+
   /**
    * Represents the global unique identifier for a group of bank accounts in monetr.
    * This value is generated automatically by the API upon creation, and cannot be changed.

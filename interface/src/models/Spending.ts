@@ -8,6 +8,8 @@ export enum SpendingType {
 }
 
 export default class Spending {
+  readonly identityPrefix = 'spnd';
+
   spendingId: string;
   bankAccountId: string;
   fundingScheduleId: string;

@@ -55,6 +55,8 @@ type Transaction struct {
 	Source               TransactionSource `json:"source" pg:"source"`
 	CreatedAt            time.Time         `json:"createdAt" pg:"created_at,notnull,default:now()"`
 	DeletedAt            *time.Time        `json:"deletedAt" pg:"deleted_at"`
+
+	TransactionClusterMember *TransactionClusterMember `json:"transactionClusterMember,omitempty" pg:"rel:has-one"`
 }
 
 func (Transaction) IdentityPrefix() string {
