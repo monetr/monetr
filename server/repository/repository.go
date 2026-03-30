@@ -118,16 +118,6 @@ type BaseRepository interface {
 	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 	UpdateTransactions(ctx context.Context, transactions []*Transaction) error
 
-	// WriteTransactionClusters will take the array of transaction clusters
-	// provided and persist them to the trnasaction clusters table but will also
-	// delete any existing transaction clusters for the bank account specified.
-	// This is because clusters are meant to be regenerated each time new
-	// transactions come in.
-	WriteTransactionClusters(
-		ctx context.Context,
-		bankAccountId ID[BankAccount],
-		clusters []TransactionCluster,
-	) (updated []TransactionCluster, err error)
 	GetTransactionClusterMembersByBankAccount(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
@@ -165,7 +155,12 @@ type BaseRepository interface {
 	// contains the specified transaction ID as a member for the specified bank.
 	// If no cluster can be found then nil and pg.NoRows will be returned
 	// (wrapped).
-	GetTransactionClusterByMember(ctx context.Context, bankAccountId ID[BankAccount], transactionId ID[Transaction]) (*TransactionCluster, error)
+	// Deprecated: You should simply read the transaction member row instead.
+	GetTransactionClusterByMember(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionId ID[Transaction],
+	) (*TransactionCluster, error)
 	GetTransactionCluster(
 		ctx context.Context,
 		bankAccountId ID[BankAccount],
