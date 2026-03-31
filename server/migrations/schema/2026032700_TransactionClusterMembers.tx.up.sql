@@ -20,7 +20,7 @@ CREATE INDEX "ix_transaction_cluster_members_bank_account"
 ON "transaction_cluster_members" ("account_id", "bank_account_id", "transaction_cluster_id");
 
 INSERT INTO "transaction_cluster_members" ("transaction_id", "account_id", "bank_account_id", "transaction_cluster_id")
-SELECT
+SELECT DISTINCT ON ("m"."transaction_id", "txc"."account_id", "txc"."bank_account_id")
   "m"."transaction_id",
   "txc"."account_id",
   "txc"."bank_account_id",
@@ -30,5 +30,6 @@ CROSS JOIN LATERAL UNNEST("txc"."members") AS "m"("transaction_id")
 INNER JOIN "transactions" AS "t"
   ON "t"."transaction_id" = "m"."transaction_id"
   AND "t"."account_id" = "txc"."account_id"
-  AND "t"."bank_account_id" = "txc"."bank_account_id";
+  AND "t"."bank_account_id" = "txc"."bank_account_id"
+ORDER BY "m"."transaction_id", "txc"."account_id", "txc"."bank_account_id", "txc"."transaction_cluster_id";
 
