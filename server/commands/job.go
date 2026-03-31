@@ -12,6 +12,7 @@ func JobCommand(parent *cobra.Command) {
 	}
 
 	jobSyncPlaid(jobCommand)
+	jobProcessFundingSchedules(jobCommand)
 
 	parent.AddCommand(jobCommand)
 }
