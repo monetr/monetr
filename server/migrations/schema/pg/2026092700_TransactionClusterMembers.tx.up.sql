@@ -1,6 +1,7 @@
 ALTER TABLE "transaction_clusters" DROP CONSTRAINT "pk_transaction_clusters";
 ALTER TABLE "transaction_clusters" ADD CONSTRAINT "pk_transaction_clusters" PRIMARY KEY ("transaction_cluster_id", "account_id", "bank_account_id");
 
+-- TODO Add down migration or make all of this conditional
 CREATE TABLE "transaction_cluster_members" (
   "transaction_id"                VARCHAR(32) NOT NULL,
   "account_id"                    VARCHAR(32) NOT NULL,
