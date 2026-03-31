@@ -444,6 +444,44 @@ func TestPostgresProcessor_EnqueueAndExecute(t *testing.T) {
 		assert.Equal(t, 1, count, "only one job row must exist despite two enqueue calls")
 	})
 
+	t.Run("different queues with same timestamp and args are not deduplicated", func(t *testing.T) {
+		clock := clock.New()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		log := testutils.GetLog(t)
+
+		p := NewPostgresQueue(
+			t.Context(),
+			clock,
+			log,
+			config.Configuration{},
+			db,
+			nil, nil, nil, nil, nil, nil,
+		).(*postgresProcessor)
+
+		err := p.Register(t.Context(), "cron-a", func(_ Context, _ []byte) error {
+			return nil
+		})
+		assert.NoError(t, err)
+
+		err = p.Register(t.Context(), "cron-b", func(_ Context, _ []byte) error {
+			return nil
+		})
+		assert.NoError(t, err)
+
+		// Use the same timestamp and nil args, exactly like the cron consumer
+		// does when two cron jobs share the same schedule.
+		at := clock.Now().Truncate(time.Second)
+		err = p.EnqueueAt(t.Context(), "cron-a", at, nil)
+		assert.NoError(t, err, "first queue enqueue must succeed")
+
+		err = p.EnqueueAt(t.Context(), "cron-b", at, nil)
+		assert.NoError(t, err, "second queue enqueue must succeed")
+
+		count, err := db.Model(new(models.Job)).Count()
+		assert.NoError(t, err)
+		assert.Equal(t, 2, count, "both jobs must exist because they belong to different queues")
+	})
+
 	t.Run("cron job fires and is executed", func(t *testing.T) {
 		clock := clock.New()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)

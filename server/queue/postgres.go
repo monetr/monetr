@@ -251,7 +251,7 @@ type postgresProcessor struct {
 //	──────────────────────────────────────────────────────────────────
 //	Enqueue() / EnqueueAt()
 //	  │  INSERT job row (status=pending, priority=unix_ts)
-//	  │  ON CONFLICT (signature) DO NOTHING  ← deduplication
+//	  │  ON CONFLICT (queue, signature) DO NOTHING  ← deduplication
 //	  └─► notifier.notify()  ───────────────────────────────────────────────┐
 //	                                                                        │
 //	Channels (created in Start())                                           │
@@ -856,7 +856,7 @@ func (p *postgresProcessor) consumeCronMaybe(
 //	│                  nil        consumed                                 │
 //	│                    │              │                                  │
 //	│                 continue    enqueueAt(queue, next, nil)              │
-//	│                             (regular job row, deduped by sig)        │
+//	│                             (regular job row, deduped by queue+sig)  │
 //	│                             continue ────────────────────────────────┘
 //	└──────────────────────────────────────────────────────────────────────┘
 //
