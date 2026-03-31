@@ -104,7 +104,7 @@ importers:
         version: 7.0.3
       tailwindcss:
         specifier: 3.4.19
-        version: 3.4.19(ts-node@10.9.1(@swc/core@1.15.21(@swc/helpers@0.5.19))(@types/node@20.19.23)(typescript@5.9.3))
+        version: 3.4.19(ts-node@10.9.1(@swc/core@1.15.21(@swc/helpers@0.5.20))(@types/node@20.19.23)(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -251,17 +251,17 @@ importers:
         specifier: 0.0.39
         version: 0.0.39
       '@rsbuild/core':
-        specifier: 1.7.4
-        version: 1.7.4
+        specifier: 1.7.5
+        version: 1.7.5
       '@rsbuild/plugin-babel':
         specifier: 1.1.2
-        version: 1.1.2(@rsbuild/core@1.7.4)
+        version: 1.1.2(@rsbuild/core@1.7.5)
       '@rsbuild/plugin-react':
         specifier: 1.4.6
-        version: 1.4.6(@rsbuild/core@1.7.4)
+        version: 1.4.6(@rsbuild/core@1.7.5)
       '@rsbuild/plugin-sass':
         specifier: 1.5.1
-        version: 1.5.1(@rsbuild/core@1.7.4)
+        version: 1.5.1(@rsbuild/core@1.7.5)
       '@rspack/binding-linux-arm64-gnu':
         specifier: 1.7.10
         version: 1.7.10
@@ -270,7 +270,7 @@ importers:
         version: 1.7.10
       '@rstest/adapter-rsbuild':
         specifier: 0.2.4
-        version: 0.2.4(@rsbuild/core@1.7.4)(@rstest/core@0.9.5(core-js@3.47.0)(jsdom@26.1.0))
+        version: 0.2.4(@rsbuild/core@1.7.5)(@rstest/core@0.9.5(core-js@3.47.0)(jsdom@26.1.0))
       '@rstest/core':
         specifier: 0.9.5
         version: 0.9.5(core-js@3.47.0)(jsdom@26.1.0)
@@ -1981,8 +1981,8 @@ packages:
     resolution: {integrity: sha512-xBaJish5OeGmniDj9cW5PRa/PtmuVU3ziqrbr5xJj901ZDN4TosrVaNZpEiLZAxdfnhAe7uQ7QFWfjPe9d9K2Q==}
     engines: {node: '>= 10'}
 
-  '@rsbuild/core@1.7.4':
-    resolution: {integrity: sha512-1hn9j62Kkckh2CGUMQcr/H/PtHgN5iqB3kChaMCVGqxrC4jbJBQxRtuHuWVJDKeEO0uWPMABAR748qJISIyh5w==}
+  '@rsbuild/core@1.7.5':
+    resolution: {integrity: sha512-i37urpoV4y9NSsGiUOuLdoI42KJ5h4gAZ8EG8Ilmsond3bxoAoOCu7YvC+1pJ7p+r16suVPW8cki891ZKHOoXQ==}
     engines: {node: '>=18.12.0'}
     hasBin: true
 
@@ -2353,6 +2353,9 @@ packages:
 
   '@swc/helpers@0.5.19':
     resolution: {integrity: sha512-QamiFeIK3txNjgUTNppE6MiG3p7TdninpZu0E0PbqVh1a9FNLT2FRhisaa4NcaX52XVhA5l7Pk58Ft7Sqi/2sA==}
+
+  '@swc/helpers@0.5.20':
+    resolution: {integrity: sha512-2egEBHUMasdypIzrprsu8g+OEVd7Vp2MM3a2eVlM/cyFYto0nGz5BX5BTgh/ShZZI9ed+ozEq+Ngt+rgmUs8tw==}
 
   '@swc/types@0.1.25':
     resolution: {integrity: sha512-iAoY/qRhNH8a/hBvm3zKj9qQ4oc2+3w1unPJa2XvTK3XjeLXtzcCingVPw/9e5mn1+0yPqxcBGp9Jf0pkfMb1g==}
@@ -7566,11 +7569,11 @@ snapshots:
       '@resvg/resvg-js-win32-ia32-msvc': 2.6.2
       '@resvg/resvg-js-win32-x64-msvc': 2.6.2
 
-  '@rsbuild/core@1.7.4':
+  '@rsbuild/core@1.7.5':
     dependencies:
-      '@rspack/core': 1.7.10(@swc/helpers@0.5.19)
+      '@rspack/core': 1.7.10(@swc/helpers@0.5.20)
       '@rspack/lite-tapable': 1.1.0
-      '@swc/helpers': 0.5.19
+      '@swc/helpers': 0.5.20
       core-js: 3.47.0
       jiti: 2.6.1
 
@@ -7583,7 +7586,7 @@ snapshots:
     transitivePeerDependencies:
       - '@module-federation/runtime-tools'
 
-  '@rsbuild/plugin-babel@1.1.2(@rsbuild/core@1.7.4)':
+  '@rsbuild/plugin-babel@1.1.2(@rsbuild/core@1.7.5)':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/plugin-proposal-decorators': 7.29.0(@babel/core@7.29.0)
@@ -7592,20 +7595,20 @@ snapshots:
       '@types/babel__core': 7.20.5
       reduce-configs: 1.1.1
     optionalDependencies:
-      '@rsbuild/core': 1.7.4
+      '@rsbuild/core': 1.7.5
     transitivePeerDependencies:
       - supports-color
 
-  '@rsbuild/plugin-react@1.4.6(@rsbuild/core@1.7.4)':
+  '@rsbuild/plugin-react@1.4.6(@rsbuild/core@1.7.5)':
     dependencies:
       '@rspack/plugin-react-refresh': 1.6.1(react-refresh@0.18.0)
       react-refresh: 0.18.0
     optionalDependencies:
-      '@rsbuild/core': 1.7.4
+      '@rsbuild/core': 1.7.5
     transitivePeerDependencies:
       - webpack-hot-middleware
 
-  '@rsbuild/plugin-sass@1.5.1(@rsbuild/core@1.7.4)':
+  '@rsbuild/plugin-sass@1.5.1(@rsbuild/core@1.7.5)':
     dependencies:
       deepmerge: 4.3.1
       loader-utils: 2.0.4
@@ -7613,7 +7616,7 @@ snapshots:
       reduce-configs: 1.1.1
       sass-embedded: 1.97.3
     optionalDependencies:
-      '@rsbuild/core': 1.7.4
+      '@rsbuild/core': 1.7.5
 
   '@rspack/binding-darwin-arm64@1.7.10':
     optional: true
@@ -7703,13 +7706,13 @@ snapshots:
       '@rspack/binding-win32-ia32-msvc': 2.0.0-beta.8
       '@rspack/binding-win32-x64-msvc': 2.0.0-beta.8
 
-  '@rspack/core@1.7.10(@swc/helpers@0.5.19)':
+  '@rspack/core@1.7.10(@swc/helpers@0.5.20)':
     dependencies:
       '@module-federation/runtime-tools': 0.22.0
       '@rspack/binding': 1.7.10
       '@rspack/lite-tapable': 1.1.0
     optionalDependencies:
-      '@swc/helpers': 0.5.19
+      '@swc/helpers': 0.5.20
 
   '@rspack/core@2.0.0-beta.8(@swc/helpers@0.5.19)':
     dependencies:
@@ -7725,9 +7728,9 @@ snapshots:
       html-entities: 2.6.0
       react-refresh: 0.18.0
 
-  '@rstest/adapter-rsbuild@0.2.4(@rsbuild/core@1.7.4)(@rstest/core@0.9.5(core-js@3.47.0)(jsdom@26.1.0))':
+  '@rstest/adapter-rsbuild@0.2.4(@rsbuild/core@1.7.5)(@rstest/core@0.9.5(core-js@3.47.0)(jsdom@26.1.0))':
     dependencies:
-      '@rsbuild/core': 1.7.4
+      '@rsbuild/core': 1.7.5
       '@rstest/core': 0.9.5(core-js@3.47.0)(jsdom@26.1.0)
 
   '@rstest/core@0.9.5(core-js@3.47.0)(jsdom@26.1.0)':
@@ -7898,6 +7901,26 @@ snapshots:
       '@swc/helpers': 0.5.19
     optional: true
 
+  '@swc/core@1.15.21(@swc/helpers@0.5.20)':
+    dependencies:
+      '@swc/counter': 0.1.3
+      '@swc/types': 0.1.25
+    optionalDependencies:
+      '@swc/core-darwin-arm64': 1.15.21
+      '@swc/core-darwin-x64': 1.15.21
+      '@swc/core-linux-arm-gnueabihf': 1.15.21
+      '@swc/core-linux-arm64-gnu': 1.15.21
+      '@swc/core-linux-arm64-musl': 1.15.21
+      '@swc/core-linux-ppc64-gnu': 1.15.21
+      '@swc/core-linux-s390x-gnu': 1.15.21
+      '@swc/core-linux-x64-gnu': 1.15.21
+      '@swc/core-linux-x64-musl': 1.15.21
+      '@swc/core-win32-arm64-msvc': 1.15.21
+      '@swc/core-win32-ia32-msvc': 1.15.21
+      '@swc/core-win32-x64-msvc': 1.15.21
+      '@swc/helpers': 0.5.20
+    optional: true
+
   '@swc/counter@0.1.3':
     optional: true
 
@@ -7906,6 +7929,10 @@ snapshots:
       tslib: 2.8.1
 
   '@swc/helpers@0.5.19':
+    dependencies:
+      tslib: 2.8.1
+
+  '@swc/helpers@0.5.20':
     dependencies:
       tslib: 2.8.1
 
@@ -10964,6 +10991,14 @@ snapshots:
       postcss: 8.5.6
       ts-node: 10.9.1(@swc/core@1.15.21(@swc/helpers@0.5.19))(@types/node@20.19.23)(typescript@5.9.3)
 
+  postcss-load-config@4.0.2(postcss@8.5.6)(ts-node@10.9.1(@swc/core@1.15.21(@swc/helpers@0.5.20))(@types/node@20.19.23)(typescript@5.9.3)):
+    dependencies:
+      lilconfig: 3.1.3
+      yaml: 2.7.1
+    optionalDependencies:
+      postcss: 8.5.6
+      ts-node: 10.9.1(@swc/core@1.15.21(@swc/helpers@0.5.20))(@types/node@20.19.23)(typescript@5.9.3)
+
   postcss-merge-longhand@7.0.5(postcss@8.5.6):
     dependencies:
       postcss: 8.5.6
@@ -12077,6 +12112,33 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
+  tailwindcss@3.4.19(ts-node@10.9.1(@swc/core@1.15.21(@swc/helpers@0.5.20))(@types/node@20.19.23)(typescript@5.9.3)):
+    dependencies:
+      '@alloc/quick-lru': 5.2.0
+      arg: 5.0.2
+      chokidar: 3.6.0
+      didyoumean: 1.2.2
+      dlv: 1.1.3
+      fast-glob: 3.3.2
+      glob-parent: 6.0.2
+      is-glob: 4.0.3
+      jiti: 1.21.7
+      lilconfig: 3.1.3
+      micromatch: 4.0.8
+      normalize-path: 3.0.0
+      object-hash: 3.0.0
+      picocolors: 1.1.1
+      postcss: 8.5.6
+      postcss-import: 15.1.0(postcss@8.5.6)
+      postcss-js: 4.0.1(postcss@8.5.6)
+      postcss-load-config: 4.0.2(postcss@8.5.6)(ts-node@10.9.1(@swc/core@1.15.21(@swc/helpers@0.5.20))(@types/node@20.19.23)(typescript@5.9.3))
+      postcss-nested: 6.2.0(postcss@8.5.6)
+      postcss-selector-parser: 6.1.2
+      resolve: 1.22.10
+      sucrase: 3.35.0
+    transitivePeerDependencies:
+      - ts-node
+
   tailwindcss@4.2.1: {}
 
   thenify-all@1.6.0:
@@ -12154,6 +12216,27 @@ snapshots:
       yn: 3.1.1
     optionalDependencies:
       '@swc/core': 1.15.21(@swc/helpers@0.5.19)
+    optional: true
+
+  ts-node@10.9.1(@swc/core@1.15.21(@swc/helpers@0.5.20))(@types/node@20.19.23)(typescript@5.9.3):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.12
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 20.19.23
+      acorn: 8.15.0
+      acorn-walk: 8.3.4
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.4
+      make-error: 1.3.6
+      typescript: 5.9.3
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optionalDependencies:
+      '@swc/core': 1.15.21(@swc/helpers@0.5.20)
     optional: true
 
   tsconfig-paths@4.2.0:
