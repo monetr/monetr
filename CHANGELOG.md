@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.12.1](https://github.com/monetr/monetr/compare/v1.12.0...v1.12.1) (2026-03-31)
+
+
+### Dependencies
+
+* **api:** update aws-sdk-go-v2 monorepo ([#3050](https://github.com/monetr/monetr/issues/3050)) ([dbe1f4b](https://github.com/monetr/monetr/commit/dbe1f4bee62cf70e231e9fdc3420e72ab8e7f0c9))
+* **api:** update module github.com/getsentry/sentry-go to v0.44.1 ([#3045](https://github.com/monetr/monetr/issues/3045)) ([c39a48b](https://github.com/monetr/monetr/commit/c39a48b927ac554ee1d7aed031ab9e148bb9741f))
+* **ui:** update dependency @rsbuild/core to v1.7.5 ([#3051](https://github.com/monetr/monetr/issues/3051)) ([72c15e0](https://github.com/monetr/monetr/commit/72c15e0d86fb4d329a570c279598ee5ae1c7881c))
+
+
+### Bug Fixes
+
+* **api:** Adding tests to prove new cron behavior ([c5d44f1](https://github.com/monetr/monetr/commit/c5d44f133de2a1a26809c61b98ba61b26e4f40dd))
+* **api:** Fix funding schedules processing being stuck ([5f536f2](https://github.com/monetr/monetr/commit/5f536f2fc0b0dda7b92aad0a5f4205b301121167)), closes [#3053](https://github.com/monetr/monetr/issues/3053)
+
 ## [1.12.0](https://github.com/monetr/monetr/compare/v1.11.0...v1.12.0) (2026-03-27)
 
 
