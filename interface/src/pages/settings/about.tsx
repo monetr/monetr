@@ -130,7 +130,7 @@ function AboutHyperlink(props: AboutHyperlinkProps): JSX.Element {
   });
 
   return (
-    <a className={className} href={props.href} target='_blank'>
+    <a className={className} href={props.href} rel='noopener' target='_blank'>
       {props.children}
     </a>
   );
