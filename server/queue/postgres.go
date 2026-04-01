@@ -96,26 +96,28 @@ type postgresContext struct {
 // Such as email or billing. But [Enqueue] or [EnqueueAt] within the callback is
 // transactional.
 func (p *postgresContext) RunInTransaction(ctx context.Context, callback func(ctx Context) error) error {
-	return p.DB().RunInTransaction(ctx, func(tx *pg.Tx) error {
-		span := sentry.StartSpan(ctx, "db.transaction")
-		defer span.Finish()
+	return errors.WithStack(
+		p.DB().RunInTransaction(ctx, func(tx *pg.Tx) error {
+			span := sentry.StartSpan(ctx, "db.transaction")
+			defer span.Finish()
 
-		// Clone the postgresProcessor and replace the DB with the transaction.
-		// This must be a deep clone of the processor (not just the context) so
-		// that replacing db does not mutate the original processor's db field
-		// through the shared pointer.
-		processorClone := *p.postgresProcessor
-		processorClone.db = tx
+			// Clone the postgresProcessor and replace the DB with the transaction.
+			// This must be a deep clone of the processor (not just the context) so
+			// that replacing db does not mutate the original processor's db field
+			// through the shared pointer.
+			processorClone := *p.postgresProcessor
+			processorClone.db = tx
 
-		// Build a new context pointing at the cloned processor.
-		clone := postgresContext{
-			ctx:               span.Context(),
-			postgresProcessor: &processorClone,
-		}
+			// Build a new context pointing at the cloned processor.
+			clone := postgresContext{
+				ctx:               span.Context(),
+				postgresProcessor: &processorClone,
+			}
 
-		// Then call the callback using the cloned context
-		return callback(&clone)
-	})
+			// Then call the callback using the cloned context
+			return callback(&clone)
+		}),
+	)
 }
 
 func (p *postgresContext) Job() models.Job {
