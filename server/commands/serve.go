@@ -274,7 +274,11 @@ func ServeCommand(parent *cobra.Command) {
 					bill,
 					email,
 				)
-				if err := jobs.RegisterJobs(context.Background(), jobQueue); err != nil {
+				if err := jobs.RegisterJobs(
+					cmd.Context(),
+					configuration,
+					jobQueue,
+				); err != nil {
 					log.Error("failed to register jobs", "err", err)
 					return err
 				}
