@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -962,5 +963,175 @@ func TestPostgresProcessor_Close(t *testing.T) {
 			Count()
 		assert.NoError(t, err)
 		assert.Equal(t, 1, count, "in-flight job must be completed after graceful shutdown")
+	})
+}
+
+func TestPostgresProcessor_WakeNotification(t *testing.T) {
+	t.Run("each enqueue outside a transaction sends a wake notification", func(t *testing.T) {
+		clock := clock.New()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		log := testutils.GetLog(t)
+
+		listener := db.Listen(context.Background(), "queue:wake")
+		defer listener.Close()
+		notifications := listener.Channel()
+
+		p := NewPostgresQueue(
+			t.Context(),
+			clock,
+			log,
+			config.Configuration{},
+			db,
+			nil, nil, nil, nil, nil, nil,
+		).(*postgresProcessor)
+
+		err := p.Register(t.Context(), "test-wake-a", func(_ Context, _ []byte) error {
+			return nil
+		})
+		assert.NoError(t, err)
+
+		err = p.Register(t.Context(), "test-wake-b", func(_ Context, _ []byte) error {
+			return nil
+		})
+		assert.NoError(t, err)
+
+		now := clock.Now().Truncate(time.Second)
+		err = p.EnqueueAt(t.Context(), "test-wake-a", now, nil)
+		require.NoError(t, err)
+
+		err = p.EnqueueAt(t.Context(), "test-wake-b", now.Add(time.Second), nil)
+		require.NoError(t, err)
+
+		// Both enqueues happen outside a transaction, so each one must produce its
+		// own wake notification.
+		for i := 0; i < 2; i++ {
+			select {
+			case <-notifications:
+			case <-time.After(5 * time.Second):
+				require.Failf(t, "timed out waiting for wake notification", "expected 2, received %d", i)
+			}
+		}
+	})
+
+	t.Run("multiple enqueues inside a transaction send only one wake notification", func(t *testing.T) {
+		clock := clock.New()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		log := testutils.GetLog(t)
+
+		listener := db.Listen(context.Background(), "queue:wake")
+		defer listener.Close()
+		notifications := listener.Channel()
+
+		p := NewPostgresQueue(
+			t.Context(),
+			clock,
+			log,
+			config.Configuration{},
+			db,
+			nil, nil, nil, nil, nil, nil,
+		).(*postgresProcessor)
+
+		err := p.Register(t.Context(), "test-txn-wake-a", func(_ Context, _ []byte) error {
+			return nil
+		})
+		assert.NoError(t, err)
+
+		err = p.Register(t.Context(), "test-txn-wake-b", func(_ Context, _ []byte) error {
+			return nil
+		})
+		assert.NoError(t, err)
+
+		err = p.Register(t.Context(), "test-txn-wake-c", func(_ Context, _ []byte) error {
+			return nil
+		})
+		assert.NoError(t, err)
+
+		// RunInTransaction sets notify = pointer(false) on the cloned processor,
+		// so only the first EnqueueAt should issue a NOTIFY. Subsequent enqueues
+		// within the same transaction must skip it.
+		jobCtx := p.JobContext(t.Context(), &models.Job{})
+		err = jobCtx.RunInTransaction(t.Context(), func(ctx Context) error {
+			now := clock.Now().Truncate(time.Second)
+			enqueuer := ctx.Enqueuer()
+			for i, queue := range []string{"test-txn-wake-a", "test-txn-wake-b", "test-txn-wake-c"} {
+				if err := enqueuer.EnqueueAt(t.Context(), queue, now.Add(time.Duration(i)*time.Second), nil); err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+		require.NoError(t, err)
+
+		// Exactly one notification should arrive after the transaction commits.
+		select {
+		case <-notifications:
+		case <-time.After(5 * time.Second):
+			require.Fail(t, "timed out waiting for the single wake notification from the transaction")
+		}
+
+		// No further notifications should arrive. A short timeout is sufficient
+		// here because the NOTIFY is dispatched inline with the transaction commit
+		// so any extra notifications would already be buffered on the channel.
+		select {
+		case <-notifications:
+			require.Fail(t, "received a second wake notification, but the transaction must only send one")
+		case <-time.After(500 * time.Millisecond):
+		}
+
+		// All three jobs must exist despite the single notification.
+		count, err := db.Model(new(models.Job)).Count()
+		assert.NoError(t, err)
+		assert.Equal(t, 3, count, "all three jobs must be enqueued within the transaction")
+	})
+
+	t.Run("rolled back transaction does not send a wake notification", func(t *testing.T) {
+		clock := clock.New()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		log := testutils.GetLog(t)
+
+		listener := db.Listen(context.Background(), "queue:wake")
+		defer listener.Close()
+		notifications := listener.Channel()
+
+		p := NewPostgresQueue(
+			t.Context(),
+			clock,
+			log,
+			config.Configuration{},
+			db,
+			nil, nil, nil, nil, nil, nil,
+		).(*postgresProcessor)
+
+		err := p.Register(t.Context(), "test-rollback-wake", func(_ Context, _ []byte) error {
+			return nil
+		})
+		assert.NoError(t, err)
+
+		// PostgreSQL holds NOTIFY delivery until COMMIT; a ROLLBACK discards them.
+		// Returning an error from the callback causes RunInTransaction to roll back,
+		// so no notification should ever reach the listener.
+		rollbackErr := errors.New("deliberate rollback")
+		jobCtx := p.JobContext(t.Context(), &models.Job{})
+		err = jobCtx.RunInTransaction(t.Context(), func(ctx Context) error {
+			enqueuer := ctx.Enqueuer()
+			if err := enqueuer.EnqueueAt(t.Context(), "test-rollback-wake", clock.Now(), nil); err != nil {
+				return err
+			}
+			return rollbackErr
+		})
+		require.ErrorIs(t, err, rollbackErr)
+
+		// The job row must not exist because the transaction was rolled back.
+		count, err := db.Model(new(models.Job)).Count()
+		assert.NoError(t, err)
+		assert.Equal(t, 0, count, "no jobs must exist after a rolled back transaction")
+
+		// No wake notification should arrive. PostgreSQL discards pending NOTIFYs
+		// on ROLLBACK, so there is nothing to deliver.
+		select {
+		case <-notifications:
+			require.Fail(t, "received a wake notification after a rolled back transaction")
+		case <-time.After(500 * time.Millisecond):
+		}
 	})
 }

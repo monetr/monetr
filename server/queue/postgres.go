@@ -44,6 +44,7 @@ import (
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
@@ -107,6 +108,8 @@ func (p *postgresContext) RunInTransaction(ctx context.Context, callback func(ct
 			// through the shared pointer.
 			processorClone := *p.postgresProcessor
 			processorClone.db = tx
+			// Used to prevent sending multiple wake signals inside a transaction.
+			processorClone.notify = myownsanity.Pointer(false)
 
 			// Build a new context pointing at the cloned processor.
 			clone := postgresContext{
@@ -243,6 +246,15 @@ type postgresProcessor struct {
 	shutdownConsumers []chan chan struct{}
 	shutdownWorkers   []chan chan struct{}
 	dispatch          chan *models.Job
+
+	// notify is not thread safe, but is only present when using a processor
+	// context within a transaction (and transactions are not thread safe anyway
+	// and therefore must be single threaded.) If notify is not null then we are
+	// in a transaction and we only ever want to send a single wake signal when
+	// calling enqueue at. This is important for cron jobs that enqueue many other
+	// jobs. If notify is null then we can call the wake signal as much as we
+	// want.
+	notify *bool
 }
 
 // NewPostgresQueue creates a processor that is backed by a PostgreSQL database.
@@ -383,17 +395,35 @@ func (p *postgresProcessor) EnqueueAt(
 
 	log.DebugContext(span.Context(), "successfully enqueued job")
 
-	// Send a notification in the same database context as the job was enqueued
-	// on. This way if a job is enqueued in a transaction then we would only wake
-	// the workers once the transaction is committed!
-	if _, err := p.db.ExecContext(
-		span.Context(),
-		`NOTIFY "queue:wake", ?`,
-		job.JobId,
-	); err != nil {
-		log.DebugContext(span.Context(), "failed to notify workers of new jobs",
-			"err", err,
-		)
+	// If we are not inside a transaction (notify is nil) send a wake signal every
+	// time we enqueue a job.
+	// If we are in a transaction (notify is not nil) then check to see if it is
+	// false. If it is then that means we have not sent a wake signal from inside
+	// the transaction yet. When we are in a transaction we only need to send a
+	// single wake signal (which will propagate on commit). This way we do not
+	// blow up the database with unnecessary queries.
+	// This is thread safe because we only ever have a single thread in a
+	// transaction, and checking for a nil value in multiple threads is fine
+	// because it will always be nil outside of the transaction.
+	if p.notify == nil || (p.notify != nil && *p.notify == false) {
+		// Send a notification in the same database context as the job was enqueued
+		// on. This way if a job is enqueued in a transaction then we would only
+		// wake the workers once the transaction is committed!
+		if _, err := p.db.ExecContext(
+			span.Context(),
+			`NOTIFY "queue:wake", ?`,
+			job.JobId,
+		); err != nil {
+			log.DebugContext(span.Context(), "failed to notify workers of new jobs",
+				"err", err,
+			)
+		}
+
+		// If we are in a transaction, let subsequent enqueues know that we already
+		// sent the wake signal.
+		if p.notify != nil {
+			p.notify = myownsanity.Pointer(true)
+		}
 	}
 
 	return nil
@@ -1206,6 +1236,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 
 	var err error
 	defer func() {
+		now := p.clock.Now()
 		if panicErr := recover(); panicErr != nil {
 			log.ErrorContext(
 				span.Context(),
@@ -1227,7 +1258,6 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 
 			// If we panic during the job then just mark the job as failed and don't
 			// retry.
-			now := p.clock.Now()
 			if _, err := p.db.ModelContext(span.Context(), job).
 				Set(`"status" = ?`, models.FailedJobStatus).
 				Set(`"completed_at" = ?`, now).
@@ -1253,7 +1283,6 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 					"err", err,
 					"attempt", job.Attempt,
 				)
-				now := p.clock.Now()
 				if _, err := p.db.ModelContext(span.Context(), job).
 					Set(`"attempt" = ?`, job.Attempt+1).
 					Set(`"priority" = ?`, now.Add(attemptBackoff*time.Duration(job.Attempt)).Unix()).
@@ -1271,7 +1300,6 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 					"err", err,
 					"attempt", job.Attempt,
 				)
-				now := p.clock.Now()
 				if _, err := p.db.ModelContext(span.Context(), job).
 					Set(`"status" = ?`, models.FailedJobStatus).
 					Set(`"completed_at" = ?`, now).
@@ -1284,7 +1312,6 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 		} else {
 			// If the job succeeded then mark the job as completed and we don't need
 			// to do anything else.
-			now := p.clock.Now()
 			if _, err := p.db.ModelContext(span.Context(), job).
 				Set(`"status" = ?`, models.CompletedJobStatus).
 				Set(`"completed_at" = ?`, now).
