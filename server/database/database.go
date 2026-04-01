@@ -28,6 +28,7 @@ func GetDatabase(
 	configuration config.Configuration,
 	stats *metrics.Stats,
 ) (*pg.DB, error) {
+	pg.SetLogger(logging.NewPGLogger(log))
 	pgOptions := &pg.Options{
 		Addr: net.JoinHostPort(
 			configuration.PostgreSQL.Address,

@@ -2,6 +2,7 @@ package logging
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"strings"
 	"time"
@@ -12,6 +13,20 @@ import (
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 )
+
+type pgLogger struct {
+	log *slog.Logger
+}
+
+func (l *pgLogger) Printf(ctx context.Context, format string, v ...any) {
+	// I'm making an assumption here that go-pg is only going to log something if
+	// there is a problem, generally its a pretty quiet library.
+	l.log.WarnContext(ctx, fmt.Sprintf(format, v...), "logger", "go-pg")
+}
+
+func NewPGLogger(log *slog.Logger) *pgLogger {
+	return &pgLogger{log}
+}
 
 var (
 	_ pg.QueryHook = &PostgresHooks{}
