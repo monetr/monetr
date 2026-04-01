@@ -5,15 +5,12 @@ type JoinResult[A any, B any] struct {
 	Join []B
 }
 
-func LeftJoin[
-	A any, B any,
-	E func(a A, b B) bool,
-	R struct {
-		From A
-		Join []B
-	},
-](inputA []A, inputB []B, equality E) []R {
-	accumulator := make([]R, len(inputA))
+func LeftJoin[A any, B any](
+	inputA []A,
+	inputB []B,
+	equality func(a A, b B) bool,
+) []JoinResult[A, B] {
+	accumulator := make([]JoinResult[A, B], len(inputA))
 	for i, a := range inputA {
 		items := make([]B, 0)
 		for _, b := range inputB {
@@ -21,7 +18,7 @@ func LeftJoin[
 				items = append(items, b)
 			}
 		}
-		accumulator[i] = R{
+		accumulator[i] = JoinResult[A, B]{
 			From: a,
 			Join: items,
 		}

@@ -1,6 +1,8 @@
 import parseDate from '@monetr/interface/util/parseDate';
 
 export default class FundingSchedule {
+  readonly identityPrefix = 'fund';
+
   fundingScheduleId: string;
   bankAccountId: string;
   name: string;

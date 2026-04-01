@@ -1,0 +1,3 @@
+-- This migration does nothing, but exists because migrations were applied out
+-- of order in staging but not production. So to make sure that the rollout
+-- works for everyone, this migration needs to exist.

@@ -1,13 +1,30 @@
-import { type UseQueryResult, useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { type InfiniteData, type UseInfiniteQueryResult, useInfiniteQuery } from '@tanstack/react-query';
 
-import type Transaction from '@monetr/interface/models/Transaction';
-import TransactionCluster from '@monetr/interface/models/TransactionCluster';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
+import Transaction from '@monetr/interface/models/Transaction';
 
-export function useSimilarTransactions(transaction?: Transaction): UseQueryResult<TransactionCluster, unknown> {
-  return useQuery<Partial<TransactionCluster>, unknown, TransactionCluster>({
-    queryKey: [`/bank_accounts/${transaction?.bankAccountId}/transactions/${transaction?.transactionId}/similar`],
-    enabled: Boolean(transaction),
-    select: data => new TransactionCluster(data),
-    retry: false,
+export function useSimilarTransactions(
+  transactionClusterId?: string,
+): UseInfiniteQueryResult<Array<Transaction>, unknown> {
+  const selectedBankAccountId = useSelectedBankAccountId();
+  const select = useCallback(
+    (data: InfiniteData<Array<Partial<Transaction>>>) => data.pages.flat().map(item => new Transaction(item)),
+    [],
+  );
+  return useInfiniteQuery<Array<Partial<Transaction>>, unknown, Array<Transaction>>({
+    queryKey: [`/bank_accounts/${selectedBankAccountId}/similar/${transactionClusterId}/transactions`],
+    initialPageParam: 0,
+    getNextPageParam: (_, pages) => {
+      // If there are no more pages then we should return null.
+      if (pages.some(page => page.length < 10)) {
+        return null;
+      }
+      // Otherwise we simply return the number of pages we have already requests times 10 since that is our page size.
+      return pages.length * 10;
+    },
+    enabled: Boolean(selectedBankAccountId && transactionClusterId),
+    // We want to flatten the data we return to the caller so that way it is easier to work with.
+    select,
   });
 }

@@ -8,7 +8,11 @@ export interface SimilarTransactionsProps {
 }
 
 export default function SimilarTransactions(props: SimilarTransactionsProps): JSX.Element {
-  const { data: similarData, isLoading, isError } = useSimilarTransactions(props.transaction);
+  const {
+    data: similarData,
+    isLoading,
+    isError,
+  } = useSimilarTransactions(props.transaction.transactionClusterMember?.transactionClusterId);
 
   if (isLoading) {
     return null;
@@ -18,15 +22,12 @@ export default function SimilarTransactions(props: SimilarTransactionsProps): JS
     return null;
   }
 
-  if (similarData?.members?.length === 0) {
+  if (!similarData) {
     return null;
   }
 
-  const maxNumberOfSimilarTransactions = 10;
-  const items = similarData.members
-    .filter(item => item !== props.transaction.transactionId)
-    .slice(0, Math.min(maxNumberOfSimilarTransactions, similarData.members.length) - 1)
-    .map(item => <SimilarTransactionItem key={item} transactionId={item} />);
+  // TODO Doesn't exclude the current transaction.
+  const items = similarData.map(item => <SimilarTransactionItem key={item.transactionId} transaction={item} />);
 
   return (
     <div className='w-full flex flex-col gap-2'>

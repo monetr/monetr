@@ -89,7 +89,7 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
               <div className='flex flex-col gap-stack'>
                 <MSpan>Are you sure you want to remove this transaction?</MSpan>
                 <ul>
-                  <SimilarTransactionItem disableNavigate transactionId={transaction.transactionId} />
+                  <SimilarTransactionItem disableNavigate transaction={transaction} />
                 </ul>
                 <MSpan>You will not be able to undo this action.</MSpan>
                 <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string gap-component'>

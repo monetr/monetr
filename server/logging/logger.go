@@ -21,6 +21,17 @@ func NewLoggerWithConfig(configuration config.Logging) *slog.Logger {
 	case "json":
 		inner = slog.NewJSONHandler(os.Stderr, opts)
 	default: // "text"
+		// inner = devslog.NewHandler(os.Stderr, &devslog.Options{
+		// 	HandlerOptions:      opts,
+		// 	MaxSlicePrintSize:   0,
+		// 	SortKeys:            true,
+		// 	TimeFormat:          time.RFC3339,
+		// 	NewLineAfterLog:     false,
+		// 	StringIndentation:   true,
+		// 	StringerFormatter:   true,
+		// 	NoColor:             false,
+		// 	SameSourceInfoColor: false,
+		// })
 		inner = slog.NewTextHandler(os.Stderr, opts)
 	}
 
