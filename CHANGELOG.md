@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.12.2](https://github.com/monetr/monetr/compare/v1.12.1...v1.12.2) (2026-04-01)
+
+
+### Dependencies
+
+* **api:** update module github.com/aws/aws-sdk-go-v2/service/s3 to v1.98.0 ([#3059](https://github.com/monetr/monetr/issues/3059)) ([cc58db9](https://github.com/monetr/monetr/commit/cc58db9fce6c1804c73b51828d2b8d68fc5f0538))
+* **renovate:** update dependency @biomejs/biome to v2.4.10 ([#3032](https://github.com/monetr/monetr/issues/3032)) ([549987e](https://github.com/monetr/monetr/commit/549987ebde5d0207071d62ad3a5e4e82638dc201))
+* **ui:** update rsbuild to v1.7.11 ([#3058](https://github.com/monetr/monetr/issues/3058)) ([69c89e9](https://github.com/monetr/monetr/commit/69c89e936c846147db664cccf284945347065e90))
+
+
+### Bug Fixes
+
+* **api:** Don't register all jobs all the time ([e53201a](https://github.com/monetr/monetr/commit/e53201a733e378ebb776048c6d71c86b92a44f3e))
+* **api:** Fix go-pg logging ([569f108](https://github.com/monetr/monetr/commit/569f108ad8cf09d8f9a42652d2b822a91502c969))
+* **api:** Fix queue wake notification spam ([604e273](https://github.com/monetr/monetr/commit/604e273cb41df92b245e7db14262e1d961d50446))
+* **api:** Include stack trace for db transaction errors ([ff4f81a](https://github.com/monetr/monetr/commit/ff4f81aed1af95ac709263ca244560c5fd83a947))
+* **ui:** Allow closing transaction modal when form is invalid ([#3057](https://github.com/monetr/monetr/issues/3057)) ([39b6bfa](https://github.com/monetr/monetr/commit/39b6bfa71bec4153070eafb86063665e5917c8af)), closes [#3056](https://github.com/monetr/monetr/issues/3056)
+* **ui:** Fixing more bad cancel buttons ([df0262e](https://github.com/monetr/monetr/commit/df0262ec6335987733f1b8a6a07233de1dfd176b))
+
 ## [1.12.1](https://github.com/monetr/monetr/compare/v1.12.0...v1.12.1) (2026-03-31)
 
 
