@@ -10,8 +10,7 @@ export function useRemoveFundingSchedule(): (_fundingSchedule: FundingSchedule) 
     return request({
       method: 'DELETE',
       url: `/api/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules/${fundingSchedule.fundingScheduleId}`,
-    })
-      .then(() => fundingSchedule);
+    }).then(() => fundingSchedule);
   }
 
   const mutation = useMutation({

@@ -32,8 +32,7 @@ export function useTransfer(): (transferParameters: TransferParameters) => Promi
       method: 'POST',
       url: `/api/bank_accounts/${selectedBankAccountId}/spending/transfer`,
       data: transferRequest,
-    })
-      .then(result => result.data);
+    }).then(result => result.data);
   }
 
   const { mutateAsync } = useMutation({
@@ -60,7 +59,9 @@ export function useTransfer(): (transferParameters: TransferParameters) => Promi
             }),
         ),
         queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast`] }),
-        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast/next_funding`] }),
+        queryClient.invalidateQueries({
+          queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast/next_funding`],
+        }),
       ]),
   });
 

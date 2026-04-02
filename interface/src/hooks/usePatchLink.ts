@@ -9,8 +9,9 @@ export function usePatchLink(): (_: PatchLinkRequest) => Promise<Link> {
   const queryClient = useQueryClient();
 
   async function patchLink({ linkId, ...patch }: PatchLinkRequest): Promise<Link> {
-    return request<Partial<Link>>({ method: 'PATCH', url: `/api/links/${linkId}`, data: patch })
-      .then(result => new Link(result.data));
+    return request<Partial<Link>>({ method: 'PATCH', url: `/api/links/${linkId}`, data: patch }).then(
+      result => new Link(result.data),
+    );
   }
 
   const mutation = useMutation({

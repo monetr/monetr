@@ -11,7 +11,9 @@ import Spending from '@monetr/interface/models/Spending';
 export function useSpending(spendingId?: string): UseQueryResult<Spending, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   const queryClient = useQueryClient();
-  const existingData = queryClient.getQueryData<Array<Spending>>([`/api/bank_accounts/${selectedBankAccountId}/spending`]);
+  const existingData = queryClient.getQueryData<Array<Spending>>([
+    `/api/bank_accounts/${selectedBankAccountId}/spending`,
+  ]);
 
   return useQuery<Partial<Spending>, unknown, Spending>({
     queryKey: [`/api/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`],

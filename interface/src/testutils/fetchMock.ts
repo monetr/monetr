@@ -55,13 +55,10 @@ export default class FetchMock {
       const handler = this.handlers[handlerIndex];
 
       // Return a real Response object
-      return new Response(
-        handler.body !== undefined ? JSON.stringify(handler.body) : null,
-        {
-          status: handler.status,
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
+      return new Response(handler.body !== undefined ? JSON.stringify(handler.body) : null, {
+        status: handler.status,
+        headers: { 'Content-Type': 'application/json' },
+      });
     };
   }
 

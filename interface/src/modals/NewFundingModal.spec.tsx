@@ -1,8 +1,9 @@
 import { Fragment } from 'react';
 
 import { act, waitFor } from '@testing-library/react';
-import FetchMock from '@monetr/interface/testutils/fetchMock';
+
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 describe('new funding schedule modal', () => {
@@ -14,7 +15,9 @@ describe('new funding schedule modal', () => {
   afterEach(() => {
     mockFetch.reset();
   });
-  afterAll(() => { mockFetch.restore(); });
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render', async () => {
     mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {

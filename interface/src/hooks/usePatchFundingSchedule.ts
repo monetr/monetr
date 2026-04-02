@@ -29,11 +29,10 @@ export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => P
       method: 'PATCH',
       url: `/api/bank_accounts/${bankAccountId}/funding_schedules/${fundingScheduleId}`,
       data: patch,
-    })
-      .then(result => ({
-        fundingSchedule: new FundingSchedule(result.data.fundingSchedule),
-        spending: result.data.spending.map(spending => new Spending(spending)),
-      }));
+    }).then(result => ({
+      fundingSchedule: new FundingSchedule(result.data.fundingSchedule),
+      spending: result.data.spending.map(spending => new Spending(spending)),
+    }));
   }
 
   const mutation = useMutation({
@@ -48,7 +47,9 @@ export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => P
             ),
         ),
         queryClient.setQueryData(
-          [`/api/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules/${fundingSchedule.fundingScheduleId}`],
+          [
+            `/api/bank_accounts/${fundingSchedule.bankAccountId}/funding_schedules/${fundingSchedule.fundingScheduleId}`,
+          ],
           fundingSchedule,
         ),
         queryClient.setQueryData(

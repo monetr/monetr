@@ -11,8 +11,7 @@ export function useCreateSpending(): (_spending: Spending) => Promise<Spending> 
       method: 'POST',
       url: `/api/bank_accounts/${spending.bankAccountId}/spending`,
       data: spending,
-    })
-      .then(result => new Spending(result?.data));
+    }).then(result => new Spending(result?.data));
   }
 
   const mutation = useMutation({
@@ -23,10 +22,15 @@ export function useCreateSpending(): (_spending: Spending) => Promise<Spending> 
           [`/api/bank_accounts/${created.bankAccountId}/spending`],
           (previous: Array<Partial<Spending>>) => (previous || []).concat(created),
         ),
-        queryClient.setQueryData([`/api/bank_accounts/${created.bankAccountId}/spending/${created.spendingId}`], created),
+        queryClient.setQueryData(
+          [`/api/bank_accounts/${created.bankAccountId}/spending/${created.spendingId}`],
+          created,
+        ),
         queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${created.bankAccountId}/balances`] }),
         queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${created.bankAccountId}/forecast`] }),
-        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${created.bankAccountId}/forecast/next_funding`] }),
+        queryClient.invalidateQueries({
+          queryKey: [`/api/bank_accounts/${created.bankAccountId}/forecast/next_funding`],
+        }),
       ]),
   });
 

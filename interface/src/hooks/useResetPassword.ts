@@ -1,7 +1,7 @@
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
-import { type ApiError } from '@monetr/interface/api/client';
+import type { ApiError } from '@monetr/interface/api/client';
 import request, { type APIError } from '@monetr/interface/util/request';
 
 export default function useResetPassword(): (newPassword: string, token: string) => Promise<void> {

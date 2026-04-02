@@ -13,8 +13,11 @@ export function useUpdateBankAccount(): (_bankAccount: UpdateBankAccountRequest)
   const queryClient = useQueryClient();
 
   async function updateBankAccount({ bankAccountId, ...updates }: UpdateBankAccountRequest): Promise<BankAccount> {
-    return request<Partial<BankAccount>>({ method: 'PUT', url: `/api/bank_accounts/${bankAccountId}`, data: updates })
-      .then(result => new BankAccount(result?.data));
+    return request<Partial<BankAccount>>({
+      method: 'PUT',
+      url: `/api/bank_accounts/${bankAccountId}`,
+      data: updates,
+    }).then(result => new BankAccount(result?.data));
   }
 
   const mutate = useMutation({

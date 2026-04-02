@@ -17,8 +17,9 @@ export function useAfterCheckout(): (_checkoutSessionId: string) => Promise<Afte
   const queryClient = useQueryClient();
 
   async function queryCheckoutSession(checkoutSessionId: string): Promise<AfterCheckoutResult> {
-    return request<AfterCheckoutResult>({ method: 'GET', url: `/api/billing/checkout/${checkoutSessionId}` })
-      .then(result => result.data);
+    return request<AfterCheckoutResult>({ method: 'GET', url: `/api/billing/checkout/${checkoutSessionId}` }).then(
+      result => result.data,
+    );
   }
 
   const mutation = useMutation({

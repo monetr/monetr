@@ -1,4 +1,5 @@
 import { waitFor } from '@testing-library/react';
+
 import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
@@ -13,7 +14,9 @@ describe('funding schedule details view', () => {
   afterEach(() => {
     mockFetch.reset();
   });
-  afterAll(() => { mockFetch.restore(); });
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render with adjusted weekend', async () => {
     mockFetch.onGet('/api/users/me').reply(200, {

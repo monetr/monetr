@@ -30,8 +30,7 @@ export function useCreateTransaction(): (_: CreateTransactionRequest) => Promise
       method: 'POST',
       url: `/api/bank_accounts/${transaction.bankAccountId}/transactions`,
       data: transaction,
-    })
-      .then(result => result.data);
+    }).then(result => result.data);
   }
 
   const { mutateAsync } = useMutation({

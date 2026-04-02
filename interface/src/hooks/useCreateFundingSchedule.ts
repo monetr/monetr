@@ -19,8 +19,7 @@ export function useCreateFundingSchedule(): (_funding: CreateFundingScheduleRequ
       method: 'POST',
       url: `/api/bank_accounts/${bankAccountId}/funding_schedules`,
       data: fundingSchedule,
-    })
-      .then(result => new FundingSchedule(result?.data));
+    }).then(result => new FundingSchedule(result?.data));
   }
 
   const mutate = useMutation({

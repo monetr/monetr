@@ -14,16 +14,19 @@ export default function plaidLinkTokenCallback(
   institutionName: string,
   accountIds: string[],
 ): Promise<LinkTokenCallbackResponse> {
-  return request<Partial<LinkTokenCallbackResponse>>({ method: 'POST', url: '/api/plaid/link/token/callback', data: {
+  return request<Partial<LinkTokenCallbackResponse>>({
+    method: 'POST',
+    url: '/api/plaid/link/token/callback',
+    data: {
       publicToken,
       institutionId,
       institutionName,
       accountIds,
-    } })
-    .then(
-      result =>
-        new LinkTokenCallbackResponse({
-          linkId: result.data.linkId,
-        }),
-    );
+    },
+  }).then(
+    result =>
+      new LinkTokenCallbackResponse({
+        linkId: result.data.linkId,
+      }),
+  );
 }

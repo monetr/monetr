@@ -9,8 +9,10 @@ export function useRemoveSpending(): (_spendingId: string) => Promise<unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
 
   async function removeSpending(spendingId: string): Promise<string> {
-    return request({ method: 'DELETE', url: `/api/bank_accounts/${selectedBankAccountId}/spending/${spendingId}` })
-      .then(() => spendingId);
+    return request({
+      method: 'DELETE',
+      url: `/api/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`,
+    }).then(() => spendingId);
   }
 
   const mutation = useMutation({
@@ -26,7 +28,9 @@ export function useRemoveSpending(): (_spendingId: string) => Promise<unknown> {
         }),
         queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/balances`] }),
         queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast`] }),
-        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast/next_funding`] }),
+        queryClient.invalidateQueries({
+          queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast/next_funding`],
+        }),
         queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/transactions`] }),
       ]),
   });

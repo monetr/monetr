@@ -1,4 +1,5 @@
 import { waitFor } from '@testing-library/react';
+
 import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
@@ -14,7 +15,9 @@ describe('resend verification email', () => {
     mockFetch.reset();
   });
 
-  afterAll(() => { mockFetch.restore(); });
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render without ReCAPTCHA', () => {
     mockFetch.onGet('/api/config').reply(200, {

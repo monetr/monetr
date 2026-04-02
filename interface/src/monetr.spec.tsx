@@ -1,6 +1,7 @@
 import { waitFor } from '@testing-library/react';
-import FetchMock from '@monetr/interface/testutils/fetchMock';
+
 import Monetr from '@monetr/interface/monetr';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import apiSampleResponses from '@monetr/interface/testutils/fixtures/apiSampleResponses';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
@@ -13,7 +14,9 @@ describe('monetr app', () => {
   afterEach(() => {
     mockFetch.reset();
   });
-  afterAll(() => { mockFetch.restore(); });
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render the demo app used in docs', async () => {
     apiSampleResponses(mockFetch);

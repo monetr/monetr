@@ -7,8 +7,7 @@ export function useRemoveLink(): (_linkId: string) => Promise<unknown> {
   const queryClient = useQueryClient();
 
   async function removeLink(linkId: string): Promise<string> {
-    return request({ method: 'DELETE', url: `/api/links/${linkId}` })
-      .then(() => linkId);
+    return request({ method: 'DELETE', url: `/api/links/${linkId}` }).then(() => linkId);
   }
 
   const mutate = useMutation({
