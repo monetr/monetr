@@ -1,9 +1,8 @@
 import type React from 'react';
 import { useCallback, useMemo } from 'react';
 import { QueryClient, QueryClientProvider, type QueryFunctionContext, type QueryKey } from '@tanstack/react-query';
-import type { AxiosError, AxiosInstance } from 'axios';
 
-import monetrClient from '@monetr/interface/api/api';
+import request, { type ApiError } from '@monetr/interface/util/request';
 
 export enum QueryMethod {
   UseQuery,
@@ -12,61 +11,48 @@ export enum QueryMethod {
 
 export interface MQueryClientProps {
   children: React.ReactElement;
-  client?: AxiosInstance;
 }
 
 interface RequestParams {
-  offset?: unknown;
+  offset?: string | number;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export default function MQueryClient(props: MQueryClientProps): JSX.Element {
-  const client = useMemo(() => {
-    if (props.client) {
-      return client;
+  const queryFn = useCallback(async (context: QueryFunctionContext<QueryKey>) => {
+    let method: 'GET' | 'POST' = 'GET';
+    let body: unknown;
+    let params: RequestParams = {};
+    if (context.queryKey.length > 1 && context?.meta?.method !== QueryMethod.UseQuery) {
+      method = 'POST';
+      body = context.queryKey[1];
     }
 
-    return monetrClient;
-  }, [props.client]);
+    if (context?.meta?.method === QueryMethod.UseQuery && context.queryKey.length > 1) {
+      params = context.queryKey[1] as RequestParams;
+    }
 
-  const queryFn = useCallback(
-    async (context: QueryFunctionContext<QueryKey>) => {
-      let method = 'GET';
-      let body: unknown;
-      let params: RequestParams = {};
-      if (context.queryKey.length > 1 && context?.meta?.method !== QueryMethod.UseQuery) {
-        method = 'POST';
-        body = context.queryKey[1];
+    if (context.pageParam) {
+      params.offset = context.pageParam as string | number;
+    }
+
+    const { data } = await request({
+      method: method,
+      url: `${context.queryKey[0]}`,
+      params: params,
+      data: body,
+    }).catch((error: ApiError) => {
+      switch (error.response.status) {
+        case 404:
+        case 500: // Internal Server Error
+        case 502:
+          throw error;
+        default:
+          return error.response;
       }
-
-      if (context?.meta?.method === QueryMethod.UseQuery && context.queryKey.length > 1) {
-        params = context.queryKey[1];
-      }
-
-      if (context.pageParam) {
-        params.offset = context.pageParam;
-      }
-
-      const { data } = await client
-        .request({
-          url: `${context.queryKey[0]}`,
-          method: method,
-          params: params,
-          data: body,
-        })
-        .catch((result: AxiosError) => {
-          switch (result.response.status) {
-            case 404:
-            case 500: // Internal Server Error
-            case 502:
-              throw result;
-            default:
-              return result.response;
-          }
-        });
-      return data;
-    },
-    [client],
-  );
+    });
+    return data;
+  }, []);
 
   const queryClient = useMemo(
     () =>

@@ -32,11 +32,14 @@ function ChangePasswordModal(): JSX.Element {
 
   async function updatePassword(values: ChangePasswordValues, helpers: FormikHelpers<ChangePasswordValues>) {
     helpers.setSubmitting(true);
-    return request()
-      .put('/users/security/password', {
+    return request({
+      method: 'PUT',
+      url: '/api/users/security/password',
+      data: {
         currentPassword: values.currentPassword,
         newPassword: values.newPassword,
-      })
+      },
+    })
       .then(() =>
         enqueueSnackbar('Successfully updated password.', {
           variant: 'success',

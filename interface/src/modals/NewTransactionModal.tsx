@@ -1,10 +1,10 @@
 import { Fragment, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import type { AxiosError } from 'axios';
 import { startOfDay, startOfToday } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
@@ -76,7 +76,7 @@ function NewTransactionModal(): JSX.Element {
         // TODO Show toast that the transaction was created, include button to "view transaction".
         .then(() => modal.remove())
         .catch(
-          (error: AxiosError<APIError>) =>
+          (error: ApiError<APIError>) =>
             void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,

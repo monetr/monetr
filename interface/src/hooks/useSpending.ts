@@ -11,10 +11,10 @@ import Spending from '@monetr/interface/models/Spending';
 export function useSpending(spendingId?: string): UseQueryResult<Spending, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   const queryClient = useQueryClient();
-  const existingData = queryClient.getQueryData<Array<Spending>>([`/bank_accounts/${selectedBankAccountId}/spending`]);
+  const existingData = queryClient.getQueryData<Array<Spending>>([`/api/bank_accounts/${selectedBankAccountId}/spending`]);
 
   return useQuery<Partial<Spending>, unknown, Spending>({
-    queryKey: [`/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`],
+    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`],
     enabled: Boolean(selectedBankAccountId) && Boolean(spendingId),
     initialData: () =>
       Array.isArray(existingData)
@@ -23,7 +23,7 @@ export function useSpending(spendingId?: string): UseQueryResult<Spending, unkno
         : // Otherwise fall back to undefined.
           undefined,
     initialDataUpdatedAt: () =>
-      queryClient.getQueryState([`/bank_accounts/${selectedBankAccountId}/spending`])?.dataUpdatedAt,
+      queryClient.getQueryState([`/api/bank_accounts/${selectedBankAccountId}/spending`])?.dataUpdatedAt,
     select: data => new Spending(data),
   });
 }

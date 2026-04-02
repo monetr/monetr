@@ -1,30 +1,31 @@
 import { waitFor } from '@testing-library/react';
-import MockAdapter from 'axios-mock-adapter';
 
-import monetrClient from '@monetr/interface/api/api';
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 describe('bank sidebar', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
 
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       allowForgotPassword: true,
       allowSignUp: true,
       iconsEnabled: true,
       billingEnabled: false,
     });
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       hasSubscription: true,
       isActive: true,
       isSetup: true,
@@ -55,7 +56,7 @@ describe('bank sidebar', () => {
         userId: 1,
       },
     });
-    mockAxios.onGet('/api/links').reply(200, [
+    mockFetch.onGet('/api/links').reply(200, [
       {
         linkId: 4,
         linkType: 1,
@@ -75,7 +76,7 @@ describe('bank sidebar', () => {
         updatedAt: '2023-07-02T04:22:52.969206Z',
       },
     ]);
-    mockAxios.onGet('/api/institutions/ins_116794').reply(200, {
+    mockFetch.onGet('/api/institutions/ins_116794').reply(200, {
       institutionId: 'ins_116794',
       name: 'Mercury',
       products: ['assets', 'auth', 'balance', 'transactions', 'identity'],
@@ -114,7 +115,7 @@ describe('bank sidebar', () => {
         },
       },
     });
-    mockAxios.onGet('/api/bank_accounts').reply(200, [
+    mockFetch.onGet('/api/bank_accounts').reply(200, [
       {
         bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
         linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
@@ -131,7 +132,7 @@ describe('bank sidebar', () => {
         lastUpdated: '2023-07-02T04:22:52.48118Z',
       },
     ]);
-    mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, [
+    mockFetch.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, [
       {
         bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
         linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
@@ -162,13 +163,13 @@ describe('bank sidebar', () => {
   });
 
   it('will show subscription when billing is enabled', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       allowForgotPassword: true,
       allowSignUp: true,
       iconsEnabled: true,
       billingEnabled: true,
     });
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       hasSubscription: true,
       isActive: true,
       isSetup: true,
@@ -199,7 +200,7 @@ describe('bank sidebar', () => {
         userId: 1,
       },
     });
-    mockAxios.onGet('/api/links').reply(200, [
+    mockFetch.onGet('/api/links').reply(200, [
       {
         linkId: 4,
         linkType: 1,
@@ -219,7 +220,7 @@ describe('bank sidebar', () => {
         updatedAt: '2023-07-02T04:22:52.969206Z',
       },
     ]);
-    mockAxios.onGet('/api/institutions/ins_116794').reply(200, {
+    mockFetch.onGet('/api/institutions/ins_116794').reply(200, {
       institutionId: 'ins_116794',
       name: 'Mercury',
       products: ['assets', 'auth', 'balance', 'transactions', 'identity'],
@@ -258,7 +259,7 @@ describe('bank sidebar', () => {
         },
       },
     });
-    mockAxios.onGet('/api/bank_accounts').reply(200, [
+    mockFetch.onGet('/api/bank_accounts').reply(200, [
       {
         bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
         linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
@@ -275,7 +276,7 @@ describe('bank sidebar', () => {
         lastUpdated: '2023-07-02T04:22:52.48118Z',
       },
     ]);
-    mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, [
+    mockFetch.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, [
       {
         bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
         linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
@@ -305,13 +306,13 @@ describe('bank sidebar', () => {
   });
 
   it('will render without an institution icon', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       allowForgotPassword: true,
       allowSignUp: true,
       iconsEnabled: true,
       billingEnabled: false,
     });
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       hasSubscription: true,
       isActive: true,
       isSetup: true,
@@ -342,7 +343,7 @@ describe('bank sidebar', () => {
         userId: 1,
       },
     });
-    mockAxios.onGet('/api/links').reply(200, [
+    mockFetch.onGet('/api/links').reply(200, [
       {
         linkId: 4,
         linkType: 1,
@@ -362,7 +363,7 @@ describe('bank sidebar', () => {
         updatedAt: '2023-07-02T04:22:52.969206Z',
       },
     ]);
-    mockAxios.onGet('/api/institutions/ins_116794').reply(200, {
+    mockFetch.onGet('/api/institutions/ins_116794').reply(200, {
       institutionId: 'ins_116794',
       name: 'Mercury',
       products: ['assets', 'auth', 'balance', 'transactions', 'identity'],
@@ -400,7 +401,7 @@ describe('bank sidebar', () => {
         },
       },
     });
-    mockAxios.onGet('/api/bank_accounts').reply(200, [
+    mockFetch.onGet('/api/bank_accounts').reply(200, [
       {
         bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
         linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
@@ -417,7 +418,7 @@ describe('bank sidebar', () => {
         lastUpdated: '2023-07-02T04:22:52.48118Z',
       },
     ]);
-    mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, [
+    mockFetch.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, [
       {
         bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
         linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4

@@ -2,10 +2,8 @@ import { act } from 'react';
 import { rs } from '@rstest/core';
 import * as reactRouterDomActual from 'react-router-dom' with { rstest: 'importActual' };
 
-import MockAdapter from 'axios-mock-adapter';
-
-import monetrClient from '@monetr/interface/api/api';
 import useLogin from '@monetr/interface/hooks/useLogin';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 
 const mockUseNavigate = rs.fn((_url: string) => {});
@@ -15,19 +13,21 @@ rs.mock('react-router-dom', () => ({
 }));
 
 describe('login', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
     mockUseNavigate.mockReset();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will authenticate successfully', async () => {
-    mockAxios.onPost('/api/authentication/login').reply(200, {
+    mockFetch.onPost('/api/authentication/login').reply(200, {
       isActive: false,
       nextUrl: '/account/subscribe',
     });
@@ -48,7 +48,7 @@ describe('login', () => {
   });
 
   it('will navigate without a next url', async () => {
-    mockAxios.onPost('/api/authentication/login').reply(200, {
+    mockFetch.onPost('/api/authentication/login').reply(200, {
       isActive: true,
     });
 
@@ -68,7 +68,7 @@ describe('login', () => {
   });
 
   it('will require a password reset', async () => {
-    mockAxios.onPost('/api/authentication/login').reply(428, {
+    mockFetch.onPost('/api/authentication/login').reply(428, {
       code: 'PASSWORD_CHANGE_REQUIRED',
       resetToken: 'abc123',
     });
@@ -95,7 +95,7 @@ describe('login', () => {
   });
 
   it('email has not been verified', async () => {
-    mockAxios.onPost('/api/authentication/login').reply(428, {
+    mockFetch.onPost('/api/authentication/login').reply(428, {
       code: 'EMAIL_NOT_VERIFIED',
     });
 

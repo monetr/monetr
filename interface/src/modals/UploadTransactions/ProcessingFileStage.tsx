@@ -71,7 +71,7 @@ function useTransactionUploadProgress(
         return;
       }
       const data: Partial<TransactionUpload> = JSON.parse(event.data);
-      const queryKey = [`/bank_accounts/${bankAccountId}/transactions/upload/${transactionUploadId}`];
+      const queryKey = [`/api/bank_accounts/${bankAccountId}/transactions/upload/${transactionUploadId}`];
       // Take the current upload data stored in state (if its there) and merge it with the message we received. The
       // first message will contain the entire transaction upload object so if its not already in the state then this
       // will persist it. Subsequent messages will contain changes to the status.
@@ -89,7 +89,7 @@ function useTransactionUploadProgress(
 
   // Subscribe to changes for the transaction upload
   return useQuery<Partial<TransactionUpload>, unknown, TransactionUpload>({
-    queryKey: [`/bank_accounts/${bankAccountId}/transactions/upload/${transactionUploadId}`],
+    queryKey: [`/api/bank_accounts/${bankAccountId}/transactions/upload/${transactionUploadId}`],
     initialData: () => null, // Don't do the initial fetch, rely on the websocket instead.
     select: data => new TransactionUpload(data),
   });

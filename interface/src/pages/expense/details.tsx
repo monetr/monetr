@@ -1,10 +1,10 @@
-import type { AxiosError } from 'axios';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { ArrowUpDown, HeartCrack, Receipt, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
 import ExpenseTransactionList from '@monetr/interface/components/expenses/ExpenseTransactionList';
@@ -130,7 +130,7 @@ export default function ExpenseDetails(): JSX.Element {
           }),
       )
       .catch(
-        (error: AxiosError<APIError>) =>
+        (error: ApiError<APIError>) =>
           void enqueueSnackbar(error.response.data.error || 'Failed to update expense', {
             variant: 'error',
             disableWindowBlurListener: true,

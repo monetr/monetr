@@ -1,23 +1,24 @@
 import { waitFor } from '@testing-library/react';
-import MockAdapter from 'axios-mock-adapter';
 
-import monetrClient from '@monetr/interface/api/api';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 
 describe('use locale currency', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will provide defaults if youre not authenticated', async () => {
-    mockAxios.onGet('/users/me').reply(403, {
+    mockFetch.onGet('/api/users/me').reply(403, {
       error: 'unauthenticated',
     });
 
@@ -29,7 +30,7 @@ describe('use locale currency', () => {
   });
 
   it('will provide the real locale and currency for the current user', async () => {
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: '2024-09-26T00:31:38Z',
       hasSubscription: true,
       isActive: true,
@@ -71,7 +72,7 @@ describe('use locale currency', () => {
   });
 
   it('will provide the locale for the current bank account if it can', async () => {
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: '2024-09-26T00:31:38Z',
       hasSubscription: true,
       isActive: true,
@@ -104,7 +105,7 @@ describe('use locale currency', () => {
         },
       },
     });
-    mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
+    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
       bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
       linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
       availableBalance: 47986,
@@ -133,7 +134,7 @@ describe('use locale currency', () => {
   });
 
   it('will handle a bad bank ID', async () => {
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: '2024-09-26T00:31:38Z',
       hasSubscription: true,
       isActive: true,
@@ -166,7 +167,7 @@ describe('use locale currency', () => {
         },
       },
     });
-    mockAxios.onGet('/api/bank_accounts/undefined').reply(404, {
+    mockFetch.onGet('/api/bank_accounts/undefined').reply(404, {
       error: 'Not found',
     });
 
@@ -180,7 +181,7 @@ describe('use locale currency', () => {
   });
 
   it('will allow a default currency to be overridden', async () => {
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: '2024-09-26T00:31:38Z',
       hasSubscription: true,
       isActive: true,
@@ -213,7 +214,7 @@ describe('use locale currency', () => {
         },
       },
     });
-    mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
+    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
       bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
       linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
       availableBalance: 47986,

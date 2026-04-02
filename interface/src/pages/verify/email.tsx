@@ -27,10 +27,13 @@ export default function VerifyEmail(): JSX.Element {
       return;
     }
 
-    request()
-      .post('/authentication/verify', {
+    request<{ message?: string; nextUrl?: string }>({
+      method: 'POST',
+      url: '/api/authentication/verify',
+      data: {
         token: token,
-      })
+      },
+    })
       .then(result =>
         errorRedirect(
           result?.data?.message || 'Your email has been verified, please login.',

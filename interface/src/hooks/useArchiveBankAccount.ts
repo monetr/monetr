@@ -7,8 +7,7 @@ export function useArchiveBankAccount(): (_bankAccountId: string) => Promise<str
   const queryClient = useQueryClient();
 
   async function archiveBankAccount(bankAccountId: string): Promise<string> {
-    return request()
-      .delete<Partial<BankAccount>>(`/bank_accounts/${bankAccountId}`)
+    return request({ method: 'DELETE', url: `/api/bank_accounts/${bankAccountId}` })
       .then(() => bankAccountId);
   }
 
@@ -16,10 +15,10 @@ export function useArchiveBankAccount(): (_bankAccountId: string) => Promise<str
     mutationFn: archiveBankAccount,
     onSuccess: (bankAccountId: string) =>
       Promise.all([
-        queryClient.setQueryData(['/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
+        queryClient.setQueryData(['/api/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
           previous.filter(item => item.bankAccountId !== bankAccountId),
         ),
-        queryClient.removeQueries({ queryKey: [`/bank_accounts/${bankAccountId}`] }),
+        queryClient.removeQueries({ queryKey: [`/api/bank_accounts/${bankAccountId}`] }),
       ]),
   });
 

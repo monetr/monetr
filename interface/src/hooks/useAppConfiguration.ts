@@ -44,7 +44,7 @@ export class AppConfiguration {
 export function useAppConfiguration(): UseQueryResult<AppConfiguration, unknown> {
   const select = useCallback((data: Partial<AppConfiguration>) => new AppConfiguration(data), []);
   return useQuery<Partial<AppConfiguration>, unknown, AppConfiguration>({
-    queryKey: ['/config'],
+    queryKey: ['/api/config'],
     staleTime: 60 * 1000, // One minute in milliseconds.
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

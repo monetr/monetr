@@ -27,13 +27,17 @@ export default function SubscribePage(): JSX.Element {
     setLoading(true);
     let promise: Promise<{ data: { url: string } }>;
     if (initialPlan && !hasSubscription) {
-      promise = request().post('/billing/create_checkout', {
-        cancelPath: '/logout',
+      promise = request({
+        method: 'POST',
+        url: '/api/billing/create_checkout',
+        data: {
+          cancelPath: '/logout',
+        },
       });
     } else if (hasSubscription) {
       // If the customer has a subscription then we want to just manage it. This will allow a customer to fix a
       // subscription for a card that has failed payment or something similar.
-      promise = request().get('/billing/portal');
+      promise = request({ method: 'GET', url: '/api/billing/portal' });
     }
 
     promise

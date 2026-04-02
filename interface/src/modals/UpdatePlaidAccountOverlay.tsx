@@ -37,8 +37,10 @@ function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaid
   });
 
   useEffect(() => {
-    request()
-      .put(`/plaid/link/update/${link.linkId}?update_account_selection=${!!updateAccountSelection}`)
+    request<{ linkToken: string }>({
+      method: 'PUT',
+      url: `/api/plaid/link/update/${link.linkId}?update_account_selection=${!!updateAccountSelection}`,
+    })
       .then(result =>
         setState({
           loading: false,
@@ -66,17 +68,20 @@ function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaid
         loading: true,
       });
 
-      return request()
-        .post('/plaid/link/update/callback', {
+      return request({
+        method: 'POST',
+        url: '/api/plaid/link/update/callback',
+        data: {
           linkId: link.linkId,
           publicToken: token,
           accountIds: metadata.accounts.map(account => account.id),
-        })
+        },
+      })
         .then(() =>
           Promise.all([
-            queryClient.invalidateQueries({ queryKey: ['/bank_accounts'] }),
-            queryClient.invalidateQueries({ queryKey: ['/links'] }),
-            queryClient.invalidateQueries({ queryKey: [`/links/${link.linkId}`] }),
+            queryClient.invalidateQueries({ queryKey: ['/api/bank_accounts'] }),
+            queryClient.invalidateQueries({ queryKey: ['/api/links'] }),
+            queryClient.invalidateQueries({ queryKey: [`/api/links/${link.linkId}`] }),
           ]),
         )
         .then(() => modal.remove());

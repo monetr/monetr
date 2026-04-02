@@ -14,8 +14,7 @@ export default function SubscriptionPage(): JSX.Element {
   const navigate = useNavigate();
 
   useMountEffect(() => {
-    request()
-      .get('/billing/portal')
+    request<{ url: string }>({ method: 'GET', url: '/api/billing/portal' })
       .then(result => window.location.assign(result.data.url))
       .catch(error => {
         enqueueSnackbar(error?.response?.data?.error || 'Failed to navigate to billing portal.', {

@@ -26,8 +26,11 @@ export function useCreateTransaction(): (_: CreateTransactionRequest) => Promise
   const queryClient = useQueryClient();
 
   async function createTransaction(transaction: CreateTransactionRequest): Promise<CreateTransactionResponse> {
-    return request()
-      .post<CreateTransactionResponse>(`/bank_accounts/${transaction.bankAccountId}/transactions`, transaction)
+    return request<CreateTransactionResponse>({
+      method: 'POST',
+      url: `/api/bank_accounts/${transaction.bankAccountId}/transactions`,
+      data: transaction,
+    })
       .then(result => result.data);
   }
 
@@ -36,17 +39,17 @@ export function useCreateTransaction(): (_: CreateTransactionRequest) => Promise
     onSuccess: ({ transaction, balance, spending }: CreateTransactionResponse) =>
       Promise.all([
         queryClient.setQueryData(
-          [`/bank_accounts/${transaction.bankAccountId}/spending`],
+          [`/api/bank_accounts/${transaction.bankAccountId}/spending`],
           (previous: Array<Partial<Spending>>) =>
             previous.map(item => (spending?.spendingId === item.spendingId ? spending : item)),
         ),
         spending != null &&
           queryClient.setQueryData(
-            [`/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}`],
+            [`/api/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}`],
             spending,
           ),
         queryClient.setQueryData(
-          [`/bank_accounts/${transaction.bankAccountId}/balances`],
+          [`/api/bank_accounts/${transaction.bankAccountId}/balances`],
           (previous: Partial<Balance>) =>
             new Balance({
               ...previous,
@@ -54,7 +57,7 @@ export function useCreateTransaction(): (_: CreateTransactionRequest) => Promise
             }),
         ),
         queryClient.invalidateQueries({
-          queryKey: [`/bank_accounts/${transaction.bankAccountId}/transactions`],
+          queryKey: [`/api/bank_accounts/${transaction.bankAccountId}/transactions`],
         }),
       ]),
   });

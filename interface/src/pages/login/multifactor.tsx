@@ -28,11 +28,14 @@ export default function MultifactorAuthenticationPage(): JSX.Element {
   async function submit(values: MultifactorValues, helpers: FormikHelpers<MultifactorValues>) {
     helpers.setSubmitting(true);
 
-    return request()
-      .post('/authentication/multifactor', {
+    return request({
+      method: 'POST',
+      url: '/api/authentication/multifactor',
+      data: {
         totp: values.totp,
-      })
-      .then(() => queryClient.invalidateQueries({ queryKey: ['/users/me'] }))
+      },
+    })
+      .then(() => queryClient.invalidateQueries({ queryKey: ['/api/users/me'] }))
       .catch(error =>
         enqueueSnackbar(error?.response?.data?.error || 'Failed to validate TOTP code.', {
           variant: 'error',

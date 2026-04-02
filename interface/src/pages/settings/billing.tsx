@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
-import type { AxiosResponse } from 'axios';
 import { format, isFuture, isThisYear } from 'date-fns';
 import { Clock } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useLocation } from 'react-router-dom';
 
+import type { ApiResponse } from '@monetr/interface/api/client';
 import Badge from '@monetr/interface/components/Badge';
 import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
@@ -19,16 +19,20 @@ export default function SettingsBilling(): JSX.Element {
   const { data: auth } = useAuthentication();
   const handleManageSubscription = useCallback(async () => {
     setLoading(true);
-    let promise: Promise<AxiosResponse<{ url: string }>>;
+    let promise: Promise<ApiResponse<{ url: string }>>;
     if (!auth?.hasSubscription) {
-      promise = request().post('/billing/create_checkout', {
-        // If the user backs out of the stripe checkout then return them to the current URL.
-        cancelPath: location.pathname,
+      promise = request({
+        method: 'POST',
+        url: '/api/billing/create_checkout',
+        data: {
+          // If the user backs out of the stripe checkout then return them to the current URL.
+          cancelPath: location.pathname,
+        },
       });
     } else {
       // If the customer has a subscription then we want to just manage it. This will allow a customer to fix a
       // subscription for a card that has failed payment or something similar.
-      promise = request().get('/billing/portal');
+      promise = request({ method: 'GET', url: '/api/billing/portal' });
     }
 
     await promise

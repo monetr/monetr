@@ -5,8 +5,7 @@ import request from '@monetr/interface/util/request';
 export default function useLogout(): () => Promise<void> {
   const queryClient = useQueryClient();
   return async () => {
-    return request()
-      .get('/authentication/logout')
-      .then(() => queryClient.invalidateQueries({ queryKey: ['/users/me'] }));
+    return request({ method: 'GET', url: '/api/authentication/logout' })
+      .then(() => queryClient.invalidateQueries({ queryKey: ['/api/users/me'] }));
   };
 }

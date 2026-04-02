@@ -1,7 +1,6 @@
 import { type FormEvent, useCallback, useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { useQueryClient } from '@tanstack/react-query';
-import axios, { type AxiosProgressEvent, type AxiosResponse } from 'axios';
 import { FileUp } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 
@@ -14,6 +13,7 @@ import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/Pro
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 import fileSize from '@monetr/interface/util/fileSize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import request, { type ApiResponse } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export enum UploadTransactionStage {
@@ -36,8 +36,8 @@ function UploadTransactionsModal(): JSX.Element {
   const [monetrUpload, setMonetrUpload] = useState<TransactionUpload | null>(null);
   const onClose = useCallback(() => {
     if (stage === UploadTransactionStage.Processing) {
-      queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/transactions`] });
-      queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/balances`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/transactions`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/balances`] });
     }
     return modal.remove();
   }, [stage, modal, queryClient, selectedBankAccountId]);
@@ -102,20 +102,18 @@ function UploadFileStage(props: StageProps) {
     const formData = new FormData();
     formData.append('data', file, file.name);
 
-    const config = {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+    setUploadProgress(0);
+
+    return request<TransactionUpload>({
+      method: 'POST',
+      url: `/api/bank_accounts/${selectedBankAccountId}/transactions/upload`,
+      data: formData,
+      onUploadProgress: progressEvent => {
         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
         setUploadProgress(percentCompleted);
       },
-    };
-    setUploadProgress(0);
-
-    return axios
-      .post(`/api/bank_accounts/${selectedBankAccountId}/transactions/upload`, formData, config)
-      .then((result: AxiosResponse<TransactionUpload>) => {
+    })
+      .then((result: ApiResponse<TransactionUpload>) => {
         props.setResult(new TransactionUpload(result.data));
         props.setStage(UploadTransactionStage.Processing);
       })

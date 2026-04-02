@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
-import type { AxiosError } from 'axios';
 import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useLocation } from 'react-router-dom';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
@@ -28,14 +28,17 @@ export default function ResendVerificationPage(): JSX.Element {
 
   const resendVerification = useCallback(
     async (values: ResendValues): Promise<void> => {
-      return await request()
-        .post('/authentication/verify/resend', {
+      return await request({
+        method: 'POST',
+        url: '/api/authentication/verify/resend',
+        data: {
           email: values.email,
           captcha: values.captcha,
-        })
+        },
+      })
         .then(() => setDone(true))
         .catch(
-          (error: AxiosError<APIError>) =>
+          (error: ApiError<APIError>) =>
             void enqueueSnackbar(error?.response?.data?.error || 'Failed to resend verification link', {
               variant: 'error',
               disableWindowBlurListener: true,

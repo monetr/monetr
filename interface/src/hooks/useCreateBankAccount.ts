@@ -19,19 +19,19 @@ export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest)
   const queryClient = useQueryClient();
 
   async function createBankAccount(newBankAccount: CreateBankAccountRequest): Promise<BankAccount> {
-    return request()
-      .post<Partial<BankAccount>>('/bank_accounts', newBankAccount)
-      .then(result => new BankAccount(result?.data));
+    return request<Partial<BankAccount>>({ method: 'POST', url: '/api/bank_accounts', data: newBankAccount }).then(
+      result => new BankAccount(result?.data),
+    );
   }
 
   const mutate = useMutation({
     mutationFn: createBankAccount,
     onSuccess: (newBankAccount: BankAccount) =>
       Promise.all([
-        queryClient.setQueryData(['/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
+        queryClient.setQueryData(['/api/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
           (previous ?? []).concat(newBankAccount),
         ),
-        queryClient.setQueryData([`/bank_accounts/${newBankAccount.bankAccountId}`], newBankAccount),
+        queryClient.setQueryData([`/api/bank_accounts/${newBankAccount.bankAccountId}`], newBankAccount),
       ]),
   });
 

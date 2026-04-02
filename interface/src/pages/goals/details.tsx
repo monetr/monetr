@@ -1,10 +1,10 @@
-import type { AxiosError } from 'axios';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { ArrowUpDown, HeartCrack, PiggyBank, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
@@ -130,7 +130,7 @@ export default function GoalDetails(): JSX.Element {
           }),
       )
       .catch(
-        (error: AxiosError<APIError>) =>
+        (error: ApiError<APIError>) =>
           void enqueueSnackbar(error.response.data.error || 'Failed to update goal', {
             variant: 'error',
             disableWindowBlurListener: true,

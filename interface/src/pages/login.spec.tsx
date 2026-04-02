@@ -3,10 +3,9 @@ import * as reactRouterDomActual from 'react-router-dom' with { rstest: 'importA
 
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import MockAdapter from 'axios-mock-adapter';
 
-import monetrClient from '@monetr/interface/api/api';
 import Login from '@monetr/interface/pages/login';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 const mockUseNavigate = rs.fn((_url: string) => {});
@@ -16,19 +15,21 @@ rs.mock('react-router-dom', () => ({
 }));
 
 describe('login page', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
     mockUseNavigate.mockReset();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render with default options', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       allowForgotPassword: true,
       allowSignUp: true,
       verifyLogin: false,
@@ -44,7 +45,7 @@ describe('login page', () => {
   });
 
   test('without signup', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       allowForgotPassword: true,
       allowSignUp: false,
       verifyLogin: false,
@@ -61,7 +62,7 @@ describe('login page', () => {
   });
 
   test('without forgot password', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       allowForgotPassword: false,
       allowSignUp: false,
       verifyLogin: false,
@@ -78,13 +79,13 @@ describe('login page', () => {
   });
 
   test('will submit login', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       allowForgotPassword: false,
       allowSignUp: false,
       verifyLogin: false,
     });
 
-    mockAxios.onPost('/api/authentication/login').reply(200, {
+    mockFetch.onPost('/api/authentication/login').reply(200, {
       isActive: true,
     });
 
@@ -107,13 +108,13 @@ describe('login page', () => {
   });
 
   test('will submit login and require subscription', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       allowForgotPassword: false,
       allowSignUp: false,
       verifyLogin: false,
     });
 
-    mockAxios.onPost('/api/authentication/login').reply(200, {
+    mockFetch.onPost('/api/authentication/login').reply(200, {
       isActive: false,
       nextUrl: '/account/subscribe',
     });

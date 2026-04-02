@@ -6,13 +6,16 @@ import Link from '@monetr/interface/models/Link';
 export function useLink(linkId?: string): UseQueryResult<Link, unknown> {
   const queryClient = useQueryClient();
   const initialData = useCallback(
-    () => queryClient.getQueryData<Array<Link>>(['/links'])?.find(item => item.linkId === linkId),
+    () => queryClient.getQueryData<Array<Link>>(['/api/links'])?.find(item => item.linkId === linkId),
     [queryClient, linkId],
   );
-  const initialDataUpdatedAt = useCallback(() => queryClient.getQueryState(['/links'])?.dataUpdatedAt, [queryClient]);
+  const initialDataUpdatedAt = useCallback(
+    () => queryClient.getQueryState(['/api/links'])?.dataUpdatedAt,
+    [queryClient],
+  );
   const select = useCallback((data: Partial<Link>) => new Link(data), []);
   return useQuery<Partial<Link>, unknown, Link>({
-    queryKey: [`/links/${linkId}`],
+    queryKey: [`/api/links/${linkId}`],
     enabled: Boolean(linkId),
     select,
     initialData: initialData,

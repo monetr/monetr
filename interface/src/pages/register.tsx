@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import type { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import Flex from '@monetr/interface/components/Flex';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
@@ -123,7 +123,7 @@ export default function Register(): JSX.Element {
           return setSuccessful(true);
         }
 
-        return queryClient.invalidateQueries({ queryKey: ['/users/me'] }).then(() => {
+        return queryClient.invalidateQueries({ queryKey: ['/api/users/me'] }).then(() => {
           // If the register endpoint has told us to navigate to a specific url afterwards, then do that now.
           if (result.nextUrl) {
             return navigate(result.nextUrl);
@@ -133,7 +133,7 @@ export default function Register(): JSX.Element {
           return navigate('/');
         });
       })
-      .catch((error: AxiosError<APIError>) => {
+      .catch((error: ApiError<APIError>) => {
         const message = error.response.data.error || 'Failed to sign up.';
         enqueueSnackbar(message, {
           variant: 'error',

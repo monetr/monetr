@@ -15,8 +15,11 @@ export function useCreateFundingSchedule(): (_funding: CreateFundingScheduleRequ
     bankAccountId,
     ...fundingSchedule
   }: CreateFundingScheduleRequest): Promise<FundingSchedule> {
-    return request()
-      .post<Partial<FundingSchedule>>(`/bank_accounts/${bankAccountId}/funding_schedules`, fundingSchedule)
+    return request<Partial<FundingSchedule>>({
+      method: 'POST',
+      url: `/api/bank_accounts/${bankAccountId}/funding_schedules`,
+      data: fundingSchedule,
+    })
       .then(result => new FundingSchedule(result?.data));
   }
 
@@ -25,11 +28,11 @@ export function useCreateFundingSchedule(): (_funding: CreateFundingScheduleRequ
     onSuccess: (newFunding: FundingSchedule) =>
       Promise.all([
         queryClient.setQueryData(
-          [`/bank_accounts/${newFunding.bankAccountId}/funding_schedules`],
+          [`/api/bank_accounts/${newFunding.bankAccountId}/funding_schedules`],
           (previous: Array<Partial<FundingSchedule>>) => (previous ?? []).concat(newFunding),
         ),
         queryClient.setQueryData(
-          [`/bank_accounts/${newFunding.bankAccountId}/funding_schedules/${newFunding.fundingScheduleId}`],
+          [`/api/bank_accounts/${newFunding.bankAccountId}/funding_schedules/${newFunding.fundingScheduleId}`],
           newFunding,
         ),
       ]),

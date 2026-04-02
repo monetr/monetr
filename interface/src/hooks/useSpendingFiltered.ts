@@ -7,7 +7,7 @@ export function useSpendingFiltered(kind: SpendingType): UseQueryResult<Array<Sp
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<Array<Partial<Spending>>, unknown, Array<Spending>>({
     // Use the same query key so that way the request is not sent again if the data is already in the cache.
-    queryKey: [`/bank_accounts/${selectedBankAccountId}/spending`],
+    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/spending`],
     enabled: Boolean(selectedBankAccountId),
     initialData: [],
     initialDataUpdatedAt: 0,
