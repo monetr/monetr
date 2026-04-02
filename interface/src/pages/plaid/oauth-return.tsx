@@ -25,8 +25,7 @@ export default function OauthReturn(): JSX.Element {
   });
 
   useEffect(() => {
-    request()
-      .get('/plaid/link/token/new?use_cache=true')
+    request<{ linkToken: string }>({ method: 'GET', url: '/api/plaid/link/token/new?use_cache=true' })
       .then(result =>
         setState({
           loading: false,
@@ -53,8 +52,7 @@ export default function OauthReturn(): JSX.Element {
       return Promise.resolve();
     }
 
-    return request()
-      .get(`/plaid/link/setup/wait/${linkId}`)
+    return request({ method: 'GET', url: `/api/plaid/link/setup/wait/${linkId}` })
       .then(() => Promise.resolve())
       .catch(error => {
         if (error.response.status === 408) {
@@ -91,25 +89,27 @@ export default function OauthReturn(): JSX.Element {
   async function plaidLinkSuccess(public_token: string, metadata: PlaidLinkOnSuccessMetadata): Promise<void> {
     setState({ loading: true });
 
-    return void request()
-      .post('/plaid/link/token/callback', {
+    return void request<{ linkId: number }>({
+      method: 'POST',
+      url: '/api/plaid/link/token/callback',
+      data: {
         publicToken: public_token,
         institutionId: metadata.institution.institution_id,
         institutionName: metadata.institution.name,
         accountIds: metadata.accounts.map((account: { id: string }) => account.id),
-      })
-      .then(result => {
-        setState({
-          linkId: result.data.linkId,
-        });
-
-        return longPollSetup().then(() =>
-          Promise.all([
-            queryClient.invalidateQueries({ queryKey: ['/links'] }),
-            queryClient.invalidateQueries({ queryKey: ['/bank_accounts'] }),
-          ]),
-        );
+      },
+    }).then(result => {
+      setState({
+        linkId: result.data.linkId,
       });
+
+      return longPollSetup().then(() =>
+        Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['/api/links'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/bank_accounts'] }),
+        ]),
+      );
+    });
   }
 
   function renderContents(): JSX.Element {

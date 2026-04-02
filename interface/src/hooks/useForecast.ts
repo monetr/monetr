@@ -82,7 +82,7 @@ export class FundingEvent {
 export function useForecast(): UseQueryResult<Forecast, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<Partial<Forecast>, unknown, Forecast>({
-    queryKey: [`/bank_accounts/${selectedBankAccountId}/forecast`],
+    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast`],
     enabled: Boolean(selectedBankAccountId),
     select: data => new Forecast(data),
   });

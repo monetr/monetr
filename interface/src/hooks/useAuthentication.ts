@@ -34,7 +34,7 @@ export function useAuthentication(): UseQueryResult<Authentication | undefined, 
     [],
   );
   const result = useQuery<Partial<Authentication>, unknown, Authentication>({
-    queryKey: ['/users/me'],
+    queryKey: ['/api/users/me'],
     select,
     refetchOnWindowFocus: true, // Might want to change this to 'always' at some point?
   });

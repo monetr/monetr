@@ -1,25 +1,26 @@
 import { waitFor } from '@testing-library/react';
-import MockAdapter from 'axios-mock-adapter';
 
-import monetrClient from '@monetr/interface/api/api';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 import ResendVerificationPage from './resend';
 
 describe('resend verification email', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
 
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render without ReCAPTCHA', () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       ReCAPTCHAKey: null,
     });
 
@@ -32,7 +33,7 @@ describe('resend verification email', () => {
   });
 
   it('will render with ReCAPTCHA', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       ReCAPTCHAKey: '6LfL3vcgAAAAALlJNxvUPdgrbzH_ca94YTCqso6L',
     });
 
@@ -45,7 +46,7 @@ describe('resend verification email', () => {
   });
 
   it('will render with provided email', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       ReCAPTCHAKey: null,
     });
 

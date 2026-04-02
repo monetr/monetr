@@ -1,11 +1,11 @@
 import { useId } from 'react';
-import type { AxiosError } from 'axios';
 import { format, isEqual, startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikErrors, FormikHelpers } from 'formik';
 import { CalendarSync, HeartCrack, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useMatch, useNavigate } from 'react-router-dom';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
@@ -97,7 +97,7 @@ export default function FundingDetails(): JSX.Element {
           }),
       )
       .catch(
-        (error: AxiosError<APIError>) =>
+        (error: ApiError<APIError>) =>
           void enqueueSnackbar(error.response.data.error || 'Failed to update funding schedule', {
             variant: 'error',
             disableWindowBlurListener: true,
@@ -119,7 +119,7 @@ export default function FundingDetails(): JSX.Element {
       return removeFundingSchedule(funding)
         .then(() => backToFunding())
         .catch(
-          (error: AxiosError<APIError>) =>
+          (error: ApiError<APIError>) =>
             void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,

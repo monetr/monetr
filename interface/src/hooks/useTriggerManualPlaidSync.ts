@@ -8,10 +8,13 @@ export function useTriggerManualPlaidSync(): (_linkId: string) => Promise<void> 
   const queryClient = useQueryClient();
   return async (linkId: string): Promise<void> => {
     return (
-      request()
-        .post('/plaid/link/sync', {
+      request({
+        method: 'POST',
+        url: '/api/plaid/link/sync',
+        data: {
           linkId,
-        })
+        },
+      })
         .then(
           () =>
             void enqueueSnackbar('Triggered a manual sync in the background!', {
@@ -20,7 +23,7 @@ export function useTriggerManualPlaidSync(): (_linkId: string) => Promise<void> 
             }),
         )
         // Will make things like the "last attempted update" timestamp thing update.
-        .then(() => setTimeout(() => queryClient.invalidateQueries({ queryKey: ['/links'] }), 2000))
+        .then(() => setTimeout(() => queryClient.invalidateQueries({ queryKey: ['/api/links'] }), 2000))
         .catch(
           error =>
             void enqueueSnackbar(

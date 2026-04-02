@@ -1,25 +1,26 @@
 import { act, Fragment } from 'react';
 
 import { waitFor } from '@testing-library/react';
-import MockAdapter from 'axios-mock-adapter';
 
-import monetrClient from '@monetr/interface/api/api';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 describe('new expense modal', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render', async () => {
-    mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
+    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
       bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
       linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
       availableBalance: 47986,
@@ -34,7 +35,7 @@ describe('new expense modal', () => {
       createdAt: '2022-09-25T02:08:40.758642Z',
       updatedAt: '2024-03-19T06:17:32.335106Z',
     });
-    mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules').reply(200, []);
+    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules').reply(200, []);
 
     const world = testRenderer(<Fragment />, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/expenses' });
     // Open the dialog

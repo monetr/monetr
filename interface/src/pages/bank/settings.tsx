@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
-import type { AxiosError } from 'axios';
 import type { FormikHelpers } from 'formik';
 import { Archive, FlaskConical, HeartCrack, Save, Settings } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
 import FormTextField from '@monetr/interface/components/FormTextField';
@@ -75,7 +75,7 @@ export default function BankAccountSettingsPage(): JSX.Element {
           disableWindowBlurListener: true,
         }),
       )
-      .catch((error: AxiosError<APIError>) =>
+      .catch((error: ApiError<APIError>) =>
         enqueueSnackbar(error?.response?.data?.error || 'Failed to update bank account', {
           variant: 'error',
           disableWindowBlurListener: true,

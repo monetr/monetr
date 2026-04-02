@@ -1,11 +1,11 @@
 import type React from 'react';
 import { useCallback } from 'react';
-import type { AxiosError } from 'axios';
 import type { FormikHelpers } from 'formik';
 import { ChevronRight, Landmark, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { Link, useParams } from 'react-router-dom';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import Badge from '@monetr/interface/components/Badge';
 import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
@@ -47,7 +47,7 @@ export default function LinkDetails(): React.JSX.Element {
             disableWindowBlurListener: true,
           }),
         )
-        .catch((error: AxiosError<APIError>) =>
+        .catch((error: ApiError<APIError>) =>
           enqueueSnackbar(error?.response?.data?.error || 'Failed to update link', {
             variant: 'error',
             disableWindowBlurListener: true,

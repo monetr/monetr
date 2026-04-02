@@ -54,15 +54,13 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
       return Promise.resolve();
     }
 
-    return void request()
-      .get(`/plaid/link/setup/wait/${linkId}`)
-      .catch(error => {
-        if (error.response.status === 408) {
-          return longPollSetup(recur + 1, linkId);
-        }
+    return void request({ method: 'GET', url: `/api/plaid/link/setup/wait/${linkId}` }).catch(error => {
+      if (error.response.status === 408) {
+        return longPollSetup(recur + 1, linkId);
+      }
 
-        throw error;
-      });
+      throw error;
+    });
   }
 
   function onPlaidExit(error: null | PlaidLinkError, metadata: PlaidLinkOnExitMetadata) {
@@ -104,20 +102,23 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   }
 
   async function onPlaidSuccess(public_token: string, metadata: PlaidLinkOnSuccessMetadata) {
-    return request()
-      .post('/plaid/link/token/callback', {
+    return request<{ linkId: number }>({
+      method: 'POST',
+      url: '/api/plaid/link/token/callback',
+      data: {
         publicToken: public_token,
         institutionId: metadata.institution.institution_id,
         institutionName: metadata.institution.name,
         accountIds: metadata.accounts.map((account: { id: string }) => account.id),
-      })
+      },
+    })
       .then(async result => {
         const linkId: number = result.data.linkId;
         await longPollSetup(0, linkId);
 
         setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['/links'] });
-          queryClient.invalidateQueries({ queryKey: ['/bank_accounts'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/links'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/bank_accounts'] });
           navigate('/');
         }, 8000);
       })
@@ -141,8 +142,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
 
   const { error: plaidError, open: plaidOpen } = usePlaidLink(config);
   useEffect(() => {
-    request()
-      .get('/plaid/link/token/new?use_cache=true')
+    request<{ linkToken: string }>({ method: 'GET', url: '/api/plaid/link/token/new?use_cache=true' })
       .then(result =>
         setTimeout(() => {
           setState({

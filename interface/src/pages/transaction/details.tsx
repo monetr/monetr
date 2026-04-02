@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
-import type { AxiosError } from 'axios';
 import { startOfDay } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { HeartCrack, Save, ShoppingCart } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import Flex from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
@@ -69,7 +69,7 @@ export default function TransactionDetails(): JSX.Element {
             disableWindowBlurListener: true,
           }),
         )
-        .catch((error: AxiosError<APIError>) =>
+        .catch((error: ApiError<APIError>) =>
           enqueueSnackbar(error?.response?.data?.error || 'Failed to update transaction', {
             variant: 'error',
             disableWindowBlurListener: true,

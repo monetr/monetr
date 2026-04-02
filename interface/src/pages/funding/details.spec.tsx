@@ -1,24 +1,25 @@
 import { waitFor } from '@testing-library/react';
-import MockAdapter from 'axios-mock-adapter';
 
-import monetrClient from '@monetr/interface/api/api';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 import FundingDetails from './details';
 
 describe('funding schedule details view', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render with adjusted weekend', async () => {
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: '2024-09-26T00:31:38Z',
       hasSubscription: true,
       isActive: true,
@@ -51,7 +52,7 @@ describe('funding schedule details view', () => {
         },
       },
     });
-    mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
+    mockFetch.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
       bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
       linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
       availableBalance: 48635,
@@ -67,7 +68,7 @@ describe('funding schedule details view', () => {
       lastUpdated: '2023-07-02T04:22:52.48118Z',
     });
 
-    mockAxios
+    mockFetch
       .onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules/fund_01hy4re7c1xc2v44cf6kx302jx')
       .reply(200, {
         bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
@@ -93,7 +94,7 @@ describe('funding schedule details view', () => {
   });
 
   it('will render without adjusted weekend', async () => {
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: '2024-09-26T00:31:38Z',
       hasSubscription: true,
       isActive: true,
@@ -126,7 +127,7 @@ describe('funding schedule details view', () => {
         },
       },
     });
-    mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
+    mockFetch.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
       bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
       linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
       availableBalance: 48635,
@@ -142,7 +143,7 @@ describe('funding schedule details view', () => {
       lastUpdated: '2023-07-02T04:22:52.48118Z',
     });
 
-    mockAxios
+    mockFetch
       .onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules/fund_01hy4re7c1xc2v44cf6kx302jx')
       .reply(200, {
         bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,

@@ -1,10 +1,10 @@
 import { useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import type { AxiosError } from 'axios';
 import { type FormikErrors, type FormikHelpers, useFormikContext } from 'formik';
 import { ArrowUpDown } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import type { LabelDecoratorProps } from '@monetr/interface/components/Label';
@@ -97,7 +97,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
           }),
         )
         .catch(
-          (error: AxiosError<APIError>) =>
+          (error: ApiError<APIError>) =>
             void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,

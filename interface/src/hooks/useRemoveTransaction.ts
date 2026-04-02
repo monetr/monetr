@@ -24,14 +24,13 @@ export function useRemoveTransaction(): (_: RemoveTransactionRequest) => Promise
   // related queries that might be affected by the removal.
   async function removeTransaction(removal: RemoveTransactionRequest): Promise<unknown> {
     const { transaction, softDelete, adjustsBalance } = removal;
-    const path = `/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`;
+    const path = `/api/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`;
     const params = new URLSearchParams();
     // Build the query parameters for the request.
     params.set('adjusts_balance', String(adjustsBalance));
     params.set('soft', String(softDelete));
     // Send the delete request to the server and handle any changes returned.
-    return await request()
-      .delete(`${path}?${params.toString()}`)
+    return await request({ method: 'DELETE', url: `${path}?${params.toString()}` })
       .then(result => result.data)
       .then(
         async (_: RemoveTransactionResponse) =>
@@ -39,13 +38,13 @@ export function useRemoveTransaction(): (_: RemoveTransactionRequest) => Promise
             // TODO Instead of just invalidating all of these, it would be more efficient to move them into a mutator so we
             // can update their data in place.
             queryClient.invalidateQueries({
-              queryKey: [`/bank_accounts/${removal.transaction.bankAccountId}/transactions`],
+              queryKey: [`/api/bank_accounts/${removal.transaction.bankAccountId}/transactions`],
             }),
             queryClient.invalidateQueries({
-              queryKey: [`/bank_accounts/${removal.transaction.bankAccountId}/spending`],
+              queryKey: [`/api/bank_accounts/${removal.transaction.bankAccountId}/spending`],
             }),
             queryClient.invalidateQueries({
-              queryKey: [`/bank_accounts/${removal.transaction.bankAccountId}/balances`],
+              queryKey: [`/api/bank_accounts/${removal.transaction.bankAccountId}/balances`],
             }),
           ]),
       );

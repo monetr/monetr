@@ -9,9 +9,10 @@ export function useRemoveSpending(): (_spendingId: string) => Promise<unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
 
   async function removeSpending(spendingId: string): Promise<string> {
-    return request()
-      .delete(`/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`)
-      .then(() => spendingId);
+    return request({
+      method: 'DELETE',
+      url: `/api/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`,
+    }).then(() => spendingId);
   }
 
   const mutation = useMutation({
@@ -19,16 +20,18 @@ export function useRemoveSpending(): (_spendingId: string) => Promise<unknown> {
     onSuccess: (removedSpendingId: string) =>
       Promise.all([
         queryClient.setQueryData(
-          [`/bank_accounts/${selectedBankAccountId}/spending`],
+          [`/api/bank_accounts/${selectedBankAccountId}/spending`],
           (previous: Array<Partial<Spending>>) => previous.filter(item => item.spendingId !== removedSpendingId),
         ),
         queryClient.removeQueries({
-          queryKey: [`/bank_accounts/${selectedBankAccountId}/spending/${removedSpendingId}`],
+          queryKey: [`/api/bank_accounts/${selectedBankAccountId}/spending/${removedSpendingId}`],
         }),
-        queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/balances`] }),
-        queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/forecast`] }),
-        queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/forecast/next_funding`] }),
-        queryClient.invalidateQueries({ queryKey: [`/bank_accounts/${selectedBankAccountId}/transactions`] }),
+        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/balances`] }),
+        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast`] }),
+        queryClient.invalidateQueries({
+          queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast/next_funding`],
+        }),
+        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${selectedBankAccountId}/transactions`] }),
       ]),
   });
 

@@ -1,23 +1,24 @@
 import { waitFor } from '@testing-library/react';
-import MockAdapter from 'axios-mock-adapter';
 
-import monetrClient from '@monetr/interface/api/api';
 import { useInstalledCurrencies } from '@monetr/interface/hooks/useInstalledCurrencies';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 
 describe('use installed currencies', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will fetch currencies if we are authenticated', async () => {
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: '2024-09-26T00:31:38Z',
       hasSubscription: true,
       isActive: true,
@@ -50,7 +51,7 @@ describe('use installed currencies', () => {
         },
       },
     });
-    mockAxios.onGet('/api/locale/currency').reply(200, [
+    mockFetch.onGet('/api/locale/currency').reply(200, [
       'EUR',
       'USD',
       // Having all of them doesn't matter, just testing
@@ -66,7 +67,7 @@ describe('use installed currencies', () => {
   });
 
   it('will not fetch currencies if we are not authenticated', async () => {
-    mockAxios.onGet('/users/me').reply(403, {
+    mockFetch.onGet('/api/users/me').reply(403, {
       error: 'unauthenticated',
     });
     const world = testRenderHook(useInstalledCurrencies, {

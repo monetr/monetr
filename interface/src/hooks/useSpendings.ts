@@ -6,7 +6,7 @@ import Spending from '@monetr/interface/models/Spending';
 export function useSpendings(): UseQueryResult<Array<Spending>, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   return useQuery<Array<Partial<Spending>>, unknown, Array<Spending>>({
-    queryKey: [`/bank_accounts/${selectedBankAccountId}/spending`],
+    queryKey: [`/api/bank_accounts/${selectedBankAccountId}/spending`],
     enabled: Boolean(selectedBankAccountId),
     select: data => (data || []).map(item => new Spending(item)),
   });

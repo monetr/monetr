@@ -1,29 +1,29 @@
 import { act } from 'react';
 
-import MockAdapter from 'axios-mock-adapter';
-
-import monetrClient from '@monetr/interface/api/api';
 import {
   type PatchFundingScheduleResponse,
   usePatchFundingSchedule,
 } from '@monetr/interface/hooks/usePatchFundingSchedule';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 import parseDate from '@monetr/interface/util/parseDate';
 
 describe('patch funding schedule', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
 
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will update a funding schedule', async () => {
-    mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
+    mockFetch.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
       bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
       linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
       availableBalance: 48635,
@@ -37,7 +37,7 @@ describe('patch funding schedule', () => {
       status: 'active',
       lastUpdated: '2023-07-02T04:22:52.48118Z',
     });
-    mockAxios
+    mockFetch
       .onPatch('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules/fund_01hy4re7c1xc2v44cf6kx302jx')
       .reply(200, {
         fundingSchedule: {
@@ -79,7 +79,7 @@ describe('patch funding schedule', () => {
   });
 
   it('it will fail to update a funding schedule', async () => {
-    mockAxios.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
+    mockFetch.onGet('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx').reply(200, {
       bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx', // 12,
       linkId: 'link_01hy4rbb1gjdek7h2xmgy5pnwk', // 4
       availableBalance: 48635,
@@ -93,7 +93,7 @@ describe('patch funding schedule', () => {
       status: 'active',
       lastUpdated: '2023-07-02T04:22:52.48118Z',
     });
-    mockAxios
+    mockFetch
       .onPatch('/api/bank_accounts/bac_01hy4rcmadc01d2kzv7vynbxxx/funding_schedules/fund_01hy4re7c1xc2v44cf6kx302jx')
       .reply(400, {
         error: 'Invalid request',

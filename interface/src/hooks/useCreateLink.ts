@@ -12,16 +12,16 @@ export interface CreateLinkRequest {
 export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {
   const mutate = useMutation({
     mutationFn: async (newLink: CreateLinkRequest): Promise<Link> => {
-      return request()
-        .post<Partial<Link>>('/links', newLink)
-        .then(result => new Link(result?.data));
+      return request<Partial<Link>>({ method: 'POST', url: '/api/links', data: newLink }).then(
+        result => new Link(result?.data),
+      );
     },
     onSuccess: (newLink: Link, _a, _b, context) =>
       Promise.all([
-        context.client.setQueryData(['/links'], (previous: Array<Partial<Link>> | null) =>
+        context.client.setQueryData(['/api/links'], (previous: Array<Partial<Link>> | null) =>
           (previous ?? []).concat(newLink),
         ),
-        context.client.setQueryData([`/links/${newLink.linkId}`], newLink),
+        context.client.setQueryData([`/api/links/${newLink.linkId}`], newLink),
       ]),
   });
 

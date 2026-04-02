@@ -1,16 +1,19 @@
-import type { AxiosError } from 'axios';
 import { useSnackbar, type VariantType } from 'notistack';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import request, { type APIError } from '@monetr/interface/util/request';
 
 export default function useSendForgotPassword(): (email: string, ReCAPTCHA: string | null) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
   return async (email: string, ReCAPTCHA: string | null) => {
-    return request()
-      .post('/authentication/forgot', {
+    return request({
+      method: 'POST',
+      url: '/api/authentication/forgot',
+      data: {
         email,
         captcha: ReCAPTCHA,
-      })
+      },
+    })
       .then(
         () =>
           void enqueueSnackbar('Successfully sent password reset link.', {
@@ -18,7 +21,7 @@ export default function useSendForgotPassword(): (email: string, ReCAPTCHA: stri
             disableWindowBlurListener: true,
           }),
       )
-      .catch((error: AxiosError<APIError>) => {
+      .catch((error: ApiError<APIError>) => {
         const message = error.response.data.error || 'Failed to send password reset email.';
         let variant: VariantType = 'error';
 

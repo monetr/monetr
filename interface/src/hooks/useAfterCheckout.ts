@@ -17,14 +17,14 @@ export function useAfterCheckout(): (_checkoutSessionId: string) => Promise<Afte
   const queryClient = useQueryClient();
 
   async function queryCheckoutSession(checkoutSessionId: string): Promise<AfterCheckoutResult> {
-    return request()
-      .get<AfterCheckoutResult>(`/billing/checkout/${checkoutSessionId}`)
-      .then(result => result.data);
+    return request<AfterCheckoutResult>({ method: 'GET', url: `/api/billing/checkout/${checkoutSessionId}` }).then(
+      result => result.data,
+    );
   }
 
   const mutation = useMutation({
     mutationFn: queryCheckoutSession,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/users/me'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['/api/users/me'] }),
   });
 
   return mutation.mutateAsync;

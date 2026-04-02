@@ -4,10 +4,9 @@ import { endOfMonth, endOfToday, startOfToday } from 'date-fns';
 
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import MockAdapter from 'axios-mock-adapter';
 
-import monetrClient from '@monetr/interface/api/api';
 import SettingsBilling from '@monetr/interface/pages/settings/billing';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 const locationAssignMock = rs.fn();
@@ -17,7 +16,7 @@ const locationAssignMock = rs.fn();
 const implSymbol = Reflect.ownKeys(window.location).find(i => typeof i === 'symbol')!;
 
 describe('billing settings page', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
   let assignSpy: ReturnType<typeof rs.spyOn>;
 
   beforeAll(() => {
@@ -25,20 +24,20 @@ describe('billing settings page', () => {
   });
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
   });
 
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
 
   afterAll(() => {
-    mockAxios.restore();
+    mockFetch.restore();
     assignSpy.mockRestore();
   });
 
   it('will show a trial subscription', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       requireLegalName: false,
       requirePhoneNumber: false,
       verifyLogin: false,
@@ -62,7 +61,7 @@ describe('billing settings page', () => {
       buildType: 'development',
       buildTime: '2025-01-07T19:17:19Z',
     });
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: null,
       hasSubscription: false,
       isActive: true,
@@ -94,7 +93,7 @@ describe('billing settings page', () => {
         role: 'owner',
       },
     });
-    mockAxios.onPost('/api/billing/create_checkout').reply(200, {
+    mockFetch.onPost('/api/billing/create_checkout').reply(200, {
       url: 'http://localhost/bogus/portal',
     });
 
@@ -109,7 +108,7 @@ describe('billing settings page', () => {
   });
 
   it('will show an active subscription', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       requireLegalName: false,
       requirePhoneNumber: false,
       verifyLogin: false,
@@ -133,7 +132,7 @@ describe('billing settings page', () => {
       buildType: 'development',
       buildTime: '2025-01-07T19:17:19Z',
     });
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: endOfMonth(endOfToday()).toISOString(),
       hasSubscription: true,
       isActive: true,
@@ -167,7 +166,7 @@ describe('billing settings page', () => {
         role: 'owner',
       },
     });
-    mockAxios.onGet('/api/billing/portal').reply(200, {
+    mockFetch.onGet('/api/billing/portal').reply(200, {
       url: 'http://localhost/bogus/portal',
     });
 
@@ -182,7 +181,7 @@ describe('billing settings page', () => {
   });
 
   it('will show an expired subscription', async () => {
-    mockAxios.onGet('/api/config').reply(200, {
+    mockFetch.onGet('/api/config').reply(200, {
       requireLegalName: false,
       requirePhoneNumber: false,
       verifyLogin: false,
@@ -206,7 +205,7 @@ describe('billing settings page', () => {
       buildType: 'development',
       buildTime: '2025-01-07T19:17:19Z',
     });
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: startOfToday().toISOString(),
       hasSubscription: true,
       isActive: false,

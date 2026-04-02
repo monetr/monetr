@@ -1,10 +1,10 @@
 import { Fragment, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import type { AxiosError } from 'axios';
 import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
 import Flex from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
@@ -66,7 +66,7 @@ function NewBankAccountModal(): JSX.Element {
       .then(result => navigate(`/bank/${result.bankAccountId}/transactions`))
       .then(() => modal.remove())
       .catch(
-        (error: AxiosError<APIError>) =>
+        (error: ApiError<APIError>) =>
           void enqueueSnackbar(error.response.data.error, {
             variant: 'error',
             disableWindowBlurListener: true,

@@ -1,25 +1,26 @@
 import { Fragment } from 'react';
 
 import { act, waitFor } from '@testing-library/react';
-import MockAdapter from 'axios-mock-adapter';
 
-import monetrClient from '@monetr/interface/api/api';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 describe('new funding schedule modal', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render', async () => {
-    mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
+    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
       bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
       linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
       availableBalance: 47986,

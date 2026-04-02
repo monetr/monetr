@@ -4,10 +4,9 @@ import * as reactRouterDomActual from 'react-router-dom' with { rstest: 'importA
 
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import MockAdapter from 'axios-mock-adapter';
 
-import monetrClient from '@monetr/interface/api/api';
 import { showNewBankAccountModal } from '@monetr/interface/modals/NewBankAccountModal';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 const mockUseNavigate = rs.fn((_url: string) => {});
@@ -17,19 +16,21 @@ rs.mock('react-router-dom', () => ({
 }));
 
 describe('new bank account modal', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
     mockUseNavigate.mockReset();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render', async () => {
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: '2024-09-26T00:31:38Z',
       hasSubscription: true,
       isActive: true,
@@ -62,7 +63,7 @@ describe('new bank account modal', () => {
         },
       },
     });
-    mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
+    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
       bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
       linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
       availableBalance: 47986,
@@ -91,7 +92,7 @@ describe('new bank account modal', () => {
   });
 
   it('will attempt to create a new bank account', async () => {
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: '2024-09-26T00:31:38Z',
       hasSubscription: true,
       isActive: true,
@@ -124,7 +125,7 @@ describe('new bank account modal', () => {
         },
       },
     });
-    mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
+    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
       bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
       linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
       availableBalance: 47986,
@@ -141,7 +142,7 @@ describe('new bank account modal', () => {
       updatedAt: '2024-03-19T06:17:32.335106Z',
     });
 
-    mockAxios.onPost('/api/bank_accounts').reply(200, {
+    mockFetch.onPost('/api/bank_accounts').reply(200, {
       bankAccountId: 'bac_created',
       linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
       availableBalance: 10000,
@@ -174,7 +175,7 @@ describe('new bank account modal', () => {
   });
 
   it('will create an account with a JPY currency', async () => {
-    mockAxios.onGet('/api/users/me').reply(200, {
+    mockFetch.onGet('/api/users/me').reply(200, {
       activeUntil: '2024-09-26T00:31:38Z',
       hasSubscription: true,
       isActive: true,
@@ -207,7 +208,7 @@ describe('new bank account modal', () => {
         },
       },
     });
-    mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
+    mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
       bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
       linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
       availableBalance: 47986,
@@ -224,7 +225,7 @@ describe('new bank account modal', () => {
       updatedAt: '2024-03-19T06:17:32.335106Z',
     });
 
-    mockAxios.onPost('/api/bank_accounts').reply(200, {
+    mockFetch.onPost('/api/bank_accounts').reply(200, {
       bankAccountId: 'bac_created',
       linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
       availableBalance: 100,

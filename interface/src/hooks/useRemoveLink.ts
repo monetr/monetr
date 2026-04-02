@@ -7,19 +7,17 @@ export function useRemoveLink(): (_linkId: string) => Promise<unknown> {
   const queryClient = useQueryClient();
 
   async function removeLink(linkId: string): Promise<string> {
-    return request()
-      .delete(`/links/${linkId}`)
-      .then(() => linkId);
+    return request({ method: 'DELETE', url: `/api/links/${linkId}` }).then(() => linkId);
   }
 
   const mutate = useMutation({
     mutationFn: removeLink,
     onSuccess: (linkId: string) =>
       Promise.all([
-        queryClient.setQueryData(['/links'], (previous: Array<Partial<Link>>) =>
+        queryClient.setQueryData(['/api/links'], (previous: Array<Partial<Link>>) =>
           previous.filter(item => item.linkId !== linkId),
         ),
-        queryClient.removeQueries({ queryKey: [`/links/${linkId}`] }),
+        queryClient.removeQueries({ queryKey: [`/api/links/${linkId}`] }),
       ]),
   });
 

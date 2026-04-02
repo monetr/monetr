@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react';
-import type { AxiosError } from 'axios';
 import type { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import { flexVariants } from '@monetr/interface/components/Flex';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
@@ -39,19 +39,22 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
   const submit = useCallback(
     (values: LunchFlowSetupIntroValues, helpers: FormikHelpers<LunchFlowSetupIntroValues>) => {
       helpers.setSubmitting(true);
-      request()
-        .post<Partial<LunchFlowLink>>(`/lunch_flow/link`, {
+      request<Partial<LunchFlowLink>>({
+        method: 'POST',
+        url: '/api/lunch_flow/link',
+        data: {
           name: values.name,
           lunchFlowURL: values.apiURL,
           apiKey: values.apiKey,
-        })
+        },
+      })
         .then(result => new LunchFlowLink(result?.data))
         .then(lunchFlowLink =>
           navigate(lunchFlowLink.lunchFlowLinkId, {
             relative: 'path',
           }),
         )
-        .catch((error: AxiosError<APIError>) =>
+        .catch((error: ApiError<APIError>) =>
           enqueueSnackbar(
             <div>
               <Typography size='sm'>{error?.response?.data?.error || 'Failed to create Lunch Flow link!'}</Typography>

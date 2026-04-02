@@ -1,24 +1,25 @@
 import { waitFor } from '@testing-library/react';
-import MockAdapter from 'axios-mock-adapter';
 
-import monetrClient from '@monetr/interface/api/api';
 import Monetr from '@monetr/interface/monetr';
+import FetchMock from '@monetr/interface/testutils/fetchMock';
 import apiSampleResponses from '@monetr/interface/testutils/fixtures/apiSampleResponses';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
 describe('monetr app', () => {
-  let mockAxios: MockAdapter;
+  let mockFetch: FetchMock;
 
   beforeEach(() => {
-    mockAxios = new MockAdapter(monetrClient);
+    mockFetch = new FetchMock();
   });
   afterEach(() => {
-    mockAxios.reset();
+    mockFetch.reset();
   });
-  afterAll(() => mockAxios.restore());
+  afterAll(() => {
+    mockFetch.restore();
+  });
 
   it('will render the demo app used in docs', async () => {
-    apiSampleResponses(mockAxios);
+    apiSampleResponses(mockFetch);
 
     const world = testRenderer(<Monetr />, {
       initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions',

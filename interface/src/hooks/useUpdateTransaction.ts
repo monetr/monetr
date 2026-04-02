@@ -14,17 +14,16 @@ export interface TransactionUpdateResponse {
 export function useUpdateTransaction(): (_transaction: Transaction) => Promise<TransactionUpdateResponse> {
   const { mutateAsync } = useMutation({
     async mutationFn(transaction: Transaction): Promise<TransactionUpdateResponse> {
-      return request()
-        .put<TransactionUpdateResponse>(
-          `/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`,
-          transaction,
-        )
-        .then(result => result.data);
+      return request<TransactionUpdateResponse>({
+        method: 'PUT',
+        url: `/api/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`,
+        data: transaction,
+      }).then(result => result.data);
     },
     onSuccess: ({ transaction, spending, balance }: TransactionUpdateResponse, _input, _, { client: queryClient }) =>
       Promise.all([
         queryClient.setQueryData<InfiniteData<Array<Partial<Transaction>>>>(
-          [`/bank_accounts/${transaction.bankAccountId}/transactions`],
+          [`/api/bank_accounts/${transaction.bankAccountId}/transactions`],
           previous =>
             // If previous does not exist then do nothing, otherwise this will break the page.
             previous && {
@@ -39,11 +38,11 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<T
           {},
         ),
         queryClient.setQueryData(
-          [`/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`],
+          [`/api/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`],
           transaction,
         ),
         queryClient.setQueryData<Array<Partial<Spending>>>(
-          [`/bank_accounts/${transaction.bankAccountId}/spending`],
+          [`/api/bank_accounts/${transaction.bankAccountId}/spending`],
           previous =>
             // Since there could be multiple spending objects updated here, we need to take map over all of the existing
             // spendinng objects and then check to see if that spending object is in the array of updated spending
@@ -55,23 +54,25 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<T
         (spending || []).map(spending =>
           Promise.all([
             queryClient.setQueryData(
-              [`/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}`],
+              [`/api/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}`],
               spending,
             ),
             queryClient.invalidateQueries({
-              queryKey: [`/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}/transactions`],
+              queryKey: [
+                `/api/bank_accounts/${transaction.bankAccountId}/spending/${spending.spendingId}/transactions`,
+              ],
             }),
           ]),
         ),
         queryClient.setQueryData<Partial<Balance>>(
-          [`/bank_accounts/${transaction.bankAccountId}/balances`],
+          [`/api/bank_accounts/${transaction.bankAccountId}/balances`],
           previous => new Balance({ ...previous, ...balance }),
         ),
         queryClient.invalidateQueries({
-          queryKey: [`/bank_accounts/${transaction.bankAccountId}/forecast`],
+          queryKey: [`/api/bank_accounts/${transaction.bankAccountId}/forecast`],
         }),
         queryClient.invalidateQueries({
-          queryKey: [`/bank_accounts/${transaction.bankAccountId}/forecast/next_funding`],
+          queryKey: [`/api/bank_accounts/${transaction.bankAccountId}/forecast/next_funding`],
         }),
       ]),
   });

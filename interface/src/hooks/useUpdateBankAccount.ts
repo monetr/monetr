@@ -13,19 +13,21 @@ export function useUpdateBankAccount(): (_bankAccount: UpdateBankAccountRequest)
   const queryClient = useQueryClient();
 
   async function updateBankAccount({ bankAccountId, ...updates }: UpdateBankAccountRequest): Promise<BankAccount> {
-    return request()
-      .put<Partial<BankAccount>>(`/bank_accounts/${bankAccountId}`, updates)
-      .then(result => new BankAccount(result?.data));
+    return request<Partial<BankAccount>>({
+      method: 'PUT',
+      url: `/api/bank_accounts/${bankAccountId}`,
+      data: updates,
+    }).then(result => new BankAccount(result?.data));
   }
 
   const mutate = useMutation({
     mutationFn: updateBankAccount,
     onSuccess: (updatedBankAccount: BankAccount) =>
       Promise.all([
-        queryClient.setQueryData(['/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
+        queryClient.setQueryData(['/api/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
           previous.map(item => (item.bankAccountId === updatedBankAccount.bankAccountId ? updatedBankAccount : item)),
         ),
-        queryClient.setQueryData([`/bank_accounts/${updatedBankAccount.bankAccountId}`], updatedBankAccount),
+        queryClient.setQueryData([`/api/bank_accounts/${updatedBankAccount.bankAccountId}`], updatedBankAccount),
       ]),
   });
 

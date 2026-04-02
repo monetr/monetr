@@ -11,7 +11,7 @@ export interface Icon {
 export function useIconSearch(name: string): Icon | null {
   const { data: configuration } = useAppConfiguration();
   const { data } = useQuery<Icon>({
-    queryKey: ['/icons/search', { name }],
+    queryKey: ['/api/icons/search', { name }],
     enabled: Boolean(configuration?.iconsEnabled) && Boolean(name) && name?.length > 0,
     meta: {
       method: QueryMethod.UseBody,

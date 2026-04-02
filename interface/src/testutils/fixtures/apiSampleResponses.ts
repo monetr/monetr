@@ -1,10 +1,10 @@
-import type MockAdapter from 'axios-mock-adapter';
+import type FetchMock from '@monetr/interface/testutils/fetchMock';
 
 // apiSampleResponses will fill the mock adapter with most of the API calls that the application needs to render most
 // pages. Some pages may not be able to render with this data and additional mocks may be needed. This should only be
 // called once per test.
-export default function apiSampleResponses(mockAxios: MockAdapter) {
-  mockAxios.onGet('/api/config').reply(200, {
+export default function apiSampleResponses(mockFetch: FetchMock) {
+  mockFetch.onGet('/api/config').reply(200, {
     requireLegalName: true,
     requirePhoneNumber: true,
     verifyLogin: false,
@@ -27,7 +27,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
     buildType: 'binary',
     buildTime: '2024-08-28T02:42:56Z',
   });
-  mockAxios.onGet('/api/users/me').reply(200, {
+  mockFetch.onGet('/api/users/me').reply(200, {
     activeUntil: '2024-09-26T00:31:38Z',
     hasSubscription: true,
     isActive: true,
@@ -60,7 +60,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
       },
     },
   });
-  mockAxios.onGet('/api/links').reply(200, [
+  mockFetch.onGet('/api/links').reply(200, [
     {
       linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
       linkType: 1,
@@ -86,7 +86,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
       deletedAt: null,
     },
   ]);
-  mockAxios.onGet('/api/institutions/ins_116794').reply(200, {
+  mockFetch.onGet('/api/institutions/ins_116794').reply(200, {
     institutionId: 'ins_116794',
     name: 'Mercury',
     products: ['assets', 'auth', 'balance', 'transactions', 'identity'],
@@ -125,7 +125,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
       },
     },
   });
-  mockAxios.onGet('/api/bank_accounts').reply(200, [
+  mockFetch.onGet('/api/bank_accounts').reply(200, [
     {
       bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
       linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
@@ -143,7 +143,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
       updatedAt: '2024-03-19T06:17:32.335106Z',
     },
   ]);
-  mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
+  mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb').reply(200, {
     bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
     linkId: 'link_01gds6eqsqacg48p0azb3wcpsq',
     plaidBankAccount: {
@@ -169,7 +169,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
     createdAt: '2022-09-25T02:08:40.758642Z',
     updatedAt: '2024-03-19T06:17:32.335106Z',
   });
-  mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules').reply(200, [
+  mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules').reply(200, [
     {
       fundingScheduleId: 'fund_01hym37k3kj4ghv67nfx7vkvr0',
       bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
@@ -184,7 +184,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
       nextRecurrenceOriginal: '2024-08-31T05:00:00Z',
     },
   ]);
-  mockAxios
+  mockFetch
     .onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules/fund_01hym37k3kj4ghv67nfx7vkvr0')
     .reply(200, {
       fundingScheduleId: 'fund_01hym37k3kj4ghv67nfx7vkvr0',
@@ -199,7 +199,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
       nextRecurrence: '2024-08-30T05:00:00Z',
       nextRecurrenceOriginal: '2024-08-31T05:00:00Z',
     });
-  mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/balances').reply(200, {
+  mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/balances').reply(200, {
     bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
     current: 47986,
     available: 47986,
@@ -207,7 +207,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
     expenses: 30262,
     goals: 10000,
   });
-  mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending').reply(200, [
+  mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/spending').reply(200, [
     {
       spendingId: 'spnd_01h264znvxkghmxp5s0wmdbr9j',
       bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',
@@ -430,7 +430,7 @@ export default function apiSampleResponses(mockAxios: MockAdapter) {
       createdAt: '2021-12-14T16:42:41Z',
     },
   ]);
-  mockAxios.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions').reply(200, [
+  mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions').reply(200, [
     {
       transactionId: 'txn_01j68vszqeq30t7jz7atk9yd9r',
       bankAccountId: 'bac_01gds6eqsq7h5mgevwtmw3cyxb',

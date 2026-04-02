@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
-import axios from 'axios';
 import { CreditCard } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
+import request from '@monetr/interface/util/request';
 
 /**
  * The SetupBillingButton should only be used on the setup page, it is intended to be a way to manage your billing
@@ -21,8 +21,7 @@ export default function SetupBillingButton(): JSX.Element {
     setLoading(true);
     // If the customer has a subscription then we want to just manage it. This will allow a customer to fix a
     // subscription for a card that has failed payment or something similar.
-    axios
-      .get('/api/billing/portal')
+    request<{ url: string }>({ method: 'GET', url: '/api/billing/portal' })
       .then(result => window.location.assign(result.data.url))
       .catch(error => {
         setLoading(false);

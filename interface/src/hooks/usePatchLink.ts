@@ -9,21 +9,21 @@ export function usePatchLink(): (_: PatchLinkRequest) => Promise<Link> {
   const queryClient = useQueryClient();
 
   async function patchLink({ linkId, ...patch }: PatchLinkRequest): Promise<Link> {
-    return request()
-      .patch(`/links/${linkId}`, patch)
-      .then(result => new Link(result.data));
+    return request<Partial<Link>>({ method: 'PATCH', url: `/api/links/${linkId}`, data: patch }).then(
+      result => new Link(result.data),
+    );
   }
 
   const mutation = useMutation({
     mutationFn: patchLink,
     onSuccess: (updated: Link) =>
       Promise.all([
-        queryClient.setQueryData(['/links'], (previous: Array<Partial<Link>>) =>
+        queryClient.setQueryData(['/api/links'], (previous: Array<Partial<Link>>) =>
           (previous ?? [])
             // Take the existing data in the cache and map over it, returning the updated item instead of the old item.
             .map(existing => (existing.linkId === updated.linkId ? updated : existing)),
         ),
-        queryClient.setQueryData([`/links/${updated.linkId}`], updated),
+        queryClient.setQueryData([`/api/links/${updated.linkId}`], updated),
       ]),
   });
 

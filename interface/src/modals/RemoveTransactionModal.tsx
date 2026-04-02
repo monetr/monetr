@@ -1,10 +1,10 @@
 import { Fragment, useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import type { AxiosError } from 'axios';
 import type { FormikHelpers } from 'formik';
 import { Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
+import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import MForm from '@monetr/interface/components/MForm';
@@ -61,7 +61,7 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
         .then(() => modal.resolve())
         .then(() => modal.remove())
         .catch(
-          (error: AxiosError<APIError>) =>
+          (error: ApiError<APIError>) =>
             void enqueueSnackbar(error.response.data.error, {
               variant: 'error',
               disableWindowBlurListener: true,

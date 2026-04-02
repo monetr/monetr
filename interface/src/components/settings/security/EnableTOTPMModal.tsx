@@ -39,8 +39,7 @@ function EnableTOTPModal(): JSX.Element {
   // TODO This does not handle loading states.
   useEffect(() => {
     if (totpState === null) {
-      request()
-        .post('/users/security/totp/setup')
+      request<TOTPState>({ method: 'POST', url: '/api/users/security/totp/setup' })
         .then(result => setTotpState(result.data))
         .catch(error => {
           console.error('failed to get totp state', error);
@@ -51,11 +50,14 @@ function EnableTOTPModal(): JSX.Element {
   async function submit(values: EnableTOTPValues, helpers: FormikHelpers<EnableTOTPValues>) {
     helpers.setSubmitting(true);
 
-    return request()
-      .post('/users/security/totp/confirm', {
+    return request({
+      method: 'POST',
+      url: '/api/users/security/totp/confirm',
+      data: {
         totp: values.totp,
-      })
-      .then(() => queryClient.invalidateQueries({ queryKey: ['/users/me'] }))
+      },
+    })
+      .then(() => queryClient.invalidateQueries({ queryKey: ['/api/users/me'] }))
       .then(() =>
         enqueueSnackbar('Multifactor authentication enabled.', {
           variant: 'success',

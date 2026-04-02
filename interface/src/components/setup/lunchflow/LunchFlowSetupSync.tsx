@@ -18,8 +18,12 @@ export default function LunchFlowSetupSync(): React.JSX.Element {
   // As soon as this page loads immediately trigger the lunch flow sync
   useEffect(
     () =>
-      void request().post(`/lunch_flow/link/sync`, {
-        linkId,
+      void request({
+        method: 'POST',
+        url: '/api/lunch_flow/link/sync',
+        data: {
+          linkId,
+        },
       }),
     [linkId],
   );
