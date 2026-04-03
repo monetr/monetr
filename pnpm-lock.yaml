@@ -265,8 +265,8 @@ importers:
         specifier: 1.7.11
         version: 1.7.11
       '@rstest/adapter-rsbuild':
-        specifier: 0.2.4
-        version: 0.2.4(@rsbuild/core@1.7.5)(@rstest/core@0.9.5(core-js@3.47.0)(jsdom@26.1.0))
+        specifier: 0.2.5
+        version: 0.2.5(@rsbuild/core@1.7.5)(@rstest/core@0.9.5(core-js@3.47.0)(jsdom@26.1.0))
       '@rstest/core':
         specifier: 0.9.5
         version: 0.9.5(core-js@3.47.0)(jsdom@26.1.0)
@@ -2168,8 +2168,8 @@ packages:
       webpack-hot-middleware:
         optional: true
 
-  '@rstest/adapter-rsbuild@0.2.4':
-    resolution: {integrity: sha512-qyYSBo5eLfd8NVDF22m2IZau9OEs5vJpMtD+hcps3ODYGUaBaAeFeOWHkSaWZVg+rO7N8n/YMYHN6iKcvOwtfA==}
+  '@rstest/adapter-rsbuild@0.2.5':
+    resolution: {integrity: sha512-VMLvOgPFVy3AazzegZ3IeB86EiVr5J7VaGVR4zSkSjHoIm83wr1KIAGbDC5jPkXPH9XlTjxd0P9HKhb2c47fOQ==}
     peerDependencies:
       '@rsbuild/core': '*'
       '@rstest/core': '>=0.7.7'
@@ -7731,7 +7731,7 @@ snapshots:
       html-entities: 2.6.0
       react-refresh: 0.18.0
 
-  '@rstest/adapter-rsbuild@0.2.4(@rsbuild/core@1.7.5)(@rstest/core@0.9.5(core-js@3.47.0)(jsdom@26.1.0))':
+  '@rstest/adapter-rsbuild@0.2.5(@rsbuild/core@1.7.5)(@rstest/core@0.9.5(core-js@3.47.0)(jsdom@26.1.0))':
     dependencies:
       '@rsbuild/core': 1.7.5
       '@rstest/core': 0.9.5(core-js@3.47.0)(jsdom@26.1.0)
