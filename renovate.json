@@ -14,10 +14,18 @@
   "packageRules": [
     {
       "matchPackageNames": [
-        "github.com/aws/aws-sdk-go",
-        "google.golang.org/genproto",
         "@types/.+",
         "renovate"
+      ],
+      "extends": [
+        "schedule:monthly"
+      ]
+    },
+    {
+      "groupName": "aws",
+      "groupSlug": "aws",
+      "matchPackageNames": [
+        "github.com/aws"
       ],
       "extends": [
         "schedule:monthly"
@@ -51,6 +59,13 @@
       "matchPackageNames": [
         "/rspack/",
         "/rsbuild/"
+      ]
+    },
+    {
+      "groupName": "rstest",
+      "groupSlug": "rstest",
+      "matchPackageNames": [
+        "/rstest/"
       ]
     },
     {
