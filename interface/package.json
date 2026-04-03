@@ -82,9 +82,9 @@
     "cssnano": "7.1.2",
     "postcss": "8.5.6",
     "react-compiler-runtime": "1.0.0",
-    "sass": "1.98.0",
-    "sass-embedded-linux-arm64": "1.98.0",
-    "sass-embedded-linux-x64": "1.98.0",
+    "sass": "1.99.0",
+    "sass-embedded-linux-arm64": "1.99.0",
+    "sass-embedded-linux-x64": "1.99.0",
     "typescript": "5.9.3"
   }
 }
