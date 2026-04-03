@@ -23,6 +23,7 @@ set(RSBUILD_EXECUTABLE ${NODE_MODULES_BIN}/rsbuild${JS_EXECUTABLE_SUFFIX})
 set(RSPACK_EXECUTABLE ${NODE_MODULES_BIN}/rspack${JS_EXECUTABLE_SUFFIX})
 set(SITEMAP_EXECUTABLE ${NODE_MODULES_BIN}/next-sitemap${JS_EXECUTABLE_SUFFIX})
 set(SPELLCHECKER_EXECUTABLE ${NODE_MODULES_BIN}/spellchecker${JS_EXECUTABLE_SUFFIX})
+set(TSC_EXECUTABLE ${NODE_MODULES_BIN}/tsc${JS_EXECUTABLE_SUFFIX})
 
 set(PNPM_ARGUMENTS "--frozen-lockfile" "--ignore-scripts")
 
@@ -38,6 +39,7 @@ add_custom_command(
          ${RSPACK_EXECUTABLE}
          ${SITEMAP_EXECUTABLE}
          ${SPELLCHECKER_EXECUTABLE}
+         ${TSC_EXECUTABLE}
          ${CMAKE_SOURCE_DIR}/docs/node_modules
          ${CMAKE_SOURCE_DIR}/emails/node_modules
          ${CMAKE_SOURCE_DIR}/interface/node_modules
@@ -53,6 +55,7 @@ add_custom_command(
              ${RSPACK_EXECUTABLE}
              ${SITEMAP_EXECUTABLE}
              ${SPELLCHECKER_EXECUTABLE}
+             ${TSC_EXECUTABLE}
              ${CMAKE_SOURCE_DIR}/docs/node_modules
              ${CMAKE_SOURCE_DIR}/emails/node_modules
              ${CMAKE_SOURCE_DIR}/interface/node_modules
@@ -120,5 +123,10 @@ add_custom_target(
 
 add_custom_target(
   tools.spellchecker
+  DEPENDS dependencies.node_modules
+)
+
+add_custom_target(
+  tools.tsc
   DEPENDS dependencies.node_modules
 )

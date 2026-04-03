@@ -12,6 +12,7 @@
     "allowImportingTsExtensions": true,
     "outDir": "../server/ui/static",
     "sourceMap": true,
+    "skipLibCheck": true,
     "strict": false,
     "target": "ES2022",
     "types": ["node", "@rstest/core/globals", "@testing-library/jest-dom"],

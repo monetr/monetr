@@ -288,6 +288,17 @@ if(BUILD_TESTING)
     )
   endif()
 
+  add_test(
+    NAME interface.typecheck
+    COMMAND ${TSC_EXECUTABLE} --noEmit --pretty
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/interface
+  )
+  set_tests_properties(interface.typecheck PROPERTIES
+    FIXTURES_REQUIRED node_modules
+    TIMEOUT 120
+    LABELS "interface"
+  )
+
   # add_test(
   #   NAME renovate.validate
   #   COMMAND ${RENOVATE_CONFIG_VALIDATOR_EXECUTABLE} --strict
