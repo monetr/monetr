@@ -291,11 +291,18 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 		return err
 	}
 
+	// Don't allow any of these fields to be modified, eventually this will be
+	// handled via schema validation or something and will be a PATCH request
+	// instead of a PUT.
 	transaction.PlaidTransactionId = existingTransaction.PlaidTransactionId
 	transaction.PendingPlaidTransactionId = existingTransaction.PendingPlaidTransactionId
 	transaction.OriginalName = existingTransaction.OriginalName
 	transaction.OriginalMerchantName = existingTransaction.OriginalMerchantName
 	transaction.LunchFlowTransactionId = existingTransaction.LunchFlowTransactionId
+	transaction.Source = existingTransaction.Source
+	transaction.CreatedAt = existingTransaction.CreatedAt
+	// TODO Handle un-soft-deleting a transaction.
+	transaction.DeletedAt = existingTransaction.DeletedAt
 
 	if !isManual {
 		// Prevent the user from attempting to change a transaction's amount if we are on a plaid link.
@@ -329,7 +336,6 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 	//  update the name to be blank?
 
 	// TODO Handle balance changes on a transaction with an amount change.
-	// TODO Handle un-soft-deleting a transaction.
 	if err = repo.UpdateTransaction(
 		c.getContext(ctx),
 		bankAccountId,

@@ -7,6 +7,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
@@ -846,6 +847,61 @@ func TestPutTransactions(t *testing.T) {
 
 			response.Status(http.StatusNotFound)
 			response.JSON().Path("$.error").String().IsEqual("failed to retrieve existing transaction for update: record does not exist")
+		}
+	})
+
+	t.Run("cannot update fields that shouldn't be updated", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction, transaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+			transaction = originalTransaction
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		assert.Nil(t, originalTransaction.DeletedAt, "deleted at should be nil to start with")
+
+		{ // Update the transaction
+			now := app.Clock.Now()
+			transaction.Source = "other"
+			transaction.CreatedAt = now
+			transaction.DeletedAt = myownsanity.Pointer(now)
+
+			response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transaction.TransactionId).
+				WithCookie(TestCookieName, token).
+				WithJSON(transaction).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Make sure we cannot update any fields that aren't meant to be updated.
+			response.JSON().Path("$.transaction.transactionId").IsEqual(transaction.TransactionId)
+			response.JSON().Path("$.transaction.source").IsEqual(originalTransaction.Source)
+			response.JSON().Path("$.transaction.createdAt").String().AsDateTime(time.RFC3339).IsEqual(originalTransaction.CreatedAt)
+			// Make sure that we did not actaully set the deleted at timestamp
+			response.JSON().Path("$.transaction.deletedAt").IsNull()
+		}
+
+		{ // Make sure that we can still see the transaction
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+
+			// Make sure that our original transaction is still visible in the
+			// response. Previously this transaction would have been hidden if we did
+			// a PUT to the deleted at.
+			response.JSON().Path("$[0].transactionId").IsEqual(transaction.TransactionId)
 		}
 	})
 }
