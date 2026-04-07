@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.12.3](https://github.com/monetr/monetr/compare/v1.12.2...v1.12.3) (2026-04-07)
+
+This patch includes a fix for
+[GHSA-hqxq-hwqf-wg83](https://github.com/monetr/monetr/security/advisories/GHSA-hqxq-hwqf-wg83) which allowed
+authenticated users to modify fields on transactions that were not intended to be modifiable via the PUT API.
+
+Thank you to [QiaoNPC](https://github.com/QiaoNPC) for reporting this!
+
+### Dependencies
+
+* **api:** update aws-sdk-go-v2 monorepo ([#3065](https://github.com/monetr/monetr/issues/3065)) ([d1f6f9e](https://github.com/monetr/monetr/commit/d1f6f9e21458c75f70467052b1429b4a413c5bf4))
+* **api:** update module github.com/aws/smithy-go to v1.24.3 ([#3066](https://github.com/monetr/monetr/issues/3066)) ([5e58555](https://github.com/monetr/monetr/commit/5e58555c0685051924885826830b8be5e2b22cee))
+* **containers:** update ghcr.io/openbao/openbao docker tag to v2.5.2 ([#2960](https://github.com/monetr/monetr/issues/2960)) ([02ec55e](https://github.com/monetr/monetr/commit/02ec55e490dc6130754a9a4642867d2360219fb7))
+* **renovate:** update codecov/codecov-action action to v6 ([#3077](https://github.com/monetr/monetr/issues/3077)) ([f9406df](https://github.com/monetr/monetr/commit/f9406df73465732184d84a63398114a0ca5d8d20))
+* **renovate:** update dependency simple-icons to v14.15.0 ([#2565](https://github.com/monetr/monetr/issues/2565)) ([531745a](https://github.com/monetr/monetr/commit/531745a4d34623b0b050ee9b0f247bbc0aa08d6e))
+* **renovate:** update docker/login-action action to v4 ([#3021](https://github.com/monetr/monetr/issues/3021)) ([c0dc9f8](https://github.com/monetr/monetr/commit/c0dc9f863fb4320b809832dac6f53a2e3e7591aa))
+* **ui:** update dependency @tanstack/react-query to v5.96.1 ([#3060](https://github.com/monetr/monetr/issues/3060)) ([d8e2416](https://github.com/monetr/monetr/commit/d8e2416be5b0085f443157c6a56874c944c23572))
+* **ui:** update dependency @tanstack/react-query to v5.96.2 ([#3071](https://github.com/monetr/monetr/issues/3071)) ([9c456b0](https://github.com/monetr/monetr/commit/9c456b0cd9c06ae4a25ebb46bcf0f11cef5a4521))
+* **ui:** update dependency katex to v0.16.44 ([#2995](https://github.com/monetr/monetr/issues/2995)) ([20e6e21](https://github.com/monetr/monetr/commit/20e6e21a725537b4beac3553fa355ee246de192a))
+* **ui:** update dependency lucide-react to v1 ([#3072](https://github.com/monetr/monetr/issues/3072)) ([19be1cd](https://github.com/monetr/monetr/commit/19be1cd96776b3b8d82e4962829b9df129d83b62))
+* **ui:** update dependency react-dropzone to v15 ([#3073](https://github.com/monetr/monetr/issues/3073)) ([56a6823](https://github.com/monetr/monetr/commit/56a6823fc63932f890ece860298b4c8718d8edb1))
+* **ui:** update rstest ([#3074](https://github.com/monetr/monetr/issues/3074)) ([d136a80](https://github.com/monetr/monetr/commit/d136a80c7f18feb075cd2c8f274f5f7ee86b67ee))
+* **ui:** update sass to v1.99.0 ([#3067](https://github.com/monetr/monetr/issues/3067)) ([4ebfddf](https://github.com/monetr/monetr/commit/4ebfddfe8d8442298b0e0277879c4f6f26c2c829))
+* **ui:** update sentry-javascript monorepo to v10.47.0 ([#3064](https://github.com/monetr/monetr/issues/3064)) ([6addccb](https://github.com/monetr/monetr/commit/6addccb16395a0ff21879301d2d189bf6a4b7fd0))
+
+
+### Bug Fixes
+
+* **api:** Fix allowing PUTing unauthorized fields ([8881629](https://github.com/monetr/monetr/commit/8881629d3bcb8b82571b5b1a216ffa7544e861cc))
+
+
+### Miscellaneous
+
+* **deps:** bump github.com/go-jose/go-jose/v4 from 4.1.3 to 4.1.4 ([#3068](https://github.com/monetr/monetr/issues/3068)) ([0ea7b8f](https://github.com/monetr/monetr/commit/0ea7b8f2d1789fb16a871a2d6f805453930103f9))
+* Fixing stray axios dependency ([238dc65](https://github.com/monetr/monetr/commit/238dc6588c03186fedd54120d19f0d9d650fb52f))
+* Tweaking renovate config ([72d82ce](https://github.com/monetr/monetr/commit/72d82ce633502d5f75e0a4767b11e7e63ec396c1))
+
+
+### Refactor
+
+* **ui:** Adding tests for typechecking ([7c1f1b0](https://github.com/monetr/monetr/commit/7c1f1b09ebc52e8b557216e21924a4d04311757e))
+* **ui:** Migrating from axios to fetch ([#3061](https://github.com/monetr/monetr/issues/3061)) ([43607c8](https://github.com/monetr/monetr/commit/43607c80b8b99695080b9b64f7498cab390aad94))
+
 ## [1.12.2](https://github.com/monetr/monetr/compare/v1.12.1...v1.12.2) (2026-04-01)
 
 
