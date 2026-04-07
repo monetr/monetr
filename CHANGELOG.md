@@ -2,6 +2,11 @@
 
 ## [1.12.3](https://github.com/monetr/monetr/compare/v1.12.2...v1.12.3) (2026-04-07)
 
+This patch includes a fix for
+[GHSA-hqxq-hwqf-wg83](https://github.com/monetr/monetr/security/advisories/GHSA-hqxq-hwqf-wg83) which allowed
+authenticated users to modify fields on transactions that were not intended to be modifiable via the PUT API.
+
+Thank you to [QiaoNPC](https://github.com/QiaoNPC) for reporting this!
 
 ### Dependencies
 
