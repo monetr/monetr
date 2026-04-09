@@ -1,4 +1,4 @@
-set(GO_MIN_VERSION "1.26.1")
+set(GO_MIN_VERSION "1.26.2")
 
 # Default to amd64 if the go arch is not specified.
 if("${GOARCH}" STREQUAL "")
