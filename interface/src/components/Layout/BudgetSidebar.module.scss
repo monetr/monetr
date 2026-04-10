@@ -37,13 +37,12 @@
 
 .budgetSidebarRoot {
   z-index: 40;
-  position: fixed;
+  position: sticky;
   top: 0;
   bottom: 0;
   left: 0;
-  padding-left: var(--bank-sidebar-width-static);
   
-  min-height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border);

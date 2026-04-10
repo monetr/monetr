@@ -92,12 +92,12 @@ svg.lucide {
   --semibold: 600;
   --bold: 700;
 
-  --bank-sidebar-width-static: #{16 * variables.$size};
+  --bank-sidebar-width-static: #{20 * variables.$size};
   --bank-sidebar-width: 0px;
   --budget-sidebar-width: 0px;
 
   @media (min-width: variables.$largeScreen) {
-    --bank-sidebar-width: #{16 * variables.$size};
+    --bank-sidebar-width: #{20 * variables.$size};
     --budget-sidebar-width: #{72 * variables.$size};
   }
 
