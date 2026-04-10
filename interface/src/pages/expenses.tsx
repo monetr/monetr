@@ -63,7 +63,7 @@ export default function Expenses(): JSX.Element {
           New Expense
         </Button>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0' ref={ref}>
+      <div className='w-full flex grow flex-col min-w-0' ref={ref}>
         {(expenses ?? []).length === 0 && <EmptyState />}
         {expenses?.length > 0 && (
           <ul className='w-full flex flex-col gap-2 py-2 pb-16'>
@@ -81,7 +81,7 @@ export default function Expenses(): JSX.Element {
 
 function EmptyState(): JSX.Element {
   return (
-    <div className='w-full h-full flex justify-center items-center'>
+    <div className='w-full flex justify-center items-center grow'>
       <div className='flex flex-col gap-2 items-center max-w-md'>
         <div className='w-full flex justify-center space-x-4'>
           <Receipt className='dark:text-dark-monetr-content-muted h-12 w-12' />

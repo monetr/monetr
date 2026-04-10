@@ -47,7 +47,7 @@ export default function Funding(): JSX.Element {
           New Funding Schedule
         </Button>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0'>
+      <div className='w-full flex flex-grow flex-col min-w-0'>
         <ListContent />
       </div>
     </Fragment>
@@ -56,7 +56,7 @@ export default function Funding(): JSX.Element {
 
 function EmptyState(): JSX.Element {
   return (
-    <div className='w-full h-full flex justify-center items-center'>
+    <div className='w-full flex justify-center items-center'>
       <div className='flex flex-col gap-2 items-center max-w-md'>
         <div className='w-full flex justify-center space-x-4'>
           <CalendarSync className='dark:text-dark-monetr-content-muted h-12 w-12' />

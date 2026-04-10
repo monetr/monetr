@@ -4,4 +4,6 @@
   min-width: 0px; 
   padding-left: calc(var(--bank-sidebar-width) + var(--budget-sidebar-width));
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }

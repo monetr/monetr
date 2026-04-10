@@ -110,8 +110,8 @@ export default function Transactions(): JSX.Element {
         <UploadButtonMaybe />
       </MTopNavigation>
       <AddTransactionButton />
-      <div className='flex flex-grow min-w-0 min-h-0'>
-        <ul className='w-full overflow-y-auto pb-16' ref={ref}>
+      <div className='flex flex-grow min-w-0'>
+        <ul className='w-full pb-16' ref={ref}>
           {Object.entries(groups).map(([date, transactionGroup]) => (
             <li key={date}>
               <ul className='flex gap-2 flex-col'>
