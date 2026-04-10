@@ -92,14 +92,6 @@ svg.lucide {
   --semibold: 600;
   --bold: 700;
 
-  /* Sizes for things, to be used with width, height, gaps etc */
-  --size-1: 0.25rem; /* 4px */
-  --size-2: calc(2 * var(--size-1));
-  --size-3: calc(3 * var(--size-1));
-  --size-4: calc(4 * var(--size-1));
-  --size-5: calc(5 * var(--size-1));
-  --size-8: calc(8 * var(--size-1));
-
   --bank-sidebar-width-static: #{16 * variables.$size};
   --bank-sidebar-width: 0px;
   --budget-sidebar-width: 0px;

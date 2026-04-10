@@ -5,7 +5,7 @@ $basePadding: 4 * variables.$size;
 .selectLoading {
   display: flex !important;
   cursor: progress;
-  gap: var(--size-1);
+  gap: variables.$size;
   align-items: center;
 }
 
@@ -21,7 +21,7 @@ $basePadding: 4 * variables.$size;
 .select {
   display: flex !important;
   cursor: text;
-  gap: var(--size-1);
+  gap: variables.$size;
   align-items: center;
 
   &:is(button) {
@@ -84,27 +84,27 @@ $basePadding: 4 * variables.$size;
   position: absolute;
   background-color: var(--background-darker);
   border-radius: var(--border-radius);
-  padding: var(--size-1);
+  padding: variables.$size;
   overflow-y: auto;
   z-index: 50;
 
   /* Add a half size gap on the top and bottom of every element in the list */
   /* see space-y-0.5 */
   > :not([hidden]) {
-    margin-top: calc(0.5 * var(--size-1));
-    margin-bottom: calc(0.5 * var(--size-1));
+    margin-top: 0.5 * variables.$size;
+    margin-bottom: 0.5 * variables.$size;
   }
 }
 
 .unorderedListMobile {
-  padding-left: calc(2 * var(--size-1));
-  padding-right: calc(2 * var(--size-1));
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
 
   /* Add a half size gap on the top and bottom of every element in the list */
   /* see space-y-0.5 */
   > :not([hidden]) {
-    margin-top: calc(0.5 * var(--size-1));
-    margin-bottom: calc(0.5 * var(--size-1));
+    margin-top: 0.5 * variables.$size;
+    margin-bottom: 0.5 * variables.$size;
   }
 
   padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
