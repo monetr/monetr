@@ -42,7 +42,7 @@ func adminSecretView(parent *cobra.Command) {
 
 			var token models.PlaidToken
 			err = db.Model(&token).
-				Where(`"item_id" = ?`, arguments.KMS).
+				Where(`"item_id" = ?`, arguments.ItemID).
 				Limit(1).
 				Select(&token)
 			if err != nil {
