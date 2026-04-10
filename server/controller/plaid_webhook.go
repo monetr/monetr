@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"bytes"
+	"crypto/subtle"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -50,7 +52,7 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
 	}
 
-	signature := myownsanity.SHA256(bodyBytes)
+	signature := []byte(myownsanity.SHA256(bodyBytes))
 
 	var kid string
 	var claims PlaidClaims
@@ -109,7 +111,10 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 	}
 
-	if !strings.EqualFold(signature, claims.RequestBodySHA256) {
+	if subtle.ConstantTimeCompare(
+		bytes.ToLower(signature),
+		bytes.ToLower([]byte(claims.RequestBodySHA256)),
+	) != 1 {
 		c.getLog(ctx).ErrorContext(c.getContext(ctx), "received plaid request with valid token but invalid signature!", "expected", signature, "received", claims.RequestBodySHA256)
 		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 	}
