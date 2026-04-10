@@ -1,8 +1,9 @@
 package controller
 
 import (
-	"bytes"
+	"crypto/sha256"
 	"crypto/subtle"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -47,12 +48,32 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 	}
 
-	bodyBytes, err := io.ReadAll(ctx.Request().Body)
-	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
+	// Stream the request body through a SHA256 hasher while decoding the JSON
+	// payload. This computes the body signature in a single pass without
+	// buffering the entire request into memory. The decode happens before the
+	// JWT verification so we can hash and parse in one read; the body size is
+	// already capped by middleware so the decoder is not exposed to unbounded
+	// untrusted input.
+	hasher := sha256.New()
+	tee := io.TeeReader(ctx.Request().Body, hasher)
+	decoder := json.NewDecoder(tee)
+
+	var hook PlaidWebhook
+	if err := decoder.Decode(&hook); err != nil {
+		return c.badRequest(ctx, "malformed JSON")
 	}
 
-	signature := []byte(myownsanity.SHA256(bodyBytes))
+	// The webhook body must be exactly one JSON value. Decoding into a fresh
+	// value should hit io.EOF after skipping any trailing whitespace; anything
+	// else means there is extra content (a second JSON value or garbage) which
+	// we reject. This second Decode also pulls any remaining body bytes through
+	// the tee, so the hasher sees the entire request payload Plaid signed.
+	var trailing json.RawMessage
+	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
+		return c.badRequest(ctx, "malformed JSON")
+	}
+
+	signature := []byte(hex.EncodeToString(hasher.Sum(nil)))
 
 	var kid string
 	var claims PlaidClaims
@@ -112,16 +133,11 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 	}
 
 	if subtle.ConstantTimeCompare(
-		bytes.ToLower(signature),
-		bytes.ToLower([]byte(claims.RequestBodySHA256)),
+		signature,
+		[]byte(strings.ToLower(claims.RequestBodySHA256)),
 	) != 1 {
 		c.getLog(ctx).ErrorContext(c.getContext(ctx), "received plaid request with valid token but invalid signature!", "expected", signature, "received", claims.RequestBodySHA256)
 		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
-	}
-
-	var hook PlaidWebhook
-	if err = json.Unmarshal(bodyBytes, &hook); err != nil {
-		return c.badRequest(ctx, "malformed JSON")
 	}
 
 	if err = c.processWebhook(ctx, hook); err != nil {
