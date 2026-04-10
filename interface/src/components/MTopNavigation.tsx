@@ -2,11 +2,10 @@ import type React from 'react';
 import { Fragment, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
 import Typography from '@monetr/interface/components/Typography';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import MSidebarToggle from './MSidebarToggle';
-import MSpan from './MSpan';
 import styles from './MTopNavigation.module.scss';
 
 export interface MTopNavigationProps {
@@ -50,12 +49,12 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
             </Typography>
             {Boolean(props.breadcrumb) && (
               <Fragment>
-                <MSpan className={styles.breadcrumbSeparator} color='subtle' size='2xl' weight='bold'>
+                <Typography className={styles.breadcrumbSeparator} color='subtle' size='2xl' weight='bold'>
                   /
-                </MSpan>
-                <MSpan className={styles.breadcrumbText} color='emphasis' ellipsis size='2xl' weight='bold'>
+                </Typography>
+                <Typography className={styles.breadcrumbText} color='emphasis' ellipsis size='2xl' weight='bold'>
                   {props.breadcrumb}
-                </MSpan>
+                </Typography>
               </Fragment>
             )}
           </span>

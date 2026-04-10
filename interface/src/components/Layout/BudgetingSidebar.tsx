@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 import Badge from '@monetr/interface/components/Badge';
 import Divider from '@monetr/interface/components/Divider';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import BalanceAvailableAmount from '@monetr/interface/components/Layout/BalanceAvailableAmount';
 import BalanceCurrentAmount from '@monetr/interface/components/Layout/BalanceCurrentAmount';
 import BalanceFreeToUseAmount from '@monetr/interface/components/Layout/BalanceFreeToUseAmount';
@@ -10,7 +11,7 @@ import BalanceLimitAmount from '@monetr/interface/components/Layout/BalanceLimit
 import PlaidBankStatusCard from '@monetr/interface/components/Layout/PlaidBankStatusCard';
 import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import SelectBankAccount from '@monetr/interface/components/Layout/SelectBankAccount';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useNextFundingDate } from '@monetr/interface/hooks/useNextFundingDate';
@@ -39,7 +40,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
       <BudgetingSidebarTitle />
       <div className='flex h-full w-full flex-col items-center gap-4 px-2 pt-4'>
         <SelectBankAccount />
-        <Divider className='w-1/2' />
+        <Divider className={layoutVariants({ width: '1/2' })} />
 
         <div className='flex w-full flex-col items-center gap-2 px-2'>
           <BalanceFreeToUseAmount />
@@ -47,38 +48,38 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
           <BalanceCurrentAmount />
           <BalanceLimitAmount />
         </div>
-        <Divider className='w-1/2' />
+        <Divider className={layoutVariants({ width: '1/2' })} />
 
         <div className='flex h-full w-full flex-col gap-2 pb-4'>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/transactions`}>
             <ShoppingCart />
-            <MSpan color='inherit' ellipsis>
+            <Typography color='inherit' ellipsis size='lg' weight='medium'>
               Transactions
-            </MSpan>
+            </Typography>
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/expenses`}>
             <Receipt />
-            <MSpan color='inherit' ellipsis>
+            <Typography color='inherit' ellipsis size='lg' weight='medium'>
               Expenses
-            </MSpan>
+            </Typography>
             <Badge className='ml-auto' size='sm'>
               {locale.formatAmount(balance?.expenses, AmountType.Stored)}
             </Badge>
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/goals`}>
             <PiggyBank />
-            <MSpan color='inherit' ellipsis>
+            <Typography color='inherit' ellipsis size='lg' weight='medium'>
               Goals
-            </MSpan>
+            </Typography>
             <Badge className='ml-auto' size='sm'>
               {locale.formatAmount(balance?.goals, AmountType.Stored)}
             </Badge>
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/funding`}>
             <CalendarSync />
-            <MSpan color='inherit' ellipsis>
+            <Typography color='inherit' ellipsis size='lg' weight='medium'>
               Funding Schedules
-            </MSpan>
+            </Typography>
             <NextFundingBadge />
           </NavigationItem>
         </div>

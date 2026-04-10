@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 
 import Divider from '@monetr/interface/components/Divider';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MStepperProps {
@@ -90,10 +90,10 @@ function MStep(props: MStepProps): JSX.Element {
 
   return (
     <Fragment>
-      <MSpan className='flex gap-1 items-center h-6'>
-        <MSpan className={numberClass}>{props.index + 1}</MSpan>
-        <MSpan className={textClass}>{props.name}</MSpan>
-      </MSpan>
+      <Typography className='flex gap-1 items-center h-6'>
+        <Typography className={numberClass}>{props.index + 1}</Typography>
+        <Typography className={textClass}>{props.name}</Typography>
+      </Typography>
       {props.divider && <Divider className={lineClass} />}
     </Fragment>
   );
