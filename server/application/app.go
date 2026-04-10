@@ -24,6 +24,10 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *echo
 		WaitForDelivery: false,
 		Timeout:         30 * time.Second,
 	}))
+	// Right now uploads are soft limited to 5MB anyway, this gives us some head
+	// room and this should also be defined at the reverse proxy layer as well to
+	// prevent spam.
+	app.Use(middleware.BodyLimit("6MB"))
 
 	app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: configuration.CORS.AllowedOrigins,
