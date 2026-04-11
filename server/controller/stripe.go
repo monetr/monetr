@@ -2,6 +2,7 @@ package controller
 
 import (
 	"io"
+	"math"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -26,7 +27,12 @@ func (c *Controller) handleStripeWebhook(ctx echo.Context) error {
 	}
 	defer body.Close()
 
-	requestBody, err := io.ReadAll(body)
+	// Not using [http.MaxBytesReader] since it leverages the response writer as
+	// well. I don't want to interfere with echo's response handling or any other
+	// middleware I have setup so I'm using [io.LimitReader] instead to achieve
+	// the same thing. Max of 65kb based on:
+	// https://github.com/stripe/stripe-go/blob/395614cfd3891376de57411afe8e02ab1f614cf3/webhook/client_handler_test.go#L14-L17
+	requestBody, err := io.ReadAll(io.LimitReader(body, int64(math.MaxUint16)))
 	if err != nil {
 		c.reportError(ctx, err)
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to read request body")
