@@ -1,5 +1,4 @@
 import rehypeMathPostProcess from './plugins/rehypeMathPostProcess';
-import pluginSearchIndexCleanup from './plugins/searchIndexCleanup';
 
 import path from 'node:path';
 import { pluginSass } from '@rsbuild/plugin-sass';
@@ -72,7 +71,7 @@ export default defineConfig({
       checkDeadImages: true,
     },
   },
-  plugins: [pluginSitemap({ siteUrl: 'https://monetr.app' }), pluginSearchIndexCleanup()],
+  plugins: [pluginSitemap({ siteUrl: 'https://monetr.app' })],
   builderConfig: {
     plugins: [pluginSass()],
     output: {
