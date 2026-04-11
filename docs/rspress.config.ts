@@ -68,6 +68,9 @@ export default defineConfig({
     link: {
       checkDeadLinks: true,
     },
+    image: {
+      checkDeadImages: true,
+    },
   },
   plugins: [pluginSitemap({ siteUrl: 'https://monetr.app' }), pluginSearchIndexCleanup()],
   builderConfig: {

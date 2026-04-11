@@ -23,12 +23,12 @@ export default function Hero(): JSX.Element {
 
       <div className='m-view-width flex flex-col mx-auto items-center gap-8'>
         <div className='max-w-3xl flex flex-col gap-8 text-center items-center'>
-          <div className='flex items-center justify-center p-4'>
-            <span className='absolute mx-auto flex border w-fit bg-gradient-to-r blur-xl opacity-50 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-4xl sm:text-6xl font-extrabold text-transparent text-center select-none'>
+          <div className='flex items-center justify-center relative py-4'>
+            <span className='absolute mx-auto flex w-fit bg-gradient-to-r blur-xl opacity-50 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-5xl/tight sm:text-6xl/tight font-extrabold text-transparent text-center select-none'>
               Welcome to monetr,
             </span>
-            <h1 className='h-24 relative top-0 justify-center flex bg-gradient-to-r items-center from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-4xl sm:text-6xl font-extrabold text-transparent text-center select-auto'>
-              Welcome to monetr
+            <h1 className='relative top-0 mb-auto justify-center flex bg-gradient-to-r items-center from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-5xl/tight sm:text-6xl/tight font-extrabold text-transparent text-center select-auto'>
+              Welcome to monetr,
             </h1>
           </div>
 

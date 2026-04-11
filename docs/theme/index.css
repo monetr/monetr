@@ -41,6 +41,8 @@
   --rp-home-background-bg: #111111;
   --rp-font-family-base: 'Inter Variable', -apple-system, BlinkMacSystemFont,
     'Segoe UI', Roboto, sans-serif;
+
+  --rp-radius: 0.5rem;
 }
 
 .rp-nav {
@@ -155,6 +157,7 @@ mark {
 /* Make edit this page match the last updated text color */
 .rp-edit-link {
   color: var(--rp-c-text-3) !important;
+  font-size: unset;
 }
 
 /* Fixes an issue where images that are also links are rendered oddly */
@@ -168,4 +171,19 @@ mark {
   height: min-content;
   /* Fixes medium-zoom things on the image itself */
   pointer-events: none;
+}
+
+p {
+  /* match nextra */
+  font-size: 17px;
+}
+
+.rp-last-updated > p {
+  font-size: unset;
+}
+
+/* On pages with no sidebar or table of contents, AND we are on mobile. Just
+ * hide this element so we don't do weird layout shifts */
+.rp-doc-layout__menu:has(> .rp-sidebar-menu > .rp-sidebar-menu__left:empty + .rp-sidebar-menu__right:empty) {
+  display: none;
 }
