@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 
-import GithubStars from '../components/GithubStars';
-import QueryClientWrapper from '../components/QueryClientWrapper';
-import SignIn from '../components/SignIn';
-
 import { useFrontmatter } from '@rspress/core/runtime';
 import { Layout as BasicLayout, Link, FallbackHeading as OriginalFallbackHeading } from '@rspress/core/theme-original';
 
 import './index.css';
+
+import GithubStars from '@monetr/docs/components/GithubStars';
+import QueryClientWrapper from '@monetr/docs/components/QueryClientWrapper';
+import SignIn from '@monetr/docs/components/SignIn';
 
 function NavTitle() {
   return (

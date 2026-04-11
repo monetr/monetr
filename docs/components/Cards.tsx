@@ -13,15 +13,15 @@ interface CardProps {
 function Card({ title, href, icon, children, arrow }: CardProps) {
   return (
     <Link
-      className='block p-4 rounded-lg border border-zinc-700 hover:border-zinc-500 transition-colors bg-black bg-opacity-20 backdrop-blur-sm no-underline text-inherit'
+      className='flex p-4 rounded-lg border border-zinc-700 hover:border-zinc-500 transition-colors bg-black bg-opacity-20 backdrop-blur-sm no-underline text-inherit my-2 gap-2'
       href={href}
     >
-      {icon && <span className='text-2xl mb-2 block'>{icon}</span>}
-      <h3 className='text-lg font-semibold'>
+      {icon && <span className='text-2xl'>{icon}</span>}
+      <h3 className='text-lg font-semibold my-[unset]'>
         {title}
-        {arrow && <span className='ml-1'>&rarr;</span>}
+        {arrow && <span className='ml-1 leading-none'>&rarr;</span>}
       </h3>
-      {children && <p className='text-sm text-zinc-400 mt-1'>{children}</p>}
+      {children && <p className='text-sm text-zinc-400 mt-1 leading-none'>{children}</p>}
     </Link>
   );
 }
