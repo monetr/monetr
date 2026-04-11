@@ -29,8 +29,9 @@
 import { format, parse } from 'date-fns';
 import { ArrowRight } from 'lucide-react';
 
-import { Link } from '@rspress/core/theme-original';
 import useDocPages from '@monetr/docs/components/hooks/useDocPages';
+
+import { Link } from '@rspress/core/theme-original';
 
 export default function BlogIndex(): JSX.Element {
   const { pages } = useDocPages();
