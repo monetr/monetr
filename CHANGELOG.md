@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.12.4](https://github.com/monetr/monetr/compare/v1.12.3...v1.12.4) (2026-04-11)
+
+This patch includes a fix for [GHSA-v7xq-3wx6-fqc2](https://github.com/monetr/monetr/security/advisories/GHSA-v7xq-3wx6-fqc2). Which now prevents potential denial of service that could have been caused by sending massive request bodies to the Stripe webhook endpoint when both Stripe and Stripe webhooks were enabled on the monetr server.
+
+Thank you to [Jvr2022](https://github.com/Jvr2022) for reporting this!
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.45.0 ([#3085](https://github.com/monetr/monetr/issues/3085)) ([2241c63](https://github.com/monetr/monetr/commit/2241c63f4348710cc156b06fae5bf05e358fc778))
+* **api:** update module golang.org/x/sys to v0.43.0 ([#3086](https://github.com/monetr/monetr/issues/3086)) ([14d5e70](https://github.com/monetr/monetr/commit/14d5e70afd59dc97fcaf8224391d49a9d6f71d4a))
+* **api:** update module golang.org/x/text to v0.36.0 ([#3087](https://github.com/monetr/monetr/issues/3087)) ([89fbf50](https://github.com/monetr/monetr/commit/89fbf509ff46fc1bcc8f67df90d164410697229c))
+* **api:** update module golang.org/x/tools to v0.43.0 ([#3018](https://github.com/monetr/monetr/issues/3018)) ([d8d6983](https://github.com/monetr/monetr/commit/d8d698376e6e8c42d1772ae9e94c80b6385e7a54))
+* **containers:** update golang docker tag to v1.26.2 ([#3082](https://github.com/monetr/monetr/issues/3082)) ([c6bdb8f](https://github.com/monetr/monetr/commit/c6bdb8f9e432adb1d7b04990d4bd0a966d1f141b))
+* **renovate:** update dependency @biomejs/biome to v2.4.11 ([#3090](https://github.com/monetr/monetr/issues/3090)) ([46a27b6](https://github.com/monetr/monetr/commit/46a27b6693b844d46c8e78d5c7922346b34c4dbf))
+* **renovate:** update dependency go to v1.26.2 ([#3083](https://github.com/monetr/monetr/issues/3083)) ([f86fb8a](https://github.com/monetr/monetr/commit/f86fb8a67aea8ad1c8c39e6d9e0eb11a5dcfc3d1))
+* **ui:** update dependency @tanstack/react-query to v5.97.0 ([#3088](https://github.com/monetr/monetr/issues/3088)) ([ca8cbf0](https://github.com/monetr/monetr/commit/ca8cbf073eaa4f4dc17623de476f16b5edddc77c))
+* **ui:** update dependency lucide-react to v1.8.0 ([#3089](https://github.com/monetr/monetr/issues/3089)) ([a1351db](https://github.com/monetr/monetr/commit/a1351db66b2d2afd9188fe524f4b4c279c5346e9))
+
+
+### Bug Fixes
+
+* **api:** Constant time compare for plaid webhook signatures ([038c1c2](https://github.com/monetr/monetr/commit/038c1c25f56bd721830985158d11e3022370d0a9))
+* **api:** Fix stripe webhook reading unbounded request body ([#3093](https://github.com/monetr/monetr/issues/3093)) ([cd31c80](https://github.com/monetr/monetr/commit/cd31c806eb680f85efc72f9385025d9323bc949f))
+* **api:** Limit request body size in middleware ([788bf02](https://github.com/monetr/monetr/commit/788bf0238bc47ad40966d5c69b234cd415959aa5))
+* **cli:** Fixed secret view CLI argument being mishandled ([b9a021f](https://github.com/monetr/monetr/commit/b9a021f66474871927e4978376b2d2026514677d))
+* Improve plaid webhook signature handling ([dc1a822](https://github.com/monetr/monetr/commit/dc1a82298e731e87adcab50a21e9e3ff56961ca2))
+* **ui:** Fixed overscroll bug on list pages ([5ef9dbe](https://github.com/monetr/monetr/commit/5ef9dbe4c67501cb0a3cf556204c836d3fddcb2c))
+* **ui:** Get rid of `--size-*` css variable ([0ab31df](https://github.com/monetr/monetr/commit/0ab31df702c063e41e2cc49e1d1659e384263f1d))
+
+
+### Refactor
+
+* **ui:** More migrations to new typography component ([8a213f5](https://github.com/monetr/monetr/commit/8a213f50fa9649119a1c922e2991a92ca22cc8e4))
+
 ## [1.12.3](https://github.com/monetr/monetr/compare/v1.12.2...v1.12.3) (2026-04-07)
 
 This patch includes a fix for
