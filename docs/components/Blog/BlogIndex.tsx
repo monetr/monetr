@@ -29,11 +29,11 @@
 import { format, parse } from 'date-fns';
 import { ArrowRight } from 'lucide-react';
 
-import { usePages } from '@rspress/core/runtime';
 import { Link } from '@rspress/core/theme-original';
+import useDocPages from '@monetr/docs/components/hooks/useDocPages';
 
 export default function BlogIndex(): JSX.Element {
-  const { pages } = usePages();
+  const { pages } = useDocPages();
 
   const blogPages = pages
     .filter(page => page.routePath.startsWith('/blog/') && page.routePath !== '/blog/' && page.routePath !== '/blog')
@@ -92,11 +92,11 @@ export default function BlogIndex(): JSX.Element {
                   {format(parse(page.frontmatter.date as string, 'yyyy/MM/dd', new Date()), 'MMMM dd, yyyy')}
                 </span>
               ) : null}
-              {(page.frontmatter?.author as string) ? (
-                <span className='opacity-60 text-sm group-hover:opacity-100'>
-                  by {page.frontmatter.author as string}
+              {page?.authors?.map(author => (
+                <span className='opacity-60 text-sm group-hover:opacity-100' key={author.name}>
+                  by {author.name}
                 </span>
-              ) : null}
+              ))}
             </div>
           </Link>
         ))}

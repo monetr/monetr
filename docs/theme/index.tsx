@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 
 import { useFrontmatter } from '@rspress/core/runtime';
 import { Layout as BasicLayout, Link, FallbackHeading as OriginalFallbackHeading } from '@rspress/core/theme-original';
@@ -6,6 +6,7 @@ import { Layout as BasicLayout, Link, FallbackHeading as OriginalFallbackHeading
 import './index.css';
 
 import GithubStars from '@monetr/docs/components/GithubStars';
+import PageMetadata from '@monetr/docs/components/PageMetadata';
 import QueryClientWrapper from '@monetr/docs/components/QueryClientWrapper';
 import SignIn from '@monetr/docs/components/SignIn';
 
@@ -71,24 +72,27 @@ const Layout = () => {
   }, []);
 
   return (
-    <QueryClientWrapper>
-      <BasicLayout
-        afterNavMenu={<NavExtras />}
-        // TODO This renders weird on custom pages, causing a brief flash.
-        // beforeNav={
-        //   <NoSSR>
-        //     <Banner
-        //       display={typeof window !== 'undefined'}
-        //       href='/blog/2025-12-31-similar-transactions'
-        //       message='🎉 Read the latest blog post about similar transactions'
-        //       storageKey='monetr-launched-january-2025'
-        //     />
-        //   </NoSSR>
-        // }
-        bottom={<Footer />}
-        navTitle={<NavTitle />}
-      />
-    </QueryClientWrapper>
+    <Fragment>
+      <PageMetadata />
+      <QueryClientWrapper>
+        <BasicLayout
+          afterNavMenu={<NavExtras />}
+          // TODO This renders weird on custom pages, causing a brief flash.
+          // beforeNav={
+          //   <NoSSR>
+          //     <Banner
+          //       display={typeof window !== 'undefined'}
+          //       href='/blog/2025-12-31-similar-transactions'
+          //       message='🎉 Read the latest blog post about similar transactions'
+          //       storageKey='monetr-launched-january-2025'
+          //     />
+          //   </NoSSR>
+          // }
+          bottom={<Footer />}
+          navTitle={<NavTitle />}
+        />
+      </QueryClientWrapper>
+    </Fragment>
   );
 };
 
