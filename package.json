@@ -19,5 +19,21 @@
     "develop-docs": "cmake --preset default && cmake --build build -t development.documentation.up",
     "shutdown": "cmake --preset default && cmake --build build -t development.down",
     "clean": "pnpm shutdown && cmake --build build -t clean && cmake -E remove_directory build"
+  },
+  "pnpm": {
+    "supportedArchitectures": {
+      "os": [
+        "linux",
+        "darwin",
+        "win32"
+      ],
+      "cpu": [
+        "x64",
+        "arm64"
+      ],
+      "libc": [
+        "glibc"
+      ]
+    }
   }
 }
