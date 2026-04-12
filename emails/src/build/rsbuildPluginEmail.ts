@@ -4,9 +4,10 @@ import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { RsbuildPlugin } from '@rsbuild/core';
-import { convert as htmlToText } from 'html-to-text';
 import juice from 'juice';
 import { renderToStaticMarkup } from 'react-dom/server';
+
+import { toPlainText } from '../toPlainText';
 
 const SSG_BUNDLE_FOLDER = '__email_ssg__';
 const SSG_BUNDLE_NAME = 'email-bundle.cjs';
@@ -27,21 +28,6 @@ function inlineCSS(html: string, css: string): string {
     applyStyleTags: true,
     removeStyleTags: false,
     preserveImportant: true,
-  });
-}
-
-function toPlainText(html: string): string {
-  return htmlToText(html, {
-    selectors: [
-      { selector: 'img', format: 'skip' },
-      { selector: '[data-skip-in-text]', format: 'skip' },
-      {
-        selector: 'a',
-        options: {
-          hideLinkHrefIfSameAsText: true,
-        },
-      },
-    ],
   });
 }
 

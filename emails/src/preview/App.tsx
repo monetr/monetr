@@ -1,52 +1,11 @@
 import { createElement, useMemo, useState } from 'react';
 
 import { templateList } from './templates';
+import { toPlainText } from '../toPlainText';
 
 import { renderToStaticMarkup } from 'react-dom/server';
 
 type ViewMode = 'preview' | 'html' | 'text';
-
-function htmlToPlainText(html: string): string {
-  // Remove hidden preview div
-  let text = html.replace(/<div[^>]*data-skip-in-text[^>]*>[\s\S]*?<\/div>\s*<\/div>/gi, '');
-  // Remove style and head tags entirely
-  text = text.replace(/<(style|head)[^>]*>[\s\S]*?<\/\1>/gi, '');
-  // Replace <hr> with a line of dashes
-  text = text.replace(/<hr[^>]*>/gi, '\n' + '-'.repeat(80) + '\n');
-  // Replace <br> with newline
-  text = text.replace(/<br\s*\/?>/gi, '\n');
-  // Replace block-level closing tags with newlines
-  text = text.replace(/<\/(p|h[1-6]|div|tr|table|tbody)>/gi, '\n');
-  // Extract link text with href
-  text = text.replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_, href, content) => {
-    const linkText = content.replace(/<[^>]+>/g, '').trim();
-    if (href === `mailto:${linkText}` || href === linkText) {
-      return linkText;
-    }
-    return `${linkText} [${href}]`;
-  });
-  // Remove remaining tags
-  text = text.replace(/<[^>]+>/g, '');
-  // Decode common HTML entities
-  text = text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ');
-  // Remove zero-width characters used for preview padding
-  text = text.replace(/[\u200C\u200B\u00A0]+/g, ' ');
-  // Collapse multiple blank lines
-  text = text.replace(/\n{3,}/g, '\n\n');
-  // Trim lines and overall
-  text = text
-    .split('\n')
-    .map(l => l.trim())
-    .join('\n')
-    .trim();
-  return text;
-}
 
 export function App() {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -57,7 +16,7 @@ export function App() {
     return renderToStaticMarkup(createElement(selected.component, selected.previewProps));
   }, [selected]);
 
-  const plainText = useMemo(() => htmlToPlainText(renderedHtml), [renderedHtml]);
+  const plainText = useMemo(() => toPlainText(renderedHtml), [renderedHtml]);
 
   const viewModes: { key: ViewMode; label: string }[] = [
     { key: 'preview', label: 'Preview' },
