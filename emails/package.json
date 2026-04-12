@@ -2,10 +2,23 @@
   "name": "@monetr/emails",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rsbuild build",
+    "dev": "rsbuild dev"
+  },
   "devDependencies": {
-    "@react-email/components": "1.0.9",
+    "@rsbuild/core": "2.0.0-rc.1",
+    "@rsbuild/plugin-react": "2.0.0-rc.2",
+    "@rsbuild/plugin-sass": "1.5.1",
+    "@types/html-to-text": "9.0.4",
+    "@types/react": "18.3.26",
+    "@types/react-dom": "18.3.7",
+    "cheerio": "1.2.0",
+    "html-to-text": "9.0.5",
+    "juice": "11.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-email": "5.2.9"
+    "sass": "1.98.0"
   }
 }

@@ -1,0 +1,10 @@
+@use '@monetr/emails/variables';
+
+.table {
+  max-width: 150 * variables.$size;
+  border-collapse: separate;
+}
+
+.row {
+  width: 100%;
+}

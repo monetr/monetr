@@ -1,7 +1,10 @@
-import { Button, Heading, Hr, Link, Section, Text } from '@react-email/components';
-
-import EmailLayout from '../../components/EmailLayout';
-import EmailLogo from '../../components/EmailLogo';
+import Button from '@monetr/emails/components/Button';
+import EmailLayout from '@monetr/emails/components/EmailLayout';
+import EmailLogo from '@monetr/emails/components/EmailLogo';
+import Heading from '@monetr/emails/components/Heading';
+import Hr from '@monetr/emails/components/Hr';
+import Link from '@monetr/emails/components/Link';
+import Typography from '@monetr/emails/components/Typography';
 
 interface PlaidDisconnectedProps {
   baseUrl?: string;
@@ -24,35 +27,22 @@ export const PlaidDisconnected = ({
   return (
     <EmailLayout previewText={previewText}>
       <EmailLogo baseUrl={baseUrl} />
-      <Heading className='text-black text-2xl font-normal text-center p-0 my-8 mx-0'>
-        One of your linked accounts has been disconnected
-      </Heading>
-      <Text className='text-black text-sm leading-6'>Hello {firstName},</Text>
-      <Text className='text-black text-sm leading-6'>
+      <Heading>One of your linked accounts has been disconnected</Heading>
+      <Typography>Hello {firstName},</Typography>
+      <Typography>
         Your <strong>{linkName}</strong> account connected via Plaid needs to be reauthenticated. This account will not
         receive automatic updates until the link has been updated.
-      </Text>
-      <Section className='text-center mt-9 mb-9'>
-        <Button
-          className='bg-purple-500 rounded-lg text-white text-sm font-semibold no-underline text-center'
-          href={linkURL}
-        >
-          <Text className='text-sm text-white m-2'>Reconnect {linkName}</Text>
-        </Button>
-      </Section>
-      <Hr className='border border-solid border-gray-200 my-6 mx-0 w-full' />
-      <Text className='text-gray-500 text-xs leading-6'>
+      </Typography>
+      <Button href={linkURL}>Reconnect {linkName}</Button>
+      <Hr />
+      <Typography variant='footer'>
         This message was intended for{' '}
-        <span className='text-black'>
+        <strong>
           {firstName} {lastName}
-        </span>
+        </strong>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
-        communication please reach out to{' '}
-        <Link className='text-blue-600 no-underline' href={`mailto:${supportEmail}`}>
-          {supportEmail}
-        </Link>
-        .
-      </Text>
+        communication please reach out to <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
+      </Typography>
     </EmailLayout>
   );
 };

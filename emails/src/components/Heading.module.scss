@@ -1,0 +1,12 @@
+@use '@monetr/emails/colors';
+@use '@monetr/emails/variables';
+
+.heading {
+  color: colors.$content;
+  font-size: 6 * variables.$size;
+  line-height: 8 * variables.$size;
+  font-weight: 400;
+  text-align: center;
+  padding: 0;
+  margin: 8 * variables.$size 0;
+}

@@ -1,0 +1,6 @@
+@use '@monetr/emails/colors';
+
+.link {
+  color: colors.$link;
+  text-decoration: none;
+}

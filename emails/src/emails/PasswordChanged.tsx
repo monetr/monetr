@@ -1,7 +1,9 @@
-import { Heading, Hr, Link, Text } from '@react-email/components';
-
-import EmailLayout from '../../components/EmailLayout';
-import EmailLogo from '../../components/EmailLogo';
+import EmailLayout from '@monetr/emails/components/EmailLayout';
+import EmailLogo from '@monetr/emails/components/EmailLogo';
+import Heading from '@monetr/emails/components/Heading';
+import Hr from '@monetr/emails/components/Hr';
+import Link from '@monetr/emails/components/Link';
+import Typography from '@monetr/emails/components/Typography';
 
 interface PasswordChangedProps {
   baseUrl?: string;
@@ -20,29 +22,23 @@ export const PasswordChanged = ({
   return (
     <EmailLayout previewText={previewText}>
       <EmailLogo baseUrl={baseUrl} />
-      <Heading className='text-black text-2xl font-normal text-center p-0 my-8 mx-0'>
+      <Heading>
         Your password for <strong>monetr</strong> has been updated
       </Heading>
-      <Text className='text-black text-sm leading-6'>Hello {firstName},</Text>
-      <Text className='text-black text-sm leading-6'>
+      <Typography>Hello {firstName},</Typography>
+      <Typography>
         If you did not initiate the change in your password please reach out to us immediately via our support email:{' '}
-        <Link className='text-blue-600 no-underline' href={`mailto:${supportEmail}`}>
-          {supportEmail}
-        </Link>
-      </Text>
-      <Hr className='border border-solid border-gray-200 my-6 mx-0 w-full' />
-      <Text className='text-gray-500 text-xs leading-6'>
+        <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>
+      </Typography>
+      <Hr />
+      <Typography variant='footer'>
         This message was intended for{' '}
-        <span className='text-black'>
+        <strong>
           {firstName} {lastName}
-        </span>
+        </strong>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
-        communication please reach out to{' '}
-        <Link className='text-blue-600 no-underline' href={`mailto:${supportEmail}`}>
-          {supportEmail}
-        </Link>
-        .
-      </Text>
+        communication please reach out to <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
+      </Typography>
     </EmailLayout>
   );
 };

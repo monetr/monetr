@@ -1,0 +1,118 @@
+@use '@monetr/emails/variables';
+
+.root {
+  display: flex;
+  height: 100vh;
+  font-family: system-ui, sans-serif;
+}
+
+.sidebar {
+  width: 60 * variables.$size;
+  border-right: 1px solid #e5e7eb;
+  padding: 4 * variables.$size;
+  background-color: #fafafa;
+  flex-shrink: 0;
+}
+
+.sidebarHeading {
+  margin: 0 0 4 * variables.$size;
+  font-size: 3.5 * variables.$size;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.templateButton {
+  display: block;
+  width: 100%;
+  padding: 2 * variables.$size 3 * variables.$size;
+  margin-bottom: 1 * variables.$size;
+  border: none;
+  border-radius: 1.5 * variables.$size;
+  text-align: left;
+  cursor: pointer;
+  font-size: 3.5 * variables.$size;
+  background-color: transparent;
+  color: #374151;
+}
+
+.templateButtonActive {
+  background-color: #4e1aa0;
+  color: #fff;
+}
+
+.main {
+  flex: 1;
+  overflow: auto;
+  background-color: #f3f4f6;
+  padding: 6 * variables.$size;
+}
+
+.card {
+  max-width: 175 * variables.$size;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 2 * variables.$size;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+  padding: 3 * variables.$size 4 * variables.$size;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 3.25 * variables.$size;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardTitle {
+  color: #111827;
+}
+
+.viewModeButtons {
+  display: flex;
+  gap: 1 * variables.$size;
+}
+
+.viewModeButton {
+  padding: 1 * variables.$size 2.5 * variables.$size;
+  border: 1px solid #d1d5db;
+  border-radius: 1 * variables.$size;
+  font-size: 3 * variables.$size;
+  cursor: pointer;
+  background-color: #fff;
+  color: #374151;
+}
+
+.viewModeButtonActive {
+  border-color: #4e1aa0;
+  background-color: #4e1aa0;
+  color: #fff;
+}
+
+.previewContent {
+  padding: 4 * variables.$size;
+}
+
+.pre {
+  padding: 4 * variables.$size;
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: #374151;
+}
+
+.preText {
+  font-size: 3.25 * variables.$size;
+  line-height: 1.6;
+}
+
+.preHtml {
+  font-size: 3 * variables.$size;
+  line-height: 1.5;
+  max-height: 80vh;
+  overflow: auto;
+}

@@ -1,0 +1,10 @@
+// Email palette. Kept as SCSS variables rather than CSS custom properties so
+// that juice inlines the actual hex values into each element -- `var(--foo)`
+// has spotty support across email clients (notably Outlook).
+
+$brand: #4e1aa0;
+$background: #fff;
+$border: #e5e7eb;
+$content: #000;
+$content-muted: #6b7280;
+$link: #2563eb;

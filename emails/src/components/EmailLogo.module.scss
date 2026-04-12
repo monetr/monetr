@@ -1,0 +1,11 @@
+@use '@monetr/emails/variables';
+
+.section {
+  margin-top: 8 * variables.$size;
+  border-width: 0;
+}
+
+.logo {
+  display: block;
+  margin: 0 auto;
+}

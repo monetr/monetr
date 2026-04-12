@@ -1,63 +1,46 @@
 set(EMAIL_TEMPLATE_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/emails")
-set(EMAIL_TEMPLATE_HTML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/emails/output/html")
-set(EMAIL_TEMPLATE_TXT_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/emails/output/html")
-file(MAKE_DIRECTORY ${EMAIL_TEMPLATE_HTML_OUTPUT_DIRECTORY})
-file(MAKE_DIRECTORY ${EMAIL_TEMPLATE_TXT_OUTPUT_DIRECTORY})
-
 set(EMAIL_IN_TREE_OUTPUT "${CMAKE_SOURCE_DIR}/server/communication/email_templates")
 
-# WARNING: This does not exclude any spec or story files.
-file(GLOB_RECURSE EMAIL_TEMPLATE_INPUTS "${EMAIL_TEMPLATE_INPUT_DIRECTORY}/*/index.tsx")
+# Collect all template input files for dependency tracking
+file(GLOB_RECURSE EMAIL_TEMPLATE_INPUTS "${EMAIL_TEMPLATE_INPUT_DIRECTORY}/*.tsx")
+file(GLOB_RECURSE EMAIL_COMPONENT_INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/src/components/*.tsx")
+file(GLOB_RECURSE EMAIL_STYLE_INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/src/**/*.scss")
 
+# Determine expected output files from template names
 set(TEMPLATE_OUTPUTS)
 foreach(FILE ${EMAIL_TEMPLATE_INPUTS})
   string(REPLACE "${EMAIL_TEMPLATE_INPUT_DIRECTORY}/" "" TEMPLATE_NAME "${FILE}")
-  string(REPLACE "/index.tsx" "" TEMPLATE_NAME "${TEMPLATE_NAME}")
-  set(HTML_TEMPLATE_DIR "${EMAIL_TEMPLATE_HTML_OUTPUT_DIRECTORY}/html/${TEMPLATE_NAME}")
-  set(HTML_TEMPLATE "${HTML_TEMPLATE_DIR}/index.html")
-  set(HTML_IN_TREE_TEMPLATE "${EMAIL_IN_TREE_OUTPUT}/${TEMPLATE_NAME}.html")
-  set(TXT_TEMPLATE_DIR "${EMAIL_TEMPLATE_TXT_OUTPUT_DIRECTORY}/txt/${TEMPLATE_NAME}")
-  set(TXT_TEMPLATE "${TXT_TEMPLATE_DIR}/index.txt")
-  set(TXT_IN_TREE_TEMPLATE "${EMAIL_IN_TREE_OUTPUT}/${TEMPLATE_NAME}.txt")
-  add_custom_command(
-    OUTPUT ${HTML_IN_TREE_TEMPLATE}
-    BYPRODUCTS ${HTML_IN_TREE_TEMPLATE}
-    COMMAND ${REACT_EMAIL_EXECUTABLE} export --silent --dir src/emails/${TEMPLATE_NAME} --outDir ${HTML_TEMPLATE_DIR}
-    COMMAND ${CMAKE_COMMAND} -E rename ${HTML_TEMPLATE} ${HTML_IN_TREE_TEMPLATE}
-    COMMENT "Building ${TEMPLATE_NAME} HTML email templates"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    DEPENDS
-      tools.react-email
-      ${FILE}
-  )
-
-  add_custom_command(
-    OUTPUT ${TXT_IN_TREE_TEMPLATE}
-    BYPRODUCTS ${TXT_IN_TREE_TEMPLATE}
-    COMMAND ${REACT_EMAIL_EXECUTABLE} export --plainText --silent --dir src/emails/${TEMPLATE_NAME} --outDir ${TXT_TEMPLATE_DIR}
-    COMMAND ${CMAKE_COMMAND} -E rename ${TXT_TEMPLATE} ${TXT_IN_TREE_TEMPLATE}
-    COMMENT "Building ${TEMPLATE_NAME} TXT email templates"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    DEPENDS
-      tools.react-email
-      ${FILE}
-  )
-
-  list(APPEND TEMPLATE_OUTPUTS "${HTML_IN_TREE_TEMPLATE}")
-  list(APPEND TEMPLATE_OUTPUTS "${TXT_IN_TREE_TEMPLATE}")
+  string(REPLACE ".tsx" "" TEMPLATE_NAME "${TEMPLATE_NAME}")
+  list(APPEND TEMPLATE_OUTPUTS "${EMAIL_IN_TREE_OUTPUT}/${TEMPLATE_NAME}.html")
+  list(APPEND TEMPLATE_OUTPUTS "${EMAIL_IN_TREE_OUTPUT}/${TEMPLATE_NAME}.txt")
 endforeach()
+
+add_custom_command(
+  OUTPUT ${TEMPLATE_OUTPUTS}
+  BYPRODUCTS ${TEMPLATE_OUTPUTS}
+  COMMAND ${CMAKE_COMMAND} -E env EMAIL_OUT_DIR=${EMAIL_IN_TREE_OUTPUT} ${RSBUILD_EXECUTABLE} build
+  COMMENT "Building email templates"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DEPENDS
+    tools.rsbuild
+    ${EMAIL_TEMPLATE_INPUTS}
+    ${EMAIL_COMPONENT_INPUTS}
+    ${EMAIL_STYLE_INPUTS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/rsbuild.config.ts
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/build/entry.ts
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/build/rsbuildPluginEmail.ts
+)
 
 add_custom_target(
   build.email
-  COMMAND ${CMAKE_COMMAND} -E true # no-op
   DEPENDS ${TEMPLATE_OUTPUTS}
 )
 
 add_custom_target(
   development.email
   COMMENT "Running the local development tools for email templates"
-  COMMAND ${REACT_EMAIL_EXECUTABLE} dev --dir src/emails
+  COMMAND ${RSBUILD_EXECUTABLE} dev
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   DEPENDS
-    tools.react-email
+    tools.rsbuild
 )
