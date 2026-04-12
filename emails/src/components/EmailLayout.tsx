@@ -1,10 +1,10 @@
 import type React from 'react';
 
-import { Body } from '@monetr/emails/components/email/Body';
-import { Container } from '@monetr/emails/components/email/Container';
-import { Head } from '@monetr/emails/components/email/Head';
-import { Html } from '@monetr/emails/components/email/Html';
-import { Preview } from '@monetr/emails/components/email/Preview';
+import Body from '@monetr/emails/components/Body';
+import Container from '@monetr/emails/components/Container';
+import Head from '@monetr/emails/components/Head';
+import Html from '@monetr/emails/components/Html';
+import Preview from '@monetr/emails/components/Preview';
 
 import styles from './EmailLayout.module.scss';
 

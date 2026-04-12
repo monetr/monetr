@@ -1,10 +1,10 @@
 import EmailLayout from '@monetr/emails/components/EmailLayout';
 import EmailLogo from '@monetr/emails/components/EmailLogo';
-import { Button } from '@monetr/emails/components/email/Button';
-import { Heading } from '@monetr/emails/components/email/Heading';
-import { Hr } from '@monetr/emails/components/email/Hr';
-import { Link } from '@monetr/emails/components/email/Link';
-import { Typography } from '@monetr/emails/components/email/Typography';
+import Button from '@monetr/emails/components/Button';
+import Heading from '@monetr/emails/components/Heading';
+import Hr from '@monetr/emails/components/Hr';
+import Link from '@monetr/emails/components/Link';
+import Typography from '@monetr/emails/components/Typography';
 
 interface ForgotPasswordProps {
   baseUrl?: string;

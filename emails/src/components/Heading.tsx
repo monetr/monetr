@@ -8,6 +8,6 @@ export type HeadingProps = React.ComponentPropsWithoutRef<'h1'> & {
   as?: HeadingAs;
 };
 
-export function Heading({ as: Tag = 'h1', className, ...props }: HeadingProps) {
+export default function Heading({ as: Tag = 'h1', className, ...props }: HeadingProps) {
   return <Tag className={className || styles.heading} {...props} />;
 }

@@ -1,35 +1,38 @@
 import EmailLayout from '@monetr/emails/components/EmailLayout';
 import EmailLogo from '@monetr/emails/components/EmailLogo';
-import { Heading } from '@monetr/emails/components/email/Heading';
-import { Hr } from '@monetr/emails/components/email/Hr';
-import { Link } from '@monetr/emails/components/email/Link';
-import { Typography } from '@monetr/emails/components/email/Typography';
+import Button from '@monetr/emails/components/Button';
+import Heading from '@monetr/emails/components/Heading';
+import Hr from '@monetr/emails/components/Hr';
+import Link from '@monetr/emails/components/Link';
+import Typography from '@monetr/emails/components/Typography';
 
-interface PasswordChangedProps {
+interface VerifyEmailProps {
   baseUrl?: string;
   firstName?: string;
   lastName?: string;
   supportEmail?: string;
+  verifyLink?: string;
 }
 
-export const PasswordChanged = ({
+export const VerifyEmailAddress = ({
   baseUrl = '{{ .BaseURL }}',
   firstName = '{{ .FirstName }}',
   lastName = '{{ .LastName }}',
   supportEmail = '{{ .SupportEmail }}',
-}: PasswordChangedProps) => {
-  const previewText = 'Your password has been updated';
+  verifyLink: inviteLink = '{{ .VerifyURL }}',
+}: VerifyEmailProps) => {
+  const previewText = 'Verify your email address for monetr';
   return (
     <EmailLayout previewText={previewText}>
       <EmailLogo baseUrl={baseUrl} />
       <Heading>
-        Your password for <strong>monetr</strong> has been updated
+        Verify your email address for <strong>monetr</strong>
       </Heading>
       <Typography>Hello {firstName},</Typography>
       <Typography>
-        If you did not initiate the change in your password please reach out to us immediately via our support email:{' '}
-        <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>
+        Thank you for signing up for monetr, in order to use your account we ask that you verify your email address.
       </Typography>
+      <Button href={inviteLink}>Verify email address</Button>
       <Hr />
       <Typography variant='footer'>
         This message was intended for{' '}
@@ -43,11 +46,12 @@ export const PasswordChanged = ({
   );
 };
 
-PasswordChanged.PreviewProps = {
+VerifyEmailAddress.PreviewProps = {
   baseUrl: 'https://my.monetr.dev',
   firstName: 'Elliot',
   lastName: 'Courant',
   supportEmail: 'support@monetr.local',
-} as PasswordChangedProps;
+  verifyLink: 'https://monetr.local/test',
+} as VerifyEmailProps;
 
-export default PasswordChanged;
+export default VerifyEmailAddress;

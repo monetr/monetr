@@ -6,7 +6,7 @@ export type ContainerProps = React.ComponentPropsWithoutRef<'table'> & {
   children?: React.ReactNode;
 };
 
-export function Container({ children, style, className, ...props }: ContainerProps) {
+export default function Container({ children, style, className, ...props }: ContainerProps) {
   return (
     <table
       align='center'

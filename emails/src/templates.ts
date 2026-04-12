@@ -7,7 +7,7 @@ export type EmailTemplate = React.ComponentType<unknown> & {
 
 // Auto-discover all email templates via require.context at compile time.
 type TemplateModule = { [key: string]: EmailTemplate | undefined; default?: EmailTemplate };
-const ctx = require.context('./emails', true, /^\.\/[^/]+\/index\.tsx$/) as {
+const ctx = require.context('./emails', false, /^\.\/[^/]+\.tsx$/) as {
   keys(): string[];
   (key: string): TemplateModule;
 };
@@ -16,7 +16,7 @@ export const templates: Record<string, EmailTemplate> = {};
 
 for (const key of ctx.keys()) {
   const mod = ctx(key);
-  const name = key.split('/')[1]; // "./VerifyEmailAddress/index.tsx" -> "VerifyEmailAddress"
+  const name = key.slice(2).replace(/\.tsx$/, ''); // "./VerifyEmailAddress.tsx" -> "VerifyEmailAddress"
   const Component = mod[name] || mod.default;
   if (Component && typeof Component === 'function') {
     templates[name] = Component;

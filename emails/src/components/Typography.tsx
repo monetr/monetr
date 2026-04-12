@@ -13,6 +13,6 @@ const variantStyles: Record<TypographyVariant, string> = {
   footer: styles.footer,
 };
 
-export function Typography({ variant = 'body', className, ...props }: TypographyProps) {
+export default function Typography({ variant = 'body', className, ...props }: TypographyProps) {
   return <p className={className || variantStyles[variant]} {...props} />;
 }

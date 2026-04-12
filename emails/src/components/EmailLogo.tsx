@@ -1,5 +1,5 @@
-import { Img } from '@monetr/emails/components/email/Img';
-import { Section } from '@monetr/emails/components/email/Section';
+import Img from '@monetr/emails/components/Img';
+import Section from '@monetr/emails/components/Section';
 
 import styles from './EmailLogo.module.scss';
 

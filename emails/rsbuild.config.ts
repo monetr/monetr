@@ -21,7 +21,7 @@ const outDir = process.env.EMAIL_OUT_DIR
 const devEnvironments = {
   web: {
     source: {
-      entry: { index: './src/preview/index.tsx' },
+      entry: { index: './src/preview/main.tsx' },
     },
     html: {
       template: './src/preview/index.html',

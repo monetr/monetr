@@ -2,7 +2,7 @@ import type React from 'react';
 
 export type HeadProps = React.ComponentPropsWithoutRef<'head'>;
 
-export function Head({ children, ...props }: HeadProps) {
+export default function Head({ children, ...props }: HeadProps) {
   return (
     <head {...props}>
       <meta content='text/html; charset=UTF-8' httpEquiv='Content-Type' />
