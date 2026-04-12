@@ -1,0 +1,34 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+
+.root {
+  grid-column: 1 / -1;
+
+  @media (min-width: variables.$mediumScreen) {
+    grid-column: span 2 / span 2;
+  }
+}
+
+.title {
+  @include mixins.text-2-extra-large;
+  text-align: start;
+  font-weight: var(--semibold);
+
+  @media (min-width: variables.$smallScreen) {
+    text-align: center;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    @include mixins.text-3-extra-large;
+  }
+}
+
+.description {
+  @include mixins.text-large;
+  text-align: start;
+  color: var(--dark-monetr-content);
+
+  @media (min-width: variables.$smallScreen) {
+    text-align: center;
+  }
+}

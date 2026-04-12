@@ -1,20 +1,12 @@
-import Feature from '@monetr/docs/components/Feature';
+import FeatureCard from '@monetr/docs/components/Features/FeatureCard';
 
 export default function Forecasting(): JSX.Element {
   return (
-    <Feature
-      className='col-span-full md:col-span-2'
-      description={
-        <h2 className='text-lg text-start sm:text-center text-dark-monetr-content'>
-          See a forecast of your finances based on your budget, so you can see how much you'll have and when you'll have
-          it.
-        </h2>
-      }
+    <FeatureCard
+      description={`See a forecast of your finances based on your budget, so you can see how much you'll have and when you'll have it.`}
       link='/documentation/use/forecasting/'
       linkText='Learn About Forecasting'
-      title={
-        <h1 className='text-2xl lg:text-3xl text-start sm:text-center font-semibold'>See Your Financial Future</h1>
-      }
+      title='See Your Financial Future'
     />
   );
 }

@@ -1,0 +1,136 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+@use '@monetr/docs/components/GradientHeading/GradientHeading' as gh;
+
+.root {
+  padding-top: 8 * variables.$size;
+  padding-bottom: 8 * variables.$size;
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8 * variables.$size;
+  text-align: center;
+  align-items: center;
+}
+
+.titleWrapper {
+  @include gh.wrapper;
+  padding: 4 * variables.$size;
+}
+
+.titleBlur {
+  @include gh.blur;
+  border-width: 1px;
+  border-style: solid;
+  border-color: currentColor;
+  opacity: 0.5;
+  @include mixins.text-5-extra-large-tight;
+}
+
+.titleForeground {
+  @include gh.foreground;
+  height: 24 * variables.$size;
+  @include mixins.text-5-extra-large-tight;
+}
+
+.list {
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cardLink {
+  display: block;
+  margin-bottom: 8 * variables.$size;
+  flex-shrink: 0;
+  width: 100%;
+  padding: 2 * variables.$size;
+  text-decoration: none;
+  color: inherit;
+
+  @media (min-width: variables.$largeScreen) {
+    width: 50%;
+  }
+
+  &:hover {
+    .image {
+      transform: scale(1.05);
+    }
+    .titleRow,
+    .titleTag,
+    .description,
+    .metaItem {
+      opacity: 1;
+    }
+  }
+}
+
+.imageWrap {
+  margin-top: 4 * variables.$size;
+  border-radius: 0.25rem;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.image {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.titleRow {
+  display: flex;
+  margin-top: 8 * variables.$size;
+  @include mixins.text-3-extra-large;
+  opacity: 0.9;
+  align-items: center;
+  gap: 2 * variables.$size;
+}
+
+.titleTag {
+  opacity: 0.8;
+  @include mixins.text-extra-small;
+  padding-top: 1 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  box-shadow: 0 0 0 1px var(--gray-300);
+  border-radius: 0.25rem;
+  margin-top: 1 * variables.$size;
+}
+
+.description {
+  opacity: 0.8;
+  margin-top: 2 * variables.$size;
+}
+
+.descriptionReadMore {
+  display: flex;
+  align-items: center;
+}
+
+.descriptionReadMoreArrow {
+  height: 4 * variables.$size;
+}
+
+.meta {
+  display: flex;
+  gap: 1 * variables.$size;
+  flex-wrap: wrap;
+  margin-top: 3 * variables.$size;
+  align-items: baseline;
+}
+
+.metaItem {
+  opacity: 0.6;
+  @include mixins.text-small;
+}

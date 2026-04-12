@@ -1,0 +1,95 @@
+@use '@monetr/docs/styles/variables';
+
+@keyframes moveHorizontal {
+  0%   { transform: translateX(-50%) translateY(-10%); }
+  50%  { transform: translateX(50%)  translateY(10%); }
+  100% { transform: translateX(-50%) translateY(-10%); }
+}
+
+@keyframes moveInCircle {
+  0%   { transform: rotate(0deg); }
+  50%  { transform: rotate(180deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes moveVertical {
+  0%   { transform: translateY(-50%); }
+  50%  { transform: translateY(50%); }
+  100% { transform: translateY(-50%); }
+}
+
+.root {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  overflow: hidden;
+  inset: 0;
+  top: 0;
+  left: 0;
+  z-index: -20;
+  background-image: linear-gradient(40deg, rgb(var(--gradient-background-start)), rgb(var(--gradient-background-end)));
+  opacity: 0.2;
+}
+
+.svg {
+  display: none;
+}
+
+.container {
+  height: 100%;
+  width: 100%;
+}
+
+.containerSafari {
+  filter: blur(40px);
+}
+
+.containerChromium {
+  filter: url(#blurMe) blur(40px);
+}
+
+.gradientBlob {
+  position: absolute;
+  mix-blend-mode: var(--blending-value);
+  width: var(--size);
+  height: var(--size);
+  top: calc(50% - var(--size) / 2);
+  left: calc(50% - var(--size) / 2);
+}
+
+.first {
+  // Unwrapped var() is invalid at runtime so this blob intentionally does not
+  // render. Matches the original Tailwind. Don't wrap in rgb()/rgba().
+  background: radial-gradient(circle at center, var(--first-color) 0, var(--first-color) 50%) no-repeat;
+  transform-origin: center center;
+  animation: moveVertical 60s ease infinite;
+  opacity: 1;
+}
+
+.second {
+  background: radial-gradient(circle at center, rgba(var(--second-color), 0.8) 0, rgba(var(--second-color), 0) 50%) no-repeat;
+  transform-origin: calc(50% - 400px);
+  animation: moveInCircle 40s reverse infinite;
+  opacity: 1;
+}
+
+.third {
+  background: radial-gradient(circle at center, rgba(var(--third-color), 0.8) 0, rgba(var(--third-color), 0) 50%) no-repeat;
+  transform-origin: calc(50% + 400px);
+  animation: moveInCircle 80s linear infinite;
+  opacity: 1;
+}
+
+.fourth {
+  background: radial-gradient(circle at center, rgba(var(--fourth-color), 0.8) 0, rgba(var(--fourth-color), 0) 50%) no-repeat;
+  transform-origin: calc(50% - 200px);
+  animation: moveHorizontal 80s ease infinite;
+  opacity: 0.7;
+}
+
+.fifth {
+  background: radial-gradient(circle at center, rgba(var(--fifth-color), 0.8) 0, rgba(var(--fifth-color), 0) 50%) no-repeat;
+  transform-origin: calc(50% - 800px) calc(50% + 800px);
+  animation: moveInCircle 40s ease infinite;
+  opacity: 1;
+}

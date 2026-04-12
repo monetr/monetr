@@ -26,7 +26,7 @@ export default defineConfig({
     default: 'v1',
     versions: ['v1'],
   },
-  globalStyles: path.join(__dirname, 'theme/index.css'),
+  globalStyles: path.join(__dirname, 'styles/globals.scss'),
   themeConfig: {
     darkMode: true,
     socialLinks: [
@@ -76,6 +76,12 @@ export default defineConfig({
     plugins: [pluginSass()],
     output: {
       cleanDistPath: true,
+      cssModules: isDevelopment
+        ? undefined
+        : {
+            // Hash class names in production builds to match interface/ convention.
+            localIdentName: '[hash:base64:6]',
+          },
     },
     resolve: {
       alias: {

@@ -1,0 +1,111 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+@use '@monetr/docs/components/GradientHeading/GradientHeading' as gh;
+
+.navTitle {
+  display: flex;
+  align-items: center;
+  gap: 3 * variables.$size;
+  text-decoration: none;
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
+
+.navLogo {
+  width: 8 * variables.$size;
+  height: 8 * variables.$size;
+  border-radius: 0;
+
+  @media (min-width: variables.$largeScreen) {
+    width: 10 * variables.$size;
+    height: 10 * variables.$size;
+  }
+}
+
+.navBrandWrapper {
+  @include gh.wrapper;
+  margin-left: 1 * variables.$size;
+}
+
+.navBrandBlur {
+  @include gh.blur;
+  border-width: 1px;
+  border-style: solid;
+  border-color: currentColor;
+  box-sizing: content-box;
+  opacity: 0.75;
+  @include mixins.text-2-extra-large;
+
+  @media (min-width: variables.$largeScreen) {
+    @include mixins.text-3-extra-large;
+  }
+}
+
+.navBrandForeground {
+  @include gh.foreground;
+  @include mixins.text-2-extra-large;
+
+  @media (min-width: variables.$largeScreen) {
+    @include mixins.text-3-extra-large;
+  }
+}
+
+.navExtras {
+  display: flex;
+  align-items: center;
+  gap: 3 * variables.$size;
+}
+
+.footer {
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: var(--zinc-700);
+  padding-top: 6 * variables.$size;
+  padding-bottom: 6 * variables.$size;
+  margin-top: 8 * variables.$size;
+}
+
+.footerRow {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 6 * variables.$size;
+  padding-right: 6 * variables.$size;
+
+  @media (min-width: variables.$smallScreen) {
+    align-items: flex-start;
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-left: 20 * variables.$size;
+    padding-right: 20 * variables.$size;
+  }
+}
+
+.footerCopyright {
+  @include mixins.text-small;
+  color: var(--zinc-400);
+}
+
+.footerLinks {
+  gap: 2 * variables.$size;
+  display: flex;
+  flex-direction: column;
+
+  @media (min-width: variables.$smallScreen) {
+    gap: 4 * variables.$size;
+    flex-direction: row;
+  }
+}
+
+.footerLink {
+  @include mixins.text-small;
+  color: var(--zinc-400);
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

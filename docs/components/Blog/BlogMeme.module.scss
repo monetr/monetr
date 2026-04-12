@@ -1,0 +1,18 @@
+@use '@monetr/docs/styles/variables';
+
+.root {
+  display: flex;
+  justify-content: center;
+}
+
+.inner {
+  width: 66.666667%;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: 50%;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    width: 25%;
+  }
+}

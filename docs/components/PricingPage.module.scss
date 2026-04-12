@@ -1,0 +1,126 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+@use '@monetr/docs/components/GradientHeading/GradientHeading' as gh;
+
+.root {
+  width: 100%;
+  position: relative;
+  padding-top: 8 * variables.$size;
+  padding-bottom: 8 * variables.$size;
+  display: flex;
+  flex-direction: column;
+  gap: 16 * variables.$size;
+}
+
+.bgGlow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -10;
+}
+
+.bgGlowRing {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  aspect-ratio: 1 / 1;
+
+  @media (min-width: variables.$smallScreen) {
+    width: 50%;
+  }
+}
+
+.bgGlowOrb {
+  position: absolute;
+  inset: 0;
+  background-color: var(--purple-500);
+  border-radius: 9999px;
+  filter: blur(120px);
+  opacity: 0.10;
+  min-height: 5vh;
+}
+
+.headerBlock {
+  display: flex;
+  flex-direction: column;
+  margin-left: auto;
+  margin-right: auto;
+  align-items: center;
+  gap: 4 * variables.$size;
+}
+
+.titleBlock {
+  max-width: 48rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8 * variables.$size;
+  text-align: center;
+  align-items: center;
+}
+
+.titleWrapper {
+  @include gh.wrapper;
+  padding: 4 * variables.$size;
+}
+
+.titleBlur {
+  @include gh.blur;
+  border-width: 1px;
+  border-style: solid;
+  border-color: currentColor;
+  opacity: 0.5;
+  @include mixins.text-5-extra-large;
+
+  @media (min-width: variables.$smallScreen) {
+    @include mixins.text-6-extra-large;
+  }
+}
+
+.titleForeground {
+  @include gh.foreground;
+  height: 24 * variables.$size;
+  @include mixins.text-5-extra-large;
+
+  @media (min-width: variables.$smallScreen) {
+    @include mixins.text-6-extra-large;
+  }
+}
+
+.pricingCardsWrap {
+  display: flex;
+  width: 100%;
+}
+
+.faqBlock {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 6 * variables.$size;
+  padding-left: 8 * variables.$size;
+  padding-right: 8 * variables.$size;
+}
+
+.faqHeading {
+  font-weight: var(--bold);
+  @include mixins.text-4-extra-large;
+  text-align: center;
+}
+
+.faqList {
+  max-width: 42rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4 * variables.$size;
+}
+
+.faqQuestion {
+  @include mixins.text-large;
+  font-weight: var(--bold);
+}

@@ -1,0 +1,140 @@
+@use '@monetr/docs/styles/variables';
+
+/*
+inset-ring creates a border around a component using boxshadow, however the
+border is inset on the component instead of outset. Use the variables
+`--ring-color` and `--ring-size` to control the ring.
+*/
+@mixin inset-ring {
+  box-shadow: rgb(255, 255, 255) 0px 0px 0px 0px inset,
+      var(--ring-color) 0px 0px 0px var(--ring-size) inset,
+      rgba(0, 0, 0, 0) 0px 0px 0px 0px;
+  transition: ease-in-out;
+  transition-property: box-shadow;
+  transition-duration: 75ms;
+}
+
+// ring takes the variables below and crafts a box shadow representing that
+// ring.
+// - `--ring-color`
+// - `--ring-size`
+@mixin ring {
+  box-shadow: rgb(255, 255, 255) 0px 0px 0px 0px,
+    var(--ring-color) 0px 0px 0px var(--ring-size, 1px),
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px;
+  transition: ease-in-out;
+  transition-property: box-shadow;
+  transition-duration: 75ms;
+}
+
+$textExtraSmallFontSize: 3;
+$textExtraSmallLineHeight: 4;
+@mixin text-extra-small {
+  font-size: $textExtraSmallFontSize * variables.$size; // 0.75rem 12px
+  line-height: $textExtraSmallLineHeight * variables.$size; // 1rem 16px
+}
+
+$textSmallFontSize: 3.5;
+$textSmallLineHeight: 5;
+@mixin text-small {
+  font-size: $textSmallFontSize * variables.$size; // 0.875rem 14px
+  line-height: $textSmallLineHeight * variables.$size; // 1.25rem 20px
+}
+
+$textBaseFontSize: 4;
+$textBaseLineHeight: 6;
+@mixin text-base {
+  font-size: $textBaseFontSize * variables.$size; // 1rem 16px
+  line-height: $textBaseLineHeight * variables.$size; // 1.5rem 24px
+}
+
+$textLargeFontSize: 4.5;
+$textLargeLineHeight: 7;
+@mixin text-large {
+  font-size: $textLargeFontSize * variables.$size; // 1.125rem 18px
+  line-height: $textLargeLineHeight * variables.$size; // 1.75rem 28px
+}
+
+$textExtraLargeFontSize: 5;
+$textExtraLargeLineHeight: 7;
+@mixin text-extra-large {
+  font-size: $textExtraLargeFontSize * variables.$size; // 1.25rem 20px
+  line-height: $textExtraLargeLineHeight * variables.$size; // 1.75rem 28px
+}
+
+$text2ExtraLargeFontSize: 6;
+$text2ExtraLargeLineHeight: 8;
+@mixin text-2-extra-large {
+  font-size: $text2ExtraLargeFontSize * variables.$size; // 1.5rem 24px
+  line-height: $text2ExtraLargeLineHeight * variables.$size; // 2rem 32px
+}
+
+$text3ExtraLargeFontSize: 7.5;
+$text3ExtraLargeLineHeight: 9;
+@mixin text-3-extra-large {
+  font-size: $text3ExtraLargeFontSize * variables.$size; // 1.875rem 30px
+  line-height: $text3ExtraLargeLineHeight * variables.$size; // 2.25rem 36px
+}
+
+$text4ExtraLargeFontSize: 9;
+$text4ExtraLargeLineHeight: 10;
+@mixin text-4-extra-large {
+  font-size: $text4ExtraLargeFontSize * variables.$size; // 2.25rem 36px
+  line-height: $text4ExtraLargeLineHeight * variables.$size; // 2.5rem 40px
+}
+
+$text5ExtraLargeFontSize: 12;
+$text5ExtraLargeLineHeight: 7;
+@mixin text-5-extra-large {
+  font-size: $text5ExtraLargeFontSize * variables.$size; // 3rem 48px
+  line-height: 1;
+}
+
+$text6ExtraLargeFontSize: 15;
+@mixin text-6-extra-large {
+  font-size: $text6ExtraLargeFontSize * variables.$size; // 3.75rem 60px
+  line-height: 1;
+}
+
+@mixin text-5-extra-large-tight {
+  font-size: $text5ExtraLargeFontSize * variables.$size;
+  line-height: 1.25;
+}
+
+@mixin text-6-extra-large-tight {
+  font-size: $text6ExtraLargeFontSize * variables.$size;
+  line-height: 1.25;
+}
+
+@mixin width-fifth {
+  width: percentage(1/5);
+}
+
+@mixin width-quarter {
+  width: percentage(1/4);
+}
+
+@mixin width-third {
+  width: percentage(1/3);
+}
+
+@mixin width-half {
+  width: percentage(1/2);
+}
+
+@mixin width-full {
+  width: 100%;
+}
+
+@mixin height-full {
+  height: 100%;
+}
+
+// screen will always fill the entire view window, note that on some mobile
+// devices such as iPhones the view window may not be the entire screen but may
+// include spacing at the bottom or the top to account for browser UX such as
+// the URL bar.
+@mixin screen {
+  width: 100vw;
+  height: 100vh;
+}

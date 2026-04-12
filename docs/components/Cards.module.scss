@@ -1,0 +1,55 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+
+.cardsGrid {
+  display: grid;
+  gap: 4 * variables.$size;
+  margin-top: 4 * variables.$size;
+}
+
+.card {
+  display: flex;
+  padding: 4 * variables.$size;
+  border-radius: 0.5rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--zinc-700);
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  text-decoration: none;
+  color: inherit;
+  margin-top: 2 * variables.$size;
+  margin-bottom: 2 * variables.$size;
+  gap: 2 * variables.$size;
+
+  &:hover {
+    border-color: var(--zinc-500);
+  }
+}
+
+.icon {
+  @include mixins.text-2-extra-large;
+}
+
+.title {
+  @include mixins.text-large;
+  font-weight: var(--semibold);
+  margin-top: unset;
+  margin-bottom: unset;
+}
+
+.titleArrow {
+  margin-left: 1 * variables.$size;
+  line-height: 1;
+}
+
+.description {
+  @include mixins.text-small;
+  color: var(--zinc-400);
+  margin-top: 1 * variables.$size;
+  line-height: 1;
+}

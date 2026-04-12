@@ -1,0 +1,31 @@
+@use '@monetr/docs/styles/variables';
+
+.link {
+  display: none;
+  position: relative;
+  color: var(--slate-300);
+  text-decoration: none;
+  transition-property: color;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+
+  @media (min-width: variables.$smallScreen) {
+    display: block;
+  }
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+.inner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.arrow {
+  width: 5 * variables.$size;
+  height: 5 * variables.$size;
+}
