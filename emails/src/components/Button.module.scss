@@ -16,10 +16,11 @@
   font-weight: 600;
   text-decoration: none;
   text-align: center;
+  padding: 2 * variables.$size;
 }
 
 .text {
   font-size: 3.5 * variables.$size;
   color: colors.$background;
-  margin: 2 * variables.$size;
+  margin: 0px;
 }
