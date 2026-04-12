@@ -1,11 +1,7 @@
 // Ambient types for rspack/webpack require.context
 interface RequireContext {
   keys(): string[];
-  <T = any>(id: string): T;
-}
-
-interface NodeRequire {
-  context(directory: string, useSubdirectories: boolean, regExp: RegExp): RequireContext;
+  <T = unknown>(id: string): T;
 }
 
 // SCSS module imports
