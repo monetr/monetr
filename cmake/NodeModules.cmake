@@ -96,11 +96,6 @@ add_custom_target(
 )
 
 add_custom_target(
-  tools.tsx
-  DEPENDS dependencies.node_modules
-)
-
-add_custom_target(
   tools.rspress
   DEPENDS dependencies.node_modules
 )
