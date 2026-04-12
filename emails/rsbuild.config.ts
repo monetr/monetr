@@ -7,6 +7,7 @@ import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const emailsSource = resolve(__dirname, 'src');
 
 // rsbuild sets NODE_ENV before loading config:
 //   rsbuild dev   -> NODE_ENV=development
@@ -73,6 +74,11 @@ export default defineConfig({
     pluginSass(),
     ...(!isDev ? [rsbuildPluginEmail({ outDir })] : []),
   ],
+  resolve: {
+    alias: {
+      '@monetr/emails': emailsSource,
+    },
+  },
   environments: isDev ? devEnvironments : buildEnvironments,
   server: {
     port: 3100,

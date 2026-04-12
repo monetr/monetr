@@ -1,9 +1,11 @@
+@use '@monetr/emails/variables';
+
 .heading {
   color: #000;
-  font-size: 1.5rem;
-  line-height: 2rem;
+  font-size: 6 * variables.$size;
+  line-height: 8 * variables.$size;
   font-weight: 400;
   text-align: center;
   padding: 0;
-  margin: 2rem 0;
+  margin: 8 * variables.$size 0;
 }

@@ -1,4 +1,5 @@
 import type React from 'react';
+
 import styles from './Text.module.scss';
 
 export type TextVariant = 'body' | 'footer';

@@ -1,3 +1,5 @@
+@use '@monetr/emails/variables';
+
 .body {
   background-color: #fff;
   margin: auto;
@@ -7,8 +9,8 @@
 
 .container {
   border: 1px solid #e5e7eb;
-  border-radius: 0.25rem;
-  margin: 2.5rem auto;
-  padding: 1.25rem;
-  max-width: 36rem;
+  border-radius: 1 * variables.$size;
+  margin: 10 * variables.$size auto;
+  padding: 5 * variables.$size;
+  max-width: 144 * variables.$size;
 }

@@ -1,4 +1,5 @@
 import type React from 'react';
+
 import styles from './Link.module.scss';
 
 export type LinkProps = React.ComponentPropsWithoutRef<'a'>;

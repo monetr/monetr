@@ -1,5 +1,7 @@
+@use '@monetr/emails/variables';
+
 .section {
-  margin-top: 2rem;
+  margin-top: 8 * variables.$size;
   border-width: 0;
 }
 

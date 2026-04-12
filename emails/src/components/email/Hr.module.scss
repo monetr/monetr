@@ -1,5 +1,7 @@
+@use '@monetr/emails/variables';
+
 .hr {
   border: 1px solid #e5e7eb;
-  margin: 1.5rem 0;
+  margin: 6 * variables.$size 0;
   width: 100%;
 }

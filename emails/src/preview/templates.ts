@@ -1,5 +1,5 @@
-import type { EmailTemplate } from '../templates';
-import { templates } from '../templates';
+import type { EmailTemplate } from '@monetr/emails/templates';
+import { templates } from '@monetr/emails/templates';
 
 export interface TemplateEntry {
   name: string;

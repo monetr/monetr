@@ -1,7 +1,7 @@
-import { Button, Heading, Hr, Link, Text } from '../../components/email';
-import textStyles from '../../components/email/Text.module.scss';
-import EmailLayout from '../../components/EmailLayout';
-import EmailLogo from '../../components/EmailLogo';
+import EmailLayout from '@monetr/emails/components/EmailLayout';
+import EmailLogo from '@monetr/emails/components/EmailLogo';
+import { Button, Heading, Hr, Link, Text } from '@monetr/emails/components/email';
+import textStyles from '@monetr/emails/components/email/Text.module.scss';
 
 interface ForgotPasswordProps {
   baseUrl?: string;

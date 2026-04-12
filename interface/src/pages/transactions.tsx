@@ -152,7 +152,7 @@ export default function Transactions(): JSX.Element {
 function AddTransactionButton(): JSX.Element {
   const { data: link } = useCurrentLink();
 
-  if (!link || !link.getIsManual()) {
+  if (!link?.getIsManual()) {
     return null;
   }
 

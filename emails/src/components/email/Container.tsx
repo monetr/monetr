@@ -1,4 +1,5 @@
 import type React from 'react';
+
 import styles from './Container.module.scss';
 
 export type ContainerProps = React.ComponentPropsWithoutRef<'table'> & {
@@ -12,8 +13,8 @@ export function Container({ children, style, className, ...props }: ContainerPro
       border={0}
       cellPadding='0'
       cellSpacing='0'
-      role='presentation'
       className={styles.table}
+      role='presentation'
       width='100%'
       {...props}
     >

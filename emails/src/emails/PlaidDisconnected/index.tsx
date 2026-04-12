@@ -1,7 +1,7 @@
-import { Button, Heading, Hr, Link, Text } from '../../components/email';
-import textStyles from '../../components/email/Text.module.scss';
-import EmailLayout from '../../components/EmailLayout';
-import EmailLogo from '../../components/EmailLogo';
+import EmailLayout from '@monetr/emails/components/EmailLayout';
+import EmailLogo from '@monetr/emails/components/EmailLogo';
+import { Button, Heading, Hr, Link, Text } from '@monetr/emails/components/email';
+import textStyles from '@monetr/emails/components/email/Text.module.scss';
 
 interface PlaidDisconnectedProps {
   baseUrl?: string;
@@ -38,8 +38,7 @@ export const PlaidDisconnected = ({
           {firstName} {lastName}
         </span>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
-        communication please reach out to{' '}
-        <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
+        communication please reach out to <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
       </Text>
     </EmailLayout>
   );

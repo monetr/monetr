@@ -1,22 +1,24 @@
+@use '@monetr/emails/variables';
+
 .section {
   text-align: center;
-  margin-top: 2.25rem;
-  margin-bottom: 2.25rem;
+  margin-top: 9 * variables.$size;
+  margin-bottom: 9 * variables.$size;
 }
 
 .button {
   display: inline-block;
   background-color: #4e1aa0;
-  border-radius: 0.5rem;
+  border-radius: 2 * variables.$size;
   color: #fff;
-  font-size: 0.875rem;
+  font-size: 3.5 * variables.$size;
   font-weight: 600;
   text-decoration: none;
   text-align: center;
 }
 
 .text {
-  font-size: 0.875rem;
+  font-size: 3.5 * variables.$size;
   color: #fff;
-  margin: 0.5rem;
+  margin: 2 * variables.$size;
 }

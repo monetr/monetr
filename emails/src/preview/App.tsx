@@ -1,7 +1,8 @@
 import { createElement, useMemo, useState } from 'react';
 
+import { toPlainText } from '@monetr/emails/toPlainText';
+
 import { templateList } from './templates';
-import { toPlainText } from '../toPlainText';
 
 import { renderToStaticMarkup } from 'react-dom/server';
 
@@ -65,6 +66,7 @@ export function App() {
               backgroundColor: i === selectedIndex ? '#4E1AA0' : 'transparent',
               color: i === selectedIndex ? '#fff' : '#374151',
             }}
+            type='button'
           >
             {template.name}
           </button>
@@ -112,6 +114,7 @@ export function App() {
                     backgroundColor: viewMode === key ? '#4E1AA0' : '#fff',
                     color: viewMode === key ? '#fff' : '#374151',
                   }}
+                  type='button'
                 >
                   {label}
                 </button>

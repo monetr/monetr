@@ -1,6 +1,7 @@
 import type React from 'react';
-import { Section } from './Section';
+
 import styles from './Button.module.scss';
+import { Section } from './Section';
 
 export type ButtonProps = React.ComponentPropsWithoutRef<'a'> & {
   children: React.ReactNode;
