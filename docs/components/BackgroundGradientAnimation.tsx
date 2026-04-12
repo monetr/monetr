@@ -38,7 +38,16 @@ export function BackgroundGradientAnimation(): JSX.Element {
     document.body.style.setProperty('--pointer-color', pointerColor);
     document.body.style.setProperty('--size', size);
     document.body.style.setProperty('--blending-value', blendingValue);
-  }, [fifthColor, firstColor, fourthColor, gradientBackgroundEnd, pointerColor, secondColor, thirdColor]);
+  }, [
+    fifthColor,
+    firstColor,
+    fourthColor,
+    gradientBackgroundEnd,
+    pointerColor,
+    secondColor,
+    thirdColor,
+    gradientBackgroundStart,
+  ]);
 
   const [isSafari, setIsSafari] = useState(false);
   useEffect(() => {
