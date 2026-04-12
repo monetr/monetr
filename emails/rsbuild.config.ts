@@ -40,18 +40,16 @@ const buildEnvironments = {
       },
     },
     output: {
-      // Use web target so rspack extracts CSS to separate files instead of
-      // discarding it (node target only exports class name mappings).
-      // Safe because the email templates are pure React with no Node APIs.
+      // Use web target so rspack extracts CSS to separate files instead of discarding it (node target only exports
+      // class name mappings). Safe because the email templates are pure React with no Node APIs.
       target: 'web' as const,
       distPath: { root: 'dist/server', js: '', css: '' },
       filename: { js: '[name].cjs', css: '[name].css' },
       minify: false,
       injectStyles: false,
     },
-    // rspack needs these flags to preserve all named exports from the bundle.
-    // Without them, the template components get tree-shaken or lost during
-    // module concatenation since nothing inside the bundle consumes them.
+    // rspack needs these flags to preserve all named exports from the bundle. Without them, the template components get
+    // tree-shaken or lost during module concatenation since nothing inside the bundle consumes them.
     tools: {
       rspack: {
         optimization: {
