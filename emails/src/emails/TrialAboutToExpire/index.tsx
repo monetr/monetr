@@ -1,7 +1,9 @@
 import EmailLayout from '@monetr/emails/components/EmailLayout';
 import EmailLogo from '@monetr/emails/components/EmailLogo';
-import { Heading, Hr, Link, Text } from '@monetr/emails/components/email';
-import textStyles from '@monetr/emails/components/email/Text.module.scss';
+import { Heading } from '@monetr/emails/components/email/Heading';
+import { Hr } from '@monetr/emails/components/email/Hr';
+import { Link } from '@monetr/emails/components/email/Link';
+import { Typography } from '@monetr/emails/components/email/Typography';
 
 interface TrialAboutToExpireProps {
   baseUrl?: string;
@@ -27,26 +29,26 @@ export const TrialAboutToExpire = ({
       <Heading>
         Your trial for <strong>monetr</strong> is about to expire
       </Heading>
-      <Text>Hello {firstName},</Text>
-      <Text>
+      <Typography>Hello {firstName},</Typography>
+      <Typography>
         We are just letting you know that your trial is about to expire. Don't worry, if you don't want to continue
         using monetr then no action is required on your part. If you would like to continue using monetr though, you
         will need to setup a subscription the next time you login.
-      </Text>
-      <Text>
+      </Typography>
+      <Typography>
         Your trial will expire in about <strong>{trialExpirationWindow}</strong> on{' '}
         <strong>{trialExpirationDate}</strong>.
-      </Text>
-      <Text>Thank you for trying out monetr!</Text>
+      </Typography>
+      <Typography>Thank you for trying out monetr!</Typography>
       <Hr />
-      <Text variant='footer'>
+      <Typography variant='footer'>
         This message was intended for{' '}
-        <span className={textStyles.recipient}>
+        <strong>
           {firstName} {lastName}
-        </span>
+        </strong>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
         communication please reach out to <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
-      </Text>
+      </Typography>
     </EmailLayout>
   );
 };

@@ -1,7 +1,9 @@
 import EmailLayout from '@monetr/emails/components/EmailLayout';
 import EmailLogo from '@monetr/emails/components/EmailLogo';
-import { Heading, Hr, Link, Text } from '@monetr/emails/components/email';
-import textStyles from '@monetr/emails/components/email/Text.module.scss';
+import { Heading } from '@monetr/emails/components/email/Heading';
+import { Hr } from '@monetr/emails/components/email/Hr';
+import { Link } from '@monetr/emails/components/email/Link';
+import { Typography } from '@monetr/emails/components/email/Typography';
 
 interface PasswordChangedProps {
   baseUrl?: string;
@@ -23,20 +25,20 @@ export const PasswordChanged = ({
       <Heading>
         Your password for <strong>monetr</strong> has been updated
       </Heading>
-      <Text>Hello {firstName},</Text>
-      <Text>
+      <Typography>Hello {firstName},</Typography>
+      <Typography>
         If you did not initiate the change in your password please reach out to us immediately via our support email:{' '}
         <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>
-      </Text>
+      </Typography>
       <Hr />
-      <Text variant='footer'>
+      <Typography variant='footer'>
         This message was intended for{' '}
-        <span className={textStyles.recipient}>
+        <strong>
           {firstName} {lastName}
-        </span>
+        </strong>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
         communication please reach out to <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
-      </Text>
+      </Typography>
     </EmailLayout>
   );
 };

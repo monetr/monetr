@@ -1,7 +1,10 @@
 import EmailLayout from '@monetr/emails/components/EmailLayout';
 import EmailLogo from '@monetr/emails/components/EmailLogo';
-import { Button, Heading, Hr, Link, Text } from '@monetr/emails/components/email';
-import textStyles from '@monetr/emails/components/email/Text.module.scss';
+import { Button } from '@monetr/emails/components/email/Button';
+import { Heading } from '@monetr/emails/components/email/Heading';
+import { Hr } from '@monetr/emails/components/email/Hr';
+import { Link } from '@monetr/emails/components/email/Link';
+import { Typography } from '@monetr/emails/components/email/Typography';
 
 interface VerifyEmailProps {
   baseUrl?: string;
@@ -25,20 +28,20 @@ export const VerifyEmailAddress = ({
       <Heading>
         Verify your email address for <strong>monetr</strong>
       </Heading>
-      <Text>Hello {firstName},</Text>
-      <Text>
+      <Typography>Hello {firstName},</Typography>
+      <Typography>
         Thank you for signing up for monetr, in order to use your account we ask that you verify your email address.
-      </Text>
+      </Typography>
       <Button href={inviteLink}>Verify email address</Button>
       <Hr />
-      <Text variant='footer'>
+      <Typography variant='footer'>
         This message was intended for{' '}
-        <span className={textStyles.recipient}>
+        <strong>
           {firstName} {lastName}
-        </span>
+        </strong>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
         communication please reach out to <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
-      </Text>
+      </Typography>
     </EmailLayout>
   );
 };

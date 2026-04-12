@@ -1,7 +1,10 @@
 import EmailLayout from '@monetr/emails/components/EmailLayout';
 import EmailLogo from '@monetr/emails/components/EmailLogo';
-import { Button, Heading, Hr, Link, Text } from '@monetr/emails/components/email';
-import textStyles from '@monetr/emails/components/email/Text.module.scss';
+import { Button } from '@monetr/emails/components/email/Button';
+import { Heading } from '@monetr/emails/components/email/Heading';
+import { Hr } from '@monetr/emails/components/email/Hr';
+import { Link } from '@monetr/emails/components/email/Link';
+import { Typography } from '@monetr/emails/components/email/Typography';
 
 interface PlaidDisconnectedProps {
   baseUrl?: string;
@@ -25,21 +28,21 @@ export const PlaidDisconnected = ({
     <EmailLayout previewText={previewText}>
       <EmailLogo baseUrl={baseUrl} />
       <Heading>One of your linked accounts has been disconnected</Heading>
-      <Text>Hello {firstName},</Text>
-      <Text>
+      <Typography>Hello {firstName},</Typography>
+      <Typography>
         Your <strong>{linkName}</strong> account connected via Plaid needs to be reauthenticated. This account will not
         receive automatic updates until the link has been updated.
-      </Text>
+      </Typography>
       <Button href={linkURL}>Reconnect {linkName}</Button>
       <Hr />
-      <Text variant='footer'>
+      <Typography variant='footer'>
         This message was intended for{' '}
-        <span className={textStyles.recipient}>
+        <strong>
           {firstName} {lastName}
-        </span>
+        </strong>
         . If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about this
         communication please reach out to <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
-      </Text>
+      </Typography>
     </EmailLayout>
   );
 };

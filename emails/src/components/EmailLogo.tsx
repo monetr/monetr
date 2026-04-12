@@ -1,5 +1,7 @@
+import { Img } from '@monetr/emails/components/email/Img';
+import { Section } from '@monetr/emails/components/email/Section';
+
 import styles from './EmailLogo.module.scss';
-import { Img, Section } from './email';
 
 export interface EmailLogoProps {
   baseUrl: string;

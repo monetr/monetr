@@ -1,7 +1,10 @@
 import EmailLayout from '@monetr/emails/components/EmailLayout';
 import EmailLogo from '@monetr/emails/components/EmailLogo';
-import { Button, Heading, Hr, Link, Text } from '@monetr/emails/components/email';
-import textStyles from '@monetr/emails/components/email/Text.module.scss';
+import { Button } from '@monetr/emails/components/email/Button';
+import { Heading } from '@monetr/emails/components/email/Heading';
+import { Hr } from '@monetr/emails/components/email/Hr';
+import { Link } from '@monetr/emails/components/email/Link';
+import { Typography } from '@monetr/emails/components/email/Typography';
 
 interface ForgotPasswordProps {
   baseUrl?: string;
@@ -26,18 +29,18 @@ export const ForgotPassword = ({
       <Heading>
         Reset your password for <strong>monetr</strong>
       </Heading>
-      <Text>Hello {firstName},</Text>
-      <Text>Below is the link you requested in order to change your login password.</Text>
+      <Typography>Hello {firstName},</Typography>
+      <Typography>Below is the link you requested in order to change your login password.</Typography>
       <Button href={resetUrl}>Reset password</Button>
       <Hr />
-      <Text variant='footer'>
+      <Typography variant='footer'>
         This message was intended for{' '}
-        <span className={textStyles.recipient}>
+        <strong>
           {firstName} {lastName}
-        </span>
+        </strong>
         . If you did not make this request or you are concerned about this communication please reach out to{' '}
         <Link href={`mailto:${supportEmail}`}>{supportEmail}</Link>.
-      </Text>
+      </Typography>
     </EmailLayout>
   );
 };

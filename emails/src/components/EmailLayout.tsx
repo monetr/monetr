@@ -1,7 +1,12 @@
 import type React from 'react';
 
+import { Body } from '@monetr/emails/components/email/Body';
+import { Container } from '@monetr/emails/components/email/Container';
+import { Head } from '@monetr/emails/components/email/Head';
+import { Html } from '@monetr/emails/components/email/Html';
+import { Preview } from '@monetr/emails/components/email/Preview';
+
 import styles from './EmailLayout.module.scss';
-import { Body, Container, Head, Html, Preview } from './email';
 
 export interface EmailLayoutProps {
   previewText: string;

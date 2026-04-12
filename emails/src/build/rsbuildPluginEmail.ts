@@ -32,16 +32,16 @@ function inlineCSS(html: string, css: string): string {
   });
 }
 
-// After juice inlines styles, CSS-module class names serve no purpose in the
-// final email. Strip them so clients see leaner markup.
+// After juice inlines styles, CSS-module class names serve no purpose in the final email. Strip them so clients see
+// leaner markup.
 function stripClassAttributes(html: string): string {
   const $ = loadHtml(html);
   $('[class]').removeAttr('class');
   return $.html();
 }
 
-// Renders email templates to static HTML+text at build time, following the
-// same processAssets pattern as rspress's rsbuildPluginSSG.
+// Renders email templates to static HTML+text at build time, following the same processAssets pattern as rspress's
+// rsbuildPluginSSG.
 export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugin => ({
   name: 'monetr-rsbuild-plugin-email',
   async setup(api) {
@@ -85,11 +85,11 @@ export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugi
           await mkdir(outDir, { recursive: true });
 
           const templateNames = Object.keys(templates);
-          console.log(`[email] Found ${templateNames.length} templates: ${templateNames.join(', ')}`);
+          console.log(`[email] Found ${templateNames.length} templates`);
 
           for (const name of templateNames) {
             const Component = templates[name];
-            console.log(`[email] Building ${name}...`);
+            console.group(`[email] Building ${name}...`);
 
             // Default props contain Go template placeholders for production
             let html = renderToStaticMarkup(createElement(Component));
@@ -102,11 +102,14 @@ export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugi
             await writeFile(htmlPath, html);
             await writeFile(txtPath, plaintext);
 
-            console.log(`[email]   -> ${htmlPath}`);
-            console.log(`[email]   -> ${txtPath}`);
+            console.log(`[email] ${htmlPath}`);
+            console.log(`[email] ${txtPath}`);
+            console.groupEnd();
           }
 
-          await rm(ssgFolderPath, { recursive: true }).catch(() => {});
+          await rm(ssgFolderPath, { recursive: true }).catch(error =>
+            console.error(`Failed to removed ${ssgFolderPath}: ${error}`),
+          );
 
           console.log('[email] Done!');
         },
