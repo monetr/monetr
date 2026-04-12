@@ -10,9 +10,9 @@ const ctx = require.context('./emails', false, /^\.\/[^/]+\.tsx$/);
 export const templates: Record<string, EmailTemplate> = {};
 
 for (const key of ctx.keys()) {
-  const mod = ctx(key);
+  const module = ctx(key);
   const name = key.slice(2).replace(/\.tsx$/, ''); // "./VerifyEmailAddress.tsx" -> "VerifyEmailAddress"
-  const Component = mod[name];
+  const Component = module[name];
   if (Component && typeof Component === 'function') {
     templates[name] = Component;
   }
