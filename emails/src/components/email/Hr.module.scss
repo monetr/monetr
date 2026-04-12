@@ -1,7 +1,8 @@
+@use '@monetr/emails/colors';
 @use '@monetr/emails/variables';
 
 .hr {
-  border: 1px solid #e5e7eb;
+  border: 1px solid colors.$border;
   margin: 6 * variables.$size 0;
   width: 100%;
 }

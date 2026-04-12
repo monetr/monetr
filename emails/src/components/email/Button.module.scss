@@ -1,3 +1,4 @@
+@use '@monetr/emails/colors';
 @use '@monetr/emails/variables';
 
 .section {
@@ -8,9 +9,9 @@
 
 .button {
   display: inline-block;
-  background-color: #4e1aa0;
+  background-color: colors.$brand;
   border-radius: 2 * variables.$size;
-  color: #fff;
+  color: colors.$background;
   font-size: 3.5 * variables.$size;
   font-weight: 600;
   text-decoration: none;
@@ -19,6 +20,6 @@
 
 .text {
   font-size: 3.5 * variables.$size;
-  color: #fff;
+  color: colors.$background;
   margin: 2 * variables.$size;
 }

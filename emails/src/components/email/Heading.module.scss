@@ -1,7 +1,8 @@
+@use '@monetr/emails/colors';
 @use '@monetr/emails/variables';
 
 .heading {
-  color: #000;
+  color: colors.$content;
   font-size: 6 * variables.$size;
   line-height: 8 * variables.$size;
   font-weight: 400;

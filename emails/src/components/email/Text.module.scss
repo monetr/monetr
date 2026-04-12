@@ -1,19 +1,20 @@
+@use '@monetr/emails/colors';
 @use '@monetr/emails/variables';
 
 .body {
-  color: #000;
+  color: colors.$content;
   font-size: 3.5 * variables.$size;
   line-height: 6 * variables.$size;
   margin: 4 * variables.$size 0;
 }
 
 .footer {
-  color: #6b7280;
+  color: colors.$content-muted;
   font-size: 3 * variables.$size;
   line-height: 6 * variables.$size;
   margin: 4 * variables.$size 0;
 }
 
 .recipient {
-  color: #000;
+  color: colors.$content;
 }

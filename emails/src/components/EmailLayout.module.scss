@@ -1,14 +1,15 @@
+@use '@monetr/emails/colors';
 @use '@monetr/emails/variables';
 
 .body {
-  background-color: #fff;
+  background-color: colors.$background;
   margin: auto;
   font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 .container {
-  border: 1px solid #e5e7eb;
+  border: 1px solid colors.$border;
   border-radius: 1 * variables.$size;
   margin: 10 * variables.$size auto;
   padding: 5 * variables.$size;
