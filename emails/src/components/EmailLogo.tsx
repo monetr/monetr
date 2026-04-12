@@ -14,7 +14,7 @@ export default function EmailLogo(props: EmailLogoProps): JSX.Element {
         alt='monetr'
         className={styles.logo}
         height='64'
-        src={`${props.baseUrl}/assets/resources/transparent-128.png `}
+        src={`${props.baseUrl}/assets/resources/transparent-128.png`}
         width='64'
       />
     </Section>

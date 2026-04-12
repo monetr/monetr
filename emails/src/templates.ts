@@ -1,11 +1,16 @@
+/// <reference types="@rspack/core/module" />
 // PreviewProps provides sample data for the dev preview; default prop values
 // contain Go template placeholders for the production build.
-export type EmailTemplate = React.ComponentType<any> & {
-  PreviewProps: Record<string, any>;
+export type EmailTemplate = React.ComponentType<unknown> & {
+  PreviewProps: Record<string, string>;
 };
 
 // Auto-discover all email templates via require.context at compile time.
-const ctx = require.context('./emails', true, /^\.\/[^/]+\/index\.tsx$/);
+type TemplateModule = { [key: string]: EmailTemplate | undefined; default?: EmailTemplate };
+const ctx = require.context('./emails', true, /^\.\/[^/]+\/index\.tsx$/) as {
+  keys(): string[];
+  (key: string): TemplateModule;
+};
 
 export const templates: Record<string, EmailTemplate> = {};
 
