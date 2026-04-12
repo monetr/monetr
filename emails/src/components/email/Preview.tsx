@@ -1,3 +1,5 @@
+import styles from './Preview.module.scss';
+
 export type PreviewProps = {
   children: string;
 };
@@ -10,21 +12,9 @@ export function Preview({ children }: PreviewProps) {
   const padding = '\u200C\u00A0'.repeat(Math.max(0, MAX_LENGTH - text.length));
 
   return (
-    // Must be inline -- clients that strip <style> tags would otherwise
-    // reveal the preview text in the email body.
-    <div
-      data-skip-in-text='true'
-      style={{
-        display: 'none',
-        overflow: 'hidden',
-        lineHeight: '1px',
-        opacity: 0,
-        maxHeight: 0,
-        maxWidth: 0,
-      }}
-    >
+    <div data-skip-in-text='true' className={styles.preview}>
       {text}
-      <div style={{ display: 'none', overflow: 'hidden', maxHeight: 0 }}>{padding}</div>
+      <div className={styles.padding}>{padding}</div>
     </div>
   );
 }

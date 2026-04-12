@@ -1,4 +1,5 @@
 import type React from 'react';
+import styles from './Container.module.scss';
 
 export type ContainerProps = React.ComponentPropsWithoutRef<'table'> & {
   children?: React.ReactNode;
@@ -12,15 +13,12 @@ export function Container({ children, style, className, ...props }: ContainerPro
       cellPadding='0'
       cellSpacing='0'
       role='presentation'
-      // Must be inline -- email clients that strip <style> tags need these
-      // for table layout to work.
-      style={{ maxWidth: '37.5em', borderCollapse: 'separate' }}
+      className={styles.table}
       width='100%'
       {...props}
     >
       <tbody>
-        {/* Must be inline for table layout in email clients */}
-        <tr style={{ width: '100%' }}>
+        <tr className={styles.row}>
           <td className={className} style={style}>
             {children}
           </td>

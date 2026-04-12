@@ -9,16 +9,7 @@ export type ButtonProps = React.ComponentPropsWithoutRef<'a'> & {
 export function Button({ children, target = '_blank', ...props }: ButtonProps) {
   return (
     <Section className={styles.section}>
-      <a
-        // Must be inline -- some email clients strip <style> tags entirely.
-        style={{
-          display: 'inline-block',
-          textDecoration: 'none',
-        }}
-        className={styles.button}
-        target={target}
-        {...props}
-      >
+      <a className={styles.button} target={target} {...props}>
         <p className={styles.text}>{children}</p>
       </a>
     </Section>
