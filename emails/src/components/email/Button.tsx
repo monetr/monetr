@@ -10,8 +10,7 @@ export function Button({ children, target = '_blank', ...props }: ButtonProps) {
   return (
     <Section className={styles.section}>
       <a
-        // Inline styles required for email client compatibility — some clients
-        // strip <style> tags entirely, so these must survive as inline attributes.
+        // Must be inline -- some email clients strip <style> tags entirely.
         style={{
           display: 'inline-block',
           textDecoration: 'none',

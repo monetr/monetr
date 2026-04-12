@@ -19,9 +19,6 @@ export interface EmailPluginOptions {
   outDir: string;
 }
 
-/**
- * Inline CSS into HTML using juice.
- */
 function inlineCSS(html: string, css: string): string {
   return juice.inlineContent(html, css, {
     preserveMediaQueries: true,
@@ -33,9 +30,6 @@ function inlineCSS(html: string, css: string): string {
   });
 }
 
-/**
- * Convert HTML to plaintext.
- */
 function toPlainText(html: string): string {
   return htmlToText(html, {
     selectors: [
@@ -51,17 +45,8 @@ function toPlainText(html: string): string {
   });
 }
 
-/**
- * rsbuild plugin that renders email templates from the node environment bundle.
- *
- * Follows the same pattern as rspress's rsbuildPluginSSG:
- * 1. Hook into processAssets on the node environment
- * 2. Write the compiled JS bundle to disk, capture the compiled CSS
- * 3. Dynamically import the JS bundle
- * 4. Render each exported component to HTML
- * 5. Post-process: juice CSS inlining → plaintext generation
- * 6. Write .html and .txt files to the output directory
- */
+// Renders email templates to static HTML+text at build time, following the
+// same processAssets pattern as rspress's rsbuildPluginSSG.
 export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugin => ({
   name: 'monetr-rsbuild-plugin-email',
   async setup(api) {
@@ -77,7 +62,7 @@ export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugi
           const ssgFolderPath = join(distPath, SSG_BUNDLE_FOLDER);
           const bundleAbsolutePath = join(ssgFolderPath, SSG_BUNDLE_NAME);
 
-          // Collect compiled CSS from the build output (SCSS modules → extracted CSS)
+          // Collect compiled CSS from the build output
           let css = '';
           for (const [assetName, assetSource] of Object.entries(assets)) {
             if (assetName.endsWith('.css')) {
@@ -86,7 +71,6 @@ export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugi
             }
           }
 
-          // Write the compiled node bundle(s) to disk so we can import them
           await mkdir(ssgFolderPath, { recursive: true });
           await Promise.all(
             Object.entries(assets).map(async ([assetName, assetSource]) => {
@@ -98,13 +82,11 @@ export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugi
             }),
           );
 
-          // Import the bundle to get the template registry.
-          // Node.js wraps CJS module.exports as the `default` export when using import().
+          // Node.js wraps CJS module.exports as `default` when using import()
           const rawModule = await import(pathToFileURL(bundleAbsolutePath).href);
           const bundleExports = rawModule.default || rawModule;
           const templates: Record<string, React.ComponentType> = bundleExports.templates;
 
-          // Create output directory
           await mkdir(outDir, { recursive: true });
 
           const templateNames = Object.keys(templates);
@@ -114,19 +96,11 @@ export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugi
             const Component = templates[name];
             console.log(`[email] Building ${name}...`);
 
-            // 1. Render to HTML (uses default props which contain Go template placeholders)
+            // Default props contain Go template placeholders for production
             let html = renderToStaticMarkup(createElement(Component));
-
-            // 2. Inline the compiled SCSS module CSS
             html = inlineCSS(html, css);
-
-            // 3. Prepend XHTML doctype
             html = `${XHTML_DOCTYPE}\n${html}`;
-
-            // 4. Generate plaintext
             const plaintext = toPlainText(html);
-
-            // 5. Write output files
             const htmlPath = join(outDir, `${name}.html`);
             const txtPath = join(outDir, `${name}.txt`);
             await writeFile(htmlPath, html);
@@ -136,7 +110,6 @@ export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugi
             console.log(`[email]   -> ${txtPath}`);
           }
 
-          // Clean up the SSG bundle folder
           await rm(ssgFolderPath, { recursive: true }).catch(() => {});
 
           console.log('[email] Done!');

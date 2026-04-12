@@ -9,8 +9,8 @@ import { pluginSass } from '@rsbuild/plugin-sass';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // rsbuild sets NODE_ENV before loading config:
-//   rsbuild dev   → NODE_ENV=development
-//   rsbuild build → NODE_ENV=production
+//   rsbuild dev   -> NODE_ENV=development
+//   rsbuild build -> NODE_ENV=production
 const isDev = process.env.NODE_ENV !== 'production';
 
 const outDir = process.env.EMAIL_OUT_DIR
@@ -40,8 +40,8 @@ const buildEnvironments = {
     },
     output: {
       // Use web target so rspack extracts CSS to separate files instead of
-      // discarding it (node target only exports class name mappings). The
-      // email templates are pure React — no Node.js APIs — so web works fine.
+      // discarding it (node target only exports class name mappings).
+      // Safe because the email templates are pure React with no Node APIs.
       target: 'web' as const,
       distPath: { root: 'dist/server', js: '', css: '' },
       filename: { js: '[name].cjs', css: '[name].css' },

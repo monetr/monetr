@@ -6,10 +6,6 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 type ViewMode = 'preview' | 'html' | 'text';
 
-/**
- * Simple HTML to plaintext conversion for browser-side preview.
- * Strips tags, collapses whitespace, extracts link hrefs.
- */
 function htmlToPlainText(html: string): string {
   // Remove hidden preview div
   let text = html.replace(/<div[^>]*data-skip-in-text[^>]*>[\s\S]*?<\/div>\s*<\/div>/gi, '');
@@ -24,7 +20,9 @@ function htmlToPlainText(html: string): string {
   // Extract link text with href
   text = text.replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_, href, content) => {
     const linkText = content.replace(/<[^>]+>/g, '').trim();
-    if (href === `mailto:${linkText}` || href === linkText) return linkText;
+    if (href === `mailto:${linkText}` || href === linkText) {
+      return linkText;
+    }
     return `${linkText} [${href}]`;
   });
   // Remove remaining tags

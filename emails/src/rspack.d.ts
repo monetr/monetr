@@ -1,5 +1,4 @@
-// Type declarations for rspack/webpack's require.context, used to auto-discover
-// email templates at compile time.
+// Ambient types for rspack/webpack require.context
 interface RequireContext {
   keys(): string[];
   <T = any>(id: string): T;

@@ -2,12 +2,8 @@ import type React from 'react';
 
 export type BodyProps = React.HtmlHTMLAttributes<HTMLBodyElement>;
 
-/**
- * Email-compatible body wrapper. Wraps children in a presentation table
- * because Yahoo and AOL strip all styles from the <body> element when
- * converting it to a <div>. The user's styles and className are applied
- * to the inner <td> instead so they survive this stripping.
- */
+// Yahoo and AOL strip styles from <body> by converting it to a <div>.
+// Wrapping in a presentation table with styles on the <td> survives this.
 export function Body({ children, style, className, ...props }: BodyProps) {
   return (
     <body {...props}>

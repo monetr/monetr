@@ -1,3 +1,3 @@
-// SSR entry: re-exports the template registry for the node build environment.
-// The rsbuild plugin imports this bundle after compilation to render each template.
+// Entry point for the node build environment; the rsbuild plugin imports this
+// bundle to render each template to static HTML.
 export { templates } from '../templates';

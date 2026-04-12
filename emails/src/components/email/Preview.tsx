@@ -10,10 +10,8 @@ export function Preview({ children }: PreviewProps) {
   const padding = '\u200C\u00A0'.repeat(Math.max(0, MAX_LENGTH - text.length));
 
   return (
-    // Inline styles are required here — the preview text must be visually
-    // hidden in every email client. These hiding techniques must be inline
-    // because clients that strip <style> tags would otherwise reveal the
-    // preview text and padding characters in the email body.
+    // Must be inline -- clients that strip <style> tags would otherwise
+    // reveal the preview text in the email body.
     <div
       data-skip-in-text='true'
       style={{

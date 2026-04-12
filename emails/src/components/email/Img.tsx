@@ -5,10 +5,8 @@ export type ImgProps = React.ComponentPropsWithoutRef<'img'>;
 export function Img({ style, ...props }: ImgProps) {
   return (
     <img
-      // Inline styles required for email client compatibility — prevents
-      // unwanted borders, outlines, and link underlines that some clients
-      // add to images by default. Must be inline since some clients strip
-      // <style> tags.
+      // Must be inline -- some email clients add default borders and
+      // underlines to images and strip <style> tags.
       style={{
         display: 'block',
         outline: 'none',
