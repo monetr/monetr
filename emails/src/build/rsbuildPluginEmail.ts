@@ -4,6 +4,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { RsbuildPlugin } from '@rsbuild/core';
+import { load as loadHtml } from 'cheerio';
 import juice from 'juice';
 import { renderToStaticMarkup } from 'react-dom/server';
 
@@ -29,6 +30,14 @@ function inlineCSS(html: string, css: string): string {
     removeStyleTags: false,
     preserveImportant: true,
   });
+}
+
+// After juice inlines styles, CSS-module class names serve no purpose in the
+// final email. Strip them so clients see leaner markup.
+function stripClassAttributes(html: string): string {
+  const $ = loadHtml(html);
+  $('[class]').removeAttr('class');
+  return $.html();
 }
 
 // Renders email templates to static HTML+text at build time, following the
@@ -85,6 +94,7 @@ export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugi
             // Default props contain Go template placeholders for production
             let html = renderToStaticMarkup(createElement(Component));
             html = inlineCSS(html, css);
+            html = stripClassAttributes(html);
             html = `${XHTML_DOCTYPE}\n${html}`;
             const plaintext = toPlainText(html);
             const htmlPath = join(outDir, `${name}.html`);

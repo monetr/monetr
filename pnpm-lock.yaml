@@ -122,6 +122,9 @@ importers:
       '@types/react-dom':
         specifier: 18.3.7
         version: 18.3.7(@types/react@18.3.26)
+      cheerio:
+        specifier: 1.2.0
+        version: 1.2.0
       html-to-text:
         specifier: 9.0.5
         version: 9.0.5
