@@ -2,11 +2,10 @@ import { createElement, useMemo, useState } from 'react';
 
 import { toPlainText } from '@monetr/emails/toPlainText';
 
+import styles from './App.module.scss';
 import { templateList } from './templates';
 
 import { renderToStaticMarkup } from 'react-dom/server';
-
-import styles from './App.module.scss';
 
 type ViewMode = 'preview' | 'html' | 'text';
 
@@ -37,9 +36,9 @@ export function App() {
         <h2 className={styles.sidebarHeading}>Email Templates</h2>
         {templateList.map((template, i) => (
           <button
+            className={cx(styles.templateButton, i === selectedIndex && styles.templateButtonActive)}
             key={template.name}
             onClick={() => setSelectedIndex(i)}
-            className={cx(styles.templateButton, i === selectedIndex && styles.templateButtonActive)}
             type='button'
           >
             {template.name}
@@ -56,9 +55,9 @@ export function App() {
             <div className={styles.viewModeButtons}>
               {viewModes.map(({ key, label }) => (
                 <button
+                  className={cx(styles.viewModeButton, viewMode === key && styles.viewModeButtonActive)}
                   key={key}
                   onClick={() => setViewMode(key)}
-                  className={cx(styles.viewModeButton, viewMode === key && styles.viewModeButtonActive)}
                   type='button'
                 >
                   {label}
