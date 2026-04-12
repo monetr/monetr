@@ -1,0 +1,16 @@
+[
+  { "type": "file", "name": "cors", "label": "CORS" },
+  { "type": "file", "name": "email", "label": "Email" },
+  { "type": "file", "name": "kms", "label": "Key Management" },
+  { "type": "file", "name": "links", "label": "Links" },
+  { "type": "file", "name": "logging", "label": "Logging" },
+  { "type": "file", "name": "lunch_flow", "label": "Lunch Flow" },
+  { "type": "file", "name": "plaid", "label": "Plaid" },
+  { "type": "file", "name": "postgres", "label": "PostgreSQL" },
+  { "type": "file", "name": "recaptcha", "label": "ReCAPTCHA" },
+  { "type": "file", "name": "redis", "label": "Redis" },
+  { "type": "file", "name": "security", "label": "Security" },
+  { "type": "file", "name": "sentry", "label": "Sentry" },
+  { "type": "file", "name": "server", "label": "Server" },
+  { "type": "file", "name": "storage", "label": "Storage" }
+]

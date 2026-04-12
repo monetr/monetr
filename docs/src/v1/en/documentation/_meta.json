@@ -1,0 +1,11 @@
+[
+  { "type": "file", "name": "index", "label": "Introduction" },
+  { "type": "section-header", "label": "Help" },
+  { "type": "dir", "name": "use", "label": "Using monetr" },
+  { "type": "section-header", "label": "Self-Hosting", "collapsed": true },
+  { "type": "dir", "name": "install", "label": "Installation", "collapsed": true },
+  { "type": "dir", "name": "configure", "label": "Configuration", "collapsed": true },
+  { "type": "dir", "name": "guides", "label": "Guides", "collapsed": true },
+  { "type": "section-header", "label": "Contributing", "collapsed": true },
+  { "type": "dir", "name": "development", "label": "Development", "collapsed": true }
+]

@@ -269,5 +269,5 @@ jobs:
         name: Upload Documentation As Artifact
         with:
           name: '${{ github.sha }}-docs'
-          path: '${{ github.workspace }}/docs/out'
+          path: '${{ github.workspace }}/build/docs/out'
           retention-days: 7
