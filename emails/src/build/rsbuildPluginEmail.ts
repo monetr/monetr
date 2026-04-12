@@ -34,9 +34,10 @@ function inlineCSS(html: string, css: string): string {
 
 // After juice inlines styles, CSS-module class names serve no purpose in the final email. Strip them so clients see
 // leaner markup.
-function stripClassAttributes(html: string): string {
+function stripUnneededAttributes(html: string): string {
   const $ = loadHtml(html);
   $('[class]').removeAttr('class');
+  $('[data-skip-in-text]').removeAttr('data-skip-in-text');
   return $.html();
 }
 
@@ -94,9 +95,9 @@ export const rsbuildPluginEmail = ({ outDir }: EmailPluginOptions): RsbuildPlugi
             // Default props contain Go template placeholders for production
             let html = renderToStaticMarkup(createElement(Component));
             html = inlineCSS(html, css);
-            html = stripClassAttributes(html);
-            html = `${XHTML_DOCTYPE}\n${html}`;
             const plaintext = toPlainText(html);
+            html = stripUnneededAttributes(html);
+            html = `${XHTML_DOCTYPE}\n${html}`;
             const htmlPath = join(outDir, `${name}.html`);
             const txtPath = join(outDir, `${name}.txt`);
             await writeFile(htmlPath, html);
