@@ -19,12 +19,5 @@
     "develop-docs": "cmake --preset default && cmake --build build -t development.documentation.up",
     "shutdown": "cmake --preset default && cmake --build build -t development.down",
     "clean": "pnpm shutdown && cmake --build build -t clean && cmake -E remove_directory build"
-  },
-  "pnpm": {
-    "overrides": {
-      "form-data": "4.0.5",
-      "katex": "0.16.45",
-      "next": "15.5.14"
-    }
   }
 }

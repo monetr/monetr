@@ -4,11 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  form-data: 4.0.5
-  katex: 0.16.45
-  next: 15.5.14
-
 importers:
 
   .:
