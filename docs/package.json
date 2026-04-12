@@ -25,8 +25,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "rehype-katex": "7.0.1",
-    "remark-math": "6.0.0",
-    "tailwind-merge": "1.14.0"
+    "remark-math": "6.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -37,7 +36,6 @@
     "sass": "1.99.0",
     "satori": "0.19.2",
     "spellchecker-cli": "7.0.3",
-    "tailwindcss": "3.4.19",
     "typescript": "5.9.3"
   }
 }

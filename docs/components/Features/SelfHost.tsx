@@ -1,17 +1,12 @@
-import Feature from '@monetr/docs/components/Feature';
+import FeatureCard from '@monetr/docs/components/Features/FeatureCard';
 
 export default function SelfHost(): JSX.Element {
   return (
-    <Feature
-      className='col-span-full md:col-span-2'
-      description={
-        <h2 className='text-lg text-start sm:text-center text-dark-monetr-content'>
-          Host monetr yourself on your own hardware, for free. Keeping your data private.
-        </h2>
-      }
+    <FeatureCard
+      description='Host monetr yourself on your own hardware, for free. Keeping your data private.'
       link='/documentation/install/'
       linkText='Installation Guide'
-      title={<h1 className='text-2xl lg:text-3xl text-start sm:text-center font-semibold'>Self-Host</h1>}
+      title='Self-Host'
     />
   );
 }

@@ -1,16 +1,10 @@
-import Feature from '@monetr/docs/components/Feature';
+import FeatureCard from '@monetr/docs/components/Features/FeatureCard';
 
 export default function MobileFriendly(): JSX.Element {
   return (
-    <Feature
-      className='col-span-full md:col-span-2'
-      description={
-        <h2 className='text-lg text-start sm:text-center text-dark-monetr-content'>
-          monetr is built to be mobile friendly out of the box, it can even be installed as a full featured web app on
-          your desktop or mobile device.
-        </h2>
-      }
-      title={<h1 className='text-2xl lg:text-3xl text-start sm:text-center font-semibold'>Mobile Friendly</h1>}
+    <FeatureCard
+      description='monetr is built to be mobile friendly out of the box, it can even be installed as a full featured web app on your desktop or mobile device.'
+      title='Mobile Friendly'
     />
   );
 }

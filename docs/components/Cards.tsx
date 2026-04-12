@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import styles from './Cards.module.scss';
+
 import { Link } from '@rspress/core/theme-original';
 
 interface CardProps {
@@ -12,16 +14,13 @@ interface CardProps {
 
 function Card({ title, href, icon, children, arrow }: CardProps) {
   return (
-    <Link
-      className='flex p-4 rounded-lg border border-zinc-700 hover:border-zinc-500 transition-colors bg-black bg-opacity-20 backdrop-blur-sm no-underline text-inherit my-2 gap-2'
-      href={href}
-    >
-      {icon && <span className='text-2xl'>{icon}</span>}
-      <h3 className='text-lg font-semibold my-[unset]'>
+    <Link className={styles.card} href={href}>
+      {icon && <span className={styles.icon}>{icon}</span>}
+      <h3 className={styles.title}>
         {title}
-        {arrow && <span className='ml-1 leading-none'>&rarr;</span>}
+        {arrow && <span className={styles.titleArrow}>&rarr;</span>}
       </h3>
-      {children && <p className='text-sm text-zinc-400 mt-1 leading-none'>{children}</p>}
+      {children && <p className={styles.description}>{children}</p>}
     </Link>
   );
 }
@@ -34,7 +33,7 @@ interface CardsProps {
 export function Cards({ children, num }: CardsProps) {
   return (
     <div
-      className='grid gap-4 mt-4'
+      className={styles.cardsGrid}
       style={{
         gridTemplateColumns: `repeat(${num ?? 2}, minmax(0, 1fr))`,
       }}

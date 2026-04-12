@@ -3,32 +3,36 @@ import { Fragment, useEffect } from 'react';
 import { useFrontmatter } from '@rspress/core/runtime';
 import { Layout as BasicLayout, Link, FallbackHeading as OriginalFallbackHeading } from '@rspress/core/theme-original';
 
-import './index.css';
+import 'katex/dist/katex.min.css';
+import '@fontsource-variable/inter';
 
 import GithubStars from '@monetr/docs/components/GithubStars';
+import GradientHeading from '@monetr/docs/components/GradientHeading/GradientHeading';
 import PageMetadata from '@monetr/docs/components/PageMetadata';
 import QueryClientWrapper from '@monetr/docs/components/QueryClientWrapper';
 import SignIn from '@monetr/docs/components/SignIn';
 
+import layoutStyles from './Layout.module.scss';
+
 function NavTitle() {
   return (
-    <Link className='flex items-center gap-3 no-underline hover:brightness-110' href='/'>
-      <img alt='monetr logo' className='size-8 lg:size-10 rounded-none' src='/logo.svg' />
-      <div className='flex items-center justify-center ml-1'>
-        <span className='absolute mx-auto flex border w-fit bg-gradient-to-r blur-xl opacity-75 from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-2xl lg:text-3xl box-content font-extrabold text-transparent text-center select-none'>
-          monetr
-        </span>
-        <span className='relative top-0 justify-center flex bg-gradient-to-r items-center from-purple-100 via-purple-200 to-purple-300 bg-clip-text text-2xl lg:text-3xl font-extrabold text-transparent text-center select-auto'>
-          monetr
-        </span>
-      </div>
+    <Link className={layoutStyles.navTitle} href='/'>
+      <img alt='monetr logo' className={layoutStyles.navLogo} src='/logo.svg' />
+      <GradientHeading
+        as='span'
+        blurClassName={layoutStyles.navBrandBlur}
+        foregroundClassName={layoutStyles.navBrandForeground}
+        wrapperClassName={layoutStyles.navBrandWrapper}
+      >
+        monetr
+      </GradientHeading>
     </Link>
   );
 }
 
 function NavExtras() {
   return (
-    <div className='flex items-center gap-3'>
+    <div className={layoutStyles.navExtras}>
       <GithubStars />
       <SignIn />
     </div>
@@ -37,25 +41,20 @@ function NavExtras() {
 
 function Footer() {
   return (
-    <footer className='border-t border-zinc-700 py-6 mt-8'>
-      <div className='flex w-full items-center sm:items-start justify-between px-6 md:px-20'>
-        <p className='text-sm text-zinc-400'>© {new Date().getFullYear()} monetr LLC.</p>
-        <div className='gap-2 sm:gap-4 flex flex-col sm:flex-row'>
-          <Link
-            className='hover:underline text-sm text-zinc-400'
-            href='https://status.monetr.app/'
-            rel='noreferrer'
-            target='_blank'
-          >
+    <footer className={layoutStyles.footer}>
+      <div className={layoutStyles.footerRow}>
+        <p className={layoutStyles.footerCopyright}>© {new Date().getFullYear()} monetr LLC.</p>
+        <div className={layoutStyles.footerLinks}>
+          <Link className={layoutStyles.footerLink} href='https://status.monetr.app/' rel='noreferrer' target='_blank'>
             Status
           </Link>
-          <Link className='hover:underline text-sm text-zinc-400' href='/contact'>
+          <Link className={layoutStyles.footerLink} href='/contact'>
             Contact
           </Link>
-          <Link className='hover:underline text-sm text-zinc-400' href='/policy/terms'>
+          <Link className={layoutStyles.footerLink} href='/policy/terms'>
             Terms & Conditions
           </Link>
-          <Link className='hover:underline text-sm text-zinc-400' href='/policy/privacy'>
+          <Link className={layoutStyles.footerLink} href='/policy/privacy'>
             Privacy
           </Link>
         </div>

@@ -1,0 +1,89 @@
+@use '@monetr/docs/styles/variables';
+
+.root {
+  position: relative;
+}
+
+.contentWrap {
+  overflow: hidden;
+}
+
+.content {
+  display: flex;
+}
+
+.contentHorizontal {
+  margin-left: -4 * variables.$size;
+}
+
+.contentVertical {
+  margin-top: -4 * variables.$size;
+  flex-direction: column;
+}
+
+.item {
+  min-width: 0;
+  flex-shrink: 0;
+  flex-grow: 0;
+  flex-basis: 100%;
+}
+
+.itemHorizontal {
+  padding-left: 4 * variables.$size;
+}
+
+.itemVertical {
+  padding-top: 4 * variables.$size;
+}
+
+.navButton {
+  position: absolute;
+}
+
+// Specificity bump to override Button's .button and .sizeIcon size/radius.
+.navButton.navButton {
+  height: 8 * variables.$size;
+  width: 8 * variables.$size;
+  border-radius: 9999px;
+}
+
+.navPrevHorizontal {
+  left: -6 * variables.$size;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.navPrevVertical {
+  top: -6 * variables.$size;
+  left: 50%;
+  transform: translateX(-50%) rotate(90deg);
+}
+
+.navNextHorizontal {
+  right: -6 * variables.$size;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.navNextVertical {
+  bottom: -6 * variables.$size;
+  left: 50%;
+  transform: translateX(-50%) rotate(90deg);
+}
+
+.arrowIcon {
+  height: 4 * variables.$size;
+  width: 4 * variables.$size;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

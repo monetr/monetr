@@ -1,0 +1,123 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2 * variables.$size;
+  white-space: nowrap;
+  border-radius: 0.375rem;
+  @include mixins.text-small;
+  font-weight: var(--medium);
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  &:focus-visible {
+    outline-style: solid;
+    outline-width: var(--outline-size);
+    outline-offset: var(--outline-size);
+    outline-color: var(--brand-focused);
+  }
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  & svg {
+    pointer-events: none;
+    width: 4 * variables.$size;
+    height: 4 * variables.$size;
+    flex-shrink: 0;
+  }
+}
+
+.variantDefault {
+  background-color: #7C3AED;
+  color: #fafafa;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+
+  &:hover {
+    background-color: rgba(124, 58, 237, 0.9);
+  }
+}
+
+.variantDestructive {
+  background-color: #ef4444;
+  color: #d4d4d8;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+
+  &:hover {
+    background-color: rgba(239, 68, 68, 0.9);
+  }
+}
+
+.variantOutline {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #71717a;
+  background-color: #19161f;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+
+  &:hover {
+    background-color: #3f3f46;
+    color: #fafafa;
+  }
+}
+
+.variantSecondary {
+  background-color: #1F2937;
+  color: #fafafa;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+
+  &:hover {
+    background-color: rgba(31, 41, 55, 0.8);
+  }
+}
+
+.variantGhost {
+  &:hover {
+    background-color: #3f3f46;
+    color: #fafafa;
+  }
+}
+
+.variantLink {
+  color: #7C3AED;
+  text-underline-offset: 4px;
+
+  &:hover {
+    text-decoration-line: underline;
+  }
+}
+
+.sizeDefault {
+  height: 9 * variables.$size;
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+  padding-top: 2 * variables.$size;
+  padding-bottom: 2 * variables.$size;
+}
+
+.sizeSm {
+  height: 8 * variables.$size;
+  border-radius: 0.375rem;
+  padding-left: 3 * variables.$size;
+  padding-right: 3 * variables.$size;
+  @include mixins.text-extra-small;
+}
+
+.sizeLg {
+  height: 10 * variables.$size;
+  border-radius: 0.375rem;
+  padding-left: 8 * variables.$size;
+  padding-right: 8 * variables.$size;
+}
+
+.sizeIcon {
+  height: 9 * variables.$size;
+  width: 9 * variables.$size;
+}

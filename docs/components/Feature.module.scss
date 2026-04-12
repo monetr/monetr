@@ -1,0 +1,55 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+
+.root {
+  border-radius: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--zinc-700);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  justify-content: space-between;
+}
+
+.body {
+  width: 100%;
+  padding: 8 * variables.$size;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 4 * variables.$size;
+}
+
+.link {
+  width: 100%;
+  bottom: 0;
+  display: block;
+  padding-left: 8 * variables.$size;
+  padding-right: 8 * variables.$size;
+  padding-top: 3 * variables.$size;
+  padding-bottom: 3 * variables.$size;
+  @include mixins.text-base;
+  font-weight: var(--semibold);
+  text-align: center;
+  color: var(--gray-100);
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 100ms;
+  background-color: rgba(255, 255, 255, 0.1);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  text-decoration: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.text-base;
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+}

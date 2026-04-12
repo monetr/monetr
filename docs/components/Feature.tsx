@@ -1,5 +1,8 @@
 import type React from 'react';
-import { twMerge } from 'tailwind-merge';
+
+import mergeClasses from '@monetr/docs/util/mergeClasses';
+
+import styles from './Feature.module.scss';
 
 import { Link } from '@rspress/core/theme-original';
 
@@ -13,20 +16,15 @@ interface FeatureProps {
 }
 
 export default function Feature(props: FeatureProps): JSX.Element {
-  const className = twMerge(
-    'rounded-3xl bg-black border border-zinc-700 bg-opacity-20 backdrop-blur-sm shadow-lg flex flex-col overflow-hidden  justify-between',
-    props.className,
-  );
-
   return (
-    <div className={className}>
-      <div className='w-full p-8 flex flex-col justify-evenly gap-4'>
+    <div className={mergeClasses(styles.root, props.className)}>
+      <div className={styles.body}>
         {props.title}
         {props.description && props.description}
       </div>
       {props.link && (
         <Link
-          className='w-full bottom-0 block px-8 py-3 text-md font-semibold text-center text-gray-100 transition duration-100 bg-white outline-none bg-opacity-10 hover:bg-opacity-20 md:text-base no-underline'
+          className={styles.link}
           href={props.link}
           rel={props.linkExternal ? 'noreferrer' : undefined}
           target={props.linkExternal ? '_blank' : undefined}

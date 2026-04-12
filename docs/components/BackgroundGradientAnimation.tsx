@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { twMerge } from 'tailwind-merge';
+
+import mergeClasses from '@monetr/docs/util/mergeClasses';
+
+import styles from './BackgroundGradientAnimation.module.scss';
 
 function hexToRgb(hex: string) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -43,16 +46,8 @@ export function BackgroundGradientAnimation(): JSX.Element {
   }, []);
 
   return (
-    <div
-      className={twMerge(
-        'h-screen w-screen',
-        'fixed overflow-hidden',
-        'inset-0 top-0 left-0 -z-20',
-        'bg-[linear-gradient(40deg,rgb(var(--gradient-background-start)),rgb(var(--gradient-background-end)))]',
-        'opacity-20',
-      )}
-    >
-      <svg className='hidden'>
+    <div className={styles.root}>
+      <svg className={styles.svg}>
         <title>Background animation</title>
         <defs>
           <filter id='blurMe'>
@@ -62,72 +57,12 @@ export function BackgroundGradientAnimation(): JSX.Element {
           </filter>
         </defs>
       </svg>
-      <div
-        className={twMerge(
-          'gradients-container h-full w-full blur-lg',
-          isSafari ? 'blur-2xl' : '[filter:url(#blurMe)_blur(40px)]',
-        )}
-      >
-        <div
-          className={twMerge(
-            'absolute',
-            '[background:radial-gradient(circle_at_center,_var(--first-color)_0,_var(--first-color)_50%)_no-repeat]',
-            '[mix-blend-mode:var(--blending-value)]',
-            'w-[var(--size)] h-[var(--size)]',
-            'top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]',
-            '[transform-origin:center_center]',
-            'animate-first',
-            'opacity-100',
-          )}
-        ></div>
-        <div
-          className={twMerge(
-            'absolute',
-            '[background:radial-gradient(circle_at_center,_rgba(var(--second-color),_0.8)_0,_rgba(var(--second-color),_0)_50%)_no-repeat]',
-            '[mix-blend-mode:var(--blending-value)]',
-            'w-[var(--size)] h-[var(--size)]',
-            'top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]',
-            '[transform-origin:calc(50%-400px)]',
-            'animate-second',
-            'opacity-100',
-          )}
-        ></div>
-        <div
-          className={twMerge(
-            'absolute',
-            '[background:radial-gradient(circle_at_center,_rgba(var(--third-color),_0.8)_0,_rgba(var(--third-color),_0)_50%)_no-repeat]',
-            '[mix-blend-mode:var(--blending-value)]',
-            'w-[var(--size)] h-[var(--size)]',
-            'top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]',
-            '[transform-origin:calc(50%+400px)]',
-            'animate-third',
-            'opacity-100',
-          )}
-        ></div>
-        <div
-          className={twMerge(
-            'absolute',
-            '[background:radial-gradient(circle_at_center,_rgba(var(--fourth-color),_0.8)_0,_rgba(var(--fourth-color),_0)_50%)_no-repeat]',
-            '[mix-blend-mode:var(--blending-value)]',
-            'w-[var(--size)] h-[var(--size)]',
-            'top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]',
-            '[transform-origin:calc(50%-200px)]',
-            'animate-fourth',
-            'opacity-70',
-          )}
-        ></div>
-        <div
-          className={twMerge(
-            'absolute',
-            '[background:radial-gradient(circle_at_center,_rgba(var(--fifth-color),_0.8)_0,_rgba(var(--fifth-color),_0)_50%)_no-repeat]',
-            '[mix-blend-mode:var(--blending-value)]',
-            'w-[var(--size)] h-[var(--size)]',
-            'top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]',
-            '[transform-origin:calc(50%-800px)_calc(50%+800px)]',
-            'animate-fifth',
-            'opacity-100',
-          )}
-        ></div>
+      <div className={mergeClasses(styles.container, isSafari ? styles.containerSafari : styles.containerChromium)}>
+        <div className={mergeClasses(styles.gradientBlob, styles.first)}></div>
+        <div className={mergeClasses(styles.gradientBlob, styles.second)}></div>
+        <div className={mergeClasses(styles.gradientBlob, styles.third)}></div>
+        <div className={mergeClasses(styles.gradientBlob, styles.fourth)}></div>
+        <div className={mergeClasses(styles.gradientBlob, styles.fifth)}></div>
       </div>
     </div>
   );

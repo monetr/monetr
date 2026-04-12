@@ -1,0 +1,46 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+@use '@monetr/docs/components/GradientHeading/GradientHeading' as gh;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1 * variables.$size;
+  align-items: center;
+  margin-bottom: 10 * variables.$size;
+  text-align: center;
+}
+
+.date {
+  color: var(--dark-monetr-content);
+}
+
+.titleWrapper {
+  @include gh.wrapper;
+  position: relative;
+}
+
+.titleBlur {
+  @include gh.blur;
+  opacity: 0.5;
+  @include mixins.text-5-extra-large-tight;
+
+  @media (min-width: variables.$smallScreen) {
+    @include mixins.text-6-extra-large-tight;
+  }
+}
+
+.titleForeground {
+  @include gh.foreground;
+  margin-bottom: auto;
+  @include mixins.text-5-extra-large-tight;
+
+  @media (min-width: variables.$smallScreen) {
+    @include mixins.text-6-extra-large-tight;
+  }
+}
+
+.description {
+  @include mixins.text-extra-large;
+  color: var(--dark-monetr-content);
+}

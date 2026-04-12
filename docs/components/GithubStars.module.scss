@@ -1,0 +1,56 @@
+@use '@monetr/docs/styles/variables';
+@use '@monetr/docs/styles/mixins';
+
+.root {
+  height: 33.5px;
+  display: none;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 0.5rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--dark-monetr-border);
+  overflow: hidden;
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  @media (min-width: variables.$smallScreen) {
+    display: flex;
+  }
+
+  &:hover {
+    .icon,
+    .count {
+      opacity: 0.8;
+    }
+  }
+}
+
+.iconWrap {
+  padding: 1 * variables.$size;
+  background-color: var(--zinc-800);
+}
+
+.icon {
+  opacity: 1;
+  height: 6 * variables.$size;
+  width: 6 * variables.$size;
+}
+
+.count {
+  padding-top: 1 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  text-align: center;
+  font-weight: var(--medium);
+  @include mixins.text-small;
+  opacity: 1;
+  width: 10 * variables.$size;
+}
+
+.skeleton {
+  border-radius: 0.25rem;
+  background-color: var(--dark-monetr-background-emphasis);
+  color: var(--dark-monetr-background-emphasis);
+}
