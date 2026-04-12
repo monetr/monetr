@@ -1,6 +1,6 @@
 /// <reference types="@rspack/core/module" />
-// PreviewProps provides sample data for the dev preview; default prop values
-// contain Go template placeholders for the production build.
+// PreviewProps provides sample data for the dev preview; default prop values contain Go template placeholders for the
+// production build.
 export type EmailTemplate = React.ComponentType<unknown> & {
   PreviewProps: Record<string, string>;
 };

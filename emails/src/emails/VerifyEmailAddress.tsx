@@ -1,6 +1,6 @@
+import Button from '@monetr/emails/components/Button';
 import EmailLayout from '@monetr/emails/components/EmailLayout';
 import EmailLogo from '@monetr/emails/components/EmailLogo';
-import Button from '@monetr/emails/components/Button';
 import Heading from '@monetr/emails/components/Heading';
 import Hr from '@monetr/emails/components/Hr';
 import Link from '@monetr/emails/components/Link';
