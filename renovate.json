@@ -76,6 +76,13 @@
       ]
     },
     {
+      "groupName": "golang.org/x",
+      "groupSlug": "golang-x",
+      "matchPackageNames": [
+        "golang.org/x/{/,}**"
+      ]
+    },
+    {
       "groupName": "sass",
       "groupSlug": "sass",
       "matchPackageNames": [
