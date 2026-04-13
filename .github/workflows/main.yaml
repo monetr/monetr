@@ -212,7 +212,7 @@ jobs:
           make docs
       - name: Upload static files as artifact
         id: deployment
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: build/docs/out
 
