@@ -43,7 +43,7 @@ require (
 	github.com/wneessen/go-mail v0.7.2
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/mock v0.6.0
-	golang.org/x/crypto v0.49.0
+	golang.org/x/crypto v0.50.0
 	golang.org/x/net v0.52.0
 	golang.org/x/sys v0.43.0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
