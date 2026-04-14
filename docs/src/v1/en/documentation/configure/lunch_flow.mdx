@@ -12,8 +12,11 @@ setting up Lunch Flow you can follow the guide here: [Integrate with Lunch Flow]
 ```yaml title="config.yaml"
 lunchflow:
   enabled: true
+  allowedApiUrls:
+    - https://lunchflow.app/api/v1
 ```
 
-| **Name**  | **Type** | **Default** | **Description**                                          |
-| ---       | ---      | ---         | ---                                                      |
-| `enabled` | Boolean  | `true`      | Allow Lunch Flow connections to be configured in monetr. |
+| **Name**         | **Type** | **Default**                        | **Description**                                                                                                                                                                                                                                  |
+| ---              | ---      | ---                                | ---                                                                                                                                                                                                                                              |
+| `enabled`        | Boolean  | `true`                             | Allow Lunch Flow connections to be configured in monetr.                                                                                                                                                                                         |
+| `allowedApiUrls` | Array    | `["https://lunchflow.app/api/v1"]` | Allowlist of URLs that are considered valid base API URLs for new Lunch Flow links. This defaults to the production Lunch Flow API URL, but if you want to use another Lunch Flow compatible API then you need to add it manually to the config. |

@@ -213,6 +213,7 @@ func (s *syncLunchFlowContext) setupClient(ctx queue.Context) error {
 			s.log,
 			link.LunchFlowLink.ApiUrl,
 			secret.Value,
+			ctx.Configuration().LunchFlow,
 		)
 		if err != nil {
 			return errors.Wrap(err, "failed to create Lunch Flow API client")

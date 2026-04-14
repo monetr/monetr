@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/jarcoal/httpmock"
+	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/internal/mock_lunch_flow"
 	"github.com/monetr/monetr/server/internal/testutils"
@@ -13,7 +14,7 @@ import (
 func TestLunchFlowClient_GetAccounts(t *testing.T) {
 	t.Run("happy path, retrieve a few accounts", func(t *testing.T) {
 		httpmock.Activate()
-		defer httpmock.Deactivate()
+		defer httpmock.DeactivateAndReset()
 
 		accountOne := lunch_flow.Account{
 			Id:              "1234",
@@ -40,8 +41,12 @@ func TestLunchFlowClient_GetAccounts(t *testing.T) {
 
 		client, err := lunch_flow.NewLunchFlowClient(
 			log,
-			lunch_flow.DefaultAPIURL,
+			config.DefaultLunchFlowAPIURL,
 			"bogus-token",
+			config.LunchFlow{
+				Enabled:        true,
+				AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
+			},
 		)
 		assert.NoError(t, err, "must not return an error creating the client")
 		assert.NotNil(t, client, "client must have a value")
@@ -60,7 +65,7 @@ func TestLunchFlowClient_GetAccounts(t *testing.T) {
 
 	t.Run("fail to retrieve accounts", func(t *testing.T) {
 		httpmock.Activate()
-		defer httpmock.Deactivate()
+		defer httpmock.DeactivateAndReset()
 
 		mock_lunch_flow.MockFetchAccountsError(t)
 
@@ -68,8 +73,12 @@ func TestLunchFlowClient_GetAccounts(t *testing.T) {
 
 		client, err := lunch_flow.NewLunchFlowClient(
 			log,
-			lunch_flow.DefaultAPIURL,
+			config.DefaultLunchFlowAPIURL,
 			"bogus-token",
+			config.LunchFlow{
+				Enabled:        true,
+				AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
+			},
 		)
 		assert.NoError(t, err, "must not return an error creating the client")
 		assert.NotNil(t, client, "client must have a value")
@@ -84,10 +93,60 @@ func TestLunchFlowClient_GetAccounts(t *testing.T) {
 	})
 }
 
+func TestLunchFlowClient_Constructor(t *testing.T) {
+	t.Run("rejects URL that is not in the allowlist", func(t *testing.T) {
+		log := testutils.GetLog(t)
+
+		client, err := lunch_flow.NewLunchFlowClient(
+			log,
+			"http://169.254.169.254/latest/meta-data",
+			"bogus-token",
+			config.LunchFlow{
+				Enabled:        true,
+				AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
+			},
+		)
+		assert.EqualError(t, err, "Lunch Flow API URL is not in the configured allowlist")
+		assert.Nil(t, client, "client must be nil on rejection")
+	})
+
+	t.Run("rejects when allowlist is empty", func(t *testing.T) {
+		log := testutils.GetLog(t)
+
+		client, err := lunch_flow.NewLunchFlowClient(
+			log,
+			config.DefaultLunchFlowAPIURL,
+			"bogus-token",
+			config.LunchFlow{
+				Enabled:        true,
+				AllowedApiUrls: []string{},
+			},
+		)
+		assert.EqualError(t, err, "Lunch Flow API URL is not in the configured allowlist")
+		assert.Nil(t, client)
+	})
+
+	t.Run("accepts URL that matches an allowlist entry", func(t *testing.T) {
+		log := testutils.GetLog(t)
+
+		client, err := lunch_flow.NewLunchFlowClient(
+			log,
+			config.DefaultLunchFlowAPIURL,
+			"bogus-token",
+			config.LunchFlow{
+				Enabled:        true,
+				AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
+			},
+		)
+		assert.NoError(t, err, "must accept an allowlisted URL")
+		assert.NotNil(t, client, "client must be created")
+	})
+}
+
 func TestLunchFlowClient_GetBalance(t *testing.T) {
 	t.Run("happy path read balance", func(t *testing.T) {
 		httpmock.Activate()
-		defer httpmock.Deactivate()
+		defer httpmock.DeactivateAndReset()
 
 		expectedBalance := lunch_flow.Balance{
 			Amount:   "1234.56",
@@ -99,8 +158,12 @@ func TestLunchFlowClient_GetBalance(t *testing.T) {
 
 		client, err := lunch_flow.NewLunchFlowClient(
 			log,
-			lunch_flow.DefaultAPIURL,
+			config.DefaultLunchFlowAPIURL,
 			"bogus-token",
+			config.LunchFlow{
+				Enabled:        true,
+				AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
+			},
 		)
 		assert.NoError(t, err, "must not return an error creating the client")
 		assert.NotNil(t, client, "client must have a value")
@@ -117,7 +180,7 @@ func TestLunchFlowClient_GetBalance(t *testing.T) {
 
 	t.Run("fails to read balance", func(t *testing.T) {
 		httpmock.Activate()
-		defer httpmock.Deactivate()
+		defer httpmock.DeactivateAndReset()
 
 		mock_lunch_flow.MockFetchBalanceError(t, "1234")
 
@@ -125,8 +188,12 @@ func TestLunchFlowClient_GetBalance(t *testing.T) {
 
 		client, err := lunch_flow.NewLunchFlowClient(
 			log,
-			lunch_flow.DefaultAPIURL,
+			config.DefaultLunchFlowAPIURL,
 			"bogus-token",
+			config.LunchFlow{
+				Enabled:        true,
+				AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
+			},
 		)
 		assert.NoError(t, err, "must not return an error creating the client")
 		assert.NotNil(t, client, "client must have a value")

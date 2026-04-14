@@ -6,7 +6,6 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/config"
-	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/datasources/lunch_flow/lunch_flow_jobs"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
@@ -90,7 +89,7 @@ func TestCleanupLunchFlowCron(t *testing.T) {
 			AccountId: user.AccountId,
 			SecretId:  secret.SecretId,
 			Name:      "Test Lunch Flow Link",
-			ApiUrl:    lunch_flow.DefaultAPIURL,
+			ApiUrl:    config.DefaultLunchFlowAPIURL,
 			Status:    models.LunchFlowLinkStatusPending,
 			CreatedBy: user.UserId,
 		}
@@ -174,7 +173,7 @@ func TestCleanupLunchFlowCron(t *testing.T) {
 			AccountId: user.AccountId,
 			SecretId:  secret.SecretId,
 			Name:      "Test Lunch Flow Link",
-			ApiUrl:    lunch_flow.DefaultAPIURL,
+			ApiUrl:    config.DefaultLunchFlowAPIURL,
 			Status:    models.LunchFlowLinkStatusPending,
 			CreatedBy: user.UserId,
 		}
@@ -257,7 +256,7 @@ func TestCleanupLunchFlow(t *testing.T) {
 			AccountId: user.AccountId,
 			SecretId:  secret.SecretId,
 			Name:      "Test Lunch Flow Link",
-			ApiUrl:    lunch_flow.DefaultAPIURL,
+			ApiUrl:    config.DefaultLunchFlowAPIURL,
 			Status:    models.LunchFlowLinkStatusPending,
 			CreatedBy: user.UserId,
 		}
@@ -375,7 +374,7 @@ func TestCleanupLunchFlow(t *testing.T) {
 			AccountId: user.AccountId,
 			SecretId:  secret.SecretId,
 			Name:      "Test Lunch Flow Link",
-			ApiUrl:    lunch_flow.DefaultAPIURL,
+			ApiUrl:    config.DefaultLunchFlowAPIURL,
 			Status:    models.LunchFlowLinkStatusActive,
 			CreatedBy: user.UserId,
 		}

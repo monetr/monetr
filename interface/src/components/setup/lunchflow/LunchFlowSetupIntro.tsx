@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import type { FormikHelpers } from 'formik';
+import { useFormikContext } from 'formik';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,6 +10,7 @@ import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import { layoutVariants } from '@monetr/interface/components/Layout';
 import MForm from '@monetr/interface/components/MForm';
+import Select, { type SelectOption } from '@monetr/interface/components/Select';
 import LunchFlowSetupLayout from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupLayout';
 import { LunchFlowSetupSteps } from '@monetr/interface/components/setup/lunchflow/LunchFlowSetupSteps';
 import Typography from '@monetr/interface/components/Typography';
@@ -27,13 +29,16 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
+  const allowedAPIURLs = config.lunchFlowAllowedAPIURLs ?? [];
+  const initialApiURL = allowedAPIURLs.length > 0 ? allowedAPIURLs[0] : '';
+
   const initialValues: LunchFlowSetupIntroValues = useMemo(
     () => ({
       name: '',
       apiKey: '',
-      apiURL: config.lunchFlowDefaultAPIURL,
+      apiURL: initialApiURL,
     }),
-    [config],
+    [initialApiURL],
   );
 
   const submit = useCallback(
@@ -112,20 +117,49 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           required
           type='password'
         />
-        <FormTextField
-          className={layoutVariants({ width: 'full' })}
-          data-1p-ignore
-          label='API URL'
-          name='apiURL'
-          placeholder='https://.../api/v1'
-          required
-          spellCheck='false'
-          type='url'
-        />
+        <LunchFlowURLField allowedAPIURLs={allowedAPIURLs} />
         <FormButton type='submit' variant='primary'>
           Next
         </FormButton>
       </MForm>
     </LunchFlowSetupLayout>
+  );
+}
+
+interface LunchFlowURLFieldProps {
+  allowedAPIURLs: string[];
+}
+
+function LunchFlowURLField({ allowedAPIURLs }: LunchFlowURLFieldProps): React.JSX.Element {
+  const formikContext = useFormikContext<LunchFlowSetupIntroValues>();
+
+  if (allowedAPIURLs.length > 1) {
+    const options: SelectOption<string>[] = allowedAPIURLs.map(url => ({ label: url, value: url }));
+    const value = options.find(option => option.value === formikContext.values.apiURL);
+    return (
+      <Select
+        className={layoutVariants({ width: 'full' })}
+        label='API URL'
+        name='apiURL'
+        onChange={(newValue: SelectOption<string>) => formikContext.setFieldValue('apiURL', newValue.value)}
+        options={options}
+        required
+        value={value}
+      />
+    );
+  }
+
+  return (
+    <FormTextField
+      className={layoutVariants({ width: 'full' })}
+      data-1p-ignore
+      disabled
+      label='API URL'
+      name='apiURL'
+      placeholder='No API URLs configured!'
+      required
+      spellCheck='false'
+      type='url'
+    />
   );
 }

@@ -4,6 +4,7 @@ API.*
 AVX
 AVX512
 AboutFeatures
+Allowlist
 BackgroundGradientAnimation
 Biometric
 Bitnami

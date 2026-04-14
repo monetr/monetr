@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/server/datasources/lunch_flow"
+	"github.com/monetr/monetr/server/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +20,7 @@ const (
 
 func Path(t *testing.T, relative string) string {
 	require.NotEmpty(t, relative, "relative url cannot be empty")
-	parsed, err := url.Parse(lunch_flow.DefaultAPIURL)
+	parsed, err := url.Parse(config.DefaultLunchFlowAPIURL)
 	require.NoError(t, err, "must be able to parse lunch flow's default base URL")
 	parsed.Path = relative
 	return parsed.String()

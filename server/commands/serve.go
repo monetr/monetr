@@ -23,6 +23,7 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/controller"
 	"github.com/monetr/monetr/server/database"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/source"
 	"github.com/monetr/monetr/server/jobs"
 	"github.com/monetr/monetr/server/logging"
@@ -37,6 +38,7 @@ import (
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/ui"
 	"github.com/monetr/monetr/server/zoneinfo"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -60,6 +62,19 @@ func ServeCommand(parent *cobra.Command) {
 				log.Info("config file loaded", "config", configFileName)
 			}
 
+			// As soon as we load the config try to validate it. In the future, other
+			// validation functions can be added here in order to prevent
+			// misconfiguration. This is done AFTER the logger is loaded so that if
+			// there are validation functions in the future that require a logger in
+			// order to present warnings then that can be done at the configuration
+			// code level.
+			if err := myownsanity.FirstError(
+				configuration.LunchFlow.ValidateConfig(),
+			); err != nil {
+				return errors.Wrap(err, "there are configuration problems")
+			}
+
+			// TODO Move this to a configuration validation function
 			if configuration.ReCAPTCHA.Enabled {
 				log.Warn("DEPRECATION WARNING: ReCAPTCHA will be removed in a future release. If you are currently using it then please comment on the issue on GitHub. It is recommended to instead rate limit monetr authentication endpoints instead of using a captcha at this time.",
 					"issueUrl", "https://github.com/monetr/monetr/issues/2979",
