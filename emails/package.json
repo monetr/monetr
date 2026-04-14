@@ -8,8 +8,8 @@
     "dev": "rsbuild dev"
   },
   "devDependencies": {
-    "@rsbuild/core": "2.0.0-rc.2",
-    "@rsbuild/plugin-react": "2.0.0-rc.2",
+    "@rsbuild/core": "2.0.0-rc.3",
+    "@rsbuild/plugin-react": "2.0.0-rc.3",
     "@rsbuild/plugin-sass": "1.5.1",
     "@types/html-to-text": "9.0.4",
     "@types/react": "18.3.26",
