@@ -52,3 +52,12 @@ func TestNewApp(t *testing.T) {
 	app := application.NewApp(conf, ui.NewUIController(log, conf))
 	assert.NotNil(t, app)
 }
+
+func TestNewAppServerTimeouts(t *testing.T) {
+	app := application.NewApp(config.Configuration{})
+
+	assert.Equal(t, 5*time.Second, app.Server.ReadHeaderTimeout, "ReadHeaderTimeout should be set to mitigate slowloris")
+	assert.Equal(t, 30*time.Second, app.Server.ReadTimeout, "ReadTimeout should be set to mitigate slowloris")
+	assert.Equal(t, 45*time.Second, app.Server.WriteTimeout, "WriteTimeout must exceed the 30s Plaid long-poll ceiling in controller.getWaitForPlaid")
+	assert.Equal(t, 120*time.Second, app.Server.IdleTimeout, "IdleTimeout should bound keep-alive idle duration")
+}

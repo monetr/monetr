@@ -19,6 +19,17 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *echo
 	app := echo.New()
 	app.HideBanner = true
 	app.HidePort = true
+
+	// Configure HTTP server timeouts to mitigate slowloris-style attacks.
+	// WriteTimeout must exceed the 30s Plaid long-poll timeout in
+	// controller.getWaitForPlaid; 45s keeps 15s of headroom.
+	// TODO migrate that long-poll to a websocket so this write deadline can be
+	// tightened further.
+	app.Server.ReadHeaderTimeout = 5 * time.Second
+	app.Server.ReadTimeout = 30 * time.Second
+	app.Server.WriteTimeout = 45 * time.Second
+	app.Server.IdleTimeout = 120 * time.Second
+
 	app.Use(sentryecho.New(sentryecho.Options{
 		Repanic:         false,
 		WaitForDelivery: false,
