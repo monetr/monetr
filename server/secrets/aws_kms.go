@@ -77,7 +77,6 @@ func (a *AWSKMS) Encrypt(ctx context.Context, input string) (keyId, version *str
 
 	request := &kms.EncryptInput{
 		EncryptionAlgorithm: types.EncryptionAlgorithmSpecSymmetricDefault,
-		EncryptionContext:   nil,
 		GrantTokens:         []string{},
 		KeyId:               aws.String(a.config.KeyID),
 		Plaintext:           []byte(input),
