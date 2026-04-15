@@ -181,15 +181,23 @@ func (b *baseSecurityRepository) SetupTOTP(
 	digits := 6
 	recoveryCount := 10
 	login.TOTPRecoveryCodes = make([]string, recoveryCount)
-	// TODO Technically it should be rare but possible for this to generate
-	// duplicate recovery codes. It would be super rare, but possible.
+	seen := make(map[string]struct{}, recoveryCount)
 	for i := range login.TOTPRecoveryCodes {
-		for x := 0; x < digits; x++ {
-			digit, err := rand.Int(rand.Reader, big.NewInt(9))
-			if err != nil {
-				return "", nil, errors.Wrap(err, "failed to generate recovery codes")
+		for {
+			var code string
+			for x := 0; x < digits; x++ {
+				digit, err := rand.Int(rand.Reader, big.NewInt(10))
+				if err != nil {
+					return "", nil, errors.Wrap(err, "failed to generate recovery codes")
+				}
+				code += digit.String()
 			}
-			login.TOTPRecoveryCodes[i] += digit.String()
+			if _, ok := seen[code]; ok {
+				continue
+			}
+			seen[code] = struct{}{}
+			login.TOTPRecoveryCodes[i] = code
+			break
 		}
 	}
 	// Make sure this is nil
