@@ -132,11 +132,25 @@ func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 	}
 
+	// jwt.WithIssuedAt only enforces that iat is not in the future, so a captured
+	// webhook token could otherwise be replayed indefinitely. Reject any webhook
+	// whose issued-at claim is older than 5 minutes so captured tokens cannot be
+	// used long after Plaid originally delivered them.
+	now := c.Clock.Now()
+	if claims.IssuedAt == nil || claims.IssuedAt.Before(now.Add(-5*time.Minute)) {
+		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
+	}
+
 	if subtle.ConstantTimeCompare(
 		signature,
 		[]byte(strings.ToLower(claims.RequestBodySHA256)),
 	) != 1 {
-		c.getLog(ctx).ErrorContext(c.getContext(ctx), "received plaid request with valid token but invalid signature!", "expected", signature, "received", claims.RequestBodySHA256)
+		c.getLog(ctx).ErrorContext(
+			c.getContext(ctx),
+			"received plaid request with valid token but invalid signature!",
+			"expected", signature,
+			"received", claims.RequestBodySHA256,
+		)
 		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 	}
 

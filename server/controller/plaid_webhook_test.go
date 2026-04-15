@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"encoding/json"
 	"net/http"
 	"testing"
 	"time"
@@ -16,6 +17,7 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
 	"github.com/monetr/monetr/server/internal/mockqueue"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -336,6 +338,68 @@ func TestPlaidWebhook(t *testing.T) {
 				WebhookCode: "SYNC_UPDATES_AVAILABLE",
 				ItemId:      gofakeit.UUID(),
 			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
+		assert.EqualValues(t, map[string]int{
+			"POST https://sandbox.plaid.com/webhook_verification_key/get": 1,
+		}, httpmock.GetCallCountInfo(), "must match expected Plaid API calls")
+	})
+
+	t.Run("stale JWT is rejected (replay protection)", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		config := NewTestApplicationConfig(t)
+		config.Plaid.WebhooksEnabled = true
+		app, e := NewTestApplicationWithConfig(t, config)
+
+		// Because the in memory webhook code does not use a mock clock.
+		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+
+		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		require.NoError(t, err, "must generate EC key")
+
+		kid := gofakeit.UUID()
+		mock_plaid.MockGetWebhookVerificationKey(
+			t,
+			app.Clock,
+			kid,
+			&privateKey.PublicKey,
+		)
+
+		body := controller.PlaidWebhook{
+			WebhookType: "TRANSACTIONS",
+			WebhookCode: "SYNC_UPDATES_AVAILABLE",
+			ItemId:      gofakeit.UUID(),
+		}
+		bodyBytes, err := json.Marshal(body)
+		require.NoError(t, err, "must marshal webhook body for hash")
+
+		// Sign a token whose iat is the current mock time and whose body hash
+		// matches the payload. Plaid's real webhooks do not set exp so we do not
+		// set one here either; the handler's iat freshness check is what we want to
+		// exercise.
+		claims := controller.PlaidClaims{
+			RegisteredClaims: jwt.RegisteredClaims{
+				IssuedAt: jwt.NewNumericDate(app.Clock.Now()),
+			},
+			RequestBodySHA256: myownsanity.SHA256(bodyBytes),
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+		token.Header["kid"] = kid
+		verificationToken, err := token.SignedString(privateKey)
+		require.NoError(t, err, "must sign webhook JWT")
+
+		// Advance the mock clock past the 5 minute replay window. The handler reads
+		// c.Clock.Now() so the signed iat is now stale from its perspective,
+		// simulating a captured webhook being replayed later.
+		app.Clock.Add(6 * time.Minute)
+
+		response := e.POST(`/api/plaid/webhook`).
+			WithHeader("Plaid-Verification", verificationToken).
+			WithJSON(body).
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
