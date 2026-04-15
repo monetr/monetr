@@ -67,13 +67,13 @@ func loadCertificates(
 				if err != nil {
 					return nil, nil, errors.Wrap(err, "public key directory is not valid")
 				}
-				if err := os.MkdirAll(directory, 0600); err != nil {
+				if err := os.MkdirAll(directory, 0700); err != nil {
 					return nil, nil, errors.Wrap(err, "failed to create directory for certificates")
 				}
 				if err := os.WriteFile(
 					configuration.Security.PrivateKey,
 					privateKeyPem,
-					0644,
+					0600,
 				); err != nil {
 					return nil, nil, errors.Wrap(err, "failed to write private key")
 				}
