@@ -52,18 +52,18 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 			}
 
 			cleanup = func() {
-				// TODO (elliotcourant) Add proper logging here that the request has failed
-				//  and we are rolling back the transaction.
-				if handlerError != nil {
+				panicErr := recover()
+				if handlerError != nil || panicErr != nil {
 					if err := txn.RollbackContext(c.getContext(ctx)); err != nil {
-						// Rollback
 						c.Log.ErrorContext(c.getContext(ctx), "failed to rollback request", "err", err)
 					}
 				} else {
-					if err = txn.CommitContext(c.getContext(ctx)); err != nil {
-						// failed to commit
+					if err := txn.CommitContext(c.getContext(ctx)); err != nil {
 						panic(err)
 					}
+				}
+				if panicErr != nil {
+					panic(panicErr)
 				}
 			}
 
@@ -72,11 +72,11 @@ func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.Ha
 
 		ctx.Set(databaseContextKey, dbi)
 
-		handlerError = next(ctx)
-
 		if cleanup != nil {
-			cleanup()
+			defer cleanup()
 		}
+
+		handlerError = next(ctx)
 
 		return handlerError
 	}
