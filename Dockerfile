@@ -42,8 +42,9 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN useradd -rm -d /home/monetr -s /bin/bash -g root -G sudo -u 1000 monetr
-RUN mkdir -p /etc/monetr && chown -R 1000:1000 /etc/monetr
+RUN groupadd -g 1000 monetr && \
+    useradd -rm -d /home/monetr -s /bin/bash -g monetr -u 1000 monetr
+RUN mkdir -p /etc/monetr && chown -R monetr:monetr /etc/monetr
 USER monetr
 WORKDIR /home/monetr
 
