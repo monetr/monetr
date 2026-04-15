@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"runtime"
 	"testing"
 
 	"github.com/monetr/monetr/server/internal/testutils"
@@ -89,6 +90,61 @@ func TestFilesystemStorage(t *testing.T) {
 		assert.EqualError(t, err, "filesystem base directory specified is not a directory, it is a file")
 		assert.Nil(t, fs, "filesystem interface should not be returned if path is invalid")
 	})
+}
+
+func TestFilesystemStoragePermissions(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("POSIX file modes are not meaningful on Windows")
+	}
+
+	tempDir, err := os.MkdirTemp("", "monetr")
+	require.NoError(t, err, "must create temp directory")
+	log := testutils.GetLog(t)
+
+	// Use a non-existent base path so the constructor's MkdirAll codepath runs
+	// and we can validate the base directory's mode too.
+	basePath := path.Join(tempDir, "storage")
+	fs, err := NewFilesystemStorage(log, basePath)
+	require.NoError(t, err, "must create the filesystem storage interface")
+
+	baseInfo, err := os.Stat(basePath)
+	require.NoError(t, err, "must stat base directory")
+	require.True(t, baseInfo.IsDir(), "base path must be a directory")
+	assert.Equal(t, os.FileMode(0700), baseInfo.Mode().Perm(), "base directory must be drwx------")
+
+	file := models.File{
+		FileId:      models.NewID[models.File](),
+		AccountId:   models.NewID[models.Account](),
+		Kind:        "transactions/uploads",
+		Name:        "statement.csv",
+		ContentType: models.TextCSVContentType,
+		Size:        100,
+	}
+	input := []byte("sensitive financial data")
+	buf := &bufferWrapper{bytes.NewReader(input)}
+	require.NoError(t, fs.Store(context.Background(), buf, file), "must store file")
+
+	storedPath, err := file.GetStorePath()
+	require.NoError(t, err, "must derive store path")
+	fullPath := path.Join(basePath, storedPath)
+
+	fileInfo, err := os.Stat(fullPath)
+	require.NoError(t, err, "must stat stored file")
+	assert.True(t, fileInfo.Mode().IsRegular(), "stored entry must be a regular file")
+	assert.Equal(t, os.FileMode(0600), fileInfo.Mode().Perm(), "stored file must be -rw-------")
+
+	parentInfo, err := os.Stat(path.Dir(fullPath))
+	require.NoError(t, err, "must stat parent directory of stored file")
+	require.True(t, parentInfo.IsDir(), "parent must be a directory")
+	assert.Equal(t, os.FileMode(0700), parentInfo.Mode().Perm(), "parent directory must be drwx------")
+
+	// Confirm the server can still read what it wrote under the tightened mode.
+	rdr, err := fs.Read(context.Background(), file)
+	require.NoError(t, err, "must read file back")
+	defer rdr.Close()
+	got, err := io.ReadAll(rdr)
+	require.NoError(t, err, "must read all file content")
+	assert.Equal(t, input, got, "read content must match written content")
 }
 
 func TestFilesystemStorageStore(t *testing.T) {

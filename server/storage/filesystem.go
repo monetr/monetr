@@ -13,7 +13,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-const filesystemPermissions = 0755
+const (
+	filesystemDirPermissions  = 0700
+	filesystemFilePermissions = 0600
+)
 
 type filesystemStorage struct {
 	log           *slog.Logger
@@ -35,8 +38,7 @@ func NewFilesystemStorage(
 	if err != nil {
 		// If the directory does not exist
 		if os.IsNotExist(err) {
-			// Then create it using the same permissions we would use for the files.
-			if err := os.MkdirAll(baseDirectory, filesystemPermissions); err != nil {
+			if err := os.MkdirAll(baseDirectory, filesystemDirPermissions); err != nil {
 				return nil, errors.Wrap(err, "failed to create storage directory")
 			}
 		} else {
@@ -68,7 +70,7 @@ func (f *filesystemStorage) Store(
 	}
 	directory := path.Dir(filePath)
 
-	if err := os.MkdirAll(directory, filesystemPermissions); err != nil {
+	if err := os.MkdirAll(directory, filesystemDirPermissions); err != nil {
 		return errors.Wrap(err, "failed to create destination directory")
 	}
 
@@ -76,7 +78,7 @@ func (f *filesystemStorage) Store(
 
 	f.log.DebugContext(span.Context(), "writing file to filesystem", "uri", filePath)
 
-	fd, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, filesystemPermissions)
+	fd, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, filesystemFilePermissions)
 	if err != nil {
 		return errors.Wrap(err, "failed to open file")
 	}
@@ -107,7 +109,7 @@ func (f *filesystemStorage) Read(
 	if err != nil {
 		return nil, err
 	}
-	fd, err := os.OpenFile(filePath, os.O_RDONLY, filesystemPermissions)
+	fd, err := os.OpenFile(filePath, os.O_RDONLY, filesystemFilePermissions)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to open file")
 	}
