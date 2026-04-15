@@ -87,7 +87,6 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 		log := c.log.With(
 			"path", requestedPath,
 			"ext", path.Ext(requestedPath),
-			"resolvedToIndex", false,
 		)
 
 		content, err := c.filesystem.Open(requestedPath)
@@ -98,9 +97,6 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 			// Only apply these headers and content security permissions to the
 			// index.html return result.
 			ctx.Response().Header().Set("Cache-Control", "no-cache")
-			ctx.Response().Header().Set("X-Frame-Options", "DENY")
-			ctx.Response().Header().Set("X-Content-Type-Options", "nosniff")
-			ctx.Response().Header().Set("Referrer-Policy", "same-origin")
 			c.ApplyContentSecurityPolicy(ctx)
 			c.ApplyPermissionsPolicy(ctx)
 
@@ -109,15 +105,18 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 				SentryDSN: c.configuration.Sentry.ExternalDSN,
 			})
 		case nil:
+			log = log.With("resolvedToIndex", false)
 			if c.configuration.Server.UICacheHours > 0 {
 				cacheExpiration := time.Now().
 					Add(time.Duration(c.configuration.Server.UICacheHours) * time.Hour).
 					Truncate(time.Hour)
 				seconds := int(time.Until(cacheExpiration).Seconds())
+				// TODO Implement ETag things!
 				ctx.Response().Header().Set("Expires", cacheExpiration.Format(http.TimeFormat))
 				ctx.Response().Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", seconds))
 			}
 		default:
+			log = log.With("resolvedToIndex", false)
 			log.ErrorContext(ctx.Request().Context(), "failed to read the embedded file specified", "err", err)
 			return ctx.NoContent(http.StatusInternalServerError)
 		}

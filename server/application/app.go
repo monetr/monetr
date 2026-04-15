@@ -53,6 +53,18 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *echo
 
 	app.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
+			// TODO Add HSTS here if the external URL has an HTTPS protocol.
+			ctx.Response().Header().Set("X-Frame-Options", "DENY")
+			ctx.Response().Header().Set("X-Content-Type-Options", "nosniff")
+			ctx.Response().Header().Set("Referrer-Policy", "same-origin")
+			// Note: I would love to add Cross-Origin-Opener-Policy: same-origin
+			// however I believe this will break legitimate Plaid OAuth flows with
+			// real banks since they are not necessarily using the callback pattern?
+			// I'm not 100% sure. Ditto Cross-Origin-Embedder-Policy: require-corp,
+			// pretty sure this just straight up breaks plaid.
+			// TODO Add `Cross-Origin-Resource-Policy: same-origin` but this breaks
+			// emails since they load the logo from the server that sent the email!
+
 			if err := next(ctx); err != nil {
 				return err
 			}
