@@ -23,7 +23,7 @@ export class AppConfiguration {
   iconsEnabled: boolean;
   plaidEnabled: boolean;
   lunchFlowEnabled: boolean;
-  lunchFlowDefaultAPIURL: string;
+  lunchFlowAllowedAPIURLs: Array<string>;
   manualEnabled: true;
   uploadsEnabled: boolean;
   release: string | null;

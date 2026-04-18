@@ -100,6 +100,50 @@ func TestPostLunchFlowLink(t *testing.T) {
 		response.JSON().Path("$.problems.lunchFlowURL").String().IsEqual("Lunch Flow API URL must be a full valid URL")
 	})
 
+	t.Run("URL not in allowlist", func(t *testing.T) {
+		for _, disallowed := range []string{
+			"http://169.254.169.254/latest/meta-data",
+			"http://127.0.0.1",
+			"http://localhost",
+			"https://attacker.example.com/api/v1",
+		} {
+			_, e := NewTestApplication(t)
+			token := GivenIHaveToken(t, e)
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "Not Allowed",
+					"lunchFlowURL": disallowed,
+					"apiKey":       "foobar",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.lunchFlowURL").String().IsEqual("Lunch Flow API URL is not valid or is not in the configured allowlist")
+		}
+	})
+
+	t.Run("allowlist with multiple entries accepts any", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.LunchFlow.AllowedApiUrls = []string{
+			"https://lunchflow.app/api/v1",
+			"https://lunchflow.compatible.app/api/v1",
+		}
+		_, e := NewTestApplicationWithConfig(t, config)
+		token := GivenIHaveToken(t, e)
+
+		response := e.POST("/api/lunch_flow/link").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":         "Staging",
+				"lunchFlowURL": "https://lunchflow.compatible.app/api/v1",
+				"apiKey":       "foobar",
+			}).
+			Expect()
+		response.Status(http.StatusOK)
+	})
+
 	t.Run("invalid api key", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)

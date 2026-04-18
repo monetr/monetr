@@ -11,14 +11,19 @@ import (
 	"path"
 	"time"
 
+	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/round"
 	"github.com/pkg/errors"
 )
 
-const DefaultAPIURL = "https://lunchflow.app/api/v1"
-
 const DateFormat = "2006-01-02"
+
+// maxResponseBodySize caps how much of an upstream response body we will read.
+// This is defense against a hostile or compromised upstream streaming an
+// unbounded response to exhaust memory. 10mb is generous for realistic account
+// and transaction payloads while bounding worst case allocation.
+const maxResponseBodySize = 10 * 1024 * 1024
 
 type LunchFlowAccountId = json.Number
 
@@ -64,7 +69,22 @@ func NewLunchFlowClient(
 	log *slog.Logger,
 	apiUrl string,
 	accessToken string,
+	configuration config.LunchFlow,
 ) (LunchFlowClient, error) {
+	if !configuration.Enabled {
+		log.Error("lunch flow is not enabled on this server but the client is being instantiated!",
+			"bug", true,
+		)
+		return nil, errors.New("Lunch Flow is not enabled on this server")
+	}
+
+	if !configuration.IsAllowedApiUrl(apiUrl) {
+		log.Warn("rejected Lunch Flow API URL that is not in the configured allowlist, please update your configuration if this url is valid!",
+			"apiUrl", apiUrl,
+		)
+		return nil, errors.New("Lunch Flow API URL is not in the configured allowlist")
+	}
+
 	parsedUrl, err := url.Parse(apiUrl)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -131,12 +151,13 @@ func (l *lunchFlowClient) doRequest(ctx context.Context, relativePath string, re
 	}
 	defer response.Body.Close()
 
+	body := io.LimitReader(response.Body, maxResponseBodySize)
 	if response.StatusCode != http.StatusOK {
-		bodyStr, _ := io.ReadAll(response.Body)
+		bodyStr, _ := io.ReadAll(body)
 		return errors.Errorf("Lunch Flow request failed %s [%d]: %s", requestUrl, response.StatusCode, string(bodyStr))
 	}
 
-	if err := json.NewDecoder(response.Body).Decode(result); err != nil {
+	if err := json.NewDecoder(body).Decode(result); err != nil {
 		return errors.Wrapf(err, "failed to decode response for request %s [%d]", requestUrl, response.StatusCode)
 	}
 

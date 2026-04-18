@@ -6,8 +6,8 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/consts"
-	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -119,7 +119,7 @@ func GivenIHaveALunchFlowLink(t *testing.T, clock clock.Clock, user User) Link {
 		AccountId:            user.AccountId,
 		SecretId:             secret.SecretId,
 		Name:                 fmt.Sprintf("Lunch Flow Budget %s", gofakeit.City()),
-		ApiUrl:               lunch_flow.DefaultAPIURL,
+		ApiUrl:               config.DefaultLunchFlowAPIURL,
 		Status:               LunchFlowLinkStatusActive,
 		LastManualSync:       nil,
 		LastSuccessfulUpdate: nil,

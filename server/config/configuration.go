@@ -340,6 +340,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Logging.Level", LogLevel) // Info
 	// Lunch Flow is enabled by default for self-hosted deployments!
 	v.SetDefault("LunchFlow.Enabled", true)
+	v.SetDefault("LunchFlow.AllowedApiUrls", []string{DefaultLunchFlowAPIURL})
 	v.SetDefault("KeyManagement.Provider", "plaintext")
 	v.SetDefault("Plaid.Enabled", true)
 	v.SetDefault("Plaid.CountryCodes", []plaid.CountryCode{plaid.COUNTRYCODE_US})

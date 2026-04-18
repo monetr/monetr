@@ -145,7 +145,8 @@ func TestSyncLunchFlow(t *testing.T) {
 				context.EXPECT().Clock().Return(clock).AnyTimes()
 				context.EXPECT().Configuration().Return(config.Configuration{
 					LunchFlow: config.LunchFlow{
-						Enabled: true,
+						Enabled:        true,
+						AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
 					},
 				}).AnyTimes()
 				context.EXPECT().KMS().Return(kms).AnyTimes()
@@ -215,7 +216,8 @@ func TestSyncLunchFlow(t *testing.T) {
 				context.EXPECT().Clock().Return(clock).AnyTimes()
 				context.EXPECT().Configuration().Return(config.Configuration{
 					LunchFlow: config.LunchFlow{
-						Enabled: true,
+						Enabled:        true,
+						AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
 					},
 				}).AnyTimes()
 				context.EXPECT().KMS().Return(kms).AnyTimes()
@@ -331,7 +333,8 @@ func TestSyncLunchFlow(t *testing.T) {
 				context.EXPECT().Clock().Return(clock).AnyTimes()
 				context.EXPECT().Configuration().Return(config.Configuration{
 					LunchFlow: config.LunchFlow{
-						Enabled: true,
+						Enabled:        true,
+						AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
 					},
 				}).AnyTimes()
 				context.EXPECT().KMS().Return(kms).AnyTimes()
@@ -412,7 +415,8 @@ func TestSyncLunchFlow(t *testing.T) {
 				context.EXPECT().Clock().Return(clock).AnyTimes()
 				context.EXPECT().Configuration().Return(config.Configuration{
 					LunchFlow: config.LunchFlow{
-						Enabled: true,
+						Enabled:        true,
+						AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
 					},
 				}).AnyTimes()
 				context.EXPECT().KMS().Return(kms).AnyTimes()
@@ -511,7 +515,8 @@ func TestSyncLunchFlow(t *testing.T) {
 				context.EXPECT().Clock().Return(clock).AnyTimes()
 				context.EXPECT().Configuration().Return(config.Configuration{
 					LunchFlow: config.LunchFlow{
-						Enabled: true,
+						Enabled:        true,
+						AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
 					},
 				}).AnyTimes()
 				context.EXPECT().KMS().Return(kms).AnyTimes()

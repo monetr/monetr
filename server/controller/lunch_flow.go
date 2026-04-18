@@ -100,6 +100,10 @@ func (c *Controller) parsePostLunchFlowLinkRequest(
 
 					return true
 				}, "Lunch Flow API URL must be a full valid URL"),
+				validation.NewStringRule(
+					c.Configuration.LunchFlow.IsAllowedApiUrl,
+					"Lunch Flow API URL is not valid or is not in the configured allowlist",
+				),
 			).Required(validators.Require),
 			validation.Key(
 				"apiKey",
@@ -205,6 +209,7 @@ func (c *Controller) postLunchFlowLinkBankAccountsRefresh(ctx echo.Context) erro
 		log,
 		link.ApiUrl,
 		secret.Value,
+		c.Configuration.LunchFlow,
 	)
 	if err != nil {
 		return c.wrapAndReturnError(
