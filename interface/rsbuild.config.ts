@@ -54,16 +54,15 @@ export default defineConfig({
     historyApiFallback: true,
     host: developmentLite ? 'localhost' : '0.0.0.0',
     proxy: developmentLite
-      ? [
-          {
+      ? {
+          '/api': {
             // When we are in development-lite mode, proxy API calls to the upstream API server that they have specified.
-            context: ['/api'],
             target: `https://${developmentLiteTarget}`,
             changeOrigin: true,
             cookieDomainRewrite: 'localhost',
             ws: true, // For file uploads
           },
-        ]
+        }
       : undefined,
   },
   html: {

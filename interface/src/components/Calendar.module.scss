@@ -9,6 +9,7 @@
   display: flex;
   flex-direction: column;
   gap: 4 * variables.$size;
+  justify-content: center;
 
   @media (min-width: variables.$smallScreen) {
     flex-direction: row;
@@ -137,6 +138,7 @@
 }
 
 .daySelected {
+  border-radius: var(--border-radius);
   background-color: var(--brand);
 
   .day {
@@ -151,6 +153,7 @@
 }
 
 .dayToday {
+  border-radius: var(--border-radius);
   background-color: var(--background-darker);
 
   .day {

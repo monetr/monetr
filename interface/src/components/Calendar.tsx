@@ -1,22 +1,18 @@
 import { addYears, format, type Locale } from 'date-fns';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import {
-  DayPicker,
-  type MonthCaptionProps,
-  type PropsBase,
-  type PropsSingle,
-  useDayPicker,
-} from 'react-day-picker';
+import { DayPicker, type MonthCaptionProps, type PropsBase, type PropsSingle, useDayPicker } from 'react-day-picker';
 
 import { Button, buttonVariants } from '@monetr/interface/components/Button';
 import Typography from '@monetr/interface/components/Typography';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import styles from './Calendar.module.scss';
+import { Fragment } from 'react/jsx-runtime';
 
-export type CalendarProps = PropsBase & PropsSingle & {
-  enableYearNavigation?: boolean;
-};
+export type CalendarProps = PropsBase &
+  PropsSingle & {
+    enableYearNavigation?: boolean;
+  };
 
 function Calendar({
   className,
@@ -76,11 +72,7 @@ function Calendar({
               </Typography>
 
               <div className={styles.navGroup}>
-                <Button
-                  disabled={!nextMonth}
-                  onClick={() => nextMonth && goToMonth(nextMonth)}
-                  variant='calendar'
-                >
+                <Button disabled={!nextMonth} onClick={() => nextMonth && goToMonth(nextMonth)} variant='calendar'>
                   <ChevronRight />
                 </Button>
                 {enableYearNavigation && (
@@ -92,6 +84,11 @@ function Calendar({
             </div>
           );
         },
+        // biome-ignore lint/correctness/noNestedComponentDefinitions: Easier to structure it this way.
+        PreviousMonthButton: () => <Fragment />,
+        // biome-ignore lint/correctness/noNestedComponentDefinitions: Easier to structure it this way.
+        NextMonthButton: () => <Fragment />,
+        Nav: () => <Fragment />,
       }}
       locale={locale}
       mode='single'
