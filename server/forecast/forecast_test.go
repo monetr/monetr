@@ -25,7 +25,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 		fundingSchedules := []models.FundingSchedule{
 			{
-				RuleSet:         fundingRule,
+				Ruleset:         fundingRule,
 				ExcludeWeekends: true,
 				NextRecurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 			},
@@ -102,7 +102,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 		fundingSchedules := []models.FundingSchedule{
 			{
-				RuleSet:           fundingRule,
+				Ruleset:           fundingRule,
 				ExcludeWeekends:   true,
 				NextRecurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
 				FundingScheduleId: "fund_1",
@@ -148,7 +148,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 		fundingSchedules := []models.FundingSchedule{
 			{
-				RuleSet:           fundingRule,
+				Ruleset:           fundingRule,
 				ExcludeWeekends:   true,
 				NextRecurrence:    time.Date(2023, 8, 15, 0, 0, 0, 0, timezone),
 				FundingScheduleId: "fund_1",
@@ -318,7 +318,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 		fundingSchedules := []models.FundingSchedule{
 			{
-				RuleSet:           fundingRule,
+				Ruleset:           fundingRule,
 				ExcludeWeekends:   true,
 				NextRecurrence:    time.Date(2023, 10, 31, 0, 0, 0, 0, timezone),
 				FundingScheduleId: "fund_1",

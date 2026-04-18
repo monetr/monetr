@@ -23,7 +23,7 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 			BankAccountId:  "bac_1234",
 			Name:           "Testing #123",
 			Description:    t.Name(),
-			RuleSet:        rule,
+			Ruleset:        rule,
 			LastRecurrence: nil,
 			NextRecurrence: originalOccurrence,
 		}
@@ -48,7 +48,7 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 			BankAccountId:  "bac_1234",
 			Name:           "Testing #123",
 			Description:    t.Name(),
-			RuleSet:        rule,
+			Ruleset:        rule,
 			LastRecurrence: nil,
 			NextRecurrence: originalOccurrence,
 		}
@@ -67,7 +67,7 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 
 		fundingSchedule := models.FundingSchedule{
 			Name:            "Bogus",
-			RuleSet:         rule,
+			Ruleset:         rule,
 			ExcludeWeekends: false,
 			LastRecurrence:  nil,
 			NextRecurrence:  time.Time{},
@@ -84,7 +84,7 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 
 		fundingSchedule := models.FundingSchedule{
 			Name:            "Bogus",
-			RuleSet:         rule,
+			Ruleset:         rule,
 			ExcludeWeekends: false,
 			LastRecurrence:  nil,
 			NextRecurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, time.UTC),
@@ -101,7 +101,7 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 
 		fundingSchedule := models.FundingSchedule{
 			Name:            "Bogus",
-			RuleSet:         rule,
+			Ruleset:         rule,
 			ExcludeWeekends: true,
 			LastRecurrence:  nil,
 			NextRecurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, time.UTC),
@@ -120,7 +120,7 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 
 		fundingSchedule := models.FundingSchedule{
 			Name:            "Bogus",
-			RuleSet:         rule,
+			Ruleset:         rule,
 			ExcludeWeekends: true,
 			LastRecurrence:  nil,
 			NextRecurrence:  time.Date(2022, 9, 31, 0, 0, 0, 0, timezone),
@@ -147,7 +147,7 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 
 		fundingSchedule := models.FundingSchedule{
 			Name:            "Bogus",
-			RuleSet:         rule,
+			Ruleset:         rule,
 			ExcludeWeekends: true,
 			LastRecurrence:  nil,
 			NextRecurrence:  time.Date(2022, 5, 13, 0, 0, 0, 0, time.UTC),
@@ -167,7 +167,7 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 		expected := time.Date(2022, 9, 30, 0, 0, 0, 0, timezone)
 		fundingSchedule := models.FundingSchedule{
 			Name:            "Payday",
-			RuleSet:         rule,
+			Ruleset:         rule,
 			ExcludeWeekends: false,
 			LastRecurrence:  nil,
 			NextRecurrence:  next,

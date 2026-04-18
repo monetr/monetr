@@ -122,7 +122,7 @@ func (e *Spending) CalculateNextContribution(
 			"currentAmount", e.CurrentAmount,
 		),
 		slog.Group("funding",
-			"ruleset", fundingSchedule.RuleSet,
+			"ruleset", fundingSchedule.Ruleset,
 			"nextRecurrence", fundingSchedule.NextRecurrence,
 			"excludeWeekends", fundingSchedule.ExcludeWeekends,
 		),

@@ -573,7 +573,7 @@ func TestPatchFundingSchedule(t *testing.T) {
 			WithJSON(map[string]any{
 				"name":             fundingSchedule.Name,
 				"description":      fundingSchedule.Description,
-				"ruleset":          fundingSchedule.RuleSet,
+				"ruleset":          fundingSchedule.Ruleset,
 				"excludeWeekends":  fundingSchedule.ExcludeWeekends,
 				"estimatedDeposit": fundingSchedule.EstimatedDeposit,
 				"nextRecurrence":   fundingSchedule.NextRecurrence,

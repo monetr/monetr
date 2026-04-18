@@ -86,7 +86,7 @@ func GiveMeAFundingSchedule(nextContributionDate time.Time, ruleset *RuleSet) *F
 		FundingScheduleId: "fund_bogus",
 		Name:              "Bogus Funding Schedule",
 		Description:       "Bogus",
-		RuleSet:           ruleset,
+		Ruleset:           ruleset,
 		NextRecurrence:    nextContributionDate,
 	}
 }
@@ -620,7 +620,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 				FundingScheduleId: "fund_bogus",
 				Name:              "Bogus Funding Schedule",
 				Description:       "Bogus",
-				RuleSet:           contributionRule,
+				Ruleset:           contributionRule,
 				NextRecurrence:    time.Date(2024, 10, 15, 0, 0, 0, 0, timezone).UTC(),
 			},
 			now,
@@ -662,7 +662,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			FundingScheduleId: "fund_bogus",
 			Name:              "Bogus Funding Schedule",
 			Description:       "Bogus",
-			RuleSet:           contributionRule,
+			Ruleset:           contributionRule,
 			NextRecurrence:    contributionRule.After(now, false).UTC(),
 		}
 		spending.CalculateNextContribution(
@@ -712,7 +712,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			FundingScheduleId:      "fund_bogus",
 			Name:                   "Bogus Funding Schedule",
 			Description:            "Bogus",
-			RuleSet:                contributionRule,
+			Ruleset:                contributionRule,
 			NextRecurrence:         contributionRule.After(now, false).UTC(),
 			NextRecurrenceOriginal: contributionRule.After(now, false).UTC(),
 		}

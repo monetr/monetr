@@ -5,10 +5,13 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/Oudwins/zog"
+	"github.com/Oudwins/zog/parsers/zjson"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/schema"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 )
@@ -175,7 +178,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		return c.badRequest(ctx, "Funding schedule must have a name")
 	}
 
-	if request.RuleSet == nil {
+	if request.Ruleset == nil {
 		return c.badRequest(ctx, "Funding schedule must include a rule set")
 	}
 
@@ -213,7 +216,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 	}
 
 	// If the recurrence rule has changed then we need to recalculate spending too.
-	if request.RuleSet.String() != existingFundingSchedule.RuleSet.String() {
+	if request.Ruleset.String() != existingFundingSchedule.Ruleset.String() {
 		recalculateSpending = true
 	}
 
@@ -294,22 +297,16 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 	// Make a copy of the original so we can compare some things.
 	originalFundingSchedule := *fundingSchedule
 
-	switch err := fundingSchedule.UnmarshalRequest(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		fundingSchedule.UpdateValidators()...,
-	).(type) {
-	case validation.Errors:
+	// TODO Wrap in a helper?
+	if issues := schema.PatchFundingSchedule.Parse(
+		zjson.Decode(ctx.Request().Body),
+		fundingSchedule,
+		zog.WithCtxValue("timezone", c.mustGetTimezone(ctx)),
+	); issues != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
+			"error":  "Invalid request",
+			"issues": zog.Issues.Flatten(issues),
 		})
-	case *json.SyntaxError:
-		return c.invalidJsonError(ctx, err)
-	case nil:
-		break
-	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
 	}
 
 	if fundingSchedule.AutoCreateTransaction {
@@ -333,7 +330,7 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		recalculateSpending = true
 	}
 
-	if originalFundingSchedule.RuleSet.String() != fundingSchedule.RuleSet.String() {
+	if originalFundingSchedule.Ruleset.String() != fundingSchedule.Ruleset.String() {
 		recalculateSpending = true
 	}
 

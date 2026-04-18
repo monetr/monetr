@@ -17,7 +17,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: false,
 			NextRecurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, timezone),
 		}
@@ -36,7 +36,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: true,
 			NextRecurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, timezone),
 		}
@@ -55,7 +55,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: true,
 			NextRecurrence:  time.Date(2022, 9, 31, 0, 0, 0, 0, timezone),
 		}
@@ -87,7 +87,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: true,
 			NextRecurrence:  time.Date(2022, 5, 13, 0, 0, 0, 0, timezone),
 		}
@@ -110,7 +110,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		// 1 Second after midnight in timezone on last funding day. But in UTC because that's the server timezone.
 		now := time.Date(2022, 9, 15, 0, 0, 1, 0, timezone).UTC()
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: false,
 			NextRecurrence:  next,
 		}
@@ -128,7 +128,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		// 1 Second after midnight in timezone on last funding day. But in UTC because that's the server timezone.
 		now := time.Date(2022, 9, 15, 0, 0, 1, 0, timezone).UTC()
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: false,
 			NextRecurrence:  time.Time{},
 		}
@@ -146,7 +146,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		// 1 Second after midnight in timezone on last funding day. But in UTC because that's the server timezone.
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: false,
 			NextRecurrence:  next,
 		}
@@ -176,7 +176,7 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 			},
 		}
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: false,
 			NextRecurrence:  expected[0].Date,
 		}
@@ -214,7 +214,7 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 			},
 		}
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: false,
 			NextRecurrence:  expected[0].Date,
 		}
@@ -252,7 +252,7 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 			},
 		}
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: true,
 			NextRecurrence:  expected[0].Date,
 		}
@@ -273,7 +273,7 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		end := time.Date(2022, 12, 25, 0, 0, 1, 0, timezone).UTC()
 		next := time.Date(2022, 9, 15, 0, 0, 0, 0, timezone)
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: false,
 			NextRecurrence:  next,
 		}
@@ -293,7 +293,7 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		end := time.Date(2023, 1, 1, 0, 0, 0, 0, timezone).UTC()
 		next := time.Date(2022, 1, 15, 0, 0, 0, 0, timezone)
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: false,
 			NextRecurrence:  next,
 		}
@@ -313,7 +313,7 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		end := time.Date(2023, 1, 1, 0, 0, 0, 0, timezone).UTC()
 		next := time.Date(2022, 1, 15, 0, 0, 0, 0, timezone)
 		fundingSchedule := models.FundingSchedule{
-			RuleSet:         fundingRule,
+			Ruleset:         fundingRule,
 			ExcludeWeekends: false,
 			NextRecurrence:  next,
 		}

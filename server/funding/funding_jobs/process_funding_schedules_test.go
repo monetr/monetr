@@ -75,7 +75,7 @@ func TestProcessFundingSchedulesCron(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -140,7 +140,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -219,7 +219,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -276,7 +276,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -356,7 +356,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -435,7 +435,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -515,7 +515,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -594,7 +594,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -672,7 +672,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday 1",
 			Description:            "First payday",
-			RuleSet:                fundingRule1,
+			Ruleset:                fundingRule1,
 			NextRecurrence:         fundingRule1.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule1.After(clock.Now(), false),
 		})
@@ -683,7 +683,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday 2",
 			Description:            "Second payday",
-			RuleSet:                fundingRule2,
+			Ruleset:                fundingRule2,
 			NextRecurrence:         fundingRule2.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule2.After(clock.Now(), false),
 		})

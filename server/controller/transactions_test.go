@@ -705,7 +705,7 @@ func TestPutTransactions(t *testing.T) {
 			BankAccountId:          bank.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Whenever I get paid",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			ExcludeWeekends:        true,
 			WaitForDeposit:         false,
 			EstimatedDeposit:       nil,

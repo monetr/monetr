@@ -5,9 +5,12 @@ import (
 
 	"log/slog"
 
+	"github.com/Oudwins/zog"
+	"github.com/Oudwins/zog/parsers/zjson"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/schema"
 )
 
 func (c *Controller) getSpending(ctx echo.Context) error {
@@ -360,6 +363,103 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 		if !isManual {
 			return c.badRequest(ctx, "auto create transaction is only supported for manual links")
 		}
+	}
+
+	recalculateSpending := false
+	if updatedSpending.NextRecurrence != existingSpending.NextRecurrence {
+		newNext, err := c.midnightInLocal(ctx, updatedSpending.NextRecurrence)
+		if err != nil {
+			return c.badRequest(ctx, "failed to update next recurrence")
+		}
+
+		if newNext != existingSpending.NextRecurrence {
+			updatedSpending.NextRecurrence = newNext
+			recalculateSpending = true
+		}
+	}
+
+	if updatedSpending.TargetAmount != existingSpending.TargetAmount {
+		recalculateSpending = true
+	} else if updatedSpending.FundingScheduleId != existingSpending.FundingScheduleId {
+		recalculateSpending = true
+	} else if !recalculateSpending && updatedSpending.Ruleset != nil {
+		recalculateSpending = updatedSpending.Ruleset.String() == existingSpending.Ruleset.String()
+	}
+
+	// If the paused status of a spending object changes, recalculate the contributions.
+	if !updatedSpending.IsPaused && existingSpending.IsPaused {
+		recalculateSpending = true
+	} else if updatedSpending.IsPaused && !existingSpending.IsPaused {
+		// However, if we are pausing contributions, there is no need to do a recalculation no matter what. Since it
+		// will be invalidated when the user unpauses the spending object anyway.
+		recalculateSpending = false
+	}
+
+	if recalculateSpending {
+		timezone := c.mustGetTimezone(ctx)
+		fundingSchedule, err := repo.GetFundingSchedule(
+			c.getContext(ctx),
+			bankAccountId,
+			updatedSpending.FundingScheduleId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to retrieve funding schedule")
+		}
+
+		updatedSpending.CalculateNextContribution(
+			c.getContext(ctx),
+			timezone,
+			fundingSchedule,
+			c.Clock.Now(),
+			log,
+		)
+	}
+
+	if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []Spending{
+		*updatedSpending,
+	}); err != nil {
+		return c.wrapPgError(ctx, err, "failed to update spending")
+	}
+
+	return ctx.JSON(http.StatusOK, updatedSpending)
+}
+
+func (c *Controller) patchSpending(ctx echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	spendingId, err := ParseID[Spending](ctx.Param("spendingId"))
+	if err != nil || spendingId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid spending Id")
+	}
+
+	log := c.getLog(ctx)
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	updatedSpending, err := repo.GetSpendingById(
+		c.getContext(ctx),
+		bankAccountId,
+		spendingId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to verify spending exists")
+	}
+
+	// Make a copy of the original so we can compare some things.
+	existingSpending := *updatedSpending
+
+	// TODO Wrap in a helper?
+	if issues := schema.PatchSpending.Parse(
+		zjson.Decode(ctx.Request().Body),
+		updatedSpending,
+		zog.WithCtxValue("timezone", c.mustGetTimezone(ctx)),
+	); issues != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":  "Invalid request",
+			"issues": zog.Issues.Flatten(issues),
+		})
 	}
 
 	recalculateSpending := false

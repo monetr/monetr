@@ -33,7 +33,7 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})

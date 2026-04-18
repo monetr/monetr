@@ -24,7 +24,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		fundingInstructions := NewFundingScheduleFundingInstructions(
 			log,
 			models.FundingSchedule{
-				RuleSet:         fundingRule,
+				Ruleset:         fundingRule,
 				ExcludeWeekends: false,
 				NextRecurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 			},
@@ -94,7 +94,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		fundingInstructions := NewFundingScheduleFundingInstructions(
 			log,
 			models.FundingSchedule{
-				RuleSet:         fundingRule,
+				Ruleset:         fundingRule,
 				ExcludeWeekends: false,
 				NextRecurrence:  time.Date(2024, 3, 15, 0, 0, 0, 0, timezone),
 			},
@@ -223,7 +223,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		fundingInstructions := NewFundingScheduleFundingInstructions(
 			log,
 			models.FundingSchedule{
-				RuleSet:         fundingRule,
+				Ruleset:         fundingRule,
 				ExcludeWeekends: false,
 				NextRecurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 			},
@@ -328,7 +328,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		fundingInstructions := NewFundingScheduleFundingInstructions(
 			log,
 			models.FundingSchedule{
-				RuleSet:         fundingRule,
+				Ruleset:         fundingRule,
 				ExcludeWeekends: true,
 				NextRecurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 			},
@@ -442,7 +442,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		fundingInstructions := NewFundingScheduleFundingInstructions(
 			log,
 			models.FundingSchedule{
-				RuleSet:         fundingRule,
+				Ruleset:         fundingRule,
 				ExcludeWeekends: true,
 				NextRecurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
 			},
@@ -480,7 +480,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		fundingInstructions := NewFundingScheduleFundingInstructions(
 			log,
 			models.FundingSchedule{
-				RuleSet:         fundingRule,
+				Ruleset:         fundingRule,
 				ExcludeWeekends: true,
 				NextRecurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
 			},
@@ -516,7 +516,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		fundingInstructions := NewFundingScheduleFundingInstructions(
 			log,
 			models.FundingSchedule{
-				RuleSet:         fundingRule,
+				Ruleset:         fundingRule,
 				ExcludeWeekends: true,
 				NextRecurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
 			},
@@ -549,7 +549,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		fundingInstructions := NewFundingScheduleFundingInstructions(
 			log,
 			models.FundingSchedule{
-				RuleSet:         fundingRule,
+				Ruleset:         fundingRule,
 				ExcludeWeekends: true,
 				NextRecurrence:  time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
 			},
@@ -583,7 +583,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		fundingInstructions := NewFundingScheduleFundingInstructions(
 			log,
 			models.FundingSchedule{
-				RuleSet: fundingRule,
+				Ruleset: fundingRule,
 				// This is the problem, with exclude weekends set to false the
 				// contribution amount is accurate. Ultimately this is because
 				// GetFundingEventsBetween does not properly implement excluding
@@ -694,7 +694,7 @@ func TestSpendingInstructionBase_GetNextInflowEventAfter(t *testing.T) {
 			FundingScheduleId: "fund_bogus",
 			Name:              "Bogus Funding Schedule",
 			Description:       "Bogus",
-			RuleSet:           ruleset,
+			Ruleset:           ruleset,
 			NextRecurrence:    dayAfterTomorrow,
 		})
 		spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
@@ -727,7 +727,7 @@ func TestSpendingInstructionBase_GetNextInflowEventAfter(t *testing.T) {
 			FundingScheduleId: "fund_bogus",
 			Name:              "Bogus Funding Schedule",
 			Description:       "Bogus",
-			RuleSet:           ruleset,
+			Ruleset:           ruleset,
 			NextRecurrence:    dayAfterTomorrow.AddDate(0, 0, 1),
 		})
 		spendingInstructions := NewSpendingInstructions(log, spending, fundingInstructions)
@@ -771,7 +771,7 @@ func TestSpendingInstructionBase_GetNextInflowEventAfter(t *testing.T) {
 			FundingScheduleId: "fund_bogus",
 			Name:              "Bogus Funding Schedule",
 			Description:       "Bogus",
-			RuleSet:           fundingRule,
+			Ruleset:           fundingRule,
 			NextRecurrence:    nextFunding.UTC(),
 		}
 

@@ -8,6 +8,8 @@ import (
 	"runtime/debug"
 	"time"
 
+	"log/slog"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
@@ -16,7 +18,6 @@ import (
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
-	"log/slog"
 
 	"github.com/pkg/errors"
 )
@@ -320,6 +321,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.POST("/bank_accounts/:bankAccountId/spending", c.postSpending)
 	billed.POST("/bank_accounts/:bankAccountId/spending/transfer", c.postSpendingTransfer)
 	billed.PUT("/bank_accounts/:bankAccountId/spending/:spendingId", c.putSpending)
+	billed.PATCH("/bank_accounts/:bankAccountId/spending/:spendingId", c.patchSpending)
 	billed.DELETE("/bank_accounts/:bankAccountId/spending/:spendingId", c.deleteSpending)
 	billed.GET("/bank_accounts/:bankAccountId/spending/:spendingId/transactions", c.getSpendingTransactions)
 	// Forecasting
