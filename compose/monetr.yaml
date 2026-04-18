@@ -34,6 +34,11 @@ email:
 logging:
   format: text
   level: trace
+lunchFlow:
+  enabled: true
+  allowedApiUrls:
+    - https://lunchflow.app/api/v1
+    - https://bogus.example.com/api/v1
 postgresql:
   address: postgres
   database: postgres
