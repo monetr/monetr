@@ -1,10 +1,14 @@
 package schema
 
 import (
+	"strings"
 	"time"
 
 	z "github.com/Oudwins/zog"
+	locale "github.com/elliotcourant/go-lclocale"
+	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/util"
+	"github.com/monetr/monetr/server/zoneinfo"
 )
 
 func Name() *z.StringSchema[string] {
@@ -61,4 +65,56 @@ func FutureDate() *z.TimeSchema {
 	return z.Time(z.Time.Format(time.RFC3339)).
 		TestFunc(isMidnight).
 		TestFunc(isFuture)
+}
+
+func EmailAddress() *z.StringSchema[string] {
+	return z.String().
+		Email(z.Message("email address must be valid")).
+		Trim().
+		Transform(func(valPtr *string, ctx z.Ctx) error {
+			*valPtr = strings.ToLower(*valPtr)
+			return nil
+		})
+}
+
+func Password() *z.StringSchema[string] {
+	return z.String().
+		Required().
+		Trim().
+		Min(8, z.Message("password must be at least 8 characters")).
+		Max(71, z.Message("password cannot be longer than 71 characters"))
+}
+
+func Timezone() *z.StringSchema[string] {
+	return z.String().
+		Default("UTC").
+		TestFunc(func(val *string, ctx z.Ctx) bool {
+			_, err := zoneinfo.Timezone(*val)
+			if err != nil {
+				ctx.AddIssue(ctx.Issue().
+					SetCode("timezone_invalid").
+					SetPath([]string{"timezone"}).
+					SetMessage("timezone not recognized by server").
+					SetParams(map[string]any{
+						"timezone": val,
+					}),
+				)
+				return false
+			}
+
+			return true
+		})
+}
+
+func Locale() *z.StringSchema[string] {
+	return z.String().
+		Default(consts.DefaultLocale).
+		Transform(func(valPtr *string, ctx z.Ctx) error {
+			if _, err := locale.GetLConv(*valPtr); err != nil {
+				// If the provided locale is invalid, fallback to the default
+				*valPtr = consts.DefaultLocale
+			}
+
+			return nil
+		})
 }

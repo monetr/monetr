@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Oudwins/zog"
-	"github.com/Oudwins/zog/parsers/zjson"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
@@ -284,8 +282,9 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 	log := c.getLog(ctx)
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	// Retrieve the existing funding schedule to make sure some fields cannot be overridden
-	fundingSchedule, err := repo.GetFundingSchedule(
+	// Retrieve the existing funding schedule to make sure some fields cannot be
+	// overridden
+	originalFundingSchedule, err := repo.GetFundingSchedule(
 		c.getContext(ctx),
 		bankAccountId,
 		fundingScheduleId,
@@ -294,19 +293,14 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to verify funding schedule exists")
 	}
 
-	// Make a copy of the original so we can compare some things.
-	originalFundingSchedule := *fundingSchedule
-
-	// TODO Wrap in a helper?
-	if issues := schema.PatchFundingSchedule.Parse(
-		zjson.Decode(ctx.Request().Body),
-		fundingSchedule,
-		zog.WithCtxValue("timezone", c.mustGetTimezone(ctx)),
-	); issues != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":  "Invalid request",
-			"issues": zog.Issues.Flatten(issues),
-		})
+	fundingSchedule, err := parseAuthenticatedRequest(
+		c,
+		ctx,
+		schema.PatchFundingSchedule,
+		originalFundingSchedule,
+	)
+	if err != nil {
+		return err
 	}
 
 	if fundingSchedule.AutoCreateTransaction {
@@ -365,7 +359,7 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 				spend.CalculateNextContribution(
 					c.getContext(ctx),
 					timezone,
-					fundingSchedule,
+					&fundingSchedule,
 					now,
 					log,
 				)
@@ -382,7 +376,10 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		}
 	}
 
-	if err = repo.UpdateFundingSchedule(c.getContext(ctx), fundingSchedule); err != nil {
+	if err = repo.UpdateFundingSchedule(
+		c.getContext(ctx),
+		&fundingSchedule,
+	); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update funding schedule")
 	}
 

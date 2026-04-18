@@ -124,7 +124,8 @@ func TestLogin(t *testing.T) {
 
 	t.Run("multiple users not implemented", func(t *testing.T) {
 		app, e := NewTestApplication(t)
-		// Creating the login fixture directly prevents it from also creating a user and an account.
+		// Creating the login fixture directly prevents it from also creating a user
+		// and an account.
 		login, password := fixtures.GivenIHaveLogin(t, app.Clock)
 
 		user1 := fixtures.GivenIHaveAnAccount(t, app.Clock, login)
@@ -153,7 +154,51 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Email address provided is not valid")
+		response.JSON().Path("$.issues.email").Array().IsEqual([]string{"email address must be valid"})
+		response.JSON().Object().NotContainsKey("token")
+	})
+
+	t.Run("password missing", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email": gofakeit.Email(),
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.issues.password").Array().IsEqual([]string{"is required"})
+		response.JSON().Object().NotContainsKey("token")
+	})
+
+	t.Run("password too short", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email":    gofakeit.Email(),
+				"password": gofakeit.Password(true, true, true, true, false, 4),
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.issues.password").Array().IsEqual([]string{"password must be at least 8 characters"})
+		response.JSON().Object().NotContainsKey("token")
+	})
+
+	t.Run("password too long", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email":    gofakeit.Email(),
+				"password": gofakeit.Password(true, true, true, true, false, 80),
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.issues.password").Array().IsEqual([]string{"password cannot be longer than 71 characters"})
 		response.JSON().Object().NotContainsKey("token")
 	})
 

@@ -10,12 +10,14 @@ import (
 
 	"log/slog"
 
+	"github.com/Oudwins/zog"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
 	"github.com/monetr/monetr/server/internal/sentryecho"
+	"github.com/monetr/monetr/server/schema"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 
@@ -202,6 +204,11 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 					if _, ok := internalError.(json.Marshaler); ok {
 						return ctx.JSON(actualError.Code, internalError)
 					}
+				case schema.Error:
+					return ctx.JSON(http.StatusBadRequest, map[string]any{
+						"error":  actualError.Message,
+						"issues": zog.Issues.Flatten(internalError.Issues()),
+					})
 				default:
 					return ctx.JSON(actualError.Code, map[string]any{
 						"error": actualError.Message,

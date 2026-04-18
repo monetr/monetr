@@ -5,8 +5,6 @@ import (
 
 	"log/slog"
 
-	"github.com/Oudwins/zog"
-	"github.com/Oudwins/zog/parsers/zjson"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
@@ -438,7 +436,7 @@ func (c *Controller) patchSpending(ctx echo.Context) error {
 	log := c.getLog(ctx)
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	updatedSpending, err := repo.GetSpendingById(
+	existingSpending, err := repo.GetSpendingById(
 		c.getContext(ctx),
 		bankAccountId,
 		spendingId,
@@ -447,19 +445,14 @@ func (c *Controller) patchSpending(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to verify spending exists")
 	}
 
-	// Make a copy of the original so we can compare some things.
-	existingSpending := *updatedSpending
-
-	// TODO Wrap in a helper?
-	if issues := schema.PatchSpending.Parse(
-		zjson.Decode(ctx.Request().Body),
-		updatedSpending,
-		zog.WithCtxValue("timezone", c.mustGetTimezone(ctx)),
-	); issues != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":  "Invalid request",
-			"issues": zog.Issues.Flatten(issues),
-		})
+	updatedSpending, err := parseAuthenticatedRequest(
+		c,
+		ctx,
+		schema.PatchSpending,
+		existingSpending,
+	)
+	if err != nil {
+		return err
 	}
 
 	recalculateSpending := false
@@ -512,9 +505,13 @@ func (c *Controller) patchSpending(ctx echo.Context) error {
 		)
 	}
 
-	if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []Spending{
-		*updatedSpending,
-	}); err != nil {
+	if err = repo.UpdateSpending(
+		c.getContext(ctx),
+		bankAccountId,
+		[]Spending{
+			updatedSpending,
+		},
+	); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update spending")
 	}
 

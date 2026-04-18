@@ -1,80 +1,47 @@
 package schema
 
 import (
-	"strings"
+	"regexp"
 
 	z "github.com/Oudwins/zog"
-	"github.com/Oudwins/zog/internals"
-	locale "github.com/elliotcourant/go-lclocale"
-	"github.com/monetr/monetr/server/consts"
-	"github.com/monetr/monetr/server/zoneinfo"
 )
 
 var (
 	AuthenticationLogin = z.Struct(z.Shape{
-		"email": z.String().
-			Email().
-			Required().
-			Trim().
-			Transform(func(valPtr *string, ctx internals.Ctx) error {
-				*valPtr = strings.ToLower(*valPtr)
-				return nil
-			}),
-		"password": z.String().
-			Required().
-			Trim().
-			Min(8).
-			Max(71),
+		"email":    EmailAddress().Required(),
+		"password": Password().Required(),
 	})
 
 	AuthenticationRegister = z.Struct(z.Shape{
-		"email": z.String().
-			Email().
-			Required().
-			Trim().
-			Transform(func(valPtr *string, ctx internals.Ctx) error {
-				*valPtr = strings.ToLower(*valPtr)
-				return nil
-			}),
-		"password": z.String().
-			Required().
-			Trim().
-			Min(8).
-			Max(71),
+		"email":     EmailAddress().Required(),
+		"password":  Password().Required(),
 		"firstName": z.String().Required().Trim().Max(250),
 		"lastName":  z.String().Optional().Trim().Max(250),
-		"timezone": z.String().
-			Default("UTC").
-			Required().
-			// TODO Make this its own schema type?
-			TestFunc(func(val *string, ctx internals.Ctx) bool {
-				_, err := zoneinfo.Timezone(*val)
-				if err != nil {
-					ctx.AddIssue(ctx.Issue().
-						SetCode("timezone_invalid").
-						SetPath([]string{"timezone"}).
-						SetMessage("timezone not recognized by server").
-						SetParams(map[string]any{
-							"timezone": val,
-						}),
-					)
-					return false
-				}
+		"timezone":  Timezone().Required(),
+		"locale":    Locale().Required(),
+	})
 
-				return true
-			}),
-		"locale": z.String().
-			Default(consts.DefaultLocale).
+	AuthenticationTOTP = z.Struct(z.Shape{
+		"totp": z.String().
+			Trim().
+			Len(6).
 			Required().
-			Transform(func(valPtr *string, ctx internals.Ctx) error {
-				if _, err := locale.GetLConv(*valPtr); err != nil {
-					// If the provided locale is invalid, fallback to the default
-					*valPtr = consts.DefaultLocale
-				}
+			Match(regexp.MustCompile(`\d{6}`)),
+	})
 
-				return nil
-			}),
-		// TODO Make this a union
-		"betaCode": z.String().Optional(),
+	AuthenticationVerifyEmail = z.Struct(z.Shape{
+		"token": z.String().Trim().Required().Max(2000),
+	})
+
+	AuthenticationResendVerifyEmail = z.Struct(z.Shape{
+		"email": EmailAddress().Required(),
+	})
+
+	Captcha = z.Struct(z.Shape{
+		"captcha": z.String().Required().Max(250),
+	})
+
+	BetaCode = z.Struct(z.Shape{
+		"betaCode": z.Ptr(z.String().Required().Max(100)).NotNil(),
 	})
 )
