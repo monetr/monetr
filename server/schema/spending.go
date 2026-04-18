@@ -2,7 +2,6 @@ package schema
 
 import (
 	z "github.com/Oudwins/zog"
-	"github.com/Oudwins/zog/internals"
 	"github.com/monetr/monetr/server/models"
 )
 
@@ -42,7 +41,7 @@ var (
 // validateSpending enforces basic spending rules that are not specific to a
 // single field. In this case it enforces that expenses must have a ruleset and
 // goals must not.
-func validateSpending(val any, ctx internals.Ctx) {
+func validateSpending(val any, ctx z.Ctx) {
 	switch val := val.(type) {
 	case *models.Spending:
 		switch val.SpendingType {
