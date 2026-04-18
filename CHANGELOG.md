@@ -2,6 +2,9 @@
 
 ## [1.12.5](https://github.com/monetr/monetr/compare/v1.12.4...v1.12.5) (2026-04-18)
 
+This patch includes a fix for [GHSA-29v9-frvh-c426](https://github.com/monetr/monetr/security/advisories/GHSA-29v9-frvh-c426). Which now prevents potential an issue where GET requests could be made to arbitrary urls during monetr's Lunch Flow setup process.
+
+Thank you to [wooseokdotkim](https://github.com/wooseokdotkim) for reporting this!
 
 ### Dependencies
 
