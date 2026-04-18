@@ -116,10 +116,6 @@
   font-weight: var(--normal);
   color: var(--content-emphasis);
 
-  &[aria-selected] {
-    opacity: 1;
-  }
-
   &:enabled:hover {
     background-color: var(--background-emphasis);
   }
@@ -142,39 +138,48 @@
 
 .daySelected {
   background-color: var(--brand);
-  color: var(--content-emphasis);
 
-  &:enabled:hover {
-    background-color: var(--brand-subtle);
-    color: var(--content-emphasis);
-  }
+  .day {
+    &:enabled:hover {
+      background-color: var(--brand-subtle);
+    }
 
-  &:focus {
-    background-color: var(--brand);
-    color: var(--content-emphasis);
+    &:focus {
+      background-color: transparent;
+    }
   }
 }
 
 .dayToday {
   background-color: var(--background-darker);
-  color: var(--brand-muted);
 
-  &:hover {
-    color: var(--brand-bright);
+  .day {
+    color: var(--brand-muted);
+
+    &:hover {
+      color: var(--brand-bright);
+    }
   }
 }
 
 .dayOutside {
-  color: var(--content-subtle);
+  .day {
+    color: var(--content-subtle);
+  }
 
   &[aria-selected] {
-    color: var(--content);
     background-color: rgba(78, 26, 160, 0.5); // brand/50
+
+    .day {
+      color: var(--content);
+    }
   }
 }
 
 .dayDisabled {
-  color: var(--content-muted);
+  .day {
+    color: var(--content-muted);
+  }
 }
 
 .dayRangeMiddle {
