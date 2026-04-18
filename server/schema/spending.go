@@ -21,9 +21,9 @@ var (
 		"targetAmount":   z.Int64().GT(0).Required(),
 		"currentAmount":  z.Int64().GTE(0).Default(0).Required(),
 		"usedAmount":     z.Int64().GTE(0).Default(0).Required(),
-		"nextRecurrence": Date().Required(),
+		"nextRecurrence": FutureDate().Required(),
 		"isPaused":       z.Bool().Default(false).Optional(),
-	}).Test(z.Test[any]{Func: validateSpending})
+	}).TestFunc(isValidSpending)
 
 	PatchSpending = z.Struct(z.Shape{
 		"name":              Name().Optional(),
@@ -33,15 +33,15 @@ var (
 		"targetAmount":      z.Int64().GT(0).Optional(),
 		"currentAmount":     z.Int64().GTE(0).Optional(),
 		"usedAmount":        z.Int64().GTE(0).Optional(),
-		"nextRecurrence":    Date().Optional(),
+		"nextRecurrence":    FutureDate().Optional(),
 		"isPaused":          z.Bool().Optional(),
-	}).Test(z.Test[any]{Func: validateSpending})
+	}).TestFunc(isValidSpending)
 )
 
-// validateSpending enforces basic spending rules that are not specific to a
+// isValidSpending enforces basic spending rules that are not specific to a
 // single field. In this case it enforces that expenses must have a ruleset and
 // goals must not.
-func validateSpending(val any, ctx z.Ctx) {
+func isValidSpending(val any, ctx z.Ctx) bool {
 	switch val := val.(type) {
 	case *models.Spending:
 		switch val.SpendingType {
@@ -56,11 +56,12 @@ func validateSpending(val any, ctx z.Ctx) {
 						"ruleset":      nil,
 					}),
 				)
+				return false
 			}
 		case models.SpendingTypeGoal:
 			if val.Ruleset != nil {
 				ctx.AddIssue(ctx.Issue().
-					SetCode("rulset_not_allowed").
+					SetCode("rulset_forbidden").
 					SetPath([]string{"ruleset"}).
 					SetMessage("goals cannot have a ruleset").
 					SetParams(map[string]any{
@@ -68,7 +69,10 @@ func validateSpending(val any, ctx z.Ctx) {
 						"ruleset":      val.Ruleset,
 					}),
 				)
+				return false
 			}
 		}
 	}
+
+	return true
 }
