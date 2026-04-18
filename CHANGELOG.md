@@ -1,5 +1,62 @@
 # Changelog
 
+## [1.12.5](https://github.com/monetr/monetr/compare/v1.12.4...v1.12.5) (2026-04-18)
+
+
+### Dependencies
+
+* **api:** update golang.org/x ([#3109](https://github.com/monetr/monetr/issues/3109)) ([643a8f0](https://github.com/monetr/monetr/commit/643a8f0327736c18b9359299cbbd4d1c6a27b12f))
+* **api:** update module github.com/aws/aws-sdk-go-v2/service/s3 to v1.99.0 ([#3103](https://github.com/monetr/monetr/issues/3103)) ([beb643a](https://github.com/monetr/monetr/commit/beb643ac232339909265b642727706419b81f074))
+* **api:** update module github.com/getsentry/sentry-go to v0.45.1 ([#3113](https://github.com/monetr/monetr/issues/3113)) ([efc73f9](https://github.com/monetr/monetr/commit/efc73f980a00be8f98db27048a89d774065d2b08))
+* **api:** update module github.com/hashicorp/vault/api to v1.23.0 ([#3052](https://github.com/monetr/monetr/issues/3052)) ([8df0b26](https://github.com/monetr/monetr/commit/8df0b26c0dd191d8af068612a61f510e7f8008e0))
+* **api:** update module golang.org/x/crypto to v0.50.0 ([#3104](https://github.com/monetr/monetr/issues/3104)) ([b93d9a1](https://github.com/monetr/monetr/commit/b93d9a100884c278c0b2d6302151dc88273ef52e))
+* **renovate:** update actions/deploy-pages action to v5 ([#3097](https://github.com/monetr/monetr/issues/3097)) ([bc82a71](https://github.com/monetr/monetr/commit/bc82a71598001ecdb3c6df6bd7dc4a87746829c1))
+* **renovate:** update actions/upload-pages-artifact action to v4 ([#3098](https://github.com/monetr/monetr/issues/3098)) ([718da88](https://github.com/monetr/monetr/commit/718da88c21bc50bfc68f973845196d421601542c))
+* **renovate:** update actions/upload-pages-artifact action to v5 ([#3115](https://github.com/monetr/monetr/issues/3115)) ([93e9c5f](https://github.com/monetr/monetr/commit/93e9c5fd2f8241dccef4d69fbb08030057270eaf))
+* **renovate:** update dependency @biomejs/biome to v2.4.12 ([#3117](https://github.com/monetr/monetr/issues/3117)) ([f92ab9b](https://github.com/monetr/monetr/commit/f92ab9bf135e1fff84807b638f3b4032a8556acd))
+* **renovate:** update module golang.org/x/tools/cmd/stringer to v0.44.0 ([#3107](https://github.com/monetr/monetr/issues/3107)) ([300db73](https://github.com/monetr/monetr/commit/300db7365e202d25074c800a509dc2561b5a37ee))
+* **ui:** update dependency @imagemagick/magick-wasm to v0.0.40 ([#3119](https://github.com/monetr/monetr/issues/3119)) ([436153e](https://github.com/monetr/monetr/commit/436153e0f195fa055cadce15becc1370cd9102d9))
+* **ui:** update dependency @rsbuild/core to v2.0.0-rc.2 ([#3102](https://github.com/monetr/monetr/issues/3102)) ([21ade9c](https://github.com/monetr/monetr/commit/21ade9c20087cec73229c54e7a67ee0dffd6d378))
+* **ui:** update dependency @tanstack/react-query to v5.99.0 ([#3096](https://github.com/monetr/monetr/issues/3096)) ([47923b1](https://github.com/monetr/monetr/commit/47923b1cf68874196ca8522503586714d2b5970e))
+* **ui:** update dependency juice to v11.1.1 ([#3108](https://github.com/monetr/monetr/issues/3108)) ([4f498e5](https://github.com/monetr/monetr/commit/4f498e557d9a71b671612f6d5fdd77d4503791fa))
+* **ui:** update dependency katex to v0.16.45 ([#3091](https://github.com/monetr/monetr/issues/3091)) ([f6056cb](https://github.com/monetr/monetr/commit/f6056cb4156317b6115f2c64023c07ff727a9ef3))
+* **ui:** update dependency sass to v1.99.0 ([#3110](https://github.com/monetr/monetr/issues/3110)) ([03fdf3a](https://github.com/monetr/monetr/commit/03fdf3a2247653af44ea104a159a7cec2d1b249f))
+* **ui:** update rsbuild ([#3116](https://github.com/monetr/monetr/issues/3116)) ([213e375](https://github.com/monetr/monetr/commit/213e3755b6d2ffe72f428d4fb466c98d929c74c3))
+* **ui:** update rstest ([#3095](https://github.com/monetr/monetr/issues/3095)) ([eaacd5d](https://github.com/monetr/monetr/commit/eaacd5df4e200ed07f9cb51884e3c09a9f493945))
+* **ui:** update sentry-javascript monorepo to v10.48.0 ([#3112](https://github.com/monetr/monetr/issues/3112)) ([195a0c9](https://github.com/monetr/monetr/commit/195a0c94cad26105dc1e9ee9d5ed902af41ed46c))
+
+
+### Bug Fixes
+
+* **api:** Don't set AWS KMS encryption context to nil ([59185c1](https://github.com/monetr/monetr/commit/59185c1c8d6e19f91df64581b67df6fbcf24be8e))
+* **api:** Fixed issue where transactions could be held too long ([0842062](https://github.com/monetr/monetr/commit/08420621e588a23bcd65c45c122877a95fd65574))
+* **api:** Fixed issue with TOTP recovery code generation ([8956594](https://github.com/monetr/monetr/commit/8956594e920c607933f7c8e70c118a73b237c824))
+* **api:** Fixed permissions used for filesystem storage ([99d9ac9](https://github.com/monetr/monetr/commit/99d9ac94f56cfa8b0f59792bb79a8343236dd54a))
+* **api:** Fixed Plaid webhook `iat` age check ([fcc152a](https://github.com/monetr/monetr/commit/fcc152a171acbee43df4c8a522bebacd2bc7e4d2))
+* **api:** Fixed SSRF via Lunch Flow onboarding ([#3122](https://github.com/monetr/monetr/issues/3122)) ([c260caa](https://github.com/monetr/monetr/commit/c260caa3c573a4a396ec2d264c7641a5d958385b))
+* **api:** Fixing filesystem permissions for generated certificate ([8d16467](https://github.com/monetr/monetr/commit/8d16467c74f77ceabff981670dfc3f1b18209c02))
+* **api:** Instrument hard timeouts at a listener level ([4f2d4fa](https://github.com/monetr/monetr/commit/4f2d4fad8da85086c9612a2ec8dda0e14eb8085b))
+* **api:** Move some security headers to be returned on all requests ([1e4d5b8](https://github.com/monetr/monetr/commit/1e4d5b8bcc14e69b07e01951becb51384f33e65e))
+* **ci:** Build documentation and test concurrently ([667312d](https://github.com/monetr/monetr/commit/667312dc89c795577c3ddfb70c9d1e0b43d616e1))
+* **container:** Fixed group membership of monetr user in container ([8f9bf96](https://github.com/monetr/monetr/commit/8f9bf96ffd20212ec16569b8e1878e069bd247d2))
+* **email:** Use padding instead of margin for buttons ([990a834](https://github.com/monetr/monetr/commit/990a83426226ce95cd36e54dbe6abd48c83f9dc4))
+* **ui:** Fixing peer dependency warnings ([e4cc946](https://github.com/monetr/monetr/commit/e4cc94604d334020499e093ee6c7a6fb477e29fb))
+
+
+### Miscellaneous
+
+* **deps:** Fixing email dependencies ([7c84a70](https://github.com/monetr/monetr/commit/7c84a70a9340d4681a10cd11e2dfd5f2a91bb034))
+* **deps:** Fixing pnpm package overrides ([d060b14](https://github.com/monetr/monetr/commit/d060b14c2f58f4756f8ee315c00f8e6537d40b1a))
+* **deps:** Group golang.org/x dependencies in the future ([6cfffaa](https://github.com/monetr/monetr/commit/6cfffaaab41d96cdaa3aadedbfcb3893b6d345c2))
+* Updating README ([c42f194](https://github.com/monetr/monetr/commit/c42f194d611a4dde24144bc095de3b1821b10278))
+
+
+### Refactor
+
+* **docs:** Convert doc styles to scss modules ([#3099](https://github.com/monetr/monetr/issues/3099)) ([6ef4a5d](https://github.com/monetr/monetr/commit/6ef4a5de55ecf304d751226bb5660d55310224b7))
+* **docs:** Migrate documentation from nextra to rspress ([#3081](https://github.com/monetr/monetr/issues/3081)) ([12dd2ba](https://github.com/monetr/monetr/commit/12dd2babb5e86afb37f9d0c46db853230988619e))
+* **email:** Email templates without react-email ([#3101](https://github.com/monetr/monetr/issues/3101)) ([f80613f](https://github.com/monetr/monetr/commit/f80613fd52c3752d798426fa822ea8200f8b5831))
+
 ## [1.12.4](https://github.com/monetr/monetr/compare/v1.12.3...v1.12.4) (2026-04-11)
 
 This patch includes a fix for [GHSA-v7xq-3wx6-fqc2](https://github.com/monetr/monetr/security/advisories/GHSA-v7xq-3wx6-fqc2). Which now prevents potential denial of service that could have been caused by sending massive request bodies to the Stripe webhook endpoint when both Stripe and Stripe webhooks were enabled on the monetr server.
