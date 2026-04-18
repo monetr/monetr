@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import MLogo from '@monetr/interface/components/MLogo';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
 
 export default function VerifyEmail(): JSX.Element {
@@ -55,12 +55,12 @@ export function VerifyEmailView(): JSX.Element {
   return (
     <div className='h-screen w-screen flex flex-col justify-center items-center gap-2 p-4'>
       <MLogo className='h-24 w-24' />
-      <MSpan size='2xl' weight='bold'>
+      <Typography size='2xl' weight='bold'>
         Email Verification
-      </MSpan>
-      <MSpan className='text-center' size='xl'>
+      </Typography>
+      <Typography className='text-center' size='xl'>
         Your email is being verified, one moment...
-      </MSpan>
+      </Typography>
     </div>
   );
 }

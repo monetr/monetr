@@ -16,8 +16,8 @@ import FormTextField from '@monetr/interface/components/FormTextField';
 import FundingTimeline from '@monetr/interface/components/funding/FundingTimeline';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
-import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import Typography from '@monetr/interface/components/Typography';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchFundingSchedule } from '@monetr/interface/hooks/usePatchFundingSchedule';
@@ -52,8 +52,8 @@ export default function FundingDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content size-24' />
-        <MSpan className='text-5xl'>Something isn't right...</MSpan>
-        <MSpan className='text-2xl'>There wasn't a funding schedule specified...</MSpan>
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>There wasn't a funding schedule specified...</Typography>
       </div>
     );
   }
@@ -194,7 +194,9 @@ export default function FundingDetails(): JSX.Element {
           </div>
           <Divider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>
-            <MSpan className='text-xl my-2'>Funding Timeline</MSpan>
+            <Typography className='my-2' size='xl'>
+              Funding Timeline
+            </Typography>
             <FundingTimeline fundingScheduleId={funding.fundingScheduleId} />
           </div>
         </div>
@@ -217,8 +219,8 @@ function NextOccurrenceDecorator({ fundingSchedule: funding }: NextOccurrenceDec
   }
 
   return (
-    <MSpan data-testid='funding-schedule-weekend-notice' size='sm' weight='medium'>
+    <Typography data-testid='funding-schedule-weekend-notice' size='sm' weight='medium'>
       Actual occurrence avoids weekend ({format(funding.nextRecurrence, 'M/dd')})
-    </MSpan>
+    </Typography>
   );
 }

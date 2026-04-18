@@ -3,8 +3,8 @@ import { CalendarSync, Plus } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import FundingItem from '@monetr/interface/components/funding/FundingItem';
-import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import Typography from '@monetr/interface/components/Typography';
 import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 
@@ -14,13 +14,13 @@ export default function Funding(): JSX.Element {
   if (fundingIsLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>One moment...</MSpan>
+        <Typography size='5xl'>One moment...</Typography>
       </div>
     );
   }
 
   if (fundingIsError) {
-    return <MSpan>Error...</MSpan>;
+    return <Typography size='inherit'>Error...</Typography>;
   }
 
   function ListContent(): JSX.Element {
@@ -61,12 +61,12 @@ function EmptyState(): JSX.Element {
         <div className='w-full flex justify-center space-x-4'>
           <CalendarSync className='dark:text-dark-monetr-content-muted h-12 w-12' />
         </div>
-        <MSpan className='text-center' color='subtle' size='xl'>
+        <Typography className='text-center' color='subtle' size='xl'>
           You don't have any funding schedules yet...
-        </MSpan>
-        <MSpan className='text-center' color='subtle' size='lg'>
+        </Typography>
+        <Typography className='text-center' color='subtle' size='lg'>
           Funding schedules tell monetr when to allocate funds towards your expenses and goals.
-        </MSpan>
+        </Typography>
       </div>
     </div>
   );

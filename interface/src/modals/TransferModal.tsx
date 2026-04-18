@@ -11,7 +11,7 @@ import type { LabelDecoratorProps } from '@monetr/interface/components/Label';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
@@ -119,12 +119,12 @@ function TransferModal(props: TransferModalProps): JSX.Element {
       >
         <div className='flex flex-col gap-2'>
           <div className='flex flex-col items-center'>
-            <MSpan size='2xl' weight='semibold'>
+            <Typography size='2xl' weight='semibold'>
               Transfer
-            </MSpan>
-            <MSpan color='subtle' size='lg' weight='medium'>
+            </Typography>
+            <Typography color='subtle' size='lg' weight='medium'>
               Move funds between your budgets
-            </MSpan>
+            </Typography>
           </div>
           <MSelectSpending
             excludeFrom='toSpendingId'
@@ -217,21 +217,21 @@ function TransferSelectDecorator(props: LabelDecoratorProps): JSX.Element {
 
   if (remaining > 0 && remaining !== target) {
     return (
-      <MSpan className='gap-1'>
+      <Typography className='gap-1' size='inherit'>
         <AmountButton amount={current} />
         of
         <AmountButton amount={target} />
         &nbsp; (<AmountButton amount={remaining} />)
-      </MSpan>
+      </Typography>
     );
   }
 
   return (
-    <MSpan className='gap-1' color='subtle'>
+    <Typography className='gap-1' color='subtle' size='inherit'>
       <AmountButton amount={current} />
       of
       <AmountButton amount={target} />
-    </MSpan>
+    </Typography>
   );
 }
 
@@ -249,13 +249,13 @@ function AmountButton({ amount }: AmountButtonProps): JSX.Element {
   }, [amount, formik, locale]);
 
   return (
-    <MSpan
+    <Typography
       className='cursor-pointer hover:dark:text-dark-monetr-content-emphasis'
       onClick={onClick}
       size='sm'
       weight='medium'
     >
       {typeof amount === 'number' && locale.formatAmount(amount, AmountType.Stored)}
-    </MSpan>
+    </Typography>
   );
 }

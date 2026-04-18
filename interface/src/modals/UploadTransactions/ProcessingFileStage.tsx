@@ -3,7 +3,7 @@ import { type UseQueryResult, useQuery, useQueryClient } from '@tanstack/react-q
 import { FileUp } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import type { UploadTransactionStage } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 
@@ -20,21 +20,21 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): JS
     <div className='h-full flex flex-col gap-2 p-2 justify-between'>
       <div className='flex flex-col gap-2 h-full'>
         <div className='flex justify-between'>
-          <MSpan size='xl' weight='bold'>
+          <Typography size='xl' weight='bold'>
             Upload Transactions
-          </MSpan>
+          </Typography>
           <div>{/* TODO Close button */}</div>
         </div>
-        <MSpan>
+        <Typography size='inherit'>
           Your upload is currently pending or processing, keep this window open to see its status. You can also safely
           close this window. Your upload will not be interuptted.
-        </MSpan>
+        </Typography>
 
         <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
           <FileUp className='size-12 text-dark-monetr-content' />
           <div className='flex flex-col py-1 w-full'>
-            <MSpan size='lg'>{props.upload.file.name}</MSpan>
-            <MSpan>Import {data?.status || 'processing'}!</MSpan>
+            <Typography size='lg'>{props.upload.file.name}</Typography>
+            <Typography size='inherit'>Import {data?.status || 'processing'}!</Typography>
           </div>
         </div>
       </div>

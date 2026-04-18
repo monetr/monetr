@@ -11,7 +11,7 @@ import {
 } from 'react-plaid-link';
 
 import MModal from '@monetr/interface/components/MModal';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import type Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
@@ -139,12 +139,12 @@ function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaid
     <MModal className='py-4 md:max-w-md' open={modal.visible}>
       <div className='h-full flex flex-col gap-4 p-2 justify-between'>
         <div className='flex flex-col'>
-          <MSpan className='mb-2' size='xl' weight='bold'>
+          <Typography className='mb-2' size='xl' weight='bold'>
             {title}
-          </MSpan>
-          <MSpan size='lg' weight='medium'>
+          </Typography>
+          <Typography size='lg' weight='medium'>
             {message}
-          </MSpan>
+          </Typography>
         </div>
       </div>
     </MModal>

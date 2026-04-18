@@ -7,7 +7,7 @@ import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useSendForgotPassword from '@monetr/interface/hooks/useSendForgotPassword';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
@@ -29,16 +29,16 @@ export function ForgotPasswordComplete(): JSX.Element {
         <MLogo />
       </div>
       <div className='flex flex-col items-center'>
-        <MSpan>Check your email</MSpan>
-        <MSpan className='max-w-[248px] text-center text-sm' color='subtle'>
+        <Typography size='inherit'>Check your email</Typography>
+        <Typography className='max-w-[248px] text-center' color='subtle' size='sm'>
           If a user was found with the email provided, then you should receive an email with instructions on how to
           reset your password.
-        </MSpan>
+        </Typography>
       </div>
       <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
-        <MSpan className='text-sm' color='subtle'>
+        <Typography color='subtle' size='sm'>
           Return to
-        </MSpan>
+        </Typography>
         <MLink size='sm' to='/login'>
           Sign in
         </MLink>
@@ -87,10 +87,10 @@ export default function ForgotPasswordNew(): JSX.Element {
         <MLogo />
       </div>
       <div className='flex flex-col items-center'>
-        <MSpan>Forgot your password?</MSpan>
-        <MSpan className='text-sm' color='subtle'>
+        <Typography size='inherit'>Forgot your password?</Typography>
+        <Typography color='subtle' size='sm'>
           We can email you a link to reset it.
-        </MSpan>
+        </Typography>
       </div>
       <FormTextField
         autoComplete='username'
@@ -108,9 +108,9 @@ export default function ForgotPasswordNew(): JSX.Element {
         </FormButton>
       </div>
       <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
-        <MSpan className='text-sm' color='subtle'>
+        <Typography color='subtle' size='sm'>
           Remembered your password?
-        </MSpan>
+        </Typography>
         <MLink size='sm' to='/login'>
           Sign in
         </MLink>

@@ -7,6 +7,11 @@
   align-items: center;
 }
 
+.textInherit {
+  font-size: inherit;
+  line-height: inherit;
+}
+
 .textExtraSmall {
   @include mixins.text-extra-small;
 }
@@ -29,6 +34,10 @@
 
 .text2ExtraLarge {
   @include mixins.text-2-extra-large;
+}
+
+.text3ExtraLarge {
+  @include mixins.text-3-extra-large;
 }
 
 .text5ExtraLarge {

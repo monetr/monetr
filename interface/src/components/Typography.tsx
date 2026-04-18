@@ -5,12 +5,14 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import styles from './Typography.module.scss';
 
 export const textSizes = {
+  inherit: styles.textInherit,
   xs: styles.textExtraSmall,
   sm: styles.textSmall,
   md: styles.textBase,
   lg: styles.textLarge,
   xl: styles.textExtraLarge,
   '2xl': styles.text2ExtraLarge,
+  '3xl': styles.text3ExtraLarge,
   '5xl': styles.text5ExtraLarge,
 };
 
@@ -26,6 +28,7 @@ export const textVariants = cva([styles.root], {
     component: {
       span: undefined,
       p: undefined,
+      h1: undefined,
       h3: undefined,
       code: styles.code,
     },
@@ -70,7 +73,7 @@ export type TypographyProps = React.PropsWithChildren<
   VariantProps &
     (
       | ({ component?: 'span' } & React.HTMLAttributes<HTMLSpanElement>)
-      | ({ component?: 'h3' } & React.HTMLAttributes<HTMLHeadingElement>)
+      | ({ component?: 'h1' | 'h3' } & React.HTMLAttributes<HTMLHeadingElement>)
       | ({ component?: 'p' } & React.HTMLAttributes<HTMLParagraphElement>)
       | ({ component?: 'code' } & React.HTMLAttributes<HTMLElement>)
     )

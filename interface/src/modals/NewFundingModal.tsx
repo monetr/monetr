@@ -13,8 +13,8 @@ import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
-import MSpan from '@monetr/interface/components/MSpan';
 import { Switch } from '@monetr/interface/components/Switch';
+import Typography from '@monetr/interface/components/Typography';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
@@ -91,7 +91,9 @@ function NewFundingModal(): JSX.Element {
         {({ setFieldValue, values }) => (
           <Fragment>
             <div className='flex flex-col'>
-              <MSpan className='font-bold text-xl mb-2'>Create A New Funding Schedule</MSpan>
+              <Typography className='mb-2' size='xl' weight='bold'>
+                Create A New Funding Schedule
+              </Typography>
               <FormTextField
                 autoComplete='off'
                 autoFocus

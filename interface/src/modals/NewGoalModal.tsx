@@ -13,7 +13,7 @@ import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useCreateSpending } from '@monetr/interface/hooks/useCreateSpending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
@@ -83,7 +83,9 @@ function NewGoalModal(): JSX.Element {
         onSubmit={submit}
       >
         <div className='flex flex-col'>
-          <MSpan className='font-bold text-xl mb-2'>Create A New Goal</MSpan>
+          <Typography className='mb-2' size='xl' weight='bold'>
+            Create A New Goal
+          </Typography>
           <FormTextField
             autoComplete='off'
             autoFocus

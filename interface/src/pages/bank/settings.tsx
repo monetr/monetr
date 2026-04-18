@@ -9,9 +9,9 @@ import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
-import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
+import Typography from '@monetr/interface/components/Typography';
 import { useArchiveBankAccount } from '@monetr/interface/hooks/useArchiveBankAccount';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
@@ -46,7 +46,7 @@ export default function BankAccountSettingsPage(): JSX.Element {
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>One moment...</MSpan>
+        <Typography size='5xl'>One moment...</Typography>
       </div>
     );
   }
@@ -55,8 +55,8 @@ export default function BankAccountSettingsPage(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>Something isn't right...</MSpan>
-        <MSpan className='text-2xl'>We weren't able to load details for the bank account specified...</MSpan>
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>We weren't able to load details for the bank account specified...</Typography>
       </div>
     );
   }
@@ -112,12 +112,12 @@ export default function BankAccountSettingsPage(): JSX.Element {
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
             <Card className='w-full mb-4'>
-              <MSpan>
+              <Typography size='inherit'>
                 <FlaskConical className='w-16 h-16' />
                 This page is still a work in progress, however it has been made available to make it possible to switch
                 the currencies for your bank account sooner. This page will be changed over the next several releases to
                 improve the UX and functionality.
-              </MSpan>
+              </Typography>
             </Card>
             <FormTextField
               className='w-full'

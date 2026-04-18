@@ -3,7 +3,7 @@ import { LoaderCircle } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import Logo from '@monetr/interface/assets/Logo';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useAfterCheckout } from '@monetr/interface/hooks/useAfterCheckout';
 
 export default function AfterCheckoutPage(): JSX.Element {
@@ -36,9 +36,9 @@ export default function AfterCheckoutPage(): JSX.Element {
           <Logo className='w-1/3' />
         </div>
         <div className='w-full pt-2.5 pb-2.5'>
-          <MSpan className='w-full text-center' size='xl'>
+          <Typography className='w-full text-center' size='xl'>
             Getting your account setup...
-          </MSpan>
+          </Typography>
         </div>
         <div className='w-full pt-2.5 pb-2.5 flex justify-center'>
           <LoaderCircle className='spin' />

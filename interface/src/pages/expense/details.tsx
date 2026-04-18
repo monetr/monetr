@@ -16,8 +16,8 @@ import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
-import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import Typography from '@monetr/interface/components/Typography';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useRemoveSpending } from '@monetr/interface/hooks/useRemoveSpending';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
@@ -52,8 +52,8 @@ export default function ExpenseDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content size-24' />
-        <MSpan className='text-5xl'>Something isn't right...</MSpan>
-        <MSpan className='text-2xl'>There wasn't an expense specified...</MSpan>
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>There wasn't an expense specified...</Typography>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export default function ExpenseDetails(): JSX.Element {
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>One moment...</MSpan>
+        <Typography size='5xl'>One moment...</Typography>
       </div>
     );
   }
@@ -70,8 +70,8 @@ export default function ExpenseDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content size-24' />
-        <MSpan className='text-5xl'>Something isn't right...</MSpan>
-        <MSpan className='text-2xl'>Couldn't find the expense you specified...</MSpan>
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>Couldn't find the expense you specified...</Typography>
       </div>
     );
   }
@@ -84,8 +84,8 @@ export default function ExpenseDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content size-24' />
-        <MSpan className='text-5xl'>Something isn't right...</MSpan>
-        <MSpan className='text-2xl'>This spending object is not an expense...</MSpan>
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>This spending object is not an expense...</Typography>
       </div>
     );
   }
@@ -180,11 +180,11 @@ export default function ExpenseDetails(): JSX.Element {
                 <MerchantIcon className='flex-none' name={spending?.name} />
                 <div className='flex flex-col flex-1 overflow-hidden'>
                   <p className='text-ellipsis truncate min-w-0'>{spending?.name}</p>
-                  <MSpan weight='semibold'>
+                  <Typography size='inherit' weight='semibold'>
                     {locale.formatAmount(spending?.currentAmount, AmountType.Stored)}
                     <span className='font-normal'>of</span>
                     {locale.formatAmount(spending?.targetAmount, AmountType.Stored)}
-                  </MSpan>
+                  </Typography>
                 </div>
               </div>
               <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
@@ -228,7 +228,9 @@ export default function ExpenseDetails(): JSX.Element {
           </div>
           <Divider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>
-            <MSpan className='text-xl my-2'>Expense Timeline</MSpan>
+            <Typography className='my-2' size='xl'>
+              Expense Timeline
+            </Typography>
             <ExpenseTimeline spendingId={spending.spendingId} />
           </div>
         </div>

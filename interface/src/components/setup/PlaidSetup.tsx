@@ -12,9 +12,9 @@ import { useNavigate } from 'react-router-dom';
 
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
-import MSpan from '@monetr/interface/components/MSpan';
 import MSpinner from '@monetr/interface/components/MSpinner';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
+import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
 
 interface PlaidProps {
@@ -182,20 +182,24 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
 
   let inner: React.ReactNode = (
     <div className='flex flex-col justify-center items-center'>
-      <MSpan className='text-2xl font-medium'>Getting Plaid Ready!</MSpan>
-      <MSpan className='text-lg' color='subtle'>
+      <Typography size='2xl' weight='medium'>
+        Getting Plaid Ready!
+      </Typography>
+      <Typography color='subtle' size='lg'>
         One moment while we prepare your connection with Plaid.
-      </MSpan>
+      </Typography>
     </div>
   );
 
   if (settingUp) {
     inner = (
       <div className='flex flex-col justify-center items-center'>
-        <MSpan className='text-2xl font-medium'>Successfully connected with Plaid!</MSpan>
-        <MSpan className='text-lg' color='subtle'>
+        <Typography size='2xl' weight='medium'>
+          Successfully connected with Plaid!
+        </Typography>
+        <Typography color='subtle' size='lg'>
           Hold on a moment while we pull the initial data from Plaid into monetr.
-        </MSpan>
+        </Typography>
       </div>
     );
   }
@@ -211,16 +215,18 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   if (error) {
     inner = (
       <div className='flex flex-col justify-center items-center'>
-        <MSpan className='text-2xl font-medium'>Something isn't quite right</MSpan>
-        <MSpan className='text-lg' color='subtle'>
+        <Typography size='2xl' weight='medium'>
+          Something isn't quite right
+        </Typography>
+        <Typography color='subtle' size='lg'>
           We were not able to get Plaid ready for you at this time, please try again shortly.
-        </MSpan>
-        <MSpan className='text-lg' color='subtle'>
+        </Typography>
+        <Typography color='subtle' size='lg'>
           If the problem continues, please contact support@monetr.app
-        </MSpan>
-        <MSpan className='text-md' color='muted'>
+        </Typography>
+        <Typography color='muted' size='md'>
           Error Message: {error}
-        </MSpan>
+        </Typography>
       </div>
     );
   }
@@ -229,15 +235,15 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
     const backUrl = props.alreadyOnboarded ? '/link/create' : '/setup';
     inner = (
       <div className='flex flex-col justify-center items-center'>
-        <MSpan size='2xl' weight='medium'>
+        <Typography size='2xl' weight='medium'>
           Something isn't quite right
-        </MSpan>
-        <MSpan color='subtle' size='lg'>
+        </Typography>
+        <Typography color='subtle' size='lg'>
           Plaid exited, did you want to set it up later?
-        </MSpan>
-        <MSpan color='subtle' size='md'>
+        </Typography>
+        <Typography color='subtle' size='md'>
           Or <MLink to={backUrl}>go back</MLink> and pick another option?
-        </MSpan>
+        </Typography>
       </div>
     );
   }

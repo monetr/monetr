@@ -1,5 +1,5 @@
-import MSpan from '@monetr/interface/components/MSpan';
 import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/InstitutionLogo';
+import Typography from '@monetr/interface/components/Typography';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useInstitution } from '@monetr/interface/hooks/useInstitution';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
@@ -32,9 +32,9 @@ export default function PlaidBankStatusCard(): JSX.Element {
   return (
     <div className='p-2 group border-[thin] border-dark-monetr-border rounded-lg w-full flex gap-2'>
       <PlaidInstitutionLogo className={mergeTailwind('w-6 h-6', additionalClasses)} link={link} />
-      <MSpan color='subtle' size='sm'>
+      <Typography color='subtle' size='sm'>
         {status}
-      </MSpan>
+      </Typography>
     </div>
   );
 }

@@ -12,7 +12,6 @@ import { layoutVariants } from '@monetr/interface/components/Layout';
 import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLogo from '@monetr/interface/components/MLogo';
-import MSpan from '@monetr/interface/components/MSpan';
 import BetaCodeInput from '@monetr/interface/components/register/BetaCodeInput';
 import TextLink from '@monetr/interface/components/TextLink';
 import Typography from '@monetr/interface/components/Typography';
@@ -217,7 +216,7 @@ export default function Register(): JSX.Element {
           Sign Up
         </FormButton>
         <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
-          <MSpan className='gap-1 inline-block text-center' color='subtle' component='p' size='sm'>
+          <Typography className='gap-1 inline-block text-center' color='subtle' component='p' size='sm'>
             By signing up you agree to monetr's&nbsp;
             <a
               className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
@@ -236,7 +235,7 @@ export default function Register(): JSX.Element {
             >
               Privacy Policy
             </a>
-          </MSpan>
+          </Typography>
         </div>
         <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
           <Typography color='subtle' size='sm'>

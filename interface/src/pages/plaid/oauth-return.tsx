@@ -3,9 +3,9 @@ import { captureEvent } from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
-import MSpan from '@monetr/interface/components/MSpan';
 import MSpinner from '@monetr/interface/components/MSpinner';
 import { OAuthRedirectPlaidLink } from '@monetr/interface/components/Plaid/OAuthRedirectPlaidLink';
+import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
 
 import type { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
@@ -116,7 +116,7 @@ export default function OauthReturn(): JSX.Element {
     if (state.loading || !state.linkToken) {
       return (
         <div>
-          <MSpan size='xl'>One moment...</MSpan>
+          <Typography size='xl'>One moment...</Typography>
           <div className='flex flex-col justify-center items-center'>
             <MSpinner />
           </div>

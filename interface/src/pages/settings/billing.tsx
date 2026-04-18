@@ -8,7 +8,7 @@ import type { ApiResponse } from '@monetr/interface/api/client';
 import Badge from '@monetr/interface/components/Badge';
 import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
 
@@ -50,13 +50,13 @@ export default function SettingsBilling(): JSX.Element {
 
   return (
     <div className='w-full flex flex-col p-4 max-w-xl'>
-      <MSpan className='mb-4' color='emphasis' size='2xl' weight='bold'>
+      <Typography className='mb-4' color='emphasis' size='2xl' weight='bold'>
         Billing
-      </MSpan>
+      </Typography>
       <Divider />
 
       <div className='flex justify-between py-4'>
-        <MSpan>Subscription Status</MSpan>
+        <Typography size='inherit'>Subscription Status</Typography>
         <SubscriptionStatusBadge />
       </div>
       <Divider />

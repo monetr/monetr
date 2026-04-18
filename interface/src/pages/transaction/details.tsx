@@ -16,8 +16,8 @@ import { layoutVariants } from '@monetr/interface/components/Layout';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
-import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import Typography from '@monetr/interface/components/Typography';
 import RemoveTransactionButton from '@monetr/interface/components/transactions/RemoveTransactionButton';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
@@ -146,8 +146,8 @@ export default function TransactionDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>Something isn't right...</MSpan>
-        <MSpan className='text-2xl'>There wasn't an expense specified...</MSpan>
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>There wasn't an expense specified...</Typography>
       </div>
     );
   }
@@ -155,8 +155,8 @@ export default function TransactionDetails(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content h-24 w-24' />
-        <MSpan className='text-5xl'>Something isn't right...</MSpan>
-        <MSpan className='text-2xl'>We weren't able to load details for the transaction specified...</MSpan>
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>We weren't able to load details for the transaction specified...</Typography>
       </div>
     );
   }

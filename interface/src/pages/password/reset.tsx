@@ -8,7 +8,7 @@ import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import useResetPassword from '@monetr/interface/hooks/useResetPassword';
 
 interface ResetPasswordValues {
@@ -87,7 +87,9 @@ export default function PasswordResetNew(): JSX.Element {
         <div className='max-w-[128px] w-full'>
           <MLogo />
         </div>
-        <MSpan className='flex items-center text-center'>{message}</MSpan>
+        <Typography className='flex items-center text-center' size='inherit'>
+          {message}
+        </Typography>
         <FormTextField
           autoComplete='current-password'
           autoFocus
@@ -110,9 +112,9 @@ export default function PasswordResetNew(): JSX.Element {
         </FormButton>
       </div>
       <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
-        <MSpan className='text-sm' color='subtle'>
+        <Typography color='subtle' size='sm'>
           Remembered your password?
-        </MSpan>
+        </Typography>
         <MLink size='sm' to='/login'>
           Sign in
         </MLink>

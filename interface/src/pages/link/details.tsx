@@ -12,8 +12,8 @@ import Divider from '@monetr/interface/components/Divider';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
-import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import Typography from '@monetr/interface/components/Typography';
 import { useBankAccountsForLink } from '@monetr/interface/hooks/useBankAccountsForLink';
 import { useLink } from '@monetr/interface/hooks/useLink';
 import { usePatchLink } from '@monetr/interface/hooks/usePatchLink';
@@ -65,7 +65,7 @@ export default function LinkDetails(): React.JSX.Element {
   if (linkIsLoading || bankAccountsLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>One moment...</MSpan>
+        <Typography size='5xl'>One moment...</Typography>
       </div>
     );
   }
@@ -89,7 +89,9 @@ export default function LinkDetails(): React.JSX.Element {
       <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
-            <MSpan className='text-xl my-2 w-full'>Details</MSpan>
+            <Typography className='my-2 w-full' size='xl'>
+              Details
+            </Typography>
             <FormTextField
               className='w-full'
               data-1p-ignore
@@ -101,7 +103,9 @@ export default function LinkDetails(): React.JSX.Element {
           </div>
           <Divider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>
-            <MSpan className='text-xl my-2'>Accounts</MSpan>
+            <Typography className='my-2' size='xl'>
+              Accounts
+            </Typography>
             <ul className='flex flex-col gap-2'>
               {bankAccounts.map(account => (
                 <BankAccountItem bankAccount={account} key={account.bankAccountId} />
@@ -128,14 +132,14 @@ function BankAccountItem(props: BankAccountItemProps): React.JSX.Element {
       >
         <div className='flex min-w-0 flex-col overflow-hidden grow'>
           <div className='flex gap-2'>
-            <MSpan className='group-hover:underline' color='emphasis' ellipsis size='md' weight='semibold'>
+            <Typography className='group-hover:underline' color='emphasis' ellipsis size='md' weight='semibold'>
               {props.bankAccount.name}
-            </MSpan>
+            </Typography>
             {Boolean(props.bankAccount.deletedAt) && <Badge size='sm'>Archived</Badge>}
           </div>
-          <MSpan color='default' ellipsis size='sm' weight='medium'>
+          <Typography color='default' ellipsis size='sm' weight='medium'>
             {capitalize(props.bankAccount.accountSubType)}
-          </MSpan>
+          </Typography>
         </div>
         <ChevronRight className='text-dark-monetr-content-subtle group-hover:text-dark-monetr-content-emphasis' />
       </Link>

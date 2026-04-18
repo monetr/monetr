@@ -2,7 +2,7 @@ import { Shield } from 'lucide-react';
 
 import { Button } from '@monetr/interface/components/Button';
 import Card from '@monetr/interface/components/Card';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 const showEnableTOTPModal = async () =>
@@ -27,13 +27,13 @@ export default function TOTPCard(): JSX.Element {
           {login.totpEnabledAt ? 'Already Enabled' : 'Enable TOTP'}
         </Button>
       </div>
-      <MSpan color='emphasis' size='md' weight='medium'>
+      <Typography color='emphasis' size='md' weight='medium'>
         Authenticator App (TOTP)
-      </MSpan>
-      <MSpan component='p'>
+      </Typography>
+      <Typography component='p' size='inherit'>
         Get verification codes from an authenticator app such as 1Password or Google Authenticator. It works even if
         your phone is offline.
-      </MSpan>
+      </Typography>
     </Card>
   );
 }

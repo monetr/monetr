@@ -13,9 +13,9 @@ import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectSpending from '@monetr/interface/components/MSelectSpending';
-import MSpan from '@monetr/interface/components/MSpan';
 import { Switch } from '@monetr/interface/components/Switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monetr/interface/components/Tabs';
+import Typography from '@monetr/interface/components/Typography';
 import { type CreateTransactionRequest, useCreateTransaction } from '@monetr/interface/hooks/useCreateTransaction';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
@@ -92,9 +92,9 @@ function NewTransactionModal(): JSX.Element {
         {({ setFieldValue, values }) => (
           <Fragment>
             <div className='flex flex-col'>
-              <MSpan className='mb-2' size='xl' weight='bold'>
+              <Typography className='mb-2' size='xl' weight='bold'>
                 Create A New Transaction
-              </MSpan>
+              </Typography>
 
               {/* 
               TODO I'm like 99% sure there is going to be a bug here where someone could do something like select a

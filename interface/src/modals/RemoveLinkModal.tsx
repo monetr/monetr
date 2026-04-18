@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import { useRemoveLink } from '@monetr/interface/hooks/useRemoveLink';
 import type Link from '@monetr/interface/models/Link';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
@@ -43,16 +43,16 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
     <MModal className='py-4 md:max-w-md' open={modal.visible} ref={ref}>
       <div className='h-full flex flex-col gap-4 p-2 justify-between'>
         <div className='flex flex-col'>
-          <MSpan className='mb-2' size='xl' weight='bold'>
+          <Typography className='mb-2' size='xl' weight='bold'>
             <Trash />
             Remove {props.link.getName()}?
-          </MSpan>
-          <MSpan size='lg' weight='medium'>
+          </Typography>
+          <Typography size='lg' weight='medium'>
             Are you sure you want to remove your {props.link.getName()} data?
-          </MSpan>
-          <MSpan size='lg'>
+          </Typography>
+          <Typography size='lg'>
             All expenses, goals and transactions related to this will be deleted. This cannot be undone.
-          </MSpan>
+          </Typography>
         </div>
         <div className='flex justify-end gap-2'>
           <Button disabled={submitting} onClick={modal.remove} variant='secondary'>

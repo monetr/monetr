@@ -16,7 +16,6 @@ import GoalTimeline from '@monetr/interface/components/goals/GoalTimeline';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
-import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
@@ -185,11 +184,11 @@ export default function GoalDetails(): JSX.Element {
                 <MerchantIcon className='flex-none' name={spending?.name} />
                 <div className='flex flex-col flex-1 overflow-hidden'>
                   <p className='text-ellipsis truncate min-w-0'>{spending?.name}</p>
-                  <MSpan weight='semibold'>
+                  <Typography size='inherit' weight='semibold'>
                     {locale.formatAmount(spending?.currentAmount, AmountType.Stored)}
                     <span className='font-normal'>of</span>
                     {locale.formatAmount(spending?.targetAmount, AmountType.Stored)}
-                  </MSpan>
+                  </Typography>
                 </div>
               </div>
               <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
@@ -233,7 +232,9 @@ export default function GoalDetails(): JSX.Element {
           </div>
           <Divider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>
-            <MSpan className='text-xl my-2'>Goal Timeline</MSpan>
+            <Typography className='my-2' size='xl'>
+              Goal Timeline
+            </Typography>
             <GoalTimeline spendingId={spending.spendingId} />
           </div>
         </div>

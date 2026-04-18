@@ -1,4 +1,4 @@
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import SimilarTransactionItem from '@monetr/interface/components/transactions/SimilarTransactionItem';
 import { useSimilarTransactions } from '@monetr/interface/hooks/useSimilarTransactions';
 import type Transaction from '@monetr/interface/models/Transaction';
@@ -30,9 +30,9 @@ export default function SimilarTransactions(props: SimilarTransactionsProps): JS
 
   return (
     <div className='w-full flex flex-col gap-2'>
-      <MSpan className='pl-4' size='xl' weight='semibold'>
+      <Typography className='pl-4' size='xl' weight='semibold'>
         Similar Transactions
-      </MSpan>
+      </Typography>
       <ul className='w-full flex gap-2 flex-col'>{items}</ul>
     </div>
   );

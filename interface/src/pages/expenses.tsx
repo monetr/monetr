@@ -4,8 +4,8 @@ import { useNavigationType } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import ExpenseItem from '@monetr/interface/components/expenses/ExpenseItem';
-import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import Typography from '@monetr/interface/components/Typography';
 import { useSpendingFiltered } from '@monetr/interface/hooks/useSpendingFiltered';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import { SpendingType } from '@monetr/interface/models/Spending';
@@ -40,7 +40,7 @@ export default function Expenses(): JSX.Element {
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>One moment...</MSpan>
+        <Typography size='5xl'>One moment...</Typography>
       </div>
     );
   }
@@ -49,8 +49,8 @@ export default function Expenses(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content size-24' />
-        <MSpan className='text-5xl'>Something isn't right...</MSpan>
-        <MSpan className='text-2xl'>We weren't able to retrieve expenses at this time...</MSpan>
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>We weren't able to retrieve expenses at this time...</Typography>
       </div>
     );
   }
@@ -86,12 +86,12 @@ function EmptyState(): JSX.Element {
         <div className='w-full flex justify-center space-x-4'>
           <Receipt className='dark:text-dark-monetr-content-muted h-12 w-12' />
         </div>
-        <MSpan className='text-center' color='subtle' size='xl'>
+        <Typography className='text-center' color='subtle' size='xl'>
           You don't have any expenses yet...
-        </MSpan>
-        <MSpan className='text-center' color='subtle' size='lg'>
+        </Typography>
+        <Typography className='text-center' color='subtle' size='lg'>
           Expenses are budgets for recurring spending. Things like your streaming subscription, rent, or car payments.
-        </MSpan>
+        </Typography>
       </div>
     </div>
   );

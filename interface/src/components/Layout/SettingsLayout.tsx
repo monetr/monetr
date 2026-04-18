@@ -2,9 +2,10 @@ import { Settings } from 'lucide-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
 import Divider from '@monetr/interface/components/Divider';
-import { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import { textVariants } from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export default function SettingsLayout(): JSX.Element {
   const config = useAppConfiguration();
@@ -32,10 +33,13 @@ interface SettingTabProps {
 function SettingTab(props: SettingTabProps): JSX.Element {
   const location = useLocation();
   const active = location.pathname === props.to;
-  const className = MSpanDeriveClasses({
-    className: 'cursor-pointer pb-3',
-    weight: active ? 'bold' : 'normal',
-  });
+  const className = mergeTailwind(
+    textVariants({
+      size: 'inherit',
+      weight: active ? 'bold' : 'normal',
+    }),
+    'cursor-pointer pb-3',
+  );
 
   return (
     <Link className={className} to={props.to}>

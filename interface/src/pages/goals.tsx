@@ -4,8 +4,8 @@ import { useNavigationType } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import GoalItem from '@monetr/interface/components/goals/GoalItem';
-import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import Typography from '@monetr/interface/components/Typography';
 import { useSpendingFiltered } from '@monetr/interface/hooks/useSpendingFiltered';
 import { showNewGoalModal } from '@monetr/interface/modals/NewGoalModal';
 import { SpendingType } from '@monetr/interface/models/Spending';
@@ -40,7 +40,7 @@ export default function Goals(): JSX.Element {
   if (isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <MSpan className='text-5xl'>One moment...</MSpan>
+        <Typography size='5xl'>One moment...</Typography>
       </div>
     );
   }
@@ -49,8 +49,8 @@ export default function Goals(): JSX.Element {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartCrack className='dark:text-dark-monetr-content size-24' />
-        <MSpan className='text-5xl'>Something isn't right...</MSpan>
-        <MSpan className='text-2xl'>We weren't able to retrieve goals at this time...</MSpan>
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>We weren't able to retrieve goals at this time...</Typography>
       </div>
     );
   }
@@ -93,13 +93,13 @@ function EmptyState(): JSX.Element {
         <div className='w-full flex justify-center space-x-4'>
           <PiggyBank className='w-16 h-16 dark:text-dark-monetr-content-muted' />
         </div>
-        <MSpan className='text-center' color='subtle' size='xl'>
+        <Typography className='text-center' color='subtle' size='xl'>
           You don't have any goals yet...
-        </MSpan>
-        <MSpan className='text-center' color='subtle' size='lg'>
+        </Typography>
+        <Typography className='text-center' color='subtle' size='lg'>
           Goals are longer budgets that don't recur. They are meant to be used to put money aside for something like
           saving up for a vaction, or paying off a loan.
-        </MSpan>
+        </Typography>
       </div>
     </div>
   );

@@ -9,8 +9,8 @@ import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
-import MSpan from '@monetr/interface/components/MSpan';
 import { Switch } from '@monetr/interface/components/Switch';
+import Typography from '@monetr/interface/components/Typography';
 import SimilarTransactionItem from '@monetr/interface/components/transactions/SimilarTransactionItem';
 import { useRemoveTransaction } from '@monetr/interface/hooks/useRemoveTransaction';
 import type Transaction from '@monetr/interface/models/Transaction';
@@ -82,16 +82,16 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
         {({ setFieldValue, values, isSubmitting }) => (
           <Fragment>
             <div className='flex flex-col gap-stack'>
-              <MSpan className='mb-2' size='xl' weight='bold'>
+              <Typography className='mb-2' size='xl' weight='bold'>
                 <Trash />
                 Remove Transaction
-              </MSpan>
+              </Typography>
               <div className='flex flex-col gap-stack'>
-                <MSpan>Are you sure you want to remove this transaction?</MSpan>
+                <Typography size='inherit'>Are you sure you want to remove this transaction?</Typography>
                 <ul>
                   <SimilarTransactionItem disableNavigate transactionId={transaction.transactionId} />
                 </ul>
-                <MSpan>You will not be able to undo this action.</MSpan>
+                <Typography size='inherit'>You will not be able to undo this action.</Typography>
                 <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string gap-component'>
                   <div className='gap-component'>
                     <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>

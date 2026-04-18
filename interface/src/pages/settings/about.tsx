@@ -1,8 +1,9 @@
 import { format } from 'date-fns';
 
 import Divider from '@monetr/interface/components/Divider';
-import MSpan, { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';
+import Typography, { textVariants } from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export default function SettingsAbout(): JSX.Element {
   const {
@@ -12,77 +13,77 @@ export default function SettingsAbout(): JSX.Element {
   return (
     <div className='w-full flex flex-col p-4 gap-8'>
       <div className='w-full flex flex-col max-w-2xl'>
-        <MSpan className='mb-4' color='emphasis' size='2xl' weight='bold'>
+        <Typography className='mb-4' color='emphasis' size='2xl' weight='bold'>
           About monetr
-        </MSpan>
+        </Typography>
         <Divider />
         <div className='flex flex-col md:flex-row p-4 gap-2'>
-          <MSpan className='md:w-1/3' size='lg' weight='semibold'>
+          <Typography className='md:w-1/3' size='lg' weight='semibold'>
             Version
-          </MSpan>
-          <MSpan className='max-w-fit' component='code' size='lg'>
+          </Typography>
+          <Typography className='max-w-fit' component='code' size='lg'>
             {release || 'Unknown'}
-          </MSpan>
+          </Typography>
         </div>
         <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
-          <MSpan className='md:w-1/3' size='lg' weight='semibold'>
+          <Typography className='md:w-1/3' size='lg' weight='semibold'>
             Revision
-          </MSpan>
-          <MSpan className='max-w-fit' component='code' size='lg'>
+          </Typography>
+          <Typography className='max-w-fit' component='code' size='lg'>
             {revision ? revision.slice(0, 7) : 'Unknown'}
-          </MSpan>
+          </Typography>
         </div>
         <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
-          <MSpan className='md:w-1/3' size='lg' weight='semibold'>
+          <Typography className='md:w-1/3' size='lg' weight='semibold'>
             Build Type
-          </MSpan>
-          <MSpan className='max-w-fit' component='code' size='lg'>
+          </Typography>
+          <Typography className='max-w-fit' component='code' size='lg'>
             {buildType || 'Unknown'}
-          </MSpan>
+          </Typography>
         </div>
         <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
-          <MSpan className='md:w-1/3' size='lg' weight='semibold'>
+          <Typography className='md:w-1/3' size='lg' weight='semibold'>
             Build Time
-          </MSpan>
-          <MSpan className='max-w-fit' component='code' ellipsis size='lg'>
+          </Typography>
+          <Typography className='max-w-fit' component='code' ellipsis size='lg'>
             {format(buildTime, 'LLLL do yyyy, h:mmaaa OOOO')}
-          </MSpan>
+          </Typography>
         </div>
         <Divider />
       </div>
 
       <div className='w-full flex flex-col max-w-2xl'>
-        <MSpan className='mb-4' color='emphasis' size='2xl' weight='bold'>
+        <Typography className='mb-4' color='emphasis' size='2xl' weight='bold'>
           Need Help?
-        </MSpan>
+        </Typography>
         <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
-          <MSpan className='md:w-1/3' size='lg' weight='semibold'>
+          <Typography className='md:w-1/3' size='lg' weight='semibold'>
             Source Code
-          </MSpan>
+          </Typography>
           <AboutHyperlink href='https://github.com/monetr/monetr'>https://github.com/monetr/monetr</AboutHyperlink>
         </div>
         <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
-          <MSpan className='md:w-1/3' size='lg' weight='semibold'>
+          <Typography className='md:w-1/3' size='lg' weight='semibold'>
             Email
-          </MSpan>
+          </Typography>
           <AboutHyperlink href='mailto:support@monetr.app'>support@monetr.app</AboutHyperlink>
         </div>
         <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
-          <MSpan className='md:w-1/3' size='lg' weight='semibold'>
+          <Typography className='md:w-1/3' size='lg' weight='semibold'>
             Github Discussions
-          </MSpan>
+          </Typography>
           <AboutHyperlink href='https://github.com/monetr/monetr/discussions'>
             https://github.com/monetr/monetr/discussions
           </AboutHyperlink>
@@ -90,25 +91,25 @@ export default function SettingsAbout(): JSX.Element {
         <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
-          <MSpan className='md:w-1/3' size='lg' weight='semibold'>
+          <Typography className='md:w-1/3' size='lg' weight='semibold'>
             Discord
-          </MSpan>
+          </Typography>
           <AboutHyperlink href='https://discord.gg/68wTCXrhuq'>Join Discord Server</AboutHyperlink>
         </div>
         <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
-          <MSpan className='md:w-1/3' size='lg' weight='semibold'>
+          <Typography className='md:w-1/3' size='lg' weight='semibold'>
             Terms & Conditions
-          </MSpan>
+          </Typography>
           <AboutHyperlink href='https://monetr.app/policy/terms'>https://monetr.app/policy/terms</AboutHyperlink>
         </div>
         <Divider />
 
         <div className='flex flex-col md:flex-row p-4 gap-2'>
-          <MSpan className='md:w-1/3' size='lg' weight='semibold'>
+          <Typography className='md:w-1/3' size='lg' weight='semibold'>
             Privacy Policy
-          </MSpan>
+          </Typography>
           <AboutHyperlink href='https://monetr.app/policy/privacy'>https://monetr.app/policy/privacy</AboutHyperlink>
         </div>
         <Divider />
@@ -123,11 +124,10 @@ interface AboutHyperlinkProps {
 }
 
 function AboutHyperlink(props: AboutHyperlinkProps): JSX.Element {
-  const className = MSpanDeriveClasses({
-    size: 'lg',
-    className:
-      'block dark:text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline text-ellipsis min-w-0 truncate',
-  });
+  const className = mergeTailwind(
+    textVariants({ size: 'lg' }),
+    'block dark:text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline text-ellipsis min-w-0 truncate',
+  );
 
   return (
     <a className={className} href={props.href} rel='noopener' target='_blank'>

@@ -10,7 +10,7 @@ import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
-import MSpan from '@monetr/interface/components/MSpan';
+import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
 
 interface ChangePasswordValues {
@@ -88,9 +88,9 @@ function ChangePasswordModal(): JSX.Element {
         validate={validate}
       >
         <div className='flex flex-col'>
-          <MSpan className='mb-2' size='xl' weight='bold'>
+          <Typography className='mb-2' size='xl' weight='bold'>
             Change Your Password
-          </MSpan>
+          </Typography>
           <FormTextField
             autoComplete='current-password'
             autoFocus
