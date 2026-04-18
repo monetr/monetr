@@ -240,7 +240,7 @@ func TestRemoveLink(t *testing.T) {
 			CurrentAmount:          5000,
 			NextRecurrence:         rule.After(clock.Now(), false),
 			NextContributionAmount: 5000,
-			RuleSet:                rule,
+			Ruleset:                rule,
 			CreatedAt:              clock.Now(),
 		})
 

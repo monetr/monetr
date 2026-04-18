@@ -4,13 +4,14 @@ import (
 	"context"
 	"time"
 
+	"log/slog"
+
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
-	"log/slog"
 )
 
 type SpendingEvent struct {
@@ -46,8 +47,8 @@ func NewSpendingInstructions(log *slog.Logger, spending Spending, fundingInstruc
 		spending: spending,
 		funding:  fundingInstructions,
 	}
-	if spending.RuleSet != nil {
-		instructions.ruleset = spending.RuleSet.Clone()
+	if spending.Ruleset != nil {
+		instructions.ruleset = spending.Ruleset.Clone()
 	}
 
 	return instructions
@@ -236,7 +237,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(
 	input = util.Midnight(input, timezone)
 
 	var rule *RuleSet
-	if s.spending.RuleSet != nil {
+	if s.spending.Ruleset != nil {
 		rule = s.ruleset
 	}
 

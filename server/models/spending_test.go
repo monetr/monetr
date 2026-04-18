@@ -162,7 +162,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   25000,
 			CurrentAmount:  6960,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 			NextRecurrence: nextRecurrence.UTC(),
 		}
 
@@ -199,7 +199,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			TargetAmount:   1500,
 			CurrentAmount:  0,
 			NextRecurrence: nextDueDate,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 		}
 
 		spending.CalculateNextContribution(
@@ -232,7 +232,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			TargetAmount:   1500,
 			CurrentAmount:  0,
 			NextRecurrence: nextDueDate,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 		}
 
 		spending.CalculateNextContribution(
@@ -262,7 +262,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			TargetAmount:   1500,
 			CurrentAmount:  0,
 			NextRecurrence: nextDueDate,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 		}
 
 		spending.CalculateNextContribution(
@@ -291,7 +291,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			TargetAmount:   5000,
 			CurrentAmount:  5000, // We have enough to cover the 11th, but not subsequent ones.
 			NextRecurrence: nextDueDate,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 		}
 		spending.CalculateNextContribution(
 			t.Context(),
@@ -335,7 +335,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			TargetAmount:   5000,
 			CurrentAmount:  16000, // Allocate enough for this funding period and the next one.
 			NextRecurrence: nextDueDate,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 		}
 		spending.CalculateNextContribution(
 			t.Context(),
@@ -386,7 +386,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			TargetAmount:   5000,
 			CurrentAmount:  5000, // We have enough to cover the 11th, but not subsequent ones.
 			NextRecurrence: nextDueDate,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 		}
 
 		spending.CalculateNextContribution(
@@ -432,7 +432,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			TargetAmount:   5000,
 			CurrentAmount:  0,
 			NextRecurrence: nextDueDate,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 		}
 
 		spending.CalculateNextContribution(
@@ -461,7 +461,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			TargetAmount:   5000,
 			CurrentAmount:  100, // We have enough to cover the 11th, but not subsequent ones.
 			NextRecurrence: nextDueDate,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 		}
 
 		spending.CalculateNextContribution(
@@ -490,7 +490,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			TargetAmount:   20000,
 			CurrentAmount:  1454,
 			NextRecurrence: nextDueDate,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 		}
 
 		spending.CalculateNextContribution(
@@ -520,7 +520,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			TargetAmount:   20000,
 			CurrentAmount:  1454,
 			NextRecurrence: nextDueDate,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 		}
 
 		spending.CalculateNextContribution(
@@ -549,7 +549,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			TargetAmount:   25000,
 			CurrentAmount:  0,
 			NextRecurrence: nextDueDate,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 		}
 
 		spending.CalculateNextContribution(
@@ -611,7 +611,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			CurrentAmount:          0,
 			NextContributionAmount: 0,
 			NextRecurrence:         time.Date(2024, 10, 1, 0, 0, 0, 0, timezone).UTC(),
-			RuleSet:                spendingRule,
+			Ruleset:                spendingRule,
 		}
 		spending.CalculateNextContribution(
 			t.Context(),
@@ -656,7 +656,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			CurrentAmount:          0,
 			NextContributionAmount: 0,
 			NextRecurrence:         spendingRule.After(now, false).UTC(),
-			RuleSet:                spendingRule,
+			Ruleset:                spendingRule,
 		}
 		funding := FundingSchedule{
 			FundingScheduleId: "fund_bogus",
@@ -705,7 +705,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			NextContributionAmount: 0,
 			NextRecurrence:         time.Date(2025, 6, 15, 5, 0, 0, 0, time.UTC),
 			LastRecurrence:         &lastRecurrence,
-			RuleSet:                spendingRule,
+			Ruleset:                spendingRule,
 			IsBehind:               false,
 		}
 		funding := FundingSchedule{

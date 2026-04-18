@@ -3,10 +3,11 @@ package controller
 import (
 	"net/http"
 
+	"log/slog"
+
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
-	"log/slog"
 )
 
 func (c *Controller) getSpending(ctx echo.Context) error {
@@ -107,11 +108,11 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 
 	switch spending.SpendingType {
 	case SpendingTypeExpense:
-		if spending.RuleSet == nil {
+		if spending.Ruleset == nil {
 			return c.badRequest(ctx, "recurrence rule must be specified for expenses")
 		}
 	case SpendingTypeGoal:
-		if spending.RuleSet != nil {
+		if spending.Ruleset != nil {
 			return c.badRequest(ctx, "recurrence rule cannot be specified for goals")
 		}
 	}
@@ -341,10 +342,10 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 	updatedSpending.NextContributionAmount = existingSpending.NextContributionAmount
 
 	if updatedSpending.SpendingType == SpendingTypeGoal {
-		updatedSpending.RuleSet = nil
+		updatedSpending.Ruleset = nil
 	}
 
-	if updatedSpending.SpendingType == SpendingTypeExpense && updatedSpending.RuleSet == nil {
+	if updatedSpending.SpendingType == SpendingTypeExpense && updatedSpending.Ruleset == nil {
 		return c.badRequest(ctx, "Expense must have a recurrence rule provided")
 	}
 
@@ -378,8 +379,8 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 		recalculateSpending = true
 	} else if updatedSpending.FundingScheduleId != existingSpending.FundingScheduleId {
 		recalculateSpending = true
-	} else if !recalculateSpending && updatedSpending.RuleSet != nil {
-		recalculateSpending = updatedSpending.RuleSet.String() == existingSpending.RuleSet.String()
+	} else if !recalculateSpending && updatedSpending.Ruleset != nil {
+		recalculateSpending = updatedSpending.Ruleset.String() == existingSpending.Ruleset.String()
 	}
 
 	// If the paused status of a spending object changes, recalculate the contributions.

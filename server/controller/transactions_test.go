@@ -726,7 +726,7 @@ func TestPutTransactions(t *testing.T) {
 			CurrentAmount:          transaction.Amount * 2,
 			NextContributionAmount: transaction.Amount * 2,
 			NextRecurrence:         spendingRuleOne.After(now, false),
-			RuleSet:                spendingRuleOne,
+			Ruleset:                spendingRuleOne,
 			AccountId:              user.AccountId,
 			BankAccountId:          bank.BankAccountId,
 			FundingScheduleId:      fundingSchedule.FundingScheduleId,

@@ -67,10 +67,12 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
 )
 
 require (
 	aidanwoods.dev/go-result v0.3.1 // indirect
+	github.com/Oudwins/zog v0.22.0
 	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect

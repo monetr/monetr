@@ -156,7 +156,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			TargetAmount:           10000,
 			CurrentAmount:          0,
 			NextContributionAmount: 5000,
-			RuleSet:                spendingRule,
+			Ruleset:                spendingRule,
 			NextRecurrence:         spendingRule.After(clock.Now(), false),
 			CreatedAt:              clock.Now(),
 		})
@@ -293,7 +293,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			CurrentAmount:          0,
 			NextContributionAmount: 5000,
 			IsPaused:               true,
-			RuleSet:                spendingRule,
+			Ruleset:                spendingRule,
 			NextRecurrence:         spendingRule.After(clock.Now(), false),
 			CreatedAt:              clock.Now(),
 		})
@@ -372,7 +372,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			TargetAmount:           10000,
 			CurrentAmount:          10000,
 			NextContributionAmount: 0,
-			RuleSet:                spendingRule,
+			Ruleset:                spendingRule,
 			NextRecurrence:         spendingRule.After(clock.Now(), false),
 			CreatedAt:              clock.Now(),
 		})
@@ -451,7 +451,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			TargetAmount:           10000,
 			CurrentAmount:          0,
 			NextContributionAmount: 5000,
-			RuleSet:                spendingRule,
+			Ruleset:                spendingRule,
 			NextRecurrence:         spendingRule.After(clock.Now(), false),
 			CreatedAt:              clock.Now(),
 		})
@@ -536,7 +536,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			CurrentAmount:          3000,
 			UsedAmount:             7000,
 			NextContributionAmount: 0,
-			RuleSet:                spendingRule,
+			Ruleset:                spendingRule,
 			NextRecurrence:         spendingRule.After(clock.Now(), false),
 			CreatedAt:              clock.Now(),
 		})
@@ -614,7 +614,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			CurrentAmount:          2000,
 			UsedAmount:             3000,
 			NextContributionAmount: 1000,
-			RuleSet:                spendingRule,
+			Ruleset:                spendingRule,
 			NextRecurrence:         spendingRule.After(clock.Now(), false),
 			CreatedAt:              clock.Now(),
 		})
@@ -699,7 +699,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			TargetAmount:           10000,
 			CurrentAmount:          0,
 			NextContributionAmount: 5000,
-			RuleSet:                spendingRule,
+			Ruleset:                spendingRule,
 			NextRecurrence:         spendingRule.After(clock.Now(), false),
 			CreatedAt:              clock.Now(),
 		})
@@ -715,7 +715,7 @@ func TestProcessFundingSchedule(t *testing.T) {
 			TargetAmount:           8000,
 			CurrentAmount:          0,
 			NextContributionAmount: 4000,
-			RuleSet:                spendingRule2,
+			Ruleset:                spendingRule2,
 			NextRecurrence:         spendingRule2.After(clock.Now(), false),
 			CreatedAt:              clock.Now(),
 		})

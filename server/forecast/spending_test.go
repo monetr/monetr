@@ -36,7 +36,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				TargetAmount:   5000,
 				CurrentAmount:  0,
 				NextRecurrence: time.Date(2022, 10, 8, 0, 0, 0, 0, timezone),
-				RuleSet:        spendingRule,
+				Ruleset:        spendingRule,
 			},
 			fundingInstructions,
 		)
@@ -106,7 +106,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				TargetAmount:   5000,
 				CurrentAmount:  5000,
 				NextRecurrence: time.Date(2024, 3, 2, 0, 0, 0, 0, timezone),
-				RuleSet:        spendingRule,
+				Ruleset:        spendingRule,
 			},
 			fundingInstructions,
 		)
@@ -235,7 +235,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				TargetAmount:   7500,
 				CurrentAmount:  0,
 				NextRecurrence: time.Date(2022, 9, 16, 0, 0, 0, 0, timezone),
-				RuleSet:        spendingRule,
+				Ruleset:        spendingRule,
 			},
 			fundingInstructions,
 		)
@@ -340,7 +340,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				TargetAmount:   7500,
 				CurrentAmount:  0,
 				NextRecurrence: time.Date(2022, 9, 16, 0, 0, 0, 0, timezone),
-				RuleSet:        spendingRule,
+				Ruleset:        spendingRule,
 			},
 			fundingInstructions,
 		)
@@ -454,7 +454,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				TargetAmount:   1395,
 				CurrentAmount:  1395,
 				NextRecurrence: time.Date(2022, 1, 8, 0, 0, 0, 0, timezone),
-				RuleSet:        spendingRule,
+				Ruleset:        spendingRule,
 			},
 			fundingInstructions,
 		)
@@ -492,7 +492,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				TargetAmount:   1395,
 				CurrentAmount:  1395,
 				NextRecurrence: time.Date(2022, 1, 7, 0, 0, 0, 0, timezone),
-				RuleSet:        spendingRule,
+				Ruleset:        spendingRule,
 			},
 			fundingInstructions,
 		)
@@ -562,7 +562,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				TargetAmount:   1000,
 				CurrentAmount:  0,
 				NextRecurrence: start,
-				RuleSet:        nil,
+				Ruleset:        nil,
 			},
 			fundingInstructions,
 		).(*spendingInstructionBase)
@@ -601,7 +601,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				CurrentAmount:  48394,
 				UsedAmount:     319861,
 				NextRecurrence: time.Date(2024, 5, 16, 0, 0, 0, 0, timezone),
-				RuleSet:        nil,
+				Ruleset:        nil,
 			},
 			fundingInstructions,
 		).(*spendingInstructionBase)
@@ -763,7 +763,7 @@ func TestSpendingInstructionBase_GetNextInflowEventAfter(t *testing.T) {
 			SpendingType:   models.SpendingTypeExpense,
 			TargetAmount:   25000,
 			CurrentAmount:  6960,
-			RuleSet:        spendingRule,
+			Ruleset:        spendingRule,
 			NextRecurrence: nextRecurrence.UTC(),
 		}
 
