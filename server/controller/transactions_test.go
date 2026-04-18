@@ -817,6 +817,44 @@ func TestPutTransactions(t *testing.T) {
 		assert.Equal(t, originalTransaction.LunchFlowTransactionId, updatedTransaction.LunchFlowTransactionId, "lunch flow transaction ID must not change")
 	})
 
+	t.Run("update does not overwrite spending amount", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction, transaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			// Set an initial spending amount on the transaction directly to simulate
+			// a transaction that was already spent from an expense.
+			originalTransaction.SpendingAmount = myownsanity.Pointer(int64(500))
+			testutils.MustDBUpdate(t, &originalTransaction)
+			transaction = originalTransaction
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		// Attempt to override the spending amount via user input.
+		transaction.SpendingAmount = myownsanity.Pointer(int64(9999))
+		assert.NotEqual(t, *originalTransaction.SpendingAmount, *transaction.SpendingAmount, "make sure the spending amounts dont somehow match")
+
+		response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", transaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(transaction).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(transaction.TransactionId)
+		// Make sure the spending amount was not overwritten by user input.
+		response.JSON().Path("$.transaction.spendingAmount").IsEqual(*originalTransaction.SpendingAmount)
+	})
+
 	t.Run("cant put someone elses transaction", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string

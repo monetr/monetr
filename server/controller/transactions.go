@@ -299,6 +299,7 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 	transaction.OriginalName = existingTransaction.OriginalName
 	transaction.OriginalMerchantName = existingTransaction.OriginalMerchantName
 	transaction.LunchFlowTransactionId = existingTransaction.LunchFlowTransactionId
+	transaction.SpendingAmount = existingTransaction.SpendingAmount
 	transaction.Source = existingTransaction.Source
 	transaction.CreatedAt = existingTransaction.CreatedAt
 	// TODO Handle un-soft-deleting a transaction.
