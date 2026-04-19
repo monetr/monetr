@@ -9,12 +9,12 @@ import (
 var (
 	CreateLink = zog.Struct(zog.Shape{
 		"institutionName": Name().Required(),
-		"description":     Description().Optional(),
+		"description":     z.Ptr(Description().Optional()),
 		"lunchFlowLinkId": z.Ptr(ID[models.LunchFlowLink]().Optional()),
 	})
 
 	PatchLink = zog.Struct(zog.Shape{
 		"institutionName": Name().Optional(),
-		"description":     Description().Optional(),
+		"description":     z.Ptr(Description().Optional()),
 	})
 )
