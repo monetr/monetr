@@ -1,11 +1,13 @@
 # Logging Configuration
 
-monetr supports a text and JSON log formatter.
+monetr supports a text and JSON log formatter. However if you do not need to parse the log's using something like
+Promtail or Fluentd, then you can use the `pretty` log formatter which will structure the log format more towards humans
+needing to be able to read it easily. monetr defaults to the `text` log format though.
 
 ```yaml title="config.yaml"
 logging:
   level: "<error|warn|info|debug|trace>"
-  format: "<text|json>"
+  format: "<text|pretty|json>"
 ```
 
 The default log level for monetr is `info`. Lower log levels can create a lot of noise, `debug` will log each HTTP

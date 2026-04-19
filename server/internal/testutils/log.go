@@ -7,6 +7,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/logging"
 )
 
@@ -115,7 +116,10 @@ func GetTestLog(t *testing.T) (*slog.Logger, *TestLogHook) {
 	}
 
 	hook := &TestLogHook{}
-	base := logging.NewLoggerWithLevel("trace")
+	base := logging.NewLoggerWithConfig(config.Logging{
+		Level:  "trace",
+		Format: "pretty",
+	})
 
 	combined := slog.New(&multiHandler{
 		handlers: []slog.Handler{
