@@ -445,7 +445,7 @@ func (c *Controller) patchSpending(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to verify spending exists")
 	}
 
-	updatedSpending, err := parseAuthenticatedRequest(
+	updatedSpending, err := parse(
 		c,
 		ctx,
 		schema.PatchSpending,

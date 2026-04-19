@@ -7,11 +7,9 @@ import (
 	"time"
 
 	"github.com/Oudwins/zog"
-	"github.com/Oudwins/zog/parsers/zjson"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
@@ -58,6 +56,27 @@ func (c *Controller) mustGetTimezone(ctx echo.Context) *time.Location {
 	timezone, err := account.GetTimezone()
 	if err != nil {
 		panic(err)
+	}
+
+	return timezone
+}
+
+// mustGetTimezoneUnsafe will never panic. It will attempt to retrieve the
+// current user's timezone, but if that fails it will fall back to UTC.
+func (c *Controller) mustGetTimezoneUnsafe(ctx echo.Context) *time.Location {
+	accountId, err := c.getAccountId(ctx)
+	if err != nil {
+		return time.UTC
+	}
+
+	account, err := c.Accounts.GetAccount(c.getContext(ctx), accountId)
+	if err != nil {
+		return time.UTC
+	}
+
+	timezone, err := account.GetTimezone()
+	if err != nil {
+		return time.UTC
 	}
 
 	return timezone
@@ -315,62 +334,43 @@ func enqueueJob[T any](
 	)
 }
 
-// parseUnauthenticatedRequest is similar to [parseAuthenticatedRequest] however
-// if the schema provided requires ANY user level context such as the user's
-// timezone or anything, then this function will panic.
-func parseUnauthenticatedRequest[T any](
+// parse takes the current request context, controller, schema and a base object
+// and produces a copy of the base object with the request body parsed into it.
+// It will overwrite fields specified in the schema if they exist in the
+// request.
+func parse[T any](
 	c *Controller,
 	ctx echo.Context,
 	requestSchema *zog.StructSchema,
-	dest *T,
-	options ...zog.ExecOption,
+	base *T,
 ) (T, error) {
-	span := crumbs.StartFnTrace(c.getContext(ctx))
-	defer span.Finish()
-
-	result := *dest
-	issues := requestSchema.Parse(
-		zjson.Decode(ctx.Request().Body),
-		&result,
-		append(
-			options,
-			zog.WithCtxValue("clock", c.Clock),
-			schema.WithContext(span.Context()),
-		)...,
+	result, err := schema.Parse(
+		c.getContext(ctx),
+		requestSchema,
+		base,
+		ctx.Request().Body,
+		schema.ParseMetadata{
+			Clock:    c.Clock,
+			Timezone: c.mustGetTimezoneUnsafe(ctx),
+		},
 	)
-	if len(issues) > 0 {
+	switch err := errors.Cause(err).(type) {
+	case nil:
+		return result, nil
+	case schema.Error:
 		return result, echo.NewHTTPError(
 			http.StatusBadRequest,
 			"Invalid request",
-		).WithInternal(schema.NewIssueError(issues))
+		).WithInternal(err)
+	case *json.SyntaxError:
+		return result, echo.NewHTTPError(
+			http.StatusBadRequest,
+			"malformed json",
+		).WithInternal(err)
+	default:
+		return result, echo.NewHTTPError(
+			http.StatusBadRequest,
+			"Invalid request",
+		).WithInternal(err)
 	}
-
-	return result, nil
-}
-
-// parseAuthenticatedRequest takes the current request context, the desired
-// schema to validate the request against, and a destination object. However
-// parseAuthenticatedRequest does not modify the provided destination object,
-// instead it returns a copy of it with the parsed data. This way, if needed,
-// the controller can make additional comparisons from the original object to
-// the resulting object. If an error is returned it can be surfaced directly. If
-// the dest parameter is nil then this will panic.
-// The difference between [parseUnauthenticatedRequest] and
-// [parseAuthenticatedRequest] is that [parseAuthenticatedRequest] requires
-// certain user context to exist in order to succeed without panicking.
-func parseAuthenticatedRequest[T any](
-	c *Controller,
-	ctx echo.Context,
-	schema *zog.StructSchema,
-	dest *T,
-) (T, error) {
-	return parseUnauthenticatedRequest(
-		c,
-		ctx,
-		schema,
-		dest,
-		// Since we are authenticated we can access some information like the user's
-		// timezone! There will eventually be other things here.
-		zog.WithCtxValue("timezone", c.mustGetTimezone(ctx)),
-	)
 }

@@ -82,7 +82,7 @@ func Password() *z.StringSchema[string] {
 		Required().
 		Trim().
 		Min(8, z.Message("password must be at least 8 characters")).
-		Max(71, z.Message("password cannot be longer than 71 characters"))
+		Max(72, z.Message("password cannot be longer than 72 characters"))
 }
 
 func Timezone() *z.StringSchema[string] {
@@ -99,7 +99,6 @@ func Timezone() *z.StringSchema[string] {
 						"timezone": val,
 					}),
 				)
-				return false
 			}
 
 			return true

@@ -81,7 +81,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	}
 
 	var err error
-	loginRequest, err = parseUnauthenticatedRequest(
+	loginRequest, err = parse(
 		c,
 		ctx,
 		loginSchema,
@@ -301,11 +301,11 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 func (c *Controller) postMultifactor(ctx echo.Context) error {
 	c.scrubSentryBody(ctx)
 	var request struct {
-		TOTP string `json:"totp"`
+		Totp string `json:"totp"`
 	}
 	var err error
 	// Technically we are partially authenticated here?
-	request, err = parseUnauthenticatedRequest(
+	request, err = parse(
 		c,
 		ctx,
 		schema.AuthenticationTOTP,
@@ -321,7 +321,7 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 		return c.unauthorizedError(ctx, err)
 	}
 
-	if err := me.Login.VerifyTOTP(request.TOTP, c.Clock.Now()); err != nil {
+	if err := me.Login.VerifyTOTP(request.Totp, c.Clock.Now()); err != nil {
 		return c.returnError(ctx, http.StatusUnauthorized, "Invalid TOTP code")
 	}
 
@@ -411,10 +411,10 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		BetaCode  *string `json:"betaCode"`
 	}
 	var err error
-	registerRequest, err = parseUnauthenticatedRequest(
+	registerRequest, err = parse(
 		c,
 		ctx,
-		schema.AuthenticationRegister,
+		registerSchema,
 		&registerRequest,
 	)
 	if err != nil {
@@ -620,7 +620,7 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 		Token string `json:"token"`
 	}
 	var err error
-	verifyRequest, err = parseUnauthenticatedRequest(
+	verifyRequest, err = parse(
 		c,
 		ctx,
 		schema.AuthenticationVerifyEmail,
@@ -676,7 +676,7 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 		Captcha string `json:"captcha"`
 	}
 	var err error
-	request, err = parseUnauthenticatedRequest(
+	request, err = parse(
 		c,
 		ctx,
 		resendSchema,

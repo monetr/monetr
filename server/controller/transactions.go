@@ -121,7 +121,7 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 
 		AdjustsBalance bool `json:"adjustsBalance"`
 	}
-	request, err = parseAuthenticatedRequest(
+	request, err = parse(
 		c,
 		ctx,
 		schema.CreateManualTransaction.Merge(schema.AdjustsBalance),
@@ -375,7 +375,7 @@ func (c *Controller) patchTransaction(ctx echo.Context) error {
 	}
 
 	var transaction Transaction
-	transaction, err = parseAuthenticatedRequest(
+	transaction, err = parse(
 		c,
 		ctx,
 		patchSchema,

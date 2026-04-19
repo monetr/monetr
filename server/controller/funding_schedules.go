@@ -293,7 +293,7 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to verify funding schedule exists")
 	}
 
-	fundingSchedule, err := parseAuthenticatedRequest(
+	fundingSchedule, err := parse(
 		c,
 		ctx,
 		schema.PatchFundingSchedule,

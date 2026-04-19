@@ -40,7 +40,11 @@ var (
 	})
 
 	BetaCode = z.Struct(z.Shape{
-		"betaCode": z.Ptr(z.String().Required().Max(100)).NotNil(),
+		"betaCode": z.Ptr(
+			z.String().
+				Required(z.Message("beta code is required")).
+				Max(100),
+		).NotNil(z.Message("beta code is required")),
 	})
 )
 

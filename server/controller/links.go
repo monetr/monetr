@@ -46,7 +46,7 @@ func (c *Controller) postLinks(ctx echo.Context) error {
 		LinkType: ManualLinkType,
 	}
 	var err error
-	link, err = parseAuthenticatedRequest(
+	link, err = parse(
 		c,
 		ctx,
 		schema.CreateLink,
@@ -157,7 +157,7 @@ func (c *Controller) patchLink(ctx echo.Context) error {
 	}
 
 	link := *existingLink
-	link, err = parseAuthenticatedRequest(
+	link, err = parse(
 		c,
 		ctx,
 		schema.PatchLink,

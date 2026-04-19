@@ -10,6 +10,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/mock_stripe"
@@ -819,28 +820,22 @@ func TestRegister(t *testing.T) {
 	t.Run("password too long", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 
-		var registerRequest struct {
-			Email     string `json:"email"`
-			Password  string `json:"password"`
-			FirstName string `json:"firstName"`
-			LastName  string `json:"lastName"`
-			Locale    string `json:"locale"`
-			Timezone  string `json:"timezone"`
-		}
-		registerRequest.Email = testutils.GetUniqueEmail(t)
-		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 100)
-		registerRequest.FirstName = gofakeit.FirstName()
-		registerRequest.LastName = gofakeit.LastName()
-		registerRequest.Locale = "en_US"
-		registerRequest.Timezone = "America/Chicago"
-
 		{ // Register a new user.
 			response := e.POST(`/api/authentication/register`).
-				WithJSON(registerRequest).
+				WithJSON(map[string]any{
+					"email":     testutils.GetUniqueEmail(t),
+					"password":  gofakeit.Password(true, true, true, true, false, 100),
+					"firstName": gofakeit.FirstName(),
+					"lastName":  gofakeit.LastName(),
+					"locale":    "en_US",
+					"timezone":  "America/Chicago",
+				}).
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("Password must be less than 72 characters")
+			response.JSON().Path("$.issues.password").IsEqual([]string{
+				"password cannot be longer than 72 characters",
+			})
 		}
 	})
 
@@ -849,27 +844,21 @@ func TestRegister(t *testing.T) {
 		config.Beta.EnableBetaCodes = true
 		_, e := NewTestApplicationWithConfig(t, config)
 
-		var registerRequest struct {
-			Email     string `json:"email"`
-			Password  string `json:"password"`
-			FirstName string `json:"firstName"`
-			LastName  string `json:"lastName"`
-			Locale    string `json:"locale"`
-			Timezone  string `json:"timezone"`
-		}
-		registerRequest.Email = testutils.GetUniqueEmail(t)
-		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
-		registerRequest.FirstName = gofakeit.FirstName()
-		registerRequest.LastName = gofakeit.LastName()
-		registerRequest.Locale = "en_US"
-		registerRequest.Timezone = "America/Chicago"
-
 		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"password":  gofakeit.Password(true, true, true, true, false, 64),
+				"firstName": gofakeit.FirstName(),
+				"lastName":  gofakeit.LastName(),
+				"locale":    "en_US",
+				"timezone":  "America/Chicago",
+			}).
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("beta code required for registration")
+		response.JSON().Path("$.issues.betaCode").IsEqual([]string{
+			"beta code is required",
+		})
 	})
 
 	t.Run("invalid beta code", func(t *testing.T) {
@@ -877,25 +866,16 @@ func TestRegister(t *testing.T) {
 		config.Beta.EnableBetaCodes = true
 		_, e := NewTestApplicationWithConfig(t, config)
 
-		var registerRequest struct {
-			Email     string `json:"email"`
-			Password  string `json:"password"`
-			FirstName string `json:"firstName"`
-			LastName  string `json:"lastName"`
-			BetaCode  string `json:"betaCode"`
-			Locale    string `json:"locale"`
-			Timezone  string `json:"timezone"`
-		}
-		registerRequest.Email = testutils.GetUniqueEmail(t)
-		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
-		registerRequest.FirstName = gofakeit.FirstName()
-		registerRequest.LastName = gofakeit.LastName()
-		registerRequest.BetaCode = "123456"
-		registerRequest.Locale = "en_US"
-		registerRequest.Timezone = "America/Chicago"
-
 		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"password":  gofakeit.Password(true, true, true, true, false, 32),
+				"firstName": gofakeit.FirstName(),
+				"lastName":  gofakeit.LastName(),
+				"locale":    "en_US",
+				"timezone":  "America/Chicago",
+				"betaCode":  "123456",
+			}).
 			Expect()
 
 		response.Status(http.StatusNotFound)
@@ -904,27 +884,22 @@ func TestRegister(t *testing.T) {
 
 	t.Run("bad password", func(t *testing.T) {
 		_, e := NewTestApplication(t)
-		var registerRequest struct {
-			Email     string `json:"email"`
-			Password  string `json:"password"`
-			FirstName string `json:"firstName"`
-			LastName  string `json:"lastName"`
-			Locale    string `json:"locale"`
-			Timezone  string `json:"timezone"`
-		}
-		registerRequest.Email = testutils.GetUniqueEmail(t)
-		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 4)
-		registerRequest.FirstName = gofakeit.FirstName()
-		registerRequest.LastName = gofakeit.LastName()
-		registerRequest.Locale = "en_US"
-		registerRequest.Timezone = "America/Chicago"
 
 		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"password":  gofakeit.Password(true, true, true, true, false, 4),
+				"firstName": gofakeit.FirstName(),
+				"lastName":  gofakeit.LastName(),
+				"locale":    "en_US",
+				"timezone":  "America/Chicago",
+			}).
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Password must be at least 8 characters")
+		response.JSON().Path("$.issues.password").IsEqual([]string{
+			"password must be at least 8 characters",
+		})
 	})
 
 	t.Run("bad timezone", func(t *testing.T) {
@@ -949,7 +924,9 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("failed to parse timezone")
+		response.JSON().Path("$.issues.timezone").IsEqual([]string{
+			"timezone not recognized by server",
+		})
 	})
 
 	t.Run("valid captcha", func(t *testing.T) {
@@ -1004,39 +981,52 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("invalid captcha", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
 		config := NewTestApplicationConfig(t)
 		config.ReCAPTCHA.Enabled = true
 		config.ReCAPTCHA.VerifyRegister = true
 		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
 		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
-		_, e := NewTestApplicationWithConfig(t, config)
+		app, e := NewTestApplicationWithConfig(t, config)
 
-		var registerRequest struct {
-			Email     string `json:"email"`
-			Password  string `json:"password"`
-			FirstName string `json:"firstName"`
-			LastName  string `json:"lastName"`
-			Locale    string `json:"locale"`
-			Timezone  string `json:"timezone"`
-			Captcha   string `json:"captcha"`
-		}
-		registerRequest.Email = testutils.GetUniqueEmail(t)
-		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
-		registerRequest.FirstName = gofakeit.FirstName()
-		registerRequest.LastName = gofakeit.LastName()
-		registerRequest.Locale = "en_US"
-		registerRequest.Timezone = "America/Chicago"
-		registerRequest.Captcha = "I am not a valid captcha"
+		mock_http_helper.NewHttpMockJsonResponder(t,
+			"POST", "https://www.google.com/recaptcha/api/siteverify",
+			func(t *testing.T, request *http.Request) (any, int) {
+				return map[string]any{
+					"success":      false,
+					"challenge_ts": app.Clock.Now(),
+					"hostname":     "monetr.mini",
+					"score":        0,
+					"error-codes":  []string{"invalid-input-response", "bad-request"},
+				}, http.StatusOK
+			},
+			nil,
+		)
 
 		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"password":  gofakeit.Password(true, true, true, true, false, 32),
+				"firstName": gofakeit.FirstName(),
+				"lastName":  gofakeit.LastName(),
+				"locale":    "en_US",
+				"timezone":  "America/Chicago",
+				"captcha":   "I am not a valid captcha",
+			}).
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().
-			Path("$.error").
-			String().
-			IsEqual("valid ReCAPTCHA is required")
+		response.JSON().Path("$.issues.captcha").IsEqual([]string{
+			"ReCAPTCHA is not valid",
+		})
+
+		AssertNoTokenCookie(t, response)
+
+		assert.Equal(t, map[string]int{
+			"POST https://www.google.com/recaptcha/api/siteverify": 1,
+		}, httpmock.GetCallCountInfo())
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
@@ -1046,7 +1036,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("invalid JSON body")
+		response.JSON().Path("$.error").IsEqual("malformed json")
 	})
 
 	t.Run("email already exists", func(t *testing.T) {
@@ -1193,12 +1183,27 @@ func TestRegister(t *testing.T) {
 		registerRequest.LastName = gofakeit.LastName()
 		registerRequest.Timezone = "America/Chicago"
 
-		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
-			Expect()
+		{
+			response := e.POST(`/api/authentication/register`).
+				WithJSON(registerRequest).
+				Expect()
 
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Locale must be specified to register")
+			response.Status(http.StatusOK)
+		}
+
+		token := GivenILogin(t, e, registerRequest.Email, registerRequest.Password)
+		{ // Get the current user to see what the state of the account is.
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").String().IsASCII()
+			// Make sure that when we sign up without a locale, we default to
+			// something.
+			response.JSON().Path("$.user.account.locale").IsEqual(consts.DefaultLocale)
+		}
 	})
 
 	t.Run("invalid locale", func(t *testing.T) {

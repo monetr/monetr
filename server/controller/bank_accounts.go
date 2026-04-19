@@ -94,7 +94,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	}
 
 	var bankAccount BankAccount
-	bankAccount, err = parseAuthenticatedRequest(
+	bankAccount, err = parse(
 		c,
 		ctx,
 		schema.CreateBankAccount.Merge(schema.WithDefaultCurrency(currencyCode)),
