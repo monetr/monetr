@@ -59,9 +59,9 @@ type Transaction struct {
 	Categories           []string          `json:"categories" pg:"categories,type:'text[]'"`
 	Category             *string           `json:"category" pg:"category"`
 	Date                 time.Time         `json:"date" pg:"date,notnull"`
-	Name                 string            `json:"name,omitempty" pg:"name"`
+	Name                 string            `json:"name" pg:"name"`
 	OriginalName         string            `json:"originalName" pg:"original_name,notnull"`
-	MerchantName         string            `json:"merchantName,omitempty" pg:"merchant_name"`
+	MerchantName         string            `json:"merchantName" pg:"merchant_name"`
 	OriginalMerchantName string            `json:"originalMerchantName" pg:"original_merchant_name"`
 	IsPending            bool              `json:"isPending" pg:"is_pending,notnull,use_zero"`
 	UploadIdentifier     *string           `json:"uploadIdentifier" pg:"upload_identifier"`

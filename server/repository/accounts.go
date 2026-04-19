@@ -60,19 +60,17 @@ func (p *accountsRepositoryBase) GetAccount(
 
 	span.Status = sentry.SpanStatusOK
 
-	log := p.log.With("accountId", accountId)
-
 	var account Account
 	if err := p.cache.GetEz(
 		span.Context(),
 		buildAccountCacheKey(accountId),
 		&account,
 	); err != nil {
-		log.ErrorContext(span.Context(), "failed to retrieve account data from cache", "err", err)
+		p.log.ErrorContext(span.Context(), "failed to retrieve account data from cache", "err", err)
 	}
 
 	if !account.AccountId.IsZero() {
-		log.Log(span.Context(), slog.LevelDebug-4, "returning account from cache")
+		p.log.Log(span.Context(), slog.LevelDebug-4, "returning account from cache")
 		return &account, nil
 	}
 
@@ -90,7 +88,11 @@ func (p *accountsRepositoryBase) GetAccount(
 		account,
 		30*time.Minute,
 	); err != nil {
-		log.WarnContext(span.Context(), "failed to store account in cache", "err", err)
+		p.log.WarnContext(
+			span.Context(),
+			"failed to store account in cache",
+			"err", err,
+		)
 	}
 
 	return &account, nil

@@ -157,7 +157,7 @@ func TestPostTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Transaction must have a name")
+		response.JSON().Path("$.issues.name").IsEqual([]string{"is required"})
 	})
 
 	t.Run("date is required", func(t *testing.T) {
@@ -177,12 +177,13 @@ func TestPostTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Transaction must have a date")
+		response.JSON().Path("$.issues.date").IsEqual([]string{"is required"})
 	})
 
 	t.Run("amount is required", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.Must(t, time.LoadLocation, user.Account.Timezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 
@@ -193,17 +194,18 @@ func TestPostTransactions(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"name": "Foobar",
-				"date": app.Clock.Now(),
+				"date": util.Midnight(app.Clock.Now(), timezone),
 			}).
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Transaction must have a non-zero amount")
+		response.JSON().Path("$.issues.amount").IsEqual([]string{"is required"})
 	})
 
 	t.Run("bogus spending object", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.Must(t, time.LoadLocation, user.Account.Timezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 
@@ -214,7 +216,7 @@ func TestPostTransactions(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"name":       "Foobar",
-				"date":       app.Clock.Now(),
+				"date":       util.Midnight(app.Clock.Now(), timezone),
 				"amount":     100,
 				"spendingId": "spnd_bogus",
 			}).
@@ -229,8 +231,9 @@ func TestPostTransactions(t *testing.T) {
 		var token string
 		var bank BankAccount
 
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.Must(t, time.LoadLocation, user.Account.Timezone)
 		{ // Seed the data for the test.
-			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
@@ -259,7 +262,7 @@ func TestPostTransactions(t *testing.T) {
 					"amount":         100, // $1
 					"isPending":      false,
 					"name":           "I spent some money",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 				}).
 				Expect()
@@ -279,7 +282,7 @@ func TestPostTransactions(t *testing.T) {
 					"amount":         -200, // Earned $2
 					"isPending":      false,
 					"name":           "I earned some money",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 				}).
 				Expect()
@@ -298,8 +301,9 @@ func TestPostTransactions(t *testing.T) {
 		var token string
 		var bank BankAccount
 
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.Must(t, time.LoadLocation, user.Account.Timezone)
 		{ // Seed the data for the test.
-			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
@@ -328,7 +332,7 @@ func TestPostTransactions(t *testing.T) {
 					"amount":         100, // $1
 					"isPending":      false,
 					"name":           "I spent some money",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": false,
 				}).
 				Expect()
@@ -347,8 +351,9 @@ func TestPostTransactions(t *testing.T) {
 		var token string
 		var bank BankAccount
 
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.Must(t, time.LoadLocation, user.Account.Timezone)
 		{ // Seed the data for the test.
-			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
@@ -365,7 +370,7 @@ func TestPostTransactions(t *testing.T) {
 					"amount":         100, // $1
 					"isPending":      false,
 					"name":           "I spent some money",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": false,
 				}).
 				Expect()
@@ -380,6 +385,7 @@ func TestPostTransactions(t *testing.T) {
 		var token string
 		var bank BankAccount
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.Must(t, time.LoadLocation, user.Account.Timezone)
 
 		{ // Seed the data for the test.
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
@@ -449,7 +455,7 @@ func TestPostTransactions(t *testing.T) {
 					"amount":         100, // $1
 					"isPending":      false,
 					"name":           "I spent some money",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": false,
 					"spendingId":     spendingId,
 				}).

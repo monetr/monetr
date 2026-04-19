@@ -69,20 +69,19 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				log := c.Log.With(
 					"method", ctx.Request().Method,
 					"path", ctx.Path(),
-					"requestId", util.GetRequestID(ctx),
 				)
 
 				claims, err := c.getClaims(ctx)
 				if err == nil {
-					if claims.LoginId != "" {
-						log = log.With("loginId", claims.LoginId)
-					}
-					if claims.AccountId != "" {
-						log = log.With("accountId", claims.AccountId)
-					}
-					if claims.UserId != "" {
-						log = log.With("userId", claims.UserId)
-					}
+					// if claims.LoginId != "" {
+					// 	log = log.With("loginId", claims.LoginId)
+					// }
+					// if claims.AccountId != "" {
+					// 	log = log.With("accountId", claims.AccountId)
+					// }
+					// if claims.UserId != "" {
+					// 	log = log.With("userId", claims.UserId)
+					// }
 					if claims.Scope != "" {
 						log = log.With("scope", claims.Scope)
 					}

@@ -7,11 +7,11 @@ import (
 
 var (
 	CreateManualTransaction = z.Struct(z.Shape{
-		"amount":       z.Int64().Required(),
 		"spendingId":   z.Ptr(ID[models.Spending]().Optional()),
 		"name":         Name().Required(),
 		"merchantName": Name().Optional(),
 		"date":         Date().Required(),
+		"amount":       z.Int64().Required().Not().EQ(0),
 		"isPending":    z.Bool().Default(false).Required(),
 	})
 
@@ -33,11 +33,11 @@ var (
 	// manual links. This allows more fields to be changed after the creation of
 	// the transaction in order to allow for easier budgeting.
 	PatchManualTransaction = z.Struct(z.Shape{
-		"amount":       z.Int64().Optional(),
 		"spendingId":   z.Ptr(ID[models.Spending]().Optional()),
 		"name":         Name().Optional(),
 		"merchantName": Name().Optional(),
 		"date":         Date().Optional(),
+		"amount":       z.Int64().Optional().Not().EQ(0),
 		"isPending":    z.Bool().Optional(),
 	})
 )

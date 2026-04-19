@@ -4,10 +4,10 @@ import (
 	"log/slog"
 	"math"
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/schema"
 )
 
 func (c *Controller) getTransactions(ctx echo.Context) error {
@@ -121,44 +121,23 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 
 		AdjustsBalance bool `json:"adjustsBalance"`
 	}
-	if err = ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
+	request, err = parseAuthenticatedRequest(
+		c,
+		ctx,
+		schema.CreateManualTransaction.Merge(schema.AdjustsBalance),
+		&request,
+	)
+	if err != nil {
+		return err
 	}
 
-	request.TransactionId = ""
 	request.BankAccountId = bankAccountId
-	request.Name = strings.TrimSpace(request.Name)
-	request.MerchantName = strings.TrimSpace(request.MerchantName)
 	request.OriginalName = request.Name
-	// No support for allowing these to be provided yet.
-	request.Categories = nil
-	request.Category = nil
+	request.OriginalMerchantName = request.MerchantName
 	request.Source = TransactionSourceManual
-
-	request.Name, err = c.cleanString(ctx, "Name", request.Name)
-	if err != nil {
-		return err
-	}
-	if request.Name == "" {
-		return c.badRequest(ctx, "Transaction must have a name")
-	}
-
-	request.MerchantName, err = c.cleanString(ctx, "MerchantName", request.MerchantName)
-	if err != nil {
-		return err
-	}
-
-	request.OriginalName, err = c.cleanString(ctx, "OriginalName", request.OriginalName)
-	if err != nil {
-		return err
-	}
 
 	if request.Date.IsZero() {
 		return c.badRequest(ctx, "Transaction must have a date")
-	}
-
-	if request.Amount == 0 {
-		return c.badRequest(ctx, "Transaction must have a non-zero amount")
 	}
 
 	var updatedSpending *Spending
