@@ -118,3 +118,11 @@ func Locale() *z.StringSchema[string] {
 			return nil
 		})
 }
+
+func Currency() *z.StringSchema[string] {
+	return z.String().
+		OneOf(
+			locale.GetInstalledCurrencies(),
+			z.Message("currency must be one supported by the server"),
+		)
+}

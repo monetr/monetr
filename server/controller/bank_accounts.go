@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/schema"
 	"github.com/monetr/validation"
 )
 
@@ -93,31 +94,14 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	}
 
 	var bankAccount BankAccount
-	// Pre-set the default values for these fields.
-	bankAccount.Status = BankAccountStatusActive
-	bankAccount.AccountType = DepositoryBankAccountType
-	bankAccount.AccountSubType = CheckingBankAccountSubType
-	bankAccount.Currency = currencyCode
-
-	switch err := bankAccount.UnmarshalRequest(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		bankAccount.CreateValidators()...,
-	).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case nil:
-		break
-	default:
-		return c.wrapAndReturnError(
-			ctx,
-			err,
-			http.StatusBadRequest,
-			"failed to parse request",
-		)
+	bankAccount, err = parseAuthenticatedRequest(
+		c,
+		ctx,
+		schema.CreateBankAccount.Merge(schema.WithDefaultCurrency(currencyCode)),
+		&bankAccount,
+	)
+	if err != nil {
+		return err
 	}
 
 	// Some fields cannot be overwritten, so we set those after we unmarshal.
@@ -132,14 +116,17 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 
 	// If we are a lunch flow link then we can only create lunch flow bank
 	// accounts!
+	// TODO Try to figure out how to do this at a schema level somehow?
 	switch link.LinkType {
 	case LunchFlowLinkType:
 		if bankAccount.LunchFlowBankAccountId == nil ||
 			bankAccount.LunchFlowBankAccountId.IsZero() {
 			return ctx.JSON(http.StatusBadRequest, map[string]any{
 				"error": "Invalid request",
-				"problems": map[string]any{
-					"lunchFlowBankAccountId": "Lunch Flow Bank Account ID required to create a bank account for this link",
+				"issues": map[string][]string{
+					"lunchFlowBankAccountId": []string{
+						"Lunch Flow Bank Account ID required to create a bank account for this link",
+					},
 				},
 			})
 		}
@@ -160,13 +147,25 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 			return c.wrapPgError(ctx, err, "Failed to update Lunch Flow bank account")
 		}
 	case ManualLinkType:
+		if bankAccount.LunchFlowBankAccountId != nil {
+			return ctx.JSON(http.StatusBadRequest, map[string]any{
+				"error": "Invalid request",
+				"issues": map[string][]string{
+					"lunchFlowBankAccountId": []string{
+						"Cannot create a Lunch Flow bank account on a non-Lunch Flow link",
+					},
+				},
+			})
+		}
 	default:
 		// Otherwise if we are not a manual link then we simply don't allow bank
 		// accounts to be created.
 		return ctx.JSON(http.StatusBadRequest, map[string]any{
 			"error": "Invalid request",
-			"problems": map[string]any{
-				"linkId": "Cannot create a bank account for a non-manual link, specify a manual Link ID",
+			"issues": map[string][]string{
+				"linkId": []string{
+					"Cannot create a bank account for a non-manual link, specify a manual Link ID",
+				},
 			},
 		})
 	}

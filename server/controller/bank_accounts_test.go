@@ -186,6 +186,101 @@ func TestPostBankAccount(t *testing.T) {
 		}
 	})
 
+	t.Run("lunch flow bank account on non lunch flow link", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.Deactivate()
+
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var lunchFlowLinkId ID[LunchFlowLink]
+		{ // Create the lunch flow link first!
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "US Bank",
+					"lunchFlowURL": "https://lunchflow.app/api/v1",
+					"apiKey":       "foobar",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			// Link should be in pending when its first created
+			response.JSON().Path("$.status").IsEqual(LunchFlowLinkStatusPending)
+			lunchFlowLinkId = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+		}
+
+		mock_lunch_flow.MockFetchAccounts(t, []lunch_flow.Account{
+			{
+				Id:              "1234",
+				Name:            "Test Account",
+				InstitutionName: "US Bank",
+				Provider:        "Bogus",
+				Currency:        "USD",
+				Status:          "ACTIVE",
+			},
+		})
+
+		mock_lunch_flow.MockFetchBalance(t, "1234", lunch_flow.Balance{
+			Amount:   "1234.00",
+			Currency: "USD",
+		})
+
+		{ // Refresh the accounts
+			response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
+				WithPath("lunchFlowLinkId", lunchFlowLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNoContent)
+			response.Body().IsEmpty()
+		}
+
+		var lunchFlowBankAccountId ID[LunchFlowBankAccount]
+		{ // Check for bank account in the responsne
+			response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts").
+				WithPath("lunchFlowLinkId", lunchFlowLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(1)
+			lunchFlowBankAccountId = ID[LunchFlowBankAccount](response.JSON().Path("$[0].lunchFlowBankAccountId").String().Raw())
+		}
+
+		var linkId ID[Link]
+		{ // Then create the actual link!
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "U.S. Bank",
+					"description":     "My personal link",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsASCII()
+			response.JSON().Path("$.linkType").IsEqual(models.ManualLinkType)
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		{ // Create the lunch flow bank account
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId":                 linkId,
+					"lunchFlowBankAccountId": lunchFlowBankAccountId,
+					"name":                   "Test account",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.issues.lunchFlowBankAccountId").IsEqual([]string{
+				"Cannot create a Lunch Flow bank account on a non-Lunch Flow link",
+			})
+		}
+	})
+
 	t.Run("minimal creation", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
@@ -432,7 +527,9 @@ func TestPostBankAccount(t *testing.T) {
 
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").String().IsEqual("Invalid request")
-			response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be one supported by the server")
+			response.JSON().Path("$.issues.currency").IsEqual([]string{
+				"currency must be one supported by the server",
+			})
 		}
 	})
 
@@ -461,7 +558,9 @@ func TestPostBankAccount(t *testing.T) {
 			// link doesn't exist at all.
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").IsEqual("Invalid request")
-			response.JSON().Path("$.problems.linkId").String().IsEqual("required key is missing")
+			response.JSON().Path("$.issues.linkId").IsEqual([]string{
+				"is required",
+			})
 		}
 	})
 
@@ -491,7 +590,9 @@ func TestPostBankAccount(t *testing.T) {
 
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").IsEqual("Invalid request")
-			response.JSON().Path("$.problems.linkId").String().IsEqual("Cannot create a bank account for a non-manual link, specify a manual Link ID")
+			response.JSON().Path("$.issues.linkId").IsEqual([]string{
+				"Cannot create a bank account for a non-manual link, specify a manual Link ID",
+			})
 		}
 	})
 }
