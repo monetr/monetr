@@ -31,7 +31,7 @@ type Spending struct {
 	FundingSchedule        *FundingSchedule    `json:"-" pg:"rel:has-one"`
 	SpendingType           SpendingType        `json:"spendingType" pg:"spending_type,notnull,use_zero,unique:per_bank"`
 	Name                   string              `json:"name" pg:"name,notnull,unique:per_bank"`
-	Description            string              `json:"description,omitempty" pg:"description"`
+	Description            string              `json:"description" pg:"description"`
 	TargetAmount           int64               `json:"targetAmount" pg:"target_amount,notnull,use_zero"`
 	CurrentAmount          int64               `json:"currentAmount" pg:"current_amount,notnull,use_zero"`
 	UsedAmount             int64               `json:"usedAmount" pg:"used_amount,notnull,use_zero"`

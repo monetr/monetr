@@ -762,18 +762,20 @@ func TestPatchFundingSchedule(t *testing.T) {
 		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		response := e.PATCH("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
-			WithPath("bankAccountId", fundingSchedule.BankAccountId).
-			WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
-			WithJSON(map[string]any{
-				"bankAccountId": "bank_invalid",
-			}).
-			WithCookie(TestCookieName, token).
-			Expect()
+		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+				WithPath("bankAccountId", fundingSchedule.BankAccountId).
+				WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+				WithJSON(map[string]any{
+					"bankAccountId": "bank_invalid",
+				}).
+				WithCookie(TestCookieName, token).
+				Expect()
 
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.bankAccountId").String().IsEqual("key not expected")
+			response.Status(http.StatusOK)
+			// Make sure that patching a field like bank account ID has no effect
+			response.JSON().Path("$.fundingSchedule.bankAccountId").NotEqual("bank_invalid")
+		}
 	})
 
 	t.Run("invalid ruleset", func(t *testing.T) {
@@ -797,7 +799,9 @@ func TestPatchFundingSchedule(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.ruleset").String().IsEqual("Ruleset must be valid")
+		response.JSON().Path("$.issues.ruleset").IsEqual([]string{
+			"invalid RRule",
+		})
 	})
 
 	t.Run("cant patch someone elses funding schedule", func(t *testing.T) {

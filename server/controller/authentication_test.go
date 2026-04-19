@@ -201,7 +201,9 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.issues.password").Array().IsEqual([]string{"password cannot be longer than 71 characters"})
+		response.JSON().Path("$.issues.password").IsEqual([]string{
+			"password cannot be longer than 72 characters",
+		})
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -1505,7 +1507,9 @@ func TestVerifyEmail(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Token cannot be blank")
+		response.JSON().Path("$.issues.token").IsEqual([]string{
+			"verification token is not valid",
+		})
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
@@ -1516,10 +1520,7 @@ func TestVerifyEmail(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().
-			Path("$.error").
-			String().
-			IsEqual("invalid JSON body")
+		response.JSON().Path("$.error").IsEqual("malformed json")
 	})
 }
 
@@ -1604,7 +1605,9 @@ func TestResendVerificationEmail(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("email must be provided to resend verification link")
+		response.JSON().Path("$.issues.email").IsEqual([]string{
+			"email address must be valid",
+		})
 	})
 }
 

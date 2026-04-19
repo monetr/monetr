@@ -163,6 +163,9 @@ func (c *Controller) patchLink(ctx echo.Context) error {
 		schema.PatchLink,
 		existingLink,
 	)
+	if err != nil {
+		return err
+	}
 
 	if err = repo.UpdateLink(c.getContext(ctx), &link); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update link")

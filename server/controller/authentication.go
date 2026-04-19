@@ -610,7 +610,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) verifyEndpoint(ctx echo.Context) error {
+func (c *Controller) postVerify(ctx echo.Context) error {
 	c.scrubSentryBody(ctx)
 	if !c.Configuration.Email.ShouldVerifyEmails() {
 		return c.notFound(ctx, "email verification is not enabled")
@@ -682,6 +682,9 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 		resendSchema,
 		&request,
 	)
+	if err != nil {
+		return err
+	}
 
 	unauthedRepo := c.mustGetUnauthenticatedRepository(ctx)
 	login, err := unauthedRepo.GetLoginForEmail(c.getContext(ctx), request.Email)

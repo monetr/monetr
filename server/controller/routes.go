@@ -246,7 +246,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	unauthed.POST("/authentication/login", c.postLogin)
 	unauthed.GET("/authentication/logout", c.logoutEndpoint)
 	unauthed.POST("/authentication/register", c.postRegister)
-	unauthed.POST("/authentication/verify", c.verifyEndpoint)
+	unauthed.POST("/authentication/verify", c.postVerify)
 	unauthed.POST("/authentication/verify/resend", c.resendVerification)
 	unauthed.POST("/authentication/forgot", c.postForgotPassword)
 	unauthed.POST("/authentication/reset", c.resetPassword)

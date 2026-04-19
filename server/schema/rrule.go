@@ -1,24 +1,17 @@
 package schema
 
 import (
-	"errors"
-	"fmt"
-
 	z "github.com/Oudwins/zog"
 	"github.com/Oudwins/zog/zconst"
 	"github.com/monetr/monetr/server/models"
+	"github.com/pkg/errors"
 	"github.com/teambition/rrule-go"
 )
 
-var ErrInvalidRRule = errors.New("invalid rrule")
-
 const (
-	IssueCodeRRuleInvalid zconst.ZogIssueCode = "rrule_invalid"
+	IssueCodeRRuleInvalid zconst.ZogIssueCode = "invalid_rrule"
 )
 
-// RRule returns a schema that converts a raw RRULE string into an rrule.Set.
-// Use it with a *rrule.Set field wrapped in z.Ptr(...) — pointer semantics
-// give you nullability + patch-friendly skipping.
 func RRule() *z.PreprocessSchema[string, models.RuleSet] {
 	return z.Preprocess(
 		func(raw string, ctx z.Ctx) (models.RuleSet, error) {
@@ -27,8 +20,8 @@ func RRule() *z.PreprocessSchema[string, models.RuleSet] {
 				return models.RuleSet{}, ctx.Issue().
 					SetPath([]string{"ruleset"}).
 					SetCode(IssueCodeRRuleInvalid).
-					SetMessage(fmt.Sprintf("invalid rrule: %v", err)).
-					SetError(fmt.Errorf("%w: %w", ErrInvalidRRule, err)).
+					SetMessage("invalid RRule").
+					SetError(errors.WithStack(err)).
 					SetParams(map[string]any{
 						"ruleset": raw,
 					})
@@ -89,7 +82,6 @@ func RRule() *z.PreprocessSchema[string, models.RuleSet] {
 			return *set, nil
 		},
 		// Writes the pre-parsed rrule.Set into the destination (*rrule.Set).
-		// No extra validation needed here — the parse already validated.
 		z.CustomFunc[models.RuleSet](func(_ *models.RuleSet, _ z.Ctx) bool {
 			return true
 		}),
