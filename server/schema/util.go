@@ -1,8 +1,10 @@
 package schema
 
 import (
+	"context"
 	"time"
 
+	"github.com/Oudwins/zog"
 	z "github.com/Oudwins/zog"
 	"github.com/benbjohnson/clock"
 )
@@ -23,4 +25,17 @@ func MustClock(ctx z.Ctx) clock.Clock {
 	}
 
 	return clock
+}
+
+func MustContext(ctx zog.Ctx) context.Context {
+	context, ok := ctx.Get("context").(context.Context)
+	if !ok {
+		panic("context.Context is not present on schema context")
+	}
+
+	return context
+}
+
+func WithContext(ctx context.Context) zog.ExecOption {
+	return zog.WithCtxValue("context", ctx)
 }

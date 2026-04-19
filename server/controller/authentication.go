@@ -77,8 +77,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	// request schema with our login schema.
 	if c.Configuration.ReCAPTCHA.ShouldVerifyLogin() {
 		loginSchema = loginSchema.
-			Merge(schema.Captcha).          // Add the captcha onto the schema
-			TestFunc(c.isValidCaptcha(ctx)) // Validate the captcha as part of parsing
+			Merge(schema.Captcha(c.Captcha)) // Add the captcha onto the schema
 	}
 
 	var err error
@@ -393,8 +392,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	registerSchema := schema.AuthenticationRegister
 	if c.Configuration.ReCAPTCHA.ShouldVerifyRegistration() {
 		registerSchema = registerSchema.
-			Merge(schema.Captcha).          // Add the captcha onto the schema
-			TestFunc(c.isValidCaptcha(ctx)) // Validate the captcha as part of parsing
+			Merge(schema.Captcha(c.Captcha)) // Add the captcha onto the schema
 	}
 
 	if c.Configuration.Beta.EnableBetaCodes {
@@ -670,8 +668,7 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 	resendSchema := schema.AuthenticationResendVerifyEmail
 	if c.Configuration.ReCAPTCHA.Enabled {
 		resendSchema = resendSchema.
-			Merge(schema.Captcha).          // Add the captcha onto the schema
-			TestFunc(c.isValidCaptcha(ctx)) // Validate the captcha as part of parsing
+			Merge(schema.Captcha(c.Captcha)) // Add the captcha onto the schema
 	}
 
 	var request struct {

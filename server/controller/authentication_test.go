@@ -183,7 +183,9 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.issues.password").Array().IsEqual([]string{"password must be at least 8 characters"})
+		response.JSON().Path("$.issues.password").IsEqual([]string{
+			"password must be at least 8 characters",
+		})
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -213,22 +215,9 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Email address provided is not valid")
-		response.JSON().Object().NotContainsKey("token")
-	})
-
-	t.Run("password to short", func(t *testing.T) {
-		_, e := NewTestApplication(t)
-
-		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]any{
-				"email":    "example@example.com",
-				"password": "short",
-			}).
-			Expect()
-
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Password must be at least 8 characters")
+		response.JSON().Path("$.issues.email").IsEqual([]string{
+			"email address must be valid",
+		})
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -326,7 +315,7 @@ func TestLogin(t *testing.T) {
 		AssertSetTokenCookie(t, response)
 	})
 
-	t.Run("bad captcha", func(t *testing.T) {
+	t.Run("missing captcha", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.ReCAPTCHA.Enabled = true
 		config.ReCAPTCHA.VerifyLogin = true
@@ -344,8 +333,56 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Valid ReCAPTCHA is required")
+		response.JSON().Path("$.issues.captcha").IsEqual([]string{
+			"is required",
+		})
 		response.JSON().Object().NotContainsKey("token")
+		AssertNoTokenCookie(t, response)
+	})
+
+	t.Run("invalid captcha", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		config := NewTestApplicationConfig(t)
+		config.ReCAPTCHA.Enabled = true
+		config.ReCAPTCHA.VerifyLogin = true
+		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
+		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
+		app, e := NewTestApplicationWithConfig(t, config)
+		email, password := GivenIHaveLogin(t, e)
+
+		mock_http_helper.NewHttpMockJsonResponder(t,
+			"POST", "https://www.google.com/recaptcha/api/siteverify",
+			func(t *testing.T, request *http.Request) (any, int) {
+				return map[string]any{
+					"success":      false,
+					"challenge_ts": app.Clock.Now(),
+					"hostname":     "monetr.mini",
+					"score":        0,
+					"error-codes":  []string{"invalid-input-response", "bad-request"},
+				}, http.StatusOK
+			},
+			nil,
+		)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email":    email,
+				"password": password,
+				"captcha":  "completely bogus",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.issues.captcha").IsEqual([]string{
+			"ReCAPTCHA is not valid",
+		})
+		AssertNoTokenCookie(t, response)
+
+		assert.Equal(t, map[string]int{
+			"POST https://www.google.com/recaptcha/api/siteverify": 1,
+		}, httpmock.GetCallCountInfo())
 	})
 
 	t.Run("malformed json", func(t *testing.T) {

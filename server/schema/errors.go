@@ -22,7 +22,7 @@ type issueError struct {
 // Error implements [Error].
 func (i *issueError) Error() string {
 	// TODO Make this better!
-	return fmt.Sprintf("problem parsing schema")
+	return fmt.Sprintf("failed to validate schema:\n%s", zog.Issues.Prettify(i.issues))
 }
 
 // Issues implements [Error].

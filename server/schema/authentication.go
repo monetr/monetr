@@ -4,6 +4,8 @@ import (
 	"regexp"
 
 	z "github.com/Oudwins/zog"
+	"github.com/Oudwins/zog/pkgs/internals"
+	"github.com/monetr/monetr/server/captcha"
 )
 
 var (
@@ -37,11 +39,33 @@ var (
 		"email": EmailAddress().Required(),
 	})
 
-	Captcha = z.Struct(z.Shape{
-		"captcha": z.String().Required().Max(250),
-	})
-
 	BetaCode = z.Struct(z.Shape{
 		"betaCode": z.Ptr(z.String().Required().Max(100)).NotNil(),
 	})
 )
+
+// Captcha takes the captcha interface to verify the actual captcha provided as
+// part of the schema testing process.
+func Captcha(impl captcha.Verification) *z.StructSchema {
+	return z.Struct(z.Shape{
+		"captcha": z.String().
+			Required().
+			Max(3000).
+			TestFunc(func(val *string, ctx internals.Ctx) bool {
+				context := MustContext(ctx)
+				if err := impl.VerifyCaptcha(context, *val); err != nil {
+					ctx.AddIssue(ctx.Issue().
+						SetCode("captcha_missing").
+						SetPath([]string{"captcha"}).
+						SetError(err).
+						SetMessage("ReCAPTCHA is not valid").
+						SetParams(map[string]any{
+							"captcha": val,
+						}),
+					)
+				}
+
+				return true
+			}),
+	})
+}

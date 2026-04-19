@@ -332,7 +332,11 @@ func parseUnauthenticatedRequest[T any](
 	issues := requestSchema.Parse(
 		zjson.Decode(ctx.Request().Body),
 		&result,
-		append(options, zog.WithCtxValue("clock", c.Clock))...,
+		append(
+			options,
+			zog.WithCtxValue("clock", c.Clock),
+			schema.WithContext(span.Context()),
+		)...,
 	)
 	if len(issues) > 0 {
 		return result, echo.NewHTTPError(
