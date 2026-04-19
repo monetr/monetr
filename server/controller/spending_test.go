@@ -346,7 +346,9 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("target amount must be greater than 0")
+			response.JSON().Path("$.issues.targetAmount").IsEqual([]string{
+				"number must be greater than 0",
+			})
 		}
 	})
 

@@ -49,7 +49,9 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.institutionName").String().IsEqual("Institution name must be between 1 and 300 characters")
+		response.JSON().Path("$.issues.institutionName").IsEqual([]string{
+			"string must contain at most 300 character(s)",
+		})
 	})
 
 	t.Run("name not provided", func(t *testing.T) {
@@ -65,7 +67,9 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.institutionName").String().IsEqual("Institution name is required")
+		response.JSON().Path("$.issues.institutionName").IsEqual([]string{
+			"string must contain at least 1 character(s)",
+		})
 	})
 
 	t.Run("description is too long", func(t *testing.T) {
@@ -82,7 +86,9 @@ func TestPostLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
-		response.JSON().Path("$.problems.description").String().IsEqual("Description must be between 1 and 300 characters")
+		response.JSON().Path("$.issues.description").IsEqual([]string{
+			"string must contain at most 300 character(s)",
+		})
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
@@ -642,9 +648,10 @@ func TestPatchLink(t *testing.T) {
 				}).
 				Expect()
 
-			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").IsEqual("Invalid request")
-			response.JSON().Path("$.problems.linkType").String().IsEqual("key not expected")
+			response.Status(http.StatusOK)
+			// Make sure the field cannot be changed just because it is in the
+			// request.
+			response.JSON().Path("$.linkType").IsEqual(models.PlaidLinkType)
 		}
 	})
 

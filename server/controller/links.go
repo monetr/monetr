@@ -171,7 +171,7 @@ func (c *Controller) patchLink(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to update link")
 	}
 
-	return ctx.JSON(http.StatusOK, *existingLink)
+	return ctx.JSON(http.StatusOK, link)
 }
 
 func (c *Controller) deleteLink(ctx echo.Context) error {

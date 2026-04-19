@@ -59,27 +59,23 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	spending := &Spending{}
-	if err := ctx.Bind(spending); err != nil {
-		return c.invalidJson(ctx)
+	spending := Spending{
+		BankAccountId: bankAccountId,
+	}
+	spending, err = parse(
+		c,
+		ctx,
+		schema.CreateSpending,
+		&spending,
+	)
+	if err != nil {
+		return err
 	}
 
 	log := c.getLog(ctx)
 
-	spending.SpendingId = "" // Make sure we create a new spending.
 	spending.BankAccountId = bankAccountId
-	spending.Name, err = c.cleanString(ctx, "Name", spending.Name)
-	if err != nil {
-		return err
-	}
-	spending.Description, err = c.cleanString(ctx, "Description", spending.Description)
-	if err != nil {
-		return err
-	}
-	if spending.Name == "" {
-		return c.badRequest(ctx, "spending must have a name")
-	}
-
+	// TODO Remove once tested
 	if spending.TargetAmount <= 0 {
 		return c.badRequest(ctx, "target amount must be greater than 0")
 	}
@@ -148,7 +144,7 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		log,
 	)
 
-	if err = repo.CreateSpending(c.getContext(ctx), spending); err != nil {
+	if err = repo.CreateSpending(c.getContext(ctx), &spending); err != nil {
 		return c.wrapPgError(ctx, err, "failed to create spending")
 	}
 
