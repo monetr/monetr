@@ -8,7 +8,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/links/link_jobs"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/monetr/validation"
+	"github.com/monetr/monetr/server/schema"
 )
 
 func (c *Controller) getLinks(ctx echo.Context) error {
@@ -45,20 +45,15 @@ func (c *Controller) postLinks(ctx echo.Context) error {
 		// anyway.
 		LinkType: ManualLinkType,
 	}
-	switch err := link.UnmarshalRequest(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		link.CreateValidators()...,
-	).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case nil:
-		break
-	default:
-		return c.badRequestError(ctx, err, "Failed to parse post request")
+	var err error
+	link, err = parseAuthenticatedRequest(
+		c,
+		ctx,
+		schema.CreateLink,
+		&link,
+	)
+	if err != nil {
+		return err
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -159,23 +154,15 @@ func (c *Controller) patchLink(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve link")
 	}
 
-	switch err := existingLink.UnmarshalRequest(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		existingLink.UpdateValidator()...,
-	).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case nil:
-		break
-	default:
-		return c.badRequestError(ctx, err, "Failed to parse patch request")
-	}
+	link := *existingLink
+	link, err = parseAuthenticatedRequest(
+		c,
+		ctx,
+		schema.PatchLink,
+		existingLink,
+	)
 
-	if err = repo.UpdateLink(c.getContext(ctx), existingLink); err != nil {
+	if err = repo.UpdateLink(c.getContext(ctx), &link); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update link")
 	}
 
