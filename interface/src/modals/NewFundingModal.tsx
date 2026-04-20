@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useId, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfTomorrow } from 'date-fns';
-import type { FormikHelpers } from 'formik';
+import { type FormikHelpers, useFormikContext } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -35,7 +35,6 @@ interface NewFundingValues {
 
 function NewFundingModal(): JSX.Element {
   const switchId = useId();
-  const autoCreateSwitchId = useId();
   const { inTimezone } = useTimezone();
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
@@ -152,33 +151,10 @@ function NewFundingModal(): JSX.Element {
                   onCheckedChange={() => setFieldValue('excludeWeekends', !values.excludeWeekends)}
                 />
               </div>
-              {isManual && (values.estimatedDeposit ?? 0) > 0 && (
-                <div
-                  className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'
-                  data-testid='new-funding-auto-create-transaction'
-                >
-                  <div className='space-y-0.5'>
-                    <label
-                      className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'
-                      htmlFor={autoCreateSwitchId}
-                    >
-                      Auto create transaction
-                    </label>
-                    <p className='text-sm text-dark-monetr-content'>
-                      Automatically add a deposit transaction for the estimated deposit each time the funding schedule
-                      would occur.
-                    </p>
-                  </div>
-                  <Switch
-                    checked={values.autoCreateTransaction}
-                    id={autoCreateSwitchId}
-                    onCheckedChange={() => setFieldValue('autoCreateTransaction', !values.autoCreateTransaction)}
-                  />
-                </div>
-              )}
+              {isManual && <AutoCreateTransactionToggle />}
             </div>
             <div className='flex justify-end gap-2'>
-              <Button data-testid='close-new-funding-modal' onClick={modal.remove} variant='destructive'>
+              <Button data-testid='close-new-funding-modal' onClick={modal.remove} variant='secondary'>
                 Cancel
               </Button>
               <FormButton type='submit' variant='primary'>
@@ -189,6 +165,38 @@ function NewFundingModal(): JSX.Element {
         )}
       </MForm>
     </MModal>
+  );
+}
+
+function AutoCreateTransactionToggle(): JSX.Element {
+  const autoCreateSwitchId = useId();
+  const { setFieldValue, values } = useFormikContext<NewFundingValues>();
+  const hasDeposit = (values.estimatedDeposit ?? 0) > 0;
+
+  return (
+    <div
+      className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'
+      data-testid='new-funding-auto-create-transaction'
+    >
+      <div className='space-y-0.5'>
+        <label
+          aria-disabled={!hasDeposit}
+          className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
+          htmlFor={autoCreateSwitchId}
+        >
+          Auto create transaction
+        </label>
+        <p aria-disabled={!hasDeposit} className='text-sm text-dark-monetr-content aria-disabled:opacity-50'>
+          Automatically add a deposit transaction for the estimated deposit each time the funding schedule would occur.
+        </p>
+      </div>
+      <Switch
+        checked={hasDeposit && values.autoCreateTransaction}
+        disabled={!hasDeposit}
+        id={autoCreateSwitchId}
+        onCheckedChange={() => setFieldValue('autoCreateTransaction', !values.autoCreateTransaction)}
+      />
+    </div>
   );
 }
 
