@@ -27,6 +27,16 @@ const (
 	DeleteSyncAction SyncAction = "delete"
 )
 
+const (
+	// maxNullCursorRestarts bounds how many times a single SyncPlaid invocation
+	// will discard its cursor and restart pagination from null in response to
+	// Plaid's TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION error. One attempt is
+	// enough to clear out a stale mid-pagination cursor; if Plaid raises the same
+	// error on the subsequent null-cursor call then something is broken upstream
+	// and we defer to the queue's normal retry semantics.
+	maxNullCursorRestarts = 1
+)
+
 type SyncChange struct {
 	Field string `json:"field"`
 	Old   any    `json:"old"`
@@ -735,9 +745,54 @@ func SyncPlaid(ctx queue.Context, args SyncPlaidArguments) error {
 			cursor = &lastSync.NextCursor
 		}
 
+		// Tracks how many times we have had to throw away a stored cursor and
+		// restart pagination from null in response to Plaid reporting that the
+		// underlying transaction data mutated while we were paginating.
+		nullCursorRestarts := 0
+		// Set to true when an iteration reports has_more=true; cleared when we
+		// break out via has_more=false. If it is still true after the loop ends
+		// that means we exited because of the iter cap, not because Plaid ran
+		// out of pages, which is a silent failure we need to surface.
+		exitedMidPagination := false
+
 		for iter := 0; iter < 10; iter++ {
 			syncData, err := plaidClient.Sync(ctx, cursor)
 			if err != nil {
+				// Plaid returns TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION when the
+				// underlying transaction data mutated while we were paginating with the
+				// stored cursor. Per Plaid's documentation the remediation is to
+				// restart pagination with a null cursor. The existing
+				// syncPlaidTransaction / hydrateTransactions pipeline dedupes by plaid
+				// transaction id, so any items already written on a prior iteration
+				// will be updated in place rather than duplicated.
+				//
+				// Note: a null-cursor /transactions/sync does not emit removed items,
+				// so any deletions Plaid captured between the prior successful sync and
+				// this recovery window will be missed. The `deletesMayBeMissed`
+				// breadcrumb tag below lets us audit how often this actually happens in
+				// production.
+				if nullCursorRestarts < maxNullCursorRestarts &&
+					platypus.IsPlaidErrorCode(err, platypus.ErrorCodeTransactionsSyncMutationDuringPagination) {
+					nullCursorRestarts++
+					s.log.WarnContext(ctx,
+						"plaid reported TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION; discarding cursor and restarting pagination from null",
+						"iter", iter,
+						"previousCursor", cursor,
+					)
+					crumbs.Warn(ctx,
+						"Plaid mutation-during-pagination; restarting sync with null cursor",
+						"plaid",
+						map[string]any{
+							"iter":               iter,
+							"nullCursorRestart":  nullCursorRestarts,
+							"plaidLinkId":        link.PlaidLink.PlaidLinkId,
+							"itemId":             link.PlaidLink.PlaidId,
+							"deletesMayBeMissed": true,
+						},
+					)
+					cursor = nil
+					continue
+				}
 				return errors.Wrap(err, "failed to sync with plaid")
 			}
 
@@ -919,10 +974,33 @@ func SyncPlaid(ctx queue.Context, args SyncPlaidArguments) error {
 			}
 
 			if !syncData.HasMore {
+				exitedMidPagination = false
 				break
 			}
 
+			exitedMidPagination = true
 			s.log.InfoContext(ctx, "there is more data to sync from plaid, continuing", "iter", iter)
+		}
+
+		// If the pagination loop ran out of iterations while Plaid still had more
+		// pages available, the cursor we just recorded points to the middle of a
+		// sync stream. A follow-up job run will resume from it, but if Plaid's
+		// underlying data mutates before that happens we will see
+		// TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION and auto-recover via the
+		// null-cursor restart above. Surfacing this as a warning + breadcrumb turns
+		// a previously silent failure into something we can see in logs and Sentry.
+		if exitedMidPagination {
+			s.log.WarnContext(ctx,
+				"plaid sync exited at iteration cap while more pages remain; follow-up sync will continue from last recorded cursor",
+			)
+			crumbs.Warn(ctx,
+				"Plaid sync hit iteration cap",
+				"plaid",
+				map[string]any{
+					"plaidLinkId": link.PlaidLink.PlaidLinkId,
+					"itemId":      link.PlaidLink.PlaidId,
+				},
+			)
 		}
 
 		// Then enqueue all of the bank accounts we touched to have their similar

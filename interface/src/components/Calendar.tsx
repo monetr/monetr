@@ -7,6 +7,7 @@ import Typography from '@monetr/interface/components/Typography';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import styles from './Calendar.module.scss';
+
 import { Fragment } from 'react/jsx-runtime';
 
 export type CalendarProps = PropsBase &
