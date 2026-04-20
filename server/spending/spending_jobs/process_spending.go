@@ -170,14 +170,15 @@ func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
 				}
 
 				txn := models.Transaction{
-					BankAccountId: spending.BankAccountId,
-					Amount:        spending.TargetAmount,
-					Date:          dueDate,
-					Name:          spending.Name,
-					OriginalName:  spending.Name,
-					IsPending:     false,
-					Source:        models.TransactionSourceManual,
-					SpendingId:    &spending.SpendingId,
+					BankAccountId:       spending.BankAccountId,
+					Amount:              spending.TargetAmount,
+					Date:                dueDate,
+					Name:                spending.Name,
+					OriginalName:        spending.Name,
+					IsPending:           false,
+					Source:              models.TransactionSourceManual,
+					SpendingId:          &spending.SpendingId,
+					CreatedBySpendingId: &spending.SpendingId,
 				}
 
 				// AddExpenseToTransaction recalculates the contribution using

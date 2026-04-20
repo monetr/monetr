@@ -199,12 +199,13 @@ func ProcessFundingSchedule(ctx queue.Context, args ProcessFundingScheduleArgume
 				txn := models.Transaction{
 					BankAccountId: args.BankAccountId,
 					// Credits are stored as negative values in monetr.
-					Amount:       -*fundingSchedule.EstimatedDeposit,
-					Date:         fundingDate,
-					Name:         fundingSchedule.Name,
-					OriginalName: fundingSchedule.Name,
-					IsPending:    false,
-					Source:       models.TransactionSourceManual,
+					Amount:                     -*fundingSchedule.EstimatedDeposit,
+					Date:                       fundingDate,
+					Name:                       fundingSchedule.Name,
+					OriginalName:               fundingSchedule.Name,
+					IsPending:                  false,
+					Source:                     models.TransactionSourceManual,
+					CreatedByFundingScheduleId: &fundingSchedule.FundingScheduleId,
 				}
 
 				// Always subtract from our available balance. Subtract because credits
