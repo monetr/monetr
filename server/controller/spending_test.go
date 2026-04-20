@@ -111,7 +111,7 @@ func TestPostSpending(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"name":              gofakeit.Sentence(250),
+					"name":              gofakeit.Sentence(301),
 					"ruleset":           FirstDayOfEveryMonth,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
@@ -121,7 +121,9 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").IsEqual("Name must not be longer than 250 characters")
+			response.JSON().Path("$.issues.name").IsEqual([]string{
+				"string must contain at most 300 character(s)",
+			})
 		}
 
 		{ // Create an expense with a description thats too long
@@ -137,7 +139,7 @@ func TestPostSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
 					"name":              "Name is fine",
-					"description":       gofakeit.Sentence(250),
+					"description":       gofakeit.Sentence(301),
 					"ruleset":           FirstDayOfEveryMonth,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
@@ -147,7 +149,9 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").IsEqual("Description must not be longer than 250 characters")
+			response.JSON().Path("$.issues.description").IsEqual([]string{
+				"string must contain at most 300 character(s)",
+			})
 		}
 	})
 
@@ -189,7 +193,7 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("invalid JSON body")
+			response.JSON().Path("$.error").IsEqual("malformed json")
 		}
 	})
 
@@ -241,7 +245,9 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("spending must have a name")
+			response.JSON().Path("$.issues.name").IsEqual([]string{
+				"is required",
+			})
 		}
 	})
 
@@ -293,7 +299,9 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("target amount must be greater than 0")
+			response.JSON().Path("$.issues.targetAmount").IsEqual([]string{
+				"is required",
+			})
 		}
 	})
 
@@ -391,6 +399,7 @@ func TestPostSpending(t *testing.T) {
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
 		var fundingScheduleId ID[FundingSchedule]
 		{ // Create the funding schedule
@@ -422,12 +431,15 @@ func TestPostSpending(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    now.AddDate(0, 0, -1),
+					"ruleset":           FifthteenthAndLastDayOfEveryMonth,
+					"nextRecurrence":    util.Midnight(now.AddDate(0, 0, -1), timezone),
 				}).
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("next due date cannot be in the past")
+			response.JSON().Path("$.issues.nextRecurrence").IsEqual([]string{
+				"must be in the future",
+			})
 		}
 	})
 
@@ -479,7 +491,9 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("recurrence rule must be specified for expenses")
+			response.JSON().Path("$.issues.ruleset").IsEqual([]string{
+				"expenses must have a ruleset",
+			})
 		}
 	})
 
@@ -532,7 +546,9 @@ func TestPostSpending(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("recurrence rule cannot be specified for goals")
+			response.JSON().Path("$.issues.ruleset").IsEqual([]string{
+				"goals cannot have a ruleset",
+			})
 		}
 	})
 

@@ -31,7 +31,6 @@ func isMidnight(val *time.Time, ctx z.Ctx) bool {
 				"timezone": tz,
 			}),
 		)
-		return false
 	}
 
 	return true
@@ -48,7 +47,6 @@ func isFuture(val *time.Time, ctx z.Ctx) bool {
 				"now":   now,
 			}),
 		)
-		return false
 	}
 
 	return true

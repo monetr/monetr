@@ -56,7 +56,6 @@ func isValidSpending(val any, ctx z.Ctx) bool {
 						"ruleset":      nil,
 					}),
 				)
-				return false
 			}
 		case models.SpendingTypeGoal:
 			if val.Ruleset != nil {
@@ -69,7 +68,6 @@ func isValidSpending(val any, ctx z.Ctx) bool {
 						"ruleset":      val.Ruleset,
 					}),
 				)
-				return false
 			}
 		}
 	}
