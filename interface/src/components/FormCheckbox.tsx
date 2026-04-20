@@ -46,7 +46,7 @@ export default function FormCheckbox(props: FormCheckboxProps): React.JSX.Elemen
       </div>
       <div>
         {props.label && (
-          <label className={labelStyles.labelText} htmlFor={props.id}>
+          <label aria-disabled={props.disabled} className={labelStyles.labelText} htmlFor={props.id}>
             {props.label}
           </label>
         )}
