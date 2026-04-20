@@ -451,6 +451,30 @@ func (c *Controller) patchSpending(ctx echo.Context) error {
 		return err
 	}
 
+	// Schema isn't aware of general state, so we have to manually check to see if
+	// we are in a manual link, if we aren't then return a well formatted error to
+	// the client.
+	if updatedSpending.AutoCreateTransaction {
+		isManual, err := repo.GetLinkIsManualByBankAccountId(
+			c.getContext(ctx),
+			bankAccountId,
+		)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to validate if link is manual")
+		}
+		if !isManual {
+			return c.schemaError(
+				ctx,
+				"Invalid Request",
+				map[string][]string{
+					"autoCreateTransaction": []string{
+						"auto create transaction is only allowed on manual links",
+					},
+				},
+			)
+		}
+	}
+
 	recalculateSpending := false
 	if updatedSpending.NextRecurrence != existingSpending.NextRecurrence {
 		newNext, err := c.midnightInLocal(ctx, updatedSpending.NextRecurrence)

@@ -204,11 +204,11 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 						return ctx.JSON(actualError.Code, internalError)
 					}
 				case schema.Error:
-					return ctx.JSON(http.StatusBadRequest, map[string]any{
-						"error":  actualError.Message,
-						"code":   "SCHEMA_VALIDATION_ERROR",
-						"issues": zog.Issues.Flatten(internalError.Issues()),
-					})
+					return c.schemaError(
+						ctx,
+						actualError.Message.(string),
+						zog.Issues.Flatten(internalError.Issues()),
+					)
 				default:
 					return ctx.JSON(actualError.Code, map[string]any{
 						"error": actualError.Message,

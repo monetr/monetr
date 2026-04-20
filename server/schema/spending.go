@@ -17,24 +17,26 @@ var (
 			}).
 			Default(models.SpendingTypeExpense).
 			Required(),
-		"ruleset":        z.Ptr(RRule()),
-		"targetAmount":   z.Int64().GT(0).Required(),
-		"currentAmount":  z.Int64().GTE(0).Default(0).Required(),
-		"usedAmount":     z.Int64().GTE(0).Default(0).Required(),
-		"nextRecurrence": FutureDate().Required(),
-		"isPaused":       z.Bool().Default(false).Optional(),
+		"ruleset":               z.Ptr(RRule()),
+		"targetAmount":          z.Int64().GT(0).Required(),
+		"currentAmount":         z.Int64().GTE(0).Default(0).Required(),
+		"usedAmount":            z.Int64().GTE(0).Default(0).Required(),
+		"nextRecurrence":        FutureDate().Required(),
+		"isPaused":              z.Bool().Default(false).Optional(),
+		"autoCreateTransaction": z.Bool().Default(false).Optional(),
 	}).TestFunc(isValidSpending)
 
 	PatchSpending = z.Struct(z.Shape{
-		"name":              Name().Optional(),
-		"description":       Description().Optional(),
-		"fundingScheduleId": ID[models.FundingSchedule]().Optional(),
-		"ruleset":           z.Ptr(RRule()),
-		"targetAmount":      z.Int64().GT(0).Optional(),
-		"currentAmount":     z.Int64().GTE(0).Optional(),
-		"usedAmount":        z.Int64().GTE(0).Optional(),
-		"nextRecurrence":    FutureDate().Optional(),
-		"isPaused":          z.Bool().Optional(),
+		"name":                  Name().Optional(),
+		"description":           Description().Optional(),
+		"fundingScheduleId":     ID[models.FundingSchedule]().Optional(),
+		"ruleset":               z.Ptr(RRule()),
+		"targetAmount":          z.Int64().GT(0).Optional(),
+		"currentAmount":         z.Int64().GTE(0).Optional(),
+		"usedAmount":            z.Int64().GTE(0).Optional(),
+		"nextRecurrence":        FutureDate().Optional(),
+		"isPaused":              z.Bool().Optional(),
+		"autoCreateTransaction": z.Bool().Default(false).Optional(),
 	}).TestFunc(isValidSpending)
 )
 
