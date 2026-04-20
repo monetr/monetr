@@ -613,15 +613,34 @@ func TestPostSpending(t *testing.T) {
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, FifthteenthAndLastDayOfEveryMonth, false)
 		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 			WithPath("bankAccountId", bank.BankAccountId).
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"name":                  "Vacation Savings",
-				"fundingScheduleId":     fundingSchedule.FundingScheduleId,
+				"fundingScheduleId":     fundingScheduleId,
 				"targetAmount":          1000,
 				"spendingType":          SpendingTypeGoal,
 				"nextRecurrence":        app.Clock.Now().Add(30 * 24 * time.Hour),
@@ -638,8 +657,27 @@ func TestPostSpending(t *testing.T) {
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, FifthteenthAndLastDayOfEveryMonth, false)
 		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
 
 		now := app.Clock.Now()
 		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
@@ -651,7 +689,7 @@ func TestPostSpending(t *testing.T) {
 			WithJSON(map[string]any{
 				"name":                  "Some Monthly Expense",
 				"ruleset":               FirstDayOfEveryMonth,
-				"fundingScheduleId":     fundingSchedule.FundingScheduleId,
+				"fundingScheduleId":     fundingScheduleId,
 				"targetAmount":          1000,
 				"spendingType":          SpendingTypeExpense,
 				"nextRecurrence":        nextRecurrence,
@@ -668,8 +706,27 @@ func TestPostSpending(t *testing.T) {
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, FifthteenthAndLastDayOfEveryMonth, false)
 		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
 
 		now := app.Clock.Now()
 		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
@@ -681,7 +738,7 @@ func TestPostSpending(t *testing.T) {
 			WithJSON(map[string]any{
 				"name":                  "Some Monthly Expense",
 				"ruleset":               FirstDayOfEveryMonth,
-				"fundingScheduleId":     fundingSchedule.FundingScheduleId,
+				"fundingScheduleId":     fundingScheduleId,
 				"targetAmount":          1000,
 				"spendingType":          SpendingTypeExpense,
 				"nextRecurrence":        nextRecurrence,
@@ -2009,8 +2066,25 @@ func TestPutSpending(t *testing.T) {
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, FifthteenthAndLastDayOfEveryMonth, false)
 		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
 
 		nextRecurrence := app.Clock.Now().Add(30 * 24 * time.Hour)
 
@@ -2021,7 +2095,7 @@ func TestPutSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
 					"name":              "Vacation Savings",
-					"fundingScheduleId": fundingSchedule.FundingScheduleId,
+					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      SpendingTypeGoal,
 					"nextRecurrence":    nextRecurrence,
@@ -2040,7 +2114,7 @@ func TestPutSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
 					"name":                  "Vacation Savings",
-					"fundingScheduleId":     fundingSchedule.FundingScheduleId,
+					"fundingScheduleId":     fundingScheduleId,
 					"targetAmount":          1000,
 					"spendingType":          SpendingTypeGoal,
 					"nextRecurrence":        nextRecurrence,
@@ -2058,8 +2132,25 @@ func TestPutSpending(t *testing.T) {
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, FifthteenthAndLastDayOfEveryMonth, false)
 		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
 
 		now := app.Clock.Now()
 		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
@@ -2073,7 +2164,7 @@ func TestPutSpending(t *testing.T) {
 				WithJSON(map[string]any{
 					"name":              "Some Monthly Expense",
 					"ruleset":           FirstDayOfEveryMonth,
-					"fundingScheduleId": fundingSchedule.FundingScheduleId,
+					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      SpendingTypeExpense,
 					"nextRecurrence":    nextRecurrence,
@@ -2093,7 +2184,7 @@ func TestPutSpending(t *testing.T) {
 				WithJSON(map[string]any{
 					"name":                  "Some Monthly Expense",
 					"ruleset":               FirstDayOfEveryMonth,
-					"fundingScheduleId":     fundingSchedule.FundingScheduleId,
+					"fundingScheduleId":     fundingScheduleId,
 					"targetAmount":          1000,
 					"spendingType":          SpendingTypeExpense,
 					"nextRecurrence":        nextRecurrence,
@@ -2111,8 +2202,25 @@ func TestPutSpending(t *testing.T) {
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, FifthteenthAndLastDayOfEveryMonth, false)
 		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
 
 		now := app.Clock.Now()
 		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
@@ -2126,7 +2234,7 @@ func TestPutSpending(t *testing.T) {
 				WithJSON(map[string]any{
 					"name":              "Some Monthly Expense",
 					"ruleset":           FirstDayOfEveryMonth,
-					"fundingScheduleId": fundingSchedule.FundingScheduleId,
+					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      SpendingTypeExpense,
 					"nextRecurrence":    nextRecurrence,
@@ -2147,7 +2255,7 @@ func TestPutSpending(t *testing.T) {
 				WithJSON(map[string]any{
 					"name":                  "Some Monthly Expense",
 					"ruleset":               FirstDayOfEveryMonth,
-					"fundingScheduleId":     fundingSchedule.FundingScheduleId,
+					"fundingScheduleId":     fundingScheduleId,
 					"targetAmount":          1000,
 					"spendingType":          SpendingTypeExpense,
 					"nextRecurrence":        nextRecurrence,
@@ -2167,7 +2275,7 @@ func TestPutSpending(t *testing.T) {
 				WithJSON(map[string]any{
 					"name":                  "Some Monthly Expense",
 					"ruleset":               FirstDayOfEveryMonth,
-					"fundingScheduleId":     fundingSchedule.FundingScheduleId,
+					"fundingScheduleId":     fundingScheduleId,
 					"targetAmount":          1000,
 					"spendingType":          SpendingTypeExpense,
 					"nextRecurrence":        nextRecurrence,

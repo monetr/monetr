@@ -327,6 +327,6 @@ describe('funding schedule details view', () => {
     });
 
     await waitFor(() => expect(world.getByTestId('funding-details-auto-create-transaction')).toBeVisible());
-    await waitFor(() => expect(world.getByRole('checkbox', { name: /Auto create transaction/i })).toBeDisabled());
+    await waitFor(() => expect(world.getByTestId('funding-details-auto-create-transaction')).toBeDisabled());
   });
 });

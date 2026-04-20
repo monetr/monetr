@@ -16,6 +16,7 @@ export interface FormCheckboxProps {
   disabled?: boolean;
   checked?: boolean;
   className?: string;
+  'data-testid'?: string;
 }
 
 export default function FormCheckbox(props: FormCheckboxProps): React.JSX.Element {
@@ -37,6 +38,7 @@ export default function FormCheckbox(props: FormCheckboxProps): React.JSX.Elemen
       <div className={formCheckboxStyles.formCheckboxWrapper}>
         <Checkbox
           checked={props.checked}
+          data-testid={props['data-testid']}
           disabled={props.disabled}
           id={props.id}
           name={props.name}

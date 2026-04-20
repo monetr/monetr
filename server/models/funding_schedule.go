@@ -213,6 +213,10 @@ func (FundingSchedule) CreateValidators() []*validation.KeyRules {
 			validation.In(true, false).Error("Exclude weekends must be a valid boolean"),
 		).Required(validators.Optional),
 		validation.Key(
+			"autoCreateTransaction",
+			validation.In(true, false).Error("Auto create transaction must be a valid boolean"),
+		).Required(validators.Optional),
+		validation.Key(
 			"estimatedDeposit",
 			validation.Min(float64(0)).Error("Estimated deposit cannot be less than 0"),
 		).Required(validators.Optional),
@@ -237,6 +241,10 @@ func (FundingSchedule) UpdateValidators() []*validation.KeyRules {
 		validation.Key(
 			"excludeWeekends",
 			validation.In(true, false).Error("Exclude weekends must be a valid boolean"),
+		).Required(validators.Optional),
+		validation.Key(
+			"autoCreateTransaction",
+			validation.In(true, false).Error("Auto create transaction must be a valid boolean"),
 		).Required(validators.Optional),
 		validation.Key(
 			"estimatedDeposit",
