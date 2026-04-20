@@ -43,6 +43,19 @@ type Transaction struct {
 	// currently has allocated. If the transaction were to be deleted or changed
 	// we want to make sure we return the correct amount to the expense.
 	SpendingAmount       *int64            `json:"spendingAmount,omitempty" pg:"spending_amount,use_zero"`
+	// CreatedBySpendingId is set when the transaction was auto-created by the
+	// ProcessSpending job for an expense with AutoCreateTransaction enabled. It
+	// points at the spending that caused the transaction to be created and is
+	// not user-mutable. This is distinct from SpendingId, which may be changed
+	// by the user to re-allocate a transaction.
+	CreatedBySpendingId        *ID[Spending]        `json:"createdBySpendingId" pg:"created_by_spending_id,on_delete:SET NULL"`
+	CreatedBySpending          *Spending            `json:"-" pg:"rel:has-one,fk:created_by_"`
+	// CreatedByFundingScheduleId is set when the transaction was auto-created
+	// by the ProcessFundingSchedule job for a funding schedule with
+	// AutoCreateTransaction enabled. It points at the funding schedule that
+	// caused the transaction to be created and is not user-mutable.
+	CreatedByFundingScheduleId *ID[FundingSchedule] `json:"createdByFundingScheduleId" pg:"created_by_funding_schedule_id,on_delete:SET NULL"`
+	CreatedByFundingSchedule   *FundingSchedule     `json:"-" pg:"rel:has-one,fk:created_by_"`
 	Categories           []string          `json:"categories" pg:"categories,type:'text[]'"`
 	Category             *string           `json:"category" pg:"category"`
 	Date                 time.Time         `json:"date" pg:"date,notnull"`

@@ -29,6 +29,7 @@ type FundingSchedule struct {
 	RuleSet                *RuleSet            `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
 	ExcludeWeekends        bool                `json:"excludeWeekends" pg:"exclude_weekends,notnull,use_zero"`
 	WaitForDeposit         bool                `json:"waitForDeposit" pg:"wait_for_deposit,notnull,use_zero"`
+	AutoCreateTransaction  bool                `json:"autoCreateTransaction" pg:"auto_create_transaction,notnull,use_zero"`
 	EstimatedDeposit       *int64              `json:"estimatedDeposit" pg:"estimated_deposit"`
 	LastRecurrence         *time.Time          `json:"lastRecurrence" pg:"last_recurrence"`
 	NextRecurrence         time.Time           `json:"nextRecurrence" pg:"next_recurrence,notnull"`
@@ -212,6 +213,10 @@ func (FundingSchedule) CreateValidators() []*validation.KeyRules {
 			validation.In(true, false).Error("Exclude weekends must be a valid boolean"),
 		).Required(validators.Optional),
 		validation.Key(
+			"autoCreateTransaction",
+			validation.In(true, false).Error("Auto create transaction must be a valid boolean"),
+		).Required(validators.Optional),
+		validation.Key(
 			"estimatedDeposit",
 			validation.Min(float64(0)).Error("Estimated deposit cannot be less than 0"),
 		).Required(validators.Optional),
@@ -236,6 +241,10 @@ func (FundingSchedule) UpdateValidators() []*validation.KeyRules {
 		validation.Key(
 			"excludeWeekends",
 			validation.In(true, false).Error("Exclude weekends must be a valid boolean"),
+		).Required(validators.Optional),
+		validation.Key(
+			"autoCreateTransaction",
+			validation.In(true, false).Error("Auto create transaction must be a valid boolean"),
 		).Required(validators.Optional),
 		validation.Key(
 			"estimatedDeposit",

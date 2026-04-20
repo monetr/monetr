@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useId, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfTomorrow } from 'date-fns';
-import type { FormikHelpers } from 'formik';
+import { type FormikHelpers, useFormikContext } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -16,6 +16,7 @@ import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import { Switch } from '@monetr/interface/components/Switch';
 import Typography from '@monetr/interface/components/Typography';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
+import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
@@ -29,6 +30,7 @@ interface NewFundingValues {
   ruleset: string;
   excludeWeekends: boolean;
   estimatedDeposit?: number | null;
+  autoCreateTransaction: boolean;
 }
 
 function NewFundingModal(): JSX.Element {
@@ -39,6 +41,8 @@ function NewFundingModal(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const selectedBankAccountId = useSelectedBankAccountId();
   const createFundingSchedule = useCreateFundingSchedule();
+  const { data: link } = useCurrentLink();
+  const isManual = Boolean(link?.getIsManual());
   const {
     data: { friendlyToAmount },
   } = useLocaleCurrency();
@@ -51,6 +55,7 @@ function NewFundingModal(): JSX.Element {
     ruleset: '',
     excludeWeekends: false,
     estimatedDeposit: undefined,
+    autoCreateTransaction: false,
   };
 
   const submit = useCallback(
@@ -65,6 +70,10 @@ function NewFundingModal(): JSX.Element {
         ruleset: values.ruleset,
         estimatedDeposit: values.estimatedDeposit > 0 ? friendlyToAmount(values.estimatedDeposit) : null,
         excludeWeekends: values.excludeWeekends,
+        // Auto create transaction requires a manual link and a non-zero
+        // estimated deposit; force it off otherwise so the API will not reject
+        // the create.
+        autoCreateTransaction: isManual && (values.estimatedDeposit ?? 0) > 0 && values.autoCreateTransaction,
       })
         .then(created => modal.resolve(created))
         .then(() => modal.remove())
@@ -77,7 +86,7 @@ function NewFundingModal(): JSX.Element {
         )
         .finally(() => helpers.setSubmitting(false));
     },
-    [createFundingSchedule, enqueueSnackbar, friendlyToAmount, modal, selectedBankAccountId, inTimezone],
+    [createFundingSchedule, enqueueSnackbar, friendlyToAmount, modal, selectedBankAccountId, inTimezone, isManual],
   );
 
   return (
@@ -142,9 +151,10 @@ function NewFundingModal(): JSX.Element {
                   onCheckedChange={() => setFieldValue('excludeWeekends', !values.excludeWeekends)}
                 />
               </div>
+              {isManual && <AutoCreateTransactionToggle />}
             </div>
             <div className='flex justify-end gap-2'>
-              <Button data-testid='close-new-funding-modal' onClick={modal.remove} variant='destructive'>
+              <Button data-testid='close-new-funding-modal' onClick={modal.remove} variant='secondary'>
                 Cancel
               </Button>
               <FormButton type='submit' variant='primary'>
@@ -155,6 +165,38 @@ function NewFundingModal(): JSX.Element {
         )}
       </MForm>
     </MModal>
+  );
+}
+
+function AutoCreateTransactionToggle(): JSX.Element {
+  const autoCreateSwitchId = useId();
+  const { setFieldValue, values } = useFormikContext<NewFundingValues>();
+  const hasDeposit = (values.estimatedDeposit ?? 0) > 0;
+
+  return (
+    <div
+      className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'
+      data-testid='new-funding-auto-create-transaction'
+    >
+      <div className='space-y-0.5'>
+        <label
+          aria-disabled={!hasDeposit}
+          className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
+          htmlFor={autoCreateSwitchId}
+        >
+          Auto create transaction
+        </label>
+        <p aria-disabled={!hasDeposit} className='text-sm text-dark-monetr-content aria-disabled:opacity-50'>
+          Automatically add a deposit transaction for the estimated deposit each time the funding schedule would occur.
+        </p>
+      </div>
+      <Switch
+        checked={hasDeposit && values.autoCreateTransaction}
+        disabled={!hasDeposit}
+        id={autoCreateSwitchId}
+        onCheckedChange={() => setFieldValue('autoCreateTransaction', !values.autoCreateTransaction)}
+      />
+    </div>
   );
 }
 

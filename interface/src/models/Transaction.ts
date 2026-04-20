@@ -6,6 +6,8 @@ export default class Transaction {
   amount: number;
   spendingId?: string;
   spendingAmount?: number;
+  createdBySpendingId?: string;
+  createdByFundingScheduleId?: string;
   categories: string[];
   date: Date;
   authorizedDate?: Date;

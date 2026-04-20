@@ -607,6 +607,148 @@ func TestPostSpending(t *testing.T) {
 			response.JSON().Path("$.error").String().IsEqual("failed to create spending: a similar object already exists")
 		}
 	})
+
+	t.Run("rejects auto create transaction on goal", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":                  "Vacation Savings",
+				"fundingScheduleId":     fundingScheduleId,
+				"targetAmount":          1000,
+				"spendingType":          SpendingTypeGoal,
+				"nextRecurrence":        app.Clock.Now().Add(30 * 24 * time.Hour),
+				"autoCreateTransaction": true,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("auto create transaction is only supported for expenses")
+	})
+
+	t.Run("rejects auto create transaction on plaid link", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
+
+		now := app.Clock.Now()
+		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		nextRecurrence := ruleset.After(now, false)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":                  "Some Monthly Expense",
+				"ruleset":               FirstDayOfEveryMonth,
+				"fundingScheduleId":     fundingScheduleId,
+				"targetAmount":          1000,
+				"spendingType":          SpendingTypeExpense,
+				"nextRecurrence":        nextRecurrence,
+				"autoCreateTransaction": true,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("auto create transaction is only supported for manual links")
+	})
+
+	t.Run("creates expense with auto create transaction enabled", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
+
+		now := app.Clock.Now()
+		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		nextRecurrence := ruleset.After(now, false)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":                  "Some Monthly Expense",
+				"ruleset":               FirstDayOfEveryMonth,
+				"fundingScheduleId":     fundingScheduleId,
+				"targetAmount":          1000,
+				"spendingType":          SpendingTypeExpense,
+				"nextRecurrence":        nextRecurrence,
+				"autoCreateTransaction": true,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.autoCreateTransaction").Boolean().IsTrue()
+	})
 }
 
 func TestGetSpending(t *testing.T) {
@@ -1916,6 +2058,233 @@ func TestPutSpending(t *testing.T) {
 
 			response.Status(http.StatusNotFound)
 			response.JSON().Path("$.error").String().IsEqual("failed to find existing spending: record does not exist")
+		}
+	})
+
+	t.Run("rejects auto create transaction on goal during update", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
+
+		nextRecurrence := app.Clock.Now().Add(30 * 24 * time.Hour)
+
+		var spendingId ID[Spending]
+		{ // Create a goal
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":              "Vacation Savings",
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      1000,
+					"spendingType":      SpendingTypeGoal,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+			assert.False(t, spendingId.IsZero(), "must be able to extract the spending ID")
+		}
+
+		{ // Attempt to enable auto create transaction on the goal
+			response := e.PUT("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":                  "Vacation Savings",
+					"fundingScheduleId":     fundingScheduleId,
+					"targetAmount":          1000,
+					"spendingType":          SpendingTypeGoal,
+					"nextRecurrence":        nextRecurrence,
+					"autoCreateTransaction": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("auto create transaction is only supported for expenses")
+		}
+	})
+
+	t.Run("rejects auto create transaction on plaid link during update", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
+
+		now := app.Clock.Now()
+		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		nextRecurrence := ruleset.After(now, false)
+
+		var spendingId ID[Spending]
+		{ // Create an expense on a Plaid link
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":              "Some Monthly Expense",
+					"ruleset":           FirstDayOfEveryMonth,
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      1000,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+			assert.False(t, spendingId.IsZero(), "must be able to extract the spending ID")
+		}
+
+		{ // Attempt to enable auto create transaction on the Plaid expense
+			response := e.PUT("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":                  "Some Monthly Expense",
+					"ruleset":               FirstDayOfEveryMonth,
+					"fundingScheduleId":     fundingScheduleId,
+					"targetAmount":          1000,
+					"spendingType":          SpendingTypeExpense,
+					"nextRecurrence":        nextRecurrence,
+					"autoCreateTransaction": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("auto create transaction is only supported for manual links")
+		}
+	})
+
+	t.Run("can toggle auto create transaction on manual link expense", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
+		}
+
+		now := app.Clock.Now()
+		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		nextRecurrence := ruleset.After(now, false)
+
+		var spendingId ID[Spending]
+		{ // Create an expense with auto create transaction off
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":              "Some Monthly Expense",
+					"ruleset":           FirstDayOfEveryMonth,
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      1000,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.autoCreateTransaction").Boolean().IsFalse()
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+			assert.False(t, spendingId.IsZero(), "must be able to extract the spending ID")
+		}
+
+		{ // Toggle auto create transaction on
+			response := e.PUT("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":                  "Some Monthly Expense",
+					"ruleset":               FirstDayOfEveryMonth,
+					"fundingScheduleId":     fundingScheduleId,
+					"targetAmount":          1000,
+					"spendingType":          SpendingTypeExpense,
+					"nextRecurrence":        nextRecurrence,
+					"autoCreateTransaction": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.autoCreateTransaction").Boolean().IsTrue()
+		}
+
+		{ // Toggle auto create transaction back off
+			response := e.PUT("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("spendingId", spendingId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":                  "Some Monthly Expense",
+					"ruleset":               FirstDayOfEveryMonth,
+					"fundingScheduleId":     fundingScheduleId,
+					"targetAmount":          1000,
+					"spendingType":          SpendingTypeExpense,
+					"nextRecurrence":        nextRecurrence,
+					"autoCreateTransaction": false,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.autoCreateTransaction").Boolean().IsFalse()
 		}
 	})
 }

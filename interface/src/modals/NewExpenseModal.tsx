@@ -1,7 +1,7 @@
-import { useRef } from 'react';
+import { useId, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfTomorrow } from 'date-fns';
-import type { FormikHelpers } from 'formik';
+import { type FormikHelpers, useFormikContext } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -14,8 +14,10 @@ import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
+import { Switch } from '@monetr/interface/components/Switch';
 import Typography from '@monetr/interface/components/Typography';
 import { useCreateSpending } from '@monetr/interface/hooks/useCreateSpending';
+import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
@@ -29,6 +31,7 @@ interface NewExpenseValues {
   nextOccurrence: Date;
   ruleset: string;
   fundingScheduleId: string;
+  autoCreateTransaction: boolean;
 }
 
 function NewExpenseModal(): JSX.Element {
@@ -39,6 +42,8 @@ function NewExpenseModal(): JSX.Element {
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
   const { data: selectedBankAccount } = useSelectedBankAccount();
+  const { data: link } = useCurrentLink();
+  const isManual = Boolean(link?.getIsManual());
   const createSpending = useCreateSpending();
 
   const ref = useRef<MModalRef>(null);
@@ -59,6 +64,7 @@ function NewExpenseModal(): JSX.Element {
     }),
     ruleset: '',
     fundingScheduleId: '',
+    autoCreateTransaction: false,
   };
 
   async function submit(values: NewExpenseValues, helper: FormikHelpers<NewExpenseValues>): Promise<void> {
@@ -72,6 +78,9 @@ function NewExpenseModal(): JSX.Element {
       fundingScheduleId: values.fundingScheduleId,
       targetAmount: friendlyToAmount(values.amount),
       ruleset: values.ruleset,
+      // Auto create transaction requires a manual link and a non-zero target
+      // amount; force it off otherwise so the API will not reject the create.
+      autoCreateTransaction: isManual && values.amount > 0 && values.autoCreateTransaction,
     });
 
     helper.setSubmitting(true);
@@ -140,6 +149,7 @@ function NewExpenseModal(): JSX.Element {
             placeholder='Select a spending frequency...'
             required
           />
+          {isManual && <AutoCreateTransactionToggle />}
         </div>
         <div className='flex justify-end gap-2'>
           <Button data-testid='close-new-expense-modal' onClick={modal.remove} variant='destructive'>
@@ -151,6 +161,38 @@ function NewExpenseModal(): JSX.Element {
         </div>
       </MForm>
     </MModal>
+  );
+}
+
+function AutoCreateTransactionToggle(): JSX.Element {
+  const autoCreateSwitchId = useId();
+  const { setFieldValue, values } = useFormikContext<NewExpenseValues>();
+  const hasAmount = (values.amount ?? 0) > 0;
+
+  return (
+    <div
+      className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'
+      data-testid='new-expense-auto-create-transaction'
+    >
+      <div className='space-y-0.5'>
+        <label
+          aria-disabled={!hasAmount}
+          className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
+          htmlFor={autoCreateSwitchId}
+        >
+          Auto create transaction
+        </label>
+        <p aria-disabled={!hasAmount} className='text-sm text-dark-monetr-content aria-disabled:opacity-50'>
+          Automatically add a transaction for this expense each time it is due, deducting from your balance.
+        </p>
+      </div>
+      <Switch
+        checked={hasAmount && values.autoCreateTransaction}
+        disabled={!hasAmount}
+        id={autoCreateSwitchId}
+        onCheckedChange={() => setFieldValue('autoCreateTransaction', !values.autoCreateTransaction)}
+      />
+    </div>
   );
 }
 

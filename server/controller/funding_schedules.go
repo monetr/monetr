@@ -93,6 +93,19 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve bank account")
 	}
 
+	if fundingSchedule.AutoCreateTransaction {
+		if fundingSchedule.EstimatedDeposit == nil || *fundingSchedule.EstimatedDeposit <= 0 {
+			return c.badRequest(ctx, "Auto create transaction requires a non-zero estimated deposit")
+		}
+		isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to validate if link is manual")
+		}
+		if !isManual {
+			return c.badRequest(ctx, "Auto create transaction is only supported for manual links")
+		}
+	}
+
 	// Set the next occurrence based on the provided rule.
 
 	// If the next occurrence is not specified then assume that the rule is relative to now. If it is specified though
@@ -168,6 +181,19 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 
 	if request.EstimatedDeposit != nil && *request.EstimatedDeposit < 0 {
 		return c.badRequest(ctx, "Estimated deposit must be greater than or equal to zero")
+	}
+
+	if request.AutoCreateTransaction {
+		if request.EstimatedDeposit == nil || *request.EstimatedDeposit <= 0 {
+			return c.badRequest(ctx, "Auto create transaction requires a non-zero estimated deposit")
+		}
+		isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to validate if link is manual")
+		}
+		if !isManual {
+			return c.badRequest(ctx, "Auto create transaction is only supported for manual links")
+		}
 	}
 
 	recalculateSpending := false
@@ -284,6 +310,19 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		break
 	default:
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
+	}
+
+	if fundingSchedule.AutoCreateTransaction {
+		if fundingSchedule.EstimatedDeposit == nil || *fundingSchedule.EstimatedDeposit <= 0 {
+			return c.badRequest(ctx, "Auto create transaction requires a non-zero estimated deposit")
+		}
+		isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to validate if link is manual")
+		}
+		if !isManual {
+			return c.badRequest(ctx, "Auto create transaction is only supported for manual links")
+		}
 	}
 
 	// Check if the changes made to the funding schedule would require that we

@@ -10,6 +10,7 @@ export default class FundingSchedule {
   nextRecurrence: Date;
   readonly nextRecurrenceOriginal: Date;
   excludeWeekends: boolean;
+  autoCreateTransaction: boolean;
   estimatedDeposit: number | null;
 
   constructor(data?: Partial<FundingSchedule>) {

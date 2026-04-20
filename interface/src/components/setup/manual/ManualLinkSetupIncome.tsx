@@ -74,6 +74,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
           ruleset: values.ruleset,
           estimatedDeposit: locale.friendlyToAmount(values.paydayAmount),
           excludeWeekends: false,
+          autoCreateTransaction: false,
         }),
       )
       .then(fundingSchedule => navigate(`/bank/${fundingSchedule.bankAccountId}/transactions`))
