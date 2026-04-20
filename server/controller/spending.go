@@ -116,6 +116,19 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		}
 	}
 
+	if spending.AutoCreateTransaction {
+		if spending.SpendingType != SpendingTypeExpense {
+			return c.badRequest(ctx, "auto create transaction is only supported for expenses")
+		}
+		isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to validate if link is manual")
+		}
+		if !isManual {
+			return c.badRequest(ctx, "auto create transaction is only supported for manual links")
+		}
+	}
+
 	// Make sure that the next recurrence date is properly in the user's timezone.
 	nextRecurrence, err := c.midnightInLocal(ctx, next)
 	if err != nil {
@@ -333,6 +346,19 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 
 	if updatedSpending.SpendingType == SpendingTypeExpense && updatedSpending.RuleSet == nil {
 		return c.badRequest(ctx, "Expense must have a recurrence rule provided")
+	}
+
+	if updatedSpending.AutoCreateTransaction {
+		if updatedSpending.SpendingType != SpendingTypeExpense {
+			return c.badRequest(ctx, "auto create transaction is only supported for expenses")
+		}
+		isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
+		if err != nil {
+			return c.wrapPgError(ctx, err, "failed to validate if link is manual")
+		}
+		if !isManual {
+			return c.badRequest(ctx, "auto create transaction is only supported for manual links")
+		}
 	}
 
 	recalculateSpending := false

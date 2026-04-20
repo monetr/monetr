@@ -23,6 +23,7 @@ export default class Spending {
   nextContributionAmount: number;
   isBehind: boolean;
   isPaused: boolean;
+  autoCreateTransaction: boolean;
   dateCreated: Date | null;
 
   constructor(data?: Partial<Spending>) {

@@ -95,6 +95,14 @@ func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
 			return err
 		}
 
+		// Only manual links can have transactions auto-created on their behalf;
+		// Plaid links already receive real transactions from the institution.
+		isManual, err := repo.GetLinkIsManualByBankAccountId(ctx, args.BankAccountId)
+		if err != nil {
+			log.ErrorContext(ctx, "failed to determine if link is manual", "err", err)
+			return err
+		}
+
 		now := ctx.Clock().Now()
 		allSpending, err := repo.GetSpending(ctx, args.BankAccountId)
 		if err != nil {
@@ -105,6 +113,8 @@ func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
 		fundingSchedules := map[models.ID[models.FundingSchedule]]*models.FundingSchedule{}
 
 		spendingToUpdate := make([]models.Spending, 0, len(allSpending))
+		transactionsToCreate := make([]models.Transaction, 0)
+		var bankAccount *models.BankAccount
 		for i := range allSpending {
 			// Avoid funky pointer issues with arrays and for loops.
 			spending := allSpending[i]
@@ -129,6 +139,9 @@ func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
 				fundingSchedules[spending.FundingScheduleId] = fundingSchedule
 			}
 
+			// Capture the due date before CalculateNextContribution bumps the
+			// recurrence forward; this is the date the expense was due.
+			dueDate := spending.NextRecurrence
 			spending.CalculateNextContribution(
 				ctx,
 				timezone,
@@ -136,6 +149,57 @@ func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
 				now,
 				log,
 			)
+
+			// If this expense has auto create transaction enabled, create a
+			// transaction for the just-passed due date and allocate it from the
+			// expense. Goals are excluded by design.
+			if isManual &&
+				spending.SpendingType == models.SpendingTypeExpense &&
+				spending.AutoCreateTransaction &&
+				spending.TargetAmount > 0 {
+				if bankAccount == nil {
+					bankAccount, err = repo.GetBankAccount(ctx, args.BankAccountId)
+					if err != nil {
+						log.ErrorContext(
+							ctx,
+							"failed to retrieve bank account for auto created transaction",
+							"err", err,
+						)
+						return err
+					}
+				}
+
+				txn := models.Transaction{
+					BankAccountId: spending.BankAccountId,
+					Amount:        spending.TargetAmount,
+					Date:          dueDate,
+					Name:          spending.Name,
+					OriginalName:  spending.Name,
+					IsPending:     false,
+					Source:        models.TransactionSourceManual,
+					SpendingId:    &spending.SpendingId,
+				}
+
+				// AddExpenseToTransaction recalculates the contribution using
+				// spending.FundingSchedule, so make sure that relation is set.
+				spending.FundingSchedule = fundingSchedule
+
+				if err = repo.AddExpenseToTransaction(ctx, &txn, &spending); err != nil {
+					log.ErrorContext(
+						ctx,
+						"failed to add expense to auto created transaction",
+						"err", err,
+					)
+					return err
+				}
+
+				// Always subtract from our available balance. Subtract because credits
+				// are represented as negative values in monetr.
+				bankAccount.AvailableBalance -= txn.Amount
+				bankAccount.CurrentBalance -= txn.Amount
+
+				transactionsToCreate = append(transactionsToCreate, txn)
+			}
 
 			spendingToUpdate = append(spendingToUpdate, spending)
 		}
@@ -147,10 +211,26 @@ func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
 
 		log.InfoContext(ctx, "updating stale spending objects", "count", len(spendingToUpdate))
 
-		return errors.Wrap(repo.UpdateSpending(
+		if err = repo.UpdateSpending(
 			ctx,
 			args.BankAccountId,
 			spendingToUpdate,
-		), "failed to update stale spending")
+		); err != nil {
+			return errors.Wrap(err, "failed to update stale spending")
+		}
+
+		if bankAccount != nil {
+			if err = repo.UpdateBankAccount(ctx, bankAccount); err != nil {
+				return errors.Wrap(err, "failed to update bank account for auto created transactions")
+			}
+		}
+
+		for i := range transactionsToCreate {
+			if err = repo.CreateTransaction(ctx, args.BankAccountId, &transactionsToCreate[i]); err != nil {
+				return errors.Wrap(err, "failed to create auto created transaction")
+			}
+		}
+
+		return nil
 	})
 }

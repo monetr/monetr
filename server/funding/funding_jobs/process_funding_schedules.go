@@ -104,7 +104,18 @@ func ProcessFundingSchedule(ctx queue.Context, args ProcessFundingScheduleArgume
 			return err
 		}
 
+		// Only manual links can have transactions auto-created on their behalf;
+		// Plaid links and others already receive real transactions from the
+		// institution.
+		isManual, err := repo.GetLinkIsManualByBankAccountId(ctx, args.BankAccountId)
+		if err != nil {
+			log.ErrorContext(ctx, "failed to determine if link is manual", "err", err)
+			return err
+		}
+
 		expensesToUpdate := make([]models.Spending, 0)
+		transactionsToCreate := make([]models.Transaction, 0)
+		var bankAccount *models.BankAccount
 
 		initialBalances, err := repo.GetBalances(ctx, args.BankAccountId)
 		if err != nil {
@@ -148,6 +159,9 @@ func ProcessFundingSchedule(ctx queue.Context, args ProcessFundingScheduleArgume
 				}
 			}
 
+			// Capture the funding date before CalculateNextOccurrence bumps the
+			// recurrence forward; this is the date the funding schedule fired.
+			fundingDate := fundingSchedule.NextRecurrence
 			if !fundingSchedule.CalculateNextOccurrence(ctx, ctx.Clock().Now(), timezone) {
 				crumbs.IndicateBug(ctx, "bug: funding schedule for processing occurs in the future", map[string]any{
 					"nextOccurrence": fundingSchedule.NextRecurrence,
@@ -164,9 +178,54 @@ func ProcessFundingSchedule(ctx queue.Context, args ProcessFundingScheduleArgume
 				return err
 			}
 
-			expenses, err := repo.GetSpendingByFundingSchedule(ctx, args.BankAccountId, fundingScheduleId)
+			// If this funding schedule has auto create transaction enabled, create a
+			// deposit transaction for its estimated deposit amount.
+			if isManual &&
+				fundingSchedule.AutoCreateTransaction &&
+				fundingSchedule.EstimatedDeposit != nil &&
+				*fundingSchedule.EstimatedDeposit > 0 {
+				if bankAccount == nil {
+					bankAccount, err = repo.GetBankAccount(ctx, args.BankAccountId)
+					if err != nil {
+						fundingLog.ErrorContext(
+							ctx,
+							"failed to retrieve bank account for auto created deposit",
+							"err", err,
+						)
+						return err
+					}
+				}
+
+				txn := models.Transaction{
+					BankAccountId: args.BankAccountId,
+					// Credits are stored as negative values in monetr.
+					Amount:       -*fundingSchedule.EstimatedDeposit,
+					Date:         fundingDate,
+					Name:         fundingSchedule.Name,
+					OriginalName: fundingSchedule.Name,
+					IsPending:    false,
+					Source:       models.TransactionSourceManual,
+				}
+
+				// Always subtract from our available balance. Subtract because credits
+				// are represented as negative values in monetr.
+				bankAccount.AvailableBalance -= txn.Amount
+				bankAccount.CurrentBalance -= txn.Amount
+
+				transactionsToCreate = append(transactionsToCreate, txn)
+			}
+
+			expenses, err := repo.GetSpendingByFundingSchedule(
+				ctx,
+				args.BankAccountId,
+				fundingScheduleId,
+			)
 			if err != nil {
-				fundingLog.ErrorContext(ctx, "failed to retrieve expenses for processing", "err", err)
+				fundingLog.ErrorContext(
+					ctx,
+					"failed to retrieve expenses for processing",
+					"err", err,
+				)
 				return err
 			}
 
@@ -237,21 +296,35 @@ func ProcessFundingSchedule(ctx queue.Context, args ProcessFundingScheduleArgume
 			}
 		}
 
-		if len(expensesToUpdate) == 0 {
+		if len(expensesToUpdate) == 0 && len(transactionsToCreate) == 0 {
 			crumbs.Debug(ctx, "No spending objects to update for funding schedule", nil)
 			log.InfoContext(ctx, "no spending objects to update for funding schedule")
 			return nil
 		}
 
-		log.DebugContext(ctx, fmt.Sprintf("preparing to update %d spending(s)", len(expensesToUpdate)))
+		if len(expensesToUpdate) > 0 {
+			log.DebugContext(ctx, fmt.Sprintf("preparing to update %d spending(s)", len(expensesToUpdate)))
 
-		crumbs.Debug(ctx, "Updating spending objects with recalculated contributions", map[string]any{
-			"count": len(expensesToUpdate),
-		})
+			crumbs.Debug(ctx, "Updating spending objects with recalculated contributions", map[string]any{
+				"count": len(expensesToUpdate),
+			})
 
-		if err = repo.UpdateSpending(ctx, args.BankAccountId, expensesToUpdate); err != nil {
-			log.ErrorContext(ctx, "failed to update spending", "err", err)
-			return err
+			if err = repo.UpdateSpending(ctx, args.BankAccountId, expensesToUpdate); err != nil {
+				log.ErrorContext(ctx, "failed to update spending", "err", err)
+				return err
+			}
+		}
+
+		if bankAccount != nil {
+			if err = repo.UpdateBankAccount(ctx, bankAccount); err != nil {
+				return errors.Wrap(err, "failed to update bank account for auto created deposits")
+			}
+		}
+
+		for i := range transactionsToCreate {
+			if err = repo.CreateTransaction(ctx, args.BankAccountId, &transactionsToCreate[i]); err != nil {
+				return errors.Wrap(err, "failed to create auto created deposit transaction")
+			}
 		}
 
 		updatedBalances, err := repo.GetBalances(ctx, args.BankAccountId)

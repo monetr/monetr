@@ -11,6 +11,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mockqueue"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -760,5 +761,297 @@ func TestProcessFundingSchedule(t *testing.T) {
 		updatedFundingSchedule2 := testutils.MustRetrieve(t, fundingSchedule2)
 		assert.Greater(t, updatedFundingSchedule2.NextRecurrence, fundingSchedule2.NextRecurrence,
 			"second funding schedule next recurrence should have been advanced")
+	})
+
+	t.Run("auto creates deposit transaction on manual link", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+		estimatedDeposit := int64(100000)
+		expectedFundingDate := fundingRule.After(clock.Now(), false)
+		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         expectedFundingDate,
+			NextRecurrenceOriginal: expectedFundingDate,
+			EstimatedDeposit:       &estimatedDeposit,
+			AutoCreateTransaction:  true,
+		})
+
+		// Move time forward past the funding schedule's next recurrence.
+		clock.Add(32 * 24 * time.Hour)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+
+			err := funding_jobs.ProcessFundingSchedule(
+				mockqueue.NewMockContext(context),
+				funding_jobs.ProcessFundingScheduleArguments{
+					AccountId:          bankAccount.AccountId,
+					BankAccountId:      bankAccount.BankAccountId,
+					FundingScheduleIds: []models.ID[models.FundingSchedule]{fundingSchedule.FundingScheduleId},
+				},
+			)
+			assert.NoError(t, err, "should process funding schedule successfully")
+		}
+
+		// Verify the bank account balance was incremented by the deposit.
+		updatedBankAccount := testutils.MustRetrieve(t, bankAccount)
+		assert.EqualValues(t, bankAccount.AvailableBalance+estimatedDeposit, updatedBankAccount.AvailableBalance,
+			"available balance should have been incremented by the deposit")
+		assert.EqualValues(t, bankAccount.CurrentBalance+estimatedDeposit, updatedBankAccount.CurrentBalance,
+			"current balance should have been incremented by the deposit")
+
+		// Verify a deposit transaction was created.
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+		transactions, err := repo.GetTransactions(t.Context(), bankAccount.BankAccountId, 100, 0)
+		assert.NoError(t, err, "should retrieve transactions")
+		assert.Len(t, transactions, 1, "exactly one deposit transaction should have been created")
+		assert.EqualValues(t, -estimatedDeposit, transactions[0].Amount, "deposit amount should be negative")
+		assert.Equal(t, models.TransactionSourceManual, transactions[0].Source, "transaction source should be manual")
+		assert.Equal(t, fundingSchedule.Name, transactions[0].Name, "transaction name should match the funding schedule name")
+		assert.Nil(t, transactions[0].SpendingId, "deposit should not be allocated to a spending")
+		assert.True(t, transactions[0].Date.Equal(expectedFundingDate), "transaction date should match the funding date")
+	})
+
+	t.Run("does not auto create deposit on non-manual link", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+		estimatedDeposit := int64(100000)
+		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+			EstimatedDeposit:       &estimatedDeposit,
+			AutoCreateTransaction:  true,
+		})
+
+		clock.Add(32 * 24 * time.Hour)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+
+			err := funding_jobs.ProcessFundingSchedule(
+				mockqueue.NewMockContext(context),
+				funding_jobs.ProcessFundingScheduleArguments{
+					AccountId:          bankAccount.AccountId,
+					BankAccountId:      bankAccount.BankAccountId,
+					FundingScheduleIds: []models.ID[models.FundingSchedule]{fundingSchedule.FundingScheduleId},
+				},
+			)
+			assert.NoError(t, err, "should process funding schedule successfully")
+		}
+
+		// Verify the bank account balance did not change on a non-manual link.
+		updatedBankAccount := testutils.MustRetrieve(t, bankAccount)
+		assert.EqualValues(t, bankAccount.AvailableBalance, updatedBankAccount.AvailableBalance, "available balance should not change")
+		assert.EqualValues(t, bankAccount.CurrentBalance, updatedBankAccount.CurrentBalance, "current balance should not change")
+
+		// Verify no transactions were created.
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+		transactions, err := repo.GetTransactions(t.Context(), bankAccount.BankAccountId, 100, 0)
+		assert.NoError(t, err, "should retrieve transactions")
+		assert.Empty(t, transactions, "no transactions should have been created on a non-manual link")
+	})
+
+	t.Run("does not auto create deposit when estimated deposit is nil", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+			EstimatedDeposit:       nil,
+			AutoCreateTransaction:  true,
+		})
+
+		clock.Add(32 * 24 * time.Hour)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+
+			err := funding_jobs.ProcessFundingSchedule(
+				mockqueue.NewMockContext(context),
+				funding_jobs.ProcessFundingScheduleArguments{
+					AccountId:          bankAccount.AccountId,
+					BankAccountId:      bankAccount.BankAccountId,
+					FundingScheduleIds: []models.ID[models.FundingSchedule]{fundingSchedule.FundingScheduleId},
+				},
+			)
+			assert.NoError(t, err, "should process funding schedule successfully")
+		}
+
+		// Verify the bank account balance did not change without an estimated deposit.
+		updatedBankAccount := testutils.MustRetrieve(t, bankAccount)
+		assert.EqualValues(t, bankAccount.AvailableBalance, updatedBankAccount.AvailableBalance, "available balance should not change")
+		assert.EqualValues(t, bankAccount.CurrentBalance, updatedBankAccount.CurrentBalance, "current balance should not change")
+
+		// Verify no transactions were created.
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+		transactions, err := repo.GetTransactions(t.Context(), bankAccount.BankAccountId, 100, 0)
+		assert.NoError(t, err, "should retrieve transactions")
+		assert.Empty(t, transactions, "no transactions should have been created without an estimated deposit")
+	})
+
+	t.Run("does not auto create deposit when flag is off", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+		estimatedDeposit := int64(100000)
+		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+			EstimatedDeposit:       &estimatedDeposit,
+			AutoCreateTransaction:  false,
+		})
+
+		clock.Add(32 * 24 * time.Hour)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+
+			err := funding_jobs.ProcessFundingSchedule(
+				mockqueue.NewMockContext(context),
+				funding_jobs.ProcessFundingScheduleArguments{
+					AccountId:          bankAccount.AccountId,
+					BankAccountId:      bankAccount.BankAccountId,
+					FundingScheduleIds: []models.ID[models.FundingSchedule]{fundingSchedule.FundingScheduleId},
+				},
+			)
+			assert.NoError(t, err, "should process funding schedule successfully")
+		}
+
+		// Verify the bank account balance did not change when the flag is off.
+		updatedBankAccount := testutils.MustRetrieve(t, bankAccount)
+		assert.EqualValues(t, bankAccount.AvailableBalance, updatedBankAccount.AvailableBalance, "available balance should not change")
+		assert.EqualValues(t, bankAccount.CurrentBalance, updatedBankAccount.CurrentBalance, "current balance should not change")
+
+		// Verify no transactions were created.
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+		transactions, err := repo.GetTransactions(t.Context(), bankAccount.BankAccountId, 100, 0)
+		assert.NoError(t, err, "should retrieve transactions")
+		assert.Empty(t, transactions, "no transactions should have been created when the flag is off")
 	})
 }

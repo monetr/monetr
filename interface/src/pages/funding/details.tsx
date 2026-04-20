@@ -18,6 +18,7 @@ import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
+import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { usePatchFundingSchedule } from '@monetr/interface/hooks/usePatchFundingSchedule';
@@ -32,6 +33,7 @@ interface FundingValues {
   ruleset: string;
   excludeWeekends: boolean;
   estimatedDeposit: number | null;
+  autoCreateTransaction: boolean;
 }
 
 export default function FundingDetails(): JSX.Element {
@@ -43,6 +45,8 @@ export default function FundingDetails(): JSX.Element {
   const match = useMatch('/bank/:bankId/funding/:fundingId/details');
   const fundingId = match?.params?.fundingId || null;
   const { data: funding } = useFundingSchedule(fundingId);
+  const { data: link } = useCurrentLink();
+  const isManual = Boolean(link?.getIsManual());
   const navigate = useNavigate();
   const patchFundingSchedule = usePatchFundingSchedule();
   const removeFundingSchedule = useRemoveFundingSchedule();
@@ -88,6 +92,9 @@ export default function FundingDetails(): JSX.Element {
       ruleset: values.ruleset,
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: locale.friendlyToAmount(values.estimatedDeposit),
+      // Auto create transaction is only supported on manual links; force it off
+      // otherwise so the API will not reject the update.
+      autoCreateTransaction: isManual && values.autoCreateTransaction,
     })
       .then(
         () =>
@@ -137,6 +144,7 @@ export default function FundingDetails(): JSX.Element {
     excludeWeekends: funding.excludeWeekends,
     // Because we store all amounts in cents, in order to use them in the UI we need to convert them back to dollars.
     estimatedDeposit: locale.amountToFriendly(funding.estimatedDeposit),
+    autoCreateTransaction: funding.autoCreateTransaction,
   };
 
   return (
@@ -191,6 +199,14 @@ export default function FundingDetails(): JSX.Element {
               name='estimatedDeposit'
               placeholder='Example: $ 1,000.00'
             />
+            {isManual && (
+              <FormCheckbox
+                data-testid='funding-details-auto-create-transaction'
+                description='Automatically add a deposit transaction for the estimated deposit each time the funding schedule would occur.'
+                label='Auto create transaction'
+                name='autoCreateTransaction'
+              />
+            )}
           </div>
           <Divider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>

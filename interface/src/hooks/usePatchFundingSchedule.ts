@@ -8,7 +8,13 @@ export type PatchFundingScheduleRequest = Pick<FundingSchedule, 'fundingSchedule
   Partial<
     Pick<
       FundingSchedule,
-      'name' | 'description' | 'ruleset' | 'nextRecurrence' | 'excludeWeekends' | 'estimatedDeposit'
+      | 'name'
+      | 'description'
+      | 'ruleset'
+      | 'nextRecurrence'
+      | 'excludeWeekends'
+      | 'estimatedDeposit'
+      | 'autoCreateTransaction'
     >
   >;
 

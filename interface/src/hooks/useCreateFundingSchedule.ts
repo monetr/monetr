@@ -5,7 +5,14 @@ import request from '@monetr/interface/util/request';
 
 export type CreateFundingScheduleRequest = Pick<
   FundingSchedule,
-  'bankAccountId' | 'name' | 'description' | 'ruleset' | 'nextRecurrence' | 'excludeWeekends' | 'estimatedDeposit'
+  | 'bankAccountId'
+  | 'name'
+  | 'description'
+  | 'ruleset'
+  | 'nextRecurrence'
+  | 'excludeWeekends'
+  | 'estimatedDeposit'
+  | 'autoCreateTransaction'
 >;
 
 export function useCreateFundingSchedule(): (_funding: CreateFundingScheduleRequest) => Promise<FundingSchedule> {

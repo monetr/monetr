@@ -29,6 +29,7 @@ type FundingSchedule struct {
 	RuleSet                *RuleSet            `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
 	ExcludeWeekends        bool                `json:"excludeWeekends" pg:"exclude_weekends,notnull,use_zero"`
 	WaitForDeposit         bool                `json:"waitForDeposit" pg:"wait_for_deposit,notnull,use_zero"`
+	AutoCreateTransaction  bool                `json:"autoCreateTransaction" pg:"auto_create_transaction,notnull,use_zero"`
 	EstimatedDeposit       *int64              `json:"estimatedDeposit" pg:"estimated_deposit"`
 	LastRecurrence         *time.Time          `json:"lastRecurrence" pg:"last_recurrence"`
 	NextRecurrence         time.Time           `json:"nextRecurrence" pg:"next_recurrence,notnull"`

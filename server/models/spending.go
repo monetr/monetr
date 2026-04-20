@@ -42,6 +42,7 @@ type Spending struct {
 	NextContributionAmount int64               `json:"nextContributionAmount" pg:"next_contribution_amount,notnull,use_zero"`
 	IsBehind               bool                `json:"isBehind" pg:"is_behind,notnull,use_zero"`
 	IsPaused               bool                `json:"isPaused" pg:"is_paused,notnull,use_zero"`
+	AutoCreateTransaction  bool                `json:"autoCreateTransaction" pg:"auto_create_transaction,notnull,use_zero"`
 	CreatedAt              time.Time           `json:"createdAt" pg:"created_at,notnull"`
 }
 

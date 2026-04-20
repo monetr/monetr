@@ -10,6 +10,7 @@ import Divider from '@monetr/interface/components/Divider';
 import ExpenseTransactionList from '@monetr/interface/components/expenses/ExpenseTransactionList';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
+import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
@@ -18,6 +19,7 @@ import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
+import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useRemoveSpending } from '@monetr/interface/hooks/useRemoveSpending';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
@@ -36,6 +38,7 @@ interface ExpenseValues {
   nextRecurrence: Date;
   fundingScheduleId: string;
   ruleset: string;
+  autoCreateTransaction: boolean;
 }
 
 export default function ExpenseDetails(): JSX.Element {
@@ -47,6 +50,8 @@ export default function ExpenseDetails(): JSX.Element {
   const { spendingId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const { data: spending, isLoading, isError } = useSpending(spendingId);
+  const { data: link } = useCurrentLink();
+  const isManual = Boolean(link?.getIsManual());
 
   if (!spendingId) {
     return (
@@ -119,6 +124,9 @@ export default function ExpenseDetails(): JSX.Element {
       fundingScheduleId: values.fundingScheduleId,
       ruleset: values.ruleset,
       targetAmount: locale.friendlyToAmount(values.amount),
+      // Auto create transaction is only supported on manual links; force it off
+      // otherwise so the API will not reject the update.
+      autoCreateTransaction: isManual && values.autoCreateTransaction,
     });
 
     return updateSpending(updatedSpending)
@@ -145,6 +153,7 @@ export default function ExpenseDetails(): JSX.Element {
     nextRecurrence: spending.nextRecurrence,
     fundingScheduleId: spending.fundingScheduleId,
     ruleset: spending.ruleset,
+    autoCreateTransaction: spending.autoCreateTransaction,
   };
 
   const progress = ((Math.min(spending?.currentAmount, spending?.targetAmount) / spending?.targetAmount) * 100).toFixed(
@@ -223,6 +232,14 @@ export default function ExpenseDetails(): JSX.Element {
               placeholder='Select a spending frequency...'
               required
             />
+            {isManual && (
+              <FormCheckbox
+                className='w-full'
+                description='Automatically add a transaction for this expense each time it is due, deducting from your balance.'
+                label='Auto create transaction'
+                name='autoCreateTransaction'
+              />
+            )}
             <Divider className='w-1/2 my-8' />
             <ExpenseTransactionList spending={spending} />
           </div>
