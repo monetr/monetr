@@ -71,9 +71,10 @@ function NewFundingModal(): JSX.Element {
         ruleset: values.ruleset,
         estimatedDeposit: values.estimatedDeposit > 0 ? friendlyToAmount(values.estimatedDeposit) : null,
         excludeWeekends: values.excludeWeekends,
-        // Auto create transaction is only supported on manual links; force it
-        // off otherwise so the API will not reject the create.
-        autoCreateTransaction: isManual && values.autoCreateTransaction,
+        // Auto create transaction requires a manual link and a non-zero
+        // estimated deposit; force it off otherwise so the API will not reject
+        // the create.
+        autoCreateTransaction: isManual && (values.estimatedDeposit ?? 0) > 0 && values.autoCreateTransaction,
       })
         .then(created => modal.resolve(created))
         .then(() => modal.remove())
@@ -151,8 +152,11 @@ function NewFundingModal(): JSX.Element {
                   onCheckedChange={() => setFieldValue('excludeWeekends', !values.excludeWeekends)}
                 />
               </div>
-              {isManual && (
-                <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'>
+              {isManual && (values.estimatedDeposit ?? 0) > 0 && (
+                <div
+                  className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'
+                  data-testid='new-funding-auto-create-transaction'
+                >
                   <div className='space-y-0.5'>
                     <label
                       className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'
@@ -162,7 +166,7 @@ function NewFundingModal(): JSX.Element {
                     </label>
                     <p className='text-sm text-dark-monetr-content'>
                       Automatically add a deposit transaction for the estimated deposit each time the funding schedule
-                      fires.
+                      would occur.
                     </p>
                   </div>
                   <Switch

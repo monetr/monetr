@@ -94,6 +94,9 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 	}
 
 	if fundingSchedule.AutoCreateTransaction {
+		if fundingSchedule.EstimatedDeposit == nil || *fundingSchedule.EstimatedDeposit <= 0 {
+			return c.badRequest(ctx, "Auto create transaction requires a non-zero estimated deposit")
+		}
 		isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "failed to validate if link is manual")
@@ -181,6 +184,9 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 	}
 
 	if request.AutoCreateTransaction {
+		if request.EstimatedDeposit == nil || *request.EstimatedDeposit <= 0 {
+			return c.badRequest(ctx, "Auto create transaction requires a non-zero estimated deposit")
+		}
 		isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "failed to validate if link is manual")
@@ -307,6 +313,9 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 	}
 
 	if fundingSchedule.AutoCreateTransaction {
+		if fundingSchedule.EstimatedDeposit == nil || *fundingSchedule.EstimatedDeposit <= 0 {
+			return c.badRequest(ctx, "Auto create transaction requires a non-zero estimated deposit")
+		}
 		isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "failed to validate if link is manual")

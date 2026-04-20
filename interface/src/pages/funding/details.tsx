@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import { format, isEqual, startOfDay, startOfTomorrow } from 'date-fns';
-import type { FormikErrors, FormikHelpers } from 'formik';
+import { type FormikErrors, type FormikHelpers, useFormikContext } from 'formik';
 import { CalendarSync, HeartCrack, Save, Trash } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import { useMatch, useNavigate } from 'react-router-dom';
@@ -92,9 +92,9 @@ export default function FundingDetails(): JSX.Element {
       ruleset: values.ruleset,
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: locale.friendlyToAmount(values.estimatedDeposit),
-      // Auto create transaction is only supported on manual links; force it off
-      // otherwise so the API will not reject the update.
-      autoCreateTransaction: isManual && values.autoCreateTransaction,
+      // Auto create transaction requires a manual link and a non-zero estimated
+      // deposit; force it off otherwise so the API will not reject the update.
+      autoCreateTransaction: isManual && (values.estimatedDeposit ?? 0) > 0 && values.autoCreateTransaction,
     })
       .then(
         () =>
@@ -199,14 +199,7 @@ export default function FundingDetails(): JSX.Element {
               name='estimatedDeposit'
               placeholder='Example: $ 1,000.00'
             />
-            {isManual && (
-              <FormCheckbox
-                data-testid='funding-details-auto-create-transaction'
-                description='Automatically add a deposit transaction for the estimated deposit each time the funding schedule would occur.'
-                label='Auto create transaction'
-                name='autoCreateTransaction'
-              />
-            )}
+            {isManual && <AutoCreateTransactionToggle />}
           </div>
           <Divider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>
@@ -218,6 +211,23 @@ export default function FundingDetails(): JSX.Element {
         </div>
       </div>
     </MForm>
+  );
+}
+
+function AutoCreateTransactionToggle(): React.JSX.Element {
+  const { values } = useFormikContext<FundingValues>();
+  // The toggle is always visible on a manual link but is only usable once a
+  // non-zero estimated deposit has been provided.
+  const hasDeposit = (values.estimatedDeposit ?? 0) > 0;
+
+  return (
+    <FormCheckbox
+      data-testid='funding-details-auto-create-transaction'
+      description='Automatically add a deposit transaction for the estimated deposit each time the funding schedule would occur.'
+      disabled={!hasDeposit}
+      label='Auto create transaction'
+      name='autoCreateTransaction'
+    />
   );
 }
 
