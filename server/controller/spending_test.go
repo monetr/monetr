@@ -629,6 +629,7 @@ func TestPostSpending(t *testing.T) {
 	t.Run("rejects auto create transaction on goal", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -661,7 +662,7 @@ func TestPostSpending(t *testing.T) {
 				"fundingScheduleId":     fundingScheduleId,
 				"targetAmount":          1000,
 				"spendingType":          SpendingTypeGoal,
-				"nextRecurrence":        app.Clock.Now().Add(30 * 24 * time.Hour),
+				"nextRecurrence":        util.Midnight(app.Clock.Now().Add(30*24*time.Hour), timezone),
 				"autoCreateTransaction": true,
 			}).
 			Expect()
@@ -673,6 +674,7 @@ func TestPostSpending(t *testing.T) {
 	t.Run("rejects auto create transaction on plaid link", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -699,7 +701,7 @@ func TestPostSpending(t *testing.T) {
 
 		now := app.Clock.Now()
 		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
-		nextRecurrence := ruleset.After(now, false)
+		nextRecurrence := util.Midnight(ruleset.After(now, false), timezone)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 			WithPath("bankAccountId", bank.BankAccountId).
@@ -722,6 +724,7 @@ func TestPostSpending(t *testing.T) {
 	t.Run("creates expense with auto create transaction enabled", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -748,7 +751,7 @@ func TestPostSpending(t *testing.T) {
 
 		now := app.Clock.Now()
 		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
-		nextRecurrence := ruleset.After(now, false)
+		nextRecurrence := util.Midnight(ruleset.After(now, false), timezone)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 			WithPath("bankAccountId", bank.BankAccountId).
@@ -1022,6 +1025,7 @@ func TestGetSpendingByID(t *testing.T) {
 
 		{ // Create a bank account and spending under one user
 			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 			tok := GivenILogin(t, e, user.Login.Email, password)
@@ -1046,7 +1050,7 @@ func TestGetSpendingByID(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      5000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence":    util.Midnight(app.Clock.Now().AddDate(0, 1, 0), timezone),
 				}).
 				Expect().
 				Status(http.StatusOK).
@@ -1196,6 +1200,7 @@ func TestGetSpendingTransactions(t *testing.T) {
 
 		{ // Create a bank account and spending under one user
 			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 			tok := GivenILogin(t, e, user.Login.Email, password)
@@ -1220,7 +1225,7 @@ func TestGetSpendingTransactions(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      8000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence":    util.Midnight(app.Clock.Now().AddDate(0, 1, 0), timezone),
 				}).
 				Expect().
 				Status(http.StatusOK).
@@ -1249,6 +1254,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 	t.Run("move money into spending", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -1289,7 +1295,6 @@ func TestPostSpendingTransfer(t *testing.T) {
 		var spendingId ID[Spending]
 		{ // Create an expense
 			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
@@ -1326,7 +1331,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 					"amount":         -10000, // $100
 					"isPending":      false,
 					"name":           "Deposit",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 				}).
 				Expect()
@@ -1467,6 +1472,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 	t.Run("between two expenses happy path", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -1500,7 +1506,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 					"amount":         -10000, // $100
 					"isPending":      false,
 					"name":           "Deposit",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 				}).
 				Expect()
@@ -1525,7 +1531,6 @@ func TestPostSpendingTransfer(t *testing.T) {
 		var spendingId ID[Spending]
 		{ // Create an expense
 			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
@@ -1556,7 +1561,6 @@ func TestPostSpendingTransfer(t *testing.T) {
 		var spendingIdTwo ID[Spending]
 		{ // Create a second expense
 			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
@@ -1656,6 +1660,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 	t.Run("between two expenses overdraft", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -1689,7 +1694,7 @@ func TestPostSpendingTransfer(t *testing.T) {
 					"amount":         -10000, // $100
 					"isPending":      false,
 					"name":           "Deposit",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 				}).
 				Expect()
@@ -1714,7 +1719,6 @@ func TestPostSpendingTransfer(t *testing.T) {
 		var spendingId ID[Spending]
 		{ // Create an expense
 			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
@@ -1745,7 +1749,6 @@ func TestPostSpendingTransfer(t *testing.T) {
 		var spendingIdTwo ID[Spending]
 		{ // Create a second expense
 			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
@@ -2028,6 +2031,7 @@ func TestPutSpending(t *testing.T) {
 
 		{ // Create a bank account and spending under one user
 			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 			tok := GivenILogin(t, e, user.Login.Email, password)
@@ -2052,7 +2056,7 @@ func TestPutSpending(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      100000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence":    util.Midnight(app.Clock.Now().AddDate(0, 1, 0), timezone),
 				}).
 				Expect().
 				Status(http.StatusOK).
@@ -2082,6 +2086,7 @@ func TestPutSpending(t *testing.T) {
 	t.Run("rejects auto create transaction on goal during update", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -2104,7 +2109,7 @@ func TestPutSpending(t *testing.T) {
 			assert.False(t, fundingScheduleId.IsZero(), "must be able to extract the funding schedule ID")
 		}
 
-		nextRecurrence := app.Clock.Now().Add(30 * 24 * time.Hour)
+		nextRecurrence := util.Midnight(app.Clock.Now().Add(30*24*time.Hour), timezone)
 
 		var spendingId ID[Spending]
 		{ // Create a goal
@@ -2148,6 +2153,7 @@ func TestPutSpending(t *testing.T) {
 	t.Run("rejects auto create transaction on plaid link during update", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -2172,7 +2178,7 @@ func TestPutSpending(t *testing.T) {
 
 		now := app.Clock.Now()
 		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
-		nextRecurrence := ruleset.After(now, false)
+		nextRecurrence := util.Midnight(ruleset.After(now, false), timezone)
 
 		var spendingId ID[Spending]
 		{ // Create an expense on a Plaid link
@@ -2218,6 +2224,7 @@ func TestPutSpending(t *testing.T) {
 	t.Run("can toggle auto create transaction on manual link expense", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -2242,7 +2249,7 @@ func TestPutSpending(t *testing.T) {
 
 		now := app.Clock.Now()
 		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
-		nextRecurrence := ruleset.After(now, false)
+		nextRecurrence := util.Midnight(ruleset.After(now, false), timezone)
 
 		var spendingId ID[Spending]
 		{ // Create an expense with auto create transaction off
@@ -2311,6 +2318,7 @@ func TestDeleteSpending(t *testing.T) {
 	t.Run("delete spending happy path", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -2351,7 +2359,6 @@ func TestDeleteSpending(t *testing.T) {
 		var spendingId ID[Spending]
 		{ // Create an expense
 			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
@@ -2388,7 +2395,7 @@ func TestDeleteSpending(t *testing.T) {
 					"amount":         -10000, // $100
 					"isPending":      false,
 					"name":           "Deposit",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 				}).
 				Expect()
@@ -2463,6 +2470,7 @@ func TestDeleteSpending(t *testing.T) {
 	t.Run("delete spending that was used on a transaction", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
@@ -2503,7 +2511,6 @@ func TestDeleteSpending(t *testing.T) {
 		var spendingId ID[Spending]
 		{ // Create an expense
 			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
@@ -2540,7 +2547,7 @@ func TestDeleteSpending(t *testing.T) {
 					"amount":         -10000, // $100
 					"isPending":      false,
 					"name":           "Deposit",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 				}).
 				Expect()
@@ -2607,7 +2614,7 @@ func TestDeleteSpending(t *testing.T) {
 					"amount":         1000, // $100
 					"isPending":      false,
 					"name":           "Spending from my budget",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 					"spendingId":     spendingId,
 				}).
@@ -2666,6 +2673,7 @@ func TestDeleteSpending(t *testing.T) {
 
 		{ // Create a bank account and spending under one user
 			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 			tok := GivenILogin(t, e, user.Login.Email, password)
@@ -2690,7 +2698,7 @@ func TestDeleteSpending(t *testing.T) {
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      5000,
 					"spendingType":      SpendingTypeExpense,
-					"nextRecurrence":    app.Clock.Now().AddDate(0, 1, 0),
+					"nextRecurrence":    util.Midnight(app.Clock.Now().AddDate(0, 1, 0), timezone),
 				}).
 				Expect().
 				Status(http.StatusOK).

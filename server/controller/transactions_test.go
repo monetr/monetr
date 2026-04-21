@@ -469,6 +469,7 @@ func TestPostTransactions(t *testing.T) {
 
 	t.Run("create a transaction for a non-usd bank account", func(t *testing.T) {
 		app, e := NewTestApplication(t)
+		timezone := testutils.Must(t, time.LoadLocation, "Asia/Tokyo")
 		var token string
 		{ // Register a new user
 			email := testutils.GetUniqueEmail(t)
@@ -551,7 +552,7 @@ func TestPostTransactions(t *testing.T) {
 					"amount":         100, // $1
 					"isPending":      false,
 					"name":           "I spent some money",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 				}).
 				Expect()
@@ -955,9 +956,11 @@ func TestDeleteTransactions(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string
 		var bank BankAccount
+		var timezone *time.Location
 
 		{ // Seed the data for the test.
 			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			timezone = testutils.MustEz(t, user.Account.GetTimezone)
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 			token = GivenILogin(t, e, user.Login.Email, password)
@@ -985,7 +988,7 @@ func TestDeleteTransactions(t *testing.T) {
 					"amount":         200, // Spent $2
 					"isPending":      false,
 					"name":           "I spent money",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 				}).
 				Expect()
@@ -1046,9 +1049,11 @@ func TestDeleteTransactions(t *testing.T) {
 		app, e := NewTestApplication(t)
 		var token string
 		var bank BankAccount
+		var timezone *time.Location
 
 		{ // Seed the data for the test.
 			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			timezone = testutils.MustEz(t, user.Account.GetTimezone)
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
 			token = GivenILogin(t, e, user.Login.Email, password)
@@ -1076,7 +1081,7 @@ func TestDeleteTransactions(t *testing.T) {
 					"amount":         200, // Spent $2
 					"isPending":      false,
 					"name":           "I spent money",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 				}).
 				Expect()
@@ -1140,6 +1145,7 @@ func TestDeleteTransactions(t *testing.T) {
 		var token string
 		var bank BankAccount
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
 		{ // Seed the data for the test.
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
@@ -1178,7 +1184,6 @@ func TestDeleteTransactions(t *testing.T) {
 		var spendingId ID[Spending]
 		{ // Create an expense
 			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
@@ -1235,7 +1240,7 @@ func TestDeleteTransactions(t *testing.T) {
 					"amount":         200, // Spent $2
 					"isPending":      false,
 					"name":           "I spent money",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 					"spendingId":     spendingId,
 				}).
@@ -1323,6 +1328,7 @@ func TestDeleteTransactions(t *testing.T) {
 		var token string
 		var bank BankAccount
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
 		{ // Seed the data for the test.
 			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
@@ -1361,7 +1367,6 @@ func TestDeleteTransactions(t *testing.T) {
 		var spendingId ID[Spending]
 		{ // Create an expense
 			now := app.Clock.Now()
-			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
@@ -1418,7 +1423,7 @@ func TestDeleteTransactions(t *testing.T) {
 					"amount":         200, // Spent $2
 					"isPending":      false,
 					"name":           "I spent money",
-					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"date":           util.Midnight(app.Clock.Now(), timezone),
 					"adjustsBalance": true,
 					"spendingId":     spendingId,
 				}).
