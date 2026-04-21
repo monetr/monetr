@@ -4,11 +4,12 @@ import (
 	"context"
 	"time"
 
+	"log/slog"
+
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
-	"log/slog"
 )
 
 type FundingEvent struct {
@@ -42,7 +43,7 @@ func NewFundingScheduleFundingInstructions(
 ) FundingInstructions {
 	return &fundingScheduleBase{
 		log:             log,
-		ruleset:         fundingSchedule.RuleSet.Clone(),
+		ruleset:         fundingSchedule.Ruleset.Clone(),
 		fundingSchedule: fundingSchedule,
 	}
 }
@@ -182,7 +183,7 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(
 	end time.Time,
 	timezone *time.Location,
 ) ([]FundingEvent, error) {
-	rule := f.fundingSchedule.RuleSet.Set
+	rule := f.fundingSchedule.Ruleset.Set
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
 	// midnight.

@@ -122,7 +122,7 @@ type BankAccount struct {
 	CurrentBalance         int64                     `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
 	LimitBalance           int64                     `json:"limitBalance" pg:"limit_balance,notnull,use_zero"`
 	Mask                   *string                   `json:"mask" pg:"mask"`
-	Name                   string                    `json:"name,omitempty" pg:"name,notnull"`
+	Name                   string                    `json:"name" pg:"name,notnull"`
 	OriginalName           string                    `json:"originalName" pg:"original_name,notnull"`
 	AccountType            BankAccountType           `json:"accountType" pg:"account_type"`
 	AccountSubType         BankAccountSubType        `json:"accountSubType" pg:"account_sub_type"`

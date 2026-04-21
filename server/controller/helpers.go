@@ -2,15 +2,18 @@ package controller
 
 import (
 	"encoding/json"
+	"net/http"
 	"strings"
 	"time"
 
+	"github.com/Oudwins/zog"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/schema"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
@@ -53,6 +56,27 @@ func (c *Controller) mustGetTimezone(ctx echo.Context) *time.Location {
 	timezone, err := account.GetTimezone()
 	if err != nil {
 		panic(err)
+	}
+
+	return timezone
+}
+
+// mustGetTimezoneUnsafe will never panic. It will attempt to retrieve the
+// current user's timezone, but if that fails it will fall back to UTC.
+func (c *Controller) mustGetTimezoneUnsafe(ctx echo.Context) *time.Location {
+	accountId, err := c.getAccountId(ctx)
+	if err != nil {
+		return time.UTC
+	}
+
+	account, err := c.Accounts.GetAccount(c.getContext(ctx), accountId)
+	if err != nil {
+		return time.UTC
+	}
+
+	timezone, err := account.GetTimezone()
+	if err != nil {
+		return time.UTC
 	}
 
 	return timezone
@@ -308,4 +332,45 @@ func enqueueJob[T any](
 		job,
 		args,
 	)
+}
+
+// parse takes the current request context, controller, schema and a base object
+// and produces a copy of the base object with the request body parsed into it.
+// It will overwrite fields specified in the schema if they exist in the
+// request.
+func parse[T any](
+	c *Controller,
+	ctx echo.Context,
+	requestSchema *zog.StructSchema,
+	base *T,
+) (T, error) {
+	result, err := schema.Parse(
+		c.getContext(ctx),
+		requestSchema,
+		base,
+		ctx.Request().Body,
+		schema.ParseMetadata{
+			Clock:    c.Clock,
+			Timezone: c.mustGetTimezoneUnsafe(ctx),
+		},
+	)
+	switch err := errors.Cause(err).(type) {
+	case nil:
+		return result, nil
+	case schema.Error:
+		return result, echo.NewHTTPError(
+			http.StatusBadRequest,
+			"Invalid request",
+		).WithInternal(err)
+	case *json.SyntaxError:
+		return result, echo.NewHTTPError(
+			http.StatusBadRequest,
+			"malformed json",
+		).WithInternal(err)
+	default:
+		return result, echo.NewHTTPError(
+			http.StatusBadRequest,
+			"Invalid request",
+		).WithInternal(err)
+	}
 }

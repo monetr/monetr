@@ -149,3 +149,15 @@ func (c *Controller) invalidJsonError(ctx echo.Context, err error) error {
 func (c *Controller) notFound(ctx echo.Context, msg string, args ...any) error {
 	return c.returnError(ctx, http.StatusNotFound, msg, args...)
 }
+
+func (c *Controller) schemaError(
+	ctx echo.Context,
+	message string,
+	issues map[string][]string,
+) error {
+	return ctx.JSON(http.StatusBadRequest, map[string]any{
+		"error":  message,
+		"code":   "SCHEMA_VALIDATION_ERROR",
+		"issues": issues,
+	})
+}

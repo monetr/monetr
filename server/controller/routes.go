@@ -8,15 +8,18 @@ import (
 	"runtime/debug"
 	"time"
 
+	"log/slog"
+
+	"github.com/Oudwins/zog"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
 	"github.com/monetr/monetr/server/internal/sentryecho"
+	"github.com/monetr/monetr/server/schema"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
-	"log/slog"
 
 	"github.com/pkg/errors"
 )
@@ -66,20 +69,19 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				log := c.Log.With(
 					"method", ctx.Request().Method,
 					"path", ctx.Path(),
-					"requestId", util.GetRequestID(ctx),
 				)
 
 				claims, err := c.getClaims(ctx)
 				if err == nil {
-					if claims.LoginId != "" {
-						log = log.With("loginId", claims.LoginId)
-					}
-					if claims.AccountId != "" {
-						log = log.With("accountId", claims.AccountId)
-					}
-					if claims.UserId != "" {
-						log = log.With("userId", claims.UserId)
-					}
+					// if claims.LoginId != "" {
+					// 	log = log.With("loginId", claims.LoginId)
+					// }
+					// if claims.AccountId != "" {
+					// 	log = log.With("accountId", claims.AccountId)
+					// }
+					// if claims.UserId != "" {
+					// 	log = log.With("userId", claims.UserId)
+					// }
 					if claims.Scope != "" {
 						log = log.With("scope", claims.Scope)
 					}
@@ -201,6 +203,12 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 					if _, ok := internalError.(json.Marshaler); ok {
 						return ctx.JSON(actualError.Code, internalError)
 					}
+				case schema.Error:
+					return c.schemaError(
+						ctx,
+						actualError.Message.(string),
+						zog.Issues.Flatten(internalError.Issues()),
+					)
 				default:
 					return ctx.JSON(actualError.Code, map[string]any{
 						"error": actualError.Message,
@@ -210,6 +218,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				return err
 			default:
 				return ctx.JSON(http.StatusInternalServerError, map[string]any{
+					"code":  "INTERNAL_SERVER_ERROR",
 					"error": err.Error(),
 				})
 			}
@@ -237,7 +246,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	unauthed.POST("/authentication/login", c.postLogin)
 	unauthed.GET("/authentication/logout", c.logoutEndpoint)
 	unauthed.POST("/authentication/register", c.postRegister)
-	unauthed.POST("/authentication/verify", c.verifyEndpoint)
+	unauthed.POST("/authentication/verify", c.postVerify)
 	unauthed.POST("/authentication/verify/resend", c.resendVerification)
 	unauthed.POST("/authentication/forgot", c.postForgotPassword)
 	unauthed.POST("/authentication/reset", c.resetPassword)
@@ -304,6 +313,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId", c.getTransactionUploadById)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId/progress", c.getTransactionUploadProgress)
 	billed.PUT("/bank_accounts/:bankAccountId/transactions/:transactionId", c.putTransactions)
+	billed.PATCH("/bank_accounts/:bankAccountId/transactions/:transactionId", c.patchTransaction)
 	billed.DELETE("/bank_accounts/:bankAccountId/transactions/:transactionId", c.deleteTransactions)
 	// Uploads
 	billed.GET("/files", c.getFiles)
@@ -320,6 +330,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.POST("/bank_accounts/:bankAccountId/spending", c.postSpending)
 	billed.POST("/bank_accounts/:bankAccountId/spending/transfer", c.postSpendingTransfer)
 	billed.PUT("/bank_accounts/:bankAccountId/spending/:spendingId", c.putSpending)
+	billed.PATCH("/bank_accounts/:bankAccountId/spending/:spendingId", c.patchSpending)
 	billed.DELETE("/bank_accounts/:bankAccountId/spending/:spendingId", c.deleteSpending)
 	billed.GET("/bank_accounts/:bankAccountId/spending/:spendingId/transactions", c.getSpendingTransactions)
 	// Forecasting

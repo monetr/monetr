@@ -80,7 +80,7 @@ func TestRepositoryBase_GetBalances(t *testing.T) {
 			TargetAmount:           10000,
 			CurrentAmount:          1000, // $10
 			UsedAmount:             0,
-			RuleSet:                rule,
+			Ruleset:                rule,
 			LastSpentFrom:          nil,
 			LastRecurrence:         nil,
 			NextRecurrence:         nextOccurrence,

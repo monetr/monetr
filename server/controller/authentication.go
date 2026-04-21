@@ -8,14 +8,14 @@ import (
 	"strings"
 	"time"
 
-	locale "github.com/elliotcourant/go-lclocale"
+	"github.com/Oudwins/zog"
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/communication"
-	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/schema"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/zoneinfo"
 	"github.com/pkg/errors"
@@ -70,26 +70,25 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		Password string `json:"password"`
 		Captcha  string `json:"captcha"`
 	}
-	if err := ctx.Bind(&loginRequest); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
+
+	loginSchema := schema.AuthenticationLogin
+
+	// If ReCAPTCHA is enabled and required for logins then merge the captcha
+	// request schema with our login schema.
+	if c.Configuration.ReCAPTCHA.ShouldVerifyLogin() {
+		loginSchema = loginSchema.
+			Merge(schema.Captcha(c.Captcha)) // Add the captcha onto the schema
 	}
 
-	// This will take the captcha from the request and validate it if the API is
-	// configured to do so. If it is enabled and the captcha fails then an error
-	// is returned to the client.
-	if err := c.validateLoginCaptcha(c.getContext(ctx), loginRequest.Captcha); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Valid ReCAPTCHA is required")
-	}
-
-	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
-	loginRequest.Password = strings.TrimSpace(loginRequest.Password)
-
-	if err := c.validateLogin(
+	var err error
+	loginRequest, err = parse(
+		c,
 		ctx,
-		loginRequest.Email,
-		loginRequest.Password,
-	); err != nil {
-		return err // Validate login errors are valid http errors.
+		loginSchema,
+		&loginRequest,
+	)
+	if err != nil {
+		return err
 	}
 
 	secureRepo := c.mustGetSecurityRepository(ctx)
@@ -100,7 +99,11 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
-		return c.returnError(ctx, http.StatusUnauthorized, "Invalid email and password")
+		return c.returnError(
+			ctx,
+			http.StatusUnauthorized,
+			"Invalid email and password",
+		)
 	case nil:
 		// If no error was returned then do nothing.
 		break
@@ -109,25 +112,43 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	}
 
 	// I want to track how many of these types of things we get.
-	crumbs.AddTag(c.getContext(ctx), "requiresPasswordChange", fmt.Sprint(requiresPasswordChange))
+	crumbs.AddTag(
+		c.getContext(ctx),
+		"requiresPasswordChange",
+		fmt.Sprint(requiresPasswordChange),
+	)
 
 	log := c.getLog(ctx).With("loginId", login.LoginId)
 
-	// If we want to verify emails and the login does not have a verified email address, then return an error to the
-	// user.
+	// If we want to verify emails and the login does not have a verified email
+	// address, then return an error to the user.
 	if c.Configuration.Email.ShouldVerifyEmails() && !login.IsEmailVerified {
-		log.DebugContext(c.getContext(ctx), "login email address is not verified, please verify before continuing")
-		return c.failure(ctx, http.StatusPreconditionRequired, EmailNotVerifiedError{})
+		log.DebugContext(
+			c.getContext(ctx),
+			"login email address is not verified, please verify before continuing",
+		)
+		return c.failure(
+			ctx,
+			http.StatusPreconditionRequired,
+			EmailNotVerifiedError{},
+		)
 	}
 
+	// TODO This will never be true again, this was when I migrated everything to
+	// bcrypt but this code path doesn't get used anymore.
 	if requiresPasswordChange {
 		// If the server is not configured to allow password resets return an error.
 		if !c.Configuration.Email.AllowPasswordReset() {
-			return c.returnError(ctx, http.StatusNotAcceptable, "Login requires password reset, but password reset is not allowed")
+			return c.returnError(
+				ctx,
+				http.StatusNotAcceptable,
+				"Login requires password reset, but password reset is not allowed",
+			)
 		}
 
 		passwordResetToken, err := c.ClientTokens.Create(
-			5*time.Minute, // Use a much shorter lifetime than usually would be configured.
+			// Use a much shorter lifetime than usually would be configured.
+			5*time.Minute,
 			security.Claims{
 				Scope:        security.ResetPasswordScope,
 				EmailAddress: login.Email,
@@ -137,23 +158,39 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			},
 		)
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to generate a password reset token")
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"Failed to generate a password reset token",
+			)
 		}
 		ctx.Set(authenticationKey, security.Claims{
 			LoginId: login.LoginId.String(),
 			Scope:   security.ResetPasswordScope,
 		})
 
-		log.InfoContext(c.getContext(ctx), "login requires a password change")
-		return c.failure(ctx, http.StatusPreconditionRequired, PasswordResetRequiredError{
-			ResetToken: passwordResetToken,
-		})
+		log.InfoContext(
+			c.getContext(ctx),
+			"login requires a password change",
+		)
+		return c.failure(
+			ctx,
+			http.StatusPreconditionRequired,
+			PasswordResetRequiredError{
+				ResetToken: passwordResetToken,
+			},
+		)
 	}
 
 	switch len(login.Users) {
 	case 0:
 		// TODO (elliotcourant) Should we allow them to create an account?
-		return c.returnError(ctx, http.StatusInternalServerError, "User has no accounts")
+		return c.returnError(
+			ctx,
+			http.StatusInternalServerError,
+			"User has no accounts",
+		)
 	case 1:
 		user := login.Users[0]
 
@@ -180,7 +217,12 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 				},
 			)
 			if err != nil {
-				return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Could not generate token")
+				return c.wrapAndReturnError(
+					ctx,
+					err,
+					http.StatusInternalServerError,
+					"Could not generate token",
+				)
 			}
 			c.updateAuthenticationCookie(ctx, token)
 
@@ -206,7 +248,12 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			},
 		)
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Could not generate token")
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"Could not generate token",
+			)
 		}
 
 		result := map[string]any{
@@ -220,9 +267,17 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 			return ctx.JSON(http.StatusOK, result)
 		}
 
-		subscriptionIsActive, err := c.Billing.GetSubscriptionIsActive(c.getContext(ctx), user.AccountId)
+		subscriptionIsActive, err := c.Billing.GetSubscriptionIsActive(
+			c.getContext(ctx),
+			user.AccountId,
+		)
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to determine whether or not subscription is active")
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"Failed to determine whether or not subscription is active",
+			)
 		}
 
 		result["isActive"] = subscriptionIsActive
@@ -236,22 +291,28 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		// If the login has more than one user then we want to generate a temp
 		// JWT that will only grant them access to API endpoints not specific to
 		// an account.
-		return c.badRequest(ctx, "Multiple accounts not implemented, please contact support")
+		return c.badRequest(
+			ctx,
+			"Multiple accounts not implemented, please contact support",
+		)
 	}
 }
 
 func (c *Controller) postMultifactor(ctx echo.Context) error {
 	c.scrubSentryBody(ctx)
 	var request struct {
-		TOTP string `json:"totp"`
+		Totp string `json:"totp"`
 	}
-	if err := ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
-	}
-
-	request.TOTP = strings.TrimSpace(request.TOTP)
-	if request.TOTP == "" {
-		return c.badRequest(ctx, "TOTP code is required")
+	var err error
+	// Technically we are partially authenticated here?
+	request, err = parse(
+		c,
+		ctx,
+		schema.AuthenticationTOTP,
+		&request,
+	)
+	if err != nil {
+		return err
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -260,7 +321,7 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 		return c.unauthorizedError(ctx, err)
 	}
 
-	if err := me.Login.VerifyTOTP(request.TOTP, c.Clock.Now()); err != nil {
+	if err := me.Login.VerifyTOTP(request.Totp, c.Clock.Now()); err != nil {
 		return c.returnError(ctx, http.StatusUnauthorized, "Invalid TOTP code")
 	}
 
@@ -275,7 +336,12 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 		},
 	)
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"could not generate token",
+		)
 	}
 
 	c.updateAuthenticationCookie(ctx, token)
@@ -291,7 +357,12 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 
 	subscriptionIsActive, err := c.Billing.GetSubscriptionIsActive(c.getContext(ctx), me.AccountId)
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine whether or not subscription is active")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"failed to determine whether or not subscription is active",
+		)
 	}
 
 	result["isActive"] = subscriptionIsActive
@@ -318,6 +389,17 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		return c.notFound(ctx, "sign up is not enabled on this server")
 	}
 
+	registerSchema := schema.AuthenticationRegister
+	if c.Configuration.ReCAPTCHA.ShouldVerifyRegistration() {
+		registerSchema = registerSchema.
+			Merge(schema.Captcha(c.Captcha)) // Add the captcha onto the schema
+	}
+
+	if c.Configuration.Beta.EnableBetaCodes {
+		// Same with beta codes, if they are enabled then we need to require them.
+		registerSchema = registerSchema.Merge(schema.BetaCode)
+	}
+
 	var registerRequest struct {
 		Email     string  `json:"email"`
 		Password  string  `json:"password"`
@@ -328,51 +410,22 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		Captcha   string  `json:"captcha"`
 		BetaCode  *string `json:"betaCode"`
 	}
-	if err := ctx.Bind(&registerRequest); err != nil {
-		return c.invalidJson(ctx)
-	}
-
-	// This will take the captcha from the request and validate it if the API is
-	// configured to do so. If it is enabled and the captcha fails then an error
-	// is returned to the client.
-	if err := c.validateRegistrationCaptcha(c.getContext(ctx), registerRequest.Captcha); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
+	var err error
+	registerRequest, err = parse(
+		c,
+		ctx,
+		registerSchema,
+		&registerRequest,
+	)
+	if err != nil {
+		return err
 	}
 
 	log := c.getLog(ctx)
 
-	registerRequest.Email = strings.TrimSpace(registerRequest.Email)
-	registerRequest.FirstName = strings.TrimSpace(registerRequest.FirstName)
-	registerRequest.Locale = strings.TrimSpace(registerRequest.Locale)
-	registerRequest.Password = strings.TrimSpace(registerRequest.Password)
-	if len(registerRequest.Password) > 71 {
-		return c.badRequest(ctx, "Password must be less than 72 characters")
-	}
-	if registerRequest.BetaCode != nil {
-		*registerRequest.BetaCode = strings.TrimSpace(*registerRequest.BetaCode)
-	}
-
-	if registerRequest.Locale == "" {
-		return c.badRequest(ctx, "Locale must be specified to register")
-	}
-
-	if _, err := locale.GetLConv(registerRequest.Locale); err != nil {
-		log.WarnContext(c.getContext(ctx), "invalid locale in register request, falling back to global default", "locale", registerRequest.Locale, "err", err)
-		registerRequest.Locale = consts.DefaultLocale
-	}
-
-	if err := c.validateRegistration(
-		ctx,
-		registerRequest.Email,
-		registerRequest.Password,
-		registerRequest.FirstName,
-	); err != nil {
-		return err // validateRegistration also returns a valid http error that can just be passed through.
-	}
-
 	timezone, err := zoneinfo.Timezone(registerRequest.Timezone)
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse timezone")
+		return c.badRequestError(ctx, err, "failed to parse timezone")
 	}
 
 	// If the registration details provided look good then we want to create an
@@ -381,7 +434,10 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	// a write only interface to the database.
 	repo, err := c.getUnauthenticatedRepository(ctx)
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
 			"cannot register user",
 		)
 	}
@@ -392,7 +448,10 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 			return c.badRequest(ctx, "beta code required for registration")
 		}
 
-		beta, err = repo.ValidateBetaCode(c.getContext(ctx), *registerRequest.BetaCode)
+		beta, err = repo.ValidateBetaCode(
+			c.getContext(ctx),
+			*registerRequest.BetaCode,
+		)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "could not verify beta code")
 		}
@@ -422,7 +481,12 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	var trialEndsAt *time.Time
 	if c.Configuration.Stripe.IsBillingEnabled() {
 		expiration := c.Clock.Now().AddDate(0, 0, c.Configuration.Stripe.FreeTrialDays)
-		log.DebugContext(c.getContext(ctx), "billing is enabled, new account for login will be on a trial", "trialDays", c.Configuration.Stripe.FreeTrialDays, "trialEndsAt", expiration)
+		log.DebugContext(
+			c.getContext(ctx),
+			"billing is enabled, new account for login will be on a trial",
+			"trialDays", c.Configuration.Stripe.FreeTrialDays,
+			"trialEndsAt", expiration,
+		)
 
 		trialEndsAt = &expiration
 	}
@@ -456,14 +520,24 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		&user,
 	)
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
 			"failed to create user",
 		)
 	}
 
 	if beta != nil {
-		if err = repo.UseBetaCode(c.getContext(ctx), beta.BetaId, user.UserId); err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+		if err = repo.UseBetaCode(
+			c.getContext(ctx),
+			beta.BetaId,
+			user.UserId,
+		); err != nil {
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
 				"failed to use beta code",
 			)
 		}
@@ -517,7 +591,10 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 			LoginId:      user.LoginId.String(),
 		})
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
 			"failed to create token",
 		)
 	}
@@ -533,7 +610,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) verifyEndpoint(ctx echo.Context) error {
+func (c *Controller) postVerify(ctx echo.Context) error {
 	c.scrubSentryBody(ctx)
 	if !c.Configuration.Email.ShouldVerifyEmails() {
 		return c.notFound(ctx, "email verification is not enabled")
@@ -542,26 +619,37 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 	var verifyRequest struct {
 		Token string `json:"token"`
 	}
-	if err := ctx.Bind(&verifyRequest); err != nil {
-		return c.invalidJson(ctx)
-	}
-
-	if strings.TrimSpace(verifyRequest.Token) == "" {
-		return c.badRequest(ctx, "Token cannot be blank")
+	var err error
+	verifyRequest, err = parse(
+		c,
+		ctx,
+		schema.AuthenticationVerifyEmail,
+		&verifyRequest,
+	)
+	if err != nil {
+		return err
 	}
 
 	claims, err := c.ClientTokens.Parse(verifyRequest.Token)
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusBadRequest,
+			"Invalid email verification",
+		)
 	}
 
 	if err := claims.RequireScope(security.VerifyEmailScope); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
+		return c.badRequestError(ctx, err, "Invalid email verification")
 	}
 
 	repo := c.mustGetUnauthenticatedRepository(ctx)
-	if err := repo.SetEmailVerified(c.getContext(ctx), claims.EmailAddress); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
+	if err := repo.SetEmailVerified(
+		c.getContext(ctx),
+		claims.EmailAddress,
+	); err != nil {
+		return c.badRequestError(ctx, err, "Invalid email verification")
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
@@ -577,33 +665,35 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 		return c.notFound(ctx, "email verification is not enabled")
 	}
 
-	var request struct {
-		Email   string  `json:"email"`
-		Captcha *string `json:"captcha"`
-	}
-	if err := ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
-	}
-
-	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
-	if request.Email == "" {
-		return c.badRequest(ctx, "email must be provided to resend verification link")
-	}
-
+	resendSchema := schema.AuthenticationResendVerifyEmail
 	if c.Configuration.ReCAPTCHA.Enabled {
-		if request.Captcha == nil {
-			return c.badRequest(ctx, "must provide ReCAPTCHA")
-		}
+		resendSchema = resendSchema.
+			Merge(schema.Captcha(c.Captcha)) // Add the captcha onto the schema
+	}
 
-		if err := c.validateCaptchaMaybe(c.getContext(ctx), *request.Captcha); err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid ReCAPTCHA provided")
-		}
+	var request struct {
+		Email   string `json:"email"`
+		Captcha string `json:"captcha"`
+	}
+	var err error
+	request, err = parse(
+		c,
+		ctx,
+		resendSchema,
+		&request,
+	)
+	if err != nil {
+		return err
 	}
 
 	unauthedRepo := c.mustGetUnauthenticatedRepository(ctx)
 	login, err := unauthedRepo.GetLoginForEmail(c.getContext(ctx), request.Email)
 	if err != nil {
-		log.WarnContext(c.getContext(ctx), "failed to get login for email address to resend verification", "err", err)
+		log.WarnContext(
+			c.getContext(ctx),
+			"failed to get login for email address to resend verification",
+			"err", err,
+		)
 		return ctx.NoContent(http.StatusOK)
 	}
 
@@ -841,6 +931,27 @@ func (c *Controller) validateRegistrationCaptcha(ctx context.Context, captcha st
 	}
 
 	return c.validateCaptchaMaybe(ctx, captcha)
+}
+
+func (c *Controller) isValidCaptcha(reqCtx echo.Context) zog.BoolTFunc[any] {
+	return func(val any, ctx zog.Ctx) bool {
+		switch val := val.(type) {
+		case string:
+			if err := c.Captcha.VerifyCaptcha(c.getContext(reqCtx), val); err != nil {
+				ctx.AddIssue(ctx.Issue().
+					SetCode("captcha_missing").
+					SetPath([]string{"captcha"}).
+					SetError(err).
+					SetMessage("ReCAPTCHA is not valid").
+					SetParams(map[string]any{
+						"captcha": val,
+					}),
+				)
+				return false
+			}
+		}
+		return true
+	}
 }
 
 func (c *Controller) validateCaptchaMaybe(ctx context.Context, captcha string) error {

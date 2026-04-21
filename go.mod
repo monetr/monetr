@@ -6,6 +6,7 @@ require (
 	aidanwoods.dev/go-paseto v1.6.0
 	github.com/MicahParks/jwkset v0.11.0
 	github.com/MicahParks/keyfunc/v3 v3.8.0
+	github.com/Oudwins/zog v0.22.1
 	github.com/alicebob/miniredis/v2 v2.37.0
 	github.com/aws/aws-sdk-go-v2 v1.41.5
 	github.com/aws/aws-sdk-go-v2/config v1.32.14
@@ -27,6 +28,7 @@ require (
 	github.com/hashicorp/vault/api v1.23.0
 	github.com/jarcoal/httpmock v1.4.1
 	github.com/labstack/echo/v4 v4.15.1
+	github.com/monetr/devslog v0.0.17
 	github.com/monetr/validation v1.0.5
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/openbao/openbao/api/v2 v2.5.1
@@ -67,6 +69,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
 )
 
 require (

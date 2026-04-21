@@ -94,6 +94,11 @@ test:
 	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure --output-junit $(PWD)$(CMAKE_CONFIGURATION_DIRECTORY)/junit.xml -j $(CONCURRENCY) $(PATTERN_ARG)
 	cmake -P cmake/scripts/MergeGoCoverage.cmake
 
+test-fast:
+	cmake --preset testing $(CMAKE_OPTIONS)
+	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --stop-on-failure --no-tests=error --output-on-failure --output-junit $(PWD)$(CMAKE_CONFIGURATION_DIRECTORY)/junit.xml -j $(CONCURRENCY) $(PATTERN_ARG)
+	cmake -P cmake/scripts/MergeGoCoverage.cmake
+
 lint: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t lint $(BUILD_ARGS)
 

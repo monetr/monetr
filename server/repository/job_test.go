@@ -33,7 +33,7 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -49,7 +49,7 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 			Description:       "Description or something",
 			TargetAmount:      5000,
 			CurrentAmount:     5000,
-			RuleSet:           spendingRule,
+			Ruleset:           spendingRule,
 			NextRecurrence:    spendingRule.Before(clock.Now(), true), // Make it so it recurs next in the past. (STALE)
 			CreatedAt:         clock.Now(),
 		})

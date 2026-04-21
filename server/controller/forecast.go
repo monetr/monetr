@@ -128,7 +128,7 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 				TargetAmount:      request.TargetAmount,
 				CurrentAmount:     request.CurrentAmount,
 				NextRecurrence:    request.NextRecurrence,
-				RuleSet:           request.RuleSet,
+				Ruleset:           request.RuleSet,
 				SpendingId:        "spnd_forecast", // Make sure this ID does not overlap with any real spending objects.
 			},
 		},

@@ -356,6 +356,13 @@ func AssertSetTokenCookie(t *testing.T, response *httpexpect.Response) string {
 	return cookie.Value().Raw()
 }
 
+func AssertNoTokenCookie(t *testing.T, response *httpexpect.Response) {
+	response.Cookies().NotContainsAny(TestCookieName)
+	// This assertion is here to prevent a regression. We want to make sure that
+	// requests that would previously return a token in the body, do not anymore.
+	response.JSON().Object().NotContainsKey("token")
+}
+
 func MustSendVerificationEmail(t *testing.T, app *TestApp, n int) {
 	app.Email.
 		EXPECT().

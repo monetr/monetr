@@ -49,7 +49,7 @@ func GivenIHaveAFundingSchedule(
 		BankAccount:            bankAccount,
 		Name:                   gofakeit.Generate("Payday {uuid}"),
 		Description:            gofakeit.Generate("{sentence:5}"),
-		RuleSet:                rule,
+		Ruleset:                rule,
 		ExcludeWeekends:        excludeWeekends,
 		LastRecurrence:         nil,
 		NextRecurrence:         nextOccurrence,

@@ -25,7 +25,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 		fundingSchedules := []models.FundingSchedule{
 			{
-				RuleSet:         fundingRule,
+				Ruleset:         fundingRule,
 				ExcludeWeekends: true,
 				NextRecurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 			},
@@ -36,7 +36,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				TargetAmount:   5000,
 				CurrentAmount:  0,
 				NextRecurrence: time.Date(2022, 10, 8, 0, 0, 0, 0, timezone),
-				RuleSet:        spendingRuleOne,
+				Ruleset:        spendingRuleOne,
 				SpendingId:     "spnd_1",
 			},
 			{
@@ -44,7 +44,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				TargetAmount:   12354,
 				CurrentAmount:  6177,
 				NextRecurrence: time.Date(2022, 9, 26, 0, 0, 0, 0, timezone),
-				RuleSet:        spendingRuleTwo,
+				Ruleset:        spendingRuleTwo,
 				SpendingId:     "spnd_2",
 			},
 			{
@@ -52,7 +52,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				TargetAmount:   180000,
 				CurrentAmount:  0,
 				NextRecurrence: time.Date(2022, 10, 1, 0, 0, 0, 0, timezone),
-				RuleSet:        spendingRuleThree,
+				Ruleset:        spendingRuleThree,
 				SpendingId:     "spnd_3",
 			},
 			{
@@ -102,7 +102,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 		fundingSchedules := []models.FundingSchedule{
 			{
-				RuleSet:           fundingRule,
+				Ruleset:           fundingRule,
 				ExcludeWeekends:   true,
 				NextRecurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
 				FundingScheduleId: "fund_1",
@@ -115,7 +115,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				TargetAmount:      1000,
 				CurrentAmount:     0,
 				NextRecurrence:    time.Date(2022, 12, 1, 0, 0, 0, 0, timezone),
-				RuleSet:           nil,
+				Ruleset:           nil,
 				SpendingId:        "spnd_1",
 			},
 		}
@@ -148,7 +148,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 		fundingSchedules := []models.FundingSchedule{
 			{
-				RuleSet:           fundingRule,
+				Ruleset:           fundingRule,
 				ExcludeWeekends:   true,
 				NextRecurrence:    time.Date(2023, 8, 15, 0, 0, 0, 0, timezone),
 				FundingScheduleId: "fund_1",
@@ -161,7 +161,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				TargetAmount:      2000,
 				CurrentAmount:     0,
 				NextRecurrence:    time.Date(2023, 9, 1, 0, 0, 0, 0, timezone),
-				RuleSet:           spendingRule,
+				Ruleset:           spendingRule,
 				SpendingId:        "spnd_1",
 			},
 		}
@@ -318,7 +318,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 		fundingSchedules := []models.FundingSchedule{
 			{
-				RuleSet:           fundingRule,
+				Ruleset:           fundingRule,
 				ExcludeWeekends:   true,
 				NextRecurrence:    time.Date(2023, 10, 31, 0, 0, 0, 0, timezone),
 				FundingScheduleId: "fund_1",

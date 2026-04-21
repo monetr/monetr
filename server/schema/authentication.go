@@ -1,0 +1,81 @@
+package schema
+
+import (
+	"regexp"
+
+	"github.com/Oudwins/zog"
+	"github.com/Oudwins/zog/pkgs/internals"
+	"github.com/monetr/monetr/server/captcha"
+)
+
+var (
+	AuthenticationLogin = zog.Struct(zog.Shape{
+		"email":    EmailAddress().Required(),
+		"password": Password().Required(),
+	})
+
+	AuthenticationRegister = zog.Struct(zog.Shape{
+		"email":     EmailAddress().Required(),
+		"password":  Password().Required(),
+		"firstName": zog.String().Required().Trim().Max(250),
+		"lastName":  zog.String().Optional().Trim().Max(250),
+		"timezone":  Timezone().Required(),
+		"locale":    Locale().Required(),
+	})
+
+	AuthenticationTOTP = zog.Struct(zog.Shape{
+		"totp": zog.String().
+			Trim().
+			Len(6).
+			Required().
+			Match(regexp.MustCompile(`\d{6}`)),
+	})
+
+	AuthenticationVerifyEmail = zog.Struct(zog.Shape{
+		"token": zog.String().
+			Trim().
+			Required().
+			Match(
+				regexp.MustCompile(`^v[1-4]\.(local|public)\.[a-zA-Z0-9-_]*\.?[a-zA-Z0-9-_]*$`),
+				zog.Message("verification token is not valid"),
+			),
+	})
+
+	AuthenticationResendVerifyEmail = zog.Struct(zog.Shape{
+		"email": EmailAddress().Required(),
+	})
+
+	BetaCode = zog.Struct(zog.Shape{
+		"betaCode": zog.Ptr(
+			zog.String().
+				Required(zog.Message("beta code is required")).
+				Max(100),
+		).NotNil(zog.Message("beta code is required")),
+	})
+)
+
+// Captcha takes the captcha interface to verify the actual captcha provided as
+// part of the schema testing process.
+func Captcha(impl captcha.Verification) *zog.StructSchema {
+	return zog.Struct(zog.Shape{
+		"captcha": zog.String().
+			Required().
+			Max(3000).
+			TestFunc(func(val *string, ctx internals.Ctx) bool {
+				context := MustContext(ctx)
+				if err := impl.VerifyCaptcha(context, *val); err != nil {
+					ctx.AddIssue(ctx.Issue().
+						SetCode("captcha_missing").
+						SetPath([]string{"captcha"}).
+						SetError(err).
+						SetMessage("ReCAPTCHA is not valid").
+						SetParams(map[string]any{
+							"captcha": val,
+						}),
+					)
+				}
+
+				return true
+			}),
+	})
+}

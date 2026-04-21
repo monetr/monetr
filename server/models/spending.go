@@ -11,12 +11,12 @@ import (
 	"github.com/monetr/monetr/server/util"
 )
 
-type SpendingType uint8
+type SpendingType string
 
 const (
-	SpendingTypeExpense SpendingType = iota
-	SpendingTypeGoal
-	SpendingTypeOverflow
+	SpendingTypeExpense  SpendingType = "expense"
+	SpendingTypeGoal     SpendingType = "goal"
+	SpendingTypeOverflow SpendingType = "overflow"
 )
 
 type Spending struct {
@@ -31,11 +31,11 @@ type Spending struct {
 	FundingSchedule        *FundingSchedule    `json:"-" pg:"rel:has-one"`
 	SpendingType           SpendingType        `json:"spendingType" pg:"spending_type,notnull,use_zero,unique:per_bank"`
 	Name                   string              `json:"name" pg:"name,notnull,unique:per_bank"`
-	Description            string              `json:"description,omitempty" pg:"description"`
+	Description            string              `json:"description" pg:"description"`
 	TargetAmount           int64               `json:"targetAmount" pg:"target_amount,notnull,use_zero"`
 	CurrentAmount          int64               `json:"currentAmount" pg:"current_amount,notnull,use_zero"`
 	UsedAmount             int64               `json:"usedAmount" pg:"used_amount,notnull,use_zero"`
-	RuleSet                *RuleSet            `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
+	Ruleset                *RuleSet            `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
 	LastSpentFrom          *time.Time          `json:"lastSpentFrom" pg:"last_spent_from"`
 	LastRecurrence         *time.Time          `json:"lastRecurrence" pg:"last_recurrence"`
 	NextRecurrence         time.Time           `json:"nextRecurrence" pg:"next_recurrence,notnull"`
@@ -92,7 +92,7 @@ func (e Spending) GetProgressAmount() int64 {
 func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Location) []time.Time {
 	switch e.SpendingType {
 	case SpendingTypeExpense:
-		return e.RuleSet.Between(now, before, false)
+		return e.Ruleset.Between(now, before, false)
 	case SpendingTypeGoal:
 		if e.NextRecurrence.After(now) && e.NextRecurrence.Before(before) {
 			return []time.Time{e.NextRecurrence}
@@ -117,12 +117,12 @@ func (e *Spending) CalculateNextContribution(
 		"spendingId", e.SpendingId,
 		"timezone", timezone.String(),
 		slog.Group("spending",
-			"ruleset", e.RuleSet,
+			"ruleset", e.Ruleset,
 			"targetAmount", e.TargetAmount,
 			"currentAmount", e.CurrentAmount,
 		),
 		slog.Group("funding",
-			"ruleset", fundingSchedule.RuleSet,
+			"ruleset", fundingSchedule.Ruleset,
 			"nextRecurrence", fundingSchedule.NextRecurrence,
 			"excludeWeekends", fundingSchedule.ExcludeWeekends,
 		),
@@ -190,8 +190,8 @@ func calculateNextContribution(
 	now = now.In(timezone)
 
 	var rule *RuleSet
-	if spending.RuleSet != nil {
-		rule = spending.RuleSet.Clone()
+	if spending.Ruleset != nil {
+		rule = spending.Ruleset.Clone()
 		rule.DTStart(rule.GetDTStart().In(timezone))
 	}
 

@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/schema"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 )
@@ -175,7 +176,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		return c.badRequest(ctx, "Funding schedule must have a name")
 	}
 
-	if request.RuleSet == nil {
+	if request.Ruleset == nil {
 		return c.badRequest(ctx, "Funding schedule must include a rule set")
 	}
 
@@ -213,7 +214,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 	}
 
 	// If the recurrence rule has changed then we need to recalculate spending too.
-	if request.RuleSet.String() != existingFundingSchedule.RuleSet.String() {
+	if request.Ruleset.String() != existingFundingSchedule.Ruleset.String() {
 		recalculateSpending = true
 	}
 
@@ -281,8 +282,9 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 	log := c.getLog(ctx)
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	// Retrieve the existing funding schedule to make sure some fields cannot be overridden
-	fundingSchedule, err := repo.GetFundingSchedule(
+	// Retrieve the existing funding schedule to make sure some fields cannot be
+	// overridden
+	originalFundingSchedule, err := repo.GetFundingSchedule(
 		c.getContext(ctx),
 		bankAccountId,
 		fundingScheduleId,
@@ -291,37 +293,37 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to verify funding schedule exists")
 	}
 
-	// Make a copy of the original so we can compare some things.
-	originalFundingSchedule := *fundingSchedule
-
-	switch err := fundingSchedule.UnmarshalRequest(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		fundingSchedule.UpdateValidators()...,
-	).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case *json.SyntaxError:
-		return c.invalidJsonError(ctx, err)
-	case nil:
-		break
-	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
+	fundingSchedule, err := parse(
+		c,
+		ctx,
+		schema.PatchFundingSchedule,
+		originalFundingSchedule,
+	)
+	if err != nil {
+		return err
 	}
 
+	// Schema isn't aware of general state, so we have to manually check to see if
+	// we are in a manual link, if we aren't then return a well formatted error to
+	// the client.
 	if fundingSchedule.AutoCreateTransaction {
-		if fundingSchedule.EstimatedDeposit == nil || *fundingSchedule.EstimatedDeposit <= 0 {
-			return c.badRequest(ctx, "Auto create transaction requires a non-zero estimated deposit")
-		}
-		isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
+		isManual, err := repo.GetLinkIsManualByBankAccountId(
+			c.getContext(ctx),
+			bankAccountId,
+		)
 		if err != nil {
 			return c.wrapPgError(ctx, err, "failed to validate if link is manual")
 		}
 		if !isManual {
-			return c.badRequest(ctx, "Auto create transaction is only supported for manual links")
+			return c.schemaError(
+				ctx,
+				"Invalid Request",
+				map[string][]string{
+					"autoCreateTransaction": []string{
+						"auto create transaction is only allowed on manual links",
+					},
+				},
+			)
 		}
 	}
 
@@ -333,7 +335,7 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		recalculateSpending = true
 	}
 
-	if originalFundingSchedule.RuleSet.String() != fundingSchedule.RuleSet.String() {
+	if originalFundingSchedule.Ruleset.String() != fundingSchedule.Ruleset.String() {
 		recalculateSpending = true
 	}
 
@@ -368,7 +370,7 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 				spend.CalculateNextContribution(
 					c.getContext(ctx),
 					timezone,
-					fundingSchedule,
+					&fundingSchedule,
 					now,
 					log,
 				)
@@ -385,7 +387,10 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		}
 	}
 
-	if err = repo.UpdateFundingSchedule(c.getContext(ctx), fundingSchedule); err != nil {
+	if err = repo.UpdateFundingSchedule(
+		c.getContext(ctx),
+		&fundingSchedule,
+	); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update funding schedule")
 	}
 

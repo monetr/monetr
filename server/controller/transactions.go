@@ -4,10 +4,10 @@ import (
 	"log/slog"
 	"math"
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/schema"
 )
 
 func (c *Controller) getTransactions(ctx echo.Context) error {
@@ -121,44 +121,23 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 
 		AdjustsBalance bool `json:"adjustsBalance"`
 	}
-	if err = ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
+	request, err = parse(
+		c,
+		ctx,
+		schema.CreateManualTransaction.Merge(schema.AdjustsBalance),
+		&request,
+	)
+	if err != nil {
+		return err
 	}
 
-	request.TransactionId = ""
 	request.BankAccountId = bankAccountId
-	request.Name = strings.TrimSpace(request.Name)
-	request.MerchantName = strings.TrimSpace(request.MerchantName)
 	request.OriginalName = request.Name
-	// No support for allowing these to be provided yet.
-	request.Categories = nil
-	request.Category = nil
+	request.OriginalMerchantName = request.MerchantName
 	request.Source = TransactionSourceManual
-
-	request.Name, err = c.cleanString(ctx, "Name", request.Name)
-	if err != nil {
-		return err
-	}
-	if request.Name == "" {
-		return c.badRequest(ctx, "Transaction must have a name")
-	}
-
-	request.MerchantName, err = c.cleanString(ctx, "MerchantName", request.MerchantName)
-	if err != nil {
-		return err
-	}
-
-	request.OriginalName, err = c.cleanString(ctx, "OriginalName", request.OriginalName)
-	if err != nil {
-		return err
-	}
 
 	if request.Date.IsZero() {
 		return c.badRequest(ctx, "Transaction must have a date")
-	}
-
-	if request.Amount == 0 {
-		return c.badRequest(ctx, "Transaction must have a non-zero amount")
 	}
 
 	var updatedSpending *Spending
@@ -319,6 +298,94 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 			c.getLog(ctx).WarnContext(c.getContext(ctx), "cannot change transaction date on non-manual links", "existingDate", existingTransaction.Date, "newDate", transaction.Date)
 			return c.badRequest(ctx, "Cannot change transaction date on non-manual links")
 		}
+	}
+
+	updatedExpenses, err := repo.ProcessTransactionSpentFrom(
+		c.getContext(ctx),
+		bankAccountId,
+		&transaction,
+		existingTransaction,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to process expense changes")
+	}
+
+	// TODO Handle more complex transaction updates via the API.
+	//  I think with the way I've built this so far there might be some issues
+	//  where if a field is missing during a PUT, like the name field; we might
+	//  update the name to be blank?
+
+	// TODO Handle balance changes on a transaction with an amount change.
+	if err = repo.UpdateTransaction(
+		c.getContext(ctx),
+		bankAccountId,
+		&transaction,
+	); err != nil {
+		return c.wrapPgError(ctx, err, "could not update transaction")
+	}
+
+	balance, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "could not get updated balances")
+	}
+
+	c.getLog(ctx).DebugContext(c.getContext(ctx), "successfully updated transaction")
+
+	result := map[string]any{
+		"transaction": transaction,
+		"balance":     balance,
+	}
+
+	if updatedExpenses != nil {
+		result["spending"] = updatedExpenses
+	}
+
+	return ctx.JSON(http.StatusOK, result)
+}
+
+func (c *Controller) patchTransaction(ctx echo.Context) error {
+	bankAccountId, err := ParseID[BankAccount](ctx.Param("bankAccountId"))
+	if err != nil || bankAccountId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	transactionId, err := ParseID[Transaction](ctx.Param("transactionId"))
+	if err != nil || transactionId.IsZero() {
+		return c.badRequest(ctx, "must specify a valid transaction Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	existingTransaction, err := repo.GetTransaction(
+		c.getContext(ctx),
+		bankAccountId,
+		transactionId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve existing transaction for update")
+	}
+
+	isManual, err := repo.GetLinkIsManualByBankAccountId(
+		c.getContext(ctx),
+		bankAccountId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to validate if link is manual")
+	}
+
+	patchSchema := schema.PatchTransaction
+	if isManual {
+		patchSchema = patchSchema.Merge(schema.PatchManualTransaction)
+	}
+
+	var transaction Transaction
+	transaction, err = parse(
+		c,
+		ctx,
+		patchSchema,
+		existingTransaction,
+	)
+	if err != nil {
+		return err
 	}
 
 	updatedExpenses, err := repo.ProcessTransactionSpentFrom(

@@ -25,8 +25,8 @@ type FundingSchedule struct {
 	BankAccountId          ID[BankAccount]     `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank"`
 	BankAccount            *BankAccount        `json:"bankAccount,omitempty" pg:"rel:has-one"`
 	Name                   string              `json:"name" pg:"name,notnull,unique:per_bank"`
-	Description            string              `json:"description,omitempty" pg:"description"`
-	RuleSet                *RuleSet            `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
+	Description            string              `json:"description" pg:"description"`
+	Ruleset                *RuleSet            `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
 	ExcludeWeekends        bool                `json:"excludeWeekends" pg:"exclude_weekends,notnull,use_zero"`
 	WaitForDeposit         bool                `json:"waitForDeposit" pg:"wait_for_deposit,notnull,use_zero"`
 	AutoCreateTransaction  bool                `json:"autoCreateTransaction" pg:"auto_create_transaction,notnull,use_zero"`
@@ -58,7 +58,7 @@ func (o *FundingSchedule) GetNumberOfContributionsBetween(
 	start, end time.Time,
 	timezone *time.Location,
 ) int64 {
-	rule := o.RuleSet.Set
+	rule := o.Ruleset.Set
 	// Make sure that the rule is using the timezone of the dates provided. This
 	// is an easy way to force that. We also need to truncate the hours on the
 	// start time. To make sure that we are operating relative to midnight.
@@ -89,7 +89,7 @@ func (o *FundingSchedule) GetNextContributionDateAfter(
 ) (actual, original time.Time) {
 	// Make debugging easier.
 	now = now.In(timezone)
-	nextContributionRule := o.RuleSet.Clone()
+	nextContributionRule := o.Ruleset.Clone()
 	// Force the start of the rule to be the next contribution date. This fixes a
 	// bug where the rule would increment properly, but would include the current
 	// timestamp in that increment causing incorrect comparisons below. This makes
@@ -170,7 +170,7 @@ func (o *FundingSchedule) CalculateNextOccurrence(
 	crumbs.Debug(span.Context(), "Calculated next recurrence for funding schedule", map[string]any{
 		"fundingScheduleId": o.FundingScheduleId,
 		"excludeWeekends":   o.ExcludeWeekends,
-		"ruleset":           o.RuleSet,
+		"ruleset":           o.Ruleset,
 		"before": map[string]any{
 			"lastRecurrence":         o.LastRecurrence,
 			"nextRecurrence":         o.NextRecurrence,

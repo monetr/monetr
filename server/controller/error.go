@@ -96,9 +96,11 @@ func (e EmailAlreadyExists) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// PasswordResetRequiredError is returned to the client when they attempt to login to an account that must have its
-// password updated for any reason. A short lived token is returned to the client that can be used to call the reset
-// password endpoint with an updated password.
+// PasswordResetRequiredError is returned to the client when they attempt to
+// login to an account that must have its password updated for any reason. A
+// short lived token is returned to the client that can be used to call the
+// reset password endpoint with an updated password.
+// Deprecated: This is no longer used anymore!
 type PasswordResetRequiredError struct {
 	ResetToken string `json:"resetToken"`
 }
