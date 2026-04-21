@@ -101,7 +101,7 @@ func TestProcessSpending(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -118,7 +118,7 @@ func TestProcessSpending(t *testing.T) {
 			Description:           "Auto expense",
 			TargetAmount:          5000,
 			CurrentAmount:         5000,
-			RuleSet:               spendingRule,
+			Ruleset:               spendingRule,
 			NextRecurrence:        expectedDueDate, // Make it so it recurs next in the past. (STALE)
 			AutoCreateTransaction: true,
 			CreatedAt:             clock.Now(),
@@ -188,7 +188,7 @@ func TestProcessSpending(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -204,7 +204,7 @@ func TestProcessSpending(t *testing.T) {
 			Description:           "Plaid expense",
 			TargetAmount:          5000,
 			CurrentAmount:         5000,
-			RuleSet:               spendingRule,
+			Ruleset:               spendingRule,
 			NextRecurrence:        spendingRule.Before(clock.Now(), true),
 			AutoCreateTransaction: true,
 			CreatedAt:             clock.Now(),
@@ -268,7 +268,7 @@ func TestProcessSpending(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -347,7 +347,7 @@ func TestProcessSpending(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			RuleSet:                fundingRule,
+			Ruleset:                fundingRule,
 			NextRecurrence:         fundingRule.After(clock.Now(), false),
 			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
@@ -363,7 +363,7 @@ func TestProcessSpending(t *testing.T) {
 			Description:           "Manual expense without auto create",
 			TargetAmount:          5000,
 			CurrentAmount:         5000,
-			RuleSet:               spendingRule,
+			Ruleset:               spendingRule,
 			NextRecurrence:        spendingRule.Before(clock.Now(), true),
 			AutoCreateTransaction: false,
 			CreatedAt:             clock.Now(),

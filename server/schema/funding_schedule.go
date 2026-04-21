@@ -9,7 +9,7 @@ var (
 	CreateFundingSchedule = zog.Struct(zog.Shape{
 		"name":                  Name(),
 		"description":           Description(),
-		"ruleset":               zog.Ptr(RRule()).NotNil(),
+		"ruleset":               zog.Ptr(RRule()).NotNil(zog.Message("is required")),
 		"excludeWeekends":       zog.Bool().Default(false).Required(),
 		"estimatedDeposit":      zog.Ptr(zog.Int64().GT(0).Optional()),
 		"nextRecurrence":        Date().Required(),

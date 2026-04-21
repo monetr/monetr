@@ -352,8 +352,8 @@ github.com/mitchellh/go-wordwrap v1.0.1 h1:TLuKupo69TCn6TQSyGxwI1EblZZEsQ0vMlAFQ
 github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTSsCt+hzestvNj0=
 github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
-github.com/monetr/devslog v0.0.16 h1:N9jj5/UCg862ZNk3+lMnvXin8pK6DCHzjrskFoXbWT8=
-github.com/monetr/devslog v0.0.16/go.mod h1:nzUwy/SXXIzjEmPSWWSzm14ytUBh1d9RGr2mxSDZ3Iw=
+github.com/monetr/devslog v0.0.17 h1:BHpYtqWBGVQawkEyfhgFwqnhQtPBxg4bPMD2tMxsgow=
+github.com/monetr/devslog v0.0.17/go.mod h1:nzUwy/SXXIzjEmPSWWSzm14ytUBh1d9RGr2mxSDZ3Iw=
 github.com/monetr/validation v1.0.5 h1:clGPYUfyPQRhhfDdje647xIreTclWIaqZQgMAULmj7w=
 github.com/monetr/validation v1.0.5/go.mod h1:mFBjreq4v2Z/K1PAJSGmRgVfcjdezcptqYe+9gSu2oc=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=

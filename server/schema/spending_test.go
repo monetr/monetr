@@ -1,12 +1,11 @@
 package schema_test
 
 import (
-	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/Oudwins/zog"
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schema"
@@ -22,23 +21,26 @@ func TestCreateSpending(t *testing.T) {
 			"description":       "Foobar",
 			"fundingScheduleId": "fund_1234",
 			"ruleset":           "DTSTART:20211231T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
-			"nextRecurrence":    util.Midnight(time.Now(), timezone).UTC().Add(1 * time.Minute).Format(time.RFC3339),
+			"targetAmount":      int64(2000),
+			"nextRecurrence":    util.Midnight(time.Now().Add(7*24*time.Hour), timezone).UTC().Format(time.RFC3339),
 		}
 
 		var result models.Spending
 
-		issues := schema.CreateSpending.Parse(input, &result, zog.WithCtxValue("timezone", timezone))
-		assert.Empty(t, zog.Issues.Prettify(issues))
-		j, _ := json.MarshalIndent(zog.Issues.Flatten(issues), "", "  ")
-		fmt.Println(string(j))
+		issues := schema.CreateSpending.Parse(input, &result,
+			zog.WithCtxValue("timezone", timezone),
+			zog.WithCtxValue("clock", clock.New()),
+		)
+		assert.Empty(t, zog.Issues.Flatten(issues))
 		assert.EqualValues(t, "fund_1234", result.FundingScheduleId)
-		j, _ = json.MarshalIndent(input, "", "  ")
-		fmt.Println(string(j))
-		j, _ = json.MarshalIndent(result, "", "  ")
-		fmt.Println(string(j))
+		assert.EqualValues(t, "Test", result.Name)
+		assert.EqualValues(t, "Foobar", result.Description)
+		assert.EqualValues(t, models.SpendingTypeExpense, result.SpendingType)
+		assert.EqualValues(t, int64(2000), result.TargetAmount)
 	})
 
 	t.Run("invalid funding schedule", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		input := map[string]any{
 			"name":              "Test",
 			"description":       "Foobar",
@@ -47,25 +49,24 @@ func TestCreateSpending(t *testing.T) {
 
 		var result models.Spending
 
-		issues := schema.CreateSpending.Parse(input, &result)
+		issues := schema.CreateSpending.Parse(input, &result,
+			zog.WithCtxValue("timezone", timezone),
+			zog.WithCtxValue("clock", clock.New()),
+		)
 		assert.EqualValues(t, map[string][]string{
-			"fundingScheduleId": []string{
+			"fundingScheduleId": {
 				`expected id with prefix "fund"`,
 			},
-			"nextRecurrence": []string{
+			"nextRecurrence": {
 				"is required",
 			},
-			"ruleset": []string{
+			"ruleset": {
 				"expenses must have a ruleset",
 			},
-			"targetAmount": []string{
+			"targetAmount": {
 				"is required",
 			},
 		}, zog.Issues.Flatten(issues))
-		// TODO Make test precise
-		assert.NotEmpty(t, zog.Issues.Prettify(issues))
-		j, _ := json.MarshalIndent(zog.Issues.Flatten(issues), "", "  ")
-		fmt.Println(string(j))
 		assert.EqualValues(t, "bac_1234", result.FundingScheduleId)
 	})
 }
@@ -84,7 +85,7 @@ func TestPatchSpending(t *testing.T) {
 			FundingScheduleId: "fund_1234",
 			Name:              "Original",
 			Description:       "My expense",
-			SpendingType:      "expense",
+			SpendingType:      models.SpendingTypeExpense,
 			TargetAmount:      2000,
 			CurrentAmount:     1000,
 			UsedAmount:        0,
@@ -94,15 +95,12 @@ func TestPatchSpending(t *testing.T) {
 			CreatedAt:         time.Now(),
 		}
 
-		issues := schema.PatchSpending.Parse(input, &result, zog.WithCtxValue("timezone", timezone))
-		assert.Empty(t, zog.Issues.Prettify(issues))
-		j, _ := json.MarshalIndent(zog.Issues.Flatten(issues), "", "  ")
-		fmt.Println(string(j))
+		issues := schema.PatchSpending.Parse(input, &result,
+			zog.WithCtxValue("timezone", timezone),
+			zog.WithCtxValue("clock", clock.New()),
+		)
+		assert.Empty(t, zog.Issues.Flatten(issues))
 		assert.EqualValues(t, "fund_1234", result.FundingScheduleId)
-		j, _ = json.MarshalIndent(input, "", "  ")
-		fmt.Println(string(j))
-		j, _ = json.MarshalIndent(result, "", "  ")
-		fmt.Println(string(j))
 		assert.Equal(t, "Test", result.Name)
 	})
 
@@ -120,7 +118,7 @@ func TestPatchSpending(t *testing.T) {
 			FundingScheduleId: "fund_1234",
 			Name:              "Original",
 			Description:       "My expense",
-			SpendingType:      "goal",
+			SpendingType:      models.SpendingTypeGoal,
 			TargetAmount:      2000,
 			CurrentAmount:     1000,
 			UsedAmount:        0,
@@ -130,19 +128,16 @@ func TestPatchSpending(t *testing.T) {
 			CreatedAt:         time.Now(),
 		}
 
-		issues := schema.PatchSpending.Parse(input, &result, zog.WithCtxValue("timezone", timezone))
+		issues := schema.PatchSpending.Parse(input, &result,
+			zog.WithCtxValue("timezone", timezone),
+			zog.WithCtxValue("clock", clock.New()),
+		)
 		assert.EqualValues(t, map[string][]string{
-			"ruleset": []string{
+			"ruleset": {
 				"goals cannot have a ruleset",
 			},
 		}, zog.Issues.Flatten(issues))
-		j, _ := json.MarshalIndent(zog.Issues.Flatten(issues), "", "  ")
-		fmt.Println(string(j))
 		assert.EqualValues(t, "fund_1234", result.FundingScheduleId)
-		j, _ = json.MarshalIndent(input, "", "  ")
-		fmt.Println(string(j))
-		j, _ = json.MarshalIndent(result, "", "  ")
-		fmt.Println(string(j))
 		assert.Equal(t, "Test", result.Name)
 	})
 
@@ -150,7 +145,7 @@ func TestPatchSpending(t *testing.T) {
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		input := map[string]any{
 			"name":              "Test",
-			"fudningScheduleId": nil,
+			"fundingScheduleId": nil,
 		}
 
 		result := models.Spending{
@@ -160,7 +155,7 @@ func TestPatchSpending(t *testing.T) {
 			FundingScheduleId: "fund_1234",
 			Name:              "Original",
 			Description:       "My expense",
-			SpendingType:      "goal",
+			SpendingType:      models.SpendingTypeGoal,
 			TargetAmount:      2000,
 			CurrentAmount:     1000,
 			UsedAmount:        0,
@@ -170,23 +165,12 @@ func TestPatchSpending(t *testing.T) {
 			CreatedAt:         time.Now(),
 		}
 
-		issues := schema.PatchSpending.Parse(input, &result, zog.WithCtxValue("timezone", timezone))
+		issues := schema.PatchSpending.Parse(input, &result,
+			zog.WithCtxValue("timezone", timezone),
+			zog.WithCtxValue("clock", clock.New()),
+		)
 		assert.Empty(t, zog.Issues.Flatten(issues))
-		{ // Issues
-			fmt.Println("=== Issues ===")
-			j, _ := json.MarshalIndent(zog.Issues.Flatten(issues), "", "  ")
-			fmt.Println(string(j))
-		}
-		{ // Input
-			fmt.Println("=== Input ===")
-			j, _ := json.MarshalIndent(input, "", "  ")
-			fmt.Println(string(j))
-		}
-		{ // Result
-			fmt.Println("=== Result ===")
-			j, _ := json.MarshalIndent(result, "", "  ")
-			fmt.Println(string(j))
-		}
 		assert.EqualValues(t, "fund_1234", result.FundingScheduleId)
+		assert.Equal(t, "Test", result.Name)
 	})
 }
