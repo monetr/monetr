@@ -13,7 +13,7 @@ var (
 		"date":         Date().Required(),
 		"amount":       zog.Int64().Required().Not().EQ(0),
 		"isPending":    zog.Bool().Default(false).Required(),
-	})
+	}).TestFunc(isValidTransaction)
 
 	AdjustsBalance = zog.Struct(zog.Shape{
 		// Meta fields, these fields affect things besides the transaction when the
@@ -27,7 +27,7 @@ var (
 	PatchTransaction = zog.Struct(zog.Shape{
 		"spendingId": zog.Ptr(ID[models.Spending]().Optional()),
 		"name":       Name().Optional(),
-	})
+	}).TestFunc(isValidTransaction)
 
 	// PatchManualTransaction is the schema of fields that can be updated for
 	// manual links. This allows more fields to be changed after the creation of
@@ -39,7 +39,7 @@ var (
 		"date":         Date().Optional(),
 		"amount":       zog.Int64().Optional().Not().EQ(0),
 		"isPending":    zog.Bool().Optional(),
-	})
+	}).TestFunc(isValidTransaction)
 )
 
 func isValidTransaction(val any, ctx zog.Ctx) bool {
@@ -55,7 +55,6 @@ func isValidTransaction(val any, ctx zog.Ctx) bool {
 					"amount":     val.Amount,
 				}),
 			)
-			return false
 		}
 	}
 

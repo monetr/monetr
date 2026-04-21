@@ -368,6 +368,9 @@ func (c *Controller) patchTransaction(ctx echo.Context) error {
 		c.getContext(ctx),
 		bankAccountId,
 	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to validate if link is manual")
+	}
 
 	patchSchema := schema.PatchTransaction
 	if isManual {

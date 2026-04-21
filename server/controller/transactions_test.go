@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -948,6 +949,1080 @@ func TestPutTransactions(t *testing.T) {
 			// a PUT to the deleted at.
 			response.JSON().Path("$[0].transactionId").IsEqual(transaction.TransactionId)
 		}
+	})
+}
+
+func TestPatchTransaction(t *testing.T) {
+	t.Run("update transaction name", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "A More Friendly Name",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(originalTransaction.TransactionId)
+		response.JSON().Path("$.transaction.name").String().IsEqual("A More Friendly Name")
+		response.JSON().Path("$.transaction.name").String().NotEqual(originalTransaction.Name)
+		response.JSON().Path("$.transaction.originalName").String().IsEqual(originalTransaction.Name)
+		response.JSON().Path("$.transaction.amount").Number().IsEqual(originalTransaction.Amount)
+		response.JSON().Path("$.transaction.merchantName").String().IsEqual(originalTransaction.MerchantName)
+		response.JSON().Object().NotContainsKey("spending")
+	})
+
+	t.Run("transaction does not exist", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", "bac_bogus").
+			WithPath("transactionId", "txn_bogus").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "PayPal",
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("failed to retrieve existing transaction for update: record does not exist")
+	})
+
+	t.Run("invalid bank account Id", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.PATCH(`/api/bank_accounts/1234/transactions/txn_bogus`).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "PayPal",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid bank account Id")
+	})
+
+	t.Run("invalid transaction Id", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.PATCH(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "PayPal",
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("failed to retrieve existing transaction for update: record does not exist")
+	})
+
+	t.Run("malformed json", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithBytes([]byte("I am not really json")).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("malformed json")
+	})
+
+	t.Run("no authentication token", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.PATCH(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
+			WithJSON(map[string]any{
+				"name": "PayPal",
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
+	})
+
+	t.Run("bad authentication token", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+
+		response := e.PATCH(`/api/bank_accounts/bac_bogus/transactions/txn_bogus`).
+			WithCookie(TestCookieName, gofakeit.Generate("????????")).
+			WithJSON(map[string]any{
+				"name": "PayPal",
+			}).
+			Expect()
+
+		response.Status(http.StatusUnauthorized)
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
+	})
+
+	t.Run("spend from an expense with more than the transaction amount", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+		var fundingScheduleId ID[FundingSchedule]
+		var spendingId ID[Spending]
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Create the funding schedule.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "Whenever I get paid",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+		}
+
+		{ // Create the spending.
+			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := util.Midnight(ruleset.After(app.Clock.Now(), false), timezone)
+
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":              "Spending test",
+					"ruleset":           FirstDayOfEveryMonth,
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      originalTransaction.Amount * 2,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+		}
+
+		{ // Fund the spending so it has more than the transaction amount available.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending/transfer").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"toSpendingId": spendingId,
+					"amount":       originalTransaction.Amount * 2,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"spendingId": spendingId,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(originalTransaction.TransactionId)
+		response.JSON().Path("$.transaction.spendingId").IsEqual(spendingId)
+		response.JSON().Path("$.transaction.spendingAmount").IsEqual(originalTransaction.Amount)
+		response.JSON().Path("$.spending[0].spendingId").IsEqual(spendingId)
+		response.JSON().Path("$.spending[0].currentAmount").Number().IsEqual(originalTransaction.Amount)
+	})
+
+	t.Run("update preserves lunch flow transaction id", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveALunchFlowBankAccount(t, app.Clock, &link)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			lunchFlowTransaction := testutils.MustInsert(t, LunchFlowTransaction{
+				AccountId:              user.AccountId,
+				LunchFlowBankAccountId: *bank.LunchFlowBankAccountId,
+				LunchFlowId:            "lf_test_1234",
+				Merchant:               originalTransaction.MerchantName,
+				Description:            originalTransaction.Name,
+				Date:                   originalTransaction.Date,
+				Currency:               "USD",
+				Amount:                 originalTransaction.Amount,
+				IsPending:              false,
+			})
+			originalTransaction.LunchFlowTransactionId = &lunchFlowTransaction.LunchFlowTransactionId
+			testutils.MustDBUpdate(t, &originalTransaction)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "A More Friendly Name",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(originalTransaction.TransactionId)
+		response.JSON().Path("$.transaction.name").String().IsEqual("A More Friendly Name")
+		response.JSON().Path("$.transaction.name").String().NotEqual(originalTransaction.Name)
+		response.JSON().Path("$.transaction.originalName").String().IsEqual(originalTransaction.Name)
+
+		updatedTransaction := testutils.MustRetrieve(t, Transaction{
+			TransactionId: originalTransaction.TransactionId,
+			AccountId:     bank.AccountId,
+			BankAccountId: bank.BankAccountId,
+		})
+		assert.NotNil(t, updatedTransaction.LunchFlowTransactionId, "lunch flow transaction ID must be preserved after update")
+		assert.Equal(t, originalTransaction.LunchFlowTransactionId, updatedTransaction.LunchFlowTransactionId, "lunch flow transaction ID must not change")
+	})
+
+	t.Run("update does not overwrite spending amount", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			originalTransaction.SpendingAmount = myownsanity.Pointer(int64(500))
+			testutils.MustDBUpdate(t, &originalTransaction)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"spendingAmount": 9999,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(originalTransaction.TransactionId)
+		response.JSON().Path("$.transaction.spendingAmount").IsEqual(*originalTransaction.SpendingAmount)
+	})
+
+	t.Run("cant patch someone elses transaction", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var transaction Transaction
+
+		{ // Create a bank account with a transaction under one user
+			user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			transaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+		}
+
+		{ // Create another user
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Try to update the transaction
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", transaction.TransactionId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name": "Updated Name",
+				}).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("failed to retrieve existing transaction for update: record does not exist")
+		}
+	})
+
+	t.Run("cannot update fields that shouldn't be updated", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		assert.Nil(t, originalTransaction.DeletedAt, "deleted at should be nil to start with")
+
+		{ // Update the transaction
+			now := app.Clock.Now()
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", originalTransaction.TransactionId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"source":    "other",
+					"createdAt": now,
+					"deletedAt": now,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transaction.transactionId").IsEqual(originalTransaction.TransactionId)
+			response.JSON().Path("$.transaction.source").IsEqual(originalTransaction.Source)
+			response.JSON().Path("$.transaction.createdAt").String().AsDateTime(time.RFC3339).IsEqual(originalTransaction.CreatedAt)
+			response.JSON().Path("$.transaction.deletedAt").IsNull()
+		}
+
+		{ // Make sure that we can still see the transaction
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$[0].transactionId").IsEqual(originalTransaction.TransactionId)
+		}
+	})
+
+	t.Run("partial update leaves other fields untouched", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "Only Name Changes",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.name").String().IsEqual("Only Name Changes")
+		response.JSON().Path("$.transaction.amount").Number().IsEqual(originalTransaction.Amount)
+		response.JSON().Path("$.transaction.date").String().AsDateTime(time.RFC3339).IsEqual(originalTransaction.Date)
+		response.JSON().Path("$.transaction.merchantName").String().IsEqual(originalTransaction.MerchantName)
+		response.JSON().Path("$.transaction.isPending").Boolean().IsEqual(originalTransaction.IsPending)
+		response.JSON().Path("$.transaction.originalName").String().IsEqual(originalTransaction.Name)
+	})
+
+	t.Run("plaid link ignores amount change", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"amount": 99999,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.amount").Number().IsEqual(originalTransaction.Amount)
+	})
+
+	t.Run("plaid link ignores date change", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+		var timezone *time.Location
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			timezone = testutils.MustEz(t, user.Account.GetTimezone)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"date": util.Midnight(app.Clock.Now().Add(24*time.Hour), timezone),
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.date").String().AsDateTime(time.RFC3339).IsEqual(originalTransaction.Date)
+	})
+
+	t.Run("plaid link ignores isPending change", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"isPending": true,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.isPending").Boolean().IsEqual(originalTransaction.IsPending)
+	})
+
+	t.Run("plaid link ignores merchantName change", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"merchantName": "Changed",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.merchantName").String().IsEqual(originalTransaction.MerchantName)
+	})
+
+	t.Run("manual link updates amount", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"amount": 12345,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.amount").Number().IsEqual(12345)
+	})
+
+	t.Run("manual link rejects amount of zero", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"amount": 0,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.issues.amount").Array().NotEmpty()
+	})
+
+	t.Run("manual link updates date at midnight", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+		var timezone *time.Location
+		var newDate time.Time
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			timezone = testutils.MustEz(t, user.Account.GetTimezone)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		newDate = util.Midnight(app.Clock.Now().Add(7*24*time.Hour), timezone)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"date": newDate,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.date").String().AsDateTime(time.RFC3339).IsEqual(newDate)
+	})
+
+	t.Run("manual link rejects date not at midnight", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"date": app.Clock.Now().Add(7 * 24 * time.Hour).UTC().Format(time.RFC3339),
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.issues.date").IsEqual([]string{
+			"must be at midnight in the user's timezone",
+		})
+	})
+
+	t.Run("manual link toggles isPending", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		require.False(t, originalTransaction.IsPending, "seeded transaction should not be pending")
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"isPending": true,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.isPending").Boolean().IsTrue()
+	})
+
+	t.Run("manual link updates merchantName", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"merchantName": "New Merchant",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.merchantName").String().IsEqual("New Merchant")
+		response.JSON().Path("$.transaction.originalMerchantName").String().IsEqual(originalTransaction.OriginalMerchantName)
+	})
+
+	t.Run("manual link rejects merchantName over 300 chars", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"merchantName": strings.Repeat("a", 301),
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.issues.merchantName").IsEqual([]string{
+			"string must contain at most 300 character(s)",
+		})
+	})
+
+	t.Run("name empty string rejected", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.issues.name").IsEqual([]string{
+			"string must contain at least 1 character(s)",
+		})
+	})
+
+	t.Run("name over 300 chars rejected", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": strings.Repeat("a", 301),
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.issues.name").IsEqual([]string{
+			"string must contain at most 300 character(s)",
+		})
+	})
+
+	t.Run("spendingId with invalid prefix rejected", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"spendingId": "bac_not_valid",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.issues.spendingId").IsEqual([]string{
+			`expected id with prefix "spnd"`,
+		})
+	})
+
+	t.Run("deposit with spendingId rejected", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+		var fundingScheduleId ID[FundingSchedule]
+		var spendingId ID[Spending]
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+		// Flip the transaction amount so it is a deposit.
+		originalTransaction.Amount = -1 * originalTransaction.Amount
+		testutils.MustDBUpdate(t, &originalTransaction)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Create the funding schedule.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "Whenever I get paid",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+		}
+
+		{ // Create the spending.
+			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := util.Midnight(ruleset.After(app.Clock.Now(), false), timezone)
+
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":              "Spending test",
+					"ruleset":           FirstDayOfEveryMonth,
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      10000,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"spendingId": spendingId,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.issues.spendingId").IsEqual([]string{
+			"cannot spend on a deposit",
+		})
+	})
+
+	t.Run("URL path IDs are authoritative", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalA, originalB Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			transactions := fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 2)
+			originalA = transactions[0]
+			originalB = transactions[1]
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalA.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"transactionId": originalB.TransactionId,
+				"name":          "PatchedA",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.transactionId").IsEqual(originalA.TransactionId)
+		response.JSON().Path("$.transaction.name").String().IsEqual("PatchedA")
+
+		persistedB := testutils.MustRetrieve(t, Transaction{
+			TransactionId: originalB.TransactionId,
+			AccountId:     bank.AccountId,
+			BankAccountId: bank.BankAccountId,
+		})
+		assert.Equal(t, originalB.Name, persistedB.Name, "transaction B must not have been modified")
+	})
+
+	t.Run("balance is returned", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "X",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.balance.available").Number()
+		response.JSON().Path("$.balance.current").Number()
+		response.JSON().Path("$.balance.free").Number()
+	})
+
+	t.Run("spending absent when no spending affected", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "X",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Object().NotContainsKey("spending")
+	})
+
+	t.Run("spending present when spendingId changes", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+		var fundingScheduleId ID[FundingSchedule]
+		var spendingId ID[Spending]
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Create the funding schedule.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "Whenever I get paid",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+		}
+
+		{ // Create the spending.
+			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := util.Midnight(ruleset.After(app.Clock.Now(), false), timezone)
+
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":              "Spending test",
+					"ruleset":           FirstDayOfEveryMonth,
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      originalTransaction.Amount * 2,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+		}
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", originalTransaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"spendingId": spendingId,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.spending").Array().Length().Ge(1)
+		response.JSON().Path("$.spending[0].spendingId").IsEqual(spendingId)
 	})
 }
 
