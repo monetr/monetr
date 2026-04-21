@@ -857,7 +857,9 @@ func TestPatchFundingSchedule(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Auto create transaction requires a non-zero estimated deposit")
+		response.JSON().Path("$.issues.autoCreateTransaction").IsEqual([]string{
+			"auto create transaction requires that an estimated deposit is specified",
+		})
 	})
 
 	t.Run("rejects auto create transaction on plaid link", func(t *testing.T) {
@@ -881,7 +883,9 @@ func TestPatchFundingSchedule(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().IsEqual("Auto create transaction is only supported for manual links")
+		response.JSON().Path("$.issues.autoCreateTransaction").IsEqual([]string{
+			"auto create transaction is only allowed on manual links",
+		})
 	})
 
 	t.Run("can toggle auto create transaction on manual link via patch", func(t *testing.T) {

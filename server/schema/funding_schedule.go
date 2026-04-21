@@ -14,7 +14,7 @@ var (
 		"estimatedDeposit":      zog.Ptr(zog.Int64().GT(0).Optional()),
 		"nextRecurrence":        Date().Required(),
 		"autoCreateTransaction": zog.Bool().Default(false).Required(),
-	})
+	}).TestFunc(isValidFundingSchedule)
 
 	PatchFundingSchedule = zog.Struct(zog.Shape{
 		"name":                  Name().Optional(),
@@ -24,7 +24,7 @@ var (
 		"estimatedDeposit":      zog.Ptr(zog.Int64().GT(0).Optional()),
 		"nextRecurrence":        Date().Optional(),
 		"autoCreateTransaction": zog.Bool().Optional(),
-	})
+	}).TestFunc(isValidFundingSchedule)
 )
 
 func isValidFundingSchedule(val any, ctx zog.Ctx) bool {
