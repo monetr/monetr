@@ -2024,6 +2024,108 @@ func TestPatchTransaction(t *testing.T) {
 		response.JSON().Path("$.spending").Array().Length().Ge(1)
 		response.JSON().Path("$.spending[0].spendingId").IsEqual(spendingId)
 	})
+
+	t.Run("cannot clear spendingId via PATCH after assignment", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		var originalTransaction Transaction
+		var fundingScheduleId ID[FundingSchedule]
+		var spendingId ID[Spending]
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Create the funding schedule.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "Whenever I get paid",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+		}
+
+		{ // Create the spending.
+			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := util.Midnight(ruleset.After(app.Clock.Now(), false), timezone)
+
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":              "Spending test",
+					"ruleset":           FirstDayOfEveryMonth,
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      originalTransaction.Amount * 2,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			spendingId = ID[Spending](response.JSON().Path("$.spendingId").String().Raw())
+		}
+
+		{ // Fund the spending so it has more than the transaction amount available.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending/transfer").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"toSpendingId": spendingId,
+					"amount":       originalTransaction.Amount * 2,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		{ // Assign the spending to the transaction via PATCH.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", originalTransaction.TransactionId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"spendingId": spendingId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transaction.spendingId").IsEqual(spendingId)
+		}
+
+		{ // Attempt to clear the spending ID by PATCHing with spendingId set to
+			// null. The PUT endpoint treats a null spendingId as "spent from free
+			// to use", but the PATCH schema uses zog.Ptr().Optional() which cannot
+			// distinguish a null value from a missing field, so the existing
+			// spending assignment is never removed.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionId", originalTransaction.TransactionId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"spendingId": nil,
+				}).
+				Expect()
+
+			// TODO This is an outstanding bug, we should be able to clear this field
+			// via the request but that doesn't work right now.
+			// See https://github.com/Oudwins/zog/pull/219
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transaction.spendingId").IsNull()
+		}
+	})
 }
 
 func TestDeleteTransactions(t *testing.T) {
