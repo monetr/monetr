@@ -1054,4 +1054,126 @@ func TestProcessFundingSchedule(t *testing.T) {
 		assert.NoError(t, err, "should retrieve transactions")
 		assert.Empty(t, transactions, "no transactions should have been created when the flag is off")
 	})
+
+	t.Run("auto creates expense transaction on manual link", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
+
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
+		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			RuleSet:                fundingRule,
+			NextRecurrence:         fundingRule.After(clock.Now(), false),
+			NextRecurrenceOriginal: fundingRule.After(clock.Now(), false),
+		})
+
+		// The expense recurs on the same day as the funding schedule. Without the
+		// fix, ProcessFundingSchedule would bump the expense's NextRecurrence
+		// forward and ProcessSpending would later skip it as no longer stale, so no
+		// auto-transaction would be created for this due date. The fix makes
+		// ProcessFundingSchedule create the transaction inline. Capture the due
+		// date before CalculateNextContribution advances it so we can assert the
+		// transaction is dated correctly.
+		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", clock.Now())
+		expectedDueDate := spendingRule.After(clock.Now(), false)
+		spending := testutils.MustInsert(t, models.Spending{
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			FundingScheduleId:      fundingSchedule.FundingScheduleId,
+			SpendingType:           models.SpendingTypeExpense,
+			Name:                   "Auto Expense",
+			Description:            "Recurs on the funding schedule",
+			TargetAmount:           5000,
+			CurrentAmount:          0,
+			NextContributionAmount: 5000,
+			RuleSet:                spendingRule,
+			NextRecurrence:         expectedDueDate,
+			AutoCreateTransaction:  true,
+			CreatedAt:              clock.Now(),
+		})
+
+		// Move time forward past the funding schedule's next recurrence so it is
+		// due for processing. The expense's NextRecurrence is now also in the past.
+		clock.Add(32 * 24 * time.Hour)
+
+		{
+			context := mockgen.NewMockContext(ctrl)
+			context.EXPECT().Clock().Return(clock).AnyTimes()
+			context.EXPECT().DB().Return(db).AnyTimes()
+			context.EXPECT().Log().Return(log).AnyTimes()
+			context.EXPECT().RunInTransaction(gomock.Any(), gomock.Any()).Times(1)
+
+			err := funding_jobs.ProcessFundingSchedule(
+				mockqueue.NewMockContext(context),
+				funding_jobs.ProcessFundingScheduleArguments{
+					AccountId:          bankAccount.AccountId,
+					BankAccountId:      bankAccount.BankAccountId,
+					FundingScheduleIds: []models.ID[models.FundingSchedule]{fundingSchedule.FundingScheduleId},
+				},
+			)
+			assert.NoError(t, err, "should process funding schedule successfully")
+		}
+
+		// Verify the expense received its contribution (+5000) and then had the
+		// full target allocated to the auto-created transaction (-5000), netting
+		// back to zero.
+		updatedSpending := testutils.MustRetrieve(t, spending)
+		assert.EqualValues(
+			t,
+			int64(0),
+			updatedSpending.CurrentAmount,
+			"current amount should have received the contribution and then been allocated to the transaction",
+		)
+
+		// Verify the bank account balance was decremented by the expense amount.
+		updatedBankAccount := testutils.MustRetrieve(t, bankAccount)
+		assert.EqualValues(
+			t,
+			bankAccount.AvailableBalance-5000,
+			updatedBankAccount.AvailableBalance,
+			"available balance should have been decremented by the expense target amount",
+		)
+		assert.EqualValues(
+			t,
+			bankAccount.CurrentBalance-5000,
+			updatedBankAccount.CurrentBalance,
+			"current balance should have been decremented by the expense target amount",
+		)
+
+		// Verify an expense transaction was created at the original due date.
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+		transactions, err := repo.GetTransactions(t.Context(), bankAccount.BankAccountId, 100, 0)
+		assert.NoError(t, err, "should retrieve transactions")
+		assert.Len(t, transactions, 1, "exactly one expense transaction should have been created")
+		assert.EqualValues(t, int64(5000), transactions[0].Amount, "transaction amount should match the expense target")
+		assert.Equal(t, models.TransactionSourceManual, transactions[0].Source, "transaction source should be manual")
+		assert.Equal(t, spending.Name, transactions[0].Name, "transaction name should match the expense name")
+		assert.NotNil(t, transactions[0].SpendingId, "transaction should be allocated to a spending")
+		assert.Equal(t, spending.SpendingId, *transactions[0].SpendingId, "transaction should be allocated to the auto-create expense")
+		assert.True(t, transactions[0].Date.Equal(expectedDueDate), "transaction date should match the expense's original due date")
+	})
 }

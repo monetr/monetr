@@ -185,7 +185,11 @@ func ProcessSpending(ctx queue.Context, args ProcessSpendingArguments) error {
 				// spending.FundingSchedule, so make sure that relation is set.
 				spending.FundingSchedule = fundingSchedule
 
-				if err = repo.AddExpenseToTransaction(ctx, &txn, &spending); err != nil {
+				if err = repo.AddExpenseToTransaction(
+					ctx,
+					&txn,
+					&spending,
+				); err != nil {
 					log.ErrorContext(
 						ctx,
 						"failed to add expense to auto created transaction",

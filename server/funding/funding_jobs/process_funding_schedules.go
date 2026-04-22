@@ -284,6 +284,7 @@ func ProcessFundingSchedule(ctx queue.Context, args ProcessFundingScheduleArgume
 					//  deposit showing in Plaid and thus us over-allocating temporarily
 					//  until the deposit shows properly in Plaid.
 					spending.CurrentAmount += spending.NextContributionAmount
+					dueDate := spending.NextRecurrence
 					(&spending).CalculateNextContribution(
 						ctx,
 						timezone,
@@ -291,6 +292,62 @@ func ProcessFundingSchedule(ctx queue.Context, args ProcessFundingScheduleArgume
 						ctx.Clock().Now(),
 						log,
 					)
+
+					// If this expense has auto create transaction enabled, create a
+					// transaction for the just-passed due date and allocate it from the
+					// expense. Goals are excluded by design.
+					if isManual &&
+						spending.SpendingType == models.SpendingTypeExpense &&
+						spending.AutoCreateTransaction &&
+						spending.TargetAmount > 0 {
+						if bankAccount == nil {
+							bankAccount, err = repo.GetBankAccount(ctx, args.BankAccountId)
+							if err != nil {
+								log.ErrorContext(
+									ctx,
+									"failed to retrieve bank account for auto created transaction",
+									"err", err,
+								)
+								return err
+							}
+						}
+
+						txn := models.Transaction{
+							BankAccountId:       spending.BankAccountId,
+							Amount:              spending.TargetAmount,
+							Date:                dueDate,
+							Name:                spending.Name,
+							OriginalName:        spending.Name,
+							IsPending:           false,
+							Source:              models.TransactionSourceManual,
+							SpendingId:          &spending.SpendingId,
+							CreatedBySpendingId: &spending.SpendingId,
+						}
+
+						// AddExpenseToTransaction recalculates the contribution using
+						// spending.FundingSchedule, so make sure that relation is set.
+						spending.FundingSchedule = fundingSchedule
+
+						if err = repo.AddExpenseToTransaction(
+							ctx,
+							&txn,
+							&spending,
+						); err != nil {
+							log.ErrorContext(
+								ctx,
+								"failed to add expense to auto created transaction",
+								"err", err,
+							)
+							return err
+						}
+
+						// Always subtract from our available balance. Subtract because
+						// credits are represented as negative values in monetr.
+						bankAccount.AvailableBalance -= txn.Amount
+						bankAccount.CurrentBalance -= txn.Amount
+
+						transactionsToCreate = append(transactionsToCreate, txn)
+					}
 
 					expensesToUpdate = append(expensesToUpdate, spending)
 				}
