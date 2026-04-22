@@ -13,7 +13,8 @@ const locationAssignMock = rs.fn();
 
 // jsdom 26 makes window.location non-configurable. To mock location.assign,
 // we spy on jsdom's internal implementation via its symbol property.
-const implSymbol = Reflect.ownKeys(window.location).find(i => typeof i === 'symbol')!;
+const implSymbol = Reflect.ownKeys(window.location).find(i => typeof i === 'symbol');
+if (!implSymbol) throw new Error('jsdom implementation symbol not found on window.location');
 
 describe('billing settings page', () => {
   let mockFetch: FetchMock;

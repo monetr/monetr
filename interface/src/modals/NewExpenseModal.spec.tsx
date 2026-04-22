@@ -1,4 +1,4 @@
-import { act, Fragment } from 'react';
+import { act } from 'react';
 
 import { waitFor } from '@testing-library/react';
 
@@ -37,7 +37,7 @@ describe('new expense modal', () => {
     });
     mockFetch.onGet('/api/bank_accounts/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding_schedules').reply(200, []);
 
-    const world = testRenderer(<Fragment />, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/expenses' });
+    const world = testRenderer(<div />, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/expenses' });
     // Open the dialog
     await act(() => void showNewExpenseModal());
     // Make sure it's visible.

@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { FormikHelpers } from 'formik';
 import { Trash } from 'lucide-react';
@@ -80,8 +80,7 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
         onSubmit={submit}
       >
         {({ setFieldValue, values, isSubmitting }) => (
-          <Fragment>
-            <div className='flex flex-col gap-stack'>
+          <div className='flex flex-col gap-stack'>
               <Typography className='mb-2' size='xl' weight='bold'>
                 <Trash />
                 Remove Transaction
@@ -130,7 +129,6 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
                 </FormButton>
               </div>
             </div>
-          </Fragment>
         )}
       </MForm>
     </MModal>

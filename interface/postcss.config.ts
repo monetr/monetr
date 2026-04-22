@@ -1,11 +1,11 @@
 import type { Config } from 'postcss-load-config';
 
 const config: Config = {
-  plugins: [
-    require('tailwindcss/nesting'),
-    require('tailwindcss'),
-    require('autoprefixer'),
-    require('cssnano')({
+  plugins: {
+    'tailwindcss/nesting': {},
+    'tailwindcss': {},
+    'autoprefixer': {},
+    'cssnano': {
       preset: [
         'default',
         {
@@ -14,8 +14,8 @@ const config: Config = {
           },
         },
       ],
-    }),
-  ],
+    },
+  },
 };
 
 export default config;

@@ -1,4 +1,4 @@
-import { act, Fragment } from 'react';
+import { act } from 'react';
 import { rs } from '@rstest/core';
 import * as reactRouterDomActual from 'react-router-dom' with { rstest: 'importActual' };
 
@@ -80,7 +80,7 @@ describe('new bank account modal', () => {
       updatedAt: '2024-03-19T06:17:32.335106Z',
     });
 
-    const world = testRenderer(<Fragment />, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions' });
+    const world = testRenderer(<div />, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions' });
     // Open the dialog
     await act(() => void showNewBankAccountModal());
     // Make sure it's visible.
@@ -156,7 +156,7 @@ describe('new bank account modal', () => {
       currency: 'USD',
     });
 
-    const world = testRenderer(<Fragment />, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions' });
+    const world = testRenderer(<div />, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions' });
     // Open the dialog
     await act(() => void showNewBankAccountModal());
     // Make sure it's visible.
@@ -239,7 +239,7 @@ describe('new bank account modal', () => {
       currency: 'JPY',
     });
 
-    const world = testRenderer(<Fragment />, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions' });
+    const world = testRenderer(<div />, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/transactions' });
     // Open the dialog
     await act(() => void showNewBankAccountModal());
     // Make sure it's visible.

@@ -1,4 +1,3 @@
-import { Fragment } from 'react';
 
 import { act, waitFor } from '@testing-library/react';
 
@@ -36,7 +35,7 @@ describe('new funding schedule modal', () => {
       updatedAt: '2024-03-19T06:17:32.335106Z',
     });
 
-    const world = testRenderer(<Fragment />, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding' });
+    const world = testRenderer(<div />, { initialRoute: '/bank/bac_01gds6eqsq7h5mgevwtmw3cyxb/funding' });
     // Open the dialog
     await act(() => void showNewFundingModal());
     // Make sure it's visible.

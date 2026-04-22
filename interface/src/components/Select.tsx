@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import { type UseComboboxSelectedItemChange, useCombobox } from 'downshift';
 import { ArrowDown, ArrowUp, LoaderCircle, PanelBottomClose, PanelBottomOpen } from 'lucide-react';
@@ -55,8 +55,8 @@ export function defaultFilterImplementation<V = unknown>(filterText: string): (o
   };
 }
 
-export function DefaultSelectOptionComponent<V = unknown>(props: SelectOptionComponentProps<V>): React.JSX.Element {
-  return <Fragment>{props.label}</Fragment>;
+export function DefaultSelectOptionComponent<V = unknown>(props: SelectOptionComponentProps<V>): React.ReactNode {
+  return props.label;
 }
 
 export default function Select<V>(props: SelectProps<V>): React.JSX.Element {

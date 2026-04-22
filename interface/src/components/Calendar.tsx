@@ -8,7 +8,6 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import styles from './Calendar.module.scss';
 
-import { Fragment } from 'react/jsx-runtime';
 
 export type CalendarProps = PropsBase &
   PropsSingle & {
@@ -86,10 +85,10 @@ function Calendar({
           );
         },
         // biome-ignore lint/correctness/noNestedComponentDefinitions: Easier to structure it this way.
-        PreviousMonthButton: () => <Fragment />,
+        PreviousMonthButton: () => null,
         // biome-ignore lint/correctness/noNestedComponentDefinitions: Easier to structure it this way.
-        NextMonthButton: () => <Fragment />,
-        Nav: () => <Fragment />,
+        NextMonthButton: () => null,
+        Nav: () => null,
       }}
       locale={locale}
       mode='single'

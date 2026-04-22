@@ -31,17 +31,23 @@ function getAmountStatus(spending: Spending): string {
   return 'ahead';
 }
 
-export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element {
+export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
-  const rule = rrulestr(spending.ruleset!);
+
+  const { ruleset, nextRecurrence } = spending;
+  if (!ruleset || !nextRecurrence) {
+    return null;
+  }
+
+  const rule = rrulestr(ruleset);
 
   const amountStatus = getAmountStatus(spending);
   const detailsPath = `/bank/${spending.bankAccountId}/expenses/${spending.spendingId}/details`;
 
-  const dateString = isThisYear(spending.nextRecurrence!)
-    ? format(spending.nextRecurrence!, 'MMM do')
-    : format(spending.nextRecurrence!, 'MMM do, yyyy');
+  const dateString = isThisYear(nextRecurrence)
+    ? format(nextRecurrence, 'MMM do')
+    : format(nextRecurrence, 'MMM do, yyyy');
 
   return (
     <li className={styles.root}>

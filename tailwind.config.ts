@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss';
 import plugin from 'tailwindcss/plugin';
+import tailwindcssAnimate from 'tailwindcss-animate';
 
 const config: Partial<Config> = {
   important: true,
@@ -8,7 +9,7 @@ const config: Partial<Config> = {
     hoverOnlyWhenSupported: true,
   },
   plugins: [
-    require('tailwindcss-animate'),
+    tailwindcssAnimate,
     plugin(helper => {
       helper.addBase({
         ':root': {
