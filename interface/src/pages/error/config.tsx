@@ -16,7 +16,7 @@ export default function ConfigError(): JSX.Element {
           <a
             className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
             href='mailto:support@monetr.app'
-            rel='noopener'
+            rel='noopener noreferrer'
             target='_blank'
           >
             support@monetr.app
