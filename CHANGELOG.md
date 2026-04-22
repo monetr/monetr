@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.13.0](https://github.com/monetr/monetr/compare/v1.12.5...v1.13.0) (2026-04-22)
+
+
+### Features
+
+* Automated expense/funding transactions ([#3127](https://github.com/monetr/monetr/issues/3127)) ([859a7b5](https://github.com/monetr/monetr/commit/859a7b5912133157a3a0e083e6de44b1b36f6875))
+
+
+### Dependencies
+
+* **ui:** Upgrading to react-day-picker@v9 ([afd2cb5](https://github.com/monetr/monetr/commit/afd2cb516e862f3d6cf10275def5ba2ce4f22fa0))
+
+
+### Bug Fixes
+
+* **api:** Enforce minimum TLS versions for internal services ([e121954](https://github.com/monetr/monetr/commit/e121954fe0739e609459bb91320e96d610a1d971))
+* **api:** Fixed issue with transaction mutation during pagination ([#3126](https://github.com/monetr/monetr/issues/3126)) ([0da52bc](https://github.com/monetr/monetr/commit/0da52bc1330304ba0068ea61a9be4034861070fd))
+* **api:** Fixing auto create transaction bug ([b982c7c](https://github.com/monetr/monetr/commit/b982c7c81fb3857e5ad2bc951e370ca5549e5626)), closes [#3129](https://github.com/monetr/monetr/issues/3129)
+* **api:** Prevent spending amount from being corrupted ([542a721](https://github.com/monetr/monetr/commit/542a721f685db3e52187fa801b044a6ab3209130))
+* **ui:** Fix calendar styles from migration ([7c6158c](https://github.com/monetr/monetr/commit/7c6158c245ffca1ee2983b7ba7c0ab0aa1cd0fd5))
+* **ui:** Fixing links from the interface ([9bd8db8](https://github.com/monetr/monetr/commit/9bd8db8a3e75b026eaa9d17bcb8dffe755636d7f))
+
+
+### Refactor
+
+* **api:** Code cleanup of backend ([014bd78](https://github.com/monetr/monetr/commit/014bd78e908c9ab735347722ebd097337c7c0575))
+* **api:** Linting and code smell cleanup ([eac24b3](https://github.com/monetr/monetr/commit/eac24b36d02de050f6b5503ef6b3c087c7f6f88b))
+* **ui:** Cleaning up frontend antipatterns ([bb532d6](https://github.com/monetr/monetr/commit/bb532d6186b5c1a4fe9a81fe3010e2b5b72a8a37))
+* **ui:** Migrating from old to new Typography component ([732074c](https://github.com/monetr/monetr/commit/732074c3352550946c80b467c04c2d0ac797b2e3))
+
 ## [1.12.5](https://github.com/monetr/monetr/compare/v1.12.4...v1.12.5) (2026-04-18)
 
 This patch includes a fix for [GHSA-29v9-frvh-c426](https://github.com/monetr/monetr/security/advisories/GHSA-29v9-frvh-c426). Which now prevents potential an issue where GET requests could be made to arbitrary urls during monetr's Lunch Flow setup process.
