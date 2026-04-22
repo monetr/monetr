@@ -266,6 +266,7 @@ func (o *OpenBaoTransit) reloadTLS() error {
 		RootCAs:            caCertPool,
 		ServerName:         o.host,
 		Renegotiation:      tls.RenegotiateFreelyAsClient,
+		MinVersion:         tls.VersionTLS12,
 	}
 
 	if o.config.TLSKeyPath != "" || o.config.TLSCertificatePath != "" {

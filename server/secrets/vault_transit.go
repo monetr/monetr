@@ -262,6 +262,7 @@ func (v *VaultTransit) reloadTLS() error {
 		RootCAs:            caCertPool,
 		ServerName:         v.host,
 		Renegotiation:      tls.RenegotiateFreelyAsClient,
+		MinVersion:         tls.VersionTLS12,
 	}
 
 	if v.config.TLSKeyPath != "" || v.config.TLSCertificatePath != "" {

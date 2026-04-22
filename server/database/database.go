@@ -63,6 +63,7 @@ func GetDatabase(
 			RootCAs:            caCertPool,
 			ServerName:         configuration.PostgreSQL.Address,
 			Renegotiation:      tls.RenegotiateFreelyAsClient,
+			MinVersion:         tls.VersionTLS12,
 		}
 
 		if configuration.PostgreSQL.KeyPath != "" {
@@ -116,6 +117,7 @@ func GetDatabase(
 					RootCAs:            nil,
 					ServerName:         configuration.PostgreSQL.Address,
 					Renegotiation:      tls.RenegotiateFreelyAsClient,
+					MinVersion:         tls.VersionTLS12,
 				}
 
 				{
