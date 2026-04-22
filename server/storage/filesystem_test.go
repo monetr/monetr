@@ -47,9 +47,9 @@ func TestFilesystemStorage(t *testing.T) {
 		assert.NoError(t, err, "should not have an error storing a file")
 
 		content, err := fs.Read(context.Background(), file)
+		require.NoError(t, err, "should read file back")
+		require.NotNil(t, content, "content buffer should not be nil")
 		defer content.Close()
-		assert.NoError(t, err, "should read file back")
-		assert.NotNil(t, content, "content buffer should not be nil")
 
 		allContent, err := io.ReadAll(content)
 		assert.NoError(t, err, "should read all file content without error")

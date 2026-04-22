@@ -45,7 +45,7 @@ func MockSync(t *testing.T, transactions []plaid.Transaction) {
 	)
 }
 
-func MockSyncError(t *testing.T, error plaid.PlaidError) {
+func MockSyncError(t *testing.T, plaidError plaid.PlaidError) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/transactions/sync"),
@@ -58,13 +58,13 @@ func MockSyncError(t *testing.T, error plaid.PlaidError) {
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&syncTransactionsRequest), "must decode request")
 
 			var status int
-			if s := error.Status.Get(); s != nil {
+			if s := plaidError.Status.Get(); s != nil {
 				status = int(*s)
 			} else {
 				status = http.StatusInternalServerError
 			}
 
-			return error, status
+			return plaidError, status
 		},
 		PlaidHeaders,
 	)

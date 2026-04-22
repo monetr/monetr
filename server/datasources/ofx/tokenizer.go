@@ -10,9 +10,7 @@ import (
 )
 
 var (
-	headerRegex  = regexp.MustCompile(`^(?:^\w+:\w+$)+$`)
-	payloadRegex = regexp.MustCompile(`^<OFX>([\W|\w|\s]+)</OFX>$`)
-	dataRegex    = regexp.MustCompile(`(?P<tag><[/a-zA-Z0-9.]+>)(?P<value>[^<]+)?`)
+	dataRegex = regexp.MustCompile(`(?P<tag><[/a-zA-Z0-9.]+>)(?P<value>[^<]+)?`)
 )
 
 type ItemType uint8

@@ -33,20 +33,20 @@ func MaxTime(a, b time.Time) time.Time {
 }
 
 func MaxNonNilTime(times ...*time.Time) *time.Time {
-	var max *time.Time
-	for _, time := range times {
-		if time == nil {
+	var maxTime *time.Time
+	for _, t := range times {
+		if t == nil {
 			continue
 		}
-		if max == nil {
-			max = time
+		if maxTime == nil {
+			maxTime = t
 			continue
 		}
 
-		if time.After(*max) {
-			max = time
+		if t.After(*maxTime) {
+			maxTime = t
 		}
 	}
 
-	return max
+	return maxTime
 }

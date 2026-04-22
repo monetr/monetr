@@ -257,7 +257,7 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		Printers: []httpexpect.Printer{
 			testutils.NewDebugPrinter(log, true),
 		},
-		Context: context.WithValue(context.Background(), "test", t.Name()),
+		Context: context.Background(),
 	})
 
 	return &TestApp{

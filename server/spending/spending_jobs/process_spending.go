@@ -34,8 +34,6 @@ func ProcessSpendingCron(ctx queue.Context) error {
 		"count": len(bankAccountsWithStaleSpending),
 	})
 
-	jobErrors := make([]error, 0)
-
 	for _, item := range bankAccountsWithStaleSpending {
 		itemLog := log.With(
 			"accountId", item.AccountId,
@@ -57,7 +55,6 @@ func ProcessSpendingCron(ctx queue.Context) error {
 			crumbs.Warn(ctx, "Failed to enqueue job to process stale spending", "job", map[string]any{
 				"error": err,
 			})
-			jobErrors = append(jobErrors, err)
 			continue
 		}
 

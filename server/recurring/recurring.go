@@ -158,9 +158,9 @@ func DetectRecurringTransactions(
 		}
 
 		value := result[int(index)]
-		real := real(value)
+		realPart := real(value)
 		imaginary := imag(value)
-		magnitude := math.Sqrt((real * real) + (imaginary * imaginary))
+		magnitude := math.Sqrt((realPart * realPart) + (imaginary * imaginary))
 		score.Conclusion = magnitude
 		// Confidence is the magnitude over the maximum potential magnitude. If we
 		// have 3 transactions each with an individual magnitude of 1024, then the

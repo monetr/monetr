@@ -82,17 +82,17 @@ func (c *Controller) wrapAndReturnError(ctx echo.Context, err error, status int,
 	}
 }
 
-func (c *Controller) failure(ctx echo.Context, status int, error GenericAPIError) error {
+func (c *Controller) failure(ctx echo.Context, status int, apiError GenericAPIError) error {
 	crumbs.Error(
 		c.getContext(ctx),
-		error.FriendlyMessage(),
+		apiError.FriendlyMessage(),
 		ctx.Request().URL.Hostname(),
 		map[string]any{
-			"error": error,
+			"error": apiError,
 		},
 	)
 
-	return echo.NewHTTPError(status, error.Error()).WithInternal(error)
+	return echo.NewHTTPError(status, apiError.Error()).WithInternal(apiError)
 }
 
 func (c *Controller) returnError(ctx echo.Context, status int, msg string, args ...any) error {
