@@ -838,7 +838,7 @@ func SyncPlaid(ctx queue.Context, args SyncPlaidArguments) error {
 
 			plaidTransactions := append(syncData.New, syncData.Updated...)
 
-			s.log.DebugContext(ctx, fmt.Sprintf("retrieved transactions from plaid"), "count", len(plaidTransactions))
+			s.log.DebugContext(ctx, "retrieved transactions from plaid", "count", len(plaidTransactions))
 			crumbs.Debug(ctx, "Retrieved transactions from plaid.", map[string]any{
 				"count": len(plaidTransactions),
 			})

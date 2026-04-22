@@ -52,7 +52,6 @@ func (r *repositoryBase) GetMe(ctx context.Context) (*User, error) {
 		span.Status = sentry.SpanStatusNotFound
 		return nil, errors.Errorf("user does not exist")
 	case nil:
-		break
 	default:
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrapf(err, "failed to retrieve user")

@@ -141,7 +141,6 @@ func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
 	case *json.SyntaxError:
 		return c.invalidJsonError(ctx, err)
 	case nil:
-		break
 	default:
 		return c.badRequestError(ctx, err, "failed to parse post request")
 	}

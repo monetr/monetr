@@ -73,10 +73,7 @@ func (l Login) VerifyTOTP(input string, now time.Time) error {
 }
 
 func (l Login) Name() string {
-	return strings.TrimSpace(strings.Join([]string{
-		l.FirstName,
-		l.LastName,
-	}, " "))
+	return strings.TrimSpace(l.FirstName + " " + l.LastName)
 }
 
 type LoginWithHash struct {

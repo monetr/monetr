@@ -26,9 +26,7 @@ func MockSync(t *testing.T, transactions []plaid.Transaction) {
 			count := syncTransactionsRequest.Count
 
 			filteredTransactions := make([]plaid.Transaction, 0, len(transactions))
-			for _, transaction := range transactions {
-				filteredTransactions = append(filteredTransactions, transaction)
-			}
+			filteredTransactions = append(filteredTransactions, transactions...)
 
 			endingOffset := myownsanity.Min(len(filteredTransactions), count)
 			data := filteredTransactions[0:endingOffset]

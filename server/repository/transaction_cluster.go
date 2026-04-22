@@ -21,7 +21,7 @@ func (r *repositoryBase) WriteTransactionClusters(
 
 	// Build an array of signature + centroid pairs that we want to keep. We will
 	// delete verything that isn't in this dataset.
-	keysToKeep := []types.ValueAppender{}
+	var keysToKeep []types.ValueAppender
 	for i := range clusters {
 		cluster := clusters[i]
 		cluster.AccountId = r.AccountId()

@@ -102,7 +102,7 @@ func GetKMS(
 			log.ErrorContext(context.Background(), "failed to test KMS, encryption failed; is everything configured properly?", "err", err)
 			return nil, err
 		}
-		if len(cipherText) == 0 {
+		if cipherText == "" {
 			log.ErrorContext(context.Background(), "ciphertext returned from KMS test was empty, something is very wrong!")
 			return nil, errors.Errorf("ciphertext returned from KMS test was empty, something is very wrong!")
 		}

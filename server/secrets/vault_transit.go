@@ -79,7 +79,7 @@ func NewVaultTransit(
 		config:         config,
 		log:            log,
 		client:         nil,
-		usingCustomTLS: len(config.TLSCAPath) > 0,
+		usingCustomTLS: config.TLSCAPath != "",
 		tls:            nil,
 		closer:         nil,
 	}
@@ -566,7 +566,7 @@ func (v *VaultTransit) Decrypt(
 func (v *VaultTransit) Encrypt(
 	ctx context.Context,
 	input string,
-) (keyID *string, version *string, result string, _ error) {
+) (keyID, version *string, result string, _ error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

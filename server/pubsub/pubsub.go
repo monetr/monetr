@@ -107,7 +107,7 @@ func (p *postgresPubSub) Subscribe(
 		hashedChannel: hashedChannel,
 		log:           p.log.With("channel", channel),
 		listener:      listener,
-		dataChannel:   make(chan Notification, 0),
+		dataChannel:   make(chan Notification),
 		closeChannel:  make(chan struct{}, 1),
 	}
 	go pgListener.backgroundListener()
@@ -147,7 +147,7 @@ func (p *postgresPubSub) Notify(
 
 	_, err := p.db.ExecContext(
 		span.Context(),
-		fmt.Sprintf(`NOTIFY "%s", ?`, hashedChannel),
+		fmt.Sprintf(`NOTIFY %q, ?`, hashedChannel),
 		payload,
 	)
 

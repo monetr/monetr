@@ -56,7 +56,6 @@ func (c *Controller) postLinks(ctx echo.Context) error {
 			"problems": err,
 		})
 	case nil:
-		break
 	default:
 		return c.badRequestError(ctx, err, "Failed to parse post request")
 	}
@@ -170,7 +169,6 @@ func (c *Controller) patchLink(ctx echo.Context) error {
 			"problems": err,
 		})
 	case nil:
-		break
 	default:
 		return c.badRequestError(ctx, err, "Failed to parse patch request")
 	}

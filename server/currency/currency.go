@@ -22,7 +22,7 @@ var (
 // PostgreSQL's cash_in implementation here:
 // https://github.com/postgres/postgres/blob/801b4ee7fae1caa962b789e72be11dcead79dcbf/src/backend/utils/adt/cash.c#L173
 // However this implementation does not handle currency symbols
-func ParseCurrency(input string, currency string) (int64, error) {
+func ParseCurrency(input, currency string) (int64, error) {
 	// TODO This should be outside the parsing implementation, the parser should
 	// instead just receive this information from the caller.
 	// Retrieve the fractional digits for the currency we are parsing.
@@ -56,7 +56,7 @@ func ParseCurrency(input string, currency string) (int64, error) {
 	str := strings.TrimSpace(input)
 
 ParseLoop:
-	for ; len(str) > 0; str = str[1:] {
+	for ; str != ""; str = str[1:] {
 		// Get the current character for the iterator
 		character := rune(str[0])
 		switch {
@@ -89,7 +89,7 @@ ParseLoop:
 	}
 
 	// Round up on a thousandth decimal place.
-	if len(str) > 0 && unicode.IsDigit(rune(str[0])) && rune(str[0]) > '5' {
+	if str != "" && unicode.IsDigit(rune(str[0])) && rune(str[0]) > '5' {
 		value -= 1
 	}
 
@@ -99,18 +99,18 @@ ParseLoop:
 	}
 
 	// Consume any trailing digits in the string
-	for ; len(str) > 0 && unicode.IsDigit(rune(str[0])); str = str[1:] {
+	for ; str != "" && unicode.IsDigit(rune(str[0])); str = str[1:] {
 		// All this loop does is consume trailing digits.
 	}
 
-	for len(str) > 0 {
+	for str != "" {
 		switch {
 		case unicode.IsSpace(rune(str[0])) || rune(str[0]) == ')':
 			str = str[1:]
 		case strings.HasPrefix(str, negativeSymbol):
 			sign = -1
 			str = strings.TrimPrefix(str, negativeSymbol)
-		case len(positiveSymbol) > 0 && strings.HasPrefix(str, positiveSymbol):
+		case positiveSymbol != "" && strings.HasPrefix(str, positiveSymbol):
 			str = strings.TrimPrefix(str, positiveSymbol)
 		case strings.HasPrefix(str, currencySymbol):
 			str = strings.TrimPrefix(str, currencySymbol)

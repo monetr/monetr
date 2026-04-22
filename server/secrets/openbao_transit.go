@@ -75,7 +75,7 @@ func NewOpenBaoTransit(
 		config:         config,
 		log:            log,
 		client:         nil,
-		usingCustomTLS: len(config.TLSCAPath) > 0,
+		usingCustomTLS: config.TLSCAPath != "",
 		tls:            nil,
 		closer:         nil,
 	}
@@ -585,7 +585,7 @@ func (o *OpenBaoTransit) Decrypt(
 func (o *OpenBaoTransit) Encrypt(
 	ctx context.Context,
 	input string,
-) (keyID *string, version *string, result string, _ error) {
+) (keyID, version *string, result string, _ error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

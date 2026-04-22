@@ -404,7 +404,7 @@ func IsolateFrequencyComponent(result []complex128, index int) []complex128 {
 	copy(inverseSeries, result)
 
 	// Zero out everything except the index and its symmetric counterpart
-	for i, _ := range result {
+	for i := range result {
 		if i == index || i == (n-index)%n {
 			continue
 		}

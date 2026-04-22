@@ -86,11 +86,11 @@ func TestRecurringDetection(t *testing.T) {
 			assert.NoError(t, err)
 
 			if recurringResult.Best == nil || recurringResult.Best.StartDate.IsZero() {
-				log.Info(fmt.Sprintf("cluster: \"%s\" does not recur", group.Name))
+				log.Info(fmt.Sprintf("cluster: %q does not recur", group.Name))
 				continue
 			}
 
-			log.Info(fmt.Sprintf("cluster: \"%s\" does recur roughly every %d days", group.Name, recurringResult.Best.Frequency))
+			log.Info(fmt.Sprintf("cluster: %q does recur roughly every %d days", group.Name, recurringResult.Best.Frequency))
 
 			switch strings.ToLower(group.Name) {
 			case "freshbooks":

@@ -139,7 +139,7 @@ func (l *lunchFlowClient) doRequest(ctx context.Context, relativePath string, re
 	url := l.apiUrl
 	url.Path = path.Join(url.Path, relativePath)
 	requestUrl := url.String()
-	request, err := http.NewRequestWithContext(ctx, "GET", requestUrl, nil)
+	request, err := http.NewRequestWithContext(ctx, "GET", requestUrl, http.NoBody)
 	if err != nil {
 		return errors.Wrap(err, "failed to create HTTP request")
 	}

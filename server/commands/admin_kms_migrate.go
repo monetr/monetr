@@ -165,28 +165,22 @@ func adminKMSMigrate(parent *cobra.Command) {
 		&arguments.FromKMS,
 		"from-provider",
 		"",
-		strings.Join([]string{
-			"Specify the KMS provider you are migrating from. Valid values are:",
+		"Specify the KMS provider you are migrating from. Valid values are: "+
 			"plaintext, aws, openbao, vault",
-		}, " "),
 	)
 	command.PersistentFlags().StringVar(
 		&arguments.ToKMS,
 		"to-provider",
 		"",
-		strings.Join([]string{
-			"Specify the KMS provider you are migrating to. Valid values are:",
+		"Specify the KMS provider you are migrating to. Valid values are: "+
 			"plaintext, aws, openbao, vault",
-		}, " "),
 	)
 	command.PersistentFlags().BoolVar(
 		&arguments.DryRun,
 		"dry-run",
 		false,
-		strings.Join([]string{
-			"Don't persist the changes to the database, but still perform all the",
+		"Don't persist the changes to the database, but still perform all the "+
 			"rotations in memory to ensure they all succeed.",
-		}, " "),
 	)
 
 	command.MarkPersistentFlagRequired("from-provider")

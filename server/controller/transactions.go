@@ -162,7 +162,7 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 	}
 
 	var updatedSpending *Spending
-	if request.SpendingId != nil && !(*request.SpendingId).IsZero() {
+	if request.SpendingId != nil && !request.SpendingId.IsZero() {
 		updatedSpending, err = repo.GetSpendingById(
 			c.getContext(ctx),
 			bankAccountId,

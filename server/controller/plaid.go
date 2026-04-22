@@ -151,7 +151,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 			c.getContext(ctx),
 			userId,
 			"",
-		); err == nil && len(linkToken) > 0 {
+		); err == nil && linkToken != "" {
 			log.InfoContext(c.getContext(ctx), "successfully found existing link token in cache")
 			return ctx.JSON(http.StatusOK, map[string]any{
 				"linkToken": linkToken,
@@ -161,7 +161,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 	}
 
 	legalName := ""
-	if len(me.Login.LastName) > 0 {
+	if me.Login.LastName != "" {
 		legalName = fmt.Sprintf("%s %s", me.Login.FirstName, me.Login.LastName)
 	}
 

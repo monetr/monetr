@@ -103,7 +103,6 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusUnauthorized, "Invalid email and password")
 	case nil:
 		// If no error was returned then do nothing.
-		break
 	default:
 		return c.wrapPgError(ctx, err, "Failed to authenticate")
 	}

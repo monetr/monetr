@@ -20,7 +20,7 @@ import (
 // user input for that field. It will validate that the input is not longer than
 // 250 characters and will return a bad request error if it is. It will also
 // return a whitespace trimmed version of the provided input.
-func (c *Controller) cleanString(ctx echo.Context, name string, input string) (string, error) {
+func (c *Controller) cleanString(ctx echo.Context, name, input string) (string, error) {
 	if len(input) > 250 {
 		return input, c.badRequest(ctx, "%s must not be longer than 250 characters", name)
 	}

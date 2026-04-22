@@ -170,10 +170,10 @@ func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 				log.DebugContext(context.Background(), "creating isolated database for test")
 				databaseName := fmt.Sprintf("%x", sha256.Sum256([]byte(t.Name())))
 
-				_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS "%s";`, databaseName))
+				_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS %q;`, databaseName))
 				require.NoError(t, err, "must be able to drop an isolated database if it exists")
 
-				_, err = db.Exec(fmt.Sprintf(`CREATE DATABASE "%s";`, databaseName))
+				_, err = db.Exec(fmt.Sprintf(`CREATE DATABASE %q;`, databaseName))
 				require.NoError(t, err, "must be able to create the isolated database")
 
 				isolatedOptions := *options
@@ -187,7 +187,7 @@ func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 
 				t.Cleanup(func() {
 					require.NoError(t, databaseToReturn.Close(), "must close the isolated database once we are done")
-					_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS "%s";`, databaseName))
+					_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS %q;`, databaseName))
 					require.NoError(t, err, "must be able to drop an isolated database if it exists")
 					require.NoError(t, db.Close(), "must close database connection")
 				})

@@ -110,7 +110,6 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 			"problems": err,
 		})
 	case nil:
-		break
 	default:
 		return c.wrapAndReturnError(
 			ctx,
@@ -204,7 +203,6 @@ func (c *Controller) patchBankAccount(ctx echo.Context) error {
 			"problems": err,
 		})
 	case nil:
-		break
 	default:
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
 	}

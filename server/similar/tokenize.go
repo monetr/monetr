@@ -134,7 +134,7 @@ func Tokenize(transaction *models.Transaction) []Token {
 	return tokens
 }
 
-func CleanNameRegex(transaction *models.Transaction) (lower []string, normal []string) {
+func CleanNameRegex(transaction *models.Transaction) (lower, normal []string) {
 	words := clusterCleanStringRegex.FindAllString(
 		transaction.OriginalName,
 		len(transaction.OriginalName),

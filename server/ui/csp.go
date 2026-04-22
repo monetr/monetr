@@ -116,7 +116,7 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 			"Report-To",
 			// TODO properly json encode this before hand, atm the security header
 			// endpoint is not properly escaped.
-			fmt.Sprintf(`{"group":"csp-endpoint","max_age":1800,"endpoints":[{"url":"%s"}],"include_subdomains":true}`, c.configuration.Sentry.SecurityHeaderEndpoint),
+			fmt.Sprintf(`{"group":"csp-endpoint","max_age":1800,"endpoints":[{"url":%q}],"include_subdomains":true}`, c.configuration.Sentry.SecurityHeaderEndpoint),
 		)
 	}
 

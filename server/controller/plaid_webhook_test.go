@@ -88,7 +88,7 @@ func TestPlaidWebhook(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Because the in memory webhook code does not use a mock clock.
-		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+		app.Clock.Add(time.Since(app.Clock.Now()))
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
@@ -156,7 +156,7 @@ func TestPlaidWebhook(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Because the in memory webhook code does not use a mock clock.
-		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+		app.Clock.Add(time.Since(app.Clock.Now()))
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
@@ -257,7 +257,7 @@ func TestPlaidWebhook(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Because the in memory webhook code does not use a mock clock.
-		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+		app.Clock.Add(time.Since(app.Clock.Now()))
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
@@ -307,7 +307,7 @@ func TestPlaidWebhook(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Because the in memory webhook code does not use a mock clock.
-		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+		app.Clock.Add(time.Since(app.Clock.Now()))
 
 		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		require.NoError(t, err, "must generate EC key")
@@ -356,7 +356,7 @@ func TestPlaidWebhook(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Because the in memory webhook code does not use a mock clock.
-		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+		app.Clock.Add(time.Since(app.Clock.Now()))
 
 		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		require.NoError(t, err, "must generate EC key")
@@ -418,7 +418,7 @@ func TestPlaidWebhook(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Because the in memory webhook code does not use a mock clock.
-		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+		app.Clock.Add(time.Since(app.Clock.Now()))
 
 		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		require.NoError(t, err, "must generate EC key")
@@ -460,7 +460,7 @@ func TestPlaidWebhook(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Because the in memory webhook code does not use a mock clock.
-		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+		app.Clock.Add(time.Since(app.Clock.Now()))
 
 		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		require.NoError(t, err, "must generate EC key")
@@ -506,7 +506,7 @@ func TestPlaidWebhook(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Because the in memory webhook code does not use a mock clock.
-		app.Clock.Add(time.Now().Sub(app.Clock.Now()))
+		app.Clock.Add(time.Since(app.Clock.Now()))
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)

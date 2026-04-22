@@ -178,8 +178,8 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 		return c.badRequest(ctx, "Transfer amount must be greater than 0")
 	}
 
-	if (transfer.FromSpendingId == nil || (*transfer.FromSpendingId).IsZero()) &&
-		(transfer.ToSpendingId == nil || (*transfer.ToSpendingId).IsZero()) {
+	if (transfer.FromSpendingId == nil || transfer.FromSpendingId.IsZero()) &&
+		(transfer.ToSpendingId == nil || transfer.ToSpendingId.IsZero()) {
 		return c.badRequest(ctx, "Both a from and a to must be specified to transfer allocated funds")
 	}
 

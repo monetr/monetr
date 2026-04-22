@@ -364,7 +364,6 @@ func (j *processOfxUpload) syncBalances(ctx context.Context) error {
 				// EOF means the amount is blank, we can treat this as zero
 				switch errors.Cause(err) {
 				case nil, io.EOF:
-					break
 				default:
 					return errors.Wrap(err, "failed to parse ledger balance amount")
 				}
@@ -378,7 +377,6 @@ func (j *processOfxUpload) syncBalances(ctx context.Context) error {
 				// EOF means the amount is blank, we can treat this as zero
 				switch errors.Cause(err) {
 				case nil, io.EOF:
-					break
 				default:
 					return errors.Wrap(err, "failed to parse available balance amount")
 				}
@@ -395,7 +393,6 @@ func (j *processOfxUpload) syncBalances(ctx context.Context) error {
 				// EOF means the amount is blank, we can treat this as zero
 				switch errors.Cause(err) {
 				case nil, io.EOF:
-					break
 				default:
 					return errors.Wrap(err, "failed to parse ledger balance amount")
 				}
@@ -409,7 +406,6 @@ func (j *processOfxUpload) syncBalances(ctx context.Context) error {
 				// EOF means the amount is blank, we can treat this as zero
 				switch errors.Cause(err) {
 				case nil, io.EOF:
-					break
 				default:
 					return errors.Wrap(err, "failed to parse available balance amount")
 				}

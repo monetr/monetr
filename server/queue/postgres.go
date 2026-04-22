@@ -405,7 +405,7 @@ func (p *postgresProcessor) EnqueueAt(
 	// This is thread safe because we only ever have a single thread in a
 	// transaction, and checking for a nil value in multiple threads is fine
 	// because it will always be nil outside of the transaction.
-	if p.notify == nil || (p.notify != nil && *p.notify == false) {
+	if p.notify == nil || (p.notify != nil && !*p.notify) {
 		// Send a notification in the same database context as the job was enqueued
 		// on. This way if a job is enqueued in a transaction then we would only
 		// wake the workers once the transaction is committed!
@@ -1225,7 +1225,7 @@ func (p *postgresProcessor) executeJob(job *models.Job) {
 	span.SetData("messaging.message.id", string(job.JobId))
 	span.SetData("messaging.destination.name", string(job.Queue))
 	span.SetData("messaging.message.body.size", len(job.Input))
-	span.SetData("messaging.message.receive.latency", time.Now().Sub(job.CreatedAt).Milliseconds())
+	span.SetData("messaging.message.receive.latency", time.Since(job.CreatedAt).Milliseconds())
 	span.SetData("messaging.system", "postgresql")
 	// For now, sample all background jobs
 	span.Sampled = sentry.SampledTrue
