@@ -10,8 +10,21 @@ export type DocPageData = {
   authors: Array<Author>;
 } & BaseRuntimePageInfo;
 
-function buildAuthors(page: BaseRuntimePageInfo): Array<Author> {
-  return Array.isArray(page?.frontmatter?.authors) ? (page?.frontmatter?.authors as Array<Author>) : [];
+function isAuthor(value: unknown): value is Author {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  const author = value as Record<string, unknown>;
+  return (
+    typeof author.name === 'string' &&
+    author.name.trim().length > 0 &&
+    (author.github === undefined || typeof author.github === 'string')
+  );
+}
+
+export function buildAuthors(page: Pick<BaseRuntimePageInfo, 'frontmatter'>): Array<Author> {
+  return Array.isArray(page?.frontmatter?.authors) ? page.frontmatter.authors.filter(isAuthor) : [];
 }
 
 export default function useDocPages(): {
@@ -20,8 +33,8 @@ export default function useDocPages(): {
   const { pages } = usePages();
   return {
     pages: pages.map(page => ({
-      authors: buildAuthors(page),
       ...page,
+      authors: buildAuthors(page),
     })),
   };
 }
