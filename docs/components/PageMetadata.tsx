@@ -23,6 +23,8 @@ export default function PageMetadata(): React.JSX.Element {
 
   return (
     <Head>
+      {/* canonical */}
+      <link href={url} rel='canonical' />
       {/* opengraph things */}
       <meta content={type} property='og:type' />
       <meta content={url} property='og:url' />
