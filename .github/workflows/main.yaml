@@ -115,24 +115,19 @@ jobs:
             ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum', '**/**.go') }}
             ${{ runner.os }}-test-go-build
 
-      # Cache go mod cache, used to speedup builds
-      - name: Go Mod Cache
+      # Combined cache for Go module deps and pnpm store. Both invalidate only on lockfile changes,
+      # so they share a key. Go's build cache stays separate above because its invalidation is much
+      # more aggressive (any *.go change).
+      - name: Deps Cache
         uses: actions/cache@v5
         with:
-          path: ${{ env.GOMODCACHE }}
-          key: ${{ runner.os }}-test-go-mod-${{ hashFiles('**/go.sum') }}
+          path: |
+            ${{ env.GOMODCACHE }}
+            ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-test-deps-${{ hashFiles('**/go.sum', '**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-test-go-mod-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-test-go-mod
-
-      - name: pnpm Cache
-        uses: actions/cache@v5
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            ${{ runner.os }}-test-pnpm-store
+            ${{ runner.os }}-test-deps-${{ hashFiles('**/go.sum', '**/pnpm-lock.yaml') }}
+            ${{ runner.os }}-test-deps
 
       - name: Test
         run: |
