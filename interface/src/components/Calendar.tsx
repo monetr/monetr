@@ -8,7 +8,6 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import styles from './Calendar.module.scss';
 
-
 export type CalendarProps = PropsBase &
   PropsSingle & {
     enableYearNavigation?: boolean;

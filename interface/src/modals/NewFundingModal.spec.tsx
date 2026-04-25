@@ -1,4 +1,3 @@
-
 import { act, waitFor } from '@testing-library/react';
 
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
