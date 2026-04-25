@@ -52,8 +52,12 @@ jobs:
           make monetr
 
   test:
-    name: Test
+    name: Test (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     env:
       MONETR_PG_ADDRESS: localhost
       MONETR_PG_PASSWORD: ""
@@ -122,13 +126,13 @@ jobs:
 
       - name: Test
         run: |
-          make test
+          make test SHARDS=4 SHARD=${{ matrix.shard }}
 
       - name: Code Coverage Report
         if: always()
         uses: codecov/codecov-action@v6
         with:
-          name: monetr
+          name: monetr-shard-${{ matrix.shard }}
           directory: ${{ github.workspace }}/build/tests
           root_dir: ${{ github.workspace }}
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -136,8 +140,8 @@ jobs:
         if: always()
         uses: codecov/test-results-action@v1
         with:
-          name: monetr
-          files: ${{ github.workspace }}/build/junit.xml
+          name: monetr-shard-${{ matrix.shard }}
+          files: ${{ github.workspace }}/build/junit-${{ matrix.shard }}.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
   lint:
