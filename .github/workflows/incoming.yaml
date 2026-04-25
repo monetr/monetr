@@ -119,6 +119,18 @@ jobs:
             ${{ runner.os }}-test-deps-${{ hashFiles('**/go.sum', '**/pnpm-lock.yaml') }}
             ${{ runner.os }}-test-deps
 
+      # Tune the Postgres service for ephemeral CI. Durability isn't needed since the DB is thrown
+      # away with the runner. fsync/synchronous_commit/full_page_writes are all sighup-context, so
+      # ALTER SYSTEM + pg_reload_conf picks them up without a restart.
+      - name: Tune Postgres for CI
+        run: |
+          psql -h localhost -U api-testing -d test-db -v ON_ERROR_STOP=1 <<'SQL'
+          ALTER SYSTEM SET fsync = 'off';
+          ALTER SYSTEM SET synchronous_commit = 'off';
+          ALTER SYSTEM SET full_page_writes = 'off';
+          SELECT pg_reload_conf();
+          SQL
+
       - name: Test
         run: |
           make test SHARDS=4 SHARD=${{ matrix.shard }}
