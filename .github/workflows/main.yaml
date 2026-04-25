@@ -61,8 +61,12 @@ jobs:
           retention-days: 7
 
   test:
-    name: Test
+    name: Test (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     env:
       MONETR_PG_ADDRESS: localhost
       MONETR_PG_PASSWORD: ""
@@ -111,42 +115,49 @@ jobs:
             ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum', '**/**.go') }}
             ${{ runner.os }}-test-go-build
 
-      # Cache go mod cache, used to speedup builds
-      - name: Go Mod Cache
+      # Combined cache for Go module deps and pnpm store. Both invalidate only on lockfile changes,
+      # so they share a key. Go's build cache stays separate above because its invalidation is much
+      # more aggressive (any *.go change).
+      - name: Deps Cache
         uses: actions/cache@v5
         with:
-          path: ${{ env.GOMODCACHE }}
-          key: ${{ runner.os }}-test-go-mod-${{ hashFiles('**/go.sum') }}
+          path: |
+            ${{ env.GOMODCACHE }}
+            ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-test-deps-${{ hashFiles('**/go.sum', '**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-test-go-mod-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-test-go-mod
+            ${{ runner.os }}-test-deps-${{ hashFiles('**/go.sum', '**/pnpm-lock.yaml') }}
+            ${{ runner.os }}-test-deps
 
-      - name: pnpm Cache
-        uses: actions/cache@v5
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            ${{ runner.os }}-test-pnpm-store
+      # Tune the Postgres service for ephemeral CI. Durability isn't needed since the DB is thrown
+      # away with the runner. fsync/synchronous_commit/full_page_writes are all sighup-context, so
+      # ALTER SYSTEM + pg_reload_conf picks them up without a restart.
+      - name: Tune Postgres for CI
+        run: |
+          psql -h localhost -U api-testing -d test-db -v ON_ERROR_STOP=1 <<'SQL'
+          ALTER SYSTEM SET fsync = 'off';
+          ALTER SYSTEM SET synchronous_commit = 'off';
+          ALTER SYSTEM SET full_page_writes = 'off';
+          SELECT pg_reload_conf();
+          SQL
 
       - name: Test
         run: |
-          make test
+          make test SHARDS=4 SHARD=${{ matrix.shard }}
 
       - name: Code Coverage Report
         if: always()
         uses: codecov/codecov-action@v6
         with:
-          name: monetr
+          name: monetr-shard-${{ matrix.shard }}
           directory: ${{ github.workspace }}/build/tests
           root_dir: ${{ github.workspace }}
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Test Results Report
         uses: codecov/test-results-action@v1
         with:
-          name: monetr
-          files: ${{ github.workspace }}/build/junit.xml
+          name: monetr-shard-${{ matrix.shard }}
+          files: ${{ github.workspace }}/build/junit-${{ matrix.shard }}.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
   local_dev:

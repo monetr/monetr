@@ -89,10 +89,25 @@ migrate: | $(CMAKE_CONFIGURATION_DIRECTORY)
 ifdef PATTERN
 PATTERN_ARG=-R $(PATTERN)
 endif
+
+# Optional: SHARDS=N SHARD=i runs the i-th of N shards via ctest's -I flag.
+# When set, the per-shard coverage merge is skipped; codecov merges server-side.
+SHARD ?=
+SHARDS ?=
+ifneq ($(SHARDS),)
+SHARD_ARG=-I $(SHARD),,$(SHARDS)
+JUNIT_SUFFIX=-$(SHARD)
+SKIP_COVERAGE_MERGE=1
+else
+JUNIT_SUFFIX=
+endif
+
 test:
 	cmake --preset testing $(CMAKE_OPTIONS)
-	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure --output-junit $(PWD)$(CMAKE_CONFIGURATION_DIRECTORY)/junit.xml -j $(CONCURRENCY) $(PATTERN_ARG)
+	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure --output-junit $(PWD)$(CMAKE_CONFIGURATION_DIRECTORY)/junit$(JUNIT_SUFFIX).xml -j $(CONCURRENCY) $(PATTERN_ARG) $(SHARD_ARG)
+ifndef SKIP_COVERAGE_MERGE
 	cmake -P cmake/scripts/MergeGoCoverage.cmake
+endif
 
 lint: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t lint $(BUILD_ARGS)

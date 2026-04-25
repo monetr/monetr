@@ -280,6 +280,7 @@ if(BUILD_TESTING)
     FIXTURES_REQUIRED node_modules
     TIMEOUT 120
     LABELS "interface"
+    PROCESSORS 4
   )
   if(TEST_COVERAGE)
     set_property(
@@ -297,6 +298,7 @@ if(BUILD_TESTING)
     FIXTURES_REQUIRED node_modules
     TIMEOUT 120
     LABELS "interface"
+    PROCESSORS 2
   )
 
   # add_test(

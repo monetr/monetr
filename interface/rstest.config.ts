@@ -30,6 +30,11 @@ export default defineConfig({
   // Override adapter default of 'happy-dom' — must use jsdom because billing.spec.tsx relies on jsdom's internal
   // symbol-based window.location
   testEnvironment: 'jsdom',
+  // Cap workers to match the PROCESSORS 4 contract set on the `interface` ctest entry. Without this, rstest defaults
+  // to os.cpus().length and oversubscribes the CPU on local 8-core dev boxes where ctest only allocated 4 slots.
+  pool: {
+    maxWorkers: 4,
+  },
   globals: true,
   setupFiles: ['./src/setupTests.ts'],
   include: ['src/**/*.spec.{ts,tsx}'],
