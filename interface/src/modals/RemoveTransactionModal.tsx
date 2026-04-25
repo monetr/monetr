@@ -81,54 +81,54 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
       >
         {({ setFieldValue, values, isSubmitting }) => (
           <div className='flex flex-col gap-stack'>
-              <Typography className='mb-2' size='xl' weight='bold'>
-                <Trash />
-                Remove Transaction
-              </Typography>
-              <div className='flex flex-col gap-stack'>
-                <Typography size='inherit'>Are you sure you want to remove this transaction?</Typography>
-                <ul>
-                  <SimilarTransactionItem disableNavigate transactionId={transaction.transactionId} />
-                </ul>
-                <Typography size='inherit'>You will not be able to undo this action.</Typography>
-                <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string gap-component'>
-                  <div className='gap-component'>
-                    <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>
-                      Prevent Re-Creation
-                    </label>
-                    <p className='text-sm text-dark-monetr-content'>
-                      Prevent this transaction from be re-created if it is present in future file imports?
-                    </p>
-                  </div>
-                  <Switch
-                    checked={values.softDelete}
-                    onCheckedChange={() => setFieldValue('softDelete', !values.softDelete)}
-                  />
+            <Typography className='mb-2' size='xl' weight='bold'>
+              <Trash />
+              Remove Transaction
+            </Typography>
+            <div className='flex flex-col gap-stack'>
+              <Typography size='inherit'>Are you sure you want to remove this transaction?</Typography>
+              <ul>
+                <SimilarTransactionItem disableNavigate transactionId={transaction.transactionId} />
+              </ul>
+              <Typography size='inherit'>You will not be able to undo this action.</Typography>
+              <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string gap-component'>
+                <div className='gap-component'>
+                  <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>
+                    Prevent Re-Creation
+                  </label>
+                  <p className='text-sm text-dark-monetr-content'>
+                    Prevent this transaction from be re-created if it is present in future file imports?
+                  </p>
                 </div>
-                <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string gap-component'>
-                  <div className='gap-component'>
-                    <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>
-                      Adjust Balance
-                    </label>
-                    <p className='text-sm text-dark-monetr-content'>
-                      Update your account balance as if this transaction was reversed?
-                    </p>
-                  </div>
-                  <Switch
-                    checked={values.adjustsBalance}
-                    onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
-                  />
-                </div>
+                <Switch
+                  checked={values.softDelete}
+                  onCheckedChange={() => setFieldValue('softDelete', !values.softDelete)}
+                />
               </div>
-              <div className='flex justify-end gap-stack mt-4'>
-                <Button disabled={isSubmitting} onClick={modal.remove} variant='secondary'>
-                  Cancel
-                </Button>
-                <FormButton type='submit' variant='destructive'>
-                  Remove
-                </FormButton>
+              <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string gap-component'>
+                <div className='gap-component'>
+                  <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>
+                    Adjust Balance
+                  </label>
+                  <p className='text-sm text-dark-monetr-content'>
+                    Update your account balance as if this transaction was reversed?
+                  </p>
+                </div>
+                <Switch
+                  checked={values.adjustsBalance}
+                  onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
+                />
               </div>
             </div>
+            <div className='flex justify-end gap-stack mt-4'>
+              <Button disabled={isSubmitting} onClick={modal.remove} variant='secondary'>
+                Cancel
+              </Button>
+              <FormButton type='submit' variant='destructive'>
+                Remove
+              </FormButton>
+            </div>
+          </div>
         )}
       </MForm>
     </MModal>

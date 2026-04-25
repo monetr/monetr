@@ -1,6 +1,6 @@
 import { parse } from 'date-fns';
 
-import type { Author } from '@monetr/docs/components/hooks/useDocPages';
+import { buildAuthors } from '@monetr/docs/components/hooks/useDocPages';
 import realUrl from '@monetr/docs/components/utils/realUrl';
 
 import { Head, usePage } from '@rspress/core/runtime';
@@ -19,7 +19,7 @@ export default function PageMetadata(): React.JSX.Element {
     published = [parse(frontmatter?.date as string, 'yyyy/MM/dd', new Date()).toISOString()];
     modified = page.lastUpdatedTime ? [new Date(page.lastUpdatedTime).toISOString()] : [];
   }
-  const authors = Array.isArray(frontmatter?.authors) ? (frontmatter?.authors as Array<Author>) : [];
+  const authors = buildAuthors(page);
 
   return (
     <Head>
