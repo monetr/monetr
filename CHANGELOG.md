@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.13.1](https://github.com/monetr/monetr/compare/v1.13.0...v1.13.1) (2026-04-25)
+
+
+### Dependencies
+
+* **api:** update aws-sdk-go-v2 monorepo ([#3131](https://github.com/monetr/monetr/issues/3131)) ([96d2821](https://github.com/monetr/monetr/commit/96d28212ad70c1d9d023067af13b08084c2ee047))
+* **containers:** update ghcr.io/openbao/openbao docker tag to v2.5.3 ([#3136](https://github.com/monetr/monetr/issues/3136)) ([68cad73](https://github.com/monetr/monetr/commit/68cad7336a1c8919b3407c00a64978a48b4c61d6))
+* **renovate:** update dependency @biomejs/biome to v2.4.13 ([#3138](https://github.com/monetr/monetr/issues/3138)) ([af53d7b](https://github.com/monetr/monetr/commit/af53d7bd4f33b5b51929e799dc7b6cd047629e61))
+* **ui:** update dependency postcss to v8.5.10 [security] ([#3135](https://github.com/monetr/monetr/issues/3135)) ([6fad415](https://github.com/monetr/monetr/commit/6fad415bcef44ecc9868c6ba6067d5d4af281f84))
+* **ui:** update rsbuild ([#3139](https://github.com/monetr/monetr/issues/3139)) ([69897b2](https://github.com/monetr/monetr/commit/69897b2275f445df552c734115ac17ab35fadbe5))
+* **ui:** update rstest ([#3141](https://github.com/monetr/monetr/issues/3141)) ([a8baefb](https://github.com/monetr/monetr/commit/a8baefb1886302762abc9db8a14c1b05ed6dc792))
+* **ui:** update sentry-javascript monorepo to v10.50.0 ([#3121](https://github.com/monetr/monetr/issues/3121)) ([02e2b0f](https://github.com/monetr/monetr/commit/02e2b0f5a79390dcc16a5575d4520a73c791dd7d))
+
+
+### Refactor
+
+* **build:** Shard tests in CI/CD ([#3140](https://github.com/monetr/monetr/issues/3140)) ([b4d3f8f](https://github.com/monetr/monetr/commit/b4d3f8fe6ee61c485d5508c98f2fb3341b425d92))
+
+
+### Documentation
+
+* Fix canonical URLs in docs site ([f62620d](https://github.com/monetr/monetr/commit/f62620d00deb63f523c6be768e790ee027c1755a))
+* Fixed author not showing properly on blog index ([#3133](https://github.com/monetr/monetr/issues/3133)) ([7845520](https://github.com/monetr/monetr/commit/7845520b68fd81a95a54e21eaef003c977223b9a))
+
 ## [1.13.0](https://github.com/monetr/monetr/compare/v1.12.5...v1.13.0) (2026-04-22)
 
 
