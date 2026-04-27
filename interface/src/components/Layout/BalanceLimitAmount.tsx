@@ -18,8 +18,8 @@ export default function BalanceLimitAmount(): React.JSX.Element {
       return (
         <Flex gap='sm' justify='between'>
           <Flex flex='shrink'>
+            <InfinityIcon />
             <Typography color='emphasis' ellipsis size='lg' weight='semibold' wrapping='nowrap'>
-              <InfinityIcon />
               Limit:
             </Typography>
           </Flex>
