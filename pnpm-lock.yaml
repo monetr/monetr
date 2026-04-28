@@ -187,8 +187,8 @@ importers:
         specifier: 10.50.0
         version: 10.50.0(react@18.3.1)
       '@sentry/utils':
-        specifier: 8.55.1
-        version: 8.55.1
+        specifier: 8.55.2
+        version: 8.55.2
       '@tanstack/react-query':
         specifier: 5.100.5
         version: 5.100.5(react@18.3.1)
@@ -1468,8 +1468,8 @@ packages:
     resolution: {integrity: sha512-J4A+vzUO3adl0TkFCjaN1+4miamrjHiEIYuLHiuu1lmAjq5WIVw32ObvAh4yMwNtxyaEMosTrrh5M6f12XSJFg==}
     engines: {node: '>=18'}
 
-  '@sentry/core@8.55.1':
-    resolution: {integrity: sha512-0ea+yDOgaijR3ba2al1QZxY0bZ9MBZq2a0G+2A0uCBpBkiXnpLFGVAo9UAlEikN1C4M8ROZYiuFU7yZCqacgLQ==}
+  '@sentry/core@8.55.2':
+    resolution: {integrity: sha512-YlEBwybUcOQ/KjMHDmof1vwweVnBtBxYlQp7DE3fOdtW4pqqdHWTnTntQs4VgYfxzjJYgtkd9LHlGtg8qy+JVQ==}
     engines: {node: '>=14.18'}
 
   '@sentry/react@10.50.0':
@@ -1478,8 +1478,8 @@ packages:
     peerDependencies:
       react: ^16.14.0 || 17.x || 18.x || 19.x
 
-  '@sentry/utils@8.55.1':
-    resolution: {integrity: sha512-sPL+AdVY8e+ozAuYhhl4mPwO8nam2rtdjLgys/QZR9AfI7gNKcFgOKQ0qEr23Z7qMZyUeYkHW7qIPMXFPx5AXA==}
+  '@sentry/utils@8.55.2':
+    resolution: {integrity: sha512-biW6W+/KGaNkNnNlw8yExGM1uQ1+PI+L9Rb99LzJcavm1TGHpmSfGOzqj6y08P6Iw/+JmM2Dj2hvmns2fIwTWw==}
     engines: {node: '>=14.18'}
 
   '@shikijs/core@4.0.2':
@@ -5614,7 +5614,7 @@ snapshots:
 
   '@sentry/core@10.50.0': {}
 
-  '@sentry/core@8.55.1': {}
+  '@sentry/core@8.55.2': {}
 
   '@sentry/react@10.50.0(react@18.3.1)':
     dependencies:
@@ -5622,9 +5622,9 @@ snapshots:
       '@sentry/core': 10.50.0
       react: 18.3.1
 
-  '@sentry/utils@8.55.1':
+  '@sentry/utils@8.55.2':
     dependencies:
-      '@sentry/core': 8.55.1
+      '@sentry/core': 8.55.2
 
   '@shikijs/core@4.0.2':
     dependencies:
