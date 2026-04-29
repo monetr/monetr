@@ -10,9 +10,12 @@ import (
 
 func TestPostedSpec_Validate(t *testing.T) {
 	// PostedSpec requires exactly one FieldRef (valid against the column set in
-	// context). Posted is optional; when set it must contain ASCII characters
-	// only and be no longer than 50 characters. An empty Posted string is
-	// accepted because Length(0, 50) treats empty as valid.
+	// context). Posted is optional; when set it must contain printable
+	// characters only (per [validators.PrintableUnicode], so umlauts and the
+	// like are fine but tabs and zero-width joiners are not) and be 1 to 100
+	// characters long. An empty Posted string is still accepted because
+	// Length(1, 100) treats empty as valid (the rule only fires once the value
+	// is non-empty).
 	ctx := table.WithColumns(
 		t.Context(),
 		[]string{"Date", "Status", "Description", "Amount"},
@@ -65,22 +68,6 @@ func TestPostedSpec_Validate(t *testing.T) {
 			name: "row number field, empty posted",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumber}},
-			},
-			wantErr: "",
-		},
-		{
-			name: "row per day field, ascii",
-			spec: table.PostedSpec{
-				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumberPerDay}},
-				Posted: "POSTED",
-			},
-			wantErr: "",
-		},
-		{
-			name: "row per day per amount field, ascii",
-			spec: table.PostedSpec{
-				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumberPerDayPerAmount}},
-				Posted: "Y",
 			},
 			wantErr: "",
 		},
@@ -153,25 +140,28 @@ func TestPostedSpec_Validate(t *testing.T) {
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKind("bogus")}},
 			},
-			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: derivedKind: must be blank; name: cannot be blank. or derivedKind: must be one of: [\"rowNumber\", \"rowNumberPerDay\", \"rowNumberPerDayPerAmount\"]..).",
+			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: derivedKind: must be blank; name: cannot be blank. or derivedKind: must be one of: [\"rowNumber\"]..).",
 		},
 		{
-			name: "non-ascii posted",
+			// "Pösted" is the canonical reason monetr swapped from
+			// is.PrintableASCII to [validators.PrintableUnicode]. It used to
+			// fail here, now it's a perfectly fine Posted needle.
+			name: "posted with umlauts",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: "Pösted",
 			},
-			wantErr: "failed to validate *table.PostedSpec: posted: must contain printable ASCII characters only.",
+			wantErr: "",
 		},
 		{
-			// Tab is ASCII (0x09) but not *printable* ASCII (0x20-0x7E). The switch
-			// from is.ASCII to is.PrintableASCII is what rejects it.
+			// Tab still gets caught because [unicode.IsPrint] only treats
+			// the regular ASCII space as printable, not the C0 controls.
 			name: "posted with tab",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: "POS\tTED",
 			},
-			wantErr: "failed to validate *table.PostedSpec: posted: must contain printable ASCII characters only.",
+			wantErr: "failed to validate *table.PostedSpec: posted: must contain printable characters only.",
 		},
 		{
 			name: "posted with newline",
@@ -179,16 +169,17 @@ func TestPostedSpec_Validate(t *testing.T) {
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: "POS\nTED",
 			},
-			wantErr: "failed to validate *table.PostedSpec: posted: must contain printable ASCII characters only.",
+			wantErr: "failed to validate *table.PostedSpec: posted: must contain printable characters only.",
 		},
 		{
-			// DEL (0x7F) is still ASCII but sits outside the printable range.
+			// DEL (0x7F) is still ASCII but it's outside the printable range
+			// so the new rule rejects it the same way the old one did.
 			name: "posted with DEL",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: "POSTED\x7f",
 			},
-			wantErr: "failed to validate *table.PostedSpec: posted: must contain printable ASCII characters only.",
+			wantErr: "failed to validate *table.PostedSpec: posted: must contain printable characters only.",
 		},
 		{
 			name: "posted at max length",
@@ -204,29 +195,36 @@ func TestPostedSpec_Validate(t *testing.T) {
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: strings.Repeat("A", 101),
 			},
-			wantErr: "failed to validate *table.PostedSpec: posted: the length must be no more than 100.",
+			wantErr: "failed to validate *table.PostedSpec: posted: the length must be between 1 and 100.",
 		},
 		{
-			name: "empty fields, non-ascii posted",
+			// Pösted is now fine on its own, so the only problem left here is
+			// that fields is blank. The case stays around to make sure the
+			// fields error still surfaces when the Posted needle happens to
+			// contain non-ASCII content.
+			name: "empty fields, posted with umlauts",
 			spec: table.PostedSpec{
 				Posted: "Pösted",
 			},
-			wantErr: "failed to validate *table.PostedSpec: fields: cannot be blank; posted: must contain printable ASCII characters only.",
+			wantErr: "failed to validate *table.PostedSpec: fields: cannot be blank.",
 		},
 		{
 			name: "empty fields, over-length posted",
 			spec: table.PostedSpec{
 				Posted: strings.Repeat("A", 101),
 			},
-			wantErr: "failed to validate *table.PostedSpec: fields: cannot be blank; posted: the length must be no more than 100.",
+			wantErr: "failed to validate *table.PostedSpec: fields: cannot be blank; posted: the length must be between 1 and 100.",
 		},
 		{
-			name: "invalid child, non-ascii posted",
+			// Same idea as the previous case but with the child FieldRef
+			// also broken. Since Pösted itself is fine now, only the fields
+			// error makes it through.
+			name: "invalid child, posted with umlauts",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{}},
 				Posted: "Pösted",
 			},
-			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..); posted: must contain printable ASCII characters only.",
+			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..).",
 		},
 	}
 

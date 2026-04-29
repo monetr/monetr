@@ -20,7 +20,7 @@ var (
 type TransactionImportMapping struct {
 	tableName string `pg:"transaction_import_mappings"`
 
-	TransactionImportMappingId ID[TransactionImportMapping] `json:"transactionImportMapping" pg:"transaction_import_mapping_id,notnull,pk"`
+	TransactionImportMappingId ID[TransactionImportMapping] `json:"transactionImportMappingId" pg:"transaction_import_mapping_id,notnull,pk"`
 	AccountId                  ID[Account]                  `json:"-" pg:"account_id,notnull,pk"`
 	Account                    *Account                     `json:"-" pg:"rel:has-one"`
 	Signature                  string                       `json:"signature" pg:"signature,notnull"`

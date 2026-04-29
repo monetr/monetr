@@ -33,16 +33,6 @@ func TestFieldRef_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name:    "derived row per day",
-			ref:     table.FieldRef{DerivedKind: table.DerivedKindRowNumberPerDay},
-			wantErr: "",
-		},
-		{
-			name:    "derived row per day per amount",
-			ref:     table.FieldRef{DerivedKind: table.DerivedKindRowNumberPerDayPerAmount},
-			wantErr: "",
-		},
-		{
 			name:    "name not in headers",
 			ref:     table.FieldRef{Name: "NotPresent"},
 			wantErr: "input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"]. or derivedKind: cannot be blank; name: must be blank.",
@@ -60,17 +50,18 @@ func TestFieldRef_Validate(t *testing.T) {
 		{
 			name:    "unknown derived kind",
 			ref:     table.FieldRef{DerivedKind: table.DerivedKind("bogus")},
-			wantErr: "input must be considered valid by: derivedKind: must be blank; name: cannot be blank. or derivedKind: must be one of: [\"rowNumber\", \"rowNumberPerDay\", \"rowNumberPerDayPerAmount\"].",
+			wantErr: "input must be considered valid by: derivedKind: must be blank; name: cannot be blank. or derivedKind: must be one of: [\"rowNumber\"].",
 		},
 		{
 			name:    "name with unknown derived",
 			ref:     table.FieldRef{Name: "Date", DerivedKind: table.DerivedKind("bogus")},
-			wantErr: "input must be considered valid by: derivedKind: must be blank. or derivedKind: must be one of: [\"rowNumber\", \"rowNumberPerDay\", \"rowNumberPerDayPerAmount\"]; name: must be blank.",
+			wantErr: "input must be considered valid by: derivedKind: must be blank. or derivedKind: must be one of: [\"rowNumber\"]; name: must be blank.",
 		},
 		{
-			// is.PrintableASCII fires before In(columns), so a Name containing tab or
-			// other control characters is rejected regardless of whether a column
-			// with that exact name is present in the context.
+			// A Name with a tab in it can't ever match a real column because the
+			// Headers themselves are validated through [validators.PrintableUnicode]
+			// upstream in [Mapping]. So the In check is what surfaces here, the print
+			// rule on Name is more or less defense-in-depth.
 			name:    "name with tab",
 			ref:     table.FieldRef{Name: "Dat\te"},
 			wantErr: "input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"]. or derivedKind: cannot be blank; name: must be blank.",
@@ -81,8 +72,10 @@ func TestFieldRef_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"]. or derivedKind: cannot be blank; name: must be blank.",
 		},
 		{
-			// Non-ASCII codepoint also fails printable ASCII.
-			name:    "name with non-ASCII",
+			// "Café" used to fail the print rule, but [validators.PrintableUnicode]
+			// is fine with it. The case still fails here because "Café" isn't in this
+			// context's column list, which is the more meaningful thing to test now.
+			name:    "name not in columns, with non-ASCII",
 			ref:     table.FieldRef{Name: "Café"},
 			wantErr: "input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"]. or derivedKind: cannot be blank; name: must be blank.",
 		},

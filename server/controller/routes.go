@@ -310,6 +310,10 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// Mappings
 	billed.GET("/mappings", c.getTransactionImportMappings)
 	billed.POST("/mappings", c.postTransactionImportMapping)
+	// Imports
+	billed.POST("/bank_accounts/:bankAccountId/transactions/import", c.postTransactionImport)
+	billed.GET("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.getTransactionImportById)
+	billed.PATCH("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.patchTransactionImport)
 	// Uploads
 	billed.GET("/files", c.getFiles)
 	// Funding schedules

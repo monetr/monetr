@@ -273,3 +273,92 @@ func TestDateSpec_Validate(t *testing.T) {
 		})
 	}
 }
+
+func TestDateSpec_GetTimeFormat(t *testing.T) {
+	cases := []struct {
+		name     string
+		spec     table.DateSpec
+		expected string
+	}{
+		{
+			name: "YY-MM-DD",
+			spec: table.DateSpec{
+				Fields: []table.FieldRef{{Name: "Date"}},
+				Format: "YY-MM-DD",
+			},
+			expected: "06-01-02",
+		},
+		{
+			name: "YYYY-MM-DD",
+			spec: table.DateSpec{
+				Fields: []table.FieldRef{{Name: "Date"}},
+				Format: "YYYY-MM-DD",
+			},
+			expected: "2006-01-02",
+		},
+		{
+			name: "YY-M-D",
+			spec: table.DateSpec{
+				Fields: []table.FieldRef{{Name: "Date"}},
+				Format: "YY-M-D",
+			},
+			expected: "06-1-2",
+		},
+		{
+			name: "MM/DD/YYYY",
+			spec: table.DateSpec{
+				Fields: []table.FieldRef{{Name: "Date"}},
+				Format: "MM/DD/YYYY",
+			},
+			expected: "01/02/2006",
+		},
+		{
+			name: "DD-MM-YYYY",
+			spec: table.DateSpec{
+				Fields: []table.FieldRef{{Name: "Date"}},
+				Format: "DD-MM-YYYY",
+			},
+			expected: "02-01-2006",
+		},
+		{
+			name: "DD.MM.YYYY",
+			spec: table.DateSpec{
+				Fields: []table.FieldRef{{Name: "Date"}},
+				Format: "DD.MM.YYYY",
+			},
+			expected: "02.01.2006",
+		},
+		{
+			name: "YYYY/MM/DD",
+			spec: table.DateSpec{
+				Fields: []table.FieldRef{{Name: "Date"}},
+				Format: "YYYY/MM/DD",
+			},
+			expected: "2006/01/02",
+		},
+		{
+			name: "M/D/YY",
+			spec: table.DateSpec{
+				Fields: []table.FieldRef{{Name: "Date"}},
+				Format: "M/D/YY",
+			},
+			expected: "1/2/06",
+		},
+		{
+			name: "YYYY-M-D",
+			spec: table.DateSpec{
+				Fields: []table.FieldRef{{Name: "Date"}},
+				Format: "YYYY-M-D",
+			},
+			expected: "2006-1-2",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			result := tc.spec.GetTimeFormat()
+			assert.EqualValues(t, tc.expected, result, "Expected time format to match expeced")
+		})
+	}
+}
