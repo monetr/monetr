@@ -85,6 +85,6 @@
     "sass": "1.99.0",
     "sass-embedded-linux-arm64": "1.99.0",
     "sass-embedded-linux-x64": "1.99.0",
-    "typescript": "5.9.3"
+    "typescript": "6.0.3"
   }
 }
