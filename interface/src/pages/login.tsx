@@ -75,6 +75,7 @@ export default function Login(): JSX.Element {
         Sign into your monetr account
       </Typography>
       <FormTextField
+        autoComplete='email'
         autoFocus
         className={styles.input}
         data-testid='login-email'

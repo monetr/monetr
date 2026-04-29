@@ -185,6 +185,7 @@ export default function Register(): JSX.Element {
           />
         </Flex>
         <FormTextField
+          autoComplete='email'
           className='w-full'
           data-testid='register-email'
           label='Email Address'
