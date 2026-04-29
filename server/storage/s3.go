@@ -32,7 +32,7 @@ func NewS3StorageBackend(
 
 func (s *s3Storage) Store(
 	ctx context.Context,
-	buf io.ReadSeekCloser,
+	buf io.Reader,
 	file models.File,
 ) error {
 	span := crumbs.StartFnTrace(ctx)
