@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"net/http"
 	"strings"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
+	"github.com/monetr/monetr/server/validators"
+	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 )
 
@@ -308,4 +311,41 @@ func enqueueJob[T any](
 		job,
 		args,
 	)
+}
+
+func parse[T any](
+	c *Controller,
+	ctx echo.Context,
+	existing *T,
+	schemas ...validation.MapRule,
+) (T, error) {
+	if existing == nil {
+		existing = new(T)
+	}
+
+	rawData := map[string]any{}
+	decoder := json.NewDecoder(ctx.Request().Body)
+	decoder.UseNumber()
+	if err := decoder.Decode(&rawData); err != nil {
+		return *existing, c.invalidJsonError(ctx, err)
+	}
+
+	output, err := validators.OneOf(
+		c.getContext(ctx),
+		existing,
+		rawData,
+		schemas...,
+	)
+	switch errors.Cause(err).(type) {
+	case validators.OneOfError:
+		return output, c.jsonError(ctx, http.StatusBadRequest, map[string]any{
+			"error":    "Invalid request",
+			"problems": validators.MarshalErrorTree(err),
+		})
+	case nil:
+	default:
+		return output, c.badRequestError(ctx, err, "failed to parse request")
+	}
+
+	return output, nil
 }

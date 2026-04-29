@@ -107,8 +107,8 @@ func (r *repositoryBase) CreateSpending(ctx context.Context, spending *Spending)
 	return nil
 }
 
-// UpdateSpending should only be called with complete expense  Do not use partial models with missing data for
-// this action.
+// UpdateSpending should only be called with complete expense  Do not use
+// partial models with missing data for this action.
 func (r *repositoryBase) UpdateSpending(ctx context.Context, bankAccountId ID[BankAccount], updates []Spending) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -127,6 +127,7 @@ func (r *repositoryBase) UpdateSpending(ctx context.Context, bankAccountId ID[Ba
 	}
 
 	_, err := r.txn.ModelContext(span.Context(), &updates).
+		WherePK().
 		Update(&updates)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError

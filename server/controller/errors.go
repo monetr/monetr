@@ -149,3 +149,15 @@ func (c *Controller) invalidJsonError(ctx echo.Context, err error) error {
 func (c *Controller) notFound(ctx echo.Context, msg string, args ...any) error {
 	return c.returnError(ctx, http.StatusNotFound, msg, args...)
 }
+
+// jsonError returns an *echo.HTTPError whose body is written verbatim from the
+// provided map. The error middleware in routes.go detects a non-string
+// Message of type map[string]any and emits it as-is, so callers can shape the
+// response body (e.g. validation responses with a "problems" tree) without
+// writing the JSON inline. Returning the *echo.HTTPError lets the handler
+// short-circuit cleanly: subsequent code in the handler does not run, which
+// avoids the double-body bug seen when ctx.JSON is called from a helper that
+// then returns nil.
+func (c *Controller) jsonError(ctx echo.Context, status int, body map[string]any) error {
+	return echo.NewHTTPError(status, body)
+}
