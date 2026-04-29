@@ -15,16 +15,18 @@ const (
 )
 
 var (
-	noop                 = struct{}{}
-	cspPolicy     string = ""
-	cspPolicyFunc sync.Once
+	noop                      = struct{}{}
+	cspPolicy          string = ""
+	trustedTypesPolicy string = ""
+	cspPolicyFunc      sync.Once
 )
 
-// At the time of writing this, it seems that Chrome is the only browser engine that has implemented a majority of the
-// content security policy items. See https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
-// Because of this, it is not easy (or reasonable) to have a single CSP header that will securely cover every browser.
-// This code aims to provide a header based on the user-agent of the browser in the request.
-
+// At the time of writing this, it seems that Chrome is the only browser engine
+// that has implemented a majority of the content security policy items. See
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP Because of this, it is
+// not easy (or reasonable) to have a single CSP header that will securely cover
+// every browser. This code aims to provide a header based on the user-agent of
+// the browser in the request.
 func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 	cspPolicyFunc.Do(
 		func() {
@@ -108,6 +110,31 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 			}
 
 			cspPolicy = encodePolicies()
+
+			// Trusted Types asks the browser to require that strings passed to
+			// dangerous sinks like innerHTML be wrapped in a TrustedHTML object that
+			// was created by a named policy. This helps protect against DOM based
+			// cross-site scripting attacks. See
+			// https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
+			// At the time of writing this, we cannot be sure that every dependency
+			// the UI relies on (Sentry, Plaid, ReCAPTCHA, and so on) is compatible
+			// with Trusted Types, so this is sent as a
+			// Content-Security-Policy-Report-Only header. Violations are sent to the
+			// same endpoint as the rest of the CSP reports without actually breaking
+			// the page. Once the reports are quiet this can be promoted into the
+			// enforcing Content-Security-Policy header.
+			trustedTypesParts := []string{
+				"require-trusted-types-for 'script'",
+				"trusted-types react",
+			}
+			if c.configuration.Sentry.SecurityHeaderEndpoint != "" {
+				trustedTypesParts = append(
+					trustedTypesParts,
+					"report-uri "+c.configuration.Sentry.SecurityHeaderEndpoint,
+					"report-to csp-endpoint",
+				)
+			}
+			trustedTypesPolicy = strings.Join(trustedTypesParts, "; ")
 		},
 	)
 
@@ -121,4 +148,5 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 	}
 
 	ctx.Response().Header().Set("Content-Security-Policy", cspPolicy)
+	ctx.Response().Header().Set("Content-Security-Policy-Report-Only", trustedTypesPolicy)
 }
