@@ -114,7 +114,11 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 				seconds := int(time.Until(cacheExpiration).Seconds())
 				// TODO Implement ETag things!
 				ctx.Response().Header().Set("Expires", cacheExpiration.Format(http.TimeFormat))
-				ctx.Response().Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", seconds))
+				cacheControl := fmt.Sprintf("max-age=%d", seconds)
+				if isImmutableAssetPath(requestedPath) {
+					cacheControl += ", immutable"
+				}
+				ctx.Response().Header().Set("Cache-Control", cacheControl)
 			}
 		default:
 			log = log.With("resolvedToIndex", false)

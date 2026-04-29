@@ -5,9 +5,20 @@ import (
 	"html"
 	"html/template"
 	"io"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
+
+// immutableAssetPrefixes lists the rsbuild output directories whose filenames
+// embed a content hash, which means the bytes for a given URL never change.
+// /assets/resources is intentionally excluded because resource files are not
+// content hashed and would serve stale bytes if marked immutable.
+var immutableAssetPrefixes = []string{
+	"/assets/scripts/",
+	"/assets/styles/",
+	"/assets/fonts/",
+}
 
 type indexParams struct {
 	SentryDSN     string
@@ -34,4 +45,17 @@ func buildPreconnectTag(origin string) template.HTML {
 		`<link rel="preconnect" href="%s" crossorigin />`,
 		html.EscapeString(origin),
 	))
+}
+
+// isImmutableAssetPath will return true when the given request path lives in
+// one of the rsbuild output directories that uses content hashing in the
+// filename, and is therefore safe to mark immutable in the Cache-Control
+// header.
+func isImmutableAssetPath(p string) bool {
+	for _, prefix := range immutableAssetPrefixes {
+		if strings.HasPrefix(p, prefix) {
+			return true
+		}
+	}
+	return false
 }
