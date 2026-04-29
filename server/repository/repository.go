@@ -154,6 +154,22 @@ type BaseRepository interface {
 		limit, offset int,
 	) ([]TransactionImportMapping, error)
 
+	GetTransactionImport(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionImportId ID[TransactionImport],
+	) (*TransactionImport, error)
+	CreateTransactionImport(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionImport *TransactionImport,
+	) error
+	UpdateTransactionImport(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionImport *TransactionImport,
+	) error
+
 	CreateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
 	UpdateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
 	RemoveLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) error

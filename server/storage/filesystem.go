@@ -58,7 +58,7 @@ func NewFilesystemStorage(
 
 func (f *filesystemStorage) Store(
 	ctx context.Context,
-	buf io.ReadSeekCloser,
+	buf io.Reader,
 	file models.File,
 ) error {
 	span := crumbs.StartFnTrace(ctx)
