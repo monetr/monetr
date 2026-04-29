@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"path"
 	"time"
@@ -249,6 +250,30 @@ type Sentry struct {
 
 func (s Sentry) ExternalSentryEnabled() bool {
 	return s.Enabled && s.ExternalDSN != ""
+}
+
+// GetExternalOrigin will return the scheme and host (including port if one
+// was specified) of the ExternalDSN. It will return an empty string if
+// external Sentry is not enabled, the DSN is not a valid URL, does not use
+// http or https, or points at localhost. This is used by the UI to decide
+// whether to emit a preconnect link tag pointing at the Sentry ingestion
+// host.
+func (s Sentry) GetExternalOrigin() string {
+	if !s.ExternalSentryEnabled() {
+		return ""
+	}
+	u, err := url.Parse(s.ExternalDSN)
+	if err != nil || u.Host == "" {
+		return ""
+	}
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return ""
+	}
+	switch u.Hostname() {
+	case "localhost", "127.0.0.1", "::1":
+		return ""
+	}
+	return u.Scheme + "://" + u.Host
 }
 
 type Stripe struct {

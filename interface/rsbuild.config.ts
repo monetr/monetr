@@ -71,6 +71,9 @@ export default defineConfig({
       // When we are doing local dev then don't use anything, maybe use an env var in the future but thats it. But
       // for a production build add the go template string in so that the server can provide the DSN.
       SENTRY_DSN: isDevelopment ? `${process.env.MONETR_SENTRY_DSN ?? ''}` : '{{ .SentryDSN }}',
+      // The preconnect tag is built entirely on the server so that we can skip it for localhost or unset external
+      // URLs. In dev there is nothing to preconnect to, so collapse the placeholder to an empty string.
+      PRECONNECT_TAG: isDevelopment ? '' : '{{ .PreconnectTag }}',
     },
     // Dont use the favicon here, favicon is handled by the PWA plugin.
     mountId: 'root',

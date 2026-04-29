@@ -102,7 +102,8 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 
 			log.With("contentType", "text/html").Log(ctx.Request().Context(), logging.LevelTrace, fmt.Sprintf("%s %s", ctx.Request().Method, ctx.Request().URL.Path))
 			return ctx.Render(http.StatusOK, indexFile, indexParams{
-				SentryDSN: c.configuration.Sentry.ExternalDSN,
+				SentryDSN:     c.configuration.Sentry.ExternalDSN,
+				PreconnectTag: buildPreconnectTag(c.configuration.Sentry.GetExternalOrigin()),
 			})
 		case nil:
 			log = log.With("resolvedToIndex", false)
