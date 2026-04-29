@@ -31,7 +31,7 @@
     "@types/node": "^20",
     "@types/react": "18.3.26",
     "@types/react-dom": "18.3.7",
-    "autoprefixer": "10.4.27",
+    "autoprefixer": "10.5.0",
     "postcss": "8.5.10",
     "sass": "1.99.0",
     "satori": "0.19.2",
