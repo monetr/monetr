@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"runtime/debug"
 	"time"
@@ -16,8 +17,6 @@ import (
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
-	"log/slog"
-
 	"github.com/pkg/errors"
 )
 
@@ -202,6 +201,9 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 						return ctx.JSON(actualError.Code, internalError)
 					}
 				default:
+					if body, ok := actualError.Message.(map[string]any); ok {
+						return ctx.JSON(actualError.Code, body)
+					}
 					return ctx.JSON(actualError.Code, map[string]any{
 						"error": actualError.Message,
 					})
@@ -305,6 +307,9 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId/progress", c.getTransactionUploadProgress)
 	billed.PUT("/bank_accounts/:bankAccountId/transactions/:transactionId", c.putTransactions)
 	billed.DELETE("/bank_accounts/:bankAccountId/transactions/:transactionId", c.deleteTransactions)
+	// Mappings
+	billed.GET("/mappings", c.getTransactionImportMappings)
+	billed.POST("/mappings", c.postTransactionImportMapping)
 	// Uploads
 	billed.GET("/files", c.getFiles)
 	// Funding schedules

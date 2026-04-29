@@ -4,7 +4,9 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/monetr/devslog"
 	"github.com/monetr/monetr/server/config"
 )
 
@@ -20,6 +22,19 @@ func NewLoggerWithConfig(configuration config.Logging) *slog.Logger {
 	switch strings.ToLower(configuration.Format) {
 	case "json":
 		inner = slog.NewJSONHandler(os.Stderr, opts)
+	case "pretty":
+		inner = devslog.NewHandler(os.Stderr, &devslog.Options{
+			DedupAttributes:     true,
+			HandlerOptions:      opts,
+			MaxSlicePrintSize:   0,
+			SortKeys:            true,
+			TimeFormat:          time.RFC3339,
+			NewLineAfterLog:     false,
+			StringIndentation:   true,
+			StringerFormatter:   true,
+			NoColor:             false,
+			SameSourceInfoColor: false,
+		})
 	default: // "text"
 		inner = slog.NewTextHandler(os.Stderr, opts)
 	}

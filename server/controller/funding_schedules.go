@@ -66,22 +66,14 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 
 	var fundingSchedule FundingSchedule
 	fundingSchedule.BankAccountId = bankAccountId
-	err = fundingSchedule.UnmarshalRequest(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		fundingSchedule.CreateValidators()...,
+	fundingSchedule, err = parse(
+		c,
+		ctx,
+		&fundingSchedule,
+		validation.Map(fundingSchedule.CreateValidators()...),
 	)
-	switch errors.Cause(err).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case *json.SyntaxError:
-		return c.invalidJsonError(ctx, err)
-	case nil:
-	default:
-		return c.badRequestError(ctx, err, "failed to parse post request")
+	if err != nil {
+		return err
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)

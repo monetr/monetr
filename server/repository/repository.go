@@ -136,6 +136,24 @@ type BaseRepository interface {
 		transactionUpload *TransactionUpload,
 	) error
 
+	CreateTransactionImportMapping(
+		ctx context.Context,
+		mapping *TransactionImportMapping,
+	) error
+	GetTransactionImportMapping(
+		ctx context.Context,
+		mappingId ID[TransactionImportMapping],
+	) (*TransactionImportMapping, error)
+	GetTransactionImportMappings(
+		ctx context.Context,
+		limit, offset int,
+	) ([]TransactionImportMapping, error)
+	GetTransactionImportMappingsBySignature(
+		ctx context.Context,
+		signature string,
+		limit, offset int,
+	) ([]TransactionImportMapping, error)
+
 	CreateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
 	UpdateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
 	RemoveLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) error
