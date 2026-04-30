@@ -79,7 +79,7 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 		// without an endpoint there is nowhere for the reports to go.
 		ctx.Response().Header().Set(
 			"Integrity-Policy-Report-Only",
-			"blocked-destinations=(script style), endpoints=(csp-endpoint)",
+			"blocked-destinations=(script), endpoints=(csp-endpoint)",
 		)
 	}
 
