@@ -105,6 +105,12 @@ func TestApplyContentSecurityPolicy(t *testing.T) {
 		assert.Contains(t, trustedTypes, "trusted-types react")
 		assert.Contains(t, trustedTypes, "report-uri "+testCSPEndpoint)
 		assert.Contains(t, trustedTypes, "report-to csp-endpoint")
+
+		assert.Equal(
+			t,
+			"blocked-destinations=(script style), endpoints=(csp-endpoint)",
+			headers.Get("Integrity-Policy-Report-Only"),
+		)
 	})
 
 	t.Run("no sentry csp endpoint omits reporting headers", func(t *testing.T) {
@@ -133,5 +139,6 @@ func TestApplyContentSecurityPolicy(t *testing.T) {
 		assert.NotContains(t, headers.Get("Content-Security-Policy"), "report-to")
 		assert.NotContains(t, headers.Get("Content-Security-Policy-Report-Only"), "report-uri")
 		assert.NotContains(t, headers.Get("Content-Security-Policy-Report-Only"), "report-to")
+		assert.Empty(t, headers.Get("Integrity-Policy-Report-Only"))
 	})
 }

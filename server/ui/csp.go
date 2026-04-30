@@ -61,6 +61,26 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 			"Reporting-Endpoints",
 			fmt.Sprintf("csp-endpoint=%q", c.configuration.Sentry.SecurityHeaderEndpoint),
 		)
+
+		// Integrity-Policy-Report-Only asks the browser to flag any <script> or
+		// <link rel="stylesheet"> fetch that is missing inline integrity metadata
+		// (the integrity="sha512-..." attribute). The first-party bundle already
+		// emits SRI for every static and dynamic chunk via rsbuild's SRI plugin,
+		// but third-party scripts injected at runtime (Plaid Link, ReCAPTCHA, and
+		// possibly Sentry's lazy integrations) do not carry integrity attributes
+		// and would be blocked under the enforcing variant. Sending this as
+		// report-only lets monetr collect violation reports through the same
+		// csp-endpoint without breaking those integrations, so the data can guide a
+		// future move to the enforcing Integrity-Policy header. See
+		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Integrity-Policy
+		// The value is a structured-field dictionary (RFC 8941); inner lists use
+		// space separators inside the parens and dictionary keys are separated by
+		// commas. Only set when a security header endpoint is configured because
+		// without an endpoint there is nowhere for the reports to go.
+		ctx.Response().Header().Set(
+			"Integrity-Policy-Report-Only",
+			"blocked-destinations=(script style), endpoints=(csp-endpoint)",
+		)
 	}
 
 	ctx.Response().Header().Set("Content-Security-Policy", cspPolicy)
