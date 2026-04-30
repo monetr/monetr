@@ -14,42 +14,26 @@ if(WIN32)
 else()
   set(JS_EXECUTABLE_SUFFIX "")
 endif()
-set(BIOME_EXECUTABLE ${NODE_MODULES_BIN}/biome${JS_EXECUTABLE_SUFFIX})
-set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES_BIN}/email${JS_EXECUTABLE_SUFFIX})
-set(RSBUILD_EXECUTABLE ${NODE_MODULES_BIN}/rsbuild${JS_EXECUTABLE_SUFFIX})
-set(RSPACK_EXECUTABLE ${NODE_MODULES_BIN}/rspack${JS_EXECUTABLE_SUFFIX})
-set(RSPRESS_EXECUTABLE ${NODE_MODULES_BIN}/rspress${JS_EXECUTABLE_SUFFIX})
-set(RSTEST_EXECUTABLE ${NODE_MODULES_BIN}/rstest${JS_EXECUTABLE_SUFFIX})
-set(SPELLCHECKER_EXECUTABLE ${NODE_MODULES_BIN}/spellchecker${JS_EXECUTABLE_SUFFIX})
-set(TSC_EXECUTABLE ${NODE_MODULES_BIN}/tsc${JS_EXECUTABLE_SUFFIX})
+set(BIOME_EXECUTABLE ${PNPM_EXECUTABLE} exec biome)
+set(REACT_EMAIL_EXECUTABLE ${PNPM_EXECUTABLE} exec email)
+set(RSBUILD_EXECUTABLE ${PNPM_EXECUTABLE} exec rsbuild)
+set(RSPACK_EXECUTABLE ${PNPM_EXECUTABLE} exec rspack)
+set(RSPRESS_EXECUTABLE ${PNPM_EXECUTABLE} exec rspress)
+set(RSTEST_EXECUTABLE ${PNPM_EXECUTABLE} exec rstest)
+set(SPELLCHECKER_EXECUTABLE ${PNPM_EXECUTABLE} exec spellchecker)
+set(TSC_EXECUTABLE ${PNPM_EXECUTABLE} exec tsc)
 
 set(PNPM_ARGUMENTS "--frozen-lockfile" "--ignore-scripts")
 
 add_custom_command(
   OUTPUT ${NODE_MODULES}
          ${NODE_MODULES_MARKER}
-         ${BIOME_EXECUTABLE}
-         ${REACT_EMAIL_EXECUTABLE}
-         ${RSBUILD_EXECUTABLE}
-         ${RSPACK_EXECUTABLE}
-         ${RSPRESS_EXECUTABLE}
-         ${RSTEST_EXECUTABLE}
-         ${SPELLCHECKER_EXECUTABLE}
-         ${TSC_EXECUTABLE}
          ${CMAKE_SOURCE_DIR}/docs/node_modules
          ${CMAKE_SOURCE_DIR}/emails/node_modules
          ${CMAKE_SOURCE_DIR}/interface/node_modules
          ${CMAKE_SOURCE_DIR}/stories/node_modules
   BYPRODUCTS ${NODE_MODULES}
              ${NODE_MODULES_MARKER}
-             ${BIOME_EXECUTABLE}
-             ${REACT_EMAIL_EXECUTABLE}
-             ${RSBUILD_EXECUTABLE}
-             ${RSPACK_EXECUTABLE}
-             ${RSPRESS_EXECUTABLE}
-             ${RSTEST_EXECUTABLE}
-             ${SPELLCHECKER_EXECUTABLE}
-             ${TSC_EXECUTABLE}
              ${CMAKE_SOURCE_DIR}/docs/node_modules
              ${CMAKE_SOURCE_DIR}/emails/node_modules
              ${CMAKE_SOURCE_DIR}/interface/node_modules

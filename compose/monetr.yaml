@@ -32,7 +32,7 @@ email:
     enabled: true
     tokenLifetime: 10m0s
 logging:
-  format: text
+  format: pretty
   level: trace
 lunchFlow:
   enabled: true
