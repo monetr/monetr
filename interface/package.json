@@ -69,7 +69,7 @@
     "@rspack/binding-linux-arm64-gnu": "2.0.0",
     "@rspack/binding-linux-x64-gnu": "2.0.0",
     "@rstest/adapter-rsbuild": "0.2.6",
-    "@rstest/core": "0.9.9",
+    "@rstest/core": "0.9.10",
     "@rstest/coverage-istanbul": "0.3.2",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
