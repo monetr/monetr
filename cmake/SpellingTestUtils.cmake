@@ -24,7 +24,7 @@ macro(provision_spelling_tests CURRENT_SOURCE_DIR)
       add_test(
         NAME ${PACKAGE}/${SPEC_NAME}
         COMMAND ${SPELLCHECKER_EXECUTABLE} ${TEST_ARGS} -f ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/docs
       )
       set_tests_properties(${PACKAGE}/${SPEC_NAME} PROPERTIES 
         FIXTURES_REQUIRED node_modules
