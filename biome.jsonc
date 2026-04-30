@@ -6,6 +6,9 @@
     "useIgnoreFile": true,
     "defaultBranch": "origin/main"
   },
+  "files": {
+    "includes": ["**", "!**/*.html"]
+  },
   "formatter": {
     "enabled": true,
     "bracketSpacing": true,
