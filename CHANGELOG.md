@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.13.2](https://github.com/monetr/monetr/compare/v1.13.1...v1.13.2) (2026-04-30)
+
+
+### Dependencies
+
+* **api:** update module github.com/aws/smithy-go to v1.25.1 ([#3120](https://github.com/monetr/monetr/issues/3120)) ([b8dc6bd](https://github.com/monetr/monetr/commit/b8dc6bdd53175db798c9f9641e629cc84349b23c))
+* **api:** update module github.com/getsentry/sentry-go to v0.46.0 ([#3142](https://github.com/monetr/monetr/issues/3142)) ([9a20c0a](https://github.com/monetr/monetr/commit/9a20c0a7909fa1ac3e6efe4dd6f7ccbfbf3763f6))
+* **api:** update module github.com/getsentry/sentry-go to v0.46.1 ([#3153](https://github.com/monetr/monetr/issues/3153)) ([534d145](https://github.com/monetr/monetr/commit/534d14576a95179a04ccc7212d0c5caae72945e2))
+* **ui:** update dependency @rsbuild/core to v2.0.2 ([#3147](https://github.com/monetr/monetr/issues/3147)) ([7cc4fd3](https://github.com/monetr/monetr/commit/7cc4fd34ff388b9725cc4067603e64675ea8bc02))
+* **ui:** update dependency @rsbuild/plugin-sass to v1.5.2 ([#3149](https://github.com/monetr/monetr/issues/3149)) ([570fd98](https://github.com/monetr/monetr/commit/570fd9806c911cc3cdc82b7259556aa06b46edff))
+* **ui:** update dependency @rspress/core to v2.0.10 ([#3151](https://github.com/monetr/monetr/issues/3151)) ([064bdf9](https://github.com/monetr/monetr/commit/064bdf981727a86a3d25977da82c5aa310f04b7c))
+* **ui:** update dependency @rspress/plugin-sitemap to v2.0.10 ([#3154](https://github.com/monetr/monetr/issues/3154)) ([f39f972](https://github.com/monetr/monetr/commit/f39f972b419b1b486cbce394c78a20ff8b120533))
+* **ui:** update dependency @rstest/core to v0.9.10 ([#3156](https://github.com/monetr/monetr/issues/3156)) ([fc4f4de](https://github.com/monetr/monetr/commit/fc4f4dec1bd10c935beeb033636d832cf190bcb3))
+* **ui:** update dependency @sentry/utils to v8.55.2 ([#3150](https://github.com/monetr/monetr/issues/3150)) ([b2f5010](https://github.com/monetr/monetr/commit/b2f501005ac398a439bc8ae55fcbb2fe53938db5))
+* **ui:** update dependency @tanstack/react-query to v5.100.5 ([#3143](https://github.com/monetr/monetr/issues/3143)) ([a2ba74c](https://github.com/monetr/monetr/commit/a2ba74c46c2f1b2f99b5b36368856c7ee4583c21))
+* **ui:** update dependency @tanstack/react-query to v5.100.6 ([#3155](https://github.com/monetr/monetr/issues/3155)) ([cb8fde7](https://github.com/monetr/monetr/commit/cb8fde78e77d828e0e805a41c5a7244b347b0c85))
+* **ui:** update dependency lucide-react to v1.11.0 ([#3144](https://github.com/monetr/monetr/issues/3144)) ([5233e5a](https://github.com/monetr/monetr/commit/5233e5a8adbf251684927f77527a531ae6bd3e2e))
+* **ui:** update rsbuild ([#3158](https://github.com/monetr/monetr/issues/3158)) ([64d1702](https://github.com/monetr/monetr/commit/64d1702dbffb2129ea7a32f3d34ece8eb67f3c36))
+
+
+### Bug Fixes
+
+* **build:** Fixing working directory for spellchecker ([85a3bed](https://github.com/monetr/monetr/commit/85a3bedce500fc616976c142a82b3a19aa116bd0))
+* **build:** No more .npmrc for local development! ([7b27be5](https://github.com/monetr/monetr/commit/7b27be5b0c2939312e2556eff61125c3ecdff17a))
+* **lint:** Fixing lint error from biome ([b65ebc8](https://github.com/monetr/monetr/commit/b65ebc861cf358539df79ea7fa98b0e69693ed75))
+* **ui/api:** Add preconnect tag for sentry if its configured ([3207d12](https://github.com/monetr/monetr/commit/3207d12430f6db182e10cfe4944d309021f06f4e))
+* **ui:** Add integrity reporting header ([c6bd4be](https://github.com/monetr/monetr/commit/c6bd4beade88dd321db8d74d6d3754adbfb970f4))
+* **ui:** Adding `Content-Security-Policy-Report-Only` header ([b116b72](https://github.com/monetr/monetr/commit/b116b7259a77c9959e65e0988842684f2fc159a5))
+* **ui:** Fix autocomplete attributes on login and register ([d860ca4](https://github.com/monetr/monetr/commit/d860ca489ac374a8cc36ecfd2918a8e4307b907d))
+* **ui:** Fix integrity header style error ([3495db6](https://github.com/monetr/monetr/commit/3495db66e4cfd0c5545dee21231701f01109c3ad))
+* **ui:** Fix limit balance icon wrapping incorrectly ([efd24f4](https://github.com/monetr/monetr/commit/efd24f4fd0211bd5102ded159a9670aab8da70ad))
+* **ui:** Hashed UI assets should be marked as immutable in cache ([1de378f](https://github.com/monetr/monetr/commit/1de378f92367dd903f3efc173211118595755b30))
+* **ui:** Improving content security policy for frontend ([031c3e4](https://github.com/monetr/monetr/commit/031c3e42ef2306d2cf3d1cc41b40d1be8b8c3857))
+
+
+### Refactor
+
+* **api:** Laying groundwork for CSV imports ([#3132](https://github.com/monetr/monetr/issues/3132)) ([86e0bc2](https://github.com/monetr/monetr/commit/86e0bc21863f7f89532d109fe9d9b2b4ecaac1e5))
+
 ## [1.13.1](https://github.com/monetr/monetr/compare/v1.13.0...v1.13.1) (2026-04-25)
 
 
