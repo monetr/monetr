@@ -52,7 +52,7 @@
     "react-google-recaptcha": "2.1.0",
     "react-number-format": "5.4.5",
     "react-plaid-link": "4.1.1",
-    "react-qr-code": "2.0.18",
+    "react-qr-code": "2.0.21",
     "react-router-dom": "6.30.3",
     "rrule": "2.8.1",
     "tailwind-merge": "1.14.0",
