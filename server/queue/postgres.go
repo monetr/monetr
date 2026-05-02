@@ -918,6 +918,12 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 		// looking at this specific cron job. Instead we'll sort and get the next
 		// most recent cron job.
 		p.cronSchedules[0].next = nextJob.cron.Next(next.Add(1 * time.Second))
+		// `next` is the scheduled instant the cron should fire at, which can be at
+		// or before `now` when multiple crons share the same instant; the prior
+		// loop iteration consumed one of them and a few ms elapsed before we got
+		// back here, so this one is already due. `lateness` makes that situation
+		// legible (negative when the cron is still in the future, positive when it
+		// is overdue and the timer below will fire immediately).
 		p.log.Log(
 			context.Background(),
 			slog.LevelDebug,
@@ -925,6 +931,7 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 			"queue", nextJob.queue,
 			"next", next,
 			"now", now,
+			"lateness", now.Sub(next),
 		)
 
 		// If the job is in the past then this will cause the timer below to trigger
@@ -941,10 +948,10 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 			promise <- workerSignal
 			return
 		case <-timer.C:
-			// Bump the cron we just did. But use a slightly more future timestamp.
-			// This is to fix a bug where sometimes the cron library seems to be
-			// rounding down? Resulting in a `nextTimestamp` that is slightly in the
-			// past.
+			// We pass cron.Next(next) here, not next itself, because consumeCronMaybe
+			// updates the cron_jobs row's next_run_at to whatever we hand it. After
+			// this iteration the row should point at the occurrence after the one we
+			// are about to fire, not the one we just consumed.
 			log := p.log.With("queue", nextJob.queue)
 			consumedCronJob, err := p.consumeCronMaybe(
 				nextJob.queue,
