@@ -95,8 +95,8 @@ const config: Config = {
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
       gap: {
-        'component': '0.125rem', // gap-0.5
-        'stack': '0.5rem', // gap-2
+        component: '0.125rem', // gap-0.5
+        stack: '0.5rem', // gap-2
       },
       colors: {
         inherit: 'inherit',
@@ -110,7 +110,7 @@ const config: Config = {
         content: {
           DEFAULT: '#d4d4d8', // zinc-200
           placeholder: '#9ca3af', // gray-400
-          disabled: '#6b7280' // gray-500
+          disabled: '#6b7280', // gray-500
         },
         background: {
           subtle: '#27272a', // zinc-800
@@ -153,7 +153,7 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        'monetr': {
+        monetr: {
           brand: {
             DEFAULT: '#4E1AA0',
           },
@@ -215,7 +215,7 @@ const config: Config = {
     },
     aspectRatio: {
       'video-vertical': '9/16',
-      'video': '16/9',
+      video: '16/9',
     },
     animation: {
       'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
