@@ -26,7 +26,7 @@ require (
 	github.com/gomodule/redigo v1.9.3
 	github.com/hashicorp/vault/api v1.23.0
 	github.com/jarcoal/httpmock v1.4.1
-	github.com/labstack/echo/v4 v4.15.1
+	github.com/labstack/echo/v4 v4.15.2
 	github.com/monetr/devslog v0.0.17
 	github.com/monetr/validation v1.0.5
 	github.com/oklog/ulid/v2 v2.1.1
@@ -98,9 +98,9 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/labstack/gommon v0.4.2 // indirect
+	github.com/labstack/gommon v0.5.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
@@ -135,7 +135,7 @@ require (
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/text v0.36.0
-	golang.org/x/time v0.14.0 // indirect
+	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.44.0
 	google.golang.org/protobuf v1.36.8 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
