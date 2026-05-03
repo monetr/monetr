@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.13.3](https://github.com/monetr/monetr/compare/v1.13.2...v1.13.3) (2026-05-03)
+
+
+### Dependencies
+
+* **ui:** update dependency @tanstack/react-query to v5.100.9 ([#3168](https://github.com/monetr/monetr/issues/3168)) ([a94b537](https://github.com/monetr/monetr/commit/a94b5370a3f5cac2801379d150cc3d2135a6287a))
+
+
+### Bug Fixes
+
+* **plaid:** Fixed plaid sync trampling custom names ([93463df](https://github.com/monetr/monetr/commit/93463df11fedcbad41a14b3cb9688556ca7fa76a)), closes [#3167](https://github.com/monetr/monetr/issues/3167)
+* **test:** Reduce noise in frontend tests ([529e8fe](https://github.com/monetr/monetr/commit/529e8fe2af33f0d1d988afd3990581f7a77db777))
+* **ui:** Fix some cancel buttons being treated as destructive ([04266b6](https://github.com/monetr/monetr/commit/04266b6131fd89fc8bd9eb83d83e3bbf64e197d0))
+* **ui:** Fixed transfer modal cancel button being disabled ([e98e2ce](https://github.com/monetr/monetr/commit/e98e2ce7653b3b7a8f439464aa96c3e81486e621))
+
+
+### Refactor
+
+* **test:** Shorten really long test names ([ca712e7](https://github.com/monetr/monetr/commit/ca712e7b1f16e8335f521030502b10170bc0e456))
+
 ## [1.13.2](https://github.com/monetr/monetr/compare/v1.13.1...v1.13.2) (2026-05-02)
 
 
