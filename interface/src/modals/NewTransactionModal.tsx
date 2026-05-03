@@ -185,7 +185,7 @@ function NewTransactionModal(): JSX.Element {
               </Tabs>
             </div>
             <div className='flex justify-end gap-2'>
-              <Button data-testid='close-new-transaction-modal' onClick={modal.remove} variant='destructive'>
+              <Button data-testid='close-new-transaction-modal' onClick={modal.remove} variant='secondary'>
                 Cancel
               </Button>
               <FormButton type='submit' variant='primary'>

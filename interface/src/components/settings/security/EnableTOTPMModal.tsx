@@ -7,6 +7,7 @@ import { Shield } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 import QRCode from 'react-qr-code';
 
+import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
 import FormButton from '@monetr/interface/components/FormButton';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@monetr/interface/components/InputOTP';
@@ -116,9 +117,9 @@ function EnableTOTPModal(): JSX.Element {
               </div>
             </div>
             <div className='flex justify-end gap-2'>
-              <FormButton data-testid='close-change-password-modal' onClick={modal.remove} variant='destructive'>
+              <Button data-testid='close-change-password-modal' onClick={modal.remove} variant='secondary'>
                 Cancel
-              </FormButton>
+              </Button>
               <FormButton type='submit' variant='primary'>
                 <Shield className='mr-1' />
                 Enable TOTP
