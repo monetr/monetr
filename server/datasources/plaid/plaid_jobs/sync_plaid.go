@@ -294,19 +294,16 @@ func (s *syncPlaidJob) syncPlaidTransaction(
 		existingTransaction.Date = existingPlaidTransaction.Date
 	}
 
-	if existingPlaidTransaction.Name != existingTransaction.Name {
+	// Overwrite the original name when the transaction clears.
+	// This seems unintuitive but see
+	// https://github.com/monetr/monetr/issues/1714 for more information.
+	if !existingPlaidTransaction.IsPending && existingTransaction.OriginalName != originalName {
 		changes = append(changes, SyncChange{
-			Field: "name",
-			Old:   existingTransaction.Name,
-			New:   existingPlaidTransaction.Name,
+			Field: "originalName",
+			Old:   existingTransaction.OriginalName,
+			New:   originalName,
 		})
-		existingTransaction.Name = existingPlaidTransaction.Name
-		// Overwrite the original name when the transaction clears.
-		// This seems unintuitive but see
-		// https://github.com/monetr/monetr/issues/1714 for more information.
-		if !existingPlaidTransaction.IsPending {
-			existingTransaction.OriginalName = existingPlaidTransaction.Name
-		}
+		existingTransaction.OriginalName = originalName
 	}
 
 	if existingPlaidTransaction.MerchantName != existingTransaction.MerchantName {
