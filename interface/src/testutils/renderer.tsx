@@ -19,7 +19,10 @@ function testRenderer<Q extends Queries = typeof queries, Container extends Elem
 ): RenderResult<Q, Container> {
   const Wrapper = (props: React.PropsWithChildren<unknown>) => {
     return (
-      <MemoryRouter initialEntries={[options.initialRoute]}>
+      <MemoryRouter
+        future={{ v7_startTransition: false, v7_relativeSplatPath: false }}
+        initialEntries={[options.initialRoute]}
+      >
         <MQueryClient>
           <MSnackbarProvider>
             <TooltipProvider>
