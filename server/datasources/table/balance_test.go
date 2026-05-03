@@ -27,14 +27,14 @@ func TestBalanceSpec_Validate(t *testing.T) {
 	}{
 		// --- Happy paths (at least one branch passes) ---
 		{
-			name: "none with nil Fields",
+			name: "none with nil fields",
 			spec: table.BalanceSpec{
 				Kind: table.BalanceKindNone,
 			},
 			wantErr: "",
 		},
 		{
-			name: "none with empty slice Fields",
+			name: "none with empty fields",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindNone,
 				Fields: []table.FieldRef{},
@@ -42,14 +42,14 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "sum with nil Fields",
+			name: "sum with nil fields",
 			spec: table.BalanceSpec{
 				Kind: table.BalanceKindSum,
 			},
 			wantErr: "",
 		},
 		{
-			name: "sum with empty slice Fields",
+			name: "sum with empty fields",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindSum,
 				Fields: []table.FieldRef{},
@@ -57,7 +57,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "field with single named field",
+			name: "field with named field",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}},
@@ -65,7 +65,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "field with derived row number",
+			name: "field with row number",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumber}},
@@ -73,7 +73,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "field with derived row number per day",
+			name: "field with row per day",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumberPerDay}},
@@ -81,7 +81,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "field with derived row number per day per amount",
+			name: "field with row per day per amount",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumberPerDayPerAmount}},
@@ -94,7 +94,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			// Rejected because none forbids fields (branch 1) and the kind isn't
 			// "field" (branch 2). Previously accepted under the single-branch schema;
 			// its rejection is the primary reason for this rewrite.
-			name: "none with a single field",
+			name: "none with a field",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindNone,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}},
@@ -102,7 +102,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: fields: must be blank. or kind: must equal \"field\".",
 		},
 		{
-			name: "sum with a single field",
+			name: "sum with a field",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindSum,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}},
@@ -128,7 +128,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: fields: must be blank. or fields: the length must be exactly 1; kind: must equal \"field\".",
 		},
 		{
-			name: "field with no Fields",
+			name: "field with no fields",
 			spec: table.BalanceSpec{
 				Kind: table.BalanceKindField,
 			},
@@ -137,7 +137,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 		{
 			// An explicitly empty slice is treated the same as nil for Required
 			// because IsEmpty([]) is true.
-			name: "field with empty slice Fields",
+			name: "field with empty fields",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{},
@@ -152,7 +152,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: kind: cannot be blank. or fields: cannot be blank; kind: must equal \"field\".",
 		},
 		{
-			name: "unknown kind with no Fields",
+			name: "unknown kind, no fields",
 			spec: table.BalanceSpec{
 				Kind: table.BalanceKind("bogus"),
 			},
@@ -161,7 +161,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 		{
 			// Branch 2 accepts the field but rejects the kind, so only the kind error
 			// appears in branch 2. Branch 1 rejects both.
-			name: "unknown kind with a valid single field",
+			name: "unknown kind, valid field",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKind("bogus"),
 				Fields: []table.FieldRef{{Name: "RunningBalance"}},
@@ -171,7 +171,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 
 		// --- Length violation in branch 2 (kind=field with multiple fields) ---
 		{
-			name: "field with two named fields violates length",
+			name: "field with too many fields",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}, {Name: "Amount"}},
@@ -179,7 +179,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: the length must be exactly 1.",
 		},
 		{
-			name: "field with three fields violates length",
+			name: "field with three fields",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}, {Name: "Amount"}, {Name: "Date"}},
@@ -189,7 +189,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 		{
 			// Length(1,1) fails before Unique runs, so the duplicate case reports the
 			// length error rather than the uniqueness error.
-			name: "duplicate fields are caught by length check first",
+			name: "duplicates caught by length check",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}, {Name: "RunningBalance"}},
@@ -199,7 +199,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 
 		// --- Child FieldRef invalid (exercises Each inside branch 2) ---
 		{
-			name: "field with blank child FieldRef",
+			name: "field with blank child",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{}},
@@ -207,7 +207,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: (0: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..).",
 		},
 		{
-			name: "field with child name not in headers",
+			name: "field child not in headers",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{Name: "NotPresent"}},
@@ -215,7 +215,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: (0: input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"RunningBalance\"]. or derivedKind: cannot be blank; name: must be blank..).",
 		},
 		{
-			name: "field with child that sets both name and derived kind",
+			name: "field child with name and derived",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{Name: "RunningBalance", DerivedKind: table.DerivedKindRowNumber}},
@@ -223,7 +223,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: (0: input must be considered valid by: derivedKind: must be blank. or name: must be blank..).",
 		},
 		{
-			name: "field with child that has unknown derived kind",
+			name: "field child with unknown derived",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKind("bogus")}},
@@ -243,7 +243,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: fields: must be blank; kind: cannot be blank. or fields: the length must be exactly 1; kind: must equal \"field\".",
 		},
 		{
-			name: "unknown kind with invalid child",
+			name: "unknown kind, invalid child",
 			spec: table.BalanceSpec{
 				Kind:   table.BalanceKind("bogus"),
 				Fields: []table.FieldRef{{}},

@@ -36,7 +36,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "M/D/YYYY single-digit month and day",
+			name: "M/D/YYYY single-digit",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "M/D/YYYY",
@@ -69,7 +69,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: cannot be blank.",
 		},
 		{
-			name: "two fields violates length",
+			name: "too many fields",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}, {Name: "PostDate"}},
 				Format: "YYYY-MM-DD",
@@ -77,7 +77,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: fields: the length must be exactly 1.",
 		},
 		{
-			name: "field name not in headers",
+			name: "field not in headers",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "NotPresent"}},
 				Format: "YYYY-MM-DD",
@@ -85,7 +85,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: fields: (0: input must be considered valid by: name: must be one of: [\"Date\", \"PostDate\", \"Amount\"]. or derivedKind: cannot be blank; name: must be blank..).",
 		},
 		{
-			name: "field with both name and derived kind set",
+			name: "field with name and derived",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date", DerivedKind: table.DerivedKindRowNumber}},
 				Format: "YYYY-MM-DD",
@@ -93,7 +93,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: fields: (0: input must be considered valid by: derivedKind: must be blank. or name: must be blank..).",
 		},
 		{
-			name: "format is purely junk letters",
+			name: "format of junk letters",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "hello",
@@ -101,7 +101,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: Date format does not include the year.",
 		},
 		{
-			name: "format is only separators",
+			name: "format of only separators",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "---",
@@ -109,7 +109,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: Date format does not include the year.",
 		},
 		{
-			name: "format missing day component",
+			name: "format missing day",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYYY-MM",
@@ -117,7 +117,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: Date format does not include the day of the month.",
 		},
 		{
-			name: "format missing year component",
+			name: "format missing year",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "MM-DD",
@@ -125,7 +125,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: Date format does not include the year.",
 		},
 		{
-			name: "format missing month component",
+			name: "format missing month",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYYY-DD",
@@ -133,7 +133,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: Date format does not include the month.",
 		},
 		{
-			name: "format has two year tokens",
+			name: "format with two year tokens",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYYY-YY-MM-DD",
@@ -143,7 +143,7 @@ func TestDateSpec_Validate(t *testing.T) {
 		{
 			// YYYY-MM-MM is exactly 10 chars, so Length passes and the input drives
 			// the month regex straight into its "exactly one" failure.
-			name: "format has two month tokens",
+			name: "format with two month tokens",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYYY-MM-MM",
@@ -151,7 +151,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: Date format does not include the month.",
 		},
 		{
-			name: "format has two day tokens",
+			name: "format with two day tokens",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYYY-MM-DD-DD",
@@ -159,7 +159,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: Date format does not include the day of the month.",
 		},
 		{
-			name: "format has three Y run (neither YY nor YYYY)",
+			name: "format with three Y run",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYY-MM-DD",
@@ -167,7 +167,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: Date format does not include the year.",
 		},
 		{
-			name: "format has five Y run",
+			name: "format with five Y run",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYYYY-MM-DD",
@@ -175,7 +175,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: Date format does not include the year.",
 		},
 		{
-			name: "format has three M run",
+			name: "format with three M run",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYYY-MMM-DD",
@@ -183,7 +183,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: Date format does not include the month.",
 		},
 		{
-			name: "format has three D run",
+			name: "format with three D run",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYYY-MM-DDD",
@@ -193,7 +193,7 @@ func TestDateSpec_Validate(t *testing.T) {
 		{
 			// 13 chars but the chars whitelist trips before the length rule, so the
 			// foreign letter surfaces as the explicit character-class error.
-			name: "format contains foreign uppercase letter",
+			name: "format with foreign uppercase",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYYY-HH-MM-DD",
@@ -204,7 +204,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			// Lowercase m is not in the whitelist, but the month regex (which runs
 			// before the char whitelist) fires first because [^M]* matches lowercase
 			// runs and never finds an uppercase M.
-			name: "format contains lowercase m instead of uppercase M",
+			name: "format with lowercase m",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYYY-mm-DD",
@@ -213,7 +213,7 @@ func TestDateSpec_Validate(t *testing.T) {
 		},
 		{
 			// Five characters: every Match rule passes but Length (6, 10) fails.
-			name: "format shorter than minimum length",
+			name: "format under min length",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYMMD",
@@ -223,7 +223,7 @@ func TestDateSpec_Validate(t *testing.T) {
 		{
 			// Eleven characters: every Match rule passes but Length (6, 10) fails.
 			// Also covers the "trailing separator" footgun from earlier probing.
-			name: "format longer than maximum length",
+			name: "format over max length",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YYYY-MM-DD.",
@@ -231,7 +231,7 @@ func TestDateSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.DateSpec: format: the length must be between 6 and 10.",
 		},
 		{
-			name: "format shortest valid",
+			name: "format at min valid length",
 			spec: table.DateSpec{
 				Fields: []table.FieldRef{{Name: "Date"}},
 				Format: "YY-M-D",

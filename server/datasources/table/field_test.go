@@ -33,12 +33,12 @@ func TestFieldRef_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name:    "derived row number per day",
+			name:    "derived row per day",
 			ref:     table.FieldRef{DerivedKind: table.DerivedKindRowNumberPerDay},
 			wantErr: "",
 		},
 		{
-			name:    "derived row number per day per amount",
+			name:    "derived row per day per amount",
 			ref:     table.FieldRef{DerivedKind: table.DerivedKindRowNumberPerDayPerAmount},
 			wantErr: "",
 		},
@@ -53,7 +53,7 @@ func TestFieldRef_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank.",
 		},
 		{
-			name:    "both name and derived kind",
+			name:    "both name and derived",
 			ref:     table.FieldRef{Name: "Date", DerivedKind: table.DerivedKindRowNumber},
 			wantErr: "input must be considered valid by: derivedKind: must be blank. or name: must be blank.",
 		},
@@ -63,7 +63,7 @@ func TestFieldRef_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: derivedKind: must be blank; name: cannot be blank. or derivedKind: must be one of: [\"rowNumber\", \"rowNumberPerDay\", \"rowNumberPerDayPerAmount\"].",
 		},
 		{
-			name:    "name set with unknown derived kind",
+			name:    "name with unknown derived",
 			ref:     table.FieldRef{Name: "Date", DerivedKind: table.DerivedKind("bogus")},
 			wantErr: "input must be considered valid by: derivedKind: must be blank. or derivedKind: must be one of: [\"rowNumber\", \"rowNumberPerDay\", \"rowNumberPerDayPerAmount\"]; name: must be blank.",
 		},
@@ -71,18 +71,18 @@ func TestFieldRef_Validate(t *testing.T) {
 			// is.PrintableASCII fires before In(columns), so a Name containing tab or
 			// other control characters is rejected regardless of whether a column
 			// with that exact name is present in the context.
-			name:    "name with tab character",
+			name:    "name with tab",
 			ref:     table.FieldRef{Name: "Dat\te"},
 			wantErr: "input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"]. or derivedKind: cannot be blank; name: must be blank.",
 		},
 		{
-			name:    "name with newline character",
+			name:    "name with newline",
 			ref:     table.FieldRef{Name: "Dat\ne"},
 			wantErr: "input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"]. or derivedKind: cannot be blank; name: must be blank.",
 		},
 		{
 			// Non-ASCII codepoint also fails printable ASCII.
-			name:    "name with non-ASCII character",
+			name:    "name with non-ASCII",
 			ref:     table.FieldRef{Name: "Café"},
 			wantErr: "input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"]. or derivedKind: cannot be blank; name: must be blank.",
 		},

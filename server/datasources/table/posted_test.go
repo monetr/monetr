@@ -23,14 +23,14 @@ func TestPostedSpec_Validate(t *testing.T) {
 		wantErr string
 	}{
 		{
-			name: "named field with empty Posted",
+			name: "named field, empty posted",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 			},
 			wantErr: "",
 		},
 		{
-			name: "named field with short ASCII Posted",
+			name: "named field, short ascii",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: "Posted",
@@ -38,7 +38,7 @@ func TestPostedSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "named field with mid-range ASCII Posted",
+			name: "named field, mid-range ascii",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: strings.Repeat("A", 50),
@@ -46,7 +46,7 @@ func TestPostedSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "named field with Posted at min non-empty length",
+			name: "named field, at min length",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: "A",
@@ -54,7 +54,7 @@ func TestPostedSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "named field with ASCII punctuation Posted",
+			name: "named field, ascii punctuation",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: "posted! @#$%^&*()_+-=",
@@ -62,14 +62,14 @@ func TestPostedSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "derived row number field with empty Posted",
+			name: "row number field, empty posted",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumber}},
 			},
 			wantErr: "",
 		},
 		{
-			name: "derived row number per day field with ASCII Posted",
+			name: "row per day field, ascii",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumberPerDay}},
 				Posted: "POSTED",
@@ -77,7 +77,7 @@ func TestPostedSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "derived row number per day per amount field with ASCII Posted",
+			name: "row per day per amount field, ascii",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumberPerDayPerAmount}},
 				Posted: "Y",
@@ -90,14 +90,14 @@ func TestPostedSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.PostedSpec: fields: cannot be blank.",
 		},
 		{
-			name: "nil Fields with valid Posted",
+			name: "nil fields, valid posted",
 			spec: table.PostedSpec{
 				Posted: "POSTED",
 			},
 			wantErr: "failed to validate *table.PostedSpec: fields: cannot be blank.",
 		},
 		{
-			name: "empty slice Fields with valid Posted",
+			name: "empty fields, valid posted",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{},
 				Posted: "POSTED",
@@ -105,14 +105,14 @@ func TestPostedSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.PostedSpec: fields: cannot be blank.",
 		},
 		{
-			name: "two named fields violates length",
+			name: "two named fields",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}, {Name: "Date"}},
 			},
 			wantErr: "failed to validate *table.PostedSpec: fields: the length must be exactly 1.",
 		},
 		{
-			name: "three fields violates length",
+			name: "three fields",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}, {Name: "Date"}, {Name: "Amount"}},
 			},
@@ -121,42 +121,42 @@ func TestPostedSpec_Validate(t *testing.T) {
 		{
 			// Length(1,1) fails before the Unique rule runs, so the message reports
 			// the length error rather than "duplicate".
-			name: "duplicate fields are caught by length check first",
+			name: "duplicates caught by length check",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}, {Name: "Status"}},
 			},
 			wantErr: "failed to validate *table.PostedSpec: fields: the length must be exactly 1.",
 		},
 		{
-			name: "child field is empty",
+			name: "child field empty",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{}},
 			},
 			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..).",
 		},
 		{
-			name: "child field name not in headers",
+			name: "child field not in headers",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "NotPresent"}},
 			},
 			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: name: must be one of: [\"Date\", \"Status\", \"Description\", \"Amount\"]. or derivedKind: cannot be blank; name: must be blank..).",
 		},
 		{
-			name: "child field has both name and derived kind",
+			name: "child field with name and derived",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status", DerivedKind: table.DerivedKindRowNumber}},
 			},
 			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: derivedKind: must be blank. or name: must be blank..).",
 		},
 		{
-			name: "child field has unknown derived kind",
+			name: "child field with unknown derived",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKind("bogus")}},
 			},
 			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: derivedKind: must be blank; name: cannot be blank. or derivedKind: must be one of: [\"rowNumber\", \"rowNumberPerDay\", \"rowNumberPerDayPerAmount\"]..).",
 		},
 		{
-			name: "non-ASCII Posted",
+			name: "non-ascii posted",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: "Pösted",
@@ -166,7 +166,7 @@ func TestPostedSpec_Validate(t *testing.T) {
 		{
 			// Tab is ASCII (0x09) but not *printable* ASCII (0x20-0x7E). The switch
 			// from is.ASCII to is.PrintableASCII is what rejects it.
-			name: "Posted with tab character",
+			name: "posted with tab",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: "POS\tTED",
@@ -174,7 +174,7 @@ func TestPostedSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.PostedSpec: posted: must contain printable ASCII characters only.",
 		},
 		{
-			name: "Posted with newline character",
+			name: "posted with newline",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: "POS\nTED",
@@ -183,7 +183,7 @@ func TestPostedSpec_Validate(t *testing.T) {
 		},
 		{
 			// DEL (0x7F) is still ASCII but sits outside the printable range.
-			name: "Posted with DEL character",
+			name: "posted with DEL",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: "POSTED\x7f",
@@ -191,7 +191,7 @@ func TestPostedSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.PostedSpec: posted: must contain printable ASCII characters only.",
 		},
 		{
-			name: "Posted at 100-char max length boundary",
+			name: "posted at max length",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: strings.Repeat("A", 100),
@@ -199,7 +199,7 @@ func TestPostedSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "Posted exceeds max length",
+			name: "posted over max length",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status"}},
 				Posted: strings.Repeat("A", 101),
@@ -207,21 +207,21 @@ func TestPostedSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.PostedSpec: posted: the length must be no more than 100.",
 		},
 		{
-			name: "empty Fields with non-ASCII Posted",
+			name: "empty fields, non-ascii posted",
 			spec: table.PostedSpec{
 				Posted: "Pösted",
 			},
 			wantErr: "failed to validate *table.PostedSpec: fields: cannot be blank; posted: must contain printable ASCII characters only.",
 		},
 		{
-			name: "empty Fields with over-length Posted",
+			name: "empty fields, over-length posted",
 			spec: table.PostedSpec{
 				Posted: strings.Repeat("A", 101),
 			},
 			wantErr: "failed to validate *table.PostedSpec: fields: cannot be blank; posted: the length must be no more than 100.",
 		},
 		{
-			name: "invalid child field with non-ASCII Posted",
+			name: "invalid child, non-ascii posted",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{}},
 				Posted: "Pösted",

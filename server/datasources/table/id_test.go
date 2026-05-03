@@ -37,17 +37,17 @@ func TestIDSpec_Validate(t *testing.T) {
 		wantErr string
 	}{
 		{
-			name:    "native with single named field",
+			name:    "native with named field",
 			spec:    table.IDSpec{Kind: table.IDSpecKindNative, Fields: []table.FieldRef{{Name: "Id"}}},
 			wantErr: "",
 		},
 		{
-			name:    "hashed with multiple named fields",
+			name:    "hashed with multiple named",
 			spec:    table.IDSpec{Kind: table.IDSpecKindHashed, Fields: []table.FieldRef{{Name: "Date"}, {Name: "Amount"}}},
 			wantErr: "",
 		},
 		{
-			name:    "hashed with mix of named and derived fields",
+			name:    "hashed with named and derived",
 			spec:    table.IDSpec{Kind: table.IDSpecKindHashed, Fields: []table.FieldRef{{Name: "Date"}, {DerivedKind: table.DerivedKindRowNumber}}},
 			wantErr: "",
 		},
@@ -62,28 +62,28 @@ func TestIDSpec_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.IDSpec: kind: must be one of: [\"native\", \"hashed\"].",
 		},
 		{
-			name:    "valid kind with empty fields",
+			name:    "valid kind, no fields",
 			spec:    table.IDSpec{Kind: table.IDSpecKindNative, Fields: []table.FieldRef{}},
 			wantErr: "failed to validate *table.IDSpec: fields: cannot be blank.",
 		},
 		{
-			name:    "valid kind with blank child field",
+			name:    "valid kind, blank child",
 			spec:    table.IDSpec{Kind: table.IDSpecKindNative, Fields: []table.FieldRef{{}}},
 			wantErr: "failed to validate *table.IDSpec: fields: (0: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..).",
 		},
 		{
-			name:    "valid kind with child field that sets both name and derived kind",
+			name:    "valid kind, child with name and derived",
 			spec:    table.IDSpec{Kind: table.IDSpecKindNative, Fields: []table.FieldRef{{Name: "Id", DerivedKind: table.DerivedKindRowNumber}}},
 			wantErr: "failed to validate *table.IDSpec: fields: (0: input must be considered valid by: derivedKind: must be blank. or name: must be blank..).",
 		},
 		{
-			name:    "valid kind with child name not in headers",
+			name:    "valid kind, child not in headers",
 			spec:    table.IDSpec{Kind: table.IDSpecKindNative, Fields: []table.FieldRef{{Name: "NotPresent"}}},
 			wantErr: "failed to validate *table.IDSpec: fields: (0: input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\", \"F00\", \"F01\", \"F02\", \"F03\", \"F04\", \"F05\", \"F06\", \"F07\", \"F08\", \"F09\", \"F10\", \"F11\", \"F12\", \"F13\", \"F14\", \"F15\", \"F16\", \"F17\", \"F18\", \"F19\", \"F20\"]. or derivedKind: cannot be blank; name: must be blank..).",
 		},
 		{
 			// 20 unique fields; exactly at the Length(1, 20) upper bound.
-			name: "hashed with 20 unique named fields at upper bound",
+			name: "hashed at max field count",
 			spec: table.IDSpec{
 				Kind:   table.IDSpecKindHashed,
 				Fields: makeNamedFields("F%02d", 20),
@@ -92,7 +92,7 @@ func TestIDSpec_Validate(t *testing.T) {
 		},
 		{
 			// 21 unique fields; exceeds the cap.
-			name: "hashed with 21 unique named fields exceeds upper bound",
+			name: "hashed over max field count",
 			spec: table.IDSpec{
 				Kind:   table.IDSpecKindHashed,
 				Fields: makeNamedFields("F%02d", 21),
@@ -112,7 +112,7 @@ func TestIDSpec_Validate(t *testing.T) {
 		},
 		{
 			// Two identical derived FieldRefs fail Unique the same way.
-			name: "hashed with duplicate derived fields",
+			name: "hashed with duplicate derived",
 			spec: table.IDSpec{
 				Kind:   table.IDSpecKindHashed,
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumber}, {DerivedKind: table.DerivedKindRowNumber}},

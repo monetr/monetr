@@ -57,17 +57,17 @@ func TestMapping_Validate(t *testing.T) {
 		wantErr string
 	}{
 		{
-			name:   "minimal valid mapping without optional fields",
+			name:   "minimal valid, no optional fields",
 			mutate: func(*table.Mapping) {},
 		},
 		{
-			name: "valid mapping with Merchant set",
+			name: "valid with merchant",
 			mutate: func(m *table.Mapping) {
 				m.Merchant = &table.FieldRef{Name: "Merchant"}
 			},
 		},
 		{
-			name: "valid mapping with Posted set",
+			name: "valid with posted",
 			mutate: func(m *table.Mapping) {
 				m.Posted = &table.PostedSpec{
 					Fields: []table.FieldRef{{Name: "Status"}},
@@ -76,7 +76,7 @@ func TestMapping_Validate(t *testing.T) {
 			},
 		},
 		{
-			name: "valid mapping with Merchant and Posted both set",
+			name: "valid with merchant and posted",
 			mutate: func(m *table.Mapping) {
 				m.Merchant = &table.FieldRef{Name: "Merchant"}
 				m.Posted = &table.PostedSpec{
@@ -86,7 +86,7 @@ func TestMapping_Validate(t *testing.T) {
 			},
 		},
 		{
-			name: "valid mapping with derived id field",
+			name: "valid with derived id",
 			mutate: func(m *table.Mapping) {
 				m.ID = table.IDSpec{
 					Kind:   table.IDSpecKindHashed,
@@ -95,7 +95,7 @@ func TestMapping_Validate(t *testing.T) {
 			},
 		},
 		{
-			name: "valid mapping with AmountKindType",
+			name: "valid with amount type",
 			mutate: func(m *table.Mapping) {
 				m.Amount = table.AmountSpec{
 					Kind:   table.AmountKindType,
@@ -106,7 +106,7 @@ func TestMapping_Validate(t *testing.T) {
 			},
 		},
 		{
-			name: "valid mapping with AmountKindColumn",
+			name: "valid with amount column",
 			mutate: func(m *table.Mapping) {
 				m.Amount = table.AmountSpec{
 					Kind:   table.AmountKindColumn,
@@ -115,7 +115,7 @@ func TestMapping_Validate(t *testing.T) {
 			},
 		},
 		{
-			name: "valid mapping with Balance derived from a field",
+			name: "valid with balance field",
 			mutate: func(m *table.Mapping) {
 				m.Balance = table.BalanceSpec{
 					Kind:   table.BalanceKindField,
@@ -124,12 +124,12 @@ func TestMapping_Validate(t *testing.T) {
 			},
 		},
 		{
-			name:    "empty mapping surfaces every required sub-spec error",
+			name:    "empty mapping, all sub-spec errors",
 			mutate:  func(m *table.Mapping) { *m = table.Mapping{} },
 			wantErr: "failed to validate *table.Mapping: amount: input must be considered valid by: fields: cannot be blank; kind: must equal \"sign\". or credit: cannot be blank; debit: cannot be blank; fields: cannot be blank; kind: must equal \"type\". or fields: cannot be blank; kind: must equal \"column\".; balance: input must be considered valid by: kind: cannot be blank. or fields: cannot be blank; kind: must equal \"field\".; date: failed to validate *table.DateSpec: fields: cannot be blank; format: cannot be blank.; headers: cannot be blank; id: failed to validate *table.IDSpec: fields: cannot be blank; kind: cannot be blank.; memo: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..",
 		},
 		{
-			name: "invalid ID kind",
+			name: "invalid id kind",
 			mutate: func(m *table.Mapping) {
 				m.ID = table.IDSpec{
 					Kind:   table.IDSpecKind("bogus"),
@@ -139,7 +139,7 @@ func TestMapping_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.Mapping: id: failed to validate *table.IDSpec: kind: must be one of: [\"native\", \"hashed\"]..",
 		},
 		{
-			name: "invalid Amount kind",
+			name: "invalid amount kind",
 			mutate: func(m *table.Mapping) {
 				m.Amount = table.AmountSpec{
 					Kind:   table.AmountKind("bogus"),
@@ -149,21 +149,21 @@ func TestMapping_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.Mapping: amount: input must be considered valid by: kind: must equal \"sign\". or credit: cannot be blank; debit: cannot be blank; fields: the length must be exactly 2; kind: must equal \"type\". or fields: the length must be exactly 2; kind: must equal \"column\"..",
 		},
 		{
-			name: "Memo name not in columns",
+			name: "memo not in columns",
 			mutate: func(m *table.Mapping) {
 				m.Memo = table.FieldRef{Name: "NotPresent"}
 			},
 			wantErr: "failed to validate *table.Mapping: memo: input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\", \"TransType\", \"DebitAmt\", \"CreditAmt\", \"Merchant\", \"Status\", \"RunningBalance\"]. or derivedKind: cannot be blank; name: must be blank..",
 		},
 		{
-			name: "Merchant name not in columns",
+			name: "merchant not in columns",
 			mutate: func(m *table.Mapping) {
 				m.Merchant = &table.FieldRef{Name: "NotPresent"}
 			},
 			wantErr: "failed to validate *table.Mapping: merchant: input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\", \"TransType\", \"DebitAmt\", \"CreditAmt\", \"Merchant\", \"Status\", \"RunningBalance\"]. or derivedKind: cannot be blank; name: must be blank..",
 		},
 		{
-			name: "invalid Date format",
+			name: "invalid date format",
 			mutate: func(m *table.Mapping) {
 				m.Date = table.DateSpec{
 					Fields: []table.FieldRef{{Name: "Date"}},
@@ -173,21 +173,21 @@ func TestMapping_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.Mapping: date: failed to validate *table.DateSpec: format: Date format does not include the year..",
 		},
 		{
-			name: "invalid Posted (empty PostedSpec)",
+			name: "invalid posted, empty spec",
 			mutate: func(m *table.Mapping) {
 				m.Posted = &table.PostedSpec{}
 			},
 			wantErr: "failed to validate *table.Mapping: posted: failed to validate *table.PostedSpec: fields: cannot be blank..",
 		},
 		{
-			name: "invalid Balance kind",
+			name: "invalid balance kind",
 			mutate: func(m *table.Mapping) {
 				m.Balance = table.BalanceSpec{Kind: table.BalanceKind("bogus")}
 			},
 			wantErr: "failed to validate *table.Mapping: balance: input must be considered valid by: kind: must be one of: [\"none\", \"sum\"]. or fields: cannot be blank; kind: must equal \"field\"..",
 		},
 		{
-			name: "invalid ID combined with invalid Balance",
+			name: "invalid id and balance",
 			mutate: func(m *table.Mapping) {
 				m.ID = table.IDSpec{
 					Kind:   table.IDSpecKind("bogus"),
@@ -198,14 +198,14 @@ func TestMapping_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.Mapping: balance: input must be considered valid by: kind: must be one of: [\"none\", \"sum\"]. or fields: cannot be blank; kind: must equal \"field\".; id: failed to validate *table.IDSpec: kind: must be one of: [\"native\", \"hashed\"]..",
 		},
 		{
-			name: "Merchant is invalid but Posted nil is still accepted",
+			name: "invalid merchant, posted nil ok",
 			mutate: func(m *table.Mapping) {
 				m.Merchant = &table.FieldRef{}
 			},
 			wantErr: "failed to validate *table.Mapping: merchant: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..",
 		},
 		{
-			name: "Posted is invalid but Merchant nil is still accepted",
+			name: "invalid posted, merchant nil ok",
 			mutate: func(m *table.Mapping) {
 				m.Posted = &table.PostedSpec{
 					Fields: []table.FieldRef{{Name: "Status"}},
@@ -256,7 +256,7 @@ func TestMapping_Validate_JSONShape(t *testing.T) {
 		}
 	}
 
-	t.Run("empty mapping surfaces oneOf for union sub-specs and flat objects for the rest", func(t *testing.T) {
+	t.Run("empty mapping json shape", func(t *testing.T) {
 		m := table.Mapping{}
 		err := m.Validate(t.Context())
 		require.Error(t, err)
@@ -292,7 +292,7 @@ func TestMapping_Validate_JSONShape(t *testing.T) {
 		}, decoded.ID, "id is not a union, serializes as a flat object")
 	})
 
-	t.Run("partial amount: only the sign variant has fields-only error, type and column flag the kind constraint", func(t *testing.T) {
+	t.Run("partial amount union shape", func(t *testing.T) {
 		// User submits kind=sign with two fields. Variant 1 (sign) only fails
 		// the length-1 check; variants 2 and 3 fail their kind constraint. The
 		// per-variant errors implicitly identify which one was being attempted.
@@ -321,7 +321,7 @@ func TestMapping_Validate_JSONShape(t *testing.T) {
 		assert.Equal(t, `must equal "column"`, decoded.Amount.OneOf[2]["kind"], "column variant: kind fails")
 	})
 
-	t.Run("nested union: a FieldRef union nested inside an AmountSpec union recurses correctly", func(t *testing.T) {
+	t.Run("nested union recurses", func(t *testing.T) {
 		// A FieldRef with neither name nor derivedKind sits inside the sign
 		// variant's fields[0]. The inner FieldRef.Validate returns its own
 		// OneOfError, which must serialize as a nested {"oneOf": [...]} under

@@ -24,7 +24,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 		wantErr string
 	}{
 		{
-			name: "Sign with one field, Invert false",
+			name: "sign with one field",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindSign,
 				Invert: false,
@@ -33,7 +33,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "Sign with one field, Invert true",
+			name: "sign with one field, invert",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindSign,
 				Invert: true,
@@ -42,7 +42,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "Type with two fields and credit/debit, Invert false",
+			name: "type with credit and debit",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Invert: false,
@@ -53,7 +53,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "Type with two fields and credit/debit, Invert true",
+			name: "type with credit and debit, invert",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Invert: true,
@@ -64,7 +64,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "Column with two fields, Invert false",
+			name: "column with two fields",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindColumn,
 				Invert: false,
@@ -73,7 +73,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "Column with two fields, Invert true",
+			name: "column with two fields, invert",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindColumn,
 				Invert: true,
@@ -90,12 +90,12 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: fields: cannot be blank; kind: must equal \"sign\". or credit: cannot be blank; debit: cannot be blank; fields: cannot be blank; kind: must equal \"type\". or fields: cannot be blank; kind: must equal \"column\".",
 		},
 		{
-			name:    "unknown kind with no fields",
+			name:    "unknown kind, no fields",
 			spec:    table.AmountSpec{Kind: table.AmountKind("bogus")},
 			wantErr: "input must be considered valid by: fields: cannot be blank; kind: must equal \"sign\". or credit: cannot be blank; debit: cannot be blank; fields: cannot be blank; kind: must equal \"type\". or fields: cannot be blank; kind: must equal \"column\".",
 		},
 		{
-			name: "Sign with two fields violates length",
+			name: "sign with too many fields",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindSign,
 				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "TransType"}},
@@ -103,7 +103,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: fields: the length must be exactly 1. or credit: cannot be blank; debit: cannot be blank; kind: must equal \"type\". or kind: must equal \"column\".",
 		},
 		{
-			name: "Sign with Credit set",
+			name: "sign with credit set",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindSign,
 				Fields: []table.FieldRef{{Name: "Amount"}},
@@ -112,7 +112,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified. or debit: cannot be blank; fields: the length must be exactly 2; kind: must equal \"type\". or credit: when kind is \"column\" credit cannot be specified; fields: the length must be exactly 2; kind: must equal \"column\".",
 		},
 		{
-			name: "Sign with field name not in headers",
+			name: "sign field not in headers",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindSign,
 				Fields: []table.FieldRef{{Name: "NotPresent"}},
@@ -120,7 +120,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: fields: (0: input must be considered valid by: name: must be one of: [\"Date\", \"Amount\", \"DebitAmt\", \"CreditAmt\", \"TransType\"]. or derivedKind: cannot be blank; name: must be blank..). or credit: cannot be blank; debit: cannot be blank; fields: (0: input must be considered valid by: name: must be one of: [\"Date\", \"Amount\", \"DebitAmt\", \"CreditAmt\", \"TransType\"]. or derivedKind: cannot be blank; name: must be blank..); kind: must equal \"type\". or fields: (0: input must be considered valid by: name: must be one of: [\"Date\", \"Amount\", \"DebitAmt\", \"CreditAmt\", \"TransType\"]. or derivedKind: cannot be blank; name: must be blank..); kind: must equal \"column\".",
 		},
 		{
-			name: "Type missing Credit",
+			name: "type missing credit",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "TransType"}},
@@ -129,7 +129,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: debit: when kind is \"sign\" debit cannot be specified; fields: the length must be exactly 1; kind: must equal \"sign\". or credit: cannot be blank. or debit: when kind is \"column\" debit cannot be specified; kind: must equal \"column\".",
 		},
 		{
-			name: "Type with only one field violates length",
+			name: "type with too few fields",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Fields: []table.FieldRef{{Name: "Amount"}},
@@ -139,7 +139,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified; debit: when kind is \"sign\" debit cannot be specified; kind: must equal \"sign\". or fields: the length must be exactly 2. or credit: when kind is \"column\" credit cannot be specified; debit: when kind is \"column\" debit cannot be specified; fields: the length must be exactly 2; kind: must equal \"column\".",
 		},
 		{
-			name: "Column with Credit set",
+			name: "column with credit set",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindColumn,
 				Fields: []table.FieldRef{{Name: "DebitAmt"}, {Name: "CreditAmt"}},
@@ -148,7 +148,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified; fields: the length must be exactly 1; kind: must equal \"sign\". or debit: cannot be blank; kind: must equal \"type\". or credit: when kind is \"column\" credit cannot be specified.",
 		},
 		{
-			name: "Type with duplicate fields",
+			name: "type with duplicate fields",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "Amount"}},
@@ -158,7 +158,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified; debit: when kind is \"sign\" debit cannot be specified; fields: the length must be exactly 1; kind: must equal \"sign\". or fields: fields[1] is a duplicate of an earlier entry. or credit: when kind is \"column\" credit cannot be specified; debit: when kind is \"column\" debit cannot be specified; fields: fields[1] is a duplicate of an earlier entry; kind: must equal \"column\".",
 		},
 		{
-			name: "Column with duplicate fields",
+			name: "column with duplicate fields",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindColumn,
 				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "Amount"}},
@@ -171,7 +171,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			// In allows empty values. After Required was added to the Column branch's
 			// Kind rule, all three branches now reject an empty Kind even when the
 			// rest of the shape happens to look like a valid Column spec.
-			name: "empty Kind with valid Column-shaped Fields",
+			name: "empty kind, column-shaped fields",
 			spec: table.AmountSpec{
 				Fields: []table.FieldRef{{Name: "DebitAmt"}, {Name: "CreditAmt"}},
 			},
@@ -179,7 +179,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 		},
 		{
 			// Credit at exactly 100 chars; upper boundary of Length(1, 100).
-			name: "Type with Credit at max length boundary",
+			name: "type credit at max length",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "TransType"}},
@@ -190,7 +190,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 		},
 		{
 			// Debit at exactly 100 chars; upper boundary of Length(1, 100).
-			name: "Type with Debit at max length boundary",
+			name: "type debit at max length",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "TransType"}},
@@ -200,7 +200,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name: "Type with Credit exceeds max length",
+			name: "type credit over max length",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "TransType"}},
@@ -210,7 +210,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified; debit: when kind is \"sign\" debit cannot be specified; fields: the length must be exactly 1; kind: must equal \"sign\". or credit: the length must be between 1 and 100. or credit: when kind is \"column\" credit cannot be specified; debit: when kind is \"column\" debit cannot be specified; kind: must equal \"column\".",
 		},
 		{
-			name: "Type with Debit exceeds max length",
+			name: "type debit over max length",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "TransType"}},
@@ -222,7 +222,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 		{
 			// Tab is ASCII but not printable ASCII; the recent switch from is.ASCII
 			// to is.PrintableASCII on Credit is what catches this.
-			name: "Type with Credit containing tab",
+			name: "type credit with tab",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "TransType"}},
@@ -232,7 +232,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified; debit: when kind is \"sign\" debit cannot be specified; fields: the length must be exactly 1; kind: must equal \"sign\". or credit: must contain printable ASCII characters only. or credit: when kind is \"column\" credit cannot be specified; debit: when kind is \"column\" debit cannot be specified; kind: must equal \"column\".",
 		},
 		{
-			name: "Type with Debit containing non-ASCII",
+			name: "type debit with non-ASCII",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "TransType"}},
@@ -245,7 +245,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 			// Type-branch Each coverage: second field is a blank FieldRef (first is
 			// valid). Every other rule in the Type branch passes; Each surfaces the
 			// invalid child via index 1.
-			name: "Type with second child blank FieldRef",
+			name: "type with blank child",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Fields: []table.FieldRef{{Name: "Amount"}, {}},
@@ -257,7 +257,7 @@ func TestAmountSpec_Validate(t *testing.T) {
 		{
 			// Column-branch Each coverage: first field references a column
 			// that isn't in the context.
-			name: "Column with first child name not in headers",
+			name: "column field not in headers",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindColumn,
 				Fields: []table.FieldRef{{Name: "NotPresent"}, {Name: "CreditAmt"}},
