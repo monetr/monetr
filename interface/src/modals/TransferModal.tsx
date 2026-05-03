@@ -5,6 +5,7 @@ import { ArrowUpDown } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 import type { ApiError } from '@monetr/interface/api/client';
+import { Button } from '@monetr/interface/components/Button';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
 import type { LabelDecoratorProps } from '@monetr/interface/components/Label';
@@ -148,9 +149,9 @@ function TransferModal(props: TransferModalProps): JSX.Element {
           />
         </div>
         <div className='flex justify-end gap-2'>
-          <FormButton data-testid='close-new-expense-modal' onClick={modal.remove} variant='secondary'>
+          <Button data-testid='close-new-expense-modal' onClick={modal.remove} variant='secondary'>
             Cancel
-          </FormButton>
+          </Button>
           <FormButton type='submit' variant='primary'>
             Transfer
           </FormButton>
