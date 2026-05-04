@@ -25,11 +25,11 @@ var testDelimeters = []rune{
 // parsed.
 func PeekHeader(
 	reader io.Reader,
-) ([]string, io.Reader, error) {
+) (delimiter rune, headers []string, output io.Reader, err error) {
 	buffer := bufio.NewReaderSize(reader, peekSize)
 	preview, err := buffer.Peek(peekSize)
 	if err != nil && err != io.EOF {
-		return nil, nil, errors.WithStack(err)
+		return ',', nil, nil, errors.WithStack(err)
 	}
 
 	for _, delimeter := range testDelimeters {
@@ -48,9 +48,9 @@ func PeekHeader(
 		// - Amount
 		// - Description
 		if len(header) >= 3 {
-			return header, buffer, nil
+			return delimeter, header, buffer, nil
 		}
 	}
 
-	return nil, nil, errors.New("failed to determine CSV headers")
+	return ',', nil, nil, errors.New("failed to determine CSV headers")
 }

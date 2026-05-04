@@ -16,6 +16,10 @@ const (
 func GetConfig(t *testing.T) config.Configuration {
 	return config.Configuration{
 		AllowSignUp: true,
+		Features: config.Features{
+			// Enabled for test suites and local dev
+			TransactionImports: true,
+		},
 		Server: config.Server{
 			ExternalURL: "https://monetr.local",
 			Cookies: config.Cookies{

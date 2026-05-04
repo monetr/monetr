@@ -17,8 +17,9 @@ func TestPeekHeader(t *testing.T) {
 			"2026-01-15,COFFEE SHOP,-4.50,1234.56\n" +
 			"2026-01-16,GAS STATION,-45.00,1189.56\n"
 
-		headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		delimeter, headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
 		require.NoError(t, err, "must parse a comma-delimited CSV")
+		assert.Equal(t, ',', delimeter)
 		assert.Equal(t, []string{"Date", "Description", "Amount", "Balance"}, headers, "must extract all four headers")
 
 		contents, err := io.ReadAll(reader)
@@ -31,8 +32,9 @@ func TestPeekHeader(t *testing.T) {
 			"2026-01-15|GROCERY|-42.10\n" +
 			"2026-01-16|RESTAURANT|-23.45\n"
 
-		headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		delimeter, headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
 		require.NoError(t, err, "must parse a pipe-delimited CSV")
+		assert.Equal(t, '|', delimeter)
 		assert.Equal(t, []string{"Date", "Description", "Amount"}, headers, "must extract pipe-delimited headers")
 
 		contents, err := io.ReadAll(reader)
@@ -45,7 +47,8 @@ func TestPeekHeader(t *testing.T) {
 			"2026-01-15\tUTIL\t-99.00\tBills\n" +
 			"2026-01-16\tPAYCHECK\t2000.00\tIncome\n"
 
-		headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		delimeter, headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		assert.Equal(t, '\t', delimeter)
 		require.NoError(t, err, "must parse a tab-delimited CSV")
 		assert.Equal(t, []string{"Date", "Description", "Amount", "Category"}, headers, "must extract tab-delimited headers")
 
@@ -58,7 +61,8 @@ func TestPeekHeader(t *testing.T) {
 		input := "Date, Description, Amount\n" +
 			"2026-01-15, COFFEE, -4.50\n"
 
-		headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		delimeter, headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		assert.Equal(t, ',', delimeter)
 		require.NoError(t, err, "must parse CSV with leading spaces")
 		assert.Equal(t, []string{"Date", "Description", "Amount"}, headers, "leading spaces must be trimmed from headers")
 
@@ -71,7 +75,8 @@ func TestPeekHeader(t *testing.T) {
 		input := "Date,Description,Amount,Balance\n" +
 			"2026-01-15,\"PAYROLL, INC\",\"1,234.56\",\"10,000.00\"\n"
 
-		headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		delimeter, headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		assert.Equal(t, ',', delimeter)
 		require.NoError(t, err, "must parse CSV with quoted comma fields")
 		assert.Equal(t, []string{"Date", "Description", "Amount", "Balance"}, headers, "headers must be extracted despite quoted commas in body rows")
 
@@ -86,7 +91,8 @@ func TestPeekHeader(t *testing.T) {
 		// parses into a valid header row.
 		input := "Date,Description,Amount\n2026-01-15,COFFEE,-4.50\n"
 
-		headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		delimeter, headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		assert.Equal(t, ',', delimeter)
 		require.NoError(t, err, "short CSV must still parse")
 		assert.Equal(t, []string{"Date", "Description", "Amount"}, headers, "short-input headers must be extracted")
 
@@ -108,7 +114,8 @@ func TestPeekHeader(t *testing.T) {
 		input := b.String()
 		require.Greater(t, len(input), 1000, "test setup: input must exceed the 1000-byte peek window")
 
-		headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		delimeter, headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(input)))
+		assert.Equal(t, ',', delimeter)
 		require.NoError(t, err, "large CSV must parse")
 		assert.Equal(t, []string{"Date", "Description", "Amount"}, headers, "headers must be read from the first peek window")
 
@@ -135,7 +142,8 @@ func TestPeekHeader(t *testing.T) {
 		for _, tc := range invalidCases {
 			tc := tc
 			t.Run("invalid/"+tc.name, func(t *testing.T) {
-				headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(tc.input)))
+				delimeter, headers, reader, err := csv.PeekHeader(bytes.NewReader([]byte(tc.input)))
+				assert.Equal(t, ',', delimeter)
 				assert.Error(t, err, "must reject %q as non-CSV", tc.name)
 				assert.Nil(t, headers, "headers must be nil on failure")
 				assert.Nil(t, reader, "reader must be nil on failure")

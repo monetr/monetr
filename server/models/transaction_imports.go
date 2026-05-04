@@ -48,6 +48,7 @@ type TransactionImport struct {
 	TransactionImportMappingId *ID[TransactionImportMapping] `json:"transactionImportMappingId" pg:"transaction_import_mapping_id"`
 	TransactionImportMapping   *TransactionImportMapping     `json:"transactionImportMapping,omitempty" pg:"rel:has-one"`
 	Headers                    []string                      `json:"headers" pg:"headers,notnull,type:'text[]'"`
+	Delimeter                  string                        `json:"delimeter" pg:"delimeter,notnull"`
 	Status                     TransactionImportStatus       `json:"status" pg:"status,notnull"`
 	CreatedAt                  time.Time                     `json:"createdAt" pg:"created_at,notnull"`
 	UpdatedAt                  time.Time                     `json:"updatedAt" pg:"updated_at,notnull"`

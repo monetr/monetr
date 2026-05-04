@@ -1,9 +1,15 @@
+-- Since this API was exposed but wasn't used for anything we should just drop
+-- everything from this table during this migration. We will likely do this
+-- again for the final release.
+DELETE FROM "transaction_import_mappings";
+
 CREATE TABLE "transaction_imports" (
   "transaction_import_id"         VARCHAR(32) NOT NULL,
   "account_id"                    VARCHAR(32) NOT NULL,
   "bank_account_id"               VARCHAR(32) NOT NULL,
   "file_id"                       VARCHAR(32) NOT NULL,
   "transaction_import_mapping_id" VARCHAR(32),
+  "delimeter"                     VARCHAR(1)  NOT NULL,
   "headers"                       TEXT[]      NOT NULL,
   "status"                        TEXT        NOT NULL,
   "created_by"                    VARCHAR(32) NOT NULL,

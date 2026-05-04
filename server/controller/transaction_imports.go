@@ -62,7 +62,7 @@ func (c *Controller) postTransactionImport(ctx echo.Context) error {
 
 		// TODO We only support CSV here, so we need to be able to attempt to parse
 		// the file before we store it.
-		headers, buffer, err := csv.PeekHeader(reader)
+		delimeter, headers, buffer, err := csv.PeekHeader(reader)
 		if err != nil {
 			return c.badRequestError(ctx, err, "Failed to parse CSV file")
 		}
@@ -94,6 +94,7 @@ func (c *Controller) postTransactionImport(ctx echo.Context) error {
 		}
 
 		transactionImport.Headers = headers
+		transactionImport.Delimeter = string(delimeter)
 		transactionImport.FileId = file.FileId
 		transactionImport.File = &file
 	}
