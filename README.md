@@ -14,7 +14,7 @@
 monetr is a budgeting application that aims to make it easier for people to budget around recurring expenses. While
 making it absolutely clear how much you have left over to budget or use for other unplanned spending. It is based off of
 the now defunct [Simple](https://web.archive.org/web/20201128231953/https://www.simple.com/). It is also completely free
-to [self-host](https://monetr.app/documentation/install/).
+to [self-host](https://monetr.app/documentation/install).
 
 ![monetr Screenshot](https://github.com/user-attachments/assets/d80847f7-8a99-4813-b15a-29094f5646ad)
 
@@ -25,7 +25,7 @@ In order to run monetr locally you will need sandbox credentials for Plaid, you 
 following command in the monetr project directory to start a local environment.
 
 To start working on monetr, you can follow the [Local
-Development](https://monetr.app/documentation/development/local_development/) documentation. Or if you want to just dive
+Development](https://monetr.app/documentation/development/local_development) documentation. Or if you want to just dive
 in you can run the following command in the project directory:
 
 ```shell
