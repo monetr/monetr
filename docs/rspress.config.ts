@@ -83,6 +83,12 @@ export default defineConfig({
             localIdentName: '[hash:base64:6]',
           },
     },
+    security: {
+      sri: {
+        enable: !isDevelopment,
+        algorithm: 'sha512',
+      },
+    },
     resolve: {
       alias: {
         '@monetr/docs': path.resolve(__dirname, '.'),
