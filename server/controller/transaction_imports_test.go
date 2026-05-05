@@ -60,6 +60,7 @@ func TestPostTransactionImport(t *testing.T) {
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.bankAccountId").String().IsEqual(bank.BankAccountId.String())
 		response.JSON().Path("$.fileId").String().NotEmpty()
+		response.JSON().Path("$.delimeter").IsEqual(",")
 		response.JSON().Path("$.headers").Array().IsEqual([]string{"Date", "Description", "Amount", "Balance"})
 	})
 
@@ -529,5 +530,282 @@ func TestPatchTransactionImport(t *testing.T) {
 		response.JSON().Path("$.status").String().IsEqual("pending-preview")
 	})
 
-	// TODO Add more tests for invalid paths here
+	t.Run("invalid status transition", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Seed data
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		csvData := []byte(
+			"Date,Description,Amount\n" +
+				"2026-01-15,COFFEE SHOP,-4.50\n" +
+				"2026-01-16,GAS STATION,-45.00\n",
+		)
+
+		// The POST upload triggers exactly one Store call. We don't care about the
+		// file contents at this layer, just that the upload path runs.
+		app.Storage.EXPECT().
+			Store(
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(1).
+			Return(nil)
+
+		var transactionImportId ID[TransactionImport]
+		{ // Upload the CSV. This creates the import in mapping status.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions/import").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithMultipart().
+				WithFileBytes("data", "transactions.csv", csvData).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.status").String().IsEqual("mapping")
+			transactionImportId = ID[TransactionImport](response.JSON().Path("$.transactionImportId").String().Raw())
+		}
+
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(csv_jobs.PreviewCSVImport),
+				gomock.Any(),
+				testutils.NewGenericMatcher(func(args csv_jobs.PreviewCSVImportArguments) bool {
+					return myownsanity.Every(
+						assert.EqualValues(t, bank.AccountId, args.AccountId, "Account ID should match"),
+						assert.EqualValues(t, bank.BankAccountId, args.BankAccountId, "Bank Account ID should match"),
+						assert.EqualValues(t, transactionImportId, args.TransactionImportId, "Transaction Import ID should match"),
+					)
+				}),
+			).
+			Times(0).
+			Return(nil)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/import/{transactionImportId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionImportId", transactionImportId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"status": TransactionImportStatusPendingProcessing,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("Cannot move a transaction import to any status other than pending preview from mapping")
+	})
+
+	t.Run("no cross account patching", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Seed data
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		csvData := []byte(
+			"Date,Description,Amount\n" +
+				"2026-01-15,COFFEE SHOP,-4.50\n" +
+				"2026-01-16,GAS STATION,-45.00\n",
+		)
+
+		// The POST upload triggers exactly one Store call. We don't care about the
+		// file contents at this layer, just that the upload path runs.
+		app.Storage.EXPECT().
+			Store(
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(1).
+			Return(nil)
+
+		var transactionImportId ID[TransactionImport]
+		{ // Upload the CSV. This creates the import in mapping status.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions/import").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithMultipart().
+				WithFileBytes("data", "transactions.csv", csvData).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.status").String().IsEqual("mapping")
+			transactionImportId = ID[TransactionImport](response.JSON().Path("$.transactionImportId").String().Raw())
+		}
+
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(csv_jobs.PreviewCSVImport),
+				gomock.Any(),
+				testutils.NewGenericMatcher(func(args csv_jobs.PreviewCSVImportArguments) bool {
+					return myownsanity.Every(
+						assert.EqualValues(t, bank.AccountId, args.AccountId, "Account ID should match"),
+						assert.EqualValues(t, bank.BankAccountId, args.BankAccountId, "Bank Account ID should match"),
+						assert.EqualValues(t, transactionImportId, args.TransactionImportId, "Transaction Import ID should match"),
+					)
+				}),
+			).
+			Times(0).
+			Return(nil)
+
+		{
+			// Create another use and try to patch the original import
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			token = GivenILogin(t, e, user.Login.Email, password)
+
+			// Create the mapping under the new user
+			var mappingId ID[TransactionImportMapping]
+			{
+				response := e.POST("/api/mappings").
+					WithCookie(TestCookieName, token).
+					WithJSON(map[string]any{
+						"mapping": map[string]any{
+							"id": map[string]any{
+								"kind": "hashed",
+								"fields": []any{
+									map[string]any{
+										"name": "Date",
+									},
+									map[string]any{
+										"name": "Description",
+									},
+									map[string]any{
+										"name": "Amount",
+									},
+								},
+							},
+							"amount": map[string]any{
+								"kind": "sign",
+								"fields": []any{
+									map[string]any{
+										"name": "Amount",
+									},
+								},
+							},
+							"memo": map[string]any{
+								"name": "Description",
+							},
+							"date": map[string]any{
+								"fields": []any{
+									map[string]any{
+										"name": "Date",
+									},
+								},
+								"format": "YYYY-MM-DD",
+							},
+							"balance": map[string]any{
+								"kind": "none",
+							},
+							"headers": []string{
+								"Date",
+								"Description",
+								"Amount",
+							},
+						},
+					}).
+					Expect()
+
+				response.Status(http.StatusOK)
+				mappingId = ID[TransactionImportMapping](response.JSON().Path("$.transactionImportMappingId").String().Raw())
+			}
+
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/import/{transactionImportId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("transactionImportId", transactionImportId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"transactionImportMappingId": mappingId,
+					"status":                     TransactionImportStatusPendingPreview,
+				}).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").IsEqual("failed to retrieve transaction import: record does not exist")
+		}
+	})
+
+	t.Run("patch invalid field", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		{ // Seed data
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		csvData := []byte(
+			"Date,Description,Amount\n" +
+				"2026-01-15,COFFEE SHOP,-4.50\n" +
+				"2026-01-16,GAS STATION,-45.00\n",
+		)
+
+		// The POST upload triggers exactly one Store call. We don't care about the
+		// file contents at this layer, just that the upload path runs.
+		app.Storage.EXPECT().
+			Store(
+				gomock.Any(),
+				gomock.Any(),
+				gomock.Any(),
+			).
+			Times(1).
+			Return(nil)
+
+		var transactionImportId ID[TransactionImport]
+		{ // Upload the CSV. This creates the import in mapping status.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions/import").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithMultipart().
+				WithFileBytes("data", "transactions.csv", csvData).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.status").String().IsEqual("mapping")
+			transactionImportId = ID[TransactionImport](response.JSON().Path("$.transactionImportId").String().Raw())
+		}
+
+		app.Queue.EXPECT().
+			EnqueueAt(
+				gomock.Any(),
+				mockqueue.EqQueue(csv_jobs.PreviewCSVImport),
+				gomock.Any(),
+				testutils.NewGenericMatcher(func(args csv_jobs.PreviewCSVImportArguments) bool {
+					return myownsanity.Every(
+						assert.EqualValues(t, bank.AccountId, args.AccountId, "Account ID should match"),
+						assert.EqualValues(t, bank.BankAccountId, args.BankAccountId, "Bank Account ID should match"),
+						assert.EqualValues(t, transactionImportId, args.TransactionImportId, "Transaction Import ID should match"),
+					)
+				}),
+			).
+			Times(0).
+			Return(nil)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}/transactions/import/{transactionImportId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionImportId", transactionImportId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"fileId": "file_bogus",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("Invalid request")
+	})
 }

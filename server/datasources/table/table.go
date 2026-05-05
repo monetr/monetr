@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/monetr/monetr/server/currency"
+	"github.com/monetr/monetr/server/validators"
+	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 )
 
@@ -23,6 +25,42 @@ type Row struct {
 	Date      time.Time `json:"date"`
 	Posted    bool      `json:"posted"`
 	Balance   int64     `json:"balance"`
+}
+
+func (r *Row) Validate() error {
+	return errors.Wrap(
+		validation.ValidateStruct(
+			r,
+			validation.Field(
+				&r.ID,
+				validators.PrintableUnicode,
+				validation.Length(1, 100),
+				validation.Required,
+			),
+			validation.Field(
+				&r.Amount,
+				validation.NotIn(0).Error("amount cannot be zero"),
+				validation.Required,
+			),
+			validation.Field(
+				&r.Memo,
+				validators.PrintableUnicode,
+				validation.Length(1, 300),
+				validation.Required,
+			),
+			validation.Field(
+				&r.Merchant,
+				validators.PrintableUnicode,
+				validation.Length(1, 300),
+			),
+			validation.Field(
+				&r.Date,
+				validation.NotIn(time.Time{}).Error("date cannot be empty"),
+				validation.Required,
+			),
+		),
+		"row is invalid",
+	)
 }
 
 var (

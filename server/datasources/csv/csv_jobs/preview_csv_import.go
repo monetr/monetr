@@ -91,6 +91,12 @@ func (j *previewCSVImport) loadFile(
 		j.rows = append(j.rows, *row)
 	}
 
+	j.log.DebugContext(
+		ctx,
+		"parsed rows from CSV file for preview",
+		"rows", j.rows,
+	)
+
 	return nil
 }
 

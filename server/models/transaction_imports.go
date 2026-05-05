@@ -95,18 +95,21 @@ func (TransactionImport) PatchSchemas() []validation.MapRule {
 			validation.Key(
 				"transactionImportMappingId",
 				ValidID[TransactionImportMapping]().Error("Transaction import mapping ID must be valid if provided"),
-			).Required(validators.Require),
+				validation.Required,
+			),
 			validation.Key(
 				"status",
 				validators.In(string(TransactionImportStatusPendingPreview)),
-			).Required(validators.Require),
+				validation.Required,
+			),
 		),
 		// Otherwise the user can only progress the import to pending processing.
 		validation.Map(
 			validation.Key(
 				"status",
 				validators.In(string(TransactionImportStatusPendingProcessing)),
-			).Required(validators.Require),
+				validation.Required,
+			),
 		),
 	}
 }
