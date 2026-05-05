@@ -1,13 +1,19 @@
 # Logging Configuration
 
-monetr supports a text and JSON log formatter.
+monetr supports a text, JSON and a "pretty" log formatter.
 
 ```yaml title="config.yaml"
 logging:
   level: "<error|warn|info|debug|trace>"
-  format: "<text|json>"
+  format: "<text|json|pretty>"
 ```
 
 The default log level for monetr is `info`. Lower log levels can create a lot of noise, `debug` will log each HTTP
 request that the server handles, `trace` will log every SQL query that the application performs (except as part of
-background job processing).
+background job processing or health checks).
+
+If you are working on monetr locally, the default local development (and unit test) logging is configured to be `pretty`
+to make reading logs easy. The pretty logger is a fork of
+[github.com/golang-cz/devslog](https://github.com/golang-cz/devslog) with some bug fixes applied and some tweaks to
+clean up duplicate fields; fork of the code can be found here:
+[github.com/monetr/devslog](https://github.com/monetr/devslog).
