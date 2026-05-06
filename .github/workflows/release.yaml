@@ -13,7 +13,7 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       version: "${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}"
     steps:
-      - uses: GoogleCloudPlatform/release-please-action@db8f2c60ee802b3748b512940dde88eabd7b7e01 # v3
+      - uses: GoogleCloudPlatform/release-please-action@db8f2c60ee802b3748b512940dde88eabd7b7e01 # v3.7.13
         id: release
         with:
           changelog-types: |
