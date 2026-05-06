@@ -231,19 +231,14 @@ jobs:
         run: |
           git config --global --add safe.directory ${PWD}
           make container
-      - name: Build and push monetr container to local registry
+      - name: Build, push, sign and verify monetr container to local registry
         if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           git config --global --add safe.directory ${PWD}
-          make container-push \
+          make verify-container \
             CONTAINER_REGISTRY=localhost:5000/monetr/monetr \
             CMAKE_OPTIONS="-DBUILD_CONTAINER_TAG_LATEST=OFF -DBUILD_PLATFORMS=linux/amd64 -DSIGN_TLOG_UPLOAD=OFF" \
             RELEASE_VERSION=pr-${{ github.event.pull_request.number }}-${{ github.sha }}
-      - name: Sign and verify with cosign (validation only)
-        if: github.event.pull_request.head.repo.full_name == github.repository
-        run: |
-          make sign-container
-          make verify-container
 
   local_dev:
     name: Local Development
