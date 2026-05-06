@@ -107,18 +107,22 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 			})
 		case nil:
 			log = log.With("resolvedToIndex", false)
-			if c.configuration.Server.UICacheHours > 0 {
-				cacheExpiration := time.Now().
-					Add(time.Duration(c.configuration.Server.UICacheHours) * time.Hour).
-					Truncate(time.Hour)
-				seconds := int(time.Until(cacheExpiration).Seconds())
-				// TODO Implement ETag things!
-				ctx.Response().Header().Set("Expires", cacheExpiration.Format(http.TimeFormat))
-				cacheControl := fmt.Sprintf("max-age=%d", seconds)
-				if isImmutableAssetPath(requestedPath) {
-					cacheControl += ", immutable"
+			switch path.Base(requestedPath) {
+			case "manifest.json":
+			default:
+				if c.configuration.Server.UICacheHours > 0 {
+					cacheExpiration := time.Now().
+						Add(time.Duration(c.configuration.Server.UICacheHours) * time.Hour).
+						Truncate(time.Minute)
+					seconds := int(time.Until(cacheExpiration).Seconds())
+					// TODO Implement ETag things!
+					ctx.Response().Header().Set("Expires", cacheExpiration.Format(http.TimeFormat))
+					cacheControl := fmt.Sprintf("max-age=%d", seconds)
+					if isImmutableAssetPath(requestedPath) {
+						cacheControl += ", immutable"
+					}
+					ctx.Response().Header().Set("Cache-Control", cacheControl)
 				}
-				ctx.Response().Header().Set("Cache-Control", cacheControl)
 			}
 		default:
 			log = log.With("resolvedToIndex", false)
