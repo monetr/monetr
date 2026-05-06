@@ -34,7 +34,7 @@
     "autoprefixer": "10.4.27",
     "postcss": "8.5.10",
     "sass": "1.99.0",
-    "satori": "0.19.2",
+    "satori": "0.26.0",
     "spellchecker-cli": "7.0.3",
     "typescript": "5.9.3"
   }
