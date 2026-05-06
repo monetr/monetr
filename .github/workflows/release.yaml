@@ -144,7 +144,7 @@ jobs:
     name: Deploy my.monetr.app
     runs-on: ubuntu-latest
     steps:
-      - uses: chrnorm/deployment-action@500aa6a23c81ffa1acf71072aee3cfa2cc2e556a # v2
+      - uses: chrnorm/deployment-action@500aa6a23c81ffa1acf71072aee3cfa2cc2e556a # v2.0.8
         name: Create my.monetr.app Deployment
         id: deployment
         with:
