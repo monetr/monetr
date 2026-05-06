@@ -145,7 +145,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Test Results Report
         if: always()
-        uses: codecov/test-results-action@0fa95f0e1eeaafde2c782583b36b28ad0d8c77d3 # v1
+        uses: codecov/test-results-action@0fa95f0e1eeaafde2c782583b36b28ad0d8c77d3 # v1.2.1
         with:
           name: monetr-shard-${{ matrix.shard }}
           files: ${{ github.workspace }}/build/junit-${{ matrix.shard }}.xml
