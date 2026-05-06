@@ -219,7 +219,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
         with:
           driver-opts: network=host
-          config-inline: |
+          buildkitd-config-inline: |
             [registry."localhost:5000"]
               http = true
               insecure = true
@@ -237,7 +237,7 @@ jobs:
           git config --global --add safe.directory ${PWD}
           make verify-container \
             CONTAINER_REGISTRY=localhost:5000/monetr/monetr \
-            CMAKE_OPTIONS="-DBUILD_CONTAINER_TAG_LATEST=OFF -DBUILD_PLATFORMS=linux/amd64 -DSIGN_TLOG_UPLOAD=OFF" \
+            CMAKE_OPTIONS="-DBUILD_CONTAINER_TAG_LATEST=OFF -DSIGN_TLOG_UPLOAD=OFF" \
             RELEASE_VERSION=pr-${{ github.event.pull_request.number }}-${{ github.sha }}
 
   local_dev:
