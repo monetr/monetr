@@ -10,7 +10,6 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/monetr/monetr/server/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -45,10 +44,9 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -102,10 +100,9 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense with a name thats too long
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -127,10 +124,9 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense with a description thats too long
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -226,7 +222,6 @@ func TestPostSpending(t *testing.T) {
 			rule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
 			nextRecurrence := rule.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -275,10 +270,9 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -327,10 +321,9 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -360,10 +353,9 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -459,10 +451,68 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
+
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":              "Some Monthly Expense",
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      1000,
+					"spendingType":      SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("recurrence rule must be specified for expenses")
+		}
+	})
+
+	t.Run("missing rule for expense regression 1599", func(t *testing.T) {
+		// Pin the timestamp and timezone to a known-bad combo from issue 1599. With
+		// these locked, the buggy pattern from "missing rule for expense" can be
+		// observed deterministically: util.Midnight rewinds the next recurrence to
+		// before now, so the API returns the past-date error instead of the
+		// missing-rule error this test is actually checking.
+		t.Setenv("MONETR_TIMESTAMP", "2023-10-31 18:46:01.423737301 +0000 UTC")
+		t.Setenv("MONETR_TIMEZONE", "Pacific/Auckland")
+
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId ID[FundingSchedule]
+		{ // Create the funding schedule
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
+					"excludeWeekends": true,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").String().IsASCII()
+			fundingScheduleId = ID[FundingSchedule](response.JSON().Path("$.fundingScheduleId").String().Raw())
+			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
+		}
+
+		{ // Create an expense
+			now := app.Clock.Now()
+			timezone := testutils.MustEz(t, user.Account.GetTimezone)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
+			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -511,10 +561,9 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := time.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -563,10 +612,9 @@ func TestPostSpending(t *testing.T) {
 
 		now := time.Now()
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
-		ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+		ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 		nextRecurrence := ruleset.After(now, false)
 		assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-		nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 		{ // Create an expense
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
@@ -783,10 +831,9 @@ func TestGetSpending(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -900,10 +947,9 @@ func TestGetSpendingByID(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1103,10 +1149,9 @@ func TestGetSpendingTransactions(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1272,10 +1317,9 @@ func TestPostSpendingTransfer(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1398,10 +1442,9 @@ func TestPostSpendingTransfer(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1508,10 +1551,9 @@ func TestPostSpendingTransfer(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1539,10 +1581,9 @@ func TestPostSpendingTransfer(t *testing.T) {
 		{ // Create a second expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1697,10 +1738,9 @@ func TestPostSpendingTransfer(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1728,10 +1768,9 @@ func TestPostSpendingTransfer(t *testing.T) {
 		{ // Create a second expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1850,10 +1889,9 @@ func TestPutSpending(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1881,10 +1919,9 @@ func TestPutSpending(t *testing.T) {
 		{ // Update the spending object
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.PUT("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1942,10 +1979,9 @@ func TestPutSpending(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1978,10 +2014,9 @@ func TestPutSpending(t *testing.T) {
 
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, differentUser.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.PUT("/api/bank_accounts/{bankAccountId}/spending/{spendingId}").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -2334,10 +2369,9 @@ func TestDeleteSpending(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -2486,10 +2520,9 @@ func TestDeleteSpending(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
