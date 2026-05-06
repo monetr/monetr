@@ -283,7 +283,7 @@ jobs:
         uses: docker/login-action@v4
         with:
           registry: registry.monetr.dev
-          username: ${{ secrets.CONTAINERS_MONETR_DEV_USERNAME }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.CONTAINERS_MONETR_DEV_PASSWORD }}
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
