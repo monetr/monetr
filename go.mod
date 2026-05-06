@@ -27,6 +27,7 @@ require (
 	github.com/hashicorp/vault/api v1.23.0
 	github.com/jarcoal/httpmock v1.4.1
 	github.com/labstack/echo/v4 v4.15.2
+	github.com/labstack/echo/v5 v5.1.0
 	github.com/monetr/devslog v0.0.17
 	github.com/monetr/validation v1.0.5
 	github.com/oklog/ulid/v2 v2.1.1
