@@ -80,7 +80,7 @@
     "@types/react-google-recaptcha": "2.1.9",
     "autoprefixer": "10.4.27",
     "babel-plugin-react-compiler": "1.0.0",
-    "cssnano": "7.1.2",
+    "cssnano": "8.0.0",
     "postcss": "8.5.14",
     "react-compiler-runtime": "1.0.0",
     "sass": "1.99.0",
