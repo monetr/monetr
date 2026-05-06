@@ -109,7 +109,7 @@ func DeactivatePlaidLink(ctx queue.Context, args DeactivateLinksArguments) error
 			"itemId", link.PlaidLink.PlaidId,
 			"institutionId", link.PlaidLink.InstitutionId,
 			"institutionName", link.PlaidLink.InstitutionName,
-			"plaidLinkStatus", link.PlaidLink.Status.String(),
+			"plaidLinkStatus", link.PlaidLink.Status,
 		)
 
 		log.InfoContext(ctx, "removing plaid link")

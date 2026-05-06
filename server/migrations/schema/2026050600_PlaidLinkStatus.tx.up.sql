@@ -1,0 +1,13 @@
+ALTER TABLE "plaid_links" ADD COLUMN "status_new" TEXT;
+UPDATE "plaid_links" SET "status_new" = 'unknown'            WHERE "status" = 0;
+UPDATE "plaid_links" SET "status_new" = 'pending'            WHERE "status" = 1;
+UPDATE "plaid_links" SET "status_new" = 'setup'              WHERE "status" = 2;
+UPDATE "plaid_links" SET "status_new" = 'error'              WHERE "status" = 3;
+UPDATE "plaid_links" SET "status_new" = 'pending_expiration' WHERE "status" = 4;
+UPDATE "plaid_links" SET "status_new" = 'revoked'            WHERE "status" = 5;
+UPDATE "plaid_links" SET "status_new" = 'deactivated'        WHERE "status" = 6;
+UPDATE "plaid_links" SET "status_new" = 'unknown'            WHERE "status_new" IS NULL;
+ALTER TABLE "plaid_links" ALTER COLUMN "status_new" SET NOT NULL;
+ALTER TABLE "plaid_links" ALTER COLUMN "status_new" SET DEFAULT 'unknown';
+ALTER TABLE "plaid_links" DROP COLUMN "status";
+ALTER TABLE "plaid_links" RENAME COLUMN "status_new" TO "status";

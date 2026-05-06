@@ -1,12 +1,13 @@
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum PlaidLinkStatus {
-  Unknown = 0,
-  Pending = 1,
-  Setup = 2,
-  Error = 3,
-  PendingExpiration = 4,
-  Revoked = 5,
+  Unknown = 'unknown',
+  Pending = 'pending',
+  Setup = 'setup',
+  Error = 'error',
+  PendingExpiration = 'pending_expiration',
+  Revoked = 'revoked',
+  Deactivated = 'deactivated',
 }
 
 export default class PlaidLink {

@@ -66,7 +66,7 @@ export default function apiSampleResponses(mockFetch: FetchMock) {
       linkType: 1,
       plaidLink: {
         products: ['transactions'],
-        status: 2,
+        status: 'setup',
         expirationDate: null,
         newAccountsAvailable: false,
         institutionId: 'ins_116794',

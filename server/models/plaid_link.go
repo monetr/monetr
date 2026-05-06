@@ -7,17 +7,16 @@ import (
 	"github.com/go-pg/pg/v10"
 )
 
-type PlaidLinkStatus uint8
+type PlaidLinkStatus string
 
-//go:generate go run golang.org/x/tools/cmd/stringer@v0.44.0 -type=PlaidLinkStatus -output=plaid_link.strings.go
 const (
-	PlaidLinkStatusUnknown           PlaidLinkStatus = 0
-	PlaidLinkStatusPending           PlaidLinkStatus = 1
-	PlaidLinkStatusSetup             PlaidLinkStatus = 2
-	PlaidLinkStatusError             PlaidLinkStatus = 3
-	PlaidLinkStatusPendingExpiration PlaidLinkStatus = 4
-	PlaidLinkStatusRevoked           PlaidLinkStatus = 5
-	PlaidLinkStatusDeactivated       PlaidLinkStatus = 6
+	PlaidLinkStatusUnknown           PlaidLinkStatus = "unknown"
+	PlaidLinkStatusPending           PlaidLinkStatus = "pending"
+	PlaidLinkStatusSetup             PlaidLinkStatus = "setup"
+	PlaidLinkStatusError             PlaidLinkStatus = "error"
+	PlaidLinkStatusPendingExpiration PlaidLinkStatus = "pending_expiration"
+	PlaidLinkStatusRevoked           PlaidLinkStatus = "revoked"
+	PlaidLinkStatusDeactivated       PlaidLinkStatus = "deactivated"
 )
 
 type PlaidLink struct {
@@ -30,7 +29,7 @@ type PlaidLink struct {
 	Secret               *Secret         `json:"-" pg:"rel:has-one"`
 	PlaidId              string          `json:"-" pg:"item_id,unique,notnull"`
 	Products             []string        `json:"products" pg:"products,type:'text[]'"`
-	Status               PlaidLinkStatus `json:"status" pg:"status,notnull,default:0"`
+	Status               PlaidLinkStatus `json:"status" pg:"status,notnull"`
 	ErrorCode            *string         `json:"errorCode,omitempty" pg:"error_code"`
 	ExpirationDate       *time.Time      `json:"expirationDate" pg:"expiration_date"`
 	NewAccountsAvailable bool            `json:"newAccountsAvailable" pg:"new_accounts_available,use_zero"`
