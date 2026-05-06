@@ -37,7 +37,8 @@ func (c *Controller) consumeFileUpload(
 	if contentType == "application/octet-stream" {
 		log.DebugContext(c.getContext(ctx), "upload content type is an octet stream, detecting file type by extension")
 		switch extension {
-		case ".qfx", ".ofx":
+		// TODO Make this based on [models.contentTypeExtensions]!
+		case ".qfx", ".ofx", ".qbo":
 			log.DebugContext(c.getContext(ctx), "detected OFX file format")
 			contentType = string(models.IntuitQFXContentType)
 		default:

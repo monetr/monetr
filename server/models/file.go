@@ -28,7 +28,7 @@ const (
 var (
 	contentTypeExtensions = map[ContentType][]string{
 		CAMT053ContentType:      {"xml"},
-		IntuitQFXContentType:    {"qfx", "ofx"},
+		IntuitQFXContentType:    {"qfx", "ofx", "qbo"},
 		OpenXMLExcelContentType: {"xlsx"},
 		TextCSVContentType:      {"csv"},
 	}
