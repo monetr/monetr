@@ -111,13 +111,11 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
-      - name: Build
+      - name: Build and Sign container
+        id: sign
         run: |
           git config --global --add safe.directory ${PWD}
-          make container-push CMAKE_OPTIONS="-DSIGN_RECURSIVE=ON" RELEASE_VERSION=${{ needs.release_please.outputs.version }}
-      - name: Sign images with cosign
-        id: sign
-        run: make sign-container
+          make sign-container CMAKE_OPTIONS="-DSIGN_RECURSIVE=ON" RELEASE_VERSION=${{ needs.release_please.outputs.version }}
       - name: Attest build provenance (ghcr.io)
         uses: actions/attest-build-provenance@v3
         with:
