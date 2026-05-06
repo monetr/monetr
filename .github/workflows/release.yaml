@@ -119,19 +119,19 @@ jobs:
         id: sign
         run: make sign-container
       - name: Attest build provenance (ghcr.io)
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
           subject-name: ghcr.io/monetr/monetr
           subject-digest: ${{ steps.sign.outputs.digest }}
           push-to-registry: true
       - name: Attest build provenance (docker.io)
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
           subject-name: docker.io/monetr/monetr
           subject-digest: ${{ steps.sign.outputs.digest }}
           push-to-registry: true
       - name: Attest build provenance (quay.io)
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
           subject-name: quay.io/monetr/monetr
           subject-digest: ${{ steps.sign.outputs.digest }}
