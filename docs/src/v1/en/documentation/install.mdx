@@ -15,7 +15,7 @@ overview of how to install and run monetr on your own infrastructure.
 
 Self-hosting monetr offers several advantages:
 
-- **Cost-Free Usage**: Run monetr without paying subscription fees.  
+- **Cost-Free Usage**: Run monetr without paying subscription fees.
   <small>_Note: If you use Plaid as a data provider, you may incur additional costs. See [Plaid’s
   Pricing](https://plaid.com/pricing/) for details._</small>
 - **Full Data Ownership**: Keep complete control over your financial data.
@@ -61,6 +61,44 @@ made available until then.
   description="Install monetr on your own Kubernetes cluster"
   href="/documentation/install/kubernetes/"
 />
+
+## Verify Images
+
+Starting in version [v1.14.0](https://github.com/monetr/monetr/releases/tag/v1.14.0) all monetr container images that
+are distributed are signed at build time using [cosign](https://github.com/sigstore/cosign). Build attestations are also
+published for the containers themselves and can be used to verify them before running.
+
+**Note**: Container images shipped prior to v1.14.0 do not have signatures published for them and cannot be verified
+using either of the following two methods!
+
+### Verify using cosign
+
+To verify a monetr container image using cosign, first make sure you have cosign installed. Follow the directions
+[here](https://github.com/sigstore/cosign#installation) to get started.
+
+Once cosign is installed you can run the following command against the desired container image version to verify it's
+signature.
+
+```shell title="Shell"
+cosign verify \
+  --certificate-identity-regexp '^https://github.com/monetr/monetr/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  ghcr.io/monetr/monetr:1.14.0
+```
+
+Make sure to replace the version of the container image with the version you want to verify. This can also be used to
+verify container images from any of the supported container registries that monetr pushes to.
+
+### Verify using GitHub CLI
+
+Verifying the container image using the GitHub CLI is similar, once it is installed you can run the following command.
+Replacing the version of the container with the version you are trying to verify.
+
+```shell title="Shell"
+gh attestation verify \
+  --repo monetr/monetr \
+  oci://ghcr.io/monetr/monetr:1.14.0
+```
 
 ## What’s Next?
 
