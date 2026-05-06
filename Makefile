@@ -151,5 +151,11 @@ container: | $(CMAKE_CONFIGURATION_DIRECTORY)
 container-push: $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.container.docker.push $(BUILD_ARGS)
 
+sign-container: $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.container.docker.sign $(BUILD_ARGS)
+
+verify-container: $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.container.docker.verify $(BUILD_ARGS)
+
 images: $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t images $(BUILD_ARGS)

@@ -263,6 +263,10 @@ jobs:
   docker-push:
     name: Staging Container Push
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     outputs:
       post-tag: ${{ steps.tag.outputs.POST_TAG }}
     steps:
@@ -281,11 +285,22 @@ jobs:
           registry: registry.monetr.dev
           username: ${{ secrets.CONTAINERS_MONETR_DEV_USERNAME }}
           password: ${{ secrets.CONTAINERS_MONETR_DEV_PASSWORD }}
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
       - name: Build
         run: |
           git config --global --add safe.directory ${PWD}
 
           make container-push CONTAINER_REGISTRY=registry.monetr.dev/monetr/monetr CMAKE_OPTIONS="-DBUILD_CONTAINER_TAG_LATEST=OFF -DBUILD_PLATFORMS=linux/amd64" RELEASE_VERSION=${{ steps.tag.outputs.POST_TAG }}
+      - name: Sign image with cosign
+        id: sign
+        run: make sign-container
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: registry.monetr.dev/monetr/monetr
+          subject-digest: ${{ steps.sign.outputs.digest }}
+          push-to-registry: false
 
   deploy:
     needs:

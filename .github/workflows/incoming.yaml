@@ -201,6 +201,14 @@ jobs:
   container:
     name: Container
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     steps:
       - uses: actions/checkout@v6
         with:
@@ -209,10 +217,33 @@ jobs:
         uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-      - name: Build monetr container
+        with:
+          driver-opts: network=host
+          config-inline: |
+            [registry."localhost:5000"]
+              http = true
+              insecure = true
+      - name: Install cosign
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: sigstore/cosign-installer@v3
+      - name: Build monetr container (fork PR; no push)
+        if: github.event.pull_request.head.repo.full_name != github.repository
         run: |
           git config --global --add safe.directory ${PWD}
           make container
+      - name: Build and push monetr container to local registry
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          git config --global --add safe.directory ${PWD}
+          make container-push \
+            CONTAINER_REGISTRY=localhost:5000/monetr/monetr \
+            CMAKE_OPTIONS="-DBUILD_CONTAINER_TAG_LATEST=OFF -DBUILD_PLATFORMS=linux/amd64 -DSIGN_TLOG_UPLOAD=OFF" \
+            RELEASE_VERSION=pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+      - name: Sign and verify with cosign (validation only)
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          make sign-container
+          make verify-container
 
   local_dev:
     name: Local Development

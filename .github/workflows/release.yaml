@@ -79,6 +79,11 @@ jobs:
       - release_please
     name: Container (Docker)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      packages: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -104,10 +109,33 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
       - name: Build
         run: |
           git config --global --add safe.directory ${PWD}
-          make container-push RELEASE_VERSION=${{ needs.release_please.outputs.version }}
+          make container-push CMAKE_OPTIONS="-DSIGN_RECURSIVE=ON" RELEASE_VERSION=${{ needs.release_please.outputs.version }}
+      - name: Sign images with cosign
+        id: sign
+        run: make sign-container
+      - name: Attest build provenance (ghcr.io)
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ghcr.io/monetr/monetr
+          subject-digest: ${{ steps.sign.outputs.digest }}
+          push-to-registry: true
+      - name: Attest build provenance (docker.io)
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: docker.io/monetr/monetr
+          subject-digest: ${{ steps.sign.outputs.digest }}
+          push-to-registry: true
+      - name: Attest build provenance (quay.io)
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: quay.io/monetr/monetr
+          subject-digest: ${{ steps.sign.outputs.digest }}
+          push-to-registry: true
 
   deploy:
     if: ${{ needs.release_please.outputs.release_created }}
