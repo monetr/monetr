@@ -10,7 +10,6 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	. "github.com/monetr/monetr/server/models"
-	"github.com/monetr/monetr/server/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -413,10 +412,9 @@ func TestPostTransactions(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1173,10 +1171,9 @@ func TestDeleteTransactions(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -1356,10 +1353,9 @@ func TestDeleteTransactions(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.Must(t, NewRuleSet, FirstDayOfEveryMonth)
+			ruleset := testutils.RuleSetInTimezone(t, timezone, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
-			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
