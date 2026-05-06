@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.13.4](https://github.com/monetr/monetr/compare/v1.13.3...v1.13.4) (2026-05-06)
+
+
+### Dependencies
+
+* **api:** update module github.com/fsnotify/fsnotify to v1.10.1 ([#3159](https://github.com/monetr/monetr/issues/3159)) ([f30a3e3](https://github.com/monetr/monetr/commit/f30a3e35ed3459c1b5c3a7380f2990fadc4c9e61))
+* **api:** update module github.com/getsentry/sentry-go to v0.46.2 ([#3169](https://github.com/monetr/monetr/issues/3169)) ([2c295f4](https://github.com/monetr/monetr/commit/2c295f46c7bf01c0b9c9f85c2fcb476dd5c0a5ab))
+* **ui:** update dependency postcss to v8.5.14 ([#2983](https://github.com/monetr/monetr/issues/2983)) ([760de57](https://github.com/monetr/monetr/commit/760de57f9b7adf0f38288fc0ad533e80bd979ff2))
+* **ui:** update dependency satori to v0.26.0 ([#2998](https://github.com/monetr/monetr/issues/2998)) ([2fdb2c3](https://github.com/monetr/monetr/commit/2fdb2c351082b69fdb2da47ce05a777847b7869c))
+* **ui:** update rsbuild ([#3171](https://github.com/monetr/monetr/issues/3171)) ([aa98a58](https://github.com/monetr/monetr/commit/aa98a588edd6cd5d052ad3cf61bc652320cfa8f9))
+
+
+### Miscellaneous
+
+* **build:** Push container images to quay.io as well ([8d33215](https://github.com/monetr/monetr/commit/8d3321571031fdd303e545986dfdb7f3a230a303))
+* Updating readme ([1fa9bb6](https://github.com/monetr/monetr/commit/1fa9bb60505eb3195b240ffb0b8a50ca903725f0))
+
+
+### Refactor
+
+* **api:** Adding transaction import groundwork ([#3152](https://github.com/monetr/monetr/issues/3152)) ([7df0e86](https://github.com/monetr/monetr/commit/7df0e86d57217325fe383e452ffca5d56f49e0c6))
+
+
+### Documentation
+
+* Add storage configuration to related pages on uploads ([2dfb363](https://github.com/monetr/monetr/commit/2dfb3638aced2a99d76b02dfaec9fc14369a3db8))
+* Adding asset verification signature ([d11f313](https://github.com/monetr/monetr/commit/d11f313b7fc4f9cbbc58d0f28a579bc5642e89cd))
+* Adding Lunch Flow to getting started document ([ea63891](https://github.com/monetr/monetr/commit/ea638913b2078f166d390bad194e56e6d932e2ca))
+* Logging documentation improvement + fixing bad link ([affdbc6](https://github.com/monetr/monetr/commit/affdbc647a6572b7def9fad7f2aa935a3d9e8316))
+
 ## [1.13.3](https://github.com/monetr/monetr/compare/v1.13.2...v1.13.3) (2026-05-03)
 
 
