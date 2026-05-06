@@ -1,13 +1,18 @@
 {
   "extends": [
     "config:recommended",
-    ":semanticCommitTypeAll(deps)"
+    ":semanticCommitTypeAll(deps)",
+    "helpers:pinGitHubActionDigestsToSemver"
   ],
   "semanticCommits": "enabled",
   "semanticCommitType": "deps",
   "semanticCommitScope": "Renovate",
   "branchConcurrentLimit": 20,
   "prConcurrentLimit": 20,
+  "minimumReleaseAge": "7 days",
+  "vulnerabilityAlerts": {
+    "minimumReleaseAge": "0 days"
+  },
   "postUpdateOptions": [
     "gomodTidy"
   ],
