@@ -5,7 +5,6 @@ import (
 
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
-	"github.com/monetr/validation/is"
 )
 
 type AmountKind string
@@ -117,13 +116,15 @@ func (s *AmountSpec) Validate(ctx context.Context) error {
 			validation.Field(
 				&s.Credit,
 				validation.Required,
-				is.PrintableASCII,
+				validators.PrintableUnicode,
+				validation.NotIn(s.Debit),
 				validation.Length(1, 100),
 			),
 			validation.Field(
 				&s.Debit,
 				validation.Required,
-				is.PrintableASCII,
+				validators.PrintableUnicode,
+				validation.NotIn(s.Credit),
 				validation.Length(1, 100),
 			),
 		},

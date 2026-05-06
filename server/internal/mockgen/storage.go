@@ -72,7 +72,7 @@ func (mr *MockStorageMockRecorder) Remove(ctx, file any) *gomock.Call {
 }
 
 // Store mocks base method.
-func (m *MockStorage) Store(ctx context.Context, buf io.ReadSeekCloser, file models.File) error {
+func (m *MockStorage) Store(ctx context.Context, buf io.Reader, file models.File) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Store", ctx, buf, file)
 	ret0, _ := ret[0].(error)

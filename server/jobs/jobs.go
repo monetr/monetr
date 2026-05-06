@@ -5,6 +5,7 @@ import (
 
 	"github.com/monetr/monetr/server/billing/billing_jobs"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/datasources/csv/csv_jobs"
 	"github.com/monetr/monetr/server/datasources/lunch_flow/lunch_flow_jobs"
 	"github.com/monetr/monetr/server/datasources/ofx/ofx_jobs"
 	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
@@ -48,6 +49,7 @@ func RegisterJobs(
 	}
 
 	return myownsanity.FirstError(
+		queue.Register(ctx, processor, csv_jobs.PreviewCSVImport),
 		queue.Register(ctx, processor, funding_jobs.ProcessFundingSchedule),
 		queue.Register(ctx, processor, link_jobs.RemoveLink),
 		queue.Register(ctx, processor, ofx_jobs.ProcessOFXUpload),

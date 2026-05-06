@@ -40,6 +40,7 @@ type Configuration struct {
 	Beta          Beta          `yaml:"beta"`
 	CORS          CORS          `yaml:"cors"`
 	Email         Email         `yaml:"email"`
+	Features      Features      `yaml:"transactionImports"`
 	KeyManagement KeyManagement `yaml:"keyManagement"`
 	Links         Links         `yaml:"links"`
 	Logging       Logging       `yaml:"logging"`

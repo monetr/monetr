@@ -158,6 +158,19 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified; debit: when kind is \"sign\" debit cannot be specified; fields: the length must be exactly 1; kind: must equal \"sign\". or fields: fields[1] is a duplicate of an earlier entry. or credit: when kind is \"column\" credit cannot be specified; debit: when kind is \"column\" debit cannot be specified; fields: fields[1] is a duplicate of an earlier entry; kind: must equal \"column\".",
 		},
 		{
+			// Credit and Debit must be distinct under Type. The NotIn rule on
+			// each side fires when the two strings are equal so that the same
+			// label can't represent both directions.
+			name: "type with credit equals debit",
+			spec: table.AmountSpec{
+				Kind:   table.AmountKindType,
+				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "TransType"}},
+				Credit: "DEBIT",
+				Debit:  "DEBIT",
+			},
+			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified; debit: when kind is \"sign\" debit cannot be specified; fields: the length must be exactly 1; kind: must equal \"sign\". or credit: must not be in list; debit: must not be in list. or credit: when kind is \"column\" credit cannot be specified; debit: when kind is \"column\" debit cannot be specified; kind: must equal \"column\".",
+		},
+		{
 			name: "column with duplicate fields",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindColumn,
@@ -220,8 +233,9 @@ func TestAmountSpec_Validate(t *testing.T) {
 			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified; debit: when kind is \"sign\" debit cannot be specified; fields: the length must be exactly 1; kind: must equal \"sign\". or debit: the length must be between 1 and 100. or credit: when kind is \"column\" credit cannot be specified; debit: when kind is \"column\" debit cannot be specified; kind: must equal \"column\".",
 		},
 		{
-			// Tab is ASCII but not printable ASCII; the recent switch from is.ASCII
-			// to is.PrintableASCII on Credit is what catches this.
+			// Tab still gets caught after the swap to [validators.PrintableUnicode]
+			// because [unicode.IsPrint] only considers the regular ASCII space
+			// printable, never the C0 controls.
 			name: "type credit with tab",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
@@ -229,17 +243,21 @@ func TestAmountSpec_Validate(t *testing.T) {
 				Credit: "CR\tEDIT",
 				Debit:  "DEBIT",
 			},
-			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified; debit: when kind is \"sign\" debit cannot be specified; fields: the length must be exactly 1; kind: must equal \"sign\". or credit: must contain printable ASCII characters only. or credit: when kind is \"column\" credit cannot be specified; debit: when kind is \"column\" debit cannot be specified; kind: must equal \"column\".",
+			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified; debit: when kind is \"sign\" debit cannot be specified; fields: the length must be exactly 1; kind: must equal \"sign\". or credit: must contain printable characters only. or credit: when kind is \"column\" credit cannot be specified; debit: when kind is \"column\" debit cannot be specified; kind: must equal \"column\".",
 		},
 		{
-			name: "type debit with non-ASCII",
+			// "Débit" used to be rejected because the rule was ASCII-only. After the
+			// swap to [validators.PrintableUnicode] it goes through, which is the
+			// whole point of the swap — bank exports happen in plenty of languages
+			// and we shouldn't be the reason they break.
+			name: "type debit with accented vowel",
 			spec: table.AmountSpec{
 				Kind:   table.AmountKindType,
 				Fields: []table.FieldRef{{Name: "Amount"}, {Name: "TransType"}},
 				Credit: "CREDIT",
 				Debit:  "Débit",
 			},
-			wantErr: "input must be considered valid by: credit: when kind is \"sign\" credit cannot be specified; debit: when kind is \"sign\" debit cannot be specified; fields: the length must be exactly 1; kind: must equal \"sign\". or debit: must contain printable ASCII characters only. or credit: when kind is \"column\" credit cannot be specified; debit: when kind is \"column\" debit cannot be specified; kind: must equal \"column\".",
+			wantErr: "",
 		},
 		{
 			// Type-branch Each coverage: second field is a blank FieldRef (first is

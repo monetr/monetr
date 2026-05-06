@@ -307,9 +307,17 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/bank_accounts/:bankAccountId/transactions/upload/:transactionUploadId/progress", c.getTransactionUploadProgress)
 	billed.PUT("/bank_accounts/:bankAccountId/transactions/:transactionId", c.putTransactions)
 	billed.DELETE("/bank_accounts/:bankAccountId/transactions/:transactionId", c.deleteTransactions)
-	// Mappings
-	billed.GET("/mappings", c.getTransactionImportMappings)
-	billed.POST("/mappings", c.postTransactionImportMapping)
+
+	// Mappings and transaction imports
+	if c.Configuration.Features.TransactionImports {
+		billed.GET("/mappings", c.getTransactionImportMappings)
+		billed.POST("/mappings", c.postTransactionImportMapping)
+		// Imports
+		billed.POST("/bank_accounts/:bankAccountId/transactions/import", c.postTransactionImport)
+		billed.GET("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.getTransactionImportById)
+		billed.PATCH("/bank_accounts/:bankAccountId/transactions/import/:transactionImportId", c.patchTransactionImport)
+	}
+
 	// Uploads
 	billed.GET("/files", c.getFiles)
 	// Funding schedules

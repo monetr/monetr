@@ -3,6 +3,7 @@ package table
 import (
 	"context"
 	"regexp"
+	"strings"
 
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
@@ -60,4 +61,32 @@ func (s *DateSpec) Validate(ctx context.Context) error {
 		"failed to validate %T",
 		s,
 	)
+}
+
+func (s *DateSpec) GetTimeFormat() string {
+	replacements := [][2]string{
+		{
+			"YYYY", "2006",
+		},
+		{
+			"YY", "06",
+		},
+		{
+			"MM", "01",
+		},
+		{
+			"M", "1",
+		},
+		{
+			"DD", "02",
+		},
+		{
+			"D", "2",
+		},
+	}
+	format := s.Format
+	for _, replacement := range replacements {
+		format = strings.Replace(format, replacement[0], replacement[1], 1)
+	}
+	return format
 }

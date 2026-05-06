@@ -136,7 +136,7 @@ func TestMarshalErrorTree(t *testing.T) {
 		assert.Nil(t, validators.MarshalErrorTree(nil))
 	})
 
-	t.Run("strips pkg/errors wraps and produces a JSON-marshalable map", func(t *testing.T) {
+	t.Run("strips pkg.errors wraps and produces a JSON-marshalable map", func(t *testing.T) {
 		inner := validation.Errors{"name": errors.New("cannot be blank")}
 		wrapped := errors.Wrapf(inner, "failed to validate %T", &sampleStruct{})
 		got := validators.MarshalErrorTree(wrapped)

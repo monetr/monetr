@@ -90,7 +90,7 @@ func TestMapping_Validate(t *testing.T) {
 			mutate: func(m *table.Mapping) {
 				m.ID = table.IDSpec{
 					Kind:   table.IDSpecKindHashed,
-					Fields: []table.FieldRef{{Name: "Date"}, {DerivedKind: table.DerivedKindRowNumberPerDay}},
+					Fields: []table.FieldRef{{Name: "Date"}, {DerivedKind: table.DerivedKindRowNumber}},
 				}
 			},
 		},
@@ -205,14 +205,19 @@ func TestMapping_Validate(t *testing.T) {
 			wantErr: "failed to validate *table.Mapping: merchant: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..",
 		},
 		{
+			// Pösted used to be the canonical "invalid posted needle" here because
+			// the rule was ASCII-only; after the swap to
+			// [validators.PrintableUnicode] it's a perfectly fine value. To keep the
+			// "PostedSpec error bubbles up under the posted key" coverage we use a
+			// tab now, which the new rule still rejects.
 			name: "invalid posted, merchant nil ok",
 			mutate: func(m *table.Mapping) {
 				m.Posted = &table.PostedSpec{
 					Fields: []table.FieldRef{{Name: "Status"}},
-					Posted: "Pösted",
+					Posted: "POS\tTED",
 				}
 			},
-			wantErr: "failed to validate *table.Mapping: posted: failed to validate *table.PostedSpec: posted: must contain printable ASCII characters only..",
+			wantErr: "failed to validate *table.Mapping: posted: failed to validate *table.PostedSpec: posted: must contain printable characters only..",
 		},
 	}
 

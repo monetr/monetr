@@ -5,7 +5,6 @@ import (
 
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
-	"github.com/monetr/validation/is"
 	"github.com/pkg/errors"
 )
 
@@ -16,7 +15,7 @@ import (
 // nil on the [Mapping] then all transactions are considered posted.
 type PostedSpec struct {
 	Fields []FieldRef `json:"fields"`
-	// Posted is the strong we look for in the field specified to know if the
+	// Posted is the string we look for in the field specified to know if the
 	// transaction is posted. Any other value is considered pending.
 	Posted string `json:"posted,omitempty"`
 }
@@ -39,8 +38,8 @@ func (s *PostedSpec) Validate(ctx context.Context) error {
 			),
 			validation.Field(
 				&s.Posted,
-				is.PrintableASCII,
-				validation.Length(0, 100),
+				validators.PrintableUnicode,
+				validation.Length(1, 100),
 			),
 		),
 		"failed to validate %T",

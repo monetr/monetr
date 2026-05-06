@@ -5,7 +5,6 @@ import (
 
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
-	"github.com/monetr/validation/is"
 	"github.com/pkg/errors"
 )
 
@@ -95,7 +94,7 @@ func (m *Mapping) Validate(ctx context.Context) error {
 				validation.Length(1, 20),
 				validators.Unique[string](),
 				validation.Each(
-					is.PrintableASCII,
+					validators.PrintableUnicode,
 					validation.Length(1, 100),
 					validation.Required,
 				),

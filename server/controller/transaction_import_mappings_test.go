@@ -182,6 +182,8 @@ func TestPostTransactionImportMapping(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
+		response.JSON().Path("$.transactionImportMappingId").String().NotEmpty()
+		response.JSON().Path("$.signature").String().NotEmpty()
 	})
 }
 
@@ -218,7 +220,7 @@ func TestGetTransactionImportMappings(t *testing.T) {
 			}).
 			Expect()
 		first.Status(http.StatusOK)
-		firstId := first.JSON().Path("$.transactionImportMapping").String().Raw()
+		firstId := first.JSON().Path("$.transactionImportMappingId").String().Raw()
 
 		app.Clock.Add(1 * time.Minute)
 
@@ -236,7 +238,7 @@ func TestGetTransactionImportMappings(t *testing.T) {
 			}).
 			Expect()
 		second.Status(http.StatusOK)
-		secondId := second.JSON().Path("$.transactionImportMapping").String().Raw()
+		secondId := second.JSON().Path("$.transactionImportMappingId").String().Raw()
 
 		response := e.GET("/api/mappings").
 			WithCookie(TestCookieName, token).
@@ -244,8 +246,8 @@ func TestGetTransactionImportMappings(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.JSON().Array().Length().IsEqual(2)
-		response.JSON().Path("$[0].transactionImportMapping").IsEqual(secondId)
-		response.JSON().Path("$[1].transactionImportMapping").IsEqual(firstId)
+		response.JSON().Path("$[0].transactionImportMappingId").IsEqual(secondId)
+		response.JSON().Path("$[1].transactionImportMappingId").IsEqual(firstId)
 	})
 
 	t.Run("filters by signature", func(t *testing.T) {
@@ -267,7 +269,7 @@ func TestGetTransactionImportMappings(t *testing.T) {
 			}).
 			Expect()
 		matching.Status(http.StatusOK)
-		matchingId := matching.JSON().Path("$.transactionImportMapping").String().Raw()
+		matchingId := matching.JSON().Path("$.transactionImportMappingId").String().Raw()
 		signature := matching.JSON().Path("$.signature").String().Raw()
 
 		other := e.POST("/api/mappings").
@@ -292,7 +294,7 @@ func TestGetTransactionImportMappings(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.JSON().Array().Length().IsEqual(1)
-		response.JSON().Path("$[0].transactionImportMapping").IsEqual(matchingId)
+		response.JSON().Path("$[0].transactionImportMappingId").IsEqual(matchingId)
 		response.JSON().Path("$[0].signature").IsEqual(signature)
 	})
 

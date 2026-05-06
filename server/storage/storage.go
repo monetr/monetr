@@ -31,7 +31,7 @@ type Storage interface {
 	// be present in whatever storage system even if the file was not successfully
 	// stored. This should be considered on a per-implementation basis as it will
 	// be unique to the implementation itself.
-	Store(ctx context.Context, buf io.ReadSeekCloser, file models.File) error
+	Store(ctx context.Context, buf io.Reader, file models.File) error
 	// Read will take a file model and will read it from the underlying storage
 	// system. If a file can be read then a buffer will be returned for that file.
 	Read(ctx context.Context, file models.File) (buf io.ReadCloser, err error)

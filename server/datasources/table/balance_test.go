@@ -72,22 +72,6 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			},
 			wantErr: "",
 		},
-		{
-			name: "field with row per day",
-			spec: table.BalanceSpec{
-				Kind:   table.BalanceKindField,
-				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumberPerDay}},
-			},
-			wantErr: "",
-		},
-		{
-			name: "field with row per day per amount",
-			spec: table.BalanceSpec{
-				Kind:   table.BalanceKindField,
-				Fields: []table.FieldRef{{DerivedKind: table.DerivedKindRowNumberPerDayPerAmount}},
-			},
-			wantErr: "",
-		},
 
 		// --- Cross-validation: Kind and Fields must agree ---
 		{
@@ -228,7 +212,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKind("bogus")}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: (0: input must be considered valid by: derivedKind: must be blank; name: cannot be blank. or derivedKind: must be one of: [\"rowNumber\", \"rowNumberPerDay\", \"rowNumberPerDayPerAmount\"]..).",
+			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: (0: input must be considered valid by: derivedKind: must be blank; name: cannot be blank. or derivedKind: must be one of: [\"rowNumber\"]..).",
 		},
 
 		// --- Combined (both kind and fields misbehaving) ---

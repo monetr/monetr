@@ -17,6 +17,9 @@ backgroundjobs:
 redis:
   enabled: true
   address: valkey
+features:
+  # Enable transaction imports for local development.
+  transactionImports: true
 email:
   enabled: true
   domain: monetr.local

@@ -2,10 +2,10 @@ package table
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
-	"github.com/monetr/validation/is"
 )
 
 type DerivedKind string
@@ -16,14 +16,14 @@ const (
 	// exactly stable since new rows are added and old rows are eventually
 	// removed.
 	DerivedKindRowNumber DerivedKind = "rowNumber"
-	// DerivedKindRowNumberPerDay is the 0 indexed count of rows per date value.
-	// This is from the bottom to the top of the file.
-	DerivedKindRowNumberPerDay DerivedKind = "rowNumberPerDay"
-	// DerivedKindRowNumberPerDayPerAmount is the 0 indexed count of rows per date
-	// value per amount value. This way if days have all unique transaction
-	// amounts then deduplication is easy. If days have duplicate transaction
-	// amounts then they are deduplicated in order they are observed.
-	DerivedKindRowNumberPerDayPerAmount DerivedKind = "rowNumberPerDayPerAmount"
+	// // DerivedKindRowNumberPerDay is the 0 indexed count of rows per date value.
+	// // This is from the bottom to the top of the file.
+	// DerivedKindRowNumberPerDay DerivedKind = "rowNumberPerDay"
+	// // DerivedKindRowNumberPerDayPerAmount is the 0 indexed count of rows per date
+	// // value per amount value. This way if days have all unique transaction
+	// // amounts then deduplication is easy. If days have duplicate transaction
+	// // amounts then they are deduplicated in order they are observed.
+	// DerivedKindRowNumberPerDayPerAmount DerivedKind = "rowNumberPerDayPerAmount"
 )
 
 // FieldRef references a field within the document, or it references a derived
@@ -46,8 +46,8 @@ func (s *FieldRef) Validate(ctx context.Context) error {
 			validation.Field(
 				&s.Name,
 				validators.In(getColumns(ctx)...),
+				validators.PrintableUnicode,
 				validation.Required,
-				is.PrintableASCII,
 			),
 			validation.Field(
 				&s.DerivedKind,
@@ -63,11 +63,19 @@ func (s *FieldRef) Validate(ctx context.Context) error {
 				&s.DerivedKind,
 				validators.In(
 					DerivedKindRowNumber,
-					DerivedKindRowNumberPerDay,
-					DerivedKindRowNumberPerDayPerAmount,
+					// DerivedKindRowNumberPerDay,
+					// DerivedKindRowNumberPerDayPerAmount,
 				),
 				validation.Required,
 			),
 		},
 	)
+}
+
+func (s FieldRef) String() string {
+	if s.DerivedKind != "" {
+		return fmt.Sprintf("derived::%s", s.DerivedKind)
+	}
+
+	return s.Name
 }
