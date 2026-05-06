@@ -4,6 +4,11 @@ option(BUILD_SIMPLE_ICONS "Embed simple-icons into the final binary, used for pr
 option(BUILD_NOSIMD "Disable SIMD support at compile time." OFF)
 option(BUILD_CONTAINER_TAG_LATEST "Tag containers with latest when building them." ON)
 
+option(SIGN_RECURSIVE "Sign all referenced images recursively (covers each platform image of multi-arch builds)." OFF)
+option(SIGN_TLOG_UPLOAD "Upload cosign signatures to the Sigstore Rekor transparency log." ON)
+set(SIGN_CERT_IDENTITY_REGEX "^https://github.com/monetr/monetr/" CACHE STRING "OIDC certificate identity regex used to verify cosign signatures.")
+set(SIGN_OIDC_ISSUER "https://token.actions.githubusercontent.com" CACHE STRING "OIDC issuer URL used to verify cosign signatures.")
+
 option(TEST_RACE "Go tests should be run with the -race flag" ON)
 option(TEST_COVERAGE "Coverage data should be collected from tests" ON)
 option(TEST_USE_GOTESTSUM "Wrap test execution in gotestsum" OFF)
@@ -36,6 +41,7 @@ find_package(Git REQUIRED)
 
 set(DOCKER_MIN_VERSION "26.0.0")
 find_package(Docker QUIET)
+find_program(COSIGN_EXECUTABLE cosign)
 
 set(MONETR_PKG_ROOT github.com/monetr/monetr CACHE INTERNAL "Base go package for monetr.")
 
@@ -96,7 +102,6 @@ if(DOCKER_EXECUTABLE)
     VERBATIM
     COMMAND ${CMAKE_COMMAND} -E echo "-- Building monetr container: ${CONTAINER_REGISTRY} - ${CONTAINER_TAGS}"
     COMMAND ${DOCKER_EXECUTABLE} buildx build
-        --iidfile ${DOCKER_CONTAINER}
         -f ${CMAKE_SOURCE_DIR}/Dockerfile
         --platform ${BUILD_PLATFORMS}
         --build-arg GOFLAGS=-tags=icons,simple_icons
@@ -146,7 +151,6 @@ if(DOCKER_EXECUTABLE)
     COMMAND ${CMAKE_COMMAND} -E echo "-- Building monetr container: ${CONTAINER_REGISTRY} - ${CONTAINER_TAGS}"
     COMMAND ${DOCKER_EXECUTABLE} buildx build
         --push
-        --iidfile ${DOCKER_CONTAINER_PUSH}
         -f ${CMAKE_SOURCE_DIR}/Dockerfile
         --platform ${BUILD_PLATFORMS}
         --build-arg GOFLAGS=-tags=icons,simple_icons
@@ -178,6 +182,65 @@ if(DOCKER_EXECUTABLE)
     build.container.docker.push
     DEPENDS ${DOCKER_CONTAINER_PUSH}
   )
+
+  if(COSIGN_EXECUTABLE)
+    message(STATUS "  Container signing engine: cosign (${COSIGN_EXECUTABLE})")
+
+    # CMake's add_custom_command(COMMAND ...) splits list-valued args on the
+    # ; separator, which would expand a multi-registry list into separate
+    # cmake -P arguments. Join into a comma-separated string so the script
+    # gets a single -DREGISTRIES=... arg and re-splits on , at runtime.
+    list(JOIN CONTAINER_REGISTRY "," CONTAINER_REGISTRY_CSV)
+
+    set(DOCKER_CONTAINER_DIGEST ${CMAKE_BINARY_DIR}/docker-container-push.digest)
+    set(DOCKER_CONTAINER_SIGN_STAMP ${CMAKE_BINARY_DIR}/docker-container-sign.stamp)
+    add_custom_command(
+      OUTPUT ${DOCKER_CONTAINER_SIGN_STAMP}
+      BYPRODUCTS ${DOCKER_CONTAINER_SIGN_STAMP} ${DOCKER_CONTAINER_DIGEST}
+      COMMENT "Signing monetr container images with cosign"
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      DEPENDS ${DOCKER_CONTAINER_PUSH}
+      VERBATIM
+      COMMAND ${CMAKE_COMMAND}
+        "-DMETADATA_FILE=${DOCKER_CONTAINER_PUSH}"
+        "-DREGISTRIES=${CONTAINER_REGISTRY_CSV}"
+        "-DCOSIGN_EXECUTABLE=${COSIGN_EXECUTABLE}"
+        "-DSIGN_RECURSIVE=${SIGN_RECURSIVE}"
+        "-DSIGN_TLOG_UPLOAD=${SIGN_TLOG_UPLOAD}"
+        "-DDIGEST_FILE=${DOCKER_CONTAINER_DIGEST}"
+        -P ${CMAKE_SOURCE_DIR}/cmake/scripts/CosignSign.cmake
+      COMMAND ${CMAKE_COMMAND} -E touch ${DOCKER_CONTAINER_SIGN_STAMP}
+    )
+    add_custom_target(
+      build.container.docker.sign
+      DEPENDS ${DOCKER_CONTAINER_SIGN_STAMP}
+    )
+
+    set(DOCKER_CONTAINER_VERIFY_STAMP ${CMAKE_BINARY_DIR}/docker-container-verify.stamp)
+    add_custom_command(
+      OUTPUT ${DOCKER_CONTAINER_VERIFY_STAMP}
+      BYPRODUCTS ${DOCKER_CONTAINER_VERIFY_STAMP}
+      COMMENT "Verifying monetr container image signatures with cosign"
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      DEPENDS ${DOCKER_CONTAINER_SIGN_STAMP}
+      VERBATIM
+      COMMAND ${CMAKE_COMMAND}
+        "-DMETADATA_FILE=${DOCKER_CONTAINER_PUSH}"
+        "-DREGISTRIES=${CONTAINER_REGISTRY_CSV}"
+        "-DCOSIGN_EXECUTABLE=${COSIGN_EXECUTABLE}"
+        "-DSIGN_TLOG_UPLOAD=${SIGN_TLOG_UPLOAD}"
+        "-DSIGN_CERT_IDENTITY_REGEX=${SIGN_CERT_IDENTITY_REGEX}"
+        "-DSIGN_OIDC_ISSUER=${SIGN_OIDC_ISSUER}"
+        -P ${CMAKE_SOURCE_DIR}/cmake/scripts/CosignVerify.cmake
+      COMMAND ${CMAKE_COMMAND} -E touch ${DOCKER_CONTAINER_VERIFY_STAMP}
+    )
+    add_custom_target(
+      build.container.docker.verify
+      DEPENDS ${DOCKER_CONTAINER_VERIFY_STAMP}
+    )
+  else()
+    message(STATUS "  cosign not found; container signing targets will be unavailable")
+  endif()
 endif()
 
 if(NOT DEFINED ENV{CI})
