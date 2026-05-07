@@ -1,6 +1,18 @@
 set(LOCAL_PNPM_EXECUTABLE "${NODE_BIN}/pnpm")
 set(PNPM_EXECUTABLE ${LOCAL_PNPM_EXECUTABLE} CACHE INTERNAL "Path to the local version of pnpm's executable")
 
+# Pin pnpm to whatever version package.json declares in its packageManager
+# field. Without a pin, npm always pulls the latest pnpm and we got burned when
+# pnpm 11 bumped its Node minimum past the version we install. Renovate updates
+# packageManager natively, so package.json is the single source of truth.
+file(READ "${CMAKE_SOURCE_DIR}/package.json" _MONETR_PACKAGE_JSON)
+string(JSON _MONETR_PACKAGE_MANAGER GET "${_MONETR_PACKAGE_JSON}" "packageManager")
+if(NOT _MONETR_PACKAGE_MANAGER MATCHES "^pnpm@([0-9]+\\.[0-9]+\\.[0-9]+)")
+  message(FATAL_ERROR "package.json packageManager is not pinned to a pnpm version: '${_MONETR_PACKAGE_MANAGER}'")
+endif()
+set(PNPM_VERSION "${CMAKE_MATCH_1}")
+message(STATUS "Found pnpm pin: pnpm@${PNPM_VERSION} (from package.json packageManager)")
+
 # TODO This is either a huge version mismatch between what I have and what Tim is seeing on Windows in how npm behaves
 # or windows legit just handles the prefix arg differently?
 if(WIN32)
@@ -13,9 +25,9 @@ file(MAKE_DIRECTORY "${NPM_PREFIX}")
 add_custom_command(
   OUTPUT ${PNPM_EXECUTABLE}
   BYPRODUCTS ${LOCAL_PNPM_EXECUTABLE}
-  COMMAND ${NPM_EXECUTABLE} install --silent --no-fund --no-audit --global --prefix ${NPM_PREFIX} pnpm
+  COMMAND ${NPM_EXECUTABLE} install --silent --no-fund --no-audit --global --prefix ${NPM_PREFIX} pnpm@${PNPM_VERSION}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  COMMENT "Setting up a local version of pnpm, this will not affect the host system"
+  COMMENT "Setting up a local version of pnpm@${PNPM_VERSION}, this will not affect the host system"
 )
 
 add_custom_target(
