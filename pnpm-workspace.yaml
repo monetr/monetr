@@ -2,3 +2,6 @@ packages:
   - docs
   - interface
   - emails
+allowBuilds:
+  '@swc/core': false
+  core-js: false
