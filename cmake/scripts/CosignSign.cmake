@@ -20,8 +20,8 @@ if(JSON_ERR)
   message(FATAL_ERROR "Failed to extract containerimage.digest from ${METADATA_FILE}: ${JSON_ERR}")
 endif()
 
-# Write digest to a stable file so downstream consumers don't need jq to
-# parse the buildx metadata JSON.
+# Write digest to a stable file so downstream consumers don't need jq to parse
+# the buildx metadata JSON.
 file(WRITE "${DIGEST_FILE}" "${DIGEST}")
 
 # When running under GitHub Actions, also expose the digest as a step output
@@ -36,11 +36,28 @@ if(SIGN_RECURSIVE)
   list(APPEND COSIGN_ARGS --recursive)
 endif()
 if(NOT SIGN_TLOG_UPLOAD)
-  list(APPEND COSIGN_ARGS --tlog-upload=false)
+  if(NOT SIGNING_CONFIG_FILE)
+    message(FATAL_ERROR "SIGNING_CONFIG_FILE not provided (required when SIGN_TLOG_UPLOAD is OFF)")
+  endif()
+  # cosign v3 turns --use-signing-config on by default, and that mode now
+  # rejects --tlog-upload=false. To keep PR builds out of the public Rekor
+  # transparency log we hand cosign a signing-config file with no Rekor
+  # entries. Generating it via cosign itself means the schema stays in sync
+  # with whichever cosign version cosign-installer happens to ship.
+  message(STATUS "cosign signing-config create -> ${SIGNING_CONFIG_FILE}")
+  execute_process(
+    COMMAND ${COSIGN_EXECUTABLE} signing-config create
+    OUTPUT_FILE "${SIGNING_CONFIG_FILE}"
+    RESULT_VARIABLE SIGNING_CONFIG_RES
+  )
+  if(NOT SIGNING_CONFIG_RES EQUAL 0)
+    message(FATAL_ERROR "cosign signing-config create failed (exit ${SIGNING_CONFIG_RES})")
+  endif()
+  list(APPEND COSIGN_ARGS --signing-config "${SIGNING_CONFIG_FILE}")
 endif()
 
-# Registries arrive as a comma-separated string (the wrapper joined the
-# CMake list with , to survive add_custom_command argument splitting).
+# Registries arrive as a comma-separated string (the wrapper joined the CMake
+# list with , to survive add_custom_command argument splitting).
 string(REPLACE "," ";" REGISTRY_LIST "${REGISTRIES}")
 
 foreach(REGISTRY IN LISTS REGISTRY_LIST)
