@@ -41,13 +41,18 @@ if(NOT SIGN_TLOG_UPLOAD)
   endif()
   # cosign v3 turns --use-signing-config on by default, and that mode now
   # rejects --tlog-upload=false. To keep PR builds out of the public Rekor
-  # transparency log we hand cosign a signing-config file with no Rekor
-  # entries. Generating it via cosign itself means the schema stays in sync
-  # with whichever cosign version cosign-installer happens to ship.
+  # transparency log we hand cosign a signing-config file built from the
+  # default Sigstore services with the Rekor entries stripped. TSA is also
+  # stripped to match the prior --tlog-upload=false behavior, which never
+  # enabled signed timestamps. Generating via cosign itself keeps the schema in
+  # sync with whichever cosign version cosign-installer ships.
   message(STATUS "cosign signing-config create -> ${SIGNING_CONFIG_FILE}")
   execute_process(
     COMMAND ${COSIGN_EXECUTABLE} signing-config create
-    OUTPUT_FILE "${SIGNING_CONFIG_FILE}"
+      --with-default-services
+      --no-default-rekor
+      --no-default-tsa
+      --out "${SIGNING_CONFIG_FILE}"
     RESULT_VARIABLE SIGNING_CONFIG_RES
   )
   if(NOT SIGNING_CONFIG_RES EQUAL 0)
