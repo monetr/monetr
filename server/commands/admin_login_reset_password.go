@@ -2,18 +2,19 @@ package commands
 
 import (
 	"context"
-	"crypto/rand"
 	"fmt"
-	"math/big"
+	"os"
 	"strings"
 
 	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/database"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/security"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -22,16 +23,20 @@ func adminLoginResetPassword(parent *cobra.Command) {
 	var arguments struct {
 		LoginID string
 		Email   string
+		Silent  bool
 	}
 	command := &cobra.Command{
 		Use:   "login:reset-password",
-		Short: "Reset a login's password to a randomly-generated value.",
+		Short: "Generate a password reset link for a login (and email it when SMTP is configured).",
 		Long: strings.Join([]string{
-			"Generates a fresh 16-character password for the target login and prints",
-			"it to stdout so the operator can communicate it to the user directly.",
-			"TOTP and active sessions are not affected; the operator is responsible",
-			"for any follow-up that monetr would normally do via the email-based",
-			"reset flow.",
+			"Mints a single-use password reset link for the target login using the",
+			"same PASETO machinery as the web forgot-password flow, and prints the",
+			"URL to stdout. When SMTP is configured the reset email is also sent to",
+			"the user; otherwise the operator is expected to relay the printed link",
+			"directly. The link's lifetime matches the configured",
+			"Email.ForgotPassword.TokenLifetime (default 10 minutes), and any",
+			"earlier link for the same login is invalidated as soon as the user",
+			"completes a reset (single-use).",
 		}, " "),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -65,25 +70,88 @@ func adminLoginResetPassword(parent *cobra.Command) {
 				fmt.Println("WARNING: this login's email is not verified; sign-in may be blocked depending on configuration.")
 			}
 
-			password, err := generateAdminPassword()
+			// The link's reset token has to be signed with the same Ed25519 key the
+			// running monetr server uses, otherwise the server will reject it on
+			// consumption. The loadCertificates helper would otherwise silently fall
+			// back to a fresh in-memory key (useful for first boot serve, useless
+			// here), so require a real key path before we go any further.
+			if configuration.Security.PrivateKey == "" {
+				return errors.New("Security.PrivateKey must be configured: the running server's signing key is needed to mint a token it will accept")
+			}
+			if _, err := os.Stat(configuration.Security.PrivateKey); err != nil {
+				return errors.Wrap(err, "configured signing key is not readable; tokens minted now will not validate against the running server")
+			}
+
+			publicKey, privateKey, err := loadCertificates(configuration, log, false)
 			if err != nil {
-				log.Error("failed to generate password", "err", err)
+				log.Error("failed to load ed25519 keypair", "err", err)
 				return err
 			}
 
-			if err := repo.ResetPassword(ctx, login.LoginId, password); err != nil {
-				log.Error("failed to reset login password", "err", err)
-				return errors.Wrap(err, "failed to reset login password")
+			clientTokens, err := security.NewPasetoClientTokens(
+				log,
+				clock.New(),
+				configuration.Server.GetBaseURL().String(),
+				publicKey,
+				privateKey,
+			)
+			if err != nil {
+				log.Error("failed to init paseto client tokens interface", "err", err)
+				return err
 			}
 
+			tokenLifetime := configuration.Email.ForgotPassword.TokenLifetime
+			token, err := clientTokens.Create(
+				tokenLifetime,
+				security.Claims{
+					Scope:        security.ResetPasswordScope,
+					EmailAddress: login.Email,
+					UserId:       "",
+					AccountId:    "",
+					LoginId:      login.LoginId.String(),
+				},
+			)
+			if err != nil {
+				log.Error("failed to mint password reset token", "err", err)
+				return errors.Wrap(err, "failed to mint password reset token")
+			}
+
+			resetURL := configuration.Server.GetURL("/password/reset", map[string]string{
+				"token": token,
+			})
+
 			fmt.Println()
-			fmt.Println("Login:   ", login.LoginId, fmt.Sprintf("(%s)", login.Email))
+			fmt.Println("Login:     ", login.LoginId, fmt.Sprintf("(%s)", login.Email))
+			fmt.Println("Expires in:", tokenLifetime)
 			fmt.Println()
-			fmt.Println("NEW PASSWORD:")
+			fmt.Println("PASSWORD RESET LINK:")
 			fmt.Println()
-			fmt.Println(password)
+			fmt.Println(resetURL)
 			fmt.Println()
-			fmt.Println("Communicate this password to the user out-of-band.")
+
+			// Mirror the web flow's gate so we don't email out a reset on a
+			// deployment where forgot-password is intentionally disabled. The link
+			// itself is always printed so the operator can hand-deliver it.
+			if arguments.Silent {
+				fmt.Println("Email not sent to user because --silent was specified!")
+			} else if configuration.Email.AllowPasswordReset() {
+				email := communication.NewEmailCommunication(log, configuration)
+				if err := email.SendEmail(ctx, communication.PasswordResetParams{
+					BaseURL:      configuration.Server.GetBaseURL().String(),
+					Email:        login.Email,
+					FirstName:    login.FirstName,
+					LastName:     login.LastName,
+					SupportEmail: "support@monetr.app",
+					ResetURL:     resetURL,
+				}); err != nil {
+					log.Warn("failed to send password reset email; the printed link is still valid", "err", err)
+					fmt.Println("WARNING: failed to send the reset email; relay the link above out-of-band.")
+				} else {
+					fmt.Println("A reset email has also been sent to the user.")
+				}
+			} else {
+				fmt.Println("Email is not configured on this deployment; relay the link above to user directly.")
+			}
 
 			return nil
 		},
@@ -91,6 +159,7 @@ func adminLoginResetPassword(parent *cobra.Command) {
 
 	command.PersistentFlags().StringVar(&arguments.LoginID, "login-id", "", "The login ID (e.g. lgn_...) of the login to reset.")
 	command.PersistentFlags().StringVar(&arguments.Email, "email", "", "The email address of the login to reset.")
+	command.PersistentFlags().BoolVar(&arguments.Silent, "silent", false, "Silent determines whether or not a password reset email is sent (when SMTP is configured). Defaults to: false")
 	command.MarkFlagsMutuallyExclusive("login-id", "email")
 	command.MarkFlagsOneRequired("login-id", "email")
 
@@ -131,46 +200,4 @@ func resolveLoginForReset(
 		return nil, errors.Wrap(err, "failed to find login by id")
 	}
 	return &login, nil
-}
-
-// generateAdminPassword returns a 16-character password drawn from a shell-safe
-// pool of letters, digits and symbols, with at least one character from each
-// class. The four "anchor" characters are placed at the front and then shuffled
-// so the position of each class is not predictable.
-func generateAdminPassword() (string, error) {
-	const (
-		lower  = "abcdefghijklmnopqrstuvwxyz"
-		upper  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		digits = "0123456789"
-		// Intentionally omits quote characters, backtick, backslash, dollar,
-		// semicolon, pipe and whitespace so the password can be pasted into a shell
-		// or chat client without escaping.
-		special = "!@#%^&*()-_=+[]{}<>?"
-	)
-	classes := []string{lower, upper, digits, special}
-	pool := strings.Join(classes, "")
-	out := make([]byte, 16)
-
-	for i, class := range classes {
-		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(class))))
-		if err != nil {
-			return "", errors.Wrap(err, "failed to read random data")
-		}
-		out[i] = class[n.Int64()]
-	}
-	for i := len(classes); i < len(out); i++ {
-		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(pool))))
-		if err != nil {
-			return "", errors.Wrap(err, "failed to read random data")
-		}
-		out[i] = pool[n.Int64()]
-	}
-	for i := len(out) - 1; i > 0; i-- {
-		j, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
-		if err != nil {
-			return "", errors.Wrap(err, "failed to shuffle password")
-		}
-		out[i], out[j.Int64()] = out[j.Int64()], out[i]
-	}
-	return string(out), nil
 }

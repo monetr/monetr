@@ -726,9 +726,12 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 
 func (c *Controller) resetPassword(ctx echo.Context) error {
 	c.scrubSentryBody(ctx)
-	if !c.Configuration.Email.AllowPasswordReset() {
-		return c.notFound(ctx, "password reset not enabled")
-	}
+	// The reset endpoint is intentionally not gated on Email.AllowPasswordReset;
+	// the PASETO reset token is the security control here, and operators may mint
+	// tokens out-of-band (via the login:reset-password CLI) on deployments where
+	// SMTP is intentionally disabled. The forgot-password email-sending endpoint
+	// is still gated above, so end users on no-SMTP deployments still can't
+	// self-serve.
 
 	var resetPasswordRequest struct {
 		Token    string `json:"token"`
@@ -787,22 +790,29 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "Failed to reset password")
 	}
 
-	if err := c.Email.SendEmail(
-		c.getContext(ctx),
-		communication.PasswordChangedParams{
-			BaseURL:      c.Configuration.Server.GetBaseURL().String(),
-			Email:        login.Email,
-			FirstName:    login.FirstName,
-			LastName:     login.LastName,
-			SupportEmail: "support@monetr.app",
-		},
-	); err != nil {
-		return c.wrapAndReturnError(
-			ctx,
-			err,
-			http.StatusInternalServerError,
-			"Failed to send password changed notification",
-		)
+	// Only attempt to send the "your password was changed" notification when the
+	// email subsystem is actually wired up. Previously the outer
+	// AllowPasswordReset gate guaranteed c.Email was non-nil here; now that the
+	// endpoint accepts admin-issued tokens regardless of SMTP, we have to be
+	// explicit.
+	if c.Configuration.Email.Enabled {
+		if err := c.Email.SendEmail(
+			c.getContext(ctx),
+			communication.PasswordChangedParams{
+				BaseURL:      c.Configuration.Server.GetBaseURL().String(),
+				Email:        login.Email,
+				FirstName:    login.FirstName,
+				LastName:     login.LastName,
+				SupportEmail: "support@monetr.app",
+			},
+		); err != nil {
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"Failed to send password changed notification",
+			)
+		}
 	}
 
 	return ctx.NoContent(http.StatusOK)
