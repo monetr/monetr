@@ -46,7 +46,7 @@ require (
 	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.50.0
 	golang.org/x/net v0.53.0
-	golang.org/x/sys v0.43.0
+	golang.org/x/sys v0.44.0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
 
