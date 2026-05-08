@@ -1,5 +1,56 @@
 # Changelog
 
+## [1.14.0](https://github.com/monetr/monetr/compare/v1.13.4...v1.14.0) (2026-05-08)
+
+
+### Features
+
+* **api:** Adding support for `.qbo` files ([dada9a8](https://github.com/monetr/monetr/commit/dada9a860987266b903304c4aa23abbac369ff57)), closes [#3130](https://github.com/monetr/monetr/issues/3130)
+* **build:** Container signing ([#3173](https://github.com/monetr/monetr/issues/3173)) ([9bccc2e](https://github.com/monetr/monetr/commit/9bccc2ef637ed101d183e6fb2a96100839285a71))
+* **cmd:** Adding password reset command line ([c0ba8ea](https://github.com/monetr/monetr/commit/c0ba8eae7e7d3d1eaa7825a307cbe81e13877b70)), closes [#1969](https://github.com/monetr/monetr/issues/1969)
+
+
+### Dependencies
+
+* **renovate:** pin dependencies ([#3177](https://github.com/monetr/monetr/issues/3177)) ([7eace0c](https://github.com/monetr/monetr/commit/7eace0cadd49afed4b547829975f18008544ef8b))
+* **renovate:** update actions/attest-build-provenance action to v4 ([#3175](https://github.com/monetr/monetr/issues/3175)) ([5735326](https://github.com/monetr/monetr/commit/5735326a82e20128ad7137022a0cf3e5c490721e))
+* **renovate:** update actions/cache action to v5.0.5 ([#3178](https://github.com/monetr/monetr/issues/3178)) ([2f03105](https://github.com/monetr/monetr/commit/2f031054386f1cd293a4af675dffe5f70be2c037))
+* **renovate:** update actions/checkout action to v6.0.2 ([#3179](https://github.com/monetr/monetr/issues/3179)) ([81bf7f3](https://github.com/monetr/monetr/commit/81bf7f330729f3334f85e6cb369b167aaa20a30b))
+* **renovate:** update actions/download-artifact action to v8.0.1 ([#3180](https://github.com/monetr/monetr/issues/3180)) ([a5e5944](https://github.com/monetr/monetr/commit/a5e5944909a8241f32b891009443c4ff9df32992))
+* **renovate:** update actions/upload-artifact action to v7.0.1 ([#3181](https://github.com/monetr/monetr/issues/3181)) ([6fbf2ae](https://github.com/monetr/monetr/commit/6fbf2ae1cb454eeddb9ab01935b33a70d5982226))
+* **renovate:** update chrnorm/deployment-action action to v2.0.8 ([#3182](https://github.com/monetr/monetr/issues/3182)) ([eba1a74](https://github.com/monetr/monetr/commit/eba1a7410f8f46a781c1a2e53df3857847dedef6))
+* **renovate:** update codecov/test-results-action action to v1.2.1 ([#3183](https://github.com/monetr/monetr/issues/3183)) ([fd9c228](https://github.com/monetr/monetr/commit/fd9c228354c5b6ce2e5ff56e13782baafb0a19e6))
+* **renovate:** update docker/login-action action to v4.1.0 ([#3184](https://github.com/monetr/monetr/issues/3184)) ([e370eae](https://github.com/monetr/monetr/commit/e370eae12609f38b98d57d264c594389c10ebd3b))
+* **renovate:** update getsentry/action-release action to v3.6.0 ([#3185](https://github.com/monetr/monetr/issues/3185)) ([2da6471](https://github.com/monetr/monetr/commit/2da6471b33e51b888bb542413c0c0488969ad098))
+* **renovate:** update github/codeql-action action to v4.35.2 ([#3186](https://github.com/monetr/monetr/issues/3186)) ([9238915](https://github.com/monetr/monetr/commit/923891596180332a64c81f6de1975482ebe9fb93))
+* **renovate:** update googlecloudplatform/release-please-action action to v3.7.13 ([#3187](https://github.com/monetr/monetr/issues/3187)) ([32c90ef](https://github.com/monetr/monetr/commit/32c90ef63605c3f2630264d61f895a53ce58df1a))
+* **renovate:** update registry docker tag to v3 ([#3176](https://github.com/monetr/monetr/issues/3176)) ([a89e51f](https://github.com/monetr/monetr/commit/a89e51fe11a0f50fb698286bc9bc1518b0ce09d5))
+* **renovate:** update sigstore/cosign-installer action to v3.10.1 ([#3188](https://github.com/monetr/monetr/issues/3188)) ([e145c27](https://github.com/monetr/monetr/commit/e145c27868f46877a00e77eb4cfc43fc009f5cab))
+* **renovate:** update sigstore/cosign-installer action to v4 ([#3189](https://github.com/monetr/monetr/issues/3189)) ([7b114fe](https://github.com/monetr/monetr/commit/7b114fe0ae16817f4011b213b21743d43bf880e0))
+* **ui:** update dependency @types/react to v18.3.28 ([#2841](https://github.com/monetr/monetr/issues/2841)) ([ec1fb28](https://github.com/monetr/monetr/commit/ec1fb28e1a82b36698a5dfdd622bcd372dbd430f))
+* **ui:** update dependency cssnano to v7.1.7 ([#2994](https://github.com/monetr/monetr/issues/2994)) ([18139c0](https://github.com/monetr/monetr/commit/18139c02cd9e915731398e1089b35cda01526215))
+
+
+### Bug Fixes
+
+* **api:** Fixing flakey spending timing tests ([#3190](https://github.com/monetr/monetr/issues/3190)) ([69b3c22](https://github.com/monetr/monetr/commit/69b3c2284aeda653d0993cbb451a4fa94c18b764)), closes [#1599](https://github.com/monetr/monetr/issues/1599)
+* **build:** Fixing dumb attestation bug ([e6bc2d1](https://github.com/monetr/monetr/commit/e6bc2d129f247aee37c439a3feaec823814ac90d))
+* **build:** Fixing signing container pipeline on main ([5b84e3b](https://github.com/monetr/monetr/commit/5b84e3ba6fe5689b6b4cfc5bb5bb80c7bb5929e5))
+* **ui:** Fixed UI cache time issue ([13cfb79](https://github.com/monetr/monetr/commit/13cfb79b8cf4bb6a17222130afd29218ec9a0b09))
+
+
+### Refactor
+
+* **api:** Plaid link status is now a string instead of a number ([1c1c488](https://github.com/monetr/monetr/commit/1c1c488bb2ce10d272b80dabb5f77d4bbd33b764))
+* **ui:** Migrate to forked vaul version ([31c3372](https://github.com/monetr/monetr/commit/31c3372701567816e4b1b32da832d798b312916e))
+* Update renovate config ([4466f0c](https://github.com/monetr/monetr/commit/4466f0c36c9d47730f26f8e20f25bff0e4b9da78))
+
+
+### Documentation
+
+* Adding quay.io registry to docker documentation ([2d73115](https://github.com/monetr/monetr/commit/2d731151d26cefbed4531dbcac603ade6b543f09))
+* **install:** Adding documentation on verifying container images ([91ce861](https://github.com/monetr/monetr/commit/91ce861fa29d7feb7257942ecbab049839483002))
+
 ## [1.13.4](https://github.com/monetr/monetr/compare/v1.13.3...v1.13.4) (2026-05-06)
 
 
