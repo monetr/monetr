@@ -1,10 +1,14 @@
 package application_test
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/gavv/httpexpect/v2"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/application"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/testutils"
@@ -51,6 +55,77 @@ func TestNewApp(t *testing.T) {
 	}
 	app := application.NewApp(conf, ui.NewUIController(log, conf))
 	assert.NotNil(t, app)
+}
+
+type testController struct{}
+
+func (testController) RegisterRoutes(app *echo.Echo) {
+	app.GET("/test", func(ctx echo.Context) error {
+		return ctx.NoContent(http.StatusOK)
+	})
+}
+
+func newTestApplication(t *testing.T, configuration config.Configuration) *httpexpect.Expect {
+	log := testutils.GetLog(t)
+	app := application.NewApp(configuration, testController{})
+
+	// run server using httptest
+	server := httptest.NewServer(app)
+	t.Cleanup(func() {
+		server.Close()
+	})
+
+	return httpexpect.WithConfig(httpexpect.Config{
+		TestName: t.Name(),
+		Client:   server.Client(),
+		BaseURL:  server.URL,
+		AssertionHandler: &httpexpect.DefaultAssertionHandler{
+			Formatter: &httpexpect.DefaultFormatter{
+				DisableNames:     false,
+				DisablePaths:     false,
+				DisableAliases:   false,
+				DisableDiffs:     false,
+				DisableRequests:  false,
+				DisableResponses: false,
+				DigitSeparator:   httpexpect.DigitSeparatorComma,
+				FloatFormat:      httpexpect.FloatFormatAuto,
+				StacktraceMode:   httpexpect.StacktraceModeStandard,
+				ColorMode:        httpexpect.ColorModeAuto,
+			},
+			Reporter: httpexpect.NewAssertReporter(t),
+		},
+
+		Printers: []httpexpect.Printer{
+			testutils.NewDebugPrinter(log, true),
+		},
+		Context: t.Context(),
+	})
+}
+
+func TestNewAppHSTSHeader(t *testing.T) {
+	t.Run("sets HSTS for HTTPS external URL", func(t *testing.T) {
+		e := newTestApplication(t, config.Configuration{
+			Server: config.Server{
+				ExternalURL: "https://monetr.local",
+			},
+		})
+
+		response := e.GET("/test").Expect()
+		response.Status(http.StatusOK)
+		response.Header("Strict-Transport-Security").IsEqual("max-age=31536000")
+	})
+
+	t.Run("omits HSTS for HTTP external URL", func(t *testing.T) {
+		e := newTestApplication(t, config.Configuration{
+			Server: config.Server{
+				ExternalURL: "http://monetr.local",
+			},
+		})
+
+		response := e.GET("/test").Expect()
+		response.Status(http.StatusOK)
+		response.Headers().NotContainsKey("Strict-Transport-Security")
+	})
 }
 
 func TestNewAppServerTimeouts(t *testing.T) {

@@ -64,7 +64,9 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *echo
 
 	app.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
-			// TODO Add HSTS here if the external URL has an HTTPS protocol.
+			if configuration.Server.GetIsSecureProtocol() {
+				ctx.Response().Header().Set("Strict-Transport-Security", "max-age=31536000")
+			}
 			ctx.Response().Header().Set("X-Frame-Options", "DENY")
 			ctx.Response().Header().Set("X-Content-Type-Options", "nosniff")
 			ctx.Response().Header().Set("Referrer-Policy", "same-origin")
