@@ -212,3 +212,70 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 		}
 	})
 }
+
+func TestRepositoryBase_GetTransactionsByLunchFlowId(t *testing.T) {
+	t.Run("does not return transactions from another bank account", func(t *testing.T) {
+		clock := clock.NewMock()
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		firstLink := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
+		firstBankAccount := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &firstLink)
+		secondLink := fixtures.GivenIHaveALunchFlowLink(t, clock, user)
+		secondBankAccount := fixtures.GivenIHaveALunchFlowBankAccount(t, clock, &secondLink)
+
+		repo := repository.NewRepositoryFromSession(
+			clock,
+			user.UserId,
+			user.AccountId,
+			db,
+			log,
+		)
+
+		lunchFlowId := gofakeit.UUID()
+		lunchFlowTransactions := []models.LunchFlowTransaction{
+			{
+				AccountId:              repo.AccountId(),
+				LunchFlowBankAccountId: *firstBankAccount.LunchFlowBankAccountId,
+				LunchFlowId:            lunchFlowId,
+				Merchant:               "Wendy's",
+				Description:            "Wendy's",
+				Date:                   clock.Now(),
+				Currency:               "USD",
+				Amount:                 1594,
+				IsPending:              false,
+				CreatedAt:              clock.Now(),
+			},
+		}
+		require.NoError(t, repo.CreateLunchFlowTransactions(context.Background(), lunchFlowTransactions))
+
+		transaction := models.Transaction{
+			AccountId:              repo.AccountId(),
+			BankAccountId:          firstBankAccount.BankAccountId,
+			LunchFlowTransactionId: &lunchFlowTransactions[0].LunchFlowTransactionId,
+			Amount:                 1594,
+			Categories: []string{
+				"Fast Food",
+			},
+			Date:                 clock.Now(),
+			Name:                 "Wendy's",
+			OriginalName:         "Wendy's",
+			MerchantName:         "Wendy's",
+			OriginalMerchantName: "Wendy's",
+			IsPending:            false,
+			Source:               models.TransactionSourceLunchFlow,
+			CreatedAt:            clock.Now(),
+		}
+		require.NoError(t, repo.CreateTransaction(context.Background(), transaction.BankAccountId, &transaction), "must create transaction")
+
+		byLunchFlowId, err := repo.GetTransactionsByLunchFlowId(
+			context.Background(),
+			secondBankAccount.BankAccountId,
+			[]string{
+				lunchFlowId,
+			},
+		)
+		assert.NoError(t, err, "should be able to retrieve transactions successfully")
+		assert.Empty(t, byLunchFlowId, "must not return a transaction that belongs to another bank account")
+	})
+}

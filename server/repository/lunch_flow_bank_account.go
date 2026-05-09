@@ -45,6 +45,29 @@ func (r *repositoryBase) GetLunchFlowBankAccount(
 	return &bankAccount, nil
 }
 
+func (r *repositoryBase) GetLunchFlowBankAccountForLunchFlowLink(
+	ctx context.Context,
+	linkId ID[LunchFlowLink],
+	id ID[LunchFlowBankAccount],
+) (*LunchFlowBankAccount, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var bankAccount LunchFlowBankAccount
+	err := r.txn.ModelContext(span.Context(), &bankAccount).
+		Where(`"lunch_flow_bank_account"."account_id" = ?`, r.AccountId()).
+		Where(`"lunch_flow_bank_account"."lunch_flow_link_id" = ?`, linkId).
+		Where(`"lunch_flow_bank_account"."lunch_flow_bank_account_id" = ?`, id).
+		Where(`"lunch_flow_bank_account"."deleted_at" IS NULL`).
+		Limit(1).
+		Select(&bankAccount)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &bankAccount, nil
+}
+
 func (r *repositoryBase) UpdateLunchFlowBankAccount(
 	ctx context.Context,
 	bankAccount *LunchFlowBankAccount,

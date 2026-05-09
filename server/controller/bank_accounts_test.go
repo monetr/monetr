@@ -186,6 +186,199 @@ func TestPostBankAccount(t *testing.T) {
 		}
 	})
 
+	t.Run("cannot create a lunch flow bank account from another lunch flow link", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var firstLunchFlowLinkId ID[LunchFlowLink]
+		{ // Create the first lunch flow link.
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "First Lunch Flow Account",
+					"lunchFlowURL": "https://lunchflow.app/api/v1",
+					"apiKey":       "firstapikey",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.status").IsEqual(LunchFlowLinkStatusPending)
+			firstLunchFlowLinkId = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+		}
+
+		mock_lunch_flow.MockFetchAccounts(t, []lunch_flow.Account{
+			{
+				Id:              "1234",
+				Name:            "First Lunch Flow Account",
+				InstitutionName: "US Bank",
+				Provider:        "Bogus",
+				Currency:        "USD",
+				Status:          "ACTIVE",
+			},
+		})
+		mock_lunch_flow.MockFetchBalance(t, "1234", lunch_flow.Balance{
+			Amount:   "1234.00",
+			Currency: "USD",
+		})
+
+		{ // Refresh the first lunch flow link accounts.
+			response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
+				WithPath("lunchFlowLinkId", firstLunchFlowLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNoContent)
+			response.Body().IsEmpty()
+		}
+
+		var firstLunchFlowBankAccountId ID[LunchFlowBankAccount]
+		{ // Read the first lunch flow bank account.
+			response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts").
+				WithPath("lunchFlowLinkId", firstLunchFlowLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(1)
+			firstLunchFlowBankAccountId = ID[LunchFlowBankAccount](response.JSON().Path("$[0].lunchFlowBankAccountId").String().Raw())
+		}
+
+		var firstLinkId ID[Link]
+		{ // Create the first actual link.
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "First Lunch Flow Account",
+					"description":     "My personal link",
+					"lunchFlowLinkId": firstLunchFlowLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkType").IsEqual(models.LunchFlowLinkType)
+			response.JSON().Path("$.lunchFlowLinkId").String().IsEqual(firstLunchFlowLinkId.String())
+			firstLinkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		var secondLunchFlowLinkId ID[LunchFlowLink]
+		{ // Create the second lunch flow link.
+			response := e.POST("/api/lunch_flow/link").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":         "Second Lunch Flow Account",
+					"lunchFlowURL": "https://lunchflow.app/api/v1",
+					"apiKey":       "secondapikey",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.status").IsEqual(LunchFlowLinkStatusPending)
+			secondLunchFlowLinkId = ID[LunchFlowLink](response.JSON().Path("$.lunchFlowLinkId").String().Raw())
+		}
+
+		mock_lunch_flow.MockFetchAccounts(t, []lunch_flow.Account{
+			{
+				Id:              "9876",
+				Name:            "Second Lunch Flow Account",
+				InstitutionName: "US Bank",
+				Provider:        "Bogus",
+				Currency:        "USD",
+				Status:          "ACTIVE",
+			},
+		})
+		mock_lunch_flow.MockFetchBalance(t, "9876", lunch_flow.Balance{
+			Amount:   "9876.00",
+			Currency: "USD",
+		})
+
+		{ // Refresh the second lunch flow link accounts.
+			response := e.POST("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts/refresh").
+				WithPath("lunchFlowLinkId", secondLunchFlowLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNoContent)
+			response.Body().IsEmpty()
+		}
+
+		var secondLunchFlowBankAccountId ID[LunchFlowBankAccount]
+		{ // Read the second lunch flow bank account.
+			response := e.GET("/api/lunch_flow/link/{lunchFlowLinkId}/bank_accounts").
+				WithPath("lunchFlowLinkId", secondLunchFlowLinkId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().IsEqual(1)
+			secondLunchFlowBankAccountId = ID[LunchFlowBankAccount](response.JSON().Path("$[0].lunchFlowBankAccountId").String().Raw())
+		}
+
+		var secondLinkId ID[Link]
+		{ // Create the second actual link.
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "Second Lunch Flow Account",
+					"description":     "My personal link",
+					"lunchFlowLinkId": secondLunchFlowLinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkType").IsEqual(models.LunchFlowLinkType)
+			response.JSON().Path("$.lunchFlowLinkId").String().IsEqual(secondLunchFlowLinkId.String())
+			secondLinkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+		}
+
+		{ // Try to create a bank account with the first link and a Lunch Flow bank account from the second link.
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId":                 firstLinkId,
+					"lunchFlowBankAccountId": secondLunchFlowBankAccountId,
+					"name":                   "Wrong account",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.lunchFlowBankAccountId").String().NotEmpty()
+		}
+
+		{ // Make sure the first link still accepts the first Lunch Flow bank account.
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId":                 firstLinkId,
+					"lunchFlowBankAccountId": firstLunchFlowBankAccountId,
+					"name":                   "First account",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsEqual(firstLinkId.String())
+			response.JSON().Path("$.lunchFlowBankAccountId").String().IsEqual(string(firstLunchFlowBankAccountId))
+		}
+
+		{ // Make sure the second link still accepts the second Lunch Flow bank account.
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId":                 secondLinkId,
+					"lunchFlowBankAccountId": secondLunchFlowBankAccountId,
+					"name":                   "Second account",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").String().IsEqual(secondLinkId.String())
+			response.JSON().Path("$.lunchFlowBankAccountId").String().IsEqual(string(secondLunchFlowBankAccountId))
+		}
+	})
+
 	t.Run("minimal creation", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)

@@ -103,6 +103,7 @@ func (r *repositoryBase) GetTransactionsByLunchFlowId(
 	err := r.txn.ModelContext(span.Context(), &items).
 		Relation("LunchFlowTransaction").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		WhereIn(`"lunch_flow_transaction"."lunch_flow_id" IN (?)`, lunchFlowIds).
 		Select(&items)
 	if err != nil {

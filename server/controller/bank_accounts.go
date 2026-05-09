@@ -5,11 +5,13 @@ import (
 	"net/http"
 
 	locale "github.com/elliotcourant/go-lclocale"
+	"github.com/go-pg/pg/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/validation"
+	"github.com/pkg/errors"
 )
 
 func (c *Controller) getBankAccounts(ctx echo.Context) error {
@@ -143,11 +145,29 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 			})
 		}
 
-		lunchFlowBankAccount, err := repo.GetLunchFlowBankAccount(
+		if link.LunchFlowLinkId == nil || link.LunchFlowLinkId.IsZero() {
+			return ctx.JSON(http.StatusBadRequest, map[string]any{
+				"error": "Invalid request",
+				"problems": map[string]any{
+					"linkId": "Link ID does not reference a valid Lunch Flow link",
+				},
+			})
+		}
+
+		lunchFlowBankAccount, err := repo.GetLunchFlowBankAccountForLunchFlowLink(
 			c.getContext(ctx),
+			*link.LunchFlowLinkId,
 			*bankAccount.LunchFlowBankAccountId,
 		)
 		if err != nil {
+			if errors.Cause(err) == pg.ErrNoRows {
+				return ctx.JSON(http.StatusBadRequest, map[string]any{
+					"error": "Invalid request",
+					"problems": map[string]any{
+						"lunchFlowBankAccountId": "Lunch Flow Bank Account ID must belong to the specified link",
+					},
+				})
+			}
 			return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow bank account")
 		}
 		bankAccount.OriginalName = lunchFlowBankAccount.Name

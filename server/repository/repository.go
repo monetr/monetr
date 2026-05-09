@@ -184,6 +184,11 @@ type BaseRepository interface {
 		ctx context.Context,
 		id ID[LunchFlowBankAccount],
 	) (*LunchFlowBankAccount, error)
+	GetLunchFlowBankAccountForLunchFlowLink(
+		ctx context.Context,
+		linkId ID[LunchFlowLink],
+		id ID[LunchFlowBankAccount],
+	) (*LunchFlowBankAccount, error)
 	UpdateLunchFlowBankAccount(
 		ctx context.Context,
 		bankAccount *LunchFlowBankAccount,
