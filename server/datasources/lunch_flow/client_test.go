@@ -1,11 +1,13 @@
 package lunch_flow_test
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
+	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/mock_lunch_flow"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/stretchr/testify/assert"
@@ -90,6 +92,180 @@ func TestLunchFlowClient_GetAccounts(t *testing.T) {
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
 			"GET https://lunchflow.app/api/v1/accounts": 1,
 		}, "must match Lunch Flow API calls")
+	})
+}
+
+func TestLunchFlowClient_Redirects(t *testing.T) {
+	t.Run("allows redirect under configured API URL", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		account := lunch_flow.Account{
+			Id:              "1234",
+			Name:            "Testing Checking",
+			InstitutionName: "Lehman Brothers",
+			Provider:        "Bogus",
+			Currency:        "USD",
+			Status:          "ACTIVE",
+		}
+
+		mock_http_helper.NewHttpMockJsonResponder(
+			t,
+			http.MethodGet,
+			config.DefaultLunchFlowAPIURL+"/accounts",
+			func(t *testing.T, request *http.Request) (any, int) {
+				assert.Equal(t, "bogus-token", request.Header.Get("x-api-key"))
+				return map[string]any{}, http.StatusFound
+			},
+			func(t *testing.T, request *http.Request, response any, status int) map[string][]string {
+				return map[string][]string{
+					"Location": {config.DefaultLunchFlowAPIURL + "/accounts/current"},
+				}
+			},
+		)
+		mock_http_helper.NewHttpMockJsonResponder(
+			t,
+			http.MethodGet,
+			config.DefaultLunchFlowAPIURL+"/accounts/current",
+			func(t *testing.T, request *http.Request) (any, int) {
+				assert.Equal(t, "bogus-token", request.Header.Get("x-api-key"))
+				return map[string]any{
+					"accounts": []lunch_flow.Account{account},
+					"total":    1,
+				}, http.StatusOK
+			},
+			nil,
+		)
+
+		log := testutils.GetLog(t)
+
+		client, err := lunch_flow.NewLunchFlowClient(
+			log,
+			config.DefaultLunchFlowAPIURL,
+			"bogus-token",
+			config.LunchFlow{
+				Enabled:        true,
+				AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
+			},
+		)
+		assert.NoError(t, err, "must not return an error creating the client")
+		assert.NotNil(t, client, "client must have a value")
+
+		accounts, err := client.GetAccounts(t.Context())
+		assert.NoError(t, err, "must follow redirects that stay under the configured API URL")
+		assert.EqualValues(t, []lunch_flow.Account{account}, accounts)
+
+		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
+			"GET https://lunchflow.app/api/v1/accounts":         1,
+			"GET https://lunchflow.app/api/v1/accounts/current": 1,
+		}, "must match Lunch Flow API calls")
+	})
+
+	t.Run("rejects redirect to another host", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		redirectUrl := "https://attacker.example/api/v1/accounts"
+		mock_http_helper.NewHttpMockJsonResponder(
+			t,
+			http.MethodGet,
+			config.DefaultLunchFlowAPIURL+"/accounts",
+			func(t *testing.T, request *http.Request) (any, int) {
+				assert.Equal(t, "bogus-token", request.Header.Get("x-api-key"))
+				return map[string]any{}, http.StatusFound
+			},
+			func(t *testing.T, request *http.Request, response any, status int) map[string][]string {
+				return map[string][]string{
+					"Location": {redirectUrl},
+				}
+			},
+		)
+		mock_http_helper.NewHttpMockJsonResponder(
+			t,
+			http.MethodGet,
+			redirectUrl,
+			func(t *testing.T, request *http.Request) (any, int) {
+				assert.Empty(t, request.Header.Get("x-api-key"))
+				return map[string]any{}, http.StatusNoContent
+			},
+			nil,
+		)
+
+		log := testutils.GetLog(t)
+
+		client, err := lunch_flow.NewLunchFlowClient(
+			log,
+			config.DefaultLunchFlowAPIURL,
+			"bogus-token",
+			config.LunchFlow{
+				Enabled:        true,
+				AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
+			},
+		)
+		assert.NoError(t, err, "must not return an error creating the client")
+		assert.NotNil(t, client, "client must have a value")
+
+		accounts, err := client.GetAccounts(t.Context())
+		assert.Error(t, err, "must reject redirects outside the configured API URL")
+		assert.Contains(t, err.Error(), "blocked Lunch Flow redirect")
+		assert.Empty(t, accounts)
+		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
+			"GET https://attacker.example/api/v1/accounts": 0,
+			"GET https://lunchflow.app/api/v1/accounts":    1,
+		}, "redirect target must not receive a request")
+	})
+
+	t.Run("rejects redirect outside configured API path", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		redirectUrl := "https://lunchflow.app/admin"
+		mock_http_helper.NewHttpMockJsonResponder(
+			t,
+			http.MethodGet,
+			config.DefaultLunchFlowAPIURL+"/accounts",
+			func(t *testing.T, request *http.Request) (any, int) {
+				assert.Equal(t, "bogus-token", request.Header.Get("x-api-key"))
+				return map[string]any{}, http.StatusFound
+			},
+			func(t *testing.T, request *http.Request, response any, status int) map[string][]string {
+				return map[string][]string{
+					"Location": {redirectUrl},
+				}
+			},
+		)
+		mock_http_helper.NewHttpMockJsonResponder(
+			t,
+			http.MethodGet,
+			redirectUrl,
+			func(t *testing.T, request *http.Request) (any, int) {
+				return map[string]any{}, http.StatusNoContent
+			},
+			nil,
+		)
+
+		log := testutils.GetLog(t)
+
+		client, err := lunch_flow.NewLunchFlowClient(
+			log,
+			config.DefaultLunchFlowAPIURL,
+			"bogus-token",
+			config.LunchFlow{
+				Enabled:        true,
+				AllowedApiUrls: []string{config.DefaultLunchFlowAPIURL},
+			},
+		)
+		assert.NoError(t, err, "must not return an error creating the client")
+		assert.NotNil(t, client, "client must have a value")
+
+		accounts, err := client.GetAccounts(t.Context())
+		assert.Error(t, err, "must reject redirects outside the configured API path")
+		assert.Contains(t, err.Error(), "blocked Lunch Flow redirect")
+		assert.Empty(t, accounts)
+		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
+			"GET https://lunchflow.app/admin":           0,
+			"GET https://lunchflow.app/api/v1/accounts": 1,
+		}, "redirect target must not receive a request")
 	})
 }
 

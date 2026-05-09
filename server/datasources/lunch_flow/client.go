@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/monetr/monetr/server/config"
@@ -92,6 +93,17 @@ func NewLunchFlowClient(
 
 	httpClient := &http.Client{
 		Timeout: 60 * time.Second,
+		CheckRedirect: func(request *http.Request, _ []*http.Request) error {
+			if !isAllowedRedirect(*parsedUrl, request.URL) {
+				log.Warn("blocked Lunch Flow redirect outside the configured API URL",
+					"apiUrl", parsedUrl.String(),
+					"redirectUrl", request.URL.Redacted(),
+				)
+				return errors.Errorf("blocked Lunch Flow redirect to %s", request.URL.Redacted())
+			}
+
+			return nil
+		},
 		Transport: round.NewObservabilityRoundTripper(http.DefaultTransport,
 			func(
 				ctx context.Context,
@@ -130,6 +142,46 @@ func NewLunchFlowClient(
 		log:         log,
 		httpClient:  httpClient,
 	}, nil
+}
+
+func isAllowedRedirect(apiUrl url.URL, redirectUrl *url.URL) bool {
+	if redirectUrl == nil {
+		return false
+	}
+
+	if redirectUrl.User != nil {
+		return false
+	}
+
+	if !strings.EqualFold(apiUrl.Scheme, redirectUrl.Scheme) {
+		return false
+	}
+
+	if !strings.EqualFold(apiUrl.Host, redirectUrl.Host) {
+		return false
+	}
+
+	basePath := cleanURLPath(apiUrl.Path)
+	redirectPath := cleanURLPath(redirectUrl.Path)
+	if basePath == "/" {
+		return true
+	}
+	return redirectPath == basePath || strings.HasPrefix(redirectPath, basePath+"/")
+}
+
+func cleanURLPath(input string) string {
+	if input == "" {
+		return "/"
+	}
+
+	cleaned := path.Clean(input)
+	if cleaned == "." {
+		return "/"
+	}
+	if !strings.HasPrefix(cleaned, "/") {
+		return "/" + cleaned
+	}
+	return cleaned
 }
 
 func (l *lunchFlowClient) doRequest(ctx context.Context, relativePath string, result any) error {
