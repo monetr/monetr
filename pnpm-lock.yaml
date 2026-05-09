@@ -317,8 +317,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       cssnano:
-        specifier: 7.1.7
-        version: 7.1.7(postcss@8.5.14)
+        specifier: 7.1.8
+        version: 7.1.8(postcss@8.5.14)
       postcss:
         specifier: 8.5.14
         version: 8.5.14
@@ -2109,11 +2109,11 @@ packages:
     peerDependencies:
       postcss: ^8.5.13
 
-  cssnano@7.1.7:
-    resolution: {integrity: sha512-N5LGn/OlhMxDTvKACwUPMzT34SSj1b022pvUAE/Vh6r2WD1aUCbc+QNIP/JjX9VVxebdJWZQ3352Lt4oF7dQ/g==}
+  cssnano@7.1.8:
+    resolution: {integrity: sha512-OGXtXqXmwEoIGfXM2QoD35vweUAtx+J8ZvLSZHOEV0Jv9Hs9ScTdGGjRzZXun5J4PEZhEoytKig2O2NR8NXxKw==}
     engines: {node: ^18.12.0 || ^20.9.0 || >=22.0}
     peerDependencies:
-      postcss: ^8.5.10
+      postcss: ^8.5.13
 
   csso@5.0.5:
     resolution: {integrity: sha512-0LrrStPOdJj+SPCCrGhzryycLjwcgUSHBtxNA8aIDxf0GLsRh1cKYhB00Gd1lDOS4yGH69+SNn13+TWbVHETFQ==}
@@ -3361,10 +3361,6 @@ packages:
 
   postcss-selector-parser@6.1.2:
     resolution: {integrity: sha512-Q8qQfPiZ+THO/3ZrOrO0cJJKfpYCagtMUkXbnEfmgUjwXg6z/WBeOyS9APBBPCTSiDV+s4SwQGu8yFsiMRIudg==}
-    engines: {node: '>=4'}
-
-  postcss-selector-parser@7.1.0:
-    resolution: {integrity: sha512-8sLjZwK0R+JlxlYcTuVnyT2v+htpdrjDOKuMcOVdYjt52Lh8hWRYpxBPoKx/Zg+bcjc3wx6fmQevMmUztS/ccA==}
     engines: {node: '>=4'}
 
   postcss-selector-parser@7.1.1:
@@ -6195,7 +6191,7 @@ snapshots:
     dependencies:
       postcss: 8.5.14
 
-  cssnano@7.1.7(postcss@8.5.14):
+  cssnano@7.1.8(postcss@8.5.14):
     dependencies:
       cssnano-preset-default: 7.0.17(postcss@8.5.14)
       lilconfig: 3.1.3
@@ -7719,7 +7715,7 @@ snapshots:
   postcss-calc@10.1.1(postcss@8.5.14):
     dependencies:
       postcss: 8.5.14
-      postcss-selector-parser: 7.1.0
+      postcss-selector-parser: 7.1.1
       postcss-value-parser: 4.2.0
 
   postcss-colormin@7.0.10(postcss@8.5.14):
@@ -7882,11 +7878,6 @@ snapshots:
       postcss-value-parser: 4.2.0
 
   postcss-selector-parser@6.1.2:
-    dependencies:
-      cssesc: 3.0.0
-      util-deprecate: 1.0.2
-
-  postcss-selector-parser@7.1.0:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
