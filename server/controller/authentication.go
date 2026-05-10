@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/mail"
@@ -9,7 +8,6 @@ import (
 	"time"
 
 	locale "github.com/elliotcourant/go-lclocale"
-	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/consts"
@@ -106,7 +104,6 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	var loginRequest struct {
 		Email     string `json:"email"`
 		Password  string `json:"password"`
-		Captcha   string `json:"captcha"`
 		Challenge string `json:"challenge"`
 		Nonce     uint64 `json:"nonce"`
 	}
@@ -114,16 +111,9 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
 	}
 
-	// Before the captcha, it is the cheap fail-fast. No-op when disabled.
+	// The cheap fail-fast before we do any real work. No-op when disabled.
 	if err := c.validateProofOfWork(ctx, powchallenge.PurposeLogin, loginRequest.Challenge, loginRequest.Nonce); err != nil {
 		return err // validateProofOfWork returns a valid http error.
-	}
-
-	// This will take the captcha from the request and validate it if the API is
-	// configured to do so. If it is enabled and the captcha fails then an error
-	// is returned to the client.
-	if err := c.validateLoginCaptcha(c.getContext(ctx), loginRequest.Captcha); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Valid ReCAPTCHA is required")
 	}
 
 	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
@@ -369,7 +359,6 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		LastName  string  `json:"lastName"`
 		Timezone  string  `json:"timezone"`
 		Locale    string  `json:"locale"`
-		Captcha   string  `json:"captcha"`
 		BetaCode  *string `json:"betaCode"`
 		Challenge string  `json:"challenge"`
 		Nonce     uint64  `json:"nonce"`
@@ -378,7 +367,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		return c.invalidJson(ctx)
 	}
 
-	// Before the captcha, it is the cheap fail-fast. No-op when disabled.
+	// The cheap fail-fast before we do any real work. No-op when disabled.
 	if err := c.validateProofOfWork(
 		ctx,
 		powchallenge.PurposeRegister,
@@ -386,16 +375,6 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		registerRequest.Nonce,
 	); err != nil {
 		return err // validateProofOfWork returns a valid http error.
-	}
-
-	// This will take the captcha from the request and validate it if the API is
-	// configured to do so. If it is enabled and the captcha fails then an error
-	// is returned to the client.
-	if err := c.validateRegistrationCaptcha(
-		c.getContext(ctx),
-		registerRequest.Captcha,
-	); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 	}
 
 	log := c.getLog(ctx)
@@ -659,10 +638,9 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 	}
 
 	var request struct {
-		Email     string  `json:"email"`
-		Captcha   *string `json:"captcha"`
-		Challenge string  `json:"challenge"`
-		Nonce     uint64  `json:"nonce"`
+		Email     string `json:"email"`
+		Challenge string `json:"challenge"`
+		Nonce     uint64 `json:"nonce"`
 	}
 	if err := ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
@@ -676,16 +654,6 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
 	if request.Email == "" {
 		return c.badRequest(ctx, "email must be provided to resend verification link")
-	}
-
-	if c.Configuration.ReCAPTCHA.Enabled {
-		if request.Captcha == nil {
-			return c.badRequest(ctx, "must provide ReCAPTCHA")
-		}
-
-		if err := c.validateCaptchaMaybe(c.getContext(ctx), *request.Captcha); err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid ReCAPTCHA provided")
-		}
 	}
 
 	unauthedRepo := c.mustGetUnauthenticatedRepository(ctx)
@@ -729,7 +697,6 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 
 	var sendForgotPasswordRequest struct {
 		Email     string `json:"email"`
-		ReCAPTCHA string `json:"captcha"`
 		Challenge string `json:"challenge"`
 		Nonce     uint64 `json:"nonce"`
 	}
@@ -739,7 +706,6 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 
 	// Clean up some of the input provided just in case.
 	sendForgotPasswordRequest.Email = strings.TrimSpace(strings.ToLower(sendForgotPasswordRequest.Email))
-	sendForgotPasswordRequest.ReCAPTCHA = strings.TrimSpace(sendForgotPasswordRequest.ReCAPTCHA)
 
 	// Before the captcha, it is the cheap fail-fast. No-op when disabled.
 	if err := c.validateProofOfWork(ctx, powchallenge.PurposeForgot, sendForgotPasswordRequest.Challenge, sendForgotPasswordRequest.Nonce); err != nil {
@@ -748,17 +714,6 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 
 	if sendForgotPasswordRequest.Email == "" {
 		return c.badRequest(ctx, "Must provide an email address.")
-	}
-
-	// If we require ReCAPTCHA then make sure they provide it.
-	if c.Configuration.ReCAPTCHA.ShouldVerifyForgotPassword() {
-		if sendForgotPasswordRequest.ReCAPTCHA == "" {
-			return c.badRequest(ctx, "Must provide a valid ReCAPTCHA.")
-		}
-
-		if err := c.validateCaptchaMaybe(c.getContext(ctx), sendForgotPasswordRequest.ReCAPTCHA); err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Valid ReCAPTCHA is required")
-		}
 	}
 
 	// We need to retrieve the login record for the email in order to verify that the login actually exists, as well as
@@ -949,35 +904,6 @@ func (c *Controller) validateProofOfWork(ctx echo.Context, purpose powchallenge.
 	default:
 		return c.badRequestError(ctx, err, "invalid proof of work")
 	}
-}
-
-func (c *Controller) validateLoginCaptcha(ctx context.Context, captcha string) error {
-	if !c.Configuration.ReCAPTCHA.ShouldVerifyLogin() {
-		// If it is disabled then we don't need to do anything.
-		return nil
-	}
-
-	return c.validateCaptchaMaybe(ctx, captcha)
-}
-
-func (c *Controller) validateRegistrationCaptcha(ctx context.Context, captcha string) error {
-	if !c.Configuration.ReCAPTCHA.ShouldVerifyRegistration() {
-		// If it is disabled then we don't need to do anything.
-		return nil
-	}
-
-	return c.validateCaptchaMaybe(ctx, captcha)
-}
-
-func (c *Controller) validateCaptchaMaybe(ctx context.Context, captcha string) error {
-	if captcha == "" {
-		return errors.Errorf("captcha is not valid")
-	}
-
-	span := sentry.StartSpan(ctx, "ReCAPTCHA")
-	defer span.Finish()
-
-	return c.Captcha.VerifyCaptcha(ctx, captcha)
 }
 
 // validateLogin takes the current request context and the provided email and password, it then validates thats the

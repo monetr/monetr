@@ -49,7 +49,6 @@ type Configuration struct {
 	Plaid         Plaid         `yaml:"plaid"`
 	PostgreSQL    PostgreSQL    `yaml:"postgreSql"`
 	ProofOfWork   ProofOfWork   `yaml:"proofOfWork"`
-	ReCAPTCHA     ReCAPTCHA     `yaml:"reCAPTCHA"`
 	Redis         Redis         `yaml:"redis"`
 	Security      Security      `yaml:"security"`
 	Sentry        Sentry        `yaml:"sentry"`
@@ -228,7 +227,6 @@ func (s Email) BlockedEmailDomain(emailAddress string) (string, bool) {
 // password, resend verification): the client must solve a small SHA-256
 // challenge before its request is accepted. It makes automated abuse expensive
 // without slowing real users (the work runs in a background web worker).
-// Independent of ReCAPTCHA.
 type ProofOfWork struct {
 	// Active when true. When disabled the challenge endpoint 404s and the auth
 	// endpoints skip the check. Disabled by default for now, set
@@ -240,30 +238,6 @@ type ProofOfWork struct {
 	// How long a challenge is valid for. Long enough to fill out the form, short
 	// enough that a stolen challenge is not useful for long.
 	Lifetime time.Duration `yaml:"lifetime"`
-}
-
-type ReCAPTCHA struct {
-	Enabled        bool   `yaml:"enabled"`
-	PublicKey      string `yaml:"publicKey"`
-	PrivateKey     string `yaml:"privateKey"`
-	Version        int    `yaml:"version"` // Currently only version 2 is supported by the UI.
-	VerifyLogin    bool   `yaml:"verifyLogin"`
-	VerifyRegister bool   `yaml:"loginRegister"`
-	// VerifyForgotPassword determines whether or not the user will be required to
-	// verify that they are not a robot overlord.
-	VerifyForgotPassword bool `yaml:"verifyPasswordReset"`
-}
-
-func (r ReCAPTCHA) ShouldVerifyLogin() bool {
-	return r.Enabled && r.VerifyLogin
-}
-
-func (r ReCAPTCHA) ShouldVerifyRegistration() bool {
-	return r.Enabled && r.VerifyRegister
-}
-
-func (r ReCAPTCHA) ShouldVerifyForgotPassword() bool {
-	return r.Enabled && r.VerifyForgotPassword
 }
 
 type Plaid struct {
@@ -453,10 +427,6 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("PostgreSQL.Username", "postgres")
 	v.SetDefault("Redis.Port", 6379)
 	v.SetDefault("Redis.Database", 0)
-	v.SetDefault("ReCAPTCHA.Enabled", false)
-	v.SetDefault("ReCAPTCHA.VerifyLogin", true)
-	v.SetDefault("ReCAPTCHA.VerifyRegister", true)
-	v.SetDefault("ReCAPTCHA.VerifyForgotPassword", true)
 	v.SetDefault("Security.PrivateKey", "/etc/monetr/ed25519.key")
 	v.SetDefault("Sentry.SampleRate", 1.0)
 	v.SetDefault("Sentry.TraceSampleRate", 1.0)
@@ -521,11 +491,6 @@ func setupEnv(v *viper.Viper) {
 	v.MustBindEnv("ProofOfWork.Enabled", "MONETR_PROOF_OF_WORK_ENABLED")
 	v.MustBindEnv("ProofOfWork.Difficulty", "MONETR_PROOF_OF_WORK_DIFFICULTY")
 	v.MustBindEnv("ProofOfWork.Lifetime", "MONETR_PROOF_OF_WORK_LIFETIME")
-	v.MustBindEnv("ReCAPTCHA.Enabled", "MONETR_CAPTCHA_ENABLED")
-	v.MustBindEnv("ReCAPTCHA.PublicKey", "MONETR_CAPTCHA_PUBLIC_KEY")
-	v.MustBindEnv("ReCAPTCHA.PrivateKey", "MONETR_CAPTCHA_PRIVATE_KEY")
-	v.MustBindEnv("ReCAPTCHA.VerifyLogin", "MONETR_CAPTCHA_VERIFY_LOGIN")
-	v.MustBindEnv("ReCAPTCHA.VerifyRegister", "MONETR_CAPTCHA_VERIFY_REGISTER")
 	v.MustBindEnv("Redis.Enabled", "MONETR_REDIS_ENABLED")
 	v.MustBindEnv("Redis.Address", "MONETR_REDIS_ADDRESS")
 	v.MustBindEnv("Redis.Port", "MONETR_REDIS_PORT")

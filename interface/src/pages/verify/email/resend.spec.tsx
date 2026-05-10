@@ -20,39 +20,18 @@ describe('resend verification email', () => {
     mockFetch.restore();
   });
 
-  it('will render without ReCAPTCHA', () => {
-    mockFetch.onGet('/api/config').reply(200, {
-      ReCAPTCHAKey: null,
-      proofOfWorkEnabled: false,
-    });
-
-    const world = testRenderer(<ResendVerificationPage />, { initialRoute: '/verify/email/resend' });
-
-    expect(world.queryByTestId('resend-email')).toBeVisible();
-    expect(world.queryByTestId('resend-captcha')).not.toBeInTheDocument();
-    expect(world.queryByTestId('resend-email-excluded')).toBeVisible();
-    expect(world.queryByTestId('resend-email-included')).not.toBeInTheDocument();
-  });
-
-  it('will render with ReCAPTCHA', async () => {
-    mockFetch.onGet('/api/config').reply(200, {
-      ReCAPTCHAKey: '6LfL3vcgAAAAALlJNxvUPdgrbzH_ca94YTCqso6L',
-      proofOfWorkEnabled: false,
-    });
+  it('will render', () => {
+    mockFetch.onGet('/api/config').reply(200, {});
 
     const world = testRenderer(<ResendVerificationPage />, { initialRoute: '/verify/email/resend' });
 
     expect(world.queryByTestId('resend-email')).toBeVisible();
     expect(world.queryByTestId('resend-email-excluded')).toBeVisible();
     expect(world.queryByTestId('resend-email-included')).not.toBeInTheDocument();
-    await waitFor(() => expect(world.queryByTestId('resend-captcha')).toBeVisible());
   });
 
   it('will render with provided email', async () => {
-    mockFetch.onGet('/api/config').reply(200, {
-      ReCAPTCHAKey: null,
-      proofOfWorkEnabled: false,
-    });
+    mockFetch.onGet('/api/config').reply(200, {});
 
     const world = testRenderer(<ResendVerificationPage />, {
       initialRoute: `/verify/email/resend?email=${encodeURIComponent('email@test.com')}`,
@@ -60,7 +39,6 @@ describe('resend verification email', () => {
 
     await waitFor(() => {
       expect(world.queryByTestId('resend-email')).toBeVisible();
-      expect(world.queryByTestId('resend-captcha')).not.toBeInTheDocument();
       expect(world.queryByTestId('resend-email-included')).toBeVisible();
       expect(world.queryByTestId('resend-email-excluded')).not.toBeInTheDocument();
     });

@@ -39,7 +39,6 @@ func TestNewApp(t *testing.T) {
 			Domain: "monetr.local",
 			SMTP:   config.SMTPClient{},
 		},
-		ReCAPTCHA: config.ReCAPTCHA{},
 		Plaid: config.Plaid{
 			Enabled:      true,
 			ClientID:     gofakeit.UUID(),

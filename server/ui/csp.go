@@ -130,13 +130,6 @@ func (c *UIController) buildPolicies() (csp string, trustedTypes string) {
 		policies["frame-src"]["https://*.plaid.com"] = noop
 	}
 
-	// Only allow google to connect when ReCAPTCHA is enabled.
-	if c.configuration.ReCAPTCHA.Enabled {
-		policies["script-src-elem"]["https://www.gstatic.com"] = noop
-		policies["script-src-elem"]["https://www.google.com"] = noop
-		policies["frame-src"]["https://www.google.com"] = noop
-	}
-
 	// If sentry is enabled and an external DSN is configured, then setup the
 	// connect-src for sentry.
 	if c.configuration.Sentry.Enabled {
@@ -181,11 +174,11 @@ func (c *UIController) buildPolicies() (csp string, trustedTypes string) {
 	// attacks. See
 	// https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
 	// At the time of writing this, we cannot be sure that every dependency the UI
-	// relies on (Sentry, Plaid, ReCAPTCHA, and so on) is compatible with Trusted
-	// Types, so this is sent as a Content-Security-Policy-Report-Only header.
-	// Violations are sent to the same endpoint as the rest of the CSP reports
-	// without actually breaking the page. Once the reports are quiet this can be
-	// promoted into the enforcing Content-Security-Policy header.
+	// relies on (Sentry, Plaid, and so on) is compatible with Trusted Types, so
+	// this is sent as a Content-Security-Policy-Report-Only header. Violations
+	// are sent to the same endpoint as the rest of the CSP reports without
+	// actually breaking the page. Once the reports are quiet this can be promoted
+	// into the enforcing Content-Security-Policy header.
 	trustedTypesParts := []string{
 		"require-trusted-types-for 'script'",
 		"trusted-types react",

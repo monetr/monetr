@@ -5,7 +5,6 @@ import { useSearch } from 'wouter';
 import type { ApiError } from '@monetr/interface/api/client';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLogo from '@monetr/interface/components/MLogo';
 import TextLink from '@monetr/interface/components/TextLink';
@@ -20,7 +19,6 @@ import styles from './resend.module.scss';
 
 interface ResendValues {
   email: string | null;
-  captcha: string | null;
 }
 
 export default function ResendVerificationPage(): React.JSX.Element {
@@ -42,7 +40,6 @@ export default function ResendVerificationPage(): React.JSX.Element {
             url: '/api/authentication/verify/resend',
             data: {
               email: values.email,
-              captcha: values.captcha,
               challenge: solution?.challenge,
               nonce: solution?.nonce,
             },
@@ -83,7 +80,6 @@ export default function ResendVerificationPage(): React.JSX.Element {
 
   const initialValues: ResendValues = {
     email: emailFromQuery || null,
-    captcha: null,
   };
 
   if (done) {
@@ -108,12 +104,6 @@ export default function ResendVerificationPage(): React.JSX.Element {
           data-testid='resend-email'
           label='Email'
           name='email'
-        />
-        <MCaptcha
-          data-testid='resend-captcha'
-          // Show the captcha if there is a captcha key specified in the config.
-          name='captcha'
-          show={Boolean(config?.ReCAPTCHAKey)}
         />
         <FormButton className={styles.field} color='primary' type='submit'>
           Resend Verification

@@ -19,7 +19,6 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 		VerifyRegister          bool         `json:"verifyRegister"`
 		VerifyEmailAddress      bool         `json:"verifyEmailAddress"`
 		VerifyForgotPassword    bool         `json:"verifyForgotPassword"`
-		ReCAPTCHAKey            string       `json:"ReCAPTCHAKey,omitempty"`
 		AllowSignUp             bool         `json:"allowSignUp"`
 		AllowForgotPassword     bool         `json:"allowForgotPassword"`
 		LongPollPlaidSetup      bool         `json:"longPollPlaidSetup"`
@@ -44,19 +43,10 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 	configuration.BuildType = build.BuildType
 	configuration.BuildTime = build.BuildTime
 
-	// If ReCAPTCHA is enabled then we want to provide the UI our public key as
-	// well as whether or not we want it to verify logins and registrations.
-	if c.Configuration.ReCAPTCHA.Enabled {
-		configuration.ReCAPTCHAKey = c.Configuration.ReCAPTCHA.PublicKey
-		configuration.VerifyLogin = c.Configuration.ReCAPTCHA.VerifyLogin
-		configuration.VerifyRegister = c.Configuration.ReCAPTCHA.VerifyRegister
-	}
-
 	// We can only allow forgot password if SMTP is enabled. Otherwise we have
 	// no way of sending an email to the user.
 	if c.Configuration.Email.AllowPasswordReset() {
 		configuration.AllowForgotPassword = true
-		configuration.VerifyForgotPassword = c.Configuration.ReCAPTCHA.ShouldVerifyForgotPassword()
 	}
 
 	configuration.VerifyEmailAddress = c.Configuration.Email.ShouldVerifyEmails()

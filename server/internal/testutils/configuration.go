@@ -38,7 +38,6 @@ func GetConfig(t *testing.T) config.Configuration {
 			Domain: TestEmailDomain,
 			SMTP:   config.SMTPClient{},
 		},
-		ReCAPTCHA: config.ReCAPTCHA{},
 		ProofOfWork: config.ProofOfWork{
 			// Proof of work is disabled by default in tests so that the existing
 			// test suite does not need to solve a challenge on every auth request.

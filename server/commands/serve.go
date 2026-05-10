@@ -18,7 +18,6 @@ import (
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/cache"
-	"github.com/monetr/monetr/server/captcha"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/controller"
@@ -73,13 +72,6 @@ func ServeCommand(parent *cobra.Command) {
 				configuration.LunchFlow.ValidateConfig(),
 			); err != nil {
 				return errors.Wrap(err, "there are configuration problems")
-			}
-
-			// TODO Move this to a configuration validation function
-			if configuration.ReCAPTCHA.Enabled {
-				log.Warn("DEPRECATION WARNING: ReCAPTCHA will be removed in a future release. If you are currently using it then please comment on the issue on GitHub. It is recommended to instead rate limit monetr authentication endpoints instead of using a captcha at this time.",
-					"issueUrl", "https://github.com/monetr/monetr/issues/2979",
-				)
 			}
 
 			// Proof of work relies on the browser's Web Crypto API, which is only
@@ -283,16 +275,6 @@ func ServeCommand(parent *cobra.Command) {
 				1*time.Hour,
 			)
 
-			var recaptcha captcha.Verification
-			if configuration.ReCAPTCHA.Enabled {
-				recaptcha, err = captcha.NewReCAPTCHAVerification(
-					configuration.ReCAPTCHA.PrivateKey,
-				)
-				if err != nil {
-					panic(err)
-				}
-			}
-
 			// Derive the proof of work HMAC secret from our existing ED25519 seed
 			// using HKDF. This way we do not have to introduce and manage a brand
 			// new secret just for proof of work, and because HKDF is one way the
@@ -356,7 +338,6 @@ func ServeCommand(parent *cobra.Command) {
 					Accounts:                 accountsRepo,
 					Billing:                  bill,
 					Cache:                    redisCache,
-					Captcha:                  recaptcha,
 					Challenger:               challenger,
 					ClientTokens:             clientTokens,
 					Clock:                    clock,
