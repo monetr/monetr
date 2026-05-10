@@ -1,0 +1,20 @@
+@use '@monetr/interface/variables';
+
+.spinner {
+  width: 12 * variables.$size;
+  height: 12 * variables.$size;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+.trackPath {
+  fill: var(--background-subtle);
+}
+
+.brandPath {
+  fill: var(--brand);
+}

@@ -1,0 +1,40 @@
+@use '@monetr/interface/variables';
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.root {
+  position: relative;
+}
+
+.pendingIndicator {
+  position: absolute;
+  display: flex;
+  height: 3 * variables.$size;
+  width: 3 * variables.$size;
+  right: 0;
+  bottom: 0;
+}
+
+.pendingPing {
+  position: absolute;
+  display: inline-flex;
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  background-color: var(--blue-subtle);
+  animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.pendingDot {
+  position: relative;
+  display: inline-flex;
+  height: 3 * variables.$size;
+  width: 3 * variables.$size;
+  border-radius: 9999px;
+  background-color: var(--blue);
+}

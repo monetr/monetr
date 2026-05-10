@@ -4,6 +4,8 @@ import { useInstitution } from '@monetr/interface/hooks/useInstitution';
 import type Link from '@monetr/interface/models/Link';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
+import styles from './InstitutionLogo.module.scss';
+
 interface PlaidInstitutionLogoProps {
   link?: Link;
   className?: string;
@@ -15,7 +17,7 @@ export default function PlaidInstitutionLogo(props: PlaidInstitutionLogoProps): 
   if (!institution?.logo) {
     return (
       <Landmark
-        className={mergeTailwind('text-blue-500', props.className)}
+        className={mergeTailwind(styles.iconFallback, props.className)}
         data-testid={`bank-sidebar-item-${props.link?.linkId}-logo-missing`}
       />
     );

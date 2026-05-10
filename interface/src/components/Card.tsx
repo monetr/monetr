@@ -1,8 +1,11 @@
 import type React from 'react';
-import { twMerge } from 'tailwind-merge';
+
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import styles from './Card.module.scss';
 
 export interface CardProps extends React.HTMLProps<HTMLDivElement> {}
 
 export default function Card({ className, ...props }: CardProps): JSX.Element {
-  return <div className={twMerge('border-dark-monetr-border rounded border p-4 space-y-2', className)} {...props} />;
+  return <div className={mergeTailwind(styles.card, className)} {...props} />;
 }

@@ -1,0 +1,12 @@
+@use '@monetr/interface/variables';
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  padding: 4 * variables.$size;
+
+  // Replicate tailwind space-y-2: margin-top on every non-hidden sibling after the first.
+  > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 2 * variables.$size;
+  }
+}
