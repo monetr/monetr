@@ -6,11 +6,6 @@ import parseDate from '@monetr/interface/util/parseDate';
 export class AppConfiguration {
   requireLegalName: boolean;
   requirePhoneNumber: boolean;
-  verifyLogin: boolean;
-  verifyRegister: boolean;
-  verifyEmailAddress: boolean;
-  verifyForgotPassword: boolean;
-  ReCAPTCHAKey: string | null;
   allowSignUp: boolean;
   allowForgotPassword: boolean;
   longPollPlaidSetup: boolean;

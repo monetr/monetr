@@ -12,7 +12,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/cache"
-	"github.com/monetr/monetr/server/captcha"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/sentryecho"
@@ -34,7 +33,6 @@ type Controller struct {
 	Accounts                 repository.AccountsRepository
 	Billing                  billing.Billing
 	Cache                    cache.Cache
-	Captcha                  captcha.Verification
 	ClientTokens             security.ClientTokens
 	Clock                    clock.Clock
 	Configuration            config.Configuration

@@ -9,13 +9,11 @@ import Flex from '@monetr/interface/components/Flex';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import { layoutVariants } from '@monetr/interface/components/Layout';
-import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLogo from '@monetr/interface/components/MLogo';
 import BetaCodeInput from '@monetr/interface/components/register/BetaCodeInput';
 import TextLink from '@monetr/interface/components/TextLink';
 import Typography from '@monetr/interface/components/Typography';
-import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useSignUp, { type SignUpResponse } from '@monetr/interface/hooks/useSignUp';
 import { getLocale, getTimezone } from '@monetr/interface/util/locale';
 import type { APIError } from '@monetr/interface/util/request';
@@ -29,7 +27,6 @@ interface RegisterValues {
   email: string;
   password: string;
   confirmPassword: string;
-  captcha?: string;
   betaCode?: string;
 }
 
@@ -96,7 +93,6 @@ export function RegisterSuccessful(): JSX.Element {
 
 export default function Register(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const { data: config } = useAppConfiguration();
   const signUp = useSignUp();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -107,7 +103,6 @@ export default function Register(): JSX.Element {
 
     return await signUp({
       betaCode: values.betaCode,
-      captcha: values.captcha,
       email: values.email,
       firstName: values.firstName,
       lastName: values.lastName,
@@ -212,7 +207,6 @@ export default function Register(): JSX.Element {
           type='password'
         />
         <BetaCodeInput />
-        <MCaptcha className='mb-1' name='captcha' show={Boolean(config?.verifyRegister)} />
         <FormButton className='w-full mt-1' data-testid='register-submit' role='form' type='submit' variant='primary'>
           Sign Up
         </FormButton>

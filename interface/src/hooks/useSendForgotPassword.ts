@@ -3,15 +3,14 @@ import { useSnackbar, type VariantType } from 'notistack';
 import type { ApiError } from '@monetr/interface/api/client';
 import request, { type APIError } from '@monetr/interface/util/request';
 
-export default function useSendForgotPassword(): (email: string, ReCAPTCHA: string | null) => Promise<void> {
+export default function useSendForgotPassword(): (email: string) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
-  return async (email: string, ReCAPTCHA: string | null) => {
+  return async (email: string) => {
     return request({
       method: 'POST',
       url: '/api/authentication/forgot',
       data: {
         email,
-        captcha: ReCAPTCHA,
       },
     })
       .then(

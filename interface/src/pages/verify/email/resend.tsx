@@ -6,23 +6,19 @@ import { useLocation } from 'react-router-dom';
 import type { ApiError } from '@monetr/interface/api/client';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLogo from '@monetr/interface/components/MLogo';
 import TextLink from '@monetr/interface/components/TextLink';
 import Typography from '@monetr/interface/components/Typography';
-import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import request, { type APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
 interface ResendValues {
   email: string | null;
-  captcha: string | null;
 }
 
 export default function ResendVerificationPage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const { data: config } = useAppConfiguration();
   const { state: routeState } = useLocation();
   const [done, setDone] = useState(false);
 
@@ -33,7 +29,6 @@ export default function ResendVerificationPage(): JSX.Element {
         url: '/api/authentication/verify/resend',
         data: {
           email: values.email,
-          captcha: values.captcha,
         },
       })
         .then(() => setDone(true))
@@ -70,7 +65,6 @@ export default function ResendVerificationPage(): JSX.Element {
 
   const initialValues: ResendValues = {
     email: routeState?.emailAddress || undefined,
-    captcha: null,
   };
 
   if (done) {
@@ -94,12 +88,6 @@ export default function ResendVerificationPage(): JSX.Element {
           data-testid='resend-email'
           label='Email'
           name='email'
-        />
-        <MCaptcha
-          data-testid='resend-captcha'
-          // Show the captcha if there is a captcha key specified in the config.
-          name='captcha'
-          show={Boolean(config?.ReCAPTCHAKey)}
         />
         <FormButton className='w-full' color='primary' type='submit'>
           Resend Verification
