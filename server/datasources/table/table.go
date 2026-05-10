@@ -27,9 +27,10 @@ type Row struct {
 	Balance   int64     `json:"balance"`
 }
 
-func (r *Row) Validate() error {
+func (r *Row) Validate(ctx context.Context) error {
 	return errors.Wrap(
-		validation.ValidateStruct(
+		validation.ValidateStructWithContext(
+			ctx,
 			r,
 			validation.Field(
 				&r.ID,
@@ -95,9 +96,9 @@ func NewTable(
 	}
 }
 
-func (t *Table) Read() (*Row, error) {
+func (t *Table) Read(ctx context.Context) (*Row, error) {
 	if t.firstRowHeaders && t.index == 0 {
-		if err := t.mapping.Validate(context.TODO()); err != nil {
+		if err := t.mapping.Validate(ctx); err != nil {
 			return nil, err
 		}
 
@@ -112,7 +113,7 @@ func (t *Table) Read() (*Row, error) {
 		}
 		t.index++
 	} else if !t.firstRowHeaders && len(t.headers) == 0 {
-		if err := t.mapping.Validate(context.TODO()); err != nil {
+		if err := t.mapping.Validate(ctx); err != nil {
 			return nil, err
 		}
 
@@ -173,6 +174,10 @@ func (t *Table) Read() (*Row, error) {
 		Date:      date,
 		Posted:    t.getPosted(data),
 		Balance:   balance,
+	}
+
+	if err := row.Validate(ctx); err != nil {
+		return nil, err
 	}
 
 	return &row, nil

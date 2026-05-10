@@ -1480,7 +1480,7 @@ func TestTable_Read(t *testing.T) {
 			var got []table.Row
 			var lastErr error
 			for {
-				row, err := tbl.Read()
+				row, err := tbl.Read(t.Context())
 				if err != nil {
 					lastErr = err
 					break
