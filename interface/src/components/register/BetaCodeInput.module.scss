@@ -1,0 +1,18 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.input {
+  @include mixins.width-full;
+
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.width-half;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    @include mixins.width-third;
+  }
+
+  @media (min-width: variables.$extraLargeScreen) {
+    @include mixins.width-quarter;
+  }
+}

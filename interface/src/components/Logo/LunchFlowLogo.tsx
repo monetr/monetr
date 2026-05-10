@@ -3,19 +3,15 @@
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
+import styles from './LunchFlowLogo.module.scss';
+
 interface LunchFlowLogoProps {
   className?: string;
   iconOnly?: boolean;
 }
 
 export default function LunchFlowLogo(props: LunchFlowLogoProps): React.JSX.Element {
-  const classNames = mergeTailwind(
-    {
-      'aspect-[280/86]': !props.iconOnly,
-      'aspect-[1/1]': props.iconOnly,
-    },
-    props.className,
-  );
+  const classNames = mergeTailwind(props.iconOnly ? styles.iconOnly : styles.full, props.className);
 
   const viewBox = props.iconOnly ? '30 30 86 86' : '30 30 280 86';
 

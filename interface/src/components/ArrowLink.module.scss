@@ -1,0 +1,11 @@
+@use '@monetr/interface/variables';
+
+.arrowLink {
+  flex: none;
+
+  // md:cursor-pointer - on touch screens (no hover-capable input) we don't want
+  // a pointer cursor; this matches the original tailwind responsive prefix.
+  @media (min-width: variables.$mediumScreen) {
+    cursor: pointer;
+  }
+}

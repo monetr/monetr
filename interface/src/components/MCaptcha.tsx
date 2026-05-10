@@ -5,6 +5,8 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
+import styles from './MCaptcha.module.scss';
+
 export interface MCaptchaProps {
   name?: string;
   show?: boolean;
@@ -34,7 +36,7 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
 
   const loading = Boolean(formikContext?.isSubmitting);
 
-  const classes = mergeTailwind(['flex', 'items-center', 'justify-center', 'w-full'], props.className);
+  const classes = mergeTailwind(styles.root, props.className);
 
   return (
     <div className={classes}>
