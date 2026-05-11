@@ -2,7 +2,6 @@ import { useCallback } from 'react';
 import { startOfDay } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { HeartCrack, Save, ShoppingCart } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 import { useParams } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -28,6 +27,7 @@ import { useTransaction } from '@monetr/interface/hooks/useTransaction';
 import { useUpdateTransaction } from '@monetr/interface/hooks/useUpdateTransaction';
 import Transaction from '@monetr/interface/models/Transaction';
 import type { APIError } from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 interface TransactionValues {
   name: string;

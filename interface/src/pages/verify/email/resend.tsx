@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import type { FormikErrors, FormikHelpers } from 'formik';
-import { useSnackbar } from 'notistack';
 import { useLocation } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -14,6 +13,7 @@ import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import request, { type APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
+import { useSnackbar } from '@monetr/notify';
 
 interface ResendValues {
   email: string | null;

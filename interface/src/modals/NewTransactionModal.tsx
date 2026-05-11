@@ -2,7 +2,6 @@ import { Fragment, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfToday } from 'date-fns';
 import type { FormikHelpers } from 'formik';
-import { useSnackbar } from 'notistack';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
@@ -22,6 +21,7 @@ import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankA
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import { useSnackbar } from '@monetr/notify';
 
 interface NewTransactionValues {
   name: string;

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { FormikErrors, FormikHelpers } from 'formik';
-import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -20,6 +19,7 @@ import useSignUp, { type SignUpResponse } from '@monetr/interface/hooks/useSignU
 import { getLocale, getTimezone } from '@monetr/interface/util/locale';
 import type { APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
+import { useSnackbar } from '@monetr/notify';
 
 import styles from './register.module.scss';
 

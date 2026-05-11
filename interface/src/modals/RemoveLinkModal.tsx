@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Trash } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -10,6 +9,7 @@ import Typography from '@monetr/interface/components/Typography';
 import { useRemoveLink } from '@monetr/interface/hooks/useRemoveLink';
 import type Link from '@monetr/interface/models/Link';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import { useSnackbar } from '@monetr/notify';
 
 export interface RemoveLinkModalProps {
   link: Link;

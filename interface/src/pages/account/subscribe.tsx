@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
 import Flex from '@monetr/interface/components/Flex';
@@ -10,6 +9,7 @@ import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 import styles from './subscribe.module.scss';
 

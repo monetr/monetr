@@ -1,7 +1,6 @@
 import { Fragment } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { FormikErrors, FormikHelpers } from 'formik';
-import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@monetr/interface/components/InputOTP';
@@ -10,6 +9,7 @@ import MForm from '@monetr/interface/components/MForm';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
 import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 import styles from './multifactor.module.scss';
 

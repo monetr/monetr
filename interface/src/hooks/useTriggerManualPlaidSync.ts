@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useSnackbar } from 'notistack';
 
 import request from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 export function useTriggerManualPlaidSync(): (_linkId: string) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();

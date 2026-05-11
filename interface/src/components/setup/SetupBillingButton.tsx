@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import { CreditCard } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 /**
  * The SetupBillingButton should only be used on the setup page, it is intended to be a way to manage your billing

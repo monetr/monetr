@@ -3,7 +3,6 @@ import { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { FormikErrors, FormikHelpers } from 'formik';
 import { RectangleEllipsis } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 
 import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
@@ -12,6 +11,7 @@ import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 interface ChangePasswordValues {
   currentPassword: string;

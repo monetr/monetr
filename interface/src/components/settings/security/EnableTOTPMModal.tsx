@@ -4,7 +4,6 @@ import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { FormikHelpers } from 'formik';
 import { Shield } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 import QRCode from 'react-qr-code';
 
 import { Button } from '@monetr/interface/components/Button';
@@ -15,6 +14,7 @@ import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 interface EnableTOTPValues {
   totp: string;

@@ -47,7 +47,6 @@
                 "formik",
                 "input-otp",
                 "lucide-react",
-                "notistack",
                 "react-day-picker",
                 "react-dropzone",
                 "react-google-recaptcha",

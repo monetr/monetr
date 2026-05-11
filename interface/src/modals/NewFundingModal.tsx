@@ -2,7 +2,6 @@ import { Fragment, useCallback, useId, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import { type FormikHelpers, useFormikContext } from 'formik';
-import { useSnackbar } from 'notistack';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
@@ -23,6 +22,7 @@ import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import { useSnackbar } from '@monetr/notify';
 
 interface NewFundingValues {
   name: string;

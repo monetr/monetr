@@ -2,7 +2,6 @@ import { useId } from 'react';
 import { format, isEqual, startOfDay, startOfTomorrow } from 'date-fns';
 import { type FormikErrors, type FormikHelpers, useFormikContext } from 'formik';
 import { CalendarSync, HeartCrack, Save, Trash } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 import { useMatch, useNavigate } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -26,6 +25,7 @@ import { useRemoveFundingSchedule } from '@monetr/interface/hooks/useRemoveFundi
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type { APIError } from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 interface FundingValues {
   name: string;

@@ -2,7 +2,6 @@ import { useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { type FormikErrors, type FormikHelpers, useFormikContext } from 'formik';
 import { ArrowUpDown } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
@@ -20,6 +19,7 @@ import { useTransfer } from '@monetr/interface/hooks/useTransfer';
 import { AmountType } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import { useSnackbar } from '@monetr/notify';
 
 export interface TransferModalProps {
   initialFromSpendingId?: string;

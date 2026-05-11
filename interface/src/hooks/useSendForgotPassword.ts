@@ -1,7 +1,6 @@
-import { useSnackbar, type VariantType } from 'notistack';
-
 import type { ApiError } from '@monetr/interface/api/client';
 import request, { type APIError } from '@monetr/interface/util/request';
+import { useSnackbar, type VariantType } from '@monetr/notify';
 
 export default function useSendForgotPassword(): (email: string, ReCAPTCHA: string | null) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();

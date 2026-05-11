@@ -2,7 +2,6 @@ import { useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { FormikHelpers } from 'formik';
 import { Trash } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
@@ -16,6 +15,7 @@ import { useRemoveTransaction } from '@monetr/interface/hooks/useRemoveTransacti
 import type Transaction from '@monetr/interface/models/Transaction';
 import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+import { useSnackbar } from '@monetr/notify';
 
 interface RemoveTransactionModalProps {
   transaction: Transaction;

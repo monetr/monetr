@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import type { FormikErrors, FormikHelpers } from 'formik';
-import { useSnackbar } from 'notistack';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import FormButton from '@monetr/interface/components/FormButton';
@@ -10,6 +9,7 @@ import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import Typography from '@monetr/interface/components/Typography';
 import useResetPassword from '@monetr/interface/hooks/useResetPassword';
+import { useSnackbar } from '@monetr/notify';
 
 interface ResetPasswordValues {
   password: string;

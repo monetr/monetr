@@ -1,11 +1,11 @@
 import { LoaderCircle } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
 import Logo from '@monetr/interface/assets/Logo';
 import Typography from '@monetr/interface/components/Typography';
 import useMountEffect from '@monetr/interface/hooks/useMountEffect';
 import request from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 // SubscriptionPage is just used to redirect the user to the stripe billing portal. Upon mounting, it will make an API
 // call to start a billing portal session, and once it gets a response it will redirect the user there.

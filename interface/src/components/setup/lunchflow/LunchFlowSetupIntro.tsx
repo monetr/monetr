@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useFormikContext } from 'formik';
-import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -17,6 +16,7 @@ import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import LunchFlowLink from '@monetr/interface/models/LunchFlowLink';
 import request, { type APIError } from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 export type LunchFlowSetupIntroValues = {
   name: string;

@@ -1,7 +1,6 @@
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { ArrowUpDown, HeartCrack, PiggyBank, Save, Trash } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -27,6 +26,7 @@ import { showTransferModal } from '@monetr/interface/modals/TransferModal';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 interface GoalValues {
   name: string;

@@ -2,7 +2,6 @@ import type React from 'react';
 import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { ChevronRight, Landmark, Save, Trash } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 import { Link, useParams } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -21,6 +20,7 @@ import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import capitalize from '@monetr/interface/util/capitalize';
 import type { APIError } from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 interface LinkValues {
   institutionName: string;

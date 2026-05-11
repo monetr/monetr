@@ -126,3 +126,11 @@ svg.lucide {
 ::-webkit-scrollbar-thumb:hover {
     @apply bg-zinc-500;
 }
+
+// Snap @monetr/notify's radius to monetr's standard. The package defaults this
+// inside a :where(...) selector with zero specificity, so a bare attribute
+// elector wins.
+[data-monetr-notifier-stack],
+[data-monetr-notification] {
+    --monetr-notification-radius: var(--border-radius);
+}

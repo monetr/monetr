@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { Archive, FlaskConical, HeartCrack, Save, Settings } from 'lucide-react';
-import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
@@ -17,6 +16,7 @@ import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { useUpdateBankAccount } from '@monetr/interface/hooks/useUpdateBankAccount';
 import type { APIError } from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 interface BankAccountValues {
   name: string;

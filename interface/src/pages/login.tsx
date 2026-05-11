@@ -1,5 +1,4 @@
 import type { FormikErrors, FormikHelpers } from 'formik';
-import { useSnackbar } from 'notistack';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
@@ -11,6 +10,7 @@ import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useLogin from '@monetr/interface/hooks/useLogin';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
+import { useSnackbar } from '@monetr/notify';
 
 import styles from './login.module.scss';
 
