@@ -61,7 +61,7 @@ jobs:
           retention-days: 7
 
   test:
-    name: Test (shard ${{ matrix.shard }})
+    name: Test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

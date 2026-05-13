@@ -27,25 +27,25 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-build-
 
       - name: Go Mod Cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.GOMODCACHE }}
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-mod-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-mod
+            ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-mod-
 
       - name: pnpm Cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            ${{ runner.os }}-pnpm-store
+            ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-pnpm-store-
 
       - name: Build
         run: |
@@ -100,10 +100,9 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum', '**/**.go') }}
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-test-go-build-${{ hashFiles('**/go.sum', '**/**.go') }}
           restore-keys: |
-            ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum', '**/**.go') }}
-            ${{ runner.os }}-test-go-build
+            ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-test-go-build-
 
       # Combined cache for Go module deps and pnpm store. Both invalidate only on lockfile changes,
       # so they share a key. Go's build cache stays separate above because its invalidation is much
@@ -114,10 +113,9 @@ jobs:
           path: |
             ${{ env.GOMODCACHE }}
             ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-test-deps-${{ hashFiles('**/go.sum', '**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-test-deps-${{ hashFiles('**/go.sum', '**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-test-deps-${{ hashFiles('**/go.sum', '**/pnpm-lock.yaml') }}
-            ${{ runner.os }}-test-deps
+            ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-test-deps-
 
       # Tune the Postgres service for ephemeral CI. Durability isn't needed since the DB is thrown
       # away with the runner. fsync/synchronous_commit/full_page_writes are all sighup-context, so
@@ -143,6 +141,7 @@ jobs:
           directory: ${{ github.workspace }}/build/tests
           root_dir: ${{ github.workspace }}
           token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Test Results Report
         if: always()
         uses: codecov/test-results-action@0fa95f0e1eeaafde2c782583b36b28ad0d8c77d3 # v1.2.1
@@ -174,25 +173,25 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-build-
 
       - name: Go Mod Cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.GOMODCACHE }}
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-mod-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-mod
+            ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-go-mod-
 
       - name: pnpm Cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            ${{ runner.os }}-pnpm-store
+            ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-pnpm-store-
 
       - name: Lint
         run: |
@@ -201,14 +200,6 @@ jobs:
   container:
     name: Container
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    services:
-      registry:
-        image: registry:3
-        ports:
-          - 5000:5000
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -217,28 +208,10 @@ jobs:
         uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
-        with:
-          driver-opts: network=host
-          buildkitd-config-inline: |
-            [registry."localhost:5000"]
-              http = true
-              insecure = true
-      - name: Install cosign
-        if: github.event.pull_request.head.repo.full_name == github.repository
-        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
-      - name: Build monetr container (fork PR; no push)
-        if: github.event.pull_request.head.repo.full_name != github.repository
+      - name: Build monetr container
         run: |
           git config --global --add safe.directory ${PWD}
           make container
-      - name: Build, push, sign and verify monetr container to local registry
-        if: github.event.pull_request.head.repo.full_name == github.repository
-        run: |
-          git config --global --add safe.directory ${PWD}
-          make verify-container \
-            CONTAINER_REGISTRY=localhost:5000/monetr/monetr \
-            CMAKE_OPTIONS="-DBUILD_CONTAINER_TAG_LATEST=OFF -DSIGN_TLOG_UPLOAD=OFF" \
-            RELEASE_VERSION=pr-${{ github.event.pull_request.number }}-${{ github.sha }}
 
   local_dev:
     name: Local Development
@@ -264,23 +237,26 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-localdev-go-build-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-localdev-go-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-localdev-go-build-
 
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.GOMODCACHE }}
-          key: ${{ runner.os }}-localdev-go-mod-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-localdev-go-mod-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-localdev-go-mod-
 
       - name: pnpm Cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-localdev-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-localdev-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-localdev-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            ${{ runner.os }}-localdev-pnpm-store
+            ${{ runner.os }}-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}-localdev-pnpm-store-
 
       - name: Setup local development environment
         timeout-minutes: 10
@@ -297,11 +273,14 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+
       - name: Fix dumb git issue
         run: |
           git config --global --add safe.directory ${PWD}
+
       - name: Build
         run: make docs
+
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         name: Upload Documentation As Artifact
         with:
