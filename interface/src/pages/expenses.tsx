@@ -82,7 +82,7 @@ export default function Expenses(): JSX.Element {
 function EmptyState(): JSX.Element {
   return (
     <div className='w-full flex justify-center items-center grow'>
-      <div className='flex flex-col gap-2 items-center max-w-md'>
+      <div className='flex flex-col gap-2 items-center max-w-md p-2'>
         <div className='w-full flex justify-center space-x-4'>
           <Receipt className='dark:text-dark-monetr-content-muted h-12 w-12' />
         </div>
