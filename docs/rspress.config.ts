@@ -1,4 +1,5 @@
 import rehypeMathPostProcess from './plugins/rehypeMathPostProcess';
+import trailingSlashRedirects from './plugins/trailingSlashRedirects';
 
 import path from 'node:path';
 import { pluginSass } from '@rsbuild/plugin-sass';
@@ -128,6 +129,7 @@ export default defineConfig({
         },
       },
     }),
+    trailingSlashRedirects({ siteUrl: 'https://monetr.app' }),
   ],
   builderConfig: {
     plugins: [pluginSass()],
