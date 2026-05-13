@@ -1,0 +1,195 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// The Tailwind original drives both enter and exit via tailwindcss-animate.
+// The plugin emits `.animate-in` / `.animate-out` with the default 150ms
+// duration, and `duration-200` on the content bumps its animation to 200ms.
+// The overlay had no duration override, so it stays at the 150ms default.
+$overlayDuration: 150ms;
+$contentDuration: 200ms;
+
+// CSS module @keyframes are locally scoped, so `enter` / `exit` won't collide
+// with the identically-named keyframes that tailwindcss-animate emits
+// globally. The keyframes mirror the plugin's shape so callers can compose
+// fades / zooms / slides by setting the per-axis CSS variables in a state
+// selector.
+@keyframes enter {
+  from {
+    opacity: var(--enter-opacity, 1);
+    transform:
+      translate3d(var(--enter-translate-x, 0), var(--enter-translate-y, 0), 0)
+      scale3d(var(--enter-scale, 1), var(--enter-scale, 1), var(--enter-scale, 1))
+      rotate(var(--enter-rotate, 0));
+  }
+}
+
+@keyframes exit {
+  to {
+    opacity: var(--exit-opacity, 1);
+    transform:
+      translate3d(var(--exit-translate-x, 0), var(--exit-translate-y, 0), 0)
+      scale3d(var(--exit-scale, 1), var(--exit-scale, 1), var(--exit-scale, 1))
+      rotate(var(--exit-rotate, 0));
+  }
+}
+
+.dialogOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-color: rgba(0, 0, 0, 0.8);
+
+  &[data-state="open"] {
+    animation: enter $overlayDuration;
+    --enter-opacity: 0;
+  }
+
+  &[data-state="closed"] {
+    animation: exit $overlayDuration;
+    --exit-opacity: 0;
+  }
+}
+
+.dialogContent {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 50;
+  display: grid;
+  width: 100%;
+  // tailwind max-w-lg is 32rem, the same as 128 * $size.
+  max-width: 128 * variables.$size;
+  transform: translate(-50%, -50%);
+  gap: 4 * variables.$size;
+  border-width: 1px;
+  background-color: var(--background);
+  padding: 6 * variables.$size;
+  // tailwind shadow-lg
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  // duration-200 in the Tailwind original applies to both transition-duration
+  // and animation-duration via tailwindcss-animate's matchUtilities override.
+  transition-duration: $contentDuration;
+  animation-duration: $contentDuration;
+
+  @media (min-width: variables.$smallScreen) {
+    border-radius: var(--border-radius);
+  }
+
+  &[data-state="open"] {
+    animation-name: enter;
+    --enter-opacity: 0;
+    --enter-scale: 0.95;
+    --enter-translate-x: -50%;
+    --enter-translate-y: -48%;
+  }
+
+  &[data-state="closed"] {
+    animation-name: exit;
+    --exit-opacity: 0;
+    --exit-scale: 0.95;
+    --exit-translate-x: -50%;
+    --exit-translate-y: -48%;
+  }
+}
+
+.dialogClose {
+  position: absolute;
+  right: 4 * variables.$size;
+  top: 4 * variables.$size;
+  // rounded-sm is 0.125rem, the same as 0.5 * $size.
+  border-radius: 0.5 * variables.$size;
+  opacity: 0.7;
+
+  // transition-opacity in tailwind emits opacity / cubic-bezier(0.4, 0, 0.2, 1) / 150ms.
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  // The original uses focus:outline-none + focus:ring-2 + focus:ring-ring +
+  // focus:ring-offset-2 + ring-offset-background. Because the project doesn't
+  // define --ring, hsl(var(--ring)) parses as invalid and the outer ring
+  // collapses to no visible color; only the background-coloured offset ring
+  // would draw, which is invisible against the dialog content. Preserve the
+  // same effectively-invisible focus indicator here.
+  &:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    pointer-events: none;
+  }
+
+  &[data-state="open"] {
+    background-color: var(--background-emphasis);
+    color: var(--content-subtle);
+  }
+}
+
+.dialogCloseIcon {
+  height: 4 * variables.$size;
+  width: 4 * variables.$size;
+}
+
+// The Radix close button still needs a label for assistive tech; the visible
+// X icon doesn't carry text. This mirrors tailwind's `sr-only`.
+.dialogSrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.dialogHeader {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+
+  // space-y-1.5
+  > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1.5 * variables.$size;
+  }
+
+  @media (min-width: variables.$smallScreen) {
+    text-align: left;
+  }
+}
+
+.dialogFooter {
+  display: flex;
+  flex-direction: column-reverse;
+
+  @media (min-width: variables.$smallScreen) {
+    flex-direction: row;
+    justify-content: flex-end;
+
+    // space-x-2
+    > :not([hidden]) ~ :not([hidden]) {
+      margin-left: 2 * variables.$size;
+    }
+  }
+}
+
+.dialogTitle {
+  font-size: 4.5 * variables.$size;
+  font-weight: var(--semibold);
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.dialogDescription {
+  @include mixins.text-small;
+  color: var(--content-subtle);
+}
