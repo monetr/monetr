@@ -3,23 +3,19 @@ import type { FormikErrors, FormikHelpers } from 'formik';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import Typography from '@monetr/interface/components/Typography';
-import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useSendForgotPassword from '@monetr/interface/hooks/useSendForgotPassword';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
 interface Values {
   email: string;
-  captcha: string | null;
 }
 
 const initialValues: Values = {
   email: '',
-  captcha: null,
 };
 
 export function ForgotPasswordComplete(): JSX.Element {
@@ -48,7 +44,6 @@ export function ForgotPasswordComplete(): JSX.Element {
 }
 
 export default function ForgotPasswordNew(): JSX.Element {
-  const { data: config } = useAppConfiguration();
   const sendForgotPassword = useSendForgotPassword();
   const [isComplete, setIsComplete] = useState<boolean>(false);
 
@@ -67,7 +62,7 @@ export default function ForgotPasswordNew(): JSX.Element {
 
     // sendForgotPassword pretty much does all the work, the only thing we need to do is make sure that once we are done
     // we set submitting back to false.
-    return sendForgotPassword(values.email, values.captcha)
+    return sendForgotPassword(values.email)
       .then(() => setIsComplete(true))
       .finally(() => helpers.setSubmitting(false));
   }
@@ -101,7 +96,6 @@ export default function ForgotPasswordNew(): JSX.Element {
         required
         type='email'
       />
-      <MCaptcha className='mb-1' name='captcha' show={Boolean(config?.verifyForgotPassword)} />
       <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
         <FormButton className='w-full' role='form' type='submit' variant='primary'>
           Reset Password

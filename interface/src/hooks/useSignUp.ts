@@ -2,7 +2,6 @@ import request from '@monetr/interface/util/request';
 
 export interface SignUpArguments {
   betaCode: string | null;
-  captcha: string | null;
   email: string;
   firstName: string;
   lastName: string;

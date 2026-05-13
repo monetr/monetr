@@ -21,7 +21,6 @@ import (
 	"github.com/monetr/monetr/server/application"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/cache"
-	"github.com/monetr/monetr/server/captcha"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/controller"
@@ -174,16 +173,6 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 	queue := mockgen.NewMockEnqueuer(mockController)
 	email := mockgen.NewMockEmailCommunication(mockController)
 
-	var recaptcha captcha.Verification
-	if configuration.ReCAPTCHA.Enabled {
-		recaptcha, err = captcha.NewReCAPTCHAVerification(
-			configuration.ReCAPTCHA.PrivateKey,
-		)
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	cachePool := cache.NewCache(log, redisPool)
 	accountsRepo := repository.NewAccountRepository(log, cachePool, db)
 	stripeHelper := stripe_helper.NewStripeHelper(log, gofakeit.UUID())
@@ -207,7 +196,6 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		Accounts:                 accountsRepo,
 		Billing:                  bill,
 		Cache:                    cachePool,
-		Captcha:                  recaptcha,
 		ClientTokens:             clientTokens,
 		Clock:                    clock,
 		Configuration:            configuration,
