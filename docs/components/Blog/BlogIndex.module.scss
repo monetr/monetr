@@ -36,6 +36,32 @@
   @include mixins.text-5-extra-large-tight;
 }
 
+.subscribe {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5 * variables.$size;
+  text-decoration: none;
+  color: inherit;
+  opacity: 0.7;
+  padding: 1.5 * variables.$size 3 * variables.$size;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 1px var(--gray-300);
+  @include mixins.text-small;
+  transition-property: opacity, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  &:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+}
+
+.subscribeIcon {
+  height: 4 * variables.$size;
+  width: 4 * variables.$size;
+}
+
 .list {
   display: flex;
   margin-left: auto;

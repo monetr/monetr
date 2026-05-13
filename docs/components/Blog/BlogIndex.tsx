@@ -27,7 +27,7 @@
 */
 
 import { format, parse } from 'date-fns';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Rss } from 'lucide-react';
 
 import GradientHeading from '@monetr/docs/components/GradientHeading/GradientHeading';
 import useDocPages from '@monetr/docs/components/hooks/useDocPages';
@@ -58,6 +58,17 @@ export default function BlogIndex(): JSX.Element {
         >
           Blog
         </GradientHeading>
+        <Link
+          className={styles.subscribe}
+          href='/rss/blog.xml'
+          rel='alternate'
+          target='_blank'
+          title='Subscribe to the monetr blog RSS feed'
+          type='application/rss+xml'
+        >
+          <Rss className={styles.subscribeIcon} />
+          Subscribe via RSS
+        </Link>
       </div>
       <div className={mergeClasses(styles.list, 'm-view-width')}>
         {blogPages.map(page => (

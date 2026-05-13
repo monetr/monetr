@@ -4,6 +4,7 @@ import type { BaseRuntimePageInfo } from '@rspress/shared';
 export interface Author {
   name: string;
   github?: string;
+  email?: string;
 }
 
 export type DocPageData = {
@@ -19,7 +20,8 @@ function isAuthor(value: unknown): value is Author {
   return (
     typeof author.name === 'string' &&
     author.name.trim().length > 0 &&
-    (author.github === undefined || typeof author.github === 'string')
+    (author.github === undefined || typeof author.github === 'string') &&
+    (author.email === undefined || typeof author.email === 'string')
   );
 }
 

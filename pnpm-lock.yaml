@@ -29,6 +29,9 @@ importers:
       '@rspress/core':
         specifier: 2.0.10
         version: 2.0.10(@types/mdast@4.0.4)(@types/react@18.3.28)(core-js@3.47.0)(micromark-util-types@2.0.0)(micromark@4.0.1)
+      '@rspress/plugin-rss':
+        specifier: 2.0.10
+        version: 2.0.10(@rspress/core@2.0.10(@types/mdast@4.0.4)(@types/react@18.3.28)(core-js@3.47.0)(micromark-util-types@2.0.0)(micromark@4.0.1))
       '@rspress/plugin-sitemap':
         specifier: 2.0.10
         version: 2.0.10(@rspress/core@2.0.10(@types/mdast@4.0.4)(@types/react@18.3.28)(core-js@3.47.0)(micromark-util-types@2.0.0)(micromark@4.0.1))
@@ -1284,7 +1287,6 @@ packages:
     resolution: {integrity: sha512-1ZD4YFhG1rmgqj+W8hfwHyKV8xDxGsc/3KgU0FwmiVEX7JfzhCkgBO/xlCG79kRKSrzuVzt4icO/G3cCKn0pag==}
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   '@rspack/binding-linux-arm64-musl@2.0.1':
     resolution: {integrity: sha512-S/a6uN9PiZ5O/PjSqyIXhuRC1lVzeJkJV69NeLk5sIEUiDQ/aQGZG97uN+tluwpbo1tPbLJkdHYETfjspOX4Pg==}
@@ -1308,7 +1310,6 @@ packages:
     resolution: {integrity: sha512-bBjsZxMHRaPo6X9SokApm6ucs+UhXtAJFyJJyuk2BH4XJsLeCU9Dz1vMwioeohFbJUUeTASVPm6/BL+RhSaunw==}
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   '@rspack/binding-linux-x64-musl@2.0.1':
     resolution: {integrity: sha512-TQsiBFpEDGkuvK9tNdGj/Uc+AIytzqhxXH/1jKU6M24cWB1DTw/Cx7DdrkCBDyq3129K3POLdujvbWCGqBzQUw==}
@@ -1403,6 +1404,12 @@ packages:
     resolution: {integrity: sha512-DvoV7YUW538x0CVAGyYPKfjUHgEuq7Z8LZq1cpfUgBpA1DynFUK3Ls6spvdoAHAl3l0AN+xxOHpu/sRVhzqi/A==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
+
+  '@rspress/plugin-rss@2.0.10':
+    resolution: {integrity: sha512-9zJdAED898TgnCQCi3Nev10A+MYteMew3vt+nHzaBtuNK/NTe/hFXsVrl90sQW5f2YfoQ2fq+0TmdAwNN2SFiw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    peerDependencies:
+      '@rspress/core': ^2.0.10
 
   '@rspress/plugin-sitemap@2.0.10':
     resolution: {integrity: sha512-PZLig9+OlnyLcy6x9BlEqWSRef6TzDWB6Dlh2/hY41FtKlhyb7d7U56RGlLselWaQV54SHVa6H/y611A56ZI2g==}
@@ -2351,6 +2358,10 @@ packages:
 
   fault@2.0.1:
     resolution: {integrity: sha512-WtySTkS4OKev5JtpHXnib4Gxiurzh5NCGvWrFaZ34m6JehfTUhKZvn9njTfw48t6JumVQOmrKqpmGcdwxnhqBQ==}
+
+  feed@5.2.1:
+    resolution: {integrity: sha512-jTynzYPWs9ALjro0GW8j7sv9y7cJBeOdD4Y88kVqYy/eyusIX3g+499JiTDIlD9Ge/unebx57T4Uzo6vpYvMtA==}
+    engines: {node: '>=20', pnpm: '>=10'}
 
   fflate@0.7.4:
     resolution: {integrity: sha512-5u2V/CDW15QM1XbbgS+0DfPxVB+jUKhWEKuuFuHncbk3tEEqzmoXL+2KyOFuKGqOnmdIy0/davWF1CkuwtibCw==}
@@ -3763,7 +3774,6 @@ packages:
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
-    libc: glibc
 
   sass-embedded-linux-arm@1.99.0:
     resolution: {integrity: sha512-d4IjJZrX2+AwB2YCy1JySwdptJECNP/WfAQLUl8txI3ka8/d3TUI155GtelnoZUkio211PwIeFvvAeZ9RXPQnw==}
@@ -3812,7 +3822,6 @@ packages:
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
-    libc: glibc
 
   sass-embedded-unknown-all@1.99.0:
     resolution: {integrity: sha512-P7MxiUtL/XzGo3PX0CaB8lNNEFLQWKikPA8pbKytx9ZCLZSDkt2NJcdAbblB/sqMs4AV3EK2NadV8rI/diq3xg==}
@@ -4283,6 +4292,10 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+
+  xml-js@1.6.11:
+    resolution: {integrity: sha512-7rVi2KMfwfWFl+GpPg6m80IVMWXLRjO+PxTq7V2CDhoGak0wzYzFgUY2m4XJ47OGdXd8eLE8EmwfAmdjw7lC1g==}
+    hasBin: true
 
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
@@ -5456,6 +5469,11 @@ snapshots:
       - micromark-util-types
       - supports-color
 
+  '@rspress/plugin-rss@2.0.10(@rspress/core@2.0.10(@types/mdast@4.0.4)(@types/react@18.3.28)(core-js@3.47.0)(micromark-util-types@2.0.0)(micromark@4.0.1))':
+    dependencies:
+      '@rspress/core': 2.0.10(@types/mdast@4.0.4)(@types/react@18.3.28)(core-js@3.47.0)(micromark-util-types@2.0.0)(micromark@4.0.1)
+      feed: 5.2.1
+
   '@rspress/plugin-sitemap@2.0.10(@rspress/core@2.0.10(@types/mdast@4.0.4)(@types/react@18.3.28)(core-js@3.47.0)(micromark-util-types@2.0.0)(micromark@4.0.1))':
     dependencies:
       '@rspress/core': 2.0.10(@types/mdast@4.0.4)(@types/react@18.3.28)(core-js@3.47.0)(micromark-util-types@2.0.0)(micromark@4.0.1)
@@ -6411,6 +6429,10 @@ snapshots:
   fault@2.0.1:
     dependencies:
       format: 0.2.2
+
+  feed@5.2.1:
+    dependencies:
+      xml-js: 1.6.11
 
   fflate@0.7.4: {}
 
@@ -8984,6 +9006,10 @@ snapshots:
 
   ws@8.18.0:
     optional: true
+
+  xml-js@1.6.11:
+    dependencies:
+      sax: 1.6.0
 
   xml-name-validator@5.0.0:
     optional: true
