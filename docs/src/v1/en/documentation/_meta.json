@@ -1,5 +1,5 @@
 [
-  { "type": "file", "name": "index", "label": "Introduction" },
+  { "type": "custom-link", "link": "/documentation", "label": "Introduction" },
   { "type": "section-header", "label": "Help" },
   { "type": "dir", "name": "use", "label": "Using monetr" },
   { "type": "section-header", "label": "Self-Hosting", "collapsed": true },
