@@ -639,7 +639,15 @@ func (p *postgresProcessor) Start() error {
 	p.shutdownConsumers = make([]chan chan struct{}, 0, 2)
 	{ // Always start the job consumer
 		p.shutdownConsumers = append(p.shutdownConsumers, make(chan chan struct{}))
-		go p.jobConsumer(p.shutdownConsumers[len(p.shutdownConsumers)-1])
+		// Wait until the job consumer has registered its LISTEN before we return.
+		// Otherwise a caller that does Enqueue() right after Start() could send
+		// NOTIFY "queue:wake" before our session is listening on it. Postgres does
+		// not buffer notifications for non-listening sessions, so the wake signal
+		// would be lost and the consumer would not pick up the job until its
+		// polling ticker fires.
+		ready := make(chan struct{})
+		go p.jobConsumer(p.shutdownConsumers[len(p.shutdownConsumers)-1], ready)
+		<-ready
 	}
 
 	// Only start the cron job consumer if we have cron jobs to consume
@@ -1022,7 +1030,7 @@ func (p *postgresProcessor) cronConsumer(shutdown chan chan struct{}) {
 //	│     │        │           │                                           │
 //	│   return  continue    continue ──────────────────────────────────────┘
 //	└──────────────────────────────────────────────────────────────────────┘
-func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
+func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}, ready chan struct{}) {
 	// maxBackoff is 60 seconds
 	var maxBackoff time.Duration = 6
 	var backoff time.Duration = 1
@@ -1032,6 +1040,9 @@ func (p *postgresProcessor) jobConsumer(shutdown chan chan struct{}) {
 	// wrong.
 	listener := p.db.(*pg.DB).Listen(context.Background(), "queue:wake")
 	defer listener.Unlisten(context.Background(), "queue:wake")
+	// Tell Start() that LISTEN is registered so it is safe to return to the
+	// caller. See the comment in Start() for why this barrier matters.
+	close(ready)
 	for {
 		// Because this is at the beginning of the loop, the only time this blocks
 		// is when there are no available threads. The ticker will only fire here if
