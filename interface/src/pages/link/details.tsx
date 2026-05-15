@@ -2,7 +2,7 @@ import type React from 'react';
 import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { ChevronRight, Landmark, Save, Trash } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'wouter';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import Badge from '@monetr/interface/components/Badge';
@@ -28,7 +28,7 @@ interface LinkValues {
 
 export default function LinkDetails(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const { linkId } = useParams();
+  const { linkId } = useParams<{ linkId: string }>();
   const { data: link, isLoading: linkIsLoading } = useLink(linkId);
   const { data: bankAccounts, isLoading: bankAccountsLoading } = useBankAccountsForLink(linkId);
   const patchLink = usePatchLink();

@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
 import { LoaderCircle } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useSearch } from 'wouter';
 
 import Logo from '@monetr/interface/assets/Logo';
 import Typography from '@monetr/interface/components/Typography';
 import { useAfterCheckout } from '@monetr/interface/hooks/useAfterCheckout';
 
 export default function AfterCheckoutPage(): JSX.Element {
-  const { search } = useLocation();
-  const navigate = useNavigate();
+  const search = useSearch();
+  const [, navigate] = useLocation();
   const afterCheckout = useAfterCheckout();
 
   // As soon as the component mounts, call setup from checkout to get the subscription sorted out.

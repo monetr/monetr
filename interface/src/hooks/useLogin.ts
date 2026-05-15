@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 
 import request from '@monetr/interface/util/request';
 
@@ -11,7 +11,7 @@ export interface LoginArguments {
 }
 
 export default function useLogin(): (loginArgs: LoginArguments) => Promise<void> {
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const queryClient = useQueryClient();
 
   return async (loginArgs: LoginArguments): Promise<void> => {
@@ -32,12 +32,9 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
           case 428: // The user needs to take some action before they can be fully authenticated.
             switch (error?.response?.data?.code) {
               case 'PASSWORD_CHANGE_REQUIRED':
-                return navigate('/password/reset', {
-                  state: {
-                    message: 'You are required to change your password before authenticating.',
-                    token: error?.response?.data?.resetToken,
-                  },
-                });
+                return navigate(
+                  `/password/reset?token=${encodeURIComponent(error?.response?.data?.resetToken)}&reason=password_change_required`,
+                );
               case 'MFA_REQUIRED':
                 // If we are required to provide multifactor authentication then we should be able to retrieve our user
                 // details at least.
@@ -45,11 +42,7 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
                   .invalidateQueries({ queryKey: ['/api/users/me'] })
                   .then(() => navigate('/login/multifactor'));
               case 'EMAIL_NOT_VERIFIED':
-                return navigate('/verify/email/resend', {
-                  state: {
-                    emailAddress: loginArgs.email,
-                  },
-                });
+                return navigate(`/verify/email/resend?email=${encodeURIComponent(loginArgs.email)}`);
               default:
                 throw error;
             }

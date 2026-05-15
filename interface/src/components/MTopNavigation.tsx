@@ -1,6 +1,6 @@
 import type React from 'react';
 import { Fragment, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
 import Typography from '@monetr/interface/components/Typography';
@@ -18,7 +18,7 @@ export interface MTopNavigationProps {
 
 export default function MTopNavigation(props: MTopNavigationProps): JSX.Element {
   const Icon = props.icon;
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
 
   const onInitialClick = useCallback(() => {
     if (props.base) {

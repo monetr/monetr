@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Trash } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 
 import { Button } from '@monetr/interface/components/Button';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
@@ -21,7 +21,7 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const [submitting, setSubmitting] = useState(false);
   const removeLink = useRemoveLink();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
 
   async function submit() {
     setSubmitting(true);

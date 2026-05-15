@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CircleCheck, Pencil } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
+import { Redirect } from 'wouter';
 
 import Logo from '@monetr/interface/assets/Logo';
 import { Button } from '@monetr/interface/components/Button';
@@ -34,11 +34,11 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
         <Greeting alreadyOnboarded={props.alreadyOnboarded} manualEnabled={props.manualEnabled} onContinue={setStep} />
       );
     case 'plaid':
-      return <Navigate to={plaidPath} />;
+      return <Redirect to={plaidPath} />;
     case 'lunchflow':
-      return <Navigate to={lunchFlowPath} />;
+      return <Redirect to={lunchFlowPath} />;
     case 'manual':
-      return <Navigate to={manualPath} />;
+      return <Redirect to={manualPath} />;
     default:
       return <h1>Something went wrong...</h1>;
   }

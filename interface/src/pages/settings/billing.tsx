@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { format, isFuture, isThisYear } from 'date-fns';
 import { Clock } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'wouter';
 
 import type { ApiResponse } from '@monetr/interface/api/client';
 import Badge from '@monetr/interface/components/Badge';
@@ -13,7 +13,7 @@ import request from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
 export default function SettingsBilling(): JSX.Element {
-  const location = useLocation();
+  const [pathname] = useLocation();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const { data: auth } = useAuthentication();
@@ -26,7 +26,7 @@ export default function SettingsBilling(): JSX.Element {
         url: '/api/billing/create_checkout',
         data: {
           // If the user backs out of the stripe checkout then return them to the current URL.
-          cancelPath: location.pathname,
+          cancelPath: pathname,
         },
       });
     } else {
@@ -44,7 +44,7 @@ export default function SettingsBilling(): JSX.Element {
           disableWindowBlurListener: true,
         });
       });
-  }, [enqueueSnackbar, auth, location]);
+  }, [enqueueSnackbar, auth, pathname]);
 
   const manageSubscriptionText = auth?.hasSubscription ? 'Manage Your Subscription' : 'Subscribe Early';
 

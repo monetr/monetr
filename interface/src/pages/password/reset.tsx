@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import type { FormikErrors, FormikHelpers } from 'formik';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useSearch } from 'wouter';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
@@ -23,16 +23,19 @@ const initialValues: ResetPasswordValues = {
 
 export default function PasswordResetNew(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [pathname, navigate] = useLocation();
   const resetPassword = useResetPassword();
-  const { state: routeState } = useLocation();
-  const message = routeState?.message || 'Enter the new password you would like to use.';
-  const search = location.search;
-  const query = new URLSearchParams(search);
-  // The token is loaded from the route state (which is provided when a password reset is being forced) or from the
-  // URL query parameter (which is provided when the user is brought here from a link in their email).
-  const token = query.get('token') || routeState?.token;
+  const query = new URLSearchParams(useSearch());
+  // The reason indicates whether the user was forced here by a `PASSWORD_CHANGE_REQUIRED` login response (in which
+  // case we show a different message) or arrived via the password reset link in their email.
+  const reason = query.get('reason');
+  const message =
+    reason === 'password_change_required'
+      ? 'You are required to change your password before authenticating.'
+      : 'Enter the new password you would like to use.';
+  // The token is provided as a query parameter, either from the email link or from the login flow when a password
+  // change is required.
+  const token = query.get('token');
 
   useEffect(() => {
     if (!token) {
@@ -45,8 +48,8 @@ export default function PasswordResetNew(): JSX.Element {
 
     // Clear the URL so that the token is not shown. But also so that the user cannot accidentally navigate back to the
     // password reset page with the token still in place.
-    window.history.replaceState({}, document.title, !token ? '/login' : location.pathname);
-  }, [token, enqueueSnackbar, navigate, location.pathname]);
+    window.history.replaceState({}, document.title, !token ? '/login' : pathname);
+  }, [token, enqueueSnackbar, navigate, pathname]);
 
   async function submit(values: ResetPasswordValues, helpers: FormikHelpers<ResetPasswordValues>): Promise<void> {
     helpers.setSubmitting(true);

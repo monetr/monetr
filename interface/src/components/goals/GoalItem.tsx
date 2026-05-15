@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'wouter';
 
 import ArrowLink from '@monetr/interface/components/ArrowLink';
 import Badge from '@monetr/interface/components/Badge';

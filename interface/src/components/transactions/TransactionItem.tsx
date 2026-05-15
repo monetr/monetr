@@ -1,5 +1,5 @@
 import { ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'wouter';
 
 import Flex from '@monetr/interface/components/Flex';
 import Typography from '@monetr/interface/components/Typography';

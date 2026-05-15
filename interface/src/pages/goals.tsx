@@ -1,6 +1,5 @@
-import { Fragment, useCallback, useEffect, useRef } from 'react';
+import { Fragment } from 'react';
 import { HeartCrack, PiggyBank, Plus } from 'lucide-react';
-import { useNavigationType } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import GoalItem from '@monetr/interface/components/goals/GoalItem';
@@ -10,32 +9,8 @@ import { useSpendingFiltered } from '@monetr/interface/hooks/useSpendingFiltered
 import { showNewGoalModal } from '@monetr/interface/modals/NewGoalModal';
 import { SpendingType } from '@monetr/interface/models/Spending';
 
-let evilScrollPosition: number = 0;
-
 export default function Goals(): JSX.Element {
   const { data: goals, isError, isLoading } = useSpendingFiltered(SpendingType.Goal);
-
-  // Scroll restoration code.
-  const ref = useRef<HTMLDivElement>(null);
-  const navigationType = useNavigationType();
-  const onScroll = useCallback(() => {
-    evilScrollPosition = ref.current.scrollTop;
-  }, []);
-  useEffect(() => {
-    if (!ref.current) {
-      return undefined;
-    }
-
-    if (navigationType === 'POP') {
-      ref.current.scrollTop = evilScrollPosition;
-    }
-    const current = ref.current;
-    ref.current.addEventListener('scroll', onScroll);
-    return () => {
-      current.removeEventListener('scroll', onScroll);
-    };
-    // Fix bug with current impl.
-  }, [navigationType, onScroll]);
 
   if (isLoading) {
     return (
@@ -79,7 +54,7 @@ export default function Goals(): JSX.Element {
           New Goal
         </Button>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0' ref={ref}>
+      <div className='w-full h-full overflow-y-auto min-w-0'>
         <ListContent />
       </div>
     </Fragment>

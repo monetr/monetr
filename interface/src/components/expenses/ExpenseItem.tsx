@@ -1,7 +1,7 @@
 import { format, isThisYear } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { rrulestr } from 'rrule';
+import { Link } from 'wouter';
 
 import Badge from '@monetr/interface/components/Badge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';

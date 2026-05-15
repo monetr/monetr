@@ -1,5 +1,5 @@
 import { CalendarSync, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'wouter';
 
 import Badge from '@monetr/interface/components/Badge';
 import Divider from '@monetr/interface/components/Divider';
@@ -96,8 +96,8 @@ interface NavigationItemProps {
 }
 
 function NavigationItem(props: NavigationItemProps): JSX.Element {
-  const location = useLocation();
-  const active = location.pathname.endsWith(props.to.replaceAll('.', ''));
+  const [pathname] = useLocation();
+  const active = pathname.endsWith(props.to.replaceAll('.', ''));
 
   const className = mergeTailwind(
     {

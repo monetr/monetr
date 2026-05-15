@@ -1,5 +1,5 @@
 import { ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'wouter';
 
 import styles from './ArrowLink.module.scss';
 

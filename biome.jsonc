@@ -53,14 +53,13 @@
                 "react-number-format",
                 "react-plaid-link",
                 "react-qr-code",
-                "react-router-dom",
                 "rrule",
                 "storybook/**",
                 "tailwind-merge",
                 "tailwindcss",
                 "tailwindcss-animate",
                 "tailwindcss/**",
-                "vaul"
+                "wouter"
               ],
               ":BLANK_LINE:",
               [

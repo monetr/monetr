@@ -1,11 +1,9 @@
-import { Outlet } from 'react-router-dom';
-
 import styles from './SidebarPaddingLayout.module.scss';
 
-export default function SidebarPaddingLayout(): React.JSX.Element {
-  return (
-    <div className={styles.sidebarPaddingLayout}>
-      <Outlet />
-    </div>
-  );
+export interface SidebarPaddingLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function SidebarPaddingLayout(props: SidebarPaddingLayoutProps): React.JSX.Element {
+  return <div className={styles.sidebarPaddingLayout}>{props.children}</div>;
 }

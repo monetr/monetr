@@ -1,5 +1,5 @@
 import { LoaderCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 
 import Logo from '@monetr/interface/assets/Logo';
 import Typography from '@monetr/interface/components/Typography';
@@ -11,7 +11,7 @@ import { useSnackbar } from '@monetr/notify';
 // call to start a billing portal session, and once it gets a response it will redirect the user there.
 export default function SubscriptionPage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
 
   useMountEffect(() => {
     request<{ url: string }>({ method: 'GET', url: '/api/billing/portal' })

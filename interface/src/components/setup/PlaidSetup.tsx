@@ -8,7 +8,7 @@ import {
   type PlaidLinkOptionsWithLinkToken,
   usePlaidLink,
 } from 'react-plaid-link';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
@@ -39,7 +39,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   });
 
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
 
   async function longPollSetup(recur: number, linkId: number): Promise<void> {
     setState({

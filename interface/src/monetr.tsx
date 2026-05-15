@@ -1,5 +1,4 @@
-import { withSentryReactRouterV6Routing } from '@sentry/react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'wouter';
 
 import BudgetingLayout from '@monetr/interface/components/Layout/BudgetLayout';
 import MobileSidebarContextProvider from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
@@ -48,8 +47,6 @@ import VerifyEmail from '@monetr/interface/pages/verify/email';
 import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 
-const RoutesImpl = withSentryReactRouterV6Routing(Routes);
-
 export default function Monetr(): JSX.Element {
   const { data: config, isLoading: configIsLoading, isError: configIsError } = useAppConfiguration();
   const { isLoading: authIsLoading, data: auth, isError: isAuthError } = useAuthentication();
@@ -75,103 +72,150 @@ export default function Monetr(): JSX.Element {
 
   if (!isAuthenticated) {
     return (
-      <RoutesImpl>
-        <Route element={<Login />} path='/login' />
-        <Route element={<LogoutPage />} path='/logout' />
-        {config?.allowSignUp && <Route element={<Register />} path='/register' />}
-        {config?.allowForgotPassword && <Route element={<ForgotPassword />} path='/password/forgot' />}
-        <Route element={<PasswordReset />} path='/password/reset' />
-        <Route element={<VerifyEmail />} path='/verify/email' />
-        <Route element={<ResendVerificationPage />} path='/verify/email/resend' />
-        <Route element={<Navigate replace to='/login' />} path='/' />
-        <Route element={<Navigate replace to='/login' />} path='*' />
-      </RoutesImpl>
+      <Switch>
+        <Route component={Login} path='/login' />
+        <Route component={LogoutPage} path='/logout' />
+        {config?.allowSignUp && <Route component={Register} path='/register' />}
+        {config?.allowForgotPassword && <Route component={ForgotPassword} path='/password/forgot' />}
+        <Route component={PasswordReset} path='/password/reset' />
+        <Route component={VerifyEmail} path='/verify/email' />
+        <Route component={ResendVerificationPage} path='/verify/email/resend' />
+        <Route path='/'>
+          <Redirect replace to='/login' />
+        </Route>
+        <Route path='*'>
+          <Redirect replace to='/login' />
+        </Route>
+      </Switch>
     );
   }
 
   // If the currently authenticated user requires MFA then only allow them to access the MFA pages.
   if (auth?.mfaPending) {
     return (
-      <RoutesImpl>
-        <Route element={<MultifactorAuthenticationPage />} path='/login/multifactor' />
-        <Route element={<LogoutPage />} path='/logout' />
-        <Route element={<Navigate replace to='/login/multifactor' />} path='*' />
-      </RoutesImpl>
+      <Switch>
+        <Route component={MultifactorAuthenticationPage} path='/login/multifactor' />
+        <Route component={LogoutPage} path='/logout' />
+        <Route path='*'>
+          <Redirect replace to='/login/multifactor' />
+        </Route>
+      </Switch>
     );
   }
 
   if (!auth?.isActive) {
     return (
-      <RoutesImpl>
-        <Route element={<LogoutPage />} path='/logout' />
-        <Route element={<SubscribePage />} path='/account/subscribe' />
-        <Route element={<AfterCheckoutPage />} path='/account/subscribe/after' />
-        <Route element={<Navigate replace to='/account/subscribe' />} path='*' />
-      </RoutesImpl>
+      <Switch>
+        <Route component={LogoutPage} path='/logout' />
+        <Route component={SubscribePage} path='/account/subscribe' />
+        <Route component={AfterCheckoutPage} path='/account/subscribe/after' />
+        <Route path='*'>
+          <Redirect replace to='/account/subscribe' />
+        </Route>
+      </Switch>
     );
   }
 
   const hasAnyLinks = links?.length > 0;
   if (!hasAnyLinks) {
     return (
-      <RoutesImpl>
-        <Route element={<LogoutPage />} path='/logout' />
-        <Route element={<SetupPage manualEnabled={config?.manualEnabled} />} path='/setup' />
-        <Route element={<PlaidSetup alreadyOnboarded />} path='/setup/plaid' />
-        <Route element={<SetupManualLinkPage />} path='/setup/manual' />
-        <Route element={<LunchFlowSetupIntro />} path='/setup/lunchflow' />
-        <Route element={<LunchFlowSetupAccounts />} path='/setup/lunchflow/:lunchFlowLinkId' />
-        <Route element={<OauthReturn />} path='/plaid/oauth-return' />
-        <Route element={<Navigate replace to='/setup' />} path='/account/subscribe/after' />
-        <Route element={<Navigate replace to='/setup' />} index path='*' />
-      </RoutesImpl>
+      <Switch>
+        <Route component={LogoutPage} path='/logout' />
+        <Route path='/setup'>{() => <SetupPage manualEnabled={config?.manualEnabled} />}</Route>
+        <Route path='/setup/plaid'>{() => <PlaidSetup alreadyOnboarded />}</Route>
+        <Route component={SetupManualLinkPage} path='/setup/manual' />
+        <Route component={LunchFlowSetupIntro} path='/setup/lunchflow' />
+        <Route component={LunchFlowSetupAccounts} path='/setup/lunchflow/:lunchFlowLinkId' />
+        <Route component={OauthReturn} path='/plaid/oauth-return' />
+        <Route path='/account/subscribe/after'>
+          <Redirect replace to='/setup' />
+        </Route>
+        <Route path='*'>
+          <Redirect replace to='/setup' />
+        </Route>
+      </Switch>
     );
   }
 
   return (
     <MobileSidebarContextProvider>
       <Sidebar />
-      <RoutesImpl>
-        <Route element={<BudgetingLayout />} path='/bank/:bankAccountId'>
-          <Route element={<BankAccountSettingsPage />} path='settings' />
-          <Route element={<Transactions />} path='transactions' />
-          <Route element={<TransactionDetails />} path='transactions/:transactionId/details' />
-          <Route element={<Expenses />} path='expenses' />
-          <Route element={<ExpenseDetails />} path='expenses/:spendingId/details' />
-          <Route element={<Goals />} path='goals' />
-          <Route element={<GoalDetails />} path='goals/:spendingId/details' />
-          <Route element={<Funding />} path='funding' />
-          <Route element={<FundingDetails />} path='funding/:fundingId/details' />
+      <Switch>
+        <Route path='/bank/:bankAccountId/*'>
+          <BudgetingLayout>
+            <Switch>
+              <Route component={BankAccountSettingsPage} path='/bank/:bankAccountId/settings' />
+              <Route component={Transactions} path='/bank/:bankAccountId/transactions' />
+              <Route component={TransactionDetails} path='/bank/:bankAccountId/transactions/:transactionId/details' />
+              <Route component={Expenses} path='/bank/:bankAccountId/expenses' />
+              <Route component={ExpenseDetails} path='/bank/:bankAccountId/expenses/:spendingId/details' />
+              <Route component={Goals} path='/bank/:bankAccountId/goals' />
+              <Route component={GoalDetails} path='/bank/:bankAccountId/goals/:spendingId/details' />
+              <Route component={Funding} path='/bank/:bankAccountId/funding' />
+              <Route component={FundingDetails} path='/bank/:bankAccountId/funding/:fundingId/details' />
+              <Route path='*'>
+                <Redirect replace to='/' />
+              </Route>
+            </Switch>
+          </BudgetingLayout>
         </Route>
-        <Route element={<SidebarPaddingLayout />}>
-          <Route element={<SettingsLayout />} path='/settings'>
-            <Route element={<Navigate replace to='/settings/overview' />} path='' />
-            <Route element={<SettingsOverview />} path='overview' />
-            <Route element={<SettingsSecurity />} path='security' />
-            {config?.billingEnabled && <Route element={<SettingsBilling />} path='billing' />}
-            <Route element={<SettingsAbout />} path='about' />
-          </Route>
-          <Route element={<LinkDetails />} path='/link/:linkId/details' />
-          <Route element={<LinkCreatePage />} path='/link/create' />
-          <Route element={<PlaidSetup alreadyOnboarded />} path='/link/create/plaid' />
-          <Route element={<CreateManualLinkPage />} path='/link/create/manual' />
-          <Route element={<LunchFlowSetupIntro />} path='/link/create/lunchflow' />
-          <Route element={<LunchFlowSetupAccounts />} path='/link/create/lunchflow/:lunchFlowLinkId' />
-          <Route element={<LunchFlowSetupSync />} path='/link/create/lunchflow/:linkId/sync' />
-          <Route element={<LogoutPage />} path='/logout' />
-          <Route element={<OauthReturn />} path='/plaid/oauth-return' />
-          <Route element={<SubscriptionPage />} path='/subscription' />
-          <Route element={<Navigate replace to='/' />} path='/account/subscribe' />
-          <Route element={<AfterCheckoutPage />} path='/account/subscribe/after' />
-          <Route element={<LunchFlowSetupAccounts />} path='/setup/lunchflow/:lunchFlowLinkId' />
+        <Route path='/setup'>
+          <Redirect replace to='/' />
         </Route>
-        <Route element={<Navigate replace to='/' />} path='/setup' />
-        <Route element={<Navigate replace to='/' />} path='/password/reset' />
-        <Route element={<Navigate replace to='/' />} path='/register' />
-        <Route element={<Navigate replace to='/' />} path='/login' />
-        <Route element={<Navigate replace to='/' />} path='/login/multifactor' />
-        <Route element={<RedirectToBank />} index path='/' />
-      </RoutesImpl>
+        <Route path='/password/reset'>
+          <Redirect replace to='/' />
+        </Route>
+        <Route path='/register'>
+          <Redirect replace to='/' />
+        </Route>
+        <Route path='/login/multifactor'>
+          <Redirect replace to='/' />
+        </Route>
+        <Route path='/login'>
+          <Redirect replace to='/' />
+        </Route>
+        <Route component={RedirectToBank} path='/' />
+        <Route path='*'>
+          <SidebarPaddingLayout>
+            <Switch>
+              <Route path='/settings'>
+                <Redirect replace to='/settings/overview' />
+              </Route>
+              <Route path='/settings/:rest*'>
+                <SettingsLayout>
+                  <Switch>
+                    <Route component={SettingsOverview} path='/settings/overview' />
+                    <Route component={SettingsSecurity} path='/settings/security' />
+                    {config?.billingEnabled && <Route component={SettingsBilling} path='/settings/billing' />}
+                    <Route component={SettingsAbout} path='/settings/about' />
+                    <Route path='*'>
+                      <Redirect replace to='/settings/overview' />
+                    </Route>
+                  </Switch>
+                </SettingsLayout>
+              </Route>
+              <Route component={LinkDetails} path='/link/:linkId/details' />
+              <Route component={LinkCreatePage} path='/link/create' />
+              <Route path='/link/create/plaid'>{() => <PlaidSetup alreadyOnboarded />}</Route>
+              <Route component={CreateManualLinkPage} path='/link/create/manual' />
+              <Route component={LunchFlowSetupIntro} path='/link/create/lunchflow' />
+              <Route component={LunchFlowSetupAccounts} path='/link/create/lunchflow/:lunchFlowLinkId' />
+              <Route component={LunchFlowSetupSync} path='/link/create/lunchflow/:linkId/sync' />
+              <Route component={LogoutPage} path='/logout' />
+              <Route component={OauthReturn} path='/plaid/oauth-return' />
+              <Route component={SubscriptionPage} path='/subscription' />
+              <Route path='/account/subscribe'>
+                <Redirect replace to='/' />
+              </Route>
+              <Route component={AfterCheckoutPage} path='/account/subscribe/after' />
+              <Route component={LunchFlowSetupAccounts} path='/setup/lunchflow/:lunchFlowLinkId' />
+              <Route path='*'>
+                <Redirect replace to='/' />
+              </Route>
+            </Switch>
+          </SidebarPaddingLayout>
+        </Route>
+      </Switch>
     </MobileSidebarContextProvider>
   );
 }
@@ -204,10 +248,10 @@ function RedirectToBank(): JSX.Element {
   const accounts = sortAccounts(Array.from(bankAccounts.values()).filter(account => account.linkId === link.linkId));
 
   if (accounts.length === 0) {
-    return <Navigate replace to='/link/create' />;
+    return <Redirect replace to='/link/create' />;
   }
 
   const account = accounts[0];
 
-  return <Navigate replace to={`/bank/${account.bankAccountId}/transactions`} />;
+  return <Redirect replace to={`/bank/${account.bankAccountId}/transactions`} />;
 }

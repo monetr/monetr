@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, ChevronsUpDown, CirclePlus, Settings } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'wouter';
 
 import Badge from '@monetr/interface/components/Badge';
 import { Button, buttonVariants } from '@monetr/interface/components/Button';
@@ -29,7 +29,7 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 
 export default function SelectBankAccount(): JSX.Element {
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const { data: allBankAccounts, isLoading: allIsLoading } = useBankAccounts();
   const { data: selectedBankAccount, isLoading: selectedIsLoading } = useSelectedBankAccount();
   const [open, setOpen] = React.useState(false);

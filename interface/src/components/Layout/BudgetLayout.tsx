@@ -1,19 +1,20 @@
 import { Fragment } from 'react';
-import { Outlet } from 'react-router-dom';
 
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
 
 import styles from './BudgetLayout.module.scss';
 
-export default function BudgetingLayout(): JSX.Element {
+export interface BudgetingLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function BudgetingLayout(props: BudgetingLayoutProps): JSX.Element {
   // className='hidden lg:flex'
   // className='min-w-0 flex flex-col grow'
   return (
     <Fragment>
       <BudgetingSidebar />
-      <div className={styles.budgetLayoutRoot}>
-        <Outlet />
-      </div>
+      <div className={styles.budgetLayoutRoot}>{props.children}</div>
     </Fragment>
   );
 }

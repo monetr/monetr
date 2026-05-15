@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import { useMatch } from 'react-router-dom';
+import { useRoute } from 'wouter';
 
 export function useSelectedBankAccountId(): string | undefined {
-  const match = useMatch('/bank/:bankId/*');
+  const [, params] = useRoute<{ bankId: string }>('/bank/:bankId/*');
   return useMemo(() => {
-    return match?.params?.bankId || undefined;
-  }, [match]);
+    return params?.bankId || undefined;
+  }, [params]);
 }

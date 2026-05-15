@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 
 import { flexVariants } from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
@@ -32,7 +32,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
   const createLink = useCreateLink();
   const createBankAccount = useCreateBankAccount();
   const createFundingSchedule = useCreateFundingSchedule();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
   const { data: locale } = useLocaleCurrency(viewContext.formData.currency);
   const initialValues: ManualLinkSetupIncomeValues = {

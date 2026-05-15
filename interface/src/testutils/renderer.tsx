@@ -1,6 +1,6 @@
 import type React from 'react';
 import NiceModal from '@ebay/nice-modal-react';
-import { type Location, MemoryRouter } from 'react-router-dom';
+import { Router } from 'wouter';
 
 import { type Queries, type queries, type RenderOptions, type RenderResult, render } from '@testing-library/react';
 
@@ -8,21 +8,21 @@ import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
 import { TooltipProvider } from '@monetr/interface/components/Tooltip';
 
+import { memoryLocation } from 'wouter/memory-location';
+
 export interface Options<Q extends Queries = typeof queries, Container extends Element | DocumentFragment = HTMLElement>
   extends RenderOptions<Q, Container> {
-  initialRoute: string | Partial<Location>;
+  initialRoute: string;
 }
 
 function testRenderer<Q extends Queries = typeof queries, Container extends Element | DocumentFragment = HTMLElement>(
   ui: React.ReactElement,
   options?: Options<Q, Container>,
 ): RenderResult<Q, Container> {
+  const { hook } = memoryLocation({ path: options.initialRoute });
   const Wrapper = (props: React.PropsWithChildren<unknown>) => {
     return (
-      <MemoryRouter
-        future={{ v7_startTransition: false, v7_relativeSplatPath: false }}
-        initialEntries={[options.initialRoute]}
-      >
+      <Router hook={hook}>
         <MQueryClient>
           <MSnackbarProvider>
             <TooltipProvider>
@@ -30,7 +30,7 @@ function testRenderer<Q extends Queries = typeof queries, Container extends Elem
             </TooltipProvider>
           </MSnackbarProvider>
         </MQueryClient>
-      </MemoryRouter>
+      </Router>
     );
   };
 

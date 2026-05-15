@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'wouter';
 
 import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/InstitutionLogo';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';

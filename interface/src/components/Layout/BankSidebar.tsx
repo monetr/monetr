@@ -1,5 +1,5 @@
 import { CircleAlert, LogOut, Settings } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'wouter';
 
 import Logo from '@monetr/interface/assets/Logo';
 import Divider from '@monetr/interface/components/Divider';

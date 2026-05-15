@@ -1,15 +1,15 @@
 import { act } from 'react';
 import { rs } from '@rstest/core';
-import * as reactRouterDomActual from 'react-router-dom' with { rstest: 'importActual' };
+import * as wouterActual from 'wouter' with { rstest: 'importActual' };
 
 import useLogin from '@monetr/interface/hooks/useLogin';
 import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 
-const mockUseNavigate = rs.fn((_url: string) => {});
-rs.mock('react-router-dom', () => ({
-  ...reactRouterDomActual,
-  useNavigate: () => mockUseNavigate,
+const mockNavigate = rs.fn((_url: string) => {});
+rs.mock('wouter', () => ({
+  ...wouterActual,
+  useLocation: () => ['/login', mockNavigate],
 }));
 
 describe('login', () => {
@@ -17,7 +17,7 @@ describe('login', () => {
 
   beforeEach(() => {
     mockFetch = new FetchMock();
-    mockUseNavigate.mockReset();
+    mockNavigate.mockReset();
   });
   afterEach(() => {
     mockFetch.reset();
@@ -44,7 +44,7 @@ describe('login', () => {
     });
 
     // Make sure we end up navigating to the url returned by the login endpoint.
-    expect(mockUseNavigate).toHaveBeenCalledWith('/account/subscribe');
+    expect(mockNavigate).toHaveBeenCalledWith('/account/subscribe');
   });
 
   it('will navigate without a next url', async () => {
@@ -64,7 +64,7 @@ describe('login', () => {
     });
 
     // When the login endpoint does not return a next url, navigate to an index route.
-    expect(mockUseNavigate).toHaveBeenCalledWith('/');
+    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 
   it('will require a password reset', async () => {
@@ -86,12 +86,7 @@ describe('login', () => {
 
     // When the login endpoint returns a password change required error; then make sure we navigate to the password
     // reset page.
-    expect(mockUseNavigate).toHaveBeenCalledWith('/password/reset', {
-      state: {
-        message: 'You are required to change your password before authenticating.',
-        token: 'abc123',
-      },
-    });
+    expect(mockNavigate).toHaveBeenCalledWith('/password/reset?token=abc123&reason=password_change_required');
   });
 
   it('email has not been verified', async () => {
@@ -111,10 +106,6 @@ describe('login', () => {
     });
 
     // When our email is not verified, make sure we navigate to the resend page.
-    expect(mockUseNavigate).toHaveBeenCalledWith('/verify/email/resend', {
-      state: {
-        emailAddress: 'test@test.com',
-      },
-    });
+    expect(mockNavigate).toHaveBeenCalledWith('/verify/email/resend?email=test%40test.com');
   });
 });

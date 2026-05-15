@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { captureEvent } from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 
 import MSpinner from '@monetr/interface/components/MSpinner';
 import { OAuthRedirectPlaidLink } from '@monetr/interface/components/Plaid/OAuthRedirectPlaidLink';
@@ -40,7 +40,7 @@ export default function OauthReturn(): JSX.Element {
       );
   }, []);
 
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
 
   async function longPollSetup(): Promise<void> {
     setState(prevState => ({

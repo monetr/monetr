@@ -27,11 +27,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCcw } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 export default function PullToRefresh(): JSX.Element {
-  const navigate = useNavigate();
-
   const [pullStartPoint, setPullStartPoint] = useState(0);
   const [pullChange, setPullChange] = useState(0);
   const refreshDiv = useRef<HTMLDivElement>(null);
@@ -48,7 +45,7 @@ export default function PullToRefresh(): JSX.Element {
     const forceReload = () => {
       refreshDiv.current?.classList.add('loading');
       setTimeout(() => {
-        navigate(0);
+        window.location.reload();
       }, 1000);
     };
 
@@ -141,7 +138,7 @@ export default function PullToRefresh(): JSX.Element {
       window.removeEventListener('touchmove', pullDown);
       window.removeEventListener('touchend', pullFinish);
     };
-  }, [pullDownReloadThreshold, pullStartPoint, navigate]);
+  }, [pullDownReloadThreshold, pullStartPoint]);
 
   return (
     <div

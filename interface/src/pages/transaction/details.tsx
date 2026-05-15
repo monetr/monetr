@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { startOfDay } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { HeartCrack, Save, ShoppingCart } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'wouter';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import Flex from '@monetr/interface/components/Flex';
@@ -44,7 +44,7 @@ export default function TransactionDetails(): JSX.Element {
   const selectedBankAccountId = useSelectedBankAccountId();
   const { data: link, isLoading: linkIsLoading } = useCurrentLink();
   const { enqueueSnackbar } = useSnackbar();
-  const { transactionId: id } = useParams();
+  const { transactionId: id } = useParams<{ transactionId: string }>();
   const updateTransaction = useUpdateTransaction();
   const transactionId = id || null;
   const { data: transaction, isLoading, isError } = useTransaction(transactionId);
