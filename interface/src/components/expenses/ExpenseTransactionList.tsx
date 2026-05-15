@@ -1,6 +1,5 @@
 import { Fragment } from 'react';
 import { ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 import { flexVariants } from '@monetr/interface/components/Flex';
 import { Item, ItemContent } from '@monetr/interface/components/Item';
@@ -12,6 +11,8 @@ import useSpendingTransactions from '@monetr/interface/hooks/useSpendingTransact
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type Spending from '@monetr/interface/models/Spending';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
+
+import { Link } from 'wouter';
 
 export interface ExpenseTransactionListProps {
   spending: Spending;

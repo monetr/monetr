@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { Archive, FlaskConical, HeartCrack, Save, Settings } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
@@ -18,6 +17,8 @@ import { useUpdateBankAccount } from '@monetr/interface/hooks/useUpdateBankAccou
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
+import { useLocation } from 'wouter';
+
 interface BankAccountValues {
   name: string;
   currency: string;
@@ -29,7 +30,7 @@ export default function BankAccountSettingsPage(): JSX.Element {
   const updateBankAccount = useUpdateBankAccount();
   const archiveBankAccount = useArchiveBankAccount();
   const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
 
   const archive = useCallback(async () => {
     if (!bankAccount) {

@@ -51,12 +51,7 @@ describe('resend verification email', () => {
     });
 
     const world = testRenderer(<ResendVerificationPage />, {
-      initialRoute: {
-        pathname: '/verify/email/resend',
-        state: {
-          emailAddress: 'email@test.com',
-        },
-      },
+      initialRoute: `/verify/email/resend?email=${encodeURIComponent('email@test.com')}`,
     });
 
     await waitFor(() => {

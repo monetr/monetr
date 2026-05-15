@@ -1,5 +1,4 @@
 import { ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 import Flex from '@monetr/interface/components/Flex';
 import Typography from '@monetr/interface/components/Typography';
@@ -12,6 +11,8 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import itemStyles from './TransactionItem.module.scss';
 import selectSpendingStyles from './TransactionItemSelectSpending.module.scss';
+
+import { Link } from 'wouter';
 
 export interface TransactionItemProps {
   transaction: Transaction;

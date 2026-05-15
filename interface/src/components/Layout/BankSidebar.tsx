@@ -1,5 +1,4 @@
 import { CircleAlert, LogOut, Settings } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 import Logo from '@monetr/interface/assets/Logo';
 import Divider from '@monetr/interface/components/Divider';
@@ -11,6 +10,8 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import styles from './BankSidebar.module.scss';
 import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
+
+import { Link } from 'wouter';
 
 export interface BankSidebarProps {
   className?: string;

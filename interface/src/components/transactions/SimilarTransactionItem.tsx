@@ -1,5 +1,4 @@
 import { ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 import { flexVariants } from '@monetr/interface/components/Flex';
 import { Item, ItemContent } from '@monetr/interface/components/Item';
@@ -10,6 +9,8 @@ import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransaction } from '@monetr/interface/hooks/useTransaction';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
+
+import { Link } from 'wouter';
 
 export interface SimilarTransactionItemProps {
   transactionId: string;

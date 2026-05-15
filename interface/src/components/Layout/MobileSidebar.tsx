@@ -1,16 +1,17 @@
 import { useContext, useEffect } from 'react';
-import { useLocation, useMatch } from 'react-router-dom';
 
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
 import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
+import { useLocation, useRoute } from 'wouter';
+
 export default function MobileSidebar(): JSX.Element {
   const { isOpen, setIsOpen } = useContext(MobileSidebarContext);
-  const match = useMatch('/bank/:bankId/*');
-  const isBankRoute = Boolean(match?.params?.bankId || null);
-  const { pathname } = useLocation();
+  const [, params] = useRoute<{ bankId: string }>('/bank/:bankId/*');
+  const isBankRoute = Boolean(params?.bankId);
+  const [pathname] = useLocation();
 
   // When we navigate away from the current page, if the sidebar is open; close it.
   // This achieves the behavior of; if they click a navigation item in the sidebar we automatically

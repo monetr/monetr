@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+
+import { useLocation } from 'wouter';
 
 export interface IMobileSidebarContext {
   isOpen: boolean;
@@ -16,7 +17,7 @@ export interface MobileSidebarContextProviderProps {
 }
 
 export default function MobileSidebarContextProvider(props: MobileSidebarContextProviderProps): JSX.Element {
-  const { pathname } = useLocation();
+  const [pathname] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   useEffect(() => {
     const root = document.querySelector('#root');

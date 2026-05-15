@@ -1,5 +1,4 @@
 import { rs } from '@rstest/core';
-import * as reactRouterDomActual from 'react-router-dom' with { rstest: 'importActual' };
 
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -8,10 +7,12 @@ import Login from '@monetr/interface/pages/login';
 import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-const mockUseNavigate = rs.fn((_url: string) => {});
-rs.mock('react-router-dom', () => ({
-  ...reactRouterDomActual,
-  useNavigate: () => mockUseNavigate,
+import * as wouterActual from 'wouter' with { rstest: 'importActual' };
+
+const mockNavigate = rs.fn((_url: string) => {});
+rs.mock('wouter', () => ({
+  ...wouterActual,
+  useLocation: () => ['/login', mockNavigate],
 }));
 
 describe('login page', () => {
@@ -19,7 +20,7 @@ describe('login page', () => {
 
   beforeEach(() => {
     mockFetch = new FetchMock();
-    mockUseNavigate.mockReset();
+    mockNavigate.mockReset();
   });
   afterEach(() => {
     mockFetch.reset();
@@ -104,7 +105,7 @@ describe('login page', () => {
     await user.click(world.getByTestId('login-submit'));
 
     // When we login we should be redirected to this route.
-    await waitFor(() => expect(mockUseNavigate).toHaveBeenCalledWith('/'));
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/'));
   });
 
   test('will submit login and require subscription', async () => {
@@ -134,6 +135,6 @@ describe('login page', () => {
     await user.click(world.getByTestId('login-submit'));
 
     // When we login we should be redirected to this route.
-    await waitFor(() => expect(mockUseNavigate).toHaveBeenCalledWith('/account/subscribe'));
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/account/subscribe'));
   });
 });

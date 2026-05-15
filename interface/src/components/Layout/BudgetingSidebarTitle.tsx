@@ -1,6 +1,5 @@
 import { Fragment, useCallback } from 'react';
 import { EllipsisVertical, LogIn, Plug, RefreshCw, Settings, Trash2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 import Divider from '@monetr/interface/components/Divider';
 import {
@@ -16,10 +15,12 @@ import { useTriggerManualPlaidSync } from '@monetr/interface/hooks/useTriggerMan
 import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePlaidAccountOverlay';
 
+import { useLocation } from 'wouter';
+
 export default function BudgetingSidebarTitle(): JSX.Element {
   const { data: bankAccount } = useSelectedBankAccount();
   const { data: link } = useCurrentLink();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const triggerSync = useTriggerManualPlaidSync();
 
   const handleReauthenticateLink = useCallback(() => {

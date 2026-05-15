@@ -1,7 +1,6 @@
 import { Fragment, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { FormikHelpers } from 'formik';
-import { useNavigate } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
@@ -22,6 +21,8 @@ import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
+import { useLocation } from 'wouter';
+
 interface NewBankAccountValues {
   name: string;
   balance: number;
@@ -34,7 +35,7 @@ function NewBankAccountModal(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: selectedBankAccount, isLoading } = useSelectedBankAccount();
   const createBankAccount = useCreateBankAccount();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const ref = useRef<MModalRef>(null);
 
   if (isLoading || !selectedBankAccount) {

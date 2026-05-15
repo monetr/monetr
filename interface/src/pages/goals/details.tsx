@@ -1,7 +1,6 @@
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 import { ArrowUpDown, HeartCrack, PiggyBank, Save, Trash } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
@@ -28,6 +27,8 @@ import { AmountType } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
+import { useLocation, useParams } from 'wouter';
+
 interface GoalValues {
   name: string;
   amount: number;
@@ -41,8 +42,8 @@ export default function GoalDetails(): JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();
-  const navigate = useNavigate();
-  const { spendingId } = useParams();
+  const [, navigate] = useLocation();
+  const { spendingId } = useParams<{ spendingId: string }>();
   const { enqueueSnackbar } = useSnackbar();
   const { data: spending, isLoading, isError } = useSpending(spendingId);
 

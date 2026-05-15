@@ -1,5 +1,4 @@
 import { Settings } from 'lucide-react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
 
 import Divider from '@monetr/interface/components/Divider';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
@@ -7,7 +6,13 @@ import { textVariants } from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-export default function SettingsLayout(): JSX.Element {
+import { Link, useLocation } from 'wouter';
+
+export interface SettingsLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function SettingsLayout(props: SettingsLayoutProps): JSX.Element {
   const config = useAppConfiguration();
 
   return (
@@ -20,7 +25,7 @@ export default function SettingsLayout(): JSX.Element {
         <SettingTab to='/settings/about'>About</SettingTab>
       </div>
       <Divider />
-      <Outlet />
+      {props.children}
     </div>
   );
 }
@@ -31,8 +36,8 @@ interface SettingTabProps {
 }
 
 function SettingTab(props: SettingTabProps): JSX.Element {
-  const location = useLocation();
-  const active = location.pathname === props.to;
+  const [pathname] = useLocation();
+  const active = pathname === props.to;
   const className = mergeTailwind(
     textVariants({
       size: 'inherit',

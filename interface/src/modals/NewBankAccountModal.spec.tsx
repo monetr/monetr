@@ -1,6 +1,5 @@
 import { act } from 'react';
 import { rs } from '@rstest/core';
-import * as reactRouterDomActual from 'react-router-dom' with { rstest: 'importActual' };
 
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -9,10 +8,12 @@ import { showNewBankAccountModal } from '@monetr/interface/modals/NewBankAccount
 import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-const mockUseNavigate = rs.fn((_url: string) => {});
-rs.mock('react-router-dom', () => ({
-  ...reactRouterDomActual,
-  useNavigate: () => mockUseNavigate,
+import * as wouterActual from 'wouter' with { rstest: 'importActual' };
+
+const mockNavigate = rs.fn((_url: string) => {});
+rs.mock('wouter', () => ({
+  ...wouterActual,
+  useLocation: () => ['/login', mockNavigate],
 }));
 
 describe('new bank account modal', () => {
@@ -20,7 +21,7 @@ describe('new bank account modal', () => {
 
   beforeEach(() => {
     mockFetch = new FetchMock();
-    mockUseNavigate.mockReset();
+    mockNavigate.mockReset();
   });
   afterEach(() => {
     mockFetch.reset();
@@ -168,7 +169,7 @@ describe('new bank account modal', () => {
     await act(() => userEvent.click(world.getByTestId('bank-account-submit')));
 
     // When we submit it we should get redirected to our new bank account.
-    await waitFor(() => expect(mockUseNavigate).toHaveBeenCalledWith('/bank/bac_created/transactions'));
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/bank/bac_created/transactions'));
 
     // Make sure the modal was also closed.
     await waitFor(() => expect(world.queryByTestId('new-bank-account-modal')).not.toBeInTheDocument());
@@ -251,7 +252,7 @@ describe('new bank account modal', () => {
     await act(() => userEvent.click(world.getByTestId('bank-account-submit')));
 
     // When we submit it we should get redirected to our new bank account.
-    await waitFor(() => expect(mockUseNavigate).toHaveBeenCalledWith('/bank/bac_created/transactions'));
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/bank/bac_created/transactions'));
 
     // Make sure the modal was also closed.
     await waitFor(() => expect(world.queryByTestId('new-bank-account-modal')).not.toBeInTheDocument());

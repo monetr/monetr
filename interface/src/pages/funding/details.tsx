@@ -2,7 +2,6 @@ import { useId } from 'react';
 import { format, isEqual, startOfDay, startOfTomorrow } from 'date-fns';
 import { type FormikErrors, type FormikHelpers, useFormikContext } from 'formik';
 import { CalendarSync, HeartCrack, Save, Trash } from 'lucide-react';
-import { useMatch, useNavigate } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
@@ -27,6 +26,8 @@ import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
+import { useLocation, useRoute } from 'wouter';
+
 interface FundingValues {
   name: string;
   nextRecurrence: Date;
@@ -42,12 +43,12 @@ export default function FundingDetails(): JSX.Element {
   const { data: locale } = useLocaleCurrency();
   // I don't want to do it this way, but it seems like it's the only way to do it for tests without having the entire
   // router also present in the test?
-  const match = useMatch('/bank/:bankId/funding/:fundingId/details');
-  const fundingId = match?.params?.fundingId || null;
+  const [, params] = useRoute<{ bankId: string; fundingId: string }>('/bank/:bankId/funding/:fundingId/details');
+  const fundingId = params?.fundingId || null;
   const { data: funding } = useFundingSchedule(fundingId);
   const { data: link } = useCurrentLink();
   const isManual = Boolean(link?.getIsManual());
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const patchFundingSchedule = usePatchFundingSchedule();
   const removeFundingSchedule = useRemoveFundingSchedule();
   const { enqueueSnackbar } = useSnackbar();

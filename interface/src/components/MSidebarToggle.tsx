@@ -1,9 +1,10 @@
 import { useCallback, useContext } from 'react';
 import { ArrowLeft, PanelLeft, PanelLeftClose } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import { useLocation } from 'wouter';
 
 export interface MSidebarToggleProps {
   backButton?: string;
@@ -11,7 +12,7 @@ export interface MSidebarToggleProps {
 }
 
 export default function MSidebarToggle(props: MSidebarToggleProps): JSX.Element {
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const { isOpen, setIsOpen } = useContext(MobileSidebarContext);
 
   const onClick = useCallback(() => {

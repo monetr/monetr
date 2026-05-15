@@ -1,13 +1,14 @@
 import { useCallback, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 
 import MLogo from '@monetr/interface/components/MLogo';
 import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
 
+import { useLocation, useSearch } from 'wouter';
+
 export default function VerifyEmail(): JSX.Element {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const search = useSearch();
+  const [, navigate] = useLocation();
 
   const errorRedirect = useCallback(
     (message: string, nextUrl: string = '/login') => {
@@ -17,7 +18,6 @@ export default function VerifyEmail(): JSX.Element {
     [navigate],
   );
 
-  const search = location.search;
   const query = new URLSearchParams(search);
   const token = query.get('token');
 

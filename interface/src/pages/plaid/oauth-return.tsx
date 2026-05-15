@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { captureEvent } from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 
 import MSpinner from '@monetr/interface/components/MSpinner';
 import { OAuthRedirectPlaidLink } from '@monetr/interface/components/Plaid/OAuthRedirectPlaidLink';
@@ -9,6 +8,7 @@ import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
 
 import type { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
+import { useLocation } from 'wouter';
 
 interface State {
   loading: boolean;
@@ -40,7 +40,7 @@ export default function OauthReturn(): JSX.Element {
       );
   }, []);
 
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
 
   async function longPollSetup(): Promise<void> {
     setState(prevState => ({

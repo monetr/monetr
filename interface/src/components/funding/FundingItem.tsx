@@ -1,6 +1,5 @@
 import { format } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
 import { rrulestr } from 'rrule';
 
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
@@ -12,6 +11,8 @@ import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 
+import { Link, useLocation } from 'wouter';
+
 export interface FundingItemProps {
   funding: FundingSchedule;
 }
@@ -19,7 +20,7 @@ export interface FundingItemProps {
 export default function FundingItem(props: FundingItemProps): JSX.Element {
   const { data: localeCurrency } = useLocaleCurrency();
   const { data: locale } = useLocale();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const { funding } = props;
   const contributionForecast = useNextFundingForecast(funding.fundingScheduleId);
   const rule = rrulestr(funding.ruleset);

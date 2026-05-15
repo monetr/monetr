@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { CircleCheck, Pencil } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
 
 import Logo from '@monetr/interface/assets/Logo';
 import { Button } from '@monetr/interface/components/Button';
@@ -12,6 +11,8 @@ import SetupBillingButton from '@monetr/interface/components/setup/SetupBillingB
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import { Redirect } from 'wouter';
 
 export interface SetupPageProps {
   // TODO Remove this prop and instead just use "does the user have any links". If they do then we can assume this is
@@ -34,11 +35,11 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
         <Greeting alreadyOnboarded={props.alreadyOnboarded} manualEnabled={props.manualEnabled} onContinue={setStep} />
       );
     case 'plaid':
-      return <Navigate to={plaidPath} />;
+      return <Redirect to={plaidPath} />;
     case 'lunchflow':
-      return <Navigate to={lunchFlowPath} />;
+      return <Redirect to={lunchFlowPath} />;
     case 'manual':
-      return <Navigate to={manualPath} />;
+      return <Redirect to={manualPath} />;
     default:
       return <h1>Something went wrong...</h1>;
   }

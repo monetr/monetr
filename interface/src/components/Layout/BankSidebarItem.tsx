@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom';
-
 import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/InstitutionLogo';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useBankAccounts } from '@monetr/interface/hooks/useBankAccounts';
@@ -8,6 +6,8 @@ import type MonetrLink from '@monetr/interface/models/Link';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 
 import styles from './BankSidebarItem.module.scss';
+
+import { Link } from 'wouter';
 
 interface BankSidebarItemProps {
   link: MonetrLink;

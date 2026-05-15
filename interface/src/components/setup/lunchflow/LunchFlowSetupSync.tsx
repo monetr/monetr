@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import { flexVariants } from '@monetr/interface/components/Flex';
@@ -10,9 +9,11 @@ import Typography from '@monetr/interface/components/Typography';
 import { useBankAccountsForLink } from '@monetr/interface/hooks/useBankAccountsForLink';
 import request from '@monetr/interface/util/request';
 
+import { useLocation, useParams } from 'wouter';
+
 export default function LunchFlowSetupSync(): React.JSX.Element {
-  const navigate = useNavigate();
-  const { linkId } = useParams();
+  const [, navigate] = useLocation();
+  const { linkId } = useParams<{ linkId: string }>();
   const { data: bankAccounts } = useBankAccountsForLink(linkId);
 
   // As soon as this page loads immediately trigger the lunch flow sync

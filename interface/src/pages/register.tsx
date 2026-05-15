@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { FormikErrors, FormikHelpers } from 'formik';
-import { useNavigate } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import Flex from '@monetr/interface/components/Flex';
@@ -22,6 +21,8 @@ import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './register.module.scss';
+
+import { useLocation } from 'wouter';
 
 interface RegisterValues {
   firstName: string;
@@ -98,7 +99,7 @@ export default function Register(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: config } = useAppConfiguration();
   const signUp = useSignUp();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const [successful, setSuccessful] = useState(false);
 

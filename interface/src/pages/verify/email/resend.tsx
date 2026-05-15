@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import type { FormikErrors, FormikHelpers } from 'formik';
-import { useLocation } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import FormButton from '@monetr/interface/components/FormButton';
@@ -15,6 +14,8 @@ import request, { type APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 import { useSnackbar } from '@monetr/notify';
 
+import { useSearch } from 'wouter';
+
 interface ResendValues {
   email: string | null;
   captcha: string | null;
@@ -23,7 +24,7 @@ interface ResendValues {
 export default function ResendVerificationPage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: config } = useAppConfiguration();
-  const { state: routeState } = useLocation();
+  const emailFromQuery = new URLSearchParams(useSearch()).get('email');
   const [done, setDone] = useState(false);
 
   const resendVerification = useCallback(
@@ -69,7 +70,7 @@ export default function ResendVerificationPage(): JSX.Element {
   );
 
   const initialValues: ResendValues = {
-    email: routeState?.emailAddress || undefined,
+    email: emailFromQuery || undefined,
     captcha: null,
   };
 
@@ -86,7 +87,7 @@ export default function ResendVerificationPage(): JSX.Element {
     >
       <div className='max-w-xs flex flex-col items-center gap-2'>
         <MLogo className='h-24 w-24' />
-        <RouteStateMessage />
+        <RouteStateMessage hasEmail={Boolean(emailFromQuery)} />
         <FormTextField
           autoComplete='username'
           autoFocus
@@ -135,9 +136,12 @@ export function AfterEmailVerificationSent(): JSX.Element {
   );
 }
 
-function RouteStateMessage(): JSX.Element {
-  const { state: routeState } = useLocation();
-  if (routeState) {
+interface RouteStateMessageProps {
+  hasEmail: boolean;
+}
+
+function RouteStateMessage(props: RouteStateMessageProps): JSX.Element {
+  if (props.hasEmail) {
     return (
       <Typography align='center' data-testid='resend-email-included' size='sm'>
         It looks like your email address has not been verified. Do you want to resend the email verification link?

@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useFormikContext } from 'formik';
-import { useNavigate } from 'react-router-dom';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { flexVariants } from '@monetr/interface/components/Flex';
@@ -18,6 +17,8 @@ import LunchFlowLink from '@monetr/interface/models/LunchFlowLink';
 import request, { type APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
+import { useLocation } from 'wouter';
+
 export type LunchFlowSetupIntroValues = {
   name: string;
   apiURL: string;
@@ -27,7 +28,7 @@ export type LunchFlowSetupIntroValues = {
 export default function LunchFlowSetupIntro(): React.JSX.Element {
   const { data: config } = useAppConfiguration();
   const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
+  const [pathname, navigate] = useLocation();
 
   const allowedAPIURLs = config.lunchFlowAllowedAPIURLs ?? [];
   const initialApiURL = allowedAPIURLs.length > 0 ? allowedAPIURLs[0] : '';
@@ -54,11 +55,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
         },
       })
         .then(result => new LunchFlowLink(result?.data))
-        .then(lunchFlowLink =>
-          navigate(lunchFlowLink.lunchFlowLinkId, {
-            relative: 'path',
-          }),
-        )
+        .then(lunchFlowLink => navigate(`${pathname}/${lunchFlowLink.lunchFlowLinkId}`))
         .catch((error: ApiError<APIError>) =>
           enqueueSnackbar(
             <div>
@@ -77,7 +74,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
         )
         .finally(() => helpers.setSubmitting(false));
     },
-    [navigate, enqueueSnackbar],
+    [navigate, pathname, enqueueSnackbar],
   );
 
   return (

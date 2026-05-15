@@ -1,12 +1,12 @@
-import { useNavigate } from 'react-router-dom';
-
 import type { ApiError } from '@monetr/interface/api/client';
 import request, { type APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
+import { useLocation } from 'wouter';
+
 export default function useResetPassword(): (newPassword: string, token: string) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   return async (newPassword: string, token: string) => {
     return request({
       method: 'POST',

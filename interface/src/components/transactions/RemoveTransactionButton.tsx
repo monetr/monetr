@@ -1,11 +1,12 @@
 import { useCallback } from 'react';
 import { Trash } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@monetr/interface/components/Button';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { showRemoveTransactionModal } from '@monetr/interface/modals/RemoveTransactionModal';
 import type Transaction from '@monetr/interface/models/Transaction';
+
+import { useLocation } from 'wouter';
 
 interface RemoveTransactionButtonProps {
   transaction: Transaction;
@@ -14,7 +15,7 @@ interface RemoveTransactionButtonProps {
 export default function RemoveTransactionButton(props: RemoveTransactionButtonProps): JSX.Element {
   const { transaction } = props;
   const { data: link } = useCurrentLink();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
 
   const promptRemoveTransaction = useCallback(async () => {
     return await showRemoveTransactionModal({

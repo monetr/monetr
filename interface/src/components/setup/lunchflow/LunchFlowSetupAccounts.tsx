@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import type { FormikErrors, FormikHelpers } from 'formik';
-import { useNavigate, useParams } from 'react-router-dom';
 
 import { flexVariants } from '@monetr/interface/components/Flex';
 import FormButton from '@monetr/interface/components/FormButton';
@@ -18,13 +17,15 @@ import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/Ba
 import { LunchFlowBankAccountStatus } from '@monetr/interface/models/LunchFlowBankAccount';
 import { LunchFlowLinkStatus } from '@monetr/interface/models/LunchFlowLink';
 
+import { useLocation, useParams } from 'wouter';
+
 export interface LunchFlowSetupAccountsForm {
   items: { [key: string]: boolean };
 }
 
 export default function LunchFlowSetupAccounts(): React.JSX.Element {
-  const { lunchFlowLinkId } = useParams();
-  const navigate = useNavigate();
+  const { lunchFlowLinkId } = useParams<{ lunchFlowLinkId: string }>();
+  const [, navigate] = useLocation();
   const createLink = useCreateLink();
   const createBankAccount = useCreateBankAccount();
   // When the page loads, use the ID from the url params to trigger a refresh of bank accounts. This refresh will fail
