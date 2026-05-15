@@ -5,3 +5,12 @@ packages:
 allowBuilds:
   '@swc/core': false
   core-js: false
+
+saveExact: true
+savePrefix: ""
+
+preferFrozenLockfile: true
+
+trustPolicy: no-downgrade
+minimumReleaseAge: 10080 # 7 days
+minimumReleaseAgeStrict: true
