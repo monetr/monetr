@@ -1,5 +1,6 @@
 import type React from 'react';
 import NiceModal from '@ebay/nice-modal-react';
+import { Router } from 'wouter';
 
 import { type Queries, type queries, type RenderOptions, type RenderResult, render } from '@testing-library/react';
 
@@ -7,7 +8,6 @@ import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
 import { TooltipProvider } from '@monetr/interface/components/Tooltip';
 
-import { Router } from 'wouter';
 import { memoryLocation } from 'wouter/memory-location';
 
 export interface Options<Q extends Queries = typeof queries, Container extends Element | DocumentFragment = HTMLElement>

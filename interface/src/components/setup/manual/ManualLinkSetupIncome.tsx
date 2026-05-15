@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { startOfDay, startOfTomorrow } from 'date-fns';
 import type { FormikHelpers } from 'formik';
+import { useLocation } from 'wouter';
 
 import { flexVariants } from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
@@ -18,8 +19,6 @@ import { useCreateLink } from '@monetr/interface/hooks/useCreateLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
-
-import { useLocation } from 'wouter';
 
 export type ManualLinkSetupIncomeValues = {
   nextPayday: Date;

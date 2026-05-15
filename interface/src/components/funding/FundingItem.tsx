@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
 import { rrulestr } from 'rrule';
+import { Link, useLocation } from 'wouter';
 
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import Typography from '@monetr/interface/components/Typography';
@@ -10,8 +11,6 @@ import { useNextFundingForecast } from '@monetr/interface/hooks/useNextFundingFo
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
-
-import { Link, useLocation } from 'wouter';
 
 export interface FundingItemProps {
   funding: FundingSchedule;

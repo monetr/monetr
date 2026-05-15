@@ -1,10 +1,9 @@
 import type React from 'react';
+import { Link } from 'wouter';
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import type { TextSize } from './types';
-
-import { Link } from 'wouter';
 
 export interface MLinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
   to: string;

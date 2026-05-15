@@ -1,13 +1,12 @@
 import { formatDistance } from 'date-fns';
 import { CreditCard } from 'lucide-react';
+import { Link } from 'wouter';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@monetr/interface/components/Tooltip';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 import styles from './BankSidebarSubscriptionItem.module.scss';
-
-import { Link } from 'wouter';
 
 export default function BankSidebarSubscriptionItem(): JSX.Element {
   const { data: config } = useAppConfiguration();

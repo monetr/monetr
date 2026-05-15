@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { FormikErrors, FormikHelpers } from 'formik';
+import { useLocation } from 'wouter';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import Flex from '@monetr/interface/components/Flex';
@@ -21,8 +22,6 @@ import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './register.module.scss';
-
-import { useLocation } from 'wouter';
 
 interface RegisterValues {
   firstName: string;

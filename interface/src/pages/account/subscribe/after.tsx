@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
 import { LoaderCircle } from 'lucide-react';
+import { useLocation, useSearch } from 'wouter';
 
 import Logo from '@monetr/interface/assets/Logo';
 import Typography from '@monetr/interface/components/Typography';
 import { useAfterCheckout } from '@monetr/interface/hooks/useAfterCheckout';
-
-import { useLocation, useSearch } from 'wouter';
 
 export default function AfterCheckoutPage(): JSX.Element {
   const search = useSearch();

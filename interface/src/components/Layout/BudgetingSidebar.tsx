@@ -1,4 +1,5 @@
 import { CalendarSync, PiggyBank, Receipt, ShoppingCart } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
 
 import Badge from '@monetr/interface/components/Badge';
 import Divider from '@monetr/interface/components/Divider';
@@ -20,8 +21,6 @@ import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
 import styles from './BudgetSidebar.module.scss';
-
-import { Link, useLocation } from 'wouter';
 
 export interface BudgetingSidebarProps {
   className?: string;

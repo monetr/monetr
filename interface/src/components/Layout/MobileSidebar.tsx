@@ -1,11 +1,10 @@
 import { useContext, useEffect } from 'react';
+import { useLocation, useRoute } from 'wouter';
 
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
 import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
-import { useLocation, useRoute } from 'wouter';
 
 export default function MobileSidebar(): JSX.Element {
   const { isOpen, setIsOpen } = useContext(MobileSidebarContext);

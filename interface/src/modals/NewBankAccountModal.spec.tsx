@@ -1,5 +1,6 @@
 import { act } from 'react';
 import { rs } from '@rstest/core';
+import * as wouterActual from 'wouter' with { rstest: 'importActual' };
 
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -7,8 +8,6 @@ import userEvent from '@testing-library/user-event';
 import { showNewBankAccountModal } from '@monetr/interface/modals/NewBankAccountModal';
 import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
-
-import * as wouterActual from 'wouter' with { rstest: 'importActual' };
 
 const mockNavigate = rs.fn((_url: string) => {});
 rs.mock('wouter', () => ({

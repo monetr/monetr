@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useLocation, useParams } from 'wouter';
 
 import { Button } from '@monetr/interface/components/Button';
 import { flexVariants } from '@monetr/interface/components/Flex';
@@ -8,8 +9,6 @@ import LunchFlowSetupSyncItem from '@monetr/interface/components/setup/lunchflow
 import Typography from '@monetr/interface/components/Typography';
 import { useBankAccountsForLink } from '@monetr/interface/hooks/useBankAccountsForLink';
 import request from '@monetr/interface/util/request';
-
-import { useLocation, useParams } from 'wouter';
 
 export default function LunchFlowSetupSync(): React.JSX.Element {
   const [, navigate] = useLocation();

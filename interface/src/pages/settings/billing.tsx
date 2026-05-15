@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { format, isFuture, isThisYear } from 'date-fns';
 import { Clock } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 import type { ApiResponse } from '@monetr/interface/api/client';
 import Badge from '@monetr/interface/components/Badge';
@@ -10,8 +11,6 @@ import Typography from '@monetr/interface/components/Typography';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
-
-import { useLocation } from 'wouter';
 
 export default function SettingsBilling(): JSX.Element {
   const [pathname] = useLocation();

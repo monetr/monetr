@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { FormikErrors, FormikHelpers } from 'formik';
+import { useLocation, useSearch } from 'wouter';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
@@ -9,8 +10,6 @@ import MLogo from '@monetr/interface/components/MLogo';
 import Typography from '@monetr/interface/components/Typography';
 import useResetPassword from '@monetr/interface/hooks/useResetPassword';
 import { useSnackbar } from '@monetr/notify';
-
-import { useLocation, useSearch } from 'wouter';
 
 interface ResetPasswordValues {
   password: string;

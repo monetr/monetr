@@ -1,3 +1,5 @@
+import { Redirect, Route, Switch } from 'wouter';
+
 import BudgetingLayout from '@monetr/interface/components/Layout/BudgetLayout';
 import MobileSidebarContextProvider from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import SettingsLayout from '@monetr/interface/components/Layout/SettingsLayout';
@@ -44,8 +46,6 @@ import Transactions from '@monetr/interface/pages/transactions';
 import VerifyEmail from '@monetr/interface/pages/verify/email';
 import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
-
-import { Redirect, Route, Switch } from 'wouter';
 
 export default function Monetr(): JSX.Element {
   const { data: config, isLoading: configIsLoading, isError: configIsError } = useAppConfiguration();

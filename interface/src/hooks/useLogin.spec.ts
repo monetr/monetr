@@ -1,11 +1,10 @@
 import { act } from 'react';
 import { rs } from '@rstest/core';
+import * as wouterActual from 'wouter' with { rstest: 'importActual' };
 
 import useLogin from '@monetr/interface/hooks/useLogin';
 import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderHook from '@monetr/interface/testutils/hooks';
-
-import * as wouterActual from 'wouter' with { rstest: 'importActual' };
 
 const mockNavigate = rs.fn((_url: string) => {});
 rs.mock('wouter', () => ({

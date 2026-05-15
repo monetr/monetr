@@ -1,8 +1,7 @@
 import { ChevronRight } from 'lucide-react';
+import { Link } from 'wouter';
 
 import styles from './ArrowLink.module.scss';
-
-import { Link } from 'wouter';
 
 export interface ArrowRedirectProps {
   to: string;

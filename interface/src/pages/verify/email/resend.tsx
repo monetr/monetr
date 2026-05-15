@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import type { FormikErrors, FormikHelpers } from 'formik';
+import { useSearch } from 'wouter';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import FormButton from '@monetr/interface/components/FormButton';
@@ -13,8 +14,6 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 import request, { type APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 import { useSnackbar } from '@monetr/notify';
-
-import { useSearch } from 'wouter';
 
 interface ResendValues {
   email: string | null;

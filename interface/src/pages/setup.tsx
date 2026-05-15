@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CircleCheck, Pencil } from 'lucide-react';
+import { Redirect } from 'wouter';
 
 import Logo from '@monetr/interface/assets/Logo';
 import { Button } from '@monetr/interface/components/Button';
@@ -11,8 +12,6 @@ import SetupBillingButton from '@monetr/interface/components/setup/SetupBillingB
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
-import { Redirect } from 'wouter';
 
 export interface SetupPageProps {
   // TODO Remove this prop and instead just use "does the user have any links". If they do then we can assume this is

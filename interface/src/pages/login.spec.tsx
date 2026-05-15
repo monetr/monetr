@@ -1,4 +1,5 @@
 import { rs } from '@rstest/core';
+import * as wouterActual from 'wouter' with { rstest: 'importActual' };
 
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -6,8 +7,6 @@ import userEvent from '@testing-library/user-event';
 import Login from '@monetr/interface/pages/login';
 import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderer from '@monetr/interface/testutils/renderer';
-
-import * as wouterActual from 'wouter' with { rstest: 'importActual' };
 
 const mockNavigate = rs.fn((_url: string) => {});
 rs.mock('wouter', () => ({

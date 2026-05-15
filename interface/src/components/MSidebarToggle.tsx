@@ -1,10 +1,9 @@
 import { useCallback, useContext } from 'react';
 import { ArrowLeft, PanelLeft, PanelLeftClose } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
-import { useLocation } from 'wouter';
 
 export interface MSidebarToggleProps {
   backButton?: string;

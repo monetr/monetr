@@ -8,6 +8,7 @@ import {
   type PlaidLinkOptionsWithLinkToken,
   usePlaidLink,
 } from 'react-plaid-link';
+import { useLocation } from 'wouter';
 
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
@@ -15,8 +16,6 @@ import MSpinner from '@monetr/interface/components/MSpinner';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
 import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
-
-import { useLocation } from 'wouter';
 
 interface PlaidProps {
   alreadyOnboarded?: boolean;

@@ -1,6 +1,7 @@
 import { Fragment, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import type { FormikHelpers } from 'formik';
+import { useLocation } from 'wouter';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
@@ -20,8 +21,6 @@ import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/Ba
 import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
-
-import { useLocation } from 'wouter';
 
 interface NewBankAccountValues {
   name: string;

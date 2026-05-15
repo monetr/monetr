@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useFormikContext } from 'formik';
+import { useLocation } from 'wouter';
 
 import type { ApiError } from '@monetr/interface/api/client';
 import { flexVariants } from '@monetr/interface/components/Flex';
@@ -16,8 +17,6 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 import LunchFlowLink from '@monetr/interface/models/LunchFlowLink';
 import request, { type APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
-
-import { useLocation } from 'wouter';
 
 export type LunchFlowSetupIntroValues = {
   name: string;

@@ -1,10 +1,9 @@
 import { useCallback, useEffect } from 'react';
+import { useLocation, useSearch } from 'wouter';
 
 import MLogo from '@monetr/interface/components/MLogo';
 import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
-
-import { useLocation, useSearch } from 'wouter';
 
 export default function VerifyEmail(): JSX.Element {
   const search = useSearch();

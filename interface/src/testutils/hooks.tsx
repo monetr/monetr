@@ -1,12 +1,12 @@
 import type React from 'react';
 import NiceModal from '@ebay/nice-modal-react';
+import { Router } from 'wouter';
 
 import { type RenderHookResult, renderHook } from '@testing-library/react';
 
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
 
-import { Router } from 'wouter';
 import { memoryLocation } from 'wouter/memory-location';
 
 export interface HooksOptions<TProps> {

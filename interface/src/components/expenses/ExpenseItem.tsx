@@ -1,6 +1,7 @@
 import { format, isThisYear } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
 import { rrulestr } from 'rrule';
+import { Link } from 'wouter';
 
 import Badge from '@monetr/interface/components/Badge';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
@@ -12,8 +13,6 @@ import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 
 import styles from './ExpenseItem.module.scss';
-
-import { Link } from 'wouter';
 
 export interface ExpenseItemProps {
   spending: Spending;

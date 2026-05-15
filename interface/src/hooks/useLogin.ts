@@ -1,8 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 
 import request from '@monetr/interface/util/request';
-
-import { useLocation } from 'wouter';
 
 export interface LoginArguments {
   email: string;

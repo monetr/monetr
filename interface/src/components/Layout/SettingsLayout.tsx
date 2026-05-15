@@ -1,12 +1,11 @@
 import { Settings } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
 
 import Divider from '@monetr/interface/components/Divider';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { textVariants } from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
-import { Link, useLocation } from 'wouter';
 
 export interface SettingsLayoutProps {
   children: React.ReactNode;

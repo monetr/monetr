@@ -1,12 +1,11 @@
 import { useCallback } from 'react';
 import { Trash } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 import { Button } from '@monetr/interface/components/Button';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { showRemoveTransactionModal } from '@monetr/interface/modals/RemoveTransactionModal';
 import type Transaction from '@monetr/interface/models/Transaction';
-
-import { useLocation } from 'wouter';
 
 interface RemoveTransactionButtonProps {
   transaction: Transaction;
