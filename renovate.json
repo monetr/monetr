@@ -77,7 +77,8 @@
       "groupName": "golang",
       "groupSlug": "golang",
       "matchPackageNames": [
-        "^go$"
+        "go",
+        "golang"
       ]
     },
     {
