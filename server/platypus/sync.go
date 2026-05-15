@@ -6,7 +6,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/logging"
-	"github.com/plaid/plaid-go/v41/plaid"
+	"github.com/plaid/plaid-go/v42/plaid"
 )
 
 type SyncResult struct {

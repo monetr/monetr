@@ -18,7 +18,7 @@ import (
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/similar/similar_jobs"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v41/plaid"
+	"github.com/plaid/plaid-go/v42/plaid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"

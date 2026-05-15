@@ -22,7 +22,7 @@ import (
 	"github.com/monetr/monetr/server/round"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v41/plaid"
+	"github.com/plaid/plaid-go/v42/plaid"
 )
 
 //go:generate go run go.uber.org/mock/mockgen@v0.6.0 -source=platypus.go -package=mockgen -destination=../internal/mockgen/platypus.go Platypus
