@@ -26,18 +26,13 @@
 
   @include mixins.text-small;
 
-  // transition-all animates every animatable property with tailwind's default
-  // 150ms cubic-bezier(0.4, 0, 0.2, 1) curve.
+  // transition-all
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 
-  // The original uses focus-visible:outline-none + focus-visible:ring-2 +
-  // focus-visible:ring-ring + focus-visible:ring-offset-2. monetr never
-  // defines --ring, so hsl(var(--ring)) parses as invalid and the coloured
-  // ring collapses to no visible color; only the background-coloured offset
-  // ring would draw, which is invisible against the page. Preserve the same
-  // effectively-invisible focus indicator here.
+  // monetr never defines --ring, so the original focus ring was invisible.
+  // Keep it that way rather than inventing a visible one.
   &:focus-visible {
     outline: 2px solid transparent;
     outline-offset: 2px;
@@ -59,9 +54,8 @@
 .tabsContent {
   margin-top: 2 * variables.$size;
 
-  // Same effectively-invisible focus indicator as the trigger. The Tailwind
-  // original carried a TODO noting the ring probably does not properly work
-  // here and needs to be redone; that is still true and tracked separately.
+  // Same invisible focus as the trigger.
+  // TODO Ring probably doesn't properly work here, need to redo it.
   &:focus-visible {
     outline: 2px solid transparent;
     outline-offset: 2px;

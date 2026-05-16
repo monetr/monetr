@@ -28,6 +28,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCcw } from 'lucide-react';
 
+import styles from './PullToRefresh.module.scss';
+
 export default function PullToRefresh(): JSX.Element {
   const [pullStartPoint, setPullStartPoint] = useState(0);
   const [pullChange, setPullChange] = useState(0);
@@ -41,9 +43,9 @@ export default function PullToRefresh(): JSX.Element {
 
   useEffect(() => {
     // Reload function that is called when reload threshold has been hit
-    // Add loading class to determine when to add spin animation
+    // Set the loading flag so the spin animation starts
     const forceReload = () => {
-      refreshDiv.current?.classList.add('loading');
+      refreshDiv.current?.setAttribute('data-loading', 'true');
       setTimeout(() => {
         window.location.reload();
       }, 1000);
@@ -66,16 +68,14 @@ export default function PullToRefresh(): JSX.Element {
       setPullStartPoint(e.targetTouches[0].screenY);
 
       if (window.scrollY === 0 && window.scrollX === 0) {
-        refreshDiv.current?.classList.add('block');
-        refreshDiv.current?.classList.remove('hidden');
+        refreshDiv.current?.setAttribute('data-visible', 'true');
         document.body.style.touchAction = 'none';
         document.body.style.overscrollBehavior = 'none';
         if (html) {
           html.style.overscrollBehaviorY = 'none';
         }
       } else {
-        refreshDiv.current?.classList.remove('block');
-        refreshDiv.current?.classList.add('hidden');
+        refreshDiv.current?.setAttribute('data-visible', 'false');
       }
     };
 
@@ -142,7 +142,7 @@ export default function PullToRefresh(): JSX.Element {
 
   return (
     <div
-      className='absolute left-0 right-0 z-50 m-auto w-fit transition-all ease-out'
+      className={styles.container}
       ref={refreshDiv}
       style={{
         top:
@@ -153,16 +153,9 @@ export default function PullToRefresh(): JSX.Element {
               : '',
       }}
     >
-      <div
-        className='relative -top-16 h-9 w-9 rounded-full border-1 border-dark-monetr-border bg-dark-monetr-background shadow-md shadow-black ring-1 ring-dark-monetr-background flex items-center justify-center'
-        style={{ animationDirection: 'reverse' }}
-      >
-        <div className={refreshDiv.current?.classList.contains('loading') ? 'animate-spin' : undefined}>
-          <RefreshCcw
-            className={`rounded-full ${
-              pullDownReloadThreshold && 'rotate-180'
-            } text-indigo-500 transition-all duration-300`}
-          />
+      <div className={styles.circle} style={{ animationDirection: 'reverse' }}>
+        <div className={styles.spinner}>
+          <RefreshCcw className={styles.icon} data-reload={pullDownReloadThreshold} />
         </div>
       </div>
     </div>

@@ -1,17 +1,11 @@
 @use '@monetr/interface/mixins';
 @use '@monetr/interface/variables';
 
-// The Tailwind original drives both enter and exit via tailwindcss-animate.
-// The plugin emits `.animate-in` / `.animate-out` with the default 150ms
-// duration, and the Popover never overrode it, so both directions stay at
-// 150ms.
+// Both enter and exit run at tailwindcss-animate's default 150ms.
 $duration: 150ms;
 
-// CSS module @keyframes are locally scoped, so `enter` / `exit` won't collide
-// with the identically-named keyframes that tailwindcss-animate emits
-// globally. The keyframes mirror the plugin's shape so the popover can compose
-// fades / zooms / slides by setting the per-axis CSS variables in a state or
-// side selector. This matches how Dialog was migrated.
+// Module-scoped keyframes. The state and side selectors below set the per-axis
+// vars to compose the fades, zooms and slides, same as Dialog.
 @keyframes enter {
   from {
     opacity: var(--enter-opacity, 1);
@@ -36,11 +30,8 @@ $duration: 150ms;
   z-index: 50;
   width: 72 * variables.$size;
   border-radius: var(--border-radius); // rounded-lg
-  // The original used bg-dark-monetr-popover, but that token resolves to the
-  // raw string `0 0% 100%` with no hsl() wrapper, so the declaration was
-  // invalid and no background actually painted. monetr's popover surfaces
-  // (Tooltip, Dialog, Drawer, Modal) all use --background, so adopt that here
-  // for a consistent, valid surface.
+  // The old bg-dark-monetr-popover token was invalid (no hsl() wrapper) so
+  // nothing painted; use --background like monetr's other popover surfaces.
   background-color: var(--background);
   padding: 0;
   color: var(--content-emphasis);
@@ -66,9 +57,8 @@ $duration: 150ms;
     --exit-scale: 0.95; // zoom-out-95
   }
 
-  // The slide only happens on enter. tailwindcss-animate's
-  // slide-in-from-<side>-2 maps "2" to 2 * $size, with the sign pointing the
-  // content back toward the trigger before it animates into place.
+  // Slide only happens on enter; the sign points the content back toward the
+  // trigger before it animates in.
   &[data-side="bottom"] {
     --enter-translate-y: #{-2 * variables.$size}; // slide-in-from-top-2
   }
