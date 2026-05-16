@@ -1,0 +1,87 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// The Tailwind original drives both enter and exit via tailwindcss-animate.
+// The plugin emits `.animate-in` / `.animate-out` with the default 150ms
+// duration, and the Popover never overrode it, so both directions stay at
+// 150ms.
+$duration: 150ms;
+
+// CSS module @keyframes are locally scoped, so `enter` / `exit` won't collide
+// with the identically-named keyframes that tailwindcss-animate emits
+// globally. The keyframes mirror the plugin's shape so the popover can compose
+// fades / zooms / slides by setting the per-axis CSS variables in a state or
+// side selector. This matches how Dialog was migrated.
+@keyframes enter {
+  from {
+    opacity: var(--enter-opacity, 1);
+    transform:
+      translate3d(var(--enter-translate-x, 0), var(--enter-translate-y, 0), 0)
+      scale3d(var(--enter-scale, 1), var(--enter-scale, 1), var(--enter-scale, 1))
+      rotate(var(--enter-rotate, 0));
+  }
+}
+
+@keyframes exit {
+  to {
+    opacity: var(--exit-opacity, 1);
+    transform:
+      translate3d(var(--exit-translate-x, 0), var(--exit-translate-y, 0), 0)
+      scale3d(var(--exit-scale, 1), var(--exit-scale, 1), var(--exit-scale, 1))
+      rotate(var(--exit-rotate, 0));
+  }
+}
+
+.popoverContent {
+  z-index: 50;
+  width: 72 * variables.$size;
+  border-radius: var(--border-radius); // rounded-lg
+  // The original used bg-dark-monetr-popover, but that token resolves to the
+  // raw string `0 0% 100%` with no hsl() wrapper, so the declaration was
+  // invalid and no background actually painted. monetr's popover surfaces
+  // (Tooltip, Dialog, Drawer, Modal) all use --background, so adopt that here
+  // for a consistent, valid surface.
+  background-color: var(--background);
+  padding: 0;
+  color: var(--content-emphasis);
+  border-width: 1px;
+  border-color: var(--border);
+  // shadow-md
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  // outline-none
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+
+  &[data-state="open"] {
+    animation: enter $duration;
+    --enter-opacity: 0; // fade-in-0
+    --enter-scale: 0.95; // zoom-in-95
+  }
+
+  &[data-state="closed"] {
+    animation: exit $duration;
+    --exit-opacity: 0; // fade-out-0
+    --exit-scale: 0.95; // zoom-out-95
+  }
+
+  // The slide only happens on enter. tailwindcss-animate's
+  // slide-in-from-<side>-2 maps "2" to 2 * $size, with the sign pointing the
+  // content back toward the trigger before it animates into place.
+  &[data-side="bottom"] {
+    --enter-translate-y: #{-2 * variables.$size}; // slide-in-from-top-2
+  }
+
+  &[data-side="left"] {
+    --enter-translate-x: #{2 * variables.$size}; // slide-in-from-right-2
+  }
+
+  &[data-side="right"] {
+    --enter-translate-x: #{-2 * variables.$size}; // slide-in-from-left-2
+  }
+
+  &[data-side="top"] {
+    --enter-translate-y: #{2 * variables.$size}; // slide-in-from-bottom-2
+  }
+}

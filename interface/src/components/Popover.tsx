@@ -3,6 +3,8 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
+import styles from './Popover.module.scss';
+
 const Popover = PopoverPrimitive.Root;
 
 const PopoverTrigger = PopoverPrimitive.Trigger;
@@ -14,18 +16,7 @@ const PopoverContent = React.forwardRef<
   <PopoverPrimitive.Portal>
     <PopoverPrimitive.Content
       align={align}
-      className={mergeTailwind(
-        'z-50 w-72 rounded-lg bg-dark-monetr-popover p-0 text-dark-monetr-content-emphasis',
-        'border border-dark-monetr-border',
-        'shadow-md outline-none',
-        'data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
-        'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
-        'data-[side=bottom]:slide-in-from-top-2',
-        'data-[side=left]:slide-in-from-right-2',
-        'data-[side=right]:slide-in-from-left-2',
-        'data-[side=top]:slide-in-from-bottom-2',
-        className,
-      )}
+      className={mergeTailwind(styles.popoverContent, className)}
       ref={ref}
       sideOffset={sideOffset}
       {...props}

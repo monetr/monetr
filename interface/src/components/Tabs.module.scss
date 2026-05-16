@@ -1,0 +1,69 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.tabsList {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1.5 * variables.$size; // rounded-md
+  padding: variables.$size;
+  height: 10 * variables.$size;
+  color: var(--content-subtle);
+  background-color: var(--background-subtle);
+}
+
+.tabsTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border-radius: 1.5 * variables.$size; // rounded-md
+  padding-left: 3 * variables.$size;
+  padding-right: 3 * variables.$size;
+  padding-top: 1.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+  font-weight: var(--medium);
+
+  @include mixins.text-small;
+
+  // transition-all animates every animatable property with tailwind's default
+  // 150ms cubic-bezier(0.4, 0, 0.2, 1) curve.
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  // The original uses focus-visible:outline-none + focus-visible:ring-2 +
+  // focus-visible:ring-ring + focus-visible:ring-offset-2. monetr never
+  // defines --ring, so hsl(var(--ring)) parses as invalid and the coloured
+  // ring collapses to no visible color; only the background-coloured offset
+  // ring would draw, which is invisible against the page. Preserve the same
+  // effectively-invisible focus indicator here.
+  &:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  &[data-state="active"] {
+    background-color: var(--background);
+    color: var(--content-emphasis);
+    // shadow-sm
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+}
+
+.tabsContent {
+  margin-top: 2 * variables.$size;
+
+  // Same effectively-invisible focus indicator as the trigger. The Tailwind
+  // original carried a TODO noting the ring probably does not properly work
+  // here and needs to be redone; that is still true and tracked separately.
+  &:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
