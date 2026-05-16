@@ -4,6 +4,8 @@ import Divider from '@monetr/interface/components/Divider';
 import Typography from '@monetr/interface/components/Typography';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
+import styles from './MStepper.module.scss';
+
 export interface MStepperProps {
   steps: Array<string>;
   activeIndex: number;
@@ -33,7 +35,7 @@ export default function MStepper(props: MStepperProps): JSX.Element {
     return <MStep currentIndex={activeIndex} divider={divider} index={index} key={name} name={name} state={state} />;
   });
 
-  return <div className='w-full flex gap-2 items-center bg-dark-monetr-background-focused p-2 rounded-xl'>{items}</div>;
+  return <div className={styles.stepper}>{items}</div>;
 }
 
 enum MStepState {
@@ -53,44 +55,37 @@ interface MStepProps {
 function MStep(props: MStepProps): JSX.Element {
   const lineClass = mergeTailwind(
     {
-      [MStepState.Inactive]: ['dark:border-dark-monetr-background-emphasis', 'border-dashed'],
-      [MStepState.Active]: ['dark:border-dark-monetr-background-emphasis', 'border-dashed'],
-      [MStepState.Complete]: ['dark:border-green-600'],
+      [MStepState.Inactive]: styles.lineDashed,
+      [MStepState.Active]: styles.lineDashed,
+      [MStepState.Complete]: styles.lineComplete,
     }[props.state],
-    'flex-grow',
+    styles.line,
   );
 
   const numberClass = mergeTailwind(
     {
-      [MStepState.Inactive]: ['dark:bg-dark-monetr-background-emphasis'],
-      [MStepState.Active]: ['dark:bg-dark-monetr-brand-bright', 'dark:text-black'],
-      [MStepState.Complete]: ['dark:bg-green-600', 'dark:text-white'],
+      [MStepState.Inactive]: styles.numberInactive,
+      [MStepState.Active]: styles.numberActive,
+      [MStepState.Complete]: styles.numberComplete,
     }[props.state],
-    'rounded-full',
-    'w-5',
-    'h-5',
-    'flex',
-    'text-center',
-    'align-middle',
-    'items-center',
-    'justify-center',
+    styles.number,
   );
 
   const textClass = mergeTailwind(
     {
       // On smaller screens hide the text for items that are not the current step or not the next step.
-      'sm:inline hidden': ![props.currentIndex, props.currentIndex + 1].includes(props.index),
+      [styles.textHidden]: ![props.currentIndex, props.currentIndex + 1].includes(props.index),
     },
     {
-      [MStepState.Inactive]: [],
-      [MStepState.Active]: ['dark:text-dark-monetr-brand-bright'],
-      [MStepState.Complete]: ['dark:text-green-600'],
+      [MStepState.Inactive]: undefined,
+      [MStepState.Active]: styles.textActive,
+      [MStepState.Complete]: styles.textComplete,
     }[props.state],
   );
 
   return (
     <Fragment>
-      <Typography className='flex gap-1 items-center h-6'>
+      <Typography className={styles.row}>
         <Typography className={numberClass}>{props.index + 1}</Typography>
         <Typography className={textClass}>{props.name}</Typography>
       </Typography>
