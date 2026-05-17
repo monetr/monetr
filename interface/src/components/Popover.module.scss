@@ -1,0 +1,77 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// Both enter and exit run at tailwindcss-animate's default 150ms.
+$duration: 150ms;
+
+// Module-scoped keyframes. The state and side selectors below set the per-axis
+// vars to compose the fades, zooms and slides, same as Dialog.
+@keyframes enter {
+  from {
+    opacity: var(--enter-opacity, 1);
+    transform:
+      translate3d(var(--enter-translate-x, 0), var(--enter-translate-y, 0), 0)
+      scale3d(var(--enter-scale, 1), var(--enter-scale, 1), var(--enter-scale, 1))
+      rotate(var(--enter-rotate, 0));
+  }
+}
+
+@keyframes exit {
+  to {
+    opacity: var(--exit-opacity, 1);
+    transform:
+      translate3d(var(--exit-translate-x, 0), var(--exit-translate-y, 0), 0)
+      scale3d(var(--exit-scale, 1), var(--exit-scale, 1), var(--exit-scale, 1))
+      rotate(var(--exit-rotate, 0));
+  }
+}
+
+.popoverContent {
+  z-index: 50;
+  width: 72 * variables.$size;
+  border-radius: var(--border-radius); // rounded-lg
+  // The old bg-dark-monetr-popover token was invalid (no hsl() wrapper) so
+  // nothing painted; use --background like monetr's other popover surfaces.
+  background-color: var(--background);
+  padding: 0;
+  color: var(--content-emphasis);
+  border-width: 1px;
+  border-color: var(--border);
+  // shadow-md
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  // outline-none
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+
+  &[data-state="open"] {
+    animation: enter $duration;
+    --enter-opacity: 0; // fade-in-0
+    --enter-scale: 0.95; // zoom-in-95
+  }
+
+  &[data-state="closed"] {
+    animation: exit $duration;
+    --exit-opacity: 0; // fade-out-0
+    --exit-scale: 0.95; // zoom-out-95
+  }
+
+  // Slide only happens on enter; the sign points the content back toward the
+  // trigger before it animates in.
+  &[data-side="bottom"] {
+    --enter-translate-y: #{-2 * variables.$size}; // slide-in-from-top-2
+  }
+
+  &[data-side="left"] {
+    --enter-translate-x: #{2 * variables.$size}; // slide-in-from-right-2
+  }
+
+  &[data-side="right"] {
+    --enter-translate-x: #{-2 * variables.$size}; // slide-in-from-left-2
+  }
+
+  &[data-side="top"] {
+    --enter-translate-y: #{2 * variables.$size}; // slide-in-from-bottom-2
+  }
+}

@@ -1,0 +1,79 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.stepper {
+  width: 100%;
+  display: flex;
+  gap: 2 * variables.$size;
+  align-items: center;
+  background-color: var(--background-darker);
+  padding: 2 * variables.$size;
+  border-radius: 3 * variables.$size; // rounded-xl
+}
+
+.row {
+  display: flex;
+  gap: variables.$size;
+  align-items: center;
+  height: 6 * variables.$size;
+}
+
+.number {
+  border-radius: 9999px; // rounded-full
+  width: 5 * variables.$size;
+  height: 5 * variables.$size;
+  display: flex;
+  text-align: center;
+  vertical-align: middle;
+  align-items: center;
+  justify-content: center;
+}
+
+.numberInactive {
+  background-color: var(--background-emphasis);
+}
+
+.numberActive {
+  background-color: var(--brand-bright);
+  // Typography reads its color from --text-color; set it like Badge does.
+  --text-color: #000;
+  color: #000;
+}
+
+.numberComplete {
+  background-color: #16a34a; // green-600
+  --text-color: #fff;
+  color: #fff;
+}
+
+.textActive {
+  --text-color: var(--brand-bright);
+  color: var(--brand-bright);
+}
+
+.textComplete {
+  --text-color: #16a34a; // green-600
+  color: #16a34a;
+}
+
+// Hide the label on small screens for steps that aren't the current or next one.
+.textHidden {
+  display: none;
+
+  @media (min-width: variables.$smallScreen) {
+    display: inline;
+  }
+}
+
+.line {
+  flex-grow: 1;
+}
+
+.lineDashed {
+  border-color: var(--background-emphasis);
+  border-style: dashed;
+}
+
+.lineComplete {
+  border-color: #16a34a; // green-600
+}

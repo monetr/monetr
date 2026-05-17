@@ -1,0 +1,63 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.tabsList {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1.5 * variables.$size; // rounded-md
+  padding: variables.$size;
+  height: 10 * variables.$size;
+  color: var(--content-subtle);
+  background-color: var(--background-subtle);
+}
+
+.tabsTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border-radius: 1.5 * variables.$size; // rounded-md
+  padding-left: 3 * variables.$size;
+  padding-right: 3 * variables.$size;
+  padding-top: 1.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+  font-weight: var(--medium);
+
+  @include mixins.text-small;
+
+  // transition-all
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  // monetr never defines --ring, so the original focus ring was invisible.
+  // Keep it that way rather than inventing a visible one.
+  &:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  &[data-state="active"] {
+    background-color: var(--background);
+    color: var(--content-emphasis);
+    // shadow-sm
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+}
+
+.tabsContent {
+  margin-top: 2 * variables.$size;
+
+  // Same invisible focus as the trigger.
+  // TODO Ring probably doesn't properly work here, need to redo it.
+  &:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}

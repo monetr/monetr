@@ -1,0 +1,84 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// Module-scoped keyframes; mirrors tailwind's animate-spin.
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  margin: auto;
+  width: fit-content;
+  // Visible by default; hidden via data-visible below.
+  display: block;
+
+  // transition-all ease-out
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  // Touch did not start at the top of the page.
+  &[data-visible="false"] {
+    display: none;
+  }
+
+  // Set just before the forced reload. CSS-driven so the spin no longer depends
+  // on a re-render landing before the page reloads.
+  &[data-loading="true"] .spinner {
+    animation-play-state: running;
+  }
+}
+
+.circle {
+  position: relative;
+  top: -16 * variables.$size; // -top-16
+  height: 9 * variables.$size;
+  width: 9 * variables.$size;
+  border-radius: 9999px; // rounded-full
+  // border-1 isn't a real tailwind utility so this border never rendered; add
+  // the intended 1px border to match Tooltip/Popover/Dialog.
+  border-width: 1px;
+  border-color: var(--border);
+  background-color: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // ring-1 ring-background + shadow-md shadow-black
+  box-shadow:
+    0 0 0 1px var(--background),
+    0 4px 6px -1px rgba(0, 0, 0, 1),
+    0 2px 4px -2px rgba(0, 0, 0, 1);
+}
+
+.spinner {
+  // Paused by default (rests at rotate(0)); .container[data-loading] resumes
+  // it. Defined here rather than empty so cssnano doesn't drop the class.
+  animation: spin 1s linear infinite;
+  animation-play-state: paused;
+}
+
+.icon {
+  border-radius: 9999px; // rounded-full
+  color: #6366f1; // text-indigo-500
+
+  // transition-all duration-300
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+
+  // rotate-180 once past the reload threshold.
+  &[data-reload="true"] {
+    transform: rotate(180deg);
+  }
+}

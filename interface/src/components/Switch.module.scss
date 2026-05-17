@@ -1,0 +1,66 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.switchRoot {
+  display: inline-flex;
+  align-items: center;
+  height: 6 * variables.$size;
+  width: 11 * variables.$size;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-width: 2px;
+  border-color: transparent;
+  border-radius: 9999px; // rounded-full
+
+  // transition-colors
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  // monetr never defines --ring, so the original focus ring was invisible.
+  // Keep it that way rather than inventing a visible one.
+  &:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  // --amount-positive is the only variable with this exact green.
+  &[data-state="checked"] {
+    background-color: var(--amount-positive);
+  }
+
+  &[data-state="unchecked"] {
+    background-color: var(--background-subtle);
+  }
+}
+
+.switchThumb {
+  pointer-events: none;
+  display: block;
+  height: 5 * variables.$size;
+  width: 5 * variables.$size;
+  border-radius: 9999px; // rounded-full
+  background-color: var(--content-emphasis);
+  // shadow-lg
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  // transition-transform
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  &[data-state="checked"] {
+    transform: translateX(5 * variables.$size);
+  }
+
+  &[data-state="unchecked"] {
+    transform: translateX(0);
+  }
+}
