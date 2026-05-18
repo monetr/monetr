@@ -13,9 +13,11 @@
     { "type": "docs", "section": "Documentation", "hidden": false },
     { "type": "ci", "section": "Build Automation", "hidden": false }
   ],
+  "include-component-in-tag": false,
   "packages": {
     ".": {
       "package-name": "monetr",
+      "component": "",
       "version-file": "version.txt"
     }
   }
