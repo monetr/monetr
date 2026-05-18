@@ -60,6 +60,13 @@
       "semanticCommitScope": "containers"
     },
     {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "semanticCommitType": "build",
+      "semanticCommitScope": "deps"
+    },
+    {
       "groupName": "rsbuild",
       "groupSlug": "rsbuild",
       "matchPackageNames": [
