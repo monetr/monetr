@@ -82,6 +82,13 @@
       ]
     },
     {
+      "groupName": "rspress",
+      "groupSlug": "rspress",
+      "matchPackageNames": [
+        "/rspress/"
+      ]
+    },
+    {
       "groupName": "rstest",
       "groupSlug": "rstest",
       "matchPackageNames": [
