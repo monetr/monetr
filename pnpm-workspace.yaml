@@ -17,6 +17,14 @@ trustPolicyExclude:
   # republished without provenance after earlier versions had it, so it trips
   # the no-downgrade policy. See https://github.com/nodejs/undici/issues/4666
   - 'undici-types@6.21.0'
+  # sass@1.99.0 depends on chokidar@^4.0.0, but chokidar@4.0.2 and 4.0.3 were
+  # published without provenance (returns in 5.0.0, out of the ^4 range), so it
+  # trips no-downgrade. See https://github.com/paulmillr/chokidar/issues/1440
+  - 'chokidar@4.0.3'
+  # @rspress/core (docs) pulls react-render-to-markdown; 19.x dropped its
+  # trusted-publisher signal with no in-range replacement. See
+  # https://github.com/SoonIter/react-render-to-markdown/issues/1
+  - 'react-render-to-markdown@19.0.1'
 minimumReleaseAge: 10080 # 7 days
 minimumReleaseAgeStrict: true
 minimumReleaseAgeExclude:
