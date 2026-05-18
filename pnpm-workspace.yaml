@@ -12,6 +12,11 @@ savePrefix: ""
 preferFrozenLockfile: true
 
 trustPolicy: no-downgrade
+trustPolicyExclude:
+  # @types/node@20 depends on undici-types@~6.21.0, but undici-types@6.x was
+  # republished without provenance after earlier versions had it, so it trips
+  # the no-downgrade policy. See https://github.com/nodejs/undici/issues/4666
+  - 'undici-types@6.21.0'
 minimumReleaseAge: 10080 # 7 days
 minimumReleaseAgeStrict: true
 minimumReleaseAgeExclude:
