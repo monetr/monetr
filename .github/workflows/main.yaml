@@ -227,9 +227,8 @@ jobs:
         with:
           path: build/docs/out
           # build/docs/out contains .well-known/ (security.txt, pgp-key.txt)
-          # and .nojekyll; without this the action's default
-          # --exclude=.[^/]* strips every dot-prefixed entry from the
-          # deployed artifact.
+          # and .nojekyll; without this the action's default --exclude=.[^/]*
+          # strips every dot-prefixed entry from the deployed artifact.
           include-hidden-files: true
 
   deploy-docs:
