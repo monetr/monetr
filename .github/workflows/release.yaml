@@ -13,25 +13,11 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       version: "${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}"
     steps:
-      - uses: GoogleCloudPlatform/release-please-action@db8f2c60ee802b3748b512940dde88eabd7b7e01 # v3.7.13
+      - uses: GoogleCloudPlatform/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
-          changelog-types: |
-            [
-              {"type":"feat","section":"Features","hidden":false},
-              {"type":"feature","section":"Features","hidden":false},
-              {"type":"deps","section":"Dependencies","hidden":false},
-              {"type":"fix","section":"Bug Fixes","hidden":false},
-              {"type":"chore","section":"Miscellaneous","hidden":false},
-              {"type":"refactor","section":"Refactor","hidden":false},
-              {"type":"doc","section":"Documentation","hidden":false},
-              {"type":"docs","section":"Documentation","hidden":false},
-              {"type":"ci","section":"Build Automation","hidden":false}
-            ]
-          release-type: simple
-          package-name: monetr
-          version-file: version.txt
-          bump-patch-for-minor-pre-major: true
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
 
   build_ui:
     name: Build UI
