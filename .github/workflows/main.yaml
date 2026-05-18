@@ -226,6 +226,11 @@ jobs:
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: build/docs/out
+          # build/docs/out contains .well-known/ (security.txt, pgp-key.txt)
+          # and .nojekyll; without this the action's default
+          # --exclude=.[^/]* strips every dot-prefixed entry from the
+          # deployed artifact.
+          include-hidden-files: true
 
   deploy-docs:
     name: Deploy monetr.app
