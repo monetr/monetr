@@ -14,3 +14,5 @@ preferFrozenLockfile: true
 trustPolicy: no-downgrade
 minimumReleaseAge: 10080 # 7 days
 minimumReleaseAgeStrict: true
+minimumReleaseAgeExclude:
+  - '@monetr/*'
