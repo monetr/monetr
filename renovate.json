@@ -20,6 +20,13 @@
   "packageRules": [
     {
       "matchPackageNames": [
+        "@monetr/{/,}**",
+        "github.com/monetr/{/,}**"
+      ],
+      "minimumReleaseAge": "0 days"
+    },
+    {
+      "matchPackageNames": [
         "@types/.+",
         "renovate"
       ],
