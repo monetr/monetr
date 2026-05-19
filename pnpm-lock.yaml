@@ -154,8 +154,8 @@ importers:
         specifier: 5.2.8
         version: 5.2.8
       '@monetr/notify':
-        specifier: 1.0.2
-        version: 1.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 1.0.4
+        version: 1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@monetr/vaul':
         specifier: 1.2.2
         version: 1.2.2(@radix-ui/react-dialog@1.1.15(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -674,8 +674,8 @@ packages:
       '@types/react': '>=16'
       react: '>=16'
 
-  '@monetr/notify@1.0.2':
-    resolution: {integrity: sha512-44M7c0VM7VPA8dVgrsMsw42OyC+8v7OhlJR4CGYAf/rVe1y+XWpL2gpPHHBHMYjllHNfMg1PfGWMF1LEhUYP9Q==}
+  '@monetr/notify@1.0.4':
+    resolution: {integrity: sha512-VBD49DO9DVW0NgsDkZcqCqi6m8KZpYmuabVhFnfNLMijFyWK/bUJ/BQ3qLdMLoQqPtvBrIH3ngofWi/UGfnXTg==}
     peerDependencies:
       react: ^18.0 || ^19.0.0
       react-dom: ^18.0 || ^19.0.0
@@ -4663,7 +4663,7 @@ snapshots:
       '@types/react': 18.3.28
       react: 19.2.5
 
-  '@monetr/notify@1.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@monetr/notify@1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
