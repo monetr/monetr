@@ -157,8 +157,8 @@ importers:
         specifier: 1.0.4
         version: 1.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@monetr/vaul':
-        specifier: 1.2.2
-        version: 1.2.2(@radix-ui/react-dialog@1.1.15(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 1.2.4
+        version: 1.2.4(@radix-ui/react-dialog@1.1.15(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-avatar':
         specifier: 1.1.11
         version: 1.1.11(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -680,8 +680,8 @@ packages:
       react: ^18.0 || ^19.0.0
       react-dom: ^18.0 || ^19.0.0
 
-  '@monetr/vaul@1.2.2':
-    resolution: {integrity: sha512-NBb9NcpFMrjFHnbkx5WbrIC6797Afl5Aucq9WjP/E8LVifnBa1cdriyELA5zEQjc85vCuuZGidEh5xfvaYELeg==}
+  '@monetr/vaul@1.2.4':
+    resolution: {integrity: sha512-+yzGwe/KiJ7Avl9z3DskzxYP25h8lLnJfP+nhkzEPAqXixu+pe8HZMMAtuGR2iYNcMuBS3I1Wa38dIHCSJuwTw==}
     peerDependencies:
       '@radix-ui/react-dialog': ^1.0.0
       react: ^18.0 || ^19.0.0 || ^19.0.0-rc
@@ -4658,7 +4658,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@monetr/vaul@1.2.2(@radix-ui/react-dialog@1.1.15(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@monetr/vaul@1.2.4(@radix-ui/react-dialog@1.1.15(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-dialog': 1.1.15(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
