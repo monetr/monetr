@@ -278,11 +278,11 @@ importers:
         specifier: 1.5.2
         version: 1.5.2(@rsbuild/core@2.0.5(core-js@3.47.0))
       '@rspack/binding-linux-arm64-gnu':
-        specifier: 2.0.2
-        version: 2.0.2
+        specifier: 2.0.3
+        version: 2.0.3
       '@rspack/binding-linux-x64-gnu':
-        specifier: 2.0.2
-        version: 2.0.2
+        specifier: 2.0.3
+        version: 2.0.3
       '@rstest/adapter-rsbuild':
         specifier: 0.2.6
         version: 0.2.6(@rsbuild/core@2.0.5(core-js@3.47.0))(@rstest/core@0.9.10(core-js@3.47.0)(jsdom@26.1.0))
@@ -1259,6 +1259,12 @@ packages:
     os: [linux]
     libc: [glibc]
 
+  '@rspack/binding-linux-arm64-gnu@2.0.3':
+    resolution: {integrity: sha512-aPLDaaTtX1wqjLYAIHc2MGDQZtv1Hbjx47oaaefbWz5GbAnSA4P8jdYIeeGRyrqvQ0WqJXIWXgT0d/iXtes00A==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
   '@rspack/binding-linux-arm64-musl@2.0.2':
     resolution: {integrity: sha512-/PtTkM/DsDLjeuXTmeJeRfbjCDbcL9jvoVgZrgxYFZ28y2cdLvbChbW9uigOzs5dQEs1CIBQXMTTj7KhdBTuQg==}
     cpu: [arm64]
@@ -1267,6 +1273,12 @@ packages:
 
   '@rspack/binding-linux-x64-gnu@2.0.2':
     resolution: {integrity: sha512-bBjsZxMHRaPo6X9SokApm6ucs+UhXtAJFyJJyuk2BH4XJsLeCU9Dz1vMwioeohFbJUUeTASVPm6/BL+RhSaunw==}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@rspack/binding-linux-x64-gnu@2.0.3':
+    resolution: {integrity: sha512-fAhiMuV5omT53YMft+f3Y9euAFgspuyBAk9ZpeW2buL2TkuUMwP07adhhvQfKdQ5gpELfzmjQaRDGqaIT8UWiA==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
@@ -5199,12 +5211,18 @@ snapshots:
   '@rspack/binding-darwin-x64@2.0.2':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@2.0.2': {}
+  '@rspack/binding-linux-arm64-gnu@2.0.2':
+    optional: true
+
+  '@rspack/binding-linux-arm64-gnu@2.0.3': {}
 
   '@rspack/binding-linux-arm64-musl@2.0.2':
     optional: true
 
-  '@rspack/binding-linux-x64-gnu@2.0.2': {}
+  '@rspack/binding-linux-x64-gnu@2.0.2':
+    optional: true
+
+  '@rspack/binding-linux-x64-gnu@2.0.3': {}
 
   '@rspack/binding-linux-x64-musl@2.0.2':
     optional: true
