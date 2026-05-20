@@ -2,87 +2,116 @@ package migrations
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
-	"net/http"
 
-	"github.com/go-pg/migrations/v8"
-	"github.com/monetr/monetr/server/migrations/functional"
+	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
 )
 
+// MonetrMigrationsManager owns the lifecycle of monetr's schema. It picks up
+// the embedded SQL files at construction time and exposes a small surface for
+// reading the current version and advancing it.
 type MonetrMigrationsManager struct {
-	collection *migrations.Collection
-	log        *slog.Logger
-	db         migrations.DB
+	log           *slog.Logger
+	db            *pg.DB
+	exec          Executor
+	files         []migrationFile
+	latestVersion int64
 }
 
-func NewMigrationsManager(log *slog.Logger, db migrations.DB) (*MonetrMigrationsManager, error) {
-	collection := migrations.NewCollection(functional.FunctionalMigrations...)
-	if err := collection.DiscoverSQLMigrationsFromFilesystem(http.FS(embededMigrations), "schema"); err != nil {
-		return nil, errors.Wrap(err, "failed to discover embedded sql migrations")
+// NewMigrationsManager wires up a manager against db. It discovers and
+// validates the embedded migration files, creates the schema_migrations
+// tracking table if it isn't already there, and seeds rows forward from the
+// legacy gopg_migrations table if it finds one. It does not actually run any
+// migrations, call Up for that.
+func NewMigrationsManager(log *slog.Logger, db *pg.DB) (*MonetrMigrationsManager, error) {
+	files, err := discoverMigrations(embeddedMigrations)
+	if err != nil {
+		return nil, err
 	}
 
-	if _, _, err := collection.Run(db, "init"); err != nil {
-		return nil, errors.Wrap(err, "failed to initialize schema migrations")
-	}
-
-	return &MonetrMigrationsManager{
-		collection: collection,
-		log:        log,
-		db:         db,
-	}, nil
-}
-
-func (m *MonetrMigrationsManager) CurrentVersion() (int64, error) {
-	currentVersion, err := m.collection.Version(m.db)
-
-	return currentVersion, errors.Wrap(err, "failed to get current database version")
-}
-
-func (m *MonetrMigrationsManager) LatestVersion() (int64, error) {
 	var latest int64
-	for _, migration := range m.collection.Migrations() {
-		if migration.Version > latest {
-			latest = migration.Version
+	for _, f := range files {
+		if f.Version > latest {
+			latest = f.Version
 		}
 	}
 
-	return latest, nil
+	exec := newPgExecutor(db)
+	if err := ensureSchemaTable(context.Background(), log, exec); err != nil {
+		return nil, err
+	}
+
+	return &MonetrMigrationsManager{
+		log:           log,
+		db:            db,
+		exec:          exec,
+		files:         files,
+		latestVersion: latest,
+	}, nil
 }
 
+// CurrentVersion returns the highest version recorded in schema_migrations,
+// or 0 if no migrations have been applied yet.
+func (m *MonetrMigrationsManager) CurrentVersion() (int64, error) {
+	var v int64
+	err := m.exec.Get(context.Background(), &v,
+		"SELECT COALESCE(MAX(version), 0) FROM schema_migrations",
+	)
+	return v, errors.Wrap(err, "failed to get current database version")
+}
+
+// LatestVersion is the highest version present in the embedded migration
+// files. It's computed once at construction time and doesn't query the
+// database.
+func (m *MonetrMigrationsManager) LatestVersion() int64 {
+	return m.latestVersion
+}
+
+// Up applies every pending migration in ascending version order. Pins a
+// single backend connection for the run so the advisory lock actually serves
+// its purpose, and returns the version before and after.
 func (m *MonetrMigrationsManager) Up() (oldVersion, newVersion int64, err error) {
-	oldVersion, newVersion, err = m.collection.Run(m.db, "up")
-	err = errors.Wrap(err, "failed to update database")
-	return
+	ctx := context.Background()
+
+	conn := m.db.Conn()
+	defer func() {
+		if closeErr := conn.Close(); closeErr != nil {
+			m.log.WarnContext(ctx, "failed to release migration connection", "err", closeErr)
+		}
+	}()
+
+	pinned := newPgExecutor(conn)
+	return applyMigrations(ctx, m.log, pinned, embeddedMigrations, m.files)
 }
 
-func RunMigrations(log *slog.Logger, db migrations.DB) {
-	collection := migrations.NewCollection()
-	collection.DiscoverSQLMigrationsFromFilesystem(http.FS(embededMigrations), "schema")
-
-	if _, _, err := collection.Run(db, "init"); err != nil {
-		log.ErrorContext(context.Background(), fmt.Sprintf("failed to init schema migrations: %+v", err))
+// RunMigrations is the auto-migrate entry point used at server startup and
+// from the test harness when it sets up isolated databases. Errors are logged
+// and swallowed, the caller doesn't get to react.
+func RunMigrations(log *slog.Logger, db *pg.DB) {
+	ctx := context.Background()
+	m, err := NewMigrationsManager(log, db)
+	if err != nil {
+		log.ErrorContext(ctx, "failed to initialize migration manager", "err", err)
 		return
 	}
 
-	currentVersion, err := collection.Version(db)
+	currentVersion, err := m.CurrentVersion()
 	if err != nil {
-		log.ErrorContext(context.Background(), fmt.Sprintf("failed to get database version: %+v", err))
+		log.ErrorContext(ctx, "failed to get current database version", "err", err)
 		return
 	}
+	log.InfoContext(ctx, "current database version", "version", currentVersion)
 
-	log.InfoContext(context.Background(), fmt.Sprintf("current database version is %d", currentVersion))
-
-	oldVersion, newVersion, err := collection.Run(db, "up")
+	oldVersion, newVersion, err := m.Up()
 	if err != nil {
-		log.ErrorContext(context.Background(), fmt.Sprintf("failed to run migrations: %+v", err))
+		log.ErrorContext(ctx, "failed to run migrations", "err", err)
 		return
 	}
 
 	if oldVersion == newVersion {
-		log.InfoContext(context.Background(), "no database updates")
+		log.InfoContext(ctx, "no database updates")
 	} else {
-		log.InfoContext(context.Background(), fmt.Sprintf("database upgraded from %d to %d", oldVersion, newVersion))
+		log.InfoContext(ctx, "database upgraded", "from", oldVersion, "to", newVersion)
 	}
 }

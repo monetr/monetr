@@ -30,13 +30,7 @@ func databaseVersion(parent *cobra.Command) {
 				return err
 			}
 
-			latestVersion, err := migrator.LatestVersion()
-			if err != nil {
-				log.Error("failed to determine latest database version", "err", err)
-				return err
-			}
-
-			fmt.Println("Latest:", latestVersion)
+			fmt.Println("Latest:", migrator.LatestVersion())
 
 			version, err := migrator.CurrentVersion()
 			if err != nil {
