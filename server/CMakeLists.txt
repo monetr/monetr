@@ -80,14 +80,12 @@ list(APPEND MONETR_LD_FLAGS "-X" "main.release=$(RELEASE_VERSION)")
 list(APPEND MONETR_LD_FLAGS "-X" "main.revision=$(RELEASE_REVISION)")
 list(APPEND MONETR_LD_FLAGS "-X" "main.buildTime=$(BUILD_TIME)")
 
-# Detect if we are building inside a container, if we are make sure to set the build type LDFLAG.
-if(NOT WIN32)
-  if (EXISTS "/proc/1/cgroup")
-    file(READ "/proc/1/cgroup" CONTAINER_DETECTION)
-    if ("${CONTAINER_DETECTION}" MATCHES "docker")
-      list(APPEND MONETR_LD_FLAGS "-X" "main.buildType=container")
-    endif()
-  endif()
+# Build type label embedded in the binary (e.g. "container" when produced by
+# the Dockerfile). Set explicitly by the caller via -DMONETR_BUILD_TYPE=...
+# rather than inferred from the build environment.
+set(MONETR_BUILD_TYPE "" CACHE STRING "Build type label embedded in the monetr binary (e.g. 'container')")
+if(MONETR_BUILD_TYPE)
+  list(APPEND MONETR_LD_FLAGS "-X" "main.buildType=${MONETR_BUILD_TYPE}")
 endif()
 
 list(JOIN MONETR_GO_TAGS "," MONETR_EXECUTABLE_TAGS)

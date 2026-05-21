@@ -30,7 +30,7 @@ ARG TARGETARCH
 ARG GOFLAGS
 ENV GOFLAGS=$GOFLAGS
 COPY . /monetr
-RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} make release -B
+RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} make release -B MONETR_BUILD_TYPE=container
 
 FROM debian:13-slim
 RUN apt-get update && \
