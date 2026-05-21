@@ -183,7 +183,7 @@ func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 					log: log,
 				})
 
-				migrations.RunMigrations(log, databaseToReturn)
+				migrations.RunMigrations(t.Context(), log, databaseToReturn)
 
 				t.Cleanup(func() {
 					require.NoError(t, databaseToReturn.Close(), "must close the isolated database once we are done")

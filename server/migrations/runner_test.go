@@ -147,11 +147,13 @@ func TestDiscoverMigrations_RealEmbed(t *testing.T) {
 	ups, err := discoverMigrations(embeddedMigrations)
 	require.NoError(t, err)
 
-	// 99 .tx.up.sql + 6 .up.sql = 105 up files in the production embed.
-	// If a new migration is added, bump this assertion.
-	require.Len(t, ups, 105)
+	// The production embed had 105 up files (99 .tx.up.sql + 6 .up.sql) when
+	// this test was written. Asserting >= rather than == means adding a
+	// migration doesn't drag this test along with it, while still catching an
+	// embed that fails to load or somehow shrinks.
+	require.GreaterOrEqual(t, len(ups), 105)
 	assert.Equal(t, int64(2021041100), ups[0].Version)
-	assert.Equal(t, int64(2026050600), ups[len(ups)-1].Version)
+	assert.GreaterOrEqual(t, ups[len(ups)-1].Version, int64(2026050600))
 
 	// The list must be strictly ascending.
 	for i := 1; i < len(ups); i++ {

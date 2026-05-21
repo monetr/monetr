@@ -14,8 +14,8 @@ import (
 
 // advisoryLockKey is the session-scoped Postgres advisory lock we hold while
 // applying migrations. Stops two monetr processes (rolling restart, parallel
-// test setups) from racing each other on the same database. The value itself
-// is arbitrary, it just has to be unique within monetr.
+// test setups) from racing each other on the same database. The value itself is
+// arbitrary, it just has to be unique within monetr.
 const advisoryLockKey int64 = 20180110
 
 const schemaDir = "schema"
@@ -28,9 +28,12 @@ const schemaDir = "schema"
 //	YYYYMMDDNN_Name.down.sql
 //	YYYYMMDDNN_Name.tx.down.sql
 //
-// Names may contain underscores (2021041102_Balances_View is real) but not
-// dots, since we use dots to mark the tx/direction suffix.
-var migrationFilenameRegex = regexp.MustCompile(`^(\d+)_([^.]+)\.(tx\.)?(up|down)\.sql$`)
+// The version prefix is a fixed ten digits: an eight-digit date plus a
+// two-digit per-day sequence. Pinning the width keeps a fat-fingered prefix
+// from quietly parsing as some wildly different version, which has tripped us
+// up before. Names may contain underscores (2021041102_Balances_View is real)
+// but not dots, since we use dots to mark the tx/direction suffix.
+var migrationFilenameRegex = regexp.MustCompile(`^(\d{10})_([^.]+)\.(tx\.)?(up|down)\.sql$`)
 
 type migrationFile struct {
 	Version       int64
@@ -41,8 +44,12 @@ type migrationFile struct {
 }
 
 func parseMigrationFilename(name string) (migrationFile, error) {
+	// A successful match has exactly five elements: the whole string plus the
+	// four capture groups. Checking the length rather than just != nil keeps the
+	// match[1..4] indexing below safe even if someone later adds or drops a group
+	// in the pattern.
 	match := migrationFilenameRegex.FindStringSubmatch(name)
-	if match == nil {
+	if len(match) != 5 {
 		return migrationFile{}, errors.Errorf("unrecognized migration filename %q", name)
 	}
 
@@ -60,9 +67,9 @@ func parseMigrationFilename(name string) (migrationFile, error) {
 	}, nil
 }
 
-// discoverMigrations walks fsys/schema, parses every filename, and returns
-// the up-files sorted ascending by version. Down files are validated for
-// shape but stripped out, since the runtime never invokes them.
+// discoverMigrations walks fsys/schema, parses every filename, and returns the
+// up-files sorted ascending by version. Down files are validated for shape but
+// stripped out, since the runtime never invokes them.
 func discoverMigrations(fsys fs.FS) ([]migrationFile, error) {
 	entries, err := fs.ReadDir(fsys, schemaDir)
 	if err != nil {
@@ -99,13 +106,31 @@ func discoverMigrations(fsys fs.FS) ([]migrationFile, error) {
 	return ups, nil
 }
 
+// embeddedMigrationFiles is the parsed, sorted list of up-migrations baked into
+// the binary. We resolve it once at package load via mustDiscoverMigrations so
+// a malformed embedded filename blows up the moment the package is loaded (at
+// build/test time, or worst case the very first instruction of a server boot)
+// rather than lying in wait until someone actually tries to migrate.
+var embeddedMigrationFiles = mustDiscoverMigrations(embeddedMigrations)
+
+// mustDiscoverMigrations is discoverMigrations for the embedded set, where a
+// parse failure is a programming mistake compiled into the build and there is
+// nothing sensible to do but refuse to start.
+func mustDiscoverMigrations(fsys fs.FS) []migrationFile {
+	files, err := discoverMigrations(fsys)
+	if err != nil {
+		panic(errors.Wrap(err, "failed to parse embedded migrations"))
+	}
+	return files
+}
+
 // applyMigrations runs every file in files whose version is greater than the
 // current MAX(version) in schema_migrations, ascending. The advisory lock is
 // held for the whole run so concurrent migrators (rolling restarts, parallel
 // test DBs) just take turns.
 //
-// exec MUST be pinned to a single backend connection or the advisory lock
-// won't gate anything past the lock acquisition itself.
+// exec MUST be pinned to a single backend connection or the advisory lock won't
+// gate anything past the lock acquisition itself.
 func applyMigrations(
 	ctx context.Context,
 	log *slog.Logger,
@@ -133,9 +158,9 @@ func applyMigrations(
 	}
 	newVersion = oldVersion
 
-	// Warn (but don't error) on files whose version is at or below the
-	// current max but were never applied. go-pg silently skipped these, but
-	// a maintainer probably wants to know they're sitting in the tree.
+	// Warn (but don't error) on files whose version is at or below the current
+	// max but were never applied. go-pg silently skipped these, but a maintainer
+	// probably wants to know they're sitting in the tree.
 	for _, f := range files {
 		if f.Version <= oldVersion {
 			if _, ok := applied[f.Version]; !ok {
@@ -211,8 +236,8 @@ const schemaCreateSQL = `CREATE TABLE IF NOT EXISTS schema_migrations (
 
 // gopgExistsSQL is true if the legacy gopg_migrations table is in the current
 // schema. We scope to current_schema() so a gopg_migrations sitting in some
-// other schema (e.g. a shared public in a multi-tenant cluster) doesn't
-// trigger a seed copy into the wrong place.
+// other schema (e.g. a shared public in a multi-tenant cluster) doesn't trigger
+// a seed copy into the wrong place.
 const gopgExistsSQL = `SELECT EXISTS (
     SELECT 1 FROM information_schema.tables
     WHERE table_schema = current_schema()
@@ -223,8 +248,8 @@ const gopgExistsSQL = `SELECT EXISTS (
 // into schema_migrations.
 //   - version > 0 is defensive; go-pg's init doesn't insert a sentinel, but a
 //     hand-rolled DB might.
-//   - version <> 2021050999 skips the deleted Go-side test migration, which
-//     has no .sql file in the new tree.
+//   - version <> 2021050999 skips the deleted Go-side test migration, which has
+//     no .sql file in the new tree.
 //     TODO Remove this filter (and the rest of the gopg seed path) once we're
 //     confident no production DB still has gopg_migrations.
 //   - ON CONFLICT makes it idempotent across restarts and tolerant of
@@ -236,10 +261,27 @@ WHERE version > 0
   AND version <> 2021050999
 ON CONFLICT (version) DO NOTHING`
 
-// ensureSchemaTable creates schema_migrations if it isn't already there and,
-// if the legacy gopg_migrations table is present, copies forward any
-// versions we don't have yet. Safe to call repeatedly.
+// ensureSchemaTable creates schema_migrations if it isn't already there and, if
+// the legacy gopg_migrations table is present, copies forward any versions we
+// don't have yet. Safe to call repeatedly.
+//
+// Like applyMigrations it holds the migration advisory lock for the whole run.
+// Postgres doesn't actually serialize CREATE TABLE IF NOT EXISTS, so two
+// processes booting at once (rolling restart, parallel test setups) can race it
+// and one side errors out, and we'd also rather not have both of them seeding
+// from gopg_migrations at the same time. The lock makes them take turns
+// instead. exec MUST therefore be pinned to a single backend connection or the
+// lock gates nothing past acquisition.
 func ensureSchemaTable(ctx context.Context, log *slog.Logger, exec Executor) error {
+	if err := exec.Exec(ctx, "SELECT pg_advisory_lock(?)", advisoryLockKey); err != nil {
+		return errors.Wrap(err, "failed to acquire migration advisory lock")
+	}
+	defer func() {
+		if unlockErr := exec.Exec(ctx, "SELECT pg_advisory_unlock(?)", advisoryLockKey); unlockErr != nil {
+			log.WarnContext(ctx, "failed to release migration advisory lock", "err", unlockErr)
+		}
+	}()
+
 	if err := exec.Exec(ctx, schemaCreateSQL); err != nil {
 		return errors.Wrap(err, "failed to create schema_migrations table")
 	}

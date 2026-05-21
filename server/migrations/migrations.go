@@ -19,16 +19,13 @@ type MonetrMigrationsManager struct {
 	latestVersion int64
 }
 
-// NewMigrationsManager wires up a manager against db. It discovers and
-// validates the embedded migration files, creates the schema_migrations
-// tracking table if it isn't already there, and seeds rows forward from the
-// legacy gopg_migrations table if it finds one. It does not actually run any
-// migrations, call Up for that.
-func NewMigrationsManager(log *slog.Logger, db *pg.DB) (*MonetrMigrationsManager, error) {
-	files, err := discoverMigrations(embeddedMigrations)
-	if err != nil {
-		return nil, err
-	}
+// NewMigrationsManager wires up a manager against db. The embedded migration
+// files are parsed once at package load (see embeddedMigrationFiles); here we
+// just create the schema_migrations tracking table if it isn't already there
+// and seed rows forward from the legacy gopg_migrations table if we find one.
+// It does not actually run any migrations, call Up for that.
+func NewMigrationsManager(ctx context.Context, log *slog.Logger, db *pg.DB) (*MonetrMigrationsManager, error) {
+	files := embeddedMigrationFiles
 
 	var latest int64
 	for _, f := range files {
@@ -37,15 +34,23 @@ func NewMigrationsManager(log *slog.Logger, db *pg.DB) (*MonetrMigrationsManager
 		}
 	}
 
-	exec := newPgExecutor(db)
-	if err := ensureSchemaTable(context.Background(), log, exec); err != nil {
+	// ensureSchemaTable grabs the advisory lock, which is session scoped, so it
+	// has to run on a single pinned connection rather than the pool. We only need
+	// the pin for setup; CurrentVersion and friends are fine on the pool.
+	conn := db.Conn()
+	defer func() {
+		if closeErr := conn.Close(); closeErr != nil {
+			log.WarnContext(ctx, "failed to release migration setup connection", "err", closeErr)
+		}
+	}()
+	if err := ensureSchemaTable(ctx, log, newPgExecutor(conn)); err != nil {
 		return nil, err
 	}
 
 	return &MonetrMigrationsManager{
 		log:           log,
 		db:            db,
-		exec:          exec,
+		exec:          newPgExecutor(db),
 		files:         files,
 		latestVersion: latest,
 	}, nil
@@ -53,27 +58,24 @@ func NewMigrationsManager(log *slog.Logger, db *pg.DB) (*MonetrMigrationsManager
 
 // CurrentVersion returns the highest version recorded in schema_migrations,
 // or 0 if no migrations have been applied yet.
-func (m *MonetrMigrationsManager) CurrentVersion() (int64, error) {
+func (m *MonetrMigrationsManager) CurrentVersion(ctx context.Context) (int64, error) {
 	var v int64
-	err := m.exec.Get(context.Background(), &v,
+	err := m.exec.Get(ctx, &v,
 		"SELECT COALESCE(MAX(version), 0) FROM schema_migrations",
 	)
 	return v, errors.Wrap(err, "failed to get current database version")
 }
 
-// LatestVersion is the highest version present in the embedded migration
-// files. It's computed once at construction time and doesn't query the
-// database.
+// LatestVersion is the highest version present in the embedded migration files.
+// It's computed once at construction time and doesn't query the database.
 func (m *MonetrMigrationsManager) LatestVersion() int64 {
 	return m.latestVersion
 }
 
-// Up applies every pending migration in ascending version order. Pins a
-// single backend connection for the run so the advisory lock actually serves
-// its purpose, and returns the version before and after.
-func (m *MonetrMigrationsManager) Up() (oldVersion, newVersion int64, err error) {
-	ctx := context.Background()
-
+// Up applies every pending migration in ascending version order. Pins a single
+// backend connection for the run so the advisory lock actually serves its
+// purpose, and returns the version before and after.
+func (m *MonetrMigrationsManager) Up(ctx context.Context) (oldVersion, newVersion int64, err error) {
 	conn := m.db.Conn()
 	defer func() {
 		if closeErr := conn.Close(); closeErr != nil {
@@ -85,25 +87,24 @@ func (m *MonetrMigrationsManager) Up() (oldVersion, newVersion int64, err error)
 	return applyMigrations(ctx, m.log, pinned, embeddedMigrations, m.files)
 }
 
-// RunMigrations is the auto-migrate entry point used at server startup and
-// from the test harness when it sets up isolated databases. Errors are logged
-// and swallowed, the caller doesn't get to react.
-func RunMigrations(log *slog.Logger, db *pg.DB) {
-	ctx := context.Background()
-	m, err := NewMigrationsManager(log, db)
+// RunMigrations is the auto-migrate entry point used at server startup and from
+// the test harness when it sets up isolated databases. Errors are logged and
+// swallowed, the caller doesn't get to react.
+func RunMigrations(ctx context.Context, log *slog.Logger, db *pg.DB) {
+	m, err := NewMigrationsManager(ctx, log, db)
 	if err != nil {
 		log.ErrorContext(ctx, "failed to initialize migration manager", "err", err)
 		return
 	}
 
-	currentVersion, err := m.CurrentVersion()
+	currentVersion, err := m.CurrentVersion(ctx)
 	if err != nil {
 		log.ErrorContext(ctx, "failed to get current database version", "err", err)
 		return
 	}
 	log.InfoContext(ctx, "current database version", "version", currentVersion)
 
-	oldVersion, newVersion, err := m.Up()
+	oldVersion, newVersion, err := m.Up(ctx)
 	if err != nil {
 		log.ErrorContext(ctx, "failed to run migrations", "err", err)
 		return

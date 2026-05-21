@@ -24,7 +24,7 @@ func databaseVersion(parent *cobra.Command) {
 				return err
 			}
 
-			migrator, err := migrations.NewMigrationsManager(log, db)
+			migrator, err := migrations.NewMigrationsManager(cmd.Context(), log, db)
 			if err != nil {
 				log.Error("failed to create migration manager", "err", err)
 				return err
@@ -32,7 +32,7 @@ func databaseVersion(parent *cobra.Command) {
 
 			fmt.Println("Latest:", migrator.LatestVersion())
 
-			version, err := migrator.CurrentVersion()
+			version, err := migrator.CurrentVersion(cmd.Context())
 			if err != nil {
 				log.Error("failed to determine current database version", "err", err)
 				return err

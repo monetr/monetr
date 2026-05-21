@@ -174,7 +174,7 @@ func GetDatabase(
 
 	if configuration.PostgreSQL.Migrate {
 		log.InfoContext(context.Background(), "automatic migrations are enabled")
-		migrations.RunMigrations(log, db)
+		migrations.RunMigrations(context.Background(), log, db)
 	}
 
 	return db, nil
