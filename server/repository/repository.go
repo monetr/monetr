@@ -170,6 +170,17 @@ type BaseRepository interface {
 		transactionImport *TransactionImport,
 	) error
 
+	GetTransactionImportPreviewByTransactionImportId(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionImportId ID[TransactionImport],
+	) (*TransactionImportPreview, error)
+	CreateTransactionImportPreview(
+		ctx context.Context,
+		bankAccountId ID[BankAccount],
+		transactionImportPreview *TransactionImportPreview,
+	) error
+
 	CreateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
 	UpdateLunchFlowLink(ctx context.Context, link *LunchFlowLink) error
 	RemoveLunchFlowLink(ctx context.Context, id ID[LunchFlowLink]) error

@@ -8,6 +8,8 @@ import (
 
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/datasources/table"
+	"github.com/monetr/monetr/server/id"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
@@ -30,7 +32,7 @@ type previewCSVImport struct {
 	transactionImport    *models.TransactionImport
 	file                 *models.File
 	currency             string
-	rows                 []table.Row
+	rows                 []models.TransactionImportPreviewItem
 	existingTransactions map[string]models.Transaction
 }
 
@@ -53,6 +55,20 @@ func (j *previewCSVImport) loadFile(
 		return errors.Wrap(err, "failed to retrieve transaction import")
 	}
 	j.transactionImport = transactionImport
+
+	// GetTransactionImport does not eager load the mapping relation, but we
+	// need its [table.Mapping] data to parse the file. Fetch it directly.
+	if j.transactionImport.TransactionImportMappingId == nil {
+		return errors.New("transaction import is missing a mapping")
+	}
+	mapping, err := j.repo.GetTransactionImportMapping(
+		span.Context(),
+		*j.transactionImport.TransactionImportMappingId,
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve transaction import mapping")
+	}
+	j.transactionImport.TransactionImportMapping = mapping
 
 	file, err := j.repo.GetFile(span.Context(), transactionImport.FileId)
 	if err != nil {
@@ -81,21 +97,78 @@ func (j *previewCSVImport) loadFile(
 	)
 	// TODO, make arbitrary max number of rows supported a const
 	for i := 0; i < 100000; i++ {
-		row, err := tableReader.Read()
+		row, err := tableReader.Read(span.Context())
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				return nil
 			}
 			return errors.Wrap(err, "failed to parse csv file")
 		}
-		j.rows = append(j.rows, *row)
+		j.rows = append(j.rows, models.TransactionImportPreviewItem{
+			TransactionImportPreviewItemId: id.New(),
+			Data:                           *row,
+			ExistingTransactionIds:         []models.ID[models.Transaction]{},
+		})
 	}
 
 	j.log.DebugContext(
-		ctx,
+		span.Context(),
 		"parsed rows from CSV file for preview",
-		"rows", j.rows,
 	)
+
+	return nil
+}
+
+func (j *previewCSVImport) hydrateTransactions(
+	ctx queue.Context,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var err error
+	j.existingTransactions, err = j.repo.GetTransactonsByUploadIdentifier(
+		span.Context(),
+		j.args.BankAccountId,
+		myownsanity.Map(j.rows, func(row models.TransactionImportPreviewItem) string {
+			return row.Data.ID
+		}),
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve existing transactions")
+	}
+
+	if len(j.existingTransactions) > 0 {
+		j.log.DebugContext(
+			span.Context(),
+			"found existing transactions",
+			"count", len(j.existingTransactions),
+		)
+	} else {
+		j.log.DebugContext(
+			span.Context(),
+			"did not find any existing transactions",
+		)
+	}
+
+	return nil
+}
+
+func (j *previewCSVImport) syncTransactions(
+	ctx queue.Context,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	for i := range j.rows {
+		uploadIdentifier := j.rows[i].Data.ID
+		transaction, ok := j.existingTransactions[uploadIdentifier]
+		if ok {
+			j.rows[i].ExistingTransactionIds = append(j.rows[i].ExistingTransactionIds, transaction.TransactionId)
+		}
+
+		// TODO Process changes to an existing transaction.
+		_ = transaction
+	}
 
 	return nil
 }
@@ -146,6 +219,39 @@ func PreviewCSVImport(
 
 		// Load the file and its data into memory.
 		if err := j.loadFile(ctx); err != nil {
+			return err
+		}
+
+		if err := j.hydrateTransactions(ctx); err != nil {
+			return err
+		}
+
+		if err := j.syncTransactions(ctx); err != nil {
+			return err
+		}
+
+		preview := models.TransactionImportPreview{
+			TransactionImportId: args.TransactionImportId,
+			Rows:                j.rows,
+			AvailableBalance:    0,
+			CurrentBalance:      0,
+		}
+
+		if err := j.repo.CreateTransactionImportPreview(
+			ctx,
+			args.BankAccountId,
+			&preview,
+		); err != nil {
+			return err
+		}
+
+		// Move to the preview status
+		j.transactionImport.Status = models.TransactionImportStatusPreview
+		if err := j.repo.UpdateTransactionImport(
+			ctx,
+			j.args.BankAccountId,
+			j.transactionImport,
+		); err != nil {
 			return err
 		}
 
