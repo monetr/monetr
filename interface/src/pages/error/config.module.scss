@@ -1,0 +1,38 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  @include mixins.screen;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 4 * variables.$size;
+}
+
+.message {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4 * variables.$size;
+}
+
+.contact {
+  gap: 1 * variables.$size;
+}
+
+.supportLink {
+  color: var(--blue);
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    text-decoration: underline;
+    --ring-color: var(--blue);
+    --ring-size: 2px;
+    @include mixins.ring;
+  }
+}

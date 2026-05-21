@@ -41,7 +41,7 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
       <div className={styles.spacer} />
       <div className={styles.topNav}>
         <div className={styles.topNavLeft}>
-          <MSidebarToggle backButton={props.base} className='mr-2' />
+          <MSidebarToggle backButton={props.base} className={styles.toggle} />
           <span className={styles.titleWrapper}>
             <Typography className={titleClass} ellipsis onClick={onInitialClick} size='2xl' weight='bold'>
               <Icon className={iconClass} />

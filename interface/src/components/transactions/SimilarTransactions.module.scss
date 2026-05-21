@@ -1,0 +1,19 @@
+@use '@monetr/interface/variables';
+
+.root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.heading {
+  padding-left: 4 * variables.$size;
+}
+
+.list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}

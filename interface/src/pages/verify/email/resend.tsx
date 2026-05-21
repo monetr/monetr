@@ -15,6 +15,8 @@ import request, { type APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './resend.module.scss';
+
 interface ResendValues {
   email: string | null;
   captcha: string | null;
@@ -79,18 +81,18 @@ export default function ResendVerificationPage(): JSX.Element {
 
   return (
     <MForm
-      className='h-screen w-screen flex flex-col justify-center items-center gap-2 p-4'
+      className={styles.form}
       initialValues={initialValues}
       onSubmit={submit}
       validate={validateInput}
     >
-      <div className='max-w-xs flex flex-col items-center gap-2'>
-        <MLogo className='h-24 w-24' />
+      <div className={styles.panel}>
+        <MLogo className={styles.logo} />
         <RouteStateMessage hasEmail={Boolean(emailFromQuery)} />
         <FormTextField
           autoComplete='username'
           autoFocus
-          className='w-full'
+          className={styles.field}
           data-testid='resend-email'
           label='Email'
           name='email'
@@ -101,10 +103,10 @@ export default function ResendVerificationPage(): JSX.Element {
           name='captcha'
           show={Boolean(config?.ReCAPTCHAKey)}
         />
-        <FormButton className='w-full' color='primary' type='submit'>
+        <FormButton className={styles.field} color='primary' type='submit'>
           Resend Verification
         </FormButton>
-        <div className='mt-1 flex justify-center gap-1'>
+        <div className={styles.loginRow}>
           <Typography color='subtle' size='sm'>
             Don't need to resend?
           </Typography>
@@ -119,13 +121,13 @@ export default function ResendVerificationPage(): JSX.Element {
 
 export function AfterEmailVerificationSent(): JSX.Element {
   return (
-    <div className='h-screen w-screen flex flex-col items-center justify-center'>
-      <div className='flex flex-col gap-2 max-w-xs items-center'>
-        <MLogo className='h-24 w-24' />
+    <div className={styles.sentRoot}>
+      <div className={styles.panel}>
+        <MLogo className={styles.logo} />
         <Typography align='center' size='lg'>
           A new verification link was sent to your email address...
         </Typography>
-        <div className='mt-1 flex justify-center gap-1'>
+        <div className={styles.loginRow}>
           <TextLink data-testid='login-signup' size='sm' to='/login'>
             Return to login
           </TextLink>

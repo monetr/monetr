@@ -11,3 +11,12 @@
   justify-content: space-between;
   padding: 5 * variables.$size;
 }
+
+.stepper {
+  padding: 0;
+  width: 100%;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding: 8 * variables.$size;
+  }
+}

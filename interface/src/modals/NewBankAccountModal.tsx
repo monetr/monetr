@@ -22,6 +22,8 @@ import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './NewBankAccountModal.module.scss';
+
 interface NewBankAccountValues {
   name: string;
   balance: number;
@@ -78,7 +80,7 @@ function NewBankAccountModal(): JSX.Element {
   return (
     <MModal open={modal.visible} ref={ref}>
       <MForm
-        className='h-full flex flex-col gap-2 p-2 justify-between'
+        className={styles.form}
         data-testid='new-bank-account-modal'
         initialValues={initialValues}
         onSubmit={submit}
@@ -86,7 +88,7 @@ function NewBankAccountModal(): JSX.Element {
         {({ isSubmitting, values }) => (
           <Fragment>
             <Flex orientation='column'>
-              <Typography className='mb-2' size='xl' weight='bold'>
+              <Typography className={styles.heading} size='xl' weight='bold'>
                 Create A New Bank Account
               </Typography>
               <FormTextField

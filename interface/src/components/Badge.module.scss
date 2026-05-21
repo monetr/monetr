@@ -2,7 +2,6 @@
 @use '@monetr/interface/variables';
 
 .badge {
-  background-color: var(--brand);
   // Override the typography text default color
   --text-color: var(--content-emphasis);
   color: var(--content-emphasis);
@@ -21,4 +20,30 @@
     width: 5 * variables.$size;
     height: 5 * variables.$size;
   }
+}
+
+// Each variant owns the background so it never competes with .badge in the
+// cascade. brand is the default and matches monetr's original badge.
+.brand {
+  background-color: var(--brand);
+}
+
+.success {
+  background-color: var(--success);
+}
+
+.warning {
+  background-color: var(--warning);
+}
+
+.destructive {
+  background-color: var(--destructive);
+}
+
+.info {
+  background-color: var(--blue);
+}
+
+.positive {
+  background-color: var(--amount-positive);
 }

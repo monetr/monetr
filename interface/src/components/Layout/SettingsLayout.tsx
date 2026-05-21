@@ -7,6 +7,8 @@ import { textVariants } from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
+import styles from './SettingsLayout.module.scss';
+
 export interface SettingsLayoutProps {
   children: React.ReactNode;
 }
@@ -15,9 +17,9 @@ export default function SettingsLayout(props: SettingsLayoutProps): JSX.Element 
   const config = useAppConfiguration();
 
   return (
-    <div className='w-full h-full min-w-0 flex flex-col'>
+    <div className={styles.root}>
       <MTopNavigation icon={Settings} title='Settings' />
-      <div className='w-full flex px-4 mt-4 gap-6'>
+      <div className={styles.tabs}>
         <SettingTab to='/settings/overview'>Overview</SettingTab>
         <SettingTab to='/settings/security'>Security</SettingTab>
         {config?.data?.billingEnabled && <SettingTab to='/settings/billing'>Billing</SettingTab>}
@@ -42,7 +44,7 @@ function SettingTab(props: SettingTabProps): JSX.Element {
       size: 'inherit',
       weight: active ? 'bold' : 'normal',
     }),
-    'cursor-pointer pb-3',
+    styles.tab,
   );
 
   return (

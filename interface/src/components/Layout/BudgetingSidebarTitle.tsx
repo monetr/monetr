@@ -16,6 +16,8 @@ import { useTriggerManualPlaidSync } from '@monetr/interface/hooks/useTriggerMan
 import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePlaidAccountOverlay';
 
+import styles from './BudgetingSidebarTitle.module.scss';
+
 export default function BudgetingSidebarTitle(): JSX.Element {
   const { data: bankAccount } = useSelectedBankAccount();
   const { data: link } = useCurrentLink();
@@ -50,10 +52,10 @@ export default function BudgetingSidebarTitle(): JSX.Element {
   if (!link) {
     return (
       <Fragment>
-        <div className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis'>
-          <Skeleton className='h-7 w-full' />
+        <div className={styles.titleSkeletonRow}>
+          <Skeleton className={styles.skeleton} />
         </div>
-        <Divider className='w-1/2' />
+        <Divider className={styles.dividerHalf} />
       </Fragment>
     );
   }
@@ -61,11 +63,11 @@ export default function BudgetingSidebarTitle(): JSX.Element {
   return (
     <Fragment>
       <DropdownMenu>
-        <DropdownMenuTrigger className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis dark:hover:bg-dark-monetr-background-emphasis'>
-          <span className='truncate text-xl font-semibold'>{link?.getName()}</span>
-          <EllipsisVertical className='ml-auto shrink-0' />
+        <DropdownMenuTrigger className={styles.trigger}>
+          <span className={styles.title}>{link?.getName()}</span>
+          <EllipsisVertical className={styles.menuIcon} />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className='w-72'>
+        <DropdownMenuContent className={styles.menuContent}>
           <MenuItem
             onClick={handleReauthenticateLink}
             visible={link.getIsPlaid() && (link.getIsError() || link.getIsPendingExpiration())}
@@ -87,12 +89,12 @@ export default function BudgetingSidebarTitle(): JSX.Element {
           </MenuItem>
           <Divider />
           <MenuItem onClick={handleRemoveLink} visible>
-            <Trash2 className='text-dark-monetr-red' />
+            <Trash2 className={styles.removeIcon} />
             Remove {link?.getName()}
           </MenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Divider className='w-1/2' />
+      <Divider className={styles.dividerHalf} />
     </Fragment>
   );
 }

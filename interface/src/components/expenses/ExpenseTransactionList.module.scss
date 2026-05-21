@@ -1,0 +1,5 @@
+@use '@monetr/interface/variables';
+
+.heading {
+  margin-bottom: 4 * variables.$size;
+}

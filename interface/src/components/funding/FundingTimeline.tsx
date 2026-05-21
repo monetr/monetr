@@ -8,7 +8,8 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { AmountType } from '@monetr/interface/util/amounts';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import styles from './FundingTimeline.module.scss';
 
 interface FundingTimelineProps {
   fundingScheduleId: string;
@@ -69,15 +70,15 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
   });
 
   return (
-    <ol className='relative border-l border-zinc-200 dark:border-zinc-700'>
-      {timelineItems.map((item, index) => (
-        <TimelineItem key={getUnixTime(item.date)} {...item} last={timelineItems.length - 1 === index} />
+    <ol className={styles.timeline}>
+      {timelineItems.map(item => (
+        <TimelineItem key={getUnixTime(item.date)} {...item} />
       ))}
     </ol>
   );
 }
 
-function TimelineItem({ funding, ...props }: TimelineItemData & { last: boolean }): JSX.Element {
+function TimelineItem({ funding, ...props }: TimelineItemData): JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: currency } = useLocaleCurrency();
 
@@ -88,7 +89,7 @@ function TimelineItem({ funding, ...props }: TimelineItemData & { last: boolean 
   let icon: JSX.Element | null = null;
   // Only contributed
   header = 'Contribution';
-  icon = <ArrowUpRight className='inline-block' />;
+  icon = <ArrowUpRight className={styles.icon} />;
   body = `${funding.name} will contribute ${currency.formatAmount(props.contributedAmount, AmountType.Stored)} to ${props.spendingCount} budget(s), resulting in a total allocation of ${currency.formatAmount(props.endingAllocation, AmountType.Stored)}.`;
   if (funding.estimatedDeposit) {
     body += ' ';
@@ -98,23 +99,17 @@ function TimelineItem({ funding, ...props }: TimelineItemData & { last: boolean 
     dateExtra = `(Avoided weekend or holiday on ${format(inTimezone(props.originalDate), 'MMMM do')})`;
   }
 
-  const rowClassNames = mergeTailwind(
-    {
-      'mb-5': !props.last,
-    },
-    'ml-4',
-  );
   return (
-    <li className={rowClassNames}>
-      <div className='absolute w-3 h-3 bg-zinc-200 rounded-full mt-1.5 -left-1.5 border border-white dark:border-zinc-900 dark:bg-zinc-700' />
-      <time className='mb-1 text-sm font-normal leading-none text-zinc-400 dark:text-zinc-500'>
+    <li className={styles.row}>
+      <div className={styles.dot} />
+      <time className={styles.date}>
         {format(inTimezone(props.date), 'MMMM do')} <br /> {dateExtra}
       </time>
-      <h3 className='text-lg font-semibold text-zinc-900 dark:text-white'>
+      <h3 className={styles.header}>
         {header} {icon}
       </h3>
-      <p className='text-base font-normal text-zinc-500 dark:text-zinc-400'>{body}</p>
-      {secondaryBody && <p className='text-base font-normal text-zinc-500 dark:text-zinc-400'>{secondaryBody}</p>}
+      <p className={styles.body}>{body}</p>
+      {secondaryBody && <p className={styles.body}>{secondaryBody}</p>}
     </li>
   );
 }

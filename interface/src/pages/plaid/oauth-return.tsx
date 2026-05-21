@@ -10,6 +10,8 @@ import request from '@monetr/interface/util/request';
 
 import type { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
 
+import styles from './oauth-return.module.scss';
+
 interface State {
   loading: boolean;
   linkToken: string | null;
@@ -117,7 +119,7 @@ export default function OauthReturn(): JSX.Element {
       return (
         <div>
           <Typography size='xl'>One moment...</Typography>
-          <div className='flex flex-col justify-center items-center'>
+          <div className={styles.spinnerWrapper}>
             <MSpinner />
           </div>
         </div>
@@ -136,7 +138,7 @@ export default function OauthReturn(): JSX.Element {
   }
 
   return (
-    <div className='w-full h-full flex justify-center items-center p-10'>
+    <div className={styles.root}>
       <div>{renderContents()}</div>
     </div>
   );

@@ -14,6 +14,8 @@ import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 
+import styles from './MSelectSpending.module.scss';
+
 // Remove the props that we do not want to allow the caller to pass in.
 type MSelectSpendingBaseProps = Omit<SelectProps<Spending>, 'options' | 'value' | 'onChange'>;
 
@@ -113,18 +115,18 @@ export function SelectSpendingOptionComponent(props: SelectOptionComponentProps<
   const notLoaded = props.value?.currentAmount === undefined;
   const amount = notLoaded ? 'N/A' : locale.formatAmount(props.value.currentAmount, AmountType.Stored);
   return (
-    <div className='flex justify-between'>
+    <div className={styles.optionRow}>
       <Typography color='emphasis' ellipsis size='md'>
         {props.label}
       </Typography>
-      <div className='flex gap-2'>
+      <div className={styles.badges}>
         {props.value?.spendingType === SpendingType.Goal && (
-          <Badge className='dark:bg-dark-monetr-blue  max-h-[24px]' size='sm'>
+          <Badge className={styles.iconBadge} size='sm' variant='info'>
             <PiggyBank />
           </Badge>
         )}
         {props.value?.spendingType === SpendingType.Expense && (
-          <Badge className='dark:bg-dark-monetr-green max-h-[24px]' size='sm'>
+          <Badge className={styles.iconBadge} size='sm' variant='positive'>
             <Receipt />
           </Badge>
         )}

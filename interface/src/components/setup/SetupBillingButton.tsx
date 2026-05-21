@@ -6,6 +6,8 @@ import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './SetupBillingButton.module.scss';
+
 /**
  * The SetupBillingButton should only be used on the setup page, it is intended to be a way to manage your billing
  * settings if you do not have an active link for some reason.
@@ -37,8 +39,8 @@ export default function SetupBillingButton(): JSX.Element {
   }
 
   return (
-    <Button className='max-w-xs' disabled={loading} onClick={handleManageSubscription} variant='secondary'>
-      <CreditCard className='mr-2' />
+    <Button className={styles.button} disabled={loading} onClick={handleManageSubscription} variant='secondary'>
+      <CreditCard className={styles.icon} />
       Manage Your Subscription
     </Button>
   );

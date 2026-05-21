@@ -38,11 +38,11 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
   return (
     <div className={mergeTailwind(styles.budgetSidebarRoot, props.className)}>
       <BudgetingSidebarTitle />
-      <div className='flex h-full w-full flex-col items-center gap-4 px-2 pt-4'>
+      <div className={styles.content}>
         <SelectBankAccount />
         <Divider className={layoutVariants({ width: '1/2' })} />
 
-        <div className='flex w-full flex-col items-center gap-2 px-2'>
+        <div className={styles.balances}>
           <BalanceFreeToUseAmount />
           <BalanceAvailableAmount />
           <BalanceCurrentAmount />
@@ -50,7 +50,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
         </div>
         <Divider className={layoutVariants({ width: '1/2' })} />
 
-        <div className='flex h-full w-full flex-col gap-2 pb-4'>
+        <div className={styles.navList}>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/transactions`}>
             <ShoppingCart />
             <Typography color='inherit' ellipsis size='lg' weight='medium'>
@@ -62,7 +62,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
             <Typography color='inherit' ellipsis size='lg' weight='medium'>
               Expenses
             </Typography>
-            <Badge className='ml-auto' size='sm'>
+            <Badge className={styles.badgeRight} size='sm'>
               {locale.formatAmount(balance?.expenses, AmountType.Stored)}
             </Badge>
           </NavigationItem>
@@ -71,7 +71,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
             <Typography color='inherit' ellipsis size='lg' weight='medium'>
               Goals
             </Typography>
-            <Badge className='ml-auto' size='sm'>
+            <Badge className={styles.badgeRight} size='sm'>
               {locale.formatAmount(balance?.goals, AmountType.Stored)}
             </Badge>
           </NavigationItem>
@@ -99,32 +99,8 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
   const [pathname] = useLocation();
   const active = pathname.endsWith(props.to.replaceAll('.', ''));
 
-  const className = mergeTailwind(
-    {
-      'dark:bg-dark-monetr-background-emphasis': active,
-      'dark:text-dark-monetr-content-emphasis': active,
-      'dark:text-dark-monetr-content-subtle': !active,
-      'font-semibold': active,
-      'font-medium': !active,
-    },
-    [
-      'align-middle',
-      'cursor-pointer',
-      'flex',
-      'text-lg',
-      'gap-2',
-      'dark:hover:bg-dark-monetr-background-emphasis',
-      'dark:hover:text-dark-monetr-content-emphasis',
-      'items-center',
-      'px-2',
-      'py-1',
-      'rounded-md',
-      'w-full',
-    ],
-  );
-
   return (
-    <Link className={className} to={props.to}>
+    <Link className={styles.navItem} data-active={active} to={props.to}>
       {props.children}
     </Link>
   );
@@ -137,7 +113,7 @@ function NextFundingBadge(): JSX.Element {
   }
 
   return (
-    <Badge className='ml-auto' size='sm'>
+    <Badge className={styles.badgeRight} size='sm'>
       {next}
     </Badge>
   );

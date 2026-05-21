@@ -1,0 +1,27 @@
+.mobileSidebar {
+  z-index: 40;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: row;
+  backdrop-filter: blur(4px) brightness(0.5);
+  // bg-background at 50% opacity, matching the rest of monetr's overlays.
+  background-color: color-mix(in srgb, var(--background) 50%, transparent);
+
+  &[data-open='false'] {
+    display: none;
+  }
+
+  &[data-open='true'] {
+    position: fixed;
+  }
+}
+
+.budgetingSidebar {
+  width: auto;
+  flex: 1 1 auto;
+  border: none;
+  overflow-y: auto;
+}

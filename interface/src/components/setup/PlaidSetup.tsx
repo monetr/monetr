@@ -17,6 +17,8 @@ import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
 import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
 
+import styles from './PlaidSetup.module.scss';
+
 interface PlaidProps {
   alreadyOnboarded?: boolean;
 }
@@ -181,7 +183,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   }, [plaidError]);
 
   let inner: React.ReactNode = (
-    <div className='flex flex-col justify-center items-center'>
+    <div className={styles.inner}>
       <Typography size='2xl' weight='medium'>
         Getting Plaid Ready!
       </Typography>
@@ -193,7 +195,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
 
   if (settingUp) {
     inner = (
-      <div className='flex flex-col justify-center items-center'>
+      <div className={styles.inner}>
         <Typography size='2xl' weight='medium'>
           Successfully connected with Plaid!
         </Typography>
@@ -206,7 +208,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
 
   if (loading) {
     inner = (
-      <div className='flex flex-col justify-center items-center'>
+      <div className={styles.inner}>
         <MSpinner />
       </div>
     );
@@ -214,7 +216,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
 
   if (error) {
     inner = (
-      <div className='flex flex-col justify-center items-center'>
+      <div className={styles.inner}>
         <Typography size='2xl' weight='medium'>
           Something isn't quite right
         </Typography>
@@ -234,7 +236,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   if (exited) {
     const backUrl = props.alreadyOnboarded ? '/link/create' : '/setup';
     inner = (
-      <div className='flex flex-col justify-center items-center'>
+      <div className={styles.inner}>
         <Typography size='2xl' weight='medium'>
           Something isn't quite right
         </Typography>
@@ -257,8 +259,8 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   }
 
   return (
-    <div className='w-full h-full flex justify-center items-center gap-8 flex-col overflow-hidden text-center p-2'>
-      <MLogo className='w-24 h-24' />
+    <div className={styles.root}>
+      <MLogo className={styles.logo} />
       {inner}
       <Footer />
     </div>

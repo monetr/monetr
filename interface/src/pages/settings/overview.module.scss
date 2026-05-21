@@ -1,0 +1,30 @@
+@use '@monetr/interface/variables';
+
+.root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 4 * variables.$size;
+}
+
+.fields {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 4 * variables.$size;
+}
+
+.field {
+  max-width: 24rem;
+  width: 100%;
+}
+
+.actions {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding-left: 4 * variables.$size;
+  padding-right: 4 * variables.$size;
+}

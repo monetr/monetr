@@ -7,6 +7,8 @@ import useLunchFlowLinkSyncProgress from '@monetr/interface/hooks/useLunchFlowLi
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import capitalize from '@monetr/interface/util/capitalize';
 
+import styles from './LunchFlowSetupSyncItem.module.scss';
+
 export interface LunchFlowSetupSyncItemProps {
   bankAccount: BankAccount;
 }
@@ -27,9 +29,9 @@ export default function LunchFlowSetupSyncItem({ bankAccount }: LunchFlowSetupSy
       </ItemContent>
       <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
         <Typography ellipsis>{capitalize(data?.status ?? 'Waiting')}</Typography>
-        {data?.status !== 'complete' && <LoaderCircle className='animate-spin' data-loading='true' />}
-        {data?.status === 'complete' && <Check className='text-green-500' />}
-        {(data?.status === 'error' || isError) && <X className='text-red-500' />}
+        {data?.status !== 'complete' && <LoaderCircle className={styles.loader} data-loading='true' />}
+        {data?.status === 'complete' && <Check className={styles.iconComplete} />}
+        {(data?.status === 'error' || isError) && <X className={styles.iconError} />}
       </ItemContent>
     </Item>
   );

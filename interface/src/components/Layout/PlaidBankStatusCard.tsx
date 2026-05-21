@@ -4,6 +4,8 @@ import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useInstitution } from '@monetr/interface/hooks/useInstitution';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
+import styles from './PlaidBankStatusCard.module.scss';
+
 /**
  * PlaidBankStatusCard automatically shows the institution health of the currently selected bank account. If the
  * currently selected bank account is **not** a Plaid link, then this will return null.
@@ -26,12 +28,12 @@ export default function PlaidBankStatusCard(): JSX.Element {
   }
   if (institution?.status?.transactions_updates?.breakdown?.refresh_interval === 'STOPPED') {
     status = 'Automatic updates stoppped';
-    additionalClasses = 'grayscale';
+    additionalClasses = styles.grayscale;
   }
 
   return (
-    <div className='p-2 group border-[thin] border-dark-monetr-border rounded-lg w-full flex gap-2'>
-      <PlaidInstitutionLogo className={mergeTailwind('w-6 h-6', additionalClasses)} link={link} />
+    <div className={mergeTailwind(styles.card, 'group')}>
+      <PlaidInstitutionLogo className={mergeTailwind(styles.logo, additionalClasses)} link={link} />
       <Typography color='subtle' size='sm'>
         {status}
       </Typography>

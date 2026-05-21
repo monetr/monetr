@@ -3,6 +3,8 @@ import FormTextField from '@monetr/interface/components/FormTextField';
 import Select from '@monetr/interface/components/Select';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
+import styles from './overview.module.scss';
+
 export default function SettingsOverview(): JSX.Element {
   const { data: me } = useAuthentication();
 
@@ -12,31 +14,31 @@ export default function SettingsOverview(): JSX.Element {
   };
 
   return (
-    <div className='w-full h-full flex flex-col justify-between pb-4'>
-      <div className='w-full flex p-4 flex-col'>
+    <div className={styles.root}>
+      <div className={styles.fields}>
         <FormTextField
-          className='max-w-[24rem] w-full'
+          className={styles.field}
           disabled
           label='First Name'
           name='firstName'
           value={me?.user?.login?.firstName}
         />
         <FormTextField
-          className='max-w-[24rem] w-full'
+          className={styles.field}
           disabled
           label='Last Name'
           name='lastName'
           value={me?.user?.login?.lastName}
         />
         <FormTextField
-          className='max-w-[24rem] w-full'
+          className={styles.field}
           disabled
           label='Email Address'
           name='email'
           value={me?.user?.login.email}
         />
         <Select
-          className='max-w-[24rem] w-full'
+          className={styles.field}
           disabled
           label='Timezone'
           name='timezone'
@@ -45,7 +47,7 @@ export default function SettingsOverview(): JSX.Element {
           value={timezone}
         />
       </div>
-      <div className='w-full flex justify-end px-4'>
+      <div className={styles.actions}>
         <Button disabled variant='primary'>
           Save Settings
         </Button>

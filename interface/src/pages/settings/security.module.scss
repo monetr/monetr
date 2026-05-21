@@ -1,0 +1,40 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  padding: 4 * variables.$size;
+  display: flex;
+  flex-direction: column;
+  gap: 4 * variables.$size;
+}
+
+.cards {
+  margin-top: 4 * variables.$size;
+  display: flex;
+  gap: 4 * variables.$size;
+  flex-direction: column;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+  }
+}
+
+.card {
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.width-third;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.iconBox {
+  border: 1px solid var(--border);
+  border-radius: 0.25rem; // rounded
+  width: fit-content;
+  padding: 2 * variables.$size;
+  background-color: var(--background-subtle);
+}

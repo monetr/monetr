@@ -8,12 +8,14 @@ import Typography from '@monetr/interface/components/Typography';
 import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 
+import styles from './funding.module.scss';
+
 export default function Funding(): JSX.Element {
   const { isError: fundingIsError, isLoading: fundingIsLoading, data: funding } = useFundingSchedules();
 
   if (fundingIsLoading) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+      <div className={styles.centerState}>
         <Typography size='5xl'>One moment...</Typography>
       </div>
     );
@@ -29,7 +31,7 @@ export default function Funding(): JSX.Element {
     }
 
     return (
-      <ul className='w-full flex flex-col gap-2 py-2 pb-16'>
+      <ul className={styles.list}>
         {funding
           ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
           .map(item => (
@@ -47,7 +49,7 @@ export default function Funding(): JSX.Element {
           New Funding Schedule
         </Button>
       </MTopNavigation>
-      <div className='w-full flex flex-grow flex-col min-w-0'>
+      <div className={styles.content}>
         <ListContent />
       </div>
     </Fragment>
@@ -56,15 +58,15 @@ export default function Funding(): JSX.Element {
 
 function EmptyState(): JSX.Element {
   return (
-    <div className='w-full flex justify-center items-center'>
-      <div className='flex flex-col gap-2 items-center max-w-md'>
-        <div className='w-full flex justify-center space-x-4'>
-          <CalendarSync className='dark:text-dark-monetr-content-muted h-12 w-12' />
+    <div className={styles.empty}>
+      <div className={styles.emptyInner}>
+        <div className={styles.iconRow}>
+          <CalendarSync className={styles.emptyIcon} />
         </div>
-        <Typography className='text-center' color='subtle' size='xl'>
+        <Typography align='center' color='subtle' size='xl'>
           You don't have any funding schedules yet...
         </Typography>
-        <Typography className='text-center' color='subtle' size='lg'>
+        <Typography align='center' color='subtle' size='lg'>
           Funding schedules tell monetr when to allocate funds towards your expenses and goals.
         </Typography>
       </div>

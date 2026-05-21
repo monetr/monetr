@@ -1,0 +1,18 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  @include mixins.screen;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2 * variables.$size;
+  padding: 4 * variables.$size;
+}
+
+.logo {
+  height: 24 * variables.$size;
+  width: 24 * variables.$size;
+}
+

@@ -6,9 +6,11 @@ import { showChangePasswordModal } from '@monetr/interface/components/settings/s
 import TOTPCard from '@monetr/interface/components/settings/security/TOTPCard';
 import Typography from '@monetr/interface/components/Typography';
 
+import styles from './security.module.scss';
+
 export default function SettingsSecurity(): JSX.Element {
   return (
-    <div className='p-4 flex flex-col gap-4'>
+    <div className={styles.root}>
       <div>
         <Typography color='emphasis' component='h1' size='3xl' weight='semibold'>
           Security Settings
@@ -18,10 +20,10 @@ export default function SettingsSecurity(): JSX.Element {
         </Typography>
       </div>
 
-      <div className='mt-4 flex gap-4 flex-col md:flex-row'>
-        <Card className='md:w-1/3'>
-          <div className='flex justify-between items-center'>
-            <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
+      <div className={styles.cards}>
+        <Card className={styles.card}>
+          <div className={styles.header}>
+            <div className={styles.iconBox}>
               <RectangleEllipsis />
             </div>
             <Button onClick={showChangePasswordModal} variant='primary'>
@@ -36,9 +38,9 @@ export default function SettingsSecurity(): JSX.Element {
           </Typography>
         </Card>
 
-        <Card className='md:w-1/3'>
-          <div className='flex justify-between items-center'>
-            <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
+        <Card className={styles.card}>
+          <div className={styles.header}>
+            <div className={styles.iconBox}>
               <Mail />
             </div>
             <Button disabled variant='primary'>
