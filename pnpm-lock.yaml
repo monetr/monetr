@@ -284,14 +284,14 @@ importers:
         specifier: 2.0.3
         version: 2.0.3
       '@rstest/adapter-rsbuild':
-        specifier: 0.2.6
-        version: 0.2.6(@rsbuild/core@2.0.6(core-js@3.47.0))(@rstest/core@0.9.10(core-js@3.47.0)(jsdom@26.1.0))
+        specifier: 0.10.0
+        version: 0.10.0(@rsbuild/core@2.0.6(core-js@3.47.0))(@rstest/core@0.10.0(core-js@3.47.0)(jsdom@26.1.0))
       '@rstest/core':
-        specifier: 0.9.10
-        version: 0.9.10(core-js@3.47.0)(jsdom@26.1.0)
+        specifier: 0.10.0
+        version: 0.10.0(core-js@3.47.0)(jsdom@26.1.0)
       '@rstest/coverage-istanbul':
-        specifier: 0.3.2
-        version: 0.3.2(@rstest/core@0.9.10(core-js@3.47.0)(jsdom@26.1.0))
+        specifier: 0.10.0
+        version: 0.10.0(@rstest/core@0.10.0(core-js@3.47.0)(jsdom@26.1.0))
       '@testing-library/jest-dom':
         specifier: 6.9.1
         version: 6.9.1
@@ -1418,14 +1418,14 @@ packages:
   '@rspress/shared@2.0.11':
     resolution: {integrity: sha512-7l5Pso4s597utJyisVEnd7n/40h053nfE8DwGQMeS8RLGtSwVgxFwNHsSrvQEGtFlLrg2aWWSITqnAVO1wfTew==}
 
-  '@rstest/adapter-rsbuild@0.2.6':
-    resolution: {integrity: sha512-hVAw88FnPwE3HBmstwwV7E3rWJJgiL4kU1yrEpB/+0SX3WO1KqPPztEynKzRTRSXcKcoluIlEusEaCXtO0i5aw==}
+  '@rstest/adapter-rsbuild@0.10.0':
+    resolution: {integrity: sha512-UElqWWUO7ugMQoAn6hNl7rsBQTZtR6Ab6tlNHltGxggXYidoFyoSonv+zdGQ1sdmuRsHDsa25PqWmpV2PrgG+w==}
     peerDependencies:
       '@rsbuild/core': '*'
-      '@rstest/core': '>=0.7.7'
+      '@rstest/core': ^0.10.0
 
-  '@rstest/core@0.9.10':
-    resolution: {integrity: sha512-JUSUYYXWIHEBUn193u2RglZujvGPv46Blxpl17QFwc0y9vEXe2y/IfGwGrVsJfZz7PaWZ5NnbFf0J55YIIns+g==}
+  '@rstest/core@0.10.0':
+    resolution: {integrity: sha512-TfmMZ/fvGuGCJbOfVE+Fj8mNxs0opSvEaQZm4lkXMZ/Rdvx4d0yIzHSKZ31bOIAUZIiltMXHoTwu8+pwyBHZyg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -1437,10 +1437,10 @@ packages:
       jsdom:
         optional: true
 
-  '@rstest/coverage-istanbul@0.3.2':
-    resolution: {integrity: sha512-qmAg7gbrmHkvk0p7FH46sfoBRL83EEylW8rBk0L1eVZpK3JSQBeTBuVVFrVOlSRffBgK3Rl7aQEUKJ7PUi+5wQ==}
+  '@rstest/coverage-istanbul@0.10.0':
+    resolution: {integrity: sha512-uaBPvSwYNUyBtEHdXD0E02raBcFsRxjxASZxGdcLYMUmOhQkcrF4xxkSIm2lvOqIQUXOwGoI+tIz8HZx0GRNIA==}
     peerDependencies:
-      '@rstest/core': ~0.9.8
+      '@rstest/core': ^0.10.0
 
   '@selderee/plugin-htmlparser2@0.12.0':
     resolution: {integrity: sha512-oELmoyA6ML9jDRMV3kgcMQFKxUfBU0yFVn6yTctVaLT5ygXnxH52I3TZEgV9EhXJC68/uFvE5Daj1/25c0Xa/A==}
@@ -4037,10 +4037,6 @@ packages:
   tiny-warning@1.0.3:
     resolution: {integrity: sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==}
 
-  tinypool@2.1.0:
-    resolution: {integrity: sha512-Pugqs6M0m7Lv1I7FtxN4aoyToKg1C4tu+/381vH35y8oENM/Ai7f7C4StcoK4/+BSw9ebcS8jRiVrORFKCALLw==}
-    engines: {node: ^20.0.0 || >=22.0.0}
-
   tldts-core@6.1.86:
     resolution: {integrity: sha512-Je6p7pkk+KMzMv2XXKmAE3McmolOQFdxkKw0R8EYNr7sELW46JqnNeTX8ybPiQgvg1ymCoF8LXs5fzFaZvJPTA==}
 
@@ -5481,25 +5477,24 @@ snapshots:
       - '@module-federation/runtime-tools'
       - core-js
 
-  '@rstest/adapter-rsbuild@0.2.6(@rsbuild/core@2.0.6(core-js@3.47.0))(@rstest/core@0.9.10(core-js@3.47.0)(jsdom@26.1.0))':
+  '@rstest/adapter-rsbuild@0.10.0(@rsbuild/core@2.0.6(core-js@3.47.0))(@rstest/core@0.10.0(core-js@3.47.0)(jsdom@26.1.0))':
     dependencies:
       '@rsbuild/core': 2.0.6(core-js@3.47.0)
-      '@rstest/core': 0.9.10(core-js@3.47.0)(jsdom@26.1.0)
+      '@rstest/core': 0.10.0(core-js@3.47.0)(jsdom@26.1.0)
 
-  '@rstest/core@0.9.10(core-js@3.47.0)(jsdom@26.1.0)':
+  '@rstest/core@0.10.0(core-js@3.47.0)(jsdom@26.1.0)':
     dependencies:
       '@rsbuild/core': 2.0.6(core-js@3.47.0)
       '@types/chai': 5.2.3
-      tinypool: 2.1.0
     optionalDependencies:
       jsdom: 26.1.0
     transitivePeerDependencies:
       - '@module-federation/runtime-tools'
       - core-js
 
-  '@rstest/coverage-istanbul@0.3.2(@rstest/core@0.9.10(core-js@3.47.0)(jsdom@26.1.0))':
+  '@rstest/coverage-istanbul@0.10.0(@rstest/core@0.10.0(core-js@3.47.0)(jsdom@26.1.0))':
     dependencies:
-      '@rstest/core': 0.9.10(core-js@3.47.0)(jsdom@26.1.0)
+      '@rstest/core': 0.10.0(core-js@3.47.0)(jsdom@26.1.0)
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-report: 3.0.1
       istanbul-lib-source-maps: 5.0.6
@@ -8723,8 +8718,6 @@ snapshots:
   tiny-inflate@1.0.3: {}
 
   tiny-warning@1.0.3: {}
-
-  tinypool@2.1.0: {}
 
   tldts-core@6.1.86:
     optional: true
