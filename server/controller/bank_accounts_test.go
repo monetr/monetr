@@ -84,7 +84,7 @@ func TestPostBankAccount(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
 					"name":         "US Bank",
-					"lunchFlowURL": "https://lunchflow.app/api/v1",
+					"lunchFlowURL": "https://www.lunchflow.app/api/v1",
 					"apiKey":       "foobar",
 				}).
 				Expect()
@@ -199,7 +199,7 @@ func TestPostBankAccount(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
 					"name":         "First Lunch Flow Account",
-					"lunchFlowURL": "https://lunchflow.app/api/v1",
+					"lunchFlowURL": "https://www.lunchflow.app/api/v1",
 					"apiKey":       "firstapikey",
 				}).
 				Expect()
@@ -269,7 +269,7 @@ func TestPostBankAccount(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
 					"name":         "Second Lunch Flow Account",
-					"lunchFlowURL": "https://lunchflow.app/api/v1",
+					"lunchFlowURL": "https://www.lunchflow.app/api/v1",
 					"apiKey":       "secondapikey",
 				}).
 				Expect()
@@ -1118,7 +1118,7 @@ func TestDeleteBankAccount(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
 					"name":         "US Bank",
-					"lunchFlowURL": "https://lunchflow.app/api/v1",
+					"lunchFlowURL": "https://www.lunchflow.app/api/v1",
 					"apiKey":       "foobar",
 				}).
 				Expect()

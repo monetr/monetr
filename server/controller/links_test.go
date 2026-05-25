@@ -161,7 +161,7 @@ func TestPostLink(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
 					"name":         "US Bank",
-					"lunchFlowURL": "https://lunchflow.app/api/v1",
+					"lunchFlowURL": "https://www.lunchflow.app/api/v1",
 					"apiKey":       "foobar",
 				}).
 				Expect()

@@ -43,7 +43,7 @@ func GetConfig(t *testing.T) config.Configuration {
 			// By default lunch flow is enabled in tests, disable it to simulate
 			// alternate behaviors.
 			Enabled:        true,
-			AllowedApiUrls: []string{"https://lunchflow.app/api/v1"},
+			AllowedApiUrls: []string{"https://www.lunchflow.app/api/v1"},
 		},
 		Plaid: config.Plaid{
 			Enabled:      true,

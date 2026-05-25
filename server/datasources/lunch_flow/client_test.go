@@ -61,7 +61,7 @@ func TestLunchFlowClient_GetAccounts(t *testing.T) {
 		}, accounts, "accounts response should match the expectation")
 
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-			"GET https://lunchflow.app/api/v1/accounts": 1,
+			"GET https://www.lunchflow.app/api/v1/accounts": 1,
 		}, "must match Lunch Flow API calls")
 	})
 
@@ -90,7 +90,7 @@ func TestLunchFlowClient_GetAccounts(t *testing.T) {
 		assert.Empty(t, accounts)
 
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-			"GET https://lunchflow.app/api/v1/accounts": 1,
+			"GET https://www.lunchflow.app/api/v1/accounts": 1,
 		}, "must match Lunch Flow API calls")
 	})
 }
@@ -156,8 +156,8 @@ func TestLunchFlowClient_Redirects(t *testing.T) {
 		assert.EqualValues(t, []lunch_flow.Account{account}, accounts)
 
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-			"GET https://lunchflow.app/api/v1/accounts":         1,
-			"GET https://lunchflow.app/api/v1/accounts/current": 1,
+			"GET https://www.lunchflow.app/api/v1/accounts":         1,
+			"GET https://www.lunchflow.app/api/v1/accounts/current": 1,
 		}, "must match Lunch Flow API calls")
 	})
 
@@ -210,8 +210,8 @@ func TestLunchFlowClient_Redirects(t *testing.T) {
 		assert.Contains(t, err.Error(), "blocked Lunch Flow redirect")
 		assert.Empty(t, accounts)
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-			"GET https://attacker.example/api/v1/accounts": 0,
-			"GET https://lunchflow.app/api/v1/accounts":    1,
+			"GET https://attacker.example/api/v1/accounts":  0,
+			"GET https://www.lunchflow.app/api/v1/accounts": 1,
 		}, "redirect target must not receive a request")
 	})
 
@@ -263,8 +263,8 @@ func TestLunchFlowClient_Redirects(t *testing.T) {
 		assert.Contains(t, err.Error(), "blocked Lunch Flow redirect")
 		assert.Empty(t, accounts)
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-			"GET https://lunchflow.app/admin":           0,
-			"GET https://lunchflow.app/api/v1/accounts": 1,
+			"GET https://lunchflow.app/admin":               0,
+			"GET https://www.lunchflow.app/api/v1/accounts": 1,
 		}, "redirect target must not receive a request")
 	})
 }
@@ -350,7 +350,7 @@ func TestLunchFlowClient_GetBalance(t *testing.T) {
 		assert.EqualValues(t, expectedBalance, *balance, "balance response should match expectation")
 
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-			"GET https://lunchflow.app/api/v1/accounts/1234/balance": 1,
+			"GET https://www.lunchflow.app/api/v1/accounts/1234/balance": 1,
 		}, "must match Lunch Flow API calls")
 	})
 
@@ -379,7 +379,7 @@ func TestLunchFlowClient_GetBalance(t *testing.T) {
 		assert.Nil(t, balance, "balance must be nil in an error path")
 
 		assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-			"GET https://lunchflow.app/api/v1/accounts/1234/balance": 1,
+			"GET https://www.lunchflow.app/api/v1/accounts/1234/balance": 1,
 		}, "must match Lunch Flow API calls")
 	})
 }

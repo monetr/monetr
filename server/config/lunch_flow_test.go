@@ -27,7 +27,7 @@ func TestLunchFlow_ValidateConfig(t *testing.T) {
 		configuration := config.LunchFlow{
 			Enabled: true,
 			AllowedApiUrls: []string{
-				"https://lunchflow.app/api/v1",
+				"https://www.lunchflow.app/api/v1",
 				"http://lunchflow.app/api/v1",
 			},
 		}
@@ -45,9 +45,9 @@ func TestLunchFlow_ValidateConfig(t *testing.T) {
 	t.Run("url with query parameters is rejected", func(t *testing.T) {
 		configuration := config.LunchFlow{
 			Enabled:        true,
-			AllowedApiUrls: []string{"https://lunchflow.app/api/v1?token=secret"},
+			AllowedApiUrls: []string{"https://www.lunchflow.app/api/v1?token=secret"},
 		}
-		assert.EqualError(t, configuration.ValidateConfig(), "Lunch Flow url (https://lunchflow.app/api/v1?token=secret) cannot contain query parameters")
+		assert.EqualError(t, configuration.ValidateConfig(), "Lunch Flow url (https://www.lunchflow.app/api/v1?token=secret) cannot contain query parameters")
 	})
 
 	t.Run("invalid url in config", func(t *testing.T) {
@@ -62,34 +62,34 @@ func TestLunchFlow_ValidateConfig(t *testing.T) {
 func TestLunchFlow_IsAllowedApiUrl(t *testing.T) {
 	t.Run("exact match is allowed", func(t *testing.T) {
 		configuration := config.LunchFlow{
-			AllowedApiUrls: []string{"https://lunchflow.app/api/v1"},
+			AllowedApiUrls: []string{"https://www.lunchflow.app/api/v1"},
 		}
-		assert.True(t, configuration.IsAllowedApiUrl("https://lunchflow.app/api/v1"))
+		assert.True(t, configuration.IsAllowedApiUrl("https://www.lunchflow.app/api/v1"))
 	})
 
 	t.Run("mismatch is rejected", func(t *testing.T) {
 		configuration := config.LunchFlow{
-			AllowedApiUrls: []string{"https://lunchflow.app/api/v1"},
+			AllowedApiUrls: []string{"https://www.lunchflow.app/api/v1"},
 		}
 		assert.False(t, configuration.IsAllowedApiUrl("http://169.254.169.254/latest/meta-data"))
 		assert.False(t, configuration.IsAllowedApiUrl("http://127.0.0.1"))
-		assert.False(t, configuration.IsAllowedApiUrl("https://lunchflow.app/api/v2"))
+		assert.False(t, configuration.IsAllowedApiUrl("https://www.lunchflow.app/api/v2"))
 	})
 
 	t.Run("empty list rejects everything", func(t *testing.T) {
 		configuration := config.LunchFlow{}
-		assert.False(t, configuration.IsAllowedApiUrl("https://lunchflow.app/api/v1"))
+		assert.False(t, configuration.IsAllowedApiUrl("https://www.lunchflow.app/api/v1"))
 		assert.False(t, configuration.IsAllowedApiUrl(""))
 	})
 
 	t.Run("multiple entries match any of them", func(t *testing.T) {
 		configuration := config.LunchFlow{
 			AllowedApiUrls: []string{
-				"https://lunchflow.app/api/v1",
+				"https://www.lunchflow.app/api/v1",
 				"https://lunchflow.compatible.app/api/v1",
 			},
 		}
-		assert.True(t, configuration.IsAllowedApiUrl("https://lunchflow.app/api/v1"))
+		assert.True(t, configuration.IsAllowedApiUrl("https://www.lunchflow.app/api/v1"))
 		assert.True(t, configuration.IsAllowedApiUrl("https://lunchflow.compatible.app/api/v1"))
 		assert.False(t, configuration.IsAllowedApiUrl("https://other.lunchflow.app/api/v1"))
 	})

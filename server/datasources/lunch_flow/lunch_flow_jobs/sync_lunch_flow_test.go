@@ -171,8 +171,8 @@ func TestSyncLunchFlow(t *testing.T) {
 			assert.EqualValues(t, 2, count, "should have one transaction now!")
 
 			assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-				fmt.Sprintf("GET https://lunchflow.app/api/v1/accounts/%s/balance", bankAccount.LunchFlowBankAccount.LunchFlowId):      1,
-				fmt.Sprintf("GET https://lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
+				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/balance", bankAccount.LunchFlowBankAccount.LunchFlowId):      1,
+				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
 			}, "must match Lunch Flow API calls")
 		}()
 
@@ -242,8 +242,8 @@ func TestSyncLunchFlow(t *testing.T) {
 			assert.EqualValues(t, 3, count, "should have one transaction now!")
 
 			assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-				fmt.Sprintf("GET https://lunchflow.app/api/v1/accounts/%s/balance", bankAccount.LunchFlowBankAccount.LunchFlowId):      1,
-				fmt.Sprintf("GET https://lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
+				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/balance", bankAccount.LunchFlowBankAccount.LunchFlowId):      1,
+				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
 			}, "must match Lunch Flow API calls")
 		}()
 	})
@@ -364,8 +364,8 @@ func TestSyncLunchFlow(t *testing.T) {
 			assert.EqualValues(t, 1234, bankAccountUpdated.CurrentBalance)
 
 			assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-				fmt.Sprintf("GET https://lunchflow.app/api/v1/accounts/%s/balance", bankAccount.LunchFlowBankAccount.LunchFlowId):      1,
-				fmt.Sprintf("GET https://lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
+				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/balance", bankAccount.LunchFlowBankAccount.LunchFlowId):      1,
+				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
 			}, "must match Lunch Flow API calls")
 		}()
 	})
@@ -440,7 +440,7 @@ func TestSyncLunchFlow(t *testing.T) {
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
 
 			assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-				fmt.Sprintf("GET https://lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
+				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
 			}, "must match Lunch Flow API calls")
 		}()
 	})
@@ -540,8 +540,8 @@ func TestSyncLunchFlow(t *testing.T) {
 			fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
 
 			assert.EqualValues(t, httpmock.GetCallCountInfo(), map[string]int{
-				fmt.Sprintf("GET https://lunchflow.app/api/v1/accounts/%s/balance", bankAccount.LunchFlowBankAccount.LunchFlowId):      1,
-				fmt.Sprintf("GET https://lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
+				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/balance", bankAccount.LunchFlowBankAccount.LunchFlowId):      1,
+				fmt.Sprintf("GET https://www.lunchflow.app/api/v1/accounts/%s/transactions", bankAccount.LunchFlowBankAccount.LunchFlowId): 1,
 			}, "must match Lunch Flow API calls")
 		}()
 	})

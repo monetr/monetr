@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const DefaultLunchFlowAPIURL = "https://lunchflow.app/api/v1"
+const DefaultLunchFlowAPIURL = "https://www.lunchflow.app/api/v1"
 
 type LunchFlow struct {
 	// Enabled just determines whether or not Lunch Flow will be an option to
