@@ -20,7 +20,7 @@
     ]
   },
   "dependencies": {
-    "@date-fns/tz": "1.4.1",
+    "@date-fns/tz": "1.5.0",
     "@ebay/nice-modal-react": "1.2.13",
     "@fontsource-variable/inter": "5.2.8",
     "@monetr/notify": "1.0.5",
