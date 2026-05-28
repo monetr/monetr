@@ -10,7 +10,7 @@ import (
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v85"
 )
 
 func TestStripeBase_GetProductsById(t *testing.T) {
