@@ -80,12 +80,7 @@ export default function ResendVerificationPage(): JSX.Element {
   }
 
   return (
-    <MForm
-      className={styles.form}
-      initialValues={initialValues}
-      onSubmit={submit}
-      validate={validateInput}
-    >
+    <MForm className={styles.form} initialValues={initialValues} onSubmit={submit} validate={validateInput}>
       <div className={styles.panel}>
         <MLogo className={styles.logo} />
         <RouteStateMessage hasEmail={Boolean(emailFromQuery)} />

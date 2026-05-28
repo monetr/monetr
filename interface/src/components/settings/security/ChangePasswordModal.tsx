@@ -83,12 +83,7 @@ function ChangePasswordModal(): JSX.Element {
 
   return (
     <MModal className={styles.modal} open={modal.visible} ref={ref}>
-      <MForm
-        className={styles.form}
-        initialValues={initialValues}
-        onSubmit={updatePassword}
-        validate={validate}
-      >
+      <MForm className={styles.form} initialValues={initialValues} onSubmit={updatePassword} validate={validate}>
         <div className={styles.body}>
           <Typography className={styles.heading} size='xl' weight='bold'>
             Change Your Password

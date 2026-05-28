@@ -15,12 +15,7 @@ export default function ConfigError(): JSX.Element {
         </Typography>
         <Typography className={styles.contact} size='lg'>
           You can try reloading this page, but if the problem persists please contact
-          <a
-            className={styles.supportLink}
-            href='mailto:support@monetr.app'
-            rel='noopener noreferrer'
-            target='_blank'
-          >
+          <a className={styles.supportLink} href='mailto:support@monetr.app' rel='noopener noreferrer' target='_blank'>
             support@monetr.app
           </a>
         </Typography>

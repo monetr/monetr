@@ -76,11 +76,7 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
 
   return (
     <MModal className={styles.modal} open={modal.visible} ref={ref}>
-      <MForm
-        className={styles.form}
-        initialValues={initialValues}
-        onSubmit={submit}
-      >
+      <MForm className={styles.form} initialValues={initialValues} onSubmit={submit}>
         {({ setFieldValue, values, isSubmitting }) => (
           <div className={styles.body}>
             <Typography className={styles.heading} size='xl' weight='bold'>
@@ -95,9 +91,7 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
               <Typography size='inherit'>You will not be able to undo this action.</Typography>
               <div className={styles.optionRow}>
                 <div className={styles.optionText}>
-                  <label className={styles.optionLabel}>
-                    Prevent Re-Creation
-                  </label>
+                  <label className={styles.optionLabel}>Prevent Re-Creation</label>
                   <p className={styles.optionDescription}>
                     Prevent this transaction from be re-created if it is present in future file imports?
                   </p>
@@ -109,9 +103,7 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
               </div>
               <div className={styles.optionRow}>
                 <div className={styles.optionText}>
-                  <label className={styles.optionLabel}>
-                    Adjust Balance
-                  </label>
+                  <label className={styles.optionLabel}>Adjust Balance</label>
                   <p className={styles.optionDescription}>
                     Update your account balance as if this transaction was reversed?
                   </p>

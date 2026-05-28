@@ -8,9 +8,9 @@ import { OAuthRedirectPlaidLink } from '@monetr/interface/components/Plaid/OAuth
 import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
 
-import type { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
-
 import styles from './oauth-return.module.scss';
+
+import type { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
 
 interface State {
   loading: boolean;

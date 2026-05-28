@@ -81,22 +81,16 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
     <ol className={styles.timeline}>
       <li className={styles.row}>
         <div className={styles.dot}></div>
-        <time className={styles.date}>
-          {format(inTimezone(forecast.startingTime), 'MMMM do')}
-        </time>
+        <time className={styles.date}>{format(inTimezone(forecast.startingTime), 'MMMM do')}</time>
         <h3 className={styles.header}>
           {spending.name}
-          <span className={styles.todayBadge}>
-            Today
-          </span>
+          <span className={styles.todayBadge}>Today</span>
         </h3>
         <p className={styles.body}>
           {spending.name} currently has {locale.formatAmount(spending.currentAmount, AmountType.Stored)} allocated
           towards it.
         </p>
-        <p className={styles.introBody}>
-          Below is the timeline for this expense over the next month.
-        </p>
+        <p className={styles.introBody}>Below is the timeline for this expense over the next month.</p>
       </li>
       {timelineItems.map(item => (
         <TimelineItem key={getUnixTime(item.date)} {...item} />
@@ -145,9 +139,7 @@ function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData)
   return (
     <li className={styles.row}>
       <div className={styles.dot} />
-      <time className={styles.date}>
-        {format(inTimezone(props.date), 'MMMM do')}
-      </time>
+      <time className={styles.date}>{format(inTimezone(props.date), 'MMMM do')}</time>
       <Typography color='emphasis' component='h3' size='lg' weight='semibold'>
         {header} {icon}
       </Typography>
