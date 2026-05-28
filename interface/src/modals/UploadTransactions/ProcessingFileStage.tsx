@@ -7,6 +7,8 @@ import Typography from '@monetr/interface/components/Typography';
 import type { UploadTransactionStage } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 
+import styles from './ProcessingFileStage.module.scss';
+
 interface ProcessingFileStageProps {
   close: () => void;
   upload: TransactionUpload;
@@ -17,9 +19,9 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): JS
   const { data } = useTransactionUploadProgress(props.upload.bankAccountId, props.upload.transactionUploadId);
 
   return (
-    <div className='h-full flex flex-col gap-2 p-2 justify-between'>
-      <div className='flex flex-col gap-2 h-full'>
-        <div className='flex justify-between'>
+    <div className={styles.root}>
+      <div className={styles.body}>
+        <div className={styles.header}>
           <Typography size='xl' weight='bold'>
             Upload Transactions
           </Typography>
@@ -30,15 +32,15 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): JS
           close this window. Your upload will not be interuptted.
         </Typography>
 
-        <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
-          <FileUp className='size-12 text-dark-monetr-content' />
-          <div className='flex flex-col py-1 w-full'>
+        <div className={styles.fileCard}>
+          <FileUp className={styles.fileIcon} />
+          <div className={styles.fileInfo}>
             <Typography size='lg'>{props.upload.file.name}</Typography>
             <Typography size='inherit'>Import {data?.status || 'processing'}!</Typography>
           </div>
         </div>
       </div>
-      <div className='flex justify-end gap-2 mt-2'>
+      <div className={styles.actions}>
         <Button onClick={props.close} variant='secondary'>
           Done
         </Button>

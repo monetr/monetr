@@ -5,6 +5,8 @@ import MLogo from '@monetr/interface/components/MLogo';
 import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
 
+import styles from './email.module.scss';
+
 export default function VerifyEmail(): JSX.Element {
   const search = useSearch();
   const [, navigate] = useLocation();
@@ -52,12 +54,12 @@ export default function VerifyEmail(): JSX.Element {
 
 export function VerifyEmailView(): JSX.Element {
   return (
-    <div className='h-screen w-screen flex flex-col justify-center items-center gap-2 p-4'>
-      <MLogo className='h-24 w-24' />
+    <div className={styles.root}>
+      <MLogo className={styles.logo} />
       <Typography size='2xl' weight='bold'>
         Email Verification
       </Typography>
-      <Typography className='text-center' size='xl'>
+      <Typography align='center' size='xl'>
         Your email is being verified, one moment...
       </Typography>
     </div>

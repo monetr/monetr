@@ -4,7 +4,8 @@ import { useLocation, useRoute } from 'wouter';
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
 import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+
+import styles from './MobileSidebar.module.scss';
 
 export default function MobileSidebar(): JSX.Element {
   const { isOpen, setIsOpen } = useContext(MobileSidebarContext);
@@ -24,20 +25,10 @@ export default function MobileSidebar(): JSX.Element {
     }
   }, [pathname, setIsOpen]);
 
-  // Keeps the entire sidebar from re-rendering when things change. This way stuff like the drawer animation works
-  // properly.
-  const classNames = mergeTailwind(
-    'z-40 w-screen h-screen top-0 left-0 bg-background flex flex-row backdrop-blur-sm dark:bg-opacity-50 backdrop-brightness-50',
-    {
-      fixed: isOpen,
-      hidden: !isOpen,
-    },
-  );
-
   return (
-    <div className={classNames}>
+    <div className={styles.mobileSidebar} data-open={isOpen}>
       <BankSidebar />
-      {isBankRoute && <BudgetingSidebar className='w-auto flex-auto border-none overflow-y-auto' />}
+      {isBankRoute && <BudgetingSidebar className={styles.budgetingSidebar} />}
     </div>
   );
 }

@@ -3,6 +3,8 @@ import SimilarTransactionItem from '@monetr/interface/components/transactions/Si
 import { useSimilarTransactions } from '@monetr/interface/hooks/useSimilarTransactions';
 import type Transaction from '@monetr/interface/models/Transaction';
 
+import styles from './SimilarTransactions.module.scss';
+
 export interface SimilarTransactionsProps {
   transaction: Transaction;
 }
@@ -29,11 +31,11 @@ export default function SimilarTransactions(props: SimilarTransactionsProps): JS
     .map(item => <SimilarTransactionItem key={item} transactionId={item} />);
 
   return (
-    <div className='w-full flex flex-col gap-2'>
-      <Typography className='pl-4' size='xl' weight='semibold'>
+    <div className={styles.root}>
+      <Typography className={styles.heading} size='xl' weight='semibold'>
         Similar Transactions
       </Typography>
-      <ul className='w-full flex gap-2 flex-col'>{items}</ul>
+      <ul className={styles.list}>{items}</ul>
     </div>
   );
 }

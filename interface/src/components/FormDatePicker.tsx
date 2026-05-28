@@ -141,7 +141,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
           <LabelDecorator disabled={props.disabled} name={props.name} />
         </Label>
         <div className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)} data-error={props.error}>
-          <Skeleton className='w-full h-5 mr-2' />
+          <Skeleton className={datePickerStyles.skeleton} />
         </div>
         <ErrorText error={props.error} />
       </div>
@@ -152,7 +152,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
 
   return (
     <div
-      className={mergeTailwind(errorTextStyles.errorTextPadding, 'relative', className)}
+      className={mergeTailwind(errorTextStyles.errorTextPadding, datePickerStyles.container, className)}
       data-testid={props['data-testid']}
     >
       <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
@@ -170,9 +170,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
             <span className={typographyStyles.truncate}>{formattedSelection}</span>
             {isClearEnabled && selectedValue ? (
               <button
-                className={mergeTailwind(
-                  'absolute outline-none inset-y-0 right-2 flex items-center transition duration-100 dark:text-dark-monetr-content-subtle',
-                )}
+                className={datePickerStyles.clearButton}
                 onClick={e => {
                   e.preventDefault();
                   handleReset();
@@ -186,7 +184,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
         </PopoverTrigger>
         <PopoverContent onPointerDownOutside={handleClose}>
           <Calendar
-            className='overflow-y-auto outline-none rounded-lg p-3 bg-dark-monetr-background'
+            className={datePickerStyles.calendar}
             defaultMonth={defaultMonth}
             disabled={disabledDays}
             enableYearNavigation={enableYearNavigation}

@@ -9,12 +9,14 @@ import { useSpendingFiltered } from '@monetr/interface/hooks/useSpendingFiltered
 import { showNewGoalModal } from '@monetr/interface/modals/NewGoalModal';
 import { SpendingType } from '@monetr/interface/models/Spending';
 
+import styles from './goals.module.scss';
+
 export default function Goals(): JSX.Element {
   const { data: goals, isError, isLoading } = useSpendingFiltered(SpendingType.Goal);
 
   if (isLoading) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+      <div className={styles.centerState}>
         <Typography size='5xl'>One moment...</Typography>
       </div>
     );
@@ -22,8 +24,8 @@ export default function Goals(): JSX.Element {
 
   if (isError) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartCrack className='dark:text-dark-monetr-content size-24' />
+      <div className={styles.centerState}>
+        <HeartCrack className={styles.errorIcon} />
         <Typography size='5xl'>Something isn't right...</Typography>
         <Typography size='2xl'>We weren't able to retrieve goals at this time...</Typography>
       </div>
@@ -36,7 +38,7 @@ export default function Goals(): JSX.Element {
     }
 
     return (
-      <ul className='w-full flex flex-col gap-2 py-2 pb-16'>
+      <ul className={styles.list}>
         {goals
           ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
           .map(item => (
@@ -54,7 +56,7 @@ export default function Goals(): JSX.Element {
           New Goal
         </Button>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0'>
+      <div className={styles.content}>
         <ListContent />
       </div>
     </Fragment>
@@ -63,15 +65,15 @@ export default function Goals(): JSX.Element {
 
 function EmptyState(): JSX.Element {
   return (
-    <div className='w-full h-full flex justify-center items-center'>
-      <div className='flex flex-col gap-2 items-center max-w-md'>
-        <div className='w-full flex justify-center space-x-4'>
-          <PiggyBank className='w-16 h-16 dark:text-dark-monetr-content-muted' />
+    <div className={styles.empty}>
+      <div className={styles.emptyInner}>
+        <div className={styles.iconRow}>
+          <PiggyBank className={styles.emptyIcon} />
         </div>
-        <Typography className='text-center' color='subtle' size='xl'>
+        <Typography align='center' color='subtle' size='xl'>
           You don't have any goals yet...
         </Typography>
-        <Typography className='text-center' color='subtle' size='lg'>
+        <Typography align='center' color='subtle' size='lg'>
           Goals are longer budgets that don't recur. They are meant to be used to put money aside for something like
           saving up for a vaction, or paying off a loan.
         </Typography>

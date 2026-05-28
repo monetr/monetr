@@ -11,6 +11,8 @@ import type Link from '@monetr/interface/models/Link';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './RemoveLinkModal.module.scss';
+
 export interface RemoveLinkModalProps {
   link: Link;
 }
@@ -40,10 +42,10 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
   }
 
   return (
-    <MModal className='py-4 md:max-w-md' open={modal.visible} ref={ref}>
-      <div className='h-full flex flex-col gap-4 p-2 justify-between'>
-        <div className='flex flex-col'>
-          <Typography className='mb-2' size='xl' weight='bold'>
+    <MModal className={styles.modal} open={modal.visible} ref={ref}>
+      <div className={styles.content}>
+        <div className={styles.header}>
+          <Typography className={styles.heading} size='xl' weight='bold'>
             <Trash />
             Remove {props.link.getName()}?
           </Typography>
@@ -54,7 +56,7 @@ function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
             All expenses, goals and transactions related to this will be deleted. This cannot be undone.
           </Typography>
         </div>
-        <div className='flex justify-end gap-2'>
+        <div className={styles.actions}>
           <Button disabled={submitting} onClick={modal.remove} variant='secondary'>
             Cancel
           </Button>

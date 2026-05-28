@@ -36,6 +36,10 @@
   flex-shrink: 1;
 }
 
+.toggle {
+  margin-right: 2 * variables.$size;
+}
+
 .titleWrapper {
   display: flex;
   gap: 2 * variables.$size;

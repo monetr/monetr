@@ -1,0 +1,26 @@
+@use '@monetr/interface/variables';
+
+.root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 4 * variables.$size;
+  max-width: 36rem; // max-w-xl
+}
+
+.heading {
+  margin-bottom: 4 * variables.$size;
+}
+
+.statusRow {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 4 * variables.$size;
+  padding-bottom: 4 * variables.$size;
+}
+
+.subscribeButton {
+  margin-left: auto;
+  margin-top: 4 * variables.$size;
+  max-width: 20rem; // max-w-xs
+}

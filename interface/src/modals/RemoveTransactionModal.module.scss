@@ -1,0 +1,70 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.modal {
+  @media (min-width: variables.$mediumScreen) {
+    max-width: 28rem; // md:max-w-md
+  }
+}
+
+.form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size; // gap-stack
+  padding: 2 * variables.$size;
+  justify-content: space-between;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size; // gap-stack
+}
+
+.heading {
+  margin-bottom: 2 * variables.$size;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size; // gap-stack
+}
+
+.optionRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: var(--border-radius);
+  padding: 2 * variables.$size;
+  gap: 0.5 * variables.$size; // gap-component
+
+  --ring-color: var(--border-string);
+  --ring-size: 1px;
+  @include mixins.ring;
+}
+
+.optionText {
+  gap: 0.5 * variables.$size; // gap-component
+}
+
+.optionLabel {
+  @include mixins.text-small;
+  font-weight: var(--medium);
+  color: var(--content-emphasis);
+  cursor: pointer;
+}
+
+.optionDescription {
+  @include mixins.text-small;
+  color: var(--content);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2 * variables.$size; // gap-stack
+  margin-top: 4 * variables.$size;
+}

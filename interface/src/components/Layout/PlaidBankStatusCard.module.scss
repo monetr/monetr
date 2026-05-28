@@ -1,0 +1,19 @@
+@use '@monetr/interface/variables';
+
+.card {
+  padding: 2 * variables.$size;
+  border: thin solid var(--border);
+  border-radius: var(--border-radius);
+  width: 100%;
+  display: flex;
+  gap: 2 * variables.$size;
+}
+
+.logo {
+  width: 6 * variables.$size;
+  height: 6 * variables.$size;
+}
+
+.grayscale {
+  filter: grayscale(1);
+}

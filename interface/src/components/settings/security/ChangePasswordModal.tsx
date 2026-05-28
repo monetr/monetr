@@ -13,6 +13,8 @@ import Typography from '@monetr/interface/components/Typography';
 import request from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './ChangePasswordModal.module.scss';
+
 interface ChangePasswordValues {
   currentPassword: string;
   newPassword: string;
@@ -80,21 +82,16 @@ function ChangePasswordModal(): JSX.Element {
   }
 
   return (
-    <MModal className='sm:max-w-sm' open={modal.visible} ref={ref}>
-      <MForm
-        className='h-full flex flex-col gap-2 p-2 justify-between'
-        initialValues={initialValues}
-        onSubmit={updatePassword}
-        validate={validate}
-      >
-        <div className='flex flex-col'>
-          <Typography className='mb-2' size='xl' weight='bold'>
+    <MModal className={styles.modal} open={modal.visible} ref={ref}>
+      <MForm className={styles.form} initialValues={initialValues} onSubmit={updatePassword} validate={validate}>
+        <div className={styles.body}>
+          <Typography className={styles.heading} size='xl' weight='bold'>
             Change Your Password
           </Typography>
           <FormTextField
             autoComplete='current-password'
             autoFocus
-            className='w-full'
+            className={styles.field}
             label='Current Password'
             name='currentPassword'
             placeholder='********'
@@ -102,7 +99,7 @@ function ChangePasswordModal(): JSX.Element {
           />
           <FormTextField
             autoComplete='new-password'
-            className='w-full'
+            className={styles.field}
             label='New Password'
             name='newPassword'
             placeholder='********'
@@ -110,19 +107,19 @@ function ChangePasswordModal(): JSX.Element {
           />
           <FormTextField
             autoComplete='new-password'
-            className='w-full'
+            className={styles.field}
             label='Repeat Password'
             name='repeatPassword'
             placeholder='********'
             type='password'
           />
         </div>
-        <div className='flex justify-end gap-2'>
+        <div className={styles.actions}>
           <Button data-testid='close-change-password-modal' onClick={modal.remove} variant='secondary'>
             Cancel
           </Button>
           <FormButton color='primary' type='submit'>
-            <RectangleEllipsis className='mr-1' />
+            <RectangleEllipsis className={styles.buttonIcon} />
             Update Password
           </FormButton>
         </div>

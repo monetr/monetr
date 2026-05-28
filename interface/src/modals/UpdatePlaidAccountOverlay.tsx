@@ -16,6 +16,8 @@ import type Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
+import styles from './UpdatePlaidAccountOverlay.module.scss';
+
 export interface UpdatePlaidAccountOverlayProps {
   link: Link;
   updateAccountSelection?: boolean;
@@ -136,10 +138,10 @@ function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaid
   }
 
   return (
-    <MModal className='py-4 md:max-w-md' open={modal.visible}>
-      <div className='h-full flex flex-col gap-4 p-2 justify-between'>
-        <div className='flex flex-col'>
-          <Typography className='mb-2' size='xl' weight='bold'>
+    <MModal className={styles.modal} open={modal.visible}>
+      <div className={styles.content}>
+        <div className={styles.header}>
+          <Typography className={styles.heading} size='xl' weight='bold'>
             {title}
           </Typography>
           <Typography size='lg' weight='medium'>

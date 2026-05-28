@@ -24,7 +24,7 @@ export default function ManualLinkSetupLayout(props: ManualLinkSetupLayoutProps)
   const step = steps.indexOf(viewContext.currentView);
   return (
     <div className={styles.manualLinkSetupLayoutRoot}>
-      <div className='p-0 md:p-8 w-full'>
+      <div className={styles.stepper}>
         <MStepper activeIndex={step} steps={['Intro', 'Account', 'Balances', 'Income']} />
       </div>
       <Flex align='center' className={layoutVariants({ maxWidth: 'small' })} justify='center' orientation='column'>

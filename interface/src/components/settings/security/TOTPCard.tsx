@@ -5,6 +5,8 @@ import Card from '@monetr/interface/components/Card';
 import Typography from '@monetr/interface/components/Typography';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
+import styles from './TOTPCard.module.scss';
+
 const showEnableTOTPModal = async () =>
   await import('@monetr/interface/components/settings/security/EnableTOTPMModal').then(modal =>
     modal.showEnableTOTPModal(),
@@ -18,9 +20,9 @@ export default function TOTPCard(): JSX.Element {
   } = useAuthentication();
 
   return (
-    <Card className='md:w-1/3'>
-      <div className='flex justify-between items-center'>
-        <div className='border-dark-monetr-border rounded border w-fit p-2 bg-dark-monetr-background-subtle'>
+    <Card className={styles.card}>
+      <div className={styles.header}>
+        <div className={styles.iconBox}>
           <Shield />
         </div>
         <Button disabled={Boolean(login.totpEnabledAt)} onClick={showEnableTOTPModal} variant='primary'>

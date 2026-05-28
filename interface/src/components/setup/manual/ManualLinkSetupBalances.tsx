@@ -12,6 +12,8 @@ import Typography from '@monetr/interface/components/Typography';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 
+import styles from './ManualLinkSetupBalances.module.scss';
+
 export type ManualLinkSetupBalancesValues = {
   startingBalance: number;
   currency: string;
@@ -49,10 +51,10 @@ export default function ManualLinkSetupBalances(): JSX.Element {
             What is your current available balance? monetr will use this as a starting point, you can modify this at any
             time later on.
           </Typography>
-          <SelectCurrency className='w-full' name='currency' />
+          <SelectCurrency className={styles.field} name='currency' />
           <FormAmountField
             allowNegative
-            className='w-full'
+            className={styles.field}
             currency={currency}
             label='Starting Balance'
             name='startingBalance'

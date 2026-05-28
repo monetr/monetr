@@ -1,0 +1,9 @@
+@use '@monetr/interface/variables';
+
+.button {
+  max-width: 20rem; // max-w-xs
+}
+
+.icon {
+  margin-right: 2 * variables.$size;
+}

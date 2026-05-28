@@ -1,0 +1,18 @@
+.loader {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// green-500 and red-500 only exist as the amount status colors in monetr.
+.iconComplete {
+  color: var(--amount-positive);
+}
+
+.iconError {
+  color: var(--amount-negative);
+}

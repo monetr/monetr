@@ -17,3 +17,37 @@
     pointer-events: none;
   }
 }
+
+.skeleton {
+  width: 100%;
+  height: 5 * variables.$size;
+  margin-right: 2 * variables.$size;
+}
+
+.container {
+  position: relative;
+}
+
+.clearButton {
+  position: absolute;
+  outline: none;
+  top: 0;
+  bottom: 0;
+  right: 2 * variables.$size;
+  display: flex;
+  align-items: center;
+  color: var(--content-subtle);
+
+  // transition duration-100
+  transition-property: color, background-color, border-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 100ms;
+}
+
+.calendar {
+  overflow-y: auto;
+  outline: none;
+  border-radius: var(--border-radius);
+  padding: 3 * variables.$size;
+  background-color: var(--background);
+}

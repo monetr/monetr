@@ -42,7 +42,7 @@
   bottom: 0;
   left: 0;
   padding-left: var(--bank-sidebar-width-static);
-  
+
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -50,6 +50,69 @@
   align-items: center;
 
   padding-bottom: calc(4 * variables.$size + env(safe-area-inset-bottom));
+}
+
+.content {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 4 * variables.$size;
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-top: 4 * variables.$size;
+}
+
+.balances {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 2 * variables.$size;
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+}
+
+.navList {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  padding-bottom: 4 * variables.$size;
+}
+
+.badgeRight {
+  margin-left: auto;
+}
+
+.navItem {
+  vertical-align: middle; // align-middle
+  cursor: pointer;
+  display: flex;
+  @include mixins.text-large; // text-lg
+  gap: 2 * variables.$size;
+  align-items: center;
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-top: 1 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  border-radius: 0.375rem; // rounded-md
+  width: 100%;
+  font-weight: var(--medium);
+  color: var(--content-subtle);
+
+  &:hover {
+    background-color: var(--background-emphasis);
+    color: var(--content-emphasis);
+  }
+
+  &[data-active='true'] {
+    background-color: var(--background-emphasis);
+    color: var(--content-emphasis);
+    font-weight: var(--semibold);
+  }
 }
 
 

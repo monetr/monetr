@@ -19,14 +19,14 @@ export default function LunchFlowSetupLayout(props: LunchFlowSetupLayoutProps): 
   const step = steps.indexOf(props.step ?? LunchFlowSetupSteps.Intro);
   return (
     <div className={styles.lunchFlowSetupLayoutRoot}>
-      <div className='p-0 md:p-8 w-full'>
+      <div className={styles.stepper}>
         <MStepper activeIndex={step} steps={['Intro', 'Accounts', 'Sync']} />
       </div>
-      <div className='flex flex-col md:justify-center items-center max-w-md gap-4'>
+      <div className={styles.content}>
         <div className={flexVariants({ gap: 'sm', width: 'auto' })}>
-          <MLogo className='size-16' />
-          <Plus className='h-16' />
-          <LunchFlowLogo className='h-16' iconOnly />
+          <MLogo className={styles.logo} />
+          <Plus className={styles.icon} />
+          <LunchFlowLogo className={styles.icon} iconOnly />
         </div>
         {props.children}
       </div>

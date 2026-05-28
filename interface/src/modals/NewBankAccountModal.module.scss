@@ -1,0 +1,14 @@
+@use '@monetr/interface/variables';
+
+.form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  padding: 2 * variables.$size;
+  justify-content: space-between;
+}
+
+.heading {
+  margin-bottom: 2 * variables.$size;
+}

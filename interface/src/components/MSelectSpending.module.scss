@@ -1,0 +1,15 @@
+@use '@monetr/interface/variables';
+
+.optionRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.badges {
+  display: flex;
+  gap: 2 * variables.$size;
+}
+
+.iconBadge {
+  max-height: 24px;
+}

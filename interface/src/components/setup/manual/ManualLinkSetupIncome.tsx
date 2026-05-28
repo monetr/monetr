@@ -20,6 +20,8 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 
+import styles from './ManualLinkSetupIncome.module.scss';
+
 export type ManualLinkSetupIncomeValues = {
   nextPayday: Date;
   ruleset: string;
@@ -101,7 +103,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
           </Typography>
           <FormDatePicker
             autoFocus
-            className='w-full'
+            className={styles.field}
             label='When do you get paid next?'
             min={startOfTomorrow({
               in: inTimezone,
@@ -110,7 +112,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
             required
           />
           <MSelectFrequency
-            className='w-full text-start'
+            className={styles.frequencyField}
             dateFrom='nextPayday'
             label='How often do you get paid?'
             name='ruleset'
@@ -119,7 +121,7 @@ export default function ManualLinkSetupIncome(): JSX.Element {
           />
           <FormAmountField
             allowNegative={false}
-            className='w-full'
+            className={styles.field}
             currency={currency}
             label='How much do you usually get paid?'
             name='paydayAmount'

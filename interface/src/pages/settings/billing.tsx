@@ -12,6 +12,8 @@ import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import request from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './billing.module.scss';
+
 export default function SettingsBilling(): JSX.Element {
   const [pathname] = useLocation();
   const { enqueueSnackbar } = useSnackbar();
@@ -49,20 +51,20 @@ export default function SettingsBilling(): JSX.Element {
   const manageSubscriptionText = auth?.hasSubscription ? 'Manage Your Subscription' : 'Subscribe Early';
 
   return (
-    <div className='w-full flex flex-col p-4 max-w-xl'>
-      <Typography className='mb-4' color='emphasis' size='2xl' weight='bold'>
+    <div className={styles.root}>
+      <Typography className={styles.heading} color='emphasis' size='2xl' weight='bold'>
         Billing
       </Typography>
       <Divider />
 
-      <div className='flex justify-between py-4'>
+      <div className={styles.statusRow}>
         <Typography size='inherit'>Subscription Status</Typography>
         <SubscriptionStatusBadge />
       </div>
       <Divider />
 
       <Button
-        className='ml-auto mt-4 max-w-xs'
+        className={styles.subscribeButton}
         data-testid='billing-subscribe'
         disabled={loading}
         onClick={handleManageSubscription}
@@ -80,7 +82,7 @@ function SubscriptionStatusBadge(): JSX.Element {
   // If they have a subscription and it is active then show active.
   if (auth?.hasSubscription && auth?.isActive) {
     return (
-      <Badge className='bg-green-600' data-testid='billing-subscription-active'>
+      <Badge data-testid='billing-subscription-active' variant='success'>
         Active
       </Badge>
     );
@@ -93,7 +95,7 @@ function SubscriptionStatusBadge(): JSX.Element {
       : format(auth?.trialingUntil, 'MMMM do, yyyy');
 
     return (
-      <Badge className='bg-yellow-600' data-testid='billing-subscription-trialing'>
+      <Badge data-testid='billing-subscription-trialing' variant='warning'>
         <Clock />
         Trialing Until {trialEndDate}
       </Badge>
@@ -102,7 +104,7 @@ function SubscriptionStatusBadge(): JSX.Element {
 
   // Anything else is considered expired.
   return (
-    <Badge className='bg-red-600' data-testid='billing-subscription-expired'>
+    <Badge data-testid='billing-subscription-expired' variant='destructive'>
       Expired
     </Badge>
   );

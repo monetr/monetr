@@ -17,6 +17,8 @@ import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './RemoveTransactionModal.module.scss';
+
 interface RemoveTransactionModalProps {
   transaction: Transaction;
 }
@@ -73,30 +75,24 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
   );
 
   return (
-    <MModal className='md:max-w-md' open={modal.visible} ref={ref}>
-      <MForm
-        className='h-full flex flex-col gap-stack p-2 justify-between'
-        initialValues={initialValues}
-        onSubmit={submit}
-      >
+    <MModal className={styles.modal} open={modal.visible} ref={ref}>
+      <MForm className={styles.form} initialValues={initialValues} onSubmit={submit}>
         {({ setFieldValue, values, isSubmitting }) => (
-          <div className='flex flex-col gap-stack'>
-            <Typography className='mb-2' size='xl' weight='bold'>
+          <div className={styles.body}>
+            <Typography className={styles.heading} size='xl' weight='bold'>
               <Trash />
               Remove Transaction
             </Typography>
-            <div className='flex flex-col gap-stack'>
+            <div className={styles.options}>
               <Typography size='inherit'>Are you sure you want to remove this transaction?</Typography>
               <ul>
                 <SimilarTransactionItem disableNavigate transactionId={transaction.transactionId} />
               </ul>
               <Typography size='inherit'>You will not be able to undo this action.</Typography>
-              <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string gap-component'>
-                <div className='gap-component'>
-                  <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>
-                    Prevent Re-Creation
-                  </label>
-                  <p className='text-sm text-dark-monetr-content'>
+              <div className={styles.optionRow}>
+                <div className={styles.optionText}>
+                  <label className={styles.optionLabel}>Prevent Re-Creation</label>
+                  <p className={styles.optionDescription}>
                     Prevent this transaction from be re-created if it is present in future file imports?
                   </p>
                 </div>
@@ -105,12 +101,10 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
                   onCheckedChange={() => setFieldValue('softDelete', !values.softDelete)}
                 />
               </div>
-              <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string gap-component'>
-                <div className='gap-component'>
-                  <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>
-                    Adjust Balance
-                  </label>
-                  <p className='text-sm text-dark-monetr-content'>
+              <div className={styles.optionRow}>
+                <div className={styles.optionText}>
+                  <label className={styles.optionLabel}>Adjust Balance</label>
+                  <p className={styles.optionDescription}>
                     Update your account balance as if this transaction was reversed?
                   </p>
                 </div>
@@ -120,7 +114,7 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
                 />
               </div>
             </div>
-            <div className='flex justify-end gap-stack mt-4'>
+            <div className={styles.actions}>
               <Button disabled={isSubmitting} onClick={modal.remove} variant='secondary'>
                 Cancel
               </Button>

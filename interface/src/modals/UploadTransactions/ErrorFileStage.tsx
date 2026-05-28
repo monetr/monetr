@@ -3,6 +3,8 @@ import { FileUp } from 'lucide-react';
 import { Button } from '@monetr/interface/components/Button';
 import Typography from '@monetr/interface/components/Typography';
 
+import styles from './ErrorFileStage.module.scss';
+
 interface ErrorFileStageProps {
   close: () => void;
   error: { message: string; filename: string };
@@ -10,24 +12,24 @@ interface ErrorFileStageProps {
 
 export default function ErrorFileStage(props: ErrorFileStageProps): JSX.Element {
   return (
-    <div className='h-full flex flex-col gap-2 p-2 justify-between'>
-      <div className='flex flex-col gap-2 h-full'>
-        <div className='flex justify-between'>
+    <div className={styles.root}>
+      <div className={styles.body}>
+        <div className={styles.header}>
           <Typography size='xl' weight='bold'>
             Upload Transactions
           </Typography>
           <div>{/* TODO Close button */}</div>
         </div>
 
-        <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
-          <FileUp className='size-12 text-dark-monetr-content' />
-          <div className='flex flex-col py-1 w-full'>
+        <div className={styles.fileCard}>
+          <FileUp className={styles.fileIcon} />
+          <div className={styles.fileInfo}>
             <Typography size='lg'>{props.error.filename}</Typography>
             <Typography size='inherit'>Failed to import data: {props.error.message}</Typography>
           </div>
         </div>
       </div>
-      <div className='flex justify-end gap-2 mt-2'>
+      <div className={styles.actions}>
         <Button onClick={props.close} variant='secondary'>
           Close
         </Button>

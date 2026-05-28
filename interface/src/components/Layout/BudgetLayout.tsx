@@ -9,8 +9,6 @@ export interface BudgetingLayoutProps {
 }
 
 export default function BudgetingLayout(props: BudgetingLayoutProps): JSX.Element {
-  // className='hidden lg:flex'
-  // className='min-w-0 flex flex-col grow'
   return (
     <Fragment>
       <BudgetingSidebar />

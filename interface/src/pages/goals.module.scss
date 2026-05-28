@@ -1,0 +1,67 @@
+@use '@monetr/interface/variables';
+
+.centerState {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.errorIcon {
+  color: var(--content); // dark:text-dark-monetr-content
+  width: 24 * variables.$size; // size-24
+  height: 24 * variables.$size;
+}
+
+.content {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  padding-top: 2 * variables.$size;
+  padding-bottom: 16 * variables.$size;
+}
+
+.empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.emptyInner {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  align-items: center;
+  max-width: 28rem; // max-w-md
+}
+
+.iconRow {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+  // space-x-4
+  > :not([hidden]) ~ :not([hidden]) {
+    margin-left: 4 * variables.$size;
+  }
+}
+
+.emptyIcon {
+  width: 16 * variables.$size; // w-16 h-16
+  height: 16 * variables.$size;
+  color: var(--content-muted);
+}
+

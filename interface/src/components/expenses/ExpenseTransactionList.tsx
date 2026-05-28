@@ -13,6 +13,8 @@ import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type Spending from '@monetr/interface/models/Spending';
 import { DateLength, formatDate } from '@monetr/interface/util/formatDate';
 
+import styles from './ExpenseTransactionList.module.scss';
+
 export interface ExpenseTransactionListProps {
   spending: Spending;
 }
@@ -23,7 +25,7 @@ export default function ExpenseTransactionList(props: ExpenseTransactionListProp
   const { data: locale } = useLocale();
   return (
     <Fragment>
-      <Typography className='mb-4' color='emphasis' size='xl' weight='medium'>
+      <Typography className={styles.heading} color='emphasis' size='xl' weight='medium'>
         Transactions
       </Typography>
       <ol

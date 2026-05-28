@@ -1,0 +1,44 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.form {
+  @include mixins.screen;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2 * variables.$size;
+  padding: 4 * variables.$size;
+}
+
+.sentRoot {
+  @include mixins.screen;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2 * variables.$size;
+  max-width: 20rem; // max-w-xs
+}
+
+.logo {
+  height: 24 * variables.$size;
+  width: 24 * variables.$size;
+}
+
+.field {
+  width: 100%;
+}
+
+.loginRow {
+  margin-top: 1 * variables.$size;
+  display: flex;
+  justify-content: center;
+  gap: 1 * variables.$size;
+}

@@ -1,0 +1,54 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.titleSkeletonRow {
+  display: flex;
+  height: 12 * variables.$size;
+  width: 100%;
+  align-items: center;
+  padding: 2 * variables.$size;
+  color: var(--content-emphasis);
+}
+
+.skeleton {
+  height: 7 * variables.$size;
+  width: 100%;
+}
+
+.dividerHalf {
+  width: 50%;
+}
+
+.trigger {
+  display: flex;
+  height: 12 * variables.$size;
+  width: 100%;
+  align-items: center;
+  padding: 2 * variables.$size;
+  color: var(--content-emphasis);
+
+  &:hover {
+    background-color: var(--background-emphasis);
+  }
+}
+
+.title {
+  @include mixins.text-extra-large;
+  font-weight: var(--semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menuIcon {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.menuContent {
+  width: 72 * variables.$size;
+}
+
+.removeIcon {
+  color: var(--destructive-subtle);
+}
