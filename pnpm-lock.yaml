@@ -259,8 +259,8 @@ importers:
         specifier: 1.0.7
         version: 1.0.7(tailwindcss@3.4.19(ts-node@10.9.1(@swc/core@1.15.21(@swc/helpers@0.5.21))(@types/node@20.19.23)(typescript@5.9.3)))
       wouter:
-        specifier: 3.9.0
-        version: 3.9.0(react@18.3.1)
+        specifier: 3.10.0
+        version: 3.10.0(react@18.3.1)
     devDependencies:
       '@imagemagick/magick-wasm':
         specifier: 0.0.40
@@ -4191,8 +4191,8 @@ packages:
     resolution: {integrity: sha512-0yweIbkINJodk27gX9LBGMzyQdBDan3s/dEAiwBOj+Mf0PPyWL6/rikalkv8EeD0E8jm4o5RXEOrFTP3NXbhJg==}
     engines: {node: '>=12.17'}
 
-  wouter@3.9.0:
-    resolution: {integrity: sha512-sF/od/PIgqEQBQcrN7a2x3MX6MQE6nW0ygCfy9hQuUkuB28wEZuu/6M5GyqkrrEu9M6jxdkgE12yDFsQMKos4Q==}
+  wouter@3.10.0:
+    resolution: {integrity: sha512-zTfddD80zc2/J5l8JKcdvzOK6AwP0kpyHEI3DxRN2bn8U1oJPnrSVm8v+X3WwDamvLAOxTO7ZvkxkpRWlyeJ1Q==}
     peerDependencies:
       react: '>=16.8.0'
 
@@ -8822,7 +8822,7 @@ snapshots:
 
   wordwrapjs@5.1.1: {}
 
-  wouter@3.9.0(react@18.3.1):
+  wouter@3.10.0(react@18.3.1):
     dependencies:
       mitt: 3.0.1
       react: 18.3.1
