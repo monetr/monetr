@@ -8,7 +8,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v85"
 )
 
 type ReconcileSubscriptionArguments struct {

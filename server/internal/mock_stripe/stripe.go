@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v85"
 )
 
 type MockStripeHelper struct {
