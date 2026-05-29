@@ -44,9 +44,9 @@ require (
 	github.com/wneessen/go-mail v0.7.3
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/mock v0.6.0
-	golang.org/x/crypto v0.51.0
-	golang.org/x/net v0.54.0
-	golang.org/x/sys v0.44.0
+	golang.org/x/crypto v0.52.0
+	golang.org/x/net v0.55.0
+	golang.org/x/sys v0.45.0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
 
