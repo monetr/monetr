@@ -186,7 +186,8 @@ $contentDuration: 200ms;
   font-size: 4.5 * variables.$size;
   font-weight: var(--semibold);
   line-height: 1;
-  letter-spacing: -0.025em;
+  // cap unit, see https://ishadeed.com/article/css-cap-unit/
+  letter-spacing: -0.035cap;
 }
 
 .dialogDescription {

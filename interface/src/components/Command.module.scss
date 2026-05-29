@@ -173,7 +173,8 @@
 
 .shortcut {
   margin-left: auto;
-  letter-spacing: 0.1em; // tracking-widest
+  // cap unit, see https://ishadeed.com/article/css-cap-unit/
+  letter-spacing: 0.14cap; // tracking-widest
   color: var(--content-placeholder);
 
   @include mixins.text-extra-small;

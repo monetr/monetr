@@ -255,6 +255,7 @@ $duration: 150ms;
 .shortcut {
   margin-left: auto;
   @include mixins.text-extra-small;
-  letter-spacing: 0.1em; // tracking-widest
+  // cap unit, see https://ishadeed.com/article/css-cap-unit/
+  letter-spacing: 0.14cap; // tracking-widest
   opacity: 0.6;
 }
