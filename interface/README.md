@@ -22,3 +22,4 @@ styling.
   standalone classes in scss or using @extend such that they are combined at build time. `mergeClasses` should only be
   used for conditional styling or when a component accepts a `className` property. Even then `cva` is preferred for
   conditional styling when a component does not require a `className` property.
+- Don't write `33.333333333333333333333333%` instead use `math.percentage(math.div(1, 3))`
