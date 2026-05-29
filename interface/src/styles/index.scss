@@ -111,6 +111,19 @@ select {
   background-image: none;
 }
 
+// Preflight gave every button (and role="button") a pointer cursor, and disabled
+// controls the default arrow. Native buttons default to `cursor: default`, so
+// the modules assume this rule exists; component variants opt into other cursors
+// (e.g. not-allowed) with their own higher-specificity rules.
+button,
+[role='button'] {
+  cursor: pointer;
+}
+
+:disabled {
+  cursor: default;
+}
+
 :-moz-focusring {
   outline: auto;
 }
