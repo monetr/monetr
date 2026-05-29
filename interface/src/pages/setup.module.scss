@@ -1,0 +1,131 @@
+@use '@monetr/interface/variables';
+@use '@monetr/interface/mixins';
+
+// Padding around the greeting view. Composed with the Flex grow/center
+// variants in the component. Was the `p-4` passed alongside flexVariants.
+.greeting {
+  padding: 4 * variables.$size;
+}
+
+// monetr logo above the banner.
+.logo {
+  width: 16 * variables.$size;
+  height: 16 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: 24 * variables.$size;
+    height: 24 * variables.$size;
+  }
+}
+
+// Base layout shared by every onboarding tile, regardless of state.
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  text-align: center;
+  gap: 4 * variables.$size;
+  border-radius: var(--border-radius);
+  height: 36 * variables.$size;
+
+  // p-2 py-4 -> horizontal 2, vertical 4 on mobile.
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-top: 4 * variables.$size;
+  padding-bottom: 4 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: column;
+    height: 72 * variables.$size;
+    width: 56 * variables.$size;
+    padding: 4 * variables.$size;
+  }
+}
+
+// Selectable tile, not yet selected.
+.tileInactive {
+  cursor: pointer;
+  border-width: 1px;
+  border-color: var(--border);
+
+  &:hover {
+    border-color: var(--border-string);
+  }
+}
+
+// Selectable tile, currently selected.
+.tileActive {
+  cursor: pointer;
+  border-width: 1px;
+  border-color: var(--brand);
+
+  &:hover {
+    border-color: var(--brand-subtle);
+  }
+}
+
+// Unavailable / coming-soon tile.
+.tileDisabled {
+  cursor: not-allowed;
+  color: var(--content-muted);
+  opacity: 0.5;
+
+  --ring-color: var(--border-subtle);
+  --ring-size: 1px;
+  @include mixins.inset-ring;
+}
+
+// The selected-state check mark in the top right corner.
+.checkIcon {
+  position: absolute;
+  color: var(--brand-subtle);
+  top: 2 * variables.$size;
+  right: 2 * variables.$size;
+}
+
+// The tile's provider icon/logo.
+.tileIcon {
+  width: auto;
+  height: 12 * variables.$size;
+  margin-left: 4 * variables.$size;
+  color: var(--content-emphasis);
+
+  @media (min-width: variables.$mediumScreen) {
+    height: 10 * variables.$size;
+    margin-left: 0;
+    margin-top: 6 * variables.$size;
+  }
+}
+
+// The textual body of the tile (name + description + footnote).
+.tileBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+
+  @media (min-width: variables.$mediumScreen) {
+    margin-top: 4 * variables.$size;
+    width: auto;
+  }
+}
+
+// Invisible spacer that only reserves a line on desktop.
+.spacerDesktop {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: block;
+  }
+}
+
+// "Coming Soon" / "Unavailable" footnote.
+.tileFootnote {
+  @media (min-width: variables.$mediumScreen) {
+    margin-top: 5 * variables.$size;
+  }
+}

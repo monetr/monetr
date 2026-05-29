@@ -5,7 +5,7 @@ import { heights, widths } from '@monetr/interface/components/Layout';
 import MSpinner from '@monetr/interface/components/MSpinner';
 import useLogout from '@monetr/interface/hooks/useLogout';
 import useMountEffect from '@monetr/interface/hooks/useMountEffect';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 export default function LogoutPage(): React.JSX.Element {
   const logout = useLogout();
@@ -15,7 +15,7 @@ export default function LogoutPage(): React.JSX.Element {
 
   return (
     <div
-      className={mergeTailwind(
+      className={mergeClasses(
         flexVariants({ justify: 'center', align: 'center', orientation: 'column' }),
         heights.screen,
         widths.screen,

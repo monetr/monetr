@@ -11,7 +11,9 @@ import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
 import SetupBillingButton from '@monetr/interface/components/setup/SetupBillingButton';
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
+
+import styles from './setup.module.scss';
 
 export interface SetupPageProps {
   // TODO Remove this prop and instead just use "does the user have any links". If they do then we can assume this is
@@ -82,8 +84,8 @@ function Greeting(props: GreetingProps): JSX.Element {
 
   return (
     <div
-      className={mergeTailwind(
-        'p-4',
+      className={mergeClasses(
+        styles.greeting,
         flexVariants({
           flex: 'grow',
           align: 'center',
@@ -93,7 +95,7 @@ function Greeting(props: GreetingProps): JSX.Element {
         }),
       )}
     >
-      <Logo className='size-16 md:size-24' />
+      <Logo className={styles.logo} />
       <Banner />
       <Flex gap='lg' justify='center' orientation='stackMedium'>
         <OnboardingTile
@@ -141,53 +143,12 @@ interface OnboardingTileProps {
 }
 
 function OnboardingTile(props: OnboardingTileProps): JSX.Element {
-  const nonDisabled = mergeTailwind(
-    {
-      'dark:border-dark-monetr-brand': props.active,
-      'dark:hover:border-dark-monetr-brand-subtle': props.active,
-      'border-monetr-brand': props.active,
-      'hover:border-monetr-brand-subtle': props.active,
-    },
-    {
-      'dark:border-dark-monetr-border': !props.active,
-      'dark:hover:border-dark-monetr-border-string': !props.active,
-      'border-monetr-border': !props.active,
-      'hover:border-monetr-border-string': !props.active,
-    },
-    'cursor-pointer',
-    'border',
-  );
-  const disabled = mergeTailwind(
-    'cursor-not-allowed',
-    'dark:ring-dark-monetr-border-subtle',
-    'ring-monetr-border-subtle',
-    'ring-1',
-    'ring-inset',
-    'dark:text-dark-monetr-content-muted',
-    'text-monetr-content-muted',
-    'opacity-50',
-  );
-
   const disabledState = props.comingSoon || props.disabled;
-  const wrapperClasses = mergeTailwind(
-    { [nonDisabled]: !disabledState },
-    { [disabled]: disabledState },
-    'text-center',
-    'flex',
-    'flex-row',
-    'md:flex-col',
-    'gap-4',
-    'group',
-    'md:h-72',
-    'md:w-56',
-    'items-center',
-    'p-2',
-    'py-4',
-    'md:p-4',
-    'relative',
-    'rounded-lg',
-    'h-36',
-  );
+  const wrapperClasses = mergeClasses(styles.tile, {
+    [styles.tileActive]: !disabledState && props.active,
+    [styles.tileInactive]: !disabledState && !props.active,
+    [styles.tileDisabled]: disabledState,
+  });
 
   function handleClick() {
     if (props.comingSoon) {
@@ -206,23 +167,23 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
 
   return (
     <button className={wrapperClasses} onClick={handleClick} type='button'>
-      {props.active && <CircleCheck className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' />}
+      {props.active && <CircleCheck className={styles.checkIcon} />}
       {React.createElement(props.icon, {
-        className: 'w-auto h-12 md:h-10 ml-4 md:ml-0 md:mt-6 dark:text-dark-monetr-content-emphasis',
+        className: styles.tileIcon,
       })}
-      <div className='flex flex-col gap-2 items-center h-full md:mt-4 text-center w-full md:w-auto'>
+      <div className={styles.tileBody}>
         <Typography size='lg' weight='medium'>
           {props.name}
         </Typography>
         <Typography color='subtle'>{props.description}</Typography>
-        {!props.comingSoon && <Typography className='md:block hidden'>&nbsp;</Typography>}
+        {!props.comingSoon && <Typography className={styles.spacerDesktop}>&nbsp;</Typography>}
         {props.comingSoon && (
-          <Typography className='md:mt-5' weight='medium'>
+          <Typography className={styles.tileFootnote} weight='medium'>
             Coming Soon
           </Typography>
         )}
         {props.disabled && (
-          <Typography className='md:mt-5' weight='medium'>
+          <Typography className={styles.tileFootnote} weight='medium'>
             Unavailable
           </Typography>
         )}

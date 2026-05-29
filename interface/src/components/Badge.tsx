@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import Typography, { type TypographyProps } from '@monetr/interface/components/Typography';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './Badge.module.scss';
 
@@ -24,5 +24,5 @@ const badgeVariants = cva([styles.badge], {
 export interface BadgeProps extends Omit<TypographyProps, 'color'>, VariantProps<typeof badgeVariants> {}
 
 export default function Badge({ variant, className, ...props }: BadgeProps): JSX.Element {
-  return <Typography {...props} className={mergeTailwind(badgeVariants({ variant }), className)} />;
+  return <Typography {...props} className={mergeClasses(badgeVariants({ variant }), className)} />;
 }

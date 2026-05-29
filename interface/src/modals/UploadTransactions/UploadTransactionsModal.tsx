@@ -12,9 +12,11 @@ import ErrorFileStage from '@monetr/interface/modals/UploadTransactions/ErrorFil
 import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/ProcessingFileStage';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 import fileSize from '@monetr/interface/util/fileSize';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 import request, { type ApiResponse } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
+
+import styles from './UploadTransactionsModal.module.scss';
 
 export enum UploadTransactionStage {
   FileUpload = 1,
@@ -43,7 +45,7 @@ function UploadTransactionsModal(): JSX.Element {
   }, [stage, modal, queryClient, selectedBankAccountId]);
 
   return (
-    <MModal className='sm:max-w-xl' open={modal.visible} ref={ref}>
+    <MModal className={styles.modal} open={modal.visible} ref={ref}>
       {(() => {
         switch (stage) {
           case UploadTransactionStage.FileUpload:
@@ -128,32 +130,25 @@ function UploadFileStage(props: StageProps) {
       });
   }
 
-  const uploadClassNames = mergeTailwind(
-    'border-dashed rounded-md w-full border p-8 flex justify-center flex-col items-center cursor-pointer',
-    { 'border-dark-monetr-border hover:border-dark-monetr-border-string': !isDragActive },
-    { 'border-dark-monetr-brand-subtle': isDragActive },
-  );
+  const uploadClassNames = mergeClasses(styles.dropzone, { [styles.dropzoneActive]: isDragActive });
 
   if (uploadProgress >= 0) {
     return (
-      <div className='h-full flex flex-col gap-2 p-2 justify-between'>
-        <div className='flex flex-col gap-2 h-full'>
-          <div className='flex justify-between'>
+      <div className={styles.stage}>
+        <div className={styles.stageBody}>
+          <div className={styles.stageHeader}>
             <Typography size='xl' weight='bold'>
               Upload Transactions
             </Typography>
             <div>{/* TODO Close button */}</div>
           </div>
 
-          <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
-            <FileUp className='size-12 text-dark-monetr-content' />
-            <div className='flex flex-col py-1 w-full'>
+          <div className={styles.filePreview}>
+            <FileUp className={styles.fileIcon} />
+            <div className={styles.fileInfo}>
               <Typography size='lg'>{file.name}</Typography>
-              <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
-                <div
-                  className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600'
-                  style={{ width: `${uploadProgress}%` }}
-                />
+              <div className={styles.progressTrack}>
+                <div className={styles.progressBar} style={{ width: `${uploadProgress}%` }} />
               </div>
             </div>
           </div>
@@ -164,9 +159,9 @@ function UploadFileStage(props: StageProps) {
 
   if (file) {
     return (
-      <form className='h-full flex flex-col gap-2 p-2 justify-between' onSubmit={handleSubmit}>
-        <div className='flex flex-col gap-2 h-full'>
-          <div className='flex justify-between'>
+      <form className={styles.stage} onSubmit={handleSubmit}>
+        <div className={styles.stageBody}>
+          <div className={styles.stageHeader}>
             <Typography size='xl' weight='bold'>
               Upload Transactions
             </Typography>
@@ -176,15 +171,15 @@ function UploadFileStage(props: StageProps) {
             Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.
           </Typography>
 
-          <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
-            <FileUp className='size-12 text-dark-monetr-content' />
-            <div className='flex flex-col py-1 w-full'>
+          <div className={styles.filePreview}>
+            <FileUp className={styles.fileIcon} />
+            <div className={styles.fileInfo}>
               <Typography size='lg'>{file.name}</Typography>
               <Typography>{fileSize(file.size)}</Typography>
             </div>
           </div>
         </div>
-        <div className='flex justify-end gap-2 mt-2'>
+        <div className={styles.actions}>
           <Button onClick={props.close} variant='secondary'>
             Cancel
           </Button>
@@ -197,9 +192,9 @@ function UploadFileStage(props: StageProps) {
   }
 
   return (
-    <form className='h-full flex flex-col gap-2 p-2 justify-between' onSubmit={handleSubmit}>
-      <div className='flex flex-col gap-2 h-full'>
-        <div className='flex justify-between'>
+    <form className={styles.stage} onSubmit={handleSubmit}>
+      <div className={styles.stageBody}>
+        <div className={styles.stageHeader}>
           <Typography size='xl' weight='bold'>
             Upload Transactions
           </Typography>
@@ -211,14 +206,14 @@ function UploadFileStage(props: StageProps) {
 
         <div {...getRootProps()} className={uploadClassNames}>
           <input {...getInputProps()} />
-          <FileUp className='size-12 text-dark-monetr-content' />
+          <FileUp className={styles.fileIcon} />
           <Typography size='lg' weight='semibold'>
             Drag OFX file here
           </Typography>
           <Typography>Or click to browse</Typography>
         </div>
       </div>
-      <div className='flex justify-end gap-2 mt-2'>
+      <div className={styles.actions}>
         <Button onClick={props.close} variant='secondary'>
           Cancel
         </Button>

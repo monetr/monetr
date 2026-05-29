@@ -1,4 +1,4 @@
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './Divider.module.scss';
 
@@ -7,5 +7,5 @@ export interface DividerProps {
 }
 
 export default function Divider(props: DividerProps): JSX.Element {
-  return <hr className={mergeTailwind(styles.divider, props.className)} />;
+  return <hr className={mergeClasses(styles.divider, props.className)} />;
 }

@@ -3,7 +3,9 @@ import { ArrowLeft, PanelLeft, PanelLeftClose } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 import { MobileSidebarContext } from '@monetr/interface/components/Layout/MobileSidebarContextProvider';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
+
+import styles from './MSidebarToggle.module.scss';
 
 export interface MSidebarToggleProps {
   backButton?: string;
@@ -22,11 +24,7 @@ export default function MSidebarToggle(props: MSidebarToggleProps): JSX.Element 
     }
   }, [props.backButton, isOpen, navigate, setIsOpen]);
 
-  const className = mergeTailwind(
-    'visible lg:hidden',
-    'dark:text-dark-monetr-content-emphasis h-12 flex items-center justify-center',
-    props.className,
-  );
+  const className = mergeClasses(styles.toggle, props.className);
 
   if (props.backButton) {
     return (

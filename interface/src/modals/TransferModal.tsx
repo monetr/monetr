@@ -21,6 +21,8 @@ import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './TransferModal.module.scss';
+
 export interface TransferModalProps {
   initialFromSpendingId?: string;
   initialToSpendingId?: string;
@@ -110,16 +112,16 @@ function TransferModal(props: TransferModalProps): JSX.Element {
   );
 
   return (
-    <MModal className='md:max-w-sm' open={modal.visible} ref={ref}>
+    <MModal className={styles.modal} open={modal.visible} ref={ref}>
       <MForm
-        className='h-full flex flex-col gap-2 p-2 justify-between'
+        className={styles.form}
         data-testid='transfer-modal'
         initialValues={initialValues}
         onSubmit={submit}
         validate={validate}
       >
-        <div className='flex flex-col gap-2'>
-          <div className='flex flex-col items-center'>
+        <div className={styles.body}>
+          <div className={styles.header}>
             <Typography size='2xl' weight='semibold'>
               Transfer
             </Typography>
@@ -148,7 +150,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
             step='0.01'
           />
         </div>
-        <div className='flex justify-end gap-2'>
+        <div className={styles.actions}>
           <Button data-testid='close-new-expense-modal' onClick={modal.remove} variant='secondary'>
             Cancel
           </Button>
@@ -186,8 +188,8 @@ function ReverseTargetsButton(): JSX.Element {
   }, [formik]);
 
   return (
-    <button className='w-full flex justify-center mb-1 group' onClick={swap} type='button'>
-      <ArrowUpDown className='size-10 dark:text-dark-monetr-content-subtle group-hover:dark:text-dark-monetr-content' />
+    <button className={styles.reverseButton} onClick={swap} type='button'>
+      <ArrowUpDown className={styles.reverseIcon} />
     </button>
   );
 }
@@ -218,7 +220,7 @@ function TransferSelectDecorator(props: LabelDecoratorProps): JSX.Element {
 
   if (remaining > 0 && remaining !== target) {
     return (
-      <Typography className='gap-1' size='inherit'>
+      <Typography className={styles.decorator} size='inherit'>
         <AmountButton amount={current} />
         of
         <AmountButton amount={target} />
@@ -228,7 +230,7 @@ function TransferSelectDecorator(props: LabelDecoratorProps): JSX.Element {
   }
 
   return (
-    <Typography className='gap-1' color='subtle' size='inherit'>
+    <Typography className={styles.decorator} color='subtle' size='inherit'>
       <AmountButton amount={current} />
       of
       <AmountButton amount={target} />
@@ -250,12 +252,7 @@ function AmountButton({ amount }: AmountButtonProps): JSX.Element {
   }, [amount, formik, locale]);
 
   return (
-    <Typography
-      className='cursor-pointer hover:dark:text-dark-monetr-content-emphasis'
-      onClick={onClick}
-      size='sm'
-      weight='medium'
-    >
+    <Typography className={styles.amountButton} onClick={onClick} size='sm' weight='medium'>
       {typeof amount === 'number' && locale.formatAmount(amount, AmountType.Stored)}
     </Typography>
   );

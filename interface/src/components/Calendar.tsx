@@ -4,7 +4,7 @@ import { DayPicker, type MonthCaptionProps, type PropsBase, type PropsSingle, us
 
 import { Button, buttonVariants } from '@monetr/interface/components/Button';
 import Typography from '@monetr/interface/components/Typography';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './Calendar.module.scss';
 
@@ -23,14 +23,14 @@ function Calendar({
 }: CalendarProps) {
   return (
     <DayPicker
-      className={mergeTailwind(styles.root, className)}
+      className={mergeClasses(styles.root, className)}
       classNames={{
         months: styles.months,
         month: styles.month,
         month_caption: styles.captionRow,
         nav: styles.nav,
-        button_previous: mergeTailwind(buttonVariants({ variant: 'calendar' }), styles.navButtonPrevious),
-        button_next: mergeTailwind(buttonVariants({ variant: 'calendar' }), styles.navButtonNext),
+        button_previous: mergeClasses(buttonVariants({ variant: 'calendar' }), styles.navButtonPrevious),
+        button_next: mergeClasses(buttonVariants({ variant: 'calendar' }), styles.navButtonNext),
         month_grid: styles.table,
         weekdays: styles.headRow,
         weekday: styles.headCell,

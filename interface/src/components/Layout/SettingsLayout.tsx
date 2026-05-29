@@ -5,7 +5,7 @@ import Divider from '@monetr/interface/components/Divider';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { textVariants } from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './SettingsLayout.module.scss';
 
@@ -39,7 +39,7 @@ interface SettingTabProps {
 function SettingTab(props: SettingTabProps): JSX.Element {
   const [pathname] = useLocation();
   const active = pathname === props.to;
-  const className = mergeTailwind(
+  const className = mergeClasses(
     textVariants({
       size: 'inherit',
       weight: active ? 'bold' : 'normal',

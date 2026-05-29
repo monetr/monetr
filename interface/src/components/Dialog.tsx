@@ -2,7 +2,7 @@ import React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './Dialog.module.scss';
 
@@ -18,7 +18,7 @@ const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay className={mergeTailwind(styles.dialogOverlay, className)} ref={ref} {...props} />
+  <DialogPrimitive.Overlay className={mergeClasses(styles.dialogOverlay, className)} ref={ref} {...props} />
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
@@ -28,7 +28,7 @@ const DialogContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
-    <DialogPrimitive.Content className={mergeTailwind(styles.dialogContent, className)} ref={ref} {...props}>
+    <DialogPrimitive.Content className={mergeClasses(styles.dialogContent, className)} ref={ref} {...props}>
       {children}
       <DialogPrimitive.Close className={styles.dialogClose}>
         <X className={styles.dialogCloseIcon} />
@@ -40,12 +40,12 @@ const DialogContent = React.forwardRef<
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={mergeTailwind(styles.dialogHeader, className)} {...props} />
+  <div className={mergeClasses(styles.dialogHeader, className)} {...props} />
 );
 DialogHeader.displayName = 'DialogHeader';
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={mergeTailwind(styles.dialogFooter, className)} {...props} />
+  <div className={mergeClasses(styles.dialogFooter, className)} {...props} />
 );
 DialogFooter.displayName = 'DialogFooter';
 
@@ -53,7 +53,7 @@ const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title className={mergeTailwind(styles.dialogTitle, className)} ref={ref} {...props} />
+  <DialogPrimitive.Title className={mergeClasses(styles.dialogTitle, className)} ref={ref} {...props} />
 ));
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
@@ -61,7 +61,7 @@ const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description className={mergeTailwind(styles.dialogDescription, className)} ref={ref} {...props} />
+  <DialogPrimitive.Description className={mergeClasses(styles.dialogDescription, className)} ref={ref} {...props} />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 

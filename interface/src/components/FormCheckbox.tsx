@@ -3,7 +3,7 @@ import { useFormikContext } from 'formik';
 
 import { Checkbox, type CheckedState } from '@monetr/interface/components/Checkbox';
 import Typography from '@monetr/interface/components/Typography';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import formCheckboxStyles from './FormCheckbox.module.scss';
 import labelStyles from './Label.module.scss';
@@ -34,7 +34,7 @@ export default function FormCheckbox(props: FormCheckboxProps): React.JSX.Elemen
   };
 
   return (
-    <div className={mergeTailwind(formCheckboxStyles.formCheckboxRoot, props.className)}>
+    <div className={mergeClasses(formCheckboxStyles.formCheckboxRoot, props.className)}>
       <div className={formCheckboxStyles.formCheckboxWrapper}>
         <Checkbox
           checked={props.checked}

@@ -1,0 +1,138 @@
+@use '@monetr/interface/variables';
+@use '@monetr/interface/mixins';
+
+// Centered full-size state used for the loading and error screens.
+.centerState {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.errorIcon {
+  color: var(--content);
+  width: 24 * variables.$size;
+  height: 24 * variables.$size;
+}
+
+// Empty state wrapper.
+.empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.emptyInner {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  align-items: center;
+  max-width: 112 * variables.$size;
+}
+
+.iconRow {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+  // space-x-4
+  > :not([hidden]) ~ :not([hidden]) {
+    margin-left: 4 * variables.$size;
+  }
+}
+
+.emptyIcon {
+  color: var(--content-muted);
+  width: 16 * variables.$size;
+  height: 16 * variables.$size;
+  @include mixins.text-5-extra-large;
+}
+
+// Mobile-only balance row in the top navigation.
+.balanceRow {
+  width: 100vw;
+  display: flex;
+  justify-content: space-evenly;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+// Spacers on either side of the balance amount to keep it centered.
+.balanceSpacer {
+  display: flex;
+  flex: 1 1 0%;
+  width: 100%;
+}
+
+.content {
+  display: flex;
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.list {
+  width: 100%;
+  padding-bottom: 16 * variables.$size;
+}
+
+// Group of transactions sharing a single date.
+.dateGroup {
+  display: flex;
+  gap: 2 * variables.$size;
+  flex-direction: column;
+}
+
+// Infinite scroll sentry / "load more" message row.
+.loadMore {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 5 * variables.$size;
+  opacity: 0.7;
+}
+
+// Floating add-transaction button.
+.addButton {
+  position: fixed;
+  bottom: 14 * variables.$size;
+  right: 4 * variables.$size;
+  width: 14 * variables.$size;
+  height: 14 * variables.$size;
+  border-radius: 9999px;
+  background-color: rgb(93 31 193 / 0.75);
+  backdrop-filter: blur(4px) brightness(2);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    backdrop-filter: blur(4px) brightness(0.5);
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    bottom: 4 * variables.$size;
+  }
+}
+
+.addButtonIcon {
+  color: var(--content);
+  width: 12 * variables.$size;
+  height: 12 * variables.$size;
+}
+
+// Upload button is hidden on mobile, flex from md up.
+.uploadButton {
+  display: none;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: flex;
+  }
+}

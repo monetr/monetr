@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 
 import Divider from '@monetr/interface/components/Divider';
 import Typography from '@monetr/interface/components/Typography';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './MStepper.module.scss';
 
@@ -53,7 +53,7 @@ interface MStepProps {
 }
 
 function MStep(props: MStepProps): JSX.Element {
-  const lineClass = mergeTailwind(
+  const lineClass = mergeClasses(
     {
       [MStepState.Inactive]: styles.lineDashed,
       [MStepState.Active]: styles.lineDashed,
@@ -62,7 +62,7 @@ function MStep(props: MStepProps): JSX.Element {
     styles.line,
   );
 
-  const numberClass = mergeTailwind(
+  const numberClass = mergeClasses(
     {
       [MStepState.Inactive]: styles.numberInactive,
       [MStepState.Active]: styles.numberActive,
@@ -71,7 +71,7 @@ function MStep(props: MStepProps): JSX.Element {
     styles.number,
   );
 
-  const textClass = mergeTailwind(
+  const textClass = mergeClasses(
     {
       // On smaller screens hide the text for items that are not the current step or not the next step.
       [styles.textHidden]: ![props.currentIndex, props.currentIndex + 1].includes(props.index),

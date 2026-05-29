@@ -1,0 +1,68 @@
+@use '@monetr/interface/variables';
+
+// A small status card showing when a Plaid link last synced. On large screens
+// it collapses to a single line and expands to reveal the "last attempt" line
+// on hover. The height/opacity changes are delayed by 500ms normally so the
+// card does not twitch on incidental mouse-overs, but snap immediately once a
+// hover begins.
+.card {
+  padding: 2 * variables.$size;
+  width: 100%;
+  border-radius: var(--border-radius);
+
+  border-style: solid;
+  border-width: thin;
+  border-color: var(--border);
+
+  // transition-[height]
+  transition-property: height;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  transition-delay: 500ms;
+
+  height: 16 * variables.$size;
+
+  &:hover {
+    // hover:delay-0
+    transition-delay: 0s;
+    // hover:dark:border-dark-monetr-border-string
+    border-color: var(--border-string);
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    // lg:h-10
+    height: 10 * variables.$size;
+
+    // lg:hover:h-16
+    &:hover {
+      height: 16 * variables.$size;
+    }
+  }
+}
+
+// The "Last Attempt" line. Always visible on small screens; on large screens it
+// is hidden and only fades in while the card is hovered.
+.attemptText {
+  // transition-opacity
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  transition-delay: 500ms;
+
+  opacity: 1;
+
+  // group-hover:delay-0
+  .card:hover & {
+    transition-delay: 0s;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    // lg:opacity-0
+    opacity: 0;
+
+    // lg:group-hover:opacity-100
+    .card:hover & {
+      opacity: 1;
+    }
+  }
+}

@@ -1,0 +1,70 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.root {
+  font-weight: var(--semibold);
+}
+
+.colorPrimary {
+  color: var(--brand-faint); // dark:text-dark-monetr-brand-faint
+  border-radius: 1 * variables.$size; // rounded
+
+  &:hover {
+    color: var(--brand-bright); // dark:hover:text-dark-monetr-brand-bright
+  }
+
+  // focus:ring-1 focus:ring-purple-500 (purple-500 === --brand)
+  &:focus {
+    outline-style: none;
+    --ring-color: var(--brand);
+    --ring-size: 1px;
+    @include mixins.ring;
+  }
+}
+
+.colorSecondary {
+  color: var(--content-placeholder); // text-gray-400
+
+  &:hover {
+    color: var(--content-disabled); // hover:text-gray-500
+  }
+}
+
+// Size classes mirror Typography's text sizing (text-${size}).
+.sizeXs {
+  @include mixins.text-extra-small;
+}
+
+.sizeSm {
+  @include mixins.text-small;
+}
+
+.sizeMd {
+  @include mixins.text-base;
+}
+
+.sizeLg {
+  @include mixins.text-large;
+}
+
+.sizeXl {
+  @include mixins.text-extra-large;
+}
+
+.size2Xl {
+  @include mixins.text-2-extra-large;
+}
+
+.size3Xl {
+  @include mixins.text-3-extra-large;
+}
+
+// No shared mixin exists for text-4xl, so the values are inlined here.
+.size4Xl {
+  font-size: 9 * variables.$size;
+  line-height: 10 * variables.$size;
+}
+
+.size5Xl {
+  @include mixins.text-5-extra-large;
+}

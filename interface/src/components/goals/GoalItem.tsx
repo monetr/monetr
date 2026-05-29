@@ -8,7 +8,9 @@ import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
+
+import styles from './GoalItem.module.scss';
 
 export interface GoalItemProps {
   spending: Spending;
@@ -32,35 +34,24 @@ export default function GoalItem({ spending }: GoalItemProps): JSX.Element {
   }
 
   return (
-    <li className='group relative w-full px-1 md:px-2'>
-      <Link
-        className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
-        to={detailsPath}
-      />
-      <div className='w-full flex rounded-lg group-hover:bg-zinc-600 gap-2 md:gap-4 items-center px-2 py-1 cursor-pointer md:cursor-auto'>
+    <li className={styles.root}>
+      <Link className={styles.mobileLink} to={detailsPath} />
+      <div className={styles.inner}>
         <MerchantIcon name={spending.name} />
-        <div className='w-full flex flex-col min-w-0'>
-          <div className='w-full flex gap-2 items-center min-w-0 justify-between md:justify-normal'>
-            <div className='flex items-center md:w-1/2 gap-4 min-w-0 pr-1'>
-              <div className='flex flex-col overflow-hidden min-w-0'>
-                <span className='block w-full text-zinc-50 font-semibold text-base overflow-hidden whitespace-nowrap truncate'>
+        <div className={styles.column}>
+          <div className={styles.contentRow}>
+            <div className={styles.nameSection}>
+              <div className={styles.nameColumn}>
+                <span className={styles.name}>
                   {spending.name}
-                  <span className='md:hidden text-zinc-200 font-sm text-sm overflow-hidden whitespace-nowrap truncate'>
-                    &nbsp;• {spending.getNextOccurrenceString()}
-                  </span>
+                  <span className={styles.nameInlineDetail}>&nbsp;• {spending.getNextOccurrenceString()}</span>
                 </span>
-                <span className='hidden md:block text-zinc-200 font-sm text-sm overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
-                  {spending.getNextOccurrenceString()}
-                </span>
-                <span className='md:hidden text-zinc-200 text-sm overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
-                  {contributionString}
-                </span>
+                <span className={styles.occurrenceDesktop}>{spending.getNextOccurrenceString()}</span>
+                <span className={styles.contributionMobile}>{contributionString}</span>
               </div>
             </div>
-            <div className='hidden md:flex w-1/2 overflow-hidden flex-1 min-w-0 items-center'>
-              <span className='text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
-                {contributionString}
-              </span>
+            <div className={styles.contributionDesktopWrap}>
+              <span className={styles.contributionDesktop}>{contributionString}</span>
             </div>
             <GoalAmount spending={spending} />
           </div>
@@ -78,14 +69,10 @@ interface GoalProps {
 
 function GoalAmount({ spending }: GoalProps): JSX.Element {
   const { data: locale } = useLocaleCurrency();
-  const amountClass = mergeTailwind(
-    {
-      'text-green-500': spending.targetAmount <= spending.currentAmount,
-      'text-blue-500': spending.targetAmount !== spending.currentAmount,
-    },
-    'text-end',
-    'font-semibold',
-  );
+  const amountClass = mergeClasses(styles.amount, {
+    [styles.amountComplete]: spending.targetAmount <= spending.currentAmount,
+    [styles.amountInProgress]: spending.targetAmount !== spending.currentAmount,
+  });
 
   const currentAmountString = locale.formatAmount(spending.currentAmount, AmountType.Stored);
   const targetAmountString = locale.formatAmount(spending.targetAmount, AmountType.Stored);
@@ -93,21 +80,21 @@ function GoalAmount({ spending }: GoalProps): JSX.Element {
   if (spending.getGoalIsInProgress()) {
     return (
       <Fragment>
-        <div className='flex md:hidden shrink-0 items-center gap-2'>
-          <div className='flex flex-col'>
+        <div className={styles.amountMobile}>
+          <div className={styles.amountColumn}>
             <span className={amountClass}>{currentAmountString}</span>
-            <hr className='w-full border-0 border-b-[thin] border-zinc-600' />
-            <span className='text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>{targetAmountString}</span>
+            <hr className={styles.amountDivider} />
+            <span className={styles.targetAmount}>{targetAmountString}</span>
           </div>
         </div>
-        <div className='hidden md:flex md:min-w-[12em] shrink-0 justify-end gap-2 items-center'>
-          <div className='flex flex-col'>
-            <div className='flex justify-end'>
+        <div className={styles.amountDesktop}>
+          <div className={styles.amountColumn}>
+            <div className={styles.amountRow}>
               <span className={amountClass}>{currentAmountString}</span>
               &nbsp;
-              <span className='text-end text-zinc-500 group-hover:text-zinc-400 font-medium'>of</span>
+              <span className={styles.ofLabel}>of</span>
               &nbsp;
-              <span className='text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>{targetAmountString}</span>
+              <span className={styles.targetAmount}>{targetAmountString}</span>
             </div>
           </div>
         </div>
@@ -116,8 +103,8 @@ function GoalAmount({ spending }: GoalProps): JSX.Element {
   }
 
   return (
-    <div className='flex md:min-w-[12em] shrink-0 justify-end gap-2 items-center'>
-      <Badge className='w-fit justify-end dark:bg-green-600' weight='medium'>
+    <div className={styles.badgeWrap}>
+      <Badge className={styles.badge} weight='medium'>
         {locale.formatAmount(spending.currentAmount, AmountType.Stored)}
       </Badge>
     </div>
@@ -129,15 +116,9 @@ function GoalProgressBar({ spending }: GoalProps): JSX.Element {
   const usedProgress = ((Math.min(usedAmount, targetAmount) / targetAmount) * 100).toFixed(0);
   const allocatedProgress = ((Math.min(currentAmount + usedAmount, targetAmount) / targetAmount) * 100).toFixed(0);
   return (
-    <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
-      <div
-        className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600'
-        style={{ width: `${allocatedProgress}%` }}
-      ></div>
-      <div
-        className='absolute top-0 bg-blue-600 h-1.5 rounded-full dark:bg-blue-600'
-        style={{ width: `${usedProgress}%` }}
-      ></div>
+    <div className={styles.progressTrack}>
+      <div className={styles.progressAllocated} style={{ width: `${allocatedProgress}%` }}></div>
+      <div className={styles.progressUsed} style={{ width: `${usedProgress}%` }}></div>
     </div>
   );
 }

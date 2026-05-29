@@ -1,0 +1,52 @@
+@use '@monetr/interface/variables';
+
+.modal {
+  @media (min-width: variables.$smallScreen) {
+    max-width: 144 * variables.$size; // sm:max-w-xl
+  }
+}
+
+.form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  padding: 2 * variables.$size;
+  justify-content: space-between;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+}
+
+.heading {
+  margin-bottom: 2 * variables.$size;
+}
+
+// The amount + date row stacks on mobile and becomes a row at md.
+.fieldRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    gap: 4 * variables.$size;
+  }
+}
+
+// Each field in the row is full width on mobile, half width at md.
+.fieldRowItem {
+  width: 100%;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: 50%;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2 * variables.$size;
+}

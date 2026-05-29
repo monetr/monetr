@@ -1,6 +1,6 @@
 /* Image belongs to Plaid */
 
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './PlaidLogo.module.scss';
 
@@ -9,7 +9,7 @@ export interface PlaidLogoProps {
 }
 
 export default function PlaidLogo(props: PlaidLogoProps): JSX.Element {
-  const className = mergeTailwind(styles.svg, props.className);
+  const className = mergeClasses(styles.svg, props.className);
   return (
     <div>
       <svg className={className} viewBox='0 0 126 48' xmlns='http://www.w3.org/2000/svg'>

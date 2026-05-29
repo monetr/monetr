@@ -17,7 +17,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useNextFundingDate } from '@monetr/interface/hooks/useNextFundingDate';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { AmountType } from '@monetr/interface/util/amounts';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
 import styles from './BudgetSidebar.module.scss';
@@ -36,7 +36,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
   }
 
   return (
-    <div className={mergeTailwind(styles.budgetSidebarRoot, props.className)}>
+    <div className={mergeClasses(styles.budgetSidebarRoot, props.className)}>
       <BudgetingSidebarTitle />
       <div className={styles.content}>
         <SelectBankAccount />

@@ -10,7 +10,7 @@ import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import { useUpdateTransaction } from '@monetr/interface/hooks/useUpdateTransaction';
 import Spending from '@monetr/interface/models/Spending';
 import Transaction from '@monetr/interface/models/Transaction';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './TransactionItemSelectSpending.module.scss';
 import inputStyles from '../FormTextField.module.scss';
@@ -81,7 +81,7 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
     return (
       <div className={styles.selectSpendingRoot}>
         <div className={styles.selectSpendingBlock}>
-          <div className={mergeTailwind(inputStyles.input, selectStyles.select, styles.selectSpendingWrapper)}>
+          <div className={mergeClasses(inputStyles.input, selectStyles.select, styles.selectSpendingWrapper)}>
             <Skeleton className={styles.selectSpendingSkeleton} />
           </div>
         </div>
@@ -161,7 +161,7 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
       <div className={styles.selectSpendingBlock}>
         {/** biome-ignore lint/a11y/noStaticElementInteractions: Need to account for weird padding here */}
         <div
-          className={mergeTailwind(inputStyles.input, selectStyles.select, styles.selectSpendingWrapper)}
+          className={mergeClasses(inputStyles.input, selectStyles.select, styles.selectSpendingWrapper)}
           onClick={onOpenClickHandler}
           ref={inputWrapperRef}
         >
@@ -178,8 +178,8 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
           <SelectIndicator open={isOpen} />
         </div>
         <ul
-          className={mergeTailwind(selectStyles.unorderedList, '', {
-            hidden: !(isOpen && items.length),
+          className={mergeClasses(selectStyles.unorderedList, {
+            [selectStyles.hidden]: !(isOpen && items.length),
           })}
           {...getMenuProps()}
           style={renderStyles}
@@ -187,18 +187,10 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
           {isOpen &&
             items.map((item, index) => (
               <li
-                className={mergeTailwind(
-                  [
-                    'text-dark-monetr-content-emphasis',
-                    'group w-full rounded-lg px-2 py-1.5',
-                    'hover:bg-zinc-600 aria-selected:bg-zinc-600',
-                    'cursor-pointer disabled:cursor-not-allowed',
-                  ],
-                  {
-                    // The _ACTUAL_ selected state will be slightly darker than the hover state.
-                    'bg-zinc-700': selectedItem?.value === item.value,
-                  },
-                )}
+                className={mergeClasses(selectStyles.option, {
+                  // The _ACTUAL_ selected state will be slightly darker than the hover state.
+                  [selectStyles.optionSelected]: selectedItem?.value === item.value,
+                })}
                 key={item.label}
                 {...getItemProps({
                   item,

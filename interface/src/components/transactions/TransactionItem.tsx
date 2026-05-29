@@ -8,7 +8,7 @@ import TransactionItemSelectSpending from '@monetr/interface/components/transact
 import TransactionMerchantIcon from '@monetr/interface/components/transactions/TransactionMerchantIcon';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import type Transaction from '@monetr/interface/models/Transaction';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import itemStyles from './TransactionItem.module.scss';
 import selectSpendingStyles from './TransactionItemSelectSpending.module.scss';
@@ -22,7 +22,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
 
   return (
     <li
-      className={mergeTailwind(itemStyles.root, selectSpendingStyles.transactionItemRoot)}
+      className={mergeClasses(itemStyles.root, selectSpendingStyles.transactionItemRoot)}
       data-testid={transaction.transactionId}
       id={transaction.transactionId}
     >
@@ -65,14 +65,14 @@ function BudgetingInfo({ transaction, className }: BudgetingInfoProps): JSX.Elem
 
   if (transaction.getIsAddition()) {
     return (
-      <span className={mergeTailwind(itemStyles.budgetingInfo, className)}>
+      <span className={mergeClasses(itemStyles.budgetingInfo, className)}>
         <span className={itemStyles.contributionLabel}>Contribution</span>
       </span>
     );
   }
 
   return (
-    <span className={mergeTailwind(itemStyles.budgetingInfo, className)}>
+    <span className={mergeClasses(itemStyles.budgetingInfo, className)}>
       <span className={itemStyles.spentFromLabel}>Spent from</span>
       &nbsp;
       <span className={itemStyles.spentFromValue} data-hasspending={String(Boolean(transaction.spendingId))}>

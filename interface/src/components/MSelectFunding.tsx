@@ -7,6 +7,8 @@ import Select, { type SelectOption } from '@monetr/interface/components/Select';
 import { useFundingSchedules } from '@monetr/interface/hooks/useFundingSchedules';
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 
+import styles from './MSelectFunding.module.scss';
+
 export interface MSelectFundingProps {
   label?: string;
   name: string;
@@ -55,14 +57,9 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
 
   if (funding.length === 0) {
     return (
-      <div className='h-[84px] w-full'>
+      <div className={styles.emptyState}>
         <Label label={props.label} required={props.required} />
-        <Button
-          className='w-full font-normal text-start justify-start gap-2'
-          onClick={createAndSetFunding}
-          size='select'
-          variant='primary'
-        >
+        <Button className={styles.createButton} onClick={createAndSetFunding} size='select' variant='primary'>
           <Calendar />
           Create a new funding schedule...
         </Button>

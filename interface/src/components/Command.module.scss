@@ -1,0 +1,181 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.command {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--border-radius); // rounded-lg
+  background-color: var(--background);
+  color: var(--content-emphasis);
+}
+
+// Overrides applied to the shared DialogContent surface inside CommandDialog.
+.dialogContentOverride {
+  overflow: hidden;
+  padding: 0;
+  // shadow-lg
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+// Styles the cmdk-injected child elements of the Command rendered by CommandDialog.
+.commandDialog {
+  [cmdk-group-heading] {
+    padding-left: 2 * variables.$size;
+    padding-right: 2 * variables.$size;
+    font-weight: var(--semibold);
+    color: var(--content-placeholder);
+  }
+
+  [cmdk-group]:not([hidden]) ~ [cmdk-group] {
+    padding-top: 0;
+  }
+
+  [cmdk-group] {
+    padding-left: 2 * variables.$size;
+    padding-right: 2 * variables.$size;
+  }
+
+  [cmdk-input-wrapper] svg {
+    height: 5 * variables.$size;
+    width: 5 * variables.$size;
+  }
+
+  [cmdk-input] {
+    height: 12 * variables.$size;
+  }
+
+  [cmdk-item] {
+    padding-left: 2 * variables.$size;
+    padding-right: 2 * variables.$size;
+    padding-top: 3 * variables.$size;
+    padding-bottom: 3 * variables.$size;
+
+    svg {
+      height: 5 * variables.$size;
+      width: 5 * variables.$size;
+    }
+  }
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  border-color: var(--border);
+  border-bottom-width: thin; // border-b-[thin]
+  padding-left: 3 * variables.$size;
+  padding-right: 3 * variables.$size;
+}
+
+.inputIcon {
+  margin-right: 2 * variables.$size;
+  height: 4 * variables.$size;
+  width: 4 * variables.$size;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.input {
+  display: flex;
+  height: 11 * variables.$size;
+  width: 100%;
+  border-radius: var(--border-radius); // rounded-lg
+  background-color: transparent;
+  padding-top: 3 * variables.$size;
+  padding-bottom: 3 * variables.$size;
+  outline: none;
+
+  @include mixins.text-small;
+
+  &::placeholder {
+    color: var(--content-placeholder); // placeholder:text-gray-400
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.list {
+  max-height: 75 * variables.$size; // max-h-[300px]
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.empty {
+  padding-top: 6 * variables.$size;
+  padding-bottom: 6 * variables.$size;
+  text-align: center;
+
+  @include mixins.text-small;
+}
+
+.group {
+  overflow: hidden;
+  padding: variables.$size;
+  color: var(--content-emphasis);
+
+  [cmdk-group-heading] {
+    padding-left: 2 * variables.$size;
+    padding-right: 2 * variables.$size;
+    padding-top: 1.5 * variables.$size;
+    padding-bottom: 1.5 * variables.$size;
+    font-weight: var(--semibold);
+    color: var(--content-subtle);
+
+    @include mixins.text-extra-small;
+  }
+}
+
+.separator {
+  // -mx-1
+  margin-left: -1 * variables.$size;
+  margin-right: -1 * variables.$size;
+  height: 1px; // h-px
+  background-color: transparent;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  cursor: default;
+  user-select: none;
+  align-items: center;
+  border-radius: var(--border-radius); // rounded-lg
+  color: var(--content-emphasis);
+  outline: none;
+
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-top: 1.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+
+  &[data-disabled="false"] {
+    cursor: pointer;
+  }
+
+  &[data-disabled="true"] {
+    cursor: default;
+    pointer-events: none;
+    color: var(--content-muted);
+  }
+
+  &[aria-selected="true"] {
+    background-color: var(--background-emphasis);
+    color: var(--content-emphasis);
+  }
+}
+
+.shortcut {
+  margin-left: auto;
+  // cap unit, see https://ishadeed.com/article/css-cap-unit/
+  letter-spacing: 0.14cap; // tracking-widest
+  color: var(--content-placeholder);
+
+  @include mixins.text-extra-small;
+}

@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/compo
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { useLocale } from '@monetr/interface/hooks/useLocale';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import errorTextStyles from './ErrorText.module.scss';
 import datePickerStyles from './FormDatePicker.module.scss';
@@ -136,11 +136,11 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
 
   if (localeIsLoading) {
     return (
-      <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
+      <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>
         <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
           <LabelDecorator disabled={props.disabled} name={props.name} />
         </Label>
-        <div className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)} data-error={props.error}>
+        <div className={mergeClasses(inputStyles.input, selectStyles.selectLoading)} data-error={props.error}>
           <Skeleton className={datePickerStyles.skeleton} />
         </div>
         <ErrorText error={props.error} />
@@ -152,7 +152,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
 
   return (
     <div
-      className={mergeTailwind(errorTextStyles.errorTextPadding, datePickerStyles.container, className)}
+      className={mergeClasses(errorTextStyles.errorTextPadding, datePickerStyles.container, className)}
       data-testid={props['data-testid']}
     >
       <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
@@ -161,7 +161,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
       <Popover open={open}>
         <PopoverTrigger asChild>
           <button
-            className={mergeTailwind(inputStyles.input, datePickerStyles.datePickerButton)}
+            className={mergeClasses(inputStyles.input, datePickerStyles.datePickerButton)}
             disabled={formikContext?.isSubmitting || disabled}
             onClick={handleClick}
             type='button'

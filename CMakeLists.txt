@@ -272,6 +272,14 @@ add_custom_target(lint-all
   COMMAND ${BIOME_EXECUTABLE} check --write --max-diagnostics=1000
 )
 
+add_custom_target(interface.typecheck
+  COMMENT "Type checking monetr's frontend code..."
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  DEPENDS tools.tsc
+  COMMAND ${TSC_EXECUTABLE} --noEmit --pretty
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/interface
+)
+
 ################################################################################
 #                                     TESTING                                  #
 ################################################################################

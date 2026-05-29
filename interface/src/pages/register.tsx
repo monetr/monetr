@@ -79,10 +79,10 @@ export function RegisterSuccessful(): JSX.Element {
   return (
     <div className={styles.registerPageRoot}>
       <MLogo className={layoutVariants({ size: 'logo' })} />
-      <Typography align='center' className='max-w-md' size='xl' weight='medium'>
+      <Typography align='center' className={styles.message} size='xl' weight='medium'>
         A verification message has been sent to your email address, please verify your email.
       </Typography>
-      <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
+      <div className={styles.footerRow}>
         <Typography color='subtle' size='sm'>
           Return to
         </Typography>
@@ -148,13 +148,8 @@ export default function Register(): JSX.Element {
 
   return (
     <div className={styles.registerPageRoot}>
-      <MForm
-        className='flex flex-col md:w-1/2 lg:w-1/3 xl:w-1/4 items-center gap-1'
-        initialValues={initialValues}
-        onSubmit={submit}
-        validate={validator}
-      >
-        <div className='max-w-[96px] w-full'>
+      <MForm className={styles.form} initialValues={initialValues} onSubmit={submit} validate={validator}>
+        <div className={styles.logo}>
           <MLogo />
         </div>
         <Flex align='center' orientation='column'>
@@ -168,7 +163,7 @@ export default function Register(): JSX.Element {
         <Flex gap='sm' orientation='stackSmall'>
           <FormTextField
             autoFocus
-            className='w-full'
+            className={styles.input}
             data-testid='register-first-name'
             label='First Name'
             name='firstName'
@@ -176,7 +171,7 @@ export default function Register(): JSX.Element {
             type='text'
           />
           <FormTextField
-            className='w-full'
+            className={styles.input}
             data-testid='register-last-name'
             label='Last Name'
             name='lastName'
@@ -186,7 +181,7 @@ export default function Register(): JSX.Element {
         </Flex>
         <FormTextField
           autoComplete='email'
-          className='w-full'
+          className={styles.input}
           data-testid='register-email'
           label='Email Address'
           name='email'
@@ -195,7 +190,7 @@ export default function Register(): JSX.Element {
         />
         <FormTextField
           autoComplete='new-password'
-          className='w-full'
+          className={styles.input}
           data-testid='register-password'
           label='Password'
           name='password'
@@ -204,7 +199,7 @@ export default function Register(): JSX.Element {
         />
         <FormTextField
           autoComplete='new-password'
-          className='w-full'
+          className={styles.input}
           data-testid='register-confirm-password'
           label='Confirm Password'
           name='confirmPassword'
@@ -212,15 +207,15 @@ export default function Register(): JSX.Element {
           type='password'
         />
         <BetaCodeInput />
-        <MCaptcha className='mb-1' name='captcha' show={Boolean(config?.verifyRegister)} />
-        <FormButton className='w-full mt-1' data-testid='register-submit' role='form' type='submit' variant='primary'>
+        <MCaptcha className={styles.captcha} name='captcha' show={Boolean(config?.verifyRegister)} />
+        <FormButton className={styles.submit} data-testid='register-submit' role='form' type='submit' variant='primary'>
           Sign Up
         </FormButton>
-        <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
-          <Typography className='gap-1 inline-block text-center' color='subtle' component='p' size='sm'>
+        <div className={styles.footerRow}>
+          <Typography className={styles.termsBlurb} color='subtle' component='p' size='sm'>
             By signing up you agree to monetr's&nbsp;
             <a
-              className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
+              className={styles.inlineLink}
               href='https://monetr.app/policy/terms'
               rel='noopener noreferrer'
               target='_blank'
@@ -229,7 +224,7 @@ export default function Register(): JSX.Element {
             </a>{' '}
             and&nbsp;
             <a
-              className='text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline'
+              className={styles.inlineLink}
               href='https://monetr.app/policy/privacy'
               rel='noopener noreferrer'
               target='_blank'
@@ -238,7 +233,7 @@ export default function Register(): JSX.Element {
             </a>
           </Typography>
         </div>
-        <div className='mt-1 flex justify-center gap-1 flex-col md:flex-row items-center'>
+        <div className={styles.footerRow}>
           <Typography color='subtle' size='sm'>
             Already have an account?
           </Typography>

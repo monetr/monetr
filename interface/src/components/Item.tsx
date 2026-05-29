@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'react';
 
 import Flex, { type FlexProps } from '@monetr/interface/components/Flex';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './Item.module.scss';
 
@@ -9,7 +9,7 @@ export type ItemProps = HTMLAttributes<HTMLLIElement>;
 
 export function Item({ className, ...props }: ItemProps): React.JSX.Element {
   return (
-    <li className={mergeTailwind(styles.itemRoot, className)} {...props}>
+    <li className={mergeClasses(styles.itemRoot, className)} {...props}>
       {props.children}
     </li>
   );

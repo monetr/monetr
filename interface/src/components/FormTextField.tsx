@@ -5,7 +5,7 @@ import { useFormikContext } from 'formik';
 import ErrorText from '@monetr/interface/components/ErrorText';
 import Label, { type LabelDecorator, type LabelDecoratorProps } from '@monetr/interface/components/Label';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import errorTextStyles from './ErrorText.module.scss';
 import inputStyles from './FormTextField.module.scss';
@@ -55,13 +55,13 @@ export default function FormTextField(props: FormTextFieldProps = FormTextFieldP
 
   if (props.isLoading) {
     return (
-      <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
+      <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>
         <Label disabled htmlFor={props.id} label={props.label} required={props.required}>
           <LabelDecorator disabled name={props.name} />
         </Label>
         <div>
-          <div aria-disabled='true' className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)}>
-            <Skeleton className='w-full h-5 mr-2' />
+          <div aria-disabled='true' className={mergeClasses(inputStyles.input, selectStyles.selectLoading)}>
+            <Skeleton className={selectStyles.loadingSkeleton} />
           </div>
         </div>
         <ErrorText error={props.error} />
@@ -70,7 +70,7 @@ export default function FormTextField(props: FormTextFieldProps = FormTextFieldP
   }
 
   return (
-    <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
+    <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>
       <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
         <LabelDecorator disabled={props.disabled} name={props.name} />
       </Label>

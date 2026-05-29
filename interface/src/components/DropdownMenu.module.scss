@@ -1,0 +1,262 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+$duration: 150ms;
+
+@keyframes enter {
+  from {
+    opacity: var(--enter-opacity, 1);
+    transform:
+      translate3d(var(--enter-translate-x, 0), var(--enter-translate-y, 0), 0)
+      scale3d(var(--enter-scale, 1), var(--enter-scale, 1), var(--enter-scale, 1))
+      rotate(var(--enter-rotate, 0));
+  }
+}
+
+@keyframes exit {
+  to {
+    opacity: var(--exit-opacity, 1);
+    transform:
+      translate3d(var(--exit-translate-x, 0), var(--exit-translate-y, 0), 0)
+      scale3d(var(--exit-scale, 1), var(--exit-scale, 1), var(--exit-scale, 1))
+      rotate(var(--exit-rotate, 0));
+  }
+}
+
+// Shared open/closed + side animation for the content and sub-content surfaces.
+@mixin contentAnimation {
+  &[data-state="open"] {
+    animation: enter $duration;
+    --enter-opacity: 0; // fade-in-0
+    --enter-scale: 0.95; // zoom-in-95
+  }
+
+  &[data-state="closed"] {
+    animation: exit $duration;
+    --exit-opacity: 0; // fade-out-0
+    --exit-scale: 0.95; // zoom-out-95
+  }
+
+  // Slide only happens on enter, from the side nearest the trigger. Sass won't
+  // do math inside a custom property value, so the $size offset is interpolated.
+  &[data-side="bottom"] {
+    --enter-translate-y: #{-2 * variables.$size}; // slide-in-from-top-2
+  }
+
+  &[data-side="left"] {
+    --enter-translate-x: #{2 * variables.$size}; // slide-in-from-right-2
+  }
+
+  &[data-side="right"] {
+    --enter-translate-x: #{-2 * variables.$size}; // slide-in-from-left-2
+  }
+
+  &[data-side="top"] {
+    --enter-translate-y: #{2 * variables.$size}; // slide-in-from-bottom-2
+  }
+}
+
+.subTrigger {
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+  cursor: default;
+  user-select: none;
+  // rounded-sm
+  border-radius: 0.5 * variables.$size;
+  outline: none;
+
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-top: 1.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+
+  @include mixins.text-small;
+
+  &:focus,
+  &[data-state="open"] {
+    background-color: var(--background-emphasis);
+  }
+
+  svg {
+    pointer-events: none;
+    width: 4 * variables.$size; // size-4
+    height: 4 * variables.$size;
+    flex-shrink: 0;
+  }
+}
+
+.subTriggerInset {
+  padding-left: 8 * variables.$size; // pl-8
+}
+
+.subTriggerChevron {
+  margin-left: auto;
+}
+
+.subContent {
+  z-index: 50;
+  min-width: 32 * variables.$size; // min-w-[8rem]
+  padding: variables.$size;
+  overflow: hidden;
+  // rounded-md
+  border-radius: 1.5 * variables.$size;
+  border-width: 1px;
+  border-color: var(--border);
+  background-color: var(--background);
+  color: var(--content-emphasis);
+  // shadow-lg
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  @include contentAnimation;
+}
+
+.content {
+  z-index: 50;
+  min-width: 32 * variables.$size; // min-w-[8rem]
+  padding: 0;
+  overflow: hidden;
+  // rounded-md
+  border-radius: 1.5 * variables.$size;
+  border-width: 1px;
+  border-color: var(--border);
+  background-color: var(--background);
+  color: var(--content-emphasis);
+  // shadow-md
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+
+  @include contentAnimation;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+  cursor: pointer;
+  user-select: none;
+  // rounded-sm
+  border-radius: 0.5 * variables.$size;
+  outline: none;
+
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-top: 1.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+
+  // transition-colors
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  &:focus {
+    background-color: var(--background-emphasis);
+    color: var(--content-emphasis);
+  }
+
+  &[data-disabled] {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  svg {
+    pointer-events: none;
+    width: 5 * variables.$size; // size-5
+    height: 5 * variables.$size;
+    flex-shrink: 0;
+  }
+}
+
+.itemInset {
+  padding-left: 8 * variables.$size; // pl-8
+}
+
+// CheckboxItem / RadioItem share the same row styling.
+.selectableItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: default;
+  user-select: none;
+  // rounded-sm
+  border-radius: 0.5 * variables.$size;
+  outline: none;
+
+  padding-top: 1.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+  padding-left: 8 * variables.$size; // pl-8
+  padding-right: 2 * variables.$size;
+
+  // transition-colors
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  &:focus {
+    background-color: var(--background-emphasis);
+    color: var(--content-emphasis);
+  }
+
+  &[data-disabled] {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+}
+
+// The absolutely-positioned indicator slot on the left of a checkbox / radio.
+.itemIndicator {
+  position: absolute;
+  left: 2 * variables.$size;
+  display: flex;
+  height: 3.5 * variables.$size;
+  width: 3.5 * variables.$size;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkIcon {
+  height: 4 * variables.$size;
+  width: 4 * variables.$size;
+}
+
+.circleIcon {
+  height: 2 * variables.$size;
+  width: 2 * variables.$size;
+  fill: currentColor;
+}
+
+.label {
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-top: 1.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+
+  @include mixins.text-small;
+  font-weight: var(--semibold);
+}
+
+.labelInset {
+  padding-left: 8 * variables.$size; // pl-8
+}
+
+.separator {
+  // -mx-1
+  margin-left: -1 * variables.$size;
+  margin-right: -1 * variables.$size;
+  margin-top: variables.$size;
+  margin-bottom: variables.$size;
+  height: 1px; // h-px
+  background-color: var(--border-subtle); // bg-muted
+}
+
+.shortcut {
+  margin-left: auto;
+  @include mixins.text-extra-small;
+  // cap unit, see https://ishadeed.com/article/css-cap-unit/
+  letter-spacing: 0.14cap; // tracking-widest
+  opacity: 0.6;
+}

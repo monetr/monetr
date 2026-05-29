@@ -41,9 +41,10 @@
 }
 
 .numberComplete {
-  background-color: #16a34a; // green-600
-  --text-color: #fff;
-  color: #fff;
+  background-color: var(--success); // green-600
+  // Light text on the green badge, matching how Badge colors its variants.
+  --text-color: var(--content-emphasis);
+  color: var(--content-emphasis);
 }
 
 .textActive {
@@ -52,8 +53,8 @@
 }
 
 .textComplete {
-  --text-color: #16a34a; // green-600
-  color: #16a34a;
+  --text-color: var(--success); // green-600
+  color: var(--success);
 }
 
 // Hide the label on small screens for steps that aren't the current or next one.
@@ -75,5 +76,5 @@
 }
 
 .lineComplete {
-  border-color: #16a34a; // green-600
+  border-color: var(--success); // green-600
 }

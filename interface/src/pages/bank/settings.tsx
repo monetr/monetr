@@ -18,6 +18,8 @@ import { useUpdateBankAccount } from '@monetr/interface/hooks/useUpdateBankAccou
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './settings.module.scss';
+
 interface BankAccountValues {
   name: string;
   currency: string;
@@ -45,7 +47,7 @@ export default function BankAccountSettingsPage(): JSX.Element {
 
   if (isLoading) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+      <div className={styles.centerState}>
         <Typography size='5xl'>One moment...</Typography>
       </div>
     );
@@ -53,8 +55,8 @@ export default function BankAccountSettingsPage(): JSX.Element {
 
   if (isError) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartCrack className='dark:text-dark-monetr-content h-24 w-24' />
+      <div className={styles.centerState}>
+        <HeartCrack className={styles.errorIcon} />
         <Typography size='5xl'>Something isn't right...</Typography>
         <Typography size='2xl'>We weren't able to load details for the bank account specified...</Typography>
       </div>
@@ -90,7 +92,7 @@ export default function BankAccountSettingsPage(): JSX.Element {
   };
 
   return (
-    <MForm className='w-full h-full flex flex-col' initialValues={initialValues} onSubmit={submit}>
+    <MForm className={styles.form} initialValues={initialValues} onSubmit={submit}>
       <MTopNavigation
         base={`/bank/${bankAccount.bankAccountId}/transactions`}
         breadcrumb='Settings'
@@ -108,25 +110,25 @@ export default function BankAccountSettingsPage(): JSX.Element {
           Save Changes
         </Button>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
-        <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
-          <div className='w-full md:w-1/2 flex flex-col items-center'>
-            <Card className='w-full mb-4'>
+      <div className={styles.content}>
+        <div className={styles.row}>
+          <div className={styles.column}>
+            <Card className={styles.card}>
               <Typography size='inherit'>
-                <FlaskConical className='w-16 h-16' />
+                <FlaskConical className={styles.cardIcon} />
                 This page is still a work in progress, however it has been made available to make it possible to switch
                 the currencies for your bank account sooner. This page will be changed over the next several releases to
                 improve the UX and functionality.
               </Typography>
             </Card>
             <FormTextField
-              className='w-full'
+              className={styles.input}
               data-1p-ignore
               label='Name'
               name='name'
               placeholder='Bank account name...'
             />
-            <SelectCurrency className='w-full' disabled={link?.getIsPlaid()} name='currency' />
+            <SelectCurrency className={styles.input} disabled={link?.getIsPlaid()} name='currency' />
           </div>
         </div>
       </div>

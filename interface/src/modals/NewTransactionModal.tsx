@@ -1,4 +1,4 @@
-import { Fragment, useRef } from 'react';
+import { Fragment, useId, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfToday } from 'date-fns';
 import type { FormikHelpers } from 'formik';
@@ -23,6 +23,8 @@ import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './NewTransactionModal.module.scss';
+
 interface NewTransactionValues {
   name: string;
   date: Date;
@@ -42,6 +44,7 @@ function NewTransactionModal(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: selectedBankAccount } = useSelectedBankAccount();
   const createTransaction = useCreateTransaction();
+  const adjustsBalanceToggleId = useId();
 
   const initialValues: NewTransactionValues = {
     name: '',
@@ -87,30 +90,30 @@ function NewTransactionModal(): JSX.Element {
   }
 
   return (
-    <MModal className='sm:max-w-xl' open={modal.visible} ref={ref}>
-      <MForm className='h-full flex flex-col gap-2 p-2 justify-between' initialValues={initialValues} onSubmit={submit}>
+    <MModal className={styles.modal} open={modal.visible} ref={ref}>
+      <MForm className={styles.form} initialValues={initialValues} onSubmit={submit}>
         {({ setFieldValue, values }) => (
           <Fragment>
-            <div className='flex flex-col'>
-              <Typography className='mb-2' size='xl' weight='bold'>
+            <div className={styles.body}>
+              <Typography className={styles.heading} size='xl' weight='bold'>
                 Create A New Transaction
               </Typography>
 
-              {/* 
+              {/*
               TODO I'm like 99% sure there is going to be a bug here where someone could do something like select a
               spending ID while on the debit tab, then switch to the credit tab and create a deposit with a spending ID?
               */}
 
               <Tabs
-                className='w-full mb-2'
+                className={styles.tabs}
                 defaultValue='debit'
                 onValueChange={value => setFieldValue('kind', value as unknown)}
               >
-                <TabsList className='w-full'>
-                  <TabsTrigger className='w-full' value='debit'>
+                <TabsList className={styles.fullWidth}>
+                  <TabsTrigger className={styles.fullWidth} value='debit'>
                     Debit
                   </TabsTrigger>
-                  <TabsTrigger className='w-full' value='credit'>
+                  <TabsTrigger className={styles.fullWidth} value='credit'>
                     Credit
                   </TabsTrigger>
                 </TabsList>
@@ -124,28 +127,27 @@ function NewTransactionModal(): JSX.Element {
                     placeholder='Amazon, Netflix...'
                     required
                   />
-                  <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
+                  <div className={styles.fieldRow}>
                     <FormAmountField
                       allowNegative={false}
-                      className='w-full md:w-1/2'
+                      className={styles.fieldRowItem}
                       label='Amount'
                       name='amount'
                       required
                     />
-                    <FormDatePicker className='w-full md:w-1/2' label='Date' name='date' required />
+                    <FormDatePicker className={styles.fieldRowItem} label='Date' name='date' required />
                   </div>
-                  <MSelectSpending className='w-full' name='spendingId' />
-                  <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4 mt-2'>
-                    <div className='space-y-0.5'>
-                      <label className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'>
+                  <MSelectSpending className={styles.spendingSelect} name='spendingId' />
+                  <div className={styles.optionRowSpaced}>
+                    <div className={styles.optionText}>
+                      <label className={styles.optionLabelClickable} htmlFor={adjustsBalanceToggleId}>
                         Adjust Balance
                       </label>
-                      <p className='text-sm text-dark-monetr-content'>
-                        Update your account balance for this transaction?
-                      </p>
+                      <p className={styles.optionDescription}>Update your account balance for this transaction?</p>
                     </div>
                     <Switch
                       checked={values.adjustsBalance}
+                      id={adjustsBalanceToggleId}
                       onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
                     />
                   </div>
@@ -159,22 +161,20 @@ function NewTransactionModal(): JSX.Element {
                     placeholder='Paycheck, Deposit...'
                     required
                   />
-                  <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
+                  <div className={styles.fieldRow}>
                     <FormAmountField
                       allowNegative={false}
-                      className='w-full md:w-1/2'
+                      className={styles.fieldRowItem}
                       label='Amount'
                       name='amount'
                       required
                     />
-                    <FormDatePicker className='w-full md:w-1/2' label='Date' name='date' required />
+                    <FormDatePicker className={styles.fieldRowItem} label='Date' name='date' required />
                   </div>
-                  <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'>
-                    <div className='space-y-0.5'>
-                      <label className='text-sm font-medium text-dark-monetr-content-emphasis'>Adjust Balance</label>
-                      <p className='text-sm text-dark-monetr-content'>
-                        Update your account balance for this transaction?
-                      </p>
+                  <div className={styles.optionRow}>
+                    <div className={styles.optionText}>
+                      <label className={styles.optionLabel}>Adjust Balance</label>
+                      <p className={styles.optionDescription}>Update your account balance for this transaction?</p>
                     </div>
                     <Switch
                       checked={values.adjustsBalance}
@@ -184,7 +184,7 @@ function NewTransactionModal(): JSX.Element {
                 </TabsContent>
               </Tabs>
             </div>
-            <div className='flex justify-end gap-2'>
+            <div className={styles.actions}>
               <Button data-testid='close-new-transaction-modal' onClick={modal.remove} variant='secondary'>
                 Cancel
               </Button>

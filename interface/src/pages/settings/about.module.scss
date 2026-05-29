@@ -1,0 +1,74 @@
+@use '@monetr/interface/variables';
+@use '@monetr/interface/mixins';
+
+// Page root.
+.root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 4 * variables.$size;
+  gap: 8 * variables.$size;
+}
+
+// A titled group of detail rows.
+.section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-width: 168 * variables.$size;
+}
+
+// Section heading.
+.sectionTitle {
+  margin-bottom: 4 * variables.$size;
+}
+
+// A single detail row: stacks on mobile, side-by-side from md up.
+.row {
+  display: flex;
+  flex-direction: column;
+  padding: 4 * variables.$size;
+  gap: 2 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+  }
+}
+
+// Row label takes a third of the width once the row is horizontal.
+.rowLabel {
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.width-third;
+  }
+}
+
+// Row value shrinks to its content.
+.rowValue {
+  max-width: fit-content;
+}
+
+// External link styled like a row value.
+.hyperlink {
+  display: block;
+  color: var(--blue);
+  font-weight: var(--normal);
+  min-width: 0;
+  @include mixins.text-large;
+
+  // text-ellipsis + truncate
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  --ring-color: var(--blue);
+  --ring-size: 2px;
+
+  &:hover {
+    text-decoration-line: underline;
+  }
+
+  &:focus {
+    text-decoration-line: underline;
+    @include mixins.ring;
+  }
+}

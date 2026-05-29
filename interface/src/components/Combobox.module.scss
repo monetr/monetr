@@ -1,0 +1,99 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// Base styling shared by every combobox variant, layered on top of Button.
+.base {
+  justify-content: space-between;
+  // truncate
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.outlined {
+  --ring-color: rgba(59, 130, 246, 0.5);
+  --ring-size: 1px;
+  @include mixins.ring;
+
+  &:enabled {
+    --ring-color: var(--border-string);
+  }
+}
+
+.text {
+  // ring-0
+  --ring-size: 0;
+  @include mixins.ring;
+
+  // Override the background color for combobox.
+  &:enabled:hover {
+    background-color: transparent;
+  }
+
+  // DROPDOWN IS CLOSED
+  &[data-state="closed"] {
+    // Only show the border when someone hovers over it.
+    &:enabled:hover {
+      --ring-size: 1px;
+      --ring-color: var(--border-string);
+    }
+
+    // While focused (and not hovered) keep the ring hidden.
+    &:focus {
+      --ring-size: 0;
+    }
+  }
+
+  // DROPDOWN IS OPEN
+  // Show the border all the time with the primary color.
+  &[data-state="open"] {
+    --ring-size: 2px;
+    --ring-color: var(--brand);
+  }
+}
+
+// The label text inside the trigger; truncates with an ellipsis.
+.triggerLabel {
+  // text-ellipsis text-nowrap min-w-0 overflow-hidden text-inherit
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+}
+
+.triggerIcon {
+  height: 3 * variables.$size; // h-3
+  width: 3 * variables.$size; // w-3
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+// The check mark shown next to the selected option.
+.checkIcon {
+  margin-right: 2 * variables.$size; // mr-2
+  height: 5 * variables.$size; // h-5
+  width: 5 * variables.$size; // w-5
+}
+
+.checkIconVisible {
+  opacity: 1; // opacity-100
+}
+
+.checkIconHidden {
+  opacity: 0; // opacity-0
+}
+
+// Roomier bottom padding on mobile, tighter on the popover layout.
+.group {
+  padding-bottom: 6 * variables.$size; // pb-6
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-bottom: variables.$size; // md:pb-1
+  }
+}
+
+// Spacer at the bottom of the mobile drawer.
+.drawerSpacer {
+  height: 6 * variables.$size; // h-6
+}

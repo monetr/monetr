@@ -1,0 +1,164 @@
+@use '@monetr/interface/variables';
+
+.form {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+
+// Centered error / loading state.
+.centerState {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.errorIcon {
+  color: var(--content);
+  width: 24 * variables.$size;
+  height: 24 * variables.$size;
+}
+
+// Scrolling body wrapper.
+.body {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  min-width: 0;
+  padding: 4 * variables.$size;
+  padding-bottom: 16 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-bottom: 4 * variables.$size;
+  }
+}
+
+// Two-column responsive row.
+.columns {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 8 * variables.$size;
+  align-items: center;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+// Left column.
+.column {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: 50%;
+  }
+}
+
+// Right (timeline) column.
+.columnTimeline {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: 50%;
+  }
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+// flex-none
+.flexNone {
+  flex: none;
+}
+
+.summaryHeader {
+  display: flex;
+  gap: 4 * variables.$size;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+}
+
+.summaryText {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  overflow: hidden;
+}
+
+.summaryName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+// font-normal (on the "of" span inside an otherwise semibold Typography)
+.ofText {
+  font-weight: var(--normal);
+}
+
+// Progress bar track.
+.progressTrack {
+  width: 100%;
+  background-color: var(--progress-track);
+  border-radius: 9999px;
+  height: 1.5 * variables.$size;
+  margin-top: 2 * variables.$size;
+  margin-bottom: 2 * variables.$size;
+  position: relative;
+}
+
+// Allocated-amount fill.
+.progressFillAllocated {
+  position: absolute;
+  top: 0;
+  background-color: var(--success);
+  height: 1.5 * variables.$size;
+  border-radius: 9999px;
+}
+
+// Used-amount fill.
+.progressFillUsed {
+  position: absolute;
+  top: 0;
+  background-color: var(--progress-used);
+  height: 1.5 * variables.$size;
+  border-radius: 9999px;
+}
+
+.dividerHalf {
+  width: 50%;
+  margin-top: 4 * variables.$size;
+  margin-bottom: 4 * variables.$size;
+}
+
+// Visible on mobile, hidden md+.
+.dividerMobile {
+  display: block;
+  width: 50%;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+.timelineTitle {
+  margin-top: 2 * variables.$size;
+  margin-bottom: 2 * variables.$size;
+}

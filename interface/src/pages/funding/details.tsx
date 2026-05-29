@@ -13,6 +13,7 @@ import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import FundingTimeline from '@monetr/interface/components/funding/FundingTimeline';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
@@ -26,6 +27,8 @@ import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
+
+import styles from './details.module.scss';
 
 interface FundingValues {
   name: string;
@@ -54,8 +57,8 @@ export default function FundingDetails(): JSX.Element {
 
   if (!fundingId) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartCrack className='dark:text-dark-monetr-content size-24' />
+      <div className={styles.centerState}>
+        <HeartCrack className={styles.errorIcon} />
         <Typography size='5xl'>Something isn't right...</Typography>
         <Typography size='2xl'>There wasn't a funding schedule specified...</Typography>
       </div>
@@ -148,7 +151,7 @@ export default function FundingDetails(): JSX.Element {
   };
 
   return (
-    <MForm className='flex w-full h-full flex-col' initialValues={initialValues} onSubmit={submit} validate={validate}>
+    <MForm className={styles.form} initialValues={initialValues} onSubmit={submit} validate={validate}>
       <MTopNavigation
         base={`/bank/${funding.bankAccountId}/funding`}
         breadcrumb={funding.name}
@@ -159,17 +162,23 @@ export default function FundingDetails(): JSX.Element {
           <Trash />
           Remove
         </Button>
-        <FormButton className='gap-1 py-1 px-2' role='form' type='submit' variant='primary'>
+        <FormButton className={styles.saveButton} role='form' type='submit' variant='primary'>
           <Save />
           Save
         </FormButton>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
-        <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
-          <div className='w-full md:w-1/2 flex flex-col'>
-            <FormTextField className='w-full' id={`${nameId}-funding-name-search`} label='Name' name='name' required />
+      <div className={styles.body}>
+        <div className={styles.columns}>
+          <div className={styles.column}>
+            <FormTextField
+              className={layoutVariants({ width: 'full' })}
+              id={`${nameId}-funding-name-search`}
+              label='Name'
+              name='name'
+              required
+            />
             <FormDatePicker
-              className='w-full'
+              className={layoutVariants({ width: 'full' })}
               data-testid='funding-details-date-picker'
               label='Next Recurrence'
               labelDecorator={() => <NextOccurrenceDecorator fundingSchedule={funding} />}
@@ -180,7 +189,7 @@ export default function FundingDetails(): JSX.Element {
               required
             />
             <MSelectFrequency
-              className='w-full'
+              className={layoutVariants({ width: 'full' })}
               dateFrom='nextRecurrence'
               label='How often does this funding happen?'
               name='ruleset'
@@ -201,9 +210,9 @@ export default function FundingDetails(): JSX.Element {
             />
             {isManual && <AutoCreateTransactionToggle />}
           </div>
-          <Divider className='block md:hidden w-1/2' />
-          <div className='w-full md:w-1/2 flex flex-col gap-2'>
-            <Typography className='my-2' size='xl'>
+          <Divider className={styles.dividerMobile} />
+          <div className={styles.columnTimeline}>
+            <Typography className={styles.timelineTitle} size='xl'>
               Funding Timeline
             </Typography>
             <FundingTimeline fundingScheduleId={funding.fundingScheduleId} />

@@ -1,0 +1,79 @@
+@use 'sass:math';
+@use '@monetr/interface/variables';
+
+// Centered full-size state for the loading and error screens.
+.centerState {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.errorIcon {
+  color: var(--content);
+  width: 24 * variables.$size;
+  height: 24 * variables.$size;
+}
+
+// The settings form fills its parent.
+.form {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+// Scrollable content area below the top navigation.
+.content {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  min-width: 0;
+  padding: 4 * variables.$size;
+}
+
+// Row that stacks on mobile and is side-by-side from md up.
+.row {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 8 * variables.$size;
+  align-items: center;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+// A single column, half width from md up.
+.column {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: math.percentage(math.div(1, 2));
+  }
+}
+
+// The work-in-progress notice card.
+.card {
+  width: 100%;
+  margin-bottom: 4 * variables.$size;
+}
+
+// The flask icon inside the notice card.
+.cardIcon {
+  width: 16 * variables.$size;
+  height: 16 * variables.$size;
+}
+
+// Full-width form fields.
+.input {
+  width: 100%;
+}

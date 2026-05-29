@@ -1,0 +1,18 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// The mobile sidebar toggle button. Visible on small screens, hidden on large
+// screens and up.
+.toggle {
+  visibility: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 12 * variables.$size;
+  color: var(--content-emphasis);
+
+  // `lg:hidden`
+  @media (min-width: variables.$largeScreen) {
+    display: none;
+  }
+}

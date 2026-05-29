@@ -9,6 +9,13 @@ $basePadding: 4 * variables.$size;
   align-items: center;
 }
 
+// Skeleton shown in the form field loading state.
+.loadingSkeleton {
+  width: 100%;
+  height: 5 * variables.$size;
+  margin-right: 2 * variables.$size;
+}
+
 .input {
   background-color: transparent;
   flex: 1 1 0%;
@@ -108,4 +115,45 @@ $basePadding: 4 * variables.$size;
   }
 
   padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
+}
+
+// Hide the options list when closed. The only inline styles on the list are
+// max-height/width set while open, so a plain display:none wins here.
+.hidden {
+  display: none;
+}
+
+// A single option row in the dropdown / drawer list.
+.option {
+  color: var(--content-emphasis);
+  width: 100%;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+
+  padding-top: 1.5 * variables.$size;
+  padding-bottom: 1.5 * variables.$size;
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+
+  &:hover, &[aria-selected="true"] {
+    background-color: var(--background-active);
+  }
+
+  &:disabled, &[aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+// Mobile (drawer) options additionally react to touch :active.
+.optionTouch {
+  @extend .option;
+  &:active {
+    background-color: var(--background-active);
+  }
+}
+
+// Selected option, slightly darker than hover. The hover/aria-selected rules
+// above have higher specificity, so hovering a selected row still shows hover.
+.optionSelected {
+  background-color: var(--background-emphasis);
 }

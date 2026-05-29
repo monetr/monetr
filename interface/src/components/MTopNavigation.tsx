@@ -4,7 +4,7 @@ import { useLocation } from 'wouter';
 
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
 import Typography from '@monetr/interface/components/Typography';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './MTopNavigation.module.scss';
 
@@ -26,15 +26,15 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
     }
   }, [props.base, navigate]);
 
-  const titleClass = mergeTailwind(
+  const titleClass = mergeClasses(
     styles.title,
     props.breadcrumb && styles.titleBreadcrumb,
     props.base && styles.titleClickable,
   );
 
-  const titleTextClass = mergeTailwind(styles.titleText, props.breadcrumb && styles.titleTextHidden);
+  const titleTextClass = mergeClasses(styles.titleText, props.breadcrumb && styles.titleTextHidden);
 
-  const iconClass = mergeTailwind(styles.icon, props.breadcrumb && styles.iconBreadcrumb);
+  const iconClass = mergeClasses(styles.icon, props.breadcrumb && styles.iconBreadcrumb);
 
   return (
     <Fragment>

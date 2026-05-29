@@ -25,6 +25,8 @@ import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './NewExpenseModal.module.scss';
+
 interface NewExpenseValues {
   name: string;
   amount: number;
@@ -50,7 +52,7 @@ function NewExpenseModal(): JSX.Element {
 
   if (!selectedBankAccount) {
     return (
-      <MModal className='sm:max-w-xl' open={modal.visible} ref={ref}>
+      <MModal className={styles.modal} open={modal.visible} ref={ref}>
         One moment...
       </MModal>
     );
@@ -98,15 +100,10 @@ function NewExpenseModal(): JSX.Element {
   }
 
   return (
-    <MModal className='sm:max-w-xl' open={modal.visible} ref={ref}>
-      <MForm
-        className='h-full flex flex-col gap-2 p-2 justify-between'
-        data-testid='new-expense-modal'
-        initialValues={initialValues}
-        onSubmit={submit}
-      >
-        <div className='flex flex-col'>
-          <Typography className='mb-2' size='xl' weight='bold'>
+    <MModal className={styles.modal} open={modal.visible} ref={ref}>
+      <MForm className={styles.form} data-testid='new-expense-modal' initialValues={initialValues} onSubmit={submit}>
+        <div className={styles.body}>
+          <Typography className={styles.heading} size='xl' weight='bold'>
             Create A New Expense
           </Typography>
           <FormTextField
@@ -118,16 +115,16 @@ function NewExpenseModal(): JSX.Element {
             placeholder='Amazon, Netflix...'
             required
           />
-          <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
+          <div className={styles.fieldRow}>
             <FormAmountField
               allowNegative={false}
-              className='w-full md:w-1/2'
+              className={styles.fieldRowItem}
               label='How much do you need?'
               name='amount'
               required
             />
             <FormDatePicker
-              className='w-full md:w-1/2'
+              className={styles.fieldRowItem}
               label='When do you need it next?'
               min={startOfTomorrow({
                 in: inTimezone,
@@ -151,7 +148,7 @@ function NewExpenseModal(): JSX.Element {
           />
           {isManual && <AutoCreateTransactionToggle />}
         </div>
-        <div className='flex justify-end gap-2'>
+        <div className={styles.actions}>
           <Button data-testid='close-new-expense-modal' onClick={modal.remove} variant='secondary'>
             Cancel
           </Button>
@@ -170,19 +167,12 @@ function AutoCreateTransactionToggle(): JSX.Element {
   const hasAmount = (values.amount ?? 0) > 0;
 
   return (
-    <div
-      className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'
-      data-testid='new-expense-auto-create-transaction'
-    >
-      <div className='space-y-0.5'>
-        <label
-          aria-disabled={!hasAmount}
-          className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
-          htmlFor={autoCreateSwitchId}
-        >
+    <div className={styles.optionRow} data-testid='new-expense-auto-create-transaction'>
+      <div className={styles.optionText}>
+        <label aria-disabled={!hasAmount} className={styles.optionLabel} htmlFor={autoCreateSwitchId}>
           Auto create transaction
         </label>
-        <p aria-disabled={!hasAmount} className='text-sm text-dark-monetr-content aria-disabled:opacity-50'>
+        <p aria-disabled={!hasAmount} className={styles.optionDescription}>
           Automatically add a transaction for this expense each time it is due, deducting from your balance.
         </p>
       </div>

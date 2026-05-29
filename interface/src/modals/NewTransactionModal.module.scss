@@ -1,0 +1,110 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.modal {
+  @media (min-width: variables.$smallScreen) {
+    max-width: 144 * variables.$size; // sm:max-w-xl
+  }
+}
+
+.form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  padding: 2 * variables.$size;
+  justify-content: space-between;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+}
+
+.heading {
+  margin-bottom: 2 * variables.$size;
+}
+
+.tabs {
+  width: 100%;
+  margin-bottom: 2 * variables.$size;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+// The amount + date row stacks on mobile and becomes a row at md.
+.fieldRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    gap: 4 * variables.$size;
+  }
+}
+
+// Each field in the row is full width on mobile, half width at md.
+.fieldRowItem {
+  width: 100%;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: 50%;
+  }
+}
+
+.spendingSelect {
+  width: 100%;
+}
+
+// The bordered "Adjust Balance" toggle box.
+.optionRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: var(--border-radius);
+  padding: 2 * variables.$size;
+  margin-bottom: 4 * variables.$size;
+
+  --ring-color: var(--border-string);
+  --ring-size: 1px;
+  @include mixins.ring;
+}
+
+// The debit tab's toggle box additionally has a top margin (mt-2).
+.optionRowSpaced {
+  @extend .optionRow;
+  margin-top: 2 * variables.$size;
+}
+
+.optionText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size; // space-y-0.5
+}
+
+.optionLabel {
+  @include mixins.text-small;
+  font-weight: var(--medium);
+  color: var(--content-emphasis);
+}
+
+// The debit tab's label is clickable; the credit tab's is not.
+.optionLabelClickable {
+  @extend .optionLabel;
+  cursor: pointer;
+}
+
+.optionDescription {
+  @include mixins.text-small;
+  color: var(--content);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2 * variables.$size;
+}

@@ -25,8 +25,10 @@ import useIsMobile from '@monetr/interface/hooks/useIsMobile';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { showNewBankAccountModal } from '@monetr/interface/modals/NewBankAccountModal';
 import type { BankAccountStatus } from '@monetr/interface/models/BankAccount';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
+
+import styles from './SelectBankAccount.module.scss';
 
 export default function SelectBankAccount(): JSX.Element {
   const [, navigate] = useLocation();
@@ -48,35 +50,28 @@ export default function SelectBankAccount(): JSX.Element {
   const current = accounts?.find(account => account.value === selectedBankAccount?.bankAccountId);
 
   if (allIsLoading || selectedIsLoading) {
-    return <Skeleton className='w-full h-10' />;
+    return <Skeleton className={styles.skeleton} />;
   }
 
   if (isMobile) {
     return (
-      <div className='flex w-full gap-[1px]'>
+      <div className={styles.row}>
         <Drawer onOpenChange={setOpen} open={open}>
           <DrawerTrigger asChild>
             <Button
               aria-expanded={open}
-              className={mergeTailwind(
-                comboboxVariants({ variant: 'text', size: 'select' }),
-                'h-[34px] group flex flex-auto',
-              )}
+              className={mergeClasses(comboboxVariants({ variant: 'text', size: 'select' }), styles.trigger)}
               disabled={false}
               role='combobox'
               size='select'
               variant='text'
             >
-              <div className='text-inherit flex-shrink truncate min-w-0'>
+              <div className={styles.triggerLabel}>
                 {current?.value
                   ? accounts.find(option => option.value === current?.value)?.label
                   : 'Select a bank account...'}
               </div>
-              <ChevronsUpDown
-                className={mergeTailwind('h-3 w-3 flex-none opacity-50 transition-opacity duration-100', {
-                  'opacity-100': open,
-                })}
-              />
+              <ChevronsUpDown className={mergeClasses(styles.chevron, { [styles.chevronOpen]: open })} />
             </Button>
           </DrawerTrigger>
           <DrawerContent>
@@ -90,51 +85,41 @@ export default function SelectBankAccount(): JSX.Element {
         </Drawer>
         <Link
           aria-expanded={open}
-          className={mergeTailwind(
+          className={mergeClasses(
             buttonVariants({ variant: 'text', size: 'select' }),
             comboboxVariants({ variant: 'text', size: 'select' }),
-            'h-[34px] w-[34px] p-0 justify-center group rounded-tl-none rounded-bl-none shrink-0',
-            'enabled:hover:ring-1',
-            'enabled:hover:ring-dark-monetr-border-string',
-            'focus:ring-dark-monetr-brand focus:ring-2',
+            styles.settingsLinkMobile,
           )}
           role='combobox'
           to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
         >
-          <Settings className='h-3 w-3 opacity-50 group-hover:opacity-100' />
+          <Settings className={styles.settingsIconMobile} />
         </Link>
       </div>
     );
   }
 
   return (
-    <div className='flex w-full gap-[1px]'>
+    <div className={styles.row}>
       <Popover onOpenChange={setOpen} open={open}>
         <PopoverTrigger asChild>
           <Button
             aria-expanded={open}
-            className={mergeTailwind(
-              comboboxVariants({ variant: 'text', size: 'select' }),
-              'h-[34px] group flex flex-auto',
-            )}
+            className={mergeClasses(comboboxVariants({ variant: 'text', size: 'select' }), styles.trigger)}
             disabled={false}
             role='combobox'
             size='select'
             variant='text'
           >
-            <div className='text-inherit flex-shrink truncate min-w-0'>
+            <div className={styles.triggerLabel}>
               {current?.value
                 ? accounts.find(option => option.value === current?.value)?.label
                 : 'Select a bank account...'}
             </div>
-            <ChevronsUpDown
-              className={mergeTailwind('h-3 w-3 flex-none opacity-50 transition-opacity duration-100', {
-                'opacity-100': open,
-              })}
-            />
+            <ChevronsUpDown className={mergeClasses(styles.chevron, { [styles.chevronOpen]: open })} />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className='w-80'>
+        <PopoverContent className={styles.popover}>
           <SelectBankAccountPicker
             onSelect={value => navigate(`/bank/${value}/transactions`)}
             options={accounts}
@@ -143,18 +128,15 @@ export default function SelectBankAccount(): JSX.Element {
           />
         </PopoverContent>
         <Link
-          className={mergeTailwind(
+          className={mergeClasses(
             buttonVariants({ variant: 'text', size: 'select' }),
             comboboxVariants({ variant: 'text', size: 'select' }),
-            'h-[34px] w-[34px] p-0 justify-center group rounded-tl-none rounded-bl-none shrink-0',
-            'enabled:hover:ring-1',
-            'enabled:hover:ring-dark-monetr-border-string',
-            'focus:ring-0', // DIFFERENT FROM MOBILE
+            styles.settingsLinkDesktop, // No focus ring, different from mobile.
           )}
           role='combobox'
           to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
         >
-          <Settings className='size-5 opacity-50 group-hover:opacity-100' />
+          <Settings className={styles.settingsIconDesktop} />
         </Link>
       </Popover>
     </div>
@@ -175,21 +157,21 @@ function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccoun
   return (
     <Flex align='center' gap='sm'>
       <Check
-        className={mergeTailwind(
-          'mr-1 size-5 flex-none',
-          props.currentValue === props.option.value ? 'opacity-100' : 'opacity-0',
+        className={mergeClasses(
+          styles.check,
+          props.currentValue === props.option.value ? styles.checkVisible : styles.checkHidden,
         )}
       />
       <Typography className={layoutVariants({ width: 'full' })} color='emphasis' ellipsis>
         {props.option.label}
       </Typography>
       {props.option.status === 'inactive' && (
-        <Badge className='bg-dark-monetr-border-subtle' size='xs'>
+        <Badge className={styles.inactiveBadge} size='xs'>
           Inactive
         </Badge>
       )}
       {props.option.mask && props.option.mask !== '' && (
-        <Badge className='font-mono' size='xs'>
+        <Badge className={styles.maskBadge} size='xs'>
           {props.option.mask}
         </Badge>
       )}
@@ -215,7 +197,7 @@ function SelectBankAccountPicker(props: SelectBankAccountPickerProps): JSX.Eleme
       <CommandList>
         <CommandEmpty>{props.emptyString}</CommandEmpty>
         {link?.getIsManual() && (
-          <CommandGroup className='' heading='Controls'>
+          <CommandGroup heading='Controls'>
             <CommandItem
               onSelect={() => {
                 props.setOpen(false);
@@ -224,16 +206,16 @@ function SelectBankAccountPicker(props: SelectBankAccountPickerProps): JSX.Eleme
               title='Create an account'
               value='null'
             >
-              <div className='flex items-center w-full gap-1'>
-                <CirclePlus className='mr-1 h-5 w-5 flex-none' />
-                <Typography className='w-full' color='emphasis' ellipsis size='inherit'>
+              <div className={styles.controlRow}>
+                <CirclePlus className={styles.controlIcon} />
+                <Typography className={styles.fullWidth} color='emphasis' ellipsis size='inherit'>
                   Add Another Account
                 </Typography>
               </div>
             </CommandItem>
           </CommandGroup>
         )}
-        <CommandGroup className='pb-6 md:pb-1' heading='Accounts'>
+        <CommandGroup className={styles.accountsGroup} heading='Accounts'>
           {props.options.map(option => (
             <CommandItem
               key={option.value}

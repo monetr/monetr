@@ -12,6 +12,7 @@ import FormCheckbox from '@monetr/interface/components/FormCheckbox';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import GoalTimeline from '@monetr/interface/components/goals/GoalTimeline';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import MerchantIcon from '@monetr/interface/components/MerchantIcon';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFunding from '@monetr/interface/components/MSelectFunding';
@@ -27,6 +28,8 @@ import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
+
+import styles from './details.module.scss';
 
 interface GoalValues {
   name: string;
@@ -48,8 +51,8 @@ export default function GoalDetails(): JSX.Element {
 
   if (!spendingId) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartCrack className='dark:text-dark-monetr-content size-24' />
+      <div className={styles.centerState}>
+        <HeartCrack className={styles.errorIcon} />
         <Typography size='5xl'>Something isn't right...</Typography>
         <Typography size='2xl'>There wasn't a goal specified...</Typography>
       </div>
@@ -58,7 +61,7 @@ export default function GoalDetails(): JSX.Element {
 
   if (isLoading) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+      <div className={styles.centerState}>
         <Typography size='5xl'>One moment...</Typography>
       </div>
     );
@@ -66,8 +69,8 @@ export default function GoalDetails(): JSX.Element {
 
   if (isError) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartCrack className='dark:text-dark-monetr-content size-24' />
+      <div className={styles.centerState}>
+        <HeartCrack className={styles.errorIcon} />
         <Typography size='5xl'>Something isn't right...</Typography>
         <Typography size='2xl'>Couldn't find the goal you specified...</Typography>
       </div>
@@ -80,8 +83,8 @@ export default function GoalDetails(): JSX.Element {
 
   if (spending.spendingType !== SpendingType.Goal) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartCrack className='dark:text-dark-monetr-content size-24' />
+      <div className={styles.centerState}>
+        <HeartCrack className={styles.errorIcon} />
         <Typography size='5xl'>Something isn't right...</Typography>
         <Typography size='2xl'>This spending object is not a goal...</Typography>
       </div>
@@ -156,7 +159,7 @@ export default function GoalDetails(): JSX.Element {
   ).toFixed(0);
 
   return (
-    <MForm className='flex w-full h-full flex-col' initialValues={initialValues} onSubmit={submit}>
+    <MForm className={styles.form} initialValues={initialValues} onSubmit={submit}>
       <MTopNavigation
         base={`/bank/${spending.bankAccountId}/goals`}
         breadcrumb={spending?.name}
@@ -176,39 +179,45 @@ export default function GoalDetails(): JSX.Element {
           Save
         </FormButton>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
-        <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
-          <div className='w-full md:w-1/2 flex flex-col'>
-            <div className='flex flex-col w-full'>
-              <div className='flex gap-4 items-center w-full overflow-hidden'>
-                <MerchantIcon className='flex-none' name={spending?.name} />
-                <div className='flex flex-col flex-1 overflow-hidden'>
-                  <p className='text-ellipsis truncate min-w-0'>{spending?.name}</p>
+      <div className={styles.body}>
+        <div className={styles.columns}>
+          <div className={styles.column}>
+            <div className={styles.summary}>
+              <div className={styles.summaryHeader}>
+                <MerchantIcon className={styles.flexNone} name={spending?.name} />
+                <div className={styles.summaryText}>
+                  <p className={styles.summaryName}>{spending?.name}</p>
                   <Typography size='inherit' weight='semibold'>
                     {locale.formatAmount(spending?.currentAmount, AmountType.Stored)}
-                    <span className='font-normal'>of</span>
+                    <span className={styles.ofText}>of</span>
                     {locale.formatAmount(spending?.targetAmount, AmountType.Stored)}
                   </Typography>
                 </div>
               </div>
-              <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
-                <div
-                  className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600'
-                  style={{ width: `${allocatedProgress}%` }}
-                />
-                <div
-                  className='absolute top-0 bg-blue-600 h-1.5 rounded-full dark:bg-blue-600'
-                  style={{ width: `${usedProgress}%` }}
-                />
+              <div className={styles.progressTrack}>
+                <div className={styles.progressFillAllocated} style={{ width: `${allocatedProgress}%` }} />
+                <div className={styles.progressFillUsed} style={{ width: `${usedProgress}%` }} />
               </div>
             </div>
 
-            <Divider className='w-1/2 my-4' />
+            <Divider className={styles.dividerHalf} />
 
-            <FormTextField className='w-full' data-1p-ignore label='Expense' name='name' required />
-            <FormAmountField allowNegative={false} className='w-full' label='Amount' name='amount' required />
+            <FormTextField
+              className={layoutVariants({ width: 'full' })}
+              data-1p-ignore
+              label='Expense'
+              name='name'
+              required
+            />
+            <FormAmountField
+              allowNegative={false}
+              className={layoutVariants({ width: 'full' })}
+              label='Amount'
+              name='amount'
+              required
+            />
             <FormDatePicker
-              className='w-full'
+              className={layoutVariants({ width: 'full' })}
               label='Target Date'
               min={startOfTomorrow({
                 in: inTimezone,
@@ -217,7 +226,7 @@ export default function GoalDetails(): JSX.Element {
               required
             />
             <MSelectFunding
-              className='w-full'
+              className={layoutVariants({ width: 'full' })}
               label='When do you want to fund the expense?'
               menuPortalTarget={document.body}
               name='fundingScheduleId'
@@ -230,9 +239,9 @@ export default function GoalDetails(): JSX.Element {
               name='isPaused'
             />
           </div>
-          <Divider className='block md:hidden w-1/2' />
-          <div className='w-full md:w-1/2 flex flex-col gap-2'>
-            <Typography className='my-2' size='xl'>
+          <Divider className={styles.dividerMobile} />
+          <div className={styles.columnTimeline}>
+            <Typography className={styles.timelineTitle} size='xl'>
               Goal Timeline
             </Typography>
             <GoalTimeline spendingId={spending.spendingId} />

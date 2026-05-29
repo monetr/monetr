@@ -10,6 +10,7 @@ import { Button } from '@monetr/interface/components/Button';
 import Divider from '@monetr/interface/components/Divider';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
+import { layoutVariants } from '@monetr/interface/components/Layout';
 import MForm from '@monetr/interface/components/MForm';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import Typography from '@monetr/interface/components/Typography';
@@ -21,6 +22,8 @@ import type BankAccount from '@monetr/interface/models/BankAccount';
 import capitalize from '@monetr/interface/util/capitalize';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
+
+import styles from './details.module.scss';
 
 interface LinkValues {
   institutionName: string;
@@ -64,7 +67,7 @@ export default function LinkDetails(): React.JSX.Element {
 
   if (linkIsLoading || bankAccountsLoading) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+      <div className={styles.centerState}>
         <Typography size='5xl'>One moment...</Typography>
       </div>
     );
@@ -75,7 +78,7 @@ export default function LinkDetails(): React.JSX.Element {
   };
 
   return (
-    <MForm className='flex w-full h-full flex-col' initialValues={initialValues} onSubmit={submit}>
+    <MForm className={styles.form} initialValues={initialValues} onSubmit={submit}>
       <MTopNavigation icon={Landmark} title={link.getName()}>
         <Button onClick={handleRemoveLink} variant='destructive'>
           <Trash />
@@ -86,14 +89,14 @@ export default function LinkDetails(): React.JSX.Element {
           Save Changes
         </FormButton>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0 p-4 pb-16 md:pb-4'>
-        <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
-          <div className='w-full md:w-1/2 flex flex-col items-center'>
-            <Typography className='my-2 w-full' size='xl'>
+      <div className={styles.body}>
+        <div className={styles.columns}>
+          <div className={styles.column}>
+            <Typography className={styles.headingFull} size='xl'>
               Details
             </Typography>
             <FormTextField
-              className='w-full'
+              className={layoutVariants({ width: 'full' })}
               data-1p-ignore
               label='Instituion / Budget Name'
               name='institutionName'
@@ -101,12 +104,12 @@ export default function LinkDetails(): React.JSX.Element {
               required
             />
           </div>
-          <Divider className='block md:hidden w-1/2' />
-          <div className='w-full md:w-1/2 flex flex-col gap-2'>
-            <Typography className='my-2' size='xl'>
+          <Divider className={styles.dividerMobile} />
+          <div className={styles.columnAccounts}>
+            <Typography className={styles.heading} size='xl'>
               Accounts
             </Typography>
-            <ul className='flex flex-col gap-2'>
+            <ul className={styles.accountList}>
               {bankAccounts.map(account => (
                 <BankAccountItem bankAccount={account} key={account.bankAccountId} />
               ))}
@@ -125,14 +128,11 @@ interface BankAccountItemProps {
 function BankAccountItem(props: BankAccountItemProps): React.JSX.Element {
   const path = `/bank/${props.bankAccount.bankAccountId}/settings`;
   return (
-    <li className='group relative w-full'>
-      <Link
-        className='group flex h-full gap-1 rounded-lg px-2 py-1 group-hover:bg-zinc-600 md:gap-4 items-center'
-        to={path}
-      >
-        <div className='flex min-w-0 flex-col overflow-hidden grow'>
-          <div className='flex gap-2'>
-            <Typography className='group-hover:underline' color='emphasis' ellipsis size='md' weight='semibold'>
+    <li className={styles.item}>
+      <Link className={styles.itemLink} to={path}>
+        <div className={styles.itemText}>
+          <div className={styles.itemNameRow}>
+            <Typography className={styles.itemName} color='emphasis' ellipsis size='md' weight='semibold'>
               {props.bankAccount.name}
             </Typography>
             {Boolean(props.bankAccount.deletedAt) && <Badge size='sm'>Archived</Badge>}
@@ -141,7 +141,7 @@ function BankAccountItem(props: BankAccountItemProps): React.JSX.Element {
             {capitalize(props.bankAccount.accountSubType)}
           </Typography>
         </div>
-        <ChevronRight className='text-dark-monetr-content-subtle group-hover:text-dark-monetr-content-emphasis' />
+        <ChevronRight className={styles.itemChevron} />
       </Link>
     </li>
   );

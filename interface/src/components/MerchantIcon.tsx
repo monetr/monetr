@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback } from '@monetr/interface/components/Avatar';
 import { useIconSearch } from '@monetr/interface/hooks/useIconSearch';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import avatarStyles from './Avatar.module.scss';
 import merchantIconStyles from './MerchantIcon.module.scss';
@@ -28,7 +28,7 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
     };
 
     return (
-      <div className={mergeTailwind(avatarStyles.avatar, merchantIconStyles.merchantIcon, props.className)}>
+      <div className={mergeClasses(avatarStyles.avatar, merchantIconStyles.merchantIcon, props.className)}>
         <div style={styles} />
       </div>
     );

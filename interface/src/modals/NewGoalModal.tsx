@@ -22,6 +22,8 @@ import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './NewGoalModal.module.scss';
+
 interface NewGoalValues {
   name: string;
   amount: number;
@@ -75,15 +77,10 @@ function NewGoalModal(): JSX.Element {
   }
 
   return (
-    <MModal className='sm:max-w-xl' open={modal.visible} ref={ref}>
-      <MForm
-        className='h-full flex flex-col gap-2 p-2 justify-between'
-        data-testid='new-goal-modal'
-        initialValues={initialValues}
-        onSubmit={submit}
-      >
-        <div className='flex flex-col'>
-          <Typography className='mb-2' size='xl' weight='bold'>
+    <MModal className={styles.modal} open={modal.visible} ref={ref}>
+      <MForm className={styles.form} data-testid='new-goal-modal' initialValues={initialValues} onSubmit={submit}>
+        <div className={styles.body}>
+          <Typography className={styles.heading} size='xl' weight='bold'>
             Create A New Goal
           </Typography>
           <FormTextField
@@ -95,16 +92,16 @@ function NewGoalModal(): JSX.Element {
             placeholder='Vacation, Furniture, Car...'
             required
           />
-          <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
+          <div className={styles.fieldRow}>
             <FormAmountField
               allowNegative={false}
-              className='w-full md:w-1/2'
+              className={styles.fieldRowItem}
               label='How much do you need?'
               name='amount'
               required
             />
             <FormDatePicker
-              className='w-full md:w-1/2'
+              className={styles.fieldRowItem}
               label='How soon will you need it?'
               min={startOfTomorrow({
                 in: inTimezone,
@@ -120,7 +117,7 @@ function NewGoalModal(): JSX.Element {
             required
           />
         </div>
-        <div className='flex justify-end gap-2'>
+        <div className={styles.actions}>
           <Button data-testid='close-new-goal-modal' onClick={modal.remove} variant='destructive'>
             Cancel
           </Button>

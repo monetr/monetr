@@ -1,7 +1,7 @@
 import React from 'react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './Popover.module.scss';
 
@@ -16,7 +16,7 @@ const PopoverContent = React.forwardRef<
   <PopoverPrimitive.Portal>
     <PopoverPrimitive.Content
       align={align}
-      className={mergeTailwind(styles.popoverContent, className)}
+      className={mergeClasses(styles.popoverContent, className)}
       ref={ref}
       sideOffset={sideOffset}
       {...props}

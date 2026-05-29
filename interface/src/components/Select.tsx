@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { cva } from 'class-variance-authority';
 import { type UseComboboxSelectedItemChange, useCombobox } from 'downshift';
 import { ArrowDown, ArrowUp, LoaderCircle, PanelBottomClose, PanelBottomOpen } from 'lucide-react';
 
@@ -8,7 +7,7 @@ import ErrorText from '@monetr/interface/components/ErrorText';
 import Label, { type LabelDecorator } from '@monetr/interface/components/Label';
 import { Skeleton } from '@monetr/interface/components/Skeleton';
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import errorTextStyles from './ErrorText.module.scss';
 import inputStyles from './FormTextField.module.scss';
@@ -75,12 +74,12 @@ export default function Select<V>(props: SelectProps<V>): React.JSX.Element {
 export function SelectLoading<V>(props: SelectPropsLoading<V>): React.JSX.Element {
   const LabelDecorator = props.labelDecorator || (() => null);
   return (
-    <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
+    <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>
       <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
         <LabelDecorator disabled={props.disabled} name={props.name} />
       </Label>
-      <div className={mergeTailwind(inputStyles.input, selectStyles.selectLoading)} data-error={props.error}>
-        <Skeleton className='w-full h-5 mr-2' />
+      <div className={mergeClasses(inputStyles.input, selectStyles.selectLoading)} data-error={props.error}>
+        <Skeleton className={selectStyles.loadingSkeleton} />
         <SelectIndicator disabled={props.disabled} isLoading={props.isLoading} open={false} />
       </div>
       <ErrorText error={props.error} />
@@ -170,14 +169,14 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
   const LabelDecorator = props.labelDecorator || (() => null);
 
   return (
-    <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
+    <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>
       <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
         <LabelDecorator disabled={props.disabled} name={props.name} />
       </Label>
       {/** biome-ignore lint/a11y/noStaticElementInteractions: Need to account for weird padding here */}
       <div
         aria-disabled={props.disabled}
-        className={mergeTailwind(inputStyles.input, selectStyles.select)}
+        className={mergeClasses(inputStyles.input, selectStyles.select)}
         data-error={Boolean(props.error)}
         onClick={onOpenClickHandler}
         ref={inputWrapperRef}
@@ -197,8 +196,8 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
       </div>
       <ErrorText error={props.error} />
       <ul
-        className={mergeTailwind(selectStyles.unorderedList, {
-          hidden: !(isOpen && items.length),
+        className={mergeClasses(selectStyles.unorderedList, {
+          [selectStyles.hidden]: !(isOpen && items.length),
         })}
         {...getMenuProps()}
         style={renderStyles}
@@ -206,18 +205,10 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
         {isOpen &&
           items.map((item, index) => (
             <li
-              className={mergeTailwind(
-                [
-                  'text-dark-monetr-content-emphasis',
-                  'group w-full rounded-lg px-2 py-1.5',
-                  'hover:bg-zinc-600 aria-selected:bg-zinc-600',
-                  'cursor-pointer disabled:cursor-not-allowed',
-                ],
-                {
-                  // The _ACTUAL_ selected state will be slightly darker than the hover state.
-                  'bg-zinc-700': selectedItem?.value === item.value,
-                },
-              )}
+              className={mergeClasses(selectStyles.option, {
+                // The _ACTUAL_ selected state will be slightly darker than the hover state.
+                [selectStyles.optionSelected]: selectedItem?.value === item.value,
+              })}
               key={item.label}
               {...getItemProps({
                 item,
@@ -253,7 +244,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
   const LabelDecorator = props.labelDecorator || (() => null);
 
   return (
-    <div className={mergeTailwind(errorTextStyles.errorTextPadding, props.className)}>
+    <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>
       <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
         <LabelDecorator disabled={props.disabled} name={props.name} />
       </Label>
@@ -261,13 +252,13 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
         <DrawerTrigger asChild>
           <button
             aria-disabled={props.disabled}
-            className={mergeTailwind(inputStyles.input, selectStyles.select)}
+            className={mergeClasses(inputStyles.input, selectStyles.select)}
             disabled={props.disabled}
             type='button'
           >
             <span
               aria-disabled={props.disabled}
-              className={mergeTailwind([selectStyles.selectText], {
+              className={mergeClasses([selectStyles.selectText], {
                 // If we don't have a value then use the placeholder text style.
                 [selectStyles.selectTextPlaceholder]: !props.value?.label,
               })}
@@ -283,19 +274,10 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
               {open &&
                 props.options.map(item => (
                   <li
-                    className={mergeTailwind(
-                      [
-                        'text-dark-monetr-content-emphasis',
-                        'group w-full rounded-lg px-2 py-1.5',
-                        'hover:bg-zinc-600 aria-selected:bg-zinc-600',
-                        'active:bg-zinc-600 aria-selected:bg-zinc-600',
-                        'cursor-pointer disabled:cursor-not-allowed',
-                      ],
-                      {
-                        // The _ACTUAL_ selected state will be slightly darker than the hover state.
-                        'bg-zinc-700': props.value === item,
-                      },
-                    )}
+                    className={mergeClasses(selectStyles.optionTouch, {
+                      // The _ACTUAL_ selected state will be slightly darker than the hover state.
+                      [selectStyles.optionSelected]: props.value === item,
+                    })}
                     key={item.label}
                     onClick={() => onChange(item)}
                   >
@@ -323,32 +305,10 @@ interface SelectIndicator {
   open?: boolean;
 }
 
-const SelectIndicatorClasses = cva([selectStyles.indicator], {
-  variants: {
-    isLoading: {
-      true: '',
-      false: '',
-    },
-    disabled: {
-      true: '',
-      // Should match the placeholder text color when not focused.
-      false: [
-        '',
-        // When the textbox is focused it should match the text color
-        // But only show hover and focus states when we are not disabled.
-        'group-hover:text-zinc-200 group-focus-within:text-zinc-200',
-      ],
-    },
-  },
-  defaultVariants: {
-    isLoading: false,
-    disabled: false,
-  },
-});
-
-export function SelectIndicator({ isLoading, disabled, open }: SelectIndicator): React.JSX.Element {
+export function SelectIndicator({ isLoading, open }: SelectIndicator): React.JSX.Element {
   const isMobile = useIsMobile();
-  const className = SelectIndicatorClasses({ isLoading, disabled });
+  // Hover/focus colours come from the `.select` descendant selectors.
+  const className = selectStyles.indicator;
   if (isLoading) {
     return <LoaderCircle className={className} data-loading='true' />;
   }
