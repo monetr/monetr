@@ -74,7 +74,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: ^20
-        version: 20.19.23
+        version: 20.19.41
       '@types/react':
         specifier: 18.3.28
         version: 18.3.28
@@ -294,7 +294,7 @@ importers:
         version: 14.6.1(@testing-library/dom@10.4.0)
       '@types/node':
         specifier: 20.19.23
-        version: 20.19.23
+        version: 20.19.41
       '@types/react':
         specifier: 18.3.28
         version: 18.3.28
@@ -468,6 +468,10 @@ packages:
 
   '@babel/runtime@7.28.6':
     resolution: {integrity: sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.29.2':
+    resolution: {integrity: sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.28.6':
@@ -1243,6 +1247,7 @@ packages:
     resolution: {integrity: sha512-BEk6mIYBK4BihW9qXXITJORrVXecTlkRjrqhgefili4xjXtLdcUnxAm9sN/2oJ8m378n2h33qDh4gr2orPBFWQ==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rspack/binding-linux-arm64-musl@2.0.3':
     resolution: {integrity: sha512-0WulUQPop6vmSDfrTxghmVlm+6crU8/XqD2f0dOWbEniZVuDZJ5/Y/cBqTRyk3rjl0vrmUv3lc87/t7UgQJQSw==}
@@ -1266,6 +1271,7 @@ packages:
     resolution: {integrity: sha512-xHorBPBZAg0Pn9Q0k9dWZ9euowieDxcSOzQ9JhTCmhDY6wZH5M/kCBFlCs/OQeW5/NUArW3x3MwEdO/0QJHMxg==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rspack/binding-linux-x64-musl@2.0.3':
     resolution: {integrity: sha512-0kcuFoZ8vy2iNWoISFOZt+/Ujo7LRLrzE7h07AV5r+oN/mv+/v14Sd/8NUtDIScCkrYOszYq/QS31e6t0UrVfw==}
@@ -1606,8 +1612,8 @@ packages:
   '@types/nlcst@2.0.3':
     resolution: {integrity: sha512-vSYNSDe6Ix3q+6Z7ri9lyWqgGhJTmzRjZRqyq15N0Z/1/UnVsno9G/N40NBijoYx2seFDIl0+B2mgAb9mezUCA==}
 
-  '@types/node@20.19.23':
-    resolution: {integrity: sha512-yIdlVVVHXpmqRhtyovZAcSy0MiPcYWGkoO4CGe/+jpP0hmNuihm4XhHbADpK++MsiLHP5MVlv+bcgdF99kSiFQ==}
+  '@types/node@20.19.41':
+    resolution: {integrity: sha512-ECymXOukMnOoVkC2bb1Vc/w/836DXncOg5m8Xj1RH7xSHZJWNYY6Zh7EH477vcnD5egKNNfy2RpNOmuChhFPgQ==}
 
   '@types/prop-types@15.7.12':
     resolution: {integrity: sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==}
@@ -1905,6 +1911,15 @@ packages:
 
   debug@4.3.6:
     resolution: {integrity: sha512-O/09Bd4Z1fBrU4VzkhFqVgpPzaGbw6Sm9FEkBT1A/YBXQFGuuSxa1dN2nxgxS34JmKXqYx8CZAwEVoJFImUXIg==}
+    engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
+  debug@4.4.3:
+    resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
     engines: {node: '>=6.0'}
     peerDependencies:
       supports-color: '*'
@@ -2718,6 +2733,9 @@ packages:
   ms@2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
 
+  ms@2.1.3:
+    resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
+
   nanoid@3.3.11:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -3189,6 +3207,7 @@ packages:
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
+    libc: glibc
 
   sass-embedded-linux-arm@1.99.0:
     resolution: {integrity: sha512-d4IjJZrX2+AwB2YCy1JySwdptJECNP/WfAQLUl8txI3ka8/d3TUI155GtelnoZUkio211PwIeFvvAeZ9RXPQnw==}
@@ -3237,6 +3256,7 @@ packages:
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
+    libc: glibc
 
   sass-embedded-unknown-all@1.99.0:
     resolution: {integrity: sha512-P7MxiUtL/XzGo3PX0CaB8lNNEFLQWKikPA8pbKytx9ZCLZSDkt2NJcdAbblB/sqMs4AV3EK2NadV8rI/diq3xg==}
@@ -3597,8 +3617,8 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
 
-  ws@8.18.0:
-    resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
+  ws@8.21.0:
+    resolution: {integrity: sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -3832,6 +3852,8 @@ snapshots:
       - supports-color
 
   '@babel/runtime@7.28.6': {}
+
+  '@babel/runtime@7.29.2': {}
 
   '@babel/template@7.28.6':
     dependencies:
@@ -4931,7 +4953,7 @@ snapshots:
   '@testing-library/dom@10.4.0':
     dependencies:
       '@babel/code-frame': 7.29.0
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.2
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       chalk: 4.1.2
@@ -5040,7 +5062,7 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
 
-  '@types/node@20.19.23':
+  '@types/node@20.19.41':
     dependencies:
       undici-types: 6.21.0
 
@@ -5324,6 +5346,11 @@ snapshots:
   debug@4.3.6:
     dependencies:
       ms: 2.1.2
+
+  debug@4.4.3:
+    dependencies:
+      ms: 2.1.3
+    optional: true
 
   decimal.js@10.6.0:
     optional: true
@@ -5808,7 +5835,7 @@ snapshots:
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.3.6
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -5816,7 +5843,7 @@ snapshots:
   https-proxy-agent@7.0.6:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.3.6
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -5919,7 +5946,7 @@ snapshots:
       whatwg-encoding: 3.1.1
       whatwg-mimetype: 4.0.0
       whatwg-url: 14.2.0
-      ws: 8.18.0
+      ws: 8.21.0
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -6561,6 +6588,9 @@ snapshots:
       minimist: 1.2.8
 
   ms@2.1.2: {}
+
+  ms@2.1.3:
+    optional: true
 
   nanoid@3.3.11: {}
 
@@ -7638,7 +7668,7 @@ snapshots:
       regexparam: 3.0.0
       use-sync-external-store: 1.5.0(react@18.3.1)
 
-  ws@8.18.0:
+  ws@8.21.0:
     optional: true
 
   xml-js@1.6.11:
