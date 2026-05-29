@@ -41,7 +41,7 @@
 }
 
 .numberComplete {
-  background-color: #16a34a; // green-600
+  background-color: var(--success); // green-600
   --text-color: #fff;
   color: #fff;
 }
@@ -52,8 +52,8 @@
 }
 
 .textComplete {
-  --text-color: #16a34a; // green-600
-  color: #16a34a;
+  --text-color: var(--success); // green-600
+  color: var(--success);
 }
 
 // Hide the label on small screens for steps that aren't the current or next one.
@@ -75,5 +75,5 @@
 }
 
 .lineComplete {
-  border-color: #16a34a; // green-600
+  border-color: var(--success); // green-600
 }

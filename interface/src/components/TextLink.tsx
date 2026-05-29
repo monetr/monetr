@@ -3,7 +3,7 @@ import { cva } from 'class-variance-authority';
 import { Link } from 'wouter';
 
 import { textSizes, textWeights } from '@monetr/interface/components/Typography';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './TextLink.module.scss';
 
@@ -33,7 +33,7 @@ export type TextLinkProps = VariantProps &
 export default function TextLink({ variant, size, className, ...props }: TextLinkProps): React.JSX.Element {
   return (
     <Link
-      className={mergeTailwind(
+      className={mergeClasses(
         textLinkVariants({
           variant,
           size,

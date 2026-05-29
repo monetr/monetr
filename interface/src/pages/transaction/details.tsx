@@ -29,6 +29,8 @@ import Transaction from '@monetr/interface/models/Transaction';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './details.module.scss';
+
 interface TransactionValues {
   name: string;
   originalName: string;
@@ -82,21 +84,16 @@ export default function TransactionDetails(): JSX.Element {
 
   if (isLoading || linkIsLoading) {
     return (
-      <MForm
-        className='flex w-full h-full flex-col'
-        enableReinitialize={true}
-        initialValues={{} as unknown}
-        onSubmit={submit}
-      >
+      <MForm className={styles.form} enableReinitialize={true} initialValues={{} as unknown} onSubmit={submit}>
         <MTopNavigation
           base={`/bank/${selectedBankAccountId}/transactions`}
           breadcrumb={transaction?.name}
           icon={ShoppingCart}
           title='Transactions'
         />
-        <div className='w-full h-full min-w-0 p-4 pb-16 md:pb-4'>
-          <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
-            <div className='w-full md:w-1/2 flex flex-col items-center'>
+        <div className={styles.body}>
+          <div className={styles.columns}>
+            <div className={styles.column}>
               <Flex justify='center'>
                 <MerchantIcon name={transaction?.name} />
               </Flex>
@@ -144,8 +141,8 @@ export default function TransactionDetails(): JSX.Element {
 
   if (!transactionId && !isLoading) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartCrack className='dark:text-dark-monetr-content h-24 w-24' />
+      <div className={styles.centerState}>
+        <HeartCrack className={styles.errorIcon} />
         <Typography size='5xl'>Something isn't right...</Typography>
         <Typography size='2xl'>There wasn't an expense specified...</Typography>
       </div>
@@ -153,8 +150,8 @@ export default function TransactionDetails(): JSX.Element {
   }
   if ((isError || !transaction) && !isLoading) {
     return (
-      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
-        <HeartCrack className='dark:text-dark-monetr-content h-24 w-24' />
+      <div className={styles.centerState}>
+        <HeartCrack className={styles.errorIcon} />
         <Typography size='5xl'>Something isn't right...</Typography>
         <Typography size='2xl'>We weren't able to load details for the transaction specified...</Typography>
       </div>
@@ -171,12 +168,7 @@ export default function TransactionDetails(): JSX.Element {
   };
 
   return (
-    <MForm
-      className='flex w-full h-full flex-col'
-      enableReinitialize={true}
-      initialValues={initialValues}
-      onSubmit={submit}
-    >
+    <MForm className={styles.form} enableReinitialize={true} initialValues={initialValues} onSubmit={submit}>
       <MTopNavigation
         base={`/bank/${transaction.bankAccountId}/transactions`}
         breadcrumb={transaction?.name}
@@ -189,9 +181,9 @@ export default function TransactionDetails(): JSX.Element {
           Save Changes
         </FormButton>
       </MTopNavigation>
-      <div className='w-full h-full min-w-0 p-4 pb-16 md:pb-4'>
-        <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
-          <div className='w-full md:w-1/2 flex flex-col items-center'>
+      <div className={styles.body}>
+        <div className={styles.columns}>
+          <div className={styles.column}>
             <Flex justify='center'>
               <MerchantIcon name={transaction?.name} />
             </Flex>
@@ -230,7 +222,7 @@ export default function TransactionDetails(): JSX.Element {
               <MSelectSpending className={layoutVariants({ width: 'full' })} name='spendingId' />
             )}
           </div>
-          <div className='w-full md:w-1/2 flex flex-col items-center'>
+          <div className={styles.column}>
             <SimilarTransactions transaction={transaction} />
           </div>
         </div>

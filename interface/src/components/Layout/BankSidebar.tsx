@@ -7,7 +7,7 @@ import BankSidebarItem from '@monetr/interface/components/Layout/BankSidebarItem
 import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
 import Typography from '@monetr/interface/components/Typography';
 import { useLinks } from '@monetr/interface/hooks/useLinks';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './BankSidebar.module.scss';
 import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
@@ -30,9 +30,9 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
   if (isError) {
     return (
       <SidebarWrapper className={props.className}>
-        <div className='w-full h-12 flex items-center justify-center relative group'>
-          <div className='absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'>
-            <CircleAlert className='size-9' />
+        <div className={styles.itemRow}>
+          <div className={styles.indicatorCircle}>
+            <CircleAlert className={styles.alertIcon} />
           </div>
         </div>
       </SidebarWrapper>
@@ -59,11 +59,8 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
       {linksSorted.map(link => (
         <BankSidebarItem key={link.linkId} link={link} />
       ))}
-      <div className='w-full h-12 flex items-center justify-center relative group'>
-        <Link
-          className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'
-          to='/link/create'
-        >
+      <div className={styles.itemRow}>
+        <Link className={styles.indicatorCircle} to='/link/create'>
           <Typography color='emphasis' size='xl' weight='bold'>
             +1
           </Typography>
@@ -80,13 +77,13 @@ interface SidebarWrapperProps {
 
 function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
   return (
-    <div className={mergeTailwind(styles.bankSidebarWrapperRoot, props.className)} data-testid='bank-sidebar'>
-      <MSidebarToggle className='flex lg:hidden' />
-      <div className='h-10 w-10'>
-        <Logo className='w-full' />
+    <div className={mergeClasses(styles.bankSidebarWrapperRoot, props.className)} data-testid='bank-sidebar'>
+      <MSidebarToggle className={styles.toggle} />
+      <div className={styles.logoWrapper}>
+        <Logo className={styles.logo} />
       </div>
-      <Divider className='w-1/2' />
-      <div className='h-full w-full flex items-center flex-col overflow-y-auto'>{props?.children}</div>
+      <Divider className={styles.divider} />
+      <div className={styles.items}>{props?.children}</div>
       <BankSidebarSubscriptionItem />
       <SettingsButton />
       <LogoutButton />
@@ -97,7 +94,7 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
 function SettingsButton(): JSX.Element {
   return (
     <Link data-testid='bank-sidebar-settings' to='/settings'>
-      <Settings className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+      <Settings className={styles.actionIcon} />
     </Link>
   );
 }
@@ -107,7 +104,7 @@ function LogoutButton(): JSX.Element {
   // easier to prevent the current user's data from leaking into another session.
   return (
     <Link data-testid='bank-sidebar-logout' to='/logout'>
-      <LogOut className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+      <LogOut className={styles.actionIcon} />
     </Link>
   );
 }

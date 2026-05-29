@@ -12,6 +12,8 @@ import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { AmountType } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
 
+import styles from './FundingItem.module.scss';
+
 export interface FundingItemProps {
   funding: FundingSchedule;
 }
@@ -43,16 +45,16 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
   }
 
   return (
-    <li className='group relative w-full px-1 md:px-2'>
+    <li className={styles.root}>
       <Link
-        className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
+        className={styles.mobileLink}
         to={`/bank/${funding.bankAccountId}/funding/${funding.fundingScheduleId}/details`}
       />
-      <div className='flex items-center rounded-lg group-hover:bg-zinc-600 gap-2 md:gap-4 px-2 py-1 h-full cursor-pointer md:cursor-auto'>
+      <div className={styles.inner}>
         <Avatar>
           <AvatarFallback>{letter}</AvatarFallback>
         </Avatar>
-        <div className='w-full md:w-1/2 flex flex-col flex-1 min-w-0 overflow-hidden'>
+        <div className={styles.detailsColumn}>
           <Typography color='emphasis' ellipsis size='inherit' weight='semibold'>
             {funding.name}
           </Typography>
@@ -63,25 +65,20 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
             {nextOccurrenceString}
           </Typography>
         </div>
-        <div className='flex md:min-w-[14em] shrink-0 justify-end gap-2 items-center'>
-          <div className='flex flex-col'>
-            <div className='flex justify-end'>
-              <span className='hidden sm:block text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>
-                Estimated Contribution
-              </span>
-              <span className='block sm:hidden text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>Est.</span>
+        <div className={styles.amountSection}>
+          <div className={styles.amountColumn}>
+            <div className={styles.amountRow}>
+              <span className={styles.estimatedLabel}>Estimated Contribution</span>
+              <span className={styles.estimatedLabelShort}>Est.</span>
               &nbsp;
-              <span className='text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>
+              <span className={styles.estimatedValue}>
                 {contributionForecast?.data
                   ? localeCurrency.formatAmount(contributionForecast.data, AmountType.Stored)
                   : '...'}
               </span>
             </div>
           </div>
-          <ChevronRight
-            className='dark:text-dark-monetr-content-subtle dark:group-hover:text-dark-monetr-content-emphasis flex-none md:cursor-pointer'
-            onClick={openDetails}
-          />
+          <ChevronRight className={styles.chevron} onClick={openDetails} />
         </div>
       </div>
     </li>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './Modal.module.scss';
 
@@ -23,7 +23,7 @@ const MModal = React.forwardRef<MModalRef, MModalProps>((props, ref) => {
       <div className={styles.modalBackdrop} />
       <div className={styles.modalContainer} ref={ref}>
         <div className={styles.modalWindowWrapper}>
-          <div className={mergeTailwind(styles.modalWindow, props.className)}>{props.children}</div>
+          <div className={mergeClasses(styles.modalWindow, props.className)}>{props.children}</div>
         </div>
       </div>
     </div>

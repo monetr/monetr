@@ -15,31 +15,15 @@ import {
 import { Drawer, DrawerContent, DrawerTrigger, DrawerWrapper } from '@monetr/interface/components/Drawer';
 import { Popover, PopoverContent, PopoverTrigger } from '@monetr/interface/components/Popover';
 import useIsMobile from '@monetr/interface/hooks/useIsMobile';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
-export const comboboxVariants = cva(['justify-between truncate'], {
+import styles from './Combobox.module.scss';
+
+export const comboboxVariants = cva([styles.base], {
   variants: {
     variant: {
-      outlined: ['ring-1 enabled:ring-dark-monetr-border-string'],
-      text: [
-        'ring-0',
-        // Override the background color for combobox.
-        'enabled:hover:bg-transparent',
-
-        // DROPDOWN IS CLOSED
-        // When it's closed, only show the border when someone hovers over.
-        'data-[state="closed"]:enabled:hover:ring-1',
-        'data-[state="closed"]:enabled:hover:ring-dark-monetr-border-string',
-        'data-[state="closed"]:focus:ring-0',
-        // When the dropdown is closed, don't show any icons unless they are hovering.
-        // '[&_svg]:data-[state="closed"]:hover:opacity-50 [&_svg]:data-[state="closed"]:opacity-0',
-
-        // DROPDOWN IS OPEN
-        // When its open, show the border all the time with the primary color.
-        'data-[state="open"]:ring-dark-monetr-brand data-[state="open"]:ring-2',
-        // When the dropdown is open then show icons
-        // '[&_svg]:data-[state="open"]:block',
-      ],
+      outlined: styles.outlined,
+      text: styles.text,
     },
     size: {
       default: '',
@@ -86,10 +70,10 @@ export function ComboboxItem<V extends string, O extends ComboboxOption<V>>(
   return (
     <Fragment>
       <Check
-        className={mergeTailwind(
-          'mr-2 h-5 w-5',
-          props.currentValue === props.option.value ? 'opacity-100' : 'opacity-0',
-        )}
+        className={mergeClasses(styles.checkIcon, {
+          [styles.checkIconVisible]: props.currentValue === props.option.value,
+          [styles.checkIconHidden]: props.currentValue !== props.option.value,
+        })}
       />
       {props.option.label}
     </Fragment>
@@ -112,7 +96,7 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
         )}
         <CommandList>
           <CommandEmpty>{props.emptyString}</CommandEmpty>
-          <CommandGroup className='pb-6 md:pb-1'>
+          <CommandGroup className={styles.group}>
             {props.options.map(option => (
               <CommandItem
                 key={option.value}
@@ -138,22 +122,22 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
         <DrawerTrigger asChild>
           <Button
             aria-expanded={open}
-            className={mergeTailwind(comboboxVariants({ variant: props.variant, size: props.size }), props.className)}
+            className={mergeClasses(comboboxVariants({ variant: props.variant, size: props.size }), props.className)}
             disabled={props.disabled}
             role='combobox'
             size={props.size}
             variant={props.variant}
           >
-            <div className='text-ellipsis text-nowrap min-w-0 overflow-hidden text-inherit'>
+            <div className={styles.triggerLabel}>
               {props.value ? props.options.find(option => option.value === props.value)?.label : props.placeholder}
             </div>
-            <ChevronsUpDown className='h-3 w-3 shrink-0 opacity-50' />
+            <ChevronsUpDown className={styles.triggerIcon} />
           </Button>
         </DrawerTrigger>
         <DrawerContent>
           <DrawerWrapper>
             <Picker />
-            <div className='h-6' />
+            <div className={styles.drawerSpacer} />
           </DrawerWrapper>
         </DrawerContent>
       </Drawer>
@@ -165,16 +149,16 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
       <PopoverTrigger asChild>
         <Button
           aria-expanded={open}
-          className={mergeTailwind(comboboxVariants({ variant: props.variant, size: props.size }), props.className)}
+          className={mergeClasses(comboboxVariants({ variant: props.variant, size: props.size }), props.className)}
           disabled={props.disabled}
           role='combobox'
           size={props.size}
           variant={props.variant}
         >
-          <div className='text-ellipsis text-nowrap min-w-0 overflow-hidden text-inherit'>
+          <div className={styles.triggerLabel}>
             {props.value ? props.options.find(option => option.value === props.value)?.label : props.placeholder}
           </div>
-          <ChevronsUpDown className='h-3 w-3 shrink-0 opacity-50' />
+          <ChevronsUpDown className={styles.triggerIcon} />
         </Button>
       </PopoverTrigger>
       <PopoverContent>

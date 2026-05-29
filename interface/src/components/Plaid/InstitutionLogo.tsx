@@ -2,7 +2,7 @@ import { Landmark } from 'lucide-react';
 
 import { useInstitution } from '@monetr/interface/hooks/useInstitution';
 import type Link from '@monetr/interface/models/Link';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './InstitutionLogo.module.scss';
 
@@ -17,7 +17,7 @@ export default function PlaidInstitutionLogo(props: PlaidInstitutionLogoProps): 
   if (!institution?.logo) {
     return (
       <Landmark
-        className={mergeTailwind(styles.iconFallback, props.className)}
+        className={mergeClasses(styles.iconFallback, props.className)}
         data-testid={`bank-sidebar-item-${props.link?.linkId}-logo-missing`}
       />
     );

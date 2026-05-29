@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 import { Drawer as DrawerPrimitive } from '@monetr/vaul';
 
 import styles from './Drawer.module.scss';
@@ -87,7 +87,7 @@ const DrawerOverlay = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Overlay className={mergeTailwind(styles.drawerOverlay, className)} ref={ref} {...props} />
+  <DrawerPrimitive.Overlay className={mergeClasses(styles.drawerOverlay, className)} ref={ref} {...props} />
 ));
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
@@ -97,7 +97,7 @@ const DrawerContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay />
-    <DrawerPrimitive.Content className={mergeTailwind(styles.drawerContent, className)} ref={ref} {...props}>
+    <DrawerPrimitive.Content className={mergeClasses(styles.drawerContent, className)} ref={ref} {...props}>
       <div className={styles.drawerHandle} />
       {children}
     </DrawerPrimitive.Content>
@@ -109,7 +109,7 @@ DrawerContent.displayName = 'DrawerContent';
 // properly.
 const DrawerWrapper = React.forwardRef<HTMLDivElement, React.ButtonHTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
-    <div className={mergeTailwind(styles.drawerWrapper, className)} ref={ref} {...props}>
+    <div className={mergeClasses(styles.drawerWrapper, className)} ref={ref} {...props}>
       {children}
     </div>
   ),
@@ -117,12 +117,12 @@ const DrawerWrapper = React.forwardRef<HTMLDivElement, React.ButtonHTMLAttribute
 DrawerWrapper.displayName = 'DrawerWrapper';
 
 const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={mergeTailwind(styles.drawerHeader, className)} {...props} />
+  <div className={mergeClasses(styles.drawerHeader, className)} {...props} />
 );
 DrawerHeader.displayName = 'DrawerHeader';
 
 const DrawerFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={mergeTailwind(styles.drawerFooter, className)} {...props} />
+  <div className={mergeClasses(styles.drawerFooter, className)} {...props} />
 );
 DrawerFooter.displayName = 'DrawerFooter';
 
@@ -130,7 +130,7 @@ const DrawerTitle = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Title className={mergeTailwind(styles.drawerTitle, className)} ref={ref} {...props} />
+  <DrawerPrimitive.Title className={mergeClasses(styles.drawerTitle, className)} ref={ref} {...props} />
 ));
 DrawerTitle.displayName = DrawerPrimitive.Title.displayName;
 
@@ -138,7 +138,7 @@ const DrawerDescription = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
 >(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Description className={mergeTailwind(styles.drawerDescription, className)} ref={ref} {...props} />
+  <DrawerPrimitive.Description className={mergeClasses(styles.drawerDescription, className)} ref={ref} {...props} />
 ));
 DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 

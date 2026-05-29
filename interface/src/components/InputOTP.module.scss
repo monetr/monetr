@@ -1,0 +1,91 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// The blinking caret shown in the active, empty slot.
+@keyframes caret-blink {
+  0%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+  20%,
+  50% {
+    opacity: 0;
+  }
+}
+
+.input {
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: 2 * variables.$size;
+
+  // has-[:disabled]:opacity-50
+  &:has(:disabled) {
+    opacity: 0.5;
+  }
+}
+
+.group {
+  display: flex;
+  align-items: center;
+}
+
+.slot {
+  position: relative;
+  display: flex;
+  height: 10 * variables.$size;
+  width: 10 * variables.$size;
+  align-items: center;
+  justify-content: center;
+
+  border-top-width: 1px;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+  border-color: var(--border-string);
+
+  @include mixins.text-small;
+
+  // transition-all
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  &:first-child {
+    border-top-left-radius: 0.375rem; // rounded-l-md
+    border-bottom-left-radius: 0.375rem;
+    border-left-width: 1px; // first:border-l
+  }
+
+  &:last-child {
+    border-top-right-radius: 0.375rem; // rounded-r-md
+    border-bottom-right-radius: 0.375rem;
+  }
+}
+
+// Active slot.
+.slotActive {
+  z-index: 10;
+}
+
+.caretWrapper {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.caret {
+  height: 4 * variables.$size; // h-4
+  width: 1px; // w-px
+  background-color: var(--content-emphasis);
+
+  animation: caret-blink 1000ms ease-out infinite;
+}

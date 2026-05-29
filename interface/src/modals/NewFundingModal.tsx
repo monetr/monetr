@@ -24,6 +24,8 @@ import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './NewFundingModal.module.scss';
+
 interface NewFundingValues {
   name: string;
   nextOccurrence: Date;
@@ -90,17 +92,12 @@ function NewFundingModal(): JSX.Element {
   );
 
   return (
-    <MModal className='md:max-w-md' open={modal.visible} ref={ref}>
-      <MForm
-        className='h-full flex flex-col gap-2 p-2 justify-between'
-        data-testid='new-funding-modal'
-        initialValues={initialValues}
-        onSubmit={submit}
-      >
+    <MModal className={styles.modal} open={modal.visible} ref={ref}>
+      <MForm className={styles.form} data-testid='new-funding-modal' initialValues={initialValues} onSubmit={submit}>
         {({ setFieldValue, values }) => (
           <Fragment>
-            <div className='flex flex-col'>
-              <Typography className='mb-2' size='xl' weight='bold'>
+            <div className={styles.body}>
+              <Typography className={styles.heading} size='xl' weight='bold'>
                 Create A New Funding Schedule
               </Typography>
               <FormTextField
@@ -133,15 +130,12 @@ function NewFundingModal(): JSX.Element {
                 name='estimatedDeposit'
                 placeholder='Example: $ 1,000.00'
               />
-              <div className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'>
-                <div className='space-y-0.5'>
-                  <label
-                    className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer'
-                    htmlFor={switchId}
-                  >
+              <div className={styles.optionRow}>
+                <div className={styles.optionText}>
+                  <label className={styles.optionLabel} htmlFor={switchId}>
                     Exclude Weekends
                   </label>
-                  <p className='text-sm text-dark-monetr-content'>
+                  <p className={styles.optionDescription}>
                     If it were to land on a weekend, it is adjusted to the previous weekday instead.
                   </p>
                 </div>
@@ -153,7 +147,7 @@ function NewFundingModal(): JSX.Element {
               </div>
               {isManual && <AutoCreateTransactionToggle />}
             </div>
-            <div className='flex justify-end gap-2'>
+            <div className={styles.actions}>
               <Button data-testid='close-new-funding-modal' onClick={modal.remove} variant='secondary'>
                 Cancel
               </Button>
@@ -174,19 +168,12 @@ function AutoCreateTransactionToggle(): JSX.Element {
   const hasDeposit = (values.estimatedDeposit ?? 0) > 0;
 
   return (
-    <div
-      className='flex flex-row items-center justify-between rounded-lg ring-1 p-2 ring-dark-monetr-border-string mb-4'
-      data-testid='new-funding-auto-create-transaction'
-    >
-      <div className='space-y-0.5'>
-        <label
-          aria-disabled={!hasDeposit}
-          className='text-sm font-medium text-dark-monetr-content-emphasis cursor-pointer aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
-          htmlFor={autoCreateSwitchId}
-        >
+    <div className={styles.optionRow} data-testid='new-funding-auto-create-transaction'>
+      <div className={styles.optionText}>
+        <label aria-disabled={!hasDeposit} className={styles.optionLabel} htmlFor={autoCreateSwitchId}>
           Auto create transaction
         </label>
-        <p aria-disabled={!hasDeposit} className='text-sm text-dark-monetr-content aria-disabled:opacity-50'>
+        <p aria-disabled={!hasDeposit} className={styles.optionDescription}>
           Automatically add a deposit transaction for the estimated deposit each time the funding schedule would occur.
         </p>
       </div>

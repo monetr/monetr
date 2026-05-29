@@ -2,7 +2,7 @@ import PlaidInstitutionLogo from '@monetr/interface/components/Plaid/Institution
 import Typography from '@monetr/interface/components/Typography';
 import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import { useInstitution } from '@monetr/interface/hooks/useInstitution';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './PlaidBankStatusCard.module.scss';
 
@@ -32,8 +32,8 @@ export default function PlaidBankStatusCard(): JSX.Element {
   }
 
   return (
-    <div className={mergeTailwind(styles.card, 'group')}>
-      <PlaidInstitutionLogo className={mergeTailwind(styles.logo, additionalClasses)} link={link} />
+    <div className={styles.card}>
+      <PlaidInstitutionLogo className={mergeClasses(styles.logo, additionalClasses)} link={link} />
       <Typography color='subtle' size='sm'>
         {status}
       </Typography>

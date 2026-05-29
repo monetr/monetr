@@ -7,6 +7,8 @@ import useMountEffect from '@monetr/interface/hooks/useMountEffect';
 import request from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './subscription.module.scss';
+
 // SubscriptionPage is just used to redirect the user to the stripe billing portal. Upon mounting, it will make an API
 // call to start a billing portal session, and once it gets a response it will redirect the user there.
 export default function SubscriptionPage(): JSX.Element {
@@ -26,18 +28,18 @@ export default function SubscriptionPage(): JSX.Element {
   });
 
   return (
-    <div className='flex items-center justify-center w-full h-full max-h-full'>
-      <div className='w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0'>
-        <div className='flex justify-center w-full mt-5 mb-5'>
-          <Logo className='w-1/3' />
+    <div className={styles.root}>
+      <div className={styles.card}>
+        <div className={styles.logoRow}>
+          <Logo className={styles.logo} />
         </div>
-        <div className='w-full pt-2.5 pb-2.5'>
-          <Typography className='w-full text-center' size='xl'>
+        <div className={styles.row}>
+          <Typography className={styles.message} size='xl'>
             Loading the billing portal...
           </Typography>
         </div>
-        <div className='w-full pt-2.5 pb-2.5 flex justify-center'>
-          <LoaderCircle className='spin' />
+        <div className={styles.spinnerRow}>
+          <LoaderCircle className={styles.spin} />
         </div>
       </div>
     </div>

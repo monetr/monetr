@@ -1,7 +1,7 @@
 /* The Lunch Flow logo is property of Amr Awad and Lunch Flow, it is being used here with permission of Amr. monetr does
  * not own the logo. https://github.com/monetr/monetr/pull/2857#issuecomment-3788619886 */
 
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './LunchFlowLogo.module.scss';
 
@@ -11,7 +11,7 @@ interface LunchFlowLogoProps {
 }
 
 export default function LunchFlowLogo(props: LunchFlowLogoProps): React.JSX.Element {
-  const classNames = mergeTailwind(props.iconOnly ? styles.iconOnly : styles.full, props.className);
+  const classNames = mergeClasses(props.iconOnly ? styles.iconOnly : styles.full, props.className);
 
   const viewBox = props.iconOnly ? '30 30 86 86' : '30 30 280 86';
 

@@ -1,0 +1,77 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+.timeline {
+  position: relative;
+  border-left: 1px solid var(--border); // dark:border-zinc-700
+}
+
+// The introductory list item is always spaced (mb-5) regardless of position.
+.firstRow {
+  margin-bottom: 5 * variables.$size;
+  margin-left: 4 * variables.$size;
+}
+
+.row {
+  margin-left: 4 * variables.$size;
+}
+
+// mb-5, applied when the timeline item is not the last one.
+.rowSpaced {
+  margin-bottom: 5 * variables.$size;
+}
+
+.dot {
+  position: absolute;
+  width: 3 * variables.$size;
+  height: 3 * variables.$size;
+  background-color: var(--background-emphasis); // dark:bg-zinc-700
+  border-radius: 9999px; // rounded-full
+  margin-top: 1.5 * variables.$size;
+  left: -1.5 * variables.$size;
+  border: 1px solid var(--background); // dark:border-zinc-900
+}
+
+.date {
+  margin-bottom: 1 * variables.$size;
+  @include mixins.text-small;
+  font-weight: var(--normal);
+  line-height: 1; // leading-none
+  color: var(--border-string); // dark:text-zinc-500
+}
+
+.header {
+  @include mixins.text-large;
+  font-weight: var(--semibold);
+  color: var(--content-emphasis); // dark:text-white
+}
+
+// The "Today" pill next to the first goal header.
+.todayBadge {
+  @include mixins.text-small;
+  font-weight: var(--medium);
+  margin-right: 2 * variables.$size;
+  margin-left: 3 * variables.$size;
+  padding-left: 2.5 * variables.$size;
+  padding-right: 2.5 * variables.$size;
+  padding-top: 0.5 * variables.$size;
+  padding-bottom: 0.5 * variables.$size;
+  border-radius: 0.25rem; // rounded
+  background-color: #1e3a8a; // dark:bg-blue-900
+  color: #93c5fd; // dark:text-blue-300
+}
+
+.icon {
+  display: inline-block;
+}
+
+.body {
+  @include mixins.text-base;
+  font-weight: var(--normal);
+  color: var(--content-subtle); // dark:text-zinc-400
+}
+
+// Same as .body but with the trailing mb-4 used by the intro paragraph.
+.bodyMarginBottom {
+  margin-bottom: 4 * variables.$size;
+}

@@ -1,0 +1,66 @@
+@use '@monetr/interface/variables';
+
+.modal {
+  @media (min-width: variables.$mediumScreen) {
+    max-width: 24rem; // md:max-w-sm
+  }
+}
+
+.form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+  padding: 2 * variables.$size;
+  justify-content: space-between;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// Button that swaps the from/to spending selections.
+.reverseButton {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1 * variables.$size;
+
+  &:hover .reverseIcon {
+    color: var(--content);
+  }
+}
+
+.reverseIcon {
+  width: 10 * variables.$size; // size-10
+  height: 10 * variables.$size;
+  color: var(--content-subtle);
+}
+
+// Inline amount values rendered inside the label decorator.
+.decorator {
+  gap: 1 * variables.$size;
+}
+
+// Clickable amount value that fills the field when tapped.
+.amountButton {
+  cursor: pointer;
+
+  &:hover {
+    color: var(--content-emphasis);
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2 * variables.$size;
+}

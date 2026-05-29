@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './Typography.module.scss';
 
@@ -93,7 +93,7 @@ export default function Typography({
   const TextElement: React.ElementType = component ?? 'span';
   return (
     <TextElement
-      className={mergeTailwind(
+      className={mergeClasses(
         textVariants({
           align,
           component,

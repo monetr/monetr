@@ -2,21 +2,21 @@ import { flexVariants } from '@monetr/interface/components/Flex';
 import { heights, widths } from '@monetr/interface/components/Layout';
 import MLogo from '@monetr/interface/components/MLogo';
 import Typography from '@monetr/interface/components/Typography';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './loading.module.scss';
 
 export default function Loading(): JSX.Element {
   return (
     <div
-      className={mergeTailwind(
+      className={mergeClasses(
         flexVariants({ justify: 'center', align: 'center', orientation: 'column', gap: 'xl' }),
         heights.screen,
         widths.screen,
       )}
     >
       <MLogo className={styles.logo} />
-      <div className={mergeTailwind(styles.blobs, flexVariants({ align: 'center', justify: 'center' }))}>
+      <div className={mergeClasses(styles.blobs, flexVariants({ align: 'center', justify: 'center' }))}>
         <div className={styles.dot} />
         <div className={styles.dots} />
         <div className={styles.dots} />

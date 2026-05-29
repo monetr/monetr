@@ -6,6 +6,8 @@ import Logo from '@monetr/interface/assets/Logo';
 import Typography from '@monetr/interface/components/Typography';
 import { useAfterCheckout } from '@monetr/interface/hooks/useAfterCheckout';
 
+import styles from './after.module.scss';
+
 export default function AfterCheckoutPage(): JSX.Element {
   const search = useSearch();
   const [, navigate] = useLocation();
@@ -30,18 +32,18 @@ export default function AfterCheckoutPage(): JSX.Element {
   }, [search, afterCheckout, navigate]);
 
   return (
-    <div className='flex items-center justify-center w-full h-full max-h-full'>
-      <div className='w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0'>
-        <div className='flex justify-center w-full mb-5'>
-          <Logo className='w-1/3' />
+    <div className={styles.root}>
+      <div className={styles.card}>
+        <div className={styles.logoRow}>
+          <Logo className={styles.logo} />
         </div>
-        <div className='w-full pt-2.5 pb-2.5'>
-          <Typography className='w-full text-center' size='xl'>
+        <div className={styles.row}>
+          <Typography className={styles.message} size='xl'>
             Getting your account setup...
           </Typography>
         </div>
-        <div className='w-full pt-2.5 pb-2.5 flex justify-center'>
-          <LoaderCircle className='spin' />
+        <div className={styles.spinnerRow}>
+          <LoaderCircle className={styles.spin} />
         </div>
       </div>
     </div>

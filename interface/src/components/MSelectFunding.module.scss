@@ -1,0 +1,17 @@
+@use '@monetr/interface/variables';
+
+// Empty-state wrapper shown when there are no funding schedules yet.
+.emptyState {
+  height: 21 * variables.$size; // 84px
+  width: 100%;
+}
+
+// "Create a new funding schedule" button. Overrides the Button defaults to be
+// full width, left-aligned, and normal weight.
+.createButton {
+  width: 100%;
+  font-weight: var(--normal);
+  justify-content: flex-start;
+  text-align: start;
+  gap: 2 * variables.$size;
+}

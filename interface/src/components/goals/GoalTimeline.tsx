@@ -10,7 +10,9 @@ import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
+
+import styles from './GoalTimeline.module.scss';
 
 export interface GoalTimelineProps {
   spendingId: string;
@@ -77,23 +79,19 @@ export default function GoalTimeline(props: GoalTimelineProps): JSX.Element {
   });
 
   return (
-    <ol className='relative border-l border-zinc-200 dark:border-zinc-700'>
-      <li className='mb-5 ml-4'>
-        <div className='absolute w-3 h-3 bg-zinc-200 rounded-full mt-1.5 -left-1.5 border border-white dark:border-zinc-900 dark:bg-zinc-700'></div>
-        <time className='mb-1 text-sm font-normal leading-none text-zinc-400 dark:text-zinc-500'>
-          {format(inTimezone(forecast.startingTime), 'MMMM do')}
-        </time>
-        <h3 className='text-lg font-semibold text-zinc-900 dark:text-white'>
+    <ol className={styles.timeline}>
+      <li className={styles.firstRow}>
+        <div className={styles.dot}></div>
+        <time className={styles.date}>{format(inTimezone(forecast.startingTime), 'MMMM do')}</time>
+        <h3 className={styles.header}>
           {spending.name}
-          <span className='bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300 ml-3'>
-            Today
-          </span>
+          <span className={styles.todayBadge}>Today</span>
         </h3>
-        <p className='text-base font-normal text-zinc-500 dark:text-zinc-400'>
+        <p className={styles.body}>
           {spending.name} currently has {locale.formatAmount(spending.currentAmount, AmountType.Stored)} allocated
           towards it.
         </p>
-        <p className='mb-4 text-base font-normal text-zinc-500 dark:text-zinc-400'>
+        <p className={mergeClasses(styles.body, styles.bodyMarginBottom)}>
           Below is the timeline for this goal over the next month.
         </p>
       </li>
@@ -115,7 +113,7 @@ function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData 
   if (props.contributedAmount > 0 && props.spentAmount > 0) {
     // Spent and contributed
     header = 'Contribution & Completion';
-    icon = <TrendingUpDown className='inline-block' />;
+    icon = <TrendingUpDown className={styles.icon} />;
     // NOTE To repro this, have your funding schedule land on the same day the item is being spent. For example
     // a funding schedule that is 15th and the last day of the month, landing on september 15th (friday) funding
     // an expense that is spent every friday.
@@ -127,12 +125,12 @@ function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData 
   } else if (props.contributedAmount === 0 && props.spentAmount > 0) {
     // Only spent
     header = 'Complete';
-    icon = <CircleCheck className='inline-block' />;
+    icon = <CircleCheck className={styles.icon} />;
     body = `An estimated ${locale.formatAmount(props.spentAmount, AmountType.Stored)} will be spent or will be ready to spend, from your ${spending.name} goal.`;
   } else if (props.contributedAmount > 0 && props.spentAmount === 0) {
     // Only contributed
     header = 'Contribution';
-    icon = <ArrowUpRight className='inline-block' />;
+    icon = <ArrowUpRight className={styles.icon} />;
     body = `${locale.formatAmount(props.contributedAmount, AmountType.Stored)} will be allocated towards ${spending.name} from ${fundingSchedule.name}, resulting in a total allocation of ${locale.formatAmount(props.endingAllocation, AmountType.Stored)}.`;
     if (props.totalContributedAmount > props.contributedAmount) {
       secondaryBody = `A total of ${locale.formatAmount(props.totalContributedAmount, AmountType.Stored)} will be contributed to all budgets on this day.`;
@@ -141,23 +139,18 @@ function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData 
     // Nothing is happening with this expense on this item.
     return null;
   }
-  const rowClassNames = mergeTailwind(
-    {
-      'mb-5': !props.last,
-    },
-    'ml-4',
-  );
+  const rowClassNames = mergeClasses(styles.row, {
+    [styles.rowSpaced]: !props.last,
+  });
   return (
     <li className={rowClassNames}>
-      <div className='absolute w-3 h-3 bg-zinc-200 rounded-full mt-1.5 -left-1.5 border border-white dark:border-zinc-900 dark:bg-zinc-700' />
-      <time className='mb-1 text-sm font-normal leading-none text-zinc-400 dark:text-zinc-500'>
-        {format(inTimezone(props.date), 'MMMM do')}
-      </time>
-      <h3 className='text-lg font-semibold text-zinc-900 dark:text-white'>
+      <div className={styles.dot} />
+      <time className={styles.date}>{format(inTimezone(props.date), 'MMMM do')}</time>
+      <h3 className={styles.header}>
         {header} {icon}
       </h3>
-      <p className='text-base font-normal text-zinc-500 dark:text-zinc-400'>{body}</p>
-      {secondaryBody && <p className='text-base font-normal text-zinc-500 dark:text-zinc-400'>{secondaryBody}</p>}
+      <p className={styles.body}>{body}</p>
+      {secondaryBody && <p className={styles.body}>{secondaryBody}</p>}
     </li>
   );
 }

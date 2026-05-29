@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 import { widths } from '@monetr/interface/components/Layout';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './Flex.module.scss';
 
@@ -73,7 +73,7 @@ export default function Flex({
 }: FlexProps): React.JSX.Element {
   return (
     <div
-      className={mergeTailwind(flexVariants({ gap, justify, align, orientation, shrink, flex, width }), className)}
+      className={mergeClasses(flexVariants({ gap, justify, align, orientation, shrink, flex, width }), className)}
       {...props}
     />
   );

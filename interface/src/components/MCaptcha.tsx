@@ -3,7 +3,7 @@ import { LoaderCircle } from 'lucide-react';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './MCaptcha.module.scss';
 
@@ -36,7 +36,7 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
 
   const loading = Boolean(formikContext?.isSubmitting);
 
-  const classes = mergeTailwind(styles.root, props.className);
+  const classes = mergeClasses(styles.root, props.className);
 
   return (
     <div className={classes}>

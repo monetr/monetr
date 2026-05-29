@@ -1,0 +1,155 @@
+@use '@monetr/interface/variables';
+
+.form {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+
+// Centered loading state.
+.centerState {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+// Scrolling body wrapper.
+.body {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  min-width: 0;
+  padding: 4 * variables.$size;
+  padding-bottom: 16 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-bottom: 4 * variables.$size;
+  }
+}
+
+// Two-column responsive row.
+.columns {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 8 * variables.$size;
+  align-items: center;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+// Left column.
+.column {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: 50%;
+  }
+}
+
+// Right column.
+.columnAccounts {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    width: 50%;
+  }
+}
+
+// Details heading.
+.headingFull {
+  margin-top: 2 * variables.$size;
+  margin-bottom: 2 * variables.$size;
+  width: 100%;
+}
+
+// Accounts heading.
+.heading {
+  margin-top: 2 * variables.$size;
+  margin-bottom: 2 * variables.$size;
+}
+
+// Visible on mobile, hidden md+.
+.dividerMobile {
+  display: block;
+  width: 50%;
+
+  @media (min-width: variables.$mediumScreen) {
+    display: none;
+  }
+}
+
+.accountList {
+  display: flex;
+  flex-direction: column;
+  gap: 2 * variables.$size;
+}
+
+// Acts as the hover group for its row.
+.item {
+  position: relative;
+  width: 100%;
+}
+
+.itemLink {
+  display: flex;
+  height: 100%;
+  gap: 1 * variables.$size;
+  border-radius: var(--border-radius);
+  padding-left: 2 * variables.$size;
+  padding-right: 2 * variables.$size;
+  padding-top: 1 * variables.$size;
+  padding-bottom: 1 * variables.$size;
+  align-items: center;
+
+  @media (min-width: variables.$mediumScreen) {
+    gap: 4 * variables.$size;
+  }
+
+  // group-hover:bg-zinc-600
+  .item:hover & {
+    background-color: var(--background-active);
+  }
+}
+
+.itemText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  flex-grow: 1;
+}
+
+.itemNameRow {
+  display: flex;
+  gap: 2 * variables.$size;
+}
+
+// Account name.
+.itemName {
+  .item:hover & {
+    text-decoration: underline;
+  }
+}
+
+.itemChevron {
+  color: var(--content-subtle);
+
+  .item:hover & {
+    color: var(--content-emphasis);
+  }
+}

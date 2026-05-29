@@ -1,8 +1,9 @@
 import type React from 'react';
 import { Link } from 'wouter';
 
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
+import styles from './MLink.module.scss';
 import type { TextSize } from './types';
 
 export interface MLinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
@@ -18,26 +19,30 @@ const MLinkPropsDefaults: Omit<MLinkProps, 'children' | 'to'> = {
   tabIndex: 0,
 };
 
+const colorMap: Record<NonNullable<MLinkProps['color']>, string> = {
+  primary: styles.colorPrimary,
+  secondary: styles.colorSecondary,
+};
+
+const sizeMap: Record<TextSize, string> = {
+  xs: styles.sizeXs,
+  sm: styles.sizeSm,
+  md: styles.sizeMd,
+  lg: styles.sizeLg,
+  xl: styles.sizeXl,
+  '2xl': styles.size2Xl,
+  '3xl': styles.size3Xl,
+  '4xl': styles.size4Xl,
+  '5xl': styles.size5Xl,
+};
+
 export default function MLink(props: MLinkProps): JSX.Element {
   props = {
     ...MLinkPropsDefaults,
     ...props,
   };
 
-  const colors = {
-    primary: [
-      'dark:text-dark-monetr-brand-faint',
-      'dark:hover:text-dark-monetr-brand-bright',
-      'text-purple-500',
-      'hover:text-purple-600',
-      'rounded',
-      'focus:ring-1',
-      'focus:ring-purple-500',
-    ],
-    secondary: ['text-gray-400', 'hover:text-gray-500'],
-  };
-
-  const classNames = mergeTailwind('font-semibold', ...colors[props.color], `text-${props.size}`, props.className);
+  const classNames = mergeClasses(styles.root, colorMap[props.color], sizeMap[props.size], props.className);
 
   return (
     <Link {...props} className={classNames}>

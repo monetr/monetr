@@ -1,4 +1,4 @@
-import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './MSpinner.module.scss';
 
@@ -8,7 +8,7 @@ export interface MSpinnerProps {
 
 export default function MSpinner(props: MSpinnerProps): JSX.Element {
   return (
-    <svg className={mergeTailwind(styles.spinner, props.className)} viewBox='3 3 18 18'>
+    <svg className={mergeClasses(styles.spinner, props.className)} viewBox='3 3 18 18'>
       <title>Loading...</title>
       <path
         className={styles.trackPath}

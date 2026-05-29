@@ -1,0 +1,169 @@
+@use '@monetr/interface/mixins';
+@use '@monetr/interface/variables';
+
+// Default monospace stack.
+$fontMono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+// Loading skeleton placeholder.
+.skeleton {
+  width: 100%;
+  height: 10 * variables.$size;
+}
+
+// Row wrapping the trigger button and the settings link. The one pixel gap
+// keeps their rings/borders from colliding.
+.row {
+  display: flex;
+  width: 100%;
+  gap: 1px;
+}
+
+// The main combobox trigger button. Composed with comboboxVariants() in the tsx.
+.trigger {
+  height: 34px;
+  display: flex;
+  flex: 1 1 auto;
+}
+
+// The label inside the trigger.
+.triggerLabel {
+  color: inherit;
+  flex-shrink: 1;
+  min-width: 0;
+
+  // truncate
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// The up/down chevron. Fades to half opacity when the menu is closed and to
+// full opacity when open (driven by the `.chevronOpen` modifier).
+.chevron {
+  height: 3 * variables.$size;
+  width: 3 * variables.$size;
+  flex: none;
+  opacity: 0.5;
+
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 100ms;
+}
+
+// `opacity-100` applied when the menu is open.
+.chevronOpen {
+  opacity: 1;
+}
+
+// The popover surface width override, wider than PopoverContent's default.
+.popover {
+  width: 80 * variables.$size;
+}
+
+// The settings link sitting to the right of the trigger. Composed with
+// buttonVariants()/comboboxVariants() in the tsx.
+.settingsLink {
+  height: 34px;
+  width: 34px;
+  padding: 0;
+  justify-content: center;
+  flex-shrink: 0;
+
+  // rounded-tl-none rounded-bl-none — square off the edge that meets the
+  // trigger button so the pair reads as one control.
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+// Mobile settings link. Adds a 2px brand focus ring.
+.settingsLinkMobile {
+  &:focus {
+    --ring-color: var(--brand);
+    --ring-size: 2px;
+    @include mixins.ring;
+  }
+}
+
+// Desktop settings link. Explicitly no focus ring (different from mobile).
+.settingsLinkDesktop {
+  &:focus {
+    box-shadow: none;
+  }
+}
+
+// The gear glyph inside the settings link. Half opacity, full on hover of the
+// link.
+.settingsIcon {
+  opacity: 0.5;
+
+  .settingsLink:hover & {
+    opacity: 1;
+  }
+}
+
+.settingsIconMobile {
+  height: 3 * variables.$size;
+  width: 3 * variables.$size;
+}
+
+.settingsIconDesktop {
+  height: 5 * variables.$size;
+  width: 5 * variables.$size;
+}
+
+// The check mark shown next to the currently selected account.
+.check {
+  margin-right: 1 * variables.$size;
+  height: 5 * variables.$size;
+  width: 5 * variables.$size;
+  flex: none;
+}
+
+.checkVisible {
+  opacity: 1;
+}
+
+.checkHidden {
+  opacity: 0;
+}
+
+// The "Inactive" status badge background.
+.inactiveBadge {
+  background-color: var(--border-subtle);
+}
+
+// The account mask badge uses a monospace font.
+.maskBadge {
+  font-family: $fontMono;
+}
+
+// The "Accounts" command group. Extra bottom padding on mobile so the last row
+// clears the drawer's safe area, collapsing to a normal gap on medium screens.
+.accountsGroup {
+  padding-bottom: 6 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-bottom: 1 * variables.$size;
+  }
+}
+
+// The "Add another account" control row.
+.controlRow {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 1 * variables.$size;
+}
+
+// The plus glyph in the control row.
+.controlIcon {
+  margin-right: 1 * variables.$size;
+  height: 5 * variables.$size;
+  width: 5 * variables.$size;
+  flex: none;
+}
+
+// Full-width label.
+.fullWidth {
+  width: 100%;
+}

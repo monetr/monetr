@@ -12,6 +12,8 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 import useSendForgotPassword from '@monetr/interface/hooks/useSendForgotPassword';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
+import styles from './forgot.module.scss';
+
 interface Values {
   email: string;
   captcha: string | null;
@@ -24,18 +26,18 @@ const initialValues: Values = {
 
 export function ForgotPasswordComplete(): JSX.Element {
   return (
-    <div className='h-screen w-screen flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5'>
-      <div className='max-w-[128px] w-full'>
+    <div className={styles.root}>
+      <div className={styles.logo}>
         <MLogo />
       </div>
-      <div className='flex flex-col items-center'>
+      <div className={styles.header}>
         <Typography size='inherit'>Check your email</Typography>
-        <Typography className='max-w-[248px] text-center' color='subtle' size='sm'>
+        <Typography className={styles.completeMessage} color='subtle' size='sm'>
           If a user was found with the email provided, then you should receive an email with instructions on how to
           reset your password.
         </Typography>
       </div>
-      <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
+      <div className={styles.signInRow}>
         <Typography color='subtle' size='sm'>
           Return to
         </Typography>
@@ -77,16 +79,11 @@ export default function ForgotPasswordNew(): JSX.Element {
   }
 
   return (
-    <MForm
-      className='h-screen w-screen flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5'
-      initialValues={initialValues}
-      onSubmit={submit}
-      validate={validate}
-    >
-      <div className='max-w-[128px] w-full'>
+    <MForm className={styles.root} initialValues={initialValues} onSubmit={submit} validate={validate}>
+      <div className={styles.logo}>
         <MLogo />
       </div>
-      <div className='flex flex-col items-center'>
+      <div className={styles.header}>
         <Typography size='inherit'>Forgot your password?</Typography>
         <Typography color='subtle' size='sm'>
           We can email you a link to reset it.
@@ -95,19 +92,19 @@ export default function ForgotPasswordNew(): JSX.Element {
       <FormTextField
         autoComplete='username'
         autoFocus
-        className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'
+        className={styles.input}
         label='Email Address'
         name='email'
         required
         type='email'
       />
-      <MCaptcha className='mb-1' name='captcha' show={Boolean(config?.verifyForgotPassword)} />
-      <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
-        <FormButton className='w-full' role='form' type='submit' variant='primary'>
+      <MCaptcha className={styles.captcha} name='captcha' show={Boolean(config?.verifyForgotPassword)} />
+      <div className={styles.submitWrapper}>
+        <FormButton className={styles.button} role='form' type='submit' variant='primary'>
           Reset Password
         </FormButton>
       </div>
-      <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
+      <div className={styles.signInRow}>
         <Typography color='subtle' size='sm'>
           Remembered your password?
         </Typography>

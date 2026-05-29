@@ -11,6 +11,8 @@ import Typography from '@monetr/interface/components/Typography';
 import useResetPassword from '@monetr/interface/hooks/useResetPassword';
 import { useSnackbar } from '@monetr/notify';
 
+import styles from './reset.module.scss';
+
 interface ResetPasswordValues {
   password: string;
   verifyPassword: string;
@@ -80,23 +82,18 @@ export default function PasswordResetNew(): JSX.Element {
   }
 
   return (
-    <MForm
-      className='w-full h-full flex flex-col pt-10 md:pt-0 mb:pb-10 md:justify-center items-center px-5 gap-1'
-      initialValues={initialValues}
-      onSubmit={submit}
-      validate={validate}
-    >
-      <div className='flex items-center flex-col gap-1 w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'>
-        <div className='max-w-[128px] w-full'>
+    <MForm className={styles.root} initialValues={initialValues} onSubmit={submit} validate={validate}>
+      <div className={styles.container}>
+        <div className={styles.logo}>
           <MLogo />
         </div>
-        <Typography className='flex items-center text-center' size='inherit'>
+        <Typography className={styles.message} size='inherit'>
           {message}
         </Typography>
         <FormTextField
           autoComplete='current-password'
           autoFocus
-          className='w-full'
+          className={styles.input}
           label='Password'
           name='password'
           required
@@ -104,17 +101,17 @@ export default function PasswordResetNew(): JSX.Element {
         />
         <FormTextField
           autoComplete='current-password'
-          className='w-full'
+          className={styles.input}
           label='Verify Password'
           name='verifyPassword'
           required
           type='password'
         />
-        <FormButton className='w-full' role='form' type='submit' variant='primary'>
+        <FormButton className={styles.input} role='form' type='submit' variant='primary'>
           Reset Password
         </FormButton>
       </div>
-      <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
+      <div className={styles.signInRow}>
         <Typography color='subtle' size='sm'>
           Remembered your password?
         </Typography>

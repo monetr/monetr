@@ -1,0 +1,114 @@
+@use '@monetr/interface/variables';
+@use '@monetr/interface/mixins';
+
+// Root layout for both the form and the "check your email" completion view.
+// Mirrors the login page: full screen, centered column, top padding on mobile
+// that flips to vertical centering on medium screens and up.
+.root {
+  @include mixins.screen;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 1 * variables.$size;
+
+  padding-top: 10 * variables.$size;
+  padding-left: 5 * variables.$size;
+  padding-right: 5 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-top: unset;
+    padding-bottom: 10 * variables.$size;
+    justify-content: center;
+  }
+}
+
+// Logo wrapper.
+.logo {
+  width: 100%;
+  max-width: 128px;
+}
+
+// Centered header column.
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// The body copy on the completion screen.
+.completeMessage {
+  max-width: 248px;
+  text-align: center;
+}
+
+// The email field. Same responsive width ladder as the login page input.
+.input {
+  @include mixins.width-full;
+
+  @media (min-width: variables.$smallScreen) {
+    @include mixins.width-half;
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.width-third;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    @include mixins.width-quarter;
+  }
+
+  @media (min-width: variables.$extraLargeScreen) {
+    @include mixins.width-fifth;
+  }
+}
+
+// The captcha spacing.
+.captcha {
+  margin-bottom: 1 * variables.$size;
+}
+
+// Full-width submit button.
+.button {
+  width: 100%;
+}
+
+// Wrapper around the submit button. Same width ladder as `.input` with an
+// extra top margin.
+.submitWrapper {
+  @include mixins.width-full;
+  margin-top: 1 * variables.$size;
+
+  @media (min-width: variables.$smallScreen) {
+    @include mixins.width-half;
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.width-third;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    @include mixins.width-quarter;
+  }
+
+  @media (min-width: variables.$extraLargeScreen) {
+    @include mixins.width-fifth;
+  }
+}
+
+// The "sign in" footer row. The responsive ladder here is intentionally
+// different from the inputs above (no md/xl).
+.signInRow {
+  @include mixins.width-full;
+  margin-top: 1 * variables.$size;
+  display: flex;
+  justify-content: center;
+  gap: 1 * variables.$size;
+
+  @media (min-width: variables.$smallScreen) {
+    @include mixins.width-third;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    @include mixins.width-quarter;
+  }
+}

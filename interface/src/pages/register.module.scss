@@ -20,3 +20,89 @@
     justify-content: center;
   }
 }
+
+// The sign up form column.
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.width-half;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    @include mixins.width-third;
+  }
+
+  @media (min-width: variables.$extraLargeScreen) {
+    @include mixins.width-quarter;
+  }
+}
+
+// Logo wrapper.
+.logo {
+  width: 100%;
+  max-width: 96px;
+}
+
+// Full-width inputs / captcha / submit button.
+.input {
+  width: 100%;
+}
+
+// The captcha sits above the submit button with a small bottom margin.
+.captcha {
+  margin-bottom: 1 * variables.$size;
+}
+
+// Submit button: full width with a small top margin.
+.submit {
+  width: 100%;
+  margin-top: 1 * variables.$size;
+}
+
+// Footer rows ("Return to / Sign in", terms blurb, "Already have an
+// account?").
+.footerRow {
+  margin-top: 1 * variables.$size;
+  display: flex;
+  justify-content: center;
+  gap: 1 * variables.$size;
+  flex-direction: column;
+  align-items: center;
+
+  @media (min-width: variables.$mediumScreen) {
+    flex-direction: row;
+  }
+}
+
+// Max width for the verification success message.
+.message {
+  max-width: 28rem;
+}
+
+// The terms blurb paragraph.
+.termsBlurb {
+  gap: 1 * variables.$size;
+  display: inline-block;
+  text-align: center;
+}
+
+// Inline policy links inside the terms blurb.
+.inlineLink {
+  color: var(--blue);
+
+  --ring-color: var(--blue);
+  --ring-size: 2px;
+
+  &:hover {
+    text-decoration-line: underline;
+  }
+
+  &:focus {
+    text-decoration-line: underline;
+    @include mixins.ring;
+  }
+}

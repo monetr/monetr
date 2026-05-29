@@ -1,0 +1,84 @@
+@use '@monetr/interface/variables';
+@use '@monetr/interface/mixins';
+
+// Root layout. Fills its parent rather than the viewport. Top padding on
+// mobile flips to vertical centering on medium screens.
+.root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1 * variables.$size;
+
+  padding-top: 10 * variables.$size;
+  padding-left: 5 * variables.$size;
+  padding-right: 5 * variables.$size;
+
+  @media (min-width: variables.$mediumScreen) {
+    padding-top: unset;
+    justify-content: center;
+  }
+}
+
+// The card-like inner column holding the logo, message and fields. Uses the
+// same responsive width ladder as the login page input.
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1 * variables.$size;
+
+  @include mixins.width-full;
+
+  @media (min-width: variables.$smallScreen) {
+    @include mixins.width-half;
+  }
+
+  @media (min-width: variables.$mediumScreen) {
+    @include mixins.width-third;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    @include mixins.width-quarter;
+  }
+
+  @media (min-width: variables.$extraLargeScreen) {
+    @include mixins.width-fifth;
+  }
+}
+
+// Logo wrapper.
+.logo {
+  width: 100%;
+  max-width: 128px;
+}
+
+// The instructional message.
+.message {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+// Full-width inputs and the submit button.
+.input {
+  width: 100%;
+}
+
+// The "sign in" footer row. Responsive ladder with no md/xl.
+.signInRow {
+  @include mixins.width-full;
+  margin-top: 1 * variables.$size;
+  display: flex;
+  justify-content: center;
+  gap: 1 * variables.$size;
+
+  @media (min-width: variables.$smallScreen) {
+    @include mixins.width-third;
+  }
+
+  @media (min-width: variables.$largeScreen) {
+    @include mixins.width-quarter;
+  }
+}
