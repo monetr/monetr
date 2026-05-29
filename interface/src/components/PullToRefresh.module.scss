@@ -63,7 +63,7 @@
 
 .spinner {
   // Paused by default (rests at rotate(0)); .container[data-loading] resumes
-  // it. Defined here rather than empty so cssnano doesn't drop the class.
+  // it. Defined here rather than empty so the CSS minifier doesn't drop the class.
   animation: spin 1s linear infinite;
   animation-play-state: paused;
 }
