@@ -7,7 +7,7 @@
 
 .colorPrimary {
   color: var(--brand-faint); // dark:text-dark-monetr-brand-faint
-  border-radius: 0.25rem; // rounded
+  border-radius: 1 * variables.$size; // rounded
 
   &:hover {
     color: var(--brand-bright); // dark:hover:text-dark-monetr-brand-bright

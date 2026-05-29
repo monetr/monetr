@@ -117,10 +117,10 @@ $basePadding: 4 * variables.$size;
   padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
 }
 
-// Hide the options list when closed; !important so it beats the inline
-// positioning styles set on the element.
+// Hide the options list when closed. The only inline styles on the list are
+// max-height/width set while open, so a plain display:none wins here.
 .hidden {
-  display: none !important;
+  display: none;
 }
 
 // A single option row in the dropdown / drawer list.

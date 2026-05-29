@@ -2,7 +2,7 @@
 
 .modal {
   @media (min-width: variables.$smallScreen) {
-    max-width: 36rem; // sm:max-w-xl
+    max-width: 144 * variables.$size; // sm:max-w-xl
   }
 }
 

@@ -14,11 +14,11 @@
 
 .row {
   margin-left: 4 * variables.$size;
-}
 
-// mb-5, applied when the timeline item is not the last one.
-.rowSpaced {
-  margin-bottom: 5 * variables.$size;
+  // mb-5 on every item except the last one in the timeline.
+  &:not(:last-child) {
+    margin-bottom: 5 * variables.$size;
+  }
 }
 
 .dot {
@@ -56,7 +56,7 @@
   padding-right: 2.5 * variables.$size;
   padding-top: 0.5 * variables.$size;
   padding-bottom: 0.5 * variables.$size;
-  border-radius: 0.25rem; // rounded
+  border-radius: 1 * variables.$size; // rounded
   background-color: #1e3a8a; // dark:bg-blue-900
   color: #93c5fd; // dark:text-blue-300
 }

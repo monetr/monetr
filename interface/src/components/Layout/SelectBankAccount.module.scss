@@ -20,7 +20,7 @@ $fontMono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mo
 
 // The main combobox trigger button. Composed with comboboxVariants() in the tsx.
 .trigger {
-  height: 34px;
+  height: 8.5 * variables.$size; // 34px
   display: flex;
   flex: 1 1 auto;
 }
@@ -63,8 +63,8 @@ $fontMono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mo
 // The settings link sitting to the right of the trigger. Composed with
 // buttonVariants()/comboboxVariants() in the tsx.
 .settingsLink {
-  height: 34px;
-  width: 34px;
+  height: 8.5 * variables.$size; // 34px
+  width: 8.5 * variables.$size; // 34px
   padding: 0;
   justify-content: center;
   flex-shrink: 0;

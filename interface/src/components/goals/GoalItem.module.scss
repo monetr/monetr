@@ -223,7 +223,7 @@
 
   @media (min-width: variables.$mediumScreen) {
     display: flex; // md:flex
-    min-width: 12em; // md:min-w-[12em]
+    min-width: 48 * variables.$size; // md:min-w-[12em]
     flex-shrink: 0;
     justify-content: flex-end;
     gap: 2 * variables.$size;
@@ -250,7 +250,7 @@
   align-items: center;
 
   @media (min-width: variables.$mediumScreen) {
-    min-width: 12em; // md:min-w-[12em]
+    min-width: 48 * variables.$size; // md:min-w-[12em]
   }
 
   .badge {

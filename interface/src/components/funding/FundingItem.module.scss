@@ -84,7 +84,7 @@
   align-items: center;
 
   @media (min-width: variables.$mediumScreen) {
-    min-width: 14em; // md:min-w-[14em]
+    min-width: 56 * variables.$size; // md:min-w-[14em]
   }
 }
 

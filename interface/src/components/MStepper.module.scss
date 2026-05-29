@@ -42,8 +42,9 @@
 
 .numberComplete {
   background-color: var(--success); // green-600
-  --text-color: #fff;
-  color: #fff;
+  // Light text on the green badge, matching how Badge colors its variants.
+  --text-color: var(--content-emphasis);
+  color: var(--content-emphasis);
 }
 
 .textActive {

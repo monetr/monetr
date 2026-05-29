@@ -3,7 +3,7 @@
 
 .modal {
   @media (min-width: variables.$smallScreen) {
-    max-width: 36rem; // sm:max-w-xl
+    max-width: 144 * variables.$size; // sm:max-w-xl
   }
 }
 
@@ -62,10 +62,9 @@
 }
 
 .optionText {
-  // space-y-0.5
-  > :not([hidden]) ~ :not([hidden]) {
-    margin-top: 0.5 * variables.$size;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 * variables.$size; // space-y-0.5
 }
 
 .optionLabel {

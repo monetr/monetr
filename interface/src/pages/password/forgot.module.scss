@@ -25,7 +25,7 @@
 // Logo wrapper.
 .logo {
   width: 100%;
-  max-width: 128px;
+  max-width: 32 * variables.$size;
 }
 
 // Centered header column.
@@ -37,7 +37,7 @@
 
 // The body copy on the completion screen.
 .completeMessage {
-  max-width: 248px;
+  max-width: 62 * variables.$size;
   text-align: center;
 }
 

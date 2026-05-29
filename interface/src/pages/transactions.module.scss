@@ -32,7 +32,7 @@
   flex-direction: column;
   gap: 2 * variables.$size;
   align-items: center;
-  max-width: 28rem;
+  max-width: 112 * variables.$size;
 }
 
 .iconRow {

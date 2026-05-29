@@ -102,7 +102,7 @@
 }
 
 .list {
-  max-height: 300px; // max-h-[300px]
+  max-height: 75 * variables.$size; // max-h-[300px]
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -134,8 +134,8 @@
 
 .separator {
   // -mx-1
-  margin-left: #{-1 * variables.$size};
-  margin-right: #{-1 * variables.$size};
+  margin-left: -1 * variables.$size;
+  margin-right: -1 * variables.$size;
   height: 1px; // h-px
   background-color: transparent;
 }

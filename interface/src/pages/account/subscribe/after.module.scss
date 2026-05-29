@@ -14,7 +14,7 @@
 .card {
   width: 100%;
   padding: 10 * variables.$size;
-  max-width: 640px;
+  max-width: 160 * variables.$size;
 
   @media (min-width: variables.$smallScreen) {
     width: percentage(10/12);

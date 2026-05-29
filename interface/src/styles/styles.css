@@ -23,23 +23,6 @@ input[type=number] {
     backface-visibility: hidden;
 }
 
-.m-content {
-  height: -webkit-calc(100vh - 4rem);
-  height: -moz-calc(100vh - 4rem);
-  height: calc(100vh - 4rem);
-  margin-top: 4rem;
-  width: 100%;
-  display: flex;
-}
-
-.m-view-area {
-  width: 100%;
-  height: calc(100vh - 4rem);
-  max-height: calc(100vh - 4rem);
-  overflow-y: auto !important;
-  overflow-x: unset !important;
-}
-
 /*
  Fix some weird 1password thing thats being inserted by the chrome extention?
  Web development is great...

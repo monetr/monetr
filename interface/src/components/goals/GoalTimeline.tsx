@@ -10,7 +10,6 @@ import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
-import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './GoalTimeline.module.scss';
 
@@ -93,14 +92,14 @@ export default function GoalTimeline(props: GoalTimelineProps): JSX.Element {
         </p>
         <p className={styles.bodyMarginBottom}>Below is the timeline for this goal over the next month.</p>
       </li>
-      {timelineItems.map((item, index) => (
-        <TimelineItem key={getUnixTime(item.date)} {...item} last={timelineItems.length - 1 === index} />
+      {timelineItems.map(item => (
+        <TimelineItem key={getUnixTime(item.date)} {...item} />
       ))}
     </ol>
   );
 }
 
-function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData & { last: boolean }): JSX.Element {
+function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData): JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
 
@@ -137,11 +136,8 @@ function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData 
     // Nothing is happening with this expense on this item.
     return null;
   }
-  const rowClassNames = mergeClasses(styles.row, {
-    [styles.rowSpaced]: !props.last,
-  });
   return (
-    <li className={rowClassNames}>
+    <li className={styles.row}>
       <div className={styles.dot} />
       <time className={styles.date}>{format(inTimezone(props.date), 'MMMM do')}</time>
       <h3 className={styles.header}>

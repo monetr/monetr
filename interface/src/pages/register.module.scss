@@ -44,7 +44,7 @@
 // Logo wrapper.
 .logo {
   width: 100%;
-  max-width: 96px;
+  max-width: 24 * variables.$size;
 }
 
 // Full-width inputs / captcha / submit button.
@@ -80,7 +80,7 @@
 
 // Max width for the verification success message.
 .message {
-  max-width: 28rem;
+  max-width: 112 * variables.$size;
 }
 
 // The terms blurb paragraph.
