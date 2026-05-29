@@ -76,6 +76,7 @@
 
 // The debit tab's toggle box additionally has a top margin (mt-2).
 .optionRowSpaced {
+  @extend .optionRow;
   margin-top: 2 * variables.$size;
 }
 
@@ -94,6 +95,7 @@
 
 // The debit tab's label is clickable; the credit tab's is not.
 .optionLabelClickable {
+  @extend .optionLabel;
   cursor: pointer;
 }
 

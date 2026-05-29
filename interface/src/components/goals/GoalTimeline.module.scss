@@ -73,5 +73,6 @@
 
 // Same as .body but with the trailing mb-4 used by the intro paragraph.
 .bodyMarginBottom {
+  @extend .body;
   margin-bottom: 4 * variables.$size;
 }

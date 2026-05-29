@@ -13,16 +13,22 @@ export default function mergeClasses(...args: (ClassNameValue | ClassNameMap)[])
   const result: string[] = [];
 
   for (const arg of args) {
-    if (!arg) continue;
+    if (!arg) {
+      continue;
+    }
 
     if (typeof arg === 'string') {
       result.push(arg);
     } else if (Array.isArray(arg)) {
       const nested = mergeClasses(...arg);
-      if (nested) result.push(nested);
+      if (nested) {
+        result.push(nested);
+      }
     } else if (typeof arg === 'object') {
       for (const key of Object.keys(arg)) {
-        if (arg[key]) result.push(key);
+        if (arg[key]) {
+          result.push(key);
+        }
       }
     }
   }

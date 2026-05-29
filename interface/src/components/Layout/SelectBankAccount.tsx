@@ -88,13 +88,12 @@ export default function SelectBankAccount(): JSX.Element {
           className={mergeClasses(
             buttonVariants({ variant: 'text', size: 'select' }),
             comboboxVariants({ variant: 'text', size: 'select' }),
-            styles.settingsLink,
             styles.settingsLinkMobile,
           )}
           role='combobox'
           to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
         >
-          <Settings className={mergeClasses(styles.settingsIcon, styles.settingsIconMobile)} />
+          <Settings className={styles.settingsIconMobile} />
         </Link>
       </div>
     );
@@ -132,13 +131,12 @@ export default function SelectBankAccount(): JSX.Element {
           className={mergeClasses(
             buttonVariants({ variant: 'text', size: 'select' }),
             comboboxVariants({ variant: 'text', size: 'select' }),
-            styles.settingsLink,
             styles.settingsLinkDesktop, // No focus ring, different from mobile.
           )}
           role='combobox'
           to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
         >
-          <Settings className={mergeClasses(styles.settingsIcon, styles.settingsIconDesktop)} />
+          <Settings className={styles.settingsIconDesktop} />
         </Link>
       </Popover>
     </div>

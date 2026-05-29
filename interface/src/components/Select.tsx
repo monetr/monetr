@@ -274,7 +274,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
               {open &&
                 props.options.map(item => (
                   <li
-                    className={mergeClasses(selectStyles.option, selectStyles.optionTouch, {
+                    className={mergeClasses(selectStyles.optionTouch, {
                       // The _ACTUAL_ selected state will be slightly darker than the hover state.
                       [selectStyles.optionSelected]: props.value === item,
                     })}

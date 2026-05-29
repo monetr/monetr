@@ -91,9 +91,7 @@ export default function GoalTimeline(props: GoalTimelineProps): JSX.Element {
           {spending.name} currently has {locale.formatAmount(spending.currentAmount, AmountType.Stored)} allocated
           towards it.
         </p>
-        <p className={mergeClasses(styles.body, styles.bodyMarginBottom)}>
-          Below is the timeline for this goal over the next month.
-        </p>
+        <p className={styles.bodyMarginBottom}>Below is the timeline for this goal over the next month.</p>
       </li>
       {timelineItems.map((item, index) => (
         <TimelineItem key={getUnixTime(item.date)} {...item} last={timelineItems.length - 1 === index} />

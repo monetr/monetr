@@ -19,7 +19,6 @@ import { type CreateTransactionRequest, useCreateTransaction } from '@monetr/int
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import mergeClasses from '@monetr/interface/util/mergeClasses';
 import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
@@ -138,11 +137,9 @@ function NewTransactionModal(): JSX.Element {
                     <FormDatePicker className={styles.fieldRowItem} label='Date' name='date' required />
                   </div>
                   <MSelectSpending className={styles.spendingSelect} name='spendingId' />
-                  <div className={mergeClasses(styles.optionRow, styles.optionRowSpaced)}>
+                  <div className={styles.optionRowSpaced}>
                     <div className={styles.optionText}>
-                      <label className={mergeClasses(styles.optionLabel, styles.optionLabelClickable)}>
-                        Adjust Balance
-                      </label>
+                      <label className={styles.optionLabelClickable}>Adjust Balance</label>
                       <p className={styles.optionDescription}>Update your account balance for this transaction?</p>
                     </div>
                     <Switch

@@ -77,6 +77,7 @@ $fontMono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mo
 
 // Mobile settings link. Adds a 2px brand focus ring.
 .settingsLinkMobile {
+  @extend .settingsLink;
   &:focus {
     --ring-color: var(--brand);
     --ring-size: 2px;
@@ -86,6 +87,7 @@ $fontMono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mo
 
 // Desktop settings link. Explicitly no focus ring (different from mobile).
 .settingsLinkDesktop {
+  @extend .settingsLink;
   &:focus {
     box-shadow: none;
   }
@@ -102,11 +104,13 @@ $fontMono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mo
 }
 
 .settingsIconMobile {
+  @extend .settingsIcon;
   height: 3 * variables.$size;
   width: 3 * variables.$size;
 }
 
 .settingsIconDesktop {
+  @extend .settingsIcon;
   height: 5 * variables.$size;
   width: 5 * variables.$size;
 }

@@ -146,6 +146,7 @@ $basePadding: 4 * variables.$size;
 
 // Mobile (drawer) options additionally react to touch :active.
 .optionTouch {
+  @extend .option;
   &:active {
     background-color: var(--background-active);
   }
