@@ -1,3 +1,4 @@
+@use 'sass:math';
 @use '@monetr/interface/variables';
 
 // Full-size centered container.
@@ -17,20 +18,20 @@
   max-width: 160 * variables.$size;
 
   @media (min-width: variables.$smallScreen) {
-    width: percentage(10/12);
+    width: math.percentage(math.div(10, 12));
     padding: 0;
   }
 
   @media (min-width: variables.$mediumScreen) {
-    width: percentage(2/3);
+    width: math.percentage(math.div(2, 3));
   }
 
   @media (min-width: variables.$largeScreen) {
-    width: percentage(5/12);
+    width: math.percentage(math.div(5, 12));
   }
 
   @media (min-width: variables.$extraLargeScreen) {
-    width: percentage(3/12);
+    width: math.percentage(math.div(3, 12));
   }
 }
 
@@ -45,7 +46,7 @@
 
 // The monetr logo, a third of the card width.
 .logo {
-  width: percentage(1/3);
+  width: math.percentage(math.div(1, 3));
 }
 
 // Vertically padded row, used for the message and the spinner.

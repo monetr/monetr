@@ -1,3 +1,4 @@
+@use 'sass:math';
 @use '@monetr/interface/variables';
 
 /*
@@ -84,19 +85,19 @@ $text5ExtraLargeLineHeight: 7;
 }
 
 @mixin width-fifth {
-  width: percentage(1/5);
+  width: math.percentage(math.div(1, 5));
 }
 
 @mixin width-quarter {
-  width: percentage(1/4);
+  width: math.percentage(math.div(1, 4));
 }
 
 @mixin width-third {
-  width: percentage(1/3);
+  width: math.percentage(math.div(1, 3));
 }
 
 @mixin width-half {
-  width: percentage(1/2);
+  width: math.percentage(math.div(1, 2));
 }
 
 @mixin width-full {
