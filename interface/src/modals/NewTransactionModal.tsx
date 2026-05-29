@@ -1,4 +1,4 @@
-import { Fragment, useRef } from 'react';
+import { Fragment, useId, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfToday } from 'date-fns';
 import type { FormikHelpers } from 'formik';
@@ -44,6 +44,7 @@ function NewTransactionModal(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: selectedBankAccount } = useSelectedBankAccount();
   const createTransaction = useCreateTransaction();
+  const adjustsBalanceToggleId = useId();
 
   const initialValues: NewTransactionValues = {
     name: '',
@@ -98,7 +99,7 @@ function NewTransactionModal(): JSX.Element {
                 Create A New Transaction
               </Typography>
 
-              {/* 
+              {/*
               TODO I'm like 99% sure there is going to be a bug here where someone could do something like select a
               spending ID while on the debit tab, then switch to the credit tab and create a deposit with a spending ID?
               */}
@@ -139,11 +140,14 @@ function NewTransactionModal(): JSX.Element {
                   <MSelectSpending className={styles.spendingSelect} name='spendingId' />
                   <div className={styles.optionRowSpaced}>
                     <div className={styles.optionText}>
-                      <label className={styles.optionLabelClickable}>Adjust Balance</label>
+                      <label className={styles.optionLabelClickable} htmlFor={adjustsBalanceToggleId}>
+                        Adjust Balance
+                      </label>
                       <p className={styles.optionDescription}>Update your account balance for this transaction?</p>
                     </div>
                     <Switch
                       checked={values.adjustsBalance}
+                      id={adjustsBalanceToggleId}
                       onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
                     />
                   </div>
