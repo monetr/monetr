@@ -20,6 +20,9 @@ html {
   font-family: 'Inter Variable', sans-serif;
   font-feature-settings: normal;
   font-variation-settings: normal;
+  // Preflight suppressed the mobile tap highlight; without it, holding a button
+  // (or any clickable element) flashes the browser's default grey overlay.
+  -webkit-tap-highlight-color: transparent;
   background-color: var(--background);
 }
 
@@ -40,6 +43,10 @@ hr {
   height: 0;
   color: inherit;
   border-top-width: 1px;
+}
+
+abbr:where([title]) {
+  text-decoration: underline dotted;
 }
 
 // Headings inherit size/weight; styling is opted into explicitly.
@@ -72,6 +79,14 @@ sub, sup {
   line-height: 0;
   position: relative;
   vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
 }
 
 table {
@@ -128,8 +143,35 @@ button,
   outline: auto;
 }
 
+// Remove Firefox's red box-shadow on invalid form fields.
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
 progress {
   vertical-align: baseline;
+}
+
+// Correct the cursor style of number-input spin buttons in Safari.
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+// Normalize search inputs and their WebKit decorations.
+[type='search'] {
+  -webkit-appearance: textfield;
+  outline-offset: -2px;
+}
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+// Style the file-upload button like a regular button and inherit its font.
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  font: inherit;
 }
 
 fieldset {
@@ -138,6 +180,11 @@ fieldset {
 }
 
 legend {
+  padding: 0;
+}
+
+// Reset default padding on native dialogs.
+dialog {
   padding: 0;
 }
 
@@ -182,6 +229,8 @@ body {
   min-height: 100vh;
   background-color: var(--background);
   margin: 0;
+  // Inherit line-height from html so it can be set as a class on the root.
+  line-height: inherit;
   color: var(--content-emphasis);
 
   #root {
