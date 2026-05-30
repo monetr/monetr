@@ -350,8 +350,8 @@ github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyua
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/monetr/devslog v0.0.17 h1:BHpYtqWBGVQawkEyfhgFwqnhQtPBxg4bPMD2tMxsgow=
 github.com/monetr/devslog v0.0.17/go.mod h1:nzUwy/SXXIzjEmPSWWSzm14ytUBh1d9RGr2mxSDZ3Iw=
-github.com/monetr/validation v1.0.5 h1:clGPYUfyPQRhhfDdje647xIreTclWIaqZQgMAULmj7w=
-github.com/monetr/validation v1.0.5/go.mod h1:mFBjreq4v2Z/K1PAJSGmRgVfcjdezcptqYe+9gSu2oc=
+github.com/monetr/validation v1.0.6 h1:oDKWmToIbWrujWNR+uWxcRFGUa9B8DIktWWTpkhMnjE=
+github.com/monetr/validation v1.0.6/go.mod h1:mFBjreq4v2Z/K1PAJSGmRgVfcjdezcptqYe+9gSu2oc=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=

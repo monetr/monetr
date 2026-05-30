@@ -15,7 +15,7 @@ var (
 	Optional OptionalOrRequire = false
 )
 
-func Name(required OptionalOrRequire) *validation.KeyRules {
+func Name(required OptionalOrRequire) *validation.KeyRules[string] {
 	return validation.Key(
 		"name",
 		validation.Required.When(required).Error("Name is required"),
@@ -23,21 +23,21 @@ func Name(required OptionalOrRequire) *validation.KeyRules {
 	).Required(required)
 }
 
-func Description() *validation.KeyRules {
+func Description() *validation.KeyRules[string] {
 	return validation.Key(
 		"description",
 		validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
 	).Required(Optional)
 }
 
-func Mask() *validation.KeyRules {
+func Mask() *validation.KeyRules[string] {
 	return validation.Key(
 		"mask",
 		validation.Match(regexp.MustCompile(`\d{4}`)).Error("Mask must be a 4 digit string"),
 	).Required(Optional)
 }
 
-func CurrencyCode(required OptionalOrRequire) *validation.KeyRules {
+func CurrencyCode(required OptionalOrRequire) *validation.KeyRules[string] {
 	return validation.Key(
 		"currency",
 		validation.Required.When(required).Error("Currency is required"),
@@ -47,14 +47,14 @@ func CurrencyCode(required OptionalOrRequire) *validation.KeyRules {
 	).Required(required)
 }
 
-func LimitBalance(name string) *validation.KeyRules {
+func LimitBalance(name string) *validation.KeyRules[string] {
 	return validation.Key(
 		name,
 		validation.Min(float64(0)).Error("Limit balance cannot be negative"),
 	).Required(Optional)
 }
 
-func Balance(name string) *validation.KeyRules {
+func Balance(name string) *validation.KeyRules[string] {
 	return validation.Key(
 		name,
 		validation.Max(math.MaxFloat64),

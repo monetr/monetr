@@ -151,8 +151,8 @@ func (t *Transaction) AddSpendingToTransaction(
 	return nil
 }
 
-func (Transaction) CreateValidators() []*validation.KeyRules {
-	return []*validation.KeyRules{
+func (Transaction) CreateValidators() []*validation.KeyRules[string] {
+	return []*validation.KeyRules[string]{
 		validators.Name(validators.Require),
 		validation.Key(
 			"bankAccountId",
@@ -184,8 +184,8 @@ func (Transaction) CreateValidators() []*validation.KeyRules {
 	}
 }
 
-func (Transaction) UpdateValidators() []*validation.KeyRules {
-	return []*validation.KeyRules{
+func (Transaction) UpdateValidators() []*validation.KeyRules[string] {
+	return []*validation.KeyRules[string]{
 		validators.Name(validators.Optional),
 		validation.Key(
 			"amount",

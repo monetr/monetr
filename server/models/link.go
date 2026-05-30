@@ -57,8 +57,8 @@ func (o *Link) BeforeInsert(ctx context.Context) (context.Context, error) {
 // CreateValidators returns an array of validation rules that should be applied
 // when creating a new instance of this object via the API. Only fields with
 // validation rules should allow user input.
-func (Link) CreateValidators() []*validation.KeyRules {
-	return []*validation.KeyRules{
+func (Link) CreateValidators() []*validation.KeyRules[string] {
+	return []*validation.KeyRules[string]{
 		validation.Key(
 			"institutionName",
 			validation.Required.Error("Institution name is required"),
@@ -78,8 +78,8 @@ func (Link) CreateValidators() []*validation.KeyRules {
 // UpdateValidator returns an array of validation rules that should be applied
 // when updating this specific link object via an API call. Only the validated
 // fields should be updated as well.
-func (Link) UpdateValidator() []*validation.KeyRules {
-	return []*validation.KeyRules{
+func (Link) UpdateValidator() []*validation.KeyRules[string] {
+	return []*validation.KeyRules[string]{
 		validation.Key(
 			"institutionName",
 			validation.Length(1, 300).Error("Institution name must be between 1 and 300 characters"),
@@ -101,7 +101,7 @@ func (Link) UpdateValidator() []*validation.KeyRules {
 func (o *Link) UnmarshalRequest(
 	ctx context.Context,
 	reader io.Reader,
-	validators ...*validation.KeyRules,
+	validators ...*validation.KeyRules[string],
 ) error {
 	rawData := map[string]any{}
 	decoder := json.NewDecoder(reader)

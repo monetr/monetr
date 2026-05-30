@@ -66,7 +66,7 @@ func OneOf[T any](
 	ctx context.Context,
 	existing *T,
 	input map[string]any,
-	schemas ...validation.MapRule,
+	schemas ...validation.MapRule[string],
 ) (T, error) {
 	if existing == nil {
 		existing = new(T)
