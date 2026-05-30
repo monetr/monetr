@@ -56,6 +56,7 @@
 // Mobile-only balance row in the top navigation.
 .balanceRow {
   width: 100vw;
+  max-width: 100vw;
   display: flex;
   justify-content: space-evenly;
 

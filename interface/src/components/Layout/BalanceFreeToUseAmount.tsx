@@ -1,12 +1,13 @@
 import { Wallet } from 'lucide-react';
 
-import Flex from '@monetr/interface/components/Flex';
 import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { BankAccountSubType } from '@monetr/interface/models/BankAccount';
 import { AmountType } from '@monetr/interface/util/amounts';
+
+import styles from './BalanceFreeToUseAmount.module.scss';
 
 export default function BalanceFreeToUseAmount(): JSX.Element {
   const { data: locale } = useLocaleCurrency();
@@ -19,17 +20,17 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
       const color = balance?.free >= 0 ? 'emphasis' : 'negative';
 
       return (
-        <Flex gap='sm' justify='between'>
-          <Flex flex='shrink'>
+        <div className={styles.root}>
+          <div className={styles.freeToUseText}>
             <Wallet />
             <Typography color='emphasis' ellipsis size='lg' weight='semibold' wrapping='nowrap'>
               Free-To-Use:
             </Typography>
-          </Flex>
+          </div>
           <Typography color={color} size='lg' weight='semibold' wrapping='nowrap'>
             {locale.formatAmount(balance?.free, AmountType.Stored)}
           </Typography>
-        </Flex>
+        </div>
       );
     }
   }
