@@ -30,13 +30,13 @@ func databaseMigrate(parent *cobra.Command) {
 			}
 			defer db.Close()
 
-			migrator, err := migrations.NewMigrationsManager(log, db)
+			migrator, err := migrations.NewMigrationsManager(cmd.Context(), log, db)
 			if err != nil {
 				log.Error("failed to create migration manager", "err", err)
 				return err
 			}
 
-			oldVersion, newVersion, err := migrator.Up()
+			oldVersion, newVersion, err := migrator.Up(cmd.Context())
 			if err != nil {
 				log.Error("failed to run schema migrations", "err", err)
 				return err

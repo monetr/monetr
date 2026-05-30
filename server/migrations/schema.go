@@ -5,4 +5,4 @@ import (
 )
 
 //go:embed schema/*.sql
-var embededMigrations embed.FS
+var embeddedMigrations embed.FS
