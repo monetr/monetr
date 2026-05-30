@@ -9,7 +9,7 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/billing"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/captcha"

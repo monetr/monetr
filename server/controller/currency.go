@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	locale "github.com/elliotcourant/go-lclocale"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 func (c *Controller) listCurrencies(ctx echo.Context) error {

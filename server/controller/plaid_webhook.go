@@ -12,7 +12,7 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/datasources/plaid/plaid_jobs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
