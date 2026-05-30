@@ -8,7 +8,7 @@ import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import { useUpdateTransaction } from '@monetr/interface/hooks/useUpdateTransaction';
-import Spending from '@monetr/interface/models/Spending';
+import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import Transaction from '@monetr/interface/models/Transaction';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
 
@@ -34,6 +34,7 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
         label: 'Free-To-Use',
         value: new Spending({
           spendingId: FREE_TO_USE,
+          spendingType: SpendingType.FreeToUse,
           // It is possible for the "safe" balance to not be present when switching bank accounts. This is a pseudo race
           // condition. Instead we want to gracefully handle the value not being present initially, and print a nicer string
           // until the balance is loaded.

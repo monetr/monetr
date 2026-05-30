@@ -1,5 +1,5 @@
 import { useFormikContext } from 'formik';
-import { PiggyBank, Receipt } from 'lucide-react';
+import { PiggyBank, Receipt, Wallet } from 'lucide-react';
 
 import Badge from '@monetr/interface/components/Badge';
 import Select, {
@@ -51,6 +51,7 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
     label: 'Free-To-Use',
     value: new Spending({
       spendingId: FREE_TO_USE,
+      spendingType: SpendingType.FreeToUse,
       // It is possible for the "safe" balance to not be present when switching bank accounts. This is a pseudo race
       // condition. Instead we want to gracefully handle the value not being present initially, and print a nicer string
       // until the balance is loaded.
@@ -116,10 +117,12 @@ export function SelectSpendingOptionComponent(props: SelectOptionComponentProps<
   const amount = notLoaded ? 'N/A' : locale.formatAmount(props.value.currentAmount, AmountType.Stored);
   return (
     <div className={styles.optionRow}>
-      <Typography color='emphasis' ellipsis size='md'>
-        {props.label}
-      </Typography>
-      <div className={styles.badges}>
+      <div className={styles.spendingName}>
+        {props.value?.spendingType === SpendingType.FreeToUse && (
+          <Badge className={styles.iconBadge} size='sm' variant='brand'>
+            <Wallet />
+          </Badge>
+        )}
         {props.value?.spendingType === SpendingType.Goal && (
           <Badge className={styles.iconBadge} size='sm' variant='info'>
             <PiggyBank />
@@ -130,6 +133,11 @@ export function SelectSpendingOptionComponent(props: SelectOptionComponentProps<
             <Receipt />
           </Badge>
         )}
+        <Typography color='emphasis' ellipsis size='md'>
+          {props.label}
+        </Typography>
+      </div>
+      <div className={styles.badges}>
         <Badge size='sm'>{amount}</Badge>
       </div>
     </div>

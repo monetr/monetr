@@ -3,6 +3,7 @@ import { format, isThisYear } from 'date-fns';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum SpendingType {
+  FreeToUse = -1, // Cannot be present on actual responses!
   Expense = 0,
   Goal = 1,
 }

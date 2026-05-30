@@ -5,6 +5,12 @@
   justify-content: space-between;
 }
 
+.spendingName {
+  display: flex;
+  min-width: 0;
+  gap: 2 * variables.$size;
+}
+
 .badges {
   display: flex;
   gap: 2 * variables.$size;
