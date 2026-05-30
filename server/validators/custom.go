@@ -18,12 +18,17 @@ func (i *inlineRule[T]) Validate(value any) error {
 
 // ValidateWithContext implements [validation.RuleWithContext].
 func (i *inlineRule[T]) ValidateWithContext(ctx context.Context, value any) error {
-	val, ok := value.(T)
-	if !ok {
+	switch v := value.(type) {
+	case *T:
+		// Pointer struct fields arrive already as a *T (the validation library
+		// hands us the field value verbatim). Pass it through; it may be nil.
+		return i.f(ctx, v)
+	case T:
+		// Value fields arrive as a T; wrap it so the callback always sees a *T.
+		return i.f(ctx, &v)
+	default:
 		return i.f(ctx, nil)
 	}
-
-	return i.f(ctx, &val)
 }
 
 func By[T any](callback func(ctx context.Context, value *T) error) validation.Rule {
