@@ -191,8 +191,8 @@ func (o *FundingSchedule) CalculateNextOccurrence(
 	return true
 }
 
-func (FundingSchedule) CreateValidators() []*validation.KeyRules {
-	return []*validation.KeyRules{
+func (FundingSchedule) CreateValidators() []*validation.KeyRules[string] {
+	return []*validation.KeyRules[string]{
 		// validation.Key(
 		// 	"bankAccountId",
 		// 	validation.Required.Error("Must specify a bank account ID"),
@@ -227,8 +227,8 @@ func (FundingSchedule) CreateValidators() []*validation.KeyRules {
 	}
 }
 
-func (FundingSchedule) UpdateValidators() []*validation.KeyRules {
-	return []*validation.KeyRules{
+func (FundingSchedule) UpdateValidators() []*validation.KeyRules[string] {
+	return []*validation.KeyRules[string]{
 		validators.Name(validators.Optional),
 		validators.Description(),
 		validation.Key(
@@ -267,7 +267,7 @@ func (FundingSchedule) UpdateValidators() []*validation.KeyRules {
 func (o *FundingSchedule) UnmarshalRequest(
 	ctx context.Context,
 	reader io.Reader,
-	validators ...*validation.KeyRules,
+	validators ...*validation.KeyRules[string],
 ) error {
 	rawData := map[string]any{}
 	decoder := json.NewDecoder(reader)

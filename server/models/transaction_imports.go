@@ -87,8 +87,8 @@ func (o *TransactionImport) BeforeInsert(ctx context.Context) (context.Context, 
 	return ctx, nil
 }
 
-func (TransactionImport) PatchSchemas() []validation.MapRule {
-	return []validation.MapRule{
+func (TransactionImport) PatchSchemas() []validation.MapRule[string] {
+	return []validation.MapRule[string]{
 		// When we do not yet have a mapping then they must specify a new mapping ID
 		// and say that we are moving to the pending preview status.
 		validation.Map(

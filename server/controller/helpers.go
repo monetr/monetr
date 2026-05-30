@@ -317,7 +317,7 @@ func parse[T any](
 	c *Controller,
 	ctx echo.Context,
 	existing *T,
-	schemas ...validation.MapRule,
+	schemas ...validation.MapRule[string],
 ) (T, error) {
 	if existing == nil {
 		existing = new(T)

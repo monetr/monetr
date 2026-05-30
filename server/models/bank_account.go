@@ -157,8 +157,8 @@ func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error)
 // CreateValidators returns an array of validators that can be passed to the
 // BankAccount UnmarshalRequest function. Specifically for requests to create a
 // bank account object.
-func (BankAccount) CreateValidators() []*validation.KeyRules {
-	return []*validation.KeyRules{
+func (BankAccount) CreateValidators() []*validation.KeyRules[string] {
+	return []*validation.KeyRules[string]{
 		validators.Mask(),
 		validators.Name(validators.Require),
 		validation.Key(
@@ -218,14 +218,14 @@ func (BankAccount) CreateValidators() []*validation.KeyRules {
 
 // UpdateValidator returns an array of validation rules that can be used to
 // validate requests to PATCH endpoints.
-func (o *BankAccount) UpdateValidator() []*validation.KeyRules {
+func (o *BankAccount) UpdateValidator() []*validation.KeyRules[string] {
 	if o.PlaidBankAccountId != nil {
-		return []*validation.KeyRules{
+		return []*validation.KeyRules[string]{
 			validators.Name(false),
 		}
 	}
 
-	return []*validation.KeyRules{
+	return []*validation.KeyRules[string]{
 		validators.Mask(),
 		validators.Name(validators.Optional),
 		validators.CurrencyCode(validators.Optional),
@@ -280,7 +280,7 @@ func (o *BankAccount) UpdateValidator() []*validation.KeyRules {
 func (o *BankAccount) UnmarshalRequest(
 	ctx context.Context,
 	reader io.Reader,
-	validators ...*validation.KeyRules,
+	validators ...*validation.KeyRules[string],
 ) error {
 	rawData := map[string]any{}
 	decoder := json.NewDecoder(reader)
