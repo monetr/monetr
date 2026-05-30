@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"log/slog"
 	"math"
 	"net/http"
@@ -8,6 +9,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/schemas"
+	"github.com/monetr/validation"
 )
 
 func (c *Controller) getTransactions(ctx echo.Context) error {
@@ -115,14 +118,30 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 		return c.badRequest(ctx, "Cannot create transactions for non-manual links")
 	}
 
-	var request struct {
+	var request *struct {
 		// Inherit all the fields from the transaction object
 		Transaction
 
 		AdjustsBalance bool `json:"adjustsBalance"`
 	}
-	if err = ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
+
+	request, err = schemas.Parse(
+		c.getContext(ctx),
+		ctx.Request().Body,
+		request,
+		schemas.CreateTransactionSchema,
+	)
+	switch err := err.(type) {
+	case validation.Errors, validation.OneOfError:
+		return ctx.JSON(http.StatusBadRequest, map[string]any{
+			"error":    "Invalid request",
+			"problems": err,
+		})
+	case *json.SyntaxError:
+		return c.invalidJsonError(ctx, err)
+	case nil:
+	default:
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
 	}
 
 	request.TransactionId = ""

@@ -3,7 +3,6 @@ import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { startOfDay, startOfToday } from 'date-fns';
 import type { FormikHelpers } from 'formik';
 
-import type { ApiError } from '@monetr/interface/api/client';
 import { Button } from '@monetr/interface/components/Button';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
@@ -15,11 +14,14 @@ import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import { Switch } from '@monetr/interface/components/Switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monetr/interface/components/Tabs';
 import Typography from '@monetr/interface/components/Typography';
-import { type CreateTransactionRequest, useCreateTransaction } from '@monetr/interface/hooks/useCreateTransaction';
+import {
+  type CreateTransactionError,
+  type CreateTransactionRequest,
+  useCreateTransaction,
+} from '@monetr/interface/hooks/useCreateTransaction';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
@@ -78,13 +80,15 @@ function NewTransactionModal(): JSX.Element {
       createTransaction(newTransactionRequest)
         // TODO Show toast that the transaction was created, include button to "view transaction".
         .then(() => modal.remove())
-        .catch(
-          (error: ApiError<APIError>) =>
-            void enqueueSnackbar(error.response.data.error, {
-              variant: 'error',
-              disableWindowBlurListener: true,
-            }),
-        )
+        .catch((result: CreateTransactionError) => {
+          if (result.problems) {
+            helper.setErrors(result.problems);
+          }
+          enqueueSnackbar(result.error, {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          });
+        })
         .finally(() => helper.setSubmitting(false))
     );
   }
