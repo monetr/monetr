@@ -1,16 +1,8 @@
 @use '@monetr/interface/variables';
 
 .root {
-  display: flex;
-  gap: 0.5cap;
-  flex-shrink: 1;
   min-width: 0;
-}
-
-.freeToUseText {
-  gap: 0.5cap;
-  display: flex;
+  flex-grow: 0;
   flex-shrink: 1;
-  min-width: 0;
-  width: auto;
+  width: inherit;
 }

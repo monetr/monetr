@@ -105,7 +105,9 @@ export default function Transactions(): JSX.Element {
     <Fragment>
       <MTopNavigation icon={ShoppingCart} title='Transactions'>
         <div className={styles.balanceRow}>
+          <div className={styles.balanceSpacer} /> {/* These force the free to use to be more centered */}
           <BalanceFreeToUseAmount />
+          <div className={styles.balanceSpacer} />
         </div>
         <UploadButtonMaybe />
       </MTopNavigation>
