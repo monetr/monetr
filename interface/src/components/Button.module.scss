@@ -105,6 +105,10 @@
   background-color: var(--destructive);
   color: var(--content-emphasis);
 
+  &:disabled {
+    background-color: var(--destructive-disabled);
+  }
+
   &:enabled:hover {
     background-color: var(--destructive-subtle);
   }

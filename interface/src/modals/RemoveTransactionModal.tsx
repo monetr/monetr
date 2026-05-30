@@ -8,7 +8,7 @@ import { Button } from '@monetr/interface/components/Button';
 import FormButton from '@monetr/interface/components/FormButton';
 import MForm from '@monetr/interface/components/MForm';
 import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
-import { Switch } from '@monetr/interface/components/Switch';
+import SwitchCard from '@monetr/interface/components/SwitchCard';
 import Typography from '@monetr/interface/components/Typography';
 import SimilarTransactionItem from '@monetr/interface/components/transactions/SimilarTransactionItem';
 import { useRemoveTransaction } from '@monetr/interface/hooks/useRemoveTransaction';
@@ -89,30 +89,18 @@ function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element
                 <SimilarTransactionItem disableNavigate transactionId={transaction.transactionId} />
               </ul>
               <Typography size='inherit'>You will not be able to undo this action.</Typography>
-              <div className={styles.optionRow}>
-                <div className={styles.optionText}>
-                  <label className={styles.optionLabel}>Prevent Re-Creation</label>
-                  <p className={styles.optionDescription}>
-                    Prevent this transaction from be re-created if it is present in future file imports?
-                  </p>
-                </div>
-                <Switch
-                  checked={values.softDelete}
-                  onCheckedChange={() => setFieldValue('softDelete', !values.softDelete)}
-                />
-              </div>
-              <div className={styles.optionRow}>
-                <div className={styles.optionText}>
-                  <label className={styles.optionLabel}>Adjust Balance</label>
-                  <p className={styles.optionDescription}>
-                    Update your account balance as if this transaction was reversed?
-                  </p>
-                </div>
-                <Switch
-                  checked={values.adjustsBalance}
-                  onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
-                />
-              </div>
+              <SwitchCard
+                checked={values.softDelete}
+                description='Prevent this transaction from be re-created if it is present in future file imports?'
+                label='Prevent Re-Creation'
+                onCheckedChange={() => setFieldValue('softDelete', !values.softDelete)}
+              />
+              <SwitchCard
+                checked={values.adjustsBalance}
+                description='Update your account balance as if this transaction was reversed?'
+                label='Adjust Balacne'
+                onCheckedChange={() => setFieldValue('adjustsBalance', !values.adjustsBalance)}
+              />
             </div>
             <div className={styles.actions}>
               <Button disabled={isSubmitting} onClick={modal.remove} variant='secondary'>

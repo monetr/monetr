@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '@monetr/interface/variables';
 
 // Base reset. Reproduces the Preflight defaults the modules rely on — notably
@@ -277,6 +278,7 @@ svg.lucide {
   --error: #ef4444;
 
   --destructive: #dc2626;
+  --destructive-disabled: #{color.adjust(#dc2626, $lightness: 25%)};
   --destructive-subtle: #ef4444;
 
   --success: #16a34a;

@@ -32,36 +32,6 @@
   gap: 2 * variables.$size; // gap-stack
 }
 
-.optionRow {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  border-radius: var(--border-radius);
-  padding: 2 * variables.$size;
-  gap: 0.5 * variables.$size; // gap-component
-
-  --ring-color: var(--border-string);
-  --ring-size: 1px;
-  @include mixins.ring;
-}
-
-.optionText {
-  gap: 0.5 * variables.$size; // gap-component
-}
-
-.optionLabel {
-  @include mixins.text-small;
-  font-weight: var(--medium);
-  color: var(--content-emphasis);
-  cursor: pointer;
-}
-
-.optionDescription {
-  @include mixins.text-small;
-  color: var(--content);
-}
-
 .actions {
   display: flex;
   justify-content: flex-end;

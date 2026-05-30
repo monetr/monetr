@@ -1,10 +1,11 @@
 import { useCallback } from 'react';
 import { startOfDay } from 'date-fns';
 import type { FormikHelpers } from 'formik';
-import { HeartCrack, Save, ShoppingCart } from 'lucide-react';
+import { HeartCrack, Save, ShoppingCart, Trash } from 'lucide-react';
 import { useParams } from 'wouter';
 
 import type { ApiError } from '@monetr/interface/api/client';
+import { Button } from '@monetr/interface/components/Button';
 import Flex from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormButton from '@monetr/interface/components/FormButton';
@@ -132,6 +133,16 @@ export default function TransactionDetails(): JSX.Element {
                 name='isPending'
               />
               <MSelectSpending className={layoutVariants({ width: 'full' })} isLoading name='spendingId' />
+              <div className={styles.formButtons}>
+                <Button disabled variant='destructive'>
+                  <Trash />
+                  Remove
+                </Button>
+                <Button disabled variant='primary'>
+                  <Save />
+                  Save Changes
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -174,13 +185,7 @@ export default function TransactionDetails(): JSX.Element {
         breadcrumb={transaction?.name}
         icon={ShoppingCart}
         title='Transactions'
-      >
-        <RemoveTransactionButton transaction={transaction} />
-        <FormButton role='form' type='submit' variant='primary'>
-          <Save />
-          Save Changes
-        </FormButton>
-      </MTopNavigation>
+      />
       <div className={styles.body}>
         <div className={styles.columns}>
           <div className={styles.column}>
@@ -221,6 +226,13 @@ export default function TransactionDetails(): JSX.Element {
             {!transaction.getIsAddition() && (
               <MSelectSpending className={layoutVariants({ width: 'full' })} name='spendingId' />
             )}
+            <div className={styles.formButtons}>
+              <RemoveTransactionButton transaction={transaction} />
+              <FormButton role='form' type='submit' variant='primary'>
+                <Save />
+                Save Changes
+              </FormButton>
+            </div>
           </div>
           <div className={styles.column}>
             <SimilarTransactions transaction={transaction} />
