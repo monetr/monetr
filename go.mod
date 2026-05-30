@@ -21,7 +21,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.17.0
 	github.com/getsentry/sentry-go v0.46.2
 	github.com/go-pg/migrations/v8 v8.1.0
-	github.com/go-pg/pg/v10 v10.15.0
+	github.com/go-pg/pg/v10 v10.15.1
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/gomodule/redigo v1.9.3
 	github.com/hashicorp/vault/api v1.23.0
@@ -144,7 +144,7 @@ require (
 )
 
 // Fix migrations/v8 dependency
-replace github.com/go-pg/pg/v10 v10.4.0 => github.com/go-pg/pg/v10 v10.15.0
+replace github.com/go-pg/pg/v10 v10.4.0 => github.com/go-pg/pg/v10 v10.15.1
 
 // Keep everything on the same msgpack version
 replace github.com/vmihailenco/msgpack/v5 v5.3.4 => github.com/vmihailenco/msgpack/v5 v5.4.1
