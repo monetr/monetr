@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	locale "github.com/elliotcourant/go-lclocale"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/models"

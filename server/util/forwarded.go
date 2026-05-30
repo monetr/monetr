@@ -3,7 +3,7 @@ package util
 import (
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // GetForwardedFor will return the IP address provided by the request header X-Forwarded-For or X-Real-Ip.
