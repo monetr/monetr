@@ -152,11 +152,17 @@ func TestPostTransactions(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
 				"amount": 1200,
+				"date":   app.Clock.Now(),
 			}).
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Transaction must have a name")
+		response.JSON().IsEqual(map[string]any{
+			"error": "Invalid request",
+			"problems": map[string]any{
+				"name": "required key is missing",
+			},
+		})
 	})
 
 	t.Run("date is required", func(t *testing.T) {
@@ -171,12 +177,18 @@ func TestPostTransactions(t *testing.T) {
 			WithPath("bankAccountId", bank.BankAccountId).
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
-				"name": "Foobar",
+				"name":   "Foobar",
+				"amount": 100,
 			}).
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Transaction must have a date")
+		response.JSON().IsEqual(map[string]any{
+			"error": "Invalid request",
+			"problems": map[string]any{
+				"date": "required key is missing",
+			},
+		})
 	})
 
 	t.Run("amount is required", func(t *testing.T) {
@@ -197,7 +209,12 @@ func TestPostTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Transaction must have a non-zero amount")
+		response.JSON().IsEqual(map[string]any{
+			"error": "Invalid request",
+			"problems": map[string]any{
+				"amount": "required key is missing",
+			},
+		})
 	})
 
 	t.Run("bogus spending object", func(t *testing.T) {
@@ -254,7 +271,6 @@ func TestPostTransactions(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         100, // $1
 					"isPending":      false,
 					"name":           "I spent some money",
@@ -274,7 +290,6 @@ func TestPostTransactions(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         -200, // Earned $2
 					"isPending":      false,
 					"name":           "I earned some money",
@@ -323,7 +338,6 @@ func TestPostTransactions(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         100, // $1
 					"isPending":      false,
 					"name":           "I spent some money",
@@ -360,7 +374,6 @@ func TestPostTransactions(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         100, // $1
 					"isPending":      false,
 					"name":           "I spent some money",
@@ -371,6 +384,41 @@ func TestPostTransactions(t *testing.T) {
 
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").IsEqual("Cannot create transactions for non-manual links")
+		}
+	})
+
+	t.Run("nil fields", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		{ // Seed the data for the test.
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // Now create our transaction and have it linked to our expense
+			response := e.POST("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"amount":         100, // $1
+					"isPending":      false,
+					"name":           "I spent some money",
+					"date":           app.Clock.Now(), // Should use midnight, but idc
+					"adjustsBalance": false,
+					"spendingId":     nil,
+					"merchantName":   nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.transaction.transactionId").String().NotEmpty()
+			response.JSON().Object().Keys().IsEqual([]string{"balance", "transaction"})
 		}
 	})
 
@@ -443,7 +491,6 @@ func TestPostTransactions(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         100, // $1
 					"isPending":      false,
 					"name":           "I spent some money",
@@ -539,7 +586,6 @@ func TestPostTransactions(t *testing.T) {
 				WithPath("bankAccountId", bankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bankAccountId,
 					"amount":         100, // $1
 					"isPending":      false,
 					"name":           "I spent some money",
@@ -973,7 +1019,6 @@ func TestDeleteTransactions(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         200, // Spent $2
 					"isPending":      false,
 					"name":           "I spent money",
@@ -1064,7 +1109,6 @@ func TestDeleteTransactions(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         200, // Spent $2
 					"isPending":      false,
 					"name":           "I spent money",
@@ -1222,7 +1266,6 @@ func TestDeleteTransactions(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         200, // Spent $2
 					"isPending":      false,
 					"name":           "I spent money",
@@ -1404,7 +1447,6 @@ func TestDeleteTransactions(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         200, // Spent $2
 					"isPending":      false,
 					"name":           "I spent money",

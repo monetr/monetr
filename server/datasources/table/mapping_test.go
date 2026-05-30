@@ -230,7 +230,7 @@ func TestMapping_Validate(t *testing.T) {
 			if tc.wantErr == "" {
 				assert.NoError(t, err, "Mapping must be accepted")
 			} else {
-				assert.EqualError(t, err, tc.wantErr, "Mapping must be rejected with the expected message")
+				assert.EqualErrorf(t, err, tc.wantErr, "Mapping must be rejected with the expected message, wanted: %s", tc.wantErr)
 			}
 		})
 	}

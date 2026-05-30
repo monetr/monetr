@@ -3,16 +3,18 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Balance from '@monetr/interface/models/Balance';
 import type Spending from '@monetr/interface/models/Spending';
 import type Transaction from '@monetr/interface/models/Transaction';
-import request from '@monetr/interface/util/request';
+import request, { type ApiError } from '@monetr/interface/util/request';
 
 export interface CreateTransactionRequest {
   name: string;
-  bankAccountId: string;
   amount: number;
   spendingId: string | null;
   date: Date;
   merchantName: string | null;
   isPending: boolean;
+
+  // These are auxilary fields
+  bankAccountId: string;
   adjustsBalance: boolean;
 }
 
@@ -22,15 +24,30 @@ export interface CreateTransactionResponse {
   spending: Partial<Spending> | null;
 }
 
-export function useCreateTransaction(): (_: CreateTransactionRequest) => Promise<CreateTransactionResponse> {
+export type CreateTransactionError =
+  | { error: string; problems: never }
+  | { error: string; problems: { [K in keyof CreateTransactionRequest]: string } };
+
+export function useCreateTransaction(): (
+  _: CreateTransactionRequest,
+) => Promise<CreateTransactionResponse | CreateTransactionError> {
   const queryClient = useQueryClient();
 
-  async function createTransaction(transaction: CreateTransactionRequest): Promise<CreateTransactionResponse> {
+  async function createTransaction({
+    // The bank account Id field is dropped by the controller, the path value is authoritative here so even thoguh this
+    // does kind of betray the typing of [CreateTransactionError] this is correct.
+    bankAccountId,
+    ...transaction
+  }: CreateTransactionRequest): Promise<CreateTransactionResponse> {
     return request<CreateTransactionResponse>({
       method: 'POST',
-      url: `/api/bank_accounts/${transaction.bankAccountId}/transactions`,
+      url: `/api/bank_accounts/${bankAccountId}/transactions`,
       data: transaction,
-    }).then(result => result.data);
+    })
+      .then(result => result.data)
+      .catch((error: ApiError<CreateTransactionError>) => {
+        throw error.response.data;
+      });
   }
 
   const { mutateAsync } = useMutation({
