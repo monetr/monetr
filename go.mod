@@ -144,7 +144,7 @@ require (
 )
 
 // Fix migrations/v8 dependency
-replace github.com/go-pg/pg/v10 v10.4.0 => github.com/go-pg/pg/v10 v10.15.0
+replace github.com/go-pg/pg/v10 v10.4.0 => github.com/go-pg/pg/v10 v10.15.1
 
 // Keep everything on the same msgpack version
 replace github.com/vmihailenco/msgpack/v5 v5.3.4 => github.com/vmihailenco/msgpack/v5 v5.4.1
