@@ -34,7 +34,7 @@
     "@types/react-dom": "18.3.7",
     "autoprefixer": "10.5.0",
     "postcss": "8.5.14",
-    "sass": "1.99.0",
+    "sass": "1.100.0",
     "satori": "0.26.0",
     "spellchecker-cli": "7.0.3",
     "typescript": "5.9.3"

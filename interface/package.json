@@ -77,9 +77,9 @@
     "@types/react-google-recaptcha": "2.1.9",
     "babel-plugin-react-compiler": "1.0.0",
     "react-compiler-runtime": "1.0.0",
-    "sass": "1.99.0",
-    "sass-embedded-linux-arm64": "1.99.0",
-    "sass-embedded-linux-x64": "1.99.0",
+    "sass": "1.100.0",
+    "sass-embedded-linux-arm64": "1.100.0",
+    "sass-embedded-linux-x64": "1.100.0",
     "typescript": "5.9.3"
   }
 }
