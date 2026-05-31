@@ -141,7 +141,7 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 		return c.invalidJsonError(ctx, err)
 	case nil:
 	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
+		return c.badRequestError(ctx, err, "failed to parse request")
 	}
 
 	request.TransactionId = ""
@@ -154,32 +154,6 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 	request.Category = nil
 	request.Source = TransactionSourceManual
 
-	request.Name, err = c.cleanString(ctx, "Name", request.Name)
-	if err != nil {
-		return err
-	}
-	if request.Name == "" {
-		return c.badRequest(ctx, "Transaction must have a name")
-	}
-
-	request.MerchantName, err = c.cleanString(ctx, "MerchantName", request.MerchantName)
-	if err != nil {
-		return err
-	}
-
-	request.OriginalName, err = c.cleanString(ctx, "OriginalName", request.OriginalName)
-	if err != nil {
-		return err
-	}
-
-	if request.Date.IsZero() {
-		return c.badRequest(ctx, "Transaction must have a date")
-	}
-
-	if request.Amount == 0 {
-		return c.badRequest(ctx, "Transaction must have a non-zero amount")
-	}
-
 	var updatedSpending *Spending
 	if request.SpendingId != nil && !request.SpendingId.IsZero() {
 		updatedSpending, err = repo.GetSpendingById(
@@ -188,7 +162,11 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 			*request.SpendingId,
 		)
 		if err != nil {
-			return c.wrapPgError(ctx, err, "Could not get spending provided for transaction")
+			return c.wrapPgError(
+				ctx,
+				err,
+				"Could not get spending provided for transaction",
+			)
 		}
 
 		if err = repo.AddExpenseToTransaction(
@@ -196,7 +174,12 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 			&request.Transaction,
 			updatedSpending,
 		); err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to add expense to transaction")
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"failed to add expense to transaction",
+			)
 		}
 
 		if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []Spending{
@@ -229,8 +212,15 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 		// Note, if balance is ever something monetr has to rely on for ANYTHING
 		// IMPORTANT; then this should be done in a serializable transaction to make
 		// sure that we are properly handling concurrency.
-		if err := repo.UpdateBankAccount(c.getContext(ctx), bankAccount); err != nil {
-			return c.wrapPgError(ctx, err, "could not update bank account balance for transaction")
+		if err := repo.UpdateBankAccount(
+			c.getContext(ctx),
+			bankAccount,
+		); err != nil {
+			return c.wrapPgError(
+				ctx,
+				err,
+				"could not update bank account balance for transaction",
+			)
 		}
 	}
 
