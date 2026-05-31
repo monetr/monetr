@@ -9,6 +9,7 @@
     "moduleResolution": "node",
     "noImplicitAny": false,
     "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
     "allowImportingTsExtensions": true,
     "outDir": "../server/ui/static",
     "sourceMap": true,

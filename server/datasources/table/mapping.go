@@ -38,21 +38,21 @@ func (m *Mapping) Validate(ctx context.Context) error {
 			m,
 			validation.Field(
 				&m.ID,
-				validators.By(func(ctx context.Context, field IDSpec) error {
+				validators.By(func(ctx context.Context, field *IDSpec) error {
 					return field.Validate(ctx)
 				}),
 				validation.Required,
 			),
 			validation.Field(
 				&m.Amount,
-				validators.By(func(ctx context.Context, field AmountSpec) error {
+				validators.By(func(ctx context.Context, field *AmountSpec) error {
 					return field.Validate(ctx)
 				}),
 				validation.Required,
 			),
 			validation.Field(
 				&m.Memo,
-				validators.By(func(ctx context.Context, field FieldRef) error {
+				validators.By(func(ctx context.Context, field *FieldRef) error {
 					return field.Validate(ctx)
 				}),
 				validation.Required,
@@ -68,7 +68,7 @@ func (m *Mapping) Validate(ctx context.Context) error {
 			),
 			validation.Field(
 				&m.Date,
-				validators.By(func(ctx context.Context, field DateSpec) error {
+				validators.By(func(ctx context.Context, field *DateSpec) error {
 					return field.Validate(ctx)
 				}),
 				validation.Required,
@@ -84,7 +84,7 @@ func (m *Mapping) Validate(ctx context.Context) error {
 			),
 			validation.Field(
 				&m.Balance,
-				validators.By(func(ctx context.Context, field BalanceSpec) error {
+				validators.By(func(ctx context.Context, field *BalanceSpec) error {
 					return field.Validate(ctx)
 				}),
 				validation.Required,

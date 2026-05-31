@@ -29,7 +29,7 @@ func (i *inRule[T]) Validate(value any) error {
 // "cannot be blank"; this rule speaks up only when the caller supplied a value
 // that wasn't in the allowed set.
 func (i *inRule[T]) ValidateWithContext(ctx context.Context, value any) error {
-	value, isNil := validation.Indirect(value)
+	value, isNil, _ := validation.Indirect(value)
 	if isNil || validation.IsEmpty(value) {
 		return nil
 	}
