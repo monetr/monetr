@@ -17,18 +17,22 @@ export default class Recurrence {
   equalRule(input: string): boolean {
     try {
       const inputRule = rrulestr(input);
-      inputRule.options.dtstart = null;
-      inputRule.options.byhour = null;
-      inputRule.options.byminute = null;
-      inputRule.options.bysecond = null;
-      inputRule.options.tzid = null;
+      // rrule types these option fields as non-nullable, but we deliberately null them out so they're ignored when we
+      // compare the two rules. Alias the options through a loose view so the assignments are allowed.
+      const inputOptions = inputRule.options as unknown as Record<string, unknown>;
+      inputOptions.dtstart = null;
+      inputOptions.byhour = null;
+      inputOptions.byminute = null;
+      inputOptions.bysecond = null;
+      inputOptions.tzid = null;
 
       const thisRule = this.rule.clone();
-      thisRule.options.dtstart = null;
-      thisRule.options.byhour = null;
-      thisRule.options.byminute = null;
-      thisRule.options.bysecond = null;
-      inputRule.options.tzid = null;
+      const thisOptions = thisRule.options as unknown as Record<string, unknown>;
+      thisOptions.dtstart = null;
+      thisOptions.byhour = null;
+      thisOptions.byminute = null;
+      thisOptions.bysecond = null;
+      inputOptions.tzid = null;
 
       const a = JSON.stringify(inputRule.options);
       const b = JSON.stringify(thisRule.options);
@@ -50,18 +54,22 @@ export default class Recurrence {
   equalSignature(input: string): boolean {
     try {
       const inputRule = rrulestr(input);
-      inputRule.options.dtstart = null;
-      inputRule.options.byhour = null;
-      inputRule.options.byminute = null;
-      inputRule.options.bysecond = null;
-      inputRule.options.tzid = null;
+      // rrule types these option fields as non-nullable, but we deliberately null them out so they're ignored when we
+      // compare the two rules. Alias the options through a loose view so the assignments are allowed.
+      const inputOptions = inputRule.options as unknown as Record<string, unknown>;
+      inputOptions.dtstart = null;
+      inputOptions.byhour = null;
+      inputOptions.byminute = null;
+      inputOptions.bysecond = null;
+      inputOptions.tzid = null;
 
       const thisRule = this.rule.clone();
-      thisRule.options.dtstart = null;
-      thisRule.options.byhour = null;
-      thisRule.options.byminute = null;
-      thisRule.options.bysecond = null;
-      inputRule.options.tzid = null;
+      const thisOptions = thisRule.options as unknown as Record<string, unknown>;
+      thisOptions.dtstart = null;
+      thisOptions.byhour = null;
+      thisOptions.byminute = null;
+      thisOptions.bysecond = null;
+      inputOptions.tzid = null;
 
       const a = ruleSignature(inputRule);
       const b = ruleSignature(thisRule);

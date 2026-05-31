@@ -13,11 +13,8 @@ const showEnableTOTPModal = async () =>
   );
 
 export default function TOTPCard(): JSX.Element {
-  const {
-    data: {
-      user: { login },
-    },
-  } = useAuthentication();
+  const { data } = useAuthentication();
+  const login = data?.user?.login;
 
   return (
     <Card className={styles.card}>
@@ -25,8 +22,8 @@ export default function TOTPCard(): JSX.Element {
         <div className={styles.iconBox}>
           <Shield />
         </div>
-        <Button disabled={Boolean(login.totpEnabledAt)} onClick={showEnableTOTPModal} variant='primary'>
-          {login.totpEnabledAt ? 'Already Enabled' : 'Enable TOTP'}
+        <Button disabled={Boolean(login?.totpEnabledAt)} onClick={showEnableTOTPModal} variant='primary'>
+          {login?.totpEnabledAt ? 'Already Enabled' : 'Enable TOTP'}
         </Button>
       </div>
       <Typography color='emphasis' size='md' weight='medium'>

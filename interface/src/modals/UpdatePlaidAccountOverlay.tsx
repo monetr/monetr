@@ -111,7 +111,7 @@ function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaid
   }, []);
 
   const { error, open } = usePlaidLink({
-    token: state.linkToken,
+    token: state.linkToken ?? null,
     onSuccess: plaidOnSuccess,
     onExit: plaidOnExit,
     onEvent: plaidOnEvent,
@@ -158,8 +158,9 @@ const updatePlaidAccountOverlay = NiceModal.create<UpdatePlaidAccountOverlayProp
 export default updatePlaidAccountOverlay;
 
 export function showUpdatePlaidAccountOverlay(props: UpdatePlaidAccountOverlayProps): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof updatePlaidAccountOverlay>, unknown>(
-    updatePlaidAccountOverlay,
-    props,
-  );
+  return NiceModal.show<
+    void,
+    ExtractProps<typeof updatePlaidAccountOverlay>,
+    Partial<ExtractProps<typeof updatePlaidAccountOverlay>>
+  >(updatePlaidAccountOverlay, props);
 }

@@ -49,20 +49,28 @@ export default function TransactionDetails(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { transactionId: id } = useParams<{ transactionId: string }>();
   const updateTransaction = useUpdateTransaction();
-  const transactionId = id || null;
+  const transactionId = id || undefined;
   const { data: transaction, isLoading, isError } = useTransaction(transactionId);
   const submit = useCallback(
     async (values: TransactionValues, helpers: FormikHelpers<TransactionValues>) => {
+      // We cannot build the updated transaction without a locale to convert the friendly amount back into a stored
+      // amount, the form is only reachable once the locale has loaded so this should never actually happen.
+      if (!locale) {
+        return;
+      }
+
       const updatedTransaction = new Transaction({
         ...transaction,
         name: values.name,
+        // spendingId can be null when the transaction is being moved back to free-to-use, the model treats it as an
+        // optional string but we need to send null to the server to actually clear it.
         spendingId: values.spendingId,
         amount: locale.friendlyToAmount(values.amount),
         date: startOfDay(values.date, {
           in: inTimezone,
         }),
         isPending: values.isPending,
-      });
+      } as Partial<Transaction>);
 
       helpers.setSubmitting(true);
       return await updateTransaction(updatedTransaction)
@@ -85,7 +93,12 @@ export default function TransactionDetails(): JSX.Element {
 
   if (isLoading || linkIsLoading) {
     return (
-      <MForm className={styles.form} enableReinitialize={true} initialValues={{} as unknown} onSubmit={submit}>
+      <MForm
+        className={styles.form}
+        enableReinitialize={true}
+        initialValues={{} as TransactionValues}
+        onSubmit={submit}
+      >
         <MTopNavigation
           base={`/bank/${selectedBankAccountId}/transactions`}
           breadcrumb={transaction?.name}
@@ -159,7 +172,9 @@ export default function TransactionDetails(): JSX.Element {
       </div>
     );
   }
-  if ((isError || !transaction) && !isLoading) {
+  // isLoading is already false by this point (the loading branch above returns early), so this just guards the error
+  // case and the absence of the transaction or locale. Narrowing both here lets us safely read them below.
+  if (isError || !transaction || !locale) {
     return (
       <div className={styles.centerState}>
         <HeartCrack className={styles.errorIcon} />
@@ -170,10 +185,10 @@ export default function TransactionDetails(): JSX.Element {
   }
 
   const initialValues: TransactionValues = {
-    name: transaction.name,
+    name: transaction.name ?? '',
     originalName: transaction.originalName,
     date: transaction.date,
-    spendingId: transaction.spendingId,
+    spendingId: transaction.spendingId ?? null,
     isPending: transaction.isPending,
     amount: locale.amountToFriendly(transaction.amount),
   };

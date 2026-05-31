@@ -54,6 +54,12 @@ export default function PasswordResetNew(): JSX.Element {
   }, [token, enqueueSnackbar, navigate, pathname]);
 
   async function submit(values: ResetPasswordValues, helpers: FormikHelpers<ResetPasswordValues>): Promise<void> {
+    // Without a token there is nothing to reset against. The effect above already redirects the user away in this case,
+    // so just bail here to keep things type safe.
+    if (!token) {
+      return Promise.resolve();
+    }
+
     helpers.setSubmitting(true);
 
     return (

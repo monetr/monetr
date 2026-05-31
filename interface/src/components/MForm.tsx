@@ -4,6 +4,7 @@ import { Formik, type FormikConfig, type FormikProps, type FormikValues } from '
 interface MFormProps<Values extends FormikValues = FormikValues> extends FormikConfig<Values> {
   className?: string;
   children?: ((props: FormikProps<Values>) => React.ReactNode) | React.ReactNode;
+  'data-testid'?: string;
 }
 
 export default function MForm<Values extends FormikValues = FormikValues>(

@@ -59,6 +59,12 @@ function NewTransactionModal(): JSX.Element {
   };
 
   async function submit(values: NewTransactionValues, helper: FormikHelpers<NewTransactionValues>): Promise<void> {
+    // We need both the selected bank account and the locale to build the request, the modal is only reachable once a
+    // bank account is selected and the locale has loaded so this should never actually happen.
+    if (!selectedBankAccount || !locale) {
+      return;
+    }
+
     const newTransactionRequest: CreateTransactionRequest = {
       bankAccountId: selectedBankAccount.bankAccountId,
       amount: locale.friendlyToAmount(values.kind === 'credit' ? values.amount * -1 : values.amount),
@@ -204,5 +210,9 @@ const newTransactionModal = NiceModal.create(NewTransactionModal);
 export default newTransactionModal;
 
 export function showNewTransactionModal(): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof newTransactionModal>, unknown>(newTransactionModal);
+  return NiceModal.show<
+    void,
+    ExtractProps<typeof newTransactionModal>,
+    Partial<ExtractProps<typeof newTransactionModal>>
+  >(newTransactionModal);
 }

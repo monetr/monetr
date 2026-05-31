@@ -15,20 +15,24 @@
     "@rspress/core": "2.0.12",
     "@rspress/plugin-rss": "2.0.12",
     "@rspress/plugin-sitemap": "2.0.12",
+    "@rspress/shared": "2.0.12",
     "@shikijs/transformers": "4.1.0",
     "@tanstack/react-query": "5.100.14",
     "class-variance-authority": "0.7.1",
     "date-fns": "4.2.1",
     "embla-carousel-autoplay": "8.6.0",
     "embla-carousel-react": "8.6.0",
+    "hast-util-from-html": "2.0.2",
     "katex": "0.17.0",
     "lucide-react": "1.16.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "rehype-katex": "7.0.1",
-    "remark-math": "6.0.0"
+    "remark-math": "6.0.0",
+    "unist-util-visit": "5.1.0"
   },
   "devDependencies": {
+    "@types/hast": "3.0.4",
     "@types/node": "^20",
     "@types/react": "18.3.29",
     "@types/react-dom": "18.3.7",
@@ -36,6 +40,6 @@
     "sass": "1.100.0",
     "satori": "0.26.0",
     "spellchecker-cli": "7.0.3",
-    "typescript": "5.9.3"
+    "typescript": "6.0.3"
   }
 }

@@ -21,7 +21,7 @@ export interface SimilarTransactionItemProps {
   disableNavigate?: boolean;
 }
 
-export default function SimilarTransactionItem(props: SimilarTransactionItemProps): JSX.Element {
+export default function SimilarTransactionItem(props: SimilarTransactionItemProps): JSX.Element | null {
   const { inTimezone } = useTimezone();
   const { data: transaction, isLoading, isError } = useTransaction(props.transactionId);
   const { data: locale, isLoading: localeIsLoading } = useLocale();
@@ -45,7 +45,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
     );
   }
 
-  if (isError) {
+  if (isError || !transaction || !locale) {
     return null;
   }
 

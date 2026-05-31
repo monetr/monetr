@@ -64,14 +64,16 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
 
       const updatedTransaction = new Transaction({
         ...props.transaction,
+        // spendingId can be null when moving the transaction back to free-to-use, the model types it as an optional
+        // string but we need to send null to the server to actually clear it.
         spendingId: newSpendingId,
-      });
+      } as Partial<Transaction>);
 
       return await updateTransaction(updatedTransaction).finally(() => {
         // Needs to be in a timeout for some reason. But basically re-focus the select after we have updated the
         // spending.
         setTimeout(() => {
-          document.getElementById(id).focus();
+          document.getElementById(id)?.focus();
         }, 50);
       });
     },
@@ -121,7 +123,7 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
       }
     },
     items,
-    itemToString(item: SelectOption<Spending>) {
+    itemToString(item: SelectOption<Spending> | null) {
       return item ? item.label : '';
     },
   });
@@ -140,7 +142,7 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
 
   const renderStyles = useMemo(() => {
     // Controls the height of the menu that is rendered, makes sure that we dont render past the bottom of the page.
-    if (isOpen) {
+    if (isOpen && inputWrapperRef.current) {
       const distanceFromTop = inputWrapperRef.current.offsetTop;
       const heightOfWindow = window.innerHeight;
       const heightOfWrapper = inputWrapperRef.current.offsetHeight;
@@ -172,7 +174,7 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
               className: styles.selectSpendingInput,
               onFocus: openMenu,
               spellCheck: false,
-              'data-freetouse': value.value.spendingId === FREE_TO_USE,
+              'data-freetouse': value?.value.spendingId === FREE_TO_USE,
               autoComplete: 'off',
             })}
           />

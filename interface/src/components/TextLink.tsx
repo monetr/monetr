@@ -23,7 +23,7 @@ export const textLinkVariants = cva([styles.textLink], {
   },
 });
 
-type VariantProps = Omit<Parameters<typeof textLinkVariants>[0], 'className' | 'class'>;
+type VariantProps = Omit<NonNullable<Parameters<typeof textLinkVariants>[0]>, 'className' | 'class'>;
 
 export type TextLinkProps = VariantProps &
   Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {

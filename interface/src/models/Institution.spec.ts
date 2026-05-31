@@ -26,7 +26,7 @@ describe('InstitutionPlaidIncident', () => {
     });
 
     expect(incident.start.toISOString()).toBe(start.toISOString());
-    expect(incident.end.toISOString()).toBe(end.toISOString());
+    expect(incident.end?.toISOString()).toBe(end.toISOString());
     expect(incident.title).toBe('This institution was experiencing problems.');
   });
 
@@ -41,7 +41,7 @@ describe('InstitutionPlaidIncident', () => {
 
     const result = new InstitutionPlaidIncident(input);
     expect(result.start.toISOString()).toBe(start.toISOString());
-    expect(result.end.toISOString()).toBe(end.toISOString());
+    expect(result.end?.toISOString()).toBe(end.toISOString());
     expect(result.title).toBe('This institution was experiencing problems.');
   });
 });

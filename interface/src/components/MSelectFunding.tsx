@@ -18,7 +18,7 @@ export interface MSelectFundingProps {
 }
 
 export default function MSelectFunding(props: MSelectFundingProps): JSX.Element {
-  const formikContext = useFormikContext();
+  const formikContext = useFormikContext<Record<string, any>>();
   const { data: funding, isLoading: fundingIsLoading, isError: fundingIsError } = useFundingSchedules();
   const label = props.label ?? 'Select a funding schedule';
 
@@ -52,10 +52,10 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
   }
 
   function createAndSetFunding() {
-    showNewFundingModal().then(result => formikContext.setFieldValue(props.name, result.fundingScheduleId));
+    showNewFundingModal().then(result => result && formikContext.setFieldValue(props.name, result.fundingScheduleId));
   }
 
-  if (funding.length === 0) {
+  if (!funding || funding.length === 0) {
     return (
       <div className={styles.emptyState}>
         <Label label={props.label} required={props.required} />

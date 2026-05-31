@@ -38,9 +38,7 @@ interface NewExpenseValues {
 
 function NewExpenseModal(): JSX.Element {
   const { inTimezone } = useTimezone();
-  const {
-    data: { friendlyToAmount },
-  } = useLocaleCurrency();
+  const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
   const { data: selectedBankAccount } = useSelectedBankAccount();
@@ -50,7 +48,7 @@ function NewExpenseModal(): JSX.Element {
 
   const ref = useRef<MModalRef>(null);
 
-  if (!selectedBankAccount) {
+  if (!selectedBankAccount || !locale) {
     return (
       <MModal className={styles.modal} open={modal.visible} ref={ref}>
         One moment...
@@ -70,6 +68,10 @@ function NewExpenseModal(): JSX.Element {
   };
 
   async function submit(values: NewExpenseValues, helper: FormikHelpers<NewExpenseValues>): Promise<void> {
+    if (!selectedBankAccount || !locale) {
+      return Promise.resolve();
+    }
+
     const newSpending = new Spending({
       bankAccountId: selectedBankAccount.bankAccountId,
       name: values.name.trim(),
@@ -78,7 +80,7 @@ function NewExpenseModal(): JSX.Element {
       }),
       spendingType: SpendingType.Expense,
       fundingScheduleId: values.fundingScheduleId,
-      targetAmount: friendlyToAmount(values.amount),
+      targetAmount: locale.friendlyToAmount(values.amount),
       ruleset: values.ruleset,
       // Auto create transaction requires a manual link and a non-zero target
       // amount; force it off otherwise so the API will not reject the create.
@@ -191,5 +193,9 @@ const newExpenseModal = NiceModal.create(NewExpenseModal);
 export default newExpenseModal;
 
 export function showNewExpenseModal(): Promise<Spending | null> {
-  return NiceModal.show<Spending | null, ExtractProps<typeof newExpenseModal>, unknown>(newExpenseModal);
+  return NiceModal.show<
+    Spending | null,
+    ExtractProps<typeof newExpenseModal>,
+    Partial<ExtractProps<typeof newExpenseModal>>
+  >(newExpenseModal);
 }

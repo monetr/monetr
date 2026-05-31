@@ -7,7 +7,7 @@ import User from '@monetr/interface/models/User';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export interface Authentication {
-  user: User;
+  user: User | null;
   defaultCurrency: string;
   mfaPending: boolean;
   isSetup: boolean;
@@ -21,7 +21,7 @@ export interface Authentication {
 export function useAuthentication(): UseQueryResult<Authentication | undefined, unknown> {
   const select = useCallback(
     (data: Partial<Authentication>) => ({
-      user: Boolean(data?.user) && new User(data?.user),
+      user: (data?.user && new User(data.user)) ?? null,
       defaultCurrency: data?.defaultCurrency || DefaultCurrency,
       mfaPending: Boolean(data?.mfaPending),
       isSetup: Boolean(data?.isSetup),

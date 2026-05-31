@@ -53,7 +53,7 @@ export default function ExpenseTransactionList(props: ExpenseTransactionListProp
                   {transaction.getName()}
                 </Typography>
                 <Typography component='p' ellipsis size='sm' weight='medium'>
-                  {formatDate(transaction.date, inTimezone, locale, DateLength.Long)}
+                  {locale ? formatDate(transaction.date, inTimezone, locale, DateLength.Long) : ''}
                 </Typography>
               </ItemContent>
               <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>

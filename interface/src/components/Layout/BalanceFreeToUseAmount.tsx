@@ -10,7 +10,7 @@ import { AmountType } from '@monetr/interface/util/amounts';
 
 import styles from './BalanceFreeToUseAmount.module.scss';
 
-export default function BalanceFreeToUseAmount(): JSX.Element {
+export default function BalanceFreeToUseAmount(): JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: bankAccount } = useSelectedBankAccount();
   const { data: balance } = useCurrentBalance();
@@ -18,7 +18,7 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
   switch (bankAccount?.accountSubType) {
     case BankAccountSubType.Checking:
     case BankAccountSubType.Savings: {
-      const color = balance?.free >= 0 ? 'emphasis' : 'negative';
+      const color = balance && balance.free >= 0 ? 'emphasis' : 'negative';
 
       return (
         <Flex className={styles.root} flex='shrink' gap='sm' justify='between'>
@@ -29,7 +29,7 @@ export default function BalanceFreeToUseAmount(): JSX.Element {
             </Typography>
           </Flex>
           <Typography color={color} size='lg' weight='semibold' wrapping='nowrap'>
-            {locale.formatAmount(balance?.free, AmountType.Stored)}
+            {balance ? locale?.formatAmount(balance.free, AmountType.Stored) : ''}
           </Typography>
         </Flex>
       );

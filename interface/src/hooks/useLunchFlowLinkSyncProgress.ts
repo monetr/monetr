@@ -9,7 +9,7 @@ export interface LunchFlowLinkSyncProgress {
 export default function useLunchFlowLinkSyncProgress(
   linkId: string,
   bankAccountId: string,
-): UseQueryResult<LunchFlowLinkSyncProgress, unknown> {
+): UseQueryResult<LunchFlowLinkSyncProgress | null, unknown> {
   const queryClient = useQueryClient();
   // Bootstrap the socket to listen for the actual changes.
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function useLunchFlowLinkSyncProgress(
     return () => socket.close();
   }, [linkId, bankAccountId, queryClient]);
 
-  return useQuery<LunchFlowLinkSyncProgress, unknown, LunchFlowLinkSyncProgress>({
+  return useQuery<LunchFlowLinkSyncProgress | null, unknown, LunchFlowLinkSyncProgress | null>({
     queryKey: [`/api/lunch_flow/link/sync/${linkId}/bank_account/${bankAccountId}/progress`],
     initialData: () => null, // Don't do the initial fetch, rely on the websocket instead.
     staleTime: Infinity,

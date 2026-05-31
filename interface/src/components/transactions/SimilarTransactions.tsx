@@ -9,7 +9,7 @@ export interface SimilarTransactionsProps {
   transaction: Transaction;
 }
 
-export default function SimilarTransactions(props: SimilarTransactionsProps): JSX.Element {
+export default function SimilarTransactions(props: SimilarTransactionsProps): JSX.Element | null {
   const { data: similarData, isLoading, isError } = useSimilarTransactions(props.transaction);
 
   if (isLoading) {
@@ -20,7 +20,7 @@ export default function SimilarTransactions(props: SimilarTransactionsProps): JS
     return null;
   }
 
-  if (similarData?.members?.length === 0) {
+  if (!similarData || similarData.members?.length === 0) {
     return null;
   }
 

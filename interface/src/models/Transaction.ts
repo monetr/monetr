@@ -67,7 +67,7 @@ export default class Transaction {
       return this.merchantName;
     }
 
-    return this.originalMerchantName;
+    return this.originalMerchantName ?? null;
   }
 
   // getMainCategory will return the first category in the categories array. It will first check if a custom category

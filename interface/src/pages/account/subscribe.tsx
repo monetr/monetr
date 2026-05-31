@@ -15,12 +15,11 @@ import styles from './subscribe.module.scss';
 
 export default function SubscribePage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const {
-    data: { initialPlan },
-  } = useAppConfiguration();
-  const {
-    data: { hasSubscription, activeUntil },
-  } = useAuthentication();
+  const { data: config } = useAppConfiguration();
+  const { data: auth } = useAuthentication();
+  const initialPlan = config?.initialPlan;
+  const hasSubscription = auth?.hasSubscription;
+  const activeUntil = auth?.activeUntil;
 
   const [loading, setLoading] = useState(false);
   const handleContinue = useCallback(() => {
@@ -38,6 +37,10 @@ export default function SubscribePage(): JSX.Element {
       // If the customer has a subscription then we want to just manage it. This will allow a customer to fix a
       // subscription for a card that has failed payment or something similar.
       promise = request({ method: 'GET', url: '/api/billing/portal' });
+    } else {
+      // We do not have enough information to start a billing session, so undo the loading state and bail.
+      setLoading(false);
+      return;
     }
 
     promise

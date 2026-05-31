@@ -67,7 +67,7 @@ export const textVariants = cva([styles.root], {
   },
 });
 
-type VariantProps = Omit<Parameters<typeof textVariants>[0], 'className' | 'class'>;
+type VariantProps = Omit<NonNullable<Parameters<typeof textVariants>[0]>, 'className' | 'class'>;
 
 export type TypographyProps = React.PropsWithChildren<
   VariantProps &

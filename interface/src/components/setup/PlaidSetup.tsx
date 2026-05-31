@@ -109,8 +109,8 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
       url: '/api/plaid/link/token/callback',
       data: {
         publicToken: public_token,
-        institutionId: metadata.institution.institution_id,
-        institutionName: metadata.institution.name,
+        institutionId: metadata.institution?.institution_id,
+        institutionName: metadata.institution?.name,
         accountIds: metadata.accounts.map((account: { id: string }) => account.id),
       },
     })
@@ -135,11 +135,11 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   }
 
   const config: PlaidLinkOptionsWithLinkToken = {
-    token: token,
+    token: token ?? null,
     onSuccess: onPlaidSuccess,
     onExit: onPlaidExit,
-    onLoad: null,
-    onEvent: null,
+    onLoad: undefined,
+    onEvent: undefined,
   };
 
   const { error: plaidError, open: plaidOpen } = usePlaidLink(config);
@@ -250,7 +250,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
     );
   }
 
-  function Footer(): JSX.Element {
+  function Footer(): JSX.Element | null {
     if (props.alreadyOnboarded) {
       return null;
     }
