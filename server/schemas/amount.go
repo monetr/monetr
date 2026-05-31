@@ -34,22 +34,22 @@ func Amount() validation.Rule {
 	})
 }
 
-func PositiveAmount() validation.Rule {
+func PositiveAmount(prefix string) validation.Rule {
 	return validators.By[any](func(ctx context.Context, value *any) error {
 		if value == nil {
-			return errors.New("amount is not a valid integer")
+			return errors.Errorf("%s is not a valid integer", prefix)
 		}
 		switch value := (*value).(type) {
 		case json.Number:
 			if jint, err := value.Int64(); err != nil {
-				return errors.New("amount is not a valid integer")
+				return errors.Errorf("%s is not a valid integer", prefix)
 			} else if jint <= 0 {
-				return errors.New("amount must be greater than zero")
+				return errors.Errorf("%s must be greater than zero", prefix)
 			}
 
 			return nil
 		default:
-			return errors.New("amount is not a valid integer")
+			return errors.Errorf("%s is not a valid integer", prefix)
 		}
 	})
 }
