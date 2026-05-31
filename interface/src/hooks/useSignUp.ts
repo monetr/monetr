@@ -17,11 +17,7 @@ export interface SignUpResponse {
   requireVerification: boolean | null;
 }
 
-export interface SignUpError {
-  error: string;
-}
-
-export default function useSignUp(): (args: SignUpArguments) => Promise<SignUpResponse | SignUpError> {
+export default function useSignUp(): (args: SignUpArguments) => Promise<SignUpResponse> {
   return async (args: SignUpArguments) => {
     return request({ method: 'POST', url: '/api/authentication/register', data: args }).then(
       result => result.data as SignUpResponse,

@@ -61,7 +61,7 @@ export default function PullToRefresh(): React.JSX.Element {
         return;
       }
       // Prevent accidently pull to refresh on the wrong main view.
-      if (document.querySelector('ul')?.scrollTop > 0) {
+      if ((document.querySelector('ul')?.scrollTop ?? 0) > 0) {
         return;
       }
 
@@ -86,11 +86,11 @@ export default function PullToRefresh(): React.JSX.Element {
         return;
       }
       // Prevent accidently pull to refresh on the wrong main view.
-      if (document.querySelector('ul')?.scrollTop > 0) {
+      if ((document.querySelector('ul')?.scrollTop ?? 0) > 0) {
         return;
       }
       // On the details pages don't allow pull to refresh either
-      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) {
+      if ((document.querySelector('form > div.overflow-y-auto')?.scrollTop ?? 0) > 0) {
         return;
       }
 
@@ -107,10 +107,10 @@ export default function PullToRefresh(): React.JSX.Element {
       if (document.querySelectorAll('[role="dialog"]').length > 0) {
         return;
       }
-      if (document.querySelector('ul')?.scrollTop > 0) {
+      if ((document.querySelector('ul')?.scrollTop ?? 0) > 0) {
         return;
       }
-      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) {
+      if ((document.querySelector('form > div.overflow-y-auto')?.scrollTop ?? 0) > 0) {
         return;
       }
 

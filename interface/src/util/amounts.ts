@@ -63,7 +63,7 @@ export function getDecimalSeparator(locale: string): string {
   const numberWithDecimalSeparator = 1.1;
   return Intl.NumberFormat(localeAdjusted)
     .formatToParts(numberWithDecimalSeparator)
-    .find(part => part.type === 'decimal').value;
+    .find(part => part.type === 'decimal')?.value ?? '.';
 }
 
 /**
@@ -77,7 +77,7 @@ export function getNumberGroupSeparator(locale: string): string {
   const numberWithDecimalSeparator = 100000.1;
   return Intl.NumberFormat(localeAdjusted)
     .formatToParts(numberWithDecimalSeparator)
-    .find(part => part.type === 'group').value;
+    .find(part => part.type === 'group')?.value ?? ',';
 }
 
 export function intlNumberFormatter(locale: string = 'en_US', currency: string = 'USD'): (value: string) => string {
@@ -111,7 +111,7 @@ export function amountToFriendly(amount: number, locale: string, currency: strin
   // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2 decimal
   // places so this would be 10^2 or 100. Where as JPY would have 0 because it is already in the smallest increment.
   // This results in 10^0 which is 1. And the amount/1 remains the same.
-  const modifier = 10 ** specs.maximumFractionDigits;
+  const modifier = 10 ** (specs.maximumFractionDigits ?? 2);
 
   // Shift the amount over the correct number of decimal places.
   const adjusted = Math.fround(amount / modifier);
@@ -135,7 +135,7 @@ export function friendlyToAmount(friendly: number, locale: string, currency: str
   // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2 decimal
   // places so this would be 10^2 or 100. Where as JPY would have 0 because it is already in the smallest increment.
   // This results in 10^0 which is 1. And the amount/1 remains the same.
-  const modifier = 10 ** specs.maximumFractionDigits;
+  const modifier = 10 ** (specs.maximumFractionDigits ?? 2);
 
   // Instead of fractional rounding we want to do whole rounding for storage. Take the friendly amount and multiply it
   // by the modifier based on the number of decimal places the unit has in order to reduce it to it's smallest unit.
@@ -195,7 +195,7 @@ export function formatAmount(
     // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2
     // decimal places so this would be 10^2 or 100. Where as JPY would have 0 because it is already in the smallest
     // increment. This results in 10^0 which is 1. And the amount/1 remains the same.
-    const modifier = 10 ** specs.maximumFractionDigits;
+    const modifier = 10 ** (specs.maximumFractionDigits ?? 2);
 
     // Shift the amount over the correct number of decimal places.
     const adjusted = Math.fround(amount / modifier);

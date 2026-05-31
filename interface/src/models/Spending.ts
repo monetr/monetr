@@ -42,6 +42,10 @@ export default class Spending {
   // If the next time the spending object is due is a different year than the current one; then the year will be
   // appended to the end of the date string.
   getNextOccurrenceString(): string {
+    if (!this.nextRecurrence) {
+      return '';
+    }
+
     return isThisYear(this.nextRecurrence)
       ? format(this.nextRecurrence, 'MMM do')
       : format(this.nextRecurrence, 'MMM do, yyyy');

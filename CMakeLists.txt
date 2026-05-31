@@ -280,6 +280,20 @@ add_custom_target(interface.typecheck
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/interface
 )
 
+add_custom_target(emails.typecheck
+  COMMENT "Type checking monetr's email templates..."
+  DEPENDS tools.tsc
+  COMMAND ${TSC_EXECUTABLE} --noEmit --pretty
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/emails
+)
+
+add_custom_target(docs.typecheck
+  COMMENT "Type checking monetr's documentation..."
+  DEPENDS tools.tsc
+  COMMAND ${TSC_EXECUTABLE} --noEmit --pretty
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/docs
+)
+
 ################################################################################
 #                                     TESTING                                  #
 ################################################################################
@@ -371,6 +385,30 @@ if(BUILD_TESTING)
     FIXTURES_REQUIRED node_modules
     TIMEOUT 120
     LABELS "interface"
+    PROCESSORS 2
+  )
+
+  add_test(
+    NAME emails.typecheck
+    COMMAND ${TSC_EXECUTABLE} --noEmit --pretty
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/emails
+  )
+  set_tests_properties(emails.typecheck PROPERTIES
+    FIXTURES_REQUIRED node_modules
+    TIMEOUT 120
+    LABELS "emails"
+    PROCESSORS 2
+  )
+
+  add_test(
+    NAME docs.typecheck
+    COMMAND ${TSC_EXECUTABLE} --noEmit --pretty
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/docs
+  )
+  set_tests_properties(docs.typecheck PROPERTIES
+    FIXTURES_REQUIRED node_modules
+    TIMEOUT 120
+    LABELS "docs"
     PROCESSORS 2
   )
 

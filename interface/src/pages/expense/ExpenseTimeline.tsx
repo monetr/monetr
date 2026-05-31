@@ -39,7 +39,7 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): React.JSX.
     return <Typography>Loading...</Typography>;
   }
 
-  if (isError || !spending) {
+  if (isError || !spending || !fundingSchedule || !forecast || !locale) {
     return <Typography>Failed to load expense forecast!</Typography>;
   }
 
@@ -99,9 +99,13 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): React.JSX.
   );
 }
 
-function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData): React.JSX.Element {
+function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData): React.JSX.Element | null {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
+
+  if (!locale) {
+    return null;
+  }
 
   let header = '';
   let body = '';

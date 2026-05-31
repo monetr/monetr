@@ -60,14 +60,14 @@ describe('patch funding schedule', () => {
     const world = testRenderHook(usePatchFundingSchedule, {
       initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding',
     });
-    let result: PatchFundingScheduleResponse;
+    let result!: PatchFundingScheduleResponse;
     await act(async () => {
       result = await world.result.current({
         fundingScheduleId: 'fund_01hy4re7c1xc2v44cf6kx302jx', // 3,
         bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
         description: 'something',
         name: "Elliot's Contribution",
-        nextRecurrence: parseDate('2023-07-31T05:00:00Z'),
+        nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
         ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
         estimatedDeposit: null,
         excludeWeekends: true,
@@ -109,7 +109,7 @@ describe('patch funding schedule', () => {
           bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
           description: 'something',
           name: "Elliot's Contribution",
-          nextRecurrence: parseDate('2023-07-31T05:00:00Z'),
+          nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
           ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           estimatedDeposit: null,
           excludeWeekends: true,

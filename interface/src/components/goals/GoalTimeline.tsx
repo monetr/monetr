@@ -39,7 +39,7 @@ export default function GoalTimeline(props: GoalTimelineProps): React.JSX.Elemen
     return <Typography size='inherit'>Loading...</Typography>;
   }
 
-  if (isError || !spending) {
+  if (isError || !spending || !fundingSchedule || !forecast || !locale) {
     return <Typography size='inherit'>Failed to load goal forecast!</Typography>;
   }
 
@@ -99,9 +99,13 @@ export default function GoalTimeline(props: GoalTimelineProps): React.JSX.Elemen
   );
 }
 
-function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData): React.JSX.Element {
+function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData): React.JSX.Element | null {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
+
+  if (!locale) {
+    return null;
+  }
 
   let header = '';
   let body = '';

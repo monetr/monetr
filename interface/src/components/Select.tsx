@@ -116,7 +116,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
       }
     },
     items,
-    itemToString(item: SelectOption<V>) {
+    itemToString(item: SelectOption<V> | null) {
       return item ? item.label : '';
     },
   });
@@ -149,7 +149,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
 
   const renderStyles = useMemo(() => {
     // Controls the height of the menu that is rendered, makes sure that we dont render past the bottom of the page.
-    if (isOpen) {
+    if (isOpen && inputWrapperRef.current) {
       const distanceFromTop = inputWrapperRef.current.offsetTop;
       const heightOfWindow = window.innerHeight;
       const heightOfWrapper = inputWrapperRef.current.offsetHeight;

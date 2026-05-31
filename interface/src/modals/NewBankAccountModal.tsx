@@ -54,6 +54,12 @@ function NewBankAccountModal(): React.JSX.Element {
   };
 
   const submit = async (values: NewBankAccountValues, helper: FormikHelpers<NewBankAccountValues>): Promise<void> => {
+    // The locale is needed to convert the friendly balance into a stored amount, it should always be loaded by the time
+    // we can submit but bail just in case it is not ready yet.
+    if (!locale) {
+      return Promise.resolve();
+    }
+
     helper.setSubmitting(true);
     return await createBankAccount({
       linkId: selectedBankAccount.linkId,
@@ -141,5 +147,9 @@ const newBankAccountModal = NiceModal.create(NewBankAccountModal);
 export default newBankAccountModal;
 
 export function showNewBankAccountModal(): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof newBankAccountModal>, unknown>(newBankAccountModal);
+  return NiceModal.show<
+    void,
+    ExtractProps<typeof newBankAccountModal>,
+    Partial<ExtractProps<typeof newBankAccountModal>>
+  >(newBankAccountModal);
 }

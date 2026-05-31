@@ -16,9 +16,13 @@ export interface GoalItemProps {
   spending: Spending;
 }
 
-export default function GoalItem({ spending }: GoalItemProps): React.JSX.Element {
+export default function GoalItem({ spending }: GoalItemProps): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
+
+  if (!locale) {
+    return null;
+  }
 
   const detailsPath = `/bank/${spending.bankAccountId}/goals/${spending.spendingId}/details`;
 
@@ -67,12 +71,16 @@ interface GoalProps {
   spending: Spending;
 }
 
-function GoalAmount({ spending }: GoalProps): React.JSX.Element {
+function GoalAmount({ spending }: GoalProps): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const amountClass = mergeClasses(styles.amount, {
     [styles.amountComplete]: spending.targetAmount <= spending.currentAmount,
     [styles.amountInProgress]: spending.targetAmount !== spending.currentAmount,
   });
+
+  if (!locale) {
+    return null;
+  }
 
   const currentAmountString = locale.formatAmount(spending.currentAmount, AmountType.Stored);
   const targetAmountString = locale.formatAmount(spending.targetAmount, AmountType.Stored);

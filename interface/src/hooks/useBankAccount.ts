@@ -26,7 +26,7 @@ export function useBankAccount(bankAccountId?: string): UseQueryResult<BankAccou
   return useQuery<Partial<BankAccount>, unknown, BankAccount | undefined>({
     queryKey: [`/api/bank_accounts/${bankAccountId}`],
     enabled: Boolean(bankAccountId), // Only request if we have a valid bank account ID to work with.
-    select: data => Boolean(data) && new BankAccount(data),
+    select: data => (data ? new BankAccount(data) : undefined),
     initialData,
     initialDataUpdatedAt,
   });

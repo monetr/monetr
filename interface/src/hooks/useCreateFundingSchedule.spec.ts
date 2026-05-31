@@ -54,14 +54,14 @@ describe('create funding schedule', () => {
     const world = testRenderHook(useCreateFundingSchedule, {
       initialRoute: '/bank/bac_01hy4rcmadc01d2kzv7vynbxxx/funding',
     });
-    let result: FundingSchedule;
+    let result!: FundingSchedule;
     await act(async () => {
       result = await world.result.current(
         new FundingSchedule({
           bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
           description: 'something',
           name: "Elliot's Contribution",
-          nextRecurrence: parseDate('2023-07-31T05:00:00Z'),
+          nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
           ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           estimatedDeposit: null,
           excludeWeekends: true,
@@ -102,7 +102,7 @@ describe('create funding schedule', () => {
             bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
             description: 'something',
             name: "Elliot's Contribution",
-            nextRecurrence: parseDate('2023-07-31T05:00:00Z'),
+            nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
             ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
             estimatedDeposit: null,
             excludeWeekends: true,

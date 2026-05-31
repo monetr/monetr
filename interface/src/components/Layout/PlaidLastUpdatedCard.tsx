@@ -6,10 +6,10 @@ import { useLink } from '@monetr/interface/hooks/useLink';
 import styles from './PlaidLastUpdatedCard.module.scss';
 
 interface PlaidLastUpdatedCardProps {
-  linkId: string | null;
+  linkId?: string;
 }
 
-export default function PlaidLastUpdatedCard(props: PlaidLastUpdatedCardProps): React.JSX.Element {
+export default function PlaidLastUpdatedCard(props: PlaidLastUpdatedCardProps): React.JSX.Element | null {
   const link = useLink(props?.linkId);
 
   if (!link?.data?.plaidLink) {

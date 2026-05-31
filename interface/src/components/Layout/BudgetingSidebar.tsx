@@ -26,7 +26,7 @@ export interface BudgetingSidebarProps {
   className?: string;
 }
 
-export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JSX.Element {
+export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: bankAccount, isError } = useSelectedBankAccount();
   const { data: balance } = useCurrentBalance();
@@ -63,7 +63,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JS
               Expenses
             </Typography>
             <Badge className={styles.badgeRight} size='sm'>
-              {locale.formatAmount(balance?.expenses, AmountType.Stored)}
+              {balance ? locale?.formatAmount(balance.expenses, AmountType.Stored) : ''}
             </Badge>
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/goals`}>
@@ -72,7 +72,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JS
               Goals
             </Typography>
             <Badge className={styles.badgeRight} size='sm'>
-              {locale.formatAmount(balance?.goals, AmountType.Stored)}
+              {balance ? locale?.formatAmount(balance.goals, AmountType.Stored) : ''}
             </Badge>
           </NavigationItem>
           <NavigationItem to={`/bank/${bankAccount?.bankAccountId}/funding`}>
@@ -106,7 +106,7 @@ function NavigationItem(props: NavigationItemProps): React.JSX.Element {
   );
 }
 
-function NextFundingBadge(): React.JSX.Element {
+function NextFundingBadge(): React.JSX.Element | null {
   const next = useNextFundingDate();
   if (!next) {
     return null;

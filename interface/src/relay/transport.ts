@@ -1,6 +1,10 @@
 import { makeFetchTransport } from '@sentry/browser';
-import type { BrowserTransportOptions } from '@sentry/browser/build/npm/types/transports/types';
-import type { Transport } from '@sentry/core/build/types/types-hoist/transport';
+
+// Pull these types straight off of makeFetchTransport instead of importing them from inside Sentry's build directory.
+// The bundler module resolution won't let us reach into those internal paths anymore, and deriving them here keeps us
+// typesafe without having to care where Sentry actually defines them.
+type BrowserTransportOptions = Parameters<typeof makeFetchTransport>[0];
+type Transport = ReturnType<typeof makeFetchTransport>;
 
 // Get the type of the second argument parameter. This way we are typesafe but we don't really need to worry about this
 // parameter.

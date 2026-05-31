@@ -39,7 +39,7 @@ interface GoalValues {
   isPaused: boolean;
 }
 
-export default function GoalDetails(): React.JSX.Element {
+export default function GoalDetails(): React.JSX.Element | null {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();
@@ -77,7 +77,7 @@ export default function GoalDetails(): React.JSX.Element {
     );
   }
 
-  if (!spending) {
+  if (!spending || !locale) {
     return null;
   }
 
@@ -92,7 +92,7 @@ export default function GoalDetails(): React.JSX.Element {
   }
 
   function backToGoals() {
-    navigate(`/bank/${spending.bankAccountId}/goals`);
+    navigate(`/bank/${spending?.bankAccountId}/goals`);
   }
 
   async function deleteGoal(): Promise<void> {
@@ -108,12 +108,16 @@ export default function GoalDetails(): React.JSX.Element {
   }
 
   async function submit(values: GoalValues, helpers: FormikHelpers<GoalValues>): Promise<void> {
+    if (!spending || !locale) {
+      return Promise.resolve();
+    }
+
     helpers.setSubmitting(true);
 
     const updatedSpending = new Spending({
       ...spending,
       name: values.name,
-      description: null,
+      description: undefined,
       nextRecurrence: startOfDay(values.nextRecurrence, {
         in: inTimezone,
       }),
@@ -144,7 +148,7 @@ export default function GoalDetails(): React.JSX.Element {
   const initialValues: GoalValues = {
     name: spending.name,
     amount: locale.amountToFriendly(spending.targetAmount),
-    nextRecurrence: spending.nextRecurrence,
+    nextRecurrence: spending.nextRecurrence ?? startOfTomorrow({ in: inTimezone }),
     fundingScheduleId: spending.fundingScheduleId,
     isPaused: spending.isPaused,
   };

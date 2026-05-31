@@ -50,6 +50,10 @@ function NewGoalModal(): React.JSX.Element {
   };
 
   async function submit(values: NewGoalValues, helper: FormikHelpers<NewGoalValues>): Promise<void> {
+    if (!locale) {
+      return Promise.resolve();
+    }
+
     const newSpending = new Spending({
       bankAccountId: selectedBankAccountId,
       name: values.name.trim(),
@@ -135,5 +139,7 @@ const newGoalModal = NiceModal.create(NewGoalModal);
 export default newGoalModal;
 
 export function showNewGoalModal(): Promise<Spending | null> {
-  return NiceModal.show<Spending | null, ExtractProps<typeof newGoalModal>, unknown>(newGoalModal);
+  return NiceModal.show<Spending | null, ExtractProps<typeof newGoalModal>, Partial<ExtractProps<typeof newGoalModal>>>(
+    newGoalModal,
+  );
 }

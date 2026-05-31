@@ -8,7 +8,7 @@ import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 import styles from './BankSidebarSubscriptionItem.module.scss';
 
-export default function BankSidebarSubscriptionItem(): React.JSX.Element {
+export default function BankSidebarSubscriptionItem(): React.JSX.Element | null {
   const { data: config } = useAppConfiguration();
   const { data } = useAuthentication();
   const path = '/settings/billing';
@@ -17,7 +17,7 @@ export default function BankSidebarSubscriptionItem(): React.JSX.Element {
     return null;
   }
 
-  if (data?.isTrialing) {
+  if (data?.isTrialing && data.trialingUntil) {
     return (
       <Tooltip delayDuration={100}>
         <TooltipTrigger>

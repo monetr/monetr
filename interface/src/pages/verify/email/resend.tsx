@@ -50,7 +50,7 @@ export default function ResendVerificationPage(): React.JSX.Element {
     [enqueueSnackbar],
   );
 
-  const validateInput = useCallback((values: ResendValues): FormikErrors<ResendValues> | null => {
+  const validateInput = useCallback((values: ResendValues): FormikErrors<ResendValues> => {
     const errors: FormikErrors<ResendValues> = {};
 
     if (values.email) {
@@ -71,7 +71,7 @@ export default function ResendVerificationPage(): React.JSX.Element {
   );
 
   const initialValues: ResendValues = {
-    email: emailFromQuery || undefined,
+    email: emailFromQuery || null,
     captcha: null,
   };
 

@@ -34,7 +34,10 @@ export default function useLocaleCurrency(forceCurrency?: string): UseQueryResul
   const locale = useCurrentLocale();
   const currency = useMemo(() => {
     // Return the first _defined_ currency.
-    return [forceCurrency, bankAccount?.data?.currency, me?.defaultCurrency, DefaultCurrency].find(value => !!value);
+    return (
+      [forceCurrency, bankAccount?.data?.currency, me?.defaultCurrency, DefaultCurrency].find(value => !!value) ??
+      DefaultCurrency
+    );
   }, [forceCurrency, me, bankAccount]);
 
   const friendlyToAmountCallback = useCallback(

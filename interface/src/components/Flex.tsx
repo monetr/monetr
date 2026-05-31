@@ -56,7 +56,7 @@ export const flexVariants = cva([styles.root], {
   },
 });
 
-export type VariantProps = Omit<Parameters<typeof flexVariants>[0], 'className' | 'class'>;
+export type VariantProps = Omit<NonNullable<Parameters<typeof flexVariants>[0]>, 'className' | 'class'>;
 
 export type FlexProps = VariantProps & React.HTMLAttributes<HTMLDivElement>;
 

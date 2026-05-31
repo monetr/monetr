@@ -7,9 +7,8 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 import styles from './about.module.scss';
 
 export default function SettingsAbout(): React.JSX.Element {
-  const {
-    data: { release, revision, buildType, buildTime },
-  } = useAppConfiguration();
+  const { data: config } = useAppConfiguration();
+  const { release, revision, buildType, buildTime } = config ?? {};
 
   return (
     <div className={styles.root}>
@@ -53,7 +52,7 @@ export default function SettingsAbout(): React.JSX.Element {
             Build Time
           </Typography>
           <Typography className={styles.rowValue} component='code' ellipsis size='lg'>
-            {format(buildTime, 'LLLL do yyyy, h:mmaaa OOOO')}
+            {buildTime ? format(buildTime, 'LLLL do yyyy, h:mmaaa OOOO') : 'Unknown'}
           </Typography>
         </div>
         <Divider />

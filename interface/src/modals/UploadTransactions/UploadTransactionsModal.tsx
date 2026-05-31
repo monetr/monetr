@@ -58,11 +58,16 @@ function UploadTransactionsModal(): React.JSX.Element {
               />
             );
           case UploadTransactionStage.Processing:
-            return <ProcessingFileStage close={onClose} setStage={setStage} upload={monetrUpload} />;
+            // We only reach the processing stage once the upload has been set, but narrow here so the stage component
+            // always receives a defined upload.
+            return monetrUpload ? (
+              <ProcessingFileStage close={onClose} setStage={setStage} upload={monetrUpload} />
+            ) : null;
           case UploadTransactionStage.Completed:
             return null;
           case UploadTransactionStage.Error:
-            return <ErrorFileStage close={onClose} error={error} />;
+            // Likewise the error stage is only reached once an error has been set.
+            return error ? <ErrorFileStage close={onClose} error={error} /> : null;
           default:
             return null;
         }
@@ -146,7 +151,7 @@ function UploadFileStage(props: StageProps) {
           <div className={styles.filePreview}>
             <FileUp className={styles.fileIcon} />
             <div className={styles.fileInfo}>
-              <Typography size='lg'>{file.name}</Typography>
+              <Typography size='lg'>{file?.name}</Typography>
               <div className={styles.progressTrack}>
                 <div className={styles.progressBar} style={{ width: `${uploadProgress}%` }} />
               </div>
@@ -230,5 +235,9 @@ const uploadTransactionsModal = NiceModal.create(UploadTransactionsModal);
 export default uploadTransactionsModal;
 
 export function showUploadTransactionsModal(): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof uploadTransactionsModal>, unknown>(uploadTransactionsModal);
+  return NiceModal.show<
+    void,
+    ExtractProps<typeof uploadTransactionsModal>,
+    Partial<ExtractProps<typeof uploadTransactionsModal>>
+  >(uploadTransactionsModal);
 }

@@ -29,7 +29,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const [pathname, navigate] = useLocation();
 
-  const allowedAPIURLs = config.lunchFlowAllowedAPIURLs ?? [];
+  const allowedAPIURLs = config?.lunchFlowAllowedAPIURLs ?? [];
   const initialApiURL = allowedAPIURLs.length > 0 ? allowedAPIURLs[0] : '';
 
   const initialValues: LunchFlowSetupIntroValues = useMemo(
@@ -59,7 +59,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           enqueueSnackbar(
             <div>
               <Typography size='sm'>{error?.response?.data?.error || 'Failed to create Lunch Flow link!'}</Typography>
-              {Object.entries(error?.response?.data?.problems).map(([key, problem]) => (
+              {Object.entries(error?.response?.data?.problems ?? {}).map(([key, problem]) => (
                 <Typography component='code' key={key} size='xs'>
                   {`${key}: ${problem}`}
                 </Typography>

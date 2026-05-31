@@ -5,12 +5,15 @@ import { flexVariants } from '@monetr/interface/components/Flex';
 import FormAmountField from '@monetr/interface/components/FormAmountField';
 import MForm from '@monetr/interface/components/MForm';
 import SelectCurrency from '@monetr/interface/components/SelectCurrency';
-import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
+import type {
+  ManualLinkSetupForm,
+  ManualLinkSetupMetadata,
+} from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import Typography from '@monetr/interface/components/Typography';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
-import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useLocaleCurrency, { DefaultCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
 
 import styles from './ManualLinkSetupBalances.module.scss';
 
@@ -20,7 +23,7 @@ export type ManualLinkSetupBalancesValues = {
 };
 
 export default function ManualLinkSetupBalances(): React.JSX.Element {
-  const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
+  const viewContext = useViewContext<ManualLinkSetupSteps, ManualLinkSetupMetadata, ManualLinkSetupForm>();
   const { data: currency } = useLocaleCurrency();
 
   function submit(values: ManualLinkSetupBalancesValues, helpers: FormikHelpers<ManualLinkSetupBalancesValues>) {
@@ -31,8 +34,8 @@ export default function ManualLinkSetupBalances(): React.JSX.Element {
 
   const initialValues: ManualLinkSetupBalancesValues = {
     startingBalance: 0.0,
-    currency: currency.currency,
-    ...viewContext.formData,
+    currency: currency?.currency ?? DefaultCurrency,
+    ...(viewContext.formData as Partial<ManualLinkSetupForm>),
   };
 
   return (

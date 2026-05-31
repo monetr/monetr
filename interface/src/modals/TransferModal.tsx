@@ -36,8 +36,8 @@ interface TransferValues {
 
 function TransferModal(props: TransferModalProps): React.JSX.Element {
   const initialValues: TransferValues = {
-    fromSpendingId: props.initialFromSpendingId,
-    toSpendingId: props.initialToSpendingId,
+    fromSpendingId: props.initialFromSpendingId ?? null,
+    toSpendingId: props.initialToSpendingId ?? null,
     amount: 0.0,
   };
 
@@ -51,6 +51,11 @@ function TransferModal(props: TransferModalProps): React.JSX.Element {
   const validate = useCallback(
     (values: TransferValues): FormikErrors<TransferValues> => {
       const errors: FormikErrors<TransferValues> = {};
+      // Locale is always present once the currency data has loaded, but guard anyway so we don't try to convert the
+      // amount before it is ready.
+      if (!locale) {
+        return errors;
+      }
       const amount = locale.friendlyToAmount(values.amount);
 
       if (amount <= 0) {
@@ -63,8 +68,8 @@ function TransferModal(props: TransferModalProps): React.JSX.Element {
         // Otherwise we are moving funds out of an actual budget. Find that budget.
         const from = spending?.find(item => item.spendingId === values.fromSpendingId);
         // And make sure that we are not moving more than that budget has.
-        if (amount > from?.currentAmount) {
-          errors.amount = `Cannot move more than is available from ${from?.name}`;
+        if (from && amount > from.currentAmount) {
+          errors.amount = `Cannot move more than is available from ${from.name}`;
         }
       }
 
@@ -86,6 +91,12 @@ function TransferModal(props: TransferModalProps): React.JSX.Element {
         return Promise.resolve();
       }
 
+      // We need the locale to convert the friendly amount before sending it along, it should always be present by the
+      // time we can submit but bail just in case it has not loaded yet.
+      if (!locale) {
+        return Promise.resolve();
+      }
+
       helper.setSubmitting(true);
       return await transfer({
         fromSpendingId: values.fromSpendingId,
@@ -93,11 +104,12 @@ function TransferModal(props: TransferModalProps): React.JSX.Element {
         amount: locale.friendlyToAmount(values.amount),
       })
         .then(() => modal.remove())
-        .then(() =>
-          enqueueSnackbar('Moved funds allocated successfully', {
-            variant: 'success',
-            disableWindowBlurListener: true,
-          }),
+        .then(
+          () =>
+            void enqueueSnackbar('Moved funds allocated successfully', {
+              variant: 'success',
+              disableWindowBlurListener: true,
+            }),
         )
         .catch(
           (error: ApiError<APIError>) =>
@@ -168,7 +180,10 @@ const transferModal = NiceModal.create<TransferModalProps>(TransferModal);
 export default transferModal;
 
 export function showTransferModal(props: TransferModalProps): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof transferModal>, unknown>(transferModal, props);
+  return NiceModal.show<void, ExtractProps<typeof transferModal>, Partial<ExtractProps<typeof transferModal>>>(
+    transferModal,
+    props,
+  );
 }
 
 function ReverseTargetsButton(): React.JSX.Element {
@@ -194,9 +209,10 @@ function ReverseTargetsButton(): React.JSX.Element {
   );
 }
 
-function TransferSelectDecorator(props: LabelDecoratorProps): React.JSX.Element {
+function TransferSelectDecorator(props: LabelDecoratorProps): React.JSX.Element | null {
   const formik = useFormikContext<TransferValues>();
-  const value = formik.values[props.name];
+  // The decorator is wired up to one of the spending id fields by name, so look that field up dynamically.
+  const value = props.name ? formik.values[props.name as keyof TransferValues] : undefined;
   const { data: spending } = useSpendings();
   const { data: balances } = useCurrentBalance();
 
@@ -246,14 +262,14 @@ function AmountButton({ amount }: AmountButtonProps): React.JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const formik = useFormikContext<TransferValues>();
   const onClick = useCallback(() => {
-    if (typeof amount === 'number') {
+    if (typeof amount === 'number' && locale) {
       formik?.setFieldValue('amount', locale.amountToFriendly(amount));
     }
   }, [amount, formik, locale]);
 
   return (
     <Typography className={styles.amountButton} onClick={onClick} size='sm' weight='medium'>
-      {typeof amount === 'number' && locale.formatAmount(amount, AmountType.Stored)}
+      {typeof amount === 'number' && locale && locale.formatAmount(amount, AmountType.Stored)}
     </Typography>
   );
 }

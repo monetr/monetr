@@ -45,9 +45,7 @@ function NewFundingModal(): React.JSX.Element {
   const createFundingSchedule = useCreateFundingSchedule();
   const { data: link } = useCurrentLink();
   const isManual = Boolean(link?.getIsManual());
-  const {
-    data: { friendlyToAmount },
-  } = useLocaleCurrency();
+  const { data: locale } = useLocaleCurrency();
 
   const initialValues: NewFundingValues = {
     name: '',
@@ -62,7 +60,12 @@ function NewFundingModal(): React.JSX.Element {
 
   const submit = useCallback(
     async (values: NewFundingValues, helpers: FormikHelpers<NewFundingValues>): Promise<void> => {
+      if (!selectedBankAccountId || !locale) {
+        return Promise.resolve();
+      }
+
       helpers.setSubmitting(true);
+      const estimatedDeposit = values.estimatedDeposit ?? 0;
       return await createFundingSchedule({
         bankAccountId: selectedBankAccountId,
         name: values.name,
@@ -70,12 +73,12 @@ function NewFundingModal(): React.JSX.Element {
           in: inTimezone,
         }),
         ruleset: values.ruleset,
-        estimatedDeposit: values.estimatedDeposit > 0 ? friendlyToAmount(values.estimatedDeposit) : null,
+        estimatedDeposit: estimatedDeposit > 0 ? locale.friendlyToAmount(estimatedDeposit) : null,
         excludeWeekends: values.excludeWeekends,
         // Auto create transaction requires a manual link and a non-zero
         // estimated deposit; force it off otherwise so the API will not reject
         // the create.
-        autoCreateTransaction: isManual && (values.estimatedDeposit ?? 0) > 0 && values.autoCreateTransaction,
+        autoCreateTransaction: isManual && estimatedDeposit > 0 && values.autoCreateTransaction,
       })
         .then(created => modal.resolve(created))
         .then(() => modal.remove())
@@ -88,7 +91,7 @@ function NewFundingModal(): React.JSX.Element {
         )
         .finally(() => helpers.setSubmitting(false));
     },
-    [createFundingSchedule, enqueueSnackbar, friendlyToAmount, modal, selectedBankAccountId, inTimezone, isManual],
+    [createFundingSchedule, enqueueSnackbar, locale, modal, selectedBankAccountId, inTimezone, isManual],
   );
 
   return (
@@ -192,5 +195,9 @@ const newFundingModal = NiceModal.create(NewFundingModal);
 export default newFundingModal;
 
 export function showNewFundingModal(): Promise<FundingSchedule | null> {
-  return NiceModal.show<FundingSchedule | null, ExtractProps<typeof newFundingModal>, unknown>(newFundingModal);
+  return NiceModal.show<
+    FundingSchedule | null,
+    ExtractProps<typeof newFundingModal>,
+    Partial<ExtractProps<typeof newFundingModal>>
+  >(newFundingModal);
 }

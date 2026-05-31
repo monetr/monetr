@@ -46,11 +46,11 @@ export default function OauthReturn(): React.JSX.Element {
 
   async function longPollSetup(): Promise<void> {
     setState(prevState => ({
-      longPollAttempts: prevState.longPollAttempts + 1,
+      longPollAttempts: (prevState.longPollAttempts ?? 0) + 1,
     }));
 
     const { longPollAttempts, linkId } = state;
-    if (longPollAttempts > 6) {
+    if ((longPollAttempts ?? 0) > 6) {
       return Promise.resolve();
     }
 
@@ -96,8 +96,8 @@ export default function OauthReturn(): React.JSX.Element {
       url: '/api/plaid/link/token/callback',
       data: {
         publicToken: public_token,
-        institutionId: metadata.institution.institution_id,
-        institutionName: metadata.institution.name,
+        institutionId: metadata.institution?.institution_id,
+        institutionName: metadata.institution?.name,
         accountIds: metadata.accounts.map((account: { id: string }) => account.id),
       },
     }).then(result => {

@@ -11,6 +11,9 @@ import '@monetr/interface/styles/styles.css';
 import '@monetr/interface/styles/index.scss';
 
 const container = document.getElementById('root');
+if (!container) {
+  throw new Error('failed to find the root element to mount monetr');
+}
 const root = createRoot(container);
 
 if (window?.__MONETR__?.SENTRY_DSN) {

@@ -54,7 +54,7 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): React.J
   );
 }
 
-function LinkWarningIndicator({ link }: { link: MonetrLink }): React.JSX.Element {
+function LinkWarningIndicator({ link }: { link: MonetrLink }): React.JSX.Element | null {
   const isWarning = link.getIsError() || link.getIsPendingExpiration();
   if (!isWarning) {
     return null;
@@ -68,7 +68,7 @@ function LinkWarningIndicator({ link }: { link: MonetrLink }): React.JSX.Element
   );
 }
 
-function LinkRevokedIndicator({ link }: { link: MonetrLink }): React.JSX.Element {
+function LinkRevokedIndicator({ link }: { link: MonetrLink }): React.JSX.Element | null {
   const isBad = link.getIsPlaid() && link.getIsRevoked();
   if (!isBad) {
     return null;

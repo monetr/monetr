@@ -7,7 +7,7 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { AmountType } from '@monetr/interface/util/amounts';
 
-export default function BalanceAvailableAmount(): React.JSX.Element {
+export default function BalanceAvailableAmount(): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: bankAccount } = useSelectedBankAccount();
   const { data: balance } = useCurrentBalance();
@@ -24,7 +24,7 @@ export default function BalanceAvailableAmount(): React.JSX.Element {
             </Typography>
           </Flex>
           <Typography color='emphasis' size='lg' weight='semibold'>
-            {locale.formatAmount(balance?.available, AmountType.Stored)}
+            {balance ? locale?.formatAmount(balance.available, AmountType.Stored) : ''}
           </Typography>
         </Flex>
       );

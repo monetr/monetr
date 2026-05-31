@@ -11,7 +11,7 @@ export interface MerchantIconProps {
 }
 
 export default function MerchantIcon(props: MerchantIconProps): React.JSX.Element {
-  const icon = useIconSearch(props?.name);
+  const icon = useIconSearch(props?.name ?? '');
   const size = 30;
   if (icon?.svg) {
     // It is possible for colors to be missing for a given icon. When this happens just fall back to a black color.

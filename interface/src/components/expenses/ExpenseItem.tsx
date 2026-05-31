@@ -36,7 +36,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): React.JSX.E
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
 
   const { ruleset, nextRecurrence } = spending;
-  if (!ruleset || !nextRecurrence) {
+  if (!ruleset || !nextRecurrence || !locale) {
     return null;
   }
 

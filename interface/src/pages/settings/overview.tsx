@@ -9,7 +9,7 @@ export default function SettingsOverview(): React.JSX.Element {
   const { data: me } = useAuthentication();
 
   const timezone = {
-    label: me?.user?.account?.timezone,
+    label: me?.user?.account?.timezone ?? '',
     value: 0,
   };
 

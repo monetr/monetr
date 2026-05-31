@@ -16,7 +16,7 @@ export default function AfterCheckoutPage(): React.JSX.Element {
   // As soon as the component mounts, call setup from checkout to get the subscription sorted out.
   useEffect(() => {
     const params = new URLSearchParams(search);
-    const checkoutSessionId = params.get('session');
+    const checkoutSessionId = params.get('session') ?? '';
     afterCheckout(checkoutSessionId)
       .then(result => {
         // If the user's subscription is now active then redirect them to the main view of the authenticated

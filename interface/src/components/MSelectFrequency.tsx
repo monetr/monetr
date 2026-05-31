@@ -14,7 +14,7 @@ export interface MSelectFrequencyProps extends Omit<SelectProps<string>, 'onChan
 export default function MSelectFrequency(props: MSelectFrequencyProps): React.JSX.Element {
   const { timezone } = useTimezone();
   const [selectedSignature, setSelectedSignature] = useState<string | null>(null);
-  const formikContext = useFormikContext();
+  const formikContext = useFormikContext<Record<string, any>>();
 
   const date = useMemo(() => formikContext.values[props.dateFrom], [props.dateFrom, formikContext.values]);
 
@@ -58,8 +58,9 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): React.JS
   const onChange = useCallback(
     async (newValue: SelectOption<string>) => {
       setSelectedSignature(newValue.value);
+      const selectedRule = rules.find(rule => rule.signature() === newValue.value);
       await formikContext
-        .setFieldValue(props.name, rules.find(rule => rule.signature() === newValue.value).ruleString())
+        .setFieldValue(props.name, selectedRule?.ruleString())
         // After the value has been set, we need to set the field as touched and trigger a revalidation of that specific
         // field.
         .then(async () => void (await formikContext.setFieldTouched(props.name, true)))
@@ -72,13 +73,13 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): React.JS
     <Select<string>
       {...props}
       disabled={props.disabled || formikContext.isSubmitting}
-      error={formikContext.errors[props.name]}
+      error={formikContext.errors[props.name] as string | undefined}
       label={props.label}
       name={props.name}
       onChange={onChange}
       options={options}
       placeholder={options.length > 0 ? 'Select a frequency...' : 'Select a date first...'}
-      value={value}
+      value={value ?? undefined}
     />
   );
 }

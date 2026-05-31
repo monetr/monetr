@@ -38,7 +38,7 @@ export interface MAmountFieldProps extends NumericField {
 }
 
 const MAmountFieldPropsDefaults: MAmountFieldProps = {
-  label: null,
+  label: undefined,
   labelDecorator: (_: LabelDecoratorProps) => null,
   disabled: false,
 };
@@ -46,36 +46,42 @@ const MAmountFieldPropsDefaults: MAmountFieldProps = {
 export default function MAmountField(props: MAmountFieldProps = MAmountFieldPropsDefaults): React.JSX.Element {
   const id = useId();
   const { data: localeInfo } = useLocaleCurrency(props.currency);
-  const formikContext = useFormikContext();
-  const getFormikError = () => {
-    if (!formikContext?.touched[props?.name]) {
-      return null;
+  const formikContext = useFormikContext<Record<string, any>>();
+  const getFormikError = (): string | undefined => {
+    if (!props?.name || !formikContext?.touched[props.name]) {
+      return undefined;
     }
 
-    return formikContext?.errors[props?.name];
+    // These renderers are keyed by a flat field name, so the formik error for that field is a plain string.
+    return formikContext?.errors[props.name] as string | undefined;
   };
 
   props = {
     id,
     ...MAmountFieldPropsDefaults,
-    currency: localeInfo.currency ?? 'USD',
+    currency: localeInfo?.currency ?? 'USD',
     ...props,
     disabled: props?.disabled || formikContext?.isSubmitting,
     error: props?.error || getFormikError(),
   };
-  const currencyInfo = intlNumberFormat(localeInfo.locale, props.currency);
+
+  // localeInfo comes from a query so it can be undefined before it has loaded. Fall back to sensible defaults so the
+  // formatting helpers below always receive real strings.
+  const locale = localeInfo?.locale ?? 'en_US';
+  const currency = props.currency ?? 'USD';
+  const currencyInfo = intlNumberFormat(locale, currency);
 
   const { labelDecorator, ...otherProps } = props;
-  const LabelDecorator = labelDecorator || MAmountFieldPropsDefaults.labelDecorator;
+  const LabelDecorator = labelDecorator || (() => null);
 
   // If we are working with a date picker, then take the current value and transform it for the actual input.
-  const value = formikContext?.values[props.name];
+  const value = props.name ? formikContext?.values[props.name] : undefined;
 
   // NumericFormat has a weird callback so we aren't using the typical onChange. Instead we are using onValueChange to
   // receive updates from the component and yeet them back up to formik.
   const onChange = useCallback(
     (values: NumberFormatValues) => {
-      if (formikContext) {
+      if (formikContext && props.name) {
         formikContext.setFieldValue(props.name, values.floatValue);
       }
     },
@@ -114,13 +120,13 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           className={inputStyles.input}
           data-error={Boolean(props.error)}
           decimalScale={currencyInfo.maximumFractionDigits}
-          decimalSeparator={getDecimalSeparator(localeInfo.locale)}
+          decimalSeparator={getDecimalSeparator(locale)}
           fixedDecimalScale
           onValueChange={onChange}
-          placeholder={intlNumberFormatter(localeInfo.locale, props.currency)('0')}
-          prefix={getCurrencySymbolPrefixed(localeInfo.locale, props.currency)}
-          renderText={intlNumberFormatter(localeInfo.locale, props.currency)}
-          thousandSeparator={getNumberGroupSeparator(localeInfo.locale)}
+          placeholder={intlNumberFormatter(locale, currency)('0')}
+          prefix={getCurrencySymbolPrefixed(locale, currency)}
+          renderText={intlNumberFormatter(locale, currency)}
+          thousandSeparator={getNumberGroupSeparator(locale)}
         />
       </div>
       <ErrorText error={props.error} />
