@@ -47,7 +47,7 @@ export default function LunchFlowSetupAccountItem(props: LunchFlowSetupAccountIt
         <Typography ellipsis>{props.data.name}</Typography>
       </ItemContent>
       <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>
-        <Typography>{locale.formatAmount(props.data.currentBalance, AmountType.Stored, false)}</Typography>
+        <Typography>{locale?.formatAmount(props.data.currentBalance, AmountType.Stored, false)}</Typography>
         <Switch
           checked={checked}
           disabled={props.data.status === LunchFlowBankAccountStatus.Active || formik.isSubmitting}

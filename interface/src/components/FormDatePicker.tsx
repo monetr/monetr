@@ -32,6 +32,7 @@ export interface FormDatePickerProps extends Omit<React.HTMLAttributes<HTMLButto
   name?: string;
   placeholder?: string;
   required?: boolean;
+  'data-testid'?: string;
 }
 
 export default function FormDatePicker(props: FormDatePickerProps): JSX.Element {
@@ -41,14 +42,15 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
   });
   // Load the locale data files so we can format dates with them.
   const { data: locale, isLoading: localeIsLoading } = useLocale();
-  const formikContext = useFormikContext();
+  const formikContext = useFormikContext<Record<string, any>>();
 
-  const getFormikError = () => {
-    if (!formikContext?.touched[props?.name]) {
-      return null;
+  const getFormikError = (): string | undefined => {
+    if (!props?.name || !formikContext?.touched[props.name]) {
+      return undefined;
     }
 
-    return formikContext?.errors[props?.name];
+    // This renderer is keyed by a flat field name, so the formik error for that field is a plain string.
+    return formikContext?.errors[props.name] as string | undefined;
   };
   props = {
     disabled: formikContext?.isSubmitting,
@@ -57,7 +59,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
   };
 
   const {
-    value = formikContext?.values[props.name],
+    value = props.name ? formikContext?.values[props.name] : undefined,
     min: minDate,
     max: maxDate,
     placeholder = 'Select date',
@@ -67,12 +69,12 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
     enableYearNavigation = true,
   } = props;
 
-  const [selectedValue, setSelectedValue] = useState<Date | null>(value);
+  const [selectedValue, setSelectedValue] = useState<Date | null>(value ?? null);
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Cannot include inTimezone here as it creates a problem.
   React.useEffect(() => {
-    setSelectedValue(value ? inTimezone(value) : undefined);
+    setSelectedValue(value ? inTimezone(value) : null);
   }, [value]);
 
   const open = Boolean(anchorEl);
@@ -102,13 +104,13 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
   const handleClose = useCallback(() => setAnchorEl(null), []);
 
   const handleReset = useCallback(() => {
-    if (formikContext) {
+    if (formikContext && props.name) {
       formikContext.setFieldValue(props.name, null);
       formikContext.setFieldTouched(props.name, true);
       formikContext.validateField(props.name);
     }
 
-    setSelectedValue(undefined);
+    setSelectedValue(null);
   }, [formikContext, props.name]);
 
   const handleSelect = useCallback(
@@ -119,7 +121,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
       }
 
       // If we are in a formik form boi then propagate the values upwards.
-      if (formikContext) {
+      if (formikContext && props.name) {
         formikContext.setFieldValue(props.name, value);
         formikContext.setFieldTouched(props.name, true);
         formikContext.validateField(props.name);
@@ -148,7 +150,7 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
     );
   }
 
-  const formattedSelection = hasValue ? formatSelectedDates(selectedValue, undefined, locale) : placeholder;
+  const formattedSelection = hasValue && locale ? formatSelectedDates(selectedValue, null, locale) : placeholder;
 
   return (
     <div
@@ -190,11 +192,11 @@ export default function FormDatePicker(props: FormDatePickerProps): JSX.Element 
             enableYearNavigation={enableYearNavigation}
             locale={locale}
             mode='single'
-            onSelect={(value: Date) => {
-              handleSelect(value);
+            onSelect={(value: Date | undefined) => {
+              handleSelect(value ?? null);
               handleClose();
             }}
-            selected={selectedValue}
+            selected={selectedValue ?? undefined}
             showOutsideDays={true}
           />
         </PopoverContent>

@@ -41,7 +41,7 @@ describe('useSelectedBankAccount', () => {
       expect(world.result.current.data).not.toBeDefined();
       expect(world.result.current.isLoading).toBeTruthy();
       await waitFor(() => expect(world.result.current.isSuccess).toBeTruthy());
-      expect(world.result.current.data.bankAccountId).toBe('bac_01hy4rcmadc01d2kzv7vynbxxx');
+      expect(world.result.current.data?.bankAccountId).toBe('bac_01hy4rcmadc01d2kzv7vynbxxx');
     }
   });
 

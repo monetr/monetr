@@ -13,7 +13,7 @@ interface SelectCurrencyProps {
 }
 
 export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element {
-  const formikContext = useFormikContext();
+  const formikContext = useFormikContext<Record<string, any>>();
   const { data: currencies, isLoading: currenciesLoading } = useInstalledCurrencies();
   const onChange = useCallback(
     (option: SelectOption<string>) => {

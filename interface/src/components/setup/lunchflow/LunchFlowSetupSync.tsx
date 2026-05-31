@@ -38,7 +38,7 @@ export default function LunchFlowSetupSync(): React.JSX.Element {
       </ul>
       <div className={flexVariants({ justify: 'center' })}>
         <Button
-          onClick={() => navigate(`/bank/${bankAccounts?.at(0).bankAccountId}/transactions`)}
+          onClick={() => navigate(`/bank/${bankAccounts?.at(0)?.bankAccountId}/transactions`)}
           type='submit'
           variant='primary'
         >

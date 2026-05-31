@@ -43,7 +43,7 @@ interface ExpenseValues {
   autoCreateTransaction: boolean;
 }
 
-export default function ExpenseDetails(): JSX.Element {
+export default function ExpenseDetails(): JSX.Element | null {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();
@@ -83,7 +83,7 @@ export default function ExpenseDetails(): JSX.Element {
     );
   }
 
-  if (!spending) {
+  if (!spending || !locale) {
     return null;
   }
 
@@ -98,7 +98,7 @@ export default function ExpenseDetails(): JSX.Element {
   }
 
   function backToExpenses() {
-    navigate(`/bank/${spending.bankAccountId}/expenses`);
+    navigate(`/bank/${spending?.bankAccountId}/expenses`);
   }
 
   async function deleteExpense(): Promise<void> {
@@ -114,12 +114,16 @@ export default function ExpenseDetails(): JSX.Element {
   }
 
   async function submit(values: ExpenseValues, helpers: FormikHelpers<ExpenseValues>): Promise<void> {
+    if (!spending || !locale) {
+      return Promise.resolve();
+    }
+
     helpers.setSubmitting(true);
 
     const updatedSpending = new Spending({
       ...spending,
       name: values.name,
-      description: null,
+      description: undefined,
       nextRecurrence: startOfDay(values.nextRecurrence, {
         in: inTimezone,
       }),
@@ -152,9 +156,9 @@ export default function ExpenseDetails(): JSX.Element {
   const initialValues: ExpenseValues = {
     name: spending.name,
     amount: locale.amountToFriendly(spending.targetAmount),
-    nextRecurrence: spending.nextRecurrence,
+    nextRecurrence: spending.nextRecurrence ?? startOfTomorrow({ in: inTimezone }),
     fundingScheduleId: spending.fundingScheduleId,
-    ruleset: spending.ruleset,
+    ruleset: spending.ruleset ?? '',
     autoCreateTransaction: spending.autoCreateTransaction,
   };
 

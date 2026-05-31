@@ -31,7 +31,7 @@ export function useRemoveTransaction(): (_: RemoveTransactionRequest) => Promise
     params.set('soft', String(softDelete));
     // Send the delete request to the server and handle any changes returned.
     return await request({ method: 'DELETE', url: `${path}?${params.toString()}` })
-      .then(result => result.data)
+      .then(result => result.data as RemoveTransactionResponse)
       .then(
         async (_: RemoveTransactionResponse) =>
           await Promise.all([

@@ -18,7 +18,7 @@ function testRenderHook<TProps, TResult>(
   callback: (props: TProps) => TResult,
   options?: HooksOptions<TProps>,
 ): RenderHookResult<TResult, TProps> {
-  const { hook } = memoryLocation({ path: options.initialRoute });
+  const { hook } = memoryLocation({ path: options?.initialRoute ?? '/' });
   const Wrapper: React.FC<React.PropsWithChildren> = props => {
     return (
       <Router hook={hook}>

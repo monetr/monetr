@@ -29,7 +29,7 @@ export interface MSelectSpendingProps extends MSelectSpendingBaseProps {
 const FREE_TO_USE = 'spnd_freeToUse';
 
 export default function MSelectSpending(props: MSelectSpendingProps): JSX.Element {
-  const formikContext = useFormikContext();
+  const formikContext = useFormikContext<Record<string, any>>();
   const { data: spending, isLoading, isError } = useSpendings();
   const { data: balances } = useCurrentBalance();
 
@@ -59,12 +59,12 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
     }),
   };
 
-  const items: Array<SelectOption<Spending>> = spending.map(item => ({
+  const items: Array<SelectOption<Spending>> = (spending ?? []).map(item => ({
     label: item.name,
     value: item,
   }));
 
-  const excludedFrom = formikContext.values[props.excludeFrom];
+  const excludedFrom = props.excludeFrom ? formikContext.values[props.excludeFrom] : undefined;
 
   const options: Array<SelectOption<Spending>> = [
     freeToUse,
@@ -87,12 +87,16 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
     return true;
   });
 
-  const value: string = formikContext.values[props.name];
+  const value: string | undefined = props.name ? formikContext.values[props.name] : undefined;
   // Determine the current value, if there is not a current value then use null. Null here represents Free to use, which
   // is a non existant spending item that we patch in to represent an unbudgeted transaction.
   const current = options.find(item => item.value.spendingId === (value ?? FREE_TO_USE));
 
   function onSelect(newValue: SelectOption<Spending>) {
+    if (!props.name) {
+      return;
+    }
+
     if (newValue.value.spendingId === FREE_TO_USE) {
       return formikContext.setFieldValue(props.name, null);
     }
@@ -114,7 +118,7 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
 export function SelectSpendingOptionComponent(props: SelectOptionComponentProps<Spending>): React.JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const notLoaded = props.value?.currentAmount === undefined;
-  const amount = notLoaded ? 'N/A' : locale.formatAmount(props.value.currentAmount, AmountType.Stored);
+  const amount = notLoaded || !locale ? 'N/A' : locale.formatAmount(props.value.currentAmount, AmountType.Stored);
   return (
     <div className={styles.optionRow}>
       <div className={styles.spendingName}>

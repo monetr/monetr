@@ -12,10 +12,8 @@ import styles from './SetupBillingButton.module.scss';
  * The SetupBillingButton should only be used on the setup page, it is intended to be a way to manage your billing
  * settings if you do not have an active link for some reason.
  */
-export default function SetupBillingButton(): JSX.Element {
-  const {
-    data: { hasSubscription },
-  } = useAuthentication();
+export default function SetupBillingButton(): JSX.Element | null {
+  const { data } = useAuthentication();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +32,7 @@ export default function SetupBillingButton(): JSX.Element {
       });
   }, [enqueueSnackbar]);
 
-  if (!hasSubscription) {
+  if (!data?.hasSubscription) {
     return null;
   }
 

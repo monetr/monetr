@@ -25,7 +25,7 @@ interface BankAccountValues {
   currency: string;
 }
 
-export default function BankAccountSettingsPage(): JSX.Element {
+export default function BankAccountSettingsPage(): JSX.Element | null {
   const { data: link } = useCurrentLink();
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
   const updateBankAccount = useUpdateBankAccount();
@@ -63,7 +63,17 @@ export default function BankAccountSettingsPage(): JSX.Element {
     );
   }
 
+  // By this point we are neither loading nor in an error state, so we should have a bank account. Guard anyway to keep
+  // things type safe before we start reading fields off of it.
+  if (!bankAccount) {
+    return null;
+  }
+
   async function submit(values: BankAccountValues, helpers: FormikHelpers<BankAccountValues>) {
+    if (!bankAccount) {
+      return Promise.resolve();
+    }
+
     helpers.setSubmitting(true);
 
     return await updateBankAccount({

@@ -19,7 +19,7 @@ export default function BalanceCurrentAmount(): JSX.Element {
         </Typography>
       </Flex>
       <Typography color='emphasis' size='lg' weight='semibold'>
-        {locale.formatAmount(balance?.current, AmountType.Stored)}
+        {balance ? locale?.formatAmount(balance.current, AmountType.Stored) : ''}
       </Typography>
     </Flex>
   );

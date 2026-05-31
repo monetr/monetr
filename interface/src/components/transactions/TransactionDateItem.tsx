@@ -16,7 +16,7 @@ export default function TransactionDateItem({ date }: TransactionDateItemProps):
   const { data: locale, isLoading } = useLocale();
 
   const dateString = useMemo(
-    () => (isLoading ? 'Loading...' : formatDate(date, inTimezone, locale, DateLength.Long)),
+    () => (isLoading || !locale ? 'Loading...' : formatDate(date, inTimezone, locale, DateLength.Long)),
     [locale, date, isLoading, inTimezone],
   );
 

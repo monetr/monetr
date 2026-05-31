@@ -3,7 +3,7 @@ import type BankAccount from '@monetr/interface/models/BankAccount';
 /**
  * sortAccounts will take an array of accounts and sort them by the account type and sub type priorities.
  */
-export default function sortAccounts(bankAccounts: Array<BankAccount> | undefined): Array<BankAccount> {
+export default function sortAccounts(bankAccounts: Array<BankAccount> | null | undefined): Array<BankAccount> {
   if (!bankAccounts) {
     return [];
   }

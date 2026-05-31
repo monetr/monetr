@@ -55,7 +55,7 @@ export default function Login(): JSX.Element {
     helpers.setSubmitting(true);
 
     return login({
-      captcha: values.captcha,
+      captcha: values.captcha ?? undefined,
       email: values.email,
       password: values.password,
     })
@@ -112,7 +112,7 @@ export default function Login(): JSX.Element {
   );
 }
 
-function ForgotPasswordButton(): JSX.Element {
+function ForgotPasswordButton(): JSX.Element | null {
   const { data: config } = useAppConfiguration();
   // If the application is not configured to allow forgot password then don't show the button.
   if (!config?.allowForgotPassword) {

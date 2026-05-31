@@ -25,8 +25,8 @@ describe('use locale currency', () => {
     const { result } = testRenderHook(useLocaleCurrency, { initialRoute: '/login' });
     expect(result.current.isLoading).toBeTruthy();
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
-    await waitFor(() => expect(result.current.data.locale).toBe('en_US'));
-    await waitFor(() => expect(result.current.data.currency).toBe('USD'));
+    await waitFor(() => expect(result.current.data?.locale).toBe('en_US'));
+    await waitFor(() => expect(result.current.data?.currency).toBe('USD'));
   });
 
   it('will provide the real locale and currency for the current user', async () => {
@@ -67,8 +67,8 @@ describe('use locale currency', () => {
     const { result } = testRenderHook(useLocaleCurrency, { initialRoute: '/setup' });
     expect(result.current.isLoading).toBeTruthy();
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
-    await waitFor(() => expect(result.current.data.locale).toBe('ja_JP'));
-    await waitFor(() => expect(result.current.data.currency).toBe('JPY'));
+    await waitFor(() => expect(result.current.data?.locale).toBe('ja_JP'));
+    await waitFor(() => expect(result.current.data?.currency).toBe('JPY'));
   });
 
   it('will provide the locale for the current bank account if it can', async () => {
@@ -128,9 +128,9 @@ describe('use locale currency', () => {
     expect(result.current.isLoading).toBeTruthy();
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     // Locale should always come from the user.
-    await waitFor(() => expect(result.current.data.locale).toBe('ja_JP'));
+    await waitFor(() => expect(result.current.data?.locale).toBe('ja_JP'));
     // But currency should come from the bank account when there is one.
-    await waitFor(() => expect(result.current.data.currency).toBe('EUR'));
+    await waitFor(() => expect(result.current.data?.currency).toBe('EUR'));
   });
 
   it('will handle a bad bank ID', async () => {
@@ -175,9 +175,9 @@ describe('use locale currency', () => {
     expect(result.current.isLoading).toBeTruthy();
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     // Still use the user's locale
-    await waitFor(() => expect(result.current.data.locale).toBe('ja_JP'));
+    await waitFor(() => expect(result.current.data?.locale).toBe('ja_JP'));
     // Fall back to the account's default currency if we cannot get the currency for the bank
-    await waitFor(() => expect(result.current.data.currency).toBe('JPY'));
+    await waitFor(() => expect(result.current.data?.currency).toBe('JPY'));
   });
 
   it('will allow a default currency to be overridden', async () => {
@@ -238,9 +238,9 @@ describe('use locale currency', () => {
     expect(result.current.isLoading).toBeTruthy();
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     // Locale should always come from the user.
-    await waitFor(() => expect(result.current.data.locale).toBe('ja_JP'));
+    await waitFor(() => expect(result.current.data?.locale).toBe('ja_JP'));
     // If we specify a currency override then we should use that regardless of what thee user or bank account have
     // configured.
-    await waitFor(() => expect(result.current.data.currency).toBe('EUR'));
+    await waitFor(() => expect(result.current.data?.currency).toBe('EUR'));
   });
 });

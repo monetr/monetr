@@ -91,7 +91,7 @@ export default function SelectBankAccount(): JSX.Element {
             styles.settingsLinkMobile,
           )}
           role='combobox'
-          to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
+          to={`/bank/${selectedBankAccount?.bankAccountId}/settings`}
         >
           <Settings className={styles.settingsIconMobile} />
         </Link>
@@ -134,7 +134,7 @@ export default function SelectBankAccount(): JSX.Element {
             styles.settingsLinkDesktop, // No focus ring, different from mobile.
           )}
           role='combobox'
-          to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
+          to={`/bank/${selectedBankAccount?.bankAccountId}/settings`}
         >
           <Settings className={styles.settingsIconDesktop} />
         </Link>
@@ -149,7 +149,7 @@ interface SelectBankAccountPickerOption {
   disabled?: boolean;
   // Fields used for rich display.
   type: string;
-  mask: string;
+  mask?: string;
   status: BankAccountStatus;
 }
 

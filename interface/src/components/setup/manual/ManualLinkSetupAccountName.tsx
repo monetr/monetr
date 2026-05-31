@@ -4,7 +4,10 @@ import { flexVariants } from '@monetr/interface/components/Flex';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import { layoutVariants } from '@monetr/interface/components/Layout';
 import MForm from '@monetr/interface/components/MForm';
-import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
+import type {
+  ManualLinkSetupForm,
+  ManualLinkSetupMetadata,
+} from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import Typography from '@monetr/interface/components/Typography';
@@ -15,10 +18,10 @@ export interface ManualLinkSetupAccountNameValues {
 }
 
 export default function ManualLinkSetupAccountName(): JSX.Element {
-  const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
+  const viewContext = useViewContext<ManualLinkSetupSteps, ManualLinkSetupMetadata, ManualLinkSetupForm>();
   const initialValues: ManualLinkSetupAccountNameValues = {
     accountName: '',
-    ...viewContext.formData,
+    ...(viewContext.formData as Partial<ManualLinkSetupForm>),
   };
 
   function submit(values: ManualLinkSetupAccountNameValues, helpers: FormikHelpers<ManualLinkSetupAccountNameValues>) {

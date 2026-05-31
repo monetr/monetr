@@ -7,6 +7,6 @@ export function useNextFundingForecast(fundingScheduleId: string): UseQueryResul
   return useQuery<Partial<{ nextContribution: number }>, unknown, number>({
     queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast/next_funding`, { fundingScheduleId }],
     enabled: Boolean(selectedBankAccountId),
-    select: data => data.nextContribution,
+    select: data => data.nextContribution ?? 0,
   });
 }

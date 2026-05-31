@@ -62,10 +62,13 @@ export default function LinkDetails(): React.JSX.Element {
   );
 
   const handleRemoveLink = useCallback(() => {
+    if (!link) {
+      return;
+    }
     showRemoveLinkModal({ link: link });
   }, [link]);
 
-  if (linkIsLoading || bankAccountsLoading) {
+  if (linkIsLoading || bankAccountsLoading || !link || !bankAccounts) {
     return (
       <div className={styles.centerState}>
         <Typography size='5xl'>One moment...</Typography>

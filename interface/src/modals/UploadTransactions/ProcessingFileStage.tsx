@@ -35,7 +35,7 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): JS
         <div className={styles.fileCard}>
           <FileUp className={styles.fileIcon} />
           <div className={styles.fileInfo}>
-            <Typography size='lg'>{props.upload.file.name}</Typography>
+            <Typography size='lg'>{props.upload.file?.name}</Typography>
             <Typography size='inherit'>Import {data?.status || 'processing'}!</Typography>
           </div>
         </div>
@@ -92,7 +92,7 @@ function useTransactionUploadProgress(
   // Subscribe to changes for the transaction upload
   return useQuery<Partial<TransactionUpload>, unknown, TransactionUpload>({
     queryKey: [`/api/bank_accounts/${bankAccountId}/transactions/upload/${transactionUploadId}`],
-    initialData: () => null, // Don't do the initial fetch, rely on the websocket instead.
+    initialData: () => ({}), // Don't do the initial fetch, rely on the websocket instead.
     select: data => new TransactionUpload(data),
   });
 }

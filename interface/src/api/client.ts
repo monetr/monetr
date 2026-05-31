@@ -76,7 +76,7 @@ function xhrUpload<TResponse>(config: RequestConfig): Promise<ApiResponse<TRespo
     if (config.onUploadProgress) {
       xhr.upload.onprogress = (event: ProgressEvent) => {
         if (event.lengthComputable) {
-          config.onUploadProgress({ loaded: event.loaded, total: event.total });
+          config.onUploadProgress?.({ loaded: event.loaded, total: event.total });
         }
       };
     }

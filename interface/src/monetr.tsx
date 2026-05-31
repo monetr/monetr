@@ -103,7 +103,7 @@ export default function Monetr(): JSX.Element {
     );
   }
 
-  if (!auth?.isActive) {
+  if (auth?.isActive === false) {
     return (
       <Switch>
         <Route component={LogoutPage} path='/logout' />
@@ -116,7 +116,7 @@ export default function Monetr(): JSX.Element {
     );
   }
 
-  const hasAnyLinks = links?.length > 0;
+  const hasAnyLinks = (links?.length ?? 0) > 0;
   if (!hasAnyLinks) {
     return (
       <Switch>
@@ -220,10 +220,10 @@ export default function Monetr(): JSX.Element {
   );
 }
 
-function RedirectToBank(): JSX.Element {
+function RedirectToBank(): JSX.Element | null {
   const { data: links, isLoading: linksIsLoading } = useLinks();
   const { data: bankAccounts, isLoading: bankAccountsIsLoading } = useBankAccounts();
-  if (linksIsLoading || bankAccountsIsLoading) {
+  if (linksIsLoading || bankAccountsIsLoading || !links || !bankAccounts) {
     return null;
   }
   if (links.length === 0) {

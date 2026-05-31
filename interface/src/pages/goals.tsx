@@ -33,7 +33,7 @@ export default function Goals(): JSX.Element {
   }
 
   function ListContent(): JSX.Element {
-    if (goals.length === 0) {
+    if ((goals ?? []).length === 0) {
       return <EmptyState />;
     }
 

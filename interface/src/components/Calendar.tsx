@@ -84,13 +84,12 @@ function Calendar({
           );
         },
         // biome-ignore lint/correctness/noNestedComponentDefinitions: Easier to structure it this way.
-        PreviousMonthButton: () => null,
+        PreviousMonthButton: () => <></>,
         // biome-ignore lint/correctness/noNestedComponentDefinitions: Easier to structure it this way.
-        NextMonthButton: () => null,
-        Nav: () => null,
+        NextMonthButton: () => <></>,
+        Nav: () => <></>,
       }}
       locale={locale}
-      mode='single'
       showOutsideDays={showOutsideDays}
       {...props}
     />

@@ -10,7 +10,7 @@ export enum LinkType {
   LunchFlow = 'lunch_flow',
 }
 
-export const errorMessages = {
+export const errorMessages: Partial<Record<string, string>> = {
   ITEM_LOGIN_REQUIRED: "This link's authentication has expired and needs to be re-authenticated.",
 };
 
@@ -78,6 +78,9 @@ export default class Link {
 
   getErrorMessage(): string | null {
     const code = this.plaidLink?.status;
-    return errorMessages[code] || null;
+    if (!code) {
+      return null;
+    }
+    return errorMessages[code] ?? null;
   }
 }

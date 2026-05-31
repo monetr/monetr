@@ -69,7 +69,7 @@ interface ActionAreaProps {
   children?: React.ReactNode;
 }
 
-function ActionArea(props: ActionAreaProps): JSX.Element {
+function ActionArea(props: ActionAreaProps): React.ReactNode {
   if (!props.children) {
     return null;
   }

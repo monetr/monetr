@@ -26,7 +26,7 @@ export default function Funding(): JSX.Element {
   }
 
   function ListContent(): JSX.Element {
-    if (funding.length === 0) {
+    if ((funding ?? []).length === 0) {
       return <EmptyState />;
     }
 
