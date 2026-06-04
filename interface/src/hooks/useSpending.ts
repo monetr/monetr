@@ -2,6 +2,7 @@ import { type UseQueryResult, useQuery, useQueryClient } from '@tanstack/react-q
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import Spending from '@monetr/interface/models/Spending';
+import { WithJsonValues } from '@monetr/interface/util/json';
 
 /**
  * useSpending is used to retrieve data on a single spending object. It will however, hydrate it's state using data from
@@ -15,7 +16,7 @@ export function useSpending(spendingId?: string): UseQueryResult<Spending, unkno
     `/api/bank_accounts/${selectedBankAccountId}/spending`,
   ]);
 
-  return useQuery<Partial<Spending>, unknown, Spending>({
+  return useQuery<WithJsonValues<Spending>, unknown, Spending>({
     queryKey: [`/api/bank_accounts/${selectedBankAccountId}/spending/${spendingId}`],
     enabled: Boolean(selectedBankAccountId) && Boolean(spendingId),
     initialData: () =>

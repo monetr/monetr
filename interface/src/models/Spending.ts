@@ -1,5 +1,6 @@
 import { format, isThisYear } from 'date-fns';
 
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum SpendingType {
@@ -9,33 +10,42 @@ export enum SpendingType {
 }
 
 export default class Spending {
-  spendingId: string;
-  bankAccountId: string;
+  readonly spendingId: string;
+  readonly bankAccountId: string;
   fundingScheduleId: string;
   name: string;
-  description?: string;
-  spendingType: SpendingType;
+  description: string | null;
+  readonly spendingType: SpendingType;
   targetAmount: number;
   currentAmount: number;
-  usedAmount: number;
+  readonly usedAmount: number;
   ruleset: string | null;
-  lastRecurrence: Date | null;
-  nextRecurrence: Date | null;
+  readonly lastRecurrence: Date | null;
+  nextRecurrence: Date;
   nextContributionAmount: number;
-  isBehind: boolean;
+  readonly isBehind: boolean;
   isPaused: boolean;
   autoCreateTransaction: boolean;
-  dateCreated: Date | null;
+  readonly createdAt: Date;
 
-  constructor(data?: Partial<Spending>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        lastRecurrence: parseDate(data.lastRecurrence),
-        nextRecurrence: parseDate(data.nextRecurrence),
-        dateCreated: parseDate(data.dateCreated),
-      });
-    }
+  constructor(data: WithJsonValues<Spending>) {
+    this.spendingId = data.spendingId;
+    this.bankAccountId = data.bankAccountId;
+    this.fundingScheduleId = data.fundingScheduleId;
+    this.name = data.name;
+    this.description = data.description;
+    this.spendingType = data.spendingType;
+    this.targetAmount = data.targetAmount;
+    this.currentAmount = data.currentAmount;
+    this.usedAmount = data.usedAmount;
+    this.ruleset = data.ruleset;
+    this.lastRecurrence = data.lastRecurrence ? parseDate(data.lastRecurrence) : null;
+    this.nextRecurrence = parseDate(data.nextRecurrence);
+    this.nextContributionAmount = data.nextContributionAmount;
+    this.isBehind = data.isBehind;
+    this.isPaused = data.isPaused;
+    this.autoCreateTransaction = data.autoCreateTransaction;
+    this.createdAt = parseDate(data.createdAt);
   }
 
   // getNextOccurrence string will return a friendly date string representing the next time this spending object is due.

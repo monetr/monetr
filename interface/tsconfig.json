@@ -14,9 +14,7 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "strict": true,
-    // monetr's model classes hydrate through Object.assign(this, Partial<T>), which strictPropertyInitialization
-    // cannot see, so we leave just this one strict check off instead of asserting every model field with `!:`.
-    "strictPropertyInitialization": false,
+    "strictPropertyInitialization": true,
     "target": "ES2022",
     "types": ["node", "@rstest/core/globals", "@testing-library/jest-dom"],
     "paths": {
