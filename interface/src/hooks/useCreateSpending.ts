@@ -1,38 +1,46 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useMutation } from '@tanstack/react-query';
 
-import Spending from '@monetr/interface/models/Spending';
+import type BankAccount from '@monetr/interface/models/BankAccount';
+import type { ID } from '@monetr/interface/models/ID';
+import Spending, { type SpendingType } from '@monetr/interface/models/Spending';
+import type { WithJsonValues } from '@monetr/interface/util/json';
+import type { Writable } from '@monetr/interface/util/readonly';
 import request from '@monetr/interface/util/request';
 
-export function useCreateSpending(): (_spending: Spending) => Promise<Spending> {
-  const queryClient = useQueryClient();
+export type CreateSpendingRequest = Writable<Spending> & {
+  bankAccountId: ID<BankAccount>;
+  spendingType: SpendingType;
+};
 
-  async function createSpending(spending: Spending): Promise<Spending> {
-    return request<Partial<Spending>>({
-      method: 'POST',
-      url: `/api/bank_accounts/${spending.bankAccountId}/spending`,
-      data: spending,
-    }).then(result => new Spending(result?.data));
-  }
+export function useCreateSpending(): (_spending: CreateSpendingRequest) => Promise<Spending> {
+  const createSpending = useCallback(
+    async ({ bankAccountId, ...spending }: CreateSpendingRequest): Promise<Spending> => {
+      return request<WithJsonValues<Spending>>({
+        method: 'POST',
+        url: `/api/bank_accounts/${bankAccountId}/spending`,
+        data: spending,
+      }).then(result => new Spending(result.data));
+    },
+    [],
+  );
 
-  const mutation = useMutation({
+  const { mutateAsync } = useMutation({
     mutationFn: createSpending,
-    onSuccess: (created: Spending) =>
+    onSuccess: (data: Spending, _var, _result, ctx) =>
       Promise.all([
-        queryClient.setQueryData(
-          [`/api/bank_accounts/${created.bankAccountId}/spending`],
-          (previous: Array<Partial<Spending>>) => (previous || []).concat(created),
+        ctx.client.setQueryData(
+          [`/api/bank_accounts/${data.bankAccountId}/spending`],
+          (previous: Array<Partial<Spending>>) => (previous || []).concat(data),
         ),
-        queryClient.setQueryData(
-          [`/api/bank_accounts/${created.bankAccountId}/spending/${created.spendingId}`],
-          created,
-        ),
-        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${created.bankAccountId}/balances`] }),
-        queryClient.invalidateQueries({ queryKey: [`/api/bank_accounts/${created.bankAccountId}/forecast`] }),
-        queryClient.invalidateQueries({
-          queryKey: [`/api/bank_accounts/${created.bankAccountId}/forecast/next_funding`],
+        ctx.client.setQueryData([`/api/bank_accounts/${data.bankAccountId}/spending/${data.spendingId}`], data),
+        ctx.client.invalidateQueries({ queryKey: [`/api/bank_accounts/${data.bankAccountId}/balances`] }),
+        ctx.client.invalidateQueries({ queryKey: [`/api/bank_accounts/${data.bankAccountId}/forecast`] }),
+        ctx.client.invalidateQueries({
+          queryKey: [`/api/bank_accounts/${data.bankAccountId}/forecast/next_funding`],
         }),
       ]),
   });
 
-  return mutation.mutateAsync;
+  return mutateAsync;
 }

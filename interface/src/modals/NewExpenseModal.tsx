@@ -20,7 +20,10 @@ import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import { ID } from '@monetr/interface/models/ID';
+import type Spending from '@monetr/interface/models/Spending';
+import { SpendingType } from '@monetr/interface/models/Spending';
 import type { APIError } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
@@ -32,7 +35,7 @@ interface NewExpenseValues {
   amount: number;
   nextOccurrence: Date;
   ruleset: string;
-  fundingScheduleId: string;
+  fundingScheduleId: ID<FundingSchedule>;
   autoCreateTransaction: boolean;
 }
 
@@ -63,7 +66,7 @@ function NewExpenseModal(): React.JSX.Element {
       in: inTimezone,
     }),
     ruleset: '',
-    fundingScheduleId: '',
+    fundingScheduleId: ID.from<FundingSchedule>(''),
     autoCreateTransaction: false,
   };
 
@@ -72,7 +75,8 @@ function NewExpenseModal(): React.JSX.Element {
       return Promise.resolve();
     }
 
-    const newSpending = new Spending({
+    helper.setSubmitting(true);
+    return createSpending({
       bankAccountId: selectedBankAccount.bankAccountId,
       name: values.name.trim(),
       nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
@@ -85,10 +89,7 @@ function NewExpenseModal(): React.JSX.Element {
       // Auto create transaction requires a manual link and a non-zero target
       // amount; force it off otherwise so the API will not reject the create.
       autoCreateTransaction: isManual && values.amount > 0 && values.autoCreateTransaction,
-    });
-
-    helper.setSubmitting(true);
-    return createSpending(newSpending)
+    })
       .then(created => modal.resolve(created))
       .then(() => modal.remove())
       .catch(

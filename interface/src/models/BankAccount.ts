@@ -1,3 +1,4 @@
+import type { ID } from '@monetr/interface/models/ID';
 import LunchFlowBankAccount from '@monetr/interface/models/LunchFlowBankAccount';
 import PlaidBankAccount from '@monetr/interface/models/PlaidBankAccount';
 import parseDate from '@monetr/interface/util/parseDate';
@@ -28,7 +29,7 @@ export enum BankAccountSubType {
 }
 
 export default class BankAccount {
-  bankAccountId: string;
+  bankAccountId: ID<BankAccount>;
   linkId: string;
   lunchFlowBankAccountId?: string;
   mask?: string;

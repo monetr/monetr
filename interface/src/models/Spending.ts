@@ -1,5 +1,8 @@
 import { format, isThisYear } from 'date-fns';
 
+import type BankAccount from '@monetr/interface/models/BankAccount';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import { ID } from '@monetr/interface/models/ID';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
@@ -10,9 +13,9 @@ export enum SpendingType {
 }
 
 export default class Spending {
-  readonly spendingId: string;
-  readonly bankAccountId: string;
-  fundingScheduleId: string;
+  readonly spendingId: ID<Spending>;
+  readonly bankAccountId: ID<BankAccount>;
+  fundingScheduleId: ID<FundingSchedule>;
   name: string;
   description: string | null;
   readonly spendingType: SpendingType;
@@ -29,9 +32,9 @@ export default class Spending {
   readonly createdAt: Date;
 
   constructor(data: WithJsonValues<Spending>) {
-    this.spendingId = data.spendingId;
-    this.bankAccountId = data.bankAccountId;
-    this.fundingScheduleId = data.fundingScheduleId;
+    this.spendingId = ID.from<Spending>(data.spendingId);
+    this.bankAccountId = ID.from<BankAccount>(data.bankAccountId);
+    this.fundingScheduleId = ID.from<FundingSchedule>(data.fundingScheduleId);
     this.name = data.name;
     this.description = data.description;
     this.spendingType = data.spendingType;
