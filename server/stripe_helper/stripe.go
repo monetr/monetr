@@ -12,8 +12,8 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/round"
 	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v81"
-	stripe_client "github.com/stripe/stripe-go/v81/client"
+	"github.com/stripe/stripe-go/v85"
+	stripe_client "github.com/stripe/stripe-go/v85/client"
 )
 
 // stripeLeveledLogger adapts *slog.Logger to satisfy stripe's LeveledLoggerInterface.

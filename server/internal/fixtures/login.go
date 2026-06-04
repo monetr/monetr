@@ -16,7 +16,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v85"
 	"github.com/xlzd/gotp"
 )
 

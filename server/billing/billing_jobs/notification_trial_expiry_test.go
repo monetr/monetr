@@ -16,7 +16,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/stretchr/testify/assert"
-	"github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v85"
 	"go.uber.org/mock/gomock"
 )
 
