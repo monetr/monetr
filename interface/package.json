@@ -45,7 +45,7 @@
     "downshift": "9.3.3",
     "formik": "2.4.9",
     "input-otp": "1.4.2",
-    "lucide-react": "1.16.0",
+    "lucide-react": "1.17.0",
     "react": "18.3.1",
     "react-day-picker": "10.0.1",
     "react-dom": "18.3.1",
