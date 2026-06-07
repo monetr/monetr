@@ -1,7 +1,10 @@
+import { ID, idPrefix } from '@monetr/interface/models/ID';
 import Login from '@monetr/interface/models/Login';
 
 export default class User {
-  userId: string;
+  readonly [idPrefix] = 'user';
+
+  userId: ID<User>;
   loginId: string;
   accountId: string;
   account: {

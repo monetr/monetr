@@ -1,5 +1,8 @@
+import { ID, idPrefix } from '@monetr/interface/models/ID';
 import LunchFlowLink, { LunchFlowLinkStatus } from '@monetr/interface/models/LunchFlowLink';
 import PlaidLink, { PlaidLinkStatus } from '@monetr/interface/models/PlaidLink';
+import User from '@monetr/interface/models/User';
+import { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum LinkType {
@@ -20,33 +23,25 @@ export const errorMessages: Partial<Record<string, string>> = {
  * an institution. A group of bank accounts within a single "login" for that institution.
  */
 export default class Link {
+  readonly [idPrefix] = 'link';
+
   /**
    * Represents the global unique identifier for a group of bank accounts in monetr.
    * This value is generated automatically by the API upon creation, and cannot be changed.
    */
-  linkId: string;
-  lunchFlowLinkId?: string;
+  linkId: ID<Link>;
+  lunchFlowLinkId: ID<LunchFlowLink> | null;
   linkType: LinkType;
   institutionName: string;
   description: string | null;
   updatedAt: Date;
   createdAt: Date;
-  createdBy: string;
+  createdBy: ID<User>;
 
   plaidLink: PlaidLink | null;
   lunchFlowLink: LunchFlowLink | null;
 
-  constructor(data?: Partial<Link>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        plaidLink: data?.plaidLink && new PlaidLink(data.plaidLink),
-        lunchFlowLink: data?.lunchFlowLink && new LunchFlowLink(data.lunchFlowLink),
-        updatedAt: parseDate(data?.updatedAt),
-        createdAt: parseDate(data?.createdAt),
-      });
-    }
-  }
+  constructor(data: WithJsonValues<Link>) {}
 
   getName(): string {
     return this.institutionName;

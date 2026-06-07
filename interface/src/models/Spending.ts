@@ -2,9 +2,12 @@ import { format, isThisYear } from 'date-fns';
 
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
-import { ID } from '@monetr/interface/models/ID';
+import { ID, idPrefix } from '@monetr/interface/models/ID';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
+import Balance from '@monetr/interface/models/Balance';
+
+export const FREE_TO_USE = ID.from<Spending>('spnd_freeToUse');
 
 export enum SpendingType {
   FreeToUse = -1, // Cannot be present on actual responses!
@@ -13,6 +16,8 @@ export enum SpendingType {
 }
 
 export default class Spending {
+  readonly [idPrefix] = 'spnd';
+
   readonly spendingId: ID<Spending>;
   readonly bankAccountId: ID<BankAccount>;
   fundingScheduleId: ID<FundingSchedule>;
@@ -32,9 +37,9 @@ export default class Spending {
   readonly createdAt: Date;
 
   constructor(data: WithJsonValues<Spending>) {
-    this.spendingId = ID.from<Spending>(data.spendingId);
-    this.bankAccountId = ID.from<BankAccount>(data.bankAccountId);
-    this.fundingScheduleId = ID.from<FundingSchedule>(data.fundingScheduleId);
+    this.spendingId = ID.from(data.spendingId);
+    this.bankAccountId = ID.from(data.bankAccountId);
+    this.fundingScheduleId = ID.from(data.fundingScheduleId);
     this.name = data.name;
     this.description = data.description;
     this.spendingType = data.spendingType;
@@ -81,5 +86,23 @@ export default class Spending {
 
   getGoalSavedAmount(): number {
     return this.currentAmount + this.usedAmount;
+  }
+}
+
+export class FreeToUse {
+  readonly [idPrefix] = 'spnd';
+
+  readonly spendingId: ID<Spending>;
+  readonly bankAccountId: ID<BankAccount>;
+  readonly name: string;
+  readonly spendingType: SpendingType.FreeToUse;
+  readonly currentAmount: number;
+
+  constructor(data: WithJsonValues<Balance>) {
+    this.spendingId = FREE_TO_USE;
+    this.bankAccountId = data.bankAccountId;
+    this.name = 'Free-To-Use';
+    this.spendingType = SpendingType.FreeToUse;
+    this.currentAmount = data.free;
   }
 }

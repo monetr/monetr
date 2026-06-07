@@ -21,6 +21,7 @@ import {
 } from '@monetr/interface/hooks/useCreateTransaction';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
@@ -44,9 +45,14 @@ function NewTransactionModal(): React.JSX.Element {
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
   const { enqueueSnackbar } = useSnackbar();
+  const bankAccountId = useSelectedBankAccountId();
   const { data: selectedBankAccount } = useSelectedBankAccount();
   const createTransaction = useCreateTransaction();
   const adjustsBalanceToggleId = useId();
+
+  if (!bankAccountId) {
+    throw new Error('bank account specific component used on non bank account specific page!');
+  }
 
   const initialValues: NewTransactionValues = {
     name: '',
@@ -147,7 +153,7 @@ function NewTransactionModal(): React.JSX.Element {
                     />
                     <FormDatePicker className={styles.fieldRowItem} label='Date' name='date' required />
                   </div>
-                  <MSelectSpending className={styles.spendingSelect} name='spendingId' />
+                  <MSelectSpending bankAccountId={bankAccountId} className={styles.spendingSelect} name='spendingId' />
                   <div className={styles.optionRowSpaced}>
                     <div className={styles.optionText}>
                       <label className={styles.optionLabelClickable} htmlFor={adjustsBalanceToggleId}>

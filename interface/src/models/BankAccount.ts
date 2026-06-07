@@ -1,6 +1,8 @@
-import type { ID } from '@monetr/interface/models/ID';
+import { ID, idPrefix } from '@monetr/interface/models/ID';
+import Link from '@monetr/interface/models/Link';
 import LunchFlowBankAccount from '@monetr/interface/models/LunchFlowBankAccount';
 import PlaidBankAccount from '@monetr/interface/models/PlaidBankAccount';
+import { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export type BankAccountStatus = 'unknown' | 'active' | 'inactive';
@@ -29,10 +31,12 @@ export enum BankAccountSubType {
 }
 
 export default class BankAccount {
+  readonly [idPrefix] = 'bac';
+
   bankAccountId: ID<BankAccount>;
-  linkId: string;
-  lunchFlowBankAccountId?: string;
-  mask?: string;
+  linkId: ID<Link>;
+  lunchFlowBankAccountId: ID<LunchFlowBankAccount> | null;
+  mask: string | null;
   name: string;
   originalName: string;
   status: BankAccountStatus;
@@ -42,16 +46,24 @@ export default class BankAccount {
   // Don't use these fields directly except when creating!
   currentBalance: number;
   availableBalance: number;
-  limitBalance?: number;
+  limitBalance: number | null;
   lastUpdated: Date;
   createdAt: Date;
   createdBy: string;
-  deletedAt?: Date;
+  deletedAt: Date | null;
 
   plaidBankAccount: PlaidBankAccount | null;
   lunchFlowBankAccount: LunchFlowBankAccount | null;
 
-  constructor(data?: Partial<BankAccount>) {
+  constructor(data: WithJsonValues<BankAccount>) {
+    this.bankAccountId = ID.from(data.bankAccountId);
+    this.linkId = ID.from(data.linkId);
+    this.lunchFlowBankAccountId = data.lunchFlowBankAccountId ? ID.from(data.lunchFlowBankAccountId) : null;
+    this.mask = data.mask ?? null;
+
+    this.plaidBankAccount = data.plaidBankAccount ? new PlaidBankAccount(data.plaidBankAccount) : null;
+    this.lunchFlowBankAccount = data.lunchFlowBankAccount ? new LunchFlowBankAccount(data.lunchFlowBankAccount) : null;
+
     if (data) {
       Object.assign(this, {
         ...data,

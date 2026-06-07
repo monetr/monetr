@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useFormikContext } from 'formik';
 import { PiggyBank, Receipt, Wallet } from 'lucide-react';
 
@@ -11,27 +12,41 @@ import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
-import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import type BankAccount from '@monetr/interface/models/BankAccount';
+import type { ID } from '@monetr/interface/models/ID';
+import type Spending from '@monetr/interface/models/Spending';
+import { FREE_TO_USE, FreeToUse, SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 
 import styles from './MSelectSpending.module.scss';
 
+type SpendingOption = Pick<Spending | FreeToUse, 'spendingId' | 'spendingType' | 'currentAmount' | 'name'>;
+
 // Remove the props that we do not want to allow the caller to pass in.
-type MSelectSpendingBaseProps = Omit<SelectProps<Spending>, 'options' | 'value' | 'onChange'>;
+type MSelectSpendingBaseProps = Omit<SelectProps<SpendingOption>, 'options' | 'value' | 'onChange'>;
 
 export interface MSelectSpendingProps extends MSelectSpendingBaseProps {
   // excludeFrom will take the name of another item in the form. The value of that item in the form will be excluded
   // from the list of options presented as part of this select. This is used in the transfer dialog to make sure that
   // both the to and the from selects cannot be the same value.
   excludeFrom?: string;
+  bankAccountId: ID<BankAccount>;
 }
-
-const FREE_TO_USE = 'spnd_freeToUse';
 
 export default function MSelectSpending(props: MSelectSpendingProps): React.JSX.Element {
   const formikContext = useFormikContext<Record<string, any>>();
-  const { data: spending, isLoading, isError } = useSpendings();
-  const { data: balances } = useCurrentBalance();
+  const {
+    data: spending,
+    isLoading: isSpendingsLoading,
+    isError: isSpendingsError,
+    isSuccess: isSpendingsSuccess,
+  } = useSpendings(props.bankAccountId);
+  const {
+    data: balances,
+    isLoading: isBalancesLoading,
+    isError: isBalancesError,
+    isSuccess: isBalancesSuccess,
+  } = useCurrentBalance(props.bankAccountId);
 
   props = {
     label: 'Spent From',
@@ -40,33 +55,31 @@ export default function MSelectSpending(props: MSelectSpendingProps): React.JSX.
     ...props,
   };
 
-  if (isLoading) {
+  const items: Array<SelectOption<SpendingOption>> = useMemo(() => {
+    return (spending ?? []).map(item => ({
+      label: item.name,
+      value: item,
+    }));
+  }, [spending]);
+
+  if (isSpendingsLoading || isBalancesLoading) {
     return <Select {...props} disabled isLoading onChange={() => {}} options={[]} placeholder='Loading...' />;
   }
-  if (isError) {
+  if (isSpendingsError || isBalancesError) {
+    return <Select {...props} disabled onChange={() => {}} options={[]} placeholder='Failed to load spending...' />;
+  }
+  if (!isSpendingsSuccess || !isBalancesSuccess) {
     return <Select {...props} disabled onChange={() => {}} options={[]} placeholder='Failed to load spending...' />;
   }
 
-  const freeToUse: SelectOption<Spending> = {
+  const freeToUse: SelectOption<SpendingOption> = {
     label: 'Free-To-Use',
-    value: new Spending({
-      spendingId: FREE_TO_USE,
-      spendingType: SpendingType.FreeToUse,
-      // It is possible for the "safe" balance to not be present when switching bank accounts. This is a pseudo race
-      // condition. Instead we want to gracefully handle the value not being present initially, and print a nicer string
-      // until the balance is loaded.
-      currentAmount: balances?.free,
-    }),
+    value: new FreeToUse(balances),
   };
-
-  const items: Array<SelectOption<Spending>> = (spending ?? []).map(item => ({
-    label: item.name,
-    value: item,
-  }));
 
   const excludedFrom = props.excludeFrom ? formikContext.values[props.excludeFrom] : undefined;
 
-  const options: Array<SelectOption<Spending>> = [
+  const options: Array<SelectOption<SpendingOption>> = [
     freeToUse,
     // Labels will be unique. So we only need 1 | -1
     ...items.sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1)),
@@ -92,7 +105,7 @@ export default function MSelectSpending(props: MSelectSpendingProps): React.JSX.
   // is a non existant spending item that we patch in to represent an unbudgeted transaction.
   const current = options.find(item => item.value.spendingId === (value ?? FREE_TO_USE));
 
-  function onSelect(newValue: SelectOption<Spending>) {
+  function onSelect(newValue: SelectOption<SpendingOption>) {
     if (!props.name) {
       return;
     }
@@ -115,7 +128,7 @@ export default function MSelectSpending(props: MSelectSpendingProps): React.JSX.
   );
 }
 
-export function SelectSpendingOptionComponent(props: SelectOptionComponentProps<Spending>): React.JSX.Element {
+export function SelectSpendingOptionComponent(props: SelectOptionComponentProps<SpendingOption>): React.JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const notLoaded = props.value?.currentAmount === undefined;
   const amount = notLoaded || !locale ? 'N/A' : locale.formatAmount(props.value.currentAmount, AmountType.Stored);
