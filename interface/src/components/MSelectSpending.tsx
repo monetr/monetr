@@ -12,8 +12,6 @@ import Typography from '@monetr/interface/components/Typography';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
-import type BankAccount from '@monetr/interface/models/BankAccount';
-import type { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
 import { FREE_TO_USE, FreeToUse, SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
@@ -30,7 +28,6 @@ export interface MSelectSpendingProps extends MSelectSpendingBaseProps {
   // from the list of options presented as part of this select. This is used in the transfer dialog to make sure that
   // both the to and the from selects cannot be the same value.
   excludeFrom?: string;
-  bankAccountId: ID<BankAccount>;
 }
 
 export default function MSelectSpending(props: MSelectSpendingProps): React.JSX.Element {
@@ -40,13 +37,13 @@ export default function MSelectSpending(props: MSelectSpendingProps): React.JSX.
     isLoading: isSpendingsLoading,
     isError: isSpendingsError,
     isSuccess: isSpendingsSuccess,
-  } = useSpendings(props.bankAccountId);
+  } = useSpendings();
   const {
     data: balances,
     isLoading: isBalancesLoading,
     isError: isBalancesError,
     isSuccess: isBalancesSuccess,
-  } = useCurrentBalance(props.bankAccountId);
+  } = useCurrentBalance();
 
   props = {
     label: 'Spent From',

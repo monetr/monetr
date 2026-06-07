@@ -1,28 +1,42 @@
 import { type InfiniteData, useMutation } from '@tanstack/react-query';
 
 import Balance from '@monetr/interface/models/Balance';
+import type BankAccount from '@monetr/interface/models/BankAccount';
+import type { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
 import type Transaction from '@monetr/interface/models/Transaction';
+import type { ManualTransaction, PlaidTransaction } from '@monetr/interface/models/Transaction';
+import type { WithJsonValues } from '@monetr/interface/util/json';
+import type { Writable } from '@monetr/interface/util/readonly';
 import request from '@monetr/interface/util/request';
 
 export interface TransactionUpdateResponse {
-  transaction: Partial<Transaction>;
-  spending: Array<Partial<Spending>>;
-  balance: Partial<Balance>;
+  transaction: WithJsonValues<Transaction>;
+  spending: Array<WithJsonValues<Spending>>;
+  balance: WithJsonValues<Balance>;
 }
 
-export function useUpdateTransaction(): (_transaction: Transaction) => Promise<TransactionUpdateResponse> {
+type UpdateTransactionRequest = Writable<PlaidTransaction | ManualTransaction> & {
+  transactionId: ID<Transaction>;
+  bankAccountId: ID<BankAccount>;
+};
+
+export function useUpdateTransaction(): (_transaction: UpdateTransactionRequest) => Promise<TransactionUpdateResponse> {
   const { mutateAsync } = useMutation({
-    async mutationFn(transaction: Transaction): Promise<TransactionUpdateResponse> {
+    async mutationFn({
+      transactionId,
+      bankAccountId,
+      ...transaction
+    }: UpdateTransactionRequest): Promise<TransactionUpdateResponse> {
       return request<TransactionUpdateResponse>({
         method: 'PUT',
-        url: `/api/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`,
+        url: `/api/bank_accounts/${bankAccountId}/transactions/${transactionId}`,
         data: transaction,
       }).then(result => result.data);
     },
     onSuccess: ({ transaction, spending, balance }: TransactionUpdateResponse, _input, _, { client: queryClient }) =>
       Promise.all([
-        queryClient.setQueryData<InfiniteData<Array<Partial<Transaction>>>>(
+        queryClient.setQueryData<InfiniteData<Array<WithJsonValues<Transaction>>>>(
           [`/api/bank_accounts/${transaction.bankAccountId}/transactions`],
           previous =>
             // If previous does not exist then do nothing, otherwise this will break the page.
@@ -41,7 +55,7 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<T
           [`/api/bank_accounts/${transaction.bankAccountId}/transactions/${transaction.transactionId}`],
           transaction,
         ),
-        queryClient.setQueryData<Array<Partial<Spending>>>(
+        queryClient.setQueryData<Array<WithJsonValues<Spending>>>(
           [`/api/bank_accounts/${transaction.bankAccountId}/spending`],
           previous =>
             // Since there could be multiple spending objects updated here, we need to take map over all of the existing

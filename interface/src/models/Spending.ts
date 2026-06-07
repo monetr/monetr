@@ -1,11 +1,11 @@
 import { format, isThisYear } from 'date-fns';
 
+import type Balance from '@monetr/interface/models/Balance';
 import type BankAccount from '@monetr/interface/models/BankAccount';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { ID, idPrefix } from '@monetr/interface/models/ID';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
-import Balance from '@monetr/interface/models/Balance';
 
 export const FREE_TO_USE = ID.from<Spending>('spnd_freeToUse');
 

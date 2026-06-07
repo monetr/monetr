@@ -3,14 +3,15 @@ import { type InfiniteData, type UseInfiniteQueryResult, useInfiniteQuery } from
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import Transaction from '@monetr/interface/models/Transaction';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 
 export function useTransactions(): UseInfiniteQueryResult<Array<Transaction>, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   const select = useCallback(
-    (data: InfiniteData<Array<Partial<Transaction>>>) => data.pages.flat().map(item => new Transaction(item)),
+    (data: InfiniteData<Array<WithJsonValues<Transaction>>>) => data.pages.flat().map(item => new Transaction(item)),
     [],
   );
-  return useInfiniteQuery<Array<Partial<Transaction>>, unknown, Array<Transaction>>({
+  return useInfiniteQuery<Array<WithJsonValues<Transaction>>, unknown, Array<Transaction>>({
     queryKey: [`/api/bank_accounts/${selectedBankAccountId}/transactions`],
     initialPageParam: 0,
     getNextPageParam: (_, pages) => {

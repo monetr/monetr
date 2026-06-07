@@ -10,7 +10,7 @@ import type { WithJsonValues } from '@monetr/interface/util/json';
  * all of the spending objects that have already been queried via a list endpoint. If the desired spending object is not
  * in that list though, then it will make a request to retrieve that spending object's details.
  */
-export function useSpending(spendingId?: ID<Spending>): UseQueryResult<Spending, unknown> {
+export function useSpending(spendingId: ID<Spending> | null): UseQueryResult<Spending, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
   const queryClient = useQueryClient();
   const existingData = queryClient.getQueryData<Array<Spending>>([
