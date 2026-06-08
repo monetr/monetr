@@ -26,10 +26,10 @@ export default function PlaidLastUpdatedCard(props: PlaidLastUpdatedCardProps): 
 
   return (
     <div className={styles.card}>
-      <Typography color='subtle' size='sm'>
+      <Typography color='subtle' ellipsis size='sm'>
         Last Updated: {lastUpdateString} ago
       </Typography>
-      <Typography className={styles.attemptText} color='subtle' size='sm'>
+      <Typography className={styles.attemptText} color='subtle' ellipsis size='sm'>
         Last Attempt: {lastAttemptString} ago
       </Typography>
     </div>
