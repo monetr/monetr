@@ -169,20 +169,7 @@ export default function ExpenseDetails(): JSX.Element {
         breadcrumb={spending?.name}
         icon={Receipt}
         title='Expenses'
-      >
-        <Button onClick={() => showTransferModal({ initialToSpendingId: spending?.spendingId })} variant='secondary'>
-          <ArrowUpDown />
-          Transfer
-        </Button>
-        <Button onClick={deleteExpense} variant='destructive'>
-          <Trash />
-          Remove
-        </Button>
-        <FormButton role='form' type='submit' variant='primary'>
-          <Save />
-          Save
-        </FormButton>
-      </MTopNavigation>
+      />
       <div className={styles.body}>
         <div className={styles.columns}>
           <div className={styles.column}>
@@ -252,7 +239,23 @@ export default function ExpenseDetails(): JSX.Element {
                 name='autoCreateTransaction'
               />
             )}
-            <Divider className={styles.dividerHalfLarge} />
+            <div className={styles.formButtons}>
+              <Button
+                onClick={() => showTransferModal({ initialToSpendingId: spending?.spendingId })}
+                variant='secondary'
+              >
+                <ArrowUpDown />
+                Transfer
+              </Button>
+              <Button onClick={deleteExpense} variant='destructive'>
+                <Trash />
+                Remove
+              </Button>
+              <FormButton role='form' type='submit' variant='primary'>
+                <Save />
+                Save
+              </FormButton>
+            </div>
             <ExpenseTransactionList spending={spending} />
           </div>
           <Divider className={styles.dividerMobile} />

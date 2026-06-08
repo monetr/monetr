@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'wouter';
 
+import Divider from '@monetr/interface/components/Divider';
 import { flexVariants } from '@monetr/interface/components/Flex';
 import { Item, ItemContent } from '@monetr/interface/components/Item';
 import Typography from '@monetr/interface/components/Typography';
@@ -23,8 +24,14 @@ export default function ExpenseTransactionList(props: ExpenseTransactionListProp
   const { data: transactions } = useSpendingTransactions(props.spending.spendingId);
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocale();
+
+  if (!transactions?.length) {
+    return null;
+  }
+
   return (
     <Fragment>
+      <Divider className={styles.dividerHalfLarge} />
       <Typography className={styles.heading} color='emphasis' size='xl' weight='medium'>
         Transactions
       </Typography>
