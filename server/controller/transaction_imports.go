@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/datasources/csv"
 	"github.com/monetr/monetr/server/datasources/csv/csv_jobs"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/schemas"
 )
 
 func (c *Controller) postTransactionImport(ctx echo.Context) error {
@@ -171,7 +172,7 @@ func (c *Controller) patchTransactionImport(ctx echo.Context) error {
 		c,
 		ctx,
 		existing,
-		existing.PatchSchemas()...,
+		schemas.PatchTransactionImport,
 	)
 	if err != nil {
 		return err
@@ -194,7 +195,7 @@ func (c *Controller) patchTransactionImport(ctx echo.Context) error {
 	if err = repo.UpdateTransactionImport(
 		c.getContext(ctx),
 		bankAccountId,
-		&transactionImport,
+		transactionImport,
 	); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update transaction import")
 	}

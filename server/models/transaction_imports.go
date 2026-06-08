@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
-	"github.com/monetr/monetr/server/validators"
-	"github.com/monetr/validation"
 )
 
 // TransactionImportStatus covers all of the different states of a transaction
@@ -85,31 +83,4 @@ func (o *TransactionImport) BeforeInsert(ctx context.Context) (context.Context, 
 	}
 
 	return ctx, nil
-}
-
-func (TransactionImport) PatchSchemas() []validation.MapRule[string] {
-	return []validation.MapRule[string]{
-		// When we do not yet have a mapping then they must specify a new mapping ID
-		// and say that we are moving to the pending preview status.
-		validation.Map(
-			validation.Key(
-				"transactionImportMappingId",
-				ValidID[TransactionImportMapping]().Error("Transaction import mapping ID must be valid if provided"),
-				validation.Required,
-			),
-			validation.Key(
-				"status",
-				validators.In(string(TransactionImportStatusPendingPreview)),
-				validation.Required,
-			),
-		),
-		// Otherwise the user can only progress the import to pending processing.
-		validation.Map(
-			validation.Key(
-				"status",
-				validators.In(string(TransactionImportStatusPendingProcessing)),
-				validation.Required,
-			),
-		),
-	}
 }

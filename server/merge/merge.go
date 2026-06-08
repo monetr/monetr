@@ -40,32 +40,47 @@ func Merge[T any](dst *T, src map[string]any, options ...MergeOption) error {
 }
 
 type mergeContext struct {
-	dst        reflect.Value
-	src        map[string]any
-	options    MergeOption
-	fields     []reflect.Value
-	fieldsFold map[string]int
+	dst     reflect.Value
+	src     map[string]any
+	options MergeOption
+	fields  map[string]reflect.Value
 }
 
 func (m *mergeContext) buildFieldMap(dst reflect.Value) error {
 	switch dst.Kind() {
-	case reflect.Ptr:
+	case reflect.Pointer:
 		// Most likely this will be a pointer first, so we go down a level in order
 		// to work with the actual underlying type. Which _should_ be a struct in
 		// this case.
 		return m.buildFieldMap(dst.Elem())
 	case reflect.Struct:
-		numField := dst.NumField()
-		m.fields = make([]reflect.Value, numField)
-		m.fieldsFold = make(map[string]int, numField)
-		for i := range numField {
-			field := dst.Field(i)
-			name := dst.Type().Field(i).Name
-			m.fields[i] = field
-			m.fieldsFold[strings.ToLower(name)] = i
-		}
+		return m.mapStruct(dst)
 	default:
 		return errors.Errorf("cannot build field map for destination of type: %s", dst.Type())
+	}
+}
+
+func (m *mergeContext) mapStruct(dst reflect.Value) error {
+	numField := dst.NumField()
+	for i := range numField {
+		field := dst.Field(i)
+		structField := dst.Type().Field(i)
+
+		// If the field is a nested/embedded struct then recursively add those
+		// fields to the map
+		if structField.Anonymous && structField.Type.Kind() == reflect.Struct {
+			if err := m.mapStruct(field); err != nil {
+				return err
+			}
+			continue
+		}
+
+		name := strings.ToLower(structField.Name)
+		if _, ok := m.fields[name]; ok {
+			return errors.Errorf("duplicate field in destination struct: %s", structField.Name)
+		}
+
+		m.fields[name] = field
 	}
 	return nil
 }
@@ -77,17 +92,17 @@ func (m *mergeContext) merge() error {
 
 	// Before we do anything we need to build our field map so we have something
 	// to work with.
+	m.fields = make(map[string]reflect.Value)
 	if err := m.buildFieldMap(m.dst); err != nil {
 		return err
 	}
 
 	for key, value := range m.src {
 		keyFold := strings.ToLower(key)
-		dstFieldIndex, ok := m.fieldsFold[keyFold]
+		dstField, ok := m.fields[keyFold]
 		if !ok && m.options&ErrorOnUnknownField > 0 {
 			return errors.Errorf("cannot assign field '%s' to destination", key)
 		}
-		dstField := m.fields[dstFieldIndex]
 
 		srcValue := reflect.ValueOf(value)
 
@@ -125,7 +140,7 @@ func (m *mergeContext) merge() error {
 			// If the destination is a pointer then we need to set the inner value
 			// instead of the value of the pointer.
 			if dstField.Kind() == reflect.Pointer {
-				newValue := reflect.New(reflect.TypeOf(value))
+				newValue := reflect.New(reflect.TypeFor[int64]())
 				newValue.Elem().Set(reflect.ValueOf(value))
 				dstField.Set(newValue)
 			} else {

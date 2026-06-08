@@ -1348,7 +1348,6 @@ func TestPostSpendingTransfer(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         -10000, // $100
 					"isPending":      false,
 					"name":           "Deposit",
@@ -1521,7 +1520,6 @@ func TestPostSpendingTransfer(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         -10000, // $100
 					"isPending":      false,
 					"name":           "Deposit",
@@ -1708,7 +1706,6 @@ func TestPostSpendingTransfer(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         -10000, // $100
 					"isPending":      false,
 					"name":           "Deposit",
@@ -2400,7 +2397,6 @@ func TestDeleteSpending(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         -10000, // $100
 					"isPending":      false,
 					"name":           "Deposit",
@@ -2551,7 +2547,6 @@ func TestDeleteSpending(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         -10000, // $100
 					"isPending":      false,
 					"name":           "Deposit",
@@ -2618,7 +2613,6 @@ func TestDeleteSpending(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]any{
-					"bankAccountId":  bank.BankAccountId,
 					"amount":         1000, // $100
 					"isPending":      false,
 					"name":           "Spending from my budget",

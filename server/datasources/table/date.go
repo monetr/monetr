@@ -27,7 +27,7 @@ func (s *DateSpec) Validate(ctx context.Context) error {
 			validation.Field(
 				&s.Fields,
 				validation.Each(
-					validators.By(func(ctx context.Context, field FieldRef) error {
+					validators.By(func(ctx context.Context, field *FieldRef) error {
 						return field.Validate(ctx)
 					}),
 				),

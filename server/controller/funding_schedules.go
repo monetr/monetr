@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/schemas"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 )
@@ -64,13 +65,14 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	var fundingSchedule FundingSchedule
-	fundingSchedule.BankAccountId = bankAccountId
+	fundingSchedule := &FundingSchedule{
+		BankAccountId: bankAccountId,
+	}
 	fundingSchedule, err = parse(
 		c,
 		ctx,
-		&fundingSchedule,
-		validation.Map(fundingSchedule.CreateValidators()...),
+		fundingSchedule,
+		schemas.CreateFundingSchedule,
 	)
 	if err != nil {
 		return err
@@ -97,13 +99,14 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 		}
 	}
 
-	// Set the next occurrence based on the provided rule.
-
-	// If the next occurrence is not specified then assume that the rule is relative to now. If it is specified though
-	// then do nothing, and the subsequent occurrence will be calculated relative to the provided date.
-	// We also calculate the next occurrence if the provided occurrence is in the past. This technically should not
-	// happen via the UI. But it is currently possible for someone to select the current day in the UI. Which then gets
-	// adjusted for midnight that day, which will always be in the past for the user.
+	// Set the next occurrence based on the provided rule. If the next occurrence
+	// is not specified then assume that the rule is relative to now. If it is
+	// specified though then do nothing, and the subsequent occurrence will be
+	// calculated relative to the provided date. We also calculate the next
+	// occurrence if the provided occurrence is in the past. This technically
+	// should not happen via the UI. But it is currently possible for someone to
+	// select the current day in the UI. Which then gets adjusted for midnight
+	// that day, which will always be in the past for the user.
 	if fundingSchedule.NextRecurrence.IsZero() || c.Clock.Now().After(fundingSchedule.NextRecurrence) {
 		fundingSchedule.CalculateNextOccurrence(
 			c.getContext(ctx),
@@ -117,7 +120,7 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 	// It has never occurred so this needs to be nil.
 	fundingSchedule.LastRecurrence = nil
 
-	if err = repo.CreateFundingSchedule(c.getContext(ctx), &fundingSchedule); err != nil {
+	if err = repo.CreateFundingSchedule(c.getContext(ctx), fundingSchedule); err != nil {
 		return c.wrapPgError(ctx, err, "failed to create funding schedule")
 	}
 

@@ -12,6 +12,11 @@ import (
 	"github.com/teambition/rrule-go"
 )
 
+type Embedded struct {
+	Name   string `json:"name"`
+	Amount int64  `json:"amount"`
+}
+
 func TestMerge(t *testing.T) {
 	t.Run("cannot merge into a non struct", func(t *testing.T) {
 		var dst int
@@ -63,6 +68,48 @@ func TestMerge(t *testing.T) {
 		err := merge.Merge(&dst, src)
 		assert.NoError(t, err, "Must be able to merge with pointers in the struct")
 		assert.Equal(t, src["bar"], *dst.Bar, "the source and destination fields should now match!")
+	})
+
+	t.Run("merge embedded struct fields", func(t *testing.T) {
+		type Foo struct {
+			Embedded
+
+			AdjustsBalance bool `json:"adjustsBalance"`
+		}
+
+		dst := Foo{}
+		src := map[string]any{
+			"name":           "this is a string",
+			"amount":         json.Number("12345"),
+			"adjustsBalance": true,
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.NoError(t, err, "Must be able to merge into the promoted fields of an embedded struct")
+		assert.Equal(t, src["name"], dst.Name, "the promoted name field should be merged")
+		assert.EqualValues(t, 12345, dst.Amount, "the promoted amount field should be merged")
+		assert.True(t, dst.AdjustsBalance, "the wrapper's own field should be merged")
+	})
+
+	t.Run("merge embedded struct fields handle duplicate", func(t *testing.T) {
+		type Foo struct {
+			Embedded
+
+			// Duplicate of field on embedded
+			Name           string
+			AdjustsBalance bool `json:"adjustsBalance"`
+		}
+
+		dst := Foo{}
+		src := map[string]any{
+			"name":           "this is a string",
+			"amount":         json.Number("12345"),
+			"adjustsBalance": true,
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.EqualError(t, err, "duplicate field in destination struct: Name")
+		assert.Empty(t, dst)
 	})
 
 	t.Run("merge using json.Unmarshaller", func(t *testing.T) {
