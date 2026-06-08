@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"log/slog"
 	"math"
 	"net/http"
@@ -10,7 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/schemas"
-	"github.com/monetr/validation"
 )
 
 func (c *Controller) getTransactions(ctx echo.Context) error {
@@ -125,23 +123,9 @@ func (c *Controller) postTransactions(ctx echo.Context) error {
 		AdjustsBalance bool `json:"adjustsBalance"`
 	}
 
-	request, err = schemas.Parse(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		request,
-		schemas.CreateTransactionSchema,
-	)
-	switch err := err.(type) {
-	case validation.Errors, validation.OneOfError:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case *json.SyntaxError:
-		return c.invalidJsonError(ctx, err)
-	case nil:
-	default:
-		return c.badRequestError(ctx, err, "failed to parse request")
+	request, err = parse(c, ctx, request, schemas.CreateTransactionSchema)
+	if err != nil {
+		return err
 	}
 
 	request.TransactionId = ""

@@ -201,12 +201,14 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 						return ctx.JSON(actualError.Code, internalError)
 					}
 				default:
-					if body, ok := actualError.Message.(map[string]any); ok {
-						return ctx.JSON(actualError.Code, body)
+					switch errorBody := actualError.Message.(type) {
+					case map[string]any:
+						return ctx.JSON(actualError.Code, errorBody)
+					default:
+						return ctx.JSON(actualError.Code, map[string]any{
+							"error": actualError.Message,
+						})
 					}
-					return ctx.JSON(actualError.Code, map[string]any{
-						"error": actualError.Message,
-					})
 				}
 			case nil:
 				return err

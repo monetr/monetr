@@ -191,42 +191,6 @@ func (o *FundingSchedule) CalculateNextOccurrence(
 	return true
 }
 
-func (FundingSchedule) CreateValidators() []*validation.KeyRules[string] {
-	return []*validation.KeyRules[string]{
-		// validation.Key(
-		// 	"bankAccountId",
-		// 	validation.Required.Error("Must specify a bank account ID"),
-		// 	ValidID[BankAccount]().Error("Bank account ID specified is not valid"),
-		// ).Required(validators.Optional),
-		validators.Name(validators.Require),
-		validators.Description(),
-		validation.Key(
-			"ruleset",
-			validation.Required.Error("Ruleset must be specified for funding schedules"),
-			validation.NewStringRule(func(input string) bool {
-				_, err := NewRuleSet(input)
-				return err == nil
-			}, "Ruleset must be valid"),
-		).Required(validators.Require),
-		validation.Key(
-			"excludeWeekends",
-			validation.In(true, false).Error("Exclude weekends must be a valid boolean"),
-		).Required(validators.Optional),
-		validation.Key(
-			"autoCreateTransaction",
-			validation.In(true, false).Error("Auto create transaction must be a valid boolean"),
-		).Required(validators.Optional),
-		validation.Key(
-			"estimatedDeposit",
-			validation.Min(float64(0)).Error("Estimated deposit cannot be less than 0"),
-		).Required(validators.Optional),
-		validation.Key(
-			"nextRecurrence",
-			validation.Date(time.RFC3339).Min(time.Now()).Error("Next recurrence must be in the future"),
-		).Required(validators.Optional),
-	}
-}
-
 func (FundingSchedule) UpdateValidators() []*validation.KeyRules[string] {
 	return []*validation.KeyRules[string]{
 		validators.Name(validators.Optional),
