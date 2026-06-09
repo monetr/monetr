@@ -45,8 +45,8 @@ importers:
         specifier: 0.7.1
         version: 0.7.1
       date-fns:
-        specifier: 4.3.0
-        version: 4.3.0
+        specifier: 4.4.0
+        version: 4.4.0
       embla-carousel-autoplay:
         specifier: 8.6.0
         version: 8.6.0(embla-carousel@8.6.0)
@@ -205,8 +205,8 @@ importers:
         specifier: 1.1.1
         version: 1.1.1(@types/react-dom@18.3.7(@types/react@18.3.29))(@types/react@18.3.29)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       date-fns:
-        specifier: 4.3.0
-        version: 4.3.0
+        specifier: 4.4.0
+        version: 4.4.0
       downshift:
         specifier: 9.3.4
         version: 9.3.4(react@18.3.1)
@@ -1985,8 +1985,8 @@ packages:
     resolution: {integrity: sha512-ZYP5VBHshaDAiVZxjbRVcFJpc+4xGgT0bK3vzy1HLN8jTO975HEbuYzZJcHoQEY5K1a0z8YayJkyVETa08eNTg==}
     engines: {node: '>=18'}
 
-  date-fns@4.3.0:
-    resolution: {integrity: sha512-OYcL+3N/jyWbYdFGqoMAhytDgxP9pbYPUUiRCOgn4Fewaadk9l/Wam4Avciiyp2BgkpfQyBV9B+ehnVJych+eQ==}
+  date-fns@4.4.0:
+    resolution: {integrity: sha512-+1UMbeh68lH1SegH83CGWwpb6OHHbpSgr3+s5Eww5M4CAgswBpoWS0AjTOfEJ33HiYKz1hdj/KTFprzXHmq/6w==}
 
   debug@4.3.6:
     resolution: {integrity: sha512-O/09Bd4Z1fBrU4VzkhFqVgpPzaGbw6Sm9FEkBT1A/YBXQFGuuSxa1dN2nxgxS34JmKXqYx8CZAwEVoJFImUXIg==}
@@ -5522,7 +5522,7 @@ snapshots:
       whatwg-url: 14.2.0
     optional: true
 
-  date-fns@4.3.0: {}
+  date-fns@4.4.0: {}
 
   debug@4.3.6:
     dependencies:
@@ -6943,7 +6943,7 @@ snapshots:
   react-day-picker@10.0.1(@types/react@18.3.29)(react@18.3.1):
     dependencies:
       '@date-fns/tz': 1.5.0
-      date-fns: 4.3.0
+      date-fns: 4.4.0
       react: 18.3.1
     optionalDependencies:
       '@types/react': 18.3.29
