@@ -62,7 +62,7 @@
     "@rsbuild/core": "2.0.8",
     "@rsbuild/plugin-babel": "1.2.0",
     "@rsbuild/plugin-react": "2.0.0",
-    "@rsbuild/plugin-sass": "1.5.2",
+    "@rsbuild/plugin-sass": "1.5.3",
     "@rspack/binding-linux-arm64-gnu": "2.0.5",
     "@rspack/binding-linux-x64-gnu": "2.0.5",
     "@rstest/adapter-rsbuild": "0.10.3",
