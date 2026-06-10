@@ -134,7 +134,7 @@ jobs:
           name: '${{ needs.release_please.outputs.version }}-maps'
           path: '${{ github.workspace }}/server/ui/static'
       - name: Create Sentry Release
-        uses: getsentry/action-release@f71adb49d4b2aeeda98052d3de234bbb0f3e03ab # v3.6.1
+        uses: getsentry/action-release@ff07929a6537bac57790c3451cf4d364aca38528 # v3.7.0
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
