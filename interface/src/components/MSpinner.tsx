@@ -6,7 +6,7 @@ export interface MSpinnerProps {
   className?: string;
 }
 
-export default function MSpinner(props: MSpinnerProps): JSX.Element {
+export default function MSpinner(props: MSpinnerProps): React.JSX.Element {
   return (
     <svg className={mergeClasses(styles.spinner, props.className)} viewBox='3 3 18 18'>
       <title>Loading...</title>

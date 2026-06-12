@@ -8,7 +8,7 @@ export interface BudgetingLayoutProps {
   children: React.ReactNode;
 }
 
-export default function BudgetingLayout(props: BudgetingLayoutProps): JSX.Element {
+export default function BudgetingLayout(props: BudgetingLayoutProps): React.JSX.Element {
   return (
     <Fragment>
       <BudgetingSidebar />

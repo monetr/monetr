@@ -29,7 +29,10 @@ interface State {
   error: string | null;
 }
 
-function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaidAccountOverlayProps): JSX.Element {
+function UpdatePlaidAccountOverlay({
+  link,
+  updateAccountSelection,
+}: UpdatePlaidAccountOverlayProps): React.JSX.Element {
   const modal = useModal();
   const queryClient = useQueryClient();
   const [state, setState] = useState<Partial<State>>({

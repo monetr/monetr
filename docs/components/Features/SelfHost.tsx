@@ -1,6 +1,6 @@
 import FeatureCard from '@monetr/docs/components/Features/FeatureCard';
 
-export default function SelfHost(): JSX.Element {
+export default function SelfHost(): React.JSX.Element {
   return (
     <FeatureCard
       description='Host monetr yourself on your own hardware, for free. Keeping your data private.'

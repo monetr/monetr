@@ -11,7 +11,7 @@ export interface MStepperProps {
   activeIndex: number;
 }
 
-export default function MStepper(props: MStepperProps): JSX.Element {
+export default function MStepper(props: MStepperProps): React.JSX.Element {
   const { steps, activeIndex } = props;
 
   const states = [MStepState.Inactive, MStepState.Active, MStepState.Complete];
@@ -52,7 +52,7 @@ interface MStepProps {
   divider?: boolean;
 }
 
-function MStep(props: MStepProps): JSX.Element {
+function MStep(props: MStepProps): React.JSX.Element {
   const lineClass = mergeClasses(
     {
       [MStepState.Inactive]: styles.lineDashed,

@@ -10,7 +10,7 @@ export interface MerchantIconProps {
   className?: string;
 }
 
-export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
+export default function MerchantIcon(props: MerchantIconProps): React.JSX.Element {
   const icon = useIconSearch(props?.name);
   const size = 30;
   if (icon?.svg) {

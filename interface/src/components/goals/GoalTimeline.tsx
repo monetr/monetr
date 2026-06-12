@@ -28,7 +28,7 @@ interface TimelineItemData {
   endingAllocation: number;
 }
 
-export default function GoalTimeline(props: GoalTimelineProps): JSX.Element {
+export default function GoalTimeline(props: GoalTimelineProps): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const { data: spending } = useSpending(props.spendingId);
@@ -99,14 +99,14 @@ export default function GoalTimeline(props: GoalTimelineProps): JSX.Element {
   );
 }
 
-function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData): JSX.Element {
+function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
 
   let header = '';
   let body = '';
   let secondaryBody: string | null = null;
-  let icon: JSX.Element | null = null;
+  let icon: React.JSX.Element | null = null;
   if (props.contributedAmount > 0 && props.spentAmount > 0) {
     // Spent and contributed
     header = 'Contribution & Completion';

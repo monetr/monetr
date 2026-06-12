@@ -1,6 +1,6 @@
 import FeatureCard from '@monetr/docs/components/Features/FeatureCard';
 
-export default function Plaid(): JSX.Element {
+export default function Plaid(): React.JSX.Element {
   return (
     <FeatureCard
       description='Using Plaid, monetr can receive secure automated updates from your bank. You never need to manually import your transactions or balances.'

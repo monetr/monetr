@@ -16,7 +16,7 @@ export interface GoalItemProps {
   spending: Spending;
 }
 
-export default function GoalItem({ spending }: GoalItemProps): JSX.Element {
+export default function GoalItem({ spending }: GoalItemProps): React.JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
 
@@ -67,7 +67,7 @@ interface GoalProps {
   spending: Spending;
 }
 
-function GoalAmount({ spending }: GoalProps): JSX.Element {
+function GoalAmount({ spending }: GoalProps): React.JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const amountClass = mergeClasses(styles.amount, {
     [styles.amountComplete]: spending.targetAmount <= spending.currentAmount,
@@ -111,7 +111,7 @@ function GoalAmount({ spending }: GoalProps): JSX.Element {
   );
 }
 
-function GoalProgressBar({ spending }: GoalProps): JSX.Element {
+function GoalProgressBar({ spending }: GoalProps): React.JSX.Element {
   const { usedAmount, currentAmount, targetAmount } = spending;
   const usedProgress = ((Math.min(usedAmount, targetAmount) / targetAmount) * 100).toFixed(0);
   const allocatedProgress = ((Math.min(currentAmount + usedAmount, targetAmount) / targetAmount) * 100).toFixed(0);

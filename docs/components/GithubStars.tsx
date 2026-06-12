@@ -11,7 +11,7 @@ interface GithubRepoResponse {
   stargazers_count: number;
 }
 
-export default function GithubStars(): JSX.Element {
+export default function GithubStars(): React.JSX.Element {
   const { data, isLoading } = useQuery<GithubRepoResponse>({
     queryKey: ['https://api.github.com/repos/monetr/monetr'],
   });

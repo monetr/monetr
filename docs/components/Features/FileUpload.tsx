@@ -1,6 +1,6 @@
 import FeatureCard from '@monetr/docs/components/Features/FeatureCard';
 
-export default function FileUpload(): JSX.Element {
+export default function FileUpload(): React.JSX.Element {
   return (
     <FeatureCard
       description='Upload OFX files directly from your bank account to make it easy to get data into monetr.'

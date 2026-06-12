@@ -16,7 +16,7 @@ export interface BankSidebarProps {
   className?: string;
 }
 
-export default function BankSidebar(props: BankSidebarProps): JSX.Element {
+export default function BankSidebar(props: BankSidebarProps): React.JSX.Element {
   // Important things to note. The width is 16. The width of the icons is 12.
   // This leaves a padding of 2 on each side, which isn't even needed with items-center? Not sure which
   // would be better.
@@ -75,7 +75,7 @@ interface SidebarWrapperProps {
   children?: React.ReactNode;
 }
 
-function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
+function SidebarWrapper(props: SidebarWrapperProps): React.JSX.Element {
   return (
     <div className={mergeClasses(styles.bankSidebarWrapperRoot, props.className)} data-testid='bank-sidebar'>
       <MSidebarToggle className={styles.toggle} />
@@ -91,7 +91,7 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
   );
 }
 
-function SettingsButton(): JSX.Element {
+function SettingsButton(): React.JSX.Element {
   return (
     <Link data-testid='bank-sidebar-settings' to='/settings'>
       <Settings className={styles.actionIcon} />
@@ -99,7 +99,7 @@ function SettingsButton(): JSX.Element {
   );
 }
 
-function LogoutButton(): JSX.Element {
+function LogoutButton(): React.JSX.Element {
   // By doing reloadDocument, we are forcing the @tanstack/react-query cache to be emptied. This will naturally just make it
   // easier to prevent the current user's data from leaking into another session.
   return (

@@ -6,7 +6,7 @@ import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/man
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 
-export default function ManualLinkSetupButtons(): JSX.Element {
+export default function ManualLinkSetupButtons(): React.JSX.Element {
   const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
   const steps = Object.values(ManualLinkSetupSteps);
   const step = steps.indexOf(viewContext.currentView);

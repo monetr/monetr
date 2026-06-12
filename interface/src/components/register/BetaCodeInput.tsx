@@ -3,7 +3,7 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 
 import styles from './BetaCodeInput.module.scss';
 
-export default function BetaCodeInput(): JSX.Element {
+export default function BetaCodeInput(): React.JSX.Element {
   const { data: config } = useAppConfiguration();
   if (!config?.requireBetaCode) {
     return null;

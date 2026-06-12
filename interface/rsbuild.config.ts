@@ -142,7 +142,7 @@ export default defineConfig({
     pluginBabel({
       include: /\.(?:jsx|tsx)$/,
       babelLoaderOptions(opts) {
-        opts.plugins?.unshift(['babel-plugin-react-compiler', { target: '18' }]);
+        opts.plugins?.unshift(['babel-plugin-react-compiler', { target: '19' }]);
       },
     }),
     !isDevelopment &&

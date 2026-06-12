@@ -36,7 +36,7 @@ interface NewExpenseValues {
   autoCreateTransaction: boolean;
 }
 
-function NewExpenseModal(): JSX.Element {
+function NewExpenseModal(): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const {
     data: { friendlyToAmount },
@@ -161,7 +161,7 @@ function NewExpenseModal(): JSX.Element {
   );
 }
 
-function AutoCreateTransactionToggle(): JSX.Element {
+function AutoCreateTransactionToggle(): React.JSX.Element {
   const autoCreateSwitchId = useId();
   const { setFieldValue, values } = useFormikContext<NewExpenseValues>();
   const hasAmount = (values.amount ?? 0) > 0;

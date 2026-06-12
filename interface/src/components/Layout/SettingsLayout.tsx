@@ -13,7 +13,7 @@ export interface SettingsLayoutProps {
   children: React.ReactNode;
 }
 
-export default function SettingsLayout(props: SettingsLayoutProps): JSX.Element {
+export default function SettingsLayout(props: SettingsLayoutProps): React.JSX.Element {
   const config = useAppConfiguration();
 
   return (
@@ -36,7 +36,7 @@ interface SettingTabProps {
   children: React.ReactNode;
 }
 
-function SettingTab(props: SettingTabProps): JSX.Element {
+function SettingTab(props: SettingTabProps): React.JSX.Element {
   const [pathname] = useLocation();
   const active = pathname === props.to;
   const className = mergeClasses(

@@ -5,7 +5,7 @@ import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 import styles from './overview.module.scss';
 
-export default function SettingsOverview(): JSX.Element {
+export default function SettingsOverview(): React.JSX.Element {
   const { data: me } = useAuthentication();
 
   const timezone = {

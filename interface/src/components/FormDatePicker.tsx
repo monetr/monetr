@@ -34,7 +34,7 @@ export interface FormDatePickerProps extends Omit<React.HTMLAttributes<HTMLButto
   required?: boolean;
 }
 
-export default function FormDatePicker(props: FormDatePickerProps): JSX.Element {
+export default function FormDatePicker(props: FormDatePickerProps): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const today = startOfToday({
     in: inTimezone,

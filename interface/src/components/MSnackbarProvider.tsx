@@ -6,6 +6,6 @@ export interface MSnackbarProviderProps {
   children: React.ReactNode;
 }
 
-export default function MSnackbarProvider(props: MSnackbarProviderProps): JSX.Element {
+export default function MSnackbarProvider(props: MSnackbarProviderProps): React.JSX.Element {
   return <SnackbarProvider maxSnack={5}>{props.children}</SnackbarProvider>;
 }

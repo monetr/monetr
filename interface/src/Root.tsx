@@ -7,7 +7,7 @@ import PullToRefresh from '@monetr/interface/components/PullToRefresh';
 import { TooltipProvider } from '@monetr/interface/components/Tooltip';
 import Monetr from '@monetr/interface/monetr';
 
-export default function Root(): JSX.Element {
+export default function Root(): React.JSX.Element {
   return (
     <ErrorBoundary>
       <MQueryClient>

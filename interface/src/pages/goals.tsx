@@ -11,7 +11,7 @@ import { SpendingType } from '@monetr/interface/models/Spending';
 
 import styles from './goals.module.scss';
 
-export default function Goals(): JSX.Element {
+export default function Goals(): React.JSX.Element {
   const { data: goals, isError, isLoading } = useSpendingFiltered(SpendingType.Goal);
 
   if (isLoading) {
@@ -32,7 +32,7 @@ export default function Goals(): JSX.Element {
     );
   }
 
-  function ListContent(): JSX.Element {
+  function ListContent(): React.JSX.Element {
     if (goals.length === 0) {
       return <EmptyState />;
     }
@@ -63,7 +63,7 @@ export default function Goals(): JSX.Element {
   );
 }
 
-function EmptyState(): JSX.Element {
+function EmptyState(): React.JSX.Element {
   return (
     <div className={styles.empty}>
       <div className={styles.emptyInner}>

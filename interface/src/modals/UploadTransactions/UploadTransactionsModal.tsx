@@ -27,7 +27,7 @@ export enum UploadTransactionStage {
   Error = 6,
 }
 
-function UploadTransactionsModal(): JSX.Element {
+function UploadTransactionsModal(): React.JSX.Element {
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
   const queryClient = useQueryClient();

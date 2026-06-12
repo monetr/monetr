@@ -28,7 +28,7 @@ interface TimelineItemData {
   endingAllocation: number;
 }
 
-export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Element {
+export default function ExpenseTimeline(props: ExpenseTimelineProps): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const { data: spending, isLoading: spendingLoading } = useSpending(props.spendingId);
@@ -99,14 +99,14 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
   );
 }
 
-function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData): JSX.Element {
+function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
 
   let header = '';
   let body = '';
   let secondaryBody: string | null = null;
-  let icon: JSX.Element | null = null;
+  let icon: React.JSX.Element | null = null;
   if (props.contributedAmount > 0 && props.spentAmount > 0) {
     // Spent and contributed
     header = 'Contribution & Spending';

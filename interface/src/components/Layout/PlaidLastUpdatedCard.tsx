@@ -9,7 +9,7 @@ interface PlaidLastUpdatedCardProps {
   linkId: string | null;
 }
 
-export default function PlaidLastUpdatedCard(props: PlaidLastUpdatedCardProps): JSX.Element {
+export default function PlaidLastUpdatedCard(props: PlaidLastUpdatedCardProps): React.JSX.Element {
   const link = useLink(props?.linkId);
 
   if (!link?.data?.plaidLink) {

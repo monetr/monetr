@@ -14,7 +14,7 @@ import { useSnackbar } from '@monetr/notify';
 
 import styles from './billing.module.scss';
 
-export default function SettingsBilling(): JSX.Element {
+export default function SettingsBilling(): React.JSX.Element {
   const [pathname] = useLocation();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
@@ -76,7 +76,7 @@ export default function SettingsBilling(): JSX.Element {
   );
 }
 
-function SubscriptionStatusBadge(): JSX.Element {
+function SubscriptionStatusBadge(): React.JSX.Element {
   const { data: auth } = useAuthentication();
 
   // If they have a subscription and it is active then show active.

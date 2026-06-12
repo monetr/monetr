@@ -31,7 +31,7 @@ interface TOTPState {
   recoveryCodes: Array<string>;
 }
 
-function EnableTOTPModal(): JSX.Element {
+function EnableTOTPModal(): React.JSX.Element {
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
   const { enqueueSnackbar } = useSnackbar();

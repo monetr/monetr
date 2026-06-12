@@ -8,7 +8,7 @@ interface GradientHeadingProps {
   as?: 'h1' | 'h2' | 'span';
 }
 
-export default function GradientHeading(props: GradientHeadingProps): JSX.Element {
+export default function GradientHeading(props: GradientHeadingProps): React.JSX.Element {
   const Heading = props.as ?? 'h1';
   return (
     <div className={props.wrapperClassName}>

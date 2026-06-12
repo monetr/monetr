@@ -24,7 +24,7 @@ const initialValues: Values = {
   captcha: null,
 };
 
-export function ForgotPasswordComplete(): JSX.Element {
+export function ForgotPasswordComplete(): React.JSX.Element {
   return (
     <div className={styles.root}>
       <div className={styles.logo}>
@@ -49,7 +49,7 @@ export function ForgotPasswordComplete(): JSX.Element {
   );
 }
 
-export default function ForgotPasswordNew(): JSX.Element {
+export default function ForgotPasswordNew(): React.JSX.Element {
   const { data: config } = useAppConfiguration();
   const sendForgotPassword = useSendForgotPassword();
   const [isComplete, setIsComplete] = useState<boolean>(false);

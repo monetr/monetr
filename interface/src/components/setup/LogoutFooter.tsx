@@ -2,7 +2,7 @@ import Flex from '@monetr/interface/components/Flex';
 import MLink from '@monetr/interface/components/MLink';
 import Typography from '@monetr/interface/components/Typography';
 
-export default function LogoutFooter(): JSX.Element {
+export default function LogoutFooter(): React.JSX.Element {
   return (
     <Flex gap='sm' justify='center'>
       <Typography color='subtle' size='sm'>

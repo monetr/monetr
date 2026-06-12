@@ -38,7 +38,7 @@ interface NewTransactionValues {
   adjustsBalance: boolean;
 }
 
-function NewTransactionModal(): JSX.Element {
+function NewTransactionModal(): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const modal = useModal();

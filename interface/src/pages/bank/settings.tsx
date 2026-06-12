@@ -25,7 +25,7 @@ interface BankAccountValues {
   currency: string;
 }
 
-export default function BankAccountSettingsPage(): JSX.Element {
+export default function BankAccountSettingsPage(): React.JSX.Element {
   const { data: link } = useCurrentLink();
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
   const updateBankAccount = useUpdateBankAccount();

@@ -18,7 +18,7 @@ interface ManualLinkSetupLayoutProps {
   children: ReactNode | undefined;
 }
 
-export default function ManualLinkSetupLayout(props: ManualLinkSetupLayoutProps): JSX.Element {
+export default function ManualLinkSetupLayout(props: ManualLinkSetupLayoutProps): React.JSX.Element {
   const viewContext = useViewContext<ManualLinkSetupSteps, ManualLinkSetupMetadata, ManualLinkSetupForm>();
   const steps = Object.values(ManualLinkSetupSteps);
   const step = steps.indexOf(viewContext.currentView);

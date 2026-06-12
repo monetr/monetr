@@ -75,7 +75,7 @@ function validator(values: RegisterValues): FormikErrors<RegisterValues> {
   return errors;
 }
 
-export function RegisterSuccessful(): JSX.Element {
+export function RegisterSuccessful(): React.JSX.Element {
   return (
     <div className={styles.registerPageRoot}>
       <MLogo className={layoutVariants({ size: 'logo' })} />
@@ -94,7 +94,7 @@ export function RegisterSuccessful(): JSX.Element {
   );
 }
 
-export default function Register(): JSX.Element {
+export default function Register(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: config } = useAppConfiguration();
   const signUp = useSignUp();

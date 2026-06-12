@@ -8,7 +8,7 @@ import Typography from '@monetr/interface/components/Typography';
 
 import styles from './security.module.scss';
 
-export default function SettingsSecurity(): JSX.Element {
+export default function SettingsSecurity(): React.JSX.Element {
   return (
     <div className={styles.root}>
       <div>

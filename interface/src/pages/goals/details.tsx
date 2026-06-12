@@ -39,7 +39,7 @@ interface GoalValues {
   isPaused: boolean;
 }
 
-export default function GoalDetails(): JSX.Element {
+export default function GoalDetails(): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();

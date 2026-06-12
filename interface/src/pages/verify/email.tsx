@@ -7,7 +7,7 @@ import request from '@monetr/interface/util/request';
 
 import styles from './email.module.scss';
 
-export default function VerifyEmail(): JSX.Element {
+export default function VerifyEmail(): React.JSX.Element {
   const search = useSearch();
   const [, navigate] = useLocation();
 
@@ -52,7 +52,7 @@ export default function VerifyEmail(): JSX.Element {
   return <VerifyEmailView />;
 }
 
-export function VerifyEmailView(): JSX.Element {
+export function VerifyEmailView(): React.JSX.Element {
   return (
     <div className={styles.root}>
       <MLogo className={styles.logo} />

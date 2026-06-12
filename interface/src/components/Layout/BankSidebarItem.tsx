@@ -13,7 +13,7 @@ interface BankSidebarItemProps {
   link: MonetrLink;
 }
 
-export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Element {
+export default function BankSidebarItem({ link }: BankSidebarItemProps): React.JSX.Element {
   const selectBankAccount = useSelectedBankAccount();
   const { data: bankAccounts } = useBankAccounts();
   const active = selectBankAccount.data?.linkId === link.linkId;

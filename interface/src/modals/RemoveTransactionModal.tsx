@@ -33,7 +33,7 @@ const initialValues: RemoveTransactionModalValues = {
   softDelete: true,
 };
 
-function RemoveTransactionModal(props: RemoveTransactionModalProps): JSX.Element {
+function RemoveTransactionModal(props: RemoveTransactionModalProps): React.JSX.Element {
   const { transaction } = props;
   const modal = useModal();
   const ref = useRef<MModalRef>(null);

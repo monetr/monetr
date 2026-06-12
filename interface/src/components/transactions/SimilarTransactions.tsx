@@ -9,7 +9,7 @@ export interface SimilarTransactionsProps {
   transaction: Transaction;
 }
 
-export default function SimilarTransactions(props: SimilarTransactionsProps): JSX.Element {
+export default function SimilarTransactions(props: SimilarTransactionsProps): React.JSX.Element {
   const { data: similarData, isLoading, isError } = useSimilarTransactions(props.transaction);
 
   if (isLoading) {

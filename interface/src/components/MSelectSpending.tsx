@@ -28,7 +28,7 @@ export interface MSelectSpendingProps extends MSelectSpendingBaseProps {
 
 const FREE_TO_USE = 'spnd_freeToUse';
 
-export default function MSelectSpending(props: MSelectSpendingProps): JSX.Element {
+export default function MSelectSpending(props: MSelectSpendingProps): React.JSX.Element {
   const formikContext = useFormikContext();
   const { data: spending, isLoading, isError } = useSpendings();
   const { data: balances } = useCurrentBalance();

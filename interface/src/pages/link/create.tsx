@@ -6,7 +6,7 @@ import SetupPage from '@monetr/interface/pages/setup';
 
 import { Fragment } from 'react/jsx-runtime';
 
-export default function LinkCreatePage(): JSX.Element {
+export default function LinkCreatePage(): React.JSX.Element {
   const { data: config } = useAppConfiguration();
 
   return (

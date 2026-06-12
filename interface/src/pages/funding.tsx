@@ -10,7 +10,7 @@ import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 
 import styles from './funding.module.scss';
 
-export default function Funding(): JSX.Element {
+export default function Funding(): React.JSX.Element {
   const { isError: fundingIsError, isLoading: fundingIsLoading, data: funding } = useFundingSchedules();
 
   if (fundingIsLoading) {
@@ -25,7 +25,7 @@ export default function Funding(): JSX.Element {
     return <Typography size='inherit'>Error...</Typography>;
   }
 
-  function ListContent(): JSX.Element {
+  function ListContent(): React.JSX.Element {
     if (funding.length === 0) {
       return <EmptyState />;
     }
@@ -56,7 +56,7 @@ export default function Funding(): JSX.Element {
   );
 }
 
-function EmptyState(): JSX.Element {
+function EmptyState(): React.JSX.Element {
   return (
     <div className={styles.empty}>
       <div className={styles.emptyInner}>

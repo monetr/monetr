@@ -6,7 +6,7 @@ import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './loading.module.scss';
 
-export default function Loading(): JSX.Element {
+export default function Loading(): React.JSX.Element {
   return (
     <div
       className={mergeClasses(

@@ -6,7 +6,7 @@ import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration
 
 import styles from './about.module.scss';
 
-export default function SettingsAbout(): JSX.Element {
+export default function SettingsAbout(): React.JSX.Element {
   const {
     data: { release, revision, buildType, buildTime },
   } = useAppConfiguration();
@@ -124,7 +124,7 @@ interface AboutHyperlinkProps {
   children: React.ReactNode;
 }
 
-function AboutHyperlink(props: AboutHyperlinkProps): JSX.Element {
+function AboutHyperlink(props: AboutHyperlinkProps): React.JSX.Element {
   return (
     <a className={styles.hyperlink} href={props.href} rel='noopener noreferrer' target='_blank'>
       {props.children}

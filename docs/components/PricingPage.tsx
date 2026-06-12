@@ -4,7 +4,7 @@ import mergeClasses from '@monetr/docs/util/mergeClasses';
 
 import styles from './PricingPage.module.scss';
 
-export default function PricingPage(): JSX.Element {
+export default function PricingPage(): React.JSX.Element {
   return (
     <div className={mergeClasses(styles.root, 'm-view-height')}>
       <div aria-hidden='true' className={styles.bgGlow}>

@@ -22,7 +22,7 @@ const showUploadTransactionsModal = async () =>
     modal.showUploadTransactionsModal(),
   );
 
-export default function Transactions(): JSX.Element {
+export default function Transactions(): React.JSX.Element {
   const { data: transactions, hasNextPage, isLoading, isError, isFetching, fetchNextPage } = useTransactions();
   const ref = useRef<HTMLUListElement>(null);
 
@@ -151,7 +151,7 @@ export default function Transactions(): JSX.Element {
   );
 }
 
-function AddTransactionButton(): JSX.Element {
+function AddTransactionButton(): React.JSX.Element {
   const { data: link } = useCurrentLink();
 
   if (!link?.getIsManual()) {
@@ -165,7 +165,7 @@ function AddTransactionButton(): JSX.Element {
   );
 }
 
-function UploadButtonMaybe(): JSX.Element {
+function UploadButtonMaybe(): React.JSX.Element {
   const { data: config } = useAppConfiguration();
   const { data: link } = useCurrentLink();
   if (!link?.getIsManual()) {

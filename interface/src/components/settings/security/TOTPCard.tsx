@@ -12,7 +12,7 @@ const showEnableTOTPModal = async () =>
     modal.showEnableTOTPModal(),
   );
 
-export default function TOTPCard(): JSX.Element {
+export default function TOTPCard(): React.JSX.Element {
   const {
     data: {
       user: { login },

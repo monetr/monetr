@@ -11,7 +11,7 @@ interface TransactionDateItemProps {
   date: Date;
 }
 
-export default function TransactionDateItem({ date }: TransactionDateItemProps): JSX.Element {
+export default function TransactionDateItem({ date }: TransactionDateItemProps): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale, isLoading } = useLocale();
 

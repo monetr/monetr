@@ -7,7 +7,7 @@ import styles from './BlogHeader.module.scss';
 
 import { useFrontmatter } from '@rspress/core/runtime';
 
-export default function BlogHeader(): JSX.Element {
+export default function BlogHeader(): React.JSX.Element {
   const { frontmatter } = useFrontmatter();
 
   const date = useMemo(() => {

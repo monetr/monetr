@@ -37,7 +37,7 @@ import styles from './BlogIndex.module.scss';
 
 import { Link } from '@rspress/core/theme-original';
 
-export default function BlogIndex(): JSX.Element {
+export default function BlogIndex(): React.JSX.Element {
   const { pages } = useDocPages();
 
   const blogPages = pages

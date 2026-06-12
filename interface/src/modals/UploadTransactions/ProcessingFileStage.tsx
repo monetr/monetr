@@ -15,7 +15,7 @@ interface ProcessingFileStageProps {
   setStage: (stage: UploadTransactionStage) => void;
 }
 
-export default function ProcessingFileStage(props: ProcessingFileStageProps): JSX.Element {
+export default function ProcessingFileStage(props: ProcessingFileStageProps): React.JSX.Element {
   const { data } = useTransactionUploadProgress(props.upload.bankAccountId, props.upload.transactionUploadId);
 
   return (

@@ -13,7 +13,7 @@ export interface EmailLayoutProps {
   children: React.ReactNode;
 }
 
-export default function EmailLayout(props: EmailLayoutProps): JSX.Element {
+export default function EmailLayout(props: EmailLayoutProps): React.JSX.Element {
   return (
     <Html>
       <Head />

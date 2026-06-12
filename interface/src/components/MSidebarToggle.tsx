@@ -12,7 +12,7 @@ export interface MSidebarToggleProps {
   className?: string;
 }
 
-export default function MSidebarToggle(props: MSidebarToggleProps): JSX.Element {
+export default function MSidebarToggle(props: MSidebarToggleProps): React.JSX.Element {
   const [, navigate] = useLocation();
   const { isOpen, setIsOpen } = useContext(MobileSidebarContext);
 

@@ -18,7 +18,7 @@ export interface FundingItemProps {
   funding: FundingSchedule;
 }
 
-export default function FundingItem(props: FundingItemProps): JSX.Element {
+export default function FundingItem(props: FundingItemProps): React.JSX.Element {
   const { data: localeCurrency } = useLocaleCurrency();
   const { data: locale } = useLocale();
   const [, navigate] = useLocation();

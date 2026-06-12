@@ -15,7 +15,7 @@ export interface MobileSidebarContextProviderProps {
   children: React.ReactNode;
 }
 
-export default function MobileSidebarContextProvider(props: MobileSidebarContextProviderProps): JSX.Element {
+export default function MobileSidebarContextProvider(props: MobileSidebarContextProviderProps): React.JSX.Element {
   const [pathname] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   useEffect(() => {

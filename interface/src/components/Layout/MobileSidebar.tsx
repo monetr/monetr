@@ -7,7 +7,7 @@ import { MobileSidebarContext } from '@monetr/interface/components/Layout/Mobile
 
 import styles from './MobileSidebar.module.scss';
 
-export default function MobileSidebar(): JSX.Element {
+export default function MobileSidebar(): React.JSX.Element {
   const { isOpen, setIsOpen } = useContext(MobileSidebarContext);
   const [, params] = useRoute<{ bankId: string }>('/bank/:bankId/*');
   const isBankRoute = Boolean(params?.bankId);

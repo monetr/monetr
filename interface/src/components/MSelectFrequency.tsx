@@ -11,7 +11,7 @@ export interface MSelectFrequencyProps extends Omit<SelectProps<string>, 'onChan
   dateFrom: string;
 }
 
-export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Element {
+export default function MSelectFrequency(props: MSelectFrequencyProps): React.JSX.Element {
   const { timezone } = useTimezone();
   const [selectedSignature, setSelectedSignature] = useState<string | null>(null);
   const formikContext = useFormikContext();

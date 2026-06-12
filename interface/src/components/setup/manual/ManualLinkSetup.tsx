@@ -25,7 +25,7 @@ export type ManualLinkSetupForm = ManualLinkSetupIntroNameValues &
   ManualLinkSetupBalancesValues &
   ManualLinkSetupIncomeValues;
 
-export default function ManualLinkSetup(props: ManualLinkSetupProps): JSX.Element {
+export default function ManualLinkSetup(props: ManualLinkSetupProps): React.JSX.Element {
   const initialView: ManualLinkSetupSteps = ManualLinkSetupSteps.IntroName;
 
   return (

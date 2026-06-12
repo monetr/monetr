@@ -30,7 +30,7 @@ interface NewBankAccountValues {
   currency: string;
 }
 
-function NewBankAccountModal(): JSX.Element {
+function NewBankAccountModal(): React.JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();

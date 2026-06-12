@@ -10,7 +10,7 @@ interface ErrorFileStageProps {
   error: { message: string; filename: string };
 }
 
-export default function ErrorFileStage(props: ErrorFileStageProps): JSX.Element {
+export default function ErrorFileStage(props: ErrorFileStageProps): React.JSX.Element {
   return (
     <div className={styles.root}>
       <div className={styles.body}>

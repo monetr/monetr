@@ -21,7 +21,7 @@ const initialValues: MultifactorValues = {
   totp: '',
 };
 
-export default function MultifactorAuthenticationPage(): JSX.Element {
+export default function MultifactorAuthenticationPage(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
 

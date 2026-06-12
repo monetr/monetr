@@ -39,7 +39,7 @@ interface FundingValues {
   autoCreateTransaction: boolean;
 }
 
-export default function FundingDetails(): JSX.Element {
+export default function FundingDetails(): React.JSX.Element {
   const nameId = useId();
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();

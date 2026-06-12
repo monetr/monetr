@@ -5,7 +5,7 @@ interface GithubIssueProps {
   issueNumber: number;
 }
 
-export default function GithubIssue(props: GithubIssueProps): JSX.Element {
+export default function GithubIssue(props: GithubIssueProps): React.JSX.Element {
   return (
     <Link href={`https://github.com/monetr/monetr/issues/${props.issueNumber}`} rel='noreferrer' target='_blank'>
       <img
