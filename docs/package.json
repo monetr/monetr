@@ -23,14 +23,14 @@
     "embla-carousel-react": "8.6.0",
     "katex": "0.17.0",
     "lucide-react": "1.17.0",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
     "rehype-katex": "7.0.1",
     "remark-math": "6.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/react": "19.2.15",
+    "@types/react": "19.2.16",
     "@types/react-dom": "19.2.3",
     "autoprefixer": "10.5.0",
     "sass": "1.100.0",
