@@ -154,8 +154,8 @@ importers:
         specifier: 1.0.6
         version: 1.0.6(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@monetr/vaul':
-        specifier: 1.2.5
-        version: 1.2.5(@radix-ui/react-dialog@1.1.15(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 1.2.6
+        version: 1.2.6(@radix-ui/react-dialog@1.1.15(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@radix-ui/react-avatar':
         specifier: 1.1.11
         version: 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -646,12 +646,12 @@ packages:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@monetr/vaul@1.2.5':
-    resolution: {integrity: sha512-HoFzhMspRFagsEDQbO3ld7B5CSbN7g5h+P5F2OvQoy+ZbVtjeu9AIrqOI8NxdRl+N9hFvPZYV9I0c/X2qpN0tw==}
+  '@monetr/vaul@1.2.6':
+    resolution: {integrity: sha512-FOsclTCZRJ9rqjDHx99NIQOKJ07DZfLnWYWlbu0wtwI28KnuOnjBUC9GbTqOskicpLhUkWNTC6BnGmIwKTpK3A==}
     peerDependencies:
       '@radix-ui/react-dialog': ^1.0.0
-      react: ^18.0 || ^19.0.0 || ^19.0.0-rc
-      react-dom: ^18.0 || ^19.0.0 || ^19.0.0-rc
+      react: ^19.0.0
+      react-dom: ^19.0.0
 
   '@napi-rs/wasm-runtime@1.1.4':
     resolution: {integrity: sha512-3NQNNgA1YSlJb/kMH1ildASP9HW7/7kYnRI2szWJaofaS1hWmbGI4H+d3+22aGzXXN9IJ+n+GiFVcGipJP18ow==}
@@ -4026,7 +4026,7 @@ snapshots:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
 
-  '@monetr/vaul@1.2.5(@radix-ui/react-dialog@1.1.15(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@monetr/vaul@1.2.6(@radix-ui/react-dialog@1.1.15(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       '@radix-ui/react-dialog': 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react: 19.2.7
