@@ -8,7 +8,7 @@ export interface PlaidLogoProps {
   className?: string;
 }
 
-export default function PlaidLogo(props: PlaidLogoProps): JSX.Element {
+export default function PlaidLogo(props: PlaidLogoProps): React.JSX.Element {
   const className = mergeClasses(styles.svg, props.className);
   return (
     <div>

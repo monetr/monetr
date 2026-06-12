@@ -7,7 +7,7 @@ export interface EmailLogoProps {
   baseUrl: string;
 }
 
-export default function EmailLogo(props: EmailLogoProps): JSX.Element {
+export default function EmailLogo(props: EmailLogoProps): React.JSX.Element {
   return (
     <Section className={styles.section}>
       <Img

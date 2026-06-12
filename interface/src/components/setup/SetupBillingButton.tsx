@@ -12,7 +12,7 @@ import styles from './SetupBillingButton.module.scss';
  * The SetupBillingButton should only be used on the setup page, it is intended to be a way to manage your billing
  * settings if you do not have an active link for some reason.
  */
-export default function SetupBillingButton(): JSX.Element {
+export default function SetupBillingButton(): React.JSX.Element {
   const {
     data: { hasSubscription },
   } = useAuthentication();

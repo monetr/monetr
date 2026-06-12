@@ -11,7 +11,7 @@ interface RemoveTransactionButtonProps {
   transaction: Transaction;
 }
 
-export default function RemoveTransactionButton(props: RemoveTransactionButtonProps): JSX.Element {
+export default function RemoveTransactionButton(props: RemoveTransactionButtonProps): React.JSX.Element {
   const { transaction } = props;
   const { data: link } = useCurrentLink();
   const [, navigate] = useLocation();

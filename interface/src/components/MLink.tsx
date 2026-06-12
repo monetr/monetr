@@ -40,7 +40,7 @@ const linkVariants = cva([styles.root], {
   },
 });
 
-export default function MLink(props: MLinkProps): JSX.Element {
+export default function MLink(props: MLinkProps): React.JSX.Element {
   props = {
     ...MLinkPropsDefaults,
     ...props,

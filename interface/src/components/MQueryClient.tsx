@@ -18,7 +18,7 @@ interface RequestParams {
   [key: string]: string | number | boolean | undefined;
 }
 
-export default function MQueryClient(props: MQueryClientProps): JSX.Element {
+export default function MQueryClient(props: MQueryClientProps): React.JSX.Element {
   const queryFn = useCallback(async (context: QueryFunctionContext<QueryKey>) => {
     let method: 'GET' | 'POST' = 'GET';
     let body: unknown;

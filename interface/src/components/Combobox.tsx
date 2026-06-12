@@ -66,7 +66,7 @@ export interface ComboboxProps<V extends string, O extends ComboboxOption<V>>
 
 export function ComboboxItem<V extends string, O extends ComboboxOption<V>>(
   props: ComboboxItemProps<V, O>,
-): JSX.Element {
+): React.JSX.Element {
   return (
     <Fragment>
       <Check
@@ -88,7 +88,7 @@ export function Combobox<V extends string, O extends ComboboxOption<V>>(props: C
   const [open, setOpen] = React.useState(false);
   const isMobile = useIsMobile();
 
-  function Picker(): JSX.Element {
+  function Picker(): React.JSX.Element {
     return (
       <Command>
         {((props.options.length > 1 && props.showSearch !== false) || props.showSearch) && (

@@ -23,7 +23,7 @@ const initialValues: ResetPasswordValues = {
   verifyPassword: '',
 };
 
-export default function PasswordResetNew(): JSX.Element {
+export default function PasswordResetNew(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const [pathname, navigate] = useLocation();
   const resetPassword = useResetPassword();

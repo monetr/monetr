@@ -19,7 +19,7 @@ export type ManualLinkSetupBalancesValues = {
   currency: string;
 };
 
-export default function ManualLinkSetupBalances(): JSX.Element {
+export default function ManualLinkSetupBalances(): React.JSX.Element {
   const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
   const { data: currency } = useLocaleCurrency();
 

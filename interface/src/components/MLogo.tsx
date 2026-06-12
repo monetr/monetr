@@ -6,6 +6,6 @@ type ImgProps = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement
 
 export interface MLogoProps extends Omit<ImgProps, 'src'> {}
 
-export default function MLogo(props: MLogoProps): JSX.Element {
+export default function MLogo(props: MLogoProps): React.JSX.Element {
   return <Logo {...props} />;
 }

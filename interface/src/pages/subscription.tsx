@@ -11,7 +11,7 @@ import styles from './subscription.module.scss';
 
 // SubscriptionPage is just used to redirect the user to the stripe billing portal. Upon mounting, it will make an API
 // call to start a billing portal session, and once it gets a response it will redirect the user there.
-export default function SubscriptionPage(): JSX.Element {
+export default function SubscriptionPage(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const [, navigate] = useLocation();
 

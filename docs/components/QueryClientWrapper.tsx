@@ -5,7 +5,7 @@ interface QueryClientWrapperProps {
   children: React.ReactNode;
 }
 
-export default function QueryClientWrapper(props: QueryClientWrapperProps): JSX.Element {
+export default function QueryClientWrapper(props: QueryClientWrapperProps): React.JSX.Element {
   const queryFn = useCallback(async (context: QueryFunctionContext<QueryKey>) => {
     const [url] = context.queryKey;
     const result = await fetch(url as string);

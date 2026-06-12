@@ -13,7 +13,7 @@ import { useSnackbar } from '@monetr/notify';
 
 import styles from './subscribe.module.scss';
 
-export default function SubscribePage(): JSX.Element {
+export default function SubscribePage(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const {
     data: { initialPlan },

@@ -34,7 +34,7 @@ interface TransferValues {
   amount: number;
 }
 
-function TransferModal(props: TransferModalProps): JSX.Element {
+function TransferModal(props: TransferModalProps): React.JSX.Element {
   const initialValues: TransferValues = {
     fromSpendingId: props.initialFromSpendingId,
     toSpendingId: props.initialToSpendingId,
@@ -171,7 +171,7 @@ export function showTransferModal(props: TransferModalProps): Promise<void> {
   return NiceModal.show<void, ExtractProps<typeof transferModal>, unknown>(transferModal, props);
 }
 
-function ReverseTargetsButton(): JSX.Element {
+function ReverseTargetsButton(): React.JSX.Element {
   const formik = useFormikContext<TransferValues>();
   const swap = useCallback(() => {
     // Do nothing if we are currently submitting.
@@ -194,7 +194,7 @@ function ReverseTargetsButton(): JSX.Element {
   );
 }
 
-function TransferSelectDecorator(props: LabelDecoratorProps): JSX.Element {
+function TransferSelectDecorator(props: LabelDecoratorProps): React.JSX.Element {
   const formik = useFormikContext<TransferValues>();
   const value = formik.values[props.name];
   const { data: spending } = useSpendings();
@@ -242,7 +242,7 @@ interface AmountButtonProps {
   amount: number | null | undefined;
 }
 
-function AmountButton({ amount }: AmountButtonProps): JSX.Element {
+function AmountButton({ amount }: AmountButtonProps): React.JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const formik = useFormikContext<TransferValues>();
   const onClick = useCallback(() => {

@@ -6,6 +6,6 @@ export interface DividerProps {
   className?: string;
 }
 
-export default function Divider(props: DividerProps): JSX.Element {
+export default function Divider(props: DividerProps): React.JSX.Element {
   return <hr className={mergeClasses(styles.divider, props.className)} />;
 }

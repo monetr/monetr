@@ -6,7 +6,7 @@ import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { AmountType } from '@monetr/interface/util/amounts';
 
-export default function BalanceCurrentAmount(): JSX.Element {
+export default function BalanceCurrentAmount(): React.JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const { data: balance } = useCurrentBalance();
 

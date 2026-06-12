@@ -23,6 +23,6 @@ const badgeVariants = cva([styles.badge], {
 
 export interface BadgeProps extends Omit<TypographyProps, 'color'>, VariantProps<typeof badgeVariants> {}
 
-export default function Badge({ variant, className, ...props }: BadgeProps): JSX.Element {
+export default function Badge({ variant, className, ...props }: BadgeProps): React.JSX.Element {
   return <Typography {...props} className={mergeClasses(badgeVariants({ variant }), className)} />;
 }

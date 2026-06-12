@@ -11,7 +11,7 @@ import { SpendingType } from '@monetr/interface/models/Spending';
 
 import styles from './expenses.module.scss';
 
-export default function Expenses(): JSX.Element {
+export default function Expenses(): React.JSX.Element {
   const { data: expenses, isError, isLoading } = useSpendingFiltered(SpendingType.Expense);
 
   if (isLoading) {
@@ -56,7 +56,7 @@ export default function Expenses(): JSX.Element {
   );
 }
 
-function EmptyState(): JSX.Element {
+function EmptyState(): React.JSX.Element {
   return (
     <div className={styles.empty}>
       <div className={styles.emptyInner}>

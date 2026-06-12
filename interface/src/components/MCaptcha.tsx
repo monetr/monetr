@@ -14,7 +14,7 @@ export interface MCaptchaProps {
   'data-testid'?: string;
 }
 
-export default function MCaptcha(props: MCaptchaProps): JSX.Element {
+export default function MCaptcha(props: MCaptchaProps): React.JSX.Element {
   const formikContext = useFormikContext();
   const { data: config } = useAppConfiguration();
 

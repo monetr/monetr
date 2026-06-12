@@ -20,7 +20,7 @@ interface State {
   longPollAttempts: number;
 }
 
-export default function OauthReturn(): JSX.Element {
+export default function OauthReturn(): React.JSX.Element {
   const queryClient = useQueryClient();
   const [state, setState] = useState<Partial<State>>({
     loading: true,
@@ -114,7 +114,7 @@ export default function OauthReturn(): JSX.Element {
     });
   }
 
-  function renderContents(): JSX.Element {
+  function renderContents(): React.JSX.Element {
     if (state.loading || !state.linkToken) {
       return (
         <div>

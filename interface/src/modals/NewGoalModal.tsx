@@ -31,7 +31,7 @@ interface NewGoalValues {
   fundingScheduleId: string;
 }
 
-function NewGoalModal(): JSX.Element {
+function NewGoalModal(): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const modal = useModal();

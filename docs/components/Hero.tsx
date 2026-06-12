@@ -16,7 +16,7 @@ import styles from './Hero.module.scss';
 
 import { Link } from '@rspress/core/theme-original';
 
-export default function Hero(): JSX.Element {
+export default function Hero(): React.JSX.Element {
   return (
     <div className={mergeClasses(styles.root, 'm-view-height')}>
       <div aria-hidden='true' className={styles.bgGlow}>

@@ -27,7 +27,7 @@ const initialValues: ChangePasswordValues = {
   repeatPassword: '',
 };
 
-function ChangePasswordModal(): JSX.Element {
+function ChangePasswordModal(): React.JSX.Element {
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
   const ref = useRef<MModalRef>(null);

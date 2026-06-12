@@ -47,7 +47,7 @@ import VerifyEmail from '@monetr/interface/pages/verify/email';
 import ResendVerificationPage from '@monetr/interface/pages/verify/email/resend';
 import sortAccounts from '@monetr/interface/util/sortAccounts';
 
-export default function Monetr(): JSX.Element {
+export default function Monetr(): React.JSX.Element {
   const { data: config, isLoading: configIsLoading, isError: configIsError } = useAppConfiguration();
   const { isLoading: authIsLoading, data: auth, isError: isAuthError } = useAuthentication();
   const { isLoading: linksIsLoading, data: links, isError: isLinksError } = useLinks();
@@ -220,7 +220,7 @@ export default function Monetr(): JSX.Element {
   );
 }
 
-function RedirectToBank(): JSX.Element {
+function RedirectToBank(): React.JSX.Element {
   const { data: links, isLoading: linksIsLoading } = useLinks();
   const { data: bankAccounts, isLoading: bankAccountsIsLoading } = useBankAccounts();
   if (linksIsLoading || bankAccountsIsLoading) {

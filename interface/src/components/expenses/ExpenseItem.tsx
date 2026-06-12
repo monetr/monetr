@@ -31,7 +31,7 @@ function getAmountStatus(spending: Spending): string {
   return 'ahead';
 }
 
-export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element | null {
+export default function ExpenseItem({ spending }: ExpenseItemProps): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
 

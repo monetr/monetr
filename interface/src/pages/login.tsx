@@ -46,7 +46,7 @@ function validator(values: LoginValues): FormikErrors<LoginValues> {
   return errors;
 }
 
-export default function Login(): JSX.Element {
+export default function Login(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: config } = useAppConfiguration();
   const login = useLogin();
@@ -112,7 +112,7 @@ export default function Login(): JSX.Element {
   );
 }
 
-function ForgotPasswordButton(): JSX.Element {
+function ForgotPasswordButton(): React.JSX.Element {
   const { data: config } = useAppConfiguration();
   // If the application is not configured to allow forgot password then don't show the button.
   if (!config?.allowForgotPassword) {

@@ -24,7 +24,7 @@ export interface SetupPageProps {
 
 type Step = 'greeting' | 'plaid' | 'lunchflow' | 'manual' | 'loading';
 
-export default function SetupPage(props: SetupPageProps): JSX.Element {
+export default function SetupPage(props: SetupPageProps): React.JSX.Element {
   const [step, setStep] = useState<Step>('greeting');
   const plaidPath = props.alreadyOnboarded ? '/link/create/plaid' : '/setup/plaid';
   const manualPath = props.alreadyOnboarded ? '/link/create/manual' : '/setup/manual';
@@ -52,11 +52,11 @@ interface GreetingProps {
   onContinue: (_: Step) => unknown;
 }
 
-function Greeting(props: GreetingProps): JSX.Element {
+function Greeting(props: GreetingProps): React.JSX.Element {
   const { data: config } = useAppConfiguration();
   const [active, setActive] = useState<'plaid' | 'lunchflow' | 'manual' | null>(null);
 
-  function Banner(): JSX.Element {
+  function Banner(): React.JSX.Element {
     if (!props.alreadyOnboarded) {
       return (
         <Flex align='center' gap='lg' justify='center' orientation='column'>
@@ -142,7 +142,7 @@ interface OnboardingTileProps {
   disabled?: boolean;
 }
 
-function OnboardingTile(props: OnboardingTileProps): JSX.Element {
+function OnboardingTile(props: OnboardingTileProps): React.JSX.Element {
   const disabledState = props.comingSoon || props.disabled;
   const wrapperClasses = mergeClasses(styles.tile, {
     [styles.tileActive]: !disabledState && props.active,

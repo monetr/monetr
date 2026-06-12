@@ -14,7 +14,7 @@ export interface ManualLinkSetupAccountNameValues {
   accountName: string;
 }
 
-export default function ManualLinkSetupAccountName(): JSX.Element {
+export default function ManualLinkSetupAccountName(): React.JSX.Element {
   const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
   const initialValues: ManualLinkSetupAccountNameValues = {
     accountName: '',

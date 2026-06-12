@@ -5,7 +5,7 @@ import Typography from '@monetr/interface/components/Typography';
 
 import styles from './config.module.scss';
 
-export default function ConfigError(): JSX.Element {
+export default function ConfigError(): React.JSX.Element {
   return (
     <div className={styles.root}>
       <Typography align='center' className={styles.message} size='inherit'>

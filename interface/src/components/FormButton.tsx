@@ -5,7 +5,7 @@ import { Button } from '@monetr/interface/components/Button';
 
 export type FormButtonProps = ComponentProps<typeof Button>;
 
-export default function FormButton(props: FormButtonProps): JSX.Element {
+export default function FormButton(props: FormButtonProps): React.JSX.Element {
   const formikContext = useFormikContext();
   props = {
     ...props,

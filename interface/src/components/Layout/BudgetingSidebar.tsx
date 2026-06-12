@@ -26,7 +26,7 @@ export interface BudgetingSidebarProps {
   className?: string;
 }
 
-export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Element {
+export default function BudgetingSidebar(props: BudgetingSidebarProps): React.JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const { data: bankAccount, isError } = useSelectedBankAccount();
   const { data: balance } = useCurrentBalance();
@@ -95,7 +95,7 @@ interface NavigationItemProps {
   to: string;
 }
 
-function NavigationItem(props: NavigationItemProps): JSX.Element {
+function NavigationItem(props: NavigationItemProps): React.JSX.Element {
   const [pathname] = useLocation();
   const active = pathname.endsWith(props.to.replaceAll('.', ''));
 
@@ -106,7 +106,7 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
   );
 }
 
-function NextFundingBadge(): JSX.Element {
+function NextFundingBadge(): React.JSX.Element {
   const next = useNextFundingDate();
   if (!next) {
     return null;

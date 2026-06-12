@@ -10,7 +10,7 @@ interface FeatureCardProps {
   linkExternal?: boolean;
 }
 
-export default function FeatureCard(props: FeatureCardProps): JSX.Element {
+export default function FeatureCard(props: FeatureCardProps): React.JSX.Element {
   return (
     <Feature
       className={styles.root}

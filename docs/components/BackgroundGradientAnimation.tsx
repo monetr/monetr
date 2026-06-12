@@ -15,7 +15,7 @@ function hexToRgb(hex: string) {
     : '0, 0, 0';
 }
 
-export function BackgroundGradientAnimation(): JSX.Element {
+export function BackgroundGradientAnimation(): React.JSX.Element {
   const gradientBackgroundStart = hexToRgb('#111111');
   const gradientBackgroundEnd = hexToRgb('#111111');
   const firstColor = hexToRgb('#3b82f6');

@@ -30,7 +30,7 @@ import { RefreshCcw } from 'lucide-react';
 
 import styles from './PullToRefresh.module.scss';
 
-export default function PullToRefresh(): JSX.Element {
+export default function PullToRefresh(): React.JSX.Element {
   const [pullStartPoint, setPullStartPoint] = useState(0);
   const [pullChange, setPullChange] = useState(0);
   const refreshDiv = useRef<HTMLDivElement>(null);

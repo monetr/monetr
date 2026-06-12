@@ -18,7 +18,7 @@ import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePl
 
 import styles from './BudgetingSidebarTitle.module.scss';
 
-export default function BudgetingSidebarTitle(): JSX.Element {
+export default function BudgetingSidebarTitle(): React.JSX.Element {
   const { data: bankAccount } = useSelectedBankAccount();
   const { data: link } = useCurrentLink();
   const [, navigate] = useLocation();
@@ -105,7 +105,7 @@ interface MenuItemProps {
   children?: React.ReactNode;
 }
 
-function MenuItem({ visible, onClick, children }: MenuItemProps): JSX.Element {
+function MenuItem({ visible, onClick, children }: MenuItemProps): React.JSX.Element {
   if (!visible) {
     return null;
   }

@@ -4,7 +4,7 @@ import styles from './PricingCards.module.scss';
 
 import { Link } from '@rspress/core/theme-original';
 
-export default function PricingCards(): JSX.Element {
+export default function PricingCards(): React.JSX.Element {
   return (
     <div className={styles.root}>
       <div className={styles.cardFree}>

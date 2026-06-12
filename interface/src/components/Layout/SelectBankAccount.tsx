@@ -30,7 +30,7 @@ import sortAccounts from '@monetr/interface/util/sortAccounts';
 
 import styles from './SelectBankAccount.module.scss';
 
-export default function SelectBankAccount(): JSX.Element {
+export default function SelectBankAccount(): React.JSX.Element {
   const [, navigate] = useLocation();
   const { data: allBankAccounts, isLoading: allIsLoading } = useBankAccounts();
   const { data: selectedBankAccount, isLoading: selectedIsLoading } = useSelectedBankAccount();
@@ -153,7 +153,7 @@ interface SelectBankAccountPickerOption {
   status: BankAccountStatus;
 }
 
-function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccountPickerOption>): JSX.Element {
+function BankAccountSelectItem(props: ComboboxItemProps<string, SelectBankAccountPickerOption>): React.JSX.Element {
   return (
     <Flex align='center' gap='sm'>
       <Check
@@ -188,7 +188,7 @@ interface SelectBankAccountPickerProps {
   setOpen: (open: boolean) => void;
 }
 
-function SelectBankAccountPicker(props: SelectBankAccountPickerProps): JSX.Element {
+function SelectBankAccountPicker(props: SelectBankAccountPickerProps): React.JSX.Element {
   const isMobile = useIsMobile();
   const { data: link } = useCurrentLink();
   return (

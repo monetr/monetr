@@ -16,7 +16,7 @@ export interface MTopNavigationProps {
   breadcrumb?: string;
 }
 
-export default function MTopNavigation(props: MTopNavigationProps): JSX.Element {
+export default function MTopNavigation(props: MTopNavigationProps): React.JSX.Element {
   const Icon = props.icon;
   const [, navigate] = useLocation();
 
@@ -69,7 +69,7 @@ interface ActionAreaProps {
   children?: React.ReactNode;
 }
 
-function ActionArea(props: ActionAreaProps): JSX.Element {
+function ActionArea(props: ActionAreaProps): React.JSX.Element {
   if (!props.children) {
     return null;
   }

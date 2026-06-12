@@ -23,7 +23,7 @@ interface PlaidProps {
   alreadyOnboarded?: boolean;
 }
 
-export default function PlaidSetup(props: PlaidProps): JSX.Element {
+export default function PlaidSetup(props: PlaidProps): React.JSX.Element {
   interface State {
     token: string | null;
     loading: boolean;
@@ -250,7 +250,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
     );
   }
 
-  function Footer(): JSX.Element {
+  function Footer(): React.JSX.Element {
     if (props.alreadyOnboarded) {
       return null;
     }

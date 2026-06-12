@@ -28,7 +28,7 @@ const FormTextFieldPropsDefaults: Omit<FormTextFieldProps, 'InputProps'> = {
   uppercasetext: undefined,
 };
 
-export default function FormTextField(props: FormTextFieldProps = FormTextFieldPropsDefaults): JSX.Element {
+export default function FormTextField(props: FormTextFieldProps = FormTextFieldPropsDefaults): React.JSX.Element {
   const id = useId();
   const formikContext = useFormikContext();
   const getFormikError = () => {

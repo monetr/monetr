@@ -35,7 +35,7 @@ interface NewFundingValues {
   autoCreateTransaction: boolean;
 }
 
-function NewFundingModal(): JSX.Element {
+function NewFundingModal(): React.JSX.Element {
   const switchId = useId();
   const { inTimezone } = useTimezone();
   const modal = useModal();
@@ -162,7 +162,7 @@ function NewFundingModal(): JSX.Element {
   );
 }
 
-function AutoCreateTransactionToggle(): JSX.Element {
+function AutoCreateTransactionToggle(): React.JSX.Element {
   const autoCreateSwitchId = useId();
   const { setFieldValue, values } = useFormikContext<NewFundingValues>();
   const hasDeposit = (values.estimatedDeposit ?? 0) > 0;

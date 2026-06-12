@@ -15,7 +15,7 @@ interface FeatureProps {
   linkExternal?: boolean;
 }
 
-export default function Feature(props: FeatureProps): JSX.Element {
+export default function Feature(props: FeatureProps): React.JSX.Element {
   return (
     <div className={mergeClasses(styles.root, props.className)}>
       <div className={styles.body}>

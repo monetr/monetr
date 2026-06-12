@@ -10,7 +10,7 @@ import { AmountType } from '@monetr/interface/util/amounts';
 
 import styles from './BalanceFreeToUseAmount.module.scss';
 
-export default function BalanceFreeToUseAmount(): JSX.Element {
+export default function BalanceFreeToUseAmount(): React.JSX.Element {
   const { data: locale } = useLocaleCurrency();
   const { data: bankAccount } = useSelectedBankAccount();
   const { data: balance } = useCurrentBalance();

@@ -12,7 +12,7 @@ interface SelectCurrencyProps {
   disabled?: boolean;
 }
 
-export default function SelectCurrency(props: SelectCurrencyProps): JSX.Element {
+export default function SelectCurrency(props: SelectCurrencyProps): React.JSX.Element {
   const formikContext = useFormikContext();
   const { data: currencies, isLoading: currenciesLoading } = useInstalledCurrencies();
   const onChange = useCallback(

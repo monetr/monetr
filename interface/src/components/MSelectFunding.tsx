@@ -17,7 +17,7 @@ export interface MSelectFundingProps {
   menuPortalTarget?: HTMLElement;
 }
 
-export default function MSelectFunding(props: MSelectFundingProps): JSX.Element {
+export default function MSelectFunding(props: MSelectFundingProps): React.JSX.Element {
   const formikContext = useFormikContext();
   const { data: funding, isLoading: fundingIsLoading, isError: fundingIsError } = useFundingSchedules();
   const label = props.label ?? 'Select a funding schedule';

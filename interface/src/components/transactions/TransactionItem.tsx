@@ -17,7 +17,7 @@ export interface TransactionItemProps {
   transaction: Transaction;
 }
 
-export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
+export default function TransactionItem({ transaction }: TransactionItemProps): React.JSX.Element {
   const detailsUrl: string = `/bank/${transaction.bankAccountId}/transactions/${transaction.transactionId}/details`;
 
   return (
@@ -60,7 +60,7 @@ interface BudgetingInfoProps {
   transaction: Transaction;
 }
 
-function BudgetingInfo({ transaction, className }: BudgetingInfoProps): JSX.Element {
+function BudgetingInfo({ transaction, className }: BudgetingInfoProps): React.JSX.Element {
   const { data: spending } = useSpending(transaction.spendingId);
 
   if (transaction.getIsAddition()) {

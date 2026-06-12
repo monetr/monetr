@@ -43,7 +43,7 @@ interface ExpenseValues {
   autoCreateTransaction: boolean;
 }
 
-export default function ExpenseDetails(): JSX.Element {
+export default function ExpenseDetails(): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();

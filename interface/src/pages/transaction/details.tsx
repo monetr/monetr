@@ -41,7 +41,7 @@ interface TransactionValues {
   amount: number;
 }
 
-export default function TransactionDetails(): JSX.Element {
+export default function TransactionDetails(): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const selectedBankAccountId = useSelectedBankAccountId();

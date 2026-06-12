@@ -22,7 +22,7 @@ interface ResendValues {
   captcha: string | null;
 }
 
-export default function ResendVerificationPage(): JSX.Element {
+export default function ResendVerificationPage(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: config } = useAppConfiguration();
   const emailFromQuery = new URLSearchParams(useSearch()).get('email');
@@ -114,7 +114,7 @@ export default function ResendVerificationPage(): JSX.Element {
   );
 }
 
-export function AfterEmailVerificationSent(): JSX.Element {
+export function AfterEmailVerificationSent(): React.JSX.Element {
   return (
     <div className={styles.sentRoot}>
       <div className={styles.panel}>
@@ -136,7 +136,7 @@ interface RouteStateMessageProps {
   hasEmail: boolean;
 }
 
-function RouteStateMessage(props: RouteStateMessageProps): JSX.Element {
+function RouteStateMessage(props: RouteStateMessageProps): React.JSX.Element {
   if (props.hasEmail) {
     return (
       <Typography align='center' data-testid='resend-email-included' size='sm'>

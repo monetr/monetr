@@ -4,7 +4,7 @@ import styles from './SignIn.module.scss';
 
 import { Link } from '@rspress/core/theme-original';
 
-export default function SignIn(): JSX.Element {
+export default function SignIn(): React.JSX.Element {
   return (
     <Link className={styles.link} href='https://my.monetr.app/'>
       <span className={styles.inner}>

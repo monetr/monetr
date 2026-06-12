@@ -43,7 +43,7 @@ const MAmountFieldPropsDefaults: MAmountFieldProps = {
   disabled: false,
 };
 
-export default function MAmountField(props: MAmountFieldProps = MAmountFieldPropsDefaults): JSX.Element {
+export default function MAmountField(props: MAmountFieldProps = MAmountFieldPropsDefaults): React.JSX.Element {
   const id = useId();
   const { data: localeInfo } = useLocaleCurrency(props.currency);
   const formikContext = useFormikContext();

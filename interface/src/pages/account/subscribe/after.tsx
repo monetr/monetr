@@ -8,7 +8,7 @@ import { useAfterCheckout } from '@monetr/interface/hooks/useAfterCheckout';
 
 import styles from './after.module.scss';
 
-export default function AfterCheckoutPage(): JSX.Element {
+export default function AfterCheckoutPage(): React.JSX.Element {
   const search = useSearch();
   const [, navigate] = useLocation();
   const afterCheckout = useAfterCheckout();

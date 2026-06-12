@@ -14,7 +14,7 @@ export type ManualLinkSetupIntroNameValues = {
   budgetName: string;
 };
 
-export default function ManualLinkSetupIntroName(): JSX.Element {
+export default function ManualLinkSetupIntroName(): React.JSX.Element {
   const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
   const initialValues: ManualLinkSetupIntroNameValues = {
     budgetName: '',

@@ -1,6 +1,6 @@
 import FeatureCard from '@monetr/docs/components/Features/FeatureCard';
 
-export default function Expenses(): JSX.Element {
+export default function Expenses(): React.JSX.Element {
   return (
     <FeatureCard
       description={`monetr let's you budget for things that happen on all kinds of intervals, not confining you to a single monthly budget.`}

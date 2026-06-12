@@ -6,7 +6,7 @@ export interface TransactionMerchantIconProps extends MerchantIconProps {
   pending?: boolean;
 }
 
-export default function TransactionMerchantIcon(props: TransactionMerchantIconProps): JSX.Element {
+export default function TransactionMerchantIcon(props: TransactionMerchantIconProps): React.JSX.Element {
   const { pending, ...merchantIconProps } = props;
 
   if (pending) {

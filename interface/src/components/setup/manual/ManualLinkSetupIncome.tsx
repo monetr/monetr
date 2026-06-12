@@ -29,7 +29,7 @@ export type ManualLinkSetupIncomeValues = {
   currency: string;
 };
 
-export default function ManualLinkSetupIncome(): JSX.Element {
+export default function ManualLinkSetupIncome(): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const createLink = useCreateLink();
   const createBankAccount = useCreateBankAccount();

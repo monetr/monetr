@@ -25,7 +25,7 @@ interface TimelineItemData {
   spendingCount: number;
 }
 
-export default function FundingTimeline(props: FundingTimelineProps): JSX.Element {
+export default function FundingTimeline(props: FundingTimelineProps): React.JSX.Element {
   const { data: funding } = useFundingSchedule(props.fundingScheduleId);
   const { data: forecast, isLoading, isError } = useForecast();
 
@@ -78,7 +78,7 @@ export default function FundingTimeline(props: FundingTimelineProps): JSX.Elemen
   );
 }
 
-function TimelineItem({ funding, ...props }: TimelineItemData): JSX.Element {
+function TimelineItem({ funding, ...props }: TimelineItemData): React.JSX.Element {
   const { inTimezone } = useTimezone();
   const { data: currency } = useLocaleCurrency();
 
@@ -86,7 +86,7 @@ function TimelineItem({ funding, ...props }: TimelineItemData): JSX.Element {
   let body = '';
   let dateExtra = '';
   const secondaryBody: string | null = null;
-  let icon: JSX.Element | null = null;
+  let icon: React.JSX.Element | null = null;
   // Only contributed
   header = 'Contribution';
   icon = <ArrowUpRight className={styles.icon} />;

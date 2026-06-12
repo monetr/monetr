@@ -8,7 +8,7 @@ import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 
 import styles from './BankSidebarSubscriptionItem.module.scss';
 
-export default function BankSidebarSubscriptionItem(): JSX.Element {
+export default function BankSidebarSubscriptionItem(): React.JSX.Element {
   const { data: config } = useAppConfiguration();
   const { data } = useAuthentication();
   const path = '/settings/billing';

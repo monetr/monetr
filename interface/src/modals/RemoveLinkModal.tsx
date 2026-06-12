@@ -17,7 +17,7 @@ export interface RemoveLinkModalProps {
   link: Link;
 }
 
-function RemoveLinkModal(props: RemoveLinkModalProps): JSX.Element {
+function RemoveLinkModal(props: RemoveLinkModalProps): React.JSX.Element {
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
   const { enqueueSnackbar } = useSnackbar();
