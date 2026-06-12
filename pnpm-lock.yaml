@@ -151,8 +151,8 @@ importers:
         specifier: 5.2.8
         version: 5.2.8
       '@monetr/notify':
-        specifier: 1.0.5
-        version: 1.0.5(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 1.0.6
+        version: 1.0.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@monetr/vaul':
         specifier: 1.2.5
         version: 1.2.5(@radix-ui/react-dialog@1.1.15(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -640,11 +640,11 @@ packages:
       '@types/react': '>=16'
       react: '>=16'
 
-  '@monetr/notify@1.0.5':
-    resolution: {integrity: sha512-dnPraD7Y8Ov+zOgJpVJYytlqXCvJbx4h3MpOdQagrCBjg5Z5JKl7ap/llXaIq2BP1baPaQPqABuV9VXj+svHtA==}
+  '@monetr/notify@1.0.6':
+    resolution: {integrity: sha512-AvWVFucBtjex6ntHUKG17tYCbTWYPn1ZAuMYl+4tpd+0DjT4LIt+YnWJVaguFHqEs5o7N46ngbjxApK81hD1Bg==}
     peerDependencies:
-      react: ^18.0 || ^19.0.0
-      react-dom: ^18.0 || ^19.0.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
 
   '@monetr/vaul@1.2.5':
     resolution: {integrity: sha512-HoFzhMspRFagsEDQbO3ld7B5CSbN7g5h+P5F2OvQoy+ZbVtjeu9AIrqOI8NxdRl+N9hFvPZYV9I0c/X2qpN0tw==}
@@ -1253,6 +1253,7 @@ packages:
     resolution: {integrity: sha512-H6ACzeM1KBxYDEF8YAim3501Jb1aCsSG79Gjm1M4pwJ5OJPK2ydiJEa438ugXmh0962eKYMHI2yZY0sQq8txaw==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rspack/binding-linux-arm64-musl@2.0.5':
     resolution: {integrity: sha512-5LujilxLtJFRiiPz5i5iWcWJriK9oy4gN7gZtTo8YRB7wwmwA8LMypTjjO0GLbkPS4/KeCfY4fDfTC29KmK+tA==}
@@ -1276,6 +1277,7 @@ packages:
     resolution: {integrity: sha512-rerCAz022zf0ewxI+7n3SrqLEaxCL+MXRxKjK5FLUGFa8UkIrivq+VUP/1OB6JLh2Bucebc7Y9WoWHvtk22mLA==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rspack/binding-linux-x64-musl@2.0.5':
     resolution: {integrity: sha512-BhaXZD064Lci3Kia0kLDAb4TyxO2C+0UidMlj44e8+ctasxIfFZgnrhCJrhTFHAtOiAwqhU3FHun2UuxPqX0Eg==}
@@ -3183,6 +3185,7 @@ packages:
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
+    libc: glibc
 
   sass-embedded-linux-arm@1.100.0:
     resolution: {integrity: sha512-9Ul7O1eKrc5YlhwWjkp8tZPSe3UEwSZ1uwUZOQom1HL0pRlBA6F/IlGZYFTLwnHMIP1fc77MMNaBRfc05mKMpw==}
@@ -3231,6 +3234,7 @@ packages:
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
+    libc: glibc
 
   sass-embedded-unknown-all@1.100.0:
     resolution: {integrity: sha512-c+naBgWId4MIpToXcI0DgqetjdAkwTTAxFAuOaBz7HUXLdyG1oZRrEvSsbe41nEdQOKH0vgofVFCeSQgoXOG9A==}
@@ -4017,7 +4021,7 @@ snapshots:
       '@types/react': 19.2.15
       react: 19.2.6
 
-  '@monetr/notify@1.0.5(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+  '@monetr/notify@1.0.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
     dependencies:
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
