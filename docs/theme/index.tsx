@@ -1,6 +1,6 @@
 import { Fragment, useEffect } from 'react';
 
-import { useFrontmatter } from '@rspress/core/runtime';
+import { useFrontmatter, usePage } from '@rspress/core/runtime';
 import { Layout as BasicLayout, Link, FallbackHeading as OriginalFallbackHeading } from '@rspress/core/theme-original';
 
 import 'katex/dist/katex.min.css';
@@ -34,9 +34,6 @@ function NavTitle() {
       >
         monetr
       </GradientHeading>
-      {/* TODO Hardcoded to the multiVersion default in rspress.config.ts. Wire
-          to a real release tag if one becomes available at build time. */}
-      <span className={layoutStyles.versionBadge}>v1</span>
     </Link>
   );
 }
@@ -74,6 +71,19 @@ function Footer() {
   );
 }
 
+// DocMeta renders the LedgerMeta row at the top of documentation pages. It is
+// wired into the doc layout's beforeDocContent slot so pages get the row without
+// any per-MDX additions. Scoped to the /documentation tree so policy/blog/custom
+// pages are left alone.
+function DocMeta() {
+  const { page } = usePage();
+  if (!page.routePath?.includes('/documentation')) {
+    return null;
+  }
+
+  return <LedgerMeta />;
+}
+
 const Layout = () => {
   useEffect(() => {
     // Ensure dark mode classes are present
@@ -88,10 +98,9 @@ const Layout = () => {
       <QueryClientWrapper>
         <BasicLayout
           afterNavMenu={<NavExtras />}
-          // Registers <LedgerMeta> (and anything else here) as a global MDX
-          // component. The top-level Layout threads `components` down to the
-          // MDXProvider that wraps page content, so docs can use it import-free.
-          components={{ LedgerMeta }}
+          // Renders the page-metadata ledger row at the top of doc pages without
+          // touching any MDX. DocMeta gates this to the /documentation tree.
+          beforeDocContent={<DocMeta />}
           // TODO This renders weird on custom pages, causing a brief flash.
           // beforeNav={
           //   <NoSSR>
@@ -104,6 +113,10 @@ const Layout = () => {
           //   </NoSSR>
           // }
           bottom={<Footer />}
+          // Registers <LedgerMeta> (and anything else here) as a global MDX
+          // component. The top-level Layout threads `components` down to the
+          // MDXProvider that wraps page content, so docs can use it import-free.
+          components={{ LedgerMeta }}
           navTitle={<NavTitle />}
         />
       </QueryClientWrapper>

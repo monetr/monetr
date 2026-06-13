@@ -95,7 +95,7 @@
 
   --rp-font-family-base: var(--mtr-font-body);
   --rp-font-family-mono: var(--mtr-font-mono);
-  --rp-code-font-size: 13px;
+  --rp-code-font-size: #{3.25 * variables.$size};
   --rp-radius: 0.625rem;
 
   /* Shiki ships the css-variables theme here, which means we can retheme the
@@ -196,46 +196,45 @@
    ========================================================================== */
 .rp-doc.rspress-doc {
   font-family: var(--mtr-font-body);
-  font-size: 15.5px;
+  font-size: 3.875 * variables.$size;
   line-height: 1.65;
   color: var(--mtr-text);
 
   p,
   li {
-    font-size: 15.5px;
+    font-size: 3.875 * variables.$size;
     line-height: 1.65;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  /* Heading scale, scoped to markdown headings (.rp-toc-include). Component
+     headings such as the GradientHeading blog title do not carry that class, so
+     they keep their own gradient fill, size and weight instead of being
+     clobbered by the prose scale. */
+  :is(h1, h2, h3, h4, h5, h6).rp-toc-include {
     font-family: var(--mtr-font-body);
     color: var(--mtr-text);
   }
 
-  h1 {
-    font-size: 40px;
+  h1.rp-toc-include {
+    font-size: 10 * variables.$size;
     font-weight: 700;
     letter-spacing: -0.022em;
     line-height: 1.12;
   }
 
-  h2 {
-    font-size: 25px;
+  h2.rp-toc-include {
+    font-size: 6.25 * variables.$size;
     font-weight: 600;
     letter-spacing: -0.012em;
   }
 
-  h3 {
-    font-size: 18.5px;
+  h3.rp-toc-include {
+    font-size: 4.625 * variables.$size;
     font-weight: 600;
   }
 
-  h4 {
-    font-size: 16px;
+  h4.rp-toc-include {
+    font-size: 4 * variables.$size;
     font-weight: 600;
   }
 
@@ -244,7 +243,7 @@
   a:not(.rp-header-anchor):not(:has(> img)) {
     color: var(--mtr-link);
     text-decoration: none;
-    text-underline-offset: 3px;
+    text-underline-offset: 0.75 * variables.$size;
 
     &:hover {
       text-decoration: underline;
@@ -258,14 +257,14 @@
     color: var(--mtr-violet);
     background: var(--mtr-violet-dim);
     border: 1px solid var(--mtr-line-soft);
-    border-radius: 5px;
+    border-radius: 1.25 * variables.$size;
     padding: 0.1em 0.34em;
   }
 }
 
 @media (max-width: 900px) {
-  .rp-doc.rspress-doc h1 {
-    font-size: 32px;
+  .rp-doc.rspress-doc h1.rp-toc-include {
+    font-size: 8 * variables.$size;
   }
 }
 
@@ -292,7 +291,7 @@
   /* Section headers ("Help", "Self-Hosting", ...) are the eyebrow labels. */
   .rp-sidebar-section-header__left span {
     font-family: var(--mtr-font-body);
-    font-size: 11.5px;
+    font-size: 2.875 * variables.$size;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.09em;
@@ -300,9 +299,9 @@
   }
 
   .rp-sidebar-item {
-    font-size: 13.5px;
+    font-size: 3.375 * variables.$size;
     color: var(--mtr-muted);
-    border-radius: 7px;
+    border-radius: 1.75 * variables.$size;
     transition: color 0.12s ease, background-color 0.12s ease;
 
     &:hover {
@@ -324,7 +323,7 @@
     font-weight: 500;
     background: var(--mtr-violet-dim);
     border-left: 2px solid var(--mtr-brand);
-    border-radius: 0 7px 7px 0;
+    border-radius: 0 (1.75 * variables.$size) (1.75 * variables.$size) 0;
 
     &:hover {
       background: var(--mtr-violet-dim);
@@ -339,17 +338,17 @@
   .rp-sidebar-item__right .rp-tag,
   .rp-sidebar-menu__right__text {
     font-family: var(--mtr-font-mono);
-    font-size: 10px;
+    font-size: 2.5 * variables.$size;
     color: var(--mtr-cyan);
     background: var(--mtr-cyan-dim);
-    border-radius: 4px;
-    padding: 1px 5px;
+    border-radius: 1 * variables.$size;
+    padding: (0.25 * variables.$size) (1.25 * variables.$size);
   }
 
   /* ---- Outline / table of contents ---- */
   .rp-outline__title {
     font-family: var(--mtr-font-body);
-    font-size: 11.5px;
+    font-size: 2.875 * variables.$size;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.09em;
@@ -369,7 +368,7 @@
   }
 
   .rp-toc-item {
-    font-size: 13px;
+    font-size: 3.25 * variables.$size;
     color: var(--mtr-muted);
     border-left: 1px solid var(--mtr-line);
     transition: color 0.12s ease, border-color 0.12s ease;
@@ -383,7 +382,7 @@
      the left rail ends up flush against the text. Pad the inner text span
      instead to keep a steady gap from the rail at every depth. */
   .rp-toc-item__text {
-    padding-left: 12px;
+    padding-left: 3 * variables.$size;
   }
 
   .rp-toc-item--active {
@@ -393,7 +392,7 @@
     /* hold the 1px the wider active border would otherwise steal, so the text
        does not nudge sideways when an item becomes current. */
     .rp-toc-item__text {
-      padding-left: 11px;
+      padding-left: 2.75 * variables.$size;
     }
   }
 
@@ -401,7 +400,7 @@
   /* The two cards are flex:1 and butt together in the middle by default; give
      them some air. */
   .rp-prev-next-page {
-    gap: 16px;
+    gap: 4 * variables.$size;
   }
 
   /* Elevate on hover with shadow only, no transform. Translating the card up
@@ -411,7 +410,7 @@
   .rp-prev-next-page__item {
     background: var(--mtr-surface);
     border: 1px solid var(--mtr-line);
-    border-radius: 10px;
+    border-radius: 2.5 * variables.$size;
     transition: box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1),
       border-color 0.18s ease, background-color 0.18s ease;
 
@@ -429,7 +428,7 @@
 
   .rp-prev-next-page__item__desc {
     font-family: var(--mtr-font-mono);
-    font-size: 11px;
+    font-size: 2.75 * variables.$size;
     text-transform: lowercase;
     color: var(--mtr-faint);
     transition: color 0.18s ease;
@@ -448,7 +447,7 @@
   }
 
   .rp-prev-next-page__prev:hover .rp-prev-next-page__item__desc::before {
-    transform: translateX(-3px);
+    transform: translateX(#{-0.75 * variables.$size});
   }
 
   .rp-prev-next-page__next .rp-prev-next-page__item__desc::after {
@@ -459,12 +458,12 @@
   }
 
   .rp-prev-next-page__next:hover .rp-prev-next-page__item__desc::after {
-    transform: translateX(3px);
+    transform: translateX(#{0.75 * variables.$size});
   }
 
   .rp-prev-next-page__item__title {
     font-family: var(--mtr-font-body);
-    font-size: 15px;
+    font-size: 3.75 * variables.$size;
     font-weight: 600;
     color: var(--mtr-text);
   }
@@ -478,7 +477,7 @@
   /* ---- Tables ---- */
   .rp-table-scroll-container {
     border: 1px solid var(--mtr-line);
-    border-radius: 10px;
+    border-radius: 2.5 * variables.$size;
     overflow-x: auto;
     /* rspress' .rp-scrollbar reserves a stable gutter. With no scrollbar in
        play that leaves an empty strip on the right edge, which shows through the
@@ -496,7 +495,7 @@
 
   .rp-table-scroll-container th {
     font-family: var(--mtr-font-body);
-    font-size: 12.5px;
+    font-size: 3.125 * variables.$size;
     font-weight: 600;
     color: var(--mtr-muted);
     background: var(--mtr-surface);
@@ -518,13 +517,13 @@
   .rp-codeblock {
     background: var(--mtr-code-bg);
     border: 1px solid var(--mtr-line);
-    border-radius: 10px;
+    border-radius: 2.5 * variables.$size;
     overflow: hidden;
   }
 
   .rp-codeblock__title {
     font-family: var(--mtr-font-mono);
-    font-size: 12px;
+    font-size: 3 * variables.$size;
     color: var(--mtr-muted);
     background: var(--mtr-surface);
     border-bottom: 1px solid var(--mtr-line);
@@ -539,7 +538,7 @@
   .rp-codeblock__content pre,
   .rp-codeblock__content pre code {
     font-family: var(--mtr-font-mono);
-    font-size: 13px;
+    font-size: 3.25 * variables.$size;
     line-height: 1.7;
   }
 
@@ -568,19 +567,19 @@
     background: var(--mtr-surface);
     border: 1px solid var(--mtr-line);
     border-left: 3px solid var(--mtr-line);
-    border-radius: 0 10px 10px 0;
-    padding: 13px 16px;
-    margin: 24px 0;
-    font-size: 14.5px;
+    border-radius: 0 (2.5 * variables.$size) (2.5 * variables.$size) 0;
+    padding: (3.25 * variables.$size) (4 * variables.$size);
+    margin: (6 * variables.$size) 0;
+    font-size: 3.625 * variables.$size;
   }
 
   .rp-callout__title {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 2.5 * variables.$size;
     margin: 0;
     font-family: var(--mtr-font-mono);
-    font-size: 11px;
+    font-size: 2.75 * variables.$size;
     font-weight: 500;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -604,21 +603,21 @@
       order: 2;
       flex: 0 0 auto;
       font-family: var(--mtr-font-mono);
-      font-size: 11px;
+      font-size: 2.75 * variables.$size;
       font-weight: 500;
       letter-spacing: 0;
       text-transform: none;
-      border-radius: 5px;
-      padding: 2px 8px;
+      border-radius: 1.25 * variables.$size;
+      padding: (0.5 * variables.$size) (2 * variables.$size);
     }
   }
 
   .rp-callout__content {
     color: var(--mtr-muted);
-    font-size: 14.5px;
+    font-size: 3.625 * variables.$size;
 
     p {
-      font-size: 14.5px;
+      font-size: 3.625 * variables.$size;
     }
 
     p:last-child {

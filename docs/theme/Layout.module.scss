@@ -52,20 +52,6 @@
   }
 }
 
-.versionBadge {
-  align-self: center;
-  margin-left: 2 * variables.$size;
-  padding: 1px 8px;
-  font-family: var(--mtr-font-mono);
-  font-size: 11.5px;
-  line-height: 1.45;
-  letter-spacing: 0.01em;
-  color: var(--mtr-violet);
-  background: var(--mtr-violet-dim);
-  border: 1px solid var(--mtr-line);
-  border-radius: 999px;
-}
-
 .navExtras {
   display: flex;
   align-items: center;

@@ -1,3 +1,5 @@
+@use '@monetr/docs/styles/variables';
+
 // A "funding bar" borrowed from monetr's budgeting vernacular: a 2px scroll
 // progress indicator pinned above everything, filling left to right as you read
 // down the page.
@@ -6,7 +8,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 0.5 * variables.$size;
   z-index: 2000; // above the nav
   background: var(--mtr-line-soft);
   pointer-events: none;
