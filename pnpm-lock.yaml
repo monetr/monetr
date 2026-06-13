@@ -38,6 +38,9 @@ importers:
       '@rspress/plugin-sitemap':
         specifier: 2.0.13
         version: 2.0.13(@rspress/core@2.0.13(@rspack/core@2.0.6(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.17)(core-js@3.47.0)(micromark-util-types@2.0.2)(micromark@4.0.2))
+      '@rspress/shared':
+        specifier: 2.0.13
+        version: 2.0.13(core-js@3.47.0)
       '@shikijs/transformers':
         specifier: 4.2.0
         version: 4.2.0
@@ -56,6 +59,9 @@ importers:
       embla-carousel-react:
         specifier: 8.6.0
         version: 8.6.0(react@19.2.7)
+      hast-util-from-html:
+        specifier: 2.0.2
+        version: 2.0.2
       katex:
         specifier: 0.17.0
         version: 0.17.0
@@ -77,7 +83,13 @@ importers:
       rspress-plugin-reading-time:
         specifier: 1.0.0
         version: 1.0.0(@rspress/core@2.0.13(@rspack/core@2.0.6(@swc/helpers@0.5.23))(@types/mdast@4.0.4)(@types/react@19.2.17)(core-js@3.47.0)(micromark-util-types@2.0.2)(micromark@4.0.2))
+      unist-util-visit:
+        specifier: 5.1.0
+        version: 5.1.0
     devDependencies:
+      '@types/hast':
+        specifier: 3.0.4
+        version: 3.0.4
       '@types/node':
         specifier: ^20
         version: 20.19.23
@@ -6160,7 +6172,7 @@ snapshots:
       '@types/mdast': 4.0.4
       escape-string-regexp: 5.0.0
       unist-util-is: 6.0.0
-      unist-util-visit-parents: 6.0.1
+      unist-util-visit-parents: 6.0.2
 
   mdast-util-from-markdown@2.0.2:
     dependencies:
@@ -6797,7 +6809,7 @@ snapshots:
       nlcst-to-string: 4.0.0
       unist-util-generated: 3.0.0
       unist-util-position: 5.0.0
-      unist-util-visit-parents: 6.0.1
+      unist-util-visit-parents: 6.0.2
 
   nlcst-emoticon-modifier@3.0.1:
     dependencies:
@@ -7818,7 +7830,7 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
       unist-util-is: 6.0.0
-      unist-util-visit-parents: 6.0.1
+      unist-util-visit-parents: 6.0.2
 
   universalify@2.0.1: {}
 

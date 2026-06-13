@@ -1,6 +1,6 @@
-import { usePage } from '@rspress/core/runtime';
-
 import styles from './LedgerMeta.module.scss';
+
+import { usePage } from '@rspress/core/runtime';
 
 interface LedgerMetaProps {
   // Optional override for the date (e.g. "2026/06/12"). When omitted we use the

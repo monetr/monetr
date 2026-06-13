@@ -28,17 +28,11 @@ const remapValue = (value: number, start1: number, end1: number, start2: number,
   return remapped > 0 ? remapped : 0;
 };
 
-export default function Particles({
-  className = '',
-  quantity = 40,
-  staticity = 50,
-  ease = 50,
-  refresh = false,
-}: ParticlesProps) {
+export default function Particles({ className = '', quantity = 40, staticity = 50, ease = 50 }: ParticlesProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const context = useRef<CanvasRenderingContext2D | null>(null);
-  const circles = useRef<any[]>([]);
+  const circles = useRef<Circle[]>([]);
   const mousePosition = MousePosition();
   const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const canvasSize = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
