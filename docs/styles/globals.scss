@@ -411,6 +411,11 @@
     background: var(--mtr-surface);
     border: 1px solid var(--mtr-line);
     border-radius: 2.5 * variables.$size;
+    /* rspress only pads these 12px. The direction arrows hang in this horizontal
+       padding (so the label can line up with the title), and they slide outward
+       on hover, so 12px is not enough room and the arrow escapes past the tile
+       edge. Widen the side padding so the arrow has somewhere to go. */
+    padding: (3 * variables.$size) (5 * variables.$size);
     transition: box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1),
       border-color 0.18s ease, background-color 0.18s ease;
 
@@ -427,21 +432,30 @@
   }
 
   .rp-prev-next-page__item__desc {
+    position: relative;
     font-family: var(--mtr-font-mono);
     font-size: 2.75 * variables.$size;
     text-transform: lowercase;
     color: var(--mtr-faint);
     transition: color 0.18s ease;
+    /* rspress pads this 0 20px to make room for its own arrow icon. We moved the
+       arrow into the label itself, so that padding just indents the helper text
+       away from the title underneath it. Drop it so the two line up. */
+    padding: 0;
   }
 
   .rp-prev-next-page__item:hover .rp-prev-next-page__item__desc {
     color: var(--mtr-link);
   }
 
-  /* Arrows slide outward on hover for a small directional cue. */
+  /* Arrows slide outward on hover for a small directional cue. They hang outside
+     the label (into the card's padding) rather than sitting inline, so the
+     helper text lines up flush with the page title underneath it instead of
+     getting nudged in by the arrow's width. */
   .rp-prev-next-page__prev .rp-prev-next-page__item__desc::before {
     content: '\2190';
-    display: inline-block;
+    position: absolute;
+    right: 100%;
     margin-right: 0.5em;
     transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -452,7 +466,8 @@
 
   .rp-prev-next-page__next .rp-prev-next-page__item__desc::after {
     content: '\2192';
-    display: inline-block;
+    position: absolute;
+    left: 100%;
     margin-left: 0.5em;
     transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -800,6 +815,39 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--mtr-faint);
+}
+
+/* The sidebar fights us two ways. rspress sets the standard scrollbar-width and
+   scrollbar-color on it, and the moment Chromium sees a non-auto value there it
+   switches that element to a native scrollbar, buttons and all, ignoring the
+   ::-webkit-scrollbar styling above. That is the little increment/decrement
+   buttons the sidebar grows at the top and bottom. rspress ALSO ships its own
+   thin .rp-scrollbar webkit bar that out-specifies the page rules. So reset the
+   standard props to drop the native bar, then repaint the sidebar's webkit bar
+   to match the page exactly. The .rp-dark prefix is just here to win the
+   specificity race against rspress' own .rp-dark .rp-scrollbar rules. */
+.rp-dark .rp-doc-layout__sidebar.rp-scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+
+  &::-webkit-scrollbar {
+    width: 16px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: inherit;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--mtr-line);
+    background-clip: content-box;
+    border: 6px solid transparent;
+    border-radius: 20px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--mtr-faint);
+  }
 }
 
 .monetr {

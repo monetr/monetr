@@ -1,20 +1,24 @@
 @use '@monetr/docs/styles/variables';
 
+// Sign In stays a plain text link in the nav, just on the new token palette:
+// muted at rest like the other nav items, periwinkle on hover like the active
+// doc link. Hidden on mobile where the nav collapses.
 .link {
   display: none;
-  position: relative;
-  color: var(--slate-300);
+  align-items: center;
+  color: var(--mtr-muted);
+  font-weight: 500;
   text-decoration: none;
   transition-property: color;
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 
   @media (min-width: variables.$smallScreen) {
-    display: block;
+    display: inline-flex;
   }
 
   &:hover {
-    color: #fff;
+    color: var(--mtr-link);
   }
 }
 
@@ -22,10 +26,17 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  gap: 1.5 * variables.$size;
   white-space: nowrap;
 }
 
 .arrow {
-  width: 5 * variables.$size;
-  height: 5 * variables.$size;
+  width: 4 * variables.$size;
+  height: 4 * variables.$size;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// A small nudge on hover for a bit of life, nothing more.
+.link:hover .arrow {
+  transform: translateX(#{0.5 * variables.$size});
 }
