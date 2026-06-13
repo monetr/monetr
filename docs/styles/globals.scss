@@ -11,36 +11,131 @@
   overflow: hidden !important;
 }
 
-/* Force dark mode CSS variables on all selectors */
+/* ==========================================================================
+   monetr documentation theme tokens
+
+   This is the single source of truth for the docs palette. Everything below
+   pulls from these custom properties so there are no stray hex values floating
+   around in component CSS. The surfaces are the brand purple desaturated and
+   darkened, so the whole thing keeps a faint violet undertone instead of going
+   flat gray.
+
+   Semantic rule we hold ourselves to: cyan means positive / tip / "yes", pink
+   means warning / negative. Anything else interactive stays in the purple
+   family.
+   ========================================================================== */
+:root {
+  /* Brand, straight off the logo. */
+  --mtr-brand-deep: #4E1AA0;
+  --mtr-brand: #7200E1;
+  --mtr-periwinkle: #829AFF;
+  --mtr-cyan: #2CEDFF;
+  --mtr-pink: #FF5798;
+
+  /* Dark surfaces and text. */
+  --mtr-ink: #120E1A;
+  --mtr-surface: #191324;
+  --mtr-surface-2: #201A2E;
+  --mtr-line: #2B2340;
+  --mtr-line-soft: #221B33;
+  --mtr-text: #EAE5F4;
+  --mtr-muted: #9C92B8;
+  --mtr-faint: #6E6488;
+  --mtr-link: #9DAFFF;
+  --mtr-violet: #B79CFF;
+  --mtr-cyan-dim: rgba(44, 237, 255, 0.12);
+  --mtr-pink-dim: rgba(255, 87, 152, 0.10);
+  --mtr-violet-dim: rgba(130, 154, 255, 0.10);
+  --mtr-code-bg: #0E0B15;
+
+  /* Self-hosted faces. Loaded from fontsource in the theme entry. Inter is the
+     body and heading face; JetBrains Mono is the code and ledger-metadata
+     face. */
+  --mtr-font-body: 'Inter Variable', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, sans-serif;
+  --mtr-font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo,
+    Consolas, monospace;
+}
+
+/* Map the tokens onto Rspress' own variables. monetr forces dark mode (see the
+   theme entry + the inline RSPRESS_THEME script), so we set these on every
+   appearance selector the original theme used rather than only on .rp-dark. */
 :root,
 :where(html.rp-dark),
 :where(html:not(.rp-dark)) {
-  --rp-c-bg: #111111;
-  --rp-c-bg-soft: #27272a;
-  --rp-c-bg-mute: #3f3f46;
-  --rp-c-bg-alt: #0a0a0a;
-  --rp-c-divider: rgba(63, 63, 70, 0.65);
-  --rp-c-divider-light: rgba(63, 63, 70, 0.48);
-  --rp-c-text-0: #ffffff;
-  --rp-c-text-1: #d4d4d8;
-  --rp-c-text-2: #a1a1aa;
-  --rp-c-text-3: rgba(161, 161, 170, 0.38);
-  --rp-c-text-4: rgba(161, 161, 170, 0.18);
-  --rp-c-brand: #ebebeb;
-  --rp-c-brand-light: #ffffff;
-  --rp-c-brand-lighter: #ffffff;
-  --rp-c-brand-dark: #d4d4d8;
-  --rp-c-brand-darker: #a1a1aa;
-  --rp-c-brand-tint: rgba(255, 255, 255, 0.1);
-  --rp-c-link: #AC84EB;
-  --rp-home-background-bg: #111111;
-  --rp-font-family-base: 'Inter Variable', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, sans-serif;
+  --rp-c-bg: var(--mtr-ink);
+  --rp-c-bg-soft: var(--mtr-surface);
+  --rp-c-bg-mute: var(--mtr-surface-2);
+  --rp-c-bg-alt: var(--mtr-code-bg);
+  --rp-c-divider: var(--mtr-line);
+  --rp-c-divider-light: var(--mtr-line-soft);
 
-  --rp-radius: 0.5rem;
+  --rp-c-text-0: #ffffff;
+  --rp-c-text-1: var(--mtr-text);
+  --rp-c-text-2: var(--mtr-muted);
+  --rp-c-text-3: var(--mtr-faint);
+  --rp-c-text-4: rgba(110, 100, 136, 0.45);
+
+  /* Brand drives links and accents. We lean on the lightened periwinkle so it
+     clears AA on the ink background; the darker steps are for hover/active. */
+  --rp-c-brand: var(--mtr-link);
+  --rp-c-brand-light: #B3C2FF;
+  --rp-c-brand-lighter: #C7D2FF;
+  --rp-c-brand-dark: #879BF2;
+  --rp-c-brand-darker: #6E84E0;
+  --rp-c-brand-tint: var(--mtr-violet-dim);
+  --rp-c-link: var(--mtr-link);
+
+  --rp-home-background-bg: var(--mtr-ink);
+
+  /* Code chrome. The pre itself paints with --shiki-background (transparent),
+     so the block colour comes from these. */
+  --rp-code-block-bg: var(--mtr-code-bg);
+  --rp-code-title-bg: var(--mtr-surface);
+
+  --rp-font-family-base: var(--mtr-font-body);
+  --rp-font-family-mono: var(--mtr-font-mono);
+  --rp-code-font-size: #{3.25 * variables.$size};
+  --rp-radius: 0.625rem;
+
+  /* Shiki ships the css-variables theme here, which means we can retheme the
+     syntax tokens without swapping highlighters. Cyan reads as a command,
+     strings go mint, numbers/constants borrow the warning pink. */
+  --shiki-foreground: var(--mtr-text);
+  --shiki-background: transparent;
+  --shiki-token-keyword: var(--mtr-periwinkle);
+  --shiki-token-string: #6FE8C9;
+  --shiki-token-string-expression: #6FE8C9;
+  --shiki-token-constant: var(--mtr-pink);
+  --shiki-token-comment: var(--mtr-faint);
+  --shiki-token-function: var(--mtr-cyan);
+  --shiki-token-parameter: var(--mtr-violet);
+  --shiki-token-punctuation: var(--mtr-muted);
+  --shiki-token-link: var(--mtr-link);
 }
 
-/* Design tokens. Mirrors interface/ naming. */
+/* Light mode is not the reference design and is effectively unreachable while
+   monetr forces dark, but keep it derived from the same palette so it does not
+   look broken if someone flips the scheme. */
+:where(html:not(.dark)):root {
+  --rp-c-bg: #F7F5FC;
+  --rp-c-bg-soft: #FFFFFF;
+  --rp-c-bg-mute: #EFEAF8;
+  --rp-c-bg-alt: #F1ECFA;
+  --rp-c-divider: #E1D9F0;
+  --rp-c-divider-light: #ECE6F6;
+  --rp-c-text-1: #241B33;
+  --rp-c-text-2: #5A5170;
+  --rp-c-text-3: #8076A0;
+  --rp-c-brand: var(--mtr-brand-deep);
+  --rp-c-link: var(--mtr-brand-deep);
+  --rp-code-block-bg: #F1ECFA;
+  --rp-code-title-bg: #EFEAF8;
+  --shiki-foreground: #241B33;
+}
+
+/* Design tokens. Mirrors interface/ naming. Other docs components (hero,
+   pricing, footer) reference these, so leave them in place. */
 :root {
   --brand: #4E1AA0;
   --brand-subtle: #5D1FC1;
@@ -91,11 +186,566 @@
   --indigo-100: #e0e7ff;
 }
 
-.rp-nav {
-  background: rgba(17, 17, 17, 0.7) !important;
-  backdrop-filter: saturate(150%) blur(12px);
+/* ==========================================================================
+   Typography
+
+   Prose lives on `.rp-doc.rspress-doc` (the main article carries both classes).
+   The sidebar/TOC label spans only carry `.rp-doc`, so scoping to the compound
+   selector keeps doc text from leaking into the chrome, and the extra class
+   buys us the specificity to win over the stock theme.
+   ========================================================================== */
+.rp-doc.rspress-doc {
+  font-family: var(--mtr-font-body);
+  font-size: 3.875 * variables.$size;
+  line-height: 1.65;
+  color: var(--mtr-text);
+
+  p,
+  li {
+    font-size: 3.875 * variables.$size;
+    line-height: 1.65;
+  }
+
+  /* Heading scale, scoped to markdown headings (.rp-toc-include). Component
+     headings such as the GradientHeading blog title do not carry that class, so
+     they keep their own gradient fill, size and weight instead of being
+     clobbered by the prose scale. */
+  :is(h1, h2, h3, h4, h5, h6).rp-toc-include {
+    font-family: var(--mtr-font-body);
+    color: var(--mtr-text);
+  }
+
+  h1.rp-toc-include {
+    font-size: 10 * variables.$size;
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    line-height: 1.12;
+  }
+
+  h2.rp-toc-include {
+    font-size: 6.25 * variables.$size;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+  }
+
+  h3.rp-toc-include {
+    font-size: 4.625 * variables.$size;
+    font-weight: 600;
+  }
+
+  h4.rp-toc-include {
+    font-size: 4 * variables.$size;
+    font-weight: 600;
+  }
+
+  /* Prose links: periwinkle, quiet at rest, underline on hover with a little
+     breathing room. Header anchors and image links opt out. */
+  a:not(.rp-header-anchor):not(:has(> img)) {
+    color: var(--mtr-link);
+    text-decoration: none;
+    text-underline-offset: 0.75 * variables.$size;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  /* Inline code. */
+  :not(pre) > code {
+    font-family: var(--mtr-font-mono);
+    font-size: 0.86em;
+    color: var(--mtr-violet);
+    background: var(--mtr-violet-dim);
+    border: 1px solid var(--mtr-line-soft);
+    border-radius: 1.25 * variables.$size;
+    padding: 0.1em 0.34em;
+  }
 }
 
+@media (max-width: 900px) {
+  .rp-doc.rspress-doc h1.rp-toc-include {
+    font-size: 8 * variables.$size;
+  }
+}
+
+/* ==========================================================================
+   Component overrides
+
+   Structural chrome (nav, sidebar, outline, pager, callouts, code blocks) is
+   nested under .rp-dark so we stay one class ahead of the stock theme no matter
+   the stylesheet load order. .rp-dark is always present while dark is forced.
+   ========================================================================== */
+.rp-dark {
+  /* ---- Top nav: translucent ink, blurred, hairline underneath ---- */
+  .rp-nav {
+    background: rgba(18, 14, 26, 0.86) !important;
+    backdrop-filter: saturate(150%) blur(12px);
+    border-bottom: 1px solid var(--mtr-line-soft);
+  }
+
+  .rp-nav-menu__item--active .rp-nav-menu__item__container {
+    color: var(--mtr-link);
+  }
+
+  /* ---- Sidebar ---- */
+  /* Section headers ("Help", "Self-Hosting", ...) are the eyebrow labels. */
+  .rp-sidebar-section-header__left span {
+    font-family: var(--mtr-font-body);
+    font-size: 2.875 * variables.$size;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--mtr-faint);
+  }
+
+  .rp-sidebar-item {
+    font-size: 3.375 * variables.$size;
+    color: var(--mtr-muted);
+    border-radius: 1.75 * variables.$size;
+    transition: color 0.12s ease, background-color 0.12s ease;
+
+    &:hover {
+      color: var(--mtr-text);
+      background: var(--mtr-surface);
+    }
+  }
+
+  /* Collapsible category rows ("Using monetr", "Installation", ...) sit a touch
+     brighter than their leaf items so the hierarchy still reads. */
+  .rp-sidebar-group > .rp-sidebar-item__left span,
+  a.rp-sidebar-group > .rp-sidebar-item__left span {
+    color: var(--mtr-text);
+    font-weight: 500;
+  }
+
+  .rp-sidebar-item--active {
+    color: var(--mtr-text);
+    font-weight: 500;
+    background: var(--mtr-violet-dim);
+    border-left: 2px solid var(--mtr-brand);
+    border-radius: 0 (1.75 * variables.$size) (1.75 * variables.$size) 0;
+
+    &:hover {
+      background: var(--mtr-violet-dim);
+    }
+
+    .rp-sidebar-item__left span {
+      color: var(--mtr-text);
+    }
+  }
+
+  /* Optional "new"-style tag chips that may appear on a sidebar item. */
+  .rp-sidebar-item__right .rp-tag,
+  .rp-sidebar-menu__right__text {
+    font-family: var(--mtr-font-mono);
+    font-size: 2.5 * variables.$size;
+    color: var(--mtr-cyan);
+    background: var(--mtr-cyan-dim);
+    border-radius: 1 * variables.$size;
+    padding: (0.25 * variables.$size) (1.25 * variables.$size);
+  }
+
+  /* ---- Outline / table of contents ---- */
+  .rp-outline__title {
+    font-family: var(--mtr-font-body);
+    font-size: 2.875 * variables.$size;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--mtr-faint);
+  }
+
+  /* rspress draws a rail on the outline container; the spec's rail is the
+     per-item left border instead, so drop the container's to avoid a redundant
+     second line and let the item rail sit flush left under the title. */
+  .rp-outline {
+    border-left: none;
+  }
+
+  .rp-outline__toc {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .rp-toc-item {
+    font-size: 3.25 * variables.$size;
+    color: var(--mtr-muted);
+    border-left: 1px solid var(--mtr-line);
+    transition: color 0.12s ease, border-color 0.12s ease;
+
+    &:hover {
+      color: var(--mtr-text);
+    }
+  }
+
+  /* rspress sets the item's padding-left inline per depth (0 for top level), so
+     the left rail ends up flush against the text. Pad the inner text span
+     instead to keep a steady gap from the rail at every depth. */
+  .rp-toc-item__text {
+    padding-left: 3 * variables.$size;
+  }
+
+  .rp-toc-item--active {
+    color: var(--mtr-violet);
+    border-left: 2px solid var(--mtr-brand);
+
+    /* hold the 1px the wider active border would otherwise steal, so the text
+       does not nudge sideways when an item becomes current. */
+    .rp-toc-item__text {
+      padding-left: 2.75 * variables.$size;
+    }
+  }
+
+  /* ---- Prev / next pager ---- */
+  /* The two cards are flex:1 and butt together in the middle by default; give
+     them some air. */
+  .rp-prev-next-page {
+    gap: 4 * variables.$size;
+  }
+
+  /* Elevate on hover with shadow only, no transform. Translating the card up
+     would vacate the pixels under the cursor at its bottom edge, dropping the
+     hover and flickering it on/off. The shadow reads as a lift without ever
+     moving the hit area. */
+  .rp-prev-next-page__item {
+    background: var(--mtr-surface);
+    border: 1px solid var(--mtr-line);
+    border-radius: 2.5 * variables.$size;
+    /* rspress only pads these 12px. The direction arrows hang in this horizontal
+       padding (so the label can line up with the title), and they slide outward
+       on hover, so 12px is not enough room and the arrow escapes past the tile
+       edge. Widen the side padding so the arrow has somewhere to go. */
+    padding: (3 * variables.$size) (5 * variables.$size);
+    transition: box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+      border-color 0.18s ease, background-color 0.18s ease;
+
+    &:hover {
+      /* rspress dims the card to 0.7 on hover, which fights our brighten and
+         reads as a flash; keep it solid. */
+      opacity: 1;
+      border-color: var(--mtr-brand);
+      background: var(--mtr-surface-2);
+      /* brand-tinted glow + soft drop so it reads as lifted on the dark surface */
+      box-shadow: 0 6px 20px -10px rgba(114, 0, 225, 0.5),
+        0 2px 6px -5px rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  .rp-prev-next-page__item__desc {
+    position: relative;
+    font-family: var(--mtr-font-mono);
+    font-size: 2.75 * variables.$size;
+    text-transform: lowercase;
+    color: var(--mtr-faint);
+    transition: color 0.18s ease;
+    /* rspress pads this 0 20px to make room for its own arrow icon. We moved the
+       arrow into the label itself, so that padding just indents the helper text
+       away from the title underneath it. Drop it so the two line up. */
+    padding: 0;
+  }
+
+  .rp-prev-next-page__item:hover .rp-prev-next-page__item__desc {
+    color: var(--mtr-link);
+  }
+
+  /* Arrows slide outward on hover for a small directional cue. They hang outside
+     the label (into the card's padding) rather than sitting inline, so the
+     helper text lines up flush with the page title underneath it instead of
+     getting nudged in by the arrow's width. */
+  .rp-prev-next-page__prev .rp-prev-next-page__item__desc::before {
+    content: '\2190';
+    position: absolute;
+    right: 100%;
+    margin-right: 0.5em;
+    transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .rp-prev-next-page__prev:hover .rp-prev-next-page__item__desc::before {
+    transform: translateX(#{-0.75 * variables.$size});
+  }
+
+  .rp-prev-next-page__next .rp-prev-next-page__item__desc::after {
+    content: '\2192';
+    position: absolute;
+    left: 100%;
+    margin-left: 0.5em;
+    transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .rp-prev-next-page__next:hover .rp-prev-next-page__item__desc::after {
+    transform: translateX(#{0.75 * variables.$size});
+  }
+
+  .rp-prev-next-page__item__title {
+    font-family: var(--mtr-font-body);
+    font-size: 3.75 * variables.$size;
+    font-weight: 600;
+    color: var(--mtr-text);
+  }
+
+  /* The stock theme tucks a chevron next to the title; our arrows live in the
+     direction label instead, so drop it. */
+  .rp-prev-next-page__icon {
+    display: none;
+  }
+
+  /* ---- Tables ---- */
+  .rp-table-scroll-container {
+    border: 1px solid var(--mtr-line);
+    border-radius: 2.5 * variables.$size;
+    overflow-x: auto;
+    /* rspress' .rp-scrollbar reserves a stable gutter. With no scrollbar in
+       play that leaves an empty strip on the right edge, which shows through the
+       rounded header. Only reserve the gutter when a scrollbar is actually up. */
+    scrollbar-gutter: auto;
+  }
+
+  /* Fill the rounded wrapper so the header background reaches both top corners
+     instead of stopping at the content width. */
+  .rp-table-scroll-container table {
+    width: 100%;
+    margin: 0;
+    border: none;
+  }
+
+  .rp-table-scroll-container th {
+    font-family: var(--mtr-font-body);
+    font-size: 3.125 * variables.$size;
+    font-weight: 600;
+    color: var(--mtr-muted);
+    background: var(--mtr-surface);
+    border: none;
+    border-bottom: 1px solid var(--mtr-line);
+  }
+
+  .rp-table-scroll-container td {
+    border: none;
+    border-bottom: 1px solid var(--mtr-line-soft);
+    background: transparent;
+  }
+
+  .rp-table-scroll-container tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* ---- Code blocks ---- */
+  .rp-codeblock {
+    background: var(--mtr-code-bg);
+    border: 1px solid var(--mtr-line);
+    border-radius: 2.5 * variables.$size;
+    overflow: hidden;
+  }
+
+  .rp-codeblock__title {
+    font-family: var(--mtr-font-mono);
+    font-size: 3 * variables.$size;
+    color: var(--mtr-muted);
+    background: var(--mtr-surface);
+    border-bottom: 1px solid var(--mtr-line);
+  }
+
+  .rp-codeblock__content {
+    background: var(--mtr-code-bg);
+  }
+
+  /* The markdown pre otherwise inherits the prose size and rspress' default
+     Menlo stack, so pin the code text to JetBrains Mono at the spec's 13px/1.7. */
+  .rp-codeblock__content pre,
+  .rp-codeblock__content pre code {
+    font-family: var(--mtr-font-mono);
+    font-size: 3.25 * variables.$size;
+    line-height: 1.7;
+  }
+
+  .rp-code-button-group__button {
+    color: var(--mtr-faint);
+
+    &:hover {
+      color: var(--mtr-text);
+    }
+  }
+
+  /* Comments arrive as inline-styled spans, so reach them by their style hook
+     to add the italic the spec asks for. */
+  pre.shiki span[style*='--shiki-token-comment'] {
+    font-style: italic;
+  }
+
+  /* ---- Callouts as ledger transaction rows ----
+     Rspress renders a directive as:
+       .rp-callout > .rp-callout__title + .rp-callout__content
+     We turn the title into a single ledger line: a mono eyebrow on the left, a
+     flexible dotted leader, then an amount chip on the right. Flex `order` lets
+     the ::before (leader) and ::after (chip) sit after the title text node even
+     though they generate around it. The body flows underneath as the memo. */
+  .rp-callout {
+    background: var(--mtr-surface);
+    border: 1px solid var(--mtr-line);
+    border-left: 3px solid var(--mtr-line);
+    border-radius: 0 (2.5 * variables.$size) (2.5 * variables.$size) 0;
+    padding: (3.25 * variables.$size) (4 * variables.$size);
+    margin: (6 * variables.$size) 0;
+    font-size: 3.625 * variables.$size;
+  }
+
+  .rp-callout__title {
+    display: flex;
+    align-items: center;
+    gap: 2.5 * variables.$size;
+    margin: 0;
+    font-family: var(--mtr-font-mono);
+    font-size: 2.75 * variables.$size;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
+    /* Kill the stock coloured bar; the container's left border is our accent. */
+    &::before {
+      content: '';
+      position: static;
+      order: 1;
+      flex: 1 1 auto;
+      align-self: center;
+      width: auto;
+      height: 0;
+      border-radius: 0;
+      border-bottom: 1px dotted var(--mtr-line);
+      background: none;
+    }
+
+    /* The amount chip. content + colour come from the per-type rules below. */
+    &::after {
+      order: 2;
+      flex: 0 0 auto;
+      font-family: var(--mtr-font-mono);
+      font-size: 2.75 * variables.$size;
+      font-weight: 500;
+      letter-spacing: 0;
+      text-transform: none;
+      border-radius: 1.25 * variables.$size;
+      padding: (0.5 * variables.$size) (2 * variables.$size);
+    }
+  }
+
+  .rp-callout__content {
+    color: var(--mtr-muted);
+    font-size: 3.625 * variables.$size;
+
+    p {
+      font-size: 3.625 * variables.$size;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    a {
+      color: var(--mtr-link);
+    }
+  }
+
+  /* tip -> positive, cyan, "+ tip" */
+  .rp-callout--tip {
+    border-left-color: var(--mtr-cyan);
+
+    .rp-callout__title {
+      color: var(--mtr-cyan);
+
+      &::after {
+        content: '+ tip';
+        color: var(--mtr-cyan);
+        background: var(--mtr-cyan-dim);
+      }
+    }
+  }
+
+  /* warning / caution / danger -> negative, pink, "- caution" */
+  .rp-callout--warning,
+  .rp-callout--caution,
+  .rp-callout--danger {
+    border-left-color: var(--mtr-pink);
+
+    .rp-callout__title {
+      color: var(--mtr-pink);
+
+      &::after {
+        content: '\2212 caution';
+        color: var(--mtr-pink);
+        background: var(--mtr-pink-dim);
+      }
+    }
+  }
+
+  /* note / info -> neutral, periwinkle, "= note" */
+  .rp-callout--note,
+  .rp-callout--info {
+    border-left-color: var(--mtr-periwinkle);
+
+    .rp-callout__title {
+      color: var(--mtr-link);
+
+      &::after {
+        content: '= note';
+        color: var(--mtr-link);
+        background: var(--mtr-violet-dim);
+      }
+    }
+  }
+
+  /* details stays a real disclosure widget, so give it a calm neutral look and
+     no chip (the summary keeps its marker). */
+  .rp-callout--details {
+    border-left-color: var(--mtr-faint);
+
+    .rp-callout__title {
+      color: var(--mtr-muted);
+
+      &::before {
+        display: none;
+      }
+
+      &::after {
+        content: none;
+      }
+    }
+  }
+}
+
+/* ==========================================================================
+   Accessibility + motion
+   ========================================================================== */
+:focus-visible {
+  outline: 2px solid var(--mtr-violet);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Responsive: hide the outline column on narrower viewports so the article can
+   use the full width. The sidebar keeps Rspress' own mobile behaviour.
+   ========================================================================== */
+@media (max-width: 1180px) {
+  .rp-doc-layout__outline {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   monetr nav and chrome fixups that live outside the themed sections above.
+   ========================================================================== */
 .rp-nav__right {
   min-width: 0;
 }
@@ -157,14 +807,47 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #3f3f46;
+  background-color: var(--mtr-line);
   border-radius: 20px;
   border: 6px solid transparent;
   background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #71717a;
+  background-color: var(--mtr-faint);
+}
+
+/* The sidebar fights us two ways. rspress sets the standard scrollbar-width and
+   scrollbar-color on it, and the moment Chromium sees a non-auto value there it
+   switches that element to a native scrollbar, buttons and all, ignoring the
+   ::-webkit-scrollbar styling above. That is the little increment/decrement
+   buttons the sidebar grows at the top and bottom. rspress ALSO ships its own
+   thin .rp-scrollbar webkit bar that out-specifies the page rules. So reset the
+   standard props to drop the native bar, then repaint the sidebar's webkit bar
+   to match the page exactly. The .rp-dark prefix is just here to win the
+   specificity race against rspress' own .rp-dark .rp-scrollbar rules. */
+.rp-dark .rp-doc-layout__sidebar.rp-scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+
+  &::-webkit-scrollbar {
+    width: 16px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: inherit;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--mtr-line);
+    background-clip: content-box;
+    border: 6px solid transparent;
+    border-radius: 20px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--mtr-faint);
+  }
 }
 
 .monetr {
@@ -215,6 +898,13 @@ mark {
 .rp-edit-link {
   color: var(--rp-c-text-3) !important;
   font-size: unset;
+  transition: color 0.18s ease;
+
+  &:hover {
+    /* Brighten to the same white the nav cards use on hover. !important is to
+       beat the base color above, which also sets it with !important. */
+    color: var(--mtr-text) !important;
+  }
 }
 
 /* Fixes an issue where images that are also links are rendered oddly */
@@ -230,9 +920,31 @@ mark {
   pointer-events: none;
 }
 
-p {
-  /* match nextra */
-  font-size: 17px;
+/* Center standalone screenshots horizontally. Markdown drops a lone image into
+ * its own paragraph and rspress renders the img as a block, so auto side margins
+ * pull it to the middle. The image-as-link variant is inline-flex, so that
+ * paragraph leans on text-align instead. The :only-child guard keeps inline
+ * images that share a paragraph with text where they are. */
+.rp-doc.rspress-doc {
+  p > img:only-child {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  p:has(> .rp-link:only-child > img) {
+    text-align: center;
+  }
+}
+
+/* When you click a screenshot, medium-zoom drops a full-screen overlay behind
+ * it. By default that overlay is a solid fill (it inline-styles the background
+ * to the page color), so the page just vanishes. Knock it back to a translucent
+ * ink and blur whats behind it so the zoomed image reads as floating over a
+ * frosted page. The !important is the only way to beat the inline background
+ * medium-zoom sets on the element. */
+.medium-zoom-overlay {
+  background: rgba(18, 14, 26, 0.6) !important; /* --mtr-ink, translucent */
+  backdrop-filter: saturate(120%) blur(8px);
 }
 
 .rp-last-updated > p {

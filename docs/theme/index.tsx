@@ -1,13 +1,21 @@
 import { Fragment, useEffect } from 'react';
 
-import { useFrontmatter } from '@rspress/core/runtime';
+import { useFrontmatter, usePage } from '@rspress/core/runtime';
 import { Layout as BasicLayout, Link, FallbackHeading as OriginalFallbackHeading } from '@rspress/core/theme-original';
 
 import 'katex/dist/katex.min.css';
-import '@fontsource-variable/inter';
 
+// Self-hosted faces for the docs theme. Inter is the body and heading face,
+// JetBrains Mono the code/metadata face.
+import '@fontsource-variable/inter';
+import '@fontsource/jetbrains-mono/400.css';
+import '@fontsource/jetbrains-mono/500.css';
+import '@fontsource/jetbrains-mono/600.css';
+
+import FundingBar from '@monetr/docs/components/FundingBar';
 import GithubStars from '@monetr/docs/components/GithubStars';
 import GradientHeading from '@monetr/docs/components/GradientHeading/GradientHeading';
+import LedgerMeta from '@monetr/docs/components/LedgerMeta';
 import PageMetadata from '@monetr/docs/components/PageMetadata';
 import QueryClientWrapper from '@monetr/docs/components/QueryClientWrapper';
 import SignIn from '@monetr/docs/components/SignIn';
@@ -63,6 +71,19 @@ function Footer() {
   );
 }
 
+// DocMeta renders the LedgerMeta row at the top of documentation pages. It is
+// wired into the doc layout's beforeDocContent slot so pages get the row without
+// any per-MDX additions. Scoped to the /documentation tree so policy/blog/custom
+// pages are left alone.
+function DocMeta() {
+  const { page } = usePage();
+  if (!page.routePath?.includes('/documentation')) {
+    return null;
+  }
+
+  return <LedgerMeta />;
+}
+
 const Layout = () => {
   useEffect(() => {
     // Ensure dark mode classes are present
@@ -72,10 +93,14 @@ const Layout = () => {
 
   return (
     <Fragment>
+      <FundingBar />
       <PageMetadata />
       <QueryClientWrapper>
         <BasicLayout
           afterNavMenu={<NavExtras />}
+          // Renders the page-metadata ledger row at the top of doc pages without
+          // touching any MDX. DocMeta gates this to the /documentation tree.
+          beforeDocContent={<DocMeta />}
           // TODO This renders weird on custom pages, causing a brief flash.
           // beforeNav={
           //   <NoSSR>
@@ -88,6 +113,10 @@ const Layout = () => {
           //   </NoSSR>
           // }
           bottom={<Footer />}
+          // Registers <LedgerMeta> (and anything else here) as a global MDX
+          // component. The top-level Layout threads `components` down to the
+          // MDXProvider that wraps page content, so docs can use it import-free.
+          components={{ LedgerMeta }}
           navTitle={<NavTitle />}
         />
       </QueryClientWrapper>

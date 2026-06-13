@@ -9,10 +9,21 @@ import { pluginSitemap } from '@rspress/plugin-sitemap';
 import { transformerNotationHighlight } from '@shikijs/transformers';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
+import readingTimePlugin from 'rspress-plugin-reading-time';
 
 const envName = process.env.NODE_ENV ?? 'development';
 const branch = process.env.GIT_BRANCH ?? 'main';
 const isDevelopment = envName !== 'production';
+
+// rspress-plugin-reading-time attaches a computed reading time to
+// pageData.readingTimeData (a reading-time result: { text, minutes, words, ... }).
+// Its default behaviour also injects its own component after the first heading,
+// but <LedgerMeta> renders the value itself, so we keep only the data hook.
+const readingTimeBase = readingTimePlugin();
+const readingTimeDataPlugin = {
+  name: readingTimeBase.name,
+  extendPageData: readingTimeBase.extendPageData,
+};
 
 export default defineConfig({
   outDir: process.env.OUTPUT_DIR ?? 'doc_build',
@@ -130,6 +141,7 @@ export default defineConfig({
       },
     }),
     trailingSlashRedirects({ siteUrl: 'https://monetr.app' }),
+    readingTimeDataPlugin,
   ],
   builderConfig: {
     plugins: [pluginSass()],
@@ -155,7 +167,7 @@ export default defineConfig({
     },
     performance: {
       preload: {
-        // Prevents dumb screen flash where the font is missing
+        // Prevents dumb screen flash where the font is missing.
         type: 'all-assets',
         include: [/inter-latin-wght-normal.*\.woff2$/],
       },

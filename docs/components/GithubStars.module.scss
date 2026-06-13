@@ -10,9 +10,10 @@
   border-radius: 0.5rem;
   border-width: 1px;
   border-style: solid;
-  border-color: var(--dark-monetr-border);
+  border-color: var(--mtr-line);
+  background-color: var(--mtr-surface);
   overflow: hidden;
-  transition-property: opacity;
+  transition-property: opacity, border-color;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 
@@ -21,6 +22,8 @@
   }
 
   &:hover {
+    border-color: var(--mtr-brand);
+
     .icon,
     .count {
       opacity: 0.8;
@@ -30,13 +33,14 @@
 
 .iconWrap {
   padding: 1 * variables.$size;
-  background-color: var(--zinc-800);
+  background-color: var(--mtr-surface-2);
 }
 
 .icon {
   opacity: 1;
   height: 6 * variables.$size;
   width: 6 * variables.$size;
+  color: var(--mtr-text);
 }
 
 .count {
@@ -47,10 +51,11 @@
   @include mixins.text-small;
   opacity: 1;
   width: 10 * variables.$size;
+  color: var(--mtr-text);
 }
 
 .skeleton {
   border-radius: 0.25rem;
-  background-color: var(--dark-monetr-background-emphasis);
-  color: var(--dark-monetr-background-emphasis);
+  background-color: var(--mtr-line);
+  color: var(--mtr-line);
 }
