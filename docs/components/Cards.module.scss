@@ -7,27 +7,42 @@
   margin-top: 4 * variables.$size;
 }
 
+// Match the look of the prev/next pager cards at the bottom of doc pages: same
+// surface, hairline border, radius, and brand-tinted hover lift. See the
+// .rp-prev-next-page__item rules in globals.scss, keep these two in sync.
 .card {
   display: flex;
   padding: 4 * variables.$size;
-  border-radius: 0.5rem;
-  border-width: 1px;
-  border-style: solid;
-  border-color: var(--zinc-700);
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-  background-color: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  text-decoration: none;
+  border-radius: 2.5 * variables.$size;
+  border: 1px solid var(--mtr-line);
+  background-color: var(--mtr-surface);
+  transition: box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.18s ease, background-color 0.18s ease;
+  // The global prose link styles add an underline on hover. This is a card, not
+  // a sentence link, so opt out. That underline snaps in instantly and fights
+  // the eased border, which is the inconsistency that felt off on mouse over.
+  // !important is the cheap way to beat the higher specificity prose rule.
+  text-decoration: none !important;
   color: inherit;
   margin-top: 2 * variables.$size;
   margin-bottom: 2 * variables.$size;
   gap: 2 * variables.$size;
 
   &:hover {
-    border-color: var(--zinc-500);
+    border-color: var(--mtr-brand);
+    background-color: var(--mtr-surface-2);
+    /* brand-tinted glow + soft drop, same lift the pager cards use */
+    box-shadow: 0 6px 20px -10px rgba(114, 0, 225, 0.5),
+      0 2px 6px -5px rgba(0, 0, 0, 0.6);
+  }
+
+  // Let the contents react on the same 0.18s timing as the border so the whole
+  // card lights up together instead of the text popping ahead of the chrome.
+  // Brighten to --mtr-text on hover so it matches the pager card title color.
+  &:hover .icon,
+  &:hover .title,
+  &:hover .description {
+    color: var(--mtr-text);
   }
 }
 
@@ -37,6 +52,7 @@
   display: flex;
   align-items: center;
   color: var(--mtr-link);
+  transition: color 0.18s ease;
 
   svg {
     width: 6 * variables.$size;
@@ -49,6 +65,7 @@
   font-weight: var(--semibold);
   margin-top: unset;
   margin-bottom: unset;
+  transition: color 0.18s ease;
 }
 
 .titleArrow {
@@ -58,7 +75,8 @@
 
 .description {
   @include mixins.text-small;
-  color: var(--zinc-400);
+  color: var(--mtr-muted);
   margin-top: 1 * variables.$size;
   line-height: 1;
+  transition: color 0.18s ease;
 }

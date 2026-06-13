@@ -898,6 +898,13 @@ mark {
 .rp-edit-link {
   color: var(--rp-c-text-3) !important;
   font-size: unset;
+  transition: color 0.18s ease;
+
+  &:hover {
+    /* Brighten to the same white the nav cards use on hover. !important is to
+       beat the base color above, which also sets it with !important. */
+    color: var(--mtr-text) !important;
+  }
 }
 
 /* Fixes an issue where images that are also links are rendered oddly */
