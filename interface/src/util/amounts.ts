@@ -61,9 +61,11 @@ export function getCurrencySymbolPrefixed(locale: string, currency: string): str
 export function getDecimalSeparator(locale: string): string {
   const localeAdjusted = locale.replace('_', '-');
   const numberWithDecimalSeparator = 1.1;
-  return Intl.NumberFormat(localeAdjusted)
-    .formatToParts(numberWithDecimalSeparator)
-    .find(part => part.type === 'decimal')?.value ?? '.';
+  return (
+    Intl.NumberFormat(localeAdjusted)
+      .formatToParts(numberWithDecimalSeparator)
+      .find(part => part.type === 'decimal')?.value ?? '.'
+  );
 }
 
 /**
@@ -75,9 +77,11 @@ export function getDecimalSeparator(locale: string): string {
 export function getNumberGroupSeparator(locale: string): string {
   const localeAdjusted = locale.replace('_', '-');
   const numberWithDecimalSeparator = 100000.1;
-  return Intl.NumberFormat(localeAdjusted)
-    .formatToParts(numberWithDecimalSeparator)
-    .find(part => part.type === 'group')?.value ?? ',';
+  return (
+    Intl.NumberFormat(localeAdjusted)
+      .formatToParts(numberWithDecimalSeparator)
+      .find(part => part.type === 'group')?.value ?? ','
+  );
 }
 
 export function intlNumberFormatter(locale: string = 'en_US', currency: string = 'USD'): (value: string) => string {
