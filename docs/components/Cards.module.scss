@@ -31,8 +31,17 @@
   }
 }
 
+// These used to be emoji sized by the font, now they are lucide svgs so size
+// and color them directly. 6 * size keeps the same 24px footprint the emoji had.
 .icon {
-  @include mixins.text-2-extra-large;
+  display: flex;
+  align-items: center;
+  color: var(--mtr-link);
+
+  svg {
+    width: 6 * variables.$size;
+    height: 6 * variables.$size;
+  }
 }
 
 .title {
