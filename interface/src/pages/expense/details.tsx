@@ -67,7 +67,9 @@ export default function ExpenseDetails(): React.JSX.Element | null {
     );
   }
 
-  if (isLoading) {
+  // Treat the locale still loading the same as the spending still loading, otherwise we fall all the way through to the
+  // null return below and flash a blank page while the currency formatting catches up.
+  if (isLoading || !locale) {
     return (
       <div className={styles.centerState}>
         <Typography size='5xl'>One moment...</Typography>
@@ -85,7 +87,7 @@ export default function ExpenseDetails(): React.JSX.Element | null {
     );
   }
 
-  if (!spending || !locale) {
+  if (!spending) {
     return null;
   }
 

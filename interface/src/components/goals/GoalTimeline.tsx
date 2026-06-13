@@ -4,7 +4,7 @@ import { ArrowUpRight, CircleCheck, TrendingUpDown } from 'lucide-react';
 import Typography from '@monetr/interface/components/Typography';
 import { type ForecastEvent, useForecast } from '@monetr/interface/hooks/useForecast';
 import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
-import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useLocaleCurrency, { type LocaleCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
@@ -22,6 +22,9 @@ interface TimelineItemData {
   date: Date;
   spending: Spending;
   fundingSchedule: FundingSchedule;
+  // locale is threaded down from the parent which has already confirmed it is loaded. The parent wont render any
+  // timeline items until then so we dont need to guard for it again in here.
+  locale: LocaleCurrency;
   spentAmount: number;
   totalSpentAmount: number;
   contributedAmount: number;
@@ -58,6 +61,7 @@ export default function GoalTimeline(props: GoalTimelineProps): React.JSX.Elemen
       date: event.date,
       spending,
       fundingSchedule,
+      locale,
       totalContributedAmount: event.contribution,
       totalSpentAmount: event.transaction,
       spentAmount: 0,
@@ -100,13 +104,8 @@ export default function GoalTimeline(props: GoalTimelineProps): React.JSX.Elemen
   );
 }
 
-function TimelineItem({ spending, fundingSchedule, ...props }: TimelineItemData): React.JSX.Element | null {
+function TimelineItem({ spending, fundingSchedule, locale, ...props }: TimelineItemData): React.JSX.Element | null {
   const { inTimezone } = useTimezone();
-  const { data: locale } = useLocaleCurrency();
-
-  if (!locale) {
-    return null;
-  }
 
   let header = '';
   let body = '';

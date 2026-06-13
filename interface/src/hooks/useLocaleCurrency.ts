@@ -11,7 +11,7 @@ enum CurrencySource {
   BankAccount,
 }
 
-interface LocaleCurrency {
+export interface LocaleCurrency {
   source: CurrencySource;
   locale: string;
   currency: string;

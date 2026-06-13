@@ -47,7 +47,7 @@ export default function FundingDetails(): React.JSX.Element | null {
   // router also present in the test?
   const [, params] = useRoute<{ bankId: string; fundingId: string }>('/bank/:bankId/funding/:fundingId/details');
   const fundingId = params?.fundingId;
-  const { data: funding } = useFundingSchedule(fundingId);
+  const { data: funding, isLoading, isError } = useFundingSchedule(fundingId);
   const { data: link } = useCurrentLink();
   const isManual = Boolean(link?.getIsManual());
   const [, navigate] = useLocation();
@@ -65,7 +65,27 @@ export default function FundingDetails(): React.JSX.Element | null {
     );
   }
 
-  if (!funding || !locale) {
+  // Treat the locale still loading the same as the funding schedule still loading, otherwise we fall all the way through
+  // to the null return below and flash a blank page while the currency formatting catches up.
+  if (isLoading || !locale) {
+    return (
+      <div className={styles.centerState}>
+        <Typography size='5xl'>One moment...</Typography>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className={styles.centerState}>
+        <HeartCrack className={styles.errorIcon} />
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>Couldn't find the funding schedule you specified...</Typography>
+      </div>
+    );
+  }
+
+  if (!funding) {
     return null;
   }
 
