@@ -1,0 +1,36 @@
+// A page-metadata row styled like a single ledger entry: the date on the left,
+// a dotted leader stretching across, and the reading time posted on the right
+// like a credit.
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 28px;
+  padding: 9px 2px;
+  border-top: 1px solid var(--mtr-line-soft);
+  border-bottom: 1px solid var(--mtr-line-soft);
+  font-family: var(--mtr-font-mono);
+  font-size: 12px;
+}
+
+.date {
+  color: var(--mtr-faint);
+  white-space: nowrap;
+}
+
+.leader {
+  flex: 1 1 auto;
+  align-self: center;
+  height: 0;
+  border-bottom: 1px dotted var(--mtr-line);
+}
+
+.label {
+  color: var(--mtr-faint);
+  white-space: nowrap;
+}
+
+.value {
+  color: var(--mtr-cyan);
+  white-space: nowrap;
+}
