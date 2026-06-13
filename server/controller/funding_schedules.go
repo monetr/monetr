@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -10,7 +9,6 @@ import (
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/schemas"
-	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 )
 
@@ -276,7 +274,7 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	// Retrieve the existing funding schedule to make sure some fields cannot be overridden
-	fundingSchedule, err := repo.GetFundingSchedule(
+	originalFundingSchedule, err := repo.GetFundingSchedule(
 		c.getContext(ctx),
 		bankAccountId,
 		fundingScheduleId,
@@ -285,24 +283,18 @@ func (c *Controller) patchFundingSchedule(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to verify funding schedule exists")
 	}
 
-	// Make a copy of the original so we can compare some things.
-	originalFundingSchedule := *fundingSchedule
+	fundingSchedule, err := parse(
+		c,
+		ctx,
+		originalFundingSchedule,
+		schemas.PatchFundingSchedule,
+	)
+	if err != nil {
+		return err
+	}
 
-	switch err := fundingSchedule.UnmarshalRequest(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		fundingSchedule.UpdateValidators()...,
-	).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case *json.SyntaxError:
-		return c.invalidJsonError(ctx, err)
-	case nil:
-	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
+	if fundingSchedule.NextRecurrence.Before(c.Clock.Now()) {
+		return c.badRequest(ctx, "Next recurrence must be in the future")
 	}
 
 	if fundingSchedule.AutoCreateTransaction {

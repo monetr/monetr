@@ -38,6 +38,30 @@ func TestPostFundingSchedules(t *testing.T) {
 		response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
 	})
 
+	t.Run("create a funding schedule with an explicit null description", func(t *testing.T) {
+		// The UI sends description as an explicit null when there isnt one, so make
+		// sure the validation accepts that and does not require us to wrap the
+		// description rule in a OneOf(Nil, ...) just to allow it.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":        "Payday",
+				"description": nil,
+				"ruleset":     FifthteenthAndLastDayOfEveryMonth,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.fundingScheduleId").String().NotEmpty()
+	})
+
 	t.Run("name is too long", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
