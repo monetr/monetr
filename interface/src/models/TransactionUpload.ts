@@ -14,7 +14,7 @@ export default class TransactionUpload {
   transactionUploadId: string;
   bankAccountId: string;
   fileId: string;
-  file?: MonetrFile;
+  file: MonetrFile | null;
   status: TransactionUploadStatus;
   error: string | null;
   createdAt: Date;
@@ -26,7 +26,7 @@ export default class TransactionUpload {
     this.transactionUploadId = data.transactionUploadId;
     this.bankAccountId = data.bankAccountId;
     this.fileId = data.fileId;
-    this.file = data.file ? new MonetrFile(data.file) : undefined;
+    this.file = data.file ? new MonetrFile(data.file) : null;
     this.status = data.status;
     this.error = data.error ?? null;
     this.createdAt = parseDate(data.createdAt);

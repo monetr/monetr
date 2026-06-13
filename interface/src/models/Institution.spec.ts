@@ -68,6 +68,7 @@ describe('InstitutionStatus', () => {
 
   it('will create with some incidents', () => {
     const result = new InstitutionStatus({
+      transactions_updates: null,
       plaidIncidents: [
         {
           start: addDays(new Date(), -2),
@@ -95,6 +96,7 @@ describe('Institutions', () => {
       url: 'https://www.usbank.com/',
       primaryColor: 'blue',
       logo: 'I am a picture',
+      status: null,
     });
 
     expect(item.name).toBe('U.S. Bank');

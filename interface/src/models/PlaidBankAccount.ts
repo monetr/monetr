@@ -11,7 +11,7 @@ export default class PlaidBankAccount {
   currentBalance: number;
   limitBalance: number | null;
   createdAt: Date;
-  createdByUserId: ID<User>;
+  createdBy: ID<User>;
 
   constructor(data: WithJsonValues<PlaidBankAccount>) {
     this.name = data.name;
@@ -21,6 +21,8 @@ export default class PlaidBankAccount {
     this.currentBalance = data.currentBalance;
     this.limitBalance = data.limitBalance ?? null;
     this.createdAt = parseDate(data.createdAt);
-    this.createdByUserId = ID.from(data.createdByUserId);
+    // The API sends this as `createdBy`, the old field name read `createdByUserId` which the
+    // server never actually sends so it was always undefined.
+    this.createdBy = ID.from(data.createdBy);
   }
 }

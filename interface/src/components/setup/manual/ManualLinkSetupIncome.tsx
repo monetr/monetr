@@ -80,11 +80,12 @@ export default function ManualLinkSetupIncome(): React.JSX.Element {
         createFundingSchedule({
           bankAccountId: bankAccount.bankAccountId,
           name: 'Payday',
+          description: null,
           nextRecurrence: startOfDay(values.nextPayday, {
             in: inTimezone,
           }),
           ruleset: values.ruleset,
-          estimatedDeposit: locale.friendlyToAmount(values.paydayAmount),
+          estimatedDeposit: values.paydayAmount === 0 ? null : locale.friendlyToAmount(values.paydayAmount),
           excludeWeekends: false,
           autoCreateTransaction: false,
         }),

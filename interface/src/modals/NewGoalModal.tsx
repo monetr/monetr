@@ -22,7 +22,6 @@ import { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
 import { SpendingType } from '@monetr/interface/models/Spending';
 import type { APIError } from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './NewGoalModal.module.scss';
@@ -140,7 +139,5 @@ const newGoalModal = NiceModal.create(NewGoalModal);
 export default newGoalModal;
 
 export function showNewGoalModal(): Promise<Spending | null> {
-  return NiceModal.show<Spending | null, ExtractProps<typeof newGoalModal>, Partial<ExtractProps<typeof newGoalModal>>>(
-    newGoalModal,
-  );
+  return NiceModal.show(newGoalModal) as Promise<Spending | null>;
 }

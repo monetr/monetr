@@ -18,7 +18,6 @@ import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import { useTransfer } from '@monetr/interface/hooks/useTransfer';
 import { AmountType } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './TransferModal.module.scss';
@@ -180,10 +179,7 @@ const transferModal = NiceModal.create<TransferModalProps>(TransferModal);
 export default transferModal;
 
 export function showTransferModal(props: TransferModalProps): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof transferModal>, Partial<ExtractProps<typeof transferModal>>>(
-    transferModal,
-    props,
-  );
+  return NiceModal.show(transferModal, props) as Promise<void>;
 }
 
 function ReverseTargetsButton(): React.JSX.Element {

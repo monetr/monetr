@@ -60,12 +60,13 @@ describe('create funding schedule', () => {
     await act(async () => {
       result = await world.result.current({
         bankAccountId: ID.from<BankAccount>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
-        description: 'something',
         name: "Elliot's Contribution",
+        description: 'something',
         nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
         ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
         estimatedDeposit: null,
         excludeWeekends: true,
+        autoCreateTransaction: false,
       });
     });
     expect(result).toBeDefined();
@@ -105,6 +106,7 @@ describe('create funding schedule', () => {
           ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           estimatedDeposit: null,
           excludeWeekends: true,
+          autoCreateTransaction: false,
         }),
       ).rejects.toMatchObject({
         message: 'Request failed with status code 400',

@@ -14,8 +14,8 @@ export type JsonEquivalent<T> = T extends Date
   ? string
   : T extends ID<Prefixed<string>>
     ? T
-    : T extends Array<infer U>
-      ? Array<T[number] | JsonEquivalent<U>>
+    : T extends Array<unknown>
+      ? Array<T[number] | JsonEquivalent<T[number]>>
       : T extends object
         ? {
             [K in keyof T as JsonDataKey<K, T[K]>]: T[K] | JsonEquivalent<T[K]>;

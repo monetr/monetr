@@ -25,7 +25,6 @@ import { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
 import { SpendingType } from '@monetr/interface/models/Spending';
 import type { APIError } from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './NewExpenseModal.module.scss';
@@ -194,9 +193,5 @@ const newExpenseModal = NiceModal.create(NewExpenseModal);
 export default newExpenseModal;
 
 export function showNewExpenseModal(): Promise<Spending | null> {
-  return NiceModal.show<
-    Spending | null,
-    ExtractProps<typeof newExpenseModal>,
-    Partial<ExtractProps<typeof newExpenseModal>>
-  >(newExpenseModal);
+  return NiceModal.show(newExpenseModal) as Promise<Spending | null>;
 }

@@ -31,7 +31,7 @@ export default class Recurrence {
       thisOptions.byhour = null;
       thisOptions.byminute = null;
       thisOptions.bysecond = null;
-      inputOptions.tzid = null;
+      thisOptions.tzid = null;
 
       const a = JSON.stringify(inputRule.options);
       const b = JSON.stringify(thisRule.options);
@@ -68,7 +68,7 @@ export default class Recurrence {
       thisOptions.byhour = null;
       thisOptions.byminute = null;
       thisOptions.bysecond = null;
-      inputOptions.tzid = null;
+      thisOptions.tzid = null;
 
       const a = ruleSignature(inputRule);
       const b = ruleSignature(thisRule);

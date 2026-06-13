@@ -21,7 +21,6 @@ import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBan
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import type { APIError } from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './NewFundingModal.module.scss';
@@ -69,6 +68,7 @@ function NewFundingModal(): React.JSX.Element {
       return await createFundingSchedule({
         bankAccountId: selectedBankAccountId,
         name: values.name,
+        description: null,
         nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
           in: inTimezone,
         }),
@@ -195,9 +195,5 @@ const newFundingModal = NiceModal.create(NewFundingModal);
 export default newFundingModal;
 
 export function showNewFundingModal(): Promise<FundingSchedule | null> {
-  return NiceModal.show<
-    FundingSchedule | null,
-    ExtractProps<typeof newFundingModal>,
-    Partial<ExtractProps<typeof newFundingModal>>
-  >(newFundingModal);
+  return NiceModal.show(newFundingModal) as Promise<FundingSchedule | null>;
 }

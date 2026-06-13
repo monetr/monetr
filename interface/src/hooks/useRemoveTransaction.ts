@@ -30,8 +30,8 @@ export function useRemoveTransaction(): (_: RemoveTransactionRequest) => Promise
     params.set('adjusts_balance', String(adjustsBalance));
     params.set('soft', String(softDelete));
     // Send the delete request to the server and handle any changes returned.
-    return await request({ method: 'DELETE', url: `${path}?${params.toString()}` })
-      .then(result => result.data as RemoveTransactionResponse)
+    return await request<RemoveTransactionResponse>({ method: 'DELETE', url: `${path}?${params.toString()}` })
+      .then(result => result.data)
       .then(
         async (_: RemoveTransactionResponse) =>
           await Promise.all([

@@ -14,7 +14,6 @@ import SimilarTransactionItem from '@monetr/interface/components/transactions/Si
 import { useRemoveTransaction } from '@monetr/interface/hooks/useRemoveTransaction';
 import type Transaction from '@monetr/interface/models/Transaction';
 import type { APIError } from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './RemoveTransactionModal.module.scss';
@@ -122,9 +121,5 @@ const removeTransactionModal = NiceModal.create<RemoveTransactionModalProps>(Rem
 export default removeTransactionModal;
 
 export function showRemoveTransactionModal(props: RemoveTransactionModalProps): Promise<void> {
-  return NiceModal.show<
-    void,
-    ExtractProps<typeof removeTransactionModal>,
-    Partial<ExtractProps<typeof removeTransactionModal>>
-  >(removeTransactionModal, props);
+  return NiceModal.show(removeTransactionModal, props) as Promise<void>;
 }

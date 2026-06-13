@@ -6,6 +6,7 @@ import (
 
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/monetr/validation"
+	"github.com/monetr/validation/is"
 )
 
 type OptionalOrRequire = bool
@@ -19,13 +20,17 @@ func Name(required OptionalOrRequire) *validation.KeyRules[string] {
 	return validation.Key(
 		"name",
 		validation.Required.When(required).Error("Name is required"),
+		is.PrintableUnicode,
 		validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
 	).Required(required)
 }
 
+// Description is a shorthand for description fields on object.
+// Deprecated: Use a custom rule instead.
 func Description() *validation.KeyRules[string] {
 	return validation.Key(
 		"description",
+		is.PrintableUnicode,
 		validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
 	).Required(Optional)
 }

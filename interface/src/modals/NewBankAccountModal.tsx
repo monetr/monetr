@@ -19,7 +19,6 @@ import useLocaleCurrency, { DefaultCurrency } from '@monetr/interface/hooks/useL
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import type { APIError } from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './NewBankAccountModal.module.scss';
@@ -147,9 +146,5 @@ const newBankAccountModal = NiceModal.create(NewBankAccountModal);
 export default newBankAccountModal;
 
 export function showNewBankAccountModal(): Promise<void> {
-  return NiceModal.show<
-    void,
-    ExtractProps<typeof newBankAccountModal>,
-    Partial<ExtractProps<typeof newBankAccountModal>>
-  >(newBankAccountModal);
+  return NiceModal.show(newBankAccountModal) as Promise<void>;
 }

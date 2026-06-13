@@ -25,7 +25,7 @@ export function useUpdateBankAccount(): (_bankAccount: UpdateBankAccountRequest)
     mutationFn: updateBankAccount,
     onSuccess: (updatedBankAccount: BankAccount) =>
       Promise.all([
-        queryClient.setQueryData(['/api/bank_accounts'], (previous: Array<Partial<BankAccount>>) =>
+        queryClient.setQueryData(['/api/bank_accounts'], (previous: Array<WithJsonValues<BankAccount>>) =>
           previous.map(item => (item.bankAccountId === updatedBankAccount.bankAccountId ? updatedBankAccount : item)),
         ),
         queryClient.setQueryData([`/api/bank_accounts/${updatedBankAccount.bankAccountId}`], updatedBankAccount),

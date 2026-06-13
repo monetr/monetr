@@ -139,9 +139,5 @@ const enableTOTPModal = NiceModal.create(EnableTOTPModal);
 export default enableTOTPModal;
 
 export function showEnableTOTPModal(): Promise<void> {
-  return NiceModal.show<
-    void,
-    React.ComponentProps<typeof enableTOTPModal>,
-    Partial<React.ComponentProps<typeof enableTOTPModal>>
-  >(enableTOTPModal);
+  return NiceModal.show(enableTOTPModal) as Promise<void>;
 }

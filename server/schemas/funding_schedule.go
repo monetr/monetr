@@ -6,12 +6,27 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
+	"github.com/monetr/validation/is"
 )
 
 var (
 	CreateFundingSchedule = validation.Map(
-		validators.Name(validators.Require),
-		validators.Description(),
+		validation.Key(
+			"name",
+			validation.Required.Error("Name is required"),
+			is.PrintableUnicode,
+			validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
+		).Required(validators.Require),
+		validation.Key(
+			"description",
+			validation.OneOf(
+				validation.Nil,
+				validation.AllOf(
+					is.PrintableUnicode,
+					validation.Length(1, 300).Error("Description must be between 1 and 300 characters"),
+				),
+			),
+		).Required(validators.Optional),
 		validation.Key(
 			"ruleset",
 			validation.Required.Error("Ruleset must be specified for funding schedules"),
@@ -30,8 +45,13 @@ var (
 		).Required(validators.Optional),
 		validation.Key(
 			"estimatedDeposit",
-			PositiveAmount("Estimated deposit"),
-			validation.Min(float64(0)).Error("Estimated deposit cannot be less than 0"),
+			validation.OneOf(
+				validation.Nil,
+				validation.AllOf(
+					PositiveAmount("Estimated deposit"),
+					validation.Min(float64(0)).Error("Estimated deposit cannot be less than 0"),
+				),
+			),
 		).Required(validators.Optional),
 		validation.Key(
 			"nextRecurrence",

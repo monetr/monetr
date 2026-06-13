@@ -10,7 +10,7 @@ import request from '@monetr/interface/util/request';
 
 // A create only ever sends the fields the user actually filled out, the rest of the writable fields are computed by the
 // server so we make the writable portion partial here. The required fields are enforced by the form validators.
-export type CreateFundingScheduleRequest = Partial<Writable<FundingSchedule>> & { bankAccountId: ID<BankAccount> };
+export type CreateFundingScheduleRequest = Writable<FundingSchedule> & { bankAccountId: ID<BankAccount> };
 
 export function useCreateFundingSchedule(): (_funding: CreateFundingScheduleRequest) => Promise<FundingSchedule> {
   const createFundingSchedule = useCallback(

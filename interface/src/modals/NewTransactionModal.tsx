@@ -23,7 +23,6 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './NewTransactionModal.module.scss';
@@ -220,9 +219,5 @@ const newTransactionModal = NiceModal.create(NewTransactionModal);
 export default newTransactionModal;
 
 export function showNewTransactionModal(): Promise<void> {
-  return NiceModal.show<
-    void,
-    ExtractProps<typeof newTransactionModal>,
-    Partial<ExtractProps<typeof newTransactionModal>>
-  >(newTransactionModal);
+  return NiceModal.show(newTransactionModal) as Promise<void>;
 }

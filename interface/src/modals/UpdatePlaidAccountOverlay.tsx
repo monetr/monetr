@@ -14,7 +14,6 @@ import MModal from '@monetr/interface/components/MModal';
 import Typography from '@monetr/interface/components/Typography';
 import type Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 import styles from './UpdatePlaidAccountOverlay.module.scss';
 
@@ -161,9 +160,5 @@ const updatePlaidAccountOverlay = NiceModal.create<UpdatePlaidAccountOverlayProp
 export default updatePlaidAccountOverlay;
 
 export function showUpdatePlaidAccountOverlay(props: UpdatePlaidAccountOverlayProps): Promise<void> {
-  return NiceModal.show<
-    void,
-    ExtractProps<typeof updatePlaidAccountOverlay>,
-    Partial<ExtractProps<typeof updatePlaidAccountOverlay>>
-  >(updatePlaidAccountOverlay, props);
+  return NiceModal.show(updatePlaidAccountOverlay, props) as Promise<void>;
 }

@@ -6,7 +6,7 @@ export default class Institution {
   url: string | null;
   primaryColor: string | null;
   logo: string | null;
-  status?: InstitutionStatus;
+  status: InstitutionStatus | null;
   // timestamp is not returned by the API, we stamp it client side when we hydrate the model so we know roughly how
   // stale the data we are looking at is.
   readonly timestamp: Date;
@@ -16,13 +16,13 @@ export default class Institution {
     this.url = data.url ?? null;
     this.primaryColor = data.primaryColor ?? null;
     this.logo = data.logo ?? null;
-    this.status = data.status ? new InstitutionStatus(data.status) : undefined;
+    this.status = data.status ? new InstitutionStatus(data.status) : null;
     this.timestamp = new Date();
   }
 }
 
 export class InstitutionStatus {
-  transactions_updates?: PlaidProductStatus;
+  transactions_updates: PlaidProductStatus | null;
   plaidIncidents: InstitutionPlaidIncident[];
 
   constructor(data: WithJsonValues<InstitutionStatus>) {
@@ -34,7 +34,7 @@ export class InstitutionStatus {
           last_status_change: parseDate(data.transactions_updates.last_status_change),
           breakdown: data.transactions_updates.breakdown,
         }
-      : undefined;
+      : null;
     this.plaidIncidents = (data.plaidIncidents ?? []).map(item => new InstitutionPlaidIncident(item));
   }
 }

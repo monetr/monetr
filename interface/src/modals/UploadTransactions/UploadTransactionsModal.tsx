@@ -13,7 +13,6 @@ import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/Pro
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 import fileSize from '@monetr/interface/util/fileSize';
 import request, { type ApiResponse } from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 import styles from './UploadTransactionsModal.module.scss';
 
@@ -232,9 +231,5 @@ const uploadTransactionsModal = NiceModal.create(UploadTransactionsModal);
 export default uploadTransactionsModal;
 
 export function showUploadTransactionsModal(): Promise<void> {
-  return NiceModal.show<
-    void,
-    ExtractProps<typeof uploadTransactionsModal>,
-    Partial<ExtractProps<typeof uploadTransactionsModal>>
-  >(uploadTransactionsModal);
+  return NiceModal.show(uploadTransactionsModal) as Promise<void>;
 }
