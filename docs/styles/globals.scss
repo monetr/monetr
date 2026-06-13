@@ -865,6 +865,33 @@ mark {
   pointer-events: none;
 }
 
+/* Center standalone screenshots horizontally. Markdown drops a lone image into
+ * its own paragraph and rspress renders the img as a block, so auto side margins
+ * pull it to the middle. The image-as-link variant is inline-flex, so that
+ * paragraph leans on text-align instead. The :only-child guard keeps inline
+ * images that share a paragraph with text where they are. */
+.rp-doc.rspress-doc {
+  p > img:only-child {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  p:has(> .rp-link:only-child > img) {
+    text-align: center;
+  }
+}
+
+/* When you click a screenshot, medium-zoom drops a full-screen overlay behind
+ * it. By default that overlay is a solid fill (it inline-styles the background
+ * to the page color), so the page just vanishes. Knock it back to a translucent
+ * ink and blur whats behind it so the zoomed image reads as floating over a
+ * frosted page. The !important is the only way to beat the inline background
+ * medium-zoom sets on the element. */
+.medium-zoom-overlay {
+  background: rgba(18, 14, 26, 0.6) !important; /* --mtr-ink, translucent */
+  backdrop-filter: saturate(120%) blur(8px);
+}
+
 .rp-last-updated > p {
   font-size: unset;
 }
