@@ -1,8 +1,8 @@
 import { ID, idPrefix } from '@monetr/interface/models/ID';
 import LunchFlowLink, { LunchFlowLinkStatus } from '@monetr/interface/models/LunchFlowLink';
 import PlaidLink, { PlaidLinkStatus } from '@monetr/interface/models/PlaidLink';
-import User from '@monetr/interface/models/User';
-import { WithJsonValues } from '@monetr/interface/util/json';
+import type User from '@monetr/interface/models/User';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum LinkType {
@@ -41,7 +41,18 @@ export default class Link {
   plaidLink: PlaidLink | null;
   lunchFlowLink: LunchFlowLink | null;
 
-  constructor(data: WithJsonValues<Link>) {}
+  constructor(data: WithJsonValues<Link>) {
+    this.linkId = ID.from(data.linkId);
+    this.lunchFlowLinkId = data.lunchFlowLinkId ? ID.from(data.lunchFlowLinkId) : null;
+    this.linkType = data.linkType;
+    this.institutionName = data.institutionName;
+    this.description = data.description ?? null;
+    this.updatedAt = parseDate(data.updatedAt);
+    this.createdAt = parseDate(data.createdAt);
+    this.createdBy = ID.from(data.createdBy);
+    this.plaidLink = data.plaidLink ? new PlaidLink(data.plaidLink) : null;
+    this.lunchFlowLink = data.lunchFlowLink ? new LunchFlowLink(data.lunchFlowLink) : null;
+  }
 
   getName(): string {
     return this.institutionName;

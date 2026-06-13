@@ -1,6 +1,7 @@
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
-import type MonetrFile from './File';
+import MonetrFile from './File';
 
 export enum TransactionUploadStatus {
   Pending = 'pending',
@@ -21,14 +22,16 @@ export default class TransactionUpload {
   processedAt: Date | null;
   completedAt: Date | null;
 
-  constructor(data?: Partial<TransactionUpload>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        createdAt: parseDate(data?.createdAt),
-        processedAt: parseDate(data?.processedAt),
-        completedAt: parseDate(data?.completedAt),
-      });
-    }
+  constructor(data: WithJsonValues<TransactionUpload>) {
+    this.transactionUploadId = data.transactionUploadId;
+    this.bankAccountId = data.bankAccountId;
+    this.fileId = data.fileId;
+    this.file = data.file ? new MonetrFile(data.file) : undefined;
+    this.status = data.status;
+    this.error = data.error ?? null;
+    this.createdAt = parseDate(data.createdAt);
+    this.createdBy = data.createdBy;
+    this.processedAt = parseDate(data.processedAt);
+    this.completedAt = parseDate(data.completedAt);
   }
 }

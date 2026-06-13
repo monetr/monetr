@@ -41,39 +41,39 @@
     width: 56 * variables.$size;
     padding: 4 * variables.$size;
   }
-}
 
-// Selectable tile, not yet selected.
-.tileInactive {
-  cursor: pointer;
-  border-width: 1px;
-  border-color: var(--border);
+  // Selectable tile, not yet selected.
+  &[data-state='inactive'] {
+    cursor: pointer;
+    border-width: 1px;
+    border-color: var(--border);
 
-  &:hover {
-    border-color: var(--border-string);
+    &:hover {
+      border-color: var(--border-string);
+    }
   }
-}
 
-// Selectable tile, currently selected.
-.tileActive {
-  cursor: pointer;
-  border-width: 1px;
-  border-color: var(--brand);
+  // Selectable tile, currently selected.
+  &[data-state='active'] {
+    cursor: pointer;
+    border-width: 1px;
+    border-color: var(--brand);
 
-  &:hover {
-    border-color: var(--brand-subtle);
+    &:hover {
+      border-color: var(--brand-subtle);
+    }
   }
-}
 
-// Unavailable / coming-soon tile.
-.tileDisabled {
-  cursor: not-allowed;
-  color: var(--content-muted);
-  opacity: 0.5;
+  // Unavailable / coming-soon tile.
+  &[data-state='disabled'] {
+    cursor: not-allowed;
+    color: var(--content-muted);
+    opacity: 0.5;
 
-  --ring-color: var(--border-subtle);
-  --ring-size: 1px;
-  @include mixins.inset-ring;
+    --ring-color: var(--border-subtle);
+    --ring-size: 1px;
+    @include mixins.inset-ring;
+  }
 }
 
 // The selected-state check mark in the top right corner.

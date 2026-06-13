@@ -148,11 +148,7 @@ interface OnboardingTileProps {
 
 function OnboardingTile(props: OnboardingTileProps): React.JSX.Element | null {
   const disabledState = props.comingSoon || props.disabled;
-  const wrapperClasses = mergeClasses(styles.tile, {
-    [styles.tileActive]: !disabledState && props.active,
-    [styles.tileInactive]: !disabledState && !props.active,
-    [styles.tileDisabled]: disabledState,
-  });
+  const tileState = disabledState ? 'disabled' : props.active ? 'active' : 'inactive';
 
   function handleClick() {
     if (props.comingSoon) {
@@ -170,7 +166,7 @@ function OnboardingTile(props: OnboardingTileProps): React.JSX.Element | null {
   }
 
   return (
-    <button className={wrapperClasses} onClick={handleClick} type='button'>
+    <button className={styles.tile} data-state={tileState} onClick={handleClick} type='button'>
       {props.active && <CircleCheck className={styles.checkIcon} />}
       {React.createElement(props.icon, {
         className: styles.tileIcon,

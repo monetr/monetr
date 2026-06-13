@@ -1,3 +1,4 @@
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum PlaidLinkStatus {
@@ -25,17 +26,21 @@ export default class PlaidLink {
   createdAt: Date;
   createdBy: string;
 
-  constructor(data?: Partial<PlaidLink>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        expirationDate: parseDate(data?.expirationDate),
-        lastManualSync: parseDate(data?.lastManualSync),
-        lastSuccessfulUpdate: parseDate(data?.lastSuccessfulUpdate),
-        lastAttemptedUpdate: parseDate(data?.lastAttemptedUpdate),
-        updatedAt: parseDate(data?.updatedAt),
-        createdAt: parseDate(data?.createdAt),
-      });
-    }
+  constructor(data: WithJsonValues<PlaidLink>) {
+    this.products = data.products;
+    this.status = data.status;
+    this.errorCode = data.errorCode;
+    // These dates are all optional so we coalesce the null that parseDate returns back into undefined to match the
+    // field types.
+    this.expirationDate = parseDate(data.expirationDate) ?? undefined;
+    this.newAccountsAvailable = data.newAccountsAvailable;
+    this.institutionId = data.institutionId;
+    this.institutionName = data.institutionName;
+    this.lastManualSync = parseDate(data.lastManualSync) ?? undefined;
+    this.lastSuccessfulUpdate = parseDate(data.lastSuccessfulUpdate) ?? undefined;
+    this.lastAttemptedUpdate = parseDate(data.lastAttemptedUpdate) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt);
+    this.createdAt = parseDate(data.createdAt);
+    this.createdBy = data.createdBy;
   }
 }

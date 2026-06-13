@@ -19,6 +19,8 @@ import { useLink } from '@monetr/interface/hooks/useLink';
 import { usePatchLink } from '@monetr/interface/hooks/usePatchLink';
 import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import type BankAccount from '@monetr/interface/models/BankAccount';
+import type { ID } from '@monetr/interface/models/ID';
+import type LinkModel from '@monetr/interface/models/Link';
 import capitalize from '@monetr/interface/util/capitalize';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
@@ -31,7 +33,7 @@ interface LinkValues {
 
 export default function LinkDetails(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const { linkId } = useParams<{ linkId: string }>();
+  const { linkId } = useParams<{ linkId: ID<LinkModel> }>();
   const { data: link, isLoading: linkIsLoading } = useLink(linkId);
   const { data: bankAccounts, isLoading: bankAccountsLoading } = useBankAccountsForLink(linkId);
   const patchLink = usePatchLink();

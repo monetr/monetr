@@ -27,7 +27,7 @@ export default function MStepper(props: MStepperProps): React.JSX.Element {
           index === activeIndex, // Active.
           index < activeIndex, // Completed
         ].indexOf(true)
-      ];
+      ] ?? MStepState.Inactive;
 
     // We will show the divider when we are not the last item.
     const divider = index !== steps.length - 1;
@@ -72,10 +72,9 @@ function MStep(props: MStepProps): React.JSX.Element {
   );
 
   const textClass = mergeClasses(
-    {
-      // On smaller screens hide the text for items that are not the current step or not the next step.
-      [styles.textHidden]: ![props.currentIndex, props.currentIndex + 1].includes(props.index),
-    },
+    // On smaller screens hide the text for items that are not the current step or not the next step. There isn't a
+    // stable base class on this element to hang a data attribute off of, so we keep the conditional class here.
+    ![props.currentIndex, props.currentIndex + 1].includes(props.index) && styles.textHidden,
     {
       [MStepState.Inactive]: undefined,
       [MStepState.Active]: styles.textActive,

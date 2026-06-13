@@ -28,7 +28,7 @@ export default function PlaidBankStatusCard(): React.JSX.Element | null {
   }
   if (institution?.status?.transactions_updates?.breakdown?.refresh_interval === 'STOPPED') {
     status = 'Automatic updates stoppped';
-    additionalClasses = styles.grayscale;
+    additionalClasses = styles.grayscale ?? '';
   }
 
   return (

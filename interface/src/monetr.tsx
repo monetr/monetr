@@ -245,13 +245,15 @@ function RedirectToBank(): React.JSX.Element | null {
   });
 
   const link = linksSorted[0];
-  const accounts = sortAccounts(Array.from(bankAccounts.values()).filter(account => account.linkId === link.linkId));
-
-  if (accounts.length === 0) {
+  if (!link) {
     return <Redirect replace to='/link/create' />;
   }
 
+  const accounts = sortAccounts(Array.from(bankAccounts.values()).filter(account => account.linkId === link.linkId));
   const account = accounts[0];
+  if (!account) {
+    return <Redirect replace to='/link/create' />;
+  }
 
   return <Redirect replace to={`/bank/${account.bankAccountId}/transactions`} />;
 }

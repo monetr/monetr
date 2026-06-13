@@ -25,7 +25,8 @@ const DropdownMenuSubTrigger = forwardRef<
   }
 >(({ className, inset, children, ...props }, ref) => (
   <DropdownMenuPrimitive.SubTrigger
-    className={mergeClasses(styles.subTrigger, { [styles.subTriggerInset]: inset }, className)}
+    className={mergeClasses(styles.subTrigger, className)}
+    data-inset={inset}
     ref={ref}
     {...props}
   >
@@ -65,7 +66,8 @@ const DropdownMenuItem = forwardRef<
   }
 >(({ className, inset, ...props }, ref) => (
   <DropdownMenuPrimitive.Item
-    className={mergeClasses(styles.item, { [styles.itemInset]: inset }, className)}
+    className={mergeClasses(styles.item, className)}
+    data-inset={inset}
     ref={ref}
     {...props}
   />
@@ -114,7 +116,8 @@ const DropdownMenuLabel = forwardRef<
   }
 >(({ className, inset, ...props }, ref) => (
   <DropdownMenuPrimitive.Label
-    className={mergeClasses(styles.label, { [styles.labelInset]: inset }, className)}
+    className={mergeClasses(styles.label, className)}
+    data-inset={inset}
     ref={ref}
     {...props}
   />

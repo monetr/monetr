@@ -196,19 +196,16 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
       </div>
       <ErrorText error={props.error} />
       <ul
-        className={mergeClasses(selectStyles.unorderedList, {
-          [selectStyles.hidden]: !(isOpen && items.length),
-        })}
+        className={selectStyles.unorderedList}
+        data-hidden={!(isOpen && items.length)}
         {...getMenuProps()}
         style={renderStyles}
       >
         {isOpen &&
           items.map((item, index) => (
             <li
-              className={mergeClasses(selectStyles.option, {
-                // The _ACTUAL_ selected state will be slightly darker than the hover state.
-                [selectStyles.optionSelected]: selectedItem?.value === item.value,
-              })}
+              className={selectStyles.option}
+              data-selected={selectedItem?.value === item.value}
               key={item.label}
               {...getItemProps({
                 item,
@@ -258,10 +255,8 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
           >
             <span
               aria-disabled={props.disabled}
-              className={mergeClasses([selectStyles.selectText], {
-                // If we don't have a value then use the placeholder text style.
-                [selectStyles.selectTextPlaceholder]: !props.value?.label,
-              })}
+              className={selectStyles.selectText}
+              data-placeholder={!props.value?.label}
             >
               {props.value?.label ?? props.placeholder}
             </span>
@@ -274,10 +269,8 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
               {open &&
                 props.options.map(item => (
                   <li
-                    className={mergeClasses(selectStyles.optionTouch, {
-                      // The _ACTUAL_ selected state will be slightly darker than the hover state.
-                      [selectStyles.optionSelected]: props.value === item,
-                    })}
+                    className={selectStyles.optionTouch}
+                    data-selected={props.value === item}
                     key={item.label}
                     onClick={() => onChange(item)}
                   >

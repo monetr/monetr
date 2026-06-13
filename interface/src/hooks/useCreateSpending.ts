@@ -8,7 +8,10 @@ import type { WithJsonValues } from '@monetr/interface/util/json';
 import type { Writable } from '@monetr/interface/util/readonly';
 import request from '@monetr/interface/util/request';
 
-export type CreateSpendingRequest = Writable<Spending> & {
+// A create only ever sends the fields the user actually filled out, the rest of the writable fields (currentAmount,
+// nextContributionAmount, etc.) are computed by the server so we make the writable portion partial here. The required
+// fields are enforced by the form validators rather than the type.
+export type CreateSpendingRequest = Partial<Writable<Spending>> & {
   bankAccountId: ID<BankAccount>;
   spendingType: SpendingType;
 };

@@ -1,6 +1,37 @@
-import BankAccount, { type BankAccountSubType, type BankAccountType } from '@monetr/interface/models/BankAccount';
+import BankAccount, { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
+import { ID } from '@monetr/interface/models/ID';
+import type Link from '@monetr/interface/models/Link';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 
 import sortAccounts from './sortAccounts';
+
+// The strict BankAccount constructor wants the entire JSON shape now, but these sorting tests only care about a handful
+// of fields. This helper fills in sensible defaults so each case can just override the bits that matter to it. The ids
+// here are made up so we use the two type arg form of ID.from to skip the prefix template check.
+function fixture(overrides: Partial<WithJsonValues<BankAccount>>): BankAccount {
+  return new BankAccount({
+    bankAccountId: ID.from<BankAccount, string>('abc'),
+    linkId: ID.from<Link, string>('link_test'),
+    lunchFlowBankAccountId: null,
+    mask: '1234',
+    name: 'Generic Account',
+    originalName: 'Generic Account',
+    status: 'active',
+    accountType: BankAccountType.Depository,
+    accountSubType: BankAccountSubType.Checking,
+    currency: 'USD',
+    currentBalance: 0,
+    availableBalance: 0,
+    limitBalance: null,
+    lastUpdated: new Date(),
+    createdAt: new Date(),
+    createdBy: 'user_test',
+    deletedAt: null,
+    plaidBankAccount: null,
+    lunchFlowBankAccount: null,
+    ...overrides,
+  });
+}
 
 describe('sort accounts', () => {
   it('will handle a null or undefined input', () => {
@@ -12,19 +43,19 @@ describe('sort accounts', () => {
   });
 
   it('will make sure that checking is the highest priority', () => {
-    const checkingAccount = new BankAccount({
-      bankAccountId: 'abc',
+    const checkingAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('abc'),
       mask: '1234',
       name: 'Generic Checking',
-      accountType: 'depository' as BankAccountType,
-      accountSubType: 'checking' as BankAccountSubType,
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Checking,
     });
-    const savingsAccount = new BankAccount({
-      bankAccountId: 'abd',
+    const savingsAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('abd'),
       mask: '1234',
       name: 'Generic Savings',
-      accountType: 'depository' as BankAccountType,
-      accountSubType: 'savings' as BankAccountSubType,
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Savings,
     });
     const accounts = [savingsAccount, checkingAccount];
 
@@ -34,27 +65,27 @@ describe('sort accounts', () => {
   });
 
   it('will also handle credit card', () => {
-    const checkingAccount = new BankAccount({
-      bankAccountId: 'abc',
+    const checkingAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('abc'),
       mask: '1234',
       name: 'Generic Checking',
-      accountType: 'depository' as BankAccountType,
-      accountSubType: 'checking' as BankAccountSubType,
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Checking,
     });
-    const savingsAccount = new BankAccount({
-      bankAccountId: 'abd',
+    const savingsAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('abd'),
       mask: '1234',
       name: 'Generic Savings',
-      accountType: 'depository' as BankAccountType,
-      accountSubType: 'savings' as BankAccountSubType,
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Savings,
     });
-    const creditCard = new BankAccount({
-      bankAccountId: 'abe',
+    const creditCard = fixture({
+      bankAccountId: ID.from<BankAccount, string>('abe'),
       mask: '1234',
       name: 'Generic Credit Card',
       status: 'active',
-      accountType: 'credit' as BankAccountType,
-      accountSubType: 'credit card' as BankAccountSubType,
+      accountType: BankAccountType.Credit,
+      accountSubType: BankAccountSubType.CreditCard,
     });
     const accounts = [savingsAccount, creditCard, checkingAccount];
 
@@ -65,49 +96,49 @@ describe('sort accounts', () => {
   });
 
   it('will put inactive last', () => {
-    const checkingAccount = new BankAccount({
-      bankAccountId: 'abc',
+    const checkingAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('abc'),
       mask: '1234',
       name: 'Generic Checking',
-      accountType: 'depository' as BankAccountType,
-      accountSubType: 'checking' as BankAccountSubType,
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Checking,
     });
-    const checkingAccountInactive = new BankAccount({
-      bankAccountId: 'abcinactive',
+    const checkingAccountInactive = fixture({
+      bankAccountId: ID.from<BankAccount, string>('abcinactive'),
       mask: '1234',
       name: 'Generic Checking',
-      accountType: 'depository' as BankAccountType,
-      accountSubType: 'checking' as BankAccountSubType,
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Checking,
       status: 'inactive',
     });
-    const savingsAccount = new BankAccount({
-      bankAccountId: 'abd',
+    const savingsAccount = fixture({
+      bankAccountId: ID.from<BankAccount, string>('abd'),
       mask: '1234',
       name: 'Generic Savings',
-      accountType: 'depository' as BankAccountType,
-      accountSubType: 'savings' as BankAccountSubType,
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Savings,
     });
-    const savingsAccountInactive = new BankAccount({
-      bankAccountId: 'abdinactive',
+    const savingsAccountInactive = fixture({
+      bankAccountId: ID.from<BankAccount, string>('abdinactive'),
       mask: '1234',
       name: 'Generic Savings',
-      accountType: 'depository' as BankAccountType,
-      accountSubType: 'savings' as BankAccountSubType,
+      accountType: BankAccountType.Depository,
+      accountSubType: BankAccountSubType.Savings,
       status: 'inactive',
     });
-    const creditCard = new BankAccount({
-      bankAccountId: 'abe',
+    const creditCard = fixture({
+      bankAccountId: ID.from<BankAccount, string>('abe'),
       mask: '1234',
       name: 'Generic Credit Card',
-      accountType: 'credit' as BankAccountType,
-      accountSubType: 'credit card' as BankAccountSubType,
+      accountType: BankAccountType.Credit,
+      accountSubType: BankAccountSubType.CreditCard,
     });
-    const autoInactive = new BankAccount({
-      bankAccountId: 'autoinactive',
+    const autoInactive = fixture({
+      bankAccountId: ID.from<BankAccount, string>('autoinactive'),
       mask: '1234',
       name: 'Generic Auto Loan',
-      accountType: 'loan' as BankAccountType,
-      accountSubType: 'auto' as BankAccountSubType,
+      accountType: BankAccountType.Loan,
+      accountSubType: BankAccountSubType.Auto,
       status: 'inactive',
     });
     const accounts = [

@@ -66,7 +66,7 @@ function NewExpenseModal(): React.JSX.Element {
       in: inTimezone,
     }),
     ruleset: '',
-    fundingScheduleId: ID.from<FundingSchedule>(''),
+    fundingScheduleId: ID.from<FundingSchedule, string>(''),
     autoCreateTransaction: false,
   };
 

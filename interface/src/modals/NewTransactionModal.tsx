@@ -153,7 +153,7 @@ function NewTransactionModal(): React.JSX.Element {
                     />
                     <FormDatePicker className={styles.fieldRowItem} label='Date' name='date' required />
                   </div>
-                  <MSelectSpending bankAccountId={bankAccountId} className={styles.spendingSelect} name='spendingId' />
+                  <MSelectSpending className={styles.spendingSelect} name='spendingId' />
                   <div className={styles.optionRowSpaced}>
                     <div className={styles.optionText}>
                       <label className={styles.optionLabelClickable} htmlFor={adjustsBalanceToggleId}>

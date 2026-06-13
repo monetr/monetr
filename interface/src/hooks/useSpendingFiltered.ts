@@ -2,10 +2,11 @@ import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import Spending, { type SpendingType } from '@monetr/interface/models/Spending';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 
 export function useSpendingFiltered(kind: SpendingType): UseQueryResult<Array<Spending>, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
-  return useQuery<Array<Partial<Spending>>, unknown, Array<Spending>>({
+  return useQuery<Array<WithJsonValues<Spending>>, unknown, Array<Spending>>({
     // Use the same query key so that way the request is not sent again if the data is already in the cache.
     queryKey: [`/api/bank_accounts/${selectedBankAccountId}/spending`],
     enabled: Boolean(selectedBankAccountId),

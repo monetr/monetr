@@ -56,7 +56,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
 }
 
 interface BudgetingInfoProps {
-  className: string;
+  className?: string;
   transaction: Transaction;
 }
 

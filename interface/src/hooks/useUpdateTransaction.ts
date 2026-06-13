@@ -5,7 +5,6 @@ import type BankAccount from '@monetr/interface/models/BankAccount';
 import type { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
 import type Transaction from '@monetr/interface/models/Transaction';
-import type { ManualTransaction, PlaidTransaction } from '@monetr/interface/models/Transaction';
 import type { WithJsonValues } from '@monetr/interface/util/json';
 import type { Writable } from '@monetr/interface/util/readonly';
 import request from '@monetr/interface/util/request';
@@ -16,7 +15,9 @@ export interface TransactionUpdateResponse {
   balance: WithJsonValues<Balance>;
 }
 
-type UpdateTransactionRequest = Writable<PlaidTransaction | ManualTransaction> & {
+// We only ever send the writable fields of a transaction back up to the server, the rest are computed or read only.
+// The transactionId and bankAccountId are pulled out separately because they go in the URL, not the body.
+type UpdateTransactionRequest = Writable<Transaction> & {
   transactionId: ID<Transaction>;
   bankAccountId: ID<BankAccount>;
 };

@@ -12,7 +12,6 @@ import ErrorFileStage from '@monetr/interface/modals/UploadTransactions/ErrorFil
 import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/ProcessingFileStage';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 import fileSize from '@monetr/interface/util/fileSize';
-import mergeClasses from '@monetr/interface/util/mergeClasses';
 import request, { type ApiResponse } from '@monetr/interface/util/request';
 import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
@@ -89,7 +88,7 @@ function UploadFileStage(props: StageProps) {
   const [uploadProgress, setUploadProgress] = useState(-1);
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
     const selectedFile = acceptedFiles[0];
-    setFile(selectedFile);
+    setFile(selectedFile ?? null);
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -134,8 +133,6 @@ function UploadFileStage(props: StageProps) {
         props.setStage(UploadTransactionStage.Error);
       });
   }
-
-  const uploadClassNames = mergeClasses(styles.dropzone, { [styles.dropzoneActive]: isDragActive });
 
   if (uploadProgress >= 0) {
     return (
@@ -209,7 +206,7 @@ function UploadFileStage(props: StageProps) {
           Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.
         </Typography>
 
-        <div {...getRootProps()} className={uploadClassNames}>
+        <div {...getRootProps()} className={styles.dropzone} data-active={isDragActive}>
           <input {...getInputProps()} />
           <FileUp className={styles.fileIcon} />
           <Typography size='lg' weight='semibold'>

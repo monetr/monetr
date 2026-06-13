@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { type UseQueryResult, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import BankAccount from '@monetr/interface/models/BankAccount';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 
 export function useBankAccount(bankAccountId?: string): UseQueryResult<BankAccount | undefined, unknown> {
   const queryClient = useQueryClient();
@@ -23,7 +24,7 @@ export function useBankAccount(bankAccountId?: string): UseQueryResult<BankAccou
     [queryClient],
   );
 
-  return useQuery<Partial<BankAccount>, unknown, BankAccount | undefined>({
+  return useQuery<WithJsonValues<BankAccount>, unknown, BankAccount | undefined>({
     queryKey: [`/api/bank_accounts/${bankAccountId}`],
     enabled: Boolean(bankAccountId), // Only request if we have a valid bank account ID to work with.
     select: data => (data ? new BankAccount(data) : undefined),

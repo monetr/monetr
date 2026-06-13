@@ -20,7 +20,7 @@ export interface ExpenseTransactionListProps {
   spending: Spending;
 }
 
-export default function ExpenseTransactionList(props: ExpenseTransactionListProps): React.JSX.Element {
+export default function ExpenseTransactionList(props: ExpenseTransactionListProps): React.JSX.Element | null {
   const { data: transactions } = useSpendingTransactions(props.spending.spendingId);
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocale();

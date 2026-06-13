@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import Balance from '@monetr/interface/models/Balance';
 import type Spending from '@monetr/interface/models/Spending';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import request from '@monetr/interface/util/request';
 
 export type TransferParameters = {
@@ -15,7 +16,7 @@ export function useTransfer(): (transferParameters: TransferParameters) => Promi
   const queryClient = useQueryClient();
 
   interface BalanceTransferResponse {
-    balance: Partial<Balance>;
+    balance: WithJsonValues<Balance>;
     spending: Array<Partial<Spending>>;
   }
 

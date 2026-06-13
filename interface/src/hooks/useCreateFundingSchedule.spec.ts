@@ -1,7 +1,9 @@
 import { act } from 'react';
 
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
-import FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import type BankAccount from '@monetr/interface/models/BankAccount';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import { ID } from '@monetr/interface/models/ID';
 import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 import parseDate from '@monetr/interface/util/parseDate';
@@ -56,17 +58,15 @@ describe('create funding schedule', () => {
     });
     let result!: FundingSchedule;
     await act(async () => {
-      result = await world.result.current(
-        new FundingSchedule({
-          bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
-          description: 'something',
-          name: "Elliot's Contribution",
-          nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
-          ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
-          estimatedDeposit: null,
-          excludeWeekends: true,
-        }),
-      );
+      result = await world.result.current({
+        bankAccountId: ID.from<BankAccount>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
+        description: 'something',
+        name: "Elliot's Contribution",
+        nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
+        ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+        estimatedDeposit: null,
+        excludeWeekends: true,
+      });
     });
     expect(result).toBeDefined();
     expect(result.fundingScheduleId).toBe('fund_01hy4re7c1xc2v44cf6kx302jx');
@@ -97,17 +97,15 @@ describe('create funding schedule', () => {
     });
     await act(async () => {
       await expect(
-        world.result.current(
-          new FundingSchedule({
-            bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
-            description: 'something',
-            name: "Elliot's Contribution",
-            nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
-            ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
-            estimatedDeposit: null,
-            excludeWeekends: true,
-          }),
-        ),
+        world.result.current({
+          bankAccountId: ID.from<BankAccount>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
+          description: 'something',
+          name: "Elliot's Contribution",
+          nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
+          ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+          estimatedDeposit: null,
+          excludeWeekends: true,
+        }),
       ).rejects.toMatchObject({
         message: 'Request failed with status code 400',
         response: {

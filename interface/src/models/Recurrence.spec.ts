@@ -9,6 +9,7 @@ describe('recurrence rules', () => {
     const inputRule = 'DTSTART:20211231T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1';
 
     const recurrence = new Recurrence({
+      name: 'Monthly on the 15th and last day',
       rule: new RRule({
         dtstart: startOfMonth(new Date()),
         freq: RRule.MONTHLY,
@@ -25,6 +26,7 @@ describe('recurrence rules', () => {
     const inputRule = 'DTSTART:20211231T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=1';
 
     const recurrence = new Recurrence({
+      name: 'Monthly on the 15th and last day',
       rule: new RRule({
         dtstart: startOfMonth(new Date()),
         freq: RRule.MONTHLY,
@@ -38,6 +40,7 @@ describe('recurrence rules', () => {
 
   it('will return false for invalid rule', () => {
     const recurrence = new Recurrence({
+      name: 'Monthly on the 15th and last day',
       rule: new RRule({
         dtstart: startOfMonth(new Date()),
         freq: RRule.MONTHLY,

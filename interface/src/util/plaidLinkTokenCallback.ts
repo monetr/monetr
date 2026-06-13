@@ -1,10 +1,11 @@
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import request from '@monetr/interface/util/request';
 
 export class LinkTokenCallbackResponse {
   linkId: number;
 
-  constructor(data: Partial<LinkTokenCallbackResponse>) {
-    Object.assign(this, data);
+  constructor(data: WithJsonValues<LinkTokenCallbackResponse>) {
+    this.linkId = data.linkId;
   }
 }
 
@@ -14,7 +15,7 @@ export default function plaidLinkTokenCallback(
   institutionName: string,
   accountIds: string[],
 ): Promise<LinkTokenCallbackResponse> {
-  return request<Partial<LinkTokenCallbackResponse>>({
+  return request<WithJsonValues<LinkTokenCallbackResponse>>({
     method: 'POST',
     url: '/api/plaid/link/token/callback',
     data: {
@@ -23,10 +24,5 @@ export default function plaidLinkTokenCallback(
       institutionName,
       accountIds,
     },
-  }).then(
-    result =>
-      new LinkTokenCallbackResponse({
-        linkId: result.data.linkId,
-      }),
-  );
+  }).then(result => new LinkTokenCallbackResponse(result.data));
 }

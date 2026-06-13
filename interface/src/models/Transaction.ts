@@ -90,10 +90,8 @@ export default class Transaction {
   // the transaction. If those are still not present then it will return "Other" as it cannot infer the transaction's
   // category.
   getMainCategory(): string {
-    if (this.categories && this.categories.length > 0) {
-      return this.categories[0];
-    }
-
-    return 'Other';
+    // noUncheckedIndexedAccess makes categories[0] possibly undefined even though we just checked the length, so we
+    // coalesce to "Other" which is also our fallback when there are no categories at all.
+    return this.categories[0] ?? 'Other';
   }
 }

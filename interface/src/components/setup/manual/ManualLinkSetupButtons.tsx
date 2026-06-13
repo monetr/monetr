@@ -16,7 +16,10 @@ export default function ManualLinkSetupButtons(): React.JSX.Element {
   const lastStep = steps.length - 1;
 
   const previousStep = useCallback(() => {
-    viewContext.goToView(steps[step - 1]);
+    const previous = steps[step - 1];
+    if (previous) {
+      viewContext.goToView(previous);
+    }
   }, [steps, step, viewContext]);
 
   switch (step) {

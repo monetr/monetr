@@ -1,4 +1,7 @@
-export declare const idPrefix: unique symbol;
+// idPrefix is the symbol we hang the nominal brand off of. It has to be a real runtime symbol (not a `declare`) because
+// the model classes assign it as a computed property key, e.g. `readonly [idPrefix] = 'bac'`, which the bundler needs to
+// be able to resolve at runtime.
+export const idPrefix: unique symbol = Symbol('idPrefix');
 
 export interface Prefixed<P extends string> {
   readonly [idPrefix]: P;

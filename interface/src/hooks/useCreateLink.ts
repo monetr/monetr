@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 
 import Link from '@monetr/interface/models/Link';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import request from '@monetr/interface/util/request';
 
 export interface CreateLinkRequest {
@@ -12,7 +13,7 @@ export interface CreateLinkRequest {
 export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {
   const mutate = useMutation({
     mutationFn: async (newLink: CreateLinkRequest): Promise<Link> => {
-      return request<Partial<Link>>({ method: 'POST', url: '/api/links', data: newLink }).then(
+      return request<WithJsonValues<Link>>({ method: 'POST', url: '/api/links', data: newLink }).then(
         result => new Link(result?.data),
       );
     },

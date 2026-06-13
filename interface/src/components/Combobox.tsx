@@ -69,12 +69,7 @@ export function ComboboxItem<V extends string, O extends ComboboxOption<V>>(
 ): React.JSX.Element {
   return (
     <Fragment>
-      <Check
-        className={mergeClasses(styles.checkIcon, {
-          [styles.checkIconVisible]: props.currentValue === props.option.value,
-          [styles.checkIconHidden]: props.currentValue !== props.option.value,
-        })}
-      />
+      <Check className={styles.checkIcon} data-visible={props.currentValue === props.option.value} />
       {props.option.label}
     </Fragment>
   );

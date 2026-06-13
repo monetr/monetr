@@ -8,13 +8,14 @@ import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import type { ID } from '@monetr/interface/models/ID';
 import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 
 import styles from './ExpenseTimeline.module.scss';
 
 export interface ExpenseTimelineProps {
-  spendingId: string;
+  spendingId: ID<Spending>;
 }
 
 interface TimelineItemData {

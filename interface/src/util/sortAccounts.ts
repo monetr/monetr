@@ -15,23 +15,21 @@ export default function sortAccounts(bankAccounts: Array<BankAccount> | null | u
   // listed here will have a value of -1.
   const accountSubTypeOrder = ['money market', 'mortgage', 'auto', 'credit card', 'savings', 'checking'];
 
-  const result = bankAccounts.sort((a, b) => {
-    const items = [a, b];
-    const values = [
-      0, // a
-      0, // b
-    ];
-    for (let i = 0; i < 2; i++) {
-      // Put inactive items last.
-      const multiplier = items[i].status === 'inactive' ? -10 : 1;
-      values[i] += accountTypeOrder.indexOf(items[i].accountType) + 1;
-      values[i] += accountSubTypeOrder.indexOf(items[i].accountSubType) + 1;
-      values[i] *= multiplier;
-    }
+  // score returns the sortable weight for a single account. We pulled this out into its own function so we don't have
+  // to index into parallel arrays, which noUncheckedIndexedAccess does not like.
+  function score(account: BankAccount): number {
+    // Put inactive items last.
+    const multiplier = account.status === 'inactive' ? -10 : 1;
+    let value = accountTypeOrder.indexOf(account.accountType) + 1;
+    value += accountSubTypeOrder.indexOf(account.accountSubType) + 1;
+    return value * multiplier;
+  }
 
-    // I want to sort these in descenging order. So invert whether or not the value returned
-    // is negative or positive.
-    return values[0] < values[1] ? 1 : values[0] > values[1] ? -1 : 0;
+  // I want to sort these in descenging order. So invert whether or not the value returned
+  // is negative or positive.
+  return bankAccounts.sort((a, b) => {
+    const aValue = score(a);
+    const bValue = score(b);
+    return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
   });
-  return result;
 }

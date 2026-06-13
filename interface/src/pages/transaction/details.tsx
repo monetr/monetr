@@ -26,6 +26,8 @@ import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBan
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useTransaction } from '@monetr/interface/hooks/useTransaction';
 import { useUpdateTransaction } from '@monetr/interface/hooks/useUpdateTransaction';
+import type { ID } from '@monetr/interface/models/ID';
+import type Spending from '@monetr/interface/models/Spending';
 import Transaction from '@monetr/interface/models/Transaction';
 import type { APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
@@ -36,7 +38,7 @@ interface TransactionValues {
   name: string;
   originalName: string;
   date: Date;
-  spendingId: string | null;
+  spendingId: ID<Spending> | null;
   isPending: boolean;
   amount: number;
 }
@@ -54,23 +56,24 @@ export default function TransactionDetails(): React.JSX.Element {
   const submit = useCallback(
     async (values: TransactionValues, helpers: FormikHelpers<TransactionValues>) => {
       // We cannot build the updated transaction without a locale to convert the friendly amount back into a stored
-      // amount, the form is only reachable once the locale has loaded so this should never actually happen.
-      if (!locale) {
+      // amount, or without the existing transaction to spread the rest of the fields from. The form is only reachable
+      // once both have loaded so this should never actually happen.
+      if (!locale || !transaction) {
         return;
       }
 
       const updatedTransaction = new Transaction({
         ...transaction,
         name: values.name,
-        // spendingId can be null when the transaction is being moved back to free-to-use, the model treats it as an
-        // optional string but we need to send null to the server to actually clear it.
+        // spendingId can be null when the transaction is being moved back to free-to-use, we need to send null to the
+        // server to actually clear it.
         spendingId: values.spendingId,
         amount: locale.friendlyToAmount(values.amount),
         date: startOfDay(values.date, {
           in: inTimezone,
         }),
         isPending: values.isPending,
-      } as Partial<Transaction>);
+      });
 
       helpers.setSubmitting(true);
       return await updateTransaction(updatedTransaction)
@@ -101,7 +104,7 @@ export default function TransactionDetails(): React.JSX.Element {
       >
         <MTopNavigation
           base={`/bank/${selectedBankAccountId}/transactions`}
-          breadcrumb={transaction?.name}
+          breadcrumb={transaction?.name ?? undefined}
           icon={ShoppingCart}
           title='Transactions'
         />
@@ -109,7 +112,7 @@ export default function TransactionDetails(): React.JSX.Element {
           <div className={styles.columns}>
             <div className={styles.column}>
               <Flex justify='center'>
-                <MerchantIcon name={transaction?.name} />
+                <MerchantIcon name={transaction?.name ?? undefined} />
               </Flex>
               <FormTextField
                 autoComplete='off'
@@ -197,7 +200,7 @@ export default function TransactionDetails(): React.JSX.Element {
     <MForm className={styles.form} enableReinitialize={true} initialValues={initialValues} onSubmit={submit}>
       <MTopNavigation
         base={`/bank/${transaction.bankAccountId}/transactions`}
-        breadcrumb={transaction?.name}
+        breadcrumb={transaction?.name ?? undefined}
         icon={ShoppingCart}
         title='Transactions'
       />
@@ -205,7 +208,7 @@ export default function TransactionDetails(): React.JSX.Element {
         <div className={styles.columns}>
           <div className={styles.column}>
             <Flex justify='center'>
-              <MerchantIcon name={transaction?.name} />
+              <MerchantIcon name={transaction?.name ?? undefined} />
             </Flex>
             <FormTextField
               autoComplete='off'

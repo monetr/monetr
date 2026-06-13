@@ -1,3 +1,6 @@
+import type { WithJsonValues } from '@monetr/interface/util/json';
+import parseDate from '@monetr/interface/util/parseDate';
+
 export enum Feature {
   ManualBudgeting = 'ManualBudgeting',
   LinkedBudgeting = 'LinkedBudgeting',
@@ -15,10 +18,13 @@ export default class Subscription {
   trialStart: Date | null;
   trialEnd: Date | null;
 
-  constructor(data: Partial<Subscription>) {
-    if (data) {
-      Object.assign(this, data);
-    }
+  constructor(data: WithJsonValues<Subscription>) {
+    this.subscriptionId = data.subscriptionId;
+    this.ownedByUserId = data.ownedByUserId;
+    this.features = data.features;
+    this.status = data.status;
+    this.trialStart = parseDate(data.trialStart);
+    this.trialEnd = parseDate(data.trialEnd);
   }
 
   hasFeature(feature: Feature): boolean {

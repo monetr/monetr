@@ -89,14 +89,14 @@
   align-items: center;
   cursor: pointer;
 
-  &:not(.dropzoneActive):hover {
+  &:not([data-active='true']):hover {
     border-color: var(--border-string);
   }
-}
 
-// Active (drag-over) state overrides the border colour.
-.dropzoneActive {
-  border-color: var(--brand-subtle);
+  // Active (drag-over) state overrides the border colour.
+  &[data-active='true'] {
+    border-color: var(--brand-subtle);
+  }
 }
 
 .actions {

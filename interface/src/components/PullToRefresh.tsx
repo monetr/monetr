@@ -65,7 +65,7 @@ export default function PullToRefresh(): React.JSX.Element {
         return;
       }
 
-      setPullStartPoint(e.targetTouches[0].screenY);
+      setPullStartPoint(e.targetTouches[0]?.screenY ?? 0);
 
       if (window.scrollY === 0 && window.scrollX === 0) {
         refreshDiv.current?.setAttribute('data-visible', 'true');
@@ -94,7 +94,7 @@ export default function PullToRefresh(): React.JSX.Element {
         return;
       }
 
-      const screenY = e.targetTouches[0].screenY;
+      const screenY = e.targetTouches[0]?.screenY ?? 0;
 
       const pullLength = pullStartPoint < screenY ? Math.abs(screenY - pullStartPoint) : 0;
 

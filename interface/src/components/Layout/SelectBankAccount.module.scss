@@ -38,7 +38,7 @@ $fontMono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mo
 }
 
 // The up/down chevron. Fades to half opacity when the menu is closed and to
-// full opacity when open (driven by the `.chevronOpen` modifier).
+// full opacity when open (driven by the data-open attribute).
 .chevron {
   height: 3 * variables.$size;
   width: 3 * variables.$size;
@@ -48,11 +48,11 @@ $fontMono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mo
   transition-property: opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 100ms;
-}
 
-// `opacity-100` applied when the menu is open.
-.chevronOpen {
-  opacity: 1;
+  // opacity-100 when the menu is open.
+  &[data-open='true'] {
+    opacity: 1;
+  }
 }
 
 // The popover surface width override, wider than PopoverContent's default.

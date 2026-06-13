@@ -4,10 +4,9 @@ export default class Recurrence {
   name: string;
   rule: RRule;
 
-  constructor(recurrence?: Partial<Recurrence>) {
-    if (recurrence) {
-      Object.assign(this, recurrence);
-    }
+  constructor(data: Pick<Recurrence, 'name' | 'rule'>) {
+    this.name = data.name;
+    this.rule = data.rule;
   }
 
   ruleString(): string {

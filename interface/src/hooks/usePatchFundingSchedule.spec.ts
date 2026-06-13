@@ -4,6 +4,9 @@ import {
   type PatchFundingScheduleResponse,
   usePatchFundingSchedule,
 } from '@monetr/interface/hooks/usePatchFundingSchedule';
+import type BankAccount from '@monetr/interface/models/BankAccount';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import { ID } from '@monetr/interface/models/ID';
 import FetchMock from '@monetr/interface/testutils/fetchMock';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 import parseDate from '@monetr/interface/util/parseDate';
@@ -63,8 +66,8 @@ describe('patch funding schedule', () => {
     let result!: PatchFundingScheduleResponse;
     await act(async () => {
       result = await world.result.current({
-        fundingScheduleId: 'fund_01hy4re7c1xc2v44cf6kx302jx', // 3,
-        bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
+        fundingScheduleId: ID.from<FundingSchedule>('fund_01hy4re7c1xc2v44cf6kx302jx'), // 3,
+        bankAccountId: ID.from<BankAccount>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
         description: 'something',
         name: "Elliot's Contribution",
         nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,
@@ -105,8 +108,8 @@ describe('patch funding schedule', () => {
     await act(async () => {
       await expect(
         world.result.current({
-          fundingScheduleId: 'fund_01hy4re7c1xc2v44cf6kx302jx', // 3,
-          bankAccountId: 'bac_01hy4rcmadc01d2kzv7vynbxxx',
+          fundingScheduleId: ID.from<FundingSchedule>('fund_01hy4re7c1xc2v44cf6kx302jx'), // 3,
+          bankAccountId: ID.from<BankAccount>('bac_01hy4rcmadc01d2kzv7vynbxxx'),
           description: 'something',
           name: "Elliot's Contribution",
           nextRecurrence: parseDate('2023-07-31T05:00:00Z') ?? undefined,

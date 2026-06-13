@@ -15,6 +15,7 @@ import { LunchFlowSetupSteps } from '@monetr/interface/components/setup/lunchflo
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import LunchFlowLink from '@monetr/interface/models/LunchFlowLink';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import request, { type APIError } from '@monetr/interface/util/request';
 import { useSnackbar } from '@monetr/notify';
 
@@ -30,7 +31,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
   const [pathname, navigate] = useLocation();
 
   const allowedAPIURLs = config?.lunchFlowAllowedAPIURLs ?? [];
-  const initialApiURL = allowedAPIURLs.length > 0 ? allowedAPIURLs[0] : '';
+  const initialApiURL = allowedAPIURLs[0] ?? '';
 
   const initialValues: LunchFlowSetupIntroValues = useMemo(
     () => ({
@@ -44,7 +45,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
   const submit = useCallback(
     (values: LunchFlowSetupIntroValues, helpers: FormikHelpers<LunchFlowSetupIntroValues>) => {
       helpers.setSubmitting(true);
-      request<Partial<LunchFlowLink>>({
+      request<WithJsonValues<LunchFlowLink>>({
         method: 'POST',
         url: '/api/lunch_flow/link',
         data: {
@@ -53,7 +54,7 @@ export default function LunchFlowSetupIntro(): React.JSX.Element {
           apiKey: values.apiKey,
         },
       })
-        .then(result => new LunchFlowLink(result?.data))
+        .then(result => new LunchFlowLink(result.data))
         .then(lunchFlowLink => navigate(`${pathname}/${lunchFlowLink.lunchFlowLinkId}`))
         .catch((error: ApiError<APIError>) =>
           enqueueSnackbar(

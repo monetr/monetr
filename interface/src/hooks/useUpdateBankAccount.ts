@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import BankAccount from '@monetr/interface/models/BankAccount';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import request from '@monetr/interface/util/request';
 
 export interface UpdateBankAccountRequest {
@@ -13,7 +14,7 @@ export function useUpdateBankAccount(): (_bankAccount: UpdateBankAccountRequest)
   const queryClient = useQueryClient();
 
   async function updateBankAccount({ bankAccountId, ...updates }: UpdateBankAccountRequest): Promise<BankAccount> {
-    return request<Partial<BankAccount>>({
+    return request<WithJsonValues<BankAccount>>({
       method: 'PUT',
       url: `/api/bank_accounts/${bankAccountId}`,
       data: updates,

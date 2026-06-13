@@ -24,6 +24,8 @@ import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useUpdateSpending } from '@monetr/interface/hooks/useUpdateSpending';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import type { ID } from '@monetr/interface/models/ID';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
@@ -35,7 +37,7 @@ interface GoalValues {
   name: string;
   amount: number;
   nextRecurrence: Date;
-  fundingScheduleId: string;
+  fundingScheduleId: ID<FundingSchedule>;
   isPaused: boolean;
 }
 
@@ -45,7 +47,7 @@ export default function GoalDetails(): React.JSX.Element | null {
   const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();
   const [, navigate] = useLocation();
-  const { spendingId } = useParams<{ spendingId: string }>();
+  const { spendingId } = useParams<{ spendingId: ID<Spending> }>();
   const { enqueueSnackbar } = useSnackbar();
   const { data: spending, isLoading, isError } = useSpending(spendingId);
 
@@ -117,7 +119,6 @@ export default function GoalDetails(): React.JSX.Element | null {
     const updatedSpending = new Spending({
       ...spending,
       name: values.name,
-      description: undefined,
       nextRecurrence: startOfDay(values.nextRecurrence, {
         in: inTimezone,
       }),

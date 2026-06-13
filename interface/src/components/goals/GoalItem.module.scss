@@ -180,14 +180,16 @@
 .amount {
   text-align: end;
   font-weight: var(--semibold);
-}
 
-.amountComplete {
-  color: var(--amount-positive); // text-green-500
-}
+  // Both of these can be set at once on an over-funded goal. data-complete comes first so that data-in-progress wins on
+  // equal specificity, matching the previous class ordering.
+  &[data-complete='true'] {
+    color: var(--amount-positive); // text-green-500
+  }
 
-.amountInProgress {
-  color: var(--blue); // text-blue-500
+  &[data-in-progress='true'] {
+    color: var(--blue); // text-blue-500
+  }
 }
 
 .amountMobile {

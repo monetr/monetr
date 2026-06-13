@@ -62,7 +62,7 @@ describe('InstitutionStatus', () => {
       plaidIncidents: [],
     });
 
-    expect(result.transactions_updates.status).toEqual('HEALTHY');
+    expect(result.transactions_updates?.status).toEqual('HEALTHY');
     expect(result.plaidIncidents).toHaveLength(0);
   });
 
