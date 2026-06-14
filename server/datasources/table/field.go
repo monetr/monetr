@@ -39,7 +39,7 @@ type FieldRef struct {
 }
 
 func (s *FieldRef) Validate(ctx context.Context) error {
-	return validators.OneOfStruct(
+	_, err := validation.MatchOneOfStruct(
 		ctx,
 		s,
 		[]*validation.FieldRules{
@@ -70,6 +70,7 @@ func (s *FieldRef) Validate(ctx context.Context) error {
 			),
 		},
 	)
+	return err
 }
 
 func (s FieldRef) String() string {

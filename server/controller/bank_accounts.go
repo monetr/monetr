@@ -10,6 +10,7 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	. "github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/schemas"
 	"github.com/monetr/validation"
 	"github.com/pkg/errors"
 )
@@ -94,34 +95,24 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 		currencyCode = string(bytes.TrimSpace(lconv.IntCurrSymbol))
 	}
 
-	var bankAccount BankAccount
 	// Pre-set the default values for these fields.
-	bankAccount.Status = BankAccountStatusActive
-	bankAccount.AccountType = DepositoryBankAccountType
-	bankAccount.AccountSubType = CheckingBankAccountSubType
-	bankAccount.Currency = currencyCode
-
-	switch err := bankAccount.UnmarshalRequest(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		bankAccount.CreateValidators()...,
-	).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case nil:
-	default:
-		return c.wrapAndReturnError(
-			ctx,
-			err,
-			http.StatusBadRequest,
-			"failed to parse request",
-		)
+	bankAccount := &BankAccount{
+		Status:         BankAccountStatusActive,
+		AccountType:    DepositoryBankAccountType,
+		AccountSubType: CheckingBankAccountSubType,
+		Currency:       currencyCode,
+	}
+	bankAccount, err = parse(
+		c, ctx,
+		bankAccount,
+		schemas.CreateBankAccount,
+	)
+	if err != nil {
+		return err
 	}
 
-	// Some fields cannot be overwritten, so we set those after we unmarshal.
+	// Some fields cannot be overwritten, so we set those after we parse the
+	// request.
 	bankAccount.LastUpdated = c.Clock.Now().UTC()
 
 	// Bank accounts can only be created via the API on manual links or on Lunch
@@ -137,21 +128,17 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	case LunchFlowLinkType:
 		if bankAccount.LunchFlowBankAccountId == nil ||
 			bankAccount.LunchFlowBankAccountId.IsZero() {
-			return ctx.JSON(http.StatusBadRequest, map[string]any{
-				"error": "Invalid request",
-				"problems": map[string]any{
-					"lunchFlowBankAccountId": "Lunch Flow Bank Account ID required to create a bank account for this link",
-				},
-			})
+			return c.badRequest(
+				ctx,
+				"Lunch Flow Bank Account ID required to create a bank account for this link",
+			)
 		}
 
 		if link.LunchFlowLinkId == nil || link.LunchFlowLinkId.IsZero() {
-			return ctx.JSON(http.StatusBadRequest, map[string]any{
-				"error": "Invalid request",
-				"problems": map[string]any{
-					"linkId": "Link ID does not reference a valid Lunch Flow link",
-				},
-			})
+			return c.badRequest(
+				ctx,
+				"Link ID does not reference a valid Lunch Flow link",
+			)
 		}
 
 		lunchFlowBankAccount, err := repo.GetLunchFlowBankAccountForLunchFlowLink(
@@ -161,12 +148,10 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 		)
 		if err != nil {
 			if errors.Cause(err) == pg.ErrNoRows {
-				return ctx.JSON(http.StatusBadRequest, map[string]any{
-					"error": "Invalid request",
-					"problems": map[string]any{
-						"lunchFlowBankAccountId": "Lunch Flow Bank Account ID must belong to the specified link",
-					},
-				})
+				return c.badRequest(
+					ctx,
+					"Lunch Flow Bank Account ID must belong to the specified link",
+				)
 			}
 			return c.wrapPgError(ctx, err, "Failed to retrieve Lunch Flow bank account")
 		}
@@ -182,17 +167,15 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	default:
 		// Otherwise if we are not a manual link then we simply don't allow bank
 		// accounts to be created.
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error": "Invalid request",
-			"problems": map[string]any{
-				"linkId": "Cannot create a bank account for a non-manual link, specify a manual Link ID",
-			},
-		})
+		return c.badRequest(
+			ctx,
+			"Cannot create a bank account for a non-manual link, specify a manual Link ID",
+		)
 	}
 
 	if err := repo.CreateBankAccounts(
 		c.getContext(ctx),
-		&bankAccount,
+		bankAccount,
 	); err != nil {
 		return c.wrapPgError(ctx, err, "Could not create bank account")
 	}

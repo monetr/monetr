@@ -82,7 +82,7 @@ func TestDateSpec_Validate(t *testing.T) {
 				Fields: []table.FieldRef{{Name: "NotPresent"}},
 				Format: "YYYY-MM-DD",
 			},
-			wantErr: "failed to validate *table.DateSpec: fields: (0: input must be considered valid by: name: must be one of: [\"Date\", \"PostDate\", \"Amount\"]. or derivedKind: cannot be blank; name: must be blank..).",
+			wantErr: "failed to validate *table.DateSpec: fields: (0: must match one of: (name: must be one of: [\"Date\", \"PostDate\", \"Amount\"].) or (derivedKind: cannot be blank; name: must be blank.).).",
 		},
 		{
 			name: "field with name and derived",
@@ -90,7 +90,7 @@ func TestDateSpec_Validate(t *testing.T) {
 				Fields: []table.FieldRef{{Name: "Date", DerivedKind: table.DerivedKindRowNumber}},
 				Format: "YYYY-MM-DD",
 			},
-			wantErr: "failed to validate *table.DateSpec: fields: (0: input must be considered valid by: derivedKind: must be blank. or name: must be blank..).",
+			wantErr: "failed to validate *table.DateSpec: fields: (0: must match one of: (derivedKind: must be blank.) or (name: must be blank.).).",
 		},
 		{
 			name: "format of junk letters",

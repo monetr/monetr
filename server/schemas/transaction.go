@@ -30,8 +30,8 @@ var (
 		),
 		validation.Key("spendingId",
 			validation.OneOf(
+				validation.Nil.Error("must be nil"),
 				ValidID[models.Spending](),
-				validation.Nil,
 			),
 		).Required(false),
 		validation.Key("adjustsBalance",

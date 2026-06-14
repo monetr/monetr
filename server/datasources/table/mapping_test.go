@@ -126,7 +126,7 @@ func TestMapping_Validate(t *testing.T) {
 		{
 			name:    "empty mapping, all sub-spec errors",
 			mutate:  func(m *table.Mapping) { *m = table.Mapping{} },
-			wantErr: "failed to validate *table.Mapping: amount: input must be considered valid by: fields: cannot be blank; kind: must equal \"sign\". or credit: cannot be blank; debit: cannot be blank; fields: cannot be blank; kind: must equal \"type\". or fields: cannot be blank; kind: must equal \"column\".; balance: input must be considered valid by: kind: cannot be blank. or fields: cannot be blank; kind: must equal \"field\".; date: failed to validate *table.DateSpec: fields: cannot be blank; format: cannot be blank.; headers: cannot be blank; id: failed to validate *table.IDSpec: fields: cannot be blank; kind: cannot be blank.; memo: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..",
+			wantErr: "failed to validate *table.Mapping: amount: must match one of: (fields: cannot be blank; kind: must equal \"sign\".) or (credit: cannot be blank; debit: cannot be blank; fields: cannot be blank; kind: must equal \"type\".) or (fields: cannot be blank; kind: must equal \"column\".); balance: must match one of: (kind: cannot be blank.) or (fields: cannot be blank; kind: must equal \"field\".); date: failed to validate *table.DateSpec: fields: cannot be blank; format: cannot be blank.; headers: cannot be blank; id: failed to validate *table.IDSpec: fields: cannot be blank; kind: cannot be blank.; memo: must match one of: (name: cannot be blank.) or (derivedKind: cannot be blank.).",
 		},
 		{
 			name: "invalid id kind",
@@ -146,21 +146,21 @@ func TestMapping_Validate(t *testing.T) {
 					Fields: []table.FieldRef{{Name: "Amount"}},
 				}
 			},
-			wantErr: "failed to validate *table.Mapping: amount: input must be considered valid by: kind: must equal \"sign\". or credit: cannot be blank; debit: cannot be blank; fields: the length must be exactly 2; kind: must equal \"type\". or fields: the length must be exactly 2; kind: must equal \"column\"..",
+			wantErr: "failed to validate *table.Mapping: amount: must match one of: (kind: must equal \"sign\".) or (credit: cannot be blank; debit: cannot be blank; fields: the length must be exactly 2; kind: must equal \"type\".) or (fields: the length must be exactly 2; kind: must equal \"column\".).",
 		},
 		{
 			name: "memo not in columns",
 			mutate: func(m *table.Mapping) {
 				m.Memo = table.FieldRef{Name: "NotPresent"}
 			},
-			wantErr: "failed to validate *table.Mapping: memo: input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\", \"TransType\", \"DebitAmt\", \"CreditAmt\", \"Merchant\", \"Status\", \"RunningBalance\"]. or derivedKind: cannot be blank; name: must be blank..",
+			wantErr: "failed to validate *table.Mapping: memo: must match one of: (name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\", \"TransType\", \"DebitAmt\", \"CreditAmt\", \"Merchant\", \"Status\", \"RunningBalance\"].) or (derivedKind: cannot be blank; name: must be blank.).",
 		},
 		{
 			name: "merchant not in columns",
 			mutate: func(m *table.Mapping) {
 				m.Merchant = &table.FieldRef{Name: "NotPresent"}
 			},
-			wantErr: "failed to validate *table.Mapping: merchant: input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\", \"TransType\", \"DebitAmt\", \"CreditAmt\", \"Merchant\", \"Status\", \"RunningBalance\"]. or derivedKind: cannot be blank; name: must be blank..",
+			wantErr: "failed to validate *table.Mapping: merchant: must match one of: (name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\", \"TransType\", \"DebitAmt\", \"CreditAmt\", \"Merchant\", \"Status\", \"RunningBalance\"].) or (derivedKind: cannot be blank; name: must be blank.).",
 		},
 		{
 			name: "invalid date format",
@@ -184,7 +184,7 @@ func TestMapping_Validate(t *testing.T) {
 			mutate: func(m *table.Mapping) {
 				m.Balance = table.BalanceSpec{Kind: table.BalanceKind("bogus")}
 			},
-			wantErr: "failed to validate *table.Mapping: balance: input must be considered valid by: kind: must be one of: [\"none\", \"sum\"]. or fields: cannot be blank; kind: must equal \"field\"..",
+			wantErr: "failed to validate *table.Mapping: balance: must match one of: (kind: must be one of: [\"none\", \"sum\"].) or (fields: cannot be blank; kind: must equal \"field\".).",
 		},
 		{
 			name: "invalid id and balance",
@@ -195,14 +195,14 @@ func TestMapping_Validate(t *testing.T) {
 				}
 				m.Balance = table.BalanceSpec{Kind: table.BalanceKind("bogus")}
 			},
-			wantErr: "failed to validate *table.Mapping: balance: input must be considered valid by: kind: must be one of: [\"none\", \"sum\"]. or fields: cannot be blank; kind: must equal \"field\".; id: failed to validate *table.IDSpec: kind: must be one of: [\"native\", \"hashed\"]..",
+			wantErr: "failed to validate *table.Mapping: balance: must match one of: (kind: must be one of: [\"none\", \"sum\"].) or (fields: cannot be blank; kind: must equal \"field\".); id: failed to validate *table.IDSpec: kind: must be one of: [\"native\", \"hashed\"]..",
 		},
 		{
 			name: "invalid merchant, posted nil ok",
 			mutate: func(m *table.Mapping) {
 				m.Merchant = &table.FieldRef{}
 			},
-			wantErr: "failed to validate *table.Mapping: merchant: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..",
+			wantErr: "failed to validate *table.Mapping: merchant: must match one of: (name: cannot be blank.) or (derivedKind: cannot be blank.).",
 		},
 		{
 			// Pösted used to be the canonical "invalid posted needle" here because

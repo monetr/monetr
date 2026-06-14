@@ -119,28 +119,28 @@ func TestPostedSpec_Validate(t *testing.T) {
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{}},
 			},
-			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..).",
+			wantErr: "failed to validate *table.PostedSpec: fields: (0: must match one of: (name: cannot be blank.) or (derivedKind: cannot be blank.).).",
 		},
 		{
 			name: "child field not in headers",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "NotPresent"}},
 			},
-			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: name: must be one of: [\"Date\", \"Status\", \"Description\", \"Amount\"]. or derivedKind: cannot be blank; name: must be blank..).",
+			wantErr: "failed to validate *table.PostedSpec: fields: (0: must match one of: (name: must be one of: [\"Date\", \"Status\", \"Description\", \"Amount\"].) or (derivedKind: cannot be blank; name: must be blank.).).",
 		},
 		{
 			name: "child field with name and derived",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{Name: "Status", DerivedKind: table.DerivedKindRowNumber}},
 			},
-			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: derivedKind: must be blank. or name: must be blank..).",
+			wantErr: "failed to validate *table.PostedSpec: fields: (0: must match one of: (derivedKind: must be blank.) or (name: must be blank.).).",
 		},
 		{
 			name: "child field with unknown derived",
 			spec: table.PostedSpec{
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKind("bogus")}},
 			},
-			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: derivedKind: must be blank; name: cannot be blank. or derivedKind: must be one of: [\"rowNumber\"]..).",
+			wantErr: "failed to validate *table.PostedSpec: fields: (0: must match one of: (derivedKind: must be blank; name: cannot be blank.) or (derivedKind: must be one of: [\"rowNumber\"].).).",
 		},
 		{
 			// "Pösted" is the canonical reason monetr swapped from
@@ -224,7 +224,7 @@ func TestPostedSpec_Validate(t *testing.T) {
 				Fields: []table.FieldRef{{}},
 				Posted: "Pösted",
 			},
-			wantErr: "failed to validate *table.PostedSpec: fields: (0: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..).",
+			wantErr: "failed to validate *table.PostedSpec: fields: (0: must match one of: (name: cannot be blank.) or (derivedKind: cannot be blank.).).",
 		},
 	}
 

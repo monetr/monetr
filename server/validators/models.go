@@ -17,7 +17,8 @@ var (
 )
 
 // Name is a shorthand function.
-// Deprecated use [schemas.Name] instead!
+//
+// Deprecated: use [schemas.Name] instead!
 func Name(required OptionalOrRequire) *validation.KeyRules[string] {
 	return validation.Key(
 		"name",
@@ -28,6 +29,7 @@ func Name(required OptionalOrRequire) *validation.KeyRules[string] {
 }
 
 // Description is a shorthand for description fields on object.
+//
 // Deprecated: Use a custom rule instead.
 func Description() *validation.KeyRules[string] {
 	return validation.Key(
@@ -44,6 +46,9 @@ func Mask() *validation.KeyRules[string] {
 	).Required(Optional)
 }
 
+// CurrencyCode is a shorthand
+//
+// Deprecated: Use [schemas.CurrencyCode] instead.
 func CurrencyCode(required OptionalOrRequire) *validation.KeyRules[string] {
 	return validation.Key(
 		"currency",

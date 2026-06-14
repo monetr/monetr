@@ -33,7 +33,7 @@ type BalanceSpec struct {
 }
 
 func (s *BalanceSpec) Validate(ctx context.Context) error {
-	return validators.OneOfStruct(
+	_, err := validation.MatchOneOfStruct(
 		ctx,
 		s,
 		// If [BalanceSpec.Kind] is [BalanceKindNone] or [BalanceKindSum] then
@@ -73,4 +73,5 @@ func (s *BalanceSpec) Validate(ctx context.Context) error {
 			),
 		},
 	)
+	return err
 }

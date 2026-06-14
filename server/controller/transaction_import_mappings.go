@@ -60,7 +60,7 @@ func (c *Controller) postTransactionImportMapping(ctx echo.Context) error {
 
 	if err := data.Mapping.Validate(c.getContext(ctx)); err != nil {
 		switch errors.Cause(err).(type) {
-		case validation.Errors, validators.OneOfError:
+		case validation.Errors, validation.OneOfError:
 			return c.jsonError(ctx, http.StatusBadRequest, map[string]any{
 				"error":    "Invalid request",
 				"problems": validators.MarshalErrorTree(err),

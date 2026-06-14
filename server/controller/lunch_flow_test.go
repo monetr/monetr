@@ -625,7 +625,10 @@ func TestPostLunchFlowLinkSync(t *testing.T) {
 		response := e.POST("/api/lunch_flow/link/sync").
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
-				"linkId": "link_bogusbogusbogusbogusbo",
+				// This is a properly shaped link Id, it just does not exist. The ID
+				// validation now checks the length so this has to actually look like one
+				// of our IDs to get past validation and reach the database lookup.
+				"linkId": "link_01hy4rbb1gjdek7h2xmgy5pnwk",
 			}).
 			Expect()
 

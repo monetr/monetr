@@ -343,9 +343,11 @@ func TestPostBankAccount(t *testing.T) {
 				}).
 				Expect()
 
+			// This check moved out of the schema and into the handler, so it now comes
+			// back as a plain bad request instead of a per field problem.
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("Invalid request")
-			response.JSON().Path("$.problems.lunchFlowBankAccountId").String().NotEmpty()
+			response.JSON().Path("$.error").String().IsEqual("Lunch Flow Bank Account ID must belong to the specified link")
+			response.JSON().Object().NotContainsKey("problems")
 		}
 
 		{ // Make sure the first link still accepts the first Lunch Flow bank account.
@@ -623,9 +625,11 @@ func TestPostBankAccount(t *testing.T) {
 				}).
 				Expect()
 
+			// "???" is three characters so it gets past the length rule, but it trips
+			// the alphabetical rule that the new currency schema added.
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").String().IsEqual("Invalid request")
-			response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be one supported by the server")
+			response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be alphabetical characters only")
 		}
 	})
 
@@ -682,9 +686,248 @@ func TestPostBankAccount(t *testing.T) {
 				}).
 				Expect()
 
+			// The non-manual link rejection happens in the handler now, so it is a
+			// plain bad request rather than a per field problem.
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").IsEqual("Invalid request")
-			response.JSON().Path("$.problems.linkId").String().IsEqual("Cannot create a bank account for a non-manual link, specify a manual Link ID")
+			response.JSON().Path("$.error").String().IsEqual("Cannot create a bank account for a non-manual link, specify a manual Link ID")
+			response.JSON().Object().NotContainsKey("problems")
+		}
+	})
+
+	t.Run("invalid link Id format", func(t *testing.T) {
+		// The new schema validates the shape of the link Id before we ever go to
+		// the database. A value that is not even shaped like one of our IDs should
+		// come back as a problem on the linkId field.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/bank_accounts").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": "potato",
+				"name":   "Checking Account",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.linkId").String().IsEqual("id does not match format link_...")
+	})
+
+	t.Run("mask must be exactly four digits", func(t *testing.T) {
+		// The old schema only checked that the mask contained four digits
+		// somewhere, so a longer string would slip through. The new schema pins it
+		// to exactly four digits. The linkId here is a valid shape but never gets
+		// looked up because validation fails first.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/bank_accounts").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": "link_01hy4rbb1gjdek7h2xmgy5pnwk",
+				"name":   "Checking Account",
+				"mask":   "12345",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		// Mask is a one of null or a real mask, and the one of error now serializes as
+		// a structured envelope with a branch per alternative. We only care that the
+		// four digit rule shows up as the reason the real mask branch failed.
+		response.JSON().Path("$.problems.mask.oneOf").Array().ContainsAll("Mask must be exactly 4 digits")
+	})
+
+	t.Run("mask can be explicitly null", func(t *testing.T) {
+		// The mask field is now a one of null or a four digit string, so a client
+		// that sends an explicit null should be totally fine. This used to not have
+		// an explicit null branch.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId ID[Link]
+		{ // Create the manual link
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "Manual Link",
+					"description":     "My personal link",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+			assert.False(t, linkId.IsZero(), "must be able to extract the link ID")
+		}
+
+		{ // Create the bank account with an explicit null mask
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId": linkId,
+					"name":   "Checking Account",
+					"mask":   nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").String().IsASCII().NotEmpty()
+			response.JSON().Path("$.mask").IsNull()
+		}
+	})
+
+	t.Run("currency must be all upper case", func(t *testing.T) {
+		// The new currency schema is much stricter than the old one which only
+		// checked that the value was in the installed list. A lower case currency
+		// now trips the upper case rule with its own specific message.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/bank_accounts").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId":   "link_01hy4rbb1gjdek7h2xmgy5pnwk",
+				"name":     "Checking Account",
+				"currency": "usd",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be all upper case")
+	})
+
+	t.Run("currency must be exactly three characters", func(t *testing.T) {
+		// Same idea, a currency that is the wrong length gets its own message now
+		// instead of just being reported as unsupported.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/bank_accounts").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId":   "link_01hy4rbb1gjdek7h2xmgy5pnwk",
+				"name":     "Checking Account",
+				"currency": "US",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be exactly 3 characters long")
+	})
+
+	t.Run("limit balance cannot be negative", func(t *testing.T) {
+		// Limit balance is now a one of null or a non-negative integer. A negative
+		// value should be rejected.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/bank_accounts").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId":       "link_01hy4rbb1gjdek7h2xmgy5pnwk",
+				"name":         "Checking Account",
+				"limitBalance": -5,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		// Same structured one of envelope as the mask, we just want the negative branch
+		// message to be present.
+		response.JSON().Path("$.problems.limitBalance.oneOf").Array().ContainsAll("Limit balance cannot be negative")
+	})
+
+	t.Run("balance must be an integer", func(t *testing.T) {
+		// Current and available balance only need to be integers, but they DO need
+		// to be integers. A string value should be rejected as a non integer.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/bank_accounts").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId":         "link_01hy4rbb1gjdek7h2xmgy5pnwk",
+				"name":           "Checking Account",
+				"currentBalance": "not a number",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.currentBalance").String().IsEqual("must be an integer")
+	})
+
+	t.Run("merges non-default fields over the controller defaults", func(t *testing.T) {
+		// The schema only validates a subset of the fields, but the merge step
+		// applies the WHOLE request body onto the bank account. The controller
+		// pre-sets some defaults (depository, checking, active) before parsing, so
+		// this test sends non-default values for all of those to prove the merge
+		// actually overrides the defaults rather than the defaults winning. We read
+		// the account back afterwards to make sure the merged values were persisted
+		// and not just echoed.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		var linkId ID[Link]
+		{ // Create the manual link
+			response := e.POST("/api/links").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"institutionName": "Manual Link",
+					"description":     "My personal link",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			linkId = ID[Link](response.JSON().Path("$.linkId").String().Raw())
+			assert.False(t, linkId.IsZero(), "must be able to extract the link ID")
+		}
+
+		var bankAccountId ID[BankAccount]
+		{ // Create the bank account with everything set to a non-default value
+			response := e.POST("/api/bank_accounts").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId":           linkId,
+					"name":             "Credit Card Account",
+					"originalName":     "ORIGINAL CREDIT",
+					"mask":             "9876",
+					"availableBalance": 1500,
+					"currentBalance":   1200,
+					"limitBalance":     5000,
+					"accountType":      CreditBankAccountType,
+					"accountSubType":   CreditCardBankAccountSubType,
+					"status":           BankAccountStatusInactive,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			bankAccountId = ID[BankAccount](response.JSON().Path("$.bankAccountId").String().Raw())
+			assert.False(t, bankAccountId.IsZero(), "must be able to extract the bank account ID")
+			// Every one of these is a non-default value, so seeing them come back
+			// proves the merge applied the request body over the pre-set defaults.
+			response.JSON().Path("$.originalName").String().IsEqual("ORIGINAL CREDIT")
+			response.JSON().Path("$.mask").String().IsEqual("9876")
+			response.JSON().Path("$.availableBalance").Number().IsEqual(1500)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(1200)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(5000)
+			response.JSON().Path("$.accountType").String().IsEqual(string(CreditBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CreditCardBankAccountSubType))
+			response.JSON().Path("$.status").String().IsEqual(string(BankAccountStatusInactive))
+		}
+
+		{ // Read it back to make sure the merged values were actually persisted
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.originalName").String().IsEqual("ORIGINAL CREDIT")
+			response.JSON().Path("$.mask").String().IsEqual("9876")
+			response.JSON().Path("$.availableBalance").Number().IsEqual(1500)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(1200)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(5000)
+			response.JSON().Path("$.accountType").String().IsEqual(string(CreditBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CreditCardBankAccountSubType))
+			response.JSON().Path("$.status").String().IsEqual(string(BankAccountStatusInactive))
 		}
 	})
 }

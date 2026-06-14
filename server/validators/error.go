@@ -1,7 +1,6 @@
 package validators
 
 import (
-	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -42,46 +41,11 @@ func (p Problems) Error() string {
 	return s.String()
 }
 
-// OneOfStruct validates structPtr against several alternative schemas. The
-// first schema that fully validates wins and OneOfStruct returns nil. If none
-// match, OneOfStruct returns a [OneOfError] where each element is one schema's
-// [validation.Errors] in input order. Variants are unlabeled; the per-rule
-// failures inside each variant are expected to be self-discriminating (the
-// kind-style fields will pass on exactly one variant when the input is
-// internally consistent).
-//
-// If a custom rule returns a non-validation error (anything that's not a
-// [validation.Errors]), OneOfStruct surfaces it directly so callers can
-// distinguish unexpected errors from schema-mismatch failures.
-func OneOfStruct[T any](
-	ctx context.Context,
-	structPtr *T,
-	schemas ...[]*validation.FieldRules,
-) error {
-	failures := make(OneOfError, 0, len(schemas))
-	for _, schema := range schemas {
-		err := validation.ValidateStructWithContext(
-			ctx,
-			structPtr,
-			schema...,
-		)
-		if err == nil {
-			return nil
-		}
-		verrs, ok := err.(validation.Errors)
-		if !ok {
-			return err
-		}
-		failures = append(failures, verrs)
-	}
-	return failures
-}
-
 // MarshalErrorTree prepares an error returned from a [validation.Validate]
 // chain or a [validators] helper for JSON serialization. It walks the error
 // tree, stripping pkg/errors wraps at every level (each per-spec errors.Wrapf
 // in datasources/table, plus the outermost Mapping wrap) so nested
-// [validation.Errors] and [OneOfError] values are reached by the caller's
+// [validation.Errors] and [validation.OneOfError] values are reached by the caller's
 // encoding/json. Returns a JSON-marshalable value tree built from maps, slices,
 // and strings.
 //
@@ -109,7 +73,10 @@ func walkError(err error) any {
 			out[k] = walkError(v)
 		}
 		return out
-	case OneOfError:
+	case validation.OneOfError:
+		// A union from [validation.OneOf] / [validation.MatchOneOfStruct]. A single
+		// alternative flattens to its inner errors, multiple alternatives become a
+		// {"oneOf": [...]} envelope so the client can see each shape it could match.
 		if len(e) == 1 {
 			return walkError(e[0])
 		}
@@ -126,7 +93,7 @@ func walkError(err error) any {
 // FlattenValidationError walks a validation error and produces a flat
 // [Problems] map suitable for human-readable logs and string assertions. It is
 // not the JSON marshaller; for API responses use [MarshalErrorTree] which
-// preserves the nested structure (including [OneOfError] variants).
+// preserves the nested structure (including [validation.OneOfError] variants).
 func FlattenValidationError(err error) error {
 	switch err := errors.Cause(err).(type) {
 	case validation.Errors:
@@ -135,6 +102,12 @@ func FlattenValidationError(err error) error {
 			errs[key] = []error{FlattenValidationError(problem)}
 		}
 		return errs
+	case validation.OneOfError:
+		// A union is a set of mutually exclusive alternatives, it does not flatten into
+		// a single map. Return it as is so its own "must match one of: (...) or (...)"
+		// rendering is used rather than letting the generic Unwrap case below merge the
+		// variants into one map.
+		return err
 	case interface {
 		error
 		Unwrap() []error

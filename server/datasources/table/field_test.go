@@ -35,27 +35,27 @@ func TestFieldRef_Validate(t *testing.T) {
 		{
 			name:    "name not in headers",
 			ref:     table.FieldRef{Name: "NotPresent"},
-			wantErr: "input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"]. or derivedKind: cannot be blank; name: must be blank.",
+			wantErr: "must match one of: (name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"].) or (derivedKind: cannot be blank; name: must be blank.)",
 		},
 		{
 			name:    "empty",
 			ref:     table.FieldRef{},
-			wantErr: "input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank.",
+			wantErr: "must match one of: (name: cannot be blank.) or (derivedKind: cannot be blank.)",
 		},
 		{
 			name:    "both name and derived",
 			ref:     table.FieldRef{Name: "Date", DerivedKind: table.DerivedKindRowNumber},
-			wantErr: "input must be considered valid by: derivedKind: must be blank. or name: must be blank.",
+			wantErr: "must match one of: (derivedKind: must be blank.) or (name: must be blank.)",
 		},
 		{
 			name:    "unknown derived kind",
 			ref:     table.FieldRef{DerivedKind: table.DerivedKind("bogus")},
-			wantErr: "input must be considered valid by: derivedKind: must be blank; name: cannot be blank. or derivedKind: must be one of: [\"rowNumber\"].",
+			wantErr: "must match one of: (derivedKind: must be blank; name: cannot be blank.) or (derivedKind: must be one of: [\"rowNumber\"].)",
 		},
 		{
 			name:    "name with unknown derived",
 			ref:     table.FieldRef{Name: "Date", DerivedKind: table.DerivedKind("bogus")},
-			wantErr: "input must be considered valid by: derivedKind: must be blank. or derivedKind: must be one of: [\"rowNumber\"]; name: must be blank.",
+			wantErr: "must match one of: (derivedKind: must be blank.) or (derivedKind: must be one of: [\"rowNumber\"]; name: must be blank.)",
 		},
 		{
 			// A Name with a tab in it can't ever match a real column because the
@@ -64,12 +64,12 @@ func TestFieldRef_Validate(t *testing.T) {
 			// rule on Name is more or less defense-in-depth.
 			name:    "name with tab",
 			ref:     table.FieldRef{Name: "Dat\te"},
-			wantErr: "input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"]. or derivedKind: cannot be blank; name: must be blank.",
+			wantErr: "must match one of: (name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"].) or (derivedKind: cannot be blank; name: must be blank.)",
 		},
 		{
 			name:    "name with newline",
 			ref:     table.FieldRef{Name: "Dat\ne"},
-			wantErr: "input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"]. or derivedKind: cannot be blank; name: must be blank.",
+			wantErr: "must match one of: (name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"].) or (derivedKind: cannot be blank; name: must be blank.)",
 		},
 		{
 			// "Café" used to fail the print rule, but [validators.PrintableUnicode]
@@ -77,7 +77,7 @@ func TestFieldRef_Validate(t *testing.T) {
 			// context's column list, which is the more meaningful thing to test now.
 			name:    "name not in columns, with non-ASCII",
 			ref:     table.FieldRef{Name: "Café"},
-			wantErr: "input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"]. or derivedKind: cannot be blank; name: must be blank.",
+			wantErr: "must match one of: (name: must be one of: [\"Date\", \"Description\", \"Amount\", \"Id\"].) or (derivedKind: cannot be blank; name: must be blank.)",
 		},
 	}
 

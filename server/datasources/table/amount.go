@@ -53,7 +53,7 @@ type AmountSpec struct {
 }
 
 func (s *AmountSpec) Validate(ctx context.Context) error {
-	return validators.OneOfStruct(
+	_, err := validation.MatchOneOfStruct(
 		ctx,
 		s,
 		// When we are [AmountKindSign] then only [AmountSpec.Fields] should be
@@ -162,4 +162,5 @@ func (s *AmountSpec) Validate(ctx context.Context) error {
 			),
 		},
 	)
+	return err
 }

@@ -229,10 +229,14 @@ func TestPostTransactions(t *testing.T) {
 			WithPath("bankAccountId", bank.BankAccountId).
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]any{
-				"name":       "Foobar",
-				"date":       app.Clock.Now(),
-				"amount":     100,
-				"spendingId": "spnd_bogus",
+				"name":   "Foobar",
+				"date":   app.Clock.Now(),
+				"amount": 100,
+				// A properly shaped spending Id that does not exist. The ID validation now
+				// enforces a length, so a short stub like "spnd_bogus" gets rejected as a
+				// bad request before we ever try to look the spending up. We want the not
+				// found path at the lookup instead.
+				"spendingId": "spnd_01hy4rfqk8z4xv1c2v44cf6abc",
 			}).
 			Expect()
 

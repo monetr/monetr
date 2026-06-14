@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"regexp"
 
+	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/monetr/monetr/server/merge"
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
@@ -60,4 +62,24 @@ func Name(required OptionalOrRequire) *validation.KeyRules[string] {
 		is.PrintableUnicode,
 		validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
 	).Required(required)
+}
+
+func Mask() validation.Rule {
+	return validation.AllOf(
+		validation.IsString,
+		validation.Length(4, 4).Error("Mask must be exactly 4 digits"),
+		validation.Match(regexp.MustCompile(`\d{4}`)).Error("Mask must be a 4 digit string"),
+	)
+}
+
+func CurrencyCode() validation.Rule {
+	return validation.AllOf(
+		validation.IsString,
+		validation.Length(3, 3).Error("Currency must be exactly 3 characters long"),
+		is.Alpha.Error("Currency must be alphabetical characters only"),
+		is.UpperCase.Error("Currency must be all upper case"),
+		validation.In(
+			locale.GetInstalledCurrencies()...,
+		).Error("Currency must be one supported by the server"),
+	)
 }

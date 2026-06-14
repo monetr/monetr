@@ -83,7 +83,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindNone,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank. or kind: must equal \"field\".",
+			wantErr: "must match one of: (fields: must be blank.) or (kind: must equal \"field\".)",
 		},
 		{
 			name: "sum with a field",
@@ -91,7 +91,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindSum,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank. or kind: must equal \"field\".",
+			wantErr: "must match one of: (fields: must be blank.) or (kind: must equal \"field\".)",
 		},
 		{
 			// Two-fields cases expose a different branch-2 error (length) than the
@@ -101,7 +101,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindNone,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}, {Name: "Amount"}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank. or fields: the length must be exactly 1; kind: must equal \"field\".",
+			wantErr: "must match one of: (fields: must be blank.) or (fields: the length must be exactly 1; kind: must equal \"field\".)",
 		},
 		{
 			name: "sum with multiple fields",
@@ -109,14 +109,14 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindSum,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}, {Name: "Amount"}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank. or fields: the length must be exactly 1; kind: must equal \"field\".",
+			wantErr: "must match one of: (fields: must be blank.) or (fields: the length must be exactly 1; kind: must equal \"field\".)",
 		},
 		{
 			name: "field with no fields",
 			spec: table.BalanceSpec{
 				Kind: table.BalanceKindField,
 			},
-			wantErr: "input must be considered valid by: kind: must be one of: [\"none\", \"sum\"]. or fields: cannot be blank.",
+			wantErr: "must match one of: (kind: must be one of: [\"none\", \"sum\"].) or (fields: cannot be blank.)",
 		},
 		{
 			// An explicitly empty slice is treated the same as nil for Required
@@ -126,21 +126,21 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{},
 			},
-			wantErr: "input must be considered valid by: kind: must be one of: [\"none\", \"sum\"]. or fields: cannot be blank.",
+			wantErr: "must match one of: (kind: must be one of: [\"none\", \"sum\"].) or (fields: cannot be blank.)",
 		},
 
 		// --- Kind-layer invalid ---
 		{
 			name:    "empty",
 			spec:    table.BalanceSpec{},
-			wantErr: "input must be considered valid by: kind: cannot be blank. or fields: cannot be blank; kind: must equal \"field\".",
+			wantErr: "must match one of: (kind: cannot be blank.) or (fields: cannot be blank; kind: must equal \"field\".)",
 		},
 		{
 			name: "unknown kind, no fields",
 			spec: table.BalanceSpec{
 				Kind: table.BalanceKind("bogus"),
 			},
-			wantErr: "input must be considered valid by: kind: must be one of: [\"none\", \"sum\"]. or fields: cannot be blank; kind: must equal \"field\".",
+			wantErr: "must match one of: (kind: must be one of: [\"none\", \"sum\"].) or (fields: cannot be blank; kind: must equal \"field\".)",
 		},
 		{
 			// Branch 2 accepts the field but rejects the kind, so only the kind error
@@ -150,7 +150,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKind("bogus"),
 				Fields: []table.FieldRef{{Name: "RunningBalance"}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or kind: must equal \"field\".",
+			wantErr: "must match one of: (fields: must be blank; kind: must be one of: [\"none\", \"sum\"].) or (kind: must equal \"field\".)",
 		},
 
 		// --- Length violation in branch 2 (kind=field with multiple fields) ---
@@ -160,7 +160,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}, {Name: "Amount"}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: the length must be exactly 1.",
+			wantErr: "must match one of: (fields: must be blank; kind: must be one of: [\"none\", \"sum\"].) or (fields: the length must be exactly 1.)",
 		},
 		{
 			name: "field with three fields",
@@ -168,7 +168,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}, {Name: "Amount"}, {Name: "Date"}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: the length must be exactly 1.",
+			wantErr: "must match one of: (fields: must be blank; kind: must be one of: [\"none\", \"sum\"].) or (fields: the length must be exactly 1.)",
 		},
 		{
 			// Length(1,1) fails before Unique runs, so the duplicate case reports the
@@ -178,7 +178,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{Name: "RunningBalance"}, {Name: "RunningBalance"}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: the length must be exactly 1.",
+			wantErr: "must match one of: (fields: must be blank; kind: must be one of: [\"none\", \"sum\"].) or (fields: the length must be exactly 1.)",
 		},
 
 		// --- Child FieldRef invalid (exercises Each inside branch 2) ---
@@ -188,7 +188,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: (0: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..).",
+			wantErr: "must match one of: (fields: must be blank; kind: must be one of: [\"none\", \"sum\"].) or (fields: (0: must match one of: (name: cannot be blank.) or (derivedKind: cannot be blank.).).)",
 		},
 		{
 			name: "field child not in headers",
@@ -196,7 +196,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{Name: "NotPresent"}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: (0: input must be considered valid by: name: must be one of: [\"Date\", \"Description\", \"Amount\", \"RunningBalance\"]. or derivedKind: cannot be blank; name: must be blank..).",
+			wantErr: "must match one of: (fields: must be blank; kind: must be one of: [\"none\", \"sum\"].) or (fields: (0: must match one of: (name: must be one of: [\"Date\", \"Description\", \"Amount\", \"RunningBalance\"].) or (derivedKind: cannot be blank; name: must be blank.).).)",
 		},
 		{
 			name: "field child with name and derived",
@@ -204,7 +204,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{Name: "RunningBalance", DerivedKind: table.DerivedKindRowNumber}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: (0: input must be considered valid by: derivedKind: must be blank. or name: must be blank..).",
+			wantErr: "must match one of: (fields: must be blank; kind: must be one of: [\"none\", \"sum\"].) or (fields: (0: must match one of: (derivedKind: must be blank.) or (name: must be blank.).).)",
 		},
 		{
 			name: "field child with unknown derived",
@@ -212,7 +212,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKindField,
 				Fields: []table.FieldRef{{DerivedKind: table.DerivedKind("bogus")}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: (0: input must be considered valid by: derivedKind: must be blank; name: cannot be blank. or derivedKind: must be one of: [\"rowNumber\"]..).",
+			wantErr: "must match one of: (fields: must be blank; kind: must be one of: [\"none\", \"sum\"].) or (fields: (0: must match one of: (derivedKind: must be blank; name: cannot be blank.) or (derivedKind: must be one of: [\"rowNumber\"].).).)",
 		},
 
 		// --- Combined (both kind and fields misbehaving) ---
@@ -224,7 +224,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 			spec: table.BalanceSpec{
 				Fields: []table.FieldRef{{Name: "RunningBalance"}, {Name: "Amount"}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank; kind: cannot be blank. or fields: the length must be exactly 1; kind: must equal \"field\".",
+			wantErr: "must match one of: (fields: must be blank; kind: cannot be blank.) or (fields: the length must be exactly 1; kind: must equal \"field\".)",
 		},
 		{
 			name: "unknown kind, invalid child",
@@ -232,7 +232,7 @@ func TestBalanceSpec_Validate(t *testing.T) {
 				Kind:   table.BalanceKind("bogus"),
 				Fields: []table.FieldRef{{}},
 			},
-			wantErr: "input must be considered valid by: fields: must be blank; kind: must be one of: [\"none\", \"sum\"]. or fields: (0: input must be considered valid by: name: cannot be blank. or derivedKind: cannot be blank..); kind: must equal \"field\".",
+			wantErr: "must match one of: (fields: must be blank; kind: must be one of: [\"none\", \"sum\"].) or (fields: (0: must match one of: (name: cannot be blank.) or (derivedKind: cannot be blank.).); kind: must equal \"field\".)",
 		},
 	}
 
