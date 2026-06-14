@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import Link from '@monetr/interface/models/Link';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import request from '@monetr/interface/util/request';
 
 export type PatchLinkRequest = Pick<Link, 'linkId'> & Partial<Pick<Link, 'institutionName' | 'description'>>;
@@ -9,7 +10,7 @@ export function usePatchLink(): (_: PatchLinkRequest) => Promise<Link> {
   const queryClient = useQueryClient();
 
   async function patchLink({ linkId, ...patch }: PatchLinkRequest): Promise<Link> {
-    return request<Partial<Link>>({ method: 'PATCH', url: `/api/links/${linkId}`, data: patch }).then(
+    return request<WithJsonValues<Link>>({ method: 'PATCH', url: `/api/links/${linkId}`, data: patch }).then(
       result => new Link(result.data),
     );
   }

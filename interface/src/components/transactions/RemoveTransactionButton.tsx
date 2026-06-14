@@ -11,7 +11,7 @@ interface RemoveTransactionButtonProps {
   transaction: Transaction;
 }
 
-export default function RemoveTransactionButton(props: RemoveTransactionButtonProps): React.JSX.Element {
+export default function RemoveTransactionButton(props: RemoveTransactionButtonProps): React.JSX.Element | null {
   const { transaction } = props;
   const { data: link } = useCurrentLink();
   const [, navigate] = useLocation();
@@ -23,7 +23,7 @@ export default function RemoveTransactionButton(props: RemoveTransactionButtonPr
   }, [navigate, transaction]);
 
   // We only allow removing transactions on manual links.
-  if (!link.getIsManual()) {
+  if (!link?.getIsManual()) {
     return null;
   }
 

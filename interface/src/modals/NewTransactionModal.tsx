@@ -21,8 +21,8 @@ import {
 } from '@monetr/interface/hooks/useCreateTransaction';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './NewTransactionModal.module.scss';
@@ -44,9 +44,14 @@ function NewTransactionModal(): React.JSX.Element {
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
   const { enqueueSnackbar } = useSnackbar();
+  const bankAccountId = useSelectedBankAccountId();
   const { data: selectedBankAccount } = useSelectedBankAccount();
   const createTransaction = useCreateTransaction();
   const adjustsBalanceToggleId = useId();
+
+  if (!bankAccountId) {
+    throw new Error('bank account specific component used on non bank account specific page!');
+  }
 
   const initialValues: NewTransactionValues = {
     name: '',
@@ -61,6 +66,12 @@ function NewTransactionModal(): React.JSX.Element {
   };
 
   async function submit(values: NewTransactionValues, helper: FormikHelpers<NewTransactionValues>): Promise<void> {
+    // We need both the selected bank account and the locale to build the request, the modal is only reachable once a
+    // bank account is selected and the locale has loaded so this should never actually happen.
+    if (!selectedBankAccount || !locale) {
+      return;
+    }
+
     const newTransactionRequest: CreateTransactionRequest = {
       bankAccountId: selectedBankAccount.bankAccountId,
       amount: locale.friendlyToAmount(values.kind === 'credit' ? values.amount * -1 : values.amount),
@@ -208,5 +219,5 @@ const newTransactionModal = NiceModal.create(NewTransactionModal);
 export default newTransactionModal;
 
 export function showNewTransactionModal(): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof newTransactionModal>, unknown>(newTransactionModal);
+  return NiceModal.show(newTransactionModal) as Promise<void>;
 }

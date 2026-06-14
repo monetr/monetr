@@ -20,9 +20,11 @@ import { useCurrentLink } from '@monetr/interface/hooks/useCurrentLink';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import { ID } from '@monetr/interface/models/ID';
+import type Spending from '@monetr/interface/models/Spending';
+import { SpendingType } from '@monetr/interface/models/Spending';
 import type { APIError } from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './NewExpenseModal.module.scss';
@@ -32,15 +34,13 @@ interface NewExpenseValues {
   amount: number;
   nextOccurrence: Date;
   ruleset: string;
-  fundingScheduleId: string;
+  fundingScheduleId: ID<FundingSchedule>;
   autoCreateTransaction: boolean;
 }
 
 function NewExpenseModal(): React.JSX.Element {
   const { inTimezone } = useTimezone();
-  const {
-    data: { friendlyToAmount },
-  } = useLocaleCurrency();
+  const { data: locale } = useLocaleCurrency();
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
   const { data: selectedBankAccount } = useSelectedBankAccount();
@@ -50,7 +50,7 @@ function NewExpenseModal(): React.JSX.Element {
 
   const ref = useRef<MModalRef>(null);
 
-  if (!selectedBankAccount) {
+  if (!selectedBankAccount || !locale) {
     return (
       <MModal className={styles.modal} open={modal.visible} ref={ref}>
         One moment...
@@ -65,12 +65,17 @@ function NewExpenseModal(): React.JSX.Element {
       in: inTimezone,
     }),
     ruleset: '',
-    fundingScheduleId: '',
+    fundingScheduleId: ID.from<FundingSchedule, string>(''),
     autoCreateTransaction: false,
   };
 
   async function submit(values: NewExpenseValues, helper: FormikHelpers<NewExpenseValues>): Promise<void> {
-    const newSpending = new Spending({
+    if (!selectedBankAccount || !locale) {
+      return Promise.resolve();
+    }
+
+    helper.setSubmitting(true);
+    return createSpending({
       bankAccountId: selectedBankAccount.bankAccountId,
       name: values.name.trim(),
       nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
@@ -78,15 +83,12 @@ function NewExpenseModal(): React.JSX.Element {
       }),
       spendingType: SpendingType.Expense,
       fundingScheduleId: values.fundingScheduleId,
-      targetAmount: friendlyToAmount(values.amount),
+      targetAmount: locale.friendlyToAmount(values.amount),
       ruleset: values.ruleset,
       // Auto create transaction requires a manual link and a non-zero target
       // amount; force it off otherwise so the API will not reject the create.
       autoCreateTransaction: isManual && values.amount > 0 && values.autoCreateTransaction,
-    });
-
-    helper.setSubmitting(true);
-    return createSpending(newSpending)
+    })
       .then(created => modal.resolve(created))
       .then(() => modal.remove())
       .catch(
@@ -191,5 +193,5 @@ const newExpenseModal = NiceModal.create(NewExpenseModal);
 export default newExpenseModal;
 
 export function showNewExpenseModal(): Promise<Spending | null> {
-  return NiceModal.show<Spending | null, ExtractProps<typeof newExpenseModal>, unknown>(newExpenseModal);
+  return NiceModal.show(newExpenseModal) as Promise<Spending | null>;
 }

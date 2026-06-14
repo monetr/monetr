@@ -28,12 +28,19 @@ const InputOTPSlot = React.forwardRef<
   React.ComponentPropsWithoutRef<'div'> & { index: number }
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext);
-  const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index];
+  // slots is indexed by a prop so noUncheckedIndexedAccess treats it as possibly undefined, fall back to an empty
+  // inactive slot if we ever get handed an index that is out of range.
+  const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index] ?? {
+    char: null,
+    placeholderChar: null,
+    hasFakeCaret: false,
+    isActive: false,
+  };
 
-  const finalClassName = mergeClasses(styles.slot, { [styles.slotActive]: isActive }, className);
+  const finalClassName = mergeClasses(styles.slot, className);
 
   return (
-    <div className={finalClassName} ref={ref} {...props}>
+    <div className={finalClassName} data-active={isActive} ref={ref} {...props}>
       {char}
       {hasFakeCaret && (
         <div className={styles.caretWrapper}>

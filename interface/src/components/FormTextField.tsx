@@ -22,7 +22,7 @@ export interface FormTextFieldProps extends InputProps {
 }
 
 const FormTextFieldPropsDefaults: Omit<FormTextFieldProps, 'InputProps'> = {
-  label: null,
+  label: undefined,
   labelDecorator: (_: LabelDecoratorProps) => null,
   disabled: false,
   uppercasetext: undefined,
@@ -30,28 +30,29 @@ const FormTextFieldPropsDefaults: Omit<FormTextFieldProps, 'InputProps'> = {
 
 export default function FormTextField(props: FormTextFieldProps = FormTextFieldPropsDefaults): React.JSX.Element {
   const id = useId();
-  const formikContext = useFormikContext();
-  const getFormikError = () => {
-    if (!formikContext?.touched[props?.name]) {
-      return null;
+  const formikContext = useFormikContext<Record<string, any>>();
+  const getFormikError = (): string | undefined => {
+    if (!props?.name || !formikContext?.touched[props.name]) {
+      return;
     }
 
-    return formikContext?.errors[props?.name];
+    // These renderers are keyed by a flat field name, so the formik error for that field is a plain string.
+    return formikContext?.errors[props.name] as string | undefined;
   };
 
   props = {
     id,
     ...FormTextFieldPropsDefaults,
     ...props,
-    disabled: props?.disabled || formikContext?.isSubmitting,
-    error: props?.error || getFormikError(),
+    disabled: Boolean(props?.disabled) || formikContext?.isSubmitting,
+    error: props?.error ?? getFormikError(),
   };
 
   const { labelDecorator, ...otherProps } = props;
-  const LabelDecorator = labelDecorator || FormTextFieldPropsDefaults.labelDecorator;
+  const LabelDecorator = labelDecorator ?? (() => null);
 
   // If we are working with a date picker, then take the current value and transform it for the actual input.
-  const value = formikContext?.values[props.name];
+  const value = props.name ? formikContext?.values[props.name] : undefined;
 
   if (props.isLoading) {
     return (

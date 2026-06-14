@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "target": "ESNEXT",
+    "types": ["node"],
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    "noUncheckedSideEffectImports": false,
     "noEmit": true,
     "esModuleInterop": true,
     "allowImportingTsExtensions": true,

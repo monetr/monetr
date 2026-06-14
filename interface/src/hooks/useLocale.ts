@@ -122,7 +122,7 @@ export function useLocale<LocaleName extends keyof typeof localeTable>(
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     async queryFn(context) {
-      const [_, localeName] = context.queryKey as Array<string>;
+      const [_, localeName] = context.queryKey as [string, string];
       const [sanitized, language] = sanitizeLocaleName(localeName);
       if (localeName in localeTable) {
         return await localeTable[localeName as LocaleName]();

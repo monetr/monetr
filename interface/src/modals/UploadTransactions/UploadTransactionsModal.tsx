@@ -12,9 +12,7 @@ import ErrorFileStage from '@monetr/interface/modals/UploadTransactions/ErrorFil
 import ProcessingFileStage from '@monetr/interface/modals/UploadTransactions/ProcessingFileStage';
 import TransactionUpload from '@monetr/interface/models/TransactionUpload';
 import fileSize from '@monetr/interface/util/fileSize';
-import mergeClasses from '@monetr/interface/util/mergeClasses';
 import request, { type ApiResponse } from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 import styles from './UploadTransactionsModal.module.scss';
 
@@ -58,11 +56,16 @@ function UploadTransactionsModal(): React.JSX.Element {
               />
             );
           case UploadTransactionStage.Processing:
-            return <ProcessingFileStage close={onClose} setStage={setStage} upload={monetrUpload} />;
+            // We only reach the processing stage once the upload has been set, but narrow here so the stage component
+            // always receives a defined upload.
+            return monetrUpload ? (
+              <ProcessingFileStage close={onClose} setStage={setStage} upload={monetrUpload} />
+            ) : null;
           case UploadTransactionStage.Completed:
             return null;
           case UploadTransactionStage.Error:
-            return <ErrorFileStage close={onClose} error={error} />;
+            // Likewise the error stage is only reached once an error has been set.
+            return error ? <ErrorFileStage close={onClose} error={error} /> : null;
           default:
             return null;
         }
@@ -84,7 +87,7 @@ function UploadFileStage(props: StageProps) {
   const [uploadProgress, setUploadProgress] = useState(-1);
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
     const selectedFile = acceptedFiles[0];
-    setFile(selectedFile);
+    setFile(selectedFile ?? null);
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -130,8 +133,6 @@ function UploadFileStage(props: StageProps) {
       });
   }
 
-  const uploadClassNames = mergeClasses(styles.dropzone, { [styles.dropzoneActive]: isDragActive });
-
   if (uploadProgress >= 0) {
     return (
       <div className={styles.stage}>
@@ -146,7 +147,7 @@ function UploadFileStage(props: StageProps) {
           <div className={styles.filePreview}>
             <FileUp className={styles.fileIcon} />
             <div className={styles.fileInfo}>
-              <Typography size='lg'>{file.name}</Typography>
+              <Typography size='lg'>{file?.name}</Typography>
               <div className={styles.progressTrack}>
                 <div className={styles.progressBar} style={{ width: `${uploadProgress}%` }} />
               </div>
@@ -204,7 +205,7 @@ function UploadFileStage(props: StageProps) {
           Upload a QFX or OFX file to import transaction data manually into your account. Maximum of 5MB.
         </Typography>
 
-        <div {...getRootProps()} className={uploadClassNames}>
+        <div {...getRootProps()} className={styles.dropzone} data-active={isDragActive}>
           <input {...getInputProps()} />
           <FileUp className={styles.fileIcon} />
           <Typography size='lg' weight='semibold'>
@@ -230,5 +231,5 @@ const uploadTransactionsModal = NiceModal.create(UploadTransactionsModal);
 export default uploadTransactionsModal;
 
 export function showUploadTransactionsModal(): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof uploadTransactionsModal>, unknown>(uploadTransactionsModal);
+  return NiceModal.show(uploadTransactionsModal) as Promise<void>;
 }

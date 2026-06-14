@@ -1,3 +1,6 @@
+import { ID, idPrefix } from '@monetr/interface/models/ID';
+import type User from '@monetr/interface/models/User';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum LunchFlowLinkStatus {
@@ -8,29 +11,31 @@ export enum LunchFlowLinkStatus {
 }
 
 export default class LunchFlowLink {
-  lunchFlowLinkId: string;
+  readonly [idPrefix] = 'lfx';
+
+  lunchFlowLinkId: ID<LunchFlowLink>;
   name: string;
   apiUrl: string;
   status: LunchFlowLinkStatus;
-  lastManualSync?: Date;
-  lastSuccessfulUpdate?: Date;
-  lastAttemptedUpdate?: Date;
+  lastManualSync: Date | null;
+  lastSuccessfulUpdate: Date | null;
+  lastAttemptedUpdate: Date | null;
   updatedAt: Date;
   createdAt: Date;
-  deletedAt?: Date;
-  createdBy: string;
+  deletedAt: Date | null;
+  createdBy: ID<User>;
 
-  constructor(data?: Partial<LunchFlowLink>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        lastManualSync: parseDate(data?.lastManualSync),
-        lastSuccessfulUpdate: parseDate(data?.lastSuccessfulUpdate),
-        lastAttemptedUpdate: parseDate(data?.lastAttemptedUpdate),
-        updatedAt: parseDate(data?.updatedAt),
-        createdAt: parseDate(data?.createdAt),
-        deletedAt: parseDate(data?.deletedAt),
-      });
-    }
+  constructor(data: WithJsonValues<LunchFlowLink>) {
+    this.lunchFlowLinkId = ID.from(data.lunchFlowLinkId);
+    this.name = data.name;
+    this.apiUrl = data.apiUrl;
+    this.status = data.status;
+    this.lastManualSync = parseDate(data.lastManualSync);
+    this.lastSuccessfulUpdate = parseDate(data.lastSuccessfulUpdate);
+    this.lastAttemptedUpdate = parseDate(data.lastAttemptedUpdate);
+    this.updatedAt = parseDate(data.updatedAt);
+    this.createdAt = parseDate(data.createdAt);
+    this.deletedAt = parseDate(data.deletedAt);
+    this.createdBy = ID.from(data.createdBy);
   }
 }

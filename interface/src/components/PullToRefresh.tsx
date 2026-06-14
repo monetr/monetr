@@ -61,11 +61,11 @@ export default function PullToRefresh(): React.JSX.Element {
         return;
       }
       // Prevent accidently pull to refresh on the wrong main view.
-      if (document.querySelector('ul')?.scrollTop > 0) {
+      if ((document.querySelector('ul')?.scrollTop ?? 0) > 0) {
         return;
       }
 
-      setPullStartPoint(e.targetTouches[0].screenY);
+      setPullStartPoint(e.targetTouches[0]?.screenY ?? 0);
 
       if (window.scrollY === 0 && window.scrollX === 0) {
         refreshDiv.current?.setAttribute('data-visible', 'true');
@@ -86,15 +86,15 @@ export default function PullToRefresh(): React.JSX.Element {
         return;
       }
       // Prevent accidently pull to refresh on the wrong main view.
-      if (document.querySelector('ul')?.scrollTop > 0) {
+      if ((document.querySelector('ul')?.scrollTop ?? 0) > 0) {
         return;
       }
       // On the details pages don't allow pull to refresh either
-      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) {
+      if ((document.querySelector('form > div.overflow-y-auto')?.scrollTop ?? 0) > 0) {
         return;
       }
 
-      const screenY = e.targetTouches[0].screenY;
+      const screenY = e.targetTouches[0]?.screenY ?? 0;
 
       const pullLength = pullStartPoint < screenY ? Math.abs(screenY - pullStartPoint) : 0;
 
@@ -107,10 +107,10 @@ export default function PullToRefresh(): React.JSX.Element {
       if (document.querySelectorAll('[role="dialog"]').length > 0) {
         return;
       }
-      if (document.querySelector('ul')?.scrollTop > 0) {
+      if ((document.querySelector('ul')?.scrollTop ?? 0) > 0) {
         return;
       }
-      if (document.querySelector('form > div.overflow-y-auto')?.scrollTop > 0) {
+      if ((document.querySelector('form > div.overflow-y-auto')?.scrollTop ?? 0) > 0) {
         return;
       }
 

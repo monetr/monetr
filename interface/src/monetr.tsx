@@ -103,7 +103,7 @@ export default function Monetr(): React.JSX.Element {
     );
   }
 
-  if (!auth?.isActive) {
+  if (auth?.isActive === false) {
     return (
       <Switch>
         <Route component={LogoutPage} path='/logout' />
@@ -116,7 +116,7 @@ export default function Monetr(): React.JSX.Element {
     );
   }
 
-  const hasAnyLinks = links?.length > 0;
+  const hasAnyLinks = (links?.length ?? 0) > 0;
   if (!hasAnyLinks) {
     return (
       <Switch>
@@ -220,10 +220,10 @@ export default function Monetr(): React.JSX.Element {
   );
 }
 
-function RedirectToBank(): React.JSX.Element {
+function RedirectToBank(): React.JSX.Element | null {
   const { data: links, isLoading: linksIsLoading } = useLinks();
   const { data: bankAccounts, isLoading: bankAccountsIsLoading } = useBankAccounts();
-  if (linksIsLoading || bankAccountsIsLoading) {
+  if (linksIsLoading || bankAccountsIsLoading || !links || !bankAccounts) {
     return null;
   }
   if (links.length === 0) {
@@ -245,13 +245,15 @@ function RedirectToBank(): React.JSX.Element {
   });
 
   const link = linksSorted[0];
-  const accounts = sortAccounts(Array.from(bankAccounts.values()).filter(account => account.linkId === link.linkId));
-
-  if (accounts.length === 0) {
+  if (!link) {
     return <Redirect replace to='/link/create' />;
   }
 
+  const accounts = sortAccounts(Array.from(bankAccounts.values()).filter(account => account.linkId === link.linkId));
   const account = accounts[0];
+  if (!account) {
+    return <Redirect replace to='/link/create' />;
+  }
 
   return <Redirect replace to={`/bank/${account.bankAccountId}/transactions`} />;
 }

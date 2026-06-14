@@ -72,7 +72,7 @@ export default function Select<V>(props: SelectProps<V>): React.JSX.Element {
 }
 
 export function SelectLoading<V>(props: SelectPropsLoading<V>): React.JSX.Element {
-  const LabelDecorator = props.labelDecorator || (() => null);
+  const LabelDecorator = props.labelDecorator ?? (() => null);
   return (
     <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>
       <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
@@ -116,7 +116,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
       }
     },
     items,
-    itemToString(item: SelectOption<V>) {
+    itemToString(item: SelectOption<V> | null) {
       return item ? item.label : '';
     },
   });
@@ -149,7 +149,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
 
   const renderStyles = useMemo(() => {
     // Controls the height of the menu that is rendered, makes sure that we dont render past the bottom of the page.
-    if (isOpen) {
+    if (isOpen && inputWrapperRef.current) {
       const distanceFromTop = inputWrapperRef.current.offsetTop;
       const heightOfWindow = window.innerHeight;
       const heightOfWrapper = inputWrapperRef.current.offsetHeight;
@@ -166,7 +166,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
     return {};
   }, [isOpen]);
 
-  const LabelDecorator = props.labelDecorator || (() => null);
+  const LabelDecorator = props.labelDecorator ?? (() => null);
 
   return (
     <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>
@@ -196,19 +196,16 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
       </div>
       <ErrorText error={props.error} />
       <ul
-        className={mergeClasses(selectStyles.unorderedList, {
-          [selectStyles.hidden]: !(isOpen && items.length),
-        })}
+        className={selectStyles.unorderedList}
+        data-hidden={!(isOpen && items.length)}
         {...getMenuProps()}
         style={renderStyles}
       >
         {isOpen &&
           items.map((item, index) => (
             <li
-              className={mergeClasses(selectStyles.option, {
-                // The _ACTUAL_ selected state will be slightly darker than the hover state.
-                [selectStyles.optionSelected]: selectedItem?.value === item.value,
-              })}
+              className={selectStyles.option}
+              data-selected={selectedItem?.value === item.value}
               key={item.label}
               {...getItemProps({
                 item,
@@ -241,7 +238,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
     [props],
   );
 
-  const LabelDecorator = props.labelDecorator || (() => null);
+  const LabelDecorator = props.labelDecorator ?? (() => null);
 
   return (
     <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>
@@ -258,10 +255,8 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
           >
             <span
               aria-disabled={props.disabled}
-              className={mergeClasses([selectStyles.selectText], {
-                // If we don't have a value then use the placeholder text style.
-                [selectStyles.selectTextPlaceholder]: !props.value?.label,
-              })}
+              className={selectStyles.selectText}
+              data-placeholder={!props.value?.label}
             >
               {props.value?.label ?? props.placeholder}
             </span>
@@ -274,10 +269,8 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
               {open &&
                 props.options.map(item => (
                   <li
-                    className={mergeClasses(selectStyles.optionTouch, {
-                      // The _ACTUAL_ selected state will be slightly darker than the hover state.
-                      [selectStyles.optionSelected]: props.value === item,
-                    })}
+                    className={selectStyles.optionTouch}
+                    data-selected={props.value === item}
                     key={item.label}
                     onClick={() => onChange(item)}
                   >

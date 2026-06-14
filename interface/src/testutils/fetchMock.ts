@@ -46,13 +46,12 @@ export default class FetchMock {
         this._history[methodKey].push({ url: relativeUrl, data });
       }
 
-      // Find matching handler
-      const handlerIndex = this.handlers.findIndex(h => h.method === method && h.url === rawUrl);
-      if (handlerIndex === -1) {
+      // Find matching handler. Doing the find inline like this lets typescript narrow handler down to a defined value
+      // afterwards, instead of indexing back into the array which it cant prove is in bounds.
+      const handler = this.handlers.find(h => h.method === method && h.url === rawUrl);
+      if (!handler) {
         return Promise.reject(new Error(`No mock handler for ${method} ${rawUrl}`));
       }
-
-      const handler = this.handlers[handlerIndex];
 
       // Return a real Response object
       return new Response(handler.body !== undefined ? JSON.stringify(handler.body) : null, {

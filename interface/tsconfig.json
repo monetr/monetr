@@ -2,23 +2,23 @@
   "$schema": "https://www.schemastore.org/tsconfig.json",
   "compilerOptions": {
     "allowJs": true,
-    "baseUrl": "src",
     "esModuleInterop": true,
     "jsx": "react-jsx",
     "module": "ESNEXT",
-    "moduleResolution": "node",
-    "noImplicitAny": false,
+    "moduleResolution": "bundler",
+    "noUncheckedSideEffectImports": false,
     "noImplicitReturns": true,
     "noUncheckedIndexedAccess": true,
     "allowImportingTsExtensions": true,
     "outDir": "../server/ui/static",
     "sourceMap": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
+    "strictPropertyInitialization": true,
     "target": "ES2022",
     "types": ["node", "@rstest/core/globals", "@testing-library/jest-dom"],
     "paths": {
-      "@monetr/interface/*": ["./*"]
+      "@monetr/interface/*": ["./src/*"]
     }
   },
   "include": ["src/setupTests.ts", "src/**/*"]

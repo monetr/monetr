@@ -20,7 +20,7 @@ export interface FormCheckboxProps {
 }
 
 export default function FormCheckbox(props: FormCheckboxProps): React.JSX.Element {
-  const formikContext = useFormikContext();
+  const formikContext = useFormikContext<Record<string, any>>();
 
   const onCheckedChange = useCallback(
     (state: CheckedState) => formikContext?.setFieldValue(props.name, Boolean(state)),
@@ -29,8 +29,8 @@ export default function FormCheckbox(props: FormCheckboxProps): React.JSX.Elemen
 
   props = {
     ...props,
-    disabled: props?.disabled || formikContext?.isSubmitting,
-    checked: props?.checked || formikContext.values[props.name],
+    disabled: Boolean(props?.disabled) || formikContext?.isSubmitting,
+    checked: Boolean(props?.checked) || formikContext.values[props.name],
   };
 
   return (

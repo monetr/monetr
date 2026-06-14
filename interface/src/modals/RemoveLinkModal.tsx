@@ -8,7 +8,6 @@ import MModal, { type MModalRef } from '@monetr/interface/components/MModal';
 import Typography from '@monetr/interface/components/Typography';
 import { useRemoveLink } from '@monetr/interface/hooks/useRemoveLink';
 import type Link from '@monetr/interface/models/Link';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './RemoveLinkModal.module.scss';
@@ -74,5 +73,5 @@ const removeLinkModal = NiceModal.create<RemoveLinkModalProps>(RemoveLinkModal);
 export default removeLinkModal;
 
 export function showRemoveLinkModal(props: RemoveLinkModalProps): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof removeLinkModal>, unknown>(removeLinkModal, props);
+  return NiceModal.show(removeLinkModal, props) as Promise<void>;
 }

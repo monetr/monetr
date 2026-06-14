@@ -106,8 +106,8 @@ export default function Register(): React.JSX.Element {
     helpers.setSubmitting(true);
 
     return await signUp({
-      betaCode: values.betaCode,
-      captcha: values.captcha,
+      betaCode: values.betaCode ?? null,
+      captcha: values.captcha ?? null,
       email: values.email,
       firstName: values.firstName,
       lastName: values.lastName,

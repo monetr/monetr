@@ -8,7 +8,8 @@ import { Skeleton } from '@monetr/interface/components/Skeleton';
 import { useCurrentBalance } from '@monetr/interface/hooks/useCurrentBalance';
 import { useSpendings } from '@monetr/interface/hooks/useSpendings';
 import { useUpdateTransaction } from '@monetr/interface/hooks/useUpdateTransaction';
-import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import type Spending from '@monetr/interface/models/Spending';
+import { FREE_TO_USE, FreeToUse } from '@monetr/interface/models/Spending';
 import Transaction from '@monetr/interface/models/Transaction';
 import mergeClasses from '@monetr/interface/util/mergeClasses';
 
@@ -16,7 +17,9 @@ import styles from './TransactionItemSelectSpending.module.scss';
 import inputStyles from '../FormTextField.module.scss';
 import selectStyles from '../Select.module.scss';
 
-const FREE_TO_USE = 'spnd_freeToUse';
+// We only ever read a handful of fields off the spending options here, this lets us treat the real spending objects
+// and the free-to-use pseudo spending interchangeably. Same shape MSelectSpending uses.
+type SpendingOption = Pick<Spending | FreeToUse, 'spendingId' | 'spendingType' | 'currentAmount' | 'name'>;
 
 export interface TransactionItemSelectSpendingProps {
   transaction: Transaction;
@@ -28,19 +31,12 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
   const { data: balances, isLoading: balancesIsLoading } = useCurrentBalance();
   const updateTransaction = useUpdateTransaction();
 
-  const options: Array<SelectOption<Spending>> = useMemo(
+  const options: Array<SelectOption<SpendingOption>> = useMemo(
     () => [
-      {
-        label: 'Free-To-Use',
-        value: new Spending({
-          spendingId: FREE_TO_USE,
-          spendingType: SpendingType.FreeToUse,
-          // It is possible for the "safe" balance to not be present when switching bank accounts. This is a pseudo race
-          // condition. Instead we want to gracefully handle the value not being present initially, and print a nicer string
-          // until the balance is loaded.
-          currentAmount: balances?.free,
-        }),
-      },
+      // The "safe" balance can briefly be missing when switching bank accounts, this is a pseudo race condition. The
+      // free-to-use option is derived from that balance so we only patch it in once the balance has loaded. The whole
+      // select sits behind a loading guard below until then anyway so we never actually render without it.
+      ...(balances ? [{ label: 'Free-To-Use', value: new FreeToUse(balances) }] : []),
       ...(spending ?? [])
         .sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
         .map(item => ({
@@ -55,11 +51,13 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
     [options, props.transaction],
   );
   const onChange = useCallback(
-    async (newValue: SelectOption<Spending>) => {
+    async (newValue: SelectOption<SpendingOption>) => {
       if (newValue.value.spendingId === props.transaction.spendingId) {
         return Promise.resolve();
       }
 
+      // spendingId can be null when moving the transaction back to free-to-use, we need to send null to the server to
+      // actually clear it.
       const newSpendingId = newValue.value.spendingId === FREE_TO_USE ? null : newValue.value.spendingId;
 
       const updatedTransaction = new Transaction({
@@ -71,7 +69,7 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
         // Needs to be in a timeout for some reason. But basically re-focus the select after we have updated the
         // spending.
         setTimeout(() => {
-          document.getElementById(id).focus();
+          document.getElementById(id)?.focus();
         }, 50);
       });
     },
@@ -93,16 +91,16 @@ export default function TransactionItemSelectSpending(props: TransactionItemSele
   return <InnerSelect id={id} onChange={onChange} options={options} value={value} />;
 }
 
-interface InnerSelectProps<Spending> {
+interface InnerSelectProps<T> {
   id: string;
-  value?: SelectOption<Spending>;
-  options: Array<SelectOption<Spending>>;
-  onChange: (newValue: SelectOption<Spending>) => void;
+  value?: SelectOption<T>;
+  options: Array<SelectOption<T>>;
+  onChange: (newValue: SelectOption<T>) => void;
 }
 
-function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending>): React.JSX.Element {
+function InnerSelect({ id, value, options, onChange }: InnerSelectProps<SpendingOption>): React.JSX.Element {
   const inputWrapperRef = useRef<HTMLDivElement>(null);
-  const [items, setItems] = useState<Array<SelectOption<Spending>>>(options);
+  const [items, setItems] = useState<Array<SelectOption<SpendingOption>>>(options);
   const { isOpen, getMenuProps, getInputProps, getItemProps, openMenu, selectedItem } = useCombobox({
     selectedItem: value,
     // By default the highest item should be "highlighted" unless the user moves the highlight themselves.
@@ -112,16 +110,16 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
     onInputValueChange({ inputValue, isOpen }) {
       // Only filter items if we are open!
       if (isOpen) {
-        setItems(options.filter(defaultFilterImplementation<Spending>(inputValue)));
+        setItems(options.filter(defaultFilterImplementation<SpendingOption>(inputValue)));
       }
     },
-    onSelectedItemChange(changes: UseComboboxSelectedItemChange<SelectOption<Spending>>) {
+    onSelectedItemChange(changes: UseComboboxSelectedItemChange<SelectOption<SpendingOption>>) {
       if (changes.selectedItem) {
         onChange(changes.selectedItem);
       }
     },
     items,
-    itemToString(item: SelectOption<Spending>) {
+    itemToString(item: SelectOption<SpendingOption> | null) {
       return item ? item.label : '';
     },
   });
@@ -140,7 +138,7 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
 
   const renderStyles = useMemo(() => {
     // Controls the height of the menu that is rendered, makes sure that we dont render past the bottom of the page.
-    if (isOpen) {
+    if (isOpen && inputWrapperRef.current) {
       const distanceFromTop = inputWrapperRef.current.offsetTop;
       const heightOfWindow = window.innerHeight;
       const heightOfWrapper = inputWrapperRef.current.offsetHeight;
@@ -172,26 +170,23 @@ function InnerSelect({ id, value, options, onChange }: InnerSelectProps<Spending
               className: styles.selectSpendingInput,
               onFocus: openMenu,
               spellCheck: false,
-              'data-freetouse': value.value.spendingId === FREE_TO_USE,
+              'data-freetouse': value?.value.spendingId === FREE_TO_USE,
               autoComplete: 'off',
             })}
           />
           <SelectIndicator open={isOpen} />
         </div>
         <ul
-          className={mergeClasses(selectStyles.unorderedList, {
-            [selectStyles.hidden]: !(isOpen && items.length),
-          })}
+          className={selectStyles.unorderedList}
+          data-hidden={!(isOpen && items.length)}
           {...getMenuProps()}
           style={renderStyles}
         >
           {isOpen &&
             items.map((item, index) => (
               <li
-                className={mergeClasses(selectStyles.option, {
-                  // The _ACTUAL_ selected state will be slightly darker than the hover state.
-                  [selectStyles.optionSelected]: selectedItem?.value === item.value,
-                })}
+                className={selectStyles.option}
+                data-selected={selectedItem?.value === item.value}
                 key={item.label}
                 {...getItemProps({
                   item,

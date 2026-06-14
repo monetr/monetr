@@ -1,9 +1,15 @@
 import { useMemo } from 'react';
 import { useRoute } from 'wouter';
 
-export function useSelectedBankAccountId(): string | undefined {
+import type BankAccount from '@monetr/interface/models/BankAccount';
+import { ID } from '@monetr/interface/models/ID';
+
+export function useSelectedBankAccountId(): ID<BankAccount> | undefined {
   const [, params] = useRoute<{ bankId: string }>('/bank/:bankId/*');
   return useMemo(() => {
-    return params?.bankId || undefined;
+    if (params?.bankId) {
+      return ID.from<BankAccount, string>(params.bankId);
+    }
+    return;
   }, [params]);
 }

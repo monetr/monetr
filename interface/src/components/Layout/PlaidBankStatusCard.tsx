@@ -10,7 +10,7 @@ import styles from './PlaidBankStatusCard.module.scss';
  * PlaidBankStatusCard automatically shows the institution health of the currently selected bank account. If the
  * currently selected bank account is **not** a Plaid link, then this will return null.
  */
-export default function PlaidBankStatusCard(): React.JSX.Element {
+export default function PlaidBankStatusCard(): React.JSX.Element | null {
   const { data: link } = useCurrentLink();
   const { data: institution } = useInstitution(link?.plaidLink?.institutionId);
 
@@ -28,7 +28,7 @@ export default function PlaidBankStatusCard(): React.JSX.Element {
   }
   if (institution?.status?.transactions_updates?.breakdown?.refresh_interval === 'STOPPED') {
     status = 'Automatic updates stoppped';
-    additionalClasses = styles.grayscale;
+    additionalClasses = styles.grayscale ?? '';
   }
 
   return (

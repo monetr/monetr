@@ -30,8 +30,11 @@ describe('logout', () => {
       return logout();
     });
 
-    // Make sure that we did make the API call.
-    expect(mockFetch.history.get).toHaveLength(1);
-    expect(mockFetch.history.get[0]).toMatchObject({ url: '/api/authentication/logout' });
+    // Make sure that we did make the API call. The history is keyed by method so typescript thinks the get bucket might
+    // be undefined, pull it into a local and assert its there before we poke at the first entry.
+    const getHistory = mockFetch.history.get;
+    expect(getHistory).toBeDefined();
+    expect(getHistory).toHaveLength(1);
+    expect(getHistory?.[0]).toMatchObject({ url: '/api/authentication/logout' });
   });
 });

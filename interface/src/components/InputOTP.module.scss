@@ -66,11 +66,11 @@
     border-top-right-radius: 1.5 * variables.$size; // rounded-r-md
     border-bottom-right-radius: 1.5 * variables.$size;
   }
-}
 
-// Active slot.
-.slotActive {
-  z-index: 10;
+  // Active slot.
+  &[data-active='true'] {
+    z-index: 10;
+  }
 }
 
 .caretWrapper {

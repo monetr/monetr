@@ -5,7 +5,7 @@ import { usePrevious } from '@monetr/interface/hooks/usePrevious';
 
 type ViewComponent = ComponentType<unknown>;
 
-export interface ViewContextType<T extends string, Metadata extends {}, Form extends {}> {
+export interface ViewContextType<T extends string, Metadata, Form> {
   currentView: T;
   formData: Form;
   metadata: Metadata;
@@ -25,7 +25,7 @@ function useViewContext<T extends string, Metadata extends {}, Form extends {}>(
   if (!context) {
     throw new Error('useViewContext must be used within a ViewManager');
   }
-  return context as ViewContextType<T, Metadata, Form>;
+  return context as unknown as ViewContextType<T, Metadata, Form>;
 }
 
 interface ViewManagerProps<T extends string, Metadata> {
@@ -42,7 +42,7 @@ function ViewManager<T extends string, Metadata, Form>({
   viewComponents,
   initialView,
   initialMetadata = {} as Metadata,
-  layout = null,
+  layout,
 }: ViewManagerProps<T, Metadata>) {
   const [currentView, setCurrentView] = useState<T>(initialView);
   const [formData, setFormData] = useState<Form>({} as Form);
@@ -98,12 +98,16 @@ function ViewManager<T extends string, Metadata, Form>({
     [currentView, formData, metadata, updateFormData, updateMetadata, prevView, goToView, viewOrder, reset],
   );
 
+  // ViewContext holds its value with widened type arguments, so bridge our concrete value across to the provider.
+  // Consumers re-narrow it through useViewContext, which is why casting through unknown here is safe.
+  const contextValue = value as unknown as ViewContextType<string, unknown, unknown>;
+
   const CurrentViewComponent: ViewComponent = viewComponents[currentView];
 
   if (layout) {
     const Layout = layout;
     return (
-      <ViewContext.Provider value={value}>
+      <ViewContext.Provider value={contextValue}>
         <Layout>
           <CurrentViewComponent />
         </Layout>
@@ -112,7 +116,7 @@ function ViewManager<T extends string, Metadata, Form>({
   }
 
   return (
-    <ViewContext.Provider value={value}>
+    <ViewContext.Provider value={contextValue}>
       <CurrentViewComponent />
     </ViewContext.Provider>
   );

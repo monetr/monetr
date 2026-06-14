@@ -12,7 +12,7 @@ export default function TransactionAmount({ transaction }: TransactionAmountProp
   const { data: locale } = useLocaleCurrency();
   return (
     <span className={styles.transactionAmount} data-positive={transaction.getIsAddition()}>
-      {locale.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0)}
+      {locale?.formatAmount(Math.abs(transaction.amount), AmountType.Stored, transaction.amount < 0)}
     </span>
   );
 }

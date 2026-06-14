@@ -120,7 +120,7 @@ lint-all: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t lint-all $(BUILD_ARGS)
 
 typecheck: | $(CMAKE_CONFIGURATION_DIRECTORY)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t interface.typecheck $(BUILD_ARGS)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t interface.typecheck emails.typecheck docs.typecheck $(BUILD_ARGS)
 
 develop: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.monetr.up $(BUILD_ARGS)

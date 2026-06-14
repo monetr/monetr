@@ -19,7 +19,7 @@ function testRenderer<Q extends Queries = typeof queries, Container extends Elem
   ui: React.ReactElement,
   options?: Options<Q, Container>,
 ): RenderResult<Q, Container> {
-  const { hook } = memoryLocation({ path: options.initialRoute });
+  const { hook } = memoryLocation({ path: options?.initialRoute ?? '/' });
   const Wrapper = (props: React.PropsWithChildren<unknown>) => {
     return (
       <Router hook={hook}>

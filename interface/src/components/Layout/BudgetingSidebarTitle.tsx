@@ -25,16 +25,25 @@ export default function BudgetingSidebarTitle(): React.JSX.Element {
   const triggerSync = useTriggerManualPlaidSync();
 
   const handleReauthenticateLink = useCallback(() => {
+    if (!link) {
+      return;
+    }
     showUpdatePlaidAccountOverlay({
       link: link,
     });
   }, [link]);
 
   const handleTriggerResync = useCallback(() => {
-    triggerSync(bankAccount?.linkId);
+    if (!bankAccount?.linkId) {
+      return;
+    }
+    triggerSync(bankAccount.linkId);
   }, [bankAccount?.linkId, triggerSync]);
 
   const handleUpdateAccountSelection = useCallback(() => {
+    if (!link) {
+      return;
+    }
     showUpdatePlaidAccountOverlay({
       link: link,
       updateAccountSelection: true,
@@ -42,6 +51,9 @@ export default function BudgetingSidebarTitle(): React.JSX.Element {
   }, [link]);
 
   const handleRemoveLink = useCallback(() => {
+    if (!link) {
+      return;
+    }
     showRemoveLinkModal({ link: link });
   }, [link]);
 
@@ -105,7 +117,7 @@ interface MenuItemProps {
   children?: React.ReactNode;
 }
 
-function MenuItem({ visible, onClick, children }: MenuItemProps): React.JSX.Element {
+function MenuItem({ visible, onClick, children }: MenuItemProps): React.JSX.Element | null {
   if (!visible) {
     return null;
   }

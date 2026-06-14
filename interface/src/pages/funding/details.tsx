@@ -39,15 +39,15 @@ interface FundingValues {
   autoCreateTransaction: boolean;
 }
 
-export default function FundingDetails(): React.JSX.Element {
+export default function FundingDetails(): React.JSX.Element | null {
   const nameId = useId();
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   // I don't want to do it this way, but it seems like it's the only way to do it for tests without having the entire
   // router also present in the test?
   const [, params] = useRoute<{ bankId: string; fundingId: string }>('/bank/:bankId/funding/:fundingId/details');
-  const fundingId = params?.fundingId || null;
-  const { data: funding } = useFundingSchedule(fundingId);
+  const fundingId = params?.fundingId;
+  const { data: funding, isLoading, isError } = useFundingSchedule(fundingId);
   const { data: link } = useCurrentLink();
   const isManual = Boolean(link?.getIsManual());
   const [, navigate] = useLocation();
@@ -61,6 +61,26 @@ export default function FundingDetails(): React.JSX.Element {
         <HeartCrack className={styles.errorIcon} />
         <Typography size='5xl'>Something isn't right...</Typography>
         <Typography size='2xl'>There wasn't a funding schedule specified...</Typography>
+      </div>
+    );
+  }
+
+  // Treat the locale still loading the same as the funding schedule still loading, otherwise we fall all the way through
+  // to the null return below and flash a blank page while the currency formatting catches up.
+  if (isLoading || !locale) {
+    return (
+      <div className={styles.centerState}>
+        <Typography size='5xl'>One moment...</Typography>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className={styles.centerState}>
+        <HeartCrack className={styles.errorIcon} />
+        <Typography size='5xl'>Something isn't right...</Typography>
+        <Typography size='2xl'>Couldn't find the funding schedule you specified...</Typography>
       </div>
     );
   }
@@ -84,6 +104,10 @@ export default function FundingDetails(): React.JSX.Element {
   }
 
   async function submit(values: FundingValues, helpers: FormikHelpers<FundingValues>) {
+    if (!funding || !locale) {
+      return Promise.resolve();
+    }
+
     helpers.setSubmitting(true);
     return patchFundingSchedule({
       fundingScheduleId: funding.fundingScheduleId,
@@ -94,7 +118,7 @@ export default function FundingDetails(): React.JSX.Element {
       }),
       ruleset: values.ruleset,
       excludeWeekends: values.excludeWeekends,
-      estimatedDeposit: locale.friendlyToAmount(values.estimatedDeposit),
+      estimatedDeposit: locale.friendlyToAmount(values.estimatedDeposit ?? 0),
       // Auto create transaction requires a manual link and a non-zero estimated
       // deposit; force it off otherwise so the API will not reject the update.
       autoCreateTransaction: isManual && (values.estimatedDeposit ?? 0) > 0 && values.autoCreateTransaction,
@@ -117,7 +141,7 @@ export default function FundingDetails(): React.JSX.Element {
   }
 
   function backToFunding() {
-    navigate(`/bank/${funding.bankAccountId}/funding`);
+    navigate(`/bank/${funding?.bankAccountId}/funding`);
   }
 
   async function removeFunding() {
@@ -146,7 +170,7 @@ export default function FundingDetails(): React.JSX.Element {
     ruleset: funding.ruleset,
     excludeWeekends: funding.excludeWeekends,
     // Because we store all amounts in cents, in order to use them in the UI we need to convert them back to dollars.
-    estimatedDeposit: locale.amountToFriendly(funding.estimatedDeposit),
+    estimatedDeposit: locale.amountToFriendly(funding.estimatedDeposit ?? 0),
     autoCreateTransaction: funding.autoCreateTransaction,
   };
 
@@ -244,7 +268,7 @@ interface NextOccurrenceDecoratorProps {
   fundingSchedule: FundingSchedule;
 }
 
-function NextOccurrenceDecorator({ fundingSchedule: funding }: NextOccurrenceDecoratorProps): React.JSX.Element {
+function NextOccurrenceDecorator({ fundingSchedule: funding }: NextOccurrenceDecoratorProps): React.JSX.Element | null {
   if (!funding.excludeWeekends) {
     return null;
   }

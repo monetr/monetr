@@ -2,10 +2,11 @@ import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Link from '@monetr/interface/models/Link';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 
 export function useLinks(): UseQueryResult<Array<Link>, unknown> {
   const { data } = useAuthentication();
-  return useQuery<Array<Partial<Link>>, unknown, Array<Link>>({
+  return useQuery<Array<WithJsonValues<Link>>, unknown, Array<Link>>({
     queryKey: ['/api/links'],
     // Only request links if there is an authenticated user.
     enabled: Boolean(data?.user) && data?.isActive && !data?.mfaPending,

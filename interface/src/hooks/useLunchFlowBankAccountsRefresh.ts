@@ -10,7 +10,7 @@ export default function useLunchFlowBankAccountsRefresh(): UseMutationResult<
   unknown
 > {
   return useMutation({
-    mutationFn: async (lunchFlowLinkId?: string): Promise<string> => {
+    mutationFn: async (lunchFlowLinkId: string): Promise<string> => {
       return request({ method: 'POST', url: `/api/lunch_flow/link/${lunchFlowLinkId}/bank_accounts/refresh` })
         .then(result => {
           if (result.status !== 204) {

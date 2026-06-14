@@ -8,7 +8,10 @@ import FormAmountField from '@monetr/interface/components/FormAmountField';
 import FormDatePicker from '@monetr/interface/components/FormDatePicker';
 import MForm from '@monetr/interface/components/MForm';
 import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
-import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
+import type {
+  ManualLinkSetupForm,
+  ManualLinkSetupMetadata,
+} from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import ManualLinkSetupButtons from '@monetr/interface/components/setup/manual/ManualLinkSetupButtons';
 import type { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import Typography from '@monetr/interface/components/Typography';
@@ -16,7 +19,7 @@ import { useViewContext } from '@monetr/interface/components/ViewManager';
 import { useCreateBankAccount } from '@monetr/interface/hooks/useCreateBankAccount';
 import { useCreateFundingSchedule } from '@monetr/interface/hooks/useCreateFundingSchedule';
 import { useCreateLink } from '@monetr/interface/hooks/useCreateLink';
-import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
+import useLocaleCurrency, { DefaultCurrency } from '@monetr/interface/hooks/useLocaleCurrency';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 
@@ -35,7 +38,7 @@ export default function ManualLinkSetupIncome(): React.JSX.Element {
   const createBankAccount = useCreateBankAccount();
   const createFundingSchedule = useCreateFundingSchedule();
   const [, navigate] = useLocation();
-  const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
+  const viewContext = useViewContext<ManualLinkSetupSteps, ManualLinkSetupMetadata, ManualLinkSetupForm>();
   const { data: locale } = useLocaleCurrency(viewContext.formData.currency);
   const initialValues: ManualLinkSetupIncomeValues = {
     nextPayday: startOfTomorrow({
@@ -43,10 +46,17 @@ export default function ManualLinkSetupIncome(): React.JSX.Element {
     }),
     ruleset: '',
     paydayAmount: 0.0,
-    ...viewContext.formData,
+    currency: locale?.currency ?? DefaultCurrency,
+    ...(viewContext.formData as Partial<ManualLinkSetupForm>),
   };
 
   async function submit(values: ManualLinkSetupIncomeValues, helpers: FormikHelpers<ManualLinkSetupIncomeValues>) {
+    // The locale is needed to convert the friendly amounts into stored amounts, it should always be loaded by the time
+    // we can submit but bail just in case it is not ready yet.
+    if (!locale) {
+      return Promise.resolve();
+    }
+
     helpers.setSubmitting(true);
     const data = {
       ...viewContext.formData,
@@ -70,11 +80,12 @@ export default function ManualLinkSetupIncome(): React.JSX.Element {
         createFundingSchedule({
           bankAccountId: bankAccount.bankAccountId,
           name: 'Payday',
+          description: null,
           nextRecurrence: startOfDay(values.nextPayday, {
             in: inTimezone,
           }),
           ruleset: values.ruleset,
-          estimatedDeposit: locale.friendlyToAmount(values.paydayAmount),
+          estimatedDeposit: values.paydayAmount === 0 ? null : locale.friendlyToAmount(values.paydayAmount),
           excludeWeekends: false,
           autoCreateTransaction: false,
         }),

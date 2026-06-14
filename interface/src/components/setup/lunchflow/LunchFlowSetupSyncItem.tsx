@@ -23,7 +23,7 @@ export default function LunchFlowSetupSyncItem({ bankAccount }: LunchFlowSetupSy
       </Avatar>
       <ItemContent align='default' flex='shrink' gap='none' justify='start' orientation='column' shrink='default'>
         <Typography ellipsis weight='medium'>
-          {bankAccount.lunchFlowBankAccount.institutionName}
+          {bankAccount.lunchFlowBankAccount?.institutionName}
         </Typography>
         <Typography ellipsis>{bankAccount.name}</Typography>
       </ItemContent>

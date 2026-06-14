@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Balance from '@monetr/interface/models/Balance';
 import type Spending from '@monetr/interface/models/Spending';
 import type Transaction from '@monetr/interface/models/Transaction';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import request, { type ApiError } from '@monetr/interface/util/request';
 
 export interface CreateTransactionRequest {
@@ -20,7 +21,7 @@ export interface CreateTransactionRequest {
 
 export interface CreateTransactionResponse {
   transaction: Partial<Transaction>;
-  balance: Partial<Balance>;
+  balance: WithJsonValues<Balance>;
   spending: Partial<Spending> | null;
 }
 

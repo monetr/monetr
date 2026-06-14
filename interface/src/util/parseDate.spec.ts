@@ -25,4 +25,8 @@ describe('parse dates', () => {
     const result = parseDate(input);
     expect(result).toBeNull();
   });
+
+  it('will throw on an invalid input', () => {
+    expect(() => parseDate('foobar')).toThrowError('invalid date provided: foobar');
+  });
 });

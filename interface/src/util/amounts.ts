@@ -1,3 +1,9 @@
+// When the locale/currency formatter cant tell us these we fall back to the most common conventions. For a currency
+// style formatter these are basically always populated, but strict typing makes us handle the undefined case anyway.
+const DEFAULT_DECIMAL_SEPARATOR = '.';
+const DEFAULT_GROUP_SEPARATOR = ',';
+const DEFAULT_FRACTION_DIGITS = 2;
+
 /**
  * intlNumberFormat takes a locale and a currency code and returns a ResolvedNumberFormatOptions object containing
  * information about the currency and how it should be formatted for the current locale.
@@ -61,9 +67,11 @@ export function getCurrencySymbolPrefixed(locale: string, currency: string): str
 export function getDecimalSeparator(locale: string): string {
   const localeAdjusted = locale.replace('_', '-');
   const numberWithDecimalSeparator = 1.1;
-  return Intl.NumberFormat(localeAdjusted)
-    .formatToParts(numberWithDecimalSeparator)
-    .find(part => part.type === 'decimal').value;
+  return (
+    Intl.NumberFormat(localeAdjusted)
+      .formatToParts(numberWithDecimalSeparator)
+      .find(part => part.type === 'decimal')?.value ?? DEFAULT_DECIMAL_SEPARATOR
+  );
 }
 
 /**
@@ -75,9 +83,11 @@ export function getDecimalSeparator(locale: string): string {
 export function getNumberGroupSeparator(locale: string): string {
   const localeAdjusted = locale.replace('_', '-');
   const numberWithDecimalSeparator = 100000.1;
-  return Intl.NumberFormat(localeAdjusted)
-    .formatToParts(numberWithDecimalSeparator)
-    .find(part => part.type === 'group').value;
+  return (
+    Intl.NumberFormat(localeAdjusted)
+      .formatToParts(numberWithDecimalSeparator)
+      .find(part => part.type === 'group')?.value ?? DEFAULT_GROUP_SEPARATOR
+  );
 }
 
 export function intlNumberFormatter(locale: string = 'en_US', currency: string = 'USD'): (value: string) => string {
@@ -111,7 +121,7 @@ export function amountToFriendly(amount: number, locale: string, currency: strin
   // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2 decimal
   // places so this would be 10^2 or 100. Where as JPY would have 0 because it is already in the smallest increment.
   // This results in 10^0 which is 1. And the amount/1 remains the same.
-  const modifier = 10 ** specs.maximumFractionDigits;
+  const modifier = 10 ** (specs.maximumFractionDigits ?? DEFAULT_FRACTION_DIGITS);
 
   // Shift the amount over the correct number of decimal places.
   const adjusted = Math.fround(amount / modifier);
@@ -135,7 +145,7 @@ export function friendlyToAmount(friendly: number, locale: string, currency: str
   // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2 decimal
   // places so this would be 10^2 or 100. Where as JPY would have 0 because it is already in the smallest increment.
   // This results in 10^0 which is 1. And the amount/1 remains the same.
-  const modifier = 10 ** specs.maximumFractionDigits;
+  const modifier = 10 ** (specs.maximumFractionDigits ?? DEFAULT_FRACTION_DIGITS);
 
   // Instead of fractional rounding we want to do whole rounding for storage. Take the friendly amount and multiply it
   // by the modifier based on the number of decimal places the unit has in order to reduce it to it's smallest unit.
@@ -195,7 +205,7 @@ export function formatAmount(
     // Determine the multiplier by how many decimal places the final unit would have. For example USD would have 2
     // decimal places so this would be 10^2 or 100. Where as JPY would have 0 because it is already in the smallest
     // increment. This results in 10^0 which is 1. And the amount/1 remains the same.
-    const modifier = 10 ** specs.maximumFractionDigits;
+    const modifier = 10 ** (specs.maximumFractionDigits ?? DEFAULT_FRACTION_DIGITS);
 
     // Shift the amount over the correct number of decimal places.
     const adjusted = Math.fround(amount / modifier);

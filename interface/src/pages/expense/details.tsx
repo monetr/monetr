@@ -26,6 +26,8 @@ import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useUpdateSpending } from '@monetr/interface/hooks/useUpdateSpending';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import type { ID } from '@monetr/interface/models/ID';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
@@ -38,18 +40,18 @@ interface ExpenseValues {
   name: string;
   amount: number;
   nextRecurrence: Date;
-  fundingScheduleId: string;
+  fundingScheduleId: ID<FundingSchedule>;
   ruleset: string;
   autoCreateTransaction: boolean;
 }
 
-export default function ExpenseDetails(): React.JSX.Element {
+export default function ExpenseDetails(): React.JSX.Element | null {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();
   const [, navigate] = useLocation();
-  const { spendingId } = useParams<{ spendingId: string }>();
+  const { spendingId } = useParams<{ spendingId: ID<Spending> }>();
   const { enqueueSnackbar } = useSnackbar();
   const { data: spending, isLoading, isError } = useSpending(spendingId);
   const { data: link } = useCurrentLink();
@@ -65,7 +67,9 @@ export default function ExpenseDetails(): React.JSX.Element {
     );
   }
 
-  if (isLoading) {
+  // Treat the locale still loading the same as the spending still loading, otherwise we fall all the way through to the
+  // null return below and flash a blank page while the currency formatting catches up.
+  if (isLoading || !locale) {
     return (
       <div className={styles.centerState}>
         <Typography size='5xl'>One moment...</Typography>
@@ -98,7 +102,7 @@ export default function ExpenseDetails(): React.JSX.Element {
   }
 
   function backToExpenses() {
-    navigate(`/bank/${spending.bankAccountId}/expenses`);
+    navigate(`/bank/${spending?.bankAccountId}/expenses`);
   }
 
   async function deleteExpense(): Promise<void> {
@@ -114,12 +118,15 @@ export default function ExpenseDetails(): React.JSX.Element {
   }
 
   async function submit(values: ExpenseValues, helpers: FormikHelpers<ExpenseValues>): Promise<void> {
+    if (!spending || !locale) {
+      return Promise.resolve();
+    }
+
     helpers.setSubmitting(true);
 
     const updatedSpending = new Spending({
       ...spending,
       name: values.name,
-      description: null,
       nextRecurrence: startOfDay(values.nextRecurrence, {
         in: inTimezone,
       }),
@@ -152,9 +159,9 @@ export default function ExpenseDetails(): React.JSX.Element {
   const initialValues: ExpenseValues = {
     name: spending.name,
     amount: locale.amountToFriendly(spending.targetAmount),
-    nextRecurrence: spending.nextRecurrence,
+    nextRecurrence: spending.nextRecurrence ?? startOfTomorrow({ in: inTimezone }),
     fundingScheduleId: spending.fundingScheduleId,
-    ruleset: spending.ruleset,
+    ruleset: spending.ruleset ?? '',
     autoCreateTransaction: spending.autoCreateTransaction,
   };
 

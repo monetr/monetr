@@ -1,3 +1,7 @@
+import { ID, idPrefix } from '@monetr/interface/models/ID';
+import type LunchFlowLink from '@monetr/interface/models/LunchFlowLink';
+import type User from '@monetr/interface/models/User';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum LunchFlowBankAccountStatus {
@@ -13,9 +17,11 @@ export enum LunchFlowBankAccountExternalStatus {
 }
 
 export default class LunchFlowBankAccount {
-  lunchFlowBankAccountId: string;
-  lunchFlowLinkId: string;
-  LunchFlowId: string;
+  readonly [idPrefix] = 'lbac';
+
+  lunchFlowBankAccountId: ID<LunchFlowBankAccount>;
+  lunchFlowLinkId: ID<LunchFlowLink>;
+  lunchFlowId: string;
   lunchFlowStatus: LunchFlowBankAccountExternalStatus;
   name: string;
   institutionName: string;
@@ -25,17 +31,23 @@ export default class LunchFlowBankAccount {
   currentBalance: number;
   updatedAt: Date;
   createdAt: Date;
-  deletedAt?: Date;
-  createdBy: string;
+  deletedAt: Date | null;
+  createdBy: ID<User>;
 
-  constructor(data?: Partial<LunchFlowBankAccount>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        updatedAt: parseDate(data?.updatedAt),
-        createdAt: parseDate(data?.createdAt),
-        deletedAt: parseDate(data?.deletedAt),
-      });
-    }
+  constructor(data: WithJsonValues<LunchFlowBankAccount>) {
+    this.lunchFlowBankAccountId = ID.from(data.lunchFlowBankAccountId);
+    this.lunchFlowLinkId = ID.from(data.lunchFlowLinkId);
+    this.lunchFlowId = data.lunchFlowId;
+    this.lunchFlowStatus = data.lunchFlowStatus;
+    this.name = data.name;
+    this.institutionName = data.institutionName;
+    this.provider = data.provider;
+    this.currency = data.currency;
+    this.status = data.status;
+    this.currentBalance = data.currentBalance;
+    this.updatedAt = parseDate(data.updatedAt);
+    this.createdAt = parseDate(data.createdAt);
+    this.deletedAt = parseDate(data.deletedAt);
+    this.createdBy = ID.from(data.createdBy);
   }
 }

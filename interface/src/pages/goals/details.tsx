@@ -24,6 +24,8 @@ import { useSpending } from '@monetr/interface/hooks/useSpending';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
 import { useUpdateSpending } from '@monetr/interface/hooks/useUpdateSpending';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import type { ID } from '@monetr/interface/models/ID';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
 import type { APIError } from '@monetr/interface/util/request';
@@ -35,17 +37,17 @@ interface GoalValues {
   name: string;
   amount: number;
   nextRecurrence: Date;
-  fundingScheduleId: string;
+  fundingScheduleId: ID<FundingSchedule>;
   isPaused: boolean;
 }
 
-export default function GoalDetails(): React.JSX.Element {
+export default function GoalDetails(): React.JSX.Element | null {
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocaleCurrency();
   const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();
   const [, navigate] = useLocation();
-  const { spendingId } = useParams<{ spendingId: string }>();
+  const { spendingId } = useParams<{ spendingId: ID<Spending> }>();
   const { enqueueSnackbar } = useSnackbar();
   const { data: spending, isLoading, isError } = useSpending(spendingId);
 
@@ -59,7 +61,9 @@ export default function GoalDetails(): React.JSX.Element {
     );
   }
 
-  if (isLoading) {
+  // Treat the locale still loading the same as the spending still loading, otherwise we fall all the way through to the
+  // null return below and flash a blank page while the currency formatting catches up.
+  if (isLoading || !locale) {
     return (
       <div className={styles.centerState}>
         <Typography size='5xl'>One moment...</Typography>
@@ -92,7 +96,7 @@ export default function GoalDetails(): React.JSX.Element {
   }
 
   function backToGoals() {
-    navigate(`/bank/${spending.bankAccountId}/goals`);
+    navigate(`/bank/${spending?.bankAccountId}/goals`);
   }
 
   async function deleteGoal(): Promise<void> {
@@ -108,12 +112,15 @@ export default function GoalDetails(): React.JSX.Element {
   }
 
   async function submit(values: GoalValues, helpers: FormikHelpers<GoalValues>): Promise<void> {
+    if (!spending || !locale) {
+      return Promise.resolve();
+    }
+
     helpers.setSubmitting(true);
 
     const updatedSpending = new Spending({
       ...spending,
       name: values.name,
-      description: null,
       nextRecurrence: startOfDay(values.nextRecurrence, {
         in: inTimezone,
       }),
@@ -144,7 +151,7 @@ export default function GoalDetails(): React.JSX.Element {
   const initialValues: GoalValues = {
     name: spending.name,
     amount: locale.amountToFriendly(spending.targetAmount),
-    nextRecurrence: spending.nextRecurrence,
+    nextRecurrence: spending.nextRecurrence ?? startOfTomorrow({ in: inTimezone }),
     fundingScheduleId: spending.fundingScheduleId,
     isPaused: spending.isPaused,
   };

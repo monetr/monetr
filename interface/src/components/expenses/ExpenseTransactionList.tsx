@@ -20,7 +20,7 @@ export interface ExpenseTransactionListProps {
   spending: Spending;
 }
 
-export default function ExpenseTransactionList(props: ExpenseTransactionListProps): React.JSX.Element {
+export default function ExpenseTransactionList(props: ExpenseTransactionListProps): React.JSX.Element | null {
   const { data: transactions } = useSpendingTransactions(props.spending.spendingId);
   const { inTimezone } = useTimezone();
   const { data: locale } = useLocale();
@@ -60,7 +60,7 @@ export default function ExpenseTransactionList(props: ExpenseTransactionListProp
                   {transaction.getName()}
                 </Typography>
                 <Typography component='p' ellipsis size='sm' weight='medium'>
-                  {formatDate(transaction.date, inTimezone, locale, DateLength.Long)}
+                  {locale ? formatDate(transaction.date, inTimezone, locale, DateLength.Long) : ''}
                 </Typography>
               </ItemContent>
               <ItemContent align='center' flex='grow' justify='end' shrink='none' width='fit'>

@@ -74,14 +74,15 @@
   margin-right: 2 * variables.$size; // mr-2
   height: 5 * variables.$size; // h-5
   width: 5 * variables.$size; // w-5
-}
 
-.checkIconVisible {
-  opacity: 1; // opacity-100
-}
+  // Only show the check next to the option that is currently selected.
+  &[data-visible='true'] {
+    opacity: 1; // opacity-100
+  }
 
-.checkIconHidden {
-  opacity: 0; // opacity-0
+  &[data-visible='false'] {
+    opacity: 0; // opacity-0
+  }
 }
 
 // Roomier bottom padding on mobile, tighter on the popover layout.

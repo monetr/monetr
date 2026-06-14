@@ -26,7 +26,7 @@ describe('InstitutionPlaidIncident', () => {
     });
 
     expect(incident.start.toISOString()).toBe(start.toISOString());
-    expect(incident.end.toISOString()).toBe(end.toISOString());
+    expect(incident.end?.toISOString()).toBe(end.toISOString());
     expect(incident.title).toBe('This institution was experiencing problems.');
   });
 
@@ -41,7 +41,7 @@ describe('InstitutionPlaidIncident', () => {
 
     const result = new InstitutionPlaidIncident(input);
     expect(result.start.toISOString()).toBe(start.toISOString());
-    expect(result.end.toISOString()).toBe(end.toISOString());
+    expect(result.end?.toISOString()).toBe(end.toISOString());
     expect(result.title).toBe('This institution was experiencing problems.');
   });
 });
@@ -62,12 +62,13 @@ describe('InstitutionStatus', () => {
       plaidIncidents: [],
     });
 
-    expect(result.transactions_updates.status).toEqual('HEALTHY');
+    expect(result.transactions_updates?.status).toEqual('HEALTHY');
     expect(result.plaidIncidents).toHaveLength(0);
   });
 
   it('will create with some incidents', () => {
     const result = new InstitutionStatus({
+      transactions_updates: null,
       plaidIncidents: [
         {
           start: addDays(new Date(), -2),
@@ -95,6 +96,7 @@ describe('Institutions', () => {
       url: 'https://www.usbank.com/',
       primaryColor: 'blue',
       logo: 'I am a picture',
+      status: null,
     });
 
     expect(item.name).toBe('U.S. Bank');

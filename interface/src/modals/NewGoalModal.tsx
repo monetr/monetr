@@ -17,9 +17,11 @@ import { useCreateSpending } from '@monetr/interface/hooks/useCreateSpending';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import useTimezone from '@monetr/interface/hooks/useTimezone';
-import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import type FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import { ID } from '@monetr/interface/models/ID';
+import type Spending from '@monetr/interface/models/Spending';
+import { SpendingType } from '@monetr/interface/models/Spending';
 import type { APIError } from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './NewGoalModal.module.scss';
@@ -28,7 +30,7 @@ interface NewGoalValues {
   name: string;
   amount: number;
   nextOccurrence: Date;
-  fundingScheduleId: string;
+  fundingScheduleId: ID<FundingSchedule>;
 }
 
 function NewGoalModal(): React.JSX.Element {
@@ -46,11 +48,16 @@ function NewGoalModal(): React.JSX.Element {
     nextOccurrence: startOfTomorrow({
       in: inTimezone,
     }),
-    fundingScheduleId: '',
+    fundingScheduleId: ID.from<FundingSchedule, string>(''),
   };
 
   async function submit(values: NewGoalValues, helper: FormikHelpers<NewGoalValues>): Promise<void> {
-    const newSpending = new Spending({
+    if (!locale || !selectedBankAccountId) {
+      return Promise.resolve();
+    }
+
+    helper.setSubmitting(true);
+    return createSpending({
       bankAccountId: selectedBankAccountId,
       name: values.name.trim(),
       nextRecurrence: startOfDay(new Date(values.nextOccurrence), {
@@ -60,10 +67,7 @@ function NewGoalModal(): React.JSX.Element {
       fundingScheduleId: values.fundingScheduleId,
       targetAmount: locale.friendlyToAmount(values.amount),
       ruleset: null,
-    });
-
-    helper.setSubmitting(true);
-    return createSpending(newSpending)
+    })
       .then(created => modal.resolve(created))
       .then(() => modal.remove())
       .catch(
@@ -135,5 +139,5 @@ const newGoalModal = NiceModal.create(NewGoalModal);
 export default newGoalModal;
 
 export function showNewGoalModal(): Promise<Spending | null> {
-  return NiceModal.show<Spending | null, ExtractProps<typeof newGoalModal>, unknown>(newGoalModal);
+  return NiceModal.show(newGoalModal) as Promise<Spending | null>;
 }

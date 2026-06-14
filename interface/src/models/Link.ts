@@ -1,5 +1,8 @@
+import { ID, idPrefix } from '@monetr/interface/models/ID';
 import LunchFlowLink, { LunchFlowLinkStatus } from '@monetr/interface/models/LunchFlowLink';
 import PlaidLink, { PlaidLinkStatus } from '@monetr/interface/models/PlaidLink';
+import type User from '@monetr/interface/models/User';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export enum LinkType {
@@ -10,7 +13,7 @@ export enum LinkType {
   LunchFlow = 'lunch_flow',
 }
 
-export const errorMessages = {
+export const errorMessages: Partial<Record<string, string>> = {
   ITEM_LOGIN_REQUIRED: "This link's authentication has expired and needs to be re-authenticated.",
 };
 
@@ -20,32 +23,35 @@ export const errorMessages = {
  * an institution. A group of bank accounts within a single "login" for that institution.
  */
 export default class Link {
+  readonly [idPrefix] = 'link';
+
   /**
    * Represents the global unique identifier for a group of bank accounts in monetr.
    * This value is generated automatically by the API upon creation, and cannot be changed.
    */
-  linkId: string;
-  lunchFlowLinkId?: string;
+  linkId: ID<Link>;
+  lunchFlowLinkId: ID<LunchFlowLink> | null;
   linkType: LinkType;
   institutionName: string;
   description: string | null;
   updatedAt: Date;
   createdAt: Date;
-  createdBy: string;
+  createdBy: ID<User>;
 
   plaidLink: PlaidLink | null;
   lunchFlowLink: LunchFlowLink | null;
 
-  constructor(data?: Partial<Link>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        plaidLink: data?.plaidLink && new PlaidLink(data.plaidLink),
-        lunchFlowLink: data?.lunchFlowLink && new LunchFlowLink(data.lunchFlowLink),
-        updatedAt: parseDate(data?.updatedAt),
-        createdAt: parseDate(data?.createdAt),
-      });
-    }
+  constructor(data: WithJsonValues<Link>) {
+    this.linkId = ID.from(data.linkId);
+    this.lunchFlowLinkId = data.lunchFlowLinkId ? ID.from(data.lunchFlowLinkId) : null;
+    this.linkType = data.linkType;
+    this.institutionName = data.institutionName;
+    this.description = data.description ?? null;
+    this.updatedAt = parseDate(data.updatedAt);
+    this.createdAt = parseDate(data.createdAt);
+    this.createdBy = ID.from(data.createdBy);
+    this.plaidLink = data.plaidLink ? new PlaidLink(data.plaidLink) : null;
+    this.lunchFlowLink = data.lunchFlowLink ? new LunchFlowLink(data.lunchFlowLink) : null;
   }
 
   getName(): string {
@@ -78,6 +84,9 @@ export default class Link {
 
   getErrorMessage(): string | null {
     const code = this.plaidLink?.status;
-    return errorMessages[code] || null;
+    if (!code) {
+      return null;
+    }
+    return errorMessages[code] ?? null;
   }
 }

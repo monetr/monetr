@@ -60,13 +60,19 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
 
   const submit = useCallback(
     async (values: LunchFlowSetupAccountsForm, helpers: FormikHelpers<LunchFlowSetupAccountsForm>) => {
+      // We can only submit once the link and accounts have loaded, the form is not rendered until then but bail just
+      // in case.
+      if (!lunchFlowLink || !lunchFlowAccounts) {
+        return Promise.resolve();
+      }
+
       helpers.setSubmitting(true);
       // Create the link from the lunch flow link, this will move the lunch flow link's status from pending to
       // active.
       return createLink({
-        institutionName: lunchFlowLink?.name,
+        institutionName: lunchFlowLink.name,
         description: `Created via Lunch Flow`,
-        lunchFlowLinkId: lunchFlowLink?.lunchFlowLinkId,
+        lunchFlowLinkId: lunchFlowLink.lunchFlowLinkId,
       })
         .then(result =>
           Promise.all(
@@ -86,7 +92,7 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
               ),
           ),
         )
-        .then(accounts => navigate(`/link/create/lunchflow/${accounts[0].linkId}/sync`))
+        .then(accounts => navigate(`/link/create/lunchflow/${accounts[0]?.linkId}/sync`))
         .finally(() => helpers.setSubmitting(false));
     },
     [createBankAccount, createLink, lunchFlowAccounts, lunchFlowLink, navigate],
@@ -103,7 +109,7 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
 
   const initialValues: LunchFlowSetupAccountsForm = useMemo(
     () =>
-      (lunchFlowAccounts ?? []).reduce(
+      (lunchFlowAccounts ?? []).reduce<LunchFlowSetupAccountsForm>(
         (acc, item) => {
           acc.items[item.lunchFlowBankAccountId] = item.status === LunchFlowBankAccountStatus.Inactive;
           return acc;
@@ -134,7 +140,14 @@ export default function LunchFlowSetupAccounts(): React.JSX.Element {
 
   // If we are loading ANY of our things, or if we have not started refreshing our data then we should show a loading
   // state. This should be the first few renders.
-  if (isLoadingLink || isLoadingAccounts || isRefreshing || !isRefreshComplete) {
+  if (
+    isLoadingLink ||
+    isLoadingAccounts ||
+    isRefreshing ||
+    !isRefreshComplete ||
+    !lunchFlowLink ||
+    !lunchFlowAccounts
+  ) {
     return (
       <LunchFlowSetupLayout step={LunchFlowSetupSteps.Accounts}>
         <Typography align='center'>

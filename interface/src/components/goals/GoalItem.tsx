@@ -8,7 +8,6 @@ import { useFundingSchedule } from '@monetr/interface/hooks/useFundingSchedule';
 import useLocaleCurrency from '@monetr/interface/hooks/useLocaleCurrency';
 import type Spending from '@monetr/interface/models/Spending';
 import { AmountType } from '@monetr/interface/util/amounts';
-import mergeClasses from '@monetr/interface/util/mergeClasses';
 
 import styles from './GoalItem.module.scss';
 
@@ -16,9 +15,13 @@ export interface GoalItemProps {
   spending: Spending;
 }
 
-export default function GoalItem({ spending }: GoalItemProps): React.JSX.Element {
+export default function GoalItem({ spending }: GoalItemProps): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
+
+  if (!locale) {
+    return null;
+  }
 
   const detailsPath = `/bank/${spending.bankAccountId}/goals/${spending.spendingId}/details`;
 
@@ -67,12 +70,14 @@ interface GoalProps {
   spending: Spending;
 }
 
-function GoalAmount({ spending }: GoalProps): React.JSX.Element {
+function GoalAmount({ spending }: GoalProps): React.JSX.Element | null {
   const { data: locale } = useLocaleCurrency();
-  const amountClass = mergeClasses(styles.amount, {
-    [styles.amountComplete]: spending.targetAmount <= spending.currentAmount,
-    [styles.amountInProgress]: spending.targetAmount !== spending.currentAmount,
-  });
+  const goalComplete = spending.targetAmount <= spending.currentAmount;
+  const goalInProgress = spending.targetAmount !== spending.currentAmount;
+
+  if (!locale) {
+    return null;
+  }
 
   const currentAmountString = locale.formatAmount(spending.currentAmount, AmountType.Stored);
   const targetAmountString = locale.formatAmount(spending.targetAmount, AmountType.Stored);
@@ -82,7 +87,9 @@ function GoalAmount({ spending }: GoalProps): React.JSX.Element {
       <Fragment>
         <div className={styles.amountMobile}>
           <div className={styles.amountColumn}>
-            <span className={amountClass}>{currentAmountString}</span>
+            <span className={styles.amount} data-complete={goalComplete} data-in-progress={goalInProgress}>
+              {currentAmountString}
+            </span>
             <hr className={styles.amountDivider} />
             <span className={styles.targetAmount}>{targetAmountString}</span>
           </div>
@@ -90,7 +97,9 @@ function GoalAmount({ spending }: GoalProps): React.JSX.Element {
         <div className={styles.amountDesktop}>
           <div className={styles.amountColumn}>
             <div className={styles.amountRow}>
-              <span className={amountClass}>{currentAmountString}</span>
+              <span className={styles.amount} data-complete={goalComplete} data-in-progress={goalInProgress}>
+                {currentAmountString}
+              </span>
               &nbsp;
               <span className={styles.ofLabel}>of</span>
               &nbsp;

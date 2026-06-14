@@ -4,7 +4,7 @@ export interface ErrorTextProps {
   error?: string;
 }
 
-export default function ErrorText(props: ErrorTextProps): React.JSX.Element {
+export default function ErrorText(props: ErrorTextProps): React.ReactNode {
   if (!props.error) {
     return null;
   }

@@ -1,6 +1,7 @@
 import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export class Forecast {
@@ -10,15 +11,12 @@ export class Forecast {
   endingBalance: number;
   events: Array<ForecastEvent>;
 
-  constructor(data?: Partial<Forecast>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        startingTime: parseDate(data.startingTime),
-        endingTime: parseDate(data.endingTime),
-        events: (data?.events || []).map(item => new ForecastEvent(item)),
-      });
-    }
+  constructor(data: WithJsonValues<Forecast>) {
+    this.startingTime = parseDate(data.startingTime);
+    this.endingTime = parseDate(data.endingTime);
+    this.startingBalance = data.startingBalance;
+    this.endingBalance = data.endingBalance;
+    this.events = (data.events ?? []).map(item => new ForecastEvent(item));
   }
 }
 
@@ -31,15 +29,14 @@ export class ForecastEvent {
   spending: Array<SpendingEvent>;
   transaction: number;
 
-  constructor(data?: Partial<ForecastEvent>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        date: parseDate(data.date),
-        funding: (data?.funding || []).map(item => new FundingEvent(item)),
-        spending: (data?.spending || []).map(item => new SpendingEvent(item)),
-      });
-    }
+  constructor(data: WithJsonValues<ForecastEvent>) {
+    this.balance = data.balance;
+    this.contribution = data.contribution;
+    this.date = parseDate(data.date);
+    this.delta = data.delta;
+    this.funding = (data.funding ?? []).map(item => new FundingEvent(item));
+    this.spending = (data.spending ?? []).map(item => new SpendingEvent(item));
+    this.transaction = data.transaction;
   }
 }
 
@@ -51,14 +48,13 @@ export class SpendingEvent {
   spendingId: string;
   transactionAmount: number;
 
-  constructor(data?: Partial<SpendingEvent>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        date: parseDate(data.date),
-        funding: (data?.funding || []).map(item => new FundingEvent(item)),
-      });
-    }
+  constructor(data: WithJsonValues<SpendingEvent>) {
+    this.contributionAmount = data.contributionAmount;
+    this.date = parseDate(data.date);
+    this.funding = (data.funding ?? []).map(item => new FundingEvent(item));
+    this.rollingAllocation = data.rollingAllocation;
+    this.spendingId = data.spendingId;
+    this.transactionAmount = data.transactionAmount;
   }
 }
 
@@ -68,20 +64,17 @@ export class FundingEvent {
   originalDate: Date;
   weekendAvoided: boolean;
 
-  constructor(data?: Partial<FundingEvent>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        date: parseDate(data.date),
-        originalDate: parseDate(data.originalDate),
-      });
-    }
+  constructor(data: WithJsonValues<FundingEvent>) {
+    this.date = parseDate(data.date);
+    this.fundingScheduleId = data.fundingScheduleId;
+    this.originalDate = parseDate(data.originalDate);
+    this.weekendAvoided = data.weekendAvoided;
   }
 }
 
 export function useForecast(): UseQueryResult<Forecast, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
-  return useQuery<Partial<Forecast>, unknown, Forecast>({
+  return useQuery<WithJsonValues<Forecast>, unknown, Forecast>({
     queryKey: [`/api/bank_accounts/${selectedBankAccountId}/forecast`],
     enabled: Boolean(selectedBankAccountId),
     select: data => new Forecast(data),

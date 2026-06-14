@@ -19,7 +19,6 @@ import useLocaleCurrency, { DefaultCurrency } from '@monetr/interface/hooks/useL
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { BankAccountSubType, BankAccountType } from '@monetr/interface/models/BankAccount';
 import type { APIError } from '@monetr/interface/util/request';
-import type { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 import { useSnackbar } from '@monetr/notify';
 
 import styles from './NewBankAccountModal.module.scss';
@@ -54,6 +53,12 @@ function NewBankAccountModal(): React.JSX.Element {
   };
 
   const submit = async (values: NewBankAccountValues, helper: FormikHelpers<NewBankAccountValues>): Promise<void> => {
+    // The locale is needed to convert the friendly balance into a stored amount, it should always be loaded by the time
+    // we can submit but bail just in case it is not ready yet.
+    if (!locale) {
+      return Promise.resolve();
+    }
+
     helper.setSubmitting(true);
     return await createBankAccount({
       linkId: selectedBankAccount.linkId,
@@ -141,5 +146,5 @@ const newBankAccountModal = NiceModal.create(NewBankAccountModal);
 export default newBankAccountModal;
 
 export function showNewBankAccountModal(): Promise<void> {
-  return NiceModal.show<void, ExtractProps<typeof newBankAccountModal>, unknown>(newBankAccountModal);
+  return NiceModal.show(newBankAccountModal) as Promise<void>;
 }

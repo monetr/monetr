@@ -18,7 +18,7 @@ export interface FundingItemProps {
   funding: FundingSchedule;
 }
 
-export default function FundingItem(props: FundingItemProps): React.JSX.Element {
+export default function FundingItem(props: FundingItemProps): React.JSX.Element | null {
   const { data: localeCurrency } = useLocaleCurrency();
   const { data: locale } = useLocale();
   const [, navigate] = useLocation();
@@ -26,6 +26,10 @@ export default function FundingItem(props: FundingItemProps): React.JSX.Element 
   const contributionForecast = useNextFundingForecast(funding.fundingScheduleId);
   const rule = rrulestr(funding.ruleset);
   const letter = funding.name.toUpperCase().charAt(0) || '?';
+
+  if (!locale || !localeCurrency) {
+    return null;
+  }
 
   const ruleDescription = capitalize(rule.toText());
 

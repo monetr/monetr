@@ -2,10 +2,11 @@ import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/useSelectedBankAccountId';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 
 export function useFundingSchedules(): UseQueryResult<Array<FundingSchedule>, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();
-  return useQuery<Array<Partial<FundingSchedule>>, unknown, Array<FundingSchedule>>({
+  return useQuery<Array<WithJsonValues<FundingSchedule>>, unknown, Array<FundingSchedule>>({
     queryKey: [`/api/bank_accounts/${selectedBankAccountId}/funding_schedules`],
     enabled: Boolean(selectedBankAccountId),
     select: data => data.map(item => new FundingSchedule(item)),

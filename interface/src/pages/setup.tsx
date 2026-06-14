@@ -48,7 +48,7 @@ export default function SetupPage(props: SetupPageProps): React.JSX.Element {
 
 interface GreetingProps {
   alreadyOnboarded?: boolean;
-  manualEnabled: boolean;
+  manualEnabled?: boolean;
   onContinue: (_: Step) => unknown;
 }
 
@@ -109,7 +109,7 @@ function Greeting(props: GreetingProps): React.JSX.Element {
         <OnboardingTile
           active={active === 'lunchflow'}
           description='Connect to EU/UK/Global institutions via Lunch Flow.'
-          disabled={!config.lunchFlowEnabled}
+          disabled={!config?.lunchFlowEnabled}
           icon={LunchFlowLogo}
           name='Lunch Flow'
           onClick={() => setActive('lunchflow')}
@@ -123,7 +123,11 @@ function Greeting(props: GreetingProps): React.JSX.Element {
           onClick={() => setActive('manual')}
         />
       </Flex>
-      <Button color={!active ? 'secondary' : 'primary'} disabled={!active} onClick={() => props.onContinue(active)}>
+      <Button
+        color={!active ? 'secondary' : 'primary'}
+        disabled={!active}
+        onClick={() => active && props.onContinue(active)}
+      >
         Continue
       </Button>
       {!props.alreadyOnboarded && <SetupBillingButton />}
@@ -142,13 +146,9 @@ interface OnboardingTileProps {
   disabled?: boolean;
 }
 
-function OnboardingTile(props: OnboardingTileProps): React.JSX.Element {
-  const disabledState = props.comingSoon || props.disabled;
-  const wrapperClasses = mergeClasses(styles.tile, {
-    [styles.tileActive]: !disabledState && props.active,
-    [styles.tileInactive]: !disabledState && !props.active,
-    [styles.tileDisabled]: disabledState,
-  });
+function OnboardingTile(props: OnboardingTileProps): React.JSX.Element | null {
+  const disabledState = Boolean(props.comingSoon) || props.disabled;
+  const tileState = disabledState ? 'disabled' : props.active ? 'active' : 'inactive';
 
   function handleClick() {
     if (props.comingSoon) {
@@ -166,7 +166,7 @@ function OnboardingTile(props: OnboardingTileProps): React.JSX.Element {
   }
 
   return (
-    <button className={wrapperClasses} onClick={handleClick} type='button'>
+    <button className={styles.tile} data-state={tileState} onClick={handleClick} type='button'>
       {props.active && <CircleCheck className={styles.checkIcon} />}
       {React.createElement(props.icon, {
         className: styles.tileIcon,

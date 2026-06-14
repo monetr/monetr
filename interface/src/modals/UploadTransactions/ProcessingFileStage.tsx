@@ -5,7 +5,7 @@ import { FileUp } from 'lucide-react';
 import { Button } from '@monetr/interface/components/Button';
 import Typography from '@monetr/interface/components/Typography';
 import type { UploadTransactionStage } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
-import TransactionUpload from '@monetr/interface/models/TransactionUpload';
+import type TransactionUpload from '@monetr/interface/models/TransactionUpload';
 
 import styles from './ProcessingFileStage.module.scss';
 
@@ -35,7 +35,7 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): Re
         <div className={styles.fileCard}>
           <FileUp className={styles.fileIcon} />
           <div className={styles.fileInfo}>
-            <Typography size='lg'>{props.upload.file.name}</Typography>
+            <Typography size='lg'>{props.upload.file?.name}</Typography>
             <Typography size='inherit'>Import {data?.status || 'processing'}!</Typography>
           </div>
         </div>
@@ -52,7 +52,7 @@ export default function ProcessingFileStage(props: ProcessingFileStageProps): Re
 function useTransactionUploadProgress(
   bankAccountId: string,
   transactionUploadId: string,
-): UseQueryResult<TransactionUpload, unknown> {
+): UseQueryResult<Partial<TransactionUpload>, unknown> {
   const queryClient = useQueryClient();
   // Bootstrap the socket to listen for the actual changes.
   useEffect(() => {
@@ -77,7 +77,7 @@ function useTransactionUploadProgress(
       // Take the current upload data stored in state (if its there) and merge it with the message we received. The
       // first message will contain the entire transaction upload object so if its not already in the state then this
       // will persist it. Subsequent messages will contain changes to the status.
-      queryClient.setQueryData(queryKey, (item: TransactionUpload | null) => {
+      queryClient.setQueryData(queryKey, (item: Partial<TransactionUpload> | undefined) => {
         return {
           ...(item ?? {}),
           ...data,
@@ -90,9 +90,10 @@ function useTransactionUploadProgress(
   }, [bankAccountId, queryClient, transactionUploadId]);
 
   // Subscribe to changes for the transaction upload
-  return useQuery<Partial<TransactionUpload>, unknown, TransactionUpload>({
+  // The upload object is delivered incrementally over the websocket above (first message is the whole object, then
+  // status updates) so we leave the query data as a partial rather than hydrating it into a TransactionUpload here.
+  return useQuery<Partial<TransactionUpload>, unknown>({
     queryKey: [`/api/bank_accounts/${bankAccountId}/transactions/upload/${transactionUploadId}`],
-    initialData: () => null, // Don't do the initial fetch, rely on the websocket instead.
-    select: data => new TransactionUpload(data),
+    initialData: () => ({}), // Don't do the initial fetch, rely on the websocket instead.
   });
 }

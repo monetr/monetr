@@ -47,10 +47,11 @@ export default function FundingTimeline(props: FundingTimelineProps): React.JSX.
 
   // Take all of those events and prepare our data for the timeline.
   const timelineItems: Array<TimelineItemData> = events.map(event => {
+    const fundingOccurrence = event.funding.find(funding => funding.fundingScheduleId === props.fundingScheduleId);
     const item: TimelineItemData = {
       date: event.date,
       funding,
-      originalDate: event.funding.find(funding => funding.fundingScheduleId === props.fundingScheduleId).originalDate,
+      originalDate: fundingOccurrence?.originalDate ?? event.date,
       totalContributedAmount: event.contribution,
       contributedAmount: 0,
       endingAllocation: event.balance,
@@ -78,9 +79,13 @@ export default function FundingTimeline(props: FundingTimelineProps): React.JSX.
   );
 }
 
-function TimelineItem({ funding, ...props }: TimelineItemData): React.JSX.Element {
+function TimelineItem({ funding, ...props }: TimelineItemData): React.JSX.Element | null {
   const { inTimezone } = useTimezone();
   const { data: currency } = useLocaleCurrency();
+
+  if (!currency) {
+    return null;
+  }
 
   let header = '';
   let body = '';

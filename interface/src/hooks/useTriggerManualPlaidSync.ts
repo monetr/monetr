@@ -23,7 +23,7 @@ export function useTriggerManualPlaidSync(): (_linkId: string) => Promise<void> 
             }),
         )
         // Will make things like the "last attempted update" timestamp thing update.
-        .then(() => setTimeout(() => queryClient.invalidateQueries({ queryKey: ['/api/links'] }), 2000))
+        .then(() => void setTimeout(() => queryClient.invalidateQueries({ queryKey: ['/api/links'] }), 2000))
         .catch(
           error =>
             void enqueueSnackbar(

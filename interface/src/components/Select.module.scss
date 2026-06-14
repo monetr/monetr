@@ -52,10 +52,11 @@ $basePadding: 4 * variables.$size;
   &:disabled, &[aria-disabled="true"] {
     color: var(--content-disabled);
   }
-}
 
-.selectTextPlaceholder {
-  color: var(--content-placeholder);
+  // Placeholder styling when there is no value selected.
+  &[data-placeholder='true'] {
+    color: var(--content-placeholder);
+  }
 }
 
 .indicator {
@@ -101,6 +102,12 @@ $basePadding: 4 * variables.$size;
     margin-top: 0.5 * variables.$size;
     margin-bottom: 0.5 * variables.$size;
   }
+
+  // Hide the options list when closed. The only inline styles on the list are
+  // max-height/width set while open, so a plain display:none wins here.
+  &[data-hidden='true'] {
+    display: none;
+  }
 }
 
 .unorderedListMobile {
@@ -117,12 +124,6 @@ $basePadding: 4 * variables.$size;
   padding-bottom: calc($basePadding + env(safe-area-inset-bottom));
 }
 
-// Hide the options list when closed. The only inline styles on the list are
-// max-height/width set while open, so a plain display:none wins here.
-.hidden {
-  display: none;
-}
-
 // A single option row in the dropdown / drawer list.
 .option {
   color: var(--content-emphasis);
@@ -134,6 +135,12 @@ $basePadding: 4 * variables.$size;
   padding-bottom: 1.5 * variables.$size;
   padding-left: 2 * variables.$size;
   padding-right: 2 * variables.$size;
+
+  // Selected option, slightly darker than hover. This sits before the hover/aria-selected rules below so that those
+  // still win on equal specificity, meaning hovering a selected row still shows the hover background.
+  &[data-selected='true'] {
+    background-color: var(--background-emphasis);
+  }
 
   &:hover, &[aria-selected="true"] {
     background-color: var(--background-active);
@@ -150,10 +157,4 @@ $basePadding: 4 * variables.$size;
   &:active {
     background-color: var(--background-active);
   }
-}
-
-// Selected option, slightly darker than hover. The hover/aria-selected rules
-// above have higher specificity, so hovering a selected row still shows hover.
-.optionSelected {
-  background-color: var(--background-emphasis);
 }

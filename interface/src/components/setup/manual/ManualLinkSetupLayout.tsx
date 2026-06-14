@@ -15,7 +15,7 @@ import { useViewContext } from '@monetr/interface/components/ViewManager';
 import styles from './ManualLinkSetupLayout.module.scss';
 
 interface ManualLinkSetupLayoutProps {
-  children: ReactNode | undefined;
+  children?: ReactNode;
 }
 
 export default function ManualLinkSetupLayout(props: ManualLinkSetupLayoutProps): React.JSX.Element {

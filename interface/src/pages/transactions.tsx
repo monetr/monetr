@@ -43,7 +43,7 @@ export default function Transactions(): React.JSX.Element {
 
   const groups: { [date: string]: Array<Transaction> } = useMemo(
     () =>
-      (transactions ?? []).reduce((accumulator, item) => {
+      (transactions ?? []).reduce<{ [date: string]: Array<Transaction> }>((accumulator, item) => {
         // biome-ignore lint/suspicious/noAssignInExpressions: This is the cleanest way to do this group by...
         (accumulator[format(item.date, 'yyyy-MM-dd')] ??= []).push(item);
         return accumulator;
@@ -76,7 +76,7 @@ export default function Transactions(): React.JSX.Element {
     message = 'Load more?';
   }
 
-  if (!isLoading && transactions.length === 0) {
+  if (!isLoading && transactions?.length === 0) {
     return (
       <Fragment>
         <MTopNavigation icon={ShoppingCart} title='Transactions'>
@@ -151,7 +151,7 @@ export default function Transactions(): React.JSX.Element {
   );
 }
 
-function AddTransactionButton(): React.JSX.Element {
+function AddTransactionButton(): React.JSX.Element | null {
   const { data: link } = useCurrentLink();
 
   if (!link?.getIsManual()) {
@@ -165,7 +165,7 @@ function AddTransactionButton(): React.JSX.Element {
   );
 }
 
-function UploadButtonMaybe(): React.JSX.Element {
+function UploadButtonMaybe(): React.JSX.Element | null {
   const { data: config } = useAppConfiguration();
   const { data: link } = useCurrentLink();
   if (!link?.getIsManual()) {

@@ -42,7 +42,7 @@ export default function Expenses(): React.JSX.Element {
       </MTopNavigation>
       <div className={styles.content}>
         {(expenses ?? []).length === 0 && <EmptyState />}
-        {expenses?.length > 0 && (
+        {(expenses?.length ?? 0) > 0 && (
           <ul className={styles.list}>
             {expenses
               ?.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))

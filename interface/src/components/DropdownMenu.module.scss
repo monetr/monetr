@@ -84,10 +84,11 @@ $duration: 150ms;
     height: 4 * variables.$size;
     flex-shrink: 0;
   }
-}
 
-.subTriggerInset {
-  padding-left: 8 * variables.$size; // pl-8
+  // inset lines the content up with items that have a leading icon.
+  &[data-inset='true'] {
+    padding-left: 8 * variables.$size; // pl-8
+  }
 }
 
 .subTriggerChevron {
@@ -169,10 +170,11 @@ $duration: 150ms;
     height: 5 * variables.$size;
     flex-shrink: 0;
   }
-}
 
-.itemInset {
-  padding-left: 8 * variables.$size; // pl-8
+  // inset lines the content up with items that have a leading icon.
+  &[data-inset='true'] {
+    padding-left: 8 * variables.$size; // pl-8
+  }
 }
 
 // CheckboxItem / RadioItem share the same row styling.
@@ -237,10 +239,11 @@ $duration: 150ms;
 
   @include mixins.text-small;
   font-weight: var(--semibold);
-}
 
-.labelInset {
-  padding-left: 8 * variables.$size; // pl-8
+  // inset lines the content up with items that have a leading icon.
+  &[data-inset='true'] {
+    padding-left: 8 * variables.$size; // pl-8
+  }
 }
 
 .separator {

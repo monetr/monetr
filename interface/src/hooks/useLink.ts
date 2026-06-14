@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { type UseQueryResult, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import Link from '@monetr/interface/models/Link';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 
 export function useLink(linkId?: string): UseQueryResult<Link, unknown> {
   const queryClient = useQueryClient();
@@ -13,8 +14,8 @@ export function useLink(linkId?: string): UseQueryResult<Link, unknown> {
     () => queryClient.getQueryState(['/api/links'])?.dataUpdatedAt,
     [queryClient],
   );
-  const select = useCallback((data: Partial<Link>) => new Link(data), []);
-  return useQuery<Partial<Link>, unknown, Link>({
+  const select = useCallback((data: WithJsonValues<Link>) => new Link(data), []);
+  return useQuery<WithJsonValues<Link>, unknown, Link>({
     queryKey: [`/api/links/${linkId}`],
     enabled: Boolean(linkId),
     select,

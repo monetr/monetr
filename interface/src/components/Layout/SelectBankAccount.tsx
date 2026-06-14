@@ -43,7 +43,7 @@ export default function SelectBankAccount(): React.JSX.Element {
     label: account.name,
     value: account.bankAccountId,
     type: account.accountSubType,
-    mask: account.mask,
+    mask: account.mask ?? undefined,
     status: account.status,
   }));
 
@@ -71,7 +71,7 @@ export default function SelectBankAccount(): React.JSX.Element {
                   ? accounts.find(option => option.value === current?.value)?.label
                   : 'Select a bank account...'}
               </div>
-              <ChevronsUpDown className={mergeClasses(styles.chevron, { [styles.chevronOpen]: open })} />
+              <ChevronsUpDown className={styles.chevron} data-open={open} />
             </Button>
           </DrawerTrigger>
           <DrawerContent>
@@ -91,7 +91,7 @@ export default function SelectBankAccount(): React.JSX.Element {
             styles.settingsLinkMobile,
           )}
           role='combobox'
-          to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
+          to={`/bank/${selectedBankAccount?.bankAccountId}/settings`}
         >
           <Settings className={styles.settingsIconMobile} />
         </Link>
@@ -116,7 +116,7 @@ export default function SelectBankAccount(): React.JSX.Element {
                 ? accounts.find(option => option.value === current?.value)?.label
                 : 'Select a bank account...'}
             </div>
-            <ChevronsUpDown className={mergeClasses(styles.chevron, { [styles.chevronOpen]: open })} />
+            <ChevronsUpDown className={styles.chevron} data-open={open} />
           </Button>
         </PopoverTrigger>
         <PopoverContent className={styles.popover}>
@@ -134,7 +134,7 @@ export default function SelectBankAccount(): React.JSX.Element {
             styles.settingsLinkDesktop, // No focus ring, different from mobile.
           )}
           role='combobox'
-          to={`/bank/${selectedBankAccount.bankAccountId}/settings`}
+          to={`/bank/${selectedBankAccount?.bankAccountId}/settings`}
         >
           <Settings className={styles.settingsIconDesktop} />
         </Link>
@@ -149,7 +149,7 @@ interface SelectBankAccountPickerOption {
   disabled?: boolean;
   // Fields used for rich display.
   type: string;
-  mask: string;
+  mask?: string;
   status: BankAccountStatus;
 }
 

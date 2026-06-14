@@ -1,3 +1,5 @@
+import type { WithJsonValues } from '@monetr/interface/util/json';
+
 export enum BillingInterval {
   Monthly = 'month',
 }
@@ -12,9 +14,14 @@ export default class BillingPlan {
   freeTrialDays: number;
   active: boolean;
 
-  constructor(data: Partial<BillingPlan>) {
-    if (data) {
-      Object.assign(this, data);
-    }
+  constructor(data: WithJsonValues<BillingPlan>) {
+    this.id = data.id;
+    this.name = data.name;
+    this.description = data.description;
+    this.unitPrice = data.unitPrice;
+    this.interval = data.interval;
+    this.intervalCount = data.intervalCount;
+    this.freeTrialDays = data.freeTrialDays;
+    this.active = data.active;
   }
 }

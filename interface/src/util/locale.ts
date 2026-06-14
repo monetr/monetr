@@ -1,7 +1,7 @@
 export function getLocale(): string {
   let locale: string = Intl.DateTimeFormat().resolvedOptions().locale;
   if (!locale && navigator.languages !== undefined) {
-    locale = navigator.languages[0];
+    locale = navigator.languages[0] ?? '';
   }
   if (!locale) {
     locale = navigator.language;

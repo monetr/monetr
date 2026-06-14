@@ -23,5 +23,5 @@ export function useIconSearch(name: string): Icon | null {
     retry: false,
   });
 
-  return data;
+  return data ?? null;
 }

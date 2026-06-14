@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import BankAccount, { type BankAccountSubType, type BankAccountType } from '@monetr/interface/models/BankAccount';
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import request from '@monetr/interface/util/request';
 
 export interface CreateBankAccountRequest {
@@ -19,9 +20,11 @@ export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest)
   const queryClient = useQueryClient();
 
   async function createBankAccount(newBankAccount: CreateBankAccountRequest): Promise<BankAccount> {
-    return request<Partial<BankAccount>>({ method: 'POST', url: '/api/bank_accounts', data: newBankAccount }).then(
-      result => new BankAccount(result?.data),
-    );
+    return request<WithJsonValues<BankAccount>>({
+      method: 'POST',
+      url: '/api/bank_accounts',
+      data: newBankAccount,
+    }).then(result => new BankAccount(result?.data));
   }
 
   const mutate = useMutation({

@@ -2,18 +2,24 @@ import { useCallback } from 'react';
 
 import { Button } from '@monetr/interface/components/Button';
 import Flex from '@monetr/interface/components/Flex';
-import type { ManualLinkSetupForm } from '@monetr/interface/components/setup/manual/ManualLinkSetup';
+import type {
+  ManualLinkSetupForm,
+  ManualLinkSetupMetadata,
+} from '@monetr/interface/components/setup/manual/ManualLinkSetup';
 import { ManualLinkSetupSteps } from '@monetr/interface/components/setup/manual/ManualLinkSetupSteps';
 import { useViewContext } from '@monetr/interface/components/ViewManager';
 
 export default function ManualLinkSetupButtons(): React.JSX.Element {
-  const viewContext = useViewContext<ManualLinkSetupSteps, unknown, ManualLinkSetupForm>();
+  const viewContext = useViewContext<ManualLinkSetupSteps, ManualLinkSetupMetadata, ManualLinkSetupForm>();
   const steps = Object.values(ManualLinkSetupSteps);
   const step = steps.indexOf(viewContext.currentView);
   const lastStep = steps.length - 1;
 
   const previousStep = useCallback(() => {
-    viewContext.goToView(steps[step - 1]);
+    const previous = steps[step - 1];
+    if (previous) {
+      viewContext.goToView(previous);
+    }
   }, [steps, step, viewContext]);
 
   switch (step) {

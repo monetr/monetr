@@ -1,3 +1,4 @@
+import type { WithJsonValues } from '@monetr/interface/util/json';
 import parseDate from '@monetr/interface/util/parseDate';
 
 export default class Institution {
@@ -5,38 +6,43 @@ export default class Institution {
   url: string | null;
   primaryColor: string | null;
   logo: string | null;
-  status: InstitutionStatus;
+  status: InstitutionStatus | null;
+  // timestamp is not returned by the API, we stamp it client side when we hydrate the model so we know roughly how
+  // stale the data we are looking at is.
   readonly timestamp: Date;
 
-  constructor(data?: Partial<Institution>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        status: new InstitutionStatus(data.status),
-        timestamp: new Date(),
-      });
-    }
+  constructor(data: Omit<WithJsonValues<Institution>, 'timestamp'>) {
+    this.name = data.name;
+    this.url = data.url ?? null;
+    this.primaryColor = data.primaryColor ?? null;
+    this.logo = data.logo ?? null;
+    this.status = data.status ? new InstitutionStatus(data.status) : null;
+    this.timestamp = new Date();
   }
 }
 
 export class InstitutionStatus {
-  transactions_updates: PlaidProductStatus;
+  transactions_updates: PlaidProductStatus | null;
   plaidIncidents: InstitutionPlaidIncident[];
 
-  constructor(data?: Partial<InstitutionStatus>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        plaidIncidents: (data?.plaidIncidents || []).map(item => new InstitutionPlaidIncident(item)),
-      });
-    }
+  constructor(data: WithJsonValues<InstitutionStatus>) {
+    // transactions_updates is a plain object rather than its own model, but it carries a date so we cannot just copy it
+    // across. Rebuild it so last_status_change is an actual Date.
+    this.transactions_updates = data.transactions_updates
+      ? {
+          status: data.transactions_updates.status,
+          last_status_change: parseDate(data.transactions_updates.last_status_change),
+          breakdown: data.transactions_updates.breakdown,
+        }
+      : null;
+    this.plaidIncidents = (data.plaidIncidents ?? []).map(item => new InstitutionPlaidIncident(item));
   }
 }
 
 export type PlaidStatus = 'HEALTHY' | 'DEGRADED' | 'DOWN';
 export type RefreshInterval = 'NORMAL' | 'DELAYED' | 'STOPPED';
 
-export class PlaidProductStatus {
+export interface PlaidProductStatus {
   status: PlaidStatus;
   last_status_change: Date;
   breakdown: {
@@ -52,13 +58,9 @@ export class InstitutionPlaidIncident {
   end: Date | null;
   title: string;
 
-  constructor(data?: Partial<InstitutionPlaidIncident>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        start: parseDate(data?.start),
-        end: parseDate(data?.end),
-      });
-    }
+  constructor(data: WithJsonValues<InstitutionPlaidIncident>) {
+    this.start = parseDate(data.start);
+    this.end = parseDate(data.end);
+    this.title = data.title;
   }
 }
