@@ -54,7 +54,10 @@ var (
 	Optional OptionalOrRequire = false
 )
 
-func Name(required OptionalOrRequire) *validation.KeyRules[string] {
+// NameOld is a shorthand.
+//
+// Deprecated: Use [Name] instead!
+func NameOld(required OptionalOrRequire) *validation.KeyRules[string] {
 	return validation.Key(
 		"name",
 		validation.Required.When(required).Error("Name is required"),
@@ -62,6 +65,14 @@ func Name(required OptionalOrRequire) *validation.KeyRules[string] {
 		is.PrintableUnicode,
 		validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
 	).Required(required)
+}
+
+func Name() validation.Rule {
+	return validation.AllOf(
+		validation.IsString,
+		is.PrintableUnicode,
+		validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
+	)
 }
 
 func Mask() validation.Rule {

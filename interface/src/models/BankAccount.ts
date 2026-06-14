@@ -33,13 +33,13 @@ export enum BankAccountSubType {
 export default class BankAccount {
   readonly [idPrefix] = 'bac';
 
-  bankAccountId: ID<BankAccount>;
-  linkId: ID<Link>;
-  lunchFlowBankAccountId: ID<LunchFlowBankAccount> | null;
+  readonly bankAccountId: ID<BankAccount>;
+  readonly linkId: ID<Link>;
+  readonly lunchFlowBankAccountId: ID<LunchFlowBankAccount> | null;
   mask: string | null;
   name: string;
-  originalName: string;
-  status: BankAccountStatus;
+  readonly originalName: string;
+  readonly status: BankAccountStatus;
   accountType: BankAccountType;
   accountSubType: BankAccountSubType;
   currency: string;
@@ -47,13 +47,13 @@ export default class BankAccount {
   currentBalance: number;
   availableBalance: number;
   limitBalance: number | null;
-  lastUpdated: Date;
-  createdAt: Date;
-  createdBy: string;
-  deletedAt: Date | null;
+  readonly lastUpdated: Date;
+  readonly createdAt: Date;
+  readonly createdBy: string;
+  readonly deletedAt: Date | null;
 
-  plaidBankAccount: PlaidBankAccount | null;
-  lunchFlowBankAccount: LunchFlowBankAccount | null;
+  readonly plaidBankAccount: PlaidBankAccount | null;
+  readonly lunchFlowBankAccount: LunchFlowBankAccount | null;
 
   constructor(data: WithJsonValues<BankAccount>) {
     this.bankAccountId = ID.from(data.bankAccountId);

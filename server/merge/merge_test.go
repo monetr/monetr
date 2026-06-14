@@ -70,6 +70,76 @@ func TestMerge(t *testing.T) {
 		assert.Equal(t, src["bar"], *dst.Bar, "the source and destination fields should now match!")
 	})
 
+	t.Run("null clears a pointer field", func(t *testing.T) {
+		// An explicit null in the source body should actually unset a nullable
+		// destination field. This is the bug that meant a client could never clear
+		// a bank account mask, the null was just silently ignored and the existing
+		// value was left in place.
+		type Foo struct {
+			Bar *string `json:"bar"`
+		}
+
+		existing := "this is a string"
+		dst := Foo{
+			Bar: &existing,
+		}
+		src := map[string]any{
+			"bar": nil,
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.NoError(t, err, "must be able to merge an explicit null")
+		assert.Nil(t, dst.Bar, "the null should have cleared the pointer field")
+	})
+
+	t.Run("null does not affect a non nullable field", func(t *testing.T) {
+		// A null cannot be represented by a non pointer field, so just like
+		// encoding/json we leave the destination alone rather than zeroing it out.
+		// This matters because the validation layer does NOT reject a null on a non
+		// nullable field, so without this a client could accidentally wipe a name or
+		// zero out a balance just by sending null.
+		type Foo struct {
+			Name    string `json:"name"`
+			Balance int64  `json:"balance"`
+		}
+
+		dst := Foo{
+			Name:    "do not clobber me",
+			Balance: 1234,
+		}
+		src := map[string]any{
+			"name":    nil,
+			"balance": nil,
+		}
+
+		err := merge.Merge(&dst, src)
+		assert.NoError(t, err, "a null on a non nullable field should not error")
+		assert.Equal(t, "do not clobber me", dst.Name, "the null should not have changed the string field")
+		assert.EqualValues(t, 1234, dst.Balance, "the null should not have changed the integer field")
+	})
+
+	t.Run("null skips when skipping zero values", func(t *testing.T) {
+		// When the caller asked us to skip zero values a null is just another zero
+		// so we leave the nullable field exactly as it was. This also proves we do
+		// not panic trying to call IsZero on an invalid value.
+		type Foo struct {
+			Bar *string `json:"bar"`
+		}
+
+		existing := "this is a string"
+		dst := Foo{
+			Bar: &existing,
+		}
+		src := map[string]any{
+			"bar": nil,
+		}
+
+		err := merge.Merge(&dst, src, merge.SkipZeroValues)
+		assert.NoError(t, err, "must be able to merge an explicit null while skipping zero values")
+		assert.NotNil(t, dst.Bar, "the pointer should be left alone when skipping zero values")
+		assert.Equal(t, existing, *dst.Bar, "the existing value should be untouched")
+	})
+
 	t.Run("merge embedded struct fields", func(t *testing.T) {
 		type Foo struct {
 			Embedded

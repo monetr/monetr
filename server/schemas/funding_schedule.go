@@ -10,7 +10,7 @@ import (
 
 var (
 	CreateFundingSchedule = validation.Map(
-		Name(Require),
+		NameOld(Require),
 		validation.Key(
 			"description",
 			validation.IsString,
@@ -52,7 +52,7 @@ var (
 	)
 
 	PatchFundingSchedule = validation.Map(
-		Name(Optional),
+		NameOld(Optional),
 		validation.Key(
 			"description",
 			is.PrintableUnicode,

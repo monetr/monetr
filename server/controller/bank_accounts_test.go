@@ -945,7 +945,586 @@ func TestPatchBankAccount(t *testing.T) {
 
 		token = GivenILogin(t, e, user.Login.Email, password)
 
+		{ // A manual link bank account has user managed balances and
+			// classification, so it is allowed to change its name, mask, currency,
+			// balances, and account type/sub type.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name":             "My New Name",
+					"mask":             "4321",
+					"currency":         "EUR",
+					"availableBalance": -100,
+					"currentBalance":   200,
+					"limitBalance":     5000,
+					"accountType":      CreditBankAccountType,
+					"accountSubType":   CreditCardBankAccountSubType,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.name").String().IsEqual("My New Name")
+			response.JSON().Path("$.mask").String().IsEqual("4321")
+			response.JSON().Path("$.currency").String().IsEqual("EUR")
+			response.JSON().Path("$.availableBalance").Number().IsEqual(-100)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(200)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(5000)
+			response.JSON().Path("$.accountType").String().IsEqual(string(CreditBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CreditCardBankAccountSubType))
+			// Status is intentionally not part of the manual patch schema so it
+			// should come back exactly as it was seeded.
+			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
+		}
+
+		{ // Read it back to make sure the patched values were actually persisted
+			// and not just echoed back from the handler.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.name").String().IsEqual("My New Name")
+			response.JSON().Path("$.mask").String().IsEqual("4321")
+			response.JSON().Path("$.currency").String().IsEqual("EUR")
+			response.JSON().Path("$.availableBalance").Number().IsEqual(-100)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(200)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(5000)
+			response.JSON().Path("$.accountType").String().IsEqual(string(CreditBankAccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(CreditCardBankAccountSubType))
+			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
+		}
+	})
+
+	t.Run("manual bank account cannot patch the status", func(t *testing.T) {
+		// The manual patch schema deliberately leaves status out, monetr owns it.
+		// So even though balances and the account type can be changed, status is a
+		// key the schema does not expect and the request should be rejected before
+		// we ever touch the database.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Try to patch the status.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"status": string(BankAccountStatusInactive),
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.status").String().IsEqual("key not expected")
+		}
+	})
+
+	t.Run("manual bank account rejects a negative limit balance", func(t *testing.T) {
+		// The limit balance is a one of null or a non negative integer just like on
+		// the create path, so a negative value should be rejected.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
 		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"limitBalance": -5,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.limitBalance.oneOf").Array().ContainsAll("Limit balance cannot be negative")
+		}
+	})
+
+	t.Run("manual bank account rejects an invalid account type", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"accountType": "something",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.accountType").String().IsEqual("Invalid bank account type")
+		}
+	})
+
+	t.Run("manual bank account can clear the mask", func(t *testing.T) {
+		// The mask field on the manual patch schema is a one of null or a real
+		// mask, so a client should be able to explicitly null it out and actually
+		// have it cleared. This used to silently leave the existing mask in place
+		// for two reasons that have both since been fixed. The merge code skipped
+		// nil values, and the repository used UpdateNotZero which would not write a
+		// nil column back as NULL.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // Make sure the mask starts off set.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.mask").String().IsEqual(*bank.Mask)
+		}
+
+		{ // Then null it out.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"mask": nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.mask").IsNull()
+		}
+
+		{ // And make sure it actually persisted as null.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.mask").IsNull()
+		}
+	})
+
+	t.Run("manual bank account can set a balance back to zero", func(t *testing.T) {
+		// Balances are non-nullable integers where zero is a totally valid value.
+		// We set a balance to a non-zero number and then back to zero to prove the
+		// zero actually persists. This is the case the old UpdateNotZero behavior
+		// got wrong, it would have skipped writing the zero and left the previous
+		// value in place. The full Update fixes that.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // First set the limit balance to a non-zero value.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"limitBalance": 5000,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(5000)
+		}
+
+		{ // Then set it back to zero.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"limitBalance": 0,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(0)
+		}
+
+		{ // And make sure the zero actually persisted rather than being skipped.
+			response := e.GET("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.limitBalance").Number().IsEqual(0)
+		}
+	})
+
+	t.Run("empty patch is a no-op", func(t *testing.T) {
+		// An empty patch body should be accepted and change nothing. Every field is
+		// optional so there is nothing to validate, and the merge has nothing to
+		// apply.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.name").String().IsEqual(bank.Name)
+			response.JSON().Path("$.mask").String().IsEqual(*bank.Mask)
+			response.JSON().Path("$.currency").String().IsEqual(bank.Currency)
+			response.JSON().Path("$.availableBalance").Number().IsEqual(bank.AvailableBalance)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
+			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
+			response.JSON().Path("$.accountType").String().IsEqual(string(bank.AccountType))
+			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.AccountSubType))
+		}
+	})
+
+	t.Run("manual bank account rejects a null name", func(t *testing.T) {
+		// Name is not a nullable field, so even though the key is optional an
+		// explicit null should be rejected by the Required rule rather than
+		// sneaking through validation and being silently ignored by the merge.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name": nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.name").String().IsEqual("Name is required")
+		}
+	})
+
+	t.Run("manual bank account rejects an empty name", func(t *testing.T) {
+		// An empty string is not the same as the key being absent. The length rule
+		// inside Name skips empty values, so without the Required rule an empty
+		// name would slip through and blank out the account name. This proves it
+		// does not.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name": "",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.name").String().IsEqual("Name is required")
+		}
+	})
+
+	t.Run("manual bank account rejects an empty currency", func(t *testing.T) {
+		// Same empty string concern as the name. The currency format rules skip
+		// empty values, so the Required rule is what stops an empty currency from
+		// sneaking through.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"currency": "",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.currency").String().IsEqual("Currency is required")
+		}
+	})
+
+	t.Run("manual bank account rejects a null balance", func(t *testing.T) {
+		// Same idea as the null name, the balances are not nullable so an explicit
+		// null should be rejected.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"availableBalance": nil,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.availableBalance").String().IsEqual("is required")
+		}
+	})
+
+	t.Run("manual bank account rejects an invalid mask", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // A mask that is not exactly four digits should trip the mask rule.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"mask": "12345",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			// Same structured one of envelope as the create path. We only care that
+			// the four digit rule is the reason the real mask branch failed.
+			response.JSON().Path("$.problems.mask.oneOf").Array().ContainsAll("Mask must be exactly 4 digits")
+		}
+	})
+
+	t.Run("manual bank account rejects an invalid currency", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // A lower case currency passes the length and alpha rules but trips the
+			// upper case rule.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"currency": "usd",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be all upper case")
+		}
+	})
+
+	t.Run("manual bank account rejects an unsupported currency", func(t *testing.T) {
+		// A currency that is the right shape (three upper case letters) but is not
+		// a currency the server actually knows about should trip the supported list
+		// rule. This is the same case the put endpoint covers.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"currency": "ZZZ",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.currency").String().IsEqual("Currency must be one supported by the server")
+		}
+	})
+
+	t.Run("manual bank account rejects a name that is too long", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // The name rule caps at 300 characters, so something longer should be
+			// rejected.
+			tooLong := ""
+			for i := 0; i < 301; i++ {
+				tooLong += "a"
+			}
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name": tooLong,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.name").String().IsEqual("Name must be between 1 and 300 characters")
+		}
+	})
+
+	t.Run("plaid bank account can only patch the name", func(t *testing.T) {
+		// A non-manual (Plaid) bank account uses the much more restrictive patch
+		// schema that only allows the name to be changed. Plaid owns everything
+		// else so the client should not be able to touch it.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveAPlaidBankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // The name can be changed.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name": "My New Name",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.name").String().IsEqual("My New Name")
+			// Everything else should be untouched since it is not part of the schema.
+			response.JSON().Path("$.mask").String().IsEqual(*bank.Mask)
+			response.JSON().Path("$.availableBalance").Number().IsEqual(bank.AvailableBalance)
+			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
+			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
+		}
+	})
+
+	t.Run("plaid bank account cannot patch mask currency or balances", func(t *testing.T) {
+		// This is the whole reason there are two patch schemas. A Plaid bank
+		// account is not allowed to change its mask, currency, or balances, so
+		// those keys should come back as unexpected.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveAPlaidBankAccount(t, app.Clock, &link, DepositoryBankAccountType, CheckingBankAccountSubType)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // The mask is allowed on a manual account but NOT on a Plaid one.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"mask": "4321",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.mask").String().IsEqual("key not expected")
+		}
+
+		{ // Same for the currency.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"currency": "EUR",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.currency").String().IsEqual("key not expected")
+		}
+
+		{ // And the balances.
 			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
@@ -954,16 +1533,72 @@ func TestPatchBankAccount(t *testing.T) {
 				}).
 				Expect()
 
-			response.Status(http.StatusOK)
-			response.JSON().Path("$.name").String().IsEqual(bank.Name)
-			response.JSON().Path("$.currency").String().IsEqual(bank.Currency)
-			response.JSON().Path("$.mask").String().IsEqual(*bank.Mask)
-			response.JSON().Path("$.availableBalance").Number().IsEqual(-100)
-			response.JSON().Path("$.currentBalance").Number().IsEqual(bank.CurrentBalance)
-			response.JSON().Path("$.status").String().IsEqual(string(bank.Status))
-			response.JSON().Path("$.accountType").String().IsEqual(string(bank.AccountType))
-			response.JSON().Path("$.accountSubType").String().IsEqual(string(bank.AccountSubType))
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.availableBalance").String().IsEqual("key not expected")
 		}
+	})
+
+	t.Run("lunch flow bank account can only patch the name", func(t *testing.T) {
+		// A lunch flow link is also a non-manual link, so it routes through the
+		// same restrictive patch schema as Plaid. This guards against the isManual
+		// check ever accidentally treating a lunch flow account as manual, which
+		// would let a client change balances on an account that is synced
+		// externally.
+		app, e := NewTestApplication(t)
+		var token string
+		var bank BankAccount
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveALunchFlowBankAccount(t, app.Clock, &link)
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		{ // The name can be changed.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"name": "My New Name",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.name").String().IsEqual("My New Name")
+		}
+
+		{ // But a balance is not part of the non-manual schema.
+			response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"availableBalance": -100,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("Invalid request")
+			response.JSON().Path("$.problems.availableBalance").String().IsEqual("key not expected")
+		}
+	})
+
+	t.Run("invalid bank account Id", func(t *testing.T) {
+		// A value that is not even shaped like a bank account Id should be rejected
+		// before we hit the repository at all.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.PATCH("/api/bank_accounts/{bankAccountId}").
+			WithPath("bankAccountId", "potato").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name": "My New Name",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid bank account Id")
 	})
 
 	t.Run("cant patch someone elses bank account", func(t *testing.T) {

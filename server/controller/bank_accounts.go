@@ -190,34 +190,46 @@ func (c *Controller) patchBankAccount(ctx echo.Context) error {
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	existingBankAccount, err := repo.GetBankAccount(c.getContext(ctx), bankAccountId)
+
+	isManual, err := repo.GetLinkIsManualByBankAccountId(
+		c.getContext(ctx),
+		bankAccountId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to determine if account is manual")
+	}
+
+	existingBankAccount, err := repo.GetBankAccount(
+		c.getContext(ctx),
+		bankAccountId,
+	)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve bank account")
 	}
 
-	switch err := existingBankAccount.UnmarshalRequest(
-		c.getContext(ctx),
-		ctx.Request().Body,
-		existingBankAccount.UpdateValidator()...,
-	).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case nil:
-	default:
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse patch request")
+	schema := schemas.PatchBankAccount
+	if isManual {
+		schema = schemas.PatchManualBankAccount
+	}
+
+	bankAccount, err := parse(
+		c,
+		ctx,
+		existingBankAccount,
+		schema,
+	)
+	if err != nil {
+		return err
 	}
 
 	if err = repo.UpdateBankAccount(
 		c.getContext(ctx),
-		existingBankAccount,
+		bankAccount,
 	); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update bank account")
 	}
 
-	return ctx.JSON(http.StatusOK, *existingBankAccount)
+	return ctx.JSON(http.StatusOK, bankAccount)
 }
 
 func (c *Controller) putBankAccount(ctx echo.Context) error {

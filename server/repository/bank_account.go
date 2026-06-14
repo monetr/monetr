@@ -169,9 +169,14 @@ func (r *repositoryBase) UpdateBankAccount(
 	bankAccount.AccountId = r.AccountId()
 	bankAccount.UpdatedAt = r.clock.Now()
 
+	// NOTE We do a full update here instead of UpdateNotZero on purpose. Every
+	// caller of UpdateBankAccount loads the complete bank account first and then
+	// mutates it, so writing every column back is safe. UpdateNotZero would skip
+	// zero/nil fields which means we could never persist an intentional zero (a
+	// balance that nets to zero) or clear a nullable field like the mask.
 	_, err := r.txn.ModelContext(span.Context(), bankAccount).
 		WherePK().
-		UpdateNotZero(bankAccount)
+		Update(bankAccount)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to update bank account")

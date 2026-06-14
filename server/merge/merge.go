@@ -106,11 +106,26 @@ func (m *mergeContext) merge() error {
 
 		srcValue := reflect.ValueOf(value)
 
-		if m.options&SkipZeroValues > 0 && srcValue.IsZero() {
+		// A nil source value means the caller sent an explicit JSON null for this
+		// field. We have to deal with it before the zero value check below because
+		// IsZero panics on an invalid value. When we are skipping zero values a null
+		// is just another zero so we leave the destination alone. Otherwise we mirror
+		// how encoding/json behaves. A null clears a nullable destination (a pointer,
+		// map, slice, or interface) by setting it back to nil, but it has no effect on
+		// a non-nullable destination like an int or a string. This is what lets a
+		// client actually unset a nullable field such as a bank account mask, while
+		// still making it impossible to accidentally wipe a field that cannot be null.
+		if srcValue.Kind() == reflect.Invalid {
+			if m.options&SkipZeroValues == 0 && ok {
+				switch dstField.Kind() {
+				case reflect.Pointer, reflect.Map, reflect.Slice, reflect.Interface:
+					dstField.Set(reflect.Zero(dstField.Type()))
+				}
+			}
 			continue
 		}
 
-		if srcValue.Kind() == reflect.Invalid {
+		if m.options&SkipZeroValues > 0 && srcValue.IsZero() {
 			continue
 		}
 

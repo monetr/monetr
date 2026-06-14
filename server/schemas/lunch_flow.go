@@ -24,7 +24,7 @@ var (
 	// PostLunchFlowLink is intended to be used alongside
 	// [PostLunchFlowLinkRequest] in order to parse a non model request body.
 	PostLunchFlowLink = validation.Map(
-		Name(Require),
+		NameOld(Require),
 		validation.Key(
 			"lunchFlowURL",
 			validation.Required.Error("Lunch Flow API URL is required to setup a Lunch Flow link"),
