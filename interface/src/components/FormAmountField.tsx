@@ -49,7 +49,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
   const formikContext = useFormikContext<Record<string, any>>();
   const getFormikError = (): string | undefined => {
     if (!props?.name || !formikContext?.touched[props.name]) {
-      return undefined;
+      return;
     }
 
     // These renderers are keyed by a flat field name, so the formik error for that field is a plain string.
@@ -61,8 +61,8 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
     ...MAmountFieldPropsDefaults,
     currency: localeInfo?.currency ?? 'USD',
     ...props,
-    disabled: props?.disabled || formikContext?.isSubmitting,
-    error: props?.error || getFormikError(),
+    disabled: Boolean(props?.disabled) || formikContext?.isSubmitting,
+    error: props?.error ?? getFormikError(),
   };
 
   // localeInfo comes from a query so it can be undefined before it has loaded. Fall back to sensible defaults so the
@@ -72,7 +72,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
   const currencyInfo = intlNumberFormat(locale, currency);
 
   const { labelDecorator, ...otherProps } = props;
-  const LabelDecorator = labelDecorator || (() => null);
+  const LabelDecorator = labelDecorator ?? (() => null);
 
   // If we are working with a date picker, then take the current value and transform it for the actual input.
   const value = props.name ? formikContext?.values[props.name] : undefined;

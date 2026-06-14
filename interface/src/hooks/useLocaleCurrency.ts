@@ -5,6 +5,7 @@ import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import { useCurrentLocale } from '@monetr/interface/hooks/useCurrentLocale';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/useSelectedBankAccount';
 import { type AmountType, amountToFriendly, formatAmount, friendlyToAmount } from '@monetr/interface/util/amounts';
+import { fallback } from '@monetr/interface/util/fallback';
 
 enum CurrencySource {
   UserDefault,
@@ -33,11 +34,8 @@ export default function useLocaleCurrency(forceCurrency?: string): UseQueryResul
   const bankAccount = useSelectedBankAccount();
   const locale = useCurrentLocale();
   const currency = useMemo(() => {
-    // Return the first _defined_ currency.
-    return (
-      [forceCurrency, bankAccount?.data?.currency, me?.defaultCurrency, DefaultCurrency].find(value => !!value) ??
-      DefaultCurrency
-    );
+    // Return the first defined currency, DefaultCurrency is always last so there is always something to fall back to.
+    return fallback(forceCurrency, bankAccount?.data?.currency, me?.defaultCurrency, DefaultCurrency);
   }, [forceCurrency, me, bankAccount]);
 
   const friendlyToAmountCallback = useCallback(

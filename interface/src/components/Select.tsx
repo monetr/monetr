@@ -72,7 +72,7 @@ export default function Select<V>(props: SelectProps<V>): React.JSX.Element {
 }
 
 export function SelectLoading<V>(props: SelectPropsLoading<V>): React.JSX.Element {
-  const LabelDecorator = props.labelDecorator || (() => null);
+  const LabelDecorator = props.labelDecorator ?? (() => null);
   return (
     <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>
       <Label disabled={props.disabled} htmlFor={props.id} label={props.label} required={props.required}>
@@ -166,7 +166,7 @@ export function SelectCombobox<V>(props: SelectProps<V>): React.JSX.Element {
     return {};
   }, [isOpen]);
 
-  const LabelDecorator = props.labelDecorator || (() => null);
+  const LabelDecorator = props.labelDecorator ?? (() => null);
 
   return (
     <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>
@@ -238,7 +238,7 @@ export function SelectDrawer<V>(props: SelectProps<V>): React.JSX.Element {
     [props],
   );
 
-  const LabelDecorator = props.labelDecorator || (() => null);
+  const LabelDecorator = props.labelDecorator ?? (() => null);
 
   return (
     <div className={mergeClasses(errorTextStyles.errorTextPadding, props.className)}>

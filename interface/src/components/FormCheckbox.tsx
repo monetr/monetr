@@ -29,8 +29,8 @@ export default function FormCheckbox(props: FormCheckboxProps): React.JSX.Elemen
 
   props = {
     ...props,
-    disabled: props?.disabled || formikContext?.isSubmitting,
-    checked: props?.checked || formikContext.values[props.name],
+    disabled: Boolean(props?.disabled) || formikContext?.isSubmitting,
+    checked: Boolean(props?.checked) || formikContext.values[props.name],
   };
 
   return (

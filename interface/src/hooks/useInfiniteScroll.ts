@@ -61,7 +61,7 @@ export function useInfiniteScroll({
 
   useEffect(() => {
     if (!shouldLoadMore) {
-      return undefined;
+      return;
     }
 
     const timer = setTimeout(() => {

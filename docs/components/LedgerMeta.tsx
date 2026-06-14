@@ -22,7 +22,7 @@ function readingTimeLabel(data: unknown): string | undefined {
     return `${Math.max(1, Math.ceil(data.minutes))} min`;
   }
 
-  return undefined;
+  return;
 }
 
 // formatLedgerDate turns a git commit timestamp (milliseconds) into our

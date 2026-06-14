@@ -42,7 +42,7 @@ function ViewManager<T extends string, Metadata, Form>({
   viewComponents,
   initialView,
   initialMetadata = {} as Metadata,
-  layout = undefined,
+  layout,
 }: ViewManagerProps<T, Metadata>) {
   const [currentView, setCurrentView] = useState<T>(initialView);
   const [formData, setFormData] = useState<Form>({} as Form);

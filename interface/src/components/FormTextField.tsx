@@ -33,7 +33,7 @@ export default function FormTextField(props: FormTextFieldProps = FormTextFieldP
   const formikContext = useFormikContext<Record<string, any>>();
   const getFormikError = (): string | undefined => {
     if (!props?.name || !formikContext?.touched[props.name]) {
-      return undefined;
+      return;
     }
 
     // These renderers are keyed by a flat field name, so the formik error for that field is a plain string.
@@ -44,12 +44,12 @@ export default function FormTextField(props: FormTextFieldProps = FormTextFieldP
     id,
     ...FormTextFieldPropsDefaults,
     ...props,
-    disabled: props?.disabled || formikContext?.isSubmitting,
-    error: props?.error || getFormikError(),
+    disabled: Boolean(props?.disabled) || formikContext?.isSubmitting,
+    error: props?.error ?? getFormikError(),
   };
 
   const { labelDecorator, ...otherProps } = props;
-  const LabelDecorator = labelDecorator || (() => null);
+  const LabelDecorator = labelDecorator ?? (() => null);
 
   // If we are working with a date picker, then take the current value and transform it for the actual input.
   const value = props.name ? formikContext?.values[props.name] : undefined;

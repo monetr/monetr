@@ -120,7 +120,9 @@
         "noArguments": "error",
         "noEmptyTypeParameters": "error",
         "noUselessCatch": "error",
-        "noUselessConstructor": "error"
+        "noUselessConstructor": "error",
+        "noUselessUndefined": "error",
+        "noUselessUndefinedInitialization": "error"
       },
       "suspicious": {
         "noShadowRestrictedNames": "error",
@@ -149,7 +151,9 @@
           }
         }
       },
-      "nursery": {}
+      "nursery": {
+        "useNullishCoalescing": "error"
+      }
     },
     "includes": [
       "interface/**",

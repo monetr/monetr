@@ -42,7 +42,7 @@ export default function SelectCurrency(props: SelectCurrencyProps): React.JSX.El
   return (
     <Select
       className={props.className}
-      disabled={props.disabled || formikContext.isSubmitting}
+      disabled={Boolean(props.disabled) || formikContext.isSubmitting}
       isLoading={currenciesLoading || formikContext.isSubmitting}
       label='Currency'
       name={props.name}

@@ -147,7 +147,7 @@ interface OnboardingTileProps {
 }
 
 function OnboardingTile(props: OnboardingTileProps): React.JSX.Element | null {
-  const disabledState = props.comingSoon || props.disabled;
+  const disabledState = Boolean(props.comingSoon) || props.disabled;
   const tileState = disabledState ? 'disabled' : props.active ? 'active' : 'inactive';
 
   function handleClick() {

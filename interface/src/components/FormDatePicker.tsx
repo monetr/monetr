@@ -46,7 +46,7 @@ export default function FormDatePicker(props: FormDatePickerProps): React.JSX.El
 
   const getFormikError = (): string | undefined => {
     if (!props?.name || !formikContext?.touched[props.name]) {
-      return undefined;
+      return;
     }
 
     // This renderer is keyed by a flat field name, so the formik error for that field is a plain string.
@@ -54,7 +54,7 @@ export default function FormDatePicker(props: FormDatePickerProps): React.JSX.El
   };
   props = {
     disabled: formikContext?.isSubmitting,
-    error: props?.error || getFormikError(),
+    error: props?.error ?? getFormikError(),
     ...props,
   };
 
@@ -134,7 +134,7 @@ export default function FormDatePicker(props: FormDatePickerProps): React.JSX.El
     [formikContext, handleClose, props.name, inTimezone],
   );
 
-  const LabelDecorator = props.labelDecorator || (() => null);
+  const LabelDecorator = props.labelDecorator ?? (() => null);
 
   if (localeIsLoading) {
     return (

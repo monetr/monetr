@@ -10,6 +10,6 @@ export function useSelectedBankAccountId(): ID<BankAccount> | undefined {
     if (params?.bankId) {
       return ID.from<BankAccount, string>(params.bankId);
     }
-    return undefined;
+    return;
   }, [params]);
 }
