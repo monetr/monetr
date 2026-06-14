@@ -6,7 +6,9 @@ import (
 
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
+	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_lunch_flow"
+	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
@@ -554,6 +556,168 @@ func TestGetLunchFlowLinks(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 		response := e.GET("/api/lunch_flow/link").
 			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("Lunch Flow is not enabled on this server")
+	})
+}
+
+func TestPostLunchFlowLinkSync(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		// An active Lunch Flow link that has never been manually synced should kick
+		// off a sync and come back accepted. We dont have any bank accounts on it
+		// so nothing actually gets enqueued, but the endpoint still accepts the
+		// request.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/lunch_flow/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": link.LinkId,
+			}).
+			Expect()
+
+		response.Status(http.StatusAccepted)
+		response.Body().IsEmpty()
+	})
+
+	t.Run("missing link Id", func(t *testing.T) {
+		// The endpoint used to just bind the body and run with a zero value link
+		// Id, now it validates that a link Id was actually provided.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.linkId").String().IsEqual("required key is missing")
+	})
+
+	t.Run("link Id is not a valid Id", func(t *testing.T) {
+		// A link Id that is present but does not look like one of our IDs should be
+		// rejected by the ValidID rule before we ever go to the database.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": "potato",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.linkId").String().IsEqual("id does not match format link_...")
+	})
+
+	t.Run("link does not exist", func(t *testing.T) {
+		// A well formed link Id that just is not in the database should come back
+		// as a not found rather than blowing up.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": "link_bogusbogusbogusbogusbo",
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().IsEqual("failed to retrieve link: record does not exist")
+	})
+
+	t.Run("cannot sync a non-Lunch Flow link", func(t *testing.T) {
+		// Manual sync only makes sense for Lunch Flow links. Pointing it at a
+		// manual link should be rejected.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/lunch_flow/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": link.LinkId,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("cannot manually sync a non-Lunch Flow link")
+	})
+
+	t.Run("deactivated link will not sync", func(t *testing.T) {
+		// A link that the user has deactivated should not be syncable. We flip the
+		// status directly since theres no API to deactivate a link.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		link.LunchFlowLink.Status = LunchFlowLinkStatusDeactivated
+		testutils.MustDBUpdate(t, link.LunchFlowLink)
+
+		response := e.POST("/api/lunch_flow/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": link.LinkId,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Link is not active and will not be synced")
+	})
+
+	t.Run("cannot sync too recently", func(t *testing.T) {
+		// The first sync sets the last manual sync timestamp, a second one right
+		// after it should be rejected because we only allow a manual sync every 30
+		// minutes. The mock clock does not advance between the two calls so the
+		// second is always inside that window.
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveALunchFlowLink(t, app.Clock, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		{ // The first sync should be accepted.
+			response := e.POST("/api/lunch_flow/link/sync").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId": link.LinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusAccepted)
+		}
+
+		{ // The second sync should be rejected because it is too soon.
+			response := e.POST("/api/lunch_flow/link/sync").
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]any{
+					"linkId": link.LinkId,
+				}).
+				Expect()
+
+			response.Status(http.StatusTooEarly)
+			response.JSON().Path("$.error").String().IsEqual("Link has been manually synced too recently")
+		}
+	})
+
+	t.Run("lunch flow is disabled", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.LunchFlow.Enabled = false
+		_, e := NewTestApplicationWithConfig(t, config)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link/sync").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"linkId": "link_bogusbogusbogusbogusbo",
+			}).
 			Expect()
 
 		response.Status(http.StatusNotFound)

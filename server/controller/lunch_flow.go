@@ -257,11 +257,14 @@ func (c *Controller) getLunchFlowLinkBankAccounts(ctx echo.Context) error {
 }
 
 func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
-	var request struct {
-		LinkId ID[Link] `json:"linkId"`
-	}
-	if err := ctx.Bind(&request); err != nil {
-		return c.invalidJson(ctx)
+	request, err := parse(
+		c,
+		ctx,
+		&schemas.PostLunchFlowLinkSyncRequest{},
+		schemas.PostLunchFlowLinkSync,
+	)
+	if err != nil {
+		return err
 	}
 
 	log := c.getLog(ctx).With("linkId", request.LinkId)
@@ -278,7 +281,11 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 
 	switch link.LunchFlowLink.Status {
 	case LunchFlowLinkStatusActive, LunchFlowLinkStatusError:
-		log.With("status", link.LunchFlowLink.Status).DebugContext(c.getContext(ctx), "link is not deactivated, triggering manual sync")
+		log.DebugContext(
+			c.getContext(ctx),
+			"link is not deactivated, triggering manual sync",
+			"status", link.LunchFlowLink.Status,
+		)
 	case LunchFlowLinkStatusDeactivated:
 		return c.badRequest(ctx, "Link is not active and will not be synced")
 	}
@@ -319,7 +326,12 @@ func (c *Controller) postLunchFlowLinkSync(ctx echo.Context) error {
 				LinkId:        bankAccount.LinkId,
 			},
 		); err != nil {
-			log.WarnContext(c.getContext(ctx), "failed to enqueue Lunch Flow sync", "bankAccountId", bankAccount.BankAccountId, "err", err)
+			log.WarnContext(
+				c.getContext(ctx),
+				"failed to enqueue Lunch Flow sync",
+				"bankAccountId", bankAccount.BankAccountId,
+				"err", err,
+			)
 		}
 	}
 

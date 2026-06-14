@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
@@ -13,6 +14,10 @@ type PostLunchFlowLinkRequest struct {
 	Name         string `json:"name"`
 	LunchFlowURL string `json:"lunchFlowURL"`
 	APIKey       string `json:"apiKey"`
+}
+
+type PostLunchFlowLinkSyncRequest struct {
+	LinkId models.ID[models.Link] `json:"linkId"`
 }
 
 var (
@@ -32,6 +37,14 @@ var (
 			validation.IsString,
 			validation.Length(1, 100).Error("Lunch Flow API Key must be between 1 and 100 characters"),
 			is.UTFLetterNumeric,
+		).Required(validators.Require),
+	)
+
+	PostLunchFlowLinkSync = validation.Map(
+		validation.Key(
+			"linkId",
+			validation.Required,
+			ValidID[models.Link](),
 		).Required(validators.Require),
 	)
 )
