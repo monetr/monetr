@@ -39,6 +39,9 @@ func Description() *validation.KeyRules[string] {
 	).Required(Optional)
 }
 
+// Mask is a function
+//
+// Deprecated: Use [schemas.Mask] instead.
 func Mask() *validation.KeyRules[string] {
 	return validation.Key(
 		"mask",

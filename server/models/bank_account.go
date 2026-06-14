@@ -154,68 +154,6 @@ func (o *BankAccount) BeforeInsert(ctx context.Context) (context.Context, error)
 	return ctx, nil
 }
 
-// CreateValidators returns an array of validators that can be passed to the
-// BankAccount UnmarshalRequest function. Specifically for requests to create a
-// bank account object.
-func (BankAccount) CreateValidators() []*validation.KeyRules[string] {
-	return []*validation.KeyRules[string]{
-		validators.Mask(),
-		validators.Name(validators.Require),
-		validation.Key(
-			"originalName",
-			validation.Length(1, 300).Error("Original name must be between 1 and 300 characters"),
-		).Required(validators.Optional),
-		validation.Key(
-			"linkId",
-			validation.Required.Error("Link ID must be provided"),
-			ValidID[Link]().Error("Link ID must be valid"),
-		),
-		validation.Key(
-			"lunchFlowBankAccountId",
-			ValidID[LunchFlowBankAccount]().Error("Lunch Flow Bank Account ID must be valid if provided"),
-		).Required(validators.Optional),
-		validators.CurrencyCode(validators.Optional),
-		validators.LimitBalance("limitBalance"),
-		validators.Balance("currentBalance"),
-		validators.Balance("availableBalance"),
-		validation.Key(
-			"status",
-			validation.In(
-				string(BankAccountStatusActive),
-				string(BankAccountStatusInactive),
-				string(BankAccountStatusUnknown),
-			).Error("Invalid bank account status"),
-		).Required(validators.Optional),
-		validation.Key(
-			"accountType",
-			validation.In(
-				string(DepositoryBankAccountType),
-				string(CreditBankAccountType),
-				string(LoanBankAccountType),
-				string(InvestmentBankAccountType),
-				string(OtherBankAccountType),
-			).Error("Invalid bank account type"),
-		).Required(validators.Optional),
-		validation.Key(
-			"accountSubType",
-			validation.In(
-				string(CheckingBankAccountSubType),
-				string(SavingsBankAccountSubType),
-				string(HSABankAccountSubType),
-				string(CDBankAccountSubType),
-				string(MoneyMarketBankAccountSubType),
-				string(PayPalBankAccountSubType),
-				string(PrepaidBankAccountSubType),
-				string(CashManagementBankAccountSubType),
-				string(EBTBankAccountSubType),
-				string(CreditCardBankAccountSubType),
-				string(AutoBankAccountSubType),
-				string(OtherBankAccountSubType),
-			).Error("Invalid bank account sub type"),
-		).Required(validators.Optional),
-	}
-}
-
 // UpdateValidator returns an array of validation rules that can be used to
 // validate requests to PATCH endpoints.
 func (o *BankAccount) UpdateValidator() []*validation.KeyRules[string] {

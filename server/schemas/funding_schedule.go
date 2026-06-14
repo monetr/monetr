@@ -10,7 +10,11 @@ import (
 
 var (
 	CreateFundingSchedule = validation.Map(
-		NameOld(Require),
+		validation.Key(
+			"name",
+			validation.Required.Error("Name is required"),
+			Name(),
+		).Required(Require),
 		validation.Key(
 			"description",
 			validation.IsString,
@@ -52,7 +56,11 @@ var (
 	)
 
 	PatchFundingSchedule = validation.Map(
-		NameOld(Optional),
+		validation.Key(
+			"name",
+			validation.Required.Error("Name is required"),
+			Name(),
+		).Required(Optional),
 		validation.Key(
 			"description",
 			is.PrintableUnicode,
@@ -61,6 +69,7 @@ var (
 		).Required(validators.Optional),
 		validation.Key(
 			"ruleset",
+			validation.Required.Error("Ruleset cannot be blank when specified"),
 			validation.IsString,
 			Ruleset(),
 		).Required(validators.Optional),
@@ -81,6 +90,7 @@ var (
 		).Required(validators.Optional),
 		validation.Key(
 			"nextRecurrence",
+			validation.Required.Error("Next recurrence cannot be blank when specified"),
 			validation.IsString,
 			validation.Date(time.RFC3339).Error("Next recurrence must be a valid date"),
 		).Required(validators.Optional),
