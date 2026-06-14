@@ -1,22 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import type BankAccount from '@monetr/interface/models/BankAccount';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import type { ID } from '@monetr/interface/models/ID';
 import Spending from '@monetr/interface/models/Spending';
+import type { Writable } from '@monetr/interface/util/readonly';
 import request from '@monetr/interface/util/request';
 
-export type PatchFundingScheduleRequest = Pick<FundingSchedule, 'fundingScheduleId' | 'bankAccountId'> &
-  Partial<
-    Pick<
-      FundingSchedule,
-      | 'name'
-      | 'description'
-      | 'ruleset'
-      | 'nextRecurrence'
-      | 'excludeWeekends'
-      | 'estimatedDeposit'
-      | 'autoCreateTransaction'
-    >
-  >;
+export type PatchFundingScheduleRequest = Partial<Writable<FundingSchedule>> & {
+  fundingScheduleId: ID<FundingSchedule>;
+  bankAccountId: ID<BankAccount>;
+};
 
 export interface PatchFundingScheduleResponse {
   fundingSchedule: FundingSchedule;
@@ -34,6 +28,9 @@ export function usePatchFundingSchedule(): (_: PatchFundingScheduleRequest) => P
     return request<PatchFundingScheduleResponse>({
       method: 'PATCH',
       url: `/api/bank_accounts/${bankAccountId}/funding_schedules/${fundingScheduleId}`,
+      // We only want to send the fields the caller actually specified. We dont have to filter anything ourselves though,
+      // the request wrapper runs this through JSON.stringify which already drops any keys that are undefined. A null
+      // still gets sent because thats the caller saying they want to clear the field out.
       data: patch,
     }).then(result => ({
       fundingSchedule: new FundingSchedule(result.data.fundingSchedule),

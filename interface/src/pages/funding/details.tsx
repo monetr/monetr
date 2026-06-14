@@ -65,8 +65,8 @@ export default function FundingDetails(): React.JSX.Element | null {
     );
   }
 
-  // Treat the locale still loading the same as the funding schedule still loading, otherwise we fall all the way through
-  // to the null return below and flash a blank page while the currency formatting catches up.
+  // Treat the locale still loading the same as the funding schedule still loading, otherwise we fall all the way
+  // through to the null return below and flash a blank page while the currency formatting catches up.
   if (isLoading || !locale) {
     return (
       <div className={styles.centerState}>
@@ -119,8 +119,8 @@ export default function FundingDetails(): React.JSX.Element | null {
       ruleset: values.ruleset,
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: locale.friendlyToAmount(values.estimatedDeposit ?? 0),
-      // Auto create transaction requires a manual link and a non-zero estimated
-      // deposit; force it off otherwise so the API will not reject the update.
+      // Auto create transaction requires a manual link and a non-zero estimated deposit; force it off otherwise so the
+      // API will not reject the update.
       autoCreateTransaction: isManual && (values.estimatedDeposit ?? 0) > 0 && values.autoCreateTransaction,
     })
       .then(
