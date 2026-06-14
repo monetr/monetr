@@ -16,6 +16,8 @@ var (
 	Optional OptionalOrRequire = false
 )
 
+// Name is a shorthand function.
+// Deprecated use [schemas.Name] instead!
 func Name(required OptionalOrRequire) *validation.KeyRules[string] {
 	return validation.Key(
 		"name",

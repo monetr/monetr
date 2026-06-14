@@ -7,6 +7,7 @@ import (
 
 	"github.com/monetr/monetr/server/merge"
 	"github.com/monetr/validation"
+	"github.com/monetr/validation/is"
 	"github.com/pkg/errors"
 )
 
@@ -42,4 +43,21 @@ func Parse[T any](
 	}
 
 	return &output, nil
+}
+
+type OptionalOrRequire = bool
+
+var (
+	Require  OptionalOrRequire = true
+	Optional OptionalOrRequire = false
+)
+
+func Name(required OptionalOrRequire) *validation.KeyRules[string] {
+	return validation.Key(
+		"name",
+		validation.Required.When(required).Error("Name is required"),
+		validation.IsString,
+		is.PrintableUnicode,
+		validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
+	).Required(required)
 }

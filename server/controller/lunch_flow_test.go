@@ -100,28 +100,62 @@ func TestPostLunchFlowLink(t *testing.T) {
 		response.JSON().Path("$.problems.lunchFlowURL").String().IsEqual("Lunch Flow API URL must be a full valid URL")
 	})
 
-	t.Run("URL not in allowlist", func(t *testing.T) {
-		for _, disallowed := range []string{
-			"http://169.254.169.254/latest/meta-data",
-			"http://127.0.0.1",
-			"http://localhost",
-			"https://attacker.example.com/api/v1",
-		} {
-			_, e := NewTestApplication(t)
-			token := GivenIHaveToken(t, e)
-			response := e.POST("/api/lunch_flow/link").
-				WithCookie(TestCookieName, token).
-				WithJSON(map[string]any{
-					"name":         "Not Allowed",
-					"lunchFlowURL": disallowed,
-					"apiKey":       "foobar",
-				}).
-				Expect()
+	t.Run("IP address is not in the allowlist", func(t *testing.T) {
+		// A link local IP like the cloud metadata endpoint is exactly the kind of
+		// SSRF target the allowlist is supposed to keep out. The allowlist check
+		// happens in the handler now so it comes back as a plain bad request
+		// instead of a per field problem.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":         "Not Allowed",
+				"lunchFlowURL": "http://169.254.169.254/latest/meta-data",
+				"apiKey":       "foobar",
+			}).
+			Expect()
 
-			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("Invalid request")
-			response.JSON().Path("$.problems.lunchFlowURL").String().IsEqual("Lunch Flow API URL is not valid or is not in the configured allowlist")
-		}
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid Lunch Flow API URL provided")
+		response.JSON().Object().NotContainsKey("problems")
+	})
+
+	t.Run("localhost is not in the allowlist", func(t *testing.T) {
+		// Pointing the API URL back at ourselves should never be allowed either.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":         "Not Allowed",
+				"lunchFlowURL": "http://localhost",
+				"apiKey":       "foobar",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid Lunch Flow API URL provided")
+		response.JSON().Object().NotContainsKey("problems")
+	})
+
+	t.Run("attacker controlled URL is not in the allowlist", func(t *testing.T) {
+		// And a perfectly well formed external URL that just is not one we trust
+		// should be rejected too.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":         "Not Allowed",
+				"lunchFlowURL": "https://attacker.example.com/api/v1",
+				"apiKey":       "foobar",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid Lunch Flow API URL provided")
+		response.JSON().Object().NotContainsKey("problems")
 	})
 
 	t.Run("allowlist with multiple entries accepts any", func(t *testing.T) {
@@ -159,6 +193,84 @@ func TestPostLunchFlowLink(t *testing.T) {
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().IsEqual("Invalid request")
 		response.JSON().Path("$.problems.apiKey").String().IsEqual("Lunch Flow API Key must be provided to setup a Lunch Flow link")
+	})
+
+	t.Run("empty name", func(t *testing.T) {
+		// The name validation now comes from the shared schemas.Name helper, make
+		// sure it is actually wired up. An empty string trips the Required rule on
+		// that helper which has its own custom message.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":         "",
+				"lunchFlowURL": "https://www.lunchflow.app/api/v1",
+				"apiKey":       "foobar",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.name").String().IsEqual("Name is required")
+	})
+
+	t.Run("api key with invalid characters", func(t *testing.T) {
+		// The api key has to be letters and numbers only, anything with spaces or
+		// symbols in it should be rejected by the is.UTFLetterNumeric rule.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":         "US Bank",
+				"lunchFlowURL": "https://www.lunchflow.app/api/v1",
+				"apiKey":       "not a valid key!",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.apiKey").String().IsEqual("must contain unicode letters and numbers only")
+	})
+
+	t.Run("lunch flow URL is not a string", func(t *testing.T) {
+		// The schema now asserts the URL is actually a string before it tries to
+		// parse it. A caller sending a number should trip the IsString rule rather
+		// than blow up somewhere downstream.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":         "US Bank",
+				"lunchFlowURL": 1234,
+				"apiKey":       "foobar",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.lunchFlowURL").String().IsEqual("must be a string")
+	})
+
+	t.Run("api key is not a string", func(t *testing.T) {
+		// Same idea as the URL, the api key has to be a string and the IsString
+		// rule should catch a non string value.
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		response := e.POST("/api/lunch_flow/link").
+			WithCookie(TestCookieName, token).
+			WithJSON(map[string]any{
+				"name":         "US Bank",
+				"lunchFlowURL": "https://www.lunchflow.app/api/v1",
+				"apiKey":       1234,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("Invalid request")
+		response.JSON().Path("$.problems.apiKey").String().IsEqual("must be a string")
 	})
 }
 

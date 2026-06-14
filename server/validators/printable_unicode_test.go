@@ -110,7 +110,7 @@ func TestPrintableUnicode(t *testing.T) {
 			// on their own. The 'é' here is actually two runes: 'e' followed by
 			// U+0301 combining acute.
 			name:    "combining diacritic",
-			input:   "é",
+			input:   "e\u0301",
 			wantErr: "",
 		},
 		{
@@ -164,7 +164,7 @@ func TestPrintableUnicode(t *testing.T) {
 			// The "C1" range from U+0080 to U+009F. ASCII never gets here but a
 			// botched encoding conversion can, and we don't want it.
 			name:    "c1 control",
-			input:   "POSTED",
+			input:   "POS\u0085TED",
 			wantErr: wantErr,
 		},
 
@@ -174,22 +174,22 @@ func TestPrintableUnicode(t *testing.T) {
 			// The classic copy/paste bug. NBSP looks identical to a regular space but
 			// compares differently, which causes all kinds of fun downstream.
 			name:    "no-break space",
-			input:   "hello world",
+			input:   "hello\u00A0world",
 			wantErr: wantErr,
 		},
 		{
 			name:    "en space",
-			input:   "hello world",
+			input:   "hello\u2002world",
 			wantErr: wantErr,
 		},
 		{
 			name:    "zero-width joiner",
-			input:   "POS‍TED",
+			input:   "POS\u200DTED",
 			wantErr: wantErr,
 		},
 		{
 			name:    "zero-width non-joiner",
-			input:   "POS‌TED",
+			input:   "POS\u200CTED",
 			wantErr: wantErr,
 		},
 		{
@@ -202,7 +202,7 @@ func TestPrintableUnicode(t *testing.T) {
 		},
 		{
 			name:    "line separator",
-			input:   "POS TED",
+			input:   "POS\u2028TED",
 			wantErr: wantErr,
 		},
 

@@ -3,8 +3,6 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
-	"net/url"
-	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -14,13 +12,9 @@ import (
 	"github.com/monetr/monetr/server/datasources/lunch_flow"
 	"github.com/monetr/monetr/server/datasources/lunch_flow/lunch_flow_jobs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/monetr/monetr/server/merge"
 	. "github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/validators"
-	"github.com/monetr/validation"
-	"github.com/monetr/validation/is"
-	"github.com/pkg/errors"
+	"github.com/monetr/monetr/server/schemas"
 	"golang.org/x/net/websocket"
 )
 
@@ -49,100 +43,19 @@ func (c *Controller) getLunchFlowLink(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, link)
 }
 
-type postLunchFlowLinkRequest struct {
-	Name         string `json:"name"`
-	LunchFlowURL string `json:"lunchFlowURL"`
-	APIKey       string `json:"apiKey"`
-}
-
-// parsePostLunchFlowLinkRequest will take an echo request context and the lunch
-// flow request object the caller wants the data parsed into. It will parse the
-// request body and validate it and return an error if there is one. Or it will
-// return nil and update the passed object.
-func (c *Controller) parsePostLunchFlowLinkRequest(
-	ctx echo.Context, result *postLunchFlowLinkRequest,
-) error {
-	rawData := map[string]any{}
-	decoder := json.NewDecoder(ctx.Request().Body)
-	decoder.UseNumber()
-	if err := decoder.Decode(&rawData); err != nil {
-		return c.invalidJsonError(ctx, err)
-	}
-
-	// Validate the request from the client
-	if err := validation.ValidateWithContext(
-		c.getContext(ctx),
-		&rawData,
-		validation.Map(
-			validators.Name(validators.Require),
-			validation.Key(
-				"lunchFlowURL",
-				validation.Required.Error("Lunch Flow API URL is required to setup a Lunch Flow link"),
-				validation.NewStringRule(func(input string) bool {
-					parsed, err := url.Parse(input)
-					if err != nil {
-						return false
-					}
-					// Do not allow query parameters in the URL as these will be removed
-					// when requests are made!
-					if len(parsed.Query()) > 0 {
-						return false
-					}
-
-					// Require a scheme to be specified
-					switch strings.ToLower(parsed.Scheme) {
-					case "http", "https":
-						// These are considered valid!
-					default:
-						// Any other scheme is not considered valid here!
-						return false
-					}
-
-					return true
-				}, "Lunch Flow API URL must be a full valid URL"),
-				validation.NewStringRule(
-					c.Configuration.LunchFlow.IsAllowedApiUrl,
-					"Lunch Flow API URL is not valid or is not in the configured allowlist",
-				),
-			).Required(validators.Require),
-			validation.Key(
-				"apiKey",
-				validation.Required.Error("Lunch Flow API Key must be provided to setup a Lunch Flow link"),
-				validation.Length(1, 100).Error("Lunch Flow API Key must be between 1 and 100 characters"),
-				is.UTFLetterNumeric,
-			).Required(validators.Require),
-		),
-	); err != nil {
+func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
+	request, err := parse(
+		c,
+		ctx,
+		&schemas.PostLunchFlowLinkRequest{},
+		schemas.PostLunchFlowLink,
+	)
+	if err != nil {
 		return err
 	}
 
-	// Then merge the data into our request struct!
-	if err := merge.Merge(
-		result, rawData, merge.ErrorOnUnknownField,
-	); err != nil {
-		return errors.Wrap(err, "failed to merge request data")
-	}
-
-	return nil
-}
-
-func (c *Controller) postLunchFlowLink(ctx echo.Context) error {
-	var request postLunchFlowLinkRequest
-	err := c.parsePostLunchFlowLinkRequest(
-		ctx,
-		&request,
-	)
-	switch errors.Cause(err).(type) {
-	case validation.Errors:
-		return ctx.JSON(http.StatusBadRequest, map[string]any{
-			"error":    "Invalid request",
-			"problems": err,
-		})
-	case *json.SyntaxError:
-		return c.invalidJsonError(ctx, err)
-	case nil:
-	default:
-		return c.badRequestError(ctx, err, "failed to parse post request")
+	if !c.Configuration.LunchFlow.IsAllowedApiUrl(request.LunchFlowURL) {
+		return c.badRequest(ctx, "Invalid Lunch Flow API URL provided")
 	}
 
 	secret := repository.SecretData{

@@ -3,7 +3,6 @@ package schemas
 import (
 	"time"
 
-	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/validators"
 	"github.com/monetr/validation"
 	"github.com/monetr/validation/is"
@@ -11,13 +10,7 @@ import (
 
 var (
 	CreateFundingSchedule = validation.Map(
-		validation.Key(
-			"name",
-			validation.Required.Error("Name is required"),
-			validation.IsString,
-			is.PrintableUnicode,
-			validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
-		).Required(validators.Require),
+		Name(Require),
 		validation.Key(
 			"description",
 			validation.IsString,
@@ -59,12 +52,7 @@ var (
 	)
 
 	PatchFundingSchedule = validation.Map(
-		validation.Key(
-			"name",
-			is.PrintableUnicode,
-			validation.IsString,
-			validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
-		).Required(validators.Optional),
+		Name(Optional),
 		validation.Key(
 			"description",
 			is.PrintableUnicode,
@@ -74,10 +62,7 @@ var (
 		validation.Key(
 			"ruleset",
 			validation.IsString,
-			validation.NewStringRule(func(input string) bool {
-				_, err := models.NewRuleSet(input)
-				return err == nil
-			}, "Ruleset must be valid"),
+			Ruleset(),
 		).Required(validators.Optional),
 		validation.Key(
 			"excludeWeekends",
