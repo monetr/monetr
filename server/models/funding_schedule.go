@@ -2,18 +2,12 @@ package models
 
 import (
 	"context"
-	"encoding/json"
-	"io"
 	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
-	"github.com/monetr/monetr/server/merge"
 	"github.com/monetr/monetr/server/util"
-	"github.com/monetr/monetr/server/validators"
-	"github.com/monetr/validation"
-	"github.com/pkg/errors"
 )
 
 type FundingSchedule struct {
@@ -189,72 +183,4 @@ func (o *FundingSchedule) CalculateNextOccurrence(
 	o.NextRecurrenceOriginal = originalNextFundingOccurrence
 
 	return true
-}
-
-func (FundingSchedule) UpdateValidators() []*validation.KeyRules[string] {
-	return []*validation.KeyRules[string]{
-		validators.Name(validators.Optional),
-		validators.Description(),
-		validation.Key(
-			"ruleset",
-			validation.NewStringRule(func(input string) bool {
-				_, err := NewRuleSet(input)
-				return err == nil
-			}, "Ruleset must be valid"),
-		).Required(validators.Optional),
-		validation.Key(
-			"excludeWeekends",
-			validation.In(true, false).Error("Exclude weekends must be a valid boolean"),
-		).Required(validators.Optional),
-		validation.Key(
-			"autoCreateTransaction",
-			validation.In(true, false).Error("Auto create transaction must be a valid boolean"),
-		).Required(validators.Optional),
-		validation.Key(
-			"estimatedDeposit",
-			validation.Min(float64(0)).Error("Estimated deposit cannot be less than 0"),
-		).Required(validators.Optional),
-		validation.Key(
-			"nextRecurrence",
-			validation.Date(time.RFC3339).Min(time.Now()).Error("Next recurrence must be in the future"),
-		).Required(validators.Optional),
-	}
-}
-
-// UnmarshalRequest consumes a request body and an array of validation rules in
-// order to create an object that can be persisted to the database. For updates,
-// this function should be called on the existing object that is already stored
-// in the database. The provided validators should prevent key or sensitive
-// fields from being overwritten by the client's request body. For creates, the
-// initial object can be left blank; or default values can be specified ahead of
-// calling this function in case some fields are omitted in the intial request.
-func (o *FundingSchedule) UnmarshalRequest(
-	ctx context.Context,
-	reader io.Reader,
-	validators ...*validation.KeyRules[string],
-) error {
-	rawData := map[string]any{}
-	decoder := json.NewDecoder(reader)
-	decoder.UseNumber()
-	if err := decoder.Decode(&rawData); err != nil {
-		return errors.WithStack(err)
-	}
-
-	if err := validation.ValidateWithContext(
-		ctx,
-		&rawData,
-		validation.Map(
-			validators...,
-		),
-	); err != nil {
-		return err
-	}
-
-	if err := merge.Merge(
-		o, rawData, merge.ErrorOnUnknownField,
-	); err != nil {
-		return errors.Wrap(err, "failed to merge patched data")
-	}
-
-	return nil
 }

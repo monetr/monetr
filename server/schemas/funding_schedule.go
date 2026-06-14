@@ -28,10 +28,7 @@ var (
 			"ruleset",
 			validation.Required.Error("Ruleset must be specified for funding schedules"),
 			validation.IsString,
-			validation.NewStringRule(func(input string) bool {
-				_, err := models.NewRuleSet(input)
-				return err == nil
-			}, "Ruleset must be valid"),
+			Ruleset(),
 		).Required(validators.Require),
 		validation.Key(
 			"excludeWeekends",
