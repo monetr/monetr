@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.14.3](https://github.com/monetr/monetr/compare/v1.14.2...v1.14.3) (2026-06-15)
+
+
+### Dependencies
+
+* **api:** update golang.org/x to v0.46.0 ([#3291](https://github.com/monetr/monetr/issues/3291)) ([47200ee](https://github.com/monetr/monetr/commit/47200eedab039753cad93e4f192bb1a2aa07b1d8))
+* **containers:** update golang to v1.26.4 ([#3297](https://github.com/monetr/monetr/issues/3297)) ([1aa2d45](https://github.com/monetr/monetr/commit/1aa2d456f34ac8138cb961b1770b81047c6d3f66))
+* **renovate:** update golang to v1.26.4 ([#3293](https://github.com/monetr/monetr/issues/3293)) ([277c1ed](https://github.com/monetr/monetr/commit/277c1ed7e96ca09ed5200996055ce50e016b8d78))
+* **ui:** update dependency @monetr/notify to v1.0.6 ([#3303](https://github.com/monetr/monetr/issues/3303)) ([ca115ee](https://github.com/monetr/monetr/commit/ca115eebc889efff9e0d04ab4113e9ab787c37ab))
+* **ui:** update dependency @monetr/vaul to v1.2.6 ([#3304](https://github.com/monetr/monetr/issues/3304)) ([44b032b](https://github.com/monetr/monetr/commit/44b032b779648e1ef2883cb828872851dfd5d161))
+* **ui:** update dependency date-fns to v4.4.0 ([#3285](https://github.com/monetr/monetr/issues/3285)) ([3ce14b9](https://github.com/monetr/monetr/commit/3ce14b9247cdabf2dd6eac5df665e86d9a84cdc0))
+* **ui:** update dependency downshift to v9.3.4 ([#3288](https://github.com/monetr/monetr/issues/3288)) ([513ee87](https://github.com/monetr/monetr/commit/513ee874bd04e266c9f164fbbb3faed6f73e6743))
+* **ui:** update dependency downshift to v9.3.6 ([#3300](https://github.com/monetr/monetr/issues/3300)) ([9f65d6f](https://github.com/monetr/monetr/commit/9f65d6fc2b88f05528f8b18410daf2a33442531d))
+* **ui:** update dependency hast-util-from-html to v2.0.3 ([#3310](https://github.com/monetr/monetr/issues/3310)) ([8062f0d](https://github.com/monetr/monetr/commit/8062f0dea6b66bddb975ac8a3aa7b92745fa69d4))
+* **ui:** update radix-ui-primitives monorepo ([#3308](https://github.com/monetr/monetr/issues/3308)) ([3e5f0d4](https://github.com/monetr/monetr/commit/3e5f0d4d65a94a37d9c9aff18da60025cda791a7))
+* **ui:** update react monorepo ([#3305](https://github.com/monetr/monetr/issues/3305)) ([2c3f81f](https://github.com/monetr/monetr/commit/2c3f81fce72f9cfb62f25bf6c7fde3943eefed95))
+* **ui:** update react monorepo to v18.3.30 ([#3292](https://github.com/monetr/monetr/issues/3292)) ([a08ce73](https://github.com/monetr/monetr/commit/a08ce73467c25d94208fce57489319049bdfcc6c))
+* **ui:** update react monorepo to v19.2.17 ([#3306](https://github.com/monetr/monetr/issues/3306)) ([f87571b](https://github.com/monetr/monetr/commit/f87571b895d0ce007c6a88fabed3b2a688065523))
+* **ui:** update rsbuild ([#3286](https://github.com/monetr/monetr/issues/3286)) ([eee6fa5](https://github.com/monetr/monetr/commit/eee6fa5c5c50670a44bc28887f7fbc283850e790))
+* **ui:** update rstest to v0.10.3 ([#3284](https://github.com/monetr/monetr/issues/3284)) ([a819735](https://github.com/monetr/monetr/commit/a819735c0f6e9634629717760fe14655c1f27700))
+* **ui:** update sass to v1.5.3 ([#3287](https://github.com/monetr/monetr/issues/3287)) ([015a425](https://github.com/monetr/monetr/commit/015a4251962715f683142e7db057c79a179c8e39))
+* **ui:** update shiki monorepo to v4.2.0 ([#3298](https://github.com/monetr/monetr/issues/3298)) ([e016389](https://github.com/monetr/monetr/commit/e01638929236c44c86b5fe9a52465015bbc86b1a))
+* **ui:** update tanstack-query monorepo to v5.101.0 ([#3296](https://github.com/monetr/monetr/issues/3296)) ([0074e2f](https://github.com/monetr/monetr/commit/0074e2f910625bf12384110bfce4d319d9926317))
+
+
+### Bug Fixes
+
+* **api:** Bank account schema validation at creation ([e10b248](https://github.com/monetr/monetr/commit/e10b248066b99e31a76db7cd807ece81dd598a57))
+* **api:** Don't allow blank funding shcedule names ([4510658](https://github.com/monetr/monetr/commit/4510658a1734a0b2e9ee3db448dc8826dd195bd6))
+* **api:** Fixed forgot password spam vector ([e4f0a37](https://github.com/monetr/monetr/commit/e4f0a37fffb3b408356c421a0a13883068333a01))
+* **api:** Fixing some RRules allowing invalid by rules ([3f0a70e](https://github.com/monetr/monetr/commit/3f0a70ecb9fcad327bfc1e08f4d6be5f118cac31))
+* **api:** Improving bank account API schema validation ([c7a1984](https://github.com/monetr/monetr/commit/c7a19843c30e5589020bd8c707ba88ee915b0325))
+* **api:** Improving Lunch Flow API endpoints ([1cd072c](https://github.com/monetr/monetr/commit/1cd072c700a4fe95f7a1fb219bf246d4952786d7))
+* **ui:** Handle 429 response codes for registration too ([981c086](https://github.com/monetr/monetr/commit/981c086f39c2b2d13e713ddf159856a0e2cc3ea7))
+* **ui:** Handle 429 too many requests on use login ([c806d93](https://github.com/monetr/monetr/commit/c806d93c22ef695a656b2eed08f325259adba0b3))
+
+
+### Refactor
+
+* **api:** Adding PATCH endpoint for transactions ([c80f526](https://github.com/monetr/monetr/commit/c80f5265e508581bc1abb5fb26e1f996b240caa0))
+* **api:** Deprecate the PUT funding schedules API endpoint ([68ca0cb](https://github.com/monetr/monetr/commit/68ca0cb2aa870601dea65b124c7edf8507b8df74))
+* **api:** Improving API around lunch flow links schema validation ([7f3d7b9](https://github.com/monetr/monetr/commit/7f3d7b9bf6f7dce8ba127b4a57e4ee7aff53fae8))
+* **docs:** Redesigning documentation site ([#3307](https://github.com/monetr/monetr/issues/3307)) ([25d597f](https://github.com/monetr/monetr/commit/25d597fe7b635fc583ae36493b2e3ac8a769dc9f))
+* Migrating to react 19 ([#3289](https://github.com/monetr/monetr/issues/3289)) ([5580929](https://github.com/monetr/monetr/commit/55809297b68ecdc0263f4459816be518a9aeacc6))
+* **ui:** Migrating to typescript v6 ([#3272](https://github.com/monetr/monetr/issues/3272)) ([70ae62e](https://github.com/monetr/monetr/commit/70ae62ef34914a53fff81f9a670952845f5b3b2f))
+
 ## [1.14.2](https://github.com/monetr/monetr/compare/v1.14.1...v1.14.2) (2026-06-08)
 
 
