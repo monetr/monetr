@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 
 import request from '@monetr/interface/util/request';
+import { useSnackbar } from '@monetr/notify';
 
 export interface LoginArguments {
   email: string;
@@ -11,6 +12,7 @@ export interface LoginArguments {
 }
 
 export default function useLogin(): (loginArgs: LoginArguments) => Promise<void> {
+  const { enqueueSnackbar } = useSnackbar();
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
 
@@ -48,6 +50,12 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
             }
           case 403: // Invalid login.
             throw error;
+          case 429:
+            enqueueSnackbar('Too many requests, please try again in a few minutes', {
+              variant: 'error',
+              disableWindowBlurListener: true,
+            });
+            return;
         }
 
         throw error;
