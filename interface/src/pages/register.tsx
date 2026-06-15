@@ -133,7 +133,10 @@ export default function Register(): React.JSX.Element {
         });
       })
       .catch((error: ApiError<APIError>) => {
-        const message = error.response.data.error || 'Failed to sign up.';
+        const message =
+          error?.response?.status === 429
+            ? 'Too many requests, please try again in a few minutes'
+            : error.response.data.error || 'Failed to sign up.';
         enqueueSnackbar(message, {
           variant: 'error',
           disableWindowBlurListener: true,
