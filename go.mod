@@ -43,7 +43,7 @@ require (
 	github.com/wneessen/go-mail v0.7.3
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/mock v0.6.0
-	golang.org/x/crypto v0.52.0
+	golang.org/x/crypto v0.53.0
 	golang.org/x/net v0.55.0
 	golang.org/x/sys v0.46.0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
@@ -133,7 +133,7 @@ require (
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
-	golang.org/x/text v0.37.0
+	golang.org/x/text v0.38.0
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.45.0
 	google.golang.org/protobuf v1.36.8 // indirect
