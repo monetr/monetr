@@ -1596,11 +1596,8 @@ func TestSendForgotPassword(t *testing.T) {
 				WithJSON(resetPasswordRequest).
 				Expect()
 
-			response.Status(http.StatusPreconditionRequired)
-			response.JSON().
-				Path("$.error").
-				String().
-				IsEqual("You must verify your email before you can send forgot password requests.")
+			response.Status(http.StatusOK)
+			response.Body().IsEmpty()
 		}
 	})
 

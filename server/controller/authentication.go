@@ -675,17 +675,17 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 		crumbs.Debug(c.getContext(ctx), "No password reset email will be sent, login for email not found", map[string]any{
 			"error": err.Error(),
 		})
-		// Don't return an error to the client, don't want them to know if it failed to send.
+		// Don't return an error to the client, don't want them to know if it failed
+		// to send.
 		return ctx.NoContent(http.StatusOK)
 	}
 
-	// If the login's email is not verified then return an error to the client.
+	// If the login's email is not verified then don't send an email verification
+	// message.
 	if c.Configuration.Email.ShouldVerifyEmails() && !login.GetEmailIsVerified() {
-		return c.returnError(
-			ctx,
-			http.StatusPreconditionRequired,
-			"You must verify your email before you can send forgot password requests.",
-		)
+		// TODO Would be best to also sleep for some random amount of time so that
+		// it doesn't just seem like we respond instantly.
+		return ctx.NoContent(http.StatusOK)
 	}
 
 	// Generate the password reset token.
