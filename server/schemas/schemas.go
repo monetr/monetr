@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"regexp"
+	"strings"
 
 	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/monetr/monetr/server/merge"
@@ -26,6 +27,8 @@ func Parse[T any](
 		return nil, errors.WithStack(err)
 	}
 
+	cleanStrings(rawData)
+
 	if err := validation.ValidateWithContext(
 		ctx,
 		&rawData,
@@ -45,6 +48,21 @@ func Parse[T any](
 	}
 
 	return &output, nil
+}
+
+// cleanStrings is a recursive function that takes the json body as a map and
+// trims any string fields specified on it. This is so that the validation code
+// doesnt get tripped up by any dumb whitespace provided.
+func cleanStrings(input map[string]any) {
+	for key, value := range input {
+		switch value := value.(type) {
+		case string:
+			input[key] = strings.TrimSpace(value)
+		case map[string]any:
+			cleanStrings(value)
+			// TODO Handle arrays?
+		}
+	}
 }
 
 type OptionalOrRequire = bool
@@ -69,9 +87,20 @@ func NameOld(required OptionalOrRequire) *validation.KeyRules[string] {
 
 func Name() validation.Rule {
 	return validation.AllOf(
+		// All names cannot be set to an empty string or nil, so they are soft
+		// required if the key is present!
 		validation.IsString,
 		is.PrintableUnicode,
 		validation.Length(1, 300).Error("Name must be between 1 and 300 characters"),
+		validation.Required.Error("Name is required"),
+	)
+}
+
+func TextField() validation.Rule {
+	return validation.AllOf(
+		validation.IsString,
+		is.PrintableUnicode,
+		validation.Length(1, 300).Error("Must be between 1 and 300 characters"),
 	)
 }
 
