@@ -23,10 +23,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// powZeroBits is an independent implementation of the proof of work hash used by
-// the production challenger and the frontend solver, see the wire format vectors
-// in server/powchallenge for how the three are kept in sync. It returns the
-// number of leading zero bits for a token and nonce.
+// powZeroBits is an independent implementation of the proof of work hash used
+// by the production challenger and the frontend solver, see the wire format
+// vectors in server/powchallenge for how the three are kept in sync. It returns
+// the number of leading zero bits for a token and nonce.
 func powZeroBits(token string, nonce uint64) int {
 	h := sha256.New()
 	h.Write([]byte("monetr-pow-v1:"))
@@ -93,8 +93,8 @@ func getAndSolveChallenge(t *testing.T, e *httpexpect.Expect, purpose string) (s
 	return token, solveTestChallenge(t, token, difficulty)
 }
 
-// powEnabledConfig returns a test config with proof of work turned on at the low
-// test difficulty.
+// powEnabledConfig returns a test config with proof of work turned on at the
+// low test difficulty.
 func powEnabledConfig(t *testing.T) config.Configuration {
 	conf := NewTestApplicationConfig(t)
 	conf.ProofOfWork.Enabled = true
@@ -186,7 +186,8 @@ func TestLogin(t *testing.T) {
 		conf.Server.Cookies.Name = ""
 		app, e := NewTestApplicationWithConfig(t, conf)
 
-		// We need to provision the login directly, because the token should fail otherwise.
+		// We need to provision the login directly, because the token should fail
+		// otherwise.
 		login, password := fixtures.GivenIHaveLogin(t, app.Clock)
 		fixtures.GivenIHaveAnAccount(t, app.Clock, login)
 

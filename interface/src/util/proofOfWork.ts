@@ -17,8 +17,7 @@ export interface PowSolution {
 }
 
 /**
- * fetchChallenge gets a fresh challenge for the purpose (which binds it to that
- * one endpoint).
+ * fetchChallenge gets a fresh challenge for the purpose (which binds it to that one endpoint).
  *
  * @param {PowPurpose} purpose Which endpoint the challenge is for.
  * @returns {Promise<PowChallenge>} The challenge, difficulty and ttl.
@@ -37,8 +36,8 @@ export async function fetchChallenge(purpose: PowPurpose): Promise<PowChallenge>
 }
 
 /**
- * solveChallenge solves a challenge in a web worker so the form stays responsive,
- * falling back to inline `solve` when a worker is unavailable. Honors the signal.
+ * solveChallenge solves a challenge in a web worker so the form stays responsive, falling back to inline `solve` when a
+ * worker is unavailable. Honors the signal.
  *
  * @param {PowChallenge} challenge The challenge to solve.
  * @param {AbortSignal} signal Optional cancel signal (e.g. on unmount).
@@ -53,8 +52,7 @@ export async function solveChallenge(challenge: PowChallenge, signal?: AbortSign
 }
 
 function solveNonce(challenge: string, difficulty: number, signal?: AbortSignal): Promise<number> {
-  // jsdom has no Worker, and construction can also throw (CSP, old browsers).
-  // Either way, solve inline.
+  // jsdom has no Worker, and construction can also throw (CSP, old browsers). Either way, solve inline.
   if (typeof Worker === 'undefined') {
     return solve(challenge, difficulty, signal);
   }
