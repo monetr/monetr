@@ -7,6 +7,8 @@ export type PowPurpose = 'register' | 'login' | 'forgot';
 export interface PowChallenge {
   challenge: string;
   difficulty: number;
+  // How many seconds the challenge is valid for, used to spot a stale one.
+  ttl: number;
 }
 
 export interface PowSolution {
@@ -15,11 +17,11 @@ export interface PowSolution {
 }
 
 /**
- * fetchChallenge asks the API for a fresh challenge for the given purpose. The
- * purpose binds it to one endpoint, so a `login` challenge cannot register.
+ * fetchChallenge gets a fresh challenge for the purpose (which binds it to that
+ * one endpoint).
  *
  * @param {PowPurpose} purpose Which endpoint the challenge is for.
- * @returns {Promise<PowChallenge>} The challenge token and its difficulty.
+ * @returns {Promise<PowChallenge>} The challenge, difficulty and ttl.
  */
 export async function fetchChallenge(purpose: PowPurpose): Promise<PowChallenge> {
   const response = await request<PowChallenge>({
@@ -30,18 +32,17 @@ export async function fetchChallenge(purpose: PowPurpose): Promise<PowChallenge>
   return {
     challenge: response.data.challenge,
     difficulty: response.data.difficulty,
+    ttl: response.data.ttl,
   };
 }
 
 /**
- * solveChallenge solves a challenge in a dedicated web worker so the form stays
- * responsive. If the worker cannot be constructed (jsdom in tests, a strict CSP,
- * an old browser) it falls back to solving inline with the same `solve`. Both
- * paths honor the abort signal.
+ * solveChallenge solves a challenge in a web worker so the form stays responsive,
+ * falling back to inline `solve` when a worker is unavailable. Honors the signal.
  *
  * @param {PowChallenge} challenge The challenge to solve.
- * @param {AbortSignal} signal Optional signal to cancel the work (e.g. on unmount).
- * @returns {Promise<PowSolution>} The challenge paired with the nonce that solves it.
+ * @param {AbortSignal} signal Optional cancel signal (e.g. on unmount).
+ * @returns {Promise<PowSolution>} The challenge paired with its solving nonce.
  */
 export async function solveChallenge(challenge: PowChallenge, signal?: AbortSignal): Promise<PowSolution> {
   const nonce = await solveNonce(challenge.challenge, challenge.difficulty, signal);
@@ -52,9 +53,8 @@ export async function solveChallenge(challenge: PowChallenge, signal?: AbortSign
 }
 
 function solveNonce(challenge: string, difficulty: number, signal?: AbortSignal): Promise<number> {
-  // Check before constructing so we never hit the worker URL machinery where it
-  // cannot work (jsdom), and fall back inline if construction throws (CSP, old
-  // browsers).
+  // jsdom has no Worker, and construction can also throw (CSP, old browsers).
+  // Either way, solve inline.
   if (typeof Worker === 'undefined') {
     return solve(challenge, difficulty, signal);
   }

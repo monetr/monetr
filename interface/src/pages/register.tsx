@@ -107,9 +107,8 @@ export default function Register(): React.JSX.Element {
   async function submit(values: RegisterValues, helpers: FormikHelpers<RegisterValues>): Promise<void> {
     helpers.setSubmitting(true);
 
-    // getSolution resolves to null when disabled (challenge/nonce drop off). Keep
-    // it in the chain so a fetch or solve failure still hits the catch and
-    // finally, otherwise the form can get stuck submitting.
+    // null when disabled (challenge/nonce drop off). Kept in the chain so a
+    // fetch/solve failure still hits the catch and finally below.
     return pow
       .getSolution()
       .then(solution =>
@@ -144,8 +143,7 @@ export default function Register(): React.JSX.Element {
         });
       })
       .catch((error: ApiError<APIError>) => {
-        // The challenge is single use, so line up a fresh one in case they fix
-        // whatever went wrong and submit again.
+        // Single use, so line up a fresh one for a retry.
         pow.reset();
         const message =
           error?.response?.status === 429

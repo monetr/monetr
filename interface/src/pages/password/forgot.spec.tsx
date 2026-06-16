@@ -64,6 +64,7 @@ describe('forgot password page', () => {
     mockFetch.onPost('/api/authentication/challenge').reply(200, {
       challenge: 'x',
       difficulty: 0,
+      ttl: 300,
     });
     mockFetch.onPost('/api/authentication/forgot').reply(200, {});
 

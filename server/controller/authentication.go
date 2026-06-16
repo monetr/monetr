@@ -64,9 +64,8 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 	})
 }
 
-// postChallenge issues a challenge for one of the unauthenticated auth
-// endpoints. When proof of work is disabled it 404s so the UI can tell it does
-// not need to do any work.
+// postChallenge issues a challenge for an unauthenticated auth endpoint, or
+// 404s when proof of work is disabled.
 func (c *Controller) postChallenge(ctx echo.Context) error {
 	c.scrubSentryBody(ctx)
 	if !c.Configuration.ProofOfWork.Enabled {
@@ -113,8 +112,7 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
 	}
 
-	// Proof of work runs before the captcha as the cheap fail-fast. No-op when
-	// disabled.
+	// Before the captcha, it is the cheap fail-fast. No-op when disabled.
 	if err := c.validateProofOfWork(ctx, powchallenge.PurposeLogin, loginRequest.Challenge, loginRequest.Nonce); err != nil {
 		return err // validateProofOfWork returns a valid http error.
 	}
@@ -378,8 +376,7 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		return c.invalidJson(ctx)
 	}
 
-	// Proof of work runs before the captcha as the cheap fail-fast. No-op when
-	// proof of work is disabled.
+	// Before the captcha, it is the cheap fail-fast. No-op when disabled.
 	if err := c.validateProofOfWork(ctx, powchallenge.PurposeRegister, registerRequest.Challenge, registerRequest.Nonce); err != nil {
 		return err // validateProofOfWork returns a valid http error.
 	}
@@ -705,8 +702,7 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 	sendForgotPasswordRequest.Email = strings.TrimSpace(strings.ToLower(sendForgotPasswordRequest.Email))
 	sendForgotPasswordRequest.ReCAPTCHA = strings.TrimSpace(sendForgotPasswordRequest.ReCAPTCHA)
 
-	// Proof of work runs before the captcha as the cheap fail-fast. No-op when
-	// proof of work is disabled.
+	// Before the captcha, it is the cheap fail-fast. No-op when disabled.
 	if err := c.validateProofOfWork(ctx, powchallenge.PurposeForgot, sendForgotPasswordRequest.Challenge, sendForgotPasswordRequest.Nonce); err != nil {
 		return err // validateProofOfWork returns a valid http error.
 	}
@@ -895,11 +891,9 @@ func (c *Controller) validateRegistration(ctx echo.Context, email, password, fir
 	return nil
 }
 
-// validateProofOfWork verifies the challenge and solution on an unauthenticated
-// auth request, mapping the challenger's typed failures to client 400s. No-op
-// when disabled. We distinguish expired and already-used (a real user should
-// just retry) but collapse everything else into a vague message so we do not
-// hand an attacker a precise signal about why they were rejected.
+// validateProofOfWork verifies the challenge on an auth request, mapping typed
+// failures to 400s (no-op when disabled). Expired and already-used get their own
+// message so a real user can retry; everything else stays vague on purpose.
 func (c *Controller) validateProofOfWork(ctx echo.Context, purpose powchallenge.Purpose, challenge string, nonce uint64) error {
 	if !c.Configuration.ProofOfWork.Enabled {
 		return nil

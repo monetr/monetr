@@ -56,8 +56,7 @@ export default function Login(): React.JSX.Element {
   async function submit(values: LoginValues, helpers: FormikHelpers<LoginValues>) {
     helpers.setSubmitting(true);
 
-    // getSolution resolves to null when proof of work is disabled, so the
-    // challenge and nonce just drop off the request.
+    // null when proof of work is disabled, so challenge/nonce just drop off.
     return pow
       .getSolution()
       .then(solution =>
@@ -70,8 +69,7 @@ export default function Login(): React.JSX.Element {
         }),
       )
       .catch(error => {
-        // The challenge is single use and is consumed even on a failed login, so
-        // make sure a fresh one is on the way for the retry.
+        // Single use and consumed even on a failed login, so line up a fresh one.
         pow.reset();
         return enqueueSnackbar(error?.response?.data?.error || 'Failed to authenticate.', {
           variant: 'error',

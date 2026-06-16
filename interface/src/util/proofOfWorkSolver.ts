@@ -18,24 +18,23 @@ function leadingZeroBits(bytes: Uint8Array): number {
 }
 
 /**
- * solve looks for the smallest nonce such that SHA-256 of the prefix, the
- * challenge and the nonce (as 8 big-endian bytes) has at least `difficulty`
- * leading zero bits. It has no DOM or Worker globals so the same function backs
- * both the worker and the inline fallback, they can never disagree.
+ * solve finds the smallest nonce whose SHA-256 of prefix + challenge + nonce (8
+ * big-endian bytes) has at least `difficulty` leading zero bits. No DOM or Worker
+ * globals, so the worker and the inline fallback share it and cannot disagree.
  *
  * @param {string} challenge The opaque challenge token from the server.
- * @param {number} difficulty The number of leading zero bits the proof needs.
- * @param {AbortSignal} signal Optional signal to cancel the search.
- * @returns {Promise<number>} The nonce that solves the challenge.
+ * @param {number} difficulty Leading zero bits the proof needs.
+ * @param {AbortSignal} signal Optional cancel signal.
+ * @returns {Promise<number>} The solving nonce.
  */
 export async function solve(challenge: string, difficulty: number, signal?: AbortSignal): Promise<number> {
-  // Any nonce satisfies difficulty 0, do not bother hashing.
+  // Any nonce satisfies difficulty 0.
   if (difficulty <= 0) {
     return 0;
   }
 
   const prefix = new TextEncoder().encode(`${PROOF_PREFIX}${challenge}:`);
-  // prefix followed by 8 bytes for the nonce, reused and rewritten each iteration.
+  // prefix + 8 nonce bytes, rewritten each iteration.
   const buffer = new Uint8Array(prefix.length + 8);
   buffer.set(prefix, 0);
   const view = new DataView(buffer.buffer);

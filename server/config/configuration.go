@@ -171,31 +171,20 @@ func (s Email) AllowPasswordReset() bool {
 	return s.Enabled && s.ForgotPassword.Enabled
 }
 
-// ProofOfWork configures the server issued proof of work layer that sits in
-// front of the unauthenticated authentication endpoints (register, login and
-// forgot password). When enabled the client must spend a bit of CPU finding a
-// SHA-256 preimage with a number of leading zero bits before its request is
-// accepted. It is meant to make automated abuse of these endpoints far more
-// expensive without slowing down real users (the work is done in the background
-// while they fill out the form). It is independent of ReCAPTCHA and the two can
-// be used together.
+// ProofOfWork gates the unauthenticated auth endpoints (register, login, forgot
+// password): the client must solve a small SHA-256 challenge before its request
+// is accepted. It makes automated abuse expensive without slowing real users
+// (the work runs in a background web worker). Independent of ReCAPTCHA.
 type ProofOfWork struct {
-	// Enabled controls whether or not the proof of work layer is active. When
-	// this is disabled the challenge endpoint returns a 404 and the auth
-	// endpoints do not require a solution. It is disabled by default for now, set
+	// Active when true. When disabled the challenge endpoint 404s and the auth
+	// endpoints skip the check. Disabled by default for now, set
 	// MONETR_PROOF_OF_WORK_ENABLED=true to turn it on.
 	Enabled bool `yaml:"enabled"`
-	// Difficulty is the number of leading zero bits the SHA-256 proof must have.
-	// Each additional bit roughly doubles the amount of work the client has to
-	// do. 16 is a good default, it works out to roughly 1 second of work on a
-	// desktop and 2 to 4 seconds on a low end mobile device. Because the work
-	// happens in a background web worker while the user is still typing they
-	// almost never actually wait for it.
+	// Leading zero bits the solution must have; each extra bit doubles the work.
+	// 16 is roughly 1 second on a desktop, 2 to 4 on a low end phone.
 	Difficulty int `yaml:"difficulty"`
-	// Lifetime is how long an issued challenge is valid for before it must be
-	// reissued. This needs to be long enough that a user filling out the form
-	// has plenty of time, but short enough that a stolen challenge is not useful
-	// for long.
+	// How long a challenge is valid for. Long enough to fill out the form, short
+	// enough that a stolen challenge is not useful for long.
 	Lifetime time.Duration `yaml:"lifetime"`
 }
 
@@ -399,10 +388,8 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("KeyManagement.Provider", "plaintext")
 	v.SetDefault("Plaid.Enabled", true)
 	v.SetDefault("Plaid.CountryCodes", []plaid.CountryCode{plaid.COUNTRYCODE_US})
-	// Proof of work ships disabled by default for the first release so existing
-	// self-hosted deployments do not get the new behavior without opting in.
-	// Operators turn it on with MONETR_PROOF_OF_WORK_ENABLED=true. The default
-	// will likely flip to true in a later release once it has been announced.
+	// Disabled by default for the first release so existing deployments opt in;
+	// likely flips to true in a later release once announced.
 	v.SetDefault("ProofOfWork.Enabled", false)
 	v.SetDefault("ProofOfWork.Difficulty", 16)
 	v.SetDefault("ProofOfWork.Lifetime", 5*time.Minute)

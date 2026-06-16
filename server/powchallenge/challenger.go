@@ -22,8 +22,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// Purpose binds a challenge to a single endpoint, it is baked into the signed
-// token. The numeric values are part of the wire format and must not change.
+// Purpose binds a challenge to one endpoint and is part of the signed wire
+// format, so the values must not change.
 type Purpose uint8
 
 const (
@@ -41,8 +41,8 @@ func (p Purpose) valid() bool {
 	}
 }
 
-// These are returned by [Challenger.Verify] so the HTTP layer can map each
-// failure to a specific (and not too revealing) message for the client.
+// Returned by Verify so the HTTP layer can map each failure to a specific
+// (and not too revealing) client message.
 var (
 	ErrInvalidChallenge = errors.New("proof of work challenge is not valid")
 	ErrChallengeExpired = errors.New("proof of work challenge has expired")
@@ -52,26 +52,22 @@ var (
 
 const (
 	tokenVersion byte = 0x01
-	// proofPrefix is mixed into the hash. Versioning it forces a bot operator to
-	// run our javascript instead of reusing a generic solver.
+	// Versioned so a bot operator has to run our javascript, not a generic solver.
 	proofPrefix = "monetr-pow-v1:"
-	// secretInfo is the HKDF info string. HKDF is one way so this secret cannot be
-	// walked back to the signing key, the two stay independent.
+	// HKDF info string; HKDF is one way so this stays independent of the signing key.
 	secretInfo = "monetr-pow-secret-v1"
-	// skewLeeway is the clock skew we tolerate on expiry, also padded onto the
-	// marker TTL.
+	// Clock skew tolerated on expiry, also padded onto the marker TTL.
 	skewLeeway = 30 * time.Second
 
-	// The token is a fixed length binary blob, laid out as:
+	// Token layout, then base32 (no padding) encoded for transport:
 	//   [1]  version
 	//   [1]  purpose
 	//   [16] random
 	//   [8]  issued at, unix seconds, big-endian
 	//   [2]  difficulty, big-endian
 	//   [32] HMAC-SHA256 of the preceding 28 bytes
-	// then base32 (no padding) encoded for transport.
 	randomLength = 16
-	signedLength = 28 // Everything except the trailing HMAC.
+	signedLength = 28 // All but the trailing HMAC.
 	tokenLength  = 60
 
 	versionOffset    = 0
@@ -82,28 +78,23 @@ const (
 	macOffset        = 28
 )
 
-// tokenEncoding stringifies the binary token. base32 keeps it on an unambiguous,
-// copy-paste friendly alphabet, no +/ or -_ confusion between base64 variants.
+// base32 keeps the token on a copy-paste safe alphabet (no +/ or -_).
 var tokenEncoding = base32.StdEncoding.WithPadding(base32.NoPadding)
 
 type Challenge struct {
 	Token      string `json:"challenge"`
 	Difficulty int    `json:"difficulty"`
+	// TTL in seconds, lets the client refetch a challenge that went stale while idle.
+	TTL int `json:"ttl"`
 }
 
-// Challenger issues and verifies server signed proof of work challenges. The
-// whole point is to make the unauthenticated authentication endpoints expensive
-// to hit in an automated way without making real users wait. See the
-// [config.ProofOfWork] documentation for the bigger picture.
+// Challenger issues and verifies the proof of work challenges that gate the
+// unauthenticated authentication endpoints. See [config.ProofOfWork].
 type Challenger interface {
-	// Issue will create a new challenge bound to the given purpose. It also
-	// records a single-use marker in the cache so the resulting challenge can
-	// only be redeemed once.
+	// Issue creates a challenge for the purpose and records a single-use marker.
 	Issue(ctx context.Context, purpose Purpose) (*Challenge, error)
-	// Verify will check that the provided token and nonce are a valid solution
-	// for the given purpose. It returns one of the typed errors above when the
-	// challenge is not acceptable, or nil when everything checks out. A
-	// successful verification consumes the challenge so it cannot be used again.
+	// Verify checks the token and nonce, returns a typed error or nil, and
+	// consumes the challenge on success so it cannot be reused.
 	Verify(ctx context.Context, purpose Purpose, token string, nonce uint64) error
 }
 
@@ -141,14 +132,12 @@ func NewChallenger(
 	}
 }
 
-// DeriveSecret derives the 32 byte HMAC secret from the existing ED25519 seed
-// via HKDF-SHA256. HKDF is one way, so this stays independent of the signing key
-// and we do not have to manage a separate secret just for proof of work.
+// DeriveSecret derives the 32 byte HMAC secret from the ED25519 seed via HKDF,
+// which is one way so it stays independent of the signing key.
 func DeriveSecret(seed []byte) []byte {
 	secret, err := hkdf.Key(sha256.New, seed, nil, secretInfo, 32)
 	if err != nil {
-		// Only errors when the length is too large for the hash, which 32 bytes
-		// out of SHA-256 never is.
+		// Only fails if the length is too large for the hash, which 32 bytes is not.
 		panic(errors.Wrap(err, "failed to derive proof of work secret"))
 	}
 	return secret
@@ -171,9 +160,8 @@ func (c *challengerBase) Issue(ctx context.Context, purpose Purpose) (*Challenge
 
 	issuedAt := c.clock.Now().UTC()
 
-	// Everything except the trailing HMAC is signed. Signing the purpose locks the
-	// token to one endpoint, signing the difficulty stops anyone grinding cheap
-	// low difficulty tokens and reusing them after we raise the bar.
+	// Build and sign the token. Signing purpose locks it to one endpoint; signing
+	// difficulty blocks reusing cheap tokens after a difficulty bump.
 	token := make([]byte, tokenLength)
 	token[versionOffset] = tokenVersion
 	token[purposeOffset] = byte(purpose)
@@ -184,13 +172,9 @@ func (c *challengerBase) Issue(ctx context.Context, purpose Purpose) (*Challenge
 
 	encoded := tokenEncoding.EncodeToString(token)
 
-	// Plant the single-use marker, flipped to "consumed" in Verify. The key and
-	// values are HMAC-derived so a redis-write-only attacker without the secret
-	// cannot plant one. The TTL runs a bit past the lifetime so a still-valid
-	// challenge always has a marker to flip.
-	// NOTE The marker TTL is on the real wall clock (the cache uses time.Now), not
-	// c.clock. That is fine, the c.clock expiry check in Verify is the real gate,
-	// the marker is only for replay and cleanup.
+	// Plant the single-use marker, flipped to consumed in Verify. Key and values
+	// are HMAC-derived so a redis-only attacker cannot forge one. The marker TTL
+	// uses the wall clock; Verify's c.clock time check is the real expiry gate.
 	if err := c.cache.SetTTL(
 		span.Context(),
 		c.replayKey(random),
@@ -211,6 +195,7 @@ func (c *challengerBase) Issue(ctx context.Context, purpose Purpose) (*Challenge
 	return &Challenge{
 		Token:      encoded,
 		Difficulty: c.difficulty,
+		TTL:        int(c.lifetime.Seconds()),
 	}, nil
 }
 
@@ -218,7 +203,7 @@ func (c *challengerBase) Verify(ctx context.Context, expectedPurpose Purpose, to
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	// Record a metric for every verification, labeled by outcome.
+	// Record an outcome-labeled metric for every verification.
 	start := c.clock.Now()
 	result := "ok"
 	defer func() {
@@ -232,23 +217,21 @@ func (c *challengerBase) Verify(ctx context.Context, expectedPurpose Purpose, to
 		return errors.WithStack(ErrInvalidChallenge)
 	}
 
-	// Verify the HMAC before trusting any other field. Constant time so we do not
-	// leak the signature through timing.
+	// Check the HMAC before trusting any field; constant time to avoid leaking it.
 	if subtle.ConstantTimeCompare(raw[macOffset:], c.sign(raw[:signedLength])) != 1 {
 		span.Status = sentry.SpanStatusInvalidArgument
 		result = "invalid"
 		return errors.WithStack(ErrInvalidChallenge)
 	}
 
-	// Purpose (now trusted) must match the endpoint, keeps a register challenge
-	// from being redeemed on login.
+	// Bound purpose must match the endpoint (no cross-endpoint reuse).
 	if Purpose(raw[purposeOffset]) != expectedPurpose {
 		span.Status = sentry.SpanStatusInvalidArgument
 		result = "invalid"
 		return errors.WithStack(ErrInvalidChallenge)
 	}
 
-	// Reject tokens minted below our current difficulty policy.
+	// Reject tokens minted below the current difficulty policy.
 	difficulty := int(binary.BigEndian.Uint16(raw[difficultyOffset : difficultyOffset+2]))
 	if difficulty < c.difficulty {
 		span.Status = sentry.SpanStatusInvalidArgument
@@ -256,8 +239,7 @@ func (c *challengerBase) Verify(ctx context.Context, expectedPurpose Purpose, to
 		return errors.WithStack(ErrInvalidChallenge)
 	}
 
-	// The leeway tolerates a token that looks issued slightly in the future
-	// because the issuing instance's clock is a touch ahead.
+	// Reject if expired; leeway tolerates a slightly-ahead issuing clock.
 	issuedAt := time.Unix(int64(binary.BigEndian.Uint64(raw[issuedAtOffset:issuedAtOffset+8])), 0)
 	age := c.clock.Now().UTC().Sub(issuedAt)
 	if age > c.lifetime || age < -skewLeeway {
@@ -272,9 +254,8 @@ func (c *challengerBase) Verify(ctx context.Context, expectedPurpose Purpose, to
 		return errors.WithStack(ErrInvalidProof)
 	}
 
-	// Replay protection: atomically flip the marker unused -> consumed. No swap
-	// means already used or gone, either way reject. The random comes from the
-	// trusted token so we rederive the same key and values Issue wrote.
+	// Atomically flip the marker unused -> consumed. No swap means used or gone,
+	// so reject either way.
 	random := raw[randomOffset : randomOffset+randomLength]
 	swapped, err := c.cache.CompareAndSwap(
 		span.Context(),
@@ -284,7 +265,7 @@ func (c *challengerBase) Verify(ctx context.Context, expectedPurpose Purpose, to
 		c.lifetime+skewLeeway,
 	)
 	if err != nil {
-		// Fail closed, better to reject than risk a replay when redis is down.
+		// Fail closed: reject rather than risk a replay when redis is down.
 		span.Status = sentry.SpanStatusInternalError
 		result = "error"
 		return errors.Wrap(err, "failed to verify proof of work challenge has not already been used")
@@ -299,7 +280,7 @@ func (c *challengerBase) Verify(ctx context.Context, expectedPurpose Purpose, to
 	return nil
 }
 
-// recordVerify emits the verification metrics. stats is nil in many test setups.
+// recordVerify emits the verification metrics; stats is nil in many tests.
 func (c *challengerBase) recordVerify(result string, duration time.Duration) {
 	if c.stats == nil {
 		return
@@ -318,8 +299,7 @@ func (c *challengerBase) sign(data []byte) []byte {
 	return mac.Sum(nil)
 }
 
-// replayKey is the cache key for a challenge's marker, HMAC'd so it is not
-// predictable to someone who can write redis but does not know our secret.
+// Cache key for the marker, HMAC'd so it is not predictable without the secret.
 func (c *challengerBase) replayKey(random []byte) string {
 	return "pow:" + tokenEncoding.EncodeToString(c.tag("pow-key:", random))
 }
@@ -332,8 +312,7 @@ func (c *challengerBase) consumedValue(random []byte) []byte {
 	return c.tag("pow-consumed:", random)
 }
 
-// tag HMACs a label with the random bytes. The distinct labels keep the key and
-// the two marker values different even though they share the same random.
+// HMAC a label with the random; distinct labels keep key/unused/consumed different.
 func (c *challengerBase) tag(label string, random []byte) []byte {
 	mac := hmac.New(sha256.New, c.secret)
 	mac.Write([]byte(label))
@@ -341,9 +320,8 @@ func (c *challengerBase) tag(label string, random []byte) []byte {
 	return mac.Sum(nil)
 }
 
-// computeProofDigest is the exact hash the client solves: prefix, token, a colon,
-// then the nonce as 8 big-endian bytes. MUST match the frontend solver in
-// interface/src/util/proofOfWorkSolver.ts, the shared test vectors guard drift.
+// The exact bytes the client hashes: prefix + token + ":" + 8 big-endian nonce
+// bytes. Must match the frontend solver (the shared test vectors guard drift).
 func computeProofDigest(token string, nonce uint64) []byte {
 	h := sha256.New()
 	h.Write([]byte(proofPrefix))
@@ -355,8 +333,8 @@ func computeProofDigest(token string, nonce uint64) []byte {
 	return h.Sum(nil)
 }
 
-// leadingZeroBits counts leading zero bits (not bytes or hex digits) so the
-// difficulty can be tuned one bit at a time.
+// Count leading zero bits (not bytes or hex digits) so difficulty tunes one bit
+// at a time.
 func leadingZeroBits(digest []byte) int {
 	var count int
 	for _, b := range digest {

@@ -96,9 +96,8 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 	configuration.LunchFlowEnabled = c.Configuration.LunchFlow.IsEnabled()
 	configuration.LunchFlowAllowedAPIURLs = c.Configuration.LunchFlow.AllowedApiUrls
 
-	// Tell the UI whether it needs to solve a proof of work challenge before the
-	// unauthenticated auth forms. The difficulty comes back on the challenge
-	// itself, so it does not need to be here too.
+	// Whether the UI needs to solve a challenge before the auth forms. Difficulty
+	// comes back on the challenge itself.
 	configuration.ProofOfWorkEnabled = c.Configuration.ProofOfWork.Enabled
 
 	return ctx.JSON(http.StatusOK, configuration)

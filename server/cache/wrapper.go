@@ -23,9 +23,8 @@ type Cache interface {
 	GetEz(ctx context.Context, key string, output any) error
 	Delete(ctx context.Context, key string) error
 	// CompareAndSwap atomically sets key to next only if its current value equals
-	// expected. A missing key or a mismatch writes nothing and returns false, so
-	// this is a true compare-and-swap. On a swap the expiry is refreshed to ttl,
-	// or kept as-is (KEEPTTL) when ttl is <= 0.
+	// expected; a missing key or mismatch writes nothing and returns false. On a
+	// swap the expiry is refreshed to ttl, or kept (KEEPTTL) when ttl <= 0.
 	CompareAndSwap(ctx context.Context, key string, expected, next []byte, ttl time.Duration) (swapped bool, err error)
 }
 
@@ -216,10 +215,9 @@ func (r *redisCache) GetEz(ctx context.Context, key string, output any) error {
 	return nil
 }
 
-// compareAndSwapScript is the Lua we EVAL for [redisCache.CompareAndSwap]. Redis
-// runs it atomically so the GET and SET are one unit with no read-then-write
-// race. KEYS[1] is the key, ARGV[1] expected, ARGV[2] next, ARGV[3] ttl in ms.
-// Returns 1 on swap, 0 otherwise (no write on a mismatch or missing key).
+// Lua for CompareAndSwap, run atomically by redis (no read-then-write race).
+// KEYS[1] key, ARGV[1] expected, ARGV[2] next, ARGV[3] ttl ms. Returns 1 on
+// swap, 0 otherwise (no write on a mismatch or missing key).
 const compareAndSwapScript = `
 local current = redis.call('GET', KEYS[1])
 if current == false then
@@ -260,7 +258,6 @@ func (r *redisCache) CompareAndSwap(ctx context.Context, key string, expected, n
 	}
 	span.SetData("cache.success", true)
 
-	// The script returns a Lua number which redigo gives us back as an int64.
 	swapped, err := redis.Int64(result, nil)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError

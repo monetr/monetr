@@ -29,6 +29,7 @@ describe('proof of work', () => {
       const solution = await solveChallenge({
         challenge: vector.challenge,
         difficulty: vector.difficulty,
+        ttl: 300,
       });
       expect(solution.challenge).toBe(vector.challenge);
       expect(solution.nonce).toBe(vector.nonce);

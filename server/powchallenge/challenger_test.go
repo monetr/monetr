@@ -140,6 +140,7 @@ func TestChallenger_IssueAndVerify(t *testing.T) {
 			require.NotNil(t, challenge, "issued challenge must not be nil")
 			assert.NotEmpty(t, challenge.Token, "the challenge token must not be empty")
 			assert.EqualValues(t, testDifficulty, challenge.Difficulty, "the difficulty should match the configured value")
+			assert.EqualValues(t, 300, challenge.TTL, "the ttl should be the lifetime in seconds")
 
 			nonce := solveTestProof(t, challenge.Token, challenge.Difficulty)
 			err = challenger.Verify(ctx, p.purpose, challenge.Token, nonce)

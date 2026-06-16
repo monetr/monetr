@@ -5,8 +5,8 @@ interface SolveRequest {
   difficulty: number;
 }
 
-// Cast to a tiny local shape rather than pulling in the WebWorker lib, the DOM
-// lib types `self` as a Window whose postMessage wants a target origin.
+// Cast to a tiny shape instead of pulling in the WebWorker lib (DOM types `self`
+// as a Window).
 const worker = self as unknown as {
   onmessage: ((event: MessageEvent<SolveRequest>) => void) | null;
   postMessage: (message: unknown) => void;

@@ -155,6 +155,7 @@ describe('login page', () => {
     mockFetch.onPost('/api/authentication/challenge').reply(200, {
       challenge: 'x',
       difficulty: 0,
+      ttl: 300,
     });
 
     mockFetch.onPost('/api/authentication/login').reply(200, {

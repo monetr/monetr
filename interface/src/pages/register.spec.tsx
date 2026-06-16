@@ -119,6 +119,7 @@ describe('register page', () => {
     mockFetch.onPost('/api/authentication/challenge').reply(200, {
       challenge: 'x',
       difficulty: 0,
+      ttl: 300,
     });
 
     mockFetch.onPost('/api/authentication/register').reply(200, {

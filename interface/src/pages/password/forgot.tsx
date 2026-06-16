@@ -69,8 +69,8 @@ export default function ForgotPasswordNew(): React.JSX.Element {
   async function submit(values: Values, helpers: FormikHelpers<Values>): Promise<void> {
     helpers.setSubmitting(true);
 
-    // sendForgotPassword does all the work (and shows its own error snackbar), we
-    // just flip submitting back off. getSolution resolves to null when disabled.
+    // sendForgotPassword does the work and shows its own errors; we just clear
+    // submitting. getSolution is null when disabled.
     return pow
       .getSolution()
       .then(solution =>
@@ -83,8 +83,8 @@ export default function ForgotPasswordNew(): React.JSX.Element {
       )
       .then(() => setIsComplete(true))
       .catch(() => {
-        // sendForgotPassword swallows its own errors, so a rejection here is from
-        // the proof of work, line up a fresh challenge for the retry.
+        // A rejection here is the proof of work (the hook swallows its own
+        // errors), so line up a fresh challenge.
         pow.reset();
       })
       .finally(() => helpers.setSubmitting(false));
