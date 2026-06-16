@@ -32,6 +32,7 @@ describe('register page', () => {
   it('will render with default options', async () => {
     mockFetch.onGet('/api/config').reply(200, {
       allowSignUp: true,
+      proofOfWorkEnabled: false,
     });
 
     const world = testRenderer(<Register />, { initialRoute: '/register' });
@@ -48,6 +49,7 @@ describe('register page', () => {
     mockFetch.onGet('/api/config').reply(200, {
       allowSignUp: true,
       verifyRegister: false,
+      proofOfWorkEnabled: false,
     });
 
     mockFetch.onPost('/api/authentication/register').reply(429);
@@ -77,6 +79,7 @@ describe('register page', () => {
     mockFetch.onGet('/api/config').reply(200, {
       allowSignUp: true,
       verifyRegister: false,
+      proofOfWorkEnabled: false,
     });
 
     // This one is a normal error coming from monetr itself so it does have a JSON body with a message. Make sure we did
@@ -103,5 +106,42 @@ describe('register page', () => {
         disableWindowBlurListener: true,
       }),
     );
+  });
+
+  it('will include the proof of work solution when enabled', async () => {
+    mockFetch.onGet('/api/config').reply(200, {
+      allowSignUp: true,
+      verifyRegister: false,
+      proofOfWorkEnabled: true,
+    });
+
+    // A difficulty of 0 means the solver returns a nonce of 0 immediately.
+    mockFetch.onPost('/api/authentication/challenge').reply(200, {
+      challenge: 'x',
+      difficulty: 0,
+    });
+
+    mockFetch.onPost('/api/authentication/register').reply(200, {
+      nextUrl: '/setup',
+      requireVerification: false,
+    });
+
+    const world = testRenderer(<Register />, { initialRoute: '/register' });
+    const user = userEvent.setup();
+
+    await waitFor(() => expect(world.getByTestId('register-submit')).toBeVisible());
+
+    await user.type(world.getByTestId('register-first-name'), 'Test');
+    await user.type(world.getByTestId('register-last-name'), 'User');
+    await user.type(world.getByTestId('register-email'), 'test@test.com');
+    await user.type(world.getByTestId('register-password'), 'password');
+    await user.type(world.getByTestId('register-confirm-password'), 'password');
+    await user.click(world.getByTestId('register-submit'));
+
+    // The register request should carry the challenge and the nonce we solved.
+    await waitFor(() => {
+      const registerPost = mockFetch.history.post?.find(entry => entry.url === '/api/authentication/register');
+      expect(registerPost?.data).toMatchObject({ challenge: 'x', nonce: 0 });
+    });
   });
 });

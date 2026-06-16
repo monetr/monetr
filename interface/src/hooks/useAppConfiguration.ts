@@ -27,6 +27,7 @@ export class AppConfiguration {
   lunchFlowAllowedAPIURLs: Array<string>;
   manualEnabled: true;
   uploadsEnabled: boolean;
+  proofOfWorkEnabled: boolean;
   release: string | null;
   revision: string;
   buildType: string;
@@ -52,6 +53,7 @@ export class AppConfiguration {
     this.lunchFlowAllowedAPIURLs = data.lunchFlowAllowedAPIURLs;
     this.manualEnabled = data.manualEnabled;
     this.uploadsEnabled = data.uploadsEnabled;
+    this.proofOfWorkEnabled = data.proofOfWorkEnabled;
     this.release = data.release ?? null;
     this.revision = data.revision;
     this.buildType = data.buildType;

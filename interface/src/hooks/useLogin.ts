@@ -9,6 +9,8 @@ export interface LoginArguments {
   password: string;
   captcha?: string;
   totp?: string;
+  challenge?: string;
+  nonce?: number;
 }
 
 export default function useLogin(): (loginArgs: LoginArguments) => Promise<void> {

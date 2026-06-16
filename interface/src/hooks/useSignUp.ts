@@ -9,6 +9,8 @@ export interface SignUpArguments {
   password: string;
   timezone: string;
   locale: string;
+  challenge?: string;
+  nonce?: number;
 }
 
 export interface SignUpResponse {

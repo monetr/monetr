@@ -33,6 +33,7 @@ describe('login page', () => {
       allowForgotPassword: true,
       allowSignUp: true,
       verifyLogin: false,
+      proofOfWorkEnabled: false,
     });
 
     const world = testRenderer(<Login />, { initialRoute: '/login' });
@@ -49,6 +50,7 @@ describe('login page', () => {
       allowForgotPassword: true,
       allowSignUp: false,
       verifyLogin: false,
+      proofOfWorkEnabled: false,
     });
 
     const world = testRenderer(<Login />, { initialRoute: '/login' });
@@ -66,6 +68,7 @@ describe('login page', () => {
       allowForgotPassword: false,
       allowSignUp: false,
       verifyLogin: false,
+      proofOfWorkEnabled: false,
     });
 
     const world = testRenderer(<Login />, { initialRoute: '/login' });
@@ -83,6 +86,7 @@ describe('login page', () => {
       allowForgotPassword: false,
       allowSignUp: false,
       verifyLogin: false,
+      proofOfWorkEnabled: false,
     });
 
     mockFetch.onPost('/api/authentication/login').reply(200, {
@@ -112,6 +116,7 @@ describe('login page', () => {
       allowForgotPassword: false,
       allowSignUp: false,
       verifyLogin: false,
+      proofOfWorkEnabled: false,
     });
 
     mockFetch.onPost('/api/authentication/login').reply(200, {
@@ -135,5 +140,40 @@ describe('login page', () => {
 
     // When we login we should be redirected to this route.
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/account/subscribe'));
+  });
+
+  test('will include the proof of work solution when enabled', async () => {
+    mockFetch.onGet('/api/config').reply(200, {
+      allowForgotPassword: false,
+      allowSignUp: false,
+      verifyLogin: false,
+      proofOfWorkEnabled: true,
+    });
+
+    // A difficulty of 0 means the solver returns a nonce of 0 immediately, so we
+    // do not have to do any real work in the test.
+    mockFetch.onPost('/api/authentication/challenge').reply(200, {
+      challenge: 'x',
+      difficulty: 0,
+    });
+
+    mockFetch.onPost('/api/authentication/login').reply(200, {
+      isActive: true,
+    });
+
+    const world = testRenderer(<Login />, { initialRoute: '/login' });
+    const user = userEvent.setup();
+
+    await waitFor(() => expect(world.getByTestId('login-submit')).toBeVisible());
+
+    await user.type(world.getByTestId('login-email'), 'test@test.com');
+    await user.type(world.getByTestId('login-password'), 'password');
+    await user.click(world.getByTestId('login-submit'));
+
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/'));
+
+    // The login request should carry the challenge and the nonce we solved.
+    const loginPost = mockFetch.history.post?.find(entry => entry.url === '/api/authentication/login');
+    expect(loginPost?.data).toMatchObject({ challenge: 'x', nonce: 0 });
   });
 });

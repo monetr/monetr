@@ -7,6 +7,7 @@
   { "type": "file", "name": "lunch_flow", "label": "Lunch Flow" },
   { "type": "file", "name": "plaid", "label": "Plaid" },
   { "type": "file", "name": "postgres", "label": "PostgreSQL" },
+  { "type": "file", "name": "proof_of_work", "label": "Proof of Work" },
   { "type": "file", "name": "recaptcha", "label": "ReCAPTCHA" },
   { "type": "file", "name": "redis", "label": "Redis" },
   { "type": "file", "name": "security", "label": "Security" },

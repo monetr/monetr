@@ -9,6 +9,7 @@ import TextLink from '@monetr/interface/components/TextLink';
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useLogin from '@monetr/interface/hooks/useLogin';
+import { useProofOfWork } from '@monetr/interface/hooks/useProofOfWork';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 import { useSnackbar } from '@monetr/notify';
 
@@ -50,21 +51,33 @@ export default function Login(): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { data: config } = useAppConfiguration();
   const login = useLogin();
+  const pow = useProofOfWork('login', Boolean(config?.proofOfWorkEnabled));
 
   async function submit(values: LoginValues, helpers: FormikHelpers<LoginValues>) {
     helpers.setSubmitting(true);
 
-    return login({
-      captcha: values.captcha ?? undefined,
-      email: values.email,
-      password: values.password,
-    })
-      .catch(error =>
-        enqueueSnackbar(error?.response?.data?.error || 'Failed to authenticate.', {
-          variant: 'error',
-          disableWindowBlurListener: true,
+    // getSolution resolves to null when proof of work is disabled, so the
+    // challenge and nonce just drop off the request.
+    return pow
+      .getSolution()
+      .then(solution =>
+        login({
+          captcha: values.captcha ?? undefined,
+          email: values.email,
+          password: values.password,
+          challenge: solution?.challenge,
+          nonce: solution?.nonce,
         }),
       )
+      .catch(error => {
+        // The challenge is single use and is consumed even on a failed login, so
+        // make sure a fresh one is on the way for the retry.
+        pow.reset();
+        return enqueueSnackbar(error?.response?.data?.error || 'Failed to authenticate.', {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        });
+      })
       .finally(() => helpers.setSubmitting(false));
   }
 

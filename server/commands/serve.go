@@ -29,6 +29,7 @@ import (
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
+	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
@@ -269,6 +270,25 @@ func ServeCommand(parent *cobra.Command) {
 				}
 			}
 
+			// Derive the proof of work HMAC secret from our existing ED25519 seed
+			// using HKDF. This way we do not have to introduce and manage a brand
+			// new secret just for proof of work, and because HKDF is one way the
+			// derived secret cannot be used to work backwards to the signing key.
+			// That keeps the PASETO token signing and the proof of work HMAC
+			// cryptographically independent even though they share a root. We build
+			// the challenger unconditionally, when proof of work is disabled it just
+			// never gets called.
+			powSecret := powchallenge.DeriveSecret(privateKey.Seed())
+			challenger := powchallenge.NewChallenger(
+				log,
+				redisCache,
+				clock,
+				stats,
+				powSecret,
+				configuration.ProofOfWork.Difficulty,
+				configuration.ProofOfWork.Lifetime,
+			)
+
 			var email communication.EmailCommunication
 			if configuration.Email.Enabled {
 				email = communication.NewEmailCommunication(log, configuration)
@@ -314,6 +334,7 @@ func ServeCommand(parent *cobra.Command) {
 					Billing:                  bill,
 					Cache:                    redisCache,
 					Captcha:                  recaptcha,
+					Challenger:               challenger,
 					ClientTokens:             clientTokens,
 					Clock:                    clock,
 					Configuration:            configuration,

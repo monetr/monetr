@@ -3,11 +3,15 @@ package controller_test
 import (
 	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/binary"
+	"math/bits"
 	"net/http"
 	"testing"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/gavv/httpexpect/v2"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -18,6 +22,77 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// solveTestChallenge brute forces a proof of work solution for a token at a
+// given difficulty. This is an independent implementation of the same algorithm
+// the production challenger and the frontend solver use, see the wire format
+// vectors in server/powchallenge for how the three are kept in sync. We keep the
+// difficulty low (8) in tests so this stays fast.
+func solveTestChallenge(t *testing.T, token string, difficulty int) uint64 {
+	for nonce := uint64(0); nonce < 1<<32; nonce++ {
+		h := sha256.New()
+		h.Write([]byte("monetr-pow-v1:"))
+		h.Write([]byte(token))
+		h.Write([]byte(":"))
+		var nonceBytes [8]byte
+		binary.BigEndian.PutUint64(nonceBytes[:], nonce)
+		h.Write(nonceBytes[:])
+		digest := h.Sum(nil)
+
+		var zeros int
+		for _, b := range digest {
+			if b == 0 {
+				zeros += 8
+				continue
+			}
+			zeros += bits.LeadingZeros8(b)
+			break
+		}
+		if zeros >= difficulty {
+			return nonce
+		}
+	}
+	t.Fatalf("failed to solve proof of work challenge at difficulty %d", difficulty)
+	return 0
+}
+
+// getAndSolveChallenge asks the API for a proof of work challenge for the given
+// purpose and then solves it, returning the token and nonce ready to attach to
+// an auth request.
+func getAndSolveChallenge(t *testing.T, e *httpexpect.Expect, purpose string) (string, uint64) {
+	response := e.POST("/api/authentication/challenge").
+		WithJSON(map[string]any{
+			"purpose": purpose,
+		}).
+		Expect()
+	response.Status(http.StatusOK)
+	token := response.JSON().Path("$.challenge").String().NotEmpty().Raw()
+	difficulty := int(response.JSON().Path("$.difficulty").Number().Raw())
+	return token, solveTestChallenge(t, token, difficulty)
+}
+
+// powEnabledConfig returns a test config with proof of work turned on at the low
+// test difficulty.
+func powEnabledConfig(t *testing.T) config.Configuration {
+	conf := NewTestApplicationConfig(t)
+	conf.ProofOfWork.Enabled = true
+	conf.ProofOfWork.Difficulty = 8
+	conf.ProofOfWork.Lifetime = 5 * time.Minute
+	return conf
+}
+
+// validRegisterBody builds a fresh, valid registration request body with a
+// unique email each time.
+func validRegisterBody(t *testing.T) map[string]any {
+	return map[string]any{
+		"email":     testutils.GetUniqueEmail(t),
+		"password":  gofakeit.Password(true, true, true, true, false, 32),
+		"firstName": gofakeit.FirstName(),
+		"lastName":  gofakeit.LastName(),
+		"locale":    "en_US",
+		"timezone":  "America/Chicago",
+	}
+}
 
 func TestLogin(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
@@ -2056,5 +2131,393 @@ func TestResetPassword(t *testing.T) {
 			Path("$.error").
 			String().
 			IsEqual("Failed to validate password reset token")
+	})
+}
+
+func TestPostProofOfWorkChallenge(t *testing.T) {
+	t.Run("issues a challenge for each purpose", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		// Every purpose the UI might ask for should get a challenge back at the
+		// configured difficulty.
+		for _, purpose := range []string{"register", "login", "forgot"} {
+			response := e.POST("/api/authentication/challenge").
+				WithJSON(map[string]any{
+					"purpose": purpose,
+				}).
+				Expect()
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.challenge").String().NotEmpty()
+			response.JSON().Path("$.difficulty").Number().IsEqual(8)
+		}
+	})
+
+	t.Run("rejects an unknown purpose", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		response := e.POST("/api/authentication/challenge").
+			WithJSON(map[string]any{
+				"purpose": "something-made-up",
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+	})
+
+	t.Run("returns not found when proof of work is disabled", func(t *testing.T) {
+		// The default test config has proof of work disabled, so the endpoint
+		// should behave as if it does not exist.
+		_, e := NewTestApplication(t)
+
+		response := e.POST("/api/authentication/challenge").
+			WithJSON(map[string]any{
+				"purpose": "register",
+			}).
+			Expect()
+		response.Status(http.StatusNotFound)
+	})
+}
+
+func TestPostRegister_ProofOfWork(t *testing.T) {
+	t.Run("proof of work disabled does not require a challenge", func(t *testing.T) {
+		// With proof of work disabled (the default) a registration with no
+		// challenge at all should still go through.
+		_, e := NewTestApplication(t)
+
+		response := e.POST("/api/authentication/register").
+			WithJSON(validRegisterBody(t)).
+			Expect()
+		response.Status(http.StatusOK)
+	})
+
+	t.Run("a missing challenge is rejected when enabled", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		response := e.POST("/api/authentication/register").
+			WithJSON(validRegisterBody(t)).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+	})
+
+	t.Run("a valid challenge passes through", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		token, nonce := getAndSolveChallenge(t, e, "register")
+		body := validRegisterBody(t)
+		body["challenge"] = token
+		body["nonce"] = nonce
+
+		response := e.POST("/api/authentication/register").
+			WithJSON(body).
+			Expect()
+		response.Status(http.StatusOK)
+	})
+
+	t.Run("a replayed challenge is rejected", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		token, nonce := getAndSolveChallenge(t, e, "register")
+
+		{ // The first registration consumes the challenge.
+			body := validRegisterBody(t)
+			body["challenge"] = token
+			body["nonce"] = nonce
+			e.POST("/api/authentication/register").
+				WithJSON(body).
+				Expect().
+				Status(http.StatusOK)
+		}
+
+		{ // Re-using the same challenge (even with a fresh email) must be rejected.
+			body := validRegisterBody(t)
+			body["challenge"] = token
+			body["nonce"] = nonce
+			response := e.POST("/api/authentication/register").
+				WithJSON(body).
+				Expect()
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().IsEqual("challenge already used")
+		}
+	})
+
+	t.Run("an expired challenge is rejected", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		app, e := NewTestApplicationWithConfig(t, conf)
+
+		token, nonce := getAndSolveChallenge(t, e, "register")
+		// Move past the challenge lifetime so it looks expired.
+		app.Clock.Add(6 * time.Minute)
+
+		body := validRegisterBody(t)
+		body["challenge"] = token
+		body["nonce"] = nonce
+
+		response := e.POST("/api/authentication/register").
+			WithJSON(body).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("challenge expired, please retry")
+	})
+
+	t.Run("a challenge for another purpose is rejected", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		// Get a login challenge but try to use it on register.
+		token, nonce := getAndSolveChallenge(t, e, "login")
+		body := validRegisterBody(t)
+		body["challenge"] = token
+		body["nonce"] = nonce
+
+		response := e.POST("/api/authentication/register").
+			WithJSON(body).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+	})
+}
+
+func TestPostLogin_ProofOfWork(t *testing.T) {
+	t.Run("proof of work disabled does not require a challenge", func(t *testing.T) {
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email":    user.Login.Email,
+				"password": password,
+			}).
+			Expect()
+		response.Status(http.StatusOK)
+		AssertSetTokenCookie(t, response)
+	})
+
+	t.Run("a missing challenge is rejected when enabled", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		app, e := NewTestApplicationWithConfig(t, conf)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email":    user.Login.Email,
+				"password": password,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+	})
+
+	t.Run("a valid challenge passes through", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		app, e := NewTestApplicationWithConfig(t, conf)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		token, nonce := getAndSolveChallenge(t, e, "login")
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email":     user.Login.Email,
+				"password":  password,
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusOK)
+		AssertSetTokenCookie(t, response)
+	})
+
+	t.Run("a replayed challenge is rejected", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		app, e := NewTestApplicationWithConfig(t, conf)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		token, nonce := getAndSolveChallenge(t, e, "login")
+
+		// The first login consumes the challenge.
+		e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email":     user.Login.Email,
+				"password":  password,
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect().
+			Status(http.StatusOK)
+
+		// Re-using the same challenge must be rejected. This is exactly the
+		// retry-after-bad-password case the frontend has to handle by pulling a
+		// fresh challenge.
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email":     user.Login.Email,
+				"password":  password,
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("challenge already used")
+	})
+
+	t.Run("an expired challenge is rejected", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		app, e := NewTestApplicationWithConfig(t, conf)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		token, nonce := getAndSolveChallenge(t, e, "login")
+		app.Clock.Add(6 * time.Minute)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email":     user.Login.Email,
+				"password":  password,
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("challenge expired, please retry")
+	})
+
+	t.Run("a challenge for another purpose is rejected", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		app, e := NewTestApplicationWithConfig(t, conf)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		// A register challenge should not be usable for login.
+		token, nonce := getAndSolveChallenge(t, e, "register")
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email":     user.Login.Email,
+				"password":  password,
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+	})
+}
+
+func TestPostForgotPassword_ProofOfWork(t *testing.T) {
+	// Forgot password is gated on the email subsystem being enabled, so these
+	// tests turn it on. We use a non-existent email everywhere so that, once proof
+	// of work passes, the endpoint returns a 200 without actually sending anything
+	// (it never leaks whether an email exists). That 200 is our signal that proof
+	// of work was accepted.
+	newForgotConfig := func(t *testing.T, powEnabled bool) config.Configuration {
+		conf := NewTestApplicationConfig(t)
+		conf.Email.Enabled = true
+		conf.Email.ForgotPassword.Enabled = true
+		conf.ProofOfWork.Enabled = powEnabled
+		conf.ProofOfWork.Difficulty = 8
+		conf.ProofOfWork.Lifetime = 5 * time.Minute
+		return conf
+	}
+
+	t.Run("proof of work disabled does not require a challenge", func(t *testing.T) {
+		conf := newForgotConfig(t, false)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		response := e.POST("/api/authentication/forgot").
+			WithJSON(map[string]any{
+				"email": testutils.GetUniqueEmail(t),
+			}).
+			Expect()
+		response.Status(http.StatusOK)
+	})
+
+	t.Run("a missing challenge is rejected when enabled", func(t *testing.T) {
+		conf := newForgotConfig(t, true)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		response := e.POST("/api/authentication/forgot").
+			WithJSON(map[string]any{
+				"email": testutils.GetUniqueEmail(t),
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+	})
+
+	t.Run("a valid challenge passes through", func(t *testing.T) {
+		conf := newForgotConfig(t, true)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		token, nonce := getAndSolveChallenge(t, e, "forgot")
+		response := e.POST("/api/authentication/forgot").
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusOK)
+	})
+
+	t.Run("a replayed challenge is rejected", func(t *testing.T) {
+		conf := newForgotConfig(t, true)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		token, nonce := getAndSolveChallenge(t, e, "forgot")
+		email := testutils.GetUniqueEmail(t)
+
+		e.POST("/api/authentication/forgot").
+			WithJSON(map[string]any{
+				"email":     email,
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect().
+			Status(http.StatusOK)
+
+		response := e.POST("/api/authentication/forgot").
+			WithJSON(map[string]any{
+				"email":     email,
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("challenge already used")
+	})
+
+	t.Run("an expired challenge is rejected", func(t *testing.T) {
+		conf := newForgotConfig(t, true)
+		app, e := NewTestApplicationWithConfig(t, conf)
+
+		token, nonce := getAndSolveChallenge(t, e, "forgot")
+		app.Clock.Add(6 * time.Minute)
+
+		response := e.POST("/api/authentication/forgot").
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("challenge expired, please retry")
+	})
+
+	t.Run("a challenge for another purpose is rejected", func(t *testing.T) {
+		conf := newForgotConfig(t, true)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		// A login challenge should not be usable for forgot password.
+		token, nonce := getAndSolveChallenge(t, e, "login")
+		response := e.POST("/api/authentication/forgot").
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
 	})
 }

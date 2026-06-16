@@ -2,15 +2,24 @@ import type { ApiError } from '@monetr/interface/api/client';
 import request, { type APIError } from '@monetr/interface/util/request';
 import { useSnackbar, type VariantType } from '@monetr/notify';
 
-export default function useSendForgotPassword(): (email: string, ReCAPTCHA: string | null) => Promise<void> {
+export interface SendForgotPasswordArguments {
+  email: string;
+  captcha: string | null;
+  challenge?: string;
+  nonce?: number;
+}
+
+export default function useSendForgotPassword(): (args: SendForgotPasswordArguments) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
-  return async (email: string, ReCAPTCHA: string | null) => {
+  return async ({ email, captcha, challenge, nonce }: SendForgotPasswordArguments) => {
     return request({
       method: 'POST',
       url: '/api/authentication/forgot',
       data: {
         email,
-        captcha: ReCAPTCHA,
+        captcha,
+        challenge,
+        nonce,
       },
     })
       .then(

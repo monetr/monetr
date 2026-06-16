@@ -26,6 +26,9 @@ type Stats struct {
 	QueryTime           *prometheus.HistogramVec
 	HTTPRequests        *prometheus.CounterVec
 	HTTPResponseTime    *prometheus.HistogramVec
+	PowIssued           *prometheus.CounterVec
+	PowVerified         *prometheus.CounterVec
+	PowVerifyTime       *prometheus.HistogramVec
 }
 
 func NewStats() *Stats {
@@ -93,6 +96,28 @@ func NewStats() *Stats {
 			"path",
 			"method",
 			"status",
+		}),
+		PowIssued: promauto.NewCounterVec(prometheus.CounterOpts{
+			Namespace:   metricsNamespace,
+			Name:        "pow_issued",
+			Help:        "Number of proof of work challenges that have been issued to clients.",
+			ConstLabels: map[string]string{},
+		}, []string{}),
+		PowVerified: promauto.NewCounterVec(prometheus.CounterOpts{
+			Namespace:   metricsNamespace,
+			Name:        "pow_verified",
+			Help:        "Number of proof of work challenge verifications, labeled by the result of the verification.",
+			ConstLabels: map[string]string{},
+		}, []string{
+			"result",
+		}),
+		PowVerifyTime: promauto.NewHistogramVec(prometheus.HistogramOpts{
+			Namespace: metricsNamespace,
+			Name:      "pow_verify_time",
+			Help:      "Time it takes to verify a proof of work challenge.",
+			Buckets:   []float64{1, 50, 100, 500, 1000, 10000},
+		}, []string{
+			"result",
 		}),
 	}
 }

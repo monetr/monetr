@@ -112,6 +112,7 @@ centroid
 conveniens
 cors
 cron
+cryptographic
 customizations
 decrypt.*
 dev

@@ -15,6 +15,7 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/zoneinfo"
@@ -63,15 +64,59 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 	})
 }
 
+// postChallenge issues a challenge for one of the unauthenticated auth
+// endpoints. When proof of work is disabled it 404s so the UI can tell it does
+// not need to do any work.
+func (c *Controller) postChallenge(ctx echo.Context) error {
+	c.scrubSentryBody(ctx)
+	if !c.Configuration.ProofOfWork.Enabled {
+		return c.notFound(ctx, "proof of work is not enabled")
+	}
+
+	var request struct {
+		Purpose string `json:"purpose"`
+	}
+	if err := ctx.Bind(&request); err != nil {
+		return c.invalidJson(ctx)
+	}
+
+	var purpose powchallenge.Purpose
+	switch strings.TrimSpace(strings.ToLower(request.Purpose)) {
+	case "register":
+		purpose = powchallenge.PurposeRegister
+	case "login":
+		purpose = powchallenge.PurposeLogin
+	case "forgot":
+		purpose = powchallenge.PurposeForgot
+	default:
+		return c.badRequest(ctx, "invalid proof of work purpose")
+	}
+
+	challenge, err := c.Challenger.Issue(c.getContext(ctx), purpose)
+	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to issue proof of work challenge")
+	}
+
+	return ctx.JSON(http.StatusOK, challenge)
+}
+
 func (c *Controller) postLogin(ctx echo.Context) error {
 	c.scrubSentryBody(ctx)
 	var loginRequest struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-		Captcha  string `json:"captcha"`
+		Email     string `json:"email"`
+		Password  string `json:"password"`
+		Captcha   string `json:"captcha"`
+		Challenge string `json:"challenge"`
+		Nonce     uint64 `json:"nonce"`
 	}
 	if err := ctx.Bind(&loginRequest); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
+	}
+
+	// Proof of work runs before the captcha as the cheap fail-fast. No-op when
+	// disabled.
+	if err := c.validateProofOfWork(ctx, powchallenge.PurposeLogin, loginRequest.Challenge, loginRequest.Nonce); err != nil {
+		return err // validateProofOfWork returns a valid http error.
 	}
 
 	// This will take the captcha from the request and validate it if the API is
@@ -326,9 +371,17 @@ func (c *Controller) postRegister(ctx echo.Context) error {
 		Locale    string  `json:"locale"`
 		Captcha   string  `json:"captcha"`
 		BetaCode  *string `json:"betaCode"`
+		Challenge string  `json:"challenge"`
+		Nonce     uint64  `json:"nonce"`
 	}
 	if err := ctx.Bind(&registerRequest); err != nil {
 		return c.invalidJson(ctx)
+	}
+
+	// Proof of work runs before the captcha as the cheap fail-fast. No-op when
+	// proof of work is disabled.
+	if err := c.validateProofOfWork(ctx, powchallenge.PurposeRegister, registerRequest.Challenge, registerRequest.Nonce); err != nil {
+		return err // validateProofOfWork returns a valid http error.
 	}
 
 	// This will take the captcha from the request and validate it if the API is
@@ -641,6 +694,8 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 	var sendForgotPasswordRequest struct {
 		Email     string `json:"email"`
 		ReCAPTCHA string `json:"captcha"`
+		Challenge string `json:"challenge"`
+		Nonce     uint64 `json:"nonce"`
 	}
 	if err := ctx.Bind(&sendForgotPasswordRequest); err != nil {
 		return c.invalidJson(ctx)
@@ -649,6 +704,12 @@ func (c *Controller) postForgotPassword(ctx echo.Context) error {
 	// Clean up some of the input provided just in case.
 	sendForgotPasswordRequest.Email = strings.TrimSpace(strings.ToLower(sendForgotPasswordRequest.Email))
 	sendForgotPasswordRequest.ReCAPTCHA = strings.TrimSpace(sendForgotPasswordRequest.ReCAPTCHA)
+
+	// Proof of work runs before the captcha as the cheap fail-fast. No-op when
+	// proof of work is disabled.
+	if err := c.validateProofOfWork(ctx, powchallenge.PurposeForgot, sendForgotPasswordRequest.Challenge, sendForgotPasswordRequest.Nonce); err != nil {
+		return err // validateProofOfWork returns a valid http error.
+	}
 
 	if sendForgotPasswordRequest.Email == "" {
 		return c.badRequest(ctx, "Must provide an email address.")
@@ -832,6 +893,29 @@ func (c *Controller) validateRegistration(ctx echo.Context, email, password, fir
 	}
 
 	return nil
+}
+
+// validateProofOfWork verifies the challenge and solution on an unauthenticated
+// auth request, mapping the challenger's typed failures to client 400s. No-op
+// when disabled. We distinguish expired and already-used (a real user should
+// just retry) but collapse everything else into a vague message so we do not
+// hand an attacker a precise signal about why they were rejected.
+func (c *Controller) validateProofOfWork(ctx echo.Context, purpose powchallenge.Purpose, challenge string, nonce uint64) error {
+	if !c.Configuration.ProofOfWork.Enabled {
+		return nil
+	}
+
+	err := c.Challenger.Verify(c.getContext(ctx), purpose, challenge, nonce)
+	switch errors.Cause(err) {
+	case nil:
+		return nil
+	case powchallenge.ErrChallengeExpired:
+		return c.badRequestError(ctx, err, "challenge expired, please retry")
+	case powchallenge.ErrChallengeReplay:
+		return c.badRequestError(ctx, err, "challenge already used")
+	default:
+		return c.badRequestError(ctx, err, "invalid proof of work")
+	}
 }
 
 func (c *Controller) validateLoginCaptcha(ctx context.Context, captcha string) error {

@@ -47,6 +47,7 @@ type Configuration struct {
 	LunchFlow     LunchFlow     `yaml:"lunchFlow"`
 	Plaid         Plaid         `yaml:"plaid"`
 	PostgreSQL    PostgreSQL    `yaml:"postgreSql"`
+	ProofOfWork   ProofOfWork   `yaml:"proofOfWork"`
 	ReCAPTCHA     ReCAPTCHA     `yaml:"reCAPTCHA"`
 	Redis         Redis         `yaml:"redis"`
 	Security      Security      `yaml:"security"`
@@ -168,6 +169,34 @@ func (s Email) ShouldVerifyEmails() bool {
 
 func (s Email) AllowPasswordReset() bool {
 	return s.Enabled && s.ForgotPassword.Enabled
+}
+
+// ProofOfWork configures the server issued proof of work layer that sits in
+// front of the unauthenticated authentication endpoints (register, login and
+// forgot password). When enabled the client must spend a bit of CPU finding a
+// SHA-256 preimage with a number of leading zero bits before its request is
+// accepted. It is meant to make automated abuse of these endpoints far more
+// expensive without slowing down real users (the work is done in the background
+// while they fill out the form). It is independent of ReCAPTCHA and the two can
+// be used together.
+type ProofOfWork struct {
+	// Enabled controls whether or not the proof of work layer is active. When
+	// this is disabled the challenge endpoint returns a 404 and the auth
+	// endpoints do not require a solution. It is disabled by default for now, set
+	// MONETR_PROOF_OF_WORK_ENABLED=true to turn it on.
+	Enabled bool `yaml:"enabled"`
+	// Difficulty is the number of leading zero bits the SHA-256 proof must have.
+	// Each additional bit roughly doubles the amount of work the client has to
+	// do. 16 is a good default, it works out to roughly 1 second of work on a
+	// desktop and 2 to 4 seconds on a low end mobile device. Because the work
+	// happens in a background web worker while the user is still typing they
+	// almost never actually wait for it.
+	Difficulty int `yaml:"difficulty"`
+	// Lifetime is how long an issued challenge is valid for before it must be
+	// reissued. This needs to be long enough that a user filling out the form
+	// has plenty of time, but short enough that a stolen challenge is not useful
+	// for long.
+	Lifetime time.Duration `yaml:"lifetime"`
 }
 
 type ReCAPTCHA struct {
@@ -370,6 +399,13 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("KeyManagement.Provider", "plaintext")
 	v.SetDefault("Plaid.Enabled", true)
 	v.SetDefault("Plaid.CountryCodes", []plaid.CountryCode{plaid.COUNTRYCODE_US})
+	// Proof of work ships disabled by default for the first release so existing
+	// self-hosted deployments do not get the new behavior without opting in.
+	// Operators turn it on with MONETR_PROOF_OF_WORK_ENABLED=true. The default
+	// will likely flip to true in a later release once it has been announced.
+	v.SetDefault("ProofOfWork.Enabled", false)
+	v.SetDefault("ProofOfWork.Difficulty", 16)
+	v.SetDefault("ProofOfWork.Lifetime", 5*time.Minute)
 	v.SetDefault("PostgreSQL.Address", "localhost")
 	v.SetDefault("PostgreSQL.Database", "postgres")
 	v.SetDefault("PostgreSQL.Port", 5432)
@@ -440,6 +476,9 @@ func setupEnv(v *viper.Viper) {
 	v.MustBindEnv("PostgreSQL.CACertificatePath", "MONETR_PG_CA_PATH")
 	v.MustBindEnv("PostgreSQL.CertificatePath", "MONETR_PG_CERT_PATH")
 	v.MustBindEnv("PostgreSQL.KeyPath", "MONETR_PG_KEY_PATH")
+	v.MustBindEnv("ProofOfWork.Enabled", "MONETR_PROOF_OF_WORK_ENABLED")
+	v.MustBindEnv("ProofOfWork.Difficulty", "MONETR_PROOF_OF_WORK_DIFFICULTY")
+	v.MustBindEnv("ProofOfWork.Lifetime", "MONETR_PROOF_OF_WORK_LIFETIME")
 	v.MustBindEnv("ReCAPTCHA.Enabled", "MONETR_CAPTCHA_ENABLED")
 	v.MustBindEnv("ReCAPTCHA.PublicKey", "MONETR_CAPTCHA_PUBLIC_KEY")
 	v.MustBindEnv("ReCAPTCHA.PrivateKey", "MONETR_CAPTCHA_PRIVATE_KEY")

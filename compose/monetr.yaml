@@ -51,6 +51,10 @@ security:
   privateKey: /build/build/ed25519.key
 recaptcha:
   enabled: false
+proofOfWork:
+  # Force proof of work on for local development. It is disabled by default for
+  # now (first release), this keeps us exercising it locally regardless.
+  enabled: true
 server:
   cookies:
     name: M-Token

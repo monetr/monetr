@@ -15,6 +15,7 @@ import BetaCodeInput from '@monetr/interface/components/register/BetaCodeInput';
 import TextLink from '@monetr/interface/components/TextLink';
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import { useProofOfWork } from '@monetr/interface/hooks/useProofOfWork';
 import useSignUp, { type SignUpResponse } from '@monetr/interface/hooks/useSignUp';
 import { getLocale, getTimezone } from '@monetr/interface/util/locale';
 import type { APIError } from '@monetr/interface/util/request';
@@ -101,20 +102,30 @@ export default function Register(): React.JSX.Element {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const [successful, setSuccessful] = useState(false);
+  const pow = useProofOfWork('register', Boolean(config?.proofOfWorkEnabled));
 
   async function submit(values: RegisterValues, helpers: FormikHelpers<RegisterValues>): Promise<void> {
     helpers.setSubmitting(true);
 
-    return await signUp({
-      betaCode: values.betaCode ?? null,
-      captcha: values.captcha ?? null,
-      email: values.email,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      password: values.password,
-      timezone: getTimezone(),
-      locale: getLocale(),
-    })
+    // getSolution resolves to null when disabled (challenge/nonce drop off). Keep
+    // it in the chain so a fetch or solve failure still hits the catch and
+    // finally, otherwise the form can get stuck submitting.
+    return pow
+      .getSolution()
+      .then(solution =>
+        signUp({
+          betaCode: values.betaCode ?? null,
+          captcha: values.captcha ?? null,
+          email: values.email,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          password: values.password,
+          timezone: getTimezone(),
+          locale: getLocale(),
+          challenge: solution?.challenge,
+          nonce: solution?.nonce,
+        }),
+      )
       .then((result: SignUpResponse) => {
         // After sending the sign up request, if the user needs to verify their email then the requires verification
         // field will be true. We can stop here and just show the user a successful screen.
@@ -133,10 +144,13 @@ export default function Register(): React.JSX.Element {
         });
       })
       .catch((error: ApiError<APIError>) => {
+        // The challenge is single use, so line up a fresh one in case they fix
+        // whatever went wrong and submit again.
+        pow.reset();
         const message =
           error?.response?.status === 429
             ? 'Too many requests, please try again in a few minutes'
-            : error.response.data.error || 'Failed to sign up.';
+            : error?.response?.data?.error || 'Failed to sign up.';
         enqueueSnackbar(message, {
           variant: 'error',
           disableWindowBlurListener: true,
