@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import {
-  fetchChallenge,
-  type PowPurpose,
-  type PowSolution,
-  solveChallenge,
-} from '@monetr/interface/util/proofOfWork';
+import { fetchChallenge, type PowPurpose, type PowSolution, solveChallenge } from '@monetr/interface/util/proofOfWork';
 
 export interface UseProofOfWork {
   getSolution: () => Promise<PowSolution | null>;

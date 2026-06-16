@@ -23,32 +23,37 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// solveTestChallenge brute forces a proof of work solution for a token at a
-// given difficulty. This is an independent implementation of the same algorithm
-// the production challenger and the frontend solver use, see the wire format
-// vectors in server/powchallenge for how the three are kept in sync. We keep the
-// difficulty low (8) in tests so this stays fast.
+// powZeroBits is an independent implementation of the proof of work hash used by
+// the production challenger and the frontend solver, see the wire format vectors
+// in server/powchallenge for how the three are kept in sync. It returns the
+// number of leading zero bits for a token and nonce.
+func powZeroBits(token string, nonce uint64) int {
+	h := sha256.New()
+	h.Write([]byte("monetr-pow-v1:"))
+	h.Write([]byte(token))
+	h.Write([]byte(":"))
+	var nonceBytes [8]byte
+	binary.BigEndian.PutUint64(nonceBytes[:], nonce)
+	h.Write(nonceBytes[:])
+	digest := h.Sum(nil)
+
+	var zeros int
+	for _, b := range digest {
+		if b == 0 {
+			zeros += 8
+			continue
+		}
+		zeros += bits.LeadingZeros8(b)
+		break
+	}
+	return zeros
+}
+
+// solveTestChallenge brute forces a valid solution. We keep the difficulty low
+// (8) in tests so this stays fast.
 func solveTestChallenge(t *testing.T, token string, difficulty int) uint64 {
 	for nonce := uint64(0); nonce < 1<<32; nonce++ {
-		h := sha256.New()
-		h.Write([]byte("monetr-pow-v1:"))
-		h.Write([]byte(token))
-		h.Write([]byte(":"))
-		var nonceBytes [8]byte
-		binary.BigEndian.PutUint64(nonceBytes[:], nonce)
-		h.Write(nonceBytes[:])
-		digest := h.Sum(nil)
-
-		var zeros int
-		for _, b := range digest {
-			if b == 0 {
-				zeros += 8
-				continue
-			}
-			zeros += bits.LeadingZeros8(b)
-			break
-		}
-		if zeros >= difficulty {
+		if powZeroBits(token, nonce) >= difficulty {
 			return nonce
 		}
 	}
@@ -56,10 +61,20 @@ func solveTestChallenge(t *testing.T, token string, difficulty int) uint64 {
 	return 0
 }
 
-// getAndSolveChallenge asks the API for a proof of work challenge for the given
-// purpose and then solves it, returning the token and nonce ready to attach to
-// an auth request.
-func getAndSolveChallenge(t *testing.T, e *httpexpect.Expect, purpose string) (string, uint64) {
+// insufficientNonce finds a nonce whose proof does NOT meet the difficulty, so
+// the insufficient-proof rejection can be exercised deterministically.
+func insufficientNonce(token string, difficulty int) uint64 {
+	for nonce := uint64(0); nonce < 1<<32; nonce++ {
+		if powZeroBits(token, nonce) < difficulty {
+			return nonce
+		}
+	}
+	return 0
+}
+
+// getChallenge asks the API for a challenge for the purpose and returns its
+// token and difficulty.
+func getChallenge(t *testing.T, e *httpexpect.Expect, purpose string) (string, int) {
 	response := e.POST("/api/authentication/challenge").
 		WithJSON(map[string]any{
 			"purpose": purpose,
@@ -68,6 +83,13 @@ func getAndSolveChallenge(t *testing.T, e *httpexpect.Expect, purpose string) (s
 	response.Status(http.StatusOK)
 	token := response.JSON().Path("$.challenge").String().NotEmpty().Raw()
 	difficulty := int(response.JSON().Path("$.difficulty").Number().Raw())
+	return token, difficulty
+}
+
+// getAndSolveChallenge fetches a challenge for the purpose and solves it,
+// returning the token and nonce ready to attach to an auth request.
+func getAndSolveChallenge(t *testing.T, e *httpexpect.Expect, purpose string) (string, uint64) {
+	token, difficulty := getChallenge(t, e, purpose)
 	return token, solveTestChallenge(t, token, difficulty)
 }
 
@@ -2202,6 +2224,24 @@ func TestPostRegister_ProofOfWork(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
 	})
 
+	t.Run("an insufficient solution is rejected", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		// A real challenge, but submitted with a nonce that does not meet the
+		// difficulty.
+		token, difficulty := getChallenge(t, e, "register")
+		body := validRegisterBody(t)
+		body["challenge"] = token
+		body["nonce"] = insufficientNonce(token, difficulty)
+
+		response := e.POST("/api/authentication/register").
+			WithJSON(body).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+	})
+
 	t.Run("a valid challenge passes through", func(t *testing.T) {
 		conf := powEnabledConfig(t)
 		_, e := NewTestApplicationWithConfig(t, conf)
@@ -2306,6 +2346,24 @@ func TestPostLogin_ProofOfWork(t *testing.T) {
 			WithJSON(map[string]any{
 				"email":    user.Login.Email,
 				"password": password,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+	})
+
+	t.Run("an insufficient solution is rejected", func(t *testing.T) {
+		conf := powEnabledConfig(t)
+		app, e := NewTestApplicationWithConfig(t, conf)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		token, difficulty := getChallenge(t, e, "login")
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]any{
+				"email":     user.Login.Email,
+				"password":  password,
+				"challenge": token,
+				"nonce":     insufficientNonce(token, difficulty),
 			}).
 			Expect()
 		response.Status(http.StatusBadRequest)
@@ -2444,6 +2502,22 @@ func TestPostForgotPassword_ProofOfWork(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
 	})
 
+	t.Run("an insufficient solution is rejected", func(t *testing.T) {
+		conf := newForgotConfig(t, true)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		token, difficulty := getChallenge(t, e, "forgot")
+		response := e.POST("/api/authentication/forgot").
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"challenge": token,
+				"nonce":     insufficientNonce(token, difficulty),
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+	})
+
 	t.Run("a valid challenge passes through", func(t *testing.T) {
 		conf := newForgotConfig(t, true)
 		_, e := NewTestApplicationWithConfig(t, conf)
@@ -2555,6 +2629,22 @@ func TestPostResendVerification_ProofOfWork(t *testing.T) {
 		response := e.POST("/api/authentication/verify/resend").
 			WithJSON(map[string]any{
 				"email": testutils.GetUniqueEmail(t),
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+	})
+
+	t.Run("an insufficient solution is rejected", func(t *testing.T) {
+		conf := newResendConfig(t, true)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		token, difficulty := getChallenge(t, e, "resend")
+		response := e.POST("/api/authentication/verify/resend").
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"challenge": token,
+				"nonce":     insufficientNonce(token, difficulty),
 			}).
 			Expect()
 		response.Status(http.StatusBadRequest)
