@@ -39,6 +39,16 @@ func GetConfig(t *testing.T) config.Configuration {
 			SMTP:   config.SMTPClient{},
 		},
 		ReCAPTCHA: config.ReCAPTCHA{},
+		ProofOfWork: config.ProofOfWork{
+			// Proof of work is disabled by default in tests so that the existing
+			// test suite does not need to solve a challenge on every auth request.
+			// Tests that specifically exercise proof of work flip Enabled on. The
+			// difficulty is kept low (8) so that when it IS enabled the tests stay
+			// fast and do not flake on the larger variance of higher difficulties.
+			Enabled:    false,
+			Difficulty: 8,
+			Lifetime:   5 * time.Minute,
+		},
 		LunchFlow: config.LunchFlow{
 			// By default lunch flow is enabled in tests, disable it to simulate
 			// alternate behaviors.

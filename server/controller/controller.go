@@ -18,6 +18,7 @@ import (
 	"github.com/monetr/monetr/server/internal/sentryecho"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
+	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
@@ -35,6 +36,7 @@ type Controller struct {
 	Billing                  billing.Billing
 	Cache                    cache.Cache
 	Captcha                  captcha.Verification
+	Challenger               powchallenge.Challenger
 	ClientTokens             security.ClientTokens
 	Clock                    clock.Clock
 	Configuration            config.Configuration

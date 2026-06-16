@@ -1,0 +1,68 @@
+---
+title: "Proof of Work"
+description: "Configure monetr's proof of work layer to protect the login, registration, and forgot password endpoints from automated abuse without slowing down real users."
+---
+
+# Proof of Work Configuration
+
+Proof of work helps protect monetr's unauthenticated authentication endpoints (login, registration, forgot password and
+resend verification) from automated abuse. When it is enabled the browser must spend a small amount of CPU solving a cryptographic challenge
+before one of those requests is accepted. The work is done in the background in a web worker while the user fills out the
+form, so real users effectively never wait on it, but an automated attacker is forced to pay that CPU cost on every
+single attempt.
+
+Proof of work is independent of [ReCAPTCHA](./recaptcha) and the two can be used together. When both are enabled the
+proof of work check runs first because it is the cheaper fail-fast.
+
+:::info
+Proof of work is **disabled by default** at this time so that existing self-hosted installations do not change behavior
+unexpectedly. If your monetr instance is reachable from the public internet it is recommended that you enable it. The
+default may change to enabled in a future release.
+:::
+
+:::warning
+Proof of work uses the browser's Web Crypto API, which is only available in a **secure context**: HTTPS, or a
+`localhost` address. If monetr is served over plain `http` on any other host (a private network address,
+`homelab.local`, and so on) the browser cannot solve challenges, and **every login, registration, forgot password and
+resend request will fail**. Serve monetr over HTTPS before enabling proof of work, or leave it disabled. The server logs
+a warning at startup if proof of work is enabled on a non-secure external URL.
+:::
+
+```yaml title="config.yaml"
+proofOfWork:
+  enabled: <true|false>
+  difficulty: 16 # Number of leading zero bits the solution must have.
+  lifetime: 5m   # How long an issued challenge is valid for.
+```
+
+| **Name**     | **Type** | **Default** | **Description**                                                                                                                                                       |
+| ---          | ---      | ---         | ---                                                                                                                                                                   |
+| `enabled`    | Boolean  | `false`     | Enable proof of work. When disabled the challenge endpoint returns a `404` and the authentication endpoints do not require a solution.                                |
+| `difficulty` | Number   | `16`        | The number of leading zero bits the SHA256 solution must have. Each additional bit roughly doubles the work. `16` is about 1 second on a desktop, 2 to 4 on mobile.   |
+| `lifetime`   | Duration | `5m`        | How long an issued challenge is valid for before the client has to request a new one.                                                                                |
+
+The following environment variables map to the following configuration file fields.
+
+| Variable                          | Config File Field      |
+| ---                               | ---                    |
+| `MONETR_PROOF_OF_WORK_ENABLED`    | `proofOfWork.enabled`    |
+| `MONETR_PROOF_OF_WORK_DIFFICULTY` | `proofOfWork.difficulty` |
+| `MONETR_PROOF_OF_WORK_LIFETIME`   | `proofOfWork.lifetime`   |
+
+## Difficulty
+
+Difficulty is measured in leading zero bits of the SHA256 hash, so it can be tuned one bit at a time. Because each bit
+doubles the expected amount of work, small changes have a big effect:
+
+- `16` is the default and is a good balance, roughly 1 second of work on a desktop and 2 to 4 seconds on a low end
+  mobile device.
+- Lower it if you are seeing complaints from users on very slow devices.
+- Raise it only a little at a time if you want to make automated abuse more expensive. Going much higher starts to be
+  noticeable even to real users.
+
+## Multiple instances
+
+monetr stores a single-use marker for each issued challenge so that a solved challenge cannot be replayed. This marker
+lives in the cache. If you run more than one monetr instance you should configure a shared [Redis](./redis) so that a
+challenge issued by one instance can be verified by another. A single instance works fine with the built in cache and
+does not require a separate Redis.

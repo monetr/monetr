@@ -18,6 +18,7 @@ CORS
 CSI
 CSP
 CSV
+Crypto
 Chatwoot
 Chisago
 CloudNativePG
@@ -112,6 +113,7 @@ centroid
 conveniens
 cors
 cron
+cryptographic
 customizations
 decrypt.*
 dev

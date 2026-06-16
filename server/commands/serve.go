@@ -29,6 +29,7 @@ import (
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
+	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/queue"
 	"github.com/monetr/monetr/server/repository"
@@ -79,6 +80,29 @@ func ServeCommand(parent *cobra.Command) {
 				log.Warn("DEPRECATION WARNING: ReCAPTCHA will be removed in a future release. If you are currently using it then please comment on the issue on GitHub. It is recommended to instead rate limit monetr authentication endpoints instead of using a captcha at this time.",
 					"issueUrl", "https://github.com/monetr/monetr/issues/2979",
 				)
+			}
+
+			// Proof of work relies on the browser's Web Crypto API, which is only
+			// available in a secure context (HTTPS, or a localhost address). If proof
+			// of work is enabled but monetr is served over plain http on a non
+			// localhost origin then clients cannot solve challenges and all auth will
+			// fail, so warn loudly.
+			if configuration.ProofOfWork.Enabled {
+				baseURL := configuration.Server.GetBaseURL()
+				host := baseURL.Hostname()
+				// Only HTTPS and loopback (127.0.0.0/8, ::1) plus the localhost names
+				// are secure contexts. A LAN/private IP over http (10.x, 192.168.x,
+				// and so on) is NOT, so do not treat those as safe.
+				secureContext := baseURL.Scheme == "https" ||
+					host == "localhost" ||
+					strings.HasSuffix(host, ".localhost") ||
+					strings.HasPrefix(host, "127.") ||
+					host == "::1"
+				if !secureContext {
+					log.Warn("proof of work is enabled but the external URL is not a secure context; browsers only expose the Web Crypto API over HTTPS or on localhost, so clients will not be able to solve challenges and authentication will fail. Serve monetr over HTTPS or disable proof of work.",
+						"externalUrl", baseURL.String(),
+					)
+				}
 			}
 
 			// Load any timezone aliases from the host operating system.
@@ -269,6 +293,25 @@ func ServeCommand(parent *cobra.Command) {
 				}
 			}
 
+			// Derive the proof of work HMAC secret from our existing ED25519 seed
+			// using HKDF. This way we do not have to introduce and manage a brand
+			// new secret just for proof of work, and because HKDF is one way the
+			// derived secret cannot be used to work backwards to the signing key.
+			// That keeps the PASETO token signing and the proof of work HMAC
+			// cryptographically independent even though they share a root. We build
+			// the challenger unconditionally, when proof of work is disabled it just
+			// never gets called.
+			powSecret := powchallenge.DeriveSecret(privateKey.Seed())
+			challenger := powchallenge.NewChallenger(
+				log,
+				redisCache,
+				clock,
+				stats,
+				powSecret,
+				configuration.ProofOfWork.Difficulty,
+				configuration.ProofOfWork.Lifetime,
+			)
+
 			var email communication.EmailCommunication
 			if configuration.Email.Enabled {
 				email = communication.NewEmailCommunication(log, configuration)
@@ -314,6 +357,7 @@ func ServeCommand(parent *cobra.Command) {
 					Billing:                  bill,
 					Cache:                    redisCache,
 					Captcha:                  recaptcha,
+					Challenger:               challenger,
 					ClientTokens:             clientTokens,
 					Clock:                    clock,
 					Configuration:            configuration,

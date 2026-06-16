@@ -9,6 +9,7 @@ import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import { useProofOfWork } from '@monetr/interface/hooks/useProofOfWork';
 import useSendForgotPassword from '@monetr/interface/hooks/useSendForgotPassword';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
@@ -53,6 +54,7 @@ export default function ForgotPasswordNew(): React.JSX.Element {
   const { data: config } = useAppConfiguration();
   const sendForgotPassword = useSendForgotPassword();
   const [isComplete, setIsComplete] = useState<boolean>(false);
+  const pow = useProofOfWork('forgot', Boolean(config?.proofOfWorkEnabled));
 
   function validate(values: Values): FormikErrors<Values> {
     const errors: FormikErrors<Values> = {};
@@ -67,10 +69,24 @@ export default function ForgotPasswordNew(): React.JSX.Element {
   async function submit(values: Values, helpers: FormikHelpers<Values>): Promise<void> {
     helpers.setSubmitting(true);
 
-    // sendForgotPassword pretty much does all the work, the only thing we need to do is make sure that once we are done
-    // we set submitting back to false.
-    return sendForgotPassword(values.email, values.captcha)
+    // sendForgotPassword does the work and shows its own errors; we just clear
+    // submitting. getSolution is null when disabled.
+    return pow
+      .getSolution()
+      .then(solution =>
+        sendForgotPassword({
+          email: values.email,
+          captcha: values.captcha,
+          challenge: solution?.challenge,
+          nonce: solution?.nonce,
+        }),
+      )
       .then(() => setIsComplete(true))
+      .catch(() => {
+        // A rejection here is the proof of work (the hook swallows its own
+        // errors), so line up a fresh challenge.
+        pow.reset();
+      })
       .finally(() => helpers.setSubmitting(false));
   }
 
@@ -93,6 +109,7 @@ export default function ForgotPasswordNew(): React.JSX.Element {
         autoComplete='username'
         autoFocus
         className={styles.input}
+        data-testid='forgot-email'
         label='Email Address'
         name='email'
         required
@@ -100,7 +117,7 @@ export default function ForgotPasswordNew(): React.JSX.Element {
       />
       <MCaptcha className={styles.captcha} name='captcha' show={Boolean(config?.verifyForgotPassword)} />
       <div className={styles.submitWrapper}>
-        <FormButton className={styles.button} role='form' type='submit' variant='primary'>
+        <FormButton className={styles.button} data-testid='forgot-submit' role='form' type='submit' variant='primary'>
           Reset Password
         </FormButton>
       </div>

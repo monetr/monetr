@@ -32,6 +32,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 		LunchFlowAllowedAPIURLs []string     `json:"lunchFlowAllowedAPIURLs"`
 		ManualEnabled           bool         `json:"manualEnabled"`
 		UploadsEnabled          bool         `json:"uploadsEnabled"`
+		ProofOfWorkEnabled      bool         `json:"proofOfWorkEnabled"`
 		Release                 string       `json:"release"`
 		Revision                string       `json:"revision"`
 		BuildType               string       `json:"buildType"`
@@ -94,6 +95,10 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 
 	configuration.LunchFlowEnabled = c.Configuration.LunchFlow.IsEnabled()
 	configuration.LunchFlowAllowedAPIURLs = c.Configuration.LunchFlow.AllowedApiUrls
+
+	// Whether the UI needs to solve a challenge before the auth forms. Difficulty
+	// comes back on the challenge itself.
+	configuration.ProofOfWorkEnabled = c.Configuration.ProofOfWork.Enabled
 
 	return ctx.JSON(http.StatusOK, configuration)
 }

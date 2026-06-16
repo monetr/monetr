@@ -29,6 +29,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/platypus"
+	"github.com/monetr/monetr/server/powchallenge"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
@@ -203,11 +204,26 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		pubSub,
 	)
 
+	// Wire up the proof of work challenger the same way serve.go does, deriving
+	// the secret from the same generated key. Proof of work is disabled by
+	// default in the test config so this challenger only actually gets exercised
+	// by the tests that opt in.
+	challenger := powchallenge.NewChallenger(
+		log,
+		cachePool,
+		clock,
+		nil,
+		powchallenge.DeriveSecret(privateKey.Seed()),
+		configuration.ProofOfWork.Difficulty,
+		configuration.ProofOfWork.Lifetime,
+	)
+
 	c := &controller.Controller{
 		Accounts:                 accountsRepo,
 		Billing:                  bill,
 		Cache:                    cachePool,
 		Captcha:                  recaptcha,
+		Challenger:               challenger,
 		ClientTokens:             clientTokens,
 		Clock:                    clock,
 		Configuration:            configuration,

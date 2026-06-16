@@ -47,6 +47,7 @@ type Configuration struct {
 	LunchFlow     LunchFlow     `yaml:"lunchFlow"`
 	Plaid         Plaid         `yaml:"plaid"`
 	PostgreSQL    PostgreSQL    `yaml:"postgreSql"`
+	ProofOfWork   ProofOfWork   `yaml:"proofOfWork"`
 	ReCAPTCHA     ReCAPTCHA     `yaml:"reCAPTCHA"`
 	Redis         Redis         `yaml:"redis"`
 	Security      Security      `yaml:"security"`
@@ -168,6 +169,24 @@ func (s Email) ShouldVerifyEmails() bool {
 
 func (s Email) AllowPasswordReset() bool {
 	return s.Enabled && s.ForgotPassword.Enabled
+}
+
+// ProofOfWork gates the unauthenticated auth endpoints (register, login, forgot
+// password, resend verification): the client must solve a small SHA-256
+// challenge before its request is accepted. It makes automated abuse expensive
+// without slowing real users (the work runs in a background web worker).
+// Independent of ReCAPTCHA.
+type ProofOfWork struct {
+	// Active when true. When disabled the challenge endpoint 404s and the auth
+	// endpoints skip the check. Disabled by default for now, set
+	// MONETR_PROOF_OF_WORK_ENABLED=true to turn it on.
+	Enabled bool `yaml:"enabled"`
+	// Leading zero bits the solution must have; each extra bit doubles the work.
+	// 16 is roughly 1 second on a desktop, 2 to 4 on a low end phone.
+	Difficulty int `yaml:"difficulty"`
+	// How long a challenge is valid for. Long enough to fill out the form, short
+	// enough that a stolen challenge is not useful for long.
+	Lifetime time.Duration `yaml:"lifetime"`
 }
 
 type ReCAPTCHA struct {
@@ -370,6 +389,11 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("KeyManagement.Provider", "plaintext")
 	v.SetDefault("Plaid.Enabled", true)
 	v.SetDefault("Plaid.CountryCodes", []plaid.CountryCode{plaid.COUNTRYCODE_US})
+	// Disabled by default for the first release so existing deployments opt in;
+	// likely flips to true in a later release once announced.
+	v.SetDefault("ProofOfWork.Enabled", false)
+	v.SetDefault("ProofOfWork.Difficulty", 16)
+	v.SetDefault("ProofOfWork.Lifetime", 5*time.Minute)
 	v.SetDefault("PostgreSQL.Address", "localhost")
 	v.SetDefault("PostgreSQL.Database", "postgres")
 	v.SetDefault("PostgreSQL.Port", 5432)
@@ -440,6 +464,9 @@ func setupEnv(v *viper.Viper) {
 	v.MustBindEnv("PostgreSQL.CACertificatePath", "MONETR_PG_CA_PATH")
 	v.MustBindEnv("PostgreSQL.CertificatePath", "MONETR_PG_CERT_PATH")
 	v.MustBindEnv("PostgreSQL.KeyPath", "MONETR_PG_KEY_PATH")
+	v.MustBindEnv("ProofOfWork.Enabled", "MONETR_PROOF_OF_WORK_ENABLED")
+	v.MustBindEnv("ProofOfWork.Difficulty", "MONETR_PROOF_OF_WORK_DIFFICULTY")
+	v.MustBindEnv("ProofOfWork.Lifetime", "MONETR_PROOF_OF_WORK_LIFETIME")
 	v.MustBindEnv("ReCAPTCHA.Enabled", "MONETR_CAPTCHA_ENABLED")
 	v.MustBindEnv("ReCAPTCHA.PublicKey", "MONETR_CAPTCHA_PUBLIC_KEY")
 	v.MustBindEnv("ReCAPTCHA.PrivateKey", "MONETR_CAPTCHA_PRIVATE_KEY")

@@ -238,6 +238,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	unauthed.GET("/config", c.configEndpoint)
 
 	// These endpoints do not require any authentication.
+	unauthed.POST("/authentication/challenge", c.postChallenge)
 	unauthed.POST("/authentication/login", c.postLogin)
 	unauthed.GET("/authentication/logout", c.logoutEndpoint)
 	unauthed.POST("/authentication/register", c.postRegister)
