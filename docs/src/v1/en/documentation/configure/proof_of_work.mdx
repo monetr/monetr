@@ -20,6 +20,14 @@ unexpectedly. If your monetr instance is reachable from the public internet it i
 default may change to enabled in a future release.
 :::
 
+:::warning
+Proof of work uses the browser's Web Crypto API, which is only available in a **secure context**: HTTPS, or a
+`localhost` address. If monetr is served over plain `http` on any other host (a private network address,
+`homelab.local`, and so on) the browser cannot solve challenges, and **every login, registration, forgot password and
+resend request will fail**. Serve monetr over HTTPS before enabling proof of work, or leave it disabled. The server logs
+a warning at startup if proof of work is enabled on a non-secure external URL.
+:::
+
 ```yaml title="config.yaml"
 proofOfWork:
   enabled: <true|false>

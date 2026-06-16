@@ -82,6 +82,29 @@ func ServeCommand(parent *cobra.Command) {
 				)
 			}
 
+			// Proof of work relies on the browser's Web Crypto API, which is only
+			// available in a secure context (HTTPS, or a localhost address). If proof
+			// of work is enabled but monetr is served over plain http on a non
+			// localhost origin then clients cannot solve challenges and all auth will
+			// fail, so warn loudly.
+			if configuration.ProofOfWork.Enabled {
+				baseURL := configuration.Server.GetBaseURL()
+				host := baseURL.Hostname()
+				// Only HTTPS and loopback (127.0.0.0/8, ::1) plus the localhost names
+				// are secure contexts. A LAN/private IP over http (10.x, 192.168.x,
+				// and so on) is NOT, so do not treat those as safe.
+				secureContext := baseURL.Scheme == "https" ||
+					host == "localhost" ||
+					strings.HasSuffix(host, ".localhost") ||
+					strings.HasPrefix(host, "127.") ||
+					host == "::1"
+				if !secureContext {
+					log.Warn("proof of work is enabled but the external URL is not a secure context; browsers only expose the Web Crypto API over HTTPS or on localhost, so clients will not be able to solve challenges and authentication will fail. Serve monetr over HTTPS or disable proof of work.",
+						"externalUrl", baseURL.String(),
+					)
+				}
+			}
+
 			// Load any timezone aliases from the host operating system.
 			zoneinfo.LoadAliasesFromHost(cmd.Context(), log)
 			publicKey, privateKey, err := loadCertificates(

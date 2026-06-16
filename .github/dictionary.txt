@@ -18,6 +18,7 @@ CORS
 CSI
 CSP
 CSV
+Crypto
 Chatwoot
 Chisago
 CloudNativePG

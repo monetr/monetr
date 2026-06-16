@@ -33,6 +33,13 @@ export async function solve(challenge: string, difficulty: number, signal?: Abor
     return 0;
   }
 
+  // SubtleCrypto is only exposed in a secure context (HTTPS, or a localhost
+  // address). On a plain-http non-localhost origin crypto.subtle is undefined,
+  // so fail with a message that points at the cause rather than a bare TypeError.
+  if (!globalThis.crypto?.subtle) {
+    throw new Error('proof of work requires a secure context (HTTPS or localhost)');
+  }
+
   const prefix = new TextEncoder().encode(`${PROOF_PREFIX}${challenge}:`);
   // prefix + 8 nonce bytes, rewritten each iteration.
   const buffer = new Uint8Array(prefix.length + 8);
