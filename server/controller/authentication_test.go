@@ -2141,7 +2141,7 @@ func TestPostProofOfWorkChallenge(t *testing.T) {
 
 		// Every purpose the UI might ask for should get a challenge back at the
 		// configured difficulty.
-		for _, purpose := range []string{"register", "login", "forgot"} {
+		for _, purpose := range []string{"register", "login", "forgot", "resend"} {
 			response := e.POST("/api/authentication/challenge").
 				WithJSON(map[string]any{
 					"purpose": purpose,
@@ -2511,6 +2511,123 @@ func TestPostForgotPassword_ProofOfWork(t *testing.T) {
 		// A login challenge should not be usable for forgot password.
 		token, nonce := getAndSolveChallenge(t, e, "login")
 		response := e.POST("/api/authentication/forgot").
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+	})
+}
+
+func TestPostResendVerification_ProofOfWork(t *testing.T) {
+	// Resend verification only exists when email verification is enabled. We use a
+	// non-existent email so that, once proof of work passes, the endpoint returns
+	// a 200 without sending anything (it never leaks whether an email exists).
+	newResendConfig := func(t *testing.T, powEnabled bool) config.Configuration {
+		conf := NewTestApplicationConfig(t)
+		conf.Email.Enabled = true
+		conf.Email.Verification.Enabled = true
+		conf.ProofOfWork.Enabled = powEnabled
+		conf.ProofOfWork.Difficulty = 8
+		conf.ProofOfWork.Lifetime = 5 * time.Minute
+		return conf
+	}
+
+	t.Run("proof of work disabled does not require a challenge", func(t *testing.T) {
+		conf := newResendConfig(t, false)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		response := e.POST("/api/authentication/verify/resend").
+			WithJSON(map[string]any{
+				"email": testutils.GetUniqueEmail(t),
+			}).
+			Expect()
+		response.Status(http.StatusOK)
+	})
+
+	t.Run("a missing challenge is rejected when enabled", func(t *testing.T) {
+		conf := newResendConfig(t, true)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		response := e.POST("/api/authentication/verify/resend").
+			WithJSON(map[string]any{
+				"email": testutils.GetUniqueEmail(t),
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("invalid proof of work")
+	})
+
+	t.Run("a valid challenge passes through", func(t *testing.T) {
+		conf := newResendConfig(t, true)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		token, nonce := getAndSolveChallenge(t, e, "resend")
+		response := e.POST("/api/authentication/verify/resend").
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusOK)
+	})
+
+	t.Run("a replayed challenge is rejected", func(t *testing.T) {
+		conf := newResendConfig(t, true)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		token, nonce := getAndSolveChallenge(t, e, "resend")
+		email := testutils.GetUniqueEmail(t)
+
+		e.POST("/api/authentication/verify/resend").
+			WithJSON(map[string]any{
+				"email":     email,
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect().
+			Status(http.StatusOK)
+
+		response := e.POST("/api/authentication/verify/resend").
+			WithJSON(map[string]any{
+				"email":     email,
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("challenge already used")
+	})
+
+	t.Run("an expired challenge is rejected", func(t *testing.T) {
+		conf := newResendConfig(t, true)
+		app, e := NewTestApplicationWithConfig(t, conf)
+
+		token, nonce := getAndSolveChallenge(t, e, "resend")
+		app.Clock.Add(6 * time.Minute)
+
+		response := e.POST("/api/authentication/verify/resend").
+			WithJSON(map[string]any{
+				"email":     testutils.GetUniqueEmail(t),
+				"challenge": token,
+				"nonce":     nonce,
+			}).
+			Expect()
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().IsEqual("challenge expired, please retry")
+	})
+
+	t.Run("a challenge for another purpose is rejected", func(t *testing.T) {
+		conf := newResendConfig(t, true)
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		// A login challenge should not be usable to resend verification.
+		token, nonce := getAndSolveChallenge(t, e, "login")
+		response := e.POST("/api/authentication/verify/resend").
 			WithJSON(map[string]any{
 				"email":     testutils.GetUniqueEmail(t),
 				"challenge": token,

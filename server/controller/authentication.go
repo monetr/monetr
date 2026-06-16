@@ -87,6 +87,8 @@ func (c *Controller) postChallenge(ctx echo.Context) error {
 		purpose = powchallenge.PurposeLogin
 	case "forgot":
 		purpose = powchallenge.PurposeForgot
+	case "resend":
+		purpose = powchallenge.PurposeResend
 	default:
 		return c.badRequest(ctx, "invalid proof of work purpose")
 	}
@@ -627,11 +629,18 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 	}
 
 	var request struct {
-		Email   string  `json:"email"`
-		Captcha *string `json:"captcha"`
+		Email     string  `json:"email"`
+		Captcha   *string `json:"captcha"`
+		Challenge string  `json:"challenge"`
+		Nonce     uint64  `json:"nonce"`
 	}
 	if err := ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
+	}
+
+	// Before the captcha, it is the cheap fail-fast. No-op when disabled.
+	if err := c.validateProofOfWork(ctx, powchallenge.PurposeResend, request.Challenge, request.Nonce); err != nil {
+		return err // validateProofOfWork returns a valid http error.
 	}
 
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))

@@ -172,9 +172,10 @@ func (s Email) AllowPasswordReset() bool {
 }
 
 // ProofOfWork gates the unauthenticated auth endpoints (register, login, forgot
-// password): the client must solve a small SHA-256 challenge before its request
-// is accepted. It makes automated abuse expensive without slowing real users
-// (the work runs in a background web worker). Independent of ReCAPTCHA.
+// password, resend verification): the client must solve a small SHA-256
+// challenge before its request is accepted. It makes automated abuse expensive
+// without slowing real users (the work runs in a background web worker).
+// Independent of ReCAPTCHA.
 type ProofOfWork struct {
 	// Active when true. When disabled the challenge endpoint 404s and the auth
 	// endpoints skip the check. Disabled by default for now, set

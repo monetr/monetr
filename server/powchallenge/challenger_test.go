@@ -128,6 +128,7 @@ func TestChallenger_IssueAndVerify(t *testing.T) {
 		{"register", powchallenge.PurposeRegister},
 		{"login", powchallenge.PurposeLogin},
 		{"forgot", powchallenge.PurposeForgot},
+		{"resend", powchallenge.PurposeResend},
 	}
 
 	for _, p := range purposes {

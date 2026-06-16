@@ -11,6 +11,7 @@ import MLogo from '@monetr/interface/components/MLogo';
 import TextLink from '@monetr/interface/components/TextLink';
 import Typography from '@monetr/interface/components/Typography';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import { useProofOfWork } from '@monetr/interface/hooks/useProofOfWork';
 import request, { type APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 import { useSnackbar } from '@monetr/notify';
@@ -27,27 +28,37 @@ export default function ResendVerificationPage(): React.JSX.Element {
   const { data: config } = useAppConfiguration();
   const emailFromQuery = new URLSearchParams(useSearch()).get('email');
   const [done, setDone] = useState(false);
+  const pow = useProofOfWork('resend', Boolean(config?.proofOfWorkEnabled));
 
   const resendVerification = useCallback(
     async (values: ResendValues): Promise<void> => {
-      return await request({
-        method: 'POST',
-        url: '/api/authentication/verify/resend',
-        data: {
-          email: values.email,
-          captcha: values.captcha,
-        },
-      })
+      // getSolution is null when proof of work is disabled (challenge/nonce drop
+      // off). Kept in the chain so a fetch/solve failure also hits the catch.
+      return pow
+        .getSolution()
+        .then(solution =>
+          request({
+            method: 'POST',
+            url: '/api/authentication/verify/resend',
+            data: {
+              email: values.email,
+              captcha: values.captcha,
+              challenge: solution?.challenge,
+              nonce: solution?.nonce,
+            },
+          }),
+        )
         .then(() => setDone(true))
-        .catch(
-          (error: ApiError<APIError>) =>
-            void enqueueSnackbar(error?.response?.data?.error || 'Failed to resend verification link', {
-              variant: 'error',
-              disableWindowBlurListener: true,
-            }),
-        );
+        .catch((error: ApiError<APIError>) => {
+          // Single use and consumed even on failure, so line up a fresh one.
+          pow.reset();
+          enqueueSnackbar(error?.response?.data?.error || 'Failed to resend verification link', {
+            variant: 'error',
+            disableWindowBlurListener: true,
+          });
+        });
     },
-    [enqueueSnackbar],
+    [enqueueSnackbar, pow],
   );
 
   const validateInput = useCallback((values: ResendValues): FormikErrors<ResendValues> => {

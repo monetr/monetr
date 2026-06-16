@@ -5,8 +5,8 @@ description: "Configure monetr's proof of work layer to protect the login, regis
 
 # Proof of Work Configuration
 
-Proof of work helps protect monetr's unauthenticated authentication endpoints (login, registration and forgot password)
-from automated abuse. When it is enabled the browser must spend a small amount of CPU solving a cryptographic challenge
+Proof of work helps protect monetr's unauthenticated authentication endpoints (login, registration, forgot password and
+resend verification) from automated abuse. When it is enabled the browser must spend a small amount of CPU solving a cryptographic challenge
 before one of those requests is accepted. The work is done in the background in a web worker while the user fills out the
 form, so real users effectively never wait on it, but an automated attacker is forced to pay that CPU cost on every
 single attempt.

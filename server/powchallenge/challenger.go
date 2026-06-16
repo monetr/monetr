@@ -30,11 +30,12 @@ const (
 	PurposeRegister Purpose = 1
 	PurposeLogin    Purpose = 2
 	PurposeForgot   Purpose = 3
+	PurposeResend   Purpose = 4 // Resend verification email.
 )
 
 func (p Purpose) valid() bool {
 	switch p {
-	case PurposeRegister, PurposeLogin, PurposeForgot:
+	case PurposeRegister, PurposeLogin, PurposeForgot, PurposeResend:
 		return true
 	default:
 		return false
