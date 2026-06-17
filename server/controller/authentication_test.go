@@ -1258,6 +1258,64 @@ func TestRegister(t *testing.T) {
 			response.JSON().Path("$.user.account.locale").String().IsEqual("en_US")
 		}
 	})
+
+	t.Run("a blocked domain is rejected as if the email already exists", func(t *testing.T) {
+		conf := NewTestApplicationConfig(t)
+		// Every generated email in the tests uses the monetr.mini domain, so by
+		// blocking it we can prove that sign up gets rejected.
+		conf.Email.BlockedDomains = []string{"monetr.mini"}
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		// The email from validRegisterBody is unique, so it definitely does not
+		// already exist. The ONLY reason this can come back as EMAIL_IN_USE is
+		// because the domain is blocked, which is exactly the indistinguishable
+		// response we want a would be abuser to see.
+		response := e.POST(`/api/authentication/register`).
+			WithJSON(validRegisterBody(t)).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.code").IsEqual("EMAIL_IN_USE")
+		response.JSON().Path("$.error").IsEqual("email already in use")
+	})
+
+	t.Run("can still sign up with a domain that is not blocked", func(t *testing.T) {
+		conf := NewTestApplicationConfig(t)
+		conf.Email.BlockedDomains = []string{"mailinator.com"}
+		_, e := NewTestApplicationWithConfig(t, conf)
+
+		// validRegisterBody uses a monetr.mini email which is not on the blocklist,
+		// so registration should succeed like normal.
+		response := e.POST(`/api/authentication/register`).
+			WithJSON(validRegisterBody(t)).
+			Expect()
+
+		response.Status(http.StatusOK)
+		AssertSetTokenCookie(t, response)
+	})
+
+	t.Run("blocking a domain does not stop an existing user from signing in", func(t *testing.T) {
+		// This is the whole point of the feature, the blocklist must only gate sign
+		// up. Seed a full account through the repository (NOT the register
+		// endpoint) so it behaves like an account that already existed before the
+		// domain was blocked. GivenIHaveABasicAccount creates the login on the
+		// monetr.mini domain.
+		conf := NewTestApplicationConfig(t)
+		conf.Email.BlockedDomains = []string{"monetr.mini"}
+		app, e := NewTestApplicationWithConfig(t, conf)
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+
+		response := e.POST(`/api/authentication/login`).
+			WithJSON(map[string]any{
+				"email":    user.Login.Email,
+				"password": password,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		AssertSetTokenCookie(t, response)
+	})
 }
 
 func TestVerifyEmail(t *testing.T) {
