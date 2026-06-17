@@ -284,11 +284,11 @@ importers:
         specifier: 1.5.3
         version: 1.5.3(@rsbuild/core@2.0.11(core-js@3.47.0))
       '@rspack/binding-linux-arm64-gnu':
-        specifier: 2.0.7
-        version: 2.0.7
+        specifier: 2.0.8
+        version: 2.0.8
       '@rspack/binding-linux-x64-gnu':
-        specifier: 2.0.7
-        version: 2.0.7
+        specifier: 2.0.8
+        version: 2.0.8
       '@rstest/adapter-rsbuild':
         specifier: 0.10.3
         version: 0.10.3(@rsbuild/core@2.0.11(core-js@3.47.0))(@rstest/core@0.10.3(core-js@3.47.0)(jsdom@26.1.0))
@@ -1259,9 +1259,10 @@ packages:
     resolution: {integrity: sha512-H6ACzeM1KBxYDEF8YAim3501Jb1aCsSG79Gjm1M4pwJ5OJPK2ydiJEa438ugXmh0962eKYMHI2yZY0sQq8txaw==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
-  '@rspack/binding-linux-arm64-gnu@2.0.7':
-    resolution: {integrity: sha512-bBVJtZsh/eRF8Qt12JHjw46hvyJ3rT2pLmjS81qnA4gni0U7zD64QnR6C7Sg4++hhBgzYqbGeDkt5wcZa8qfMQ==}
+  '@rspack/binding-linux-arm64-gnu@2.0.8':
+    resolution: {integrity: sha512-pSI+npPQE/uDtiboqvcOIRJbEV2+B+H1xffmko/gw50la92oTUW60kVULFwsb6L0+GVCzIcwX3yq60GtYIn+Ug==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
@@ -1276,9 +1277,10 @@ packages:
     resolution: {integrity: sha512-rerCAz022zf0ewxI+7n3SrqLEaxCL+MXRxKjK5FLUGFa8UkIrivq+VUP/1OB6JLh2Bucebc7Y9WoWHvtk22mLA==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
-  '@rspack/binding-linux-x64-gnu@2.0.7':
-    resolution: {integrity: sha512-rjIcfGfJ7/oVClJCmG6W54mIBgBBxsPodnIlrGz0bPKEZDP4NV2MCdSlujlDyeirMxvV9XL/WIuNSq9qAi2Syg==}
+  '@rspack/binding-linux-x64-gnu@2.0.8':
+    resolution: {integrity: sha512-zrkoEOnqj1hOEBO5T2I/2Ts2HSJsYFh1qXwMpK4dMJFGGNWDfNeUa6/LF5uq3VINF3JUl7RL47AgrucoSZJXPA==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
@@ -3227,6 +3229,7 @@ packages:
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
+    libc: glibc
 
   sass-embedded-linux-arm@1.100.0:
     resolution: {integrity: sha512-9Ul7O1eKrc5YlhwWjkp8tZPSe3UEwSZ1uwUZOQom1HL0pRlBA6F/IlGZYFTLwnHMIP1fc77MMNaBRfc05mKMpw==}
@@ -3275,6 +3278,7 @@ packages:
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
+    libc: glibc
 
   sass-embedded-unknown-all@1.100.0:
     resolution: {integrity: sha512-c+naBgWId4MIpToXcI0DgqetjdAkwTTAxFAuOaBz7HUXLdyG1oZRrEvSsbe41nEdQOKH0vgofVFCeSQgoXOG9A==}
@@ -4646,7 +4650,7 @@ snapshots:
   '@rspack/binding-linux-arm64-gnu@2.0.6':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@2.0.7': {}
+  '@rspack/binding-linux-arm64-gnu@2.0.8': {}
 
   '@rspack/binding-linux-arm64-musl@2.0.6':
     optional: true
@@ -4654,7 +4658,7 @@ snapshots:
   '@rspack/binding-linux-x64-gnu@2.0.6':
     optional: true
 
-  '@rspack/binding-linux-x64-gnu@2.0.7': {}
+  '@rspack/binding-linux-x64-gnu@2.0.8': {}
 
   '@rspack/binding-linux-x64-musl@2.0.6':
     optional: true
