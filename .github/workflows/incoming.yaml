@@ -70,11 +70,8 @@ jobs:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_USER: api-testing
           POSTGRES_DB: test-db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
+        # We don't have a health check here because by the time the tests
+        # actually start running this will always be healthy.
         ports:
           - 5432:5432
     steps:
@@ -131,7 +128,7 @@ jobs:
 
       - name: Test
         run: |
-          make test SHARDS=4 SHARD=${{ matrix.shard }}
+          make test SHARDS=6 SHARD=${{ matrix.shard }}
 
       - name: Code Coverage Report
         if: always()
