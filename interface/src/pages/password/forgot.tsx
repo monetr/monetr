@@ -3,7 +3,6 @@ import type { FormikErrors, FormikHelpers } from 'formik';
 
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
-import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
@@ -17,12 +16,10 @@ import styles from './forgot.module.scss';
 
 interface Values {
   email: string;
-  captcha: string | null;
 }
 
 const initialValues: Values = {
   email: '',
-  captcha: null,
 };
 
 export function ForgotPasswordComplete(): React.JSX.Element {
@@ -76,7 +73,6 @@ export default function ForgotPasswordNew(): React.JSX.Element {
       .then(solution =>
         sendForgotPassword({
           email: values.email,
-          captcha: values.captcha,
           challenge: solution?.challenge,
           nonce: solution?.nonce,
         }),
@@ -121,7 +117,6 @@ export default function ForgotPasswordNew(): React.JSX.Element {
         required
         type='email'
       />
-      <MCaptcha className={styles.captcha} name='captcha' show={Boolean(config?.verifyForgotPassword)} />
       <div className={styles.submitWrapper}>
         <FormButton className={styles.button} data-testid='forgot-submit' role='form' type='submit' variant='primary'>
           Reset Password

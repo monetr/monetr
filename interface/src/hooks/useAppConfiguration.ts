@@ -7,11 +7,6 @@ import parseDate from '@monetr/interface/util/parseDate';
 export class AppConfiguration {
   requireLegalName: boolean;
   requirePhoneNumber: boolean;
-  verifyLogin: boolean;
-  verifyRegister: boolean;
-  verifyEmailAddress: boolean;
-  verifyForgotPassword: boolean;
-  ReCAPTCHAKey: string | null;
   allowSignUp: boolean;
   allowForgotPassword: boolean;
   longPollPlaidSetup: boolean;
@@ -36,11 +31,6 @@ export class AppConfiguration {
   constructor(data: WithJsonValues<AppConfiguration>) {
     this.requireLegalName = data.requireLegalName;
     this.requirePhoneNumber = data.requirePhoneNumber;
-    this.verifyLogin = data.verifyLogin;
-    this.verifyRegister = data.verifyRegister;
-    this.verifyEmailAddress = data.verifyEmailAddress;
-    this.verifyForgotPassword = data.verifyForgotPassword;
-    this.ReCAPTCHAKey = data.ReCAPTCHAKey ?? null;
     this.allowSignUp = data.allowSignUp;
     this.allowForgotPassword = data.allowForgotPassword;
     this.longPollPlaidSetup = data.longPollPlaidSetup;

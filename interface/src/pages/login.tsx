@@ -3,7 +3,6 @@ import type { FormikErrors, FormikHelpers } from 'formik';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import UnauthenticatedLogo from '@monetr/interface/components/Layout/UnauthenticatedLogo';
-import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import TextLink from '@monetr/interface/components/TextLink';
 import Typography from '@monetr/interface/components/Typography';
@@ -18,13 +17,11 @@ import styles from './login.module.scss';
 interface LoginValues {
   email: string;
   password: string;
-  captcha: string | null;
 }
 
 const initialValues: LoginValues = {
   email: '',
   password: '',
-  captcha: null,
 };
 
 function validator(values: LoginValues): FormikErrors<LoginValues> {
@@ -61,7 +58,6 @@ export default function Login(): React.JSX.Element {
       .getSolution()
       .then(solution =>
         login({
-          captcha: values.captcha ?? undefined,
           email: values.email,
           password: values.password,
           challenge: solution?.challenge,
@@ -111,7 +107,6 @@ export default function Login(): React.JSX.Element {
         required
         type='password'
       />
-      <MCaptcha name='captcha' show={Boolean(config?.verifyLogin)} />
       <FormButton className={styles.input} data-testid='login-submit' role='form' type='submit' variant='primary'>
         Sign In
       </FormButton>

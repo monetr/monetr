@@ -12,10 +12,8 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gavv/httpexpect/v2"
-	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/fixtures"
-	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/mock_stripe"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/security"
@@ -339,65 +337,6 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").IsEqual("Invalid email and password")
-		response.JSON().Object().NotContainsKey("token")
-	})
-
-	t.Run("valid captcha", func(t *testing.T) {
-		httpmock.Activate()
-		defer httpmock.DeactivateAndReset()
-
-		config := NewTestApplicationConfig(t)
-		config.ReCAPTCHA.Enabled = true
-		config.ReCAPTCHA.VerifyLogin = true
-		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
-		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
-		app, e := NewTestApplicationWithConfig(t, config)
-		email, password := GivenIHaveLogin(t, e)
-
-		mock_http_helper.NewHttpMockJsonResponder(t,
-			"POST", "https://www.google.com/recaptcha/api/siteverify",
-			func(t *testing.T, request *http.Request) (any, int) {
-				return map[string]any{
-					"success":      true,
-					"challenge_ts": app.Clock.Now(),
-					"hostname":     "monetr.mini",
-					"score":        1.0,
-				}, http.StatusOK
-			},
-			nil,
-		)
-
-		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]any{
-				"email":    email,
-				"password": password,
-				"captcha":  "Believe it or not, I am a valid captcha",
-			}).
-			Expect()
-
-		response.Status(http.StatusOK)
-		AssertSetTokenCookie(t, response)
-	})
-
-	t.Run("bad captcha", func(t *testing.T) {
-		config := NewTestApplicationConfig(t)
-		config.ReCAPTCHA.Enabled = true
-		config.ReCAPTCHA.VerifyLogin = true
-		config.ReCAPTCHA.VerifyRegister = false
-		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
-		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
-		_, e := NewTestApplicationWithConfig(t, config)
-		email, password := GivenIHaveLogin(t, e)
-
-		response := e.POST("/api/authentication/login").
-			WithJSON(map[string]any{
-				"email":    email,
-				"password": password,
-			}).
-			Expect()
-
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").IsEqual("Valid ReCAPTCHA is required")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -966,93 +905,6 @@ func TestRegister(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").IsEqual("failed to parse timezone")
-	})
-
-	t.Run("valid captcha", func(t *testing.T) {
-		httpmock.Activate()
-		defer httpmock.DeactivateAndReset()
-
-		mock_http_helper.NewHttpMockJsonResponder(t,
-			"POST", "https://www.google.com/recaptcha/api/siteverify",
-			func(t *testing.T, request *http.Request) (any, int) {
-				return map[string]any{
-					"success":      true,
-					"challenge_ts": time.Now(),
-					"hostname":     "monetr.mini",
-					"score":        1.0,
-				}, http.StatusOK
-			},
-			nil,
-		)
-
-		config := NewTestApplicationConfig(t)
-		config.ReCAPTCHA.Enabled = true
-		config.ReCAPTCHA.VerifyRegister = true
-		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
-		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
-		_, e := NewTestApplicationWithConfig(t, config)
-
-		var registerRequest struct {
-			Email     string `json:"email"`
-			Password  string `json:"password"`
-			FirstName string `json:"firstName"`
-			LastName  string `json:"lastName"`
-			Locale    string `json:"locale"`
-			Timezone  string `json:"timezone"`
-			Captcha   string `json:"captcha"`
-		}
-		registerRequest.Email = testutils.GetUniqueEmail(t)
-		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
-		registerRequest.FirstName = gofakeit.FirstName()
-		registerRequest.LastName = gofakeit.LastName()
-		registerRequest.Locale = "en_US"
-		registerRequest.Timezone = "America/Chicago"
-		registerRequest.Captcha = "I am a valid captcha"
-
-		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
-			Expect()
-
-		response.Status(http.StatusOK)
-		AssertSetTokenCookie(t, response)
-		response.JSON().Path("$.nextUrl").String().IsEqual("/setup")
-		response.JSON().Path("$.requireVerification").Boolean().IsFalse()
-	})
-
-	t.Run("invalid captcha", func(t *testing.T) {
-		config := NewTestApplicationConfig(t)
-		config.ReCAPTCHA.Enabled = true
-		config.ReCAPTCHA.VerifyRegister = true
-		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
-		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
-		_, e := NewTestApplicationWithConfig(t, config)
-
-		var registerRequest struct {
-			Email     string `json:"email"`
-			Password  string `json:"password"`
-			FirstName string `json:"firstName"`
-			LastName  string `json:"lastName"`
-			Locale    string `json:"locale"`
-			Timezone  string `json:"timezone"`
-			Captcha   string `json:"captcha"`
-		}
-		registerRequest.Email = testutils.GetUniqueEmail(t)
-		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
-		registerRequest.FirstName = gofakeit.FirstName()
-		registerRequest.LastName = gofakeit.LastName()
-		registerRequest.Locale = "en_US"
-		registerRequest.Timezone = "America/Chicago"
-		registerRequest.Captcha = "I am not a valid captcha"
-
-		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
-			Expect()
-
-		response.Status(http.StatusBadRequest)
-		response.JSON().
-			Path("$.error").
-			String().
-			IsEqual("valid ReCAPTCHA is required")
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
@@ -1845,30 +1697,6 @@ func TestSendForgotPassword(t *testing.T) {
 
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").String().IsEqual("Must provide an email address.")
-		}
-	})
-
-	t.Run("with blank captcha", func(t *testing.T) {
-		captchaConf := conf
-		captchaConf.ReCAPTCHA.Enabled = true
-		captchaConf.ReCAPTCHA.PublicKey = gofakeit.UUID()
-		captchaConf.ReCAPTCHA.PrivateKey = gofakeit.UUID()
-		captchaConf.ReCAPTCHA.VerifyForgotPassword = true
-		app, e := NewTestApplicationWithConfig(t, captchaConf)
-
-		// Since it's not a valid request, we should never send an email.
-		MustSendPasswordResetEmail(t, app, 0)
-
-		{ // Send a request with invalid json body.
-			response := e.POST(`/api/authentication/forgot`).
-				WithJSON(map[string]any{
-					"email":   testutils.GetUniqueEmail(t),
-					"captcha": "",
-				}).
-				Expect()
-
-			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().IsEqual("Must provide a valid ReCAPTCHA.")
 		}
 	})
 }

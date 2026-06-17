@@ -8,7 +8,6 @@ import Flex from '@monetr/interface/components/Flex';
 import FormButton from '@monetr/interface/components/FormButton';
 import FormTextField from '@monetr/interface/components/FormTextField';
 import { layoutVariants } from '@monetr/interface/components/Layout';
-import MCaptcha from '@monetr/interface/components/MCaptcha';
 import MForm from '@monetr/interface/components/MForm';
 import MLogo from '@monetr/interface/components/MLogo';
 import BetaCodeInput from '@monetr/interface/components/register/BetaCodeInput';
@@ -30,7 +29,6 @@ interface RegisterValues {
   email: string;
   password: string;
   confirmPassword: string;
-  captcha?: string;
   betaCode?: string;
 }
 
@@ -114,7 +112,6 @@ export default function Register(): React.JSX.Element {
       .then(solution =>
         signUp({
           betaCode: values.betaCode ?? null,
-          captcha: values.captcha ?? null,
           email: values.email,
           firstName: values.firstName,
           lastName: values.lastName,
@@ -228,7 +225,6 @@ export default function Register(): React.JSX.Element {
           type='password'
         />
         <BetaCodeInput />
-        <MCaptcha className={styles.captcha} name='captcha' show={Boolean(config?.verifyRegister)} />
         <FormButton className={styles.submit} data-testid='register-submit' role='form' type='submit' variant='primary'>
           Sign Up
         </FormButton>

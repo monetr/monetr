@@ -4,20 +4,18 @@ import { useSnackbar, type VariantType } from '@monetr/notify';
 
 export interface SendForgotPasswordArguments {
   email: string;
-  captcha: string | null;
   challenge?: string;
   nonce?: number;
 }
 
 export default function useSendForgotPassword(): (args: SendForgotPasswordArguments) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
-  return async ({ email, captcha, challenge, nonce }: SendForgotPasswordArguments) => {
+  return async ({ email, challenge, nonce }: SendForgotPasswordArguments) => {
     return request({
       method: 'POST',
       url: '/api/authentication/forgot',
       data: {
         email,
-        captcha,
         challenge,
         nonce,
       },
