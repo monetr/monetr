@@ -2,6 +2,17 @@
 
 ## [1.15.0](https://github.com/monetr/monetr/compare/v1.14.3...v1.15.0) (2026-06-17)
 
+### Breaking Changes
+
+**This release finally removes ReCAPTCHA support within monetr**, as noted in [#2979](https://github.com/monetr/monetr/issues/2979). However in order to still help reduce spam on public facing endpoints within monetr, a [Proof of Work](https://monetr.app/documentation/configure/proof_of_work) feature has been added. This proof of work implementation is similar to what you would get out of mCaptcha or Anubis in terms of bot deterrence, however it is built into monetr directly and has no other dependencies that need to be run alongside it.
+
+The new proof of work feature though does change how authentication works, if you are using monetr's login endpoint to get a token to make API calls through some other software; then the proof of work feature will likely break these workflows entirely.
+
+That is why the proof of work feature is disabled by default in this initial release, however it will be enabled by default in a future release. But I will be sure to add first class API Key support to monetr _before_ it is enabled by default for self hosted instances.
+
+Read up on the documentation for proof of work provided before enabling it for yourself as there are some gotchas if you are not running monetr over https. If you are primarily using monetr from much older or underpowered devices you may also need to reduce the proof of work difficulty or disable it entirely if you encounter problems.
+
+This release also contains some other spam mitigation features, though this one is aimed more at the hosted version of monetr; you can now block domains from being able to register for a new account in monetr. Any existing logins for that domain are still able to sign in and use their account, or reset their password etc. But new users will not be able to be created with that domain while it is on the configured block list. This is to help reduce spam being observed in the hosted version of monetr.
 
 ### Features
 
